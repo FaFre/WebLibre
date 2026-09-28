@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ShareImage extends HookConsumerWidget {
   final HitResult hitResult;
@@ -37,9 +38,11 @@ class ShareImage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.imagePlus),
-      title: const Text('Share image'),
+      title: Text(l10n.contextmenu_shareImage),
       onTap: () async {
         final currentTab = ref.read(selectedTabStateProvider);
         final url = hitResult.tryGetSource();

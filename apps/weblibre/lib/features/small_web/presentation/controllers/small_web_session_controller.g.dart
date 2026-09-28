@@ -19,7 +19,7 @@ abstract class _$SmallWebSessionStateCWProxy {
 
   SmallWebSessionState currentConsoleUrl(Uri? currentConsoleUrl);
 
-  SmallWebSessionState infoMessage(String? infoMessage);
+  SmallWebSessionState infoMessage(SmallWebInfoMessage? infoMessage);
 
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SmallWebSessionState(...).copyWith.fieldName(value)`.
@@ -35,7 +35,7 @@ abstract class _$SmallWebSessionStateCWProxy {
     String? currentItemId,
     Uri? currentItemUrl,
     Uri? currentConsoleUrl,
-    String? infoMessage,
+    SmallWebInfoMessage? infoMessage,
   });
 }
 
@@ -71,7 +71,7 @@ class _$SmallWebSessionStateCWProxyImpl
       call(currentConsoleUrl: currentConsoleUrl);
 
   @override
-  SmallWebSessionState infoMessage(String? infoMessage) =>
+  SmallWebSessionState infoMessage(SmallWebInfoMessage? infoMessage) =>
       call(infoMessage: infoMessage);
 
   /// Creates a new instance with the provided field values.
@@ -120,7 +120,7 @@ class _$SmallWebSessionStateCWProxyImpl
       infoMessage: infoMessage == const $CopyWithPlaceholder()
           ? _value.infoMessage
           // ignore: cast_nullable_to_non_nullable
-          : infoMessage as String?,
+          : infoMessage as SmallWebInfoMessage?,
     );
   }
 }
@@ -224,7 +224,7 @@ final class SmallWebSessionControllerProvider
 }
 
 String _$smallWebSessionControllerHash() =>
-    r'd80b9c002bf28a024373b0a6ee036bddff4fe8e0';
+    r'96799489847e377da05be4918bf4d4c9454b5c10';
 
 abstract class _$SmallWebSessionController
     extends $Notifier<AsyncValue<SmallWebSessionState>> {

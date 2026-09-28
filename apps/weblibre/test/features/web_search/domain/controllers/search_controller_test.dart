@@ -20,22 +20,26 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:search_protocol/search_protocol.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/domain/entities/fetch_method.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_artifact_downloader.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   group('MetaSearchController', () {
     test('transitions to needsCredits when no token is available', () async {
       final container = ProviderContainer(
         overrides: [
+          _englishLocalizations,
           metaSearchEnsureTokenAvailableProvider.overrideWithValue(
             () async => TokenAvailabilityOutcome.noCredits,
           ),
@@ -65,6 +69,7 @@ void main() {
     test('transitions to error when token issuance fails', () async {
       final container = ProviderContainer(
         overrides: [
+          _englishLocalizations,
           metaSearchEnsureTokenAvailableProvider.overrideWithValue(
             () async => TokenAvailabilityOutcome.issuanceFailed,
           ),
@@ -98,6 +103,7 @@ void main() {
     test('transitions to error when token availability check fails', () async {
       final container = ProviderContainer(
         overrides: [
+          _englishLocalizations,
           metaSearchEnsureTokenAvailableProvider.overrideWithValue(
             () async => throw Exception('balance unavailable'),
           ),
@@ -620,6 +626,7 @@ Map<String, dynamic> _searchResultsPayload({
 ProviderContainer _createContainer(_FakeMetaSearchSession session) {
   return ProviderContainer(
     overrides: [
+      _englishLocalizations,
       metaSearchEnsureTokenAvailableProvider.overrideWithValue(
         () async => TokenAvailabilityOutcome.available,
       ),
@@ -717,3 +724,9 @@ class _CaptureRequest {
     required this.variant,
   });
 }
+
+/// Resolving the real provider reads the profile's settings database, which
+/// these tests never open.
+final _englishLocalizations = appLocalizationsProvider.overrideWithValue(
+  lookupAppLocalizations(const Locale('en')),
+);

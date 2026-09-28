@@ -30,6 +30,8 @@ dependencies:
   flutter_auto_size_text: ^5.0.0
   flutter_displaymode: ^0.7.0
   flutter_hooks: ^0.21.3+1
+  flutter_localizations:
+    sdk: flutter
   flutter_markdown: ^0.7.7+1
   flutter_material_design_icons: ^3.1.0+7447
   flutter_mozilla_components:
@@ -138,6 +140,7 @@ dev_dependencies:
   riverpod_generator: ^4.0.9
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/bangs/

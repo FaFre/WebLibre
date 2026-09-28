@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -29,12 +30,14 @@ import 'package:weblibre/features/gestures/presentation/screens/gesture_behavior
 import 'package:weblibre/features/gestures/presentation/screens/gesture_bindings_screen.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_excluded_sites_screen.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_feedback_screen.dart';
+import 'package:weblibre/features/gestures/presentation/utils/built_in_gesture_l10n.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/setting_value_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Every gesture WebLibre knows, grouped by where it is made (issue #626):
 /// the swipes on the tab bar and on tabs, each rebindable, the fixed ones
@@ -45,6 +48,7 @@ class GestureSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
     final repository = ref.read(gestureSettingsRepositoryProvider.notifier);
 
@@ -60,15 +64,15 @@ class GestureSettingsScreen extends HookConsumerWidget {
       for (final gesture in BuiltInGesture.values)
         if (gesture.surface == surface)
           SettingsEntryDefinition(
-            title: gesture.title,
-            subtitle: gesture.description,
-            keywords: const ['swipe'],
+            title: gesture.label(context),
+            subtitle: gesture.description(context),
+            keywords: settingsKeywords(l10n.gestures_builtInGestureKeywords),
             child: _BuiltInGestureTile(gesture: gesture),
           ),
     ];
 
     return SettingsCustomScrollScaffold(
-      title: 'Gestures',
+      title: l10n.gestures_screenTitle,
       actions: [
         MenuAnchor(
           builder: (context, controller, child) => IconButton(
@@ -84,7 +88,7 @@ class GestureSettingsScreen extends HookConsumerWidget {
                   : () => repository.updateSettings(
                       (current) => current.copyWith.builtInOverrides(const {}),
                     ),
-              child: const Text('Reset Swipes to Defaults'),
+              child: Text(l10n.gestures_resetSwipesToDefaultsAction),
             ),
           ],
         ),
@@ -97,47 +101,49 @@ class GestureSettingsScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: buildSettingsSectionWidgets(context, [
                 SettingsSectionDefinition(
-                  title: BuiltInGestureSurface.tabBar.title,
+                  title: BuiltInGestureSurface.tabBar.label(context),
                   entries: builtInEntries(BuiltInGestureSurface.tabBar),
                 ),
                 SettingsSectionDefinition(
-                  title: BuiltInGestureSurface.tabView.title,
+                  title: BuiltInGestureSurface.tabView.label(context),
                   entries: [
                     ...builtInEntries(BuiltInGestureSurface.tabView),
-                    const SettingsEntryDefinition(
-                      title: 'Two-finger swipe',
-                      keywords: ['container'],
+                    SettingsEntryDefinition(
+                      title: l10n.gestures_twoFingerSwipeTitle,
+                      keywords: settingsKeywords(
+                        l10n.gestures_twoFingerSwipeKeywords,
+                      ),
                       child: _FixedGestureTile(
                         icon: MdiIcons.gestureSwipeHorizontal,
-                        title: 'Two-finger swipe',
-                        action: 'Next or previous container',
+                        title: l10n.gestures_twoFingerSwipeTitle,
+                        action: l10n.gestures_twoFingerSwipeAction,
                         actionIcon: MdiIcons.folderMultipleOutline,
                       ),
                     ),
-                    const SettingsEntryDefinition(
-                      title: 'Pinch',
-                      keywords: ['grid', 'list', 'tree', 'layout'],
+                    SettingsEntryDefinition(
+                      title: l10n.gestures_pinchTitle,
+                      keywords: settingsKeywords(l10n.gestures_pinchKeywords),
                       child: _FixedGestureTile(
                         icon: MdiIcons.gesturePinch,
-                        title: 'Pinch',
-                        action: 'Grid, list or tree layout',
+                        title: l10n.gestures_pinchTitle,
+                        action: l10n.gestures_pinchAction,
                         actionIcon: MdiIcons.viewGridOutline,
                       ),
                     ),
                   ],
                 ),
                 SettingsSectionDefinition(
-                  title: 'Web Pages',
+                  title: l10n.gestures_webPagesSectionTitle,
                   entries: [
                     SettingsEntryDefinition(
-                      title: 'Drawn gestures',
-                      keywords: const ['stroke'],
+                      title: l10n.gestures_drawnGesturesTitle,
+                      keywords: settingsKeywords(
+                        l10n.gestures_drawnGesturesKeywords,
+                      ),
                       child: SwitchListTile.adaptive(
                         secondary: const Icon(MdiIcons.gestureSwipe),
-                        title: const Text('Drawn gestures'),
-                        subtitle: const Text(
-                          'Draw strokes on a page to run actions',
-                        ),
+                        title: Text(l10n.gestures_drawnGesturesTitle),
+                        subtitle: Text(l10n.gestures_drawnGesturesSubtitle),
                         value: settings.enabled,
                         onChanged: (value) => repository.updateSettings(
                           (current) => current.copyWith.enabled(value),
@@ -146,11 +152,11 @@ class GestureSettingsScreen extends HookConsumerWidget {
                     ),
                     if (settings.enabled) ...[
                       SettingsEntryDefinition(
-                        title: 'Gesture bindings',
+                        title: l10n.gestures_gestureBindingsTitle,
                         child: ListTile(
                           leading: const Icon(MdiIcons.gestureDoubleTap),
-                          title: const Text('Gesture bindings'),
-                          subtitle: const Text('Strokes mapped to actions'),
+                          title: Text(l10n.gestures_gestureBindingsTitle),
+                          subtitle: Text(l10n.gestures_gestureBindingsSubtitle),
                           trailing: _CountChevron(
                             count: settings.bindings.length,
                           ),
@@ -158,23 +164,23 @@ class GestureSettingsScreen extends HookConsumerWidget {
                         ),
                       ),
                       SettingsEntryDefinition(
-                        title: 'Behavior & timing',
+                        title: l10n.gestures_behaviorTimingTitle,
                         child: ListTile(
                           leading: const Icon(Icons.tune),
-                          title: const Text('Behavior & timing'),
-                          subtitle: const Text(
-                            'Stroke length, timeout, cooldown',
+                          title: Text(l10n.gestures_behaviorTimingTitle),
+                          subtitle: Text(
+                            l10n.gestures_behaviorTimingSubtitleShort,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => open(const GestureBehaviorScreen()),
                         ),
                       ),
                       SettingsEntryDefinition(
-                        title: 'Excluded sites',
+                        title: l10n.gestures_excludedSitesTitle,
                         child: ListTile(
                           leading: const Icon(Icons.public_off),
-                          title: const Text('Excluded sites'),
-                          subtitle: const Text('Disable gestures per site'),
+                          title: Text(l10n.gestures_excludedSitesTitle),
+                          subtitle: Text(l10n.gestures_excludedSitesSubtitle),
                           trailing: _CountChevron(
                             count: settings.excludedSites.length,
                           ),
@@ -182,34 +188,34 @@ class GestureSettingsScreen extends HookConsumerWidget {
                         ),
                       ),
                       SettingsEntryDefinition(
-                        title: 'Feedback',
+                        title: l10n.gestures_feedbackTitle,
                         child: ListTile(
                           leading: const Icon(Icons.bolt_outlined),
-                          title: const Text('Feedback'),
-                          subtitle: const Text('Live overlay and suggestions'),
+                          title: Text(l10n.gestures_feedbackTitle),
+                          subtitle: Text(l10n.gestures_feedbackSubtitleShort),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => open(const GestureFeedbackScreen()),
                         ),
                       ),
                     ],
-                    const SettingsEntryDefinition(
-                      title: 'Pull to refresh',
-                      keywords: ['reload'],
-                      child: _PullToRefreshTile(),
+                    SettingsEntryDefinition(
+                      title: l10n.gestures_pullToRefreshTitle,
+                      keywords: settingsKeywords(
+                        l10n.gestures_pullToRefreshKeywords,
+                      ),
+                      child: const _PullToRefreshTile(),
                     ),
                   ],
                 ),
                 SettingsSectionDefinition(
-                  title: 'Toolbar',
+                  title: l10n.gestures_toolbarSectionTitle,
                   entries: [
                     SettingsEntryDefinition(
-                      title: 'Long press on buttons',
+                      title: l10n.gestures_longPressButtonsTitle,
                       child: ListTile(
                         leading: const Icon(Icons.touch_app_outlined),
-                        title: const Text('Long press on buttons'),
-                        subtitle: const Text(
-                          'Chosen per button when customizing the toolbar',
-                        ),
+                        title: Text(l10n.gestures_longPressButtonsTitle),
+                        subtitle: Text(l10n.gestures_longPressButtonsSubtitle),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => const ContextualToolbarSettingsRoute()
                             .push(context),
@@ -232,14 +238,16 @@ class _BuiltInGestureTile extends HookConsumerWidget {
 
   final BuiltInGesture gesture;
 
-  static const UnsetActionOption _doNothing = (
-    title: 'Do nothing',
-    description: 'The swipe is ignored',
+  static UnsetActionOption _doNothing(AppLocalizations l10n) => (
+    title: l10n.gestures_doNothingTitle,
+    description: l10n.gestures_doNothingSubtitle,
     icon: Icons.block,
   );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final doNothing = _doNothing(l10n);
     final action = ref.watch(builtInGestureBindingProvider(gesture));
     final legacyTabBarSwipe = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabBarSwipeAction),
@@ -247,15 +255,15 @@ class _BuiltInGestureTile extends HookConsumerWidget {
 
     return SettingValueTile(
       icon: gesture.icon,
-      title: gesture.title,
-      description: gesture.description,
-      value: action?.title ?? _doNothing.title,
-      valueIcon: action?.icon ?? _doNothing.icon,
+      title: gesture.label(context),
+      description: gesture.description(context),
+      value: action?.label(context) ?? doNothing.title,
+      valueIcon: action?.icon ?? doNothing.icon,
       onTap: () async {
         final picked = await showOptionalBrowserActionPicker(
           context,
           selected: action,
-          unsetOption: _doNothing,
+          unsetOption: doNothing,
           actions: gesture.allowedActions,
         );
         if (picked == null || picked.action == action) return;
@@ -293,10 +301,12 @@ class _FixedGestureTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SettingValueTile(
       icon: icon,
       title: title,
-      description: 'Built in, cannot be changed',
+      description: l10n.gestures_builtInCannotBeChangedDescription,
       value: action,
       valueIcon: actionIcon,
     );
@@ -310,14 +320,15 @@ class _PullToRefreshTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
     );
 
     return SwitchListTile.adaptive(
       secondary: const Icon(MdiIcons.gestureSwipeDown),
-      title: const Text('Pull to refresh'),
-      subtitle: const Text('Swipe down at the top of a page to reload it'),
+      title: Text(l10n.gestures_pullToRefreshTitle),
+      subtitle: Text(l10n.gestures_pullToRefreshSubtitle),
       value: enabled,
       onChanged: (value) => ref
           .read(saveGeneralSettingsControllerProvider.notifier)

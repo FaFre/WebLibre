@@ -43,21 +43,24 @@ export 'package:weblibre/features/account/domain/services/handoff_redeem_client.
 
 part 'account_auth.g.dart';
 
-/// Convert any thrown error into a message safe to show in the UI.
+/// Convert any thrown error into an error safe to show in the UI.
 /// Untrusted exception strings (e.g. `e.toString()` for arbitrary HTTP /
 /// platform errors) can include response bodies, headers, or auth tokens —
 /// log them in full but never put them in user-visible state.
-String _sanitizeAuthError(Object error, String fallback) {
+AccountAuthError _sanitizeAuthError(
+  Object error,
+  AccountAuthErrorKind fallback,
+) {
   if (error is AccountAuthFlowException) {
-    return error.userMessage;
+    return error.error;
   }
   if (error is AuthRetryableFetchException) {
-    return 'Network error. Please check your connection and try again.';
+    return AccountAuthError(AccountAuthErrorKind.network);
   }
   if (error is AuthException) {
-    return error.message;
+    return AccountAuthError.server(error.message);
   }
-  return fallback;
+  return AccountAuthError(fallback);
 }
 
 @Riverpod(keepAlive: true)
@@ -201,11 +204,11 @@ class AccountAuthRepository extends _$AccountAuthRepository {
         displayName: data.displayName ?? data.email,
         userId: data.userId,
         syncKey: data.syncKey,
-        lastError: data.syncKey != null
-            ? 'Your saved sign-in is no longer valid. Sign in again to finish '
-                  'restoring this account — your sync key is kept.'
-            : 'Your saved sign-in is no longer valid. Sign in again to '
-                  'continue.',
+        lastError: AccountAuthError(
+          data.syncKey != null
+              ? AccountAuthErrorKind.sessionExpiredWithKey
+              : AccountAuthErrorKind.sessionExpiredNoKey,
+        ),
       );
 
   AccountAuthState _transientRestoreFailure(
@@ -219,10 +222,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       displayName: data.displayName ?? data.email,
       userId: data.userId,
       syncKey: data.syncKey,
-      lastError: _sanitizeAuthError(
-        error,
-        'Could not restore your account session. Retrying shortly.',
-      ),
+      lastError: _sanitizeAuthError(error, AccountAuthErrorKind.restoreFailed),
     );
   }
 
@@ -403,7 +403,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
           state = AsyncData(
             AccountAuthState(
               status: AccountAuthStatus.error,
-              lastError: 'Sign-in timed out. Please try again.',
+              lastError: AccountAuthError(AccountAuthErrorKind.signInTimedOut),
             ),
           );
         }
@@ -416,7 +416,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
           status: AccountAuthStatus.error,
           lastError: _sanitizeAuthError(
             e,
-            'Could not open the sign-in page. Please try again.',
+            AccountAuthErrorKind.signInOpenPageFailed,
           ),
         ),
       );
@@ -452,7 +452,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
 
       if (codeVerifier == null) {
         throw AccountAuthFlowException(
-          'No pending sign-in found. Please start sign-in again.',
+          AccountAuthError(AccountAuthErrorKind.noPendingSignIn),
         );
       }
 
@@ -482,7 +482,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
           'users; refusing the sign-in',
         );
         throw AccountAuthFlowException(
-          'Sign-in could not be verified. Please try again.',
+          AccountAuthError(AccountAuthErrorKind.signInVerificationFailed),
         );
       }
 
@@ -519,7 +519,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       if (session == null) {
         await newClient.dispose();
         throw AccountAuthFlowException(
-          'Sign-in could not be completed. Please try again.',
+          AccountAuthError(AccountAuthErrorKind.signInNotCompleted),
         );
       }
 
@@ -534,7 +534,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
         );
         await newClient.dispose();
         throw AccountAuthFlowException(
-          'Sign-in could not be verified. Please try again.',
+          AccountAuthError(AccountAuthErrorKind.signInVerificationFailed),
         );
       }
 
@@ -565,7 +565,7 @@ class AccountAuthRepository extends _$AccountAuthRepository {
       state = AsyncData(
         _currentOrEmpty.copyWith(
           status: AccountAuthStatus.error,
-          lastError: _sanitizeAuthError(e, 'Sign-in failed. Please try again.'),
+          lastError: _sanitizeAuthError(e, AccountAuthErrorKind.signInFailed),
         ),
       );
     } finally {

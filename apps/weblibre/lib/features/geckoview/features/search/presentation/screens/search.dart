@@ -71,6 +71,7 @@ import 'package:weblibre/features/web_search/presentation/widgets/route_through_
 import 'package:weblibre/features/web_search/presentation/widgets/search_filter_chips.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_mode_selector.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/web_search_results_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/hooks/sampled_value_notifier.dart';
 import 'package:weblibre/utils/input_classification.dart';
@@ -122,6 +123,7 @@ class SearchScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final appColors = AppColors.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final formKey = useMemoized(() => GlobalKey<FormState>());
@@ -725,7 +727,7 @@ class SearchScreen extends HookConsumerWidget {
                     automaticallyImplyLeading: false,
                     leading: showCloseButton
                         ? IconButton(
-                            tooltip: 'Close',
+                            tooltip: l10n.common_close,
                             icon: const Icon(Icons.close),
                             onPressed: () => context.pop(),
                           )
@@ -828,7 +830,7 @@ class SearchScreen extends HookConsumerWidget {
                         focusNode: searchFocusNode,
                         maxLines: isEditMode ? 3 : 1,
                         privateMode: privateTabMode,
-                        label: const Text('Search or enter URL'),
+                        label: Text(l10n.search_searchFieldLabel),
                         unfocusOnTapOutside: false,
                         onClearPressed: () {
                           final url = revertUrl.value;
@@ -907,7 +909,7 @@ class SearchScreen extends HookConsumerWidget {
                               if (context.mounted) {
                                 ui_helper.showErrorMessage(
                                   context,
-                                  'Invalid address',
+                                  l10n.search_invalidAddress,
                                 );
                               }
                           }

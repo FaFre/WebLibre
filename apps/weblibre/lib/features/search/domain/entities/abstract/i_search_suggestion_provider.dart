@@ -22,16 +22,15 @@ import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 
 enum SearchSuggestionProviders {
-  none('Disabled', null),
-  brave('Brave', BangKey(group: BangGroup.general, trigger: 'brave')),
-  ddg('DuckDuckGo', BangKey(group: BangGroup.general, trigger: 'ddg')),
-  kagi('Kagi', BangKey(group: BangGroup.kagi, trigger: 'kagi')),
-  qwant('Qwant', BangKey(group: BangGroup.general, trigger: 'qwant'));
+  none(null),
+  brave(BangKey(group: BangGroup.general, trigger: 'brave')),
+  ddg(BangKey(group: BangGroup.general, trigger: 'ddg')),
+  kagi(BangKey(group: BangGroup.kagi, trigger: 'kagi')),
+  qwant(BangKey(group: BangGroup.general, trigger: 'qwant'));
 
-  final String label;
   final BangKey? relatedBang;
 
-  const SearchSuggestionProviders(this.label, this.relatedBang);
+  const SearchSuggestionProviders(this.relatedBang);
 }
 
 abstract interface class ISearchSuggestionProvider {

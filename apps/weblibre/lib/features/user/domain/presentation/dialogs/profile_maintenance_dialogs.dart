@@ -20,9 +20,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/profile_copy_l10n.dart';
 
 /// Confirms deleting [profileName], including the restart it needs.
 ///
@@ -45,21 +46,27 @@ Future<bool?> showDeleteProfileDialog(
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
       final theme = Theme.of(context);
+      final l10n = AppLocalizations.of(context);
 
       return AlertDialog(
         icon: Icon(Icons.delete_forever, color: theme.colorScheme.error),
-        title: Text('Delete "$profileName"?'),
+        title: Text(l10n.user_deleteProfileTitle(profileName)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Its $profileDataDescription are removed. $cannotBeUndone',
+            Text(
+              l10n.user_deleteProfileContent(
+                l10n.profileCopy_dataDescription,
+                l10n.profileCopy_cannotBeUndone,
+              ),
             ),
             const SizedBox(height: 16),
             _RestartNote(
-              '$restartsToWork $restartClosesCurrentProfile The profile '
-              'being deleted is closed first.',
+              l10n.user_deleteProfileRestartNote(
+                l10n.profileCopy_restartsToWork,
+                l10n.profileCopy_restartClosesCurrentProfile,
+              ),
               cost: restartCost,
             ),
           ],
@@ -69,7 +76,7 @@ Future<bool?> showDeleteProfileDialog(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -79,7 +86,7 @@ Future<bool?> showDeleteProfileDialog(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Delete and restart'),
+            child: Text(l10n.user_actionDeleteAndRestart),
           ),
         ],
       );
@@ -120,53 +127,66 @@ Future<bool?> showReplaceProfileDialog(
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
       final theme = Theme.of(context);
+      final l10n = AppLocalizations.of(context);
 
       return AlertDialog(
         icon: Icon(
           Icons.settings_backup_restore,
           color: theme.colorScheme.error,
         ),
-        title: Text('Replace "$profileName" with this backup?'),
+        title: Text(l10n.user_replaceProfileTitle(profileName)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               replacesPlaceholder
-                  ? 'The backup replaces the profile you are setting up. '
-                        'Anything already in it is lost. $cannotBeUndone'
-                  : 'The backup replaces everything in "$profileName" — its '
-                        '$profileDataDescription. Anything added after the '
-                        'backup is lost. $cannotBeUndone',
+                  ? l10n.user_replaceProfilePlaceholderContent(
+                      l10n.profileCopy_cannotBeUndone,
+                    )
+                  : l10n.user_replaceProfileContent(
+                      profileName,
+                      l10n.profileCopy_dataDescription,
+                      l10n.profileCopy_cannotBeUndone,
+                    ),
             ),
             const SizedBox(height: 12),
             // Stated on the way in, because it is the half of the archive people
             // do not picture: replacing a user installs what makes it signed in.
             Text(
-              "$signedInFromBackup It restores the backup file's "
-              '$profileSecretDataDescription. $olderBackupKeepsCredentials',
+              l10n.user_replaceProfileAccountNote(
+                l10n.profileCopy_signedInFromBackup,
+                l10n.profileCopy_secretDataDescription,
+                l10n.profileCopy_olderBackupKeepsCredentials,
+              ),
               style: theme.textTheme.bodySmall,
             ),
             if (adoptedName != null) ...[
               const SizedBox(height: 12),
               Text(
-                'The profile is renamed to "$adoptedName" and keeps its lock. '
-                '$shortcutsNeedPinningAgain',
+                l10n.user_replaceProfileRenamedNote(
+                  adoptedName,
+                  l10n.profileCopy_shortcutsNeedPinningAgain,
+                ),
                 style: theme.textTheme.bodySmall,
               ),
             ] else if (sourceProfileName != null) ...[
               const SizedBox(height: 12),
               Text(
-                'The backup came from "$sourceProfileName". "$profileName" '
-                'keeps its name and lock. '
-                '$shortcutsNeedPinningAgain',
+                l10n.user_replaceProfileFromSourceNote(
+                  sourceProfileName,
+                  profileName,
+                  l10n.profileCopy_shortcutsNeedPinningAgain,
+                ),
                 style: theme.textTheme.bodySmall,
               ),
             ],
             const SizedBox(height: 16),
             _RestartNote(
-              '$restartsThenAsksPassword Nothing is replaced before that. '
-              '$restartClosesCurrentProfile',
+              l10n.user_replaceProfileRestartNote(
+                restartsThenAsksPassword(l10n),
+                l10n.profileCopy_restartClosesCurrentProfile,
+              ),
               cost: restartCost,
             ),
           ],
@@ -174,7 +194,7 @@ Future<bool?> showReplaceProfileDialog(
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -182,7 +202,7 @@ Future<bool?> showReplaceProfileDialog(
               foregroundColor: theme.colorScheme.onError,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Replace and restart'),
+            child: Text(l10n.user_actionReplaceAndRestart),
           ),
         ],
       );
@@ -209,23 +229,25 @@ Future<bool?> showBackupProfileDialog(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       // Not error-coloured, unlike the two below it. Nothing in the named
       // profile is lost, and dressing a backup as a destructive action is how
       // the colour stops meaning anything on the screens where it does.
       return AlertDialog(
         icon: const Icon(MdiIcons.safe),
-        title: Text('Back up "$profileName"?'),
+        title: Text(l10n.user_backupProfileTitle(profileName)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'The backup is taken with the profile closed, so nothing in it '
-              'changes.',
-            ),
+            Text(l10n.user_backupProfileContent),
             const SizedBox(height: 16),
             _RestartNote(
-              '$restartsToWork $restartClosesCurrentProfile',
+              l10n.user_backupProfileRestartNote(
+                l10n.profileCopy_restartsToWork,
+                l10n.profileCopy_restartClosesCurrentProfile,
+              ),
               cost: restartCost,
             ),
           ],
@@ -233,11 +255,11 @@ Future<bool?> showBackupProfileDialog(
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Back up and restart'),
+            child: Text(l10n.user_actionBackupAndRestart),
           ),
         ],
       );
@@ -259,11 +281,15 @@ class _RestartNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final losses = [
-      if (cost.privateTabs > 0) privateTabsClosedByRestart(cost.privateTabs),
+      if (cost.privateTabs > 0)
+        l10n.profileCopy_privateTabsClosedByRestart(cost.privateTabs),
       if (cost.containersClearedOnExit > 0)
-        containersClearedByRestart(cost.containersClearedOnExit),
+        l10n.profileCopy_containersClearedByRestart(
+          cost.containersClearedOnExit,
+        ),
     ];
 
     return Column(
@@ -308,7 +334,7 @@ class _RestartNote extends StatelessWidget {
                 // The floor under the list. Without it, "your tabs close" is
                 // what people read, and they stop taking backups.
                 Text(
-                  restartKeepsOtherTabs,
+                  l10n.profileCopy_restartKeepsOtherTabs,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

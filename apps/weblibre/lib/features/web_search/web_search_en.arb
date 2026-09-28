@@ -1,0 +1,306 @@
+{
+  "@@locale": "en",
+
+  "webSearch_fetchPageDataTitle": "Fetch Page Data",
+  "@webSearch_fetchPageDataTitle": {
+    "description": "Title of the dialog for choosing how to fetch a web search result page through the privacy-preserving server (as a text preview, full copy, PDF or image)."
+  },
+  "webSearch_downloadFailedTapToRetry": "Download failed — tap to retry",
+  "@webSearch_downloadFailedTapToRetry": {
+    "description": "Error line in the fetch dialog when downloading a server-captured page failed; tapping retries."
+  },
+
+  "webSearch_methodTrafilaturaTitle": "Extracted Preview",
+  "@webSearch_methodTrafilaturaTitle": {
+    "description": "Fetch method: a text-only preview of the page extracted on the server."
+  },
+  "webSearch_methodSinglefileTitle": "Full Page Capture",
+  "@webSearch_methodSinglefileTitle": {
+    "description": "Fetch method: a complete copy of the page including layout and images, saved as one file."
+  },
+  "webSearch_methodPdfTitle": "PDF Snapshot",
+  "@webSearch_methodPdfTitle": {
+    "description": "Fetch method: a PDF file of the rendered page."
+  },
+  "webSearch_methodPngTitle": "Image Snapshot",
+  "@webSearch_methodPngTitle": {
+    "description": "Fetch method: a picture (PNG screenshot) of the whole rendered page."
+  },
+  "webSearch_methodTrafilaturaSubtitle": "Reader-optimized text and metadata for the in-app preview",
+  "@webSearch_methodTrafilaturaSubtitle": {
+    "description": "Explanation under \"Extracted Preview\"."
+  },
+  "webSearch_methodSinglefileSubtitle": "Archive the full page with layout and assets for later use",
+  "@webSearch_methodSinglefileSubtitle": {
+    "description": "Explanation under \"Full Page Capture\". \"Assets\" are the page's images, styles and similar files."
+  },
+  "webSearch_methodPdfSubtitle": "Render the page to a PDF for offline reading and sharing",
+  "@webSearch_methodPdfSubtitle": {
+    "description": "Explanation under \"PDF Snapshot\"."
+  },
+  "webSearch_methodPngSubtitle": "Capture a full-page PNG screenshot of the rendered page",
+  "@webSearch_methodPngSubtitle": {
+    "description": "Explanation under \"Image Snapshot\". PNG is an image file format."
+  },
+
+  "webSearch_previewUnavailableTitle": "Preview unavailable",
+  "@webSearch_previewUnavailableTitle": {
+    "description": "Error heading when opening a preview of a search result that was not fetched yet."
+  },
+  "webSearch_previewUnavailableMessage": "Fetch the page from the result list before opening a preview.",
+  "@webSearch_previewUnavailableMessage": {
+    "description": "Explanation under \"Preview unavailable\": the page must first be fetched with the button in the search results."
+  },
+  "webSearch_openInBrowserTooltip": "Open in browser",
+  "@webSearch_openInBrowserTooltip": {
+    "description": "Tooltip of the button on the page preview screen that opens the original page in a browser tab."
+  },
+
+  "webSearch_torToggleOn": "{brand} on",
+  "@webSearch_torToggleOn": {
+    "description": "Label of the web search toggle while searches are routed through Tor. brand is \"Tor™\".",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "webSearch_torToggleOff": "{brand} off",
+  "@webSearch_torToggleOff": {
+    "description": "Label of the web search toggle while searches are not routed through Tor. brand is \"Tor™\".",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+
+  "webSearch_languageAuto": "Auto",
+  "@webSearch_languageAuto": {
+    "description": "Label of the search language filter button when no language is chosen (automatic)."
+  },
+  "webSearch_languageAutoDeviceDefault": "Auto (device default)",
+  "@webSearch_languageAutoDeviceDefault": {
+    "description": "Choice in the search language filter menu: pick the language automatically from the device settings."
+  },
+  "webSearch_countryAny": "Any",
+  "@webSearch_countryAny": {
+    "description": "Label of the search region filter button when no region is chosen."
+  },
+  "webSearch_countryAnyRegion": "Any region",
+  "@webSearch_countryAnyRegion": {
+    "description": "Choice in the search region filter menu: results from any country."
+  },
+  "webSearch_countryDeviceDefault": "{name} (device)",
+  "@webSearch_countryDeviceDefault": {
+    "description": "Choice in the search region filter menu for the device's own country. name is the country name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "webSearch_safeSearchPillDefault": "Safe: default",
+  "@webSearch_safeSearchPillDefault": {
+    "description": "Label of the SafeSearch filter button (hides explicit content) when the default level is used. \"Safe\" is short for SafeSearch; keep it short."
+  },
+  "webSearch_safeSearchPillOff": "Safe: off",
+  "@webSearch_safeSearchPillOff": {
+    "description": "Label of the SafeSearch filter button when explicit content is not filtered. Keep it short."
+  },
+  "webSearch_safeSearchPillModerate": "Safe: moderate",
+  "@webSearch_safeSearchPillModerate": {
+    "description": "Label of the SafeSearch filter button at the moderate filter level. Keep it short."
+  },
+  "webSearch_safeSearchPillStrict": "Safe: strict",
+  "@webSearch_safeSearchPillStrict": {
+    "description": "Label of the SafeSearch filter button at the strict filter level. Keep it short."
+  },
+  "webSearch_safeSearchMenuDefault": "Default (moderate)",
+  "@webSearch_safeSearchMenuDefault": {
+    "description": "Choice in the SafeSearch menu: use the default level, which is moderate."
+  },
+  "webSearch_safeSearchMenuOff": "Off",
+  "@webSearch_safeSearchMenuOff": {
+    "description": "Choice in the SafeSearch menu: do not filter explicit content."
+  },
+  "webSearch_safeSearchMenuModerate": "Moderate",
+  "@webSearch_safeSearchMenuModerate": {
+    "description": "Choice in the SafeSearch menu: moderate filtering of explicit content."
+  },
+  "webSearch_safeSearchMenuStrict": "Strict",
+  "@webSearch_safeSearchMenuStrict": {
+    "description": "Choice in the SafeSearch menu: strict filtering of explicit content."
+  },
+  "webSearch_freshnessAnyTime": "Any time",
+  "@webSearch_freshnessAnyTime": {
+    "description": "Label and choice of the search date filter: results of any age."
+  },
+  "webSearch_freshnessPastDay": "Past day",
+  "@webSearch_freshnessPastDay": {
+    "description": "Label and choice of the search date filter: only results from the last 24 hours."
+  },
+  "webSearch_freshnessPastWeek": "Past week",
+  "@webSearch_freshnessPastWeek": {
+    "description": "Label and choice of the search date filter: only results from the last 7 days."
+  },
+  "webSearch_freshnessPastMonth": "Past month",
+  "@webSearch_freshnessPastMonth": {
+    "description": "Label and choice of the search date filter: only results from the last month."
+  },
+  "webSearch_freshnessPastYear": "Past year",
+  "@webSearch_freshnessPastYear": {
+    "description": "Label and choice of the search date filter: only results from the last year."
+  },
+
+  "webSearch_modeGeneralLabel": "General",
+  "@webSearch_modeGeneralLabel": {
+    "description": "Web search mode: normal search across the whole web."
+  },
+  "webSearch_modeIndependentWebLabel": "Independent Web",
+  "@webSearch_modeIndependentWebLabel": {
+    "description": "Web search mode that prefers independent websites over large corporate ones."
+  },
+  "webSearch_modeSmallWebLabel": "Small Web",
+  "@webSearch_modeSmallWebLabel": {
+    "description": "Web search mode limited to the \"small web\": personal and non-commercial websites. Keep \"Small Web\" consistent with the app's Small Web feature."
+  },
+  "webSearch_modeGeneralDescription": "Balanced results across the open web",
+  "@webSearch_modeGeneralDescription": {
+    "description": "Explanation under the \"General\" search mode."
+  },
+  "webSearch_modeIndependentWebDescription": "Favor smaller and less corporate sources",
+  "@webSearch_modeIndependentWebDescription": {
+    "description": "Explanation under the \"Independent Web\" search mode."
+  },
+  "webSearch_modeSmallWebDescription": "Independent, personal & niche sites",
+  "@webSearch_modeSmallWebDescription": {
+    "description": "Explanation under the \"Small Web\" search mode."
+  },
+
+  "webSearch_fetchTooltip": "Fetch",
+  "@webSearch_fetchTooltip": {
+    "description": "Tooltip of the download button on a search result that fetches the page through the privacy-preserving server."
+  },
+
+  "webSearch_additionalSnippetsHeading": "Additional Snippets",
+  "@webSearch_additionalSnippetsHeading": {
+    "description": "Heading above extra text excerpts from the page, shown when a search result is expanded."
+  },
+  "webSearch_questionPrefix": "Q: ",
+  "@webSearch_questionPrefix": {
+    "description": "Prefix in front of a question in a search result's excerpts (\"Q\" for question). Keep the trailing space."
+  },
+  "webSearch_snippetsTooltip": "Snippets",
+  "@webSearch_snippetsTooltip": {
+    "description": "Tooltip of the button that expands a search result to show more text excerpts from the page."
+  },
+  "webSearch_showMoreLinks": "{count, plural, =1{Show 1 more link} other{Show {count} more links}}",
+  "@webSearch_showMoreLinks": {
+    "description": "Button in a search info box that reveals hidden links. count is the number of hidden links.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "webSearch_factsheetHeading": "Factsheet",
+  "@webSearch_factsheetHeading": {
+    "description": "Heading of the section in a search info box that lists key facts about the topic (like an encyclopedia fact box)."
+  },
+
+  "webSearch_searchFailedTitle": "Search failed",
+  "@webSearch_searchFailedTitle": {
+    "description": "Error heading when a web search failed; the error message follows below."
+  },
+  "webSearch_searchingLabel": "Searching the web...",
+  "@webSearch_searchingLabel": {
+    "description": "Progress text while a web search runs."
+  },
+  "webSearch_noResultsFor": "No results found for \"{query}\".",
+  "@webSearch_noResultsFor": {
+    "description": "Shown when a web search returned nothing. query is the search text.",
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "webSearch_creditsTokensStatus": "{credits, plural, =1{1 credit} other{{credits} credits}}  |  {tokens, plural, =1{1 token} other{{tokens} tokens}}",
+  "@webSearch_creditsTokensStatus": {
+    "description": "Status line above web search results. credits is the remaining prepaid search credits; tokens is the number of anonymous search tokens stored on the device. Keep the \"|\" separator.",
+    "placeholders": {
+      "credits": { "type": "int" },
+      "tokens": { "type": "int" }
+    }
+  },
+  "webSearch_needsCreditsMessage": "No search credits or tokens are available for a new web search.",
+  "@webSearch_needsCreditsMessage": {
+    "description": "Shown instead of results when the user has no search credits or tokens left for a web search."
+  },
+  "webSearch_buySearchPackButton": "Buy a search pack",
+  "@webSearch_buySearchPackButton": {
+    "description": "Button under that message that opens the store page for buying search credits."
+  },
+
+  "webSearch_socketConnectionError": "Search connection error. Please try again.",
+  "@webSearch_socketConnectionError": {
+    "description": "Error message when the connection to the search server failed."
+  },
+  "webSearch_closeErrorSessionTimeout": "Search session timed out. Please try again.",
+  "@webSearch_closeErrorSessionTimeout": {
+    "description": "Error message when the search server ended the session because it took too long."
+  },
+  "webSearch_closeErrorCreditInvalid": "Your search credit could not be validated. The credit may have been spent — please try again.",
+  "@webSearch_closeErrorCreditInvalid": {
+    "description": "Error message when the search server rejected the search credit (it may already have been used)."
+  },
+  "webSearch_closeErrorPolicyForbidden": "The requested page is not permitted by the search policy.",
+  "@webSearch_closeErrorPolicyForbidden": {
+    "description": "Error message when the search server refused to fetch a page because its rules do not allow that site."
+  },
+  "webSearch_closeErrorServerFailed": "The search failed on the server. Please try again.",
+  "@webSearch_closeErrorServerFailed": {
+    "description": "Error message when the search server reported an internal failure."
+  },
+  "webSearch_closeErrorUnknown": "Search connection closed unexpectedly (code {code}). Please try again.",
+  "@webSearch_closeErrorUnknown": {
+    "description": "Error message when the search server closed the connection for an unknown reason. code is the numeric close code.",
+    "placeholders": { "code": { "type": "int" } }
+  },
+
+  "webSearch_unknownErrorDetail": "unknown error",
+  "@webSearch_unknownErrorDetail": {
+    "description": "Fallback detail inserted into the \"({detail})\" part of search error messages when the server gave none. Lowercase fragment, not a sentence."
+  },
+  "webSearch_streamErrorProtocol": "Search protocol error. The session has ended — please try again. ({detail})",
+  "@webSearch_streamErrorProtocol": {
+    "description": "Error message when the app and search server disagreed about the data format. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+  "webSearch_streamErrorSearchFailed": "The search failed on the server. Please try again. ({detail})",
+  "@webSearch_streamErrorSearchFailed": {
+    "description": "Error message when the search failed on the server. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+  "webSearch_streamErrorFetchFailed": "Could not fetch this page from the source. ({detail})",
+  "@webSearch_streamErrorFetchFailed": {
+    "description": "Error message when the server could not download a result page from its website. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+  "webSearch_streamErrorExtractFailed": "Could not extract a readable preview from this page. ({detail})",
+  "@webSearch_streamErrorExtractFailed": {
+    "description": "Error message when the server could not produce a text preview of a result page. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+  "webSearch_streamErrorNotAllowed": "This page is not permitted by the search policy. ({detail})",
+  "@webSearch_streamErrorNotAllowed": {
+    "description": "Error message when the server's rules do not allow fetching this page. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+  "webSearch_streamErrorCaptureFailed": "Page capture failed. ({detail})",
+  "@webSearch_streamErrorCaptureFailed": {
+    "description": "Error message when the server failed to capture a result page as a file. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+  "webSearch_streamErrorGeneric": "Search error: {detail}",
+  "@webSearch_streamErrorGeneric": {
+    "description": "Error message for any other search failure. detail is the server's reason (often English) or \"unknown error\".",
+    "placeholders": { "detail": { "type": "String" } }
+  },
+
+  "webSearch_torStartFailed": "Could not start {torBrand} for the search. Disable the {torBrand} toggle or try again.",
+  "@webSearch_torStartFailed": {
+    "description": "Error message when a web search should go through Tor but Tor could not be started. torBrand is \"Tor™\" and appears twice.",
+    "placeholders": { "torBrand": { "type": "String" } }
+  },
+  "webSearch_creditCheckFailed": "Could not check search credits. Please try again.",
+  "@webSearch_creditCheckFailed": {
+    "description": "Error message when the app could not check the user's search credit balance before searching."
+  },
+  "webSearch_tokenIssuanceFailed": "Could not issue search tokens. Please try again.",
+  "@webSearch_tokenIssuanceFailed": {
+    "description": "Error message when the app could not obtain the anonymous search tokens needed for a web search."
+  }
+}

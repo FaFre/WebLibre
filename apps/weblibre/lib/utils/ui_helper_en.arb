@@ -1,0 +1,89 @@
+{
+  "@@locale": "en",
+
+  "uiHelper_findInPageSuggestion": "Find \"{query}\" on this page?",
+  "@uiHelper_findInPageSuggestion": {
+    "description": "Short message at the bottom of the screen offering to search the current page for text the user typed or selected. query is that text, possibly shortened.",
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "uiHelper_actionFind": "Find",
+  "@uiHelper_actionFind": {
+    "description": "Action button on the \"Find … on this page?\" message; starts searching the page for the text."
+  },
+
+  "uiHelper_openedTabsFromAnotherDevice": "{count, plural, =1{Opened 1 tab from another device} other{Opened {count} tabs from another device}}",
+  "@uiHelper_openedTabsFromAnotherDevice": {
+    "description": "Short message at the bottom of the screen after tabs sent from another device via sync were opened. count is the number of tabs.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "uiHelper_navigateBackToCloseTab": "Press BACK again to close the current tab",
+  "@uiHelper_navigateBackToCloseTab": {
+    "description": "Short message after pressing the system Back button with no page history left: pressing Back once more closes the current tab. \"BACK\" refers to the Back button/gesture and is capitalized for emphasis."
+  },
+  "uiHelper_navigateBackToExitApp": "Press BACK again to exit the app",
+  "@uiHelper_navigateBackToExitApp": {
+    "description": "Short message after pressing the system Back button with nothing left to go back to: pressing Back once more leaves the app. \"BACK\" refers to the Back button/gesture and is capitalized for emphasis."
+  },
+
+  "uiHelper_newTabOpenedInBackgroundNamed": "New tab '{tabName}' opened in background",
+  "@uiHelper_newTabOpenedInBackgroundNamed": {
+    "description": "Short message at the bottom of the screen after a link was opened in a new tab without switching to it. tabName is the page title.",
+    "placeholders": { "tabName": { "type": "String" } }
+  },
+  "uiHelper_newTabOpenedInBackground": "New tab opened in background",
+  "@uiHelper_newTabOpenedInBackground": {
+    "description": "Short message at the bottom of the screen after a link was opened in a new tab without switching to it, when the page has no title yet."
+  },
+  "uiHelper_actionShow": "Show",
+  "@uiHelper_actionShow": {
+    "description": "Action button on the \"New tab opened in background\" message; switches to that tab."
+  },
+
+  "uiHelper_wantToOpenLinkFromClipboard": "Open the link from your clipboard?",
+  "@uiHelper_wantToOpenLinkFromClipboard": {
+    "description": "Short message at the bottom of the screen offering to open a web address found on the clipboard, with an Open button."
+  },
+
+  "uiHelper_newTabOpenedNamed": "New tab '{tabName}' opened",
+  "@uiHelper_newTabOpenedNamed": {
+    "description": "Short message at the bottom of the screen after a new tab was created. tabName is the page title.",
+    "placeholders": { "tabName": { "type": "String" } }
+  },
+  "uiHelper_newTabOpened": "New tab opened",
+  "@uiHelper_newTabOpened": {
+    "description": "Short message at the bottom of the screen after a new tab was created, when the page has no title yet."
+  },
+  "uiHelper_actionSwitch": "Switch",
+  "@uiHelper_actionSwitch": {
+    "description": "Action button on the \"New tab opened\" message; switches to that tab."
+  },
+
+  "uiHelper_couldNotLaunchUrl": "Could not launch URL ({url})",
+  "@uiHelper_couldNotLaunchUrl": {
+    "description": "Error message when a link could not be handed to another app. url is the full web address.",
+    "placeholders": { "url": { "type": "String" } }
+  },
+  "uiHelper_canNotHandleScheme": "Cannot handle \"{scheme}\"",
+  "@uiHelper_canNotHandleScheme": {
+    "description": "Error message when a link uses a protocol no installed app can open. scheme is the protocol prefix of the link, e.g. \"tel\" or \"market\".",
+    "placeholders": { "scheme": { "type": "String" } }
+  },
+
+  "uiHelper_tabsClosedCount": "{count, plural, =1{Tab closed} other{{count} tabs closed}}",
+  "@uiHelper_tabsClosedCount": {
+    "description": "Short message at the bottom of the screen after closing tabs, with an Undo button. count is the number of closed tabs.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "uiHelper_closeIsolatedTabsTitle": "Close isolated tabs?",
+  "@uiHelper_closeIsolatedTabsTitle": {
+    "description": "Title of the confirmation dialog before closing isolated tabs. Isolated tabs each keep their own temporary cookies and site data, which is deleted when they close."
+  },
+  "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{This will permanently clear all browsing data for this isolated session.} other{This will permanently clear browsing data for {count} isolated sessions.}}",
+  "@uiHelper_closeIsolatedTabsConfirm": {
+    "description": "Body of the confirmation dialog before closing isolated tabs. count is the number of isolated sessions (groups of tabs sharing one temporary storage) whose data will be deleted.",
+    "placeholders": { "count": { "type": "int" } }
+  }
+
+}

@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/dialogs/pwa_install_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Shows the install bottom sheet for sites with a valid PWA manifest.
@@ -34,9 +35,11 @@ import 'package:weblibre/utils/ui_helper.dart';
 /// "Install as App" and a plain shortcut, so the choice comes back in
 /// [ShortcutInstallConfig.type].
 Future<void> showPwaInstallDialog(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
   final selectedTabId = ref.read(selectedTabProvider);
   final manifest = ref.read(currentTabManifestProvider);
-  final defaultName = manifest?.shortName ?? manifest?.name ?? 'this web app';
+  final defaultName =
+      manifest?.shortName ?? manifest?.name ?? l10n.pwa_defaultWebAppName;
   final tabState = selectedTabId != null
       ? ref.read(tabStateProvider(selectedTabId))
       : null;
@@ -66,13 +69,14 @@ Future<void> showShortcutInstallDialog(
   BuildContext context,
   WidgetRef ref,
 ) async {
+  final l10n = AppLocalizations.of(context);
   final selectedTabId = ref.read(selectedTabProvider);
   if (selectedTabId == null) return;
 
   final tabState = ref.read(tabStateProvider(selectedTabId));
   final defaultName = tabState?.title.trim().isNotEmpty == true
       ? tabState!.title
-      : 'this site';
+      : l10n.pwa_defaultSiteName;
   final url = tabState?.url ?? Uri.parse('about:blank');
 
   final settings = ref.read(generalSettingsWithDefaultsProvider);
@@ -109,6 +113,7 @@ Future<void> _performInstall(
   required String defaultName,
   required bool manifestBacked,
 }) async {
+  final l10n = AppLocalizations.of(context);
   final name = config.name;
 
   // A null override leaves the label to native's own fallback, which is not
@@ -144,12 +149,12 @@ Future<void> _performInstall(
 
     if (context.mounted) {
       if (success) {
-        showInfoMessage(context, '$name added to home screen');
+        showInfoMessage(context, l10n.pwa_addedToHomeScreen(name));
       } else {
         showErrorMessage(context, switch (config.type) {
           ShortcutInstallType.app when manifestBacked =>
-            'Failed to add $name. The site may not support installation.',
-          _ => 'Failed to add $name to home screen',
+            l10n.pwa_installFailedManifestBacked(name),
+          _ => l10n.pwa_installFailedGeneric(name),
         });
       }
     }
@@ -160,8 +165,8 @@ Future<void> _performInstall(
       showErrorMessage(
         context,
         e is StateError
-            ? 'No tab selected. Please try again.'
-            : 'Failed to add $name to home screen',
+            ? l10n.pwa_noTabSelected
+            : l10n.pwa_installFailedGeneric(name),
       );
     }
   }

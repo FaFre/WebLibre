@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -6,6 +25,8 @@ import 'package:intl/intl.dart';
 import 'package:intl/locale.dart' as intl;
 import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/domain/repositories/locale_resolver.dart';
+import 'package:weblibre/extensions/locale.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 const _expandableKeys = {'snippet', 'review', 'question'};
 
@@ -431,6 +452,7 @@ class SearchResultSnippetsToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return IconButton(
       onPressed: onToggle,
       icon: AnimatedRotation(
@@ -439,7 +461,7 @@ class SearchResultSnippetsToggle extends StatelessWidget {
         child: const Icon(Icons.expand_more, size: 16),
       ),
       visualDensity: VisualDensity.compact,
-      tooltip: 'Snippets',
+      tooltip: l10n.webSearch_snippetsTooltip,
     );
   }
 }
@@ -461,6 +483,7 @@ class SearchResultSnippetsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -475,7 +498,7 @@ class SearchResultSnippetsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Additional Snippets',
+            l10n.webSearch_additionalSnippetsHeading,
             style: textTheme.labelMedium?.copyWith(
               color: colorScheme.primary,
               fontWeight: FontWeight.w700,
@@ -489,7 +512,7 @@ class SearchResultSnippetsPanel extends StatelessWidget {
                 children: [
                   if (item.key == 'question')
                     TextSpan(
-                      text: 'Q: ',
+                      text: l10n.webSearch_questionPrefix,
                       style: textTheme.bodyMedium?.copyWith(
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
@@ -534,7 +557,12 @@ class _ResolvedLanguageLabel extends ConsumerWidget {
 
     if (locale == null) return Text(languageTag, style: style);
 
-    final resolved = ref.watch(resolveLocaleProvider(locale));
+    final resolved = ref.watch(
+      resolveLocaleProvider(
+        locale,
+        Localizations.localeOf(context).toIntlLocale(),
+      ),
+    );
 
     return Text(
       resolved.maybeWhen(

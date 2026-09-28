@@ -26,6 +26,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -47,6 +48,7 @@ class LocalHistorySuggestions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final searchAsync = ref.watch(historySearchRepositoryProvider);
     final results = searchAsync.value?.results ?? const [];
 
@@ -63,7 +65,7 @@ class LocalHistorySuggestions extends HookConsumerWidget {
     );
 
     return SearchModuleSection(
-      title: 'Local content',
+      title: l10n.search_moduleLabelLocalHistory,
       moduleType: SearchModuleType.localHistory,
       totalCount: results.length,
       contentSliverBuilder:
@@ -161,7 +163,7 @@ class LocalHistorySuggestions extends HookConsumerWidget {
                 },
                 error: (error, stackTrace) => SliverToBoxAdapter(
                   child: FailureWidget(
-                    title: 'Could not load local content',
+                    title: l10n.search_couldNotLoadLocalContent,
                     exception: error,
                   ),
                 ),

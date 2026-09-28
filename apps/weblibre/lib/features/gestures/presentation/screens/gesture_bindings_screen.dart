@@ -21,11 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_binding_editor.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_stroke_view.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Lists the configured gesture → action bindings, grouped by action category,
 /// and lets the user add, edit and remove them.
@@ -34,6 +36,7 @@ class GestureBindingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
 
     Future<void> upsertBinding(
@@ -62,19 +65,16 @@ class GestureBindingsScreen extends HookConsumerWidget {
         context: context,
         anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         builder: (context) => AlertDialog(
-          title: const Text('Restore default gestures?'),
-          content: const Text(
-            'Every gesture goes back to its default action. Your changes are '
-            'lost.',
-          ),
+          title: Text(l10n.gestures_restoreDefaultGesturesConfirmTitle),
+          content: Text(l10n.gestures_restoreDefaultGesturesConfirmContent),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.common_cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Restore'),
+              child: Text(l10n.gestures_actionRestore),
             ),
           ],
         ),
@@ -93,22 +93,24 @@ class GestureBindingsScreen extends HookConsumerWidget {
       byCategory.putIfAbsent(entry.value.category, () => []).add(entry);
     }
     for (final entries in byCategory.values) {
-      entries.sort((a, b) => a.value.title.compareTo(b.value.title));
+      entries.sort(
+        (a, b) => a.value.label(context).compareTo(b.value.label(context)),
+      );
     }
 
     return SettingsCustomScrollScaffold(
-      title: 'Gesture bindings',
+      title: l10n.gestures_gestureBindingsTitle,
       actions: [
         if (settings.hasCustomBindings)
           IconButton(
             icon: const Icon(Icons.restart_alt),
-            tooltip: 'Restore default gestures',
+            tooltip: l10n.gestures_restoreDefaultGesturesTooltip,
             onPressed: restoreDefaults,
           ),
       ],
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.add),
-        label: const Text('Add gesture'),
+        label: Text(l10n.gestures_addGestureButtonLabel),
         onPressed: () async {
           final result = await showGestureBindingEditor(
             context,
@@ -122,9 +124,9 @@ class GestureBindingsScreen extends HookConsumerWidget {
       ),
       slivers: [
         if (settings.bindings.isEmpty)
-          const SliverFillRemaining(
+          SliverFillRemaining(
             hasScrollBody: false,
-            child: Center(child: Text('No gestures assigned yet.')),
+            child: Center(child: Text(l10n.gestures_noGesturesAssignedMessage)),
           )
         else
           SliverPadding(
@@ -135,7 +137,7 @@ class GestureBindingsScreen extends HookConsumerWidget {
                   if (byCategory[category] case final entries?
                       when entries.isNotEmpty)
                     _GestureBindingGroup(
-                      title: category.label,
+                      title: category.label(context),
                       children: [
                         for (final binding in entries)
                           _GestureBindingTile(
@@ -229,15 +231,16 @@ class _GestureBindingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final stroke = GestureStroke.fromKey(gestureKey);
 
     return ListTile(
       leading: Icon(action.icon),
-      title: Text(action.title),
+      title: Text(action.label(context)),
       subtitle: GestureStrokeView(stroke: stroke),
       trailing: IconButton(
         icon: const Icon(Icons.delete_outline),
-        tooltip: 'Remove',
+        tooltip: l10n.common_remove,
         onPressed: () => onRemove(),
       ),
       onTap: () => onEdit(),

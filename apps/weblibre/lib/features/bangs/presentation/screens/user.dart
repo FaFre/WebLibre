@@ -28,6 +28,7 @@ import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class UserBangs extends HookConsumerWidget {
@@ -37,10 +38,11 @@ class UserBangs extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final bangsAsync = ref.watch(bangListProvider(groups: _userGroupFilter));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('User Bangs')),
+      appBar: AppBar(title: Text(l10n.bangs_userBangsTitle)),
       body: bangsAsync.when(
         skipLoadingOnReload: true,
         data: (bangs) {
@@ -70,7 +72,7 @@ class UserBangs extends HookConsumerWidget {
                         context,
                       ).colorScheme.onErrorContainer,
                       icon: Icons.delete,
-                      label: 'Delete',
+                      label: l10n.common_delete,
                     ),
                   ],
                 ),
@@ -87,7 +89,10 @@ class UserBangs extends HookConsumerWidget {
           );
         },
         error: (error, stackTrace) => Center(
-          child: FailureWidget(title: 'Failed to load Bangs', exception: error),
+          child: FailureWidget(
+            title: l10n.bangs_loadBangsFailedTitle,
+            exception: error,
+          ),
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),

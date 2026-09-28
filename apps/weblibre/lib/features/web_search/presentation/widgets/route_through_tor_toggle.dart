@@ -26,6 +26,7 @@ import 'package:weblibre/features/search_credits/domain/repositories/web_search_
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 
 class RouteThroughTorToggle extends HookConsumerWidget {
@@ -47,6 +48,7 @@ class RouteThroughTorToggle extends HookConsumerWidget {
       return true;
     }
 
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -122,7 +124,9 @@ class RouteThroughTorToggle extends HookConsumerWidget {
               ),
             const SizedBox(width: 6),
             Text(
-              routeThroughTor ? '$torBrand on' : '$torBrand off',
+              routeThroughTor
+                  ? l10n.webSearch_torToggleOn(torBrand)
+                  : l10n.webSearch_torToggleOff(torBrand),
               style: textTheme.labelLarge?.copyWith(
                 color: routeThroughTor
                     ? colorScheme.onPrimaryContainer

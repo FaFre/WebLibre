@@ -20,6 +20,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Dialog to confirm bang deletion.
 /// Returns true if user confirms deletion, false if cancelled, null if dismissed.
@@ -28,22 +29,24 @@ Future<bool?> showDeleteBangDialog(BuildContext context) {
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
         icon: const Icon(Icons.warning),
-        title: const Text('Delete Bang'),
-        content: const Text('Are you sure you want to delete this Bang?'),
+        title: Text(l10n.bangs_deleteBangTitle),
+        content: Text(l10n.bangs_deleteBangConfirm),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Delete'),
+            child: Text(l10n.common_delete),
           ),
         ],
       );

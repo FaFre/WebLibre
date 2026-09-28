@@ -24,12 +24,13 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
+import 'package:weblibre/presentation/utils/profile_copy_l10n.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -38,6 +39,7 @@ class LockScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isAuthenticating = useState(false);
     final isSwitching = useState(false);
     final didAutoAuthenticate = useRef(false);
@@ -66,7 +68,13 @@ class LockScreen extends HookConsumerWidget {
       isAuthenticating.value = true;
 
       try {
-        await ref.read(profileAuthStateProvider.notifier).authenticate();
+        await ref
+            .read(profileAuthStateProvider.notifier)
+            .authenticate(
+              localizedReason: AppLocalizations.of(
+                context,
+              ).user_authReasonUnlockProfile,
+            );
       } finally {
         if (context.mounted) {
           isAuthenticating.value = false;
@@ -109,14 +117,17 @@ class LockScreen extends HookConsumerWidget {
         if (!armed) {
           isSwitching.value = false;
           if (context.mounted) {
-            showErrorMessage(context, restartCouldNotBeScheduled);
+            showErrorMessage(context, restartCouldNotBeScheduled(l10n));
           }
           return;
         }
       } catch (error) {
         isSwitching.value = false;
         if (context.mounted) {
-          showErrorMessage(context, 'Could not restart: $error');
+          showErrorMessage(
+            context,
+            l10n.user_restartFailedWithError(error.toString()),
+          );
         }
         return;
       }
@@ -132,12 +143,16 @@ class LockScreen extends HookConsumerWidget {
             children: [
               const Icon(MdiIcons.lock, size: 64),
               const SizedBox(height: 16),
-              const Text('Profile is locked'),
+              Text(l10n.user_profileLockedTitle),
               const SizedBox(height: 16),
               FilledButton.icon(
                 style: FilledButton.styleFrom(minimumSize: const Size(160, 40)),
                 icon: const Icon(MdiIcons.fingerprint),
-                label: Text(isAuthenticating.value ? 'Unlocking...' : 'Unlock'),
+                label: Text(
+                  isAuthenticating.value
+                      ? l10n.user_unlockingLabel
+                      : l10n.user_unlockButtonLabel,
+                ),
                 onPressed: isAuthenticating.value || isSwitching.value
                     ? null
                     : authenticate,
@@ -152,8 +167,8 @@ class LockScreen extends HookConsumerWidget {
                   icon: const Icon(MdiIcons.accountSwitch),
                   label: Text(
                     isSwitching.value
-                        ? 'Restarting…'
-                        : 'Choose another profile',
+                        ? l10n.user_restartingLabel
+                        : l10n.user_chooseAnotherProfileLabel,
                   ),
                   onPressed: isAuthenticating.value || isSwitching.value
                       ? null

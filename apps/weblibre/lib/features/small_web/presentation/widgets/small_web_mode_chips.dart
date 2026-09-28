@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/domain/providers.dart';
+import 'package:weblibre/features/small_web/presentation/utils/kagi_small_web_mode_l10n.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 
 class SmallWebModeChips extends ConsumerWidget {
@@ -63,7 +64,7 @@ class SmallWebModeChips extends ConsumerWidget {
                   label: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(mode.label),
+                      Text(mode.label(context)),
                       if (count != null && count > 0) ...[
                         const SizedBox(width: 6),
                         InlineCountBadge(

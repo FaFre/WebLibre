@@ -39,6 +39,7 @@ import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class SingboxProxyProfilesScreen extends HookConsumerWidget {
@@ -46,6 +47,7 @@ class SingboxProxyProfilesScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final profilesAsync = ref.watch(singboxProxyProfilesRepositoryProvider);
     final runtimeState = ref.watch(singboxProxyRuntimeRepositoryProvider);
     final torState = ref.watch(torProxyServiceProvider);
@@ -69,7 +71,7 @@ class SingboxProxyProfilesScreen extends HookConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => unawaited(_showAddSheet(context)),
         icon: const Icon(Icons.add),
-        label: const Text('Add Profile'),
+        label: Text(l10n.proxy_addProfile),
       ),
       body: SafeArea(
         child: FadingScroll(
@@ -80,10 +82,10 @@ class SingboxProxyProfilesScreen extends HookConsumerWidget {
               slivers: [
                 SliverAppBar.large(
                   centerTitle: false,
-                  title: const Text('Proxy Connections'),
+                  title: Text(l10n.proxy_connectionsTitle),
                   actions: [
                     IconButton(
-                      tooltip: 'View logs',
+                      tooltip: l10n.proxy_viewLogsTooltip,
                       icon: const Icon(Icons.subject),
                       onPressed: () =>
                           const SingboxProxyLogsRoute().push(context),
@@ -146,7 +148,7 @@ class SingboxProxyProfilesScreen extends HookConsumerWidget {
                           padding: const EdgeInsets.all(24),
                           child: Center(
                             child: Text(
-                              'Failed to load proxy profiles:\n$error',
+                              l10n.proxy_loadProfilesFailed(error.toString()),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -235,6 +237,7 @@ class _ProfileListBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final sorted = [...profiles]
       ..sort((a, b) {
         final aRunning = activeProfileIds.contains(a.id);
@@ -269,7 +272,7 @@ class _ProfileListBody extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
           child: Text(
-            'Profiles',
+            l10n.proxy_profilesSectionTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: scheme.primary,
               fontWeight: FontWeight.w700,

@@ -29,85 +29,98 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-const List<SettingsSectionDefinition> urlCleanerSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Overview',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Description',
-        subtitle: 'Tracking parameter removal and offline redirect cleanup',
-        keywords: ['tracking parameters', 'redirects'],
-        child: _UrlCleanerDescriptionTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Behavior',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Enable URL Cleaner',
-        subtitle: 'Remove tracking parameters from URLs',
-        keywords: ['clean urls'],
-        child: _UrlCleanerEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Auto-apply',
-        subtitle: 'Automatically replace URL with cleaned version',
-        keywords: ['auto apply'],
-        child: _UrlCleanerAutoApplyTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Allow referral marketing',
-        subtitle: 'Keep referral and affiliate tracking parameters',
-        keywords: ['affiliate', 'referral'],
-        child: _UrlCleanerAllowReferralTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Catalog',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Auto-update catalog',
-        subtitle: 'Check for rule updates weekly',
-        child: _UrlCleanerAutoUpdateTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Update catalog',
-        subtitle: 'Fetch the latest URL cleaner rules',
-        child: _UrlCleanerUpdateButton(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Restore defaults',
-        subtitle: 'Reset to bundled catalog and default settings',
-        child: _UrlCleanerRestoreDefaultsButton(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Attribution',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Attribution',
-        subtitle: 'Credits and source links',
-        child: _UrlCleanerAttributionTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> urlCleanerSettingsSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_urlCleanerOverviewSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_indexUrlCleanerDescriptionTitle,
+          subtitle: l10n.openLinkTools_indexUrlCleanerDescriptionSubtitle,
+          keywords: settingsKeywords(
+            l10n.openLinkTools_indexUrlCleanerDescriptionKeywords,
+          ),
+          child: const _UrlCleanerDescriptionTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_urlCleanerBehaviorSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_urlCleanerEnabledTitle,
+          subtitle: l10n.openLinkTools_urlCleanerEnabledSubtitle,
+          keywords: settingsKeywords(
+            l10n.openLinkTools_urlCleanerEnabledKeywords,
+          ),
+          child: const _UrlCleanerEnabledTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_autoApplyTitle,
+          subtitle: l10n.openLinkTools_autoApplySubtitle,
+          keywords: settingsKeywords(l10n.openLinkTools_autoApplyKeywords),
+          child: const _UrlCleanerAutoApplyTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_allowReferralTitle,
+          subtitle: l10n.openLinkTools_allowReferralSubtitle,
+          keywords: settingsKeywords(l10n.openLinkTools_allowReferralKeywords),
+          child: const _UrlCleanerAllowReferralTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_urlCleanerCatalogSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_autoUpdateCatalogTitle,
+          subtitle: l10n.openLinkTools_autoUpdateCatalogSubtitle,
+          child: const _UrlCleanerAutoUpdateTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_updateCatalogTitle,
+          subtitle: l10n.openLinkTools_indexUrlCleanerUpdateCatalogSubtitle,
+          child: const _UrlCleanerUpdateButton(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_restoreDefaultsButtonTitle,
+          subtitle: l10n.openLinkTools_restoreDefaultsButtonSubtitle,
+          child: const _UrlCleanerRestoreDefaultsButton(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_urlCleanerAttributionSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_indexUrlCleanerAttributionTitle,
+          subtitle: l10n.openLinkTools_indexUrlCleanerAttributionSubtitle,
+          child: const _UrlCleanerAttributionTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class UrlCleanerSettingsScreen extends StatelessWidget {
   const UrlCleanerSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'URL Cleaner',
-      subtitle: 'URL cleanup behavior, rule catalog updates, and attribution.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.openLinkTools_urlCleanerSettingsTitle,
+      subtitle: l10n.openLinkTools_urlCleanerSettingsSubtitle,
       icon: MdiIcons.broom,
-      sections: urlCleanerSettingsSections,
+      sections: urlCleanerSettingsSections(context),
     );
   }
 }
@@ -117,13 +130,12 @@ class _UrlCleanerDescriptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ListTile(
-      title: Text('Description'),
-      subtitle: Text(
-        'This module removes tracking, referrer and other useless parameters from the URL. '
-        'It also allows for common offline URL redirections.',
-      ),
-      leading: Icon(MdiIcons.broom),
+    final l10n = AppLocalizations.of(context);
+
+    return ListTile(
+      title: Text(l10n.openLinkTools_descriptionLabel),
+      subtitle: Text(l10n.openLinkTools_urlCleanerDescriptionBody),
+      leading: const Icon(MdiIcons.broom),
     );
   }
 }
@@ -133,13 +145,14 @@ class _UrlCleanerEnabledTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.urlCleanerEnabled),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Enable URL Cleaner'),
-      subtitle: const Text('Remove tracking parameters from URLs'),
+      title: Text(l10n.openLinkTools_urlCleanerEnabledTitle),
+      subtitle: Text(l10n.openLinkTools_urlCleanerEnabledSubtitle),
       secondary: const Icon(MdiIcons.broom),
       value: enabled,
       onChanged: (value) async {
@@ -156,13 +169,14 @@ class _UrlCleanerAutoApplyTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final autoApply = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.urlCleanerAutoApply),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Auto-apply'),
-      subtitle: const Text('Automatically replace URL with cleaned version'),
+      title: Text(l10n.openLinkTools_autoApplyTitle),
+      subtitle: Text(l10n.openLinkTools_autoApplySubtitle),
       secondary: const Icon(MdiIcons.autoFix),
       value: autoApply,
       onChanged: (value) async {
@@ -179,6 +193,7 @@ class _UrlCleanerAllowReferralTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final allowReferral = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.urlCleanerAllowReferralMarketing,
@@ -186,8 +201,8 @@ class _UrlCleanerAllowReferralTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Allow referral marketing'),
-      subtitle: const Text('Keep referral and affiliate tracking parameters'),
+      title: Text(l10n.openLinkTools_allowReferralTitle),
+      subtitle: Text(l10n.openLinkTools_allowReferralSubtitle),
       secondary: const Icon(MdiIcons.cashMultiple),
       value: allowReferral,
       onChanged: (value) async {
@@ -207,13 +222,14 @@ class _UrlCleanerAutoUpdateTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final autoUpdate = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.urlCleanerAutoUpdate),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Auto-update catalog'),
-      subtitle: const Text('Check for rule updates weekly'),
+      title: Text(l10n.openLinkTools_autoUpdateCatalogTitle),
+      subtitle: Text(l10n.openLinkTools_autoUpdateCatalogSubtitle),
       secondary: const Icon(MdiIcons.update),
       value: autoUpdate,
       onChanged: (value) async {
@@ -230,6 +246,7 @@ class _UrlCleanerUpdateButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isUpdating = useState(false);
     final lastCheckEpochMs = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -253,23 +270,21 @@ class _UrlCleanerUpdateButton extends HookConsumerWidget {
         ? DateTime.fromMillisecondsSinceEpoch(lastCheckEpochMs)
         : null;
 
-    final subtitle = StringBuffer(
-      lastUpdate == null
-          ? 'Last update: not available'
-          : 'Last update: ${ref.read(formatProvider.notifier).shortDate(lastUpdate)}',
-    );
-    if (lastCheck != null) {
-      subtitle.write(
-        '\nLast check: ${ref.read(formatProvider.notifier).shortDate(lastCheck)}',
-      );
-    }
-    if (lastUpdateWasAuto) {
-      subtitle.write(' (auto)');
-    }
+    final format = ref.read(formatProvider.notifier);
+    final subtitle = [
+      if (lastUpdate == null)
+        l10n.openLinkTools_lastUpdateNotAvailable
+      else if (lastUpdateWasAuto)
+        l10n.openLinkTools_lastAutoUpdateWithDate(format.shortDate(lastUpdate))
+      else
+        l10n.openLinkTools_lastUpdateWithDate(format.shortDate(lastUpdate)),
+      if (lastCheck != null)
+        l10n.openLinkTools_lastCheckWithDate(format.shortDate(lastCheck)),
+    ].join('\n');
 
     return ListTile(
-      title: const Text('Update catalog'),
-      subtitle: Text(subtitle.toString()),
+      title: Text(l10n.openLinkTools_updateCatalogTitle),
+      subtitle: Text(subtitle),
       leading: const Icon(MdiIcons.cloudDownload),
       trailing: isUpdating.value
           ? const SizedBox(
@@ -287,11 +302,17 @@ class _UrlCleanerUpdateButton extends HookConsumerWidget {
                     .read(urlCleanerCatalogServiceProvider.notifier)
                     .updateCatalog();
                 if (context.mounted) {
-                  showInfoMessage(context, 'Catalog updated');
+                  showInfoMessage(
+                    context,
+                    l10n.openLinkTools_catalogUpdatedMessage,
+                  );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  showErrorMessage(context, 'Update failed: $e');
+                  showErrorMessage(
+                    context,
+                    l10n.openLinkTools_updateFailedWithError('$e'),
+                  );
                 }
               } finally {
                 isUpdating.value = false;
@@ -306,9 +327,11 @@ class _UrlCleanerRestoreDefaultsButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
-      title: const Text('Restore defaults'),
-      subtitle: const Text('Reset to bundled catalog and default settings'),
+      title: Text(l10n.openLinkTools_restoreDefaultsButtonTitle),
+      subtitle: Text(l10n.openLinkTools_restoreDefaultsButtonSubtitle),
       leading: const Icon(MdiIcons.restore),
       onTap: () async {
         final confirmed = await showUrlCleanerRestoreDefaultsDialog(context);
@@ -348,6 +371,7 @@ class _UrlCleanerAttributionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textColor = Theme.of(context).textTheme.bodyMedium?.color;
     final linkStyle = TextStyle(
       color: Theme.of(context).colorScheme.primary,
@@ -362,7 +386,7 @@ class _UrlCleanerAttributionTile extends StatelessWidget {
             context,
           ).textTheme.bodyMedium?.copyWith(color: textColor),
           children: [
-            const TextSpan(text: 'This module is based on the ClearURL rules:'),
+            TextSpan(text: l10n.openLinkTools_clearUrlAttributionText),
             WidgetSpan(
               alignment: PlaceholderAlignment.baseline,
               baseline: TextBaseline.alphabetic,

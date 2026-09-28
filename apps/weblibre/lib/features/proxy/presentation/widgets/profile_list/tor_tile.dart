@@ -30,6 +30,7 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_list/run_sw
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -47,6 +48,7 @@ class TorProfileTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final background = isRunning
         ? scheme.primary.withValues(alpha: 0.15)
@@ -83,7 +85,7 @@ class TorProfileTile extends ConsumerWidget {
         ),
       ),
       subtitle: ProfileSubtitle(
-        typeLabel: 'Onion routing',
+        typeLabel: l10n.proxy_onionRoutingLabel,
         latency: latencyResult,
         autostart: autostart,
       ),
@@ -103,9 +105,12 @@ class TorProfileTile extends ConsumerWidget {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: TorAction.edit,
-                child: MenuRow(icon: Icons.edit_outlined, label: 'Edit'),
+                child: MenuRow(
+                  icon: Icons.edit_outlined,
+                  label: l10n.common_edit,
+                ),
               ),
               PopupMenuItem(
                 value: TorAction.testLatency,
@@ -114,7 +119,7 @@ class TorProfileTile extends ConsumerWidget {
                   icon: latencyResult is AsyncLoading
                       ? Icons.hourglass_bottom
                       : Icons.network_check,
-                  label: 'Test connection',
+                  label: l10n.proxy_actionTestConnection,
                 ),
               ),
             ],
@@ -148,11 +153,12 @@ class TorProfileTile extends ConsumerWidget {
         stackTrace: stackTrace,
       );
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
         showErrorMessage(
           context,
           isRunning
-              ? 'Failed to stop $torBrand: $error'
-              : 'Failed to start $torBrand: $error',
+              ? l10n.proxy_stopBrandFailed(torBrand, error.toString())
+              : l10n.proxy_startBrandFailed(torBrand, error.toString()),
         );
       }
     }

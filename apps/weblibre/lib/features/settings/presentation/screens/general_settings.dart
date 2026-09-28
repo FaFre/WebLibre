@@ -19,6 +19,7 @@
  */
 import 'dart:convert';
 
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -27,153 +28,132 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/repositories/locale_resolver.dart';
+import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
-const List<SettingsSectionDefinition> generalSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Default Browser',
-    keywords: ['browser defaults'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Default Browser',
-        subtitle: 'Set WebLibre as your default browser',
-        keywords: ['system browser'],
-        child: _DefaultBrowserTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Appearance',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Theme',
-        subtitle: 'Choose system, light, or dark mode',
-        keywords: ['light', 'dark', 'theme mode'],
-        child: _ThemeSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Pure Black (OLED)',
-        subtitle:
-            'Use true-black surfaces in dark mode to save power on OLED '
-            'screens',
-        keywords: ['oled', 'amoled', 'high contrast', 'black', 'dark'],
-        child: _PureBlackTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'User Interface Zoom',
-        subtitle: 'Make the user interface smaller or larger',
-        keywords: ['ui scale', 'zoom'],
-        child: _UiZoomSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Refresh Rate',
-        subtitle: 'Request a high or low display refresh rate (Android)',
-        keywords: [
-          'fps',
-          'hz',
-          'hertz',
-          'frame rate',
-          'framerate',
-          '60hz',
-          '90hz',
-          '120hz',
-          'smooth',
-          'high refresh',
-          'display mode',
-        ],
-        child: _RefreshRateSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Disable Animations',
-        subtitle: 'Reduce motion and turn off app animations',
-        keywords: ['motion'],
-        child: _DisableAnimationsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Modal Barrier',
-        subtitle: 'Dim the background behind dialogs and bottom sheets',
-        keywords: ['dialogs', 'bottom sheets', 'overlay'],
-        child: _ShowModalBarrierTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Show Close Button',
-        subtitle:
-            'Add a button to dismiss the search / new-tab page without '
-            'a back gesture',
-        keywords: [
-          'back',
-          'close',
-          'dismiss',
-          'e-ink',
-          'eink',
-          'accessibility',
-          'new tab',
-        ],
-        child: _ShowSearchCloseButtonTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Profile',
-    keywords: ['user', 'profile'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Back up this profile',
-        subtitle: 'Write an encrypted backup file of the profile you are using',
-        keywords: [
-          'backup',
-          'archive',
-          'export',
-          'save',
-          'encrypted',
-          'restore',
-        ],
-        child: _BackupProfileTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Export & Import Settings',
-        subtitle: 'Move settings to another profile, device, or a bug report',
-        keywords: [
-          'export',
-          'import',
-          'settings',
-          'transfer',
-          'share',
-          'clipboard',
-          'json',
-          'copy',
-          'migrate',
-        ],
-        child: _SettingsTransferTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Downloads',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Use external download manager',
-        subtitle: 'Manage downloads with another app',
-        keywords: ['downloads'],
-        child: _ExternalDownloadManagerTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Download folder',
-        subtitle: 'Choose where downloaded files are saved',
-        keywords: ['downloads', 'folder', 'directory', 'storage', 'save'],
-        child: _DownloadDirectoryTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_defaultBrowserSectionTitle,
+      keywords: settingsKeywords(l10n.settings_defaultBrowserSectionKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_defaultBrowserTileTitle,
+          subtitle: l10n.settings_indexDefaultBrowserSubtitle,
+          keywords: settingsKeywords(l10n.settings_defaultBrowserTileKeywords),
+          child: const _DefaultBrowserTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_appearanceSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_themeTitle,
+          subtitle: l10n.settings_indexThemeSubtitle,
+          keywords: settingsKeywords(l10n.settings_themeKeywords),
+          child: const _ThemeSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_indexAppLanguageTitle,
+          subtitle: l10n.settings_indexAppLanguageSubtitle,
+          keywords: settingsKeywords(l10n.settings_indexAppLanguageKeywords),
+          child: const _AppLanguageSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_pureBlackTitle,
+          subtitle: l10n.settings_pureBlackSubtitle,
+          keywords: settingsKeywords(l10n.settings_pureBlackKeywords),
+          child: const _PureBlackTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_uiZoomTitle,
+          subtitle: l10n.settings_uiZoomSubtitle,
+          keywords: settingsKeywords(l10n.settings_uiZoomKeywords),
+          child: const _UiZoomSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_refreshRateTitle,
+          subtitle: l10n.settings_indexRefreshRateSubtitle,
+          keywords: settingsKeywords(l10n.settings_refreshRateKeywords),
+          child: const _RefreshRateSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_disableAnimationsTitle,
+          subtitle: l10n.settings_disableAnimationsSubtitle,
+          keywords: settingsKeywords(l10n.settings_disableAnimationsKeywords),
+          child: const _DisableAnimationsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_showModalBarrierTitle,
+          subtitle: l10n.settings_showModalBarrierSubtitle,
+          keywords: settingsKeywords(l10n.settings_showModalBarrierKeywords),
+          child: const _ShowModalBarrierTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_showSearchCloseButtonTitle,
+          subtitle: l10n.settings_indexShowCloseButtonSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_showSearchCloseButtonKeywords,
+          ),
+          child: const _ShowSearchCloseButtonTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_profileSectionTitle,
+      keywords: settingsKeywords(l10n.settings_profileSectionKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_backupProfileTitle,
+          subtitle: l10n.settings_indexBackupProfileSubtitle,
+          keywords: settingsKeywords(l10n.settings_backupProfileKeywords),
+          child: const _BackupProfileTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_settingsTransferTileTitle,
+          subtitle: l10n.settings_indexSettingsTransferSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_settingsTransferTileKeywords,
+          ),
+          child: const _SettingsTransferTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_downloadsSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_externalDownloadManagerTitle,
+          subtitle: l10n.settings_externalDownloadManagerSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_externalDownloadManagerKeywords,
+          ),
+          child: const _ExternalDownloadManagerTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_downloadFolderTitle,
+          subtitle: l10n.settings_indexDownloadFolderSubtitle,
+          keywords: settingsKeywords(l10n.settings_downloadFolderKeywords),
+          child: const _DownloadDirectoryTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 /// Takes a backup of the *active* profile without switching away from it.
 ///
@@ -188,16 +168,18 @@ class _BackupProfileTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(selectedProfileProvider);
+    final l10n = AppLocalizations.of(context);
 
     return ListTile(
       enabled: profile.hasValue,
       leading: const Icon(MdiIcons.safe),
-      title: const Text('Back up this profile'),
+      title: Text(l10n.settings_backupProfileTitle),
       subtitle: Text(switch (profile) {
-        AsyncData(:final value) =>
-          'Write "${value.name}" to an encrypted backup file',
-        AsyncError() => 'Could not read the active profile',
-        _ => 'Loading…',
+        AsyncData(:final value) => l10n.settings_backupProfileSubtitleReady(
+          value.name,
+        ),
+        AsyncError() => l10n.settings_backupProfileSubtitleError,
+        _ => l10n.common_loading,
       }),
       trailing: const Icon(Icons.chevron_right),
       onTap: profile.hasValue
@@ -221,12 +203,12 @@ class _SettingsTransferTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.swapHorizontal),
-      title: const Text('Export & Import Settings'),
-      subtitle: const Text(
-        'Write settings to a file or the clipboard, and read them back',
-      ),
+      title: Text(l10n.settings_settingsTransferTileTitle),
+      subtitle: Text(l10n.settings_settingsTransferTileSubtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => const SettingsTransferRoute().push(context),
     );
@@ -238,11 +220,13 @@ class GeneralSettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'General',
-      subtitle: 'Appearance, downloads, and browser defaults.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_generalTitle,
+      subtitle: l10n.settings_generalSubtitle,
       icon: Icons.tune,
-      sections: generalSettingsSections,
+      sections: generalSettingsSections(context),
     );
   }
 }
@@ -266,12 +250,13 @@ class _DefaultBrowserTile extends HookConsumerWidget {
     );
 
     final isCurrentDefaultBrowser = isDefault.data == true;
+    final l10n = AppLocalizations.of(context);
 
     return CustomListTile(
-      title: 'Default Browser',
+      title: l10n.settings_defaultBrowserTileTitle,
       subtitle: isCurrentDefaultBrowser
-          ? 'WebLibre is your default browser'
-          : 'Set WebLibre as your default browser',
+          ? l10n.settings_defaultBrowserTileSubtitleSet
+          : l10n.settings_defaultBrowserTileSubtitleNotSet,
       prefix: Padding(
         padding: const EdgeInsets.only(right: 16.0),
         child: Icon(
@@ -288,7 +273,11 @@ class _DefaultBrowserTile extends HookConsumerWidget {
                 defaultBrowserRefreshKey.value++;
               },
         icon: Icon(isCurrentDefaultBrowser ? Icons.check : Icons.open_in_new),
-        label: Text(isCurrentDefaultBrowser ? 'Default' : 'Set'),
+        label: Text(
+          isCurrentDefaultBrowser
+              ? l10n.settings_defaultBrowserButtonDefault
+              : l10n.settings_defaultBrowserButtonSet,
+        ),
       ),
     );
   }
@@ -308,6 +297,7 @@ class _UiZoomSection extends HookConsumerWidget {
     final sliderValue = useKeyedState(uiScaleFactor, [uiScaleFactor]);
 
     final sliderLabel = '${(sliderValue.value * 100).round()}%';
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -315,10 +305,10 @@ class _UiZoomSection extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            title: Text('User Interface Zoom'),
-            subtitle: Text('Make the user interface smaller or larger'),
-            leading: Icon(Icons.zoom_in),
+          ListTile(
+            title: Text(l10n.settings_uiZoomTitle),
+            subtitle: Text(l10n.settings_uiZoomSubtitle),
+            leading: const Icon(Icons.zoom_in),
             contentPadding: EdgeInsets.zero,
           ),
           Row(
@@ -373,10 +363,11 @@ class _DisableAnimationsTile extends HookConsumerWidget {
     final disableAnimations = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.disableAnimations),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Disable Animations'),
-      subtitle: const Text('Reduce motion and turn off app animations'),
+      title: Text(l10n.settings_disableAnimationsTitle),
+      subtitle: Text(l10n.settings_disableAnimationsSubtitle),
       secondary: const Icon(Icons.animation),
       value: disableAnimations,
       onChanged: (value) async {
@@ -399,12 +390,11 @@ class _ShowModalBarrierTile extends HookConsumerWidget {
     final showModalBarrier = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showModalBarrier),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Show Modal Barrier'),
-      subtitle: const Text(
-        'Dim the background behind dialogs and bottom sheets',
-      ),
+      title: Text(l10n.settings_showModalBarrierTitle),
+      subtitle: Text(l10n.settings_showModalBarrierSubtitle),
       secondary: const Icon(Icons.layers),
       value: showModalBarrier,
       onChanged: (value) async {
@@ -429,13 +419,11 @@ class _ShowSearchCloseButtonTile extends HookConsumerWidget {
         (s) => s.showSearchCloseButton,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Show Close Button'),
-      subtitle: const Text(
-        'Add a button to dismiss the search / new-tab page without a back '
-        'gesture, useful on devices without a back button',
-      ),
+      title: Text(l10n.settings_showSearchCloseButtonTitle),
+      subtitle: Text(l10n.settings_showSearchCloseButtonSubtitle),
       secondary: const Icon(Icons.close),
       value: showSearchCloseButton,
       onChanged: (value) async {
@@ -465,12 +453,11 @@ class _PureBlackTile extends HookConsumerWidget {
     // OLED surfaces only apply to dark mode; disable the toggle when the app
     // is locked to light mode so the setting can't appear to have no effect.
     final enabled = themeMode != ThemeMode.light;
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Pure Black (OLED)'),
-      subtitle: const Text(
-        'Use true-black surfaces in dark mode to save power on OLED screens',
-      ),
+      title: Text(l10n.settings_pureBlackTitle),
+      subtitle: Text(l10n.settings_pureBlackSubtitle),
       secondary: const Icon(Icons.contrast),
       value: pureBlack,
       onChanged: enabled
@@ -495,6 +482,7 @@ class _ThemeSection extends HookConsumerWidget {
     final themeMode = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -502,28 +490,28 @@ class _ThemeSection extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            title: Text('Theme'),
-            leading: Icon(Icons.palette),
+          ListTile(
+            title: Text(l10n.settings_themeTitle),
+            leading: const Icon(Icons.palette),
             contentPadding: EdgeInsets.zero,
           ),
           Center(
             child: SegmentedButton<ThemeMode>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: ThemeMode.system,
-                  icon: Icon(Icons.brightness_auto),
-                  label: Text('System'),
+                  icon: const Icon(Icons.brightness_auto),
+                  label: Text(l10n.settings_themeModeSystem),
                 ),
                 ButtonSegment(
                   value: ThemeMode.light,
-                  icon: Icon(Icons.light_mode),
-                  label: Text('Light'),
+                  icon: const Icon(Icons.light_mode),
+                  label: Text(l10n.settings_themeModeLight),
                 ),
                 ButtonSegment(
                   value: ThemeMode.dark,
-                  icon: Icon(Icons.dark_mode),
-                  label: Text('Dark'),
+                  icon: const Icon(Icons.dark_mode),
+                  label: Text(l10n.settings_themeModeDark),
                 ),
               ],
               selected: {themeMode},
@@ -543,6 +531,108 @@ class _ThemeSection extends HookConsumerWidget {
   }
 }
 
+/// Picks the language WebLibre's own UI renders in, distinct from the
+/// "Browser Languages" setting under Privacy & Security (which is the
+/// Accept-Language list exposed to websites, not the app's own interface).
+///
+/// `null` means "follow the system locale". The choices are
+/// [AppLocalizations.supportedLocales], i.e. every locale with an
+/// `app_<locale>.arb`.
+class _AppLanguageSection extends HookConsumerWidget {
+  const _AppLanguageSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // The resolved override rather than the raw tag: a stored tag that is no
+    // longer supported falls back to the system locale, and the list has to
+    // show that instead of leaving every option unselected.
+    final appLocale = ref.watch(effectiveAppLocaleProvider);
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text(l10n.settings_indexAppLanguageTitle),
+            subtitle: Text(l10n.settings_indexAppLanguageSubtitle),
+            leading: const Icon(Icons.language),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup<String?>(
+            groupValue: appLocale?.toLanguageTag(),
+            onChanged: (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) =>
+                        currentSettings.copyWith.appLocale(value),
+                  );
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RadioListTile<String?>(
+                  value: null,
+                  title: Text(l10n.settings_appLanguageSystemDefault),
+                  // Says which language "system" lands on, since a device
+                  // language WebLibre does not ship falls back to another.
+                  subtitle: _LanguageName(
+                    systemAppLocale,
+                    builder: (name) =>
+                        Text(l10n.settings_appLanguageCurrentlyLabel(name)),
+                  ),
+                ),
+                for (final locale in AppLocalizations.supportedLocales)
+                  RadioListTile<String?>(
+                    value: locale.toLanguageTag(),
+                    title: _LanguageName(locale, builder: Text.new),
+                    // Icon-sized, so it stays a hint beside the name rather
+                    // than competing with it.
+                    secondary: CountryFlag.fromLanguageCode(
+                      locale.languageCode,
+                      theme: const ImageTheme(
+                        width: 24,
+                        height: 24,
+                        shape: Circle(),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// [locale]'s language, named in that language itself, so someone who cannot
+/// read the current UI language can still find theirs.
+class _LanguageName extends ConsumerWidget {
+  const _LanguageName(this.locale, {required this.builder});
+
+  final Locale locale;
+  final Widget Function(String name) builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final intlLocale = locale.toIntlLocale();
+    final resolvedAsync = ref.watch(
+      resolveLocaleProvider(intlLocale, intlLocale),
+    );
+
+    return builder(
+      resolvedAsync.maybeWhen(
+        data: (data) => data.languageName,
+        orElse: () => locale.toLanguageTag(),
+      ),
+    );
+  }
+}
+
 class _RefreshRateSection extends HookConsumerWidget {
   const _RefreshRateSection();
 
@@ -551,6 +641,7 @@ class _RefreshRateSection extends HookConsumerWidget {
     final refreshRateMode = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.refreshRateMode),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -558,32 +649,29 @@ class _RefreshRateSection extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            title: Text('Refresh Rate'),
-            subtitle: Text(
-              'Choose "High" for the smoothest scrolling and animations on '
-              '90/120Hz screens, or "Low" to save battery.',
-            ),
-            leading: Icon(Icons.speed),
+          ListTile(
+            title: Text(l10n.settings_refreshRateTitle),
+            subtitle: Text(l10n.settings_refreshRateSubtitle),
+            leading: const Icon(Icons.speed),
             contentPadding: EdgeInsets.zero,
           ),
           Center(
             child: SegmentedButton<RefreshRateMode>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: RefreshRateMode.system,
-                  icon: Icon(Icons.smartphone),
-                  label: Text('System'),
+                  icon: const Icon(Icons.smartphone),
+                  label: Text(l10n.settings_refreshRateModeSystem),
                 ),
                 ButtonSegment(
                   value: RefreshRateMode.high,
-                  icon: Icon(Icons.bolt),
-                  label: Text('High'),
+                  icon: const Icon(Icons.bolt),
+                  label: Text(l10n.settings_refreshRateModeHigh),
                 ),
                 ButtonSegment(
                   value: RefreshRateMode.low,
-                  icon: Icon(Icons.battery_saver),
-                  label: Text('Low'),
+                  icon: const Icon(Icons.battery_saver),
+                  label: Text(l10n.settings_refreshRateModeLow),
                 ),
               ],
               selected: {refreshRateMode},
@@ -679,11 +767,13 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
         folder.connectionState == ConnectionState.done &&
         folder.data == null;
 
+    final l10n = AppLocalizations.of(context);
     final subtitle = switch (directoryUri) {
-      null => 'Saving to the system Downloads folder',
+      null => l10n.settings_downloadFolderSubtitleDefault,
       final uri when unavailable =>
-        'No longer available — saving to the system Downloads folder '
-            '(${describeDownloadTreeUri(uri)})',
+        l10n.settings_downloadFolderSubtitleUnavailable(
+          describeDownloadTreeUri(uri),
+        ),
       final uri => folder.data?.name ?? describeDownloadTreeUri(uri),
     };
 
@@ -720,10 +810,10 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
     }
 
     return ListTile(
-      title: const Text('Download folder'),
+      title: Text(l10n.settings_downloadFolderTitle),
       subtitle: Text(
         useExternalDownloadManager
-            ? 'The download manager app chooses where files are saved'
+            ? l10n.settings_downloadFolderSubtitleExternalManager
             : subtitle,
       ),
       leading: Icon(
@@ -732,7 +822,7 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
       trailing: directoryUri != null && !useExternalDownloadManager
           ? IconButton(
               icon: const Icon(Icons.settings_backup_restore),
-              tooltip: 'Use the system Downloads folder',
+              tooltip: l10n.settings_downloadFolderResetTooltip,
               onPressed: reset,
             )
           : null,
@@ -754,10 +844,11 @@ class _ExternalDownloadManagerTile extends HookConsumerWidget {
         (s) => s.useExternalDownloadManager,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Use external download manager'),
-      subtitle: const Text('Manage downloads with another app'),
+      title: Text(l10n.settings_externalDownloadManagerTitle),
+      subtitle: Text(l10n.settings_externalDownloadManagerSubtitle),
       secondary: const Icon(Icons.download),
       value: useExternalDownloadManager,
       onChanged: (value) async {

@@ -27,10 +27,10 @@ import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:secure_archive/secure_archive.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/maintenance/clone_participant_policy.dart';
+import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
@@ -99,7 +99,7 @@ class UserBackupService extends _$UserBackupService {
       // Leaving the task queued would reserve maintenance on the next start with
       // nothing having asked for it.
       await StartupConfigStore(filesystem.startupPaths).removeTask(task.id);
-      throw Exception(restartCouldNotBeScheduled);
+      throw const MaintenanceAborted(RestartNotScheduledFailure());
     }
 
     return task;
@@ -210,7 +210,7 @@ class UserBackupService extends _$UserBackupService {
       reason: 'maintenanceRestore',
     )) {
       await store.removeTask(task.id);
-      throw Exception(restartCouldNotBeScheduled);
+      throw const MaintenanceAborted(RestartNotScheduledFailure());
     }
 
     return task;

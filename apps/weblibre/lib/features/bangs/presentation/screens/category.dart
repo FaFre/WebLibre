@@ -26,6 +26,7 @@ import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangCategoryScreen extends HookConsumerWidget {
@@ -36,6 +37,7 @@ class BangCategoryScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final bangsAsync = ref.watch(
       bangListProvider(
         categoryFilter: category.mapNotNull(
@@ -79,7 +81,7 @@ class BangCategoryScreen extends HookConsumerWidget {
             error: (error, stackTrace) => SliverToBoxAdapter(
               child: Center(
                 child: FailureWidget(
-                  title: 'Failed to load Bangs',
+                  title: l10n.bangs_loadBangsFailedTitle,
                   exception: error,
                 ),
               ),

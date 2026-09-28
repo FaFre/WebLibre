@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class SyncDetailsTable extends StatelessWidget {
   final int? count;
@@ -29,6 +30,8 @@ class SyncDetailsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return DefaultTextStyle(
       style: GoogleFonts.robotoMono(
         textStyle: DefaultTextStyle.of(context).style,
@@ -37,12 +40,19 @@ class SyncDetailsTable extends StatelessWidget {
         columnWidths: const {0: FixedColumnWidth(100)},
         children: [
           TableRow(
-            children: [const Text('Entries'), Text(count?.toString() ?? 'N/A')],
+            children: [
+              Text(l10n.settings_entriesLabel),
+              Text(count?.toString() ?? l10n.settings_notAvailable),
+            ],
           ),
           TableRow(
             children: [
-              const Text('Last Sync'),
-              Text((lastSync != null) ? timeago.format(lastSync!) : 'N/A'),
+              Text(l10n.settings_lastSyncLabel),
+              Text(
+                (lastSync != null)
+                    ? timeago.format(lastSync!)
+                    : l10n.settings_notAvailable,
+              ),
             ],
           ),
         ],

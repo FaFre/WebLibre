@@ -24,8 +24,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/key_chord_label.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// A read-only list of the keys that currently run browser actions, grouped by
 /// category, with a way into the settings to change them.
@@ -35,6 +37,7 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(keyboardShortcutSettingsRepositoryProvider);
     final bindings = ref.watch(effectiveKeyboardShortcutsProvider);
 
@@ -52,14 +55,14 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
     }
 
     return AlertDialog(
-      title: const Text('Keyboard Shortcuts'),
+      title: Text(l10n.keyboardShortcuts_title),
       content: SizedBox(
         width: 520,
         child: bindings.isEmpty
             ? Text(
                 settings.enabled
-                    ? 'No keys are assigned to browser actions.'
-                    : 'Keyboard shortcuts are switched off.',
+                    ? l10n.keyboardShortcuts_overviewNoneAssigned
+                    : l10n.keyboardShortcuts_overviewDisabled,
               )
             : ListView(
                 shrinkWrap: true,
@@ -69,7 +72,7 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 16, bottom: 4),
                         child: Text(
-                          category.label,
+                          category.label(context),
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w700,
@@ -82,7 +85,7 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(child: Text(action.title)),
+                              Expanded(child: Text(action.label(context))),
                               const SizedBox(width: 12),
                               Flexible(
                                 child: Wrap(
@@ -103,10 +106,13 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
               ),
       ),
       actions: [
-        TextButton(onPressed: customize, child: const Text('Customize')),
+        TextButton(
+          onPressed: customize,
+          child: Text(l10n.keyboardShortcuts_actionCustomize),
+        ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n.common_close),
         ),
       ],
     );

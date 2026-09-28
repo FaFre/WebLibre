@@ -12,6 +12,7 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtim
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets(
@@ -38,12 +39,16 @@ void main() {
                 ProxyConnectionOption(
                   id: const SingboxProxyConnectionId('profile-1'),
                   title: 'Mullvad',
-                  subtitle: 'SOCKS',
+                  profileType: SingboxProxyProfileType.socks,
                 ),
               ],
             ),
           ],
-          child: MaterialApp(home: _EnsureProxyHarness(container: container)),
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: _EnsureProxyHarness(container: container),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -88,7 +93,11 @@ void main() {
             () => profilesRepository,
           ),
         ],
-        child: MaterialApp(home: _EnsureProxyHarness(container: container)),
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: _EnsureProxyHarness(container: container),
+        ),
       ),
     );
     await tester.pumpAndSettle();

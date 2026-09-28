@@ -27,17 +27,5 @@ enum HomeTarget {
   resumeLastTab,
 
   /// Open a configured address.
-  customUrl;
-
-  String get label => switch (this) {
-    home => 'Home page',
-    resumeLastTab => 'Last opened tab',
-    customUrl => 'Custom address',
-  };
-
-  String get description => switch (this) {
-    home => 'Show shortcuts and the sections you have chosen',
-    resumeLastTab => 'Pick up where you left off',
-    customUrl => 'Open a specific page',
-  };
+  customUrl,
 }

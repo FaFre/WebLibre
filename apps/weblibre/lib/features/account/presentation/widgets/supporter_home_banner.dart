@@ -30,6 +30,8 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
 import 'package:weblibre/features/account/domain/repositories/subscription_repository.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/utils/open_in_custom_tab.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/localized_spans.dart';
 
 /// Promotional banner shown above the quote card on the browser home page,
 /// inviting non-subscribers to become a WebLibre Supporter.
@@ -86,6 +88,7 @@ class SupporterHomeBanner extends HookConsumerWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     void dismiss() {
       ref
@@ -147,7 +150,7 @@ class SupporterHomeBanner extends HookConsumerWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(top: 2),
                     child: Text(
-                      'Support WebLibre',
+                      l10n.account_bannerTitle,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         height: 1.25,
@@ -166,43 +169,30 @@ class SupporterHomeBanner extends HookConsumerWidget {
                   color: colorScheme.onSurfaceVariant,
                   height: 1.45,
                 ),
-                children: [
-                  const TextSpan(
-                    text:
-                        'Supporter is an optional subscription that funds '
-                        "WebLibre's development and provides the features that "
-                        'need a hosted service to work. The browser and its '
-                        'privacy features need no subscription. ',
-                  ),
-                  TextSpan(
-                    text: 'Learn more',
-                    style: const TextStyle(
-                      color: AppColors.brandPurple,
-                      fontWeight: FontWeight.w600,
+                children: localizedSpans(
+                  l10n.account_bannerBody,
+                  tags: {
+                    'learnMore': (text) => TextSpan(
+                      text: text,
+                      style: const TextStyle(
+                        color: AppColors.brandPurple,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      recognizer: learnMoreRecognizer,
                     ),
-                    recognizer: learnMoreRecognizer,
-                  ),
-                  const TextSpan(text: '.'),
-                ],
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 12),
-            const _FeatureBullet(
-              label: 'WebLibre Search',
-              description:
-                  'A private, ad-free search built into the browser. It blends '
-                  'results from several independent sources, offers tunable '
-                  'search modes, can route over Tor, and lets you preview '
-                  'pages safely — while keeping your searches unlinkable to '
-                  'your account by design.',
+            _FeatureBullet(
+              label: l10n.account_featureSearchLabel,
+              description: l10n.account_featureSearchDescription,
             ),
             const SizedBox(height: 8),
-            const _FeatureBullet(
-              label: 'Encrypted account sync',
-              description:
-                  'Store and restore your WebLibre settings and preferences '
-                  'across profiles and devices. Everything is encrypted on '
-                  'your device before upload, so only you can read it.',
+            _FeatureBullet(
+              label: l10n.account_featureSyncLabel,
+              description: l10n.account_featureSyncDescription,
             ),
             const SizedBox(height: 18),
             SizedBox(
@@ -214,7 +204,7 @@ class SupporterHomeBanner extends HookConsumerWidget {
                   foregroundColor: colorScheme.surface,
                 ),
                 icon: const Icon(MdiIcons.heart, size: 18),
-                label: const Text('Become a Supporter'),
+                label: Text(l10n.account_becomeSupporter),
               ),
             ),
           ],
@@ -276,7 +266,7 @@ class _DismissButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: 'Dismiss',
+      tooltip: AppLocalizations.of(context).common_dismiss,
       onPressed: onPressed,
       visualDensity: VisualDensity.compact,
       iconSize: 18,

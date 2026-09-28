@@ -43,7 +43,9 @@ class ProfileAuthState extends _$ProfileAuthState {
     }
   }
 
-  Future<bool> authenticate() async {
+  /// [localizedReason] is the line the system unlock prompt shows, passed in
+  /// by the widget that asks so it follows the UI language.
+  Future<bool> authenticate({required String localizedReason}) async {
     final profile = await ref.read(selectedProfileProvider.future);
     if (!ref.mounted) return false;
 
@@ -56,7 +58,7 @@ class ProfileAuthState extends _$ProfileAuthState {
         .read(localAuthenticationServiceProvider.notifier)
         .authenticate(
           authKey: profileAccessAuthKey(profile.id),
-          localizedReason: 'Unlock profile',
+          localizedReason: localizedReason,
           settings: profile.authSettings,
           useAuthCache: true,
         );

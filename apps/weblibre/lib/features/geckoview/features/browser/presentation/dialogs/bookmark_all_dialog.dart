@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 enum BookmarkAllChoice { fast, detailed }
 
@@ -29,28 +30,30 @@ Future<BookmarkAllChoice?> showBookmarkAllDialog(BuildContext context) {
   return showDialog<BookmarkAllChoice>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => SimpleDialog(
-      title: const Text('Bookmark All Tabs'),
-      children: [
-        ListTile(
-          leading: const Icon(MdiIcons.fastForward),
-          title: const Text('Fast'),
-          subtitle: const Text(
-            'Automatically add all tabs to a selected folder',
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return SimpleDialog(
+        title: Text(l10n.browser_bookmarkAllTitle),
+        children: [
+          ListTile(
+            leading: const Icon(MdiIcons.fastForward),
+            title: Text(l10n.browser_bookmarkAllFastTitle),
+            subtitle: Text(l10n.browser_bookmarkAllFastSubtitle),
+            onTap: () {
+              Navigator.of(context).pop(BookmarkAllChoice.fast);
+            },
           ),
-          onTap: () {
-            Navigator.of(context).pop(BookmarkAllChoice.fast);
-          },
-        ),
-        ListTile(
-          leading: const Icon(MdiIcons.stepForward),
-          title: const Text('Detailed'),
-          subtitle: const Text('Review and edit each bookmark individually'),
-          onTap: () {
-            Navigator.of(context).pop(BookmarkAllChoice.detailed);
-          },
-        ),
-      ],
-    ),
+          ListTile(
+            leading: const Icon(MdiIcons.stepForward),
+            title: Text(l10n.browser_bookmarkAllDetailedTitle),
+            subtitle: Text(l10n.browser_bookmarkAllDetailedSubtitle),
+            onTap: () {
+              Navigator.of(context).pop(BookmarkAllChoice.detailed);
+            },
+          ),
+        ],
+      );
+    },
   );
 }

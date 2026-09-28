@@ -1,0 +1,99 @@
+{
+  "@@locale": "en",
+
+  "contextmenu_openInNewTab": "Open in new tab",
+  "@contextmenu_openInNewTab": {
+    "description": "Item in the menu shown when long-pressing a link on a web page; opens the link in a new tab of the current kind."
+  },
+  "contextmenu_tooltipOpenInDifferentTabType": "Open in a different tab type",
+  "@contextmenu_tooltipOpenInDifferentTabType": {
+    "description": "Tooltip of the arrow next to \"Open in new tab\" in the link long-press menu; it lists other tab kinds (regular, private, isolated) to open the link in."
+  },
+  "contextmenu_newRegularTab": "New regular tab",
+  "@contextmenu_newRegularTab": {
+    "description": "Choice in the link long-press menu's tab-kind list: open the link in a normal (non-private) tab."
+  },
+  "contextmenu_newPrivateTab": "New private tab",
+  "@contextmenu_newPrivateTab": {
+    "description": "Choice in the link long-press menu's tab-kind list: open the link in a private tab, which keeps no history."
+  },
+  "contextmenu_newIsolatedTab": "New isolated tab",
+  "@contextmenu_newIsolatedTab": {
+    "description": "Choice in the link long-press menu's tab-kind list: open the link in an isolated tab, which has its own temporary cookies and site data."
+  },
+  "contextmenu_openImageInNewTab": "Open image in new tab",
+  "@contextmenu_openImageInNewTab": {
+    "description": "Item in the menu shown when long-pressing an image on a web page; opens the image by itself in a new tab."
+  },
+
+  "contextmenu_openInContainer": "Open in container",
+  "@contextmenu_openInContainer": {
+    "description": "Item in the link long-press menu; lets the user pick a container (a separate browsing identity with its own cookies) to open the link in."
+  },
+  "contextmenu_selectContainerTitle": "Select Container",
+  "@contextmenu_selectContainerTitle": {
+    "description": "Heading of the list of containers shown after choosing \"Open in container\" in the link long-press menu."
+  },
+  "contextmenu_loadContainersFailedTitle": "Failed to load containers",
+  "@contextmenu_loadContainersFailedTitle": {
+    "description": "Error heading when the list of containers could not be loaded for \"Open in container\"."
+  },
+  "contextmenu_newContainer": "New Container",
+  "@contextmenu_newContainer": {
+    "description": "Last entry in the \"Open in container\" list; creates a new container and opens the link in it."
+  },
+
+  "contextmenu_openInApp": "Open in App",
+  "@contextmenu_openInApp": {
+    "description": "Item in the link long-press menu; opens the link in the installed app that handles it, when the app's name is unknown."
+  },
+  "contextmenu_openInAppNamed": "Open in {appName}",
+  "@contextmenu_openInAppNamed": {
+    "description": "Item in the link long-press menu; opens the link in the installed app that handles it. appName is that app's name.",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+
+  "contextmenu_copyLink": "Copy link",
+  "@contextmenu_copyLink": {
+    "description": "Item in the long-press menu of a link; copies the link address to the clipboard."
+  },
+  "contextmenu_copyLinkText": "Copy link text",
+  "@contextmenu_copyLinkText": {
+    "description": "Item in the long-press menu of a link; copies the visible text of the link, not its address."
+  },
+  "contextmenu_copyImage": "Copy image",
+  "@contextmenu_copyImage": {
+    "description": "Item in the long-press menu of an image; copies the image itself to the clipboard."
+  },
+  "contextmenu_copyImageLocation": "Copy image location",
+  "@contextmenu_copyImageLocation": {
+    "description": "Item in the long-press menu of an image; copies the image's web address to the clipboard."
+  },
+
+  "contextmenu_saveFile": "Save file",
+  "@contextmenu_saveFile": {
+    "description": "Item in the long-press menu of a link; downloads the linked file."
+  },
+  "contextmenu_saveImage": "Save image",
+  "@contextmenu_saveImage": {
+    "description": "Item in the long-press menu of an image; downloads the image to the device."
+  },
+
+  "contextmenu_shareImage": "Share image",
+  "@contextmenu_shareImage": {
+    "description": "Item in the long-press menu of an image; opens the system share sheet for the image."
+  },
+  "contextmenu_shareEmailAddress": "Share email address",
+  "@contextmenu_shareEmailAddress": {
+    "description": "Item in the long-press menu of an email link (mailto:); copies or shares the email address. Same text for both actions."
+  },
+
+  "contextmenu_urlCleanedMessage": "URL cleaned",
+  "@contextmenu_urlCleanedMessage": {
+    "description": "Short confirmation shown after tracking parameters were removed from the long-pressed link."
+  },
+  "contextmenu_urlPreviewAppliedMessage": "URL preview applied",
+  "@contextmenu_urlPreviewAppliedMessage": {
+    "description": "Short confirmation shown after the user picked which tracking parameters to remove from the long-pressed link and the cleaned address was applied."
+  }
+}

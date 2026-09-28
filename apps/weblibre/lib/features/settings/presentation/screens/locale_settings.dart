@@ -30,6 +30,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class LocaleSettingsScreen extends HookConsumerWidget {
   const LocaleSettingsScreen({super.key});
@@ -65,6 +66,7 @@ class LocaleSettingsScreen extends HookConsumerWidget {
 
     final customLocaleController = useTextEditingController();
     final search = useSettingsSearch();
+    final l10n = AppLocalizations.of(context);
 
     final filteredLocales = availableLocales.where((locale) {
       if (search.normalizedQuery.isEmpty) return true;
@@ -74,9 +76,9 @@ class LocaleSettingsScreen extends HookConsumerWidget {
     }).toList();
 
     return SettingsCustomScrollScaffold(
-      title: 'Browser Languages',
+      title: l10n.settings_browserLanguagesTitle,
       searchController: search.controller,
-      searchHintText: 'Search locales by tag',
+      searchHintText: l10n.settings_browserLanguagesSearchHint,
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
@@ -84,12 +86,12 @@ class LocaleSettingsScreen extends HookConsumerWidget {
             child: SettingsSectionList(
               sections: [
                 SettingsSectionDefinition(
-                  title: 'Language & Region Settings',
+                  title: l10n.settings_languageRegionSettingsSection,
                   entries: [
                     for (final locale in filteredLocales)
                       SettingsEntryDefinition(
                         title: locale.toLanguageTag(),
-                        subtitle: 'Browser language preference',
+                        subtitle: l10n.settings_browserLanguagePreferenceLabel,
                         keywords: [locale.languageCode],
                         child: CheckboxListTile.adaptive(
                           value: userLocales.value.contains(locale),
@@ -120,7 +122,12 @@ class LocaleSettingsScreen extends HookConsumerWidget {
                           title: Consumer(
                             builder: (context, ref, child) {
                               final resolvedAsync = ref.watch(
-                                resolveLocaleProvider(locale),
+                                resolveLocaleProvider(
+                                  locale,
+                                  Localizations.localeOf(
+                                    context,
+                                  ).toIntlLocale(),
+                                ),
                               );
 
                               return Text(
@@ -149,12 +156,14 @@ class LocaleSettingsScreen extends HookConsumerWidget {
                   ],
                 ),
                 SettingsSectionDefinition(
-                  title: 'Custom Locale',
+                  title: l10n.settings_customLocaleSection,
                   entries: [
                     SettingsEntryDefinition(
-                      title: 'Add custom locale',
-                      subtitle: 'Enter a locale tag such as en-US',
-                      keywords: const ['locale tag'],
+                      title: l10n.settings_addCustomLocaleTitle,
+                      subtitle: l10n.settings_addCustomLocaleSubtitle,
+                      keywords: settingsKeywords(
+                        l10n.settings_addCustomLocaleKeywords,
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                         child: Form(
@@ -162,7 +171,7 @@ class LocaleSettingsScreen extends HookConsumerWidget {
                           child: TextFormField(
                             controller: customLocaleController,
                             decoration: InputDecoration(
-                              label: const Text('Custom Locale'),
+                              label: Text(l10n.settings_customLocaleFieldLabel),
                               hint: const Text('en-US'),
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
@@ -179,7 +188,7 @@ class LocaleSettingsScreen extends HookConsumerWidget {
                             validator: (value) {
                               if (value != null &&
                                   Locale.tryParse(value) == null) {
-                                return 'Invalid locale identifier';
+                                return l10n.settings_invalidLocaleError;
                               }
 
                               return null;

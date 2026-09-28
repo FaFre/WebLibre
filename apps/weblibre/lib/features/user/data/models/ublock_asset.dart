@@ -37,16 +37,6 @@ enum UBlockAssetGroup {
   @JsonValue('regions')
   regions;
 
-  String get label => switch (this) {
-    $default => 'Default',
-    ads => 'Ads',
-    privacy => 'Privacy',
-    malware => 'Malware',
-    annoyances => 'Annoyances',
-    multipurpose => 'Multipurpose',
-    regions => 'Regions',
-  };
-
   static const displayOrder = UBlockAssetGroup.values;
 }
 

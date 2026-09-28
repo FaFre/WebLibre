@@ -24,6 +24,9 @@ import 'package:weblibre/features/account/data/account_adoption.dart';
 import 'package:weblibre/features/account/data/account_adoption_provider.dart';
 import 'package:weblibre/features/account/data/models/account_auth_state.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
+import 'package:weblibre/features/account/presentation/utils/account_auth_error_l10n.dart';
+import 'package:weblibre/features/account/presentation/utils/unclaimed_account_record_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Body of the "Account" settings entry. Renders the auth state machine:
 /// signed-out CTA, signing-in spinner with cancel, signed-in identity with
@@ -79,6 +82,7 @@ class _AdoptAccountTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     // Watched, not read: the controller is what says whether the answer is
     // still being carried out, and both buttons stay inert-looking without it.
     final adoption = ref.watch(accountAdoptionProvider);
@@ -102,8 +106,8 @@ class _AdoptAccountTile extends ConsumerWidget {
                 Expanded(
                   child: Text(
                     record.isUsable
-                        ? 'An older sign-in is still on this device'
-                        : 'An older sign-in cannot be read',
+                        ? l10n.account_adoptTitleUsable
+                        : l10n.account_adoptTitleUnusable,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: theme.colorScheme.onSecondaryContainer,
                     ),
@@ -120,14 +124,8 @@ class _AdoptAccountTile extends ConsumerWidget {
                   // profile deliberately leaves the archive's account behind, so
                   // reading this as "your backed-up account" would be exactly
                   // wrong.
-                  ? 'WebLibre kept a sign-in for ${record.label} from before '
-                        'profiles had separate accounts. It is not from a '
-                        'backup, and nothing on this device records which '
-                        'profile it belonged to — so it will not be guessed at.'
-                  : 'WebLibre kept a sign-in from before profiles had separate '
-                        'accounts, but the saved data is damaged and cannot be '
-                        'used to sign in. Signing in again is the only way '
-                        'back; removing it clears this message.',
+                  ? l10n.account_adoptBodyUsable(record.label(context))
+                  : l10n.account_adoptBodyUnusable,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSecondaryContainer,
               ),
@@ -135,7 +133,7 @@ class _AdoptAccountTile extends ConsumerWidget {
             if (adoption.hasError) ...[
               const SizedBox(height: 12),
               Text(
-                'That did not work. Check your connection and try again.',
+                l10n.account_adoptRetryError,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.error,
                   fontWeight: FontWeight.bold,
@@ -164,7 +162,11 @@ class _AdoptAccountTile extends ConsumerWidget {
                               .read(accountAdoptionProvider.notifier)
                               .discard(record);
                         },
-                  child: Text(record.isUsable ? 'Not mine' : 'Remove it'),
+                  child: Text(
+                    record.isUsable
+                        ? l10n.account_adoptNotMine
+                        : l10n.account_adoptRemoveIt,
+                  ),
                 ),
                 if (record.isUsable) ...[
                   const SizedBox(width: 8),
@@ -181,7 +183,7 @@ class _AdoptAccountTile extends ConsumerWidget {
                             dimension: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Use it here'),
+                        : Text(l10n.account_adoptUseItHere),
                   ),
                 ],
               ],
@@ -203,23 +205,24 @@ Future<bool?> _confirmDiscard(
 ) => showDialog<bool>(
   context: context,
   anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-  builder: (context) => AlertDialog(
-    title: const Text('Forget this sign-in?'),
-    content: Text(
-      'The saved session for ${record.label} is deleted from this device. If '
-      'it belonged to another profile, you have to sign in again there.',
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context, false),
-        child: const Text('Cancel'),
-      ),
-      TextButton(
-        onPressed: () => Navigator.pop(context, true),
-        child: const Text('Forget it'),
-      ),
-    ],
-  ),
+  builder: (context) {
+    final l10n = AppLocalizations.of(context);
+
+    return AlertDialog(
+      title: Text(l10n.account_forgetSignInTitle),
+      content: Text(l10n.account_forgetSignInContent(record.label(context))),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.common_cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l10n.account_actionForgetIt),
+        ),
+      ],
+    );
+  },
 );
 
 class _SignedOutTile extends ConsumerWidget {
@@ -234,17 +237,19 @@ class _SignedOutTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(Icons.login),
       title: Text(
         knownAccount == null
-            ? 'Sign in to WebLibre Account'
-            : 'Sign in again as $knownAccount',
+            ? l10n.account_signInTitle
+            : l10n.account_signInAgainAs(knownAccount!),
       ),
       subtitle: Text(
         knownAccount == null
-            ? 'Sync your settings across devices'
-            : "This profile's saved sign-in expired. Your sync key is kept.",
+            ? l10n.account_syncAcrossDevicesSubtitle
+            : l10n.account_signInExpiredSubtitle,
       ),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
@@ -263,16 +268,18 @@ class _SigningInTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
           const CircularProgressIndicator(),
           const SizedBox(height: 16),
-          const Text('Signing in...'),
+          Text(l10n.account_signingInEllipsis),
           const SizedBox(height: 8),
           Text(
-            'Complete sign-in in WebLibre',
+            l10n.account_completeSignInInApp,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
@@ -282,7 +289,7 @@ class _SigningInTile extends ConsumerWidget {
                   .read(accountAuthRepositoryProvider.notifier)
                   .cancelSignIn();
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
         ],
       ),
@@ -297,11 +304,17 @@ class _SignedInTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       children: [
         ListTile(
           leading: const Icon(Icons.account_circle),
-          title: Text(authState.displayName ?? authState.email ?? 'Signed in'),
+          title: Text(
+            authState.displayName ??
+                authState.email ??
+                l10n.account_signedInFallback,
+          ),
           subtitle:
               authState.email != null &&
                   authState.email != authState.displayName
@@ -309,7 +322,7 @@ class _SignedInTile extends ConsumerWidget {
               : null,
           trailing: IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Sign Out',
+            tooltip: l10n.account_tooltipSignOut,
             onPressed: () async {
               final confirmed = await _showSignOutConfirmation(context);
               if (confirmed == true) {
@@ -337,19 +350,19 @@ class _SignedInTile extends ConsumerWidget {
       context: context,
       anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) {
+        final l10n = AppLocalizations.of(context);
+
         return AlertDialog(
-          title: const Text('Sign out?'),
-          content: const Text(
-            'Are you sure you want to sign out of your WebLibre Account?',
-          ),
+          title: Text(l10n.account_signOutConfirmTitle),
+          content: Text(l10n.account_signOutConfirmContent),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.common_cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Sign Out'),
+              child: Text(l10n.account_actionSignOut),
             ),
           ],
         );
@@ -366,6 +379,7 @@ class _ErrorTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: DecoratedBox(
@@ -384,8 +398,8 @@ class _ErrorTile extends ConsumerWidget {
                 // failed" over a restored profile reads as though the restore
                 // itself went wrong.
                 authState.email == null
-                    ? 'Sign-in failed'
-                    : 'Sign in again as ${authState.email}',
+                    ? l10n.account_signInFailedTitle
+                    : l10n.account_signInAgainAs(authState.email!),
                 style: TextStyle(
                   color: colorScheme.onErrorContainer,
                   fontWeight: FontWeight.bold,
@@ -394,7 +408,7 @@ class _ErrorTile extends ConsumerWidget {
               if (authState.lastError != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  authState.lastError!,
+                  authState.lastError!.describe(AppLocalizations.of(context)),
                   style: TextStyle(color: colorScheme.onErrorContainer),
                 ),
               ],
@@ -405,7 +419,7 @@ class _ErrorTile extends ConsumerWidget {
                       .read(accountAuthRepositoryProvider.notifier)
                       .startSignIn();
                 },
-                child: const Text('Try Again'),
+                child: Text(l10n.account_actionTryAgain),
               ),
             ],
           ),
@@ -420,35 +434,34 @@ class _ResetSyncKeyTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(Icons.key_off_outlined),
-      title: const Text('Reset Sync Key'),
-      subtitle: const Text(
-        'Re-enter your password if you mistyped it or changed it',
-      ),
+      title: Text(l10n.account_resetSyncKeyTitle),
+      subtitle: Text(l10n.account_resetSyncKeySubtitle),
       onTap: () async {
         final confirmed = await showDialog<bool>(
           context: context,
           anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-          builder: (context) => AlertDialog(
-            title: const Text('Reset Sync Key'),
-            content: const Text(
-              'You will need to re-enter your account password. '
-              'If your password changed, existing snapshots '
-              'encrypted with the old password will no longer '
-              'be decryptable.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Reset'),
-              ),
-            ],
-          ),
+          builder: (context) {
+            final l10n = AppLocalizations.of(context);
+
+            return AlertDialog(
+              title: Text(l10n.account_resetSyncKeyTitle),
+              content: Text(l10n.account_resetSyncKeyConfirmContent),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(l10n.common_cancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(l10n.common_reset),
+                ),
+              ],
+            );
+          },
         );
         if (confirmed == true) {
           await ref.read(accountAuthRepositoryProvider.notifier).clearSyncKey();

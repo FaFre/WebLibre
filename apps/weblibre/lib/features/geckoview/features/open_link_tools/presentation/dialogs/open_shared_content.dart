@@ -48,8 +48,10 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/debouncer.dart';
+import 'package:weblibre/presentation/utils/localized_spans.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -69,6 +71,7 @@ class OpenSharedContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final textController = useTextEditingController(text: sharedUrl.toString());
     final appColors = AppColors.of(context);
@@ -220,13 +223,13 @@ class OpenSharedContent extends HookConsumerWidget {
 
     void applyCleanUrl() {
       if (cleaner.applyCleanUrl()) {
-        showInfoMessage(context, 'URL cleaned');
+        showInfoMessage(context, l10n.openLinkTools_urlCleanedMessage);
       }
     }
 
     void applySelectedTrackingRemovals(String previewUrl) {
       if (cleaner.applyPreviewUrl(previewUrl)) {
-        showInfoMessage(context, 'URL preview applied');
+        showInfoMessage(context, l10n.openLinkTools_urlPreviewAppliedMessage);
       }
     }
 
@@ -294,7 +297,7 @@ class OpenSharedContent extends HookConsumerWidget {
         if (success && context.mounted) {
           context.pop(true);
         } else if (!success && context.mounted) {
-          showErrorMessage(context, 'Could not open in app');
+          showErrorMessage(context, l10n.openLinkTools_couldNotOpenInApp);
         }
       }
     }
@@ -313,7 +316,10 @@ class OpenSharedContent extends HookConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text('Open link', style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                l10n.openLinkTools_openLinkTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 8),
               TextFormField(
                 controller: textController,
@@ -321,7 +327,7 @@ class OpenSharedContent extends HookConsumerWidget {
                 minLines: 1,
                 maxLines: 10,
                 validator: (value) {
-                  return validateUrl(value, eagerParsing: false);
+                  return validateUrl(value, eagerParsing: false, l10n: l10n);
                 },
               ),
               const SizedBox(height: 8),
@@ -333,7 +339,7 @@ class OpenSharedContent extends HookConsumerWidget {
                       MdiIcons.alertCircle,
                       color: Theme.of(context).colorScheme.error,
                     ),
-                    title: const Text('URL blocked by ClearURLs'),
+                    title: Text(l10n.openLinkTools_urlBlockedByClearUrls),
                     dense: true,
                   )
                 else if (cleaner.showTile)
@@ -357,7 +363,7 @@ class OpenSharedContent extends HookConsumerWidget {
                     error: (error, _) => Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(
-                        'Unshorten failed: $error',
+                        l10n.openLinkTools_unshortenFailedWithError('$error'),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
                           fontSize: 12,
@@ -369,7 +375,9 @@ class OpenSharedContent extends HookConsumerWidget {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Text(
-                            'Unshorten failed: ${result.error}',
+                            l10n.openLinkTools_unshortenFailedWithError(
+                              '${result.error}',
+                            ),
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.error,
                               fontSize: 12,
@@ -386,7 +394,10 @@ class OpenSharedContent extends HookConsumerWidget {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 4),
                           child: Text(
-                            'Remaining calls: $remaining/$limit',
+                            l10n.openLinkTools_unshortenRemainingCalls(
+                              remaining,
+                              limit,
+                            ),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         );
@@ -395,13 +406,13 @@ class OpenSharedContent extends HookConsumerWidget {
                     },
                   ),
                 _OpenActionTile(
-                  title: 'Unshorten',
-                  subtitle: 'Resolve shortened URL',
+                  title: l10n.openLinkTools_unshortenTileTitle,
+                  subtitle: l10n.openLinkTools_unshortenTileSubtitle,
                   icon: MdiIcons.linkVariant,
                   showTrailingDivider: false,
                   trailing: IconButton(
                     icon: const Icon(Icons.info_outline),
-                    tooltip: 'Unshortener info',
+                    tooltip: l10n.openLinkTools_unshortenerInfoTooltip,
                     onPressed: () {
                       unawaited(_showUnshortenerInfoDialog(context));
                     },
@@ -425,9 +436,11 @@ class OpenSharedContent extends HookConsumerWidget {
               if (appLink.data != null)
                 _OpenActionTile(
                   title: appLink.data?.appName != null
-                      ? 'Open in ${appLink.data!.appName}'
-                      : 'Open in App',
-                  subtitle: 'Open in an installed app',
+                      ? l10n.openLinkTools_openInAppNamed(
+                          appLink.data!.appName!,
+                        )
+                      : l10n.openLinkTools_openInAppGeneric,
+                  subtitle: l10n.openLinkTools_openInAppSubtitle,
                   icon: Icons.open_in_new,
                   onTap: openInApp,
                 ),
@@ -494,14 +507,14 @@ class OpenSharedContent extends HookConsumerWidget {
                 ),
               ),
               _OpenActionTile(
-                title: 'Open in new tab',
-                subtitle: 'Add to your browser tabs',
+                title: l10n.openLinkTools_openInNewTabTitle,
+                subtitle: l10n.openLinkTools_openInNewTabSubtitle,
                 icon: MdiIcons.tab,
                 onTap: () => openTab(resolveTabMode()),
               ),
               _OpenActionTile(
-                title: 'Open in custom tab',
-                subtitle: 'Open in a separate window',
+                title: l10n.openLinkTools_openInCustomTabTitle,
+                subtitle: l10n.openLinkTools_openInCustomTabSubtitle,
                 icon: MdiIcons.applicationOutline,
                 onTap: () => openCustomTab(resolveTabMode()),
               ),
@@ -514,6 +527,7 @@ class OpenSharedContent extends HookConsumerWidget {
 }
 
 Future<void> _showUnshortenerInfoDialog(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
   final textColor = Theme.of(context).textTheme.bodyMedium?.color;
   final linkStyle = TextStyle(
     color: Theme.of(context).colorScheme.primary,
@@ -525,7 +539,7 @@ Future<void> _showUnshortenerInfoDialog(BuildContext context) {
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
-      title: const Text('Unshortener Attribution'),
+      title: Text(l10n.openLinkTools_unshortenerAttributionTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -536,31 +550,28 @@ Future<void> _showUnshortenerInfoDialog(BuildContext context) {
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: textColor),
-                children: [
-                  const TextSpan(
-                    text: 'This module will unshort links by sending them to ',
+                children: localizedSpans(
+                  l10n.openLinkTools_unshortenerAttributionBody(
+                    spanPlaceholder(0),
                   ),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: AttributionLink(
-                      label: 'https://unshorten.me/',
-                      url: 'https://unshorten.me/',
-                      style: linkStyle,
+                  spans: [
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: AttributionLink(
+                        label: 'https://unshorten.me/',
+                        url: 'https://unshorten.me/',
+                        style: linkStyle,
+                      ),
                     ),
-                  ),
-                  const TextSpan(
-                    text:
-                        ', which evaluates them on their servers and saves the redirection for future requests. '
-                        'Avoid unshortening links with private or sensitive data.',
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'The free API is rate limited to 10 requests per hour for new checks.',
-              style: TextStyle(fontWeight: FontWeight.w600),
+            Text(
+              l10n.openLinkTools_unshortenerRateLimitNotice,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             RichText(
@@ -568,18 +579,20 @@ Future<void> _showUnshortenerInfoDialog(BuildContext context) {
                 style: Theme.of(
                   context,
                 ).textTheme.bodyMedium?.copyWith(color: textColor),
-                children: [
-                  const TextSpan(text: 'Privacy policy: '),
-                  WidgetSpan(
-                    alignment: PlaceholderAlignment.baseline,
-                    baseline: TextBaseline.alphabetic,
-                    child: AttributionLink(
-                      label: 'https://unshorten.me/privacy-policy',
-                      url: 'https://unshorten.me/privacy-policy',
-                      style: linkStyle,
+                children: localizedSpans(
+                  l10n.openLinkTools_privacyPolicyLabel(spanPlaceholder(0)),
+                  spans: [
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.baseline,
+                      baseline: TextBaseline.alphabetic,
+                      child: AttributionLink(
+                        label: 'https://unshorten.me/privacy-policy',
+                        url: 'https://unshorten.me/privacy-policy',
+                        style: linkStyle,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -588,7 +601,7 @@ Future<void> _showUnshortenerInfoDialog(BuildContext context) {
       actions: [
         TextButton(
           onPressed: Navigator.of(context).pop,
-          child: const Text('Close'),
+          child: Text(l10n.common_close),
         ),
       ],
     ),

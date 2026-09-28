@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/t
 import 'package:weblibre/features/geckoview/features/top_sites/domain/entities/top_site_source.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -118,6 +119,7 @@ class TopSitesSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final topSites = ref.watch(
       topSiteListProvider(
         limit: _topSitesMaxLimit,
@@ -144,7 +146,7 @@ class TopSitesSection extends HookConsumerWidget {
         : _topSitesPreviewLimit;
 
     return SearchModuleSection(
-      title: 'Shortcuts',
+      title: l10n.search_moduleLabelTopSites,
       moduleType: SearchModuleType.topSites,
       totalCount: topSites.length,
       previewLimit: previewLimit,
@@ -156,15 +158,15 @@ class TopSitesSection extends HookConsumerWidget {
               iconSize: 18,
               padding: EdgeInsets.zero,
               tooltip: reorderMode.value
-                  ? 'Disable reordering mode'
-                  : 'Enable reordering mode',
+                  ? l10n.search_disableReorderingMode
+                  : l10n.search_enableReorderingMode,
               onPressed: () {
                 final wasEnabled = reorderMode.value;
                 reorderMode.value = !wasEnabled;
                 if (!wasEnabled && context.mounted) {
                   ui_helper.showInfoMessage(
                     context,
-                    'Drag and drop shortcuts to reorder',
+                    l10n.search_dragDropShortcutsHint,
                   );
                 }
               },
@@ -307,12 +309,13 @@ class _AddShortcutTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return _TopSiteTileSurface(
       onTap: onPressed,
       child: Tooltip(
-        message: 'Add shortcut',
+        message: l10n.search_addShortcut,
         child: Icon(Icons.add, color: colorScheme.onSurfaceVariant),
       ),
     );
@@ -334,6 +337,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final localItems = useKeyedState(persistedItems, [persistedItems]);
 
     // Attached to the inner grid below, and handed to ReorderableBuilder so it
@@ -447,7 +451,7 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                   if (context.mounted) {
                     ui_helper.showErrorMessage(
                       context,
-                      'Failed to reorder shortcut',
+                      l10n.search_failedReorderShortcut,
                     );
                   }
                 } finally {
@@ -561,6 +565,7 @@ class _TopSiteGridTileState extends State<_TopSiteGridTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -568,23 +573,31 @@ class _TopSiteGridTileState extends State<_TopSiteGridTile> {
       controller: _menuController,
       menuChildren: [
         if (widget.onPin != null)
-          MenuItemButton(onPressed: widget.onPin, child: const Text('Pin')),
+          MenuItemButton(
+            onPressed: widget.onPin,
+            child: Text(l10n.search_actionPin),
+          ),
         if (widget.onEdit != null)
-          MenuItemButton(onPressed: widget.onEdit, child: const Text('Edit')),
+          MenuItemButton(
+            onPressed: widget.onEdit,
+            child: Text(l10n.common_edit),
+          ),
         // Offered for history-derived tiles too. Without it a frequently
         // visited site — a PWA especially — could occupy most of the grid
         // with no way to get rid of it.
         if (widget.onRemove != null)
           MenuItemButton(
             onPressed: widget.onRemove,
-            child: const Text('Remove'),
+            child: Text(l10n.common_remove),
           ),
         if (widget.onRemoveDomain != null &&
             canonicalTopSiteHost(widget.item.url).isNotEmpty)
           MenuItemButton(
             onPressed: widget.onRemoveDomain,
             child: Text(
-              'Hide all from ${canonicalTopSiteHost(widget.item.url)}',
+              l10n.search_hideAllFromHost(
+                canonicalTopSiteHost(widget.item.url),
+              ),
             ),
           ),
       ],
@@ -727,11 +740,17 @@ Future<void> _pinItem(
         .read(topSiteRepositoryProvider.notifier)
         .addPinnedSite(title: item.title, url: item.url);
     if (context.mounted) {
-      ui_helper.showInfoMessage(context, 'Pinned "${item.title}"');
+      ui_helper.showInfoMessage(
+        context,
+        AppLocalizations.of(context).search_pinnedSite(item.title),
+      );
     }
   } catch (e) {
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Failed to pin site');
+      ui_helper.showErrorMessage(
+        context,
+        AppLocalizations.of(context).search_failedPinSite,
+      );
     }
   }
 }
@@ -767,20 +786,28 @@ Future<void> _editItem(
 
     await repo.updateSite(id: id, title: result.title, url: result.url);
     if (context.mounted) {
-      ui_helper.showInfoMessage(context, 'Shortcut updated');
+      ui_helper.showInfoMessage(
+        context,
+        AppLocalizations.of(context).search_shortcutUpdated,
+      );
     }
   } catch (e) {
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Failed to update shortcut');
+      ui_helper.showErrorMessage(
+        context,
+        AppLocalizations.of(context).search_failedUpdateShortcut,
+      );
     }
   }
 }
 
 Future<void> _addItem(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
+
   final result = await showEditTopSiteDialog(
     context,
-    dialogTitle: 'Add shortcut',
-    confirmLabel: 'Add',
+    dialogTitle: l10n.search_addShortcut,
+    confirmLabel: l10n.common_add,
   );
 
   if (result == null || !context.mounted) return;
@@ -790,11 +817,17 @@ Future<void> _addItem(BuildContext context, WidgetRef ref) async {
         .read(topSiteRepositoryProvider.notifier)
         .addPinnedSite(title: result.title, url: result.url);
     if (context.mounted) {
-      ui_helper.showInfoMessage(context, 'Added "${result.title}"');
+      ui_helper.showInfoMessage(
+        context,
+        AppLocalizations.of(context).search_addedSite(result.title),
+      );
     }
   } catch (e) {
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Failed to add shortcut');
+      ui_helper.showErrorMessage(
+        context,
+        AppLocalizations.of(context).search_failedAddShortcut,
+      );
     }
   }
 }
@@ -817,13 +850,17 @@ Future<void> _removeItem(
     await repo.hideSite(item.url, wholeDomain: wholeDomain);
 
     if (context.mounted) {
+      final l10n = AppLocalizations.of(context);
+
       ui_helper.showInfoMessage(
         context,
         wholeDomain
-            ? 'Hid all shortcuts from ${canonicalTopSiteHost(item.url)}'
-            : 'Removed "${item.title}"',
+            ? l10n.search_hidAllShortcutsFromHost(
+                canonicalTopSiteHost(item.url),
+              )
+            : l10n.search_removedSite(item.title),
         action: SnackBarAction(
-          label: 'Undo',
+          label: l10n.common_undo,
           onPressed: () async {
             try {
               // Lift the suppression first, then restore the pin only if the
@@ -841,7 +878,10 @@ Future<void> _removeItem(
     }
   } catch (e) {
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Failed to remove shortcut');
+      ui_helper.showErrorMessage(
+        context,
+        AppLocalizations.of(context).search_failedRemoveShortcut,
+      );
     }
   }
 }

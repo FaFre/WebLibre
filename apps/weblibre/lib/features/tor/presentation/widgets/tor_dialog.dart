@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 
 class TorDialog extends StatelessWidget {
@@ -28,25 +29,24 @@ class TorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final appColors = AppColors.of(context);
     return AlertDialog(
       icon: Icon(TorIcons.onionAlt, color: appColors.torPurple),
-      title: const Text(torProxyLabel),
-      content: const Text(
-        'This container requires a $torBrand proxy for secure connections, which is not currently running.',
-      ),
+      title: Text(l10n.tor_proxyLabel(torBrand)),
+      content: Text(l10n.tor_dialogContent(torBrand)),
       actions: [
         TextButton(
           onPressed: () {
             context.pop(false);
           },
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () {
             context.pop(true);
           },
-          child: const Text('Enable'),
+          child: Text(l10n.tor_actionEnable),
         ),
       ],
     );

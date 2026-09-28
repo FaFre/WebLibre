@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class OpenImageInNewTab extends HookConsumerWidget {
   final HitResult hitResult;
@@ -40,9 +41,11 @@ class OpenImageInNewTab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.tabPlus),
-      title: const Text('Open image in new tab'),
+      title: Text(l10n.contextmenu_openImageInNewTab),
       onTap: () async {
         final currentTab = ref.read(selectedTabStateProvider);
         final tabMode =

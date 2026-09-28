@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a confirmation dialog for quitting the browser.
 ///
@@ -28,24 +29,24 @@ Future<bool?> showQuitBrowserDialog(BuildContext context) {
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
         icon: const Icon(Icons.warning),
-        title: const Text('Quit Browser'),
-        content: const Text(
-          'This will properly shutdown the browser and clear private tab data',
-        ),
+        title: Text(l10n.user_quitBrowserTitle),
+        content: Text(l10n.user_quitBrowserContent),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Quit'),
+            child: Text(l10n.user_actionQuit),
           ),
         ],
       );

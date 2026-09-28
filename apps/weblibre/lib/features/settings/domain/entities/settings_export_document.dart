@@ -111,12 +111,106 @@ String settingsExportFileName(DateTime at) =>
     'weblibre-settings_${settingsExportDateFormatter.encode(at)}'
     '$settingsExportExtension';
 
-/// The file is not a settings export this build can read.
-class SettingsExportFormatException implements Exception {
-  const SettingsExportFormatException(this.message);
+/// What is wrong with a file that is not a settings export this build can
+/// read. Each case is one sentence the user sees, translated where it is
+/// displayed (`SettingsExportFormatExceptionL10n.describe`).
+enum SettingsExportFormatErrorKind {
+  notJson,
+  notSettingsExport,
+  missingFormatVersion,
+  newerFormatVersion,
+  noSettings,
 
-  /// Shown to the user as-is, so it says what is wrong with *their* file.
-  final String message;
+  /// A section whose envelope or content has the wrong shape.
+  malformedSection,
+
+  /// One of the export's own optional metadata fields has the wrong type.
+  malformedField,
+
+  /// The Gecko preferences section has a line [serializeUserJs] would not
+  /// have written.
+  unreadablePrefsLine,
+  notPrefsSnapshot,
+  missingSchemaVersion,
+
+  /// A preference line that validated alone but did not survive parsing the
+  /// whole document.
+  unreadablePref,
+  newerSectionSchema,
+}
+
+/// The file is not a settings export this build can read.
+///
+/// Carries a [kind] and its raw details rather than a finished sentence, so
+/// the UI can say what is wrong with *their* file in the UI language.
+/// [message] is the English equivalent, for logs and [toString].
+class SettingsExportFormatException implements Exception {
+  const SettingsExportFormatException(
+    this.kind, {
+    this.sectionKey,
+    this.field,
+    this.line,
+    this.pref,
+    this.version,
+    this.supportedVersion,
+  });
+
+  final SettingsExportFormatErrorKind kind;
+
+  /// The export's key for the section concerned — a `SyncDocumentKind`
+  /// value, or whatever an unknown file used. Null for the Gecko preferences
+  /// checks, which are only ever run on that section.
+  final String? sectionKey;
+
+  /// The metadata field named by [SettingsExportFormatErrorKind.malformedField].
+  final String? field;
+
+  /// The offending line, already shortened for display.
+  final String? line;
+
+  /// The preference name that could not be read back.
+  final String? pref;
+
+  /// The version the file claims, for the two "newer version" cases.
+  final int? version;
+
+  /// The highest version this build reads, for the two "newer version" cases.
+  final int? supportedVersion;
+
+  String get message {
+    final section = '"${sectionKey ?? 'Gecko preferences'}"';
+
+    return switch (kind) {
+      SettingsExportFormatErrorKind.notJson => 'This is not a JSON file.',
+      SettingsExportFormatErrorKind.notSettingsExport =>
+        'This is not a WebLibre settings export.',
+      SettingsExportFormatErrorKind.missingFormatVersion =>
+        'The export does not say which format version it is.',
+      SettingsExportFormatErrorKind.newerFormatVersion =>
+        'This export was written by a newer version of WebLibre '
+            '(format $version, this build reads up to $supportedVersion). '
+            'Update the app and try again.',
+      SettingsExportFormatErrorKind.noSettings =>
+        'The export contains no settings.',
+      SettingsExportFormatErrorKind.malformedSection =>
+        'The $section section is malformed.',
+      SettingsExportFormatErrorKind.malformedField =>
+        'The export\'s "$field" is malformed.',
+      SettingsExportFormatErrorKind.unreadablePrefsLine =>
+        'The $section section has a line WebLibre cannot read: "$line". '
+            'Importing it would reset preferences rather than restore them.',
+      SettingsExportFormatErrorKind.notPrefsSnapshot =>
+        'The $section section is not a WebLibre preferences snapshot.',
+      SettingsExportFormatErrorKind.missingSchemaVersion =>
+        'The $section section does not say which schema version it is.',
+      SettingsExportFormatErrorKind.unreadablePref =>
+        'The $section section holds a preference WebLibre could not read '
+            'back: "$pref".',
+      SettingsExportFormatErrorKind.newerSectionSchema =>
+        'The $section section was written by a newer version of WebLibre '
+            '(schema $version, this build reads up to $supportedVersion).',
+    };
+  }
 
   @override
   String toString() => message;
@@ -198,52 +292,60 @@ SettingsExportDocument decodeSettingsExport(String text) {
   try {
     decoded = jsonDecode(text);
   } on FormatException {
-    throw const SettingsExportFormatException('This is not a JSON file.');
+    throw const SettingsExportFormatException(
+      SettingsExportFormatErrorKind.notJson,
+    );
   }
 
   if (decoded is! Map<String, dynamic>) {
     throw const SettingsExportFormatException(
-      'This is not a WebLibre settings export.',
+      SettingsExportFormatErrorKind.notSettingsExport,
     );
   }
 
   if (decoded['format'] != settingsExportFormat) {
     throw const SettingsExportFormatException(
-      'This is not a WebLibre settings export.',
+      SettingsExportFormatErrorKind.notSettingsExport,
     );
   }
 
   final formatVersion = decoded['format_version'];
   if (formatVersion is! int) {
     throw const SettingsExportFormatException(
-      'The export does not say which format version it is.',
+      SettingsExportFormatErrorKind.missingFormatVersion,
     );
   }
   if (formatVersion > settingsExportFormatVersion) {
     throw SettingsExportFormatException(
-      'This export was written by a newer version of WebLibre '
-      '(format $formatVersion, this build reads up to '
-      '$settingsExportFormatVersion). Update the app and try again.',
+      SettingsExportFormatErrorKind.newerFormatVersion,
+      version: formatVersion,
+      supportedVersion: settingsExportFormatVersion,
     );
   }
 
   final rawDocuments = decoded['documents'];
   if (rawDocuments is! Map<String, dynamic>) {
     throw const SettingsExportFormatException(
-      'The export contains no settings.',
+      SettingsExportFormatErrorKind.noSettings,
     );
   }
 
   final documents = <String, SettingsExportEntry>{};
   for (final MapEntry(:key, :value) in rawDocuments.entries) {
     if (value is! Map<String, dynamic>) {
-      throw SettingsExportFormatException('The "$key" section is malformed.');
+      throw SettingsExportFormatException(
+        SettingsExportFormatErrorKind.malformedSection,
+        sectionKey: key,
+      );
     }
 
     final schemaVersion = value['schema_version'];
     final Object? content = value['content'];
     if (schemaVersion is! int || content == null) {
-      throw SettingsExportFormatException('The "$key" section is malformed.');
+      throw SettingsExportFormatException(
+        SettingsExportFormatErrorKind.malformedSection,
+        sectionKey: key,
+      );
     }
 
     documents[key] = SettingsExportEntry(
@@ -254,7 +356,7 @@ SettingsExportDocument decodeSettingsExport(String text) {
 
   if (documents.isEmpty) {
     throw const SettingsExportFormatException(
-      'The export contains no settings.',
+      SettingsExportFormatErrorKind.noSettings,
     );
   }
 
@@ -277,7 +379,10 @@ String? _optionalString(Map<String, dynamic> json, String key) {
   final value = json[key];
   if (value == null) return null;
   if (value is! String) {
-    throw SettingsExportFormatException('The export\'s "$key" is malformed.');
+    throw SettingsExportFormatException(
+      SettingsExportFormatErrorKind.malformedField,
+      field: key,
+    );
   }
   return value;
 }
@@ -286,7 +391,10 @@ List<String> _optionalStringList(Map<String, dynamic> json, String key) {
   final value = json[key];
   if (value == null) return const [];
   if (value is! List) {
-    throw SettingsExportFormatException('The export\'s "$key" is malformed.');
+    throw SettingsExportFormatException(
+      SettingsExportFormatErrorKind.malformedField,
+      field: key,
+    );
   }
   return value.whereType<String>().toList();
 }
@@ -717,9 +825,13 @@ const geckoPrefsSnapshotMarker = '// WebLibre Gecko prefs snapshot';
 /// a comment, or a well-formed statement. An empty snapshot still passes —
 /// exported from a profile with nothing set, replacing with it is a legitimate
 /// thing to ask for — but an empty *parse* of a non-empty file does not.
-UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
-  final name = label ?? 'Gecko preferences';
-
+///
+/// [sectionKey] is the export's key for the section, carried into the error so
+/// it can name it; null when the content did not come from an export.
+UserJsParseResult requireGeckoPrefsDocument(
+  String content, {
+  String? sectionKey,
+}) {
   var sawMarker = false;
   final statements = <String>[];
 
@@ -759,14 +871,16 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
 
     final shown = line.length > 60 ? '${line.substring(0, 60)}…' : line;
     throw SettingsExportFormatException(
-      'The $name section has a line WebLibre cannot read: "$shown". '
-      'Importing it would reset preferences rather than restore them.',
+      SettingsExportFormatErrorKind.unreadablePrefsLine,
+      sectionKey: sectionKey,
+      line: shown,
     );
   }
 
   if (!sawMarker) {
     throw SettingsExportFormatException(
-      'The $name section is not a WebLibre preferences snapshot.',
+      SettingsExportFormatErrorKind.notPrefsSnapshot,
+      sectionKey: sectionKey,
     );
   }
 
@@ -774,7 +888,8 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
 
   if (parsed.schemaVersion == null) {
     throw SettingsExportFormatException(
-      'The $name section does not say which schema version it is.',
+      SettingsExportFormatErrorKind.missingSchemaVersion,
+      sectionKey: sectionKey,
     );
   }
 
@@ -785,8 +900,9 @@ UserJsParseResult requireGeckoPrefsDocument(String content, {String? label}) {
     if (parsed.prefs.containsKey(prefName)) continue;
 
     throw SettingsExportFormatException(
-      'The $name section holds a preference WebLibre could not read back: '
-      '"$prefName".',
+      SettingsExportFormatErrorKind.unreadablePref,
+      sectionKey: sectionKey,
+      pref: prefName,
     );
   }
 

@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class DohSettingsPage extends HookConsumerWidget {
@@ -28,6 +29,7 @@ class DohSettingsPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return BrowserPage(
       child: BrowserPageContent(
@@ -37,7 +39,7 @@ class DohSettingsPage extends HookConsumerWidget {
             const SizedBox(height: 24),
             Center(
               child: Text(
-                'DNS over HTTPS',
+                l10n.onboarding_dohTitle,
                 style: theme.textTheme.headlineMedium,
               ),
             ),

@@ -25,6 +25,7 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/proxy/data/forms/singbox_form_spec.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
@@ -51,16 +52,104 @@ class SaveSucceeded extends SaveOutcome {
 }
 
 class SaveFailed extends SaveOutcome {
-  final String message;
+  final ProxyProfileSaveError error;
 
-  const SaveFailed(this.message);
+  const SaveFailed(this.error);
+}
+
+/// Why an existing profile failed to load, kept as data (not a formatted
+/// [String]) so [AppLocalizations]/[BuildContext] never has to reach this
+/// controller — resolved to display text in
+/// `presentation/utils/proxy_profile_draft_error_l10n.dart`. A plain class
+/// (not a formatted message) because [ProxyProfileDraftState] compares it via
+/// [FastEquatable], which needs real `==`/`hashCode`.
+sealed class ProxyProfileLoadError {
+  const ProxyProfileLoadError();
+}
+
+class ProxyProfileNotFoundError extends ProxyProfileLoadError {
+  const ProxyProfileNotFoundError();
+
+  @override
+  bool operator ==(Object other) => other is ProxyProfileNotFoundError;
+
+  @override
+  int get hashCode => (ProxyProfileNotFoundError).hashCode;
+}
+
+class ProxyProfileLoadFailedError extends ProxyProfileLoadError {
+  final Object error;
+
+  const ProxyProfileLoadFailedError(this.error);
+
+  @override
+  bool operator ==(Object other) =>
+      other is ProxyProfileLoadFailedError && other.error == error;
+
+  @override
+  int get hashCode => error.hashCode;
+}
+
+/// Why [ProxyProfileDraft.save] failed, kept as data for the same reason as
+/// [ProxyProfileLoadError] — this controller has no [BuildContext] to
+/// localize a message with. Resolved to display text in
+/// `presentation/utils/proxy_profile_draft_error_l10n.dart`.
+sealed class ProxyProfileSaveError {
+  const ProxyProfileSaveError();
+}
+
+class ProxyProfileSaveAlreadySaving extends ProxyProfileSaveError {
+  const ProxyProfileSaveAlreadySaving();
+}
+
+class ProxyProfileSaveNameRequired extends ProxyProfileSaveError {
+  const ProxyProfileSaveNameRequired();
+}
+
+class ProxyProfileSaveStillLoading extends ProxyProfileSaveError {
+  const ProxyProfileSaveStillLoading();
+}
+
+class ProxyProfileSaveLoadFailed extends ProxyProfileSaveError {
+  final ProxyProfileLoadError loadError;
+
+  const ProxyProfileSaveLoadFailed(this.loadError);
+}
+
+class ProxyProfileSaveConfigNotJson extends ProxyProfileSaveError {
+  const ProxyProfileSaveConfigNotJson();
+}
+
+class ProxyProfileSaveSecretsNotJson extends ProxyProfileSaveError {
+  const ProxyProfileSaveSecretsNotJson();
+}
+
+class ProxyProfileSaveFieldValidation extends ProxyProfileSaveError {
+  final SingboxFormFieldError fieldError;
+
+  const ProxyProfileSaveFieldValidation(this.fieldError);
+}
+
+/// The runtime (sing-box) rejected the encoded config. [nativeMessage] comes
+/// straight from the native plugin, so it is not further localized — same
+/// treatment as any other external/native error text in this app.
+class ProxyProfileSaveRuntimeInvalid extends ProxyProfileSaveError {
+  final String nativeMessage;
+
+  const ProxyProfileSaveRuntimeInvalid(this.nativeMessage);
+}
+
+class ProxyProfileSaveUnexpectedError extends ProxyProfileSaveError {
+  final Object error;
+
+  const ProxyProfileSaveUnexpectedError(this.error);
 }
 
 @CopyWith()
 class ProxyProfileDraftState with FastEquatable {
   final String? profileId;
   final ProxyProfile? existingProfile;
-  final String? loadError;
+  final ProxyProfileLoadError? loadError;
   final String name;
   final SingboxProxyProfileType type;
   final Map<String, String> values;
@@ -164,7 +253,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
 
       if (profile == null) {
         state = state.copyWith(
-          loadError: 'Proxy profile not found.',
+          loadError: const ProxyProfileNotFoundError(),
           secretLoaded: true,
         );
         return;
@@ -199,7 +288,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
     } catch (error) {
       if (!ref.mounted) return;
       state = state.copyWith(
-        loadError: 'Failed to load proxy profile: $error',
+        loadError: ProxyProfileLoadFailedError(error),
         secretLoaded: true,
       );
     }
@@ -242,27 +331,27 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
 
   Future<SaveOutcome> save() async {
     if (state.isSaving) {
-      return const SaveFailed('Profile is already saving.');
+      return const SaveFailed(ProxyProfileSaveAlreadySaving());
     }
 
     final draft = state;
     final trimmedName = draft.name.trim();
     if (trimmedName.isEmpty) {
-      return const SaveFailed('Profile name is required.');
+      return const SaveFailed(ProxyProfileSaveNameRequired());
     }
 
     if (draft.isLoading) {
-      return const SaveFailed('Profile is still loading, please wait.');
+      return const SaveFailed(ProxyProfileSaveStillLoading());
     }
 
     if (draft.loadError != null) {
-      return SaveFailed(draft.loadError!);
+      return SaveFailed(ProxyProfileSaveLoadFailed(draft.loadError!));
     }
 
     final encoded = _encodeDraft(draft);
     switch (encoded) {
-      case _DraftEncodeFailure(:final message):
-        return SaveFailed(message);
+      case _DraftEncodeFailure(:final error):
+        return SaveFailed(error);
       case _DraftEncodeSuccess(:final configJson, :final secretJson):
         state = state.copyWith(isSaving: true);
 
@@ -283,7 +372,9 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
               .read(singboxProxyRuntimeRepositoryProvider.notifier)
               .validateProfileDraft(profile, secretJson: secretJson);
           if (validationMessage != null) {
-            return SaveFailed(validationMessage);
+            return SaveFailed(
+              ProxyProfileSaveRuntimeInvalid(validationMessage),
+            );
           }
 
           if (existing == null) {
@@ -308,7 +399,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
 
           return const SaveSucceeded();
         } catch (error) {
-          return SaveFailed('Failed to save proxy profile: $error');
+          return SaveFailed(ProxyProfileSaveUnexpectedError(error));
         } finally {
           if (ref.mounted) {
             state = state.copyWith(isSaving: false);
@@ -333,9 +424,9 @@ class _DraftEncodeSuccess extends _DraftEncodeResult {
 }
 
 class _DraftEncodeFailure extends _DraftEncodeResult {
-  final String message;
+  final ProxyProfileSaveError error;
 
-  const _DraftEncodeFailure(this.message);
+  const _DraftEncodeFailure(this.error);
 }
 
 /// Validates and encodes the draft into wire-format JSON in a single pass.
@@ -345,7 +436,7 @@ _DraftEncodeResult _encodeDraft(ProxyProfileDraftState draft) {
   if (draft.type == SingboxProxyProfileType.customOutbound) {
     final normalizedConfigJson = _normalizeJsonObject(draft.customConfigJson);
     if (normalizedConfigJson == null) {
-      return const _DraftEncodeFailure('Config must be a JSON object.');
+      return const _DraftEncodeFailure(ProxyProfileSaveConfigNotJson());
     }
 
     final rawSecret = draft.customSecretJson.trim();
@@ -357,7 +448,7 @@ _DraftEncodeResult _encodeDraft(ProxyProfileDraftState draft) {
     }
     final normalizedSecretJson = _normalizeJsonObject(draft.customSecretJson);
     if (normalizedSecretJson == null) {
-      return const _DraftEncodeFailure('Secrets must be a JSON object.');
+      return const _DraftEncodeFailure(ProxyProfileSaveSecretsNotJson());
     }
     return _DraftEncodeSuccess(
       configJson: normalizedConfigJson,
@@ -366,9 +457,9 @@ _DraftEncodeResult _encodeDraft(ProxyProfileDraftState draft) {
   }
 
   final spec = singboxProxyFormSpecs[draft.type]!;
-  final validationMessage = spec.validate(draft.values);
-  if (validationMessage != null) {
-    return _DraftEncodeFailure(validationMessage);
+  final fieldError = spec.validate(draft.values);
+  if (fieldError != null) {
+    return _DraftEncodeFailure(ProxyProfileSaveFieldValidation(fieldError));
   }
   return _DraftEncodeSuccess(
     configJson: spec.toConfigJson(draft.values),

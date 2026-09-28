@@ -24,6 +24,7 @@ import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class ToolbarLayoutPage extends HookConsumerWidget {
@@ -32,6 +33,7 @@ class ToolbarLayoutPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     return BrowserPage(
@@ -42,7 +44,7 @@ class ToolbarLayoutPage extends HookConsumerWidget {
               padding: const EdgeInsets.fromLTRB(12, 32, 12, 16),
               child: Center(
                 child: Text(
-                  'Toolbar & Layout',
+                  l10n.onboarding_toolbarLayoutTitle,
                   style: theme.textTheme.headlineMedium,
                 ),
               ),

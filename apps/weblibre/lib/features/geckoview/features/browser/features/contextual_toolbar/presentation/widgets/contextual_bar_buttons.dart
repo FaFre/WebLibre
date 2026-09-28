@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
 class ShareMenuButton extends StatelessWidget {
@@ -216,6 +217,7 @@ class CloneTabMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (value) => value.showIsolatedTabUi,
@@ -233,7 +235,7 @@ class CloneTabMenu extends HookConsumerWidget {
           onPressed: selectedTabId == null
               ? null
               : () => _cloneTabAsRegular(context, ref, selectedTabId!),
-          child: const Text('Clone as Regular'),
+          child: Text(l10n.contextualToolbar_actionCloneAsRegular),
         ),
         MenuItemButton(
           leadingIcon: Icon(
@@ -243,7 +245,7 @@ class CloneTabMenu extends HookConsumerWidget {
           onPressed: selectedTabId == null
               ? null
               : () => _cloneTabAsPrivate(context, ref, selectedTabId!),
-          child: const Text('Clone as Private'),
+          child: Text(l10n.contextualToolbar_actionCloneAsPrivate),
         ),
         if (showIsolatedTabUi)
           MenuItemButton(
@@ -254,7 +256,7 @@ class CloneTabMenu extends HookConsumerWidget {
             onPressed: selectedTabId == null
                 ? null
                 : () => _cloneTabAsIsolated(context, ref, selectedTabId!),
-            child: const Text('Clone as Isolated'),
+            child: Text(l10n.contextualToolbar_actionCloneAsIsolated),
           ),
       ],
       child: child,

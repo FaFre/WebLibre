@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class StatusHeader extends StatelessWidget {
   final int totalCount;
@@ -35,6 +36,7 @@ class StatusHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final isAnyRunning = runningCount > 0;
 
@@ -70,7 +72,9 @@ class StatusHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isAnyRunning ? 'Active' : 'Disconnected',
+                  isAnyRunning
+                      ? l10n.proxy_statusActive
+                      : l10n.proxy_statusDisconnected,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: onBackground,
@@ -78,8 +82,11 @@ class StatusHeader extends StatelessWidget {
                 ),
                 Text(
                   isAnyRunning
-                      ? '$runningCount of $totalCount routing traffic'
-                      : 'Tap a profile to connect',
+                      ? l10n.proxy_statusRoutingTraffic(
+                          runningCount,
+                          totalCount,
+                        )
+                      : l10n.proxy_statusTapToConnect,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: onBackground.withValues(alpha: 0.8),
                   ),
@@ -89,7 +96,7 @@ class StatusHeader extends StatelessWidget {
           ),
           if (onStopAll != null)
             IconButton.filled(
-              tooltip: 'Stop all',
+              tooltip: l10n.proxy_stopAllTooltip,
               onPressed: isBusy ? null : onStopAll,
               style: IconButton.styleFrom(
                 backgroundColor: scheme.errorContainer,

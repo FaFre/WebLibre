@@ -47,17 +47,27 @@ const _maxSourceBytes = 48 * 1024 * 1024;
 /// decode cost and archive weight for nothing.
 const _maxStoredEdge = 2560;
 
-/// A wallpaper the store refuses to take.
+/// Why a wallpaper import was refused.
 ///
-/// Carries a message written for the user, because every caller is a picker
-/// that has to say why the image did not stick.
-class WallpaperImportException implements Exception {
-  final String message;
+/// Kept as an enum rather than a message string so the domain layer never has
+/// to know user-facing English; the presentation layer maps each reason to
+/// localized copy (see `WallpaperImportFailureReasonL10n`), because every
+/// caller is a picker that has to say why the image did not stick.
+enum WallpaperImportFailureReason {
+  unreadableSource,
+  tooLarge,
+  notAnImage,
+  decodeFailed,
+}
 
-  const WallpaperImportException(this.message);
+/// A wallpaper the store refuses to take.
+class WallpaperImportException implements Exception {
+  final WallpaperImportFailureReason reason;
+
+  const WallpaperImportException(this.reason);
 
   @override
-  String toString() => 'WallpaperImportException: $message';
+  String toString() => 'WallpaperImportException: $reason';
 }
 
 /// Imported wallpapers on disk.
@@ -102,18 +112,24 @@ class WallpaperStore {
       length = await source.length();
     } on FileSystemException catch (e, s) {
       logger.w('Wallpaper source unreadable', error: e, stackTrace: s);
-      throw const WallpaperImportException('That file could not be read');
+      throw const WallpaperImportException(
+        WallpaperImportFailureReason.unreadableSource,
+      );
     }
 
     if (length > _maxSourceBytes) {
-      throw const WallpaperImportException('That image is too large');
+      throw const WallpaperImportException(
+        WallpaperImportFailureReason.tooLarge,
+      );
     }
 
     final bytes = await source.readAsBytes();
 
     final mimeType = lookupMimeType(sourcePath, headerBytes: bytes);
     if (mimeType == null || !mimeType.startsWith('image/')) {
-      throw const WallpaperImportException('That file is not an image');
+      throw const WallpaperImportException(
+        WallpaperImportFailureReason.notAnImage,
+      );
     }
 
     final _PreparedWallpaper prepared;
@@ -121,7 +137,9 @@ class WallpaperStore {
       prepared = await _prepareOffIsolate(bytes, mimeType);
     } catch (e, s) {
       logger.w('Wallpaper could not be decoded', error: e, stackTrace: s);
-      throw const WallpaperImportException('That image could not be read');
+      throw const WallpaperImportException(
+        WallpaperImportFailureReason.decodeFailed,
+      );
     }
 
     final fileName = '${const Uuid().v7()}.${prepared.extension}';

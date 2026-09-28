@@ -26,6 +26,8 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/localized_spans.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 
@@ -38,6 +40,7 @@ class WelcomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     final selectedMode = ref.watch(onboardingModeProvider);
     final accepted = ref.watch(eulaAcceptedProvider);
@@ -51,7 +54,9 @@ class WelcomePage extends ConsumerWidget {
             BrandHeader(colorScheme: colorScheme),
             const SizedBox(height: 24),
             Text(
-              isReturningUser ? 'Welcome back!' : 'WebLibre is ready',
+              isReturningUser
+                  ? l10n.onboarding_welcomeBackTitle
+                  : l10n.onboarding_welcomeReadyTitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -66,7 +71,7 @@ class WelcomePage extends ConsumerWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Choose your onboarding experience:',
+                  l10n.onboarding_chooseExperience,
                   style: theme.textTheme.titleSmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -75,8 +80,8 @@ class WelcomePage extends ConsumerWidget {
               const SizedBox(height: 12),
               _ModeOption(
                 mode: OnboardingMode.express,
-                title: 'Quick Start',
-                subtitle: 'Use recommended defaults and get browsing.',
+                title: l10n.onboarding_modeExpressTitle,
+                subtitle: l10n.onboarding_modeExpressSubtitle,
                 icon: Icons.bolt,
                 selected: selectedMode == OnboardingMode.express,
                 onTap: () => ref
@@ -86,8 +91,8 @@ class WelcomePage extends ConsumerWidget {
               const SizedBox(height: 12),
               _ModeOption(
                 mode: OnboardingMode.detailed,
-                title: 'Custom Setup',
-                subtitle: 'Configure DNS, toolbar, extensions, and more.',
+                title: l10n.onboarding_modeDetailedTitle,
+                subtitle: l10n.onboarding_modeDetailedSubtitle,
                 icon: Icons.tune,
                 selected: selectedMode == OnboardingMode.detailed,
                 onTap: () => ref
@@ -97,8 +102,8 @@ class WelcomePage extends ConsumerWidget {
               const SizedBox(height: 12),
               _ModeOption(
                 mode: OnboardingMode.restore,
-                title: 'Restore from Backup',
-                subtitle: 'Import a profile from an encrypted backup file.',
+                title: l10n.onboarding_modeRestoreTitle,
+                subtitle: l10n.onboarding_modeRestoreSubtitle,
                 icon: Icons.settings_backup_restore,
                 selected: selectedMode == OnboardingMode.restore,
                 onTap: () => ref
@@ -127,6 +132,8 @@ class _UpdateNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -152,7 +159,7 @@ class _UpdateNotice extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'A lot has changed!',
+                    l10n.onboarding_updateNoticeTitle,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -161,9 +168,7 @@ class _UpdateNotice extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'This update includes significant changes that require '
-                'you to review your settings. Please walk through the '
-                'following pages to revalidate your configuration.',
+                l10n.onboarding_updateNoticeBody,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -180,8 +185,7 @@ class _UpdateNotice extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Please re-check your extensions after this update '
-                      'due to known migration issues.',
+                      l10n.onboarding_updateNoticeExtensions,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -201,8 +205,7 @@ class _UpdateNotice extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Your existing settings will not be overridden '
-                      'unless you explicitly change them during this setup.',
+                      l10n.onboarding_updateNoticeSettingsPreserved,
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),
@@ -312,63 +315,62 @@ class _EulaCheckbox extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return CheckboxListTile.adaptive(
       contentPadding: EdgeInsets.zero,
       value: accepted,
       controlAffinity: ListTileControlAffinity.leading,
       onChanged: (value) => onAcceptedChanged(value ?? false),
-      title: Wrap(
-        children: [
-          Text(
-            'I have read and accept the ',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+      title: Text.rich(
+        TextSpan(
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
           ),
-          GestureDetector(
-            onTap: () => _showLegalDocument(
-              context,
-              title: 'End User License Agreement',
-              assetPath: 'assets/legal/EULA.md',
-            ),
-            child: Text(
-              'EULA',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.of(context).brandLink,
-                decoration: TextDecoration.underline,
-                decorationColor: AppColors.of(context).brandLink,
+          children: localizedSpans(
+            l10n.onboarding_eulaAcceptance,
+            tags: {
+              'eula': (text) => _legalDocumentLink(
+                context,
+                label: text,
+                title: l10n.onboarding_eulaDocumentTitle,
+                assetPath: 'assets/legal/EULA.md',
               ),
-            ),
-          ),
-          Text(
-            ' and ',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-          GestureDetector(
-            onTap: () => _showLegalDocument(
-              context,
-              title: 'Privacy Policy',
-              assetPath: 'assets/legal/PRIVACY_POLICY.md',
-            ),
-            child: Text(
-              'Privacy Policy',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.of(context).brandLink,
-                decoration: TextDecoration.underline,
-                decorationColor: AppColors.of(context).brandLink,
+              'privacy': (text) => _legalDocumentLink(
+                context,
+                label: text,
+                title: l10n.onboarding_privacyPolicy,
+                assetPath: 'assets/legal/PRIVACY_POLICY.md',
               ),
-            ),
+            },
           ),
-          Text(
-            '.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+        ),
+      ),
+    );
+  }
+
+  InlineSpan _legalDocumentLink(
+    BuildContext context, {
+    required String label,
+    required String title,
+    required String assetPath,
+  }) {
+    final linkColor = AppColors.of(context).brandLink;
+
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: GestureDetector(
+        onTap: () =>
+            _showLegalDocument(context, title: title, assetPath: assetPath),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: linkColor,
+            decoration: TextDecoration.underline,
+            decorationColor: linkColor,
           ),
-        ],
+        ),
       ),
     );
   }

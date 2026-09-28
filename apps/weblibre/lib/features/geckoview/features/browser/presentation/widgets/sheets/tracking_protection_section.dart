@@ -24,6 +24,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget displaying Enhanced Tracking Protection toggle
@@ -56,7 +57,9 @@ class TrackingProtectionSection extends HookConsumerWidget {
         final colorScheme = Theme.of(context).colorScheme;
 
         return ListTile(
-          title: const Text('Failed to load tracking protection'),
+          title: Text(
+            AppLocalizations.of(context).browser_failedToLoadTrackingProtection,
+          ),
           leading: Icon(Icons.error_outline, color: colorScheme.error),
         );
       },
@@ -72,14 +75,16 @@ class _TrackingProtectionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return SwitchListTile.adaptive(
       value: isEnabled,
       onChanged: (enabled) => _toggleProtection(context, ref, enabled),
-      title: const Text('Enhanced Tracking Protection'),
+      title: Text(l10n.browser_enhancedTrackingProtection),
       subtitle: Text(
         isEnabled
-            ? 'Trackers on this site are being blocked'
-            : 'Trackers on this site are allowed',
+            ? l10n.browser_trackersBeingBlocked
+            : l10n.browser_trackersAllowed,
       ),
       secondary: Icon(
         isEnabled ? Icons.shield : Icons.shield_outlined,
@@ -113,7 +118,12 @@ class _TrackingProtectionTile extends ConsumerWidget {
     } catch (e, s) {
       logger.e('Failed to toggle tracking protection', error: e, stackTrace: s);
       if (context.mounted) {
-        showErrorMessage(context, 'Failed to toggle tracking protection: $e');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(
+            context,
+          ).browser_failedToToggleTrackingProtection(e.toString()),
+        );
       }
     }
   }

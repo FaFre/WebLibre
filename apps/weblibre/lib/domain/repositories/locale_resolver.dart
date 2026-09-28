@@ -17,11 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/widgets.dart' hide Locale;
 import 'package:intl/locale.dart' as intl;
 import 'package:locale_resolver/locale_resolver.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/extensions/locale.dart';
 
 part 'locale_resolver.g.dart';
 
@@ -46,13 +44,18 @@ class LocaleResolverRepository extends _$LocaleResolverRepository {
   void build(intl.Locale targetLocale) {}
 }
 
+/// The language and country names of [locale], written in [displayLocale].
+///
+/// Pass the UI locale (`Localizations.localeOf(context)`) for names shown in
+/// running text, so they follow the in-app language rather than the device's,
+/// or [locale] itself where each entry should name itself (a language picker).
 @Riverpod()
-Future<LocalizedResult> resolveLocale(Ref ref, intl.Locale locale) {
+Future<LocalizedResult> resolveLocale(
+  Ref ref,
+  intl.Locale locale,
+  intl.Locale displayLocale,
+) {
   return ref
-      .read(
-        localeResolverRepositoryProvider(
-          WidgetsBinding.instance.platformDispatcher.locale.toIntlLocale(),
-        ).notifier,
-      )
+      .read(localeResolverRepositoryProvider(displayLocale).notifier)
       .resolve(locale);
 }

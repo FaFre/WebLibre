@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/empty_state_content.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_list_tile.dart';
 
 class RecentHistorySection extends ConsumerWidget {
@@ -31,6 +32,7 @@ class RecentHistorySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final visits = ref.watch(
       searchEmptyRecentHistoryProvider().select((value) => value.value ?? []),
     );
@@ -40,7 +42,7 @@ class RecentHistorySection extends ConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Recent History',
+      title: l10n.search_moduleLabelRecentHistory,
       moduleType: SearchModuleType.recentHistory,
       totalCount: visits.length,
       contentSliverBuilder:

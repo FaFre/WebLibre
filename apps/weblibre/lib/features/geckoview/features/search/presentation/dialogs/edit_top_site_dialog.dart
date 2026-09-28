@@ -19,16 +19,20 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 /// Edits an existing shortcut, or — with both initial values omitted — creates
 /// one from scratch.
+///
+/// [dialogTitle] and [confirmLabel] default to the "edit" copy when omitted;
+/// pass them explicitly for the "add" flow.
 Future<({String title, Uri url})?> showEditTopSiteDialog(
   BuildContext context, {
   String initialTitle = '',
   Uri? initialUrl,
-  String dialogTitle = 'Edit Shortcut',
-  String confirmLabel = 'Save',
+  String? dialogTitle,
+  String? confirmLabel,
 }) {
   return showDialog<({String title, Uri url})>(
     context: context,
@@ -45,8 +49,8 @@ Future<({String title, Uri url})?> showEditTopSiteDialog(
 class _EditTopSiteDialog extends StatefulWidget {
   final String initialTitle;
   final Uri? initialUrl;
-  final String dialogTitle;
-  final String confirmLabel;
+  final String? dialogTitle;
+  final String? confirmLabel;
 
   const _EditTopSiteDialog({
     required this.initialTitle,
@@ -82,8 +86,10 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: Text(widget.dialogTitle),
+      title: Text(widget.dialogTitle ?? l10n.search_editShortcutDialogTitle),
       content: Form(
         key: _formKey,
         child: Column(
@@ -91,11 +97,13 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
           children: [
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(
+                labelText: l10n.search_titleFieldLabel,
+              ),
               autofocus: true,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Title cannot be empty';
+                  return l10n.search_titleCannotBeEmpty;
                 }
                 return null;
               },
@@ -103,18 +111,18 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _urlController,
-              decoration: const InputDecoration(labelText: 'URL'),
+              decoration: InputDecoration(labelText: l10n.search_urlFieldLabel),
               keyboardType: TextInputType.url,
               validator: (value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'URL cannot be empty';
+                  return l10n.search_urlCannotBeEmpty;
                 }
                 final parsed = uri_parser.tryParseUrl(
                   value.trim(),
                   eagerParsing: true,
                 );
                 if (parsed == null) {
-                  return 'Enter a valid URL';
+                  return l10n.search_enterValidUrl;
                 }
                 return null;
               },
@@ -125,7 +133,7 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () {
@@ -141,7 +149,7 @@ class _EditTopSiteDialogState extends State<_EditTopSiteDialog> {
               ));
             }
           },
-          child: Text(widget.confirmLabel),
+          child: Text(widget.confirmLabel ?? l10n.common_save),
         ),
       ],
     );

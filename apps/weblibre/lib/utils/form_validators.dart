@@ -21,6 +21,7 @@ import 'dart:io';
 
 import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/uri_input_parser.dart';
 import 'package:weblibre/utils/uri_policy.dart';
 
@@ -44,13 +45,14 @@ Uri? parseValidatedUrl(
 String? validateUrl(
   String? value, {
   required bool eagerParsing,
+  required AppLocalizations l10n,
   bool requireAuthority = true,
   bool onlyHttpProtocol = false,
   bool required = true,
 }) {
   if (value.isEmpty) {
     if (required) {
-      return 'URL must be provided';
+      return l10n.formValidators_urlRequired;
     } else {
       return null;
     }
@@ -67,15 +69,15 @@ String? validateUrl(
     }
   }
 
-  return 'Invalid URL';
+  return l10n.formValidators_invalidUrl;
 }
 
-String? validateRequired(String? value, {String message = 'Value required'}) {
+String? validateRequired(String? value, {required AppLocalizations l10n}) {
   if (value.isNotEmpty) {
     return null;
   }
 
-  return message;
+  return l10n.formValidators_valueRequired;
 }
 
 String? validatePath(String? value) {
@@ -150,13 +152,13 @@ String? validateFileExisting(String? value) {
 
 final _profileNamePattern = RegExp(r"""^[^~)('!*<>:;,?"*|/_]+$""");
 
-String? validateProfileName(String? value) {
+String? validateProfileName(String? value, {required AppLocalizations l10n}) {
   if (value == null || value.isEmpty) {
-    return 'Name required';
+    return l10n.formValidators_nameRequired;
   }
 
   if (!_profileNamePattern.hasMatch(value)) {
-    return 'Name contains invalid caharcters';
+    return l10n.formValidators_nameInvalidCharacters;
   }
 
   return null;

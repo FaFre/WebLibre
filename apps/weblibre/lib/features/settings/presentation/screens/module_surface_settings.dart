@@ -21,10 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/utils/search_module_type_l10n.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/utils/home_search_bar_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Reorders and toggles the sections of one [ModuleSurface].
 ///
@@ -38,11 +41,12 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
   const ModuleSurfaceSettingsScreen({
     super.key,
     this.surface = ModuleSurface.home,
-    this.title = 'Customize Home',
+    required this.title,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final entries = ref.watch(searchModuleOrderProvider(surface));
     final notifier = ref.read(searchModuleOrderProvider(surface).notifier);
     final colorScheme = Theme.of(context).colorScheme;
@@ -54,7 +58,7 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
           menuChildren: [
             MenuItemButton(
               onPressed: notifier.resetToDefaults,
-              child: const Text('Reset to Defaults'),
+              child: Text(l10n.settings_actionResetToDefaults),
             ),
           ],
           builder: (context, controller, child) => IconButton(
@@ -69,8 +73,7 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Text(
-              'Drag to reorder. Switch a section off to hide it here without '
-              'affecting the other page.',
+              l10n.settings_moduleSurfaceHint,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -95,7 +98,7 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
               color: Colors.transparent,
               child: ListTile(
                 title: Text(
-                  entry.type.label,
+                  entry.type.label(context),
                   style: TextStyle(
                     color: entry.visible ? null : colorScheme.onSurfaceVariant,
                   ),
@@ -136,6 +139,7 @@ class _HomeSearchBarRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final stored = settings.homeSearchBarPlacement;
     final resolved = ref.watch(effectiveHomeSearchBarPlacementProvider);
@@ -154,16 +158,19 @@ class _HomeSearchBarRow extends ConsumerWidget {
                   .read(saveGeneralSettingsControllerProvider.notifier)
                   .save((s) => s.copyWith.homeSearchBarPlacement(placement));
             },
-            child: Text(placement.label),
+            child: Text(placement.label(context)),
           ),
       ],
       builder: (context, controller, child) => ListTile(
         leading: const Icon(Icons.search),
-        title: const Text('Search bar'),
+        title: Text(l10n.settings_homeSearchBarRowTitle),
         subtitle: Text(
           stored == HomeSearchBarPlacement.auto
-              ? '${stored.label} — currently ${resolved.label.toLowerCase()}'
-              : stored.label,
+              ? l10n.settings_currentlyResolvesTo(
+                  stored.label(context),
+                  resolved.label(context),
+                )
+              : stored.label(context),
         ),
         trailing: const Icon(Icons.arrow_drop_down),
         onTap: () => controller.isOpen ? controller.close() : controller.open(),

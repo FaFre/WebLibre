@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -566,7 +567,9 @@ class QuickTabSwitcherRow extends StatelessWidget {
                       ),
                     if (onDelete != null)
                       IconButton(
-                        tooltip: 'Close tab',
+                        tooltip: AppLocalizations.of(
+                          context,
+                        ).browser_tooltipCloseTab,
                         visualDensity: VisualDensity.compact,
                         onPressed: onDelete,
                         icon: const Icon(Icons.close),

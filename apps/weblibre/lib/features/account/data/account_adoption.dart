@@ -69,10 +69,6 @@ class UnclaimedAccountRecord {
   /// dropping a credential is what this whole flow refuses to do — but only
   /// discarding it is offered.
   final bool isUsable;
-
-  /// What to call the account on screen. Never a bare "an account": a choice
-  /// about a credential the user cannot identify is not a choice.
-  String get label => email ?? displayName ?? 'a previous sign-in';
 }
 
 /// Finds an account record that no profile owns.

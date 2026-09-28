@@ -72,6 +72,7 @@ import 'package:weblibre/features/user/domain/services/local_authentication.dart
 import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:weblibre/features/web_feed/domain/services/article_content_processor.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/widgets/web_content_keyboard.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -194,6 +195,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     useOnInitialization(() async {
       await ref
           .read(generalSettingsRepositoryProvider.notifier)
@@ -471,20 +474,21 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                         generalSettingsWithDefaultsProvider,
                       );
                       await quickActions.setShortcutItems([
-                        const ShortcutItem(
+                        ShortcutItem(
                           type: 'new_tab',
-                          localizedTitle: 'New Tab',
+                          localizedTitle: l10n.browser_quickActionNewTab,
                           icon: 'mdi_icon_tab',
                         ),
-                        const ShortcutItem(
+                        ShortcutItem(
                           type: 'new_private_tab',
-                          localizedTitle: 'New Private Tab',
+                          localizedTitle: l10n.browser_quickActionNewPrivateTab,
                           icon: 'mdi_icon_domino_mask',
                         ),
                         if (settings.showIsolatedTabUi)
-                          const ShortcutItem(
+                          ShortcutItem(
                             type: 'new_isolated_tab',
-                            localizedTitle: 'New Isolated Tab',
+                            localizedTitle:
+                                l10n.browser_quickActionNewIsolatedTab,
                             icon: 'mdi_icon_snowflake',
                           ),
                       ]);

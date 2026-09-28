@@ -36,6 +36,17 @@ import 'package:weblibre/features/user/data/providers.dart';
 
 part 'small_web_session_controller.g.dart';
 
+/// Info banners [SmallWebSessionController] can surface after a discovery
+/// attempt. Presentation resolves this to localized copy; the controller
+/// itself carries no display text.
+enum SmallWebInfoMessage { noNewItemsFound }
+
+/// Marker error for a failed discovery attempt. Presentation resolves this to
+/// localized copy instead of showing it via [Object.toString].
+class SmallWebDiscoveryFailedException implements Exception {
+  const SmallWebDiscoveryFailedException();
+}
+
 @CopyWith()
 @JsonSerializable()
 class SmallWebSessionState with FastEquatable {
@@ -46,7 +57,7 @@ class SmallWebSessionState with FastEquatable {
   final Uri? currentItemUrl;
   final Uri? currentConsoleUrl;
   @JsonKey(includeToJson: false, includeFromJson: false)
-  final String? infoMessage;
+  final SmallWebInfoMessage? infoMessage;
 
   static KagiSmallWebMode? _defaultModeForSourceKind(
     SmallWebSourceKind sourceKind,
@@ -263,14 +274,12 @@ class SmallWebSessionController extends _$SmallWebSessionController {
       }
 
       state = AsyncData(
-        session.copyWith(
-          infoMessage: 'No new items found. Try a different mode or category.',
-        ),
+        session.copyWith(infoMessage: SmallWebInfoMessage.noNewItemsFound),
       );
     } catch (e, st) {
       logger.e('Discovery failed', error: e, stackTrace: st);
       state = AsyncError<SmallWebSessionState>(
-        'Discovery failed. Please try again.',
+        const SmallWebDiscoveryFailedException(),
         st,
       );
     }

@@ -449,7 +449,7 @@ class $SmallWebItemsTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<i1.SmallWebItems, i1.SmallWebItem>(table),
                   i1.$SmallWebItemsReferences(db, table, e),
                 ),
               )
@@ -871,7 +871,9 @@ class $SmallWebMembershipsTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<i1.SmallWebMemberships, i1.SmallWebMembership>(
+                    table,
+                  ),
                   i1.$SmallWebMembershipsReferences(db, table, e),
                 ),
               )
@@ -1174,7 +1176,16 @@ class $WanderConsolesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.WanderConsoles, i1.WanderConsole>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.WanderConsoles,
+                    i1.WanderConsole
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1340,7 +1351,19 @@ class $WanderConsoleNeighborsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<
+                    i1.WanderConsoleNeighbors,
+                    i1.WanderConsoleNeighbor
+                  >(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.WanderConsoleNeighbors,
+                    i1.WanderConsoleNeighbor
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1676,7 +1699,7 @@ class $SmallWebVisitsTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<i1.SmallWebVisits, i1.SmallWebVisit>(table),
                   i1.$SmallWebVisitsReferences(db, table, e),
                 ),
               )
@@ -3735,8 +3758,12 @@ class DefinitionsDrift extends i6.ModularAccessor {
         i0.Variable<String>(mode),
         i0.Variable<String>(category),
       ],
-      readsFrom: {smallWebItems, smallWebMemberships, smallWebVisits},
-    ).asyncMap(smallWebItems.mapFromRow);
+      readsFrom: {
+        this.smallWebItems,
+        this.smallWebMemberships,
+        this.smallWebVisits,
+      },
+    ).asyncMap(this.smallWebItems.mapFromRow);
   }
 
   i0.Selectable<GetRecentVisitsResult> getRecentVisits({
@@ -3753,7 +3780,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
         i0.Variable<String>(mode),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {smallWebItems, smallWebVisits},
+      readsFrom: {this.smallWebItems, this.smallWebVisits},
     ).map(
       (i0.QueryRow row) => GetRecentVisitsResult(
         id: row.read<String>('id'),
@@ -3777,7 +3804,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
     return customSelect(
       'SELECT url FROM wander_consoles ORDER BY created_at DESC LIMIT ?1',
       variables: [i0.Variable<int>(limit)],
-      readsFrom: {wanderConsoles},
+      readsFrom: {this.wanderConsoles},
     ).map(
       (i0.QueryRow row) =>
           i1.WanderConsoles.$converterurl.fromSql(row.read<String>('url')),
@@ -3796,15 +3823,15 @@ class DefinitionsDrift extends i6.ModularAccessor {
         ),
         i0.Variable<String>(consoleUrl),
       ],
-      readsFrom: {smallWebItems, smallWebMemberships},
-    ).asyncMap(smallWebItems.mapFromRow);
+      readsFrom: {this.smallWebItems, this.smallWebMemberships},
+    ).asyncMap(this.smallWebItems.mapFromRow);
   }
 
   i0.Selectable<int> getConsoleNeighborCount({required String consoleUrl}) {
     return customSelect(
       'SELECT COUNT(*) AS c FROM wander_console_neighbors WHERE source_console_url = ?1',
       variables: [i0.Variable<String>(consoleUrl)],
-      readsFrom: {wanderConsoleNeighbors},
+      readsFrom: {this.wanderConsoleNeighbors},
     ).map((i0.QueryRow row) => row.read<int>('c'));
   }
 
@@ -3812,7 +3839,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
     return customSelect(
       'SELECT source_kind, mode, COUNT(*) AS c FROM small_web_memberships GROUP BY source_kind, mode',
       variables: [],
-      readsFrom: {smallWebMemberships},
+      readsFrom: {this.smallWebMemberships},
     ).map(
       (i0.QueryRow row) => GetAllModeItemCountsResult(
         sourceKind: i1.SmallWebMemberships.$convertersourceKind.fromSql(
@@ -3838,7 +3865,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
         i0.Variable<String>(mode),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {smallWebVisits},
+      readsFrom: {this.smallWebVisits},
     ).map((i0.QueryRow row) => row.read<String>('item_id'));
   }
 
@@ -3855,7 +3882,11 @@ class DefinitionsDrift extends i6.ModularAccessor {
         ),
         i0.Variable<String>(sourceConsoleUrl),
       ],
-      readsFrom: {wanderConsoles, smallWebMemberships, wanderConsoleNeighbors},
+      readsFrom: {
+        this.wanderConsoles,
+        this.smallWebMemberships,
+        this.wanderConsoleNeighbors,
+      },
     ).map(
       (i0.QueryRow row) => GetNeighborConsolesWithPageCountsResult(
         url: i1.WanderConsoles.$converterurl.fromSql(row.read<String>('url')),
@@ -3879,7 +3910,7 @@ class DefinitionsDrift extends i6.ModularAccessor {
         ),
         i0.Variable<String>(query),
       ],
-      readsFrom: {wanderConsoles, smallWebMemberships},
+      readsFrom: {this.wanderConsoles, this.smallWebMemberships},
     ).map(
       (i0.QueryRow row) => GetAllConsolesWithPageCountsResult(
         url: i1.WanderConsoles.$converterurl.fromSql(row.read<String>('url')),

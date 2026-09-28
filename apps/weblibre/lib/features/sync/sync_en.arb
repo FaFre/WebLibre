@@ -1,0 +1,181 @@
+{
+  "@@locale": "en",
+
+  "sync_screenTitle": "Firefox Sync",
+  "@sync_screenTitle": {
+    "description": "Title of the settings screen for Firefox Sync, Mozilla's service for syncing bookmarks, history and tabs between devices. Product name; usually left untranslated."
+  },
+  "sync_searchHint": "Search sync settings",
+  "@sync_searchHint": {
+    "description": "Placeholder of the search field on the Firefox Sync settings screen."
+  },
+
+  "sync_statusSyncing": "Synchronization in progress",
+  "@sync_statusSyncing": {
+    "description": "Status line under \"Sync Now\" while a sync is running."
+  },
+  "sync_statusNeverSynced": "Never synced",
+  "@sync_statusNeverSynced": {
+    "description": "Status line under \"Sync Now\" when this device has never completed a sync."
+  },
+  "sync_statusLastSynced": "Last synced: {date}",
+  "@sync_statusLastSynced": {
+    "description": "Status line under \"Sync Now\". date is the formatted date and time of the last completed sync.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "sync_sectionAccount": "Account",
+  "@sync_sectionAccount": {
+    "description": "Section heading on the Firefox Sync settings screen for the signed-in Mozilla account."
+  },
+  "sync_sectionAccountKeywords": "pairing, device name",
+  "@sync_sectionAccountKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "sync_entrySignedInAccountTitle": "Signed in account",
+  "@sync_entrySignedInAccountTitle": {
+    "description": "Title of the account section on the Firefox Sync settings screen when signed in."
+  },
+  "sync_entrySignInTitle": "Sign in",
+  "@sync_entrySignInTitle": {
+    "description": "Title of the account section on the Firefox Sync settings screen when not signed in."
+  },
+  "sync_entryAccountSubtitle": "Account status, QR pairing, and device name",
+  "@sync_entryAccountSubtitle": {
+    "description": "Summary of what the account section of the Firefox Sync settings contains. \"QR pairing\" means signing in by scanning a QR code shown on a computer."
+  },
+  "sync_signedIn": "Signed in",
+  "@sync_signedIn": {
+    "description": "Shown in place of the account email address when signed in but the address is unknown."
+  },
+  "sync_notSignedIn": "Not signed in",
+  "@sync_notSignedIn": {
+    "description": "Shown in place of the account email address when not signed in to Firefox Sync."
+  },
+  "sync_authExpired": "Authentication expired. Sign in again to continue syncing.",
+  "@sync_authExpired": {
+    "description": "Line under the account row when the Mozilla account session expired and the user must sign in again."
+  },
+  "sync_syncingTabsBookmarksHistory": "Syncing tabs, bookmarks, and history",
+  "@sync_syncingTabsBookmarksHistory": {
+    "description": "Line under the account row when signed in and no display name is available; says what is being synced."
+  },
+  "sync_signInPrompt": "Sign in to synchronize tabs, bookmarks, and history",
+  "@sync_signInPrompt": {
+    "description": "Line under the account row when not signed in, inviting the user to sign in."
+  },
+  "sync_actionSignOut": "Sign Out",
+  "@sync_actionSignOut": {
+    "description": "Tooltip of the sign-out button on the account row, and confirm button of the sign-out dialog."
+  },
+
+  "sync_scanQrTitle": "Scan QR Code to pair",
+  "@sync_scanQrTitle": {
+    "description": "Row that opens the camera to scan the pairing QR code shown on a computer, to sign in to Firefox Sync."
+  },
+  "sync_scanQrSubtitle": "Scan a QR code from firefox.com/pair on desktop",
+  "@sync_scanQrSubtitle": {
+    "description": "Explanation under the pairing row. firefox.com/pair is a web address and must stay unchanged; \"desktop\" means a desktop computer running Firefox."
+  },
+  "sync_invalidQrCode": "Invalid QR code: not a valid URL",
+  "@sync_invalidQrCode": {
+    "description": "Error message when the scanned QR code does not contain a web address."
+  },
+
+  "sync_deviceNameTitle": "Device Name",
+  "@sync_deviceNameTitle": {
+    "description": "Title of the row and dialog for the name this device has in Firefox Sync, as shown on the user's other devices."
+  },
+  "sync_unknown": "Unknown",
+  "@sync_unknown": {
+    "description": "Shown as the device name when it could not be determined."
+  },
+
+  "sync_sectionSynchronization": "Synchronization",
+  "@sync_sectionSynchronization": {
+    "description": "Section heading on the Firefox Sync settings screen for sync actions and what data types to sync."
+  },
+  "sync_syncNowTitle": "Sync Now",
+  "@sync_syncNowTitle": {
+    "description": "Row that starts a sync immediately."
+  },
+  "sync_syncNowKeywords": "history, bookmarks, tabs",
+  "@sync_syncNowKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "sync_syncHistoryTitle": "Sync History",
+  "@sync_syncHistoryTitle": {
+    "description": "Switch: include browsing history in Firefox Sync."
+  },
+  "sync_syncBookmarksTitle": "Sync Bookmarks",
+  "@sync_syncBookmarksTitle": {
+    "description": "Switch: include bookmarks in Firefox Sync."
+  },
+  "sync_syncOpenTabsTitle": "Sync Open Tabs",
+  "@sync_syncOpenTabsTitle": {
+    "description": "Switch: share the list of open tabs through Firefox Sync."
+  },
+
+  "sync_sectionServerOverrides": "Server Overrides",
+  "@sync_sectionServerOverrides": {
+    "description": "Section heading for advanced settings that point Firefox Sync at self-hosted servers instead of Mozilla's."
+  },
+  "sync_entryServerOverridesTitle": "Server overrides",
+  "@sync_entryServerOverridesTitle": {
+    "description": "Title of the settings entry for custom Firefox Sync servers."
+  },
+  "sync_entryServerOverridesKeywords": "fxa, token server",
+  "@sync_entryServerOverridesKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "sync_entryServerOverridesSubtitle": "Custom Firefox Account and token server endpoints",
+  "@sync_entryServerOverridesSubtitle": {
+    "description": "Explanation under \"Server overrides\": addresses of self-hosted Firefox Account (sign-in) and token servers. \"Firefox Account\" is a product name."
+  },
+  "sync_fxaServerOverrideTitle": "FxA Server Override",
+  "@sync_fxaServerOverrideTitle": {
+    "description": "Row and dialog title for a custom Firefox Account sign-in server address. FxA is Mozilla's abbreviation for Firefox Account."
+  },
+  "sync_defaultMozillaServer": "Default Mozilla server",
+  "@sync_defaultMozillaServer": {
+    "description": "Shown under the account server row when no custom server is set, meaning Mozilla's own server is used."
+  },
+  "sync_tokenServerOverrideTitle": "Sync Token Server Override",
+  "@sync_tokenServerOverrideTitle": {
+    "description": "Row and dialog title for a custom Firefox Sync token server address (the server that hands out access to sync storage)."
+  },
+  "sync_automaticFromFxaServer": "Automatic from FxA server",
+  "@sync_automaticFromFxaServer": {
+    "description": "Shown under the token server row when no custom server is set: the address is taken from the Firefox Account server's configuration. FxA is Mozilla's abbreviation for Firefox Account."
+  },
+  "sync_restartAppNotice": "Restart the app after changing server overrides.",
+  "@sync_restartAppNotice": {
+    "description": "Small note under the server override rows: changes only take effect after restarting the app."
+  },
+
+  "sync_signOutDialogTitle": "Sign out?",
+  "@sync_signOutDialogTitle": {
+    "description": "Title of the confirmation dialog before signing out of Firefox Sync."
+  },
+  "sync_signOutDialogContent": "Are you sure you want to sign out of Firefox Sync?",
+  "@sync_signOutDialogContent": {
+    "description": "Body of the confirmation dialog before signing out of Firefox Sync."
+  },
+
+  "sync_deviceNameHint": "Enter device name",
+  "@sync_deviceNameHint": {
+    "description": "Placeholder of the text field in the device name dialog."
+  },
+  "sync_deviceNameEmpty": "Device name cannot be empty",
+  "@sync_deviceNameEmpty": {
+    "description": "Error message when saving an empty device name."
+  },
+  "sync_deviceNameUpdateFailed": "Failed to update device name",
+  "@sync_deviceNameUpdateFailed": {
+    "description": "Error message when the new device name could not be saved to Firefox Sync."
+  },
+  "sync_mustBeValidHttpsUrl": "Must be a valid HTTPS URL",
+  "@sync_mustBeValidHttpsUrl": {
+    "description": "Error message when a custom sync server address is not a valid web address starting with https."
+  }
+}

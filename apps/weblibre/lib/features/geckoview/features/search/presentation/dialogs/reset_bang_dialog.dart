@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a confirmation dialog for resetting a bang's usage frequency.
 ///
@@ -30,19 +31,23 @@ Future<bool?> showResetBangDialog(
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: Text('Reset usage frequency of $triggerName?'),
-      content: const Text('This will remove the Bang from quick select.'),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Reset'),
-        ),
-      ],
-    ),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        title: Text(l10n.search_resetBangDialogTitle(triggerName)),
+        content: Text(l10n.search_resetBangDialogContent),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.common_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.common_reset),
+          ),
+        ],
+      );
+    },
   );
 }

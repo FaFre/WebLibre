@@ -252,6 +252,7 @@ class _MainWidget extends HookConsumerWidget {
     final themeMode = ref.watch(
       generalSettingsWithDefaultsProvider.select((value) => value.themeMode),
     );
+    final appLocale = ref.watch(effectiveAppLocaleProvider);
     final uiScaleFactor = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (value) => value.uiScaleFactor,
@@ -679,6 +680,7 @@ class _MainWidget extends HookConsumerWidget {
             ],
           ),
           themeMode: themeMode,
+          locale: appLocale,
           uiScaleFactor: uiScaleFactor,
           disableAnimations: disableAnimations,
         );

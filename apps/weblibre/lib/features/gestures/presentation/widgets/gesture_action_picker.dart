@@ -20,6 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
@@ -94,6 +96,7 @@ class _GestureActionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -118,7 +121,10 @@ class _GestureActionPicker extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Choose action', style: theme.textTheme.titleLarge),
+                child: Text(
+                  l10n.gestures_chooseActionTitle,
+                  style: theme.textTheme.titleLarge,
+                ),
               ),
             ),
             Expanded(
@@ -143,7 +149,7 @@ class _GestureActionPicker extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
                         child: Text(
-                          category.label,
+                          category.label(context),
                           style: theme.textTheme.titleSmall?.copyWith(
                             color: colorScheme.primary,
                             fontWeight: FontWeight.w700,
@@ -153,8 +159,8 @@ class _GestureActionPicker extends StatelessWidget {
                       for (final action in actions)
                         ListTile(
                           leading: Icon(action.icon),
-                          title: Text(action.title),
-                          subtitle: Text(action.description),
+                          title: Text(action.label(context)),
+                          subtitle: Text(action.description(context)),
                           selected: action == selected,
                           trailing: action == selected
                               ? Icon(Icons.check, color: colorScheme.primary)

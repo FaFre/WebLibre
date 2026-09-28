@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/fon
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<void> showFontSizeBottomSheet(BuildContext context) {
   return showModalBottomSheet(
@@ -43,6 +44,7 @@ class FontSizeBottomSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(engineSettingsWithDefaultsProvider);
     final factor = settings.fontSizeFactor;
     final isAutomatic = settings.automaticFontSizeAdjustment;
@@ -64,7 +66,7 @@ class FontSizeBottomSheet extends ConsumerWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Text Size',
+                  l10n.browser_fontSizeTitle,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
@@ -87,8 +89,7 @@ class FontSizeBottomSheet extends ConsumerWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Automatic font size is enabled. '
-                            'Disable in Settings to adjust manually.',
+                            l10n.browser_fontSizeAutomaticNotice,
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ),
@@ -128,7 +129,7 @@ class FontSizeBottomSheet extends ConsumerWidget {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => _resetFontSize(ref),
-                child: const Text('Reset to 100%'),
+                child: Text(l10n.browser_fontSizeResetButton),
               ),
             ],
           ],

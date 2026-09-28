@@ -28,6 +28,7 @@ import 'package:weblibre/features/app_links/domain/entities/context_app_link_pol
 import 'package:weblibre/features/app_links/domain/services/effective_app_link_policy.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 final _appLinkTargetProvider = FutureProvider.autoDispose
     .family<AppLinkTarget?, Uri>((ref, url) {
@@ -51,6 +52,7 @@ class AppLinkSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final policy = ref.watch(effectiveAppLinkPolicyProvider(contextId));
     final target = ref.watch(_appLinkTargetProvider(url));
     final isLoadingTarget = target.isLoading && !target.hasValue;
@@ -62,21 +64,21 @@ class AppLinkSection extends HookConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Text(
-            'App Links',
+            l10n.browser_appLinksSectionTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: Theme.of(context).colorScheme.primary,
             ),
           ),
         ),
         if (policy == null || isLoadingTarget)
-          const Skeletonizer(
+          Skeletonizer(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: Icon(Icons.link),
-                  title: Text('Open links for this site'),
-                  subtitle: Text('Follows the default'),
+                  leading: const Icon(Icons.link),
+                  title: Text(l10n.browser_openLinksForThisSite),
+                  subtitle: Text(l10n.browser_followsTheDefault),
                 ),
               ],
             ),
@@ -99,6 +101,7 @@ class _SiteRuleTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scope = target?.scopeKey;
     final rule = (scope != null && scope.isNotEmpty)
         ? policy.rules[scope]
@@ -123,24 +126,24 @@ class _SiteRuleTile extends ConsumerWidget {
 
     return ListTile(
       leading: Icon(icon, color: color),
-      title: const Text('Open links for this site'),
-      subtitle: Text(_subtitle(scope, rule, choice, canAlwaysOpen)),
+      title: Text(l10n.browser_openLinksForThisSite),
+      subtitle: Text(_subtitle(l10n, scope, rule, choice, canAlwaysOpen)),
       trailing: DropdownButton<_SiteRuleChoice>(
         value: choice,
         underline: const SizedBox(),
         items: [
-          const DropdownMenuItem(
+          DropdownMenuItem(
             value: _SiteRuleChoice.followDefault,
-            child: Text('Follow default'),
+            child: Text(l10n.browser_followDefault),
           ),
           DropdownMenuItem(
             value: _SiteRuleChoice.alwaysOpen,
             enabled: canAlwaysOpen || choice == _SiteRuleChoice.alwaysOpen,
-            child: const Text('Open in app'),
+            child: Text(l10n.browser_openInAppOption),
           ),
-          const DropdownMenuItem(
+          DropdownMenuItem(
             value: _SiteRuleChoice.neverOpen,
-            child: Text('Keep in browser'),
+            child: Text(l10n.browser_keepInBrowser),
           ),
         ],
         onChanged: scope == null || scope.isEmpty
@@ -155,23 +158,27 @@ class _SiteRuleTile extends ConsumerWidget {
   }
 
   String _subtitle(
+    AppLocalizations l10n,
     String? scope,
     PersistedAppLinkRule? rule,
     _SiteRuleChoice choice,
     bool canAlwaysOpen,
   ) {
-    if (scope == null || scope.isEmpty) return 'No app found for this site';
+    if (scope == null || scope.isEmpty) {
+      return l10n.browser_noAppFoundForSite;
+    }
     return switch (choice) {
-      _SiteRuleChoice.alwaysOpen =>
-        'Always opens in ${rule!.packageName ?? 'the app'}',
-      _SiteRuleChoice.neverOpen => 'Always stays in the browser',
+      _SiteRuleChoice.alwaysOpen => l10n.browser_alwaysOpensInApp(
+        rule!.packageName ?? l10n.browser_theAppFallback,
+      ),
+      _SiteRuleChoice.neverOpen => l10n.browser_alwaysStaysInBrowser,
       _SiteRuleChoice.followDefault => switch (policy.mode) {
         AppLinksMode.always =>
           canAlwaysOpen
-              ? 'Follows the default: opens in apps'
-              : 'Follows the default: no app found',
-        AppLinksMode.ask => 'Follows the default: asks first',
-        AppLinksMode.never => 'Follows the default: stays in the browser',
+              ? l10n.browser_followsDefaultOpensInApps
+              : l10n.browser_followsDefaultNoAppFound,
+        AppLinksMode.ask => l10n.browser_followsDefaultAsksFirst,
+        AppLinksMode.never => l10n.browser_followsDefaultStaysInBrowser,
       },
     };
   }

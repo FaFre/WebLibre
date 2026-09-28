@@ -27,6 +27,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a bottom sheet for selecting a bookmark folder destination (for move operations).
 ///
@@ -59,6 +60,7 @@ class _SelectBookmarkFolderSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedGuid = useState(initialFolderGuid ?? BookmarkRoot.mobile.id);
+    final l10n = AppLocalizations.of(context);
 
     return SafeArea(
       child: Padding(
@@ -68,7 +70,7 @@ class _SelectBookmarkFolderSheet extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Move to Folder',
+              l10n.bookmarks_moveToFolderTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -107,12 +109,12 @@ class _SelectBookmarkFolderSheet extends HookConsumerWidget {
               children: [
                 TextButton(
                   onPressed: () => context.pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.common_cancel),
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
                   onPressed: () => context.pop(selectedGuid.value),
-                  child: const Text('Move'),
+                  child: Text(l10n.bookmarks_actionMove),
                 ),
               ],
             ),

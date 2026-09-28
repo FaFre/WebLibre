@@ -40,6 +40,7 @@ import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_st
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 import 'package:weblibre/presentation/widgets/sliver_center_on_underflow.dart';
 
@@ -239,6 +240,7 @@ class _HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final container = ref.watch(
       selectedContainerDataProvider.select((value) => value.value),
     );
@@ -256,7 +258,7 @@ class _HomeHeader extends ConsumerWidget {
             Text(
               container.name?.isNotEmpty == true
                   ? container.name!
-                  : 'Container',
+                  : l10n.browser_containerFallbackName,
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,

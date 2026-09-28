@@ -1,0 +1,99 @@
+{
+  "@@locale": "en",
+
+  "pwa_addToHomeScreenTitle": "Add to Home Screen",
+  "@pwa_addToHomeScreenTitle": {
+    "description": "Title of the sheet for adding the current website to the Android home screen, either as a standalone web app or as a shortcut."
+  },
+  "pwa_nameFieldLabel": "Name",
+  "@pwa_nameFieldLabel": {
+    "description": "Label of the text field for the name shown under the home-screen icon."
+  },
+  "pwa_storageLabel": "Storage",
+  "@pwa_storageLabel": {
+    "description": "Section heading in the add-to-home-screen sheet; below it the user picks which cookies and site data the home-screen app uses."
+  },
+  "pwa_defaultContainerLabel": "Container",
+  "@pwa_defaultContainerLabel": {
+    "description": "Fallback name for a container that has no name, shown in the storage choices of the add-to-home-screen sheet. A container is a separate browsing identity with its own cookies."
+  },
+
+  "pwa_installAsAppTitle": "Install as App",
+  "@pwa_installAsAppTitle": {
+    "description": "Option in the add-to-home-screen sheet: install the website as a web app that opens in its own window."
+  },
+  "pwa_installAsAppSubtitle": "Runs standalone with its own window.",
+  "@pwa_installAsAppSubtitle": {
+    "description": "Explanation under \"Install as App\": the web app opens in its own window, separate from the browser."
+  },
+  "pwa_addShortcutTitle": "Add Shortcut",
+  "@pwa_addShortcutTitle": {
+    "description": "Option in the add-to-home-screen sheet: add a plain home-screen shortcut to the page."
+  },
+  "pwa_addShortcutSubtitle": "Opens as a standard tab in the browser.",
+  "@pwa_addShortcutSubtitle": {
+    "description": "Explanation under \"Add Shortcut\": the shortcut opens the page in a normal browser tab."
+  },
+
+  "pwa_storageDefaultTitle": "Default",
+  "@pwa_storageDefaultTitle": {
+    "description": "Storage choice in the add-to-home-screen sheet: use the browser's normal cookies and site data, not a container."
+  },
+  "pwa_storageDefaultSubtitle": "Uses the default browser storage (no container).",
+  "@pwa_storageDefaultSubtitle": {
+    "description": "Explanation under the \"Default\" storage choice."
+  },
+  "pwa_storageContainerTitle": "Container \"{label}\"",
+  "@pwa_storageContainerTitle": {
+    "description": "Storage choice in the add-to-home-screen sheet: use the cookies and site data of a container. label is the container name.",
+    "placeholders": { "label": { "type": "String" } }
+  },
+  "pwa_storageContainerSubtitle": "Shares cookies and data with the selected container.",
+  "@pwa_storageContainerSubtitle": {
+    "description": "Explanation under a container storage choice: the home-screen app shares cookies and site data with that container."
+  },
+  "pwa_storageInheritIsolatedTitle": "Inherit current isolated context",
+  "@pwa_storageInheritIsolatedTitle": {
+    "description": "Storage choice in the add-to-home-screen sheet, offered from an isolated tab: keep using that isolated tab's own storage. An isolated tab has its own separate cookies and site data."
+  },
+  "pwa_storageInheritIsolatedSubtitle": "Shares storage with the currently open isolated session.",
+  "@pwa_storageInheritIsolatedSubtitle": {
+    "description": "Explanation under the choice to reuse the current isolated tab's storage."
+  },
+  "pwa_storageNewIsolatedTitle": "New isolated context",
+  "@pwa_storageNewIsolatedTitle": {
+    "description": "Storage choice in the add-to-home-screen sheet: give the home-screen app its own new, separate storage."
+  },
+  "pwa_storageNewIsolatedSubtitle": "Creates a fresh storage jar just for this installation.",
+  "@pwa_storageNewIsolatedSubtitle": {
+    "description": "Explanation under \"New isolated context\": the app gets its own fresh set of cookies and site data (\"storage jar\") used by nothing else."
+  },
+
+  "pwa_defaultWebAppName": "this web app",
+  "@pwa_defaultWebAppName": {
+    "description": "Fallback name for a web app being added to the home screen when the site declares no name. Inserted into messages such as \"{name} added to home screen\"; lowercase phrase."
+  },
+  "pwa_defaultSiteName": "this site",
+  "@pwa_defaultSiteName": {
+    "description": "Fallback name for a page being added to the home screen when it has no title. Inserted into messages such as \"{name} added to home screen\"; lowercase phrase."
+  },
+  "pwa_addedToHomeScreen": "{name} added to home screen",
+  "@pwa_addedToHomeScreen": {
+    "description": "Confirmation after an icon was added to the home screen. name is the chosen name, the site name, or a fallback phrase such as \"this site\".",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "pwa_installFailedManifestBacked": "Failed to add {name}. The site may not support installation.",
+  "@pwa_installFailedManifestBacked": {
+    "description": "Error message when installing a website as a web app failed. name is the app name or a fallback phrase such as \"this web app\".",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "pwa_installFailedGeneric": "Failed to add {name} to home screen",
+  "@pwa_installFailedGeneric": {
+    "description": "Error message when adding a home-screen icon failed. name is the chosen name or a fallback phrase such as \"this site\".",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "pwa_noTabSelected": "No tab selected. Please try again.",
+  "@pwa_noTabSelected": {
+    "description": "Error message when adding to the home screen failed because no browser tab was active at that moment."
+  }
+}

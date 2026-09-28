@@ -24,7 +24,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
@@ -36,6 +35,8 @@ import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/maintenance_outcome_l10n.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -46,11 +47,23 @@ import 'package:weblibre/utils/ui_helper.dart';
 /// only scopes `LocalAuthenticationService`'s result cache.
 const _newProfileAuthKey = 'profile_access::pending';
 
-const _timeoutOptions = <DropdownMenuItem<Duration?>>[
-  DropdownMenuItem(value: Duration(minutes: 1), child: Text('1 minute')),
-  DropdownMenuItem(value: Duration(minutes: 5), child: Text('5 minutes')),
-  DropdownMenuItem(value: Duration(minutes: 15), child: Text('15 minutes')),
-  DropdownMenuItem(value: Duration(hours: 1), child: Text('1 hour')),
+List<DropdownMenuItem<Duration?>> _timeoutOptions(AppLocalizations l10n) => [
+  DropdownMenuItem(
+    value: const Duration(minutes: 1),
+    child: Text(l10n.user_timeoutOneMinute),
+  ),
+  DropdownMenuItem(
+    value: const Duration(minutes: 5),
+    child: Text(l10n.user_timeoutFiveMinutes),
+  ),
+  DropdownMenuItem(
+    value: const Duration(minutes: 15),
+    child: Text(l10n.user_timeoutFifteenMinutes),
+  ),
+  DropdownMenuItem(
+    value: const Duration(hours: 1),
+    child: Text(l10n.user_timeoutOneHour),
+  ),
 ];
 
 class ProfileEditScreen extends HookConsumerWidget {
@@ -68,6 +81,8 @@ class ProfileEditScreen extends HookConsumerWidget {
     if (!(formKey.currentState?.validate() ?? false)) {
       return;
     }
+
+    final l10n = AppLocalizations.of(context);
 
     // Require confirmation whenever a lock is involved — including on the
     // *create* path, which used to skip it because there was no existing profile
@@ -92,8 +107,8 @@ class ProfileEditScreen extends HookConsumerWidget {
                 ? profileAccessAuthKey(profile!.id)
                 : _newProfileAuthKey,
             localizedReason: profile != null
-                ? 'Require authentication for profile'
-                : 'Confirm you can unlock this profile',
+                ? l10n.user_authReasonRequireAuth
+                : l10n.user_authReasonConfirmUnlock,
             settings: authSettings,
           );
 
@@ -102,9 +117,8 @@ class ProfileEditScreen extends HookConsumerWidget {
           showErrorMessage(
             context,
             profile != null
-                ? 'Could not confirm your identity. $nothingChanged'
-                : 'Could not confirm your identity. A locked profile is only '
-                      'created once this device can unlock it.',
+                ? l10n.user_authFailedExisting(l10n.profileCopy_nothingChanged)
+                : l10n.user_authFailedNew,
           );
         }
         return;
@@ -134,6 +148,7 @@ class ProfileEditScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameTextController = useTextEditingController(text: profile?.name);
     final authSettings = useState(
@@ -143,8 +158,8 @@ class ProfileEditScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: (profile != null)
-            ? const Text('Edit Profile')
-            : const Text('Create Profile'),
+            ? Text(l10n.user_editProfileTitle)
+            : Text(l10n.user_createProfileTitle),
         actions: [
           IconButton(
             onPressed: () async {
@@ -168,11 +183,11 @@ class ProfileEditScreen extends HookConsumerWidget {
             children: [
               TextFormField(
                 controller: nameTextController,
-                decoration: const InputDecoration(
-                  label: Text('Name'),
+                decoration: InputDecoration(
+                  label: Text(l10n.user_nameFieldLabel),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
-                validator: validateProfileName,
+                validator: (value) => validateProfileName(value, l10n: l10n),
               ),
               const SizedBox(height: 24),
               _AuthSection(
@@ -204,14 +219,16 @@ class _AuthSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SettingSection(name: 'Authentication'),
+        SettingSection(name: l10n.user_authenticationSectionTitle),
         SwitchListTile.adaptive(
           value: authSettings.authenticationRequired,
-          title: const Text('Require authentication'),
-          subtitle: const Text('Ask before this profile can be opened'),
+          title: Text(l10n.user_requireAuthenticationTitle),
+          subtitle: Text(l10n.user_requireAuthenticationSubtitle),
           secondary: const Icon(MdiIcons.fingerprint),
           contentPadding: EdgeInsets.zero,
           onChanged: (value) {
@@ -227,11 +244,11 @@ class _AuthSection extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ListTile(
-                  title: Text('Auto-lock'),
-                  subtitle: Text('When to lock the profile again'),
+                ListTile(
+                  title: Text(l10n.user_autoLockTitle),
+                  subtitle: Text(l10n.user_autoLockSubtitle),
                   contentPadding: EdgeInsets.zero,
-                  leading: Icon(MdiIcons.lockClock),
+                  leading: const Icon(MdiIcons.lockClock),
                 ),
                 RadioGroup<AutoLockMode>(
                   groupValue: authSettings.autoLockMode,
@@ -242,25 +259,22 @@ class _AuthSection extends StatelessWidget {
                       );
                     }
                   },
-                  child: const Column(
+                  child: Column(
                     children: [
                       RadioListTile.adaptive(
                         value: AutoLockMode.background,
-                        title: Text('Lock in background'),
-                        subtitle: Text('As soon as WebLibre leaves the screen'),
+                        title: Text(l10n.user_lockInBackgroundTitle),
+                        subtitle: Text(l10n.user_lockInBackgroundSubtitle),
                       ),
                       RadioListTile.adaptive(
                         value: AutoLockMode.timeout,
-                        title: Text('Lock after a timeout'),
-                        subtitle: Text('After a period of inactivity'),
+                        title: Text(l10n.user_lockAfterTimeoutTitle),
+                        subtitle: Text(l10n.user_lockAfterTimeoutSubtitle),
                       ),
                       RadioListTile.adaptive(
                         value: AutoLockMode.startup,
-                        title: Text('Lock on startup only'),
-                        subtitle: Text(
-                          'Unlock once at startup, then stay unlocked until '
-                          'WebLibre is fully closed',
-                        ),
+                        title: Text(l10n.user_lockOnStartupTitle),
+                        subtitle: Text(l10n.user_lockOnStartupSubtitle),
                       ),
                     ],
                   ),
@@ -270,13 +284,13 @@ class _AuthSection extends StatelessWidget {
           ),
           if (authSettings.autoLockMode == AutoLockMode.timeout)
             ListTile(
-              title: const Text('Timeout'),
-              subtitle: const Text('How long to wait before locking'),
+              title: Text(l10n.user_timeoutFieldTitle),
+              subtitle: Text(l10n.user_timeoutFieldSubtitle),
               leading: const Icon(MdiIcons.timerOutline),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
               trailing: DropdownButton<Duration?>(
                 value: authSettings.timeout,
-                items: _timeoutOptions,
+                items: _timeoutOptions(l10n),
                 underline: const SizedBox.shrink(),
                 onChanged: (Duration? value) {
                   if (value != null) {
@@ -298,6 +312,8 @@ class _ProfileActionsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     // Backup is offered for every profile, the active one included: it does not
     // run here at all — it is queued and taken by the next process, with the
     // profile closed. Switching and deleting are the two that genuinely cannot
@@ -308,12 +324,12 @@ class _ProfileActionsSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SettingSection(name: 'Profile actions'),
+        SettingSection(name: l10n.user_profileActionsSectionTitle),
         const SizedBox(height: 8),
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
-            label: const Text('Backup'),
+            label: Text(l10n.user_actionBackup),
             icon: const Icon(MdiIcons.safe),
             onPressed: () async {
               await BackupProfileRoute(
@@ -326,8 +342,7 @@ class _ProfileActionsSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              'Switching and deleting are unavailable for the profile you '
-              'are using.',
+              l10n.user_switchDeleteUnavailableForActive,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -338,7 +353,7 @@ class _ProfileActionsSection extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              label: const Text('Switch to this profile'),
+              label: Text(l10n.user_switchToThisProfileLabel),
               icon: const Icon(MdiIcons.accountSwitch),
               onPressed: () async {
                 await handleSwitchProfile(context, ref, profile);
@@ -354,7 +369,7 @@ class _ProfileActionsSection extends ConsumerWidget {
                 foregroundColor: Theme.of(context).colorScheme.error,
                 iconColor: Theme.of(context).colorScheme.error,
               ),
-              label: const Text('Delete'),
+              label: Text(l10n.common_delete),
               icon: const Icon(Icons.delete),
               onPressed: () async {
                 // Read before the dialog opens, not inside it: counts that
@@ -385,7 +400,12 @@ class _ProfileActionsSection extends ConsumerWidget {
                     // handler would, and an uncaught error means the user taps
                     // "Delete" on a confirmed dialog and watches nothing happen.
                     if (context.mounted) {
-                      showErrorMessage(context, 'Could not delete: $error');
+                      showErrorMessage(
+                        context,
+                        l10n.user_deleteFailedWithError(
+                          describeMaintenanceFailure(l10n, error),
+                        ),
+                      );
                     }
                     return;
                   }
@@ -396,7 +416,10 @@ class _ProfileActionsSection extends ConsumerWidget {
                     // Refused rather than failed — the profile is gone already or
                     // its metadata is too damaged to discover. Saying so beats a
                     // screen that just closes after a confirmed delete.
-                    showErrorMessage(context, 'Could not delete this profile');
+                    showErrorMessage(
+                      context,
+                      l10n.user_deleteProfileFailedGeneric,
+                    );
                     context.pop();
                   }
                 }

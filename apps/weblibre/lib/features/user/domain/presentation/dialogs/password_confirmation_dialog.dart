@@ -20,6 +20,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Dialog to confirm password during backup creation.
 /// Returns the entered password string if confirmed, null if cancelled or dismissed.
@@ -29,9 +30,10 @@ Future<String?> showPasswordConfirmationDialog(BuildContext context) {
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) {
       final controller = TextEditingController();
+      final l10n = AppLocalizations.of(context);
 
       return AlertDialog(
-        title: const Text('Password Confirmation'),
+        title: Text(l10n.user_passwordConfirmationTitle),
         content: TextField(
           controller: controller,
           enableSuggestions: false,
@@ -39,8 +41,8 @@ Future<String?> showPasswordConfirmationDialog(BuildContext context) {
           enableIMEPersonalizedLearning: false,
           keyboardType: TextInputType.visiblePassword,
           obscureText: true,
-          decoration: const InputDecoration(
-            labelText: 'Password',
+          decoration: InputDecoration(
+            labelText: l10n.user_passwordFieldLabel,
             floatingLabelBehavior: FloatingLabelBehavior.always,
           ),
         ),
@@ -49,13 +51,13 @@ Future<String?> showPasswordConfirmationDialog(BuildContext context) {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(controller.text);
             },
-            child: const Text('Confirm'),
+            child: Text(l10n.user_actionConfirm),
           ),
         ],
       );

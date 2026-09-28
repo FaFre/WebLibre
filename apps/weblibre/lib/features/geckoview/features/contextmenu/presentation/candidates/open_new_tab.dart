@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class OpenInNewTab extends HookConsumerWidget {
   final HitResult hitResult;
@@ -65,6 +66,7 @@ class OpenInNewTab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final currentTab = ref.watch(selectedTabStateProvider);
 
@@ -82,7 +84,7 @@ class OpenInNewTab extends HookConsumerWidget {
 
     return ListTile(
       leading: const Icon(MdiIcons.tabPlus),
-      title: const Text('Open in new tab'),
+      title: Text(l10n.contextmenu_openInNewTab),
       trailing: alternativeTypes.isEmpty
           ? null
           : MenuAnchor(
@@ -95,12 +97,12 @@ class OpenInNewTab extends HookConsumerWidget {
                       _iconFor(type),
                       color: _colorFor(context, type),
                     ),
-                    child: Text(_labelFor(type)),
+                    child: Text(_labelFor(l10n, type)),
                   ),
               ],
               builder: (context, controller, child) => IconButton(
                 icon: const Icon(Icons.expand_more),
-                tooltip: 'Open in a different tab type',
+                tooltip: l10n.contextmenu_tooltipOpenInDifferentTabType,
                 onPressed: () =>
                     controller.isOpen ? controller.close() : controller.open(),
               ),
@@ -122,8 +124,8 @@ Color? _colorFor(BuildContext context, TabType type) => switch (type) {
   _ => null,
 };
 
-String _labelFor(TabType type) => switch (type) {
-  TabType.private => 'New private tab',
-  TabType.isolated => 'New isolated tab',
-  _ => 'New regular tab',
+String _labelFor(AppLocalizations l10n, TabType type) => switch (type) {
+  TabType.private => l10n.contextmenu_newPrivateTab,
+  TabType.isolated => l10n.contextmenu_newIsolatedTab,
+  _ => l10n.contextmenu_newRegularTab,
 };

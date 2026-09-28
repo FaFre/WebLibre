@@ -1,0 +1,20 @@
+{
+  "@@locale": "de",
+  "searchCredits_couldNotLoadTitle": "Guthaben konnte nicht geladen werden",
+  "searchCredits_title": "Suchguthaben",
+  "searchCredits_errorSubtitle": "Verbindung prüfen und zum erneuten Versuch auf Aktualisieren tippen.",
+  "searchCredits_emptySubtitle": "Zum Einstieg ein Suchpaket kaufen",
+  "searchCredits_creditsWithAllowance": "Guthaben: {credits} / {allowance}  ·  Gespeicherte Tokens: {stash}",
+  "searchCredits_creditsNoAllowance": "Guthaben: {credits}  ·  Gespeicherte Tokens: {stash}",
+  "searchCredits_tooltipRefresh": "Aktualisieren",
+  "searchCredits_resetsOn": "Wird am {date} zurückgesetzt",
+  "searchCredits_lastIssuance": "Letzte Ausgabe: {relative}  ({absolute})",
+  "searchCredits_requestingTokens": "Tokens werden angefordert …",
+  "searchCredits_issuanceFailed": "Token-Ausgabe fehlgeschlagen: {error}",
+  "searchCredits_needsReauth": "Zum Anfordern von Tokens bitte erneut anmelden.",
+  "searchCredits_buySearchPackTitle": "Suchpaket kaufen",
+  "searchCredits_getTokensTitle": "Tokens abrufen",
+  "searchCredits_requestTokensCount": "{count, plural, =1{1 Token anfordern} other{{count} Tokens anfordern}}",
+  "searchCredits_noCreditsRemaining": "Kein Guthaben mehr übrig",
+  "searchCredits_buyMoreTitle": "Mehr kaufen"
+}

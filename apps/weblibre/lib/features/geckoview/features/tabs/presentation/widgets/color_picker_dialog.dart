@@ -23,6 +23,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/custom_color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 typedef ColorPickerResult = ({Color color, bool useCustomColor});
 
@@ -38,6 +39,7 @@ class ColorPickerDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selectedColor = useState<Color>(initialColor);
     final useCustom = useState<bool>(initialUseCustomColor);
 
@@ -63,7 +65,7 @@ class ColorPickerDialog extends HookWidget {
         horizontal: 20.0,
         vertical: 24.0,
       ),
-      title: const Text('Select Color'),
+      title: Text(l10n.tabs_selectColorTitle),
       content: _ContainerColorGrid(
         selectedColor: selectedColor.value,
         useCustomColor: useCustom.value,
@@ -76,14 +78,14 @@ class ColorPickerDialog extends HookWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop<ColorPickerResult?>(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop<ColorPickerResult?>(context, (
             color: selectedColor.value,
             useCustomColor: useCustom.value,
           )),
-          child: const Text('Select'),
+          child: Text(l10n.tabs_actionSelect),
         ),
       ],
     );

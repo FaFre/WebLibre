@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/containe
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ContainerTitle extends HookConsumerWidget {
   final ContainerData container;
@@ -35,6 +36,7 @@ class ContainerTitle extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     if (container.name.isNotEmpty) {
       return Text(
         container.name!,
@@ -68,7 +70,9 @@ class ContainerTitle extends HookConsumerWidget {
             ),
           ) ??
           Text(
-            containerHasTabs ? 'Untitled' : 'Empty',
+            containerHasTabs
+                ? l10n.tabs_untitledContainer
+                : l10n.tabs_emptyContainerLabel,
             style: const TextStyle(fontStyle: FontStyle.italic),
           ),
       error: (error, stackTrace) {
@@ -78,9 +82,11 @@ class ContainerTitle extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
 
-        return const Text('Untitled');
+        return Text(l10n.tabs_untitledContainer);
       },
-      loading: () => Skeletonizer(child: Text(topicAsync.value ?? 'container')),
+      loading: () => Skeletonizer(
+        child: Text(topicAsync.value ?? l10n.tabs_untitledContainer),
+      ),
     );
   }
 }

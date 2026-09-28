@@ -22,10 +22,12 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
 import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/dialogs/key_chord_recorder_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Lists every browser action with the key combinations that run it, grouped
 /// by category, and lets the user add, change, remove and reset them.
@@ -34,6 +36,7 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(keyboardShortcutSettingsRepositoryProvider);
     final repository = ref.read(
       keyboardShortcutSettingsRepositoryProvider.notifier,
@@ -62,19 +65,16 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
         context: context,
         anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         builder: (context) => AlertDialog(
-          title: const Text('Restore default shortcuts?'),
-          content: const Text(
-            'Every action goes back to its Firefox default keys. Your changes '
-            'are lost.',
-          ),
+          title: Text(l10n.keyboardShortcuts_restoreDefaultsTitle),
+          content: Text(l10n.keyboardShortcuts_restoreDefaultsContent),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.common_cancel),
             ),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Restore'),
+              child: Text(l10n.keyboardShortcuts_actionRestore),
             ),
           ],
         ),
@@ -85,9 +85,9 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
     final query = search.normalizedQuery;
     bool matches(BrowserAction action) =>
         query.isEmpty ||
-        action.title.toLowerCase().contains(query) ||
-        action.description.toLowerCase().contains(query) ||
-        action.category.label.toLowerCase().contains(query) ||
+        action.label(context).toLowerCase().contains(query) ||
+        action.description(context).toLowerCase().contains(query) ||
+        action.category.label(context).toLowerCase().contains(query) ||
         settings
             .chordsFor(action)
             .any((chord) => chord.label.toLowerCase().contains(query));
@@ -98,14 +98,14 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
     }
 
     return SettingsCustomScrollScaffold(
-      title: 'Keyboard Shortcuts',
+      title: l10n.keyboardShortcuts_title,
       searchController: settings.enabled ? search.controller : null,
-      searchHintText: 'Search actions or keys',
+      searchHintText: l10n.keyboardShortcuts_searchHint,
       actions: [
         if (settings.enabled && settings.hasCustomizations)
           IconButton(
             icon: const Icon(Icons.restart_alt),
-            tooltip: 'Restore default shortcuts',
+            tooltip: l10n.keyboardShortcuts_restoreDefaultsTooltip,
             onPressed: restoreDefaults,
           ),
       ],
@@ -127,15 +127,14 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
                   color: colorScheme.onPrimaryContainer,
                 ),
                 title: Text(
-                  'Enable Keyboard Shortcuts',
+                  l10n.keyboardShortcuts_enableTitle,
                   style: TextStyle(
                     color: colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 subtitle: Text(
-                  'Browser actions on a hardware keyboard, even while a page '
-                  'has focus',
+                  l10n.keyboardShortcuts_enableSubtitle,
                   style: TextStyle(
                     color: colorScheme.onPrimaryContainer.withValues(
                       alpha: 0.8,
@@ -150,9 +149,11 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
         ),
         if (settings.enabled)
           if (byCategory.isEmpty)
-            const SliverFillRemaining(
+            SliverFillRemaining(
               hasScrollBody: false,
-              child: Center(child: Text('No matching actions.')),
+              child: Center(
+                child: Text(l10n.keyboardShortcuts_noMatchingActions),
+              ),
             )
           else
             SliverPadding(
@@ -162,7 +163,7 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
                   for (final category in BrowserActionCategory.values)
                     if (byCategory[category] case final actions?)
                       _ShortcutGroup(
-                        title: category.label,
+                        title: category.label(context),
                         children: [
                           for (final action in actions)
                             _ShortcutTile(
@@ -252,15 +253,16 @@ class _ShortcutTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return ListTile(
       leading: Icon(action.icon),
-      title: Text(action.title),
+      title: Text(action.label(context)),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 8),
         child: chords.isEmpty
             ? Text(
-                'No shortcut',
+                l10n.keyboardShortcuts_noShortcut,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -272,10 +274,11 @@ class _ShortcutTile extends StatelessWidget {
                   for (final chord in chords)
                     InputChip(
                       label: Text(chord.label),
-                      tooltip: 'Change',
+                      tooltip: l10n.keyboardShortcuts_tooltipChange,
                       onPressed: () => onChange(chord),
                       onDeleted: () => onRemove(chord),
-                      deleteButtonTooltipMessage: 'Remove ${chord.label}',
+                      deleteButtonTooltipMessage: l10n
+                          .keyboardShortcuts_tooltipRemoveChord(chord.label),
                     ),
                 ],
               ),
@@ -286,12 +289,12 @@ class _ShortcutTile extends StatelessWidget {
           if (customized)
             IconButton(
               icon: const Icon(Icons.restart_alt),
-              tooltip: 'Reset to default',
+              tooltip: l10n.keyboardShortcuts_tooltipResetToDefault,
               onPressed: onReset,
             ),
           IconButton(
             icon: const Icon(Icons.add),
-            tooltip: 'Add shortcut',
+            tooltip: l10n.keyboardShortcuts_addShortcut,
             onPressed: onAdd,
           ),
         ],

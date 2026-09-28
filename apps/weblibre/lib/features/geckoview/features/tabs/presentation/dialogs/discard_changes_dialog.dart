@@ -20,6 +20,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 enum DiscardChangesChoice { discard, save }
 
@@ -28,30 +29,30 @@ Future<DiscardChangesChoice?> showDiscardChangesDialog(BuildContext context) {
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
         icon: const Icon(Icons.warning),
-        title: const Text('Unsaved Changes'),
-        content: const Text(
-          'You have unsaved changes. Do you want to save them before leaving?',
-        ),
+        title: Text(l10n.tabs_unsavedChangesTitle),
+        content: Text(l10n.tabs_unsavedChangesConfirm),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, DiscardChangesChoice.discard);
             },
-            child: const Text('Discard'),
+            child: Text(l10n.common_discard),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, DiscardChangesChoice.save);
             },
-            child: const Text('Save'),
+            child: Text(l10n.common_save),
           ),
         ],
       );

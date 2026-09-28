@@ -198,8 +198,7 @@ void main() {
     expect(state.status, AccountAuthStatus.error);
     // Ours, not the server's "Invalid Refresh Token" — which said nothing about
     // what to do, least of all that the sync key survived.
-    expect(state.lastError, contains('Sign in again'));
-    expect(state.lastError, contains('sync key'));
+    expect(state.lastError?.kind, AccountAuthErrorKind.sessionExpiredWithKey);
     expect(state.email, 'me@example.com');
 
     final stored = readRecord();

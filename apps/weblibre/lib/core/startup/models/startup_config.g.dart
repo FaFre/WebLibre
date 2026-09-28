@@ -33,6 +33,8 @@ abstract class _$MaintenanceTaskCWProxy {
 
   MaintenanceTask errorKindId(String? errorKindId);
 
+  MaintenanceTask errorDetailId(String? errorDetailId);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MaintenanceTask(...).copyWith.fieldName(value)`.
   ///
@@ -54,6 +56,7 @@ abstract class _$MaintenanceTaskCWProxy {
     DateTime? startedAt,
     String? error,
     String? errorKindId,
+    String? errorDetailId,
   });
 }
 
@@ -110,6 +113,10 @@ class _$MaintenanceTaskCWProxyImpl implements _$MaintenanceTaskCWProxy {
   MaintenanceTask errorKindId(String? errorKindId) =>
       call(errorKindId: errorKindId);
 
+  @override
+  MaintenanceTask errorDetailId(String? errorDetailId) =>
+      call(errorDetailId: errorDetailId);
+
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MaintenanceTask(...).copyWith.fieldName(value)`.
   ///
@@ -132,6 +139,7 @@ class _$MaintenanceTaskCWProxyImpl implements _$MaintenanceTaskCWProxy {
     Object? startedAt = const $CopyWithPlaceholder(),
     Object? error = const $CopyWithPlaceholder(),
     Object? errorKindId = const $CopyWithPlaceholder(),
+    Object? errorDetailId = const $CopyWithPlaceholder(),
   }) {
     return MaintenanceTask(
       id: _value.id,
@@ -192,6 +200,10 @@ class _$MaintenanceTaskCWProxyImpl implements _$MaintenanceTaskCWProxy {
           ? _value.errorKindId
           // ignore: cast_nullable_to_non_nullable
           : errorKindId as String?,
+      errorDetailId: errorDetailId == const $CopyWithPlaceholder()
+          ? _value.errorDetailId
+          // ignore: cast_nullable_to_non_nullable
+          : errorDetailId as String?,
     );
   }
 }

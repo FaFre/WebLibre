@@ -27,6 +27,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/onboarding/presentation/onboarding_defaults.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
@@ -38,6 +39,7 @@ class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final installUBlock = useState(true);
 
     return BrowserPage(
@@ -51,20 +53,12 @@ class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
               const SizedBox(height: 8),
               Center(
                 child: Text(
-                  'uBlock Origin',
+                  l10n.onboarding_ublockTitle,
                   style: theme.textTheme.headlineMedium,
                 ),
               ),
               const SizedBox(height: 24),
-              const MarkdownBody(
-                data: '''
-uBlock Origin (uBO) is a CPU and memory-efficient **wide-spectrum content blocker** by **Raymond Hill** and available as a browser extensions for WebLibre.
-
-It blocks ads, trackers, coin miners, popups, annoying anti-blockers, malware sites, etc., by default using **EasyList, EasyPrivacy, Peter Lowe's Blocklist, Online Malicious URL Blocklist, and uBO filter lists**.
-
-There are many other lists available to block even more.
-                ''',
-              ),
+              MarkdownBody(data: l10n.onboarding_ublockDescription),
               const SizedBox(height: 24),
               FormField(
                 initialValue: true,
@@ -81,7 +75,7 @@ There are many other lists available to block even more.
                 builder: (field) => SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   value: field.value ?? false,
-                  title: const Text('Install uBlock Origin Extension'),
+                  title: Text(l10n.onboarding_ublockInstallTitle),
                   onChanged: (value) {
                     field.didChange(value);
                     installUBlock.value = value;
@@ -98,10 +92,8 @@ There are many other lists available to block even more.
                 builder: (field) => SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   value: field.value ?? false,
-                  title: const Text('Apply optimized defaults'),
-                  subtitle: const Text(
-                    'Enable WebLibre hardening filter lists.',
-                  ),
+                  title: Text(l10n.onboarding_ublockApplyDefaultsTitle),
+                  subtitle: Text(l10n.onboarding_ublockApplyDefaultsSubtitle),
                   onChanged: installUBlock.value
                       ? (value) {
                           field.didChange(value);

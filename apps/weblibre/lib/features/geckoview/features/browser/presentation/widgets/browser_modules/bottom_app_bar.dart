@@ -68,6 +68,7 @@ import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
@@ -1160,6 +1161,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
     );
@@ -1334,7 +1336,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         reorderBlockedMessage:
             quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs &&
                 !canManualReorder
-            ? tabReorderBlockedMessage
+            ? l10n.browser_tabReorderBlockedMessage
             : null,
         showTitles: showTitles,
         showIsolatedTabUi: showIsolatedTabUi,
@@ -1386,7 +1388,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   if (context.mounted) {
                     ui_helper.showInfoMessage(
                       context,
-                      'Tab cannot be moved here',
+                      l10n.browser_tabCannotBeMovedHere,
                     );
                   }
                   return;

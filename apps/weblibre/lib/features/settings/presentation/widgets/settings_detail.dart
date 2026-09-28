@@ -23,10 +23,19 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Default total-entry count at or below which [SettingsDetailScaffold] hides
 /// its search field — searching three toggles is just visual noise.
 const int kDefaultSettingsSearchEntryThreshold = 10;
+
+/// Splits a localized `*Keywords` message — comma-separated search terms, kept
+/// in the ARB files so translators can supply the words people type in their
+/// own language — into the list the settings search matches against.
+List<String> settingsKeywords(String message) => [
+  for (final keyword in message.split(','))
+    if (keyword.trim() case final trimmed when trimmed.isNotEmpty) trimmed,
+];
 
 class SettingsEntryDefinition {
   final String title;
@@ -88,7 +97,9 @@ class SettingsDetailScaffold extends HookWidget {
   final IconData icon;
   final List<SettingsSectionDefinition> sections;
   final List<Widget> actions;
-  final String searchHintText;
+
+  /// Falls back to a localized "Search settings" when not given.
+  final String? searchHintText;
   final int searchEntryThreshold;
 
   const SettingsDetailScaffold({
@@ -98,7 +109,7 @@ class SettingsDetailScaffold extends HookWidget {
     required this.icon,
     required this.sections,
     this.actions = const [],
-    this.searchHintText = 'Search settings',
+    this.searchHintText,
     this.searchEntryThreshold = kDefaultSettingsSearchEntryThreshold,
   });
 
@@ -183,7 +194,9 @@ class SettingsCustomScrollScaffold extends StatelessWidget {
   final String title;
   final List<Widget> actions;
   final TextEditingController? searchController;
-  final String searchHintText;
+
+  /// Falls back to a localized "Search settings" when not given.
+  final String? searchHintText;
   final List<Widget> slivers;
   final Widget? floatingActionButton;
 
@@ -193,7 +206,7 @@ class SettingsCustomScrollScaffold extends StatelessWidget {
     required this.slivers,
     this.actions = const [],
     this.searchController,
-    this.searchHintText = 'Search settings',
+    this.searchHintText,
     this.floatingActionButton,
   });
 
@@ -254,22 +267,25 @@ class SettingsCustomScrollScaffold extends StatelessWidget {
 
 class SettingsSearchField extends StatelessWidget {
   final TextEditingController controller;
-  final String hintText;
+
+  /// Falls back to a localized "Search settings" when not given.
+  final String? hintText;
 
   const SettingsSearchField({
     super.key,
     required this.controller,
-    this.hintText = 'Search settings',
+    this.hintText,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return TextField(
       controller: controller,
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: hintText ?? l10n.settings_searchHint,
         prefixIcon: const Icon(Icons.search),
         suffixIcon: controller.text.isEmpty
             ? null
@@ -301,13 +317,15 @@ class SettingsSectionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (sections.isEmpty) {
+      final l10n = AppLocalizations.of(context);
+
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 8.0),
         child: Center(
           child: Text(
             query.trim().isEmpty
-                ? 'No settings available.'
-                : 'No settings match "$query".',
+                ? l10n.settings_noSettingsAvailable
+                : l10n.settings_noSettingsMatch(query),
             style: Theme.of(context).textTheme.bodyLarge,
             textAlign: TextAlign.center,
           ),

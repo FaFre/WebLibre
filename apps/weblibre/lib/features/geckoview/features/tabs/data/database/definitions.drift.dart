@@ -388,8 +388,10 @@ class $ContainerTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), i3.$ContainerReferences(db, table, e)),
+                (e) => (
+                  e.readTable<i3.Container, i1.ContainerData>(table),
+                  i3.$ContainerReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback:
@@ -1133,7 +1135,12 @@ class $TabTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i3.$TabReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.Tab, i3.TabData>(table),
+                  i3.$TabReferences(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback:
               ({
@@ -1364,7 +1371,18 @@ class $ClosedTabTombstoneTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.ClosedTabTombstone, i3.ClosedTabTombstoneData>(
+                    table,
+                  ),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.ClosedTabTombstone,
+                    i3.ClosedTabTombstoneData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1654,7 +1672,7 @@ class $CaptureTabTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<i3.CaptureTab, i3.CaptureTabData>(table),
                   i3.$CaptureTabReferences(db, table, e),
                 ),
               )
@@ -1880,7 +1898,16 @@ class $TabFtsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.TabFts, i3.TabFt>(table),
+                  i0.BaseReferences<i0.GeneratedDatabase, i3.TabFts, i3.TabFt>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2026,7 +2053,18 @@ class $LocalIndexSettingTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.LocalIndexSetting, i3.LocalIndexSettingData>(
+                    table,
+                  ),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.LocalIndexSetting,
+                    i3.LocalIndexSettingData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2385,7 +2423,16 @@ class $HistoryTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.History, i3.HistoryData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.History,
+                    i3.HistoryData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2594,7 +2641,16 @@ class $HistoryFtsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.HistoryFts, i3.HistoryFt>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.HistoryFts,
+                    i3.HistoryFt
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2888,7 +2944,7 @@ class $VisitContainerTableManager
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
-                  e.readTable(table),
+                  e.readTable<i3.VisitContainer, i3.VisitContainerData>(table),
                   i3.$VisitContainerReferences(db, table, e),
                 ),
               )
@@ -6297,7 +6353,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customInsert(
       'INSERT INTO tab_fts (tab_fts) VALUES (\'optimize\')',
       variables: [],
-      updates: {tabFts},
+      updates: {this.tabFts},
     );
   }
 
@@ -6305,7 +6361,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customInsert(
       'INSERT INTO history_fts (history_fts) VALUES (\'optimize\')',
       variables: [],
-      updates: {historyFts},
+      updates: {this.historyFts},
     );
   }
 
@@ -6327,7 +6383,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(query),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {history, historyFts},
+      readsFrom: {this.history, this.historyFts},
     ).map(
       (i0.QueryRow row) => i10.HistoryQueryResult(
         urlCanonical: row.read<String>('url_canonical'),
@@ -6349,7 +6405,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT h.url_canonical, h.url_host, h.url_path, h.title, NULL AS extracted_content, NULL AS full_content, h.observed_at, 0.0 AS weighted_rank FROM history AS h WHERE h.url_host LIKE ?1 ORDER BY h.observed_at DESC LIMIT ?2',
       variables: [i0.Variable<String>(hostPrefix), i0.Variable<int>(limit)],
-      readsFrom: {history},
+      readsFrom: {this.history},
     ).map(
       (i0.QueryRow row) => i10.HistoryQueryResult(
         urlCanonical: row.read<String>('url_canonical'),
@@ -6376,7 +6432,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT h.url_canonical, h.url_host, h.url_path, h.title, NULL AS extracted_content, NULL AS full_content, h.observed_at, 0.0 AS weighted_rank FROM history AS h WHERE h.url_canonical IN ($expandedcanonicalUrls)',
       variables: [for (var $ in canonicalUrls) i0.Variable<String>($)],
-      readsFrom: {history},
+      readsFrom: {this.history},
     ).map(
       (i0.QueryRow row) => i10.HistoryQueryResult(
         urlCanonical: row.read<String>('url_canonical'),
@@ -6398,7 +6454,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customInsert(
       'INSERT INTO local_index_setting ("key", value) VALUES (?1, ?2) ON CONFLICT ("key") DO UPDATE SET value = excluded.value',
       variables: [i0.Variable<String>(key), i0.Variable<int>(value)],
-      updates: {localIndexSetting},
+      updates: {this.localIndexSetting},
     );
   }
 
@@ -6406,7 +6462,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT COUNT(*) AS count FROM history',
       variables: [],
-      readsFrom: {history},
+      readsFrom: {this.history},
     ).map((i0.QueryRow row) => row.read<int>('count'));
   }
 
@@ -6414,7 +6470,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customUpdate(
       'DELETE FROM history',
       variables: [],
-      updates: {history},
+      updates: {this.history},
       updateKind: i0.UpdateKind.delete,
     );
   }
@@ -6426,7 +6482,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT url_canonical FROM history ORDER BY observed_at ASC, url_canonical ASC LIMIT ?1 OFFSET ?2',
       variables: [i0.Variable<int>(limit), i0.Variable<int>(offset)],
-      readsFrom: {history},
+      readsFrom: {this.history},
     ).map((i0.QueryRow row) => row.read<String>('url_canonical'));
   }
 
@@ -6442,7 +6498,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customUpdate(
       'DELETE FROM history WHERE url_canonical IN ($expandedcanonicalUrls)',
       variables: [for (var $ in canonicalUrls) i0.Variable<String>($)],
-      updates: {history},
+      updates: {this.history},
       updateKind: i0.UpdateKind.delete,
     );
   }
@@ -6451,7 +6507,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customUpdate(
       'DELETE FROM history WHERE url_canonical IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected INNER JOIN container ON container.id = affected.container_id WHERE json_extract(container.metadata, \'\$.excludeFromHistory\') = 1 AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND NOT EXISTS (SELECT 1 FROM tab AS candidate WHERE candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) = history.url_canonical AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND(json_extract(container.metadata, \'\$.excludeFromIndex\') = 1 OR json_extract(container.metadata, \'\$.excludeFromHistory\') = 1)))',
       variables: [],
-      updates: {history},
+      updates: {this.history},
       updateKind: i0.UpdateKind.delete,
     );
   }
@@ -6460,7 +6516,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customInsert(
       'INSERT INTO history (url_canonical, url_host, url_path, title, is_probably_readerable, extracted_content_markdown, extracted_content_plain, full_content_markdown, full_content_plain, content_hash, observed_at, observed_count) SELECT url_canonical(CAST(candidate.url AS TEXT)), url_host(CAST(candidate.url AS TEXT)), url_path(CAST(candidate.url AS TEXT)), candidate.title, candidate.is_probably_readerable, candidate.extracted_content_markdown, candidate.extracted_content_plain, candidate.full_content_markdown, candidate.full_content_plain, candidate.content_hash, strftime(\'%s\', \'now\') * 1000, 1 FROM tab AS candidate WHERE (SELECT value FROM local_index_setting WHERE "key" = \'enabled\') = 1 AND candidate.url IS NOT NULL AND url_indexable(CAST(candidate.url AS TEXT)) = 1 AND url_canonical(CAST(candidate.url AS TEXT)) IN (SELECT DISTINCT url_canonical(CAST(affected.url AS TEXT)) FROM tab AS affected INNER JOIN container ON container.id = affected.container_id WHERE json_extract(container.metadata, \'\$.excludeFromHistory\') = 1 AND affected.url IS NOT NULL AND url_indexable(CAST(affected.url AS TEXT)) = 1) AND(candidate.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = candidate.container_id AND(json_extract(container.metadata, \'\$.excludeFromIndex\') = 1 OR json_extract(container.metadata, \'\$.excludeFromHistory\') = 1)) AND NOT EXISTS (SELECT 1 FROM tab AS newer WHERE newer.url IS NOT NULL AND url_indexable(CAST(newer.url AS TEXT)) = 1 AND url_canonical(CAST(newer.url AS TEXT)) = url_canonical(CAST(candidate.url AS TEXT)) AND(newer.tab_mode != 1 OR (SELECT value FROM local_index_setting WHERE "key" = \'index_private\') = 1)AND NOT EXISTS (SELECT 1 FROM container WHERE container.id = newer.container_id AND(json_extract(container.metadata, \'\$.excludeFromIndex\') = 1 OR json_extract(container.metadata, \'\$.excludeFromHistory\') = 1)) AND(newer.timestamp > candidate.timestamp OR(newer.timestamp = candidate.timestamp AND newer."rowid" > candidate."rowid"))) ON CONFLICT (url_canonical) DO UPDATE SET title = COALESCE(excluded.title, history.title), is_probably_readerable = excluded.is_probably_readerable, extracted_content_markdown = excluded.extracted_content_markdown, extracted_content_plain = excluded.extracted_content_plain, full_content_markdown = excluded.full_content_markdown, full_content_plain = excluded.full_content_plain, content_hash = excluded.content_hash, observed_at = excluded.observed_at, observed_count = history.observed_count + 1',
       variables: [],
-      updates: {history},
+      updates: {this.history},
     );
   }
 
@@ -6468,7 +6524,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT container.*, tab_agg.tab_count FROM container LEFT JOIN (SELECT container_id, COUNT(*) AS tab_count, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY container.is_pinned DESC, container.order_key ASC',
       variables: [],
-      readsFrom: {container, tab},
+      readsFrom: {this.container, this.tab},
     ).map(
       (i0.QueryRow row) => i1.ContainerDataWithCount(
         id: row.read<String>('id'),
@@ -6489,7 +6545,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT container.id FROM container LEFT JOIN (SELECT container_id, MAX(timestamp) AS last_updated FROM tab GROUP BY container_id) AS tab_agg ON container.id = tab_agg.container_id ORDER BY tab_agg.last_updated DESC NULLS LAST, container."rowid" ASC',
       variables: [],
-      readsFrom: {container, tab},
+      readsFrom: {this.container, this.tab},
     ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
@@ -6500,7 +6556,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_previous(?1, (SELECT order_key FROM container WHERE is_pinned = ?2 ORDER BY order_key LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isPinned)],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6511,7 +6567,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_next(?1, (SELECT order_key FROM container WHERE is_pinned = ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<bool>(isPinned)],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6525,7 +6581,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<bool>(isPinned),
         i0.Variable<String>(containerId),
       ],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6539,7 +6595,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<bool>(isPinned),
         i0.Variable<String>(containerId),
       ],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6550,7 +6606,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_previous(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<String>(containerId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6561,7 +6617,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_next(?1, (SELECT order_key FROM tab WHERE container_id IS ?2 ORDER BY order_key DESC LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket), i0.Variable<String>(containerId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6575,7 +6631,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(parentId),
         i0.Variable<String>(containerId),
       ],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
@@ -6586,7 +6642,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM tab WHERE container_id IS ?1) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE id = ?2',
       variables: [i0.Variable<String>(containerId), i0.Variable<String>(tabId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6597,7 +6653,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM tab WHERE container_id IS ?1) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE id = ?2',
       variables: [i0.Variable<String>(containerId), i0.Variable<String>(tabId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -6608,7 +6664,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH weights AS (SELECT 10.0 AS title_weight, 5.0 AS url_weight) SELECT t.id, t.container_id, t.tab_mode, t.title, CAST(t.url AS TEXT) AS url, t.url AS clean_url, bm25(tab_fts, weights.title_weight, weights.url_weight) AS weighted_rank FROM tab_fts AS fts INNER JOIN tab AS t ON t."rowid" = fts."rowid" CROSS JOIN weights WHERE fts.title LIKE ?1 OR fts.url LIKE ?1 ORDER BY weighted_rank ASC, t.timestamp DESC LIMIT ?2',
       variables: [i0.Variable<String>(query), i0.Variable<int>(limit)],
-      readsFrom: {tab, tabFts},
+      readsFrom: {this.tab, this.tabFts},
     ).map(
       (i0.QueryRow row) => i11.TabQueryResult(
         id: row.read<String>('id'),
@@ -6642,7 +6698,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(query),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {tab, tabFts},
+      readsFrom: {this.tab, this.tabFts},
     ).map(
       (i0.QueryRow row) => i11.TabQueryResult(
         id: row.read<String>('id'),
@@ -6670,7 +6726,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<bool>(skipContainerCheck),
         i0.Variable<String>(containerId),
       ],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => TabTreesResult(
         rootTabId: row.read<String>('root_tab_id'),
@@ -6687,7 +6743,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH RECURSIVE walk (id, parent_id, order_key, root_id, depth) AS (SELECT t.id, t.parent_id, t.order_key, t.id AS root_id, 0 AS depth FROM tab AS t WHERE t.container_id IS ?1 AND(t.parent_id IS NULL OR NOT EXISTS (SELECT 1 FROM tab AS p WHERE p.id = t.parent_id AND p.container_id IS ?1))UNION ALL SELECT t.id, t.parent_id, t.order_key, w.root_id, w.depth + 1 FROM tab AS t INNER JOIN walk AS w ON t.parent_id = w.id WHERE t.container_id IS ?1) SELECT id, parent_id, order_key, root_id, depth FROM walk',
       variables: [i0.Variable<String>(containerId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => TabsWithRootAndDepthResult(
         id: row.read<String>('id'),
@@ -6706,7 +6762,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH RECURSIVE subtree AS (SELECT id, order_key FROM tab WHERE id = ?1 AND container_id IS ?2 UNION ALL SELECT t.id, t.order_key FROM tab AS t INNER JOIN subtree AS s ON t.parent_id = s.id WHERE t.container_id IS ?2) SELECT id FROM subtree ORDER BY order_key DESC LIMIT 1',
       variables: [i0.Variable<String>(tabId), i0.Variable<String>(containerId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
@@ -6720,7 +6776,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(containerId),
         i0.Variable<String>(parentId),
       ],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => ContainerScopeSiblingsResult(
         id: row.read<String>('id'),
@@ -6735,7 +6791,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH RECURSIVE descendants AS (SELECT id, parent_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.parent_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id) SELECT id, parent_id FROM descendants',
       variables: [i0.Variable<String>(tabId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => UnorderedTabDescendantsResult(
         id: row.read<String>('id'),
@@ -6749,7 +6805,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH RECURSIVE descendants AS (SELECT id, parent_id, container_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.parent_id, t.container_id FROM tab AS t JOIN descendants AS d ON t.parent_id = d.id WHERE t.container_id IS d.container_id) SELECT id, parent_id FROM descendants',
       variables: [i0.Variable<String>(tabId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => UnorderedContainerTabDescendantsResult(
         id: row.read<String>('id'),
@@ -6762,7 +6818,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'WITH ranked_tabs AS (SELECT id, timestamp, LAG(id)OVER (ORDER BY timestamp RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_tab_id FROM tab) SELECT prev_tab_id FROM ranked_tabs WHERE id = ?1',
       variables: [i0.Variable<String>(tabId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.readNullable<String>('prev_tab_id'));
   }
 
@@ -6778,7 +6834,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(containerId),
         i0.Variable<String>(tabId),
       ],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.readNullable<String>('prev_tab_id'));
   }
 
@@ -6794,7 +6850,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(containerId),
         i0.Variable<String>(tabId),
       ],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.readNullable<String>('next_tab_id'));
   }
 
@@ -6808,7 +6864,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
         i0.Variable<String>(uriList),
         i0.Variable<String>(ignoreContainerId),
       ],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.read<bool>('existing'));
   }
 
@@ -6816,7 +6872,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT container.id, COALESCE(container.metadata ->> \'\$.contextualIdentity\', \'general\') AS contextualIdentity, value AS assigned_site FROM container CROSS JOIN json_each(container.metadata, \'\$.assignedSites\')WHERE value IS NOT NULL',
       variables: [],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map(
       (i0.QueryRow row) => i12.SiteAssignment(
         id: row.read<String>('id'),
@@ -6832,8 +6888,8 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT * FROM container WHERE container.metadata ->> \'\$.contextualIdentity\' = ?1 LIMIT 1',
       variables: [i0.Variable<String>(contextId)],
-      readsFrom: {container},
-    ).asyncMap(container.mapFromRow);
+      readsFrom: {this.container},
+    ).asyncMap(this.container.mapFromRow);
   }
 
   i0.Selectable<ContainerIdsByContextualIdentitiesResult>
@@ -6844,7 +6900,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT id, CAST(container.metadata ->> \'\$.contextualIdentity\' AS TEXT) AS contextual_identity FROM container WHERE CAST(container.metadata ->> \'\$.contextualIdentity\' AS TEXT) IN ($expandedcontextIds)',
       variables: [for (var $ in contextIds) i0.Variable<String>($)],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map(
       (i0.QueryRow row) => ContainerIdsByContextualIdentitiesResult(
         id: row.read<String>('id'),
@@ -6857,7 +6913,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT container.metadata ->> \'\$.contextualIdentity\' AS contextual_identity FROM container WHERE json_extract(container.metadata, \'\$.clearDataOnExit\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
       variables: [],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.readNullable<String>('contextual_identity'));
   }
 
@@ -6865,7 +6921,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT tab.id AS tab_id, tab.container_id AS container_id, COALESCE(json_extract(container.metadata, \'\$.excludeFromHistory\'), 0) AS excluded FROM tab LEFT JOIN container ON container.id = tab.container_id',
       variables: [],
-      readsFrom: {tab, container},
+      readsFrom: {this.tab, this.container},
     ).map(
       (i0.QueryRow row) => HistoryExclusionTabsResult(
         tabId: row.read<String>('tab_id'),
@@ -6879,7 +6935,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT container.metadata ->> \'\$.contextualIdentity\' AS context_id FROM container WHERE json_extract(container.metadata, \'\$.excludeFromHistory\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
       variables: [],
-      readsFrom: {container},
+      readsFrom: {this.container},
     ).map((i0.QueryRow row) => row.readNullable<String>('context_id'));
   }
 
@@ -6887,7 +6943,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT container.metadata ->> \'\$.contextualIdentity\' AS context_id, container.metadata ->> \'\$.contextualIdentity\' AS assignment_context_id FROM container WHERE json_extract(container.metadata, \'\$.strictMode\') = 1 AND container.metadata ->> \'\$.contextualIdentity\' IS NOT NULL UNION SELECT DISTINCT t.isolation_context_id AS context_id, c.metadata ->> \'\$.contextualIdentity\' AS assignment_context_id FROM tab AS t INNER JOIN container AS c ON c.id = t.container_id WHERE t.tab_mode = 2 AND t.isolation_context_id IS NOT NULL AND json_extract(c.metadata, \'\$.strictMode\') = 1 AND c.metadata ->> \'\$.contextualIdentity\' IS NOT NULL',
       variables: [],
-      readsFrom: {container, tab},
+      readsFrom: {this.container, this.tab},
     ).map(
       (i0.QueryRow row) => StrictContextAssignmentsResult(
         contextId: row.readNullable<String>('context_id'),
@@ -6900,7 +6956,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = ?1',
       variables: [i0.Variable<String>(contextId)],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map((i0.QueryRow row) => row.read<int>('count'));
   }
 
@@ -6908,7 +6964,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT DISTINCT isolation_context_id FROM tab WHERE isolation_context_id IS NOT NULL',
       variables: [],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => row.readNullable<String>('isolation_context_id'),
     );
@@ -6919,7 +6975,7 @@ class DefinitionsDrift extends i9.ModularAccessor {
     return customSelect(
       'SELECT DISTINCT t.isolation_context_id, t.container_id FROM tab AS t WHERE t.tab_mode = 2 AND t.isolation_context_id IS NOT NULL AND t.container_id IS NOT NULL',
       variables: [],
-      readsFrom: {tab},
+      readsFrom: {this.tab},
     ).map(
       (i0.QueryRow row) => IsolatedContextContainerPairsResult(
         isolationContextId: row.readNullable<String>('isolation_context_id'),

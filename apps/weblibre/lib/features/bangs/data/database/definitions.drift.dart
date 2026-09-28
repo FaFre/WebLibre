@@ -326,7 +326,16 @@ class $BangTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangTable, i1.Bang>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangTable,
+                    i1.Bang
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -492,7 +501,16 @@ class $BangTriggersTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangTriggers, i3.BangTrigger>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangTriggers,
+                    i3.BangTrigger
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -633,7 +651,16 @@ class $BangSyncTableManager
               }) =>
                   i3.BangSyncCompanion.insert(group: group, lastSync: lastSync),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangSync, i3.BangSyncData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangSync,
+                    i3.BangSyncData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -819,7 +846,16 @@ class $BangFrequencyTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangFrequency, i3.BangFrequencyData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangFrequency,
+                    i3.BangFrequencyData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1013,7 +1049,16 @@ class $BangHistoryTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangHistory, i3.BangHistoryData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangHistory,
+                    i3.BangHistoryData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1162,7 +1207,16 @@ class $BangFtsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangFts, i3.BangFt>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangFts,
+                    i3.BangFt
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1294,7 +1348,16 @@ class $BangTriggersFtsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i3.BangTriggersFts, i3.BangTriggersFt>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.BangTriggersFts,
+                    i3.BangTriggersFt
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -3288,7 +3351,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     return customInsert(
       'INSERT INTO bang_fts (bang_fts) VALUES (\'optimize\')',
       variables: [],
-      updates: {bangFts},
+      updates: {this.bangFts},
     );
   }
 
@@ -3296,7 +3359,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     return customInsert(
       'INSERT INTO bang_triggers_fts (bang_triggers_fts) VALUES (\'optimize\')',
       variables: [],
-      updates: {bangTriggersFts},
+      updates: {this.bangTriggersFts},
     );
   }
 
@@ -3314,7 +3377,13 @@ class DefinitionsDrift extends i7.ModularAccessor {
         i0.Variable<int>(i3.BangTable.$convertergroup.toSql(preferredGroup)),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {bangFrequency, bangFts, bang, bangTriggersFts, bangTriggers},
+      readsFrom: {
+        this.bangFrequency,
+        this.bangFts,
+        this.bang,
+        this.bangTriggersFts,
+        this.bangTriggers,
+      },
     ).map(
       (i0.QueryRow row) => i6.BangData(
         websiteName: row.read<String>('website_name'),
@@ -3352,7 +3421,13 @@ class DefinitionsDrift extends i7.ModularAccessor {
         i0.Variable<int>(i3.BangTable.$convertergroup.toSql(preferredGroup)),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {bangFrequency, bangFts, bang, bangTriggersFts, bangTriggers},
+      readsFrom: {
+        this.bangFrequency,
+        this.bangFts,
+        this.bang,
+        this.bangTriggersFts,
+        this.bangTriggers,
+      },
     ).map(
       (i0.QueryRow row) => i6.BangData(
         websiteName: row.read<String>('website_name'),
@@ -3380,15 +3455,15 @@ class DefinitionsDrift extends i7.ModularAccessor {
     return customSelect(
       'SELECT v.* FROM bang_data_view AS v WHERE v."trigger" = ?1 COLLATE NOCASE OR EXISTS (SELECT 1 AS _c0 FROM bang_triggers AS bt WHERE bt."trigger" = v."trigger" AND bt."group" = v."group" AND bt.additional_trigger = ?1 COLLATE NOCASE)',
       variables: [i0.Variable<String>(trigger)],
-      readsFrom: {bangTriggers, bang, bangFrequency},
-    ).asyncMap(bangDataView.mapFromRow);
+      readsFrom: {this.bangTriggers, this.bang, this.bangFrequency},
+    ).asyncMap(this.bangDataView.mapFromRow);
   }
 
   i0.Selectable<String> categoriesJson() {
     return customSelect(
       'WITH categories AS (SELECT b.category, json_group_array(DISTINCT b.sub_category ORDER BY b.sub_category)AS sub_categories FROM bang AS b WHERE b.category IS NOT NULL AND b.sub_category IS NOT NULL GROUP BY b.category ORDER BY b.category) SELECT json_group_object(c.category, json(c.sub_categories)) AS categories_json FROM categories AS c',
       variables: [],
-      readsFrom: {bang},
+      readsFrom: {this.bang},
     ).map((i0.QueryRow row) => row.read<String>('categories_json'));
   }
 
@@ -3398,7 +3473,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     return customSelect(
       'SELECT * FROM bang_history ORDER BY search_date DESC LIMIT ?1',
       variables: [i0.Variable<int>(limit)],
-      readsFrom: {bangHistory},
+      readsFrom: {this.bangHistory},
     ).map(
       (i0.QueryRow row) => i8.SearchHistoryEntry(
         searchQuery: row.read<String>('search_query'),
@@ -3413,7 +3488,7 @@ class DefinitionsDrift extends i7.ModularAccessor {
     return customUpdate(
       'DELETE FROM bang_history WHERE "rowid" IN (SELECT "rowid" FROM bang_history ORDER BY search_date DESC LIMIT -1 OFFSET ?1)',
       variables: [i0.Variable<int>(limit)],
-      updates: {bangHistory},
+      updates: {this.bangHistory},
       updateKind: i0.UpdateKind.delete,
     );
   }

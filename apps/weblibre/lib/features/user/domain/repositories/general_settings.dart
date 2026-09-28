@@ -19,15 +19,19 @@
  */
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show Locale;
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:intl/locale.dart' as intl;
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
+import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 part 'general_settings.g.dart';
 
@@ -47,6 +51,7 @@ typedef UpdateGeneralSettingsFunc =
 @visibleForTesting
 const generalSettingColumnTypes = <String, DriftSqlType>{
   'themeMode': DriftSqlType.string,
+  'appLocale': DriftSqlType.string,
   'uiScaleFactor': DriftSqlType.double,
   'disableAnimations': DriftSqlType.bool,
   'refreshRateMode': DriftSqlType.string,
@@ -261,6 +266,28 @@ TabBarStackingMode effectiveTabBarStackingMode(Ref ref) {
       (settings) => settings.effectiveTabBarStackingMode(window: window),
     ),
   );
+}
+
+/// The app UI locale to pass to `MaterialApp.locale`, resolved from
+/// [GeneralSettings.appLocale].
+///
+/// Null means "let Flutter resolve the system locale" — both when the user
+/// has not picked one, and defensively when a previously-picked tag is no
+/// longer supported (e.g. a translation was dropped).
+@Riverpod(keepAlive: true)
+Locale? effectiveAppLocale(Ref ref) {
+  final tag = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.appLocale),
+  );
+  if (tag == null) return null;
+
+  final resolved = intl.Locale.tryParse(tag)?.toUiLocale();
+  if (resolved == null ||
+      !AppLocalizations.supportedLocales.contains(resolved)) {
+    return null;
+  }
+
+  return resolved;
 }
 
 /// [GeneralSettings.effectiveHomeSearchBarPlacement] resolved against the

@@ -22,6 +22,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/localized_spans.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 class DialogOutcome {
@@ -38,6 +40,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final bold = TextStyle(
@@ -57,7 +60,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
 
     return AlertDialog(
       icon: const Icon(Icons.shield_outlined, size: 32),
-      title: const Text('Open link in WebLibre?'),
+      title: Text(l10n.intentGatekeeper_dialogTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -68,12 +71,16 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
-                children: [
-                  TextSpan(text: displayName, style: bold),
-                  const TextSpan(text: ' is trying to open a link in '),
-                  TextSpan(text: 'WebLibre', style: bold),
-                  const TextSpan(text: '.'),
-                ],
+                children: localizedSpans(
+                  l10n.intentGatekeeper_appIsTryingToOpenLink(
+                    spanPlaceholder(0),
+                    spanPlaceholder(1),
+                  ),
+                  spans: [
+                    TextSpan(text: displayName, style: bold),
+                    TextSpan(text: 'WebLibre', style: bold),
+                  ],
+                ),
               ),
             ),
             if (uri != null) ...[
@@ -109,21 +116,21 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
                   persist: true,
                 ),
               ),
-              child: const Text('Always allow'),
+              child: Text(l10n.intentGatekeeper_alwaysAllow),
             ),
             const SizedBox(height: 8),
             FilledButton.tonal(
               onPressed: () => Navigator.of(
                 context,
               ).pop(const DialogOutcome(decision: IntentSourcePolicy.allow)),
-              child: const Text('Allow once'),
+              child: Text(l10n.intentGatekeeper_allowOnce),
             ),
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () => Navigator.of(
                 context,
               ).pop(const DialogOutcome(decision: IntentSourcePolicy.block)),
-              child: const Text('Block once'),
+              child: Text(l10n.intentGatekeeper_blockOnce),
             ),
             const SizedBox(height: 8),
             TextButton(
@@ -133,7 +140,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
                   persist: true,
                 ),
               ),
-              child: const Text('Always block'),
+              child: Text(l10n.intentGatekeeper_alwaysBlock),
             ),
           ],
         ),

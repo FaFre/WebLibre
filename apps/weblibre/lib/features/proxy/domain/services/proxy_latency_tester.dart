@@ -34,6 +34,15 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 
 part 'proxy_latency_tester.g.dart';
 
+/// The latency test was asked for a profile that has no running endpoint.
+/// Its own type so the chip can say so in the UI language.
+class ProxyNotRunningError implements Exception {
+  const ProxyNotRunningError();
+
+  @override
+  String toString() => 'Profile is not running';
+}
+
 /// Mullvad's connectivity check — returns JSON with the egress `ip` plus
 /// geolocation. Single round trip gives both reachability and the IP we
 /// surface in the chip. Mullvad has a no-logs policy, which fits a
@@ -103,7 +112,7 @@ class ProxyLatencyResults extends _$ProxyLatencyResults {
     if (endpoint == null) {
       _set(
         SingboxProxyConnectionId(profileId),
-        AsyncError('Profile is not running', StackTrace.current),
+        AsyncError(const ProxyNotRunningError(), StackTrace.current),
       );
       return;
     }

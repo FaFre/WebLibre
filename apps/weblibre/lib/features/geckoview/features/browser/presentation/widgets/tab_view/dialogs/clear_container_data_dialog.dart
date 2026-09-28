@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ClearContainerDataResult {
   final bool confirmed;
@@ -52,24 +53,25 @@ class _ClearContainerDataDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final reopenTabs = useState(false);
 
     return AlertDialog(
       icon: const Icon(MdiIcons.databaseRemove),
-      title: const Text('Clear Container Data'),
+      title: Text(l10n.browser_menuClearContainerData),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('This will clear all data for this container:'),
+          Text(l10n.browser_clearContainerDataIntro),
           const SizedBox(height: 8),
-          const Text('• Cookies'),
-          const Text('• Site data'),
-          const Text('• Cache'),
-          const Text('• Permissions'),
+          Text(l10n.browser_bulletCookies),
+          Text(l10n.browser_bulletSiteData),
+          Text(l10n.browser_bulletCache),
+          Text(l10n.browser_bulletPermissions),
           const SizedBox(height: 8),
           Text(
-            '$tabCount tab(s) will be closed.',
+            l10n.browser_tabsWillBeClosedCount(tabCount),
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.tertiary,
@@ -82,7 +84,7 @@ class _ClearContainerDataDialog extends HookWidget {
                 reopenTabs.value = value;
               }
             },
-            title: const Text('Recreate tabs after clearing'),
+            title: Text(l10n.browser_recreateTabsAfterClearing),
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.trailing,
           ),
@@ -99,7 +101,7 @@ class _ClearContainerDataDialog extends HookWidget {
               ),
             );
           },
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () {
@@ -111,7 +113,7 @@ class _ClearContainerDataDialog extends HookWidget {
               ),
             );
           },
-          child: const Text('Clear Data'),
+          child: Text(l10n.browser_actionClearData),
         ),
       ],
     );

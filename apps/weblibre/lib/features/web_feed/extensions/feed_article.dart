@@ -17,18 +17,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter/widgets.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/extensions/atom.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 extension FeedArticleX on FeedArticleSummary {
-  String get displayTitle =>
+  String displayTitle(BuildContext context) =>
       title ??
       links
           ?.getRelation(FeedLinkRelation.alternate)
           .mapNotNull(
             (link) => link.title.whenNotEmpty ?? link.uri.toString(),
           ) ??
-      'Unnamed Article';
+      AppLocalizations.of(context).webFeed_unnamedArticleTitle;
 }

@@ -21,18 +21,17 @@ import 'package:weblibre/core/sort_field.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 
 enum BookmarkSortType {
-  manual('Default', null),
-  titleAsc('Title A-Z', SortField.titleAsc),
-  titleDesc('Title Z-A', SortField.titleDesc),
-  urlAsc('URL A-Z', SortField.urlAsc),
-  urlDesc('URL Z-A', SortField.urlDesc),
-  dateAddedDesc('Newest First', SortField.dateDesc),
-  dateAddedAsc('Oldest First', SortField.dateAsc);
+  manual(null),
+  titleAsc(SortField.titleAsc),
+  titleDesc(SortField.titleDesc),
+  urlAsc(SortField.urlAsc),
+  urlDesc(SortField.urlDesc),
+  dateAddedDesc(SortField.dateDesc),
+  dateAddedAsc(SortField.dateAsc);
 
-  final String label;
   final SortField? sortField;
 
-  const BookmarkSortType(this.label, this.sortField);
+  const BookmarkSortType(this.sortField);
 }
 
 int compareBookmarkItems(

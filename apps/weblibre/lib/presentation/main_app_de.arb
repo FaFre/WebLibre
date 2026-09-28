@@ -1,0 +1,22 @@
+{
+  "@@locale": "de",
+  "mainApp_initializationErrorTitle": "Initialisierungsfehler",
+  "mainApp_initializationErrorMessage": "Die App konnte nicht initialisiert werden",
+  "mainApp_initStageLoadingFormats": "Formate werden geladen …",
+  "mainApp_initStageLoadingPackageInfo": "App-Informationen werden geladen …",
+  "mainApp_initStageSyncingBangs": "Bangs werden synchronisiert …",
+  "mainApp_downloadCompleted": "Download abgeschlossen",
+  "mainApp_downloadOpenFailed": "Die heruntergeladene Datei konnte nicht geöffnet werden",
+  "mainApp_downloadFailed": "Download fehlgeschlagen: {name}",
+  "mainApp_containerBlockedWithHost": "{host} ist diesem Container nicht zugewiesen",
+  "mainApp_containerBlockedNoHost": "Diese Website ist diesem Container nicht zugewiesen",
+  "mainApp_sandboxNoCredits": "Kein Suchguthaben mehr übrig. Zum Fortfahren weiteres Guthaben kaufen.",
+  "mainApp_sandboxTokenIssuanceFailed": "Neue Such-Tokens konnten nicht ausgestellt werden. Verbindung prüfen und erneut versuchen.",
+  "mainApp_sandboxFetchPolicyRejected": "Erfassung durch Abrufrichtlinie blockiert: {detail}",
+  "mainApp_sandboxDetailNotAllowed": "nicht erlaubt",
+  "mainApp_sandboxCaptureFailed": "Erfassung fehlgeschlagen: {detail}",
+  "mainApp_sandboxDetailUnknownError": "unbekannter Fehler",
+  "mainApp_sandboxDownloadFailed": "Das Erfassungsergebnis konnte nicht heruntergeladen werden.",
+  "mainApp_sandboxUnknownError": "Fehler bei der Sandbox-Erfassung: {detail}",
+  "mainApp_syncFailed": "Synchronisierung fehlgeschlagen"
+}

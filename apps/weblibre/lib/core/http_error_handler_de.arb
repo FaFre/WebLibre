@@ -1,0 +1,7 @@
+{
+  "@@locale": "de",
+  "httpErrorHandler_socketError": "Der Dienst ist nicht erreichbar",
+  "httpErrorHandler_httpError": "Die Webanfrage hat einen Fehler zurückgegeben",
+  "httpErrorHandler_formatError": "Ungültiges Antwortformat",
+  "httpErrorHandler_clientError": "Der Dienst ist nicht erreichbar"
+}

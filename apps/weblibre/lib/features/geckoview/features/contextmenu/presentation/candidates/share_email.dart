@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ShareEmail extends HookConsumerWidget {
   final HitResult hitResult;
@@ -37,9 +38,11 @@ class ShareEmail extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.emailArrowRight),
-      title: const Text('Share email address'),
+      title: Text(l10n.contextmenu_shareEmailAddress),
       onTap: () async {
         final email = hitResult.tryGetLink().mapNotNull((url) => url.path);
         if (email != null) {

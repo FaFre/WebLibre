@@ -1,0 +1,301 @@
+{
+  "@@locale": "en",
+
+  "search_moduleLabelRecentSearches": "Recent Searches",
+  "@search_moduleLabelRecentSearches": {
+    "description": "Heading of the section on the search and home screens listing the user's recent search terms; also its name when reordering sections."
+  },
+  "search_moduleLabelSearchProviders": "Search Providers",
+  "@search_moduleLabelSearchProviders": {
+    "description": "Heading of the section on the search screen listing search engines and bang shortcuts to search with; also its name when reordering sections."
+  },
+  "search_moduleLabelSearchSuggestions": "Suggestions",
+  "@search_moduleLabelSearchSuggestions": {
+    "description": "Heading of the section on the search screen with search terms suggested by the search engine while typing; also its name when reordering sections."
+  },
+  "search_moduleLabelTabs": "Tabs",
+  "@search_moduleLabelTabs": {
+    "description": "Heading of the section on the search screen with open tabs matching the typed text; also its name when reordering sections."
+  },
+  "search_moduleLabelArticles": "Articles",
+  "@search_moduleLabelArticles": {
+    "description": "Heading of the section on the search screen with news feed articles matching the typed text; also its name when reordering sections."
+  },
+  "search_moduleLabelBookmarks": "Bookmarks",
+  "@search_moduleLabelBookmarks": {
+    "description": "Heading of the section on the search screen with bookmarks matching the typed text; also its name when reordering sections."
+  },
+  "search_moduleLabelHistory": "History (engine)",
+  "@search_moduleLabelHistory": {
+    "description": "Name, when reordering sections, of the search section with matches from the browser engine's own history. \"(engine)\" tells it apart from \"Local content\"."
+  },
+  "search_moduleLabelLocalHistory": "Local content",
+  "@search_moduleLabelLocalHistory": {
+    "description": "Heading of the search section with matches from the text of previously visited pages, searched on the device; also its name when reordering sections."
+  },
+  "search_moduleLabelCombinedHistory": "History",
+  "@search_moduleLabelCombinedHistory": {
+    "description": "Heading of the search section combining history matches by address and by page content; also its name when reordering sections."
+  },
+  "search_moduleLabelPopularSites": "Popular Sites",
+  "@search_moduleLabelPopularSites": {
+    "description": "Heading of the search section suggesting well-known websites matching the typed text; also its name when reordering sections."
+  },
+  "search_moduleLabelHistoryHighlights": "History Highlights",
+  "@search_moduleLabelHistoryHighlights": {
+    "description": "Heading of the home screen section with frequently or recently visited pages worth returning to; also its name when reordering sections."
+  },
+  "search_moduleLabelTopSites": "Shortcuts",
+  "@search_moduleLabelTopSites": {
+    "description": "Heading of the home screen grid of website shortcuts (pinned and most-visited sites); also its name when reordering sections."
+  },
+  "search_moduleLabelRecentHistory": "Recent History",
+  "@search_moduleLabelRecentHistory": {
+    "description": "Heading of the home screen section with the most recently visited pages; also its name when reordering sections."
+  },
+  "search_moduleLabelRecentArticles": "Recent Articles",
+  "@search_moduleLabelRecentArticles": {
+    "description": "Heading of the home screen section with the newest news feed articles; also its name when reordering sections."
+  },
+  "search_moduleLabelRecentTabs": "Recent Tabs",
+  "@search_moduleLabelRecentTabs": {
+    "description": "Heading of the home screen section with recently used tabs; also its name when reordering sections."
+  },
+  "search_moduleLabelContainers": "Containers",
+  "@search_moduleLabelContainers": {
+    "description": "Heading of the home screen section for switching containers (separate browsing identities); also its name when reordering sections."
+  },
+  "search_moduleLabelFrequentBangs": "Frequent Bangs",
+  "@search_moduleLabelFrequentBangs": {
+    "description": "Heading of the section with the most used bang search shortcuts (e.g. \"!w\"); also its name when reordering sections."
+  },
+  "search_moduleLabelQuote": "Quote",
+  "@search_moduleLabelQuote": {
+    "description": "Name, when reordering home screen sections, of the section that shows a random quote."
+  },
+  "search_moduleLabelQuickActions": "Quick Actions",
+  "@search_moduleLabelQuickActions": {
+    "description": "Heading of the home screen section with buttons such as New tab and View tabs; also its name when reordering sections."
+  },
+
+  "search_couldNotLoadHistory": "Could not load history",
+  "@search_couldNotLoadHistory": {
+    "description": "Error heading in the search screen when history matches could not be loaded."
+  },
+  "search_couldNotLoadLocalContent": "Could not load local content",
+  "@search_couldNotLoadLocalContent": {
+    "description": "Error heading in the search screen when matches from the content of visited pages could not be loaded."
+  },
+  "search_failedSearchingArticles": "Article search failed",
+  "@search_failedSearchingArticles": {
+    "description": "Error heading in the search screen when searching news feed articles failed."
+  },
+  "search_contentMatchTooltip": "Content match",
+  "@search_contentMatchTooltip": {
+    "description": "Tooltip of the icon on a history search result that matched the page's text rather than its title or address."
+  },
+
+  "search_tabTypeRegular": "Regular",
+  "@search_tabTypeRegular": {
+    "description": "Segment of the tab-type switch on the search screen: open the result in a regular tab. Keep it short."
+  },
+  "search_tabTypeChild": "Child",
+  "@search_tabTypeChild": {
+    "description": "Segment of the tab-type switch on the search screen: open the result in a new tab nested under the current tab. Keep it short."
+  },
+  "search_tabTypePrivate": "Private",
+  "@search_tabTypePrivate": {
+    "description": "Segment of the tab-type switch on the search screen: open the result in a private tab. Keep it short."
+  },
+  "search_tabTypeIsolated": "Isolated",
+  "@search_tabTypeIsolated": {
+    "description": "Segment of the tab-type switch on the search screen: open the result in an isolated tab with its own separate cookies and site data. Keep it short."
+  },
+
+  "search_fillLinkFromClipboard": "Fill link from clipboard",
+  "@search_fillLinkFromClipboard": {
+    "description": "Suggestion row in the search screen that pastes the web address currently on the clipboard into the search field."
+  },
+
+  "search_actionNewTab": "New tab",
+  "@search_actionNewTab": {
+    "description": "Button in the home screen's quick actions that opens a new tab."
+  },
+  "search_actionViewTabs": "View tabs",
+  "@search_actionViewTabs": {
+    "description": "Button in the home screen's quick actions that opens the overview of open tabs."
+  },
+  "search_actionResumeLastTab": "Resume last tab",
+  "@search_actionResumeLastTab": {
+    "description": "Button in the home screen's quick actions that returns to the most recently used tab."
+  },
+
+  "search_bangTabAllProviders": "All Providers",
+  "@search_bangTabAllProviders": {
+    "description": "Tab of the search provider selector: show all search engines and bangs."
+  },
+  "search_bangTabSearchOnThisSite": "Search On This Site",
+  "@search_bangTabSearchOnThisSite": {
+    "description": "Tab of the search provider selector: show bangs that search within the website currently open."
+  },
+
+  "search_editShortcutDialogTitle": "Edit Shortcut",
+  "@search_editShortcutDialogTitle": {
+    "description": "Title of the dialog for editing a home screen shortcut's name and address."
+  },
+  "search_addShortcut": "Add shortcut",
+  "@search_addShortcut": {
+    "description": "Tooltip of the \"+\" tile in the home screen shortcut grid, and title of the dialog it opens for adding a shortcut."
+  },
+  "search_titleFieldLabel": "Title",
+  "@search_titleFieldLabel": {
+    "description": "Label of the name field in the add/edit shortcut dialog."
+  },
+  "search_urlFieldLabel": "URL",
+  "@search_urlFieldLabel": {
+    "description": "Label of the web address field in the add/edit shortcut dialog."
+  },
+  "search_titleCannotBeEmpty": "Title cannot be empty",
+  "@search_titleCannotBeEmpty": {
+    "description": "Validation error when the shortcut name is empty."
+  },
+  "search_urlCannotBeEmpty": "URL cannot be empty",
+  "@search_urlCannotBeEmpty": {
+    "description": "Validation error when the shortcut address is empty."
+  },
+  "search_enterValidUrl": "Enter a valid URL",
+  "@search_enterValidUrl": {
+    "description": "Validation error when the shortcut address is not a valid web address."
+  },
+  "search_actionPin": "Pin",
+  "@search_actionPin": {
+    "description": "Menu item that pins a shortcut or bang so it always stays visible."
+  },
+  "search_actionUnpin": "Unpin",
+  "@search_actionUnpin": {
+    "description": "Menu item that unpins a pinned bang."
+  },
+  "search_actionResetFrequency": "Reset frequency",
+  "@search_actionResetFrequency": {
+    "description": "Menu item on a bang chip that resets how often it counts as used, removing it from the frequent bangs list."
+  },
+  "search_actionEditBang": "Edit bang",
+  "@search_actionEditBang": {
+    "description": "Menu item on a bang chip that edits a bang the user created."
+  },
+  "search_actionCustomizeAsOwnBang": "Customize as your own bang",
+  "@search_actionCustomizeAsOwnBang": {
+    "description": "Menu item on a bang chip that makes an editable personal copy of a built-in bang."
+  },
+
+  "search_resetBangDialogTitle": "Reset usage frequency of {triggerName}?",
+  "@search_resetBangDialogTitle": {
+    "description": "Title of the confirmation dialog for resetting a bang's usage count. triggerName is the bang's trigger word, e.g. \"w\".",
+    "placeholders": { "triggerName": { "type": "String" } }
+  },
+  "search_resetBangDialogContent": "This will remove the bang from the quick-select list.",
+  "@search_resetBangDialogContent": {
+    "description": "Body of the confirmation dialog for resetting a bang's usage count: it disappears from the quick-select list of frequent bangs."
+  },
+
+  "search_customizeSectionsButton": "Customize sections",
+  "@search_customizeSectionsButton": {
+    "description": "Button at the bottom of the home or search screen that enters a mode for reordering and hiding its sections."
+  },
+  "search_customizeSectionsHeading": "Customize Sections",
+  "@search_customizeSectionsHeading": {
+    "description": "Heading shown while reordering and hiding sections of the home or search screen."
+  },
+  "search_resetToDefaults": "Reset to Defaults",
+  "@search_resetToDefaults": {
+    "description": "Menu item that restores the default order and visibility of home or search screen sections."
+  },
+  "search_showAllCount": "{count, plural, other{Show all {count}}}",
+  "@search_showAllCount": {
+    "description": "Button in a section header that expands the section. count is the total number of items in the section.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+
+  "search_disableReorderingMode": "Disable reordering mode",
+  "@search_disableReorderingMode": {
+    "description": "Tooltip of the button that ends rearranging the home screen shortcuts."
+  },
+  "search_enableReorderingMode": "Enable reordering mode",
+  "@search_enableReorderingMode": {
+    "description": "Tooltip of the button that starts rearranging the home screen shortcuts."
+  },
+  "search_dragDropShortcutsHint": "Drag and drop shortcuts to reorder",
+  "@search_dragDropShortcutsHint": {
+    "description": "Hint shown after starting to rearrange home screen shortcuts."
+  },
+  "search_failedReorderShortcut": "Failed to reorder shortcut",
+  "@search_failedReorderShortcut": {
+    "description": "Error message when the new position of a home screen shortcut could not be saved."
+  },
+  "search_hideAllFromHost": "Hide all from {host}",
+  "@search_hideAllFromHost": {
+    "description": "Menu item on a home screen shortcut that hides every suggested shortcut from that website. host is the website domain, e.g. example.com.",
+    "placeholders": { "host": { "type": "String" } }
+  },
+  "search_pinnedSite": "Pinned \"{title}\"",
+  "@search_pinnedSite": {
+    "description": "Confirmation after pinning a site to the home screen shortcuts. title is the site's name.",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "search_failedPinSite": "Failed to pin site",
+  "@search_failedPinSite": {
+    "description": "Error message when pinning a site to the home screen shortcuts failed."
+  },
+  "search_shortcutUpdated": "Shortcut updated",
+  "@search_shortcutUpdated": {
+    "description": "Confirmation after editing a home screen shortcut."
+  },
+  "search_failedUpdateShortcut": "Failed to update shortcut",
+  "@search_failedUpdateShortcut": {
+    "description": "Error message when saving changes to a home screen shortcut failed."
+  },
+  "search_addedSite": "Added \"{title}\"",
+  "@search_addedSite": {
+    "description": "Confirmation after adding a home screen shortcut. title is the shortcut's name.",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "search_failedAddShortcut": "Failed to add shortcut",
+  "@search_failedAddShortcut": {
+    "description": "Error message when adding a home screen shortcut failed."
+  },
+  "search_hidAllShortcutsFromHost": "Hid all shortcuts from {host}",
+  "@search_hidAllShortcutsFromHost": {
+    "description": "Confirmation after hiding all suggested shortcuts from one website, with an Undo button. host is the website domain.",
+    "placeholders": { "host": { "type": "String" } }
+  },
+  "search_removedSite": "Removed \"{title}\"",
+  "@search_removedSite": {
+    "description": "Confirmation after removing a home screen shortcut, with an Undo button. title is the shortcut's name.",
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "search_failedRemoveShortcut": "Failed to remove shortcut",
+  "@search_failedRemoveShortcut": {
+    "description": "Error message when removing a home screen shortcut failed."
+  },
+
+  "search_quoteCardTitle": "A thought for the road",
+  "@search_quoteCardTitle": {
+    "description": "Heading of the home screen card showing a random inspirational quote. A friendly, casual phrase."
+  },
+  "search_refreshQuoteTooltip": "Refresh quote",
+  "@search_refreshQuoteTooltip": {
+    "description": "Tooltip of the button that shows a different random quote."
+  },
+  "search_quotePlaceholder": "Open a new tab and make this space your own.",
+  "@search_quotePlaceholder": {
+    "description": "Text shown in the quote card when no quote is available, encouraging the user to start browsing."
+  },
+  "search_searchFieldLabel": "Search or enter URL",
+  "@search_searchFieldLabel": {
+    "description": "Label of the main address field on the search screen, which accepts both search terms and web addresses."
+  },
+  "search_invalidAddress": "Invalid address",
+  "@search_invalidAddress": {
+    "description": "Error message when the text entered in the address field cannot be opened as a web address."
+  }
+}

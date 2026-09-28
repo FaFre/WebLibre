@@ -21,29 +21,16 @@
 import 'package:flutter/material.dart';
 
 enum KagiSmallWebMode {
-  web('Web', Icons.language, 'https://kagi.com/api/v1/smallweb/feed?nso'),
-  appreciated(
-    'Appreciated',
-    Icons.thumb_up_outlined,
-    'https://kagi.com/smallweb/appreciated',
-  ),
-  videos(
-    'Videos',
-    Icons.play_circle_outline,
-    'https://kagi.com/api/v1/smallweb/feed?yt',
-  ),
-  code('Code', Icons.code, 'https://kagi.com/api/v1/smallweb/feed?gh'),
-  comics(
-    'Comics',
-    Icons.auto_stories,
-    'https://kagi.com/api/v1/smallweb/feed?comic',
-  );
+  web(Icons.language, 'https://kagi.com/api/v1/smallweb/feed?nso'),
+  appreciated(Icons.thumb_up_outlined, 'https://kagi.com/smallweb/appreciated'),
+  videos(Icons.play_circle_outline, 'https://kagi.com/api/v1/smallweb/feed?yt'),
+  code(Icons.code, 'https://kagi.com/api/v1/smallweb/feed?gh'),
+  comics(Icons.auto_stories, 'https://kagi.com/api/v1/smallweb/feed?comic');
 
-  final String label;
   final IconData icon;
   final String feedUrlString;
 
-  const KagiSmallWebMode(this.label, this.icon, this.feedUrlString);
+  const KagiSmallWebMode(this.icon, this.feedUrlString);
 
   Uri get feedUrl => Uri.parse(feedUrlString);
 }

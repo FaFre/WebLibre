@@ -47,7 +47,10 @@ sealed class BookmarkItem {
       BookmarkNodeType.folder => BookmarkFolder(
         guid: node.guid,
         parentGuid: node.parentGuid,
-        title: node.title ?? "Unnamed Folder",
+        // Empty rather than a made-up name: the UI shows its own translated
+        // placeholder (`BookmarkFolderL10n.displayTitle`), and the editor and
+        // exports keep seeing the folder as unnamed.
+        title: node.title ?? '',
         position: node.position,
         dateAdded: node.dateAdded,
         children: node.children?.map(parseRecursive).nonNulls.toList(),

@@ -99,12 +99,10 @@ void main() {
       }
     });
 
-    test('every setting has a label and a description', () {
-      for (final setting in TabBarPositionSetting.values) {
-        expect(setting.label, isNotEmpty);
-        expect(setting.description, isNotEmpty);
-      }
-    });
+    // Display label/description moved to a presentation-layer extension
+    // (TabBarPositionSettingL10n, BuildContext-gated) to keep this data model
+    // free of AppLocalizations. Its exhaustive switch has no `default` case,
+    // so the analyzer itself guarantees every enum value is covered.
   });
 
   group('persistence compatibility', () {

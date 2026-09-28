@@ -32,88 +32,85 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/screens/country_picker.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-const List<SettingsSectionDefinition> torProxySettingsSections = [
+List<SettingsSectionDefinition> _torProxySettingsSections(
+  AppLocalizations l10n,
+) => [
   SettingsSectionDefinition(
-    title: 'Service',
-    keywords: ['power', 'start', 'stop'],
+    title: l10n.tor_sectionService,
+    keywords: settingsKeywords(l10n.tor_sectionServiceKeywords),
     entries: [
       SettingsEntryDefinition(
-        title: torServiceLabel,
-        subtitle: 'Start or stop the $torBrand service',
-        keywords: ['enable', 'connect'],
-        child: _TorServiceTile(),
+        title: l10n.tor_serviceLabel(torBrand),
+        subtitle: l10n.tor_serviceSubtitle(torBrand),
+        keywords: settingsKeywords(l10n.tor_serviceLabelKeywords),
+        child: const _TorServiceTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Start Automatically',
-        subtitle: 'Connect the $torBrand service when WebLibre starts',
-        keywords: ['autostart', 'launch', 'startup', 'boot'],
-        child: _TorAutostartTile(),
+        title: l10n.tor_startAutomaticallyTitle,
+        subtitle: l10n.tor_startAutomaticallySectionSubtitle(torBrand),
+        keywords: settingsKeywords(l10n.tor_startAutomaticallyKeywords),
+        child: const _TorAutostartTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Request New Identity',
-        subtitle: 'Use a fresh circuit for new connections',
-        keywords: ['circuit'],
-        child: _RequestNewIdentityTile(),
+        title: l10n.tor_requestNewIdentityTitle,
+        subtitle: l10n.tor_requestNewIdentitySubtitle,
+        keywords: settingsKeywords(l10n.tor_requestNewIdentityKeywords),
+        child: const _RequestNewIdentityTile(),
       ),
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Circumvention',
-    keywords: ['bridges', 'transport', 'obfs4', 'snowflake'],
+    title: l10n.tor_sectionCircumvention,
+    keywords: settingsKeywords(l10n.tor_sectionCircumventionKeywords),
     entries: [
       SettingsEntryDefinition(
-        title: 'Auto Configure Transport',
-        subtitle:
-            'Pick the right pluggable transport for your network automatically',
-        keywords: ['auto'],
-        child: _AutoConfigureTransportTile(),
+        title: l10n.tor_autoConfigureTransportTitle,
+        subtitle: l10n.tor_autoConfigureSectionSubtitle,
+        keywords: settingsKeywords(l10n.tor_autoConfigureTransportKeywords),
+        child: const _AutoConfigureTransportTile(),
       ),
       SettingsEntryDefinition(
-        title: 'Transport',
-        subtitle:
-            'Choose how to reach the $torNetworkLabel when not auto-configured',
-        keywords: ['direct', 'obfs4', 'snowflake'],
-        child: _TransportSection(),
+        title: l10n.tor_transportTitle,
+        subtitle: l10n.tor_transportSectionSubtitle(torBrand),
+        keywords: settingsKeywords(l10n.tor_transportKeywords),
+        child: const _TransportSection(),
       ),
     ],
   ),
   SettingsSectionDefinition(
-    title: 'Country Restrictions',
-    keywords: ['entry', 'exit', 'country'],
+    title: l10n.tor_sectionCountryRestrictions,
+    keywords: settingsKeywords(l10n.tor_sectionCountryRestrictionsKeywords),
     entries: [
       SettingsEntryDefinition(
-        title: 'Entry Country',
-        subtitle: 'Choose the country of the entry guard',
-        keywords: ['guard'],
-        child: _CountryPickerTile(role: _NodeRole.entry),
+        title: _NodeRole.entry.title(l10n),
+        subtitle: l10n.tor_entryCountrySubtitle,
+        keywords: settingsKeywords(l10n.tor_entryCountryKeywords),
+        child: const _CountryPickerTile(role: _NodeRole.entry),
       ),
       SettingsEntryDefinition(
-        title: 'Exit Country',
-        subtitle: 'Choose the country of the exit node',
-        keywords: ['exit'],
-        child: _CountryPickerTile(role: _NodeRole.exit),
+        title: _NodeRole.exit.title(l10n),
+        subtitle: l10n.tor_exitCountrySubtitle,
+        keywords: settingsKeywords(l10n.tor_exitCountryKeywords),
+        child: const _CountryPickerTile(role: _NodeRole.exit),
       ),
     ],
   ),
   SettingsSectionDefinition(
-    title: 'About',
-    keywords: ['trademark', 'legal'],
+    title: l10n.tor_sectionAbout,
+    keywords: settingsKeywords(l10n.tor_sectionAboutKeywords),
     entries: [
       SettingsEntryDefinition(
-        title: 'Trademark',
-        keywords: ['legal'],
+        title: l10n.tor_trademarkTitle,
+        keywords: settingsKeywords(l10n.tor_trademarkKeywords),
         child: ListTile(
-          leading: Icon(Icons.info_outline),
-          title: Text('Trademark'),
-          subtitle: Text(
-            '$torBrand is a trademark of The Tor Project; all rights reserved. '
-            'WebLibre is not endorsed or sponsored by, or affiliated with, '
-            'the Tor Project.',
-          ),
+          leading: const Icon(Icons.info_outline),
+          title: Text(l10n.tor_trademarkTitle),
+          subtitle: Text(l10n.tor_trademarkDisclaimer(torBrand)),
           isThreeLine: true,
         ),
       ),
@@ -126,6 +123,8 @@ class TorProxyScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     useOnInitialization(() async {
       await ref.read(torProxyServiceProvider.notifier).requestSync();
     });
@@ -151,12 +150,11 @@ class TorProxyScreen extends HookConsumerWidget {
       }
     });
 
-    return const SettingsDetailScaffold(
-      title: torProxyLabel,
-      subtitle:
-          'Onion routing, pluggable transports, bridges and country restrictions.',
+    return SettingsDetailScaffold(
+      title: l10n.tor_proxyLabel(torBrand),
+      subtitle: l10n.tor_screenSubtitle,
       icon: TorIcons.onionAlt,
-      sections: torProxySettingsSections,
+      sections: _torProxySettingsSections(l10n),
     );
   }
 }
@@ -166,6 +164,7 @@ class _TorServiceTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final status = ref.watch(
       torProxyServiceProvider.select((value) => value.value),
     );
@@ -196,8 +195,8 @@ class _TorServiceTile extends HookConsumerWidget {
       children: [
         SwitchListTile.adaptive(
           secondary: const Icon(MdiIcons.power),
-          title: const Text(torServiceLabel),
-          subtitle: const Text('Start or stop the $torBrand service'),
+          title: Text(l10n.tor_serviceLabel(torBrand)),
+          subtitle: Text(l10n.tor_serviceSubtitle(torBrand)),
           value: pendingRequest.value ?? isRunning,
           onChanged: isBusy
               ? null
@@ -230,17 +229,15 @@ class _TorAutostartTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final autostart = ref.watch(
       torSettingsWithDefaultsProvider.select((value) => value.autostart),
     );
 
     return SwitchListTile.adaptive(
       secondary: const Icon(MdiIcons.rocketLaunchOutline),
-      title: const Text('Start Automatically'),
-      subtitle: const Text(
-        'Connect the $torBrand service when WebLibre starts, so tabs using it '
-        'are ready without a prompt',
-      ),
+      title: Text(l10n.tor_startAutomaticallyTitle),
+      subtitle: Text(l10n.tor_startAutomaticallySubtitle(torBrand)),
       value: autostart,
       onChanged: (value) async {
         await ref
@@ -256,6 +253,7 @@ class _RequestNewIdentityTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final status = ref.watch(
       torProxyServiceProvider.select((value) => value.value),
     );
@@ -264,13 +262,16 @@ class _RequestNewIdentityTile extends ConsumerWidget {
     return ListTile(
       enabled: enabled,
       leading: const Icon(MdiIcons.refresh),
-      title: const Text('Request New Identity'),
-      subtitle: const Text('Use a fresh circuit for new connections'),
+      title: Text(l10n.tor_requestNewIdentityTitle),
+      subtitle: Text(l10n.tor_requestNewIdentitySubtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await ref.read(torProxyServiceProvider.notifier).requestNewIdentity();
         if (context.mounted) {
-          showInfoMessage(context, 'Requesting new $torBrand identity...');
+          showInfoMessage(
+            context,
+            l10n.tor_requestingNewIdentityMessage(torBrand),
+          );
         }
       },
     );
@@ -282,6 +283,7 @@ class _AutoConfigureTransportTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final torSettings = ref.watch(torSettingsWithDefaultsProvider);
     final isBusy = ref.watch(
       torProxyServiceProvider.select((value) => value.isBusy),
@@ -291,10 +293,8 @@ class _AutoConfigureTransportTile extends ConsumerWidget {
       children: [
         SwitchListTile.adaptive(
           secondary: const Icon(MdiIcons.arrowDecisionAuto),
-          title: const Text('Auto Configure Transport'),
-          subtitle: const Text(
-            'From some locations, it is necessary to use a pluggable transport to connect to $torBrand',
-          ),
+          title: Text(l10n.tor_autoConfigureTransportTitle),
+          subtitle: Text(l10n.tor_autoConfigureSubtitle(torBrand)),
           value: torSettings.config == TorConnectionConfig.auto,
           onChanged: isBusy
               ? null
@@ -313,7 +313,7 @@ class _AutoConfigureTransportTile extends ConsumerWidget {
         if (torSettings.config == TorConnectionConfig.auto)
           SwitchListTile.adaptive(
             contentPadding: const EdgeInsets.only(left: 56, right: 24),
-            title: const Text("I'm sure I cannot connect without a bridge"),
+            title: Text(l10n.tor_requireBridgeTitle),
             value: torSettings.requireBridge,
             onChanged: isBusy
                 ? null
@@ -335,18 +335,17 @@ class _TransportSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final torSettings = ref.watch(torSettingsWithDefaultsProvider);
     final isBusy = ref.watch(
       torProxyServiceProvider.select((value) => value.isBusy),
     );
 
     if (torSettings.config == TorConnectionConfig.auto) {
-      return const ListTile(
-        leading: Icon(Icons.info_outline),
-        title: Text('Auto-configured'),
-        subtitle: Text(
-          'Disable auto-configure above to pick a transport manually.',
-        ),
+      return ListTile(
+        leading: const Icon(Icons.info_outline),
+        title: Text(l10n.tor_transportAutoConfiguredTitle),
+        subtitle: Text(l10n.tor_transportAutoConfiguredSubtitle),
       );
     }
 
@@ -366,24 +365,20 @@ class _TransportSection extends ConsumerWidget {
               RadioListTile<TorConnectionConfig>.adaptive(
                 value: TorConnectionConfig.direct,
                 enabled: !isBusy,
-                title: const Text('Direct Connection'),
-                subtitle: const Text(
-                  'The best way to connect to $torBrand if $torBrand is not blocked',
-                ),
+                title: Text(l10n.tor_transportDirectTitle),
+                subtitle: Text(l10n.tor_transportDirectSubtitle(torBrand)),
               ),
               RadioListTile<TorConnectionConfig>.adaptive(
                 value: TorConnectionConfig.obfs4,
                 enabled: !isBusy,
-                title: const Text('obfs4'),
-                subtitle: const Text(
-                  'Suitable for light censorship and high bandwidth needs',
-                ),
+                title: Text(l10n.tor_transportObfs4Title),
+                subtitle: Text(l10n.tor_transportObfs4Subtitle),
               ),
               RadioListTile<TorConnectionConfig>.adaptive(
                 value: TorConnectionConfig.snowflake,
                 enabled: !isBusy,
-                title: const Text('Snowflake'),
-                subtitle: const Text('Suitable for heavy censorship'),
+                title: Text(l10n.tor_transportSnowflakeTitle),
+                subtitle: Text(l10n.tor_transportSnowflakeSubtitle),
               ),
             ],
           ),
@@ -392,7 +387,7 @@ class _TransportSection extends ConsumerWidget {
           controlAffinity: ListTileControlAffinity.leading,
           enabled: !isBusy && torSettings.config != TorConnectionConfig.direct,
           value: torSettings.fetchRemoteBridges,
-          title: const Text('Fetch fresh Bridges before connecting'),
+          title: Text(l10n.tor_fetchFreshBridgesTitle),
           onChanged: isBusy
               ? null
               : (value) async {
@@ -412,12 +407,13 @@ class _TransportSection extends ConsumerWidget {
 }
 
 enum _NodeRole {
-  entry(title: 'Entry Country'),
-  exit(title: 'Exit Country');
+  entry,
+  exit;
 
-  const _NodeRole({required this.title});
-
-  final String title;
+  String title(AppLocalizations l10n) => switch (this) {
+    _NodeRole.entry => l10n.tor_entryCountryTitle,
+    _NodeRole.exit => l10n.tor_exitCountryTitle,
+  };
 }
 
 class _CountryPickerTile extends ConsumerWidget {
@@ -427,6 +423,7 @@ class _CountryPickerTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final torSettings = ref.watch(torSettingsWithDefaultsProvider);
     final isBusy = ref.watch(
       torProxyServiceProvider.select((value) => value.isBusy),
@@ -446,12 +443,12 @@ class _CountryPickerTile extends ConsumerWidget {
             ),
           ) ??
           const Icon(Icons.public),
-      title: Text(role.title),
-      subtitle: Text(country ?? 'Automatic'),
+      title: Text(role.title(l10n)),
+      subtitle: Text(country ?? l10n.tor_automaticOption),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         final result = await TorCountryPickerRoute(
-          title: role.title,
+          title: role.title(l10n),
           $extra: country,
         ).push<String>(context);
         if (result == null) return;

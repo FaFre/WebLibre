@@ -1,0 +1,15 @@
+{
+  "@@locale": "de",
+  "wallpaper_title": "Hintergrundbild",
+  "wallpaper_settingsDescription": "Wird hinter der Startseite angezeigt – in jedem Container, der kein eigenes festlegt.",
+  "wallpaper_chooseImage": "Bild auswählen",
+  "wallpaper_replace": "Ersetzen",
+  "wallpaper_blurLabel": "Unschärfe",
+  "wallpaper_dimLabel": "Abdunkeln",
+  "wallpaper_dimDescription": "Abdunkeln blendet das Bild in den App-Hintergrund über, damit Text auf der Seite im hellen und im dunklen Design lesbar bleibt.",
+  "wallpaper_editorDefaultDescription": "Die Startseite behält ihren Standardhintergrund.",
+  "wallpaper_importErrorUnreadable": "Die Datei konnte nicht gelesen werden",
+  "wallpaper_importErrorTooLarge": "Das Bild ist zu groß",
+  "wallpaper_importErrorNotAnImage": "Die Datei ist kein Bild",
+  "wallpaper_importErrorDecodeFailed": "Das Bild konnte nicht gelesen werden"
+}

@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_rule.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   const sourceUrl =
@@ -48,6 +49,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: TrackingDetailsDialog(
           currentUrl: currentUrl,
           result: result,
@@ -101,6 +104,8 @@ void main() {
     String? applied;
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: TrackingDetailsDialog(
           currentUrl: result.cleanedUrl,
           result: result,
@@ -155,6 +160,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: TrackingDetailsDialog(
           currentUrl: referralUrl,
           result: referralResult,

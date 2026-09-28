@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:intl/intl.dart';
 import 'package:weblibre/features/addons/extensions/addon_info.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class AddonIconView extends StatelessWidget {
   final AddonInfo addon;
@@ -77,7 +78,7 @@ class AddonStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final message = addon.statusBannerMessage;
+    final message = addon.statusBannerMessage(context);
     if (message == null) {
       return const SizedBox.shrink();
     }
@@ -116,10 +117,10 @@ class AddonStatusBanner extends StatelessWidget {
   }
 }
 
-String formatAddonDate(String raw) {
+String formatAddonDate(BuildContext context, String raw) {
   final parsed = DateTime.tryParse(raw);
   if (parsed == null) {
-    return raw.isEmpty ? 'Unknown' : raw;
+    return raw.isEmpty ? AppLocalizations.of(context).addons_dateUnknown : raw;
   }
 
   return DateFormat.yMMMd().format(parsed.toLocal());
@@ -132,18 +133,23 @@ String formatUpdateAttemptDate(AddonUpdateAttemptInfo attempt) {
   return DateFormat.yMMMd().add_jm().format(date);
 }
 
-String formatUpdateAttemptStatus(AddonUpdateAttemptInfo? attempt) {
+String formatUpdateAttemptStatus(
+  BuildContext context,
+  AddonUpdateAttemptInfo? attempt,
+) {
+  final l10n = AppLocalizations.of(context);
+
   return switch (attempt?.status) {
     AddonUpdateStatus.successfullyUpdated =>
       attempt?.message?.isNotEmpty == true
           ? attempt!.message!
-          : 'Updated successfully',
-    AddonUpdateStatus.noUpdateAvailable => 'No update available',
-    AddonUpdateStatus.notInstalled => 'Extension not installed',
+          : l10n.addons_statusUpdatedSuccessfully,
+    AddonUpdateStatus.noUpdateAvailable => l10n.addons_noUpdateAvailable,
+    AddonUpdateStatus.notInstalled => l10n.addons_statusNotInstalled,
     AddonUpdateStatus.error =>
       attempt?.message?.isNotEmpty == true
-          ? 'Update failed: ${attempt!.message}'
-          : 'Update failed',
-    null => 'No update checks recorded yet',
+          ? l10n.addons_updateFailedWithMessage(attempt!.message!)
+          : l10n.addons_updateFailedGeneric,
+    null => l10n.addons_noUpdateChecksRecorded,
   };
 }

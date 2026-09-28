@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
 
 /// Which of the two multitouch gestures a pointer sequence turned out to be.
@@ -492,7 +493,7 @@ class _SwipeTargetIndicator extends StatelessWidget {
               Icon(MdiIcons.folderHidden, size: 18, color: foregroundColor),
               const SizedBox(width: 8),
               Text(
-                'Unassigned',
+                AppLocalizations.of(context).browser_unassignedContainerLabel,
                 style: TextStyle(
                   color: foregroundColor,
                   fontWeight: FontWeight.w700,

@@ -25,70 +25,79 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> customTrackingProtectionSections = [
-  SettingsSectionDefinition(
-    title: 'Allowlist Exceptions',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Allowlist exceptions',
-        subtitle: 'Compatibility exceptions for major and minor website issues',
-        child: _AllowlistSection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Cookies',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Cookies',
-        subtitle: 'Cookie blocking mode and policy selection',
-        child: _CookiesSection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Tracking Content',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Tracking content',
-        subtitle: 'Tracking scripts and scope for blocking',
-        child: _TrackingContentSection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Trackers',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Trackers',
-        subtitle: 'Cryptominers, known fingerprinters, and redirect trackers',
-        child: _TrackersSection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Advanced Fingerprinting Protection',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Advanced fingerprinting protection',
-        subtitle: 'Suspected fingerprinters and tab scope',
-        child: _AdvancedFingerprintingSection(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> customTrackingProtectionSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_allowlistExceptionsSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_indexAllowlistExceptionsTitle,
+          subtitle: l10n.settings_indexAllowlistExceptionsSubtitle,
+          child: const _AllowlistSection(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_cookiesSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_cookiesSectionTitle,
+          subtitle: l10n.settings_indexCookiesSubtitle,
+          child: const _CookiesSection(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_trackingContentSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_indexTrackingContentTitle,
+          subtitle: l10n.settings_indexTrackingContentSubtitle,
+          child: const _TrackingContentSection(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_trackersSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_trackersSectionTitle,
+          subtitle: l10n.settings_indexTrackersSubtitle,
+          child: const _TrackersSection(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_advancedFingerprintingProtectionSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_indexAdvancedFingerprintingProtectionTitle,
+          subtitle: l10n.settings_indexAdvancedFingerprintingProtectionSubtitle,
+          child: const _AdvancedFingerprintingSection(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class CustomTrackingProtectionScreen extends StatelessWidget {
   const CustomTrackingProtectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Custom Tracking Protection',
-      subtitle: 'Custom cookie, content, tracker, and fingerprinting controls.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_customTrackingProtectionTitle,
+      subtitle: l10n.settings_customTrackingProtectionSubtitle,
       icon: MdiIcons.shieldEditOutline,
-      sections: customTrackingProtectionSections,
+      sections: customTrackingProtectionSections(context),
     );
   }
 }
@@ -104,14 +113,13 @@ class _AllowlistSection extends HookConsumerWidget {
     final allowListConvenience = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.allowListConvenience),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
         SwitchListTile.adaptive(
-          title: const Text('Fix website major issues'),
-          subtitle: const Text(
-            'Apply exceptions required to avoid major website breakage (recommended)',
-          ),
+          title: Text(l10n.settings_fixMajorIssuesTitle),
+          subtitle: Text(l10n.settings_fixMajorIssuesSubtitle),
           secondary: const Icon(MdiIcons.shieldCheck),
           value: allowListBaseline,
           onChanged: (value) async {
@@ -121,10 +129,8 @@ class _AllowlistSection extends HookConsumerWidget {
           },
         ),
         SwitchListTile.adaptive(
-          title: const Text('Fix website minor issues'),
-          subtitle: const Text(
-            'Apply exceptions to fix minor issues and enable convenience features',
-          ),
+          title: Text(l10n.settings_fixMinorIssuesTitle),
+          subtitle: Text(l10n.settings_fixMinorIssuesSubtitle),
           secondary: const Icon(MdiIcons.shieldHalfFull),
           value: allowListConvenience,
           onChanged: (value) async {
@@ -149,12 +155,13 @@ class _CookiesSection extends HookConsumerWidget {
     final customCookiePolicy = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.customCookiePolicy),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
         SwitchListTile.adaptive(
-          title: const Text('Block Cookies'),
-          subtitle: const Text('Block cookies based on the policy below'),
+          title: Text(l10n.settings_blockCookiesTitle),
+          subtitle: Text(l10n.settings_blockCookiesSubtitle),
           secondary: const Icon(MdiIcons.cookie),
           value: blockCookies,
           onChanged: (value) async {
@@ -169,38 +176,38 @@ class _CookiesSection extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ListTile(
-                  title: Text('Cookie Policy'),
+                ListTile(
+                  title: Text(l10n.settings_cookiePolicyTitle),
                   contentPadding: EdgeInsets.zero,
                 ),
                 DropdownMenu<CustomCookiePolicy>(
                   initialSelection: customCookiePolicy,
                   width: double.infinity,
-                  dropdownMenuEntries: const [
+                  dropdownMenuEntries: [
                     DropdownMenuEntry(
                       value: CustomCookiePolicy.totalProtection,
-                      label: 'Total Cookie Protection (Recommended)',
-                      leadingIcon: Icon(MdiIcons.shieldLock),
+                      label: l10n.settings_cookiePolicyTotalProtectionLabel,
+                      leadingIcon: const Icon(MdiIcons.shieldLock),
                     ),
                     DropdownMenuEntry(
                       value: CustomCookiePolicy.crossSiteTrackers,
-                      label: 'Cross-site and social media trackers',
-                      leadingIcon: Icon(MdiIcons.accountGroup),
+                      label: l10n.settings_cookiePolicyCrossSiteTrackersLabel,
+                      leadingIcon: const Icon(MdiIcons.accountGroup),
                     ),
                     DropdownMenuEntry(
                       value: CustomCookiePolicy.unvisited,
-                      label: 'Unvisited sites',
-                      leadingIcon: Icon(MdiIcons.webOff),
+                      label: l10n.settings_cookiePolicyUnvisitedLabel,
+                      leadingIcon: const Icon(MdiIcons.webOff),
                     ),
                     DropdownMenuEntry(
                       value: CustomCookiePolicy.thirdParty,
-                      label: 'All third-party cookies',
-                      leadingIcon: Icon(MdiIcons.cookieOff),
+                      label: l10n.settings_cookiePolicyThirdPartyLabel,
+                      leadingIcon: const Icon(MdiIcons.cookieOff),
                     ),
                     DropdownMenuEntry(
                       value: CustomCookiePolicy.allCookies,
-                      label: 'All cookies (may break sites)',
-                      leadingIcon: Icon(MdiIcons.cookieRemove),
+                      label: l10n.settings_cookiePolicyAllCookiesLabel,
+                      leadingIcon: const Icon(MdiIcons.cookieRemove),
                     ),
                   ],
                   onSelected: (value) async {
@@ -230,14 +237,13 @@ class _TrackingContentSection extends HookConsumerWidget {
     final trackingContentScope = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.trackingContentScope),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
         SwitchListTile.adaptive(
-          title: const Text('Block Tracking Content'),
-          subtitle: const Text(
-            'Block tracking scripts and resources embedded in websites',
-          ),
+          title: Text(l10n.settings_blockTrackingContentTitle),
+          subtitle: Text(l10n.settings_blockTrackingContentSubtitle),
           secondary: const Icon(MdiIcons.scriptTextOutline),
           value: blockTrackingContent,
           onChanged: (value) async {
@@ -252,21 +258,23 @@ class _TrackingContentSection extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ListTile(
-                  title: Text('Apply to'),
+                ListTile(
+                  title: Text(l10n.settings_trackingScopeApplyToTitle),
                   contentPadding: EdgeInsets.zero,
                 ),
                 SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<TrackingScope>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: TrackingScope.all,
-                        label: Text('All tabs'),
+                        label: Text(l10n.settings_trackingScopeAllTabsLabel),
                       ),
                       ButtonSegment(
                         value: TrackingScope.privateOnly,
-                        label: Text('Private tabs only'),
+                        label: Text(
+                          l10n.settings_trackingScopePrivateOnlyLabel,
+                        ),
                       ),
                     ],
                     selected: {trackingContentScope},
@@ -306,14 +314,13 @@ class _TrackersSection extends HookConsumerWidget {
         (s) => s.blockAdsAnalyticsSocialTrackers,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
         SwitchListTile.adaptive(
-          title: const Text('Ads, Analytics, and Social Trackers'),
-          subtitle: const Text(
-            'Block advertising, analytics, social, and Mozilla social tracker categories',
-          ),
+          title: Text(l10n.settings_adsAnalyticsSocialTrackersTitle),
+          subtitle: Text(l10n.settings_adsAnalyticsSocialTrackersSubtitle),
           secondary: const Icon(Icons.block),
           value: blockAdsAnalyticsSocialTrackers,
           onChanged: (value) async {
@@ -323,10 +330,8 @@ class _TrackersSection extends HookConsumerWidget {
           },
         ),
         SwitchListTile.adaptive(
-          title: const Text('Cryptominers'),
-          subtitle: const Text(
-            'Block scripts that use your device to mine cryptocurrency',
-          ),
+          title: Text(l10n.settings_cryptominersTitle),
+          subtitle: Text(l10n.settings_cryptominersSubtitle),
           secondary: const Icon(MdiIcons.currencyBtc),
           value: blockCryptominers,
           onChanged: (value) async {
@@ -336,10 +341,8 @@ class _TrackersSection extends HookConsumerWidget {
           },
         ),
         SwitchListTile.adaptive(
-          title: const Text('Known Fingerprinters'),
-          subtitle: const Text(
-            'Block scripts that collect information to uniquely identify your device',
-          ),
+          title: Text(l10n.settings_knownFingerprintersTitle),
+          subtitle: Text(l10n.settings_knownFingerprintersSubtitle),
           secondary: const Icon(MdiIcons.fingerprint),
           value: blockFingerprinters,
           onChanged: (value) async {
@@ -349,10 +352,8 @@ class _TrackersSection extends HookConsumerWidget {
           },
         ),
         SwitchListTile.adaptive(
-          title: const Text('Redirect Trackers'),
-          subtitle: const Text(
-            'Block trackers that collect data through intermediate URL redirects',
-          ),
+          title: Text(l10n.settings_redirectTrackersTitle),
+          subtitle: Text(l10n.settings_redirectTrackersSubtitle),
           secondary: const Icon(MdiIcons.routerNetwork),
           value: blockRedirectTrackers,
           onChanged: (value) async {
@@ -381,14 +382,13 @@ class _AdvancedFingerprintingSection extends HookConsumerWidget {
         (s) => s.suspectedFingerprintersScope,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
         SwitchListTile.adaptive(
-          title: const Text('Suspected Fingerprinters'),
-          subtitle: const Text(
-            'Block additional fingerprinting techniques that may be used to track you',
-          ),
+          title: Text(l10n.settings_suspectedFingerprintersTitle),
+          subtitle: Text(l10n.settings_suspectedFingerprintersSubtitle),
           secondary: const Icon(MdiIcons.shieldSearch),
           value: blockSuspectedFingerprinters,
           onChanged: (value) async {
@@ -403,21 +403,23 @@ class _AdvancedFingerprintingSection extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const ListTile(
-                  title: Text('Apply to'),
+                ListTile(
+                  title: Text(l10n.settings_trackingScopeApplyToTitle),
                   contentPadding: EdgeInsets.zero,
                 ),
                 SizedBox(
                   width: double.infinity,
                   child: SegmentedButton<TrackingScope>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: TrackingScope.all,
-                        label: Text('All tabs'),
+                        label: Text(l10n.settings_trackingScopeAllTabsLabel),
                       ),
                       ButtonSegment(
                         value: TrackingScope.privateOnly,
-                        label: Text('Private tabs only'),
+                        label: Text(
+                          l10n.settings_trackingScopePrivateOnlyLabel,
+                        ),
                       ),
                     ],
                     selected: {suspectedFingerprintersScope},

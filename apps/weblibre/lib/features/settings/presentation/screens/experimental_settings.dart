@@ -25,38 +25,49 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
-const List<SettingsSectionDefinition> experimentalSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Runtime & Startup',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Isolated Content Process',
-        subtitle: 'Run web content in an isolated process',
-        keywords: ['restart'],
-        child: _IsolatedProcessEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'App Zygote Process',
-        subtitle: 'Preload the content service for faster isolated startup',
-        keywords: ['restart', 'android 10'],
-        child: _AppZygoteProcessEnabledTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> experimentalSettingsSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_runtimeStartupSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_isolatedContentProcessTitle,
+          subtitle: l10n.settings_indexIsolatedContentProcessSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_isolatedContentProcessKeywords,
+          ),
+          child: const _IsolatedProcessEnabledTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_appZygoteProcessTitle,
+          subtitle: l10n.settings_indexAppZygoteProcessSubtitle,
+          keywords: settingsKeywords(l10n.settings_appZygoteProcessKeywords),
+          child: const _AppZygoteProcessEnabledTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class ExperimentalSettingsScreen extends StatelessWidget {
   const ExperimentalSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Experimental',
-      subtitle: 'Runtime isolation and startup behavior.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_experimentalTitle,
+      subtitle: l10n.settings_experimentalSubtitle,
       icon: MdiIcons.flaskOutline,
-      sections: experimentalSettingsSections,
+      sections: experimentalSettingsSections(context),
     );
   }
 }
@@ -71,12 +82,11 @@ class _IsolatedProcessEnabledTile extends HookConsumerWidget {
         (s) => s.isolatedProcessEnabled,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Isolated Content Process'),
-      subtitle: const Text(
-        'Run web content in an isolated process. Requires app restart.',
-      ),
+      title: Text(l10n.settings_isolatedContentProcessTitle),
+      subtitle: Text(l10n.settings_isolatedContentProcessSubtitle),
       secondary: const Icon(MdiIcons.shieldCheck),
       value: isolatedProcessEnabled,
       onChanged: (value) async {
@@ -104,12 +114,11 @@ class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
         (s) => s.appZygoteProcessEnabled,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('App Zygote Process'),
-      subtitle: const Text(
-        'Preload the content service for faster isolated process startup. Requires Android 10+ and app restart.',
-      ),
+      title: Text(l10n.settings_appZygoteProcessTitle),
+      subtitle: Text(l10n.settings_appZygoteProcessSubtitle),
       secondary: const Icon(MdiIcons.rocketLaunch),
       value: appZygoteProcessEnabled,
       onChanged: (value) async {

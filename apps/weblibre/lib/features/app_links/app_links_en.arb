@@ -1,0 +1,114 @@
+{
+  "@@locale": "en",
+
+  "appLinks_bannerTitleNamed": "Open this link in {appName}?",
+  "@appLinks_bannerTitleNamed": {
+    "description": "Question in the banner shown when a tapped link can be opened by an installed app instead of the browser. appName is that app's name.",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+  "appLinks_bannerTitleGeneric": "Open this link in an app?",
+  "@appLinks_bannerTitleGeneric": {
+    "description": "Question in the banner shown when a tapped link can be opened by an installed app instead of the browser, when the app's name is unknown."
+  },
+  "appLinks_bannerRememberFor": "Remember for {scope}",
+  "@appLinks_bannerRememberFor": {
+    "description": "Checkbox label in the open-in-app banner. scope is a website domain (e.g. example.com) or an Android app package name; the choice is remembered for it.",
+    "placeholders": { "scope": { "type": "String" } }
+  },
+  "appLinks_bannerStayInBrowser": "Stay in browser",
+  "@appLinks_bannerStayInBrowser": {
+    "description": "Button in the open-in-app banner: keep the link in the browser."
+  },
+  "appLinks_bannerOpenApp": "Open app",
+  "@appLinks_bannerOpenApp": {
+    "description": "Button in the open-in-app banner: open the link in the app."
+  },
+
+  "appLinks_dialogTitleNamed": "Open in {appName}?",
+  "@appLinks_dialogTitleNamed": {
+    "description": "Title of the dialog asking whether to open a link in an installed app. appName is that app's name.",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+  "appLinks_dialogTitleGeneric": "Open in another app?",
+  "@appLinks_dialogTitleGeneric": {
+    "description": "Title of the dialog asking whether to open a link in an installed app, when the app's name is unknown."
+  },
+  "appLinks_dialogBody": "This link is handled by an app outside WebLibre.",
+  "@appLinks_dialogBody": {
+    "description": "Body of the dialog asking whether to open a link in an installed app. WebLibre is the app name."
+  },
+  "appLinks_dialogRememberFor": "Remember my choice for {scope}",
+  "@appLinks_dialogRememberFor": {
+    "description": "Checkbox label in the open-in-app dialog. scope is a website domain (e.g. example.com) or an Android app package name; the choice is remembered for it.",
+    "placeholders": { "scope": { "type": "String" } }
+  },
+
+  "appLinks_warningProtectedContext": "This link is protected here. The app opens its own connection, outside the rules this tab follows.",
+  "@appLinks_warningProtectedContext": {
+    "description": "Warning in the open-in-app prompt when WebLibre applies extra protection to this link (for example its connection rules or privacy settings): the other app connects on its own and does not follow them."
+  },
+  "appLinks_warningPrivateTab": "This is a private tab. The app keeps its own history and sign-in state.",
+  "@appLinks_warningPrivateTab": {
+    "description": "Warning in the open-in-app prompt when the link comes from a private tab: the other app keeps its own history and stays signed in."
+  },
+  "appLinks_warningWallet": "This link asks a wallet app for credentials. Open it only if you initiated the request.",
+  "@appLinks_warningWallet": {
+    "description": "Warning in the open-in-app prompt when the link would hand a request for identity credentials to a wallet app."
+  },
+
+  "appLinks_settingsTitleWithContainer": "App Links — {containerName}",
+  "@appLinks_settingsTitleWithContainer": {
+    "description": "Title of the per-container settings for opening links in apps. containerName is the container's name. \"App Links\" means links that installed apps can open.",
+    "placeholders": { "containerName": { "type": "String" } }
+  },
+  "appLinks_settingsTitleDefault": "Container App Links",
+  "@appLinks_settingsTitleDefault": {
+    "description": "Title of the per-container settings for opening links in apps, when the container has no name."
+  },
+  "appLinks_settingsIntro": "These settings apply only to this container and fully replace the global app-link settings for its tabs.",
+  "@appLinks_settingsIntro": {
+    "description": "Explanation at the top of the per-container app link settings: these settings override the global ones for tabs in this container."
+  },
+
+  "appLinks_modeAlwaysTitle": "Always",
+  "@appLinks_modeAlwaysTitle": {
+    "description": "Option in the app link settings: always open supported links in their apps."
+  },
+  "appLinks_modeAlwaysSubtitle": "Always open links in their native apps without asking",
+  "@appLinks_modeAlwaysSubtitle": {
+    "description": "Explanation under the \"Always\" option for opening links in apps."
+  },
+  "appLinks_modeAskTitle": "Ask before opening",
+  "@appLinks_modeAskTitle": {
+    "description": "Option in the app link settings: ask each time before opening a link in an app."
+  },
+  "appLinks_modeAskSubtitle": "Show a prompt before opening links in apps",
+  "@appLinks_modeAskSubtitle": {
+    "description": "Explanation under the \"Ask before opening\" option for opening links in apps."
+  },
+  "appLinks_modeNeverTitle": "Never",
+  "@appLinks_modeNeverTitle": {
+    "description": "Option in the app link settings: never open links in apps."
+  },
+  "appLinks_modeNeverSubtitle": "Always open links in the browser instead of apps",
+  "@appLinks_modeNeverSubtitle": {
+    "description": "Explanation under the \"Never\" option for opening links in apps."
+  },
+
+  "appLinks_rememberedRulesHeader": "Remembered site rules",
+  "@appLinks_rememberedRulesHeader": {
+    "description": "Section heading above the list of sites and apps for which an open-in-app choice was remembered."
+  },
+  "appLinks_ruleAlwaysOpenSubtitle": "Always open in the app",
+  "@appLinks_ruleAlwaysOpenSubtitle": {
+    "description": "Line under a remembered site or app: its links always open in the app."
+  },
+  "appLinks_ruleAlwaysKeepSubtitle": "Always keep in the browser",
+  "@appLinks_ruleAlwaysKeepSubtitle": {
+    "description": "Line under a remembered site or app: its links always stay in the browser."
+  },
+  "appLinks_removeRuleTooltip": "Remove rule",
+  "@appLinks_removeRuleTooltip": {
+    "description": "Tooltip of the button that deletes a remembered open-in-app choice."
+  }
+}

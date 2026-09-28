@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Dialog to select between extracted or full content for sharing.
 /// Shows options for extracted (reader-optimized) vs full (complete) content.
@@ -34,36 +35,36 @@ Future<void> showContentSelectionDialog(
   await showDialog(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => SimpleDialog(
-      title: title,
-      children: [
-        ListTile(
-          title: const Text('Extracted Content'),
-          subtitle: const Text(
-            'Reader-optimized content without navigation and ads',
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return SimpleDialog(
+        title: title,
+        children: [
+          ListTile(
+            title: Text(l10n.browser_contentSelectionExtractedTitle),
+            subtitle: Text(l10n.browser_contentSelectionExtractedSubtitle),
+            onTap: () async {
+              Navigator.of(context).pop();
+              await shareMarkdownAction(
+                tabData.extractedContentMarkdown!,
+                tabData.title ?? tabData.url?.authority,
+              );
+            },
           ),
-          onTap: () async {
-            Navigator.of(context).pop();
-            await shareMarkdownAction(
-              tabData.extractedContentMarkdown!,
-              tabData.title ?? tabData.url?.authority,
-            );
-          },
-        ),
-        ListTile(
-          title: const Text('Full Content'),
-          subtitle: const Text(
-            'Complete page including all elements and structure',
+          ListTile(
+            title: Text(l10n.browser_contentSelectionFullTitle),
+            subtitle: Text(l10n.browser_contentSelectionFullSubtitle),
+            onTap: () async {
+              Navigator.of(context).pop();
+              await shareMarkdownAction(
+                tabData.fullContentMarkdown!,
+                tabData.title ?? tabData.url?.authority,
+              );
+            },
           ),
-          onTap: () async {
-            Navigator.of(context).pop();
-            await shareMarkdownAction(
-              tabData.fullContentMarkdown!,
-              tabData.title ?? tabData.url?.authority,
-            );
-          },
-        ),
-      ],
-    ),
+        ],
+      );
+    },
   );
 }

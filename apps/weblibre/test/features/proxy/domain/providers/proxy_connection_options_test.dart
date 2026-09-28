@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
@@ -7,6 +9,7 @@ import 'package:weblibre/features/proxy/domain/providers/proxy_connection_option
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   group('proxyConnectionOptionsProvider', () {
@@ -46,7 +49,7 @@ void main() {
       expect(options.map((option) => option.title), [torBrand, 'Mullvad']);
     });
 
-    test('uses standardized WireGuard branding for subtitles', () async {
+    test('carries the profile type the subtitle is derived from', () async {
       final createdAt = DateTime(2026);
       final container = ProviderContainer(
         overrides: [
@@ -75,7 +78,8 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       final options = container.read(proxyConnectionOptionsProvider);
-      expect(options[1].subtitle, wireGuardBrand);
+      expect(options[0].profileType, isNull);
+      expect(options[1].profileType, SingboxProxyProfileType.wireguard);
     });
 
     test('labels unknown proxy ids explicitly', () {
@@ -83,6 +87,7 @@ void main() {
         proxyConnectionTitle(
           const [],
           const SingboxProxyConnectionId('missing'),
+          lookupAppLocalizations(const Locale('en')),
         ),
         'Unknown proxy',
       );

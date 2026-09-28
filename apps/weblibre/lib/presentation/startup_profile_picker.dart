@@ -16,10 +16,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid_value.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/startup/profile_discovery.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Asks which profile to start, while the selection lease is held.
 ///
@@ -52,6 +52,7 @@ class StartupProfilePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     // The same disambiguation every in-app picker uses. It matters more here
     // than anywhere: two users called "a" are two identical rows at the one
@@ -67,14 +68,16 @@ class StartupProfilePicker extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
               child: Text(
-                'Choose a profile',
+                l10n.startup_pickerTitle,
                 style: theme.textTheme.headlineSmall,
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Each profile keeps its own $profilePickerContents.',
+                l10n.startup_pickerEachProfileKeepsOwn(
+                  l10n.profileCopy_pickerContents,
+                ),
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -113,9 +116,11 @@ class StartupProfilePicker extends StatelessWidget {
                     ),
                     title: Text(labelOfProfile(profile.metadata, labels)),
                     subtitle: switch ((isCandidate, isLocked)) {
-                      (true, true) => const Text('Opens by default · Locked'),
-                      (true, false) => const Text('Opens by default'),
-                      (false, true) => const Text('Locked'),
+                      (true, true) => Text(
+                        l10n.startup_pickerOpensByDefaultLocked,
+                      ),
+                      (true, false) => Text(l10n.startup_pickerOpensByDefault),
+                      (false, true) => Text(l10n.startup_pickerLocked),
                       (false, false) => null,
                     },
                     // Said before the choice rather than discovered after it:

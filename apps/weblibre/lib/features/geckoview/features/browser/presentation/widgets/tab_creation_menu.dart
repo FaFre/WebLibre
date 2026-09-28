@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class TabCreationMenu extends HookConsumerWidget {
   final Widget child;
@@ -36,6 +37,7 @@ class TabCreationMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final createChildTabsOption = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (value) => value.createChildTabsOption,
@@ -58,7 +60,7 @@ class TabCreationMenu extends HookConsumerWidget {
             await const SearchRoute(tabType: TabType.regular).push(context);
           },
           leadingIcon: const Icon(MdiIcons.tab),
-          child: const Text('Add Regular Tab'),
+          child: Text(l10n.browser_menuAddRegularTab),
         ),
         if (createChildTabsOption)
           MenuItemButton(
@@ -66,7 +68,7 @@ class TabCreationMenu extends HookConsumerWidget {
               await const SearchRoute(tabType: TabType.child).push(context);
             },
             leadingIcon: const Icon(MdiIcons.fileTree),
-            child: const Text('Add Child Tab'),
+            child: Text(l10n.browser_menuAddChildTab),
           ),
         MenuItemButton(
           onPressed: () async {
@@ -76,7 +78,7 @@ class TabCreationMenu extends HookConsumerWidget {
             MdiIcons.dominoMask,
             color: AppColors.of(context).privateTabPurple,
           ),
-          child: const Text('Add Private Tab'),
+          child: Text(l10n.browser_menuAddPrivateTab),
         ),
         if (showIsolatedTabUi)
           MenuItemButton(
@@ -87,7 +89,7 @@ class TabCreationMenu extends HookConsumerWidget {
               MdiIcons.snowflake,
               color: AppColors.of(context).isolatedTabTeal,
             ),
-            child: const Text('Add Isolated Tab'),
+            child: Text(l10n.browser_menuAddIsolatedTab),
           ),
       ],
       child: child,

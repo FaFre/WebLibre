@@ -38,6 +38,21 @@ import 'package:weblibre/features/small_web/domain/services/wander_js_parser.dar
 const _staleDuration = Duration(hours: 3);
 const _retryAfterError = Duration(minutes: 30);
 
+/// Reasons [WanderSourceService.addConsoleFromUrl]/[validateConsole] can
+/// reject a console URL. Presentation resolves this to localized copy; the
+/// service itself carries no display text.
+enum WanderConsoleValidationFailure {
+  fetchFailed,
+  noConsolesOrPages,
+  alreadyAdded,
+}
+
+class WanderConsoleValidationException implements Exception {
+  final WanderConsoleValidationFailure reason;
+
+  const WanderConsoleValidationException(this.reason);
+}
+
 typedef _WanderJsFetchRequest = ({
   RootIsolateToken token,
   String url,
@@ -261,11 +276,15 @@ class WanderSourceService {
     ));
 
     if (result == null) {
-      throw Exception('Could not fetch wander.js from $wanderJsUrl');
+      throw const WanderConsoleValidationException(
+        WanderConsoleValidationFailure.fetchFailed,
+      );
     }
 
     if (result.consoles.isEmpty && result.pages.isEmpty) {
-      throw Exception('The wander.js file contains no consoles or pages');
+      throw const WanderConsoleValidationException(
+        WanderConsoleValidationFailure.noConsolesOrPages,
+      );
     }
 
     return result;
@@ -281,7 +300,9 @@ class WanderSourceService {
     final consoleUrl = normalizeConsoleUrl(rawUrl);
 
     if (await consoleExists(consoleUrl)) {
-      throw Exception('This console has already been added');
+      throw const WanderConsoleValidationException(
+        WanderConsoleValidationFailure.alreadyAdded,
+      );
     }
 
     // Validate by fetching wander.js

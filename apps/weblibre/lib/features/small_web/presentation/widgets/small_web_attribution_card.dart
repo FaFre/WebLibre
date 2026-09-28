@@ -20,6 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
+import 'package:weblibre/features/small_web/presentation/utils/kagi_small_web_mode_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class SmallWebAttributionAction {
   final String label;
@@ -53,69 +55,72 @@ class SmallWebAttributionData {
   });
 
   factory SmallWebAttributionData.forSelection({
+    required BuildContext context,
     required SmallWebSourceKind sourceKind,
     KagiSmallWebMode? mode,
   }) {
+    final l10n = AppLocalizations.of(context);
+
     return switch (sourceKind) {
       SmallWebSourceKind.kagi => SmallWebAttributionData._forKagi(
+        context,
+        l10n,
         mode ?? KagiSmallWebMode.web,
       ),
-      SmallWebSourceKind.wander => SmallWebAttributionData._forWander(),
+      SmallWebSourceKind.wander => SmallWebAttributionData._forWander(l10n),
     };
   }
 
-  factory SmallWebAttributionData._forKagi(KagiSmallWebMode mode) {
+  factory SmallWebAttributionData._forKagi(
+    BuildContext context,
+    AppLocalizations l10n,
+    KagiSmallWebMode mode,
+  ) {
     final commonActions = [
       SmallWebAttributionAction(
-        label: 'Blog Post',
+        label: l10n.smallWeb_kagiBlogPostAction,
         icon: Icons.article_outlined,
         uri: Uri.https('blog.kagi.com', '/small-web'),
       ),
       SmallWebAttributionAction(
-        label: 'GitHub',
+        label: l10n.smallWeb_kagiGithubAction,
         icon: Icons.code,
         uri: Uri.https('github.com', '/kagisearch/smallweb'),
       ),
     ];
 
     final description = switch (mode) {
-      KagiSmallWebMode.web =>
-        'Kagi Small Web surfaces recent posts from personal sites and blogs by individual authors across the small web.',
-      KagiSmallWebMode.appreciated =>
-        'This Kagi Small Web mode highlights appreciated posts from the small web as curated by the open-source project.',
-      KagiSmallWebMode.videos =>
-        'This Kagi Small Web mode focuses on video posts from smaller independent creators and curated channel seeds.',
-      KagiSmallWebMode.code =>
-        'This Kagi Small Web mode focuses on code-oriented posts from personal sites and other small web sources.',
-      KagiSmallWebMode.comics =>
-        'This Kagi Small Web mode focuses on comics and illustrated posts surfaced through the Small Web project.',
+      KagiSmallWebMode.web => l10n.smallWeb_kagiDescriptionWeb,
+      KagiSmallWebMode.appreciated => l10n.smallWeb_kagiDescriptionAppreciated,
+      KagiSmallWebMode.videos => l10n.smallWeb_kagiDescriptionVideos,
+      KagiSmallWebMode.code => l10n.smallWeb_kagiDescriptionCode,
+      KagiSmallWebMode.comics => l10n.smallWeb_kagiDescriptionComics,
     };
 
     return SmallWebAttributionData(
       icon: Icons.travel_explore,
-      title: 'Kagi Small Web',
-      badgeLabel: mode.label,
+      title: l10n.smallWeb_kagiTitle,
+      badgeLabel: mode.label(context),
       description: description,
-      attributionLine: 'By Kagi Search - open source under the MIT License.',
+      attributionLine: l10n.smallWeb_kagiAttributionLine,
       actions: [...commonActions],
     );
   }
 
-  factory SmallWebAttributionData._forWander() {
+  factory SmallWebAttributionData._forWander(AppLocalizations l10n) {
     return SmallWebAttributionData(
       icon: Icons.dns,
-      title: 'Wander',
-      description:
-          'Wander is a network of personal websites connected through shared consoles that help people browse pages across the wider Wander community.',
-      attributionLine: 'By Susam Pal - open source under the MIT License.',
+      title: l10n.smallWeb_wanderTitle,
+      description: l10n.smallWeb_wanderDescription,
+      attributionLine: l10n.smallWeb_wanderAttributionLine,
       actions: [
         SmallWebAttributionAction(
-          label: 'Project',
+          label: l10n.smallWeb_wanderProjectAction,
           icon: Icons.public,
           uri: Uri.https('codeberg.org', '/susam/wander'),
         ),
         SmallWebAttributionAction(
-          label: 'Setup your Console',
+          label: l10n.smallWeb_wanderSetupConsoleAction,
           icon: Icons.forum_outlined,
           uri: Uri.https('codeberg.org', '/susam/wander#install'),
         ),

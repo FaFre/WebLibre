@@ -69,8 +69,9 @@ void main() {
     );
 
     // Naming it is the point: a choice about a credential the user cannot
-    // identify is not a choice.
-    expect(found?.label, 'me@example.com');
+    // identify is not a choice. The display label itself is presentation-layer
+    // (UnclaimedAccountRecordL10n), so this checks the data it's built from.
+    expect(found?.email, 'me@example.com');
     expect(found?.storageKey, accountSecureBaseKey);
     expect(found?.isUsable, isTrue);
   });
@@ -96,8 +97,12 @@ void main() {
       storage: storage,
     );
 
+    // "Unnamed" at the data layer means no email/displayName to build a label
+    // from; UnclaimedAccountRecordL10n.label falls back to generic copy for
+    // this case, but that's presentation-layer and tested separately.
     expect(found, isNotNull);
-    expect(found!.label, isNotEmpty);
+    expect(found!.email, isNull);
+    expect(found.displayName, isNull);
   });
 
   test('an unparseable record is offered but not as adoptable', () async {

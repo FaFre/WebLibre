@@ -27,6 +27,7 @@ import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -39,13 +40,14 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final exceptionsAsync = ref.watch(trackingProtectionRepositoryProvider);
     final search = useSettingsSearch();
 
     return SettingsCustomScrollScaffold(
-      title: 'Tracking Protection Exceptions',
+      title: l10n.settings_trackingProtectionExceptionsTitle,
       searchController: search.controller,
-      searchHintText: 'Search exception URLs',
+      searchHintText: l10n.settings_trackingProtectionExceptionsSearchHint,
       actions: [
         exceptionsAsync.maybeWhen(
           data: (exceptions) => exceptions.isNotEmpty
@@ -64,7 +66,9 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
                     MenuItemButton(
                       leadingIcon: const Icon(Icons.delete_sweep),
                       onPressed: () => _showDeleteAllDialog(context, ref),
-                      child: const Text('Delete All'),
+                      child: Text(
+                        l10n.settings_trackingProtectionExceptionsDeleteAll,
+                      ),
                     ),
                   ],
                 )
@@ -99,12 +103,14 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
                 return SettingsSectionList(
                   sections: [
                     SettingsSectionDefinition(
-                      title: 'Exception List',
+                      title: l10n
+                          .settings_trackingProtectionExceptionsSectionTitle,
                       entries: [
                         for (final exception in filteredExceptions)
                           SettingsEntryDefinition(
                             title: exception.url,
-                            subtitle: 'Site with tracking protection disabled',
+                            subtitle: l10n
+                                .settings_trackingProtectionExceptionsEntrySubtitle,
                             child: _ExceptionTile(
                               exception: exception,
                               onDelete: () =>
@@ -141,7 +147,12 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
           stackTrace: s,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to delete exceptions: $e');
+          showErrorMessage(
+            context,
+            AppLocalizations.of(
+              context,
+            ).settings_trackingProtectionExceptionsDeleteAllFailed('$e'),
+          );
         }
       }
     }
@@ -163,7 +174,12 @@ class TrackingProtectionExceptionsScreen extends HookConsumerWidget {
         stackTrace: s,
       );
       if (context.mounted) {
-        showErrorMessage(context, 'Failed to remove exception: $e');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(
+            context,
+          ).settings_trackingProtectionExceptionsRemoveFailed('$e'),
+        );
       }
     }
   }
@@ -177,6 +193,7 @@ class _ExceptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final uri = Uri.tryParse(exception.url);
 
     return ListTile(
@@ -187,7 +204,7 @@ class _ExceptionTile extends StatelessWidget {
       trailing: IconButton(
         icon: const Icon(Icons.close),
         onPressed: onDelete,
-        tooltip: 'Remove exception',
+        tooltip: l10n.settings_trackingProtectionExceptionsRemoveTooltip,
       ),
     );
   }
@@ -198,6 +215,8 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -208,10 +227,13 @@ class _EmptyState extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
-          Text('No exceptions', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.settings_trackingProtectionExceptionsEmptyTitle,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           Text(
-            'Sites added to exceptions will appear here',
+            l10n.settings_trackingProtectionExceptionsEmptySubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
@@ -229,6 +251,8 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -236,7 +260,7 @@ class _ErrorState extends StatelessWidget {
           const Icon(Icons.error_outline, size: 64),
           const SizedBox(height: 16),
           Text(
-            'Error loading exceptions',
+            l10n.settings_trackingProtectionExceptionsErrorTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),

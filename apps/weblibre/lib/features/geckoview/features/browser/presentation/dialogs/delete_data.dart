@@ -25,6 +25,8 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/presentation/utils/delete_browsing_data_type_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a bottom sheet to select and delete browsing data.
 Future<void> showDeleteDataDialog(
@@ -47,6 +49,7 @@ class _DeleteDataSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selections = useState(initialSettings);
+    final l10n = AppLocalizations.of(context);
 
     return SafeArea(
       child: Padding(
@@ -56,7 +59,7 @@ class _DeleteDataSheet extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Delete Browsing Data',
+              l10n.browser_deleteDataTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -64,10 +67,10 @@ class _DeleteDataSheet extends HookConsumerWidget {
               CheckboxListTile.adaptive(
                 value: selections.value.contains(type),
                 controlAffinity: ListTileControlAffinity.leading,
-                title: Text(type.title),
-                subtitle: type.description.mapNotNull(
-                  (description) => Text(description),
-                ),
+                title: Text(type.label(context)),
+                subtitle: type
+                    .description(context)
+                    .mapNotNull((description) => Text(description)),
                 onChanged: (value) {
                   if (value == true) {
                     selections.value = {...selections.value, type};
@@ -93,7 +96,7 @@ class _DeleteDataSheet extends HookConsumerWidget {
                 backgroundColor: Theme.of(context).colorScheme.error,
                 foregroundColor: Theme.of(context).colorScheme.onError,
               ),
-              label: const Text('Delete'),
+              label: Text(l10n.common_delete),
               icon: const Icon(Icons.delete_forever),
             ),
           ],

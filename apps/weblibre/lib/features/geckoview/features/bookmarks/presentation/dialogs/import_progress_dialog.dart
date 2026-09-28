@@ -20,6 +20,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows how far a running bookmark import has got.
 ///
@@ -36,10 +37,12 @@ class ImportProgressDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return PopScope(
       canPop: false,
       child: AlertDialog(
-        title: const Text('Importing bookmarks'),
+        title: Text(l10n.bookmarks_importProgressTitle),
         content: ValueListenableBuilder<BookmarkImportProgress>(
           valueListenable: progress,
           builder: (context, value, child) {
@@ -48,11 +51,17 @@ class ImportProgressDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(switch (value.phase) {
-                  BookmarkImportPhase.parsing => 'Reading the file…',
-                  BookmarkImportPhase.erasing => 'Removing existing bookmarks…',
+                  BookmarkImportPhase.parsing =>
+                    l10n.bookmarks_importPhaseParsing,
+                  BookmarkImportPhase.erasing =>
+                    l10n.bookmarks_importPhaseErasing,
                   BookmarkImportPhase.inserting when value.total > 0 =>
-                    '${value.inserted} of ${value.total} bookmarks',
-                  BookmarkImportPhase.inserting => 'Saving bookmarks…',
+                    l10n.bookmarks_importPhaseInsertingProgress(
+                      value.inserted,
+                      value.total,
+                    ),
+                  BookmarkImportPhase.inserting =>
+                    l10n.bookmarks_importPhaseInsertingIndeterminate,
                 }),
                 const SizedBox(height: 16.0),
                 LinearProgressIndicator(value: value.fraction),

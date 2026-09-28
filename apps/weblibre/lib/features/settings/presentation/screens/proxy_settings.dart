@@ -21,66 +21,54 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_log_level_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> proxySettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Proxy',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Proxy Connections',
-        subtitle: 'Manage proxy profiles and connections',
-        keywords: [
-          'sing-box',
-          'socks',
-          'vpn',
-          'wireguard',
-          'tor',
-          'onion',
-          'bridges',
-          'obfs4',
-          'snowflake',
-        ],
-        child: _ProxyConnectionsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Proxy Routing',
-        subtitle: 'Choose which proxy carries regular and private tabs',
-        keywords: ['routing', 'container'],
-        child: _ProxyRoutingTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Proxy Logs',
-        subtitle: 'Read the proxy log and set how much it records',
-        keywords: [
-          'log',
-          'logging',
-          'logs',
-          'diagnostics',
-          'debug',
-          'trace',
-          'verbose',
-          'troubleshoot',
-          'level',
-        ],
-        child: _ProxyLogsTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> proxySettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_proxySectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_proxyConnectionsTitle,
+          subtitle: l10n.settings_proxyConnectionsSubtitle,
+          keywords: settingsKeywords(l10n.settings_proxyConnectionsKeywords),
+          child: const _ProxyConnectionsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_proxyRoutingTitle,
+          subtitle: l10n.settings_proxyRoutingSubtitle,
+          keywords: settingsKeywords(l10n.settings_proxyRoutingKeywords),
+          child: const _ProxyRoutingTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_proxyLogsTitle,
+          subtitle: l10n.settings_indexProxyLogsSubtitle,
+          keywords: settingsKeywords(l10n.settings_proxyLogsKeywords),
+          child: const _ProxyLogsTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class ProxySettingsScreen extends StatelessWidget {
   const ProxySettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Proxy',
-      subtitle: 'Manage proxy connections and choose which tabs use them.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_proxyTitle,
+      subtitle: l10n.settings_proxySubtitle,
       icon: MdiIcons.lanConnect,
-      sections: proxySettingsSections,
+      sections: proxySettingsSections(context),
     );
   }
 }
@@ -90,10 +78,12 @@ class _ProxyConnectionsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.lanConnect),
-      title: const Text('Proxy Connections'),
-      subtitle: const Text('Manage proxy profiles and connections'),
+      title: Text(l10n.settings_proxyConnectionsTitle),
+      subtitle: Text(l10n.settings_proxyConnectionsSubtitle),
       trailing: const Icon(Icons.chevron_right),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
@@ -111,12 +101,12 @@ class _ProxyRoutingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(Icons.route_outlined),
-      title: const Text('Proxy Routing'),
-      subtitle: const Text(
-        'Choose which proxy carries regular and private tabs',
-      ),
+      title: Text(l10n.settings_proxyRoutingTitle),
+      subtitle: Text(l10n.settings_proxyRoutingSubtitle),
       trailing: const Icon(Icons.chevron_right),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
@@ -141,6 +131,7 @@ class _ProxyLogsTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final logLevel = ref
         .watch(proxyDiagnosticsSettingsWithDefaultsProvider)
         .logLevel;
@@ -152,12 +143,8 @@ class _ProxyLogsTile extends ConsumerWidget {
             : MdiIcons.textBoxOutline,
         color: logLevel.isVerbose ? Theme.of(context).colorScheme.error : null,
       ),
-      title: const Text('Proxy Logs'),
-      subtitle: Text(
-        logLevel.isVerbose
-            ? 'Recording ${logLevel.label.toLowerCase()} — this slows browsing'
-            : 'Recording ${logLevel.label.toLowerCase()}',
-      ),
+      title: Text(l10n.settings_proxyLogsTitle),
+      subtitle: Text(logLevel.recordingSummary(context)),
       trailing: const Icon(Icons.chevron_right),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,

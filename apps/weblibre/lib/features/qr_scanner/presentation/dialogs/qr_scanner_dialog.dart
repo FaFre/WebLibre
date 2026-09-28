@@ -24,6 +24,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 Future<Barcode?> showQrScannerDialog(BuildContext context) async {
@@ -32,7 +33,10 @@ Future<Barcode?> showQrScannerDialog(BuildContext context) async {
   if (!context.mounted) return null;
 
   if (!cameraPermission.isGranted) {
-    ui_helper.showErrorMessage(context, 'No Camera Permission granted');
+    ui_helper.showErrorMessage(
+      context,
+      AppLocalizations.of(context).qrScanner_noCameraPermission,
+    );
     return null;
   }
 
@@ -48,6 +52,7 @@ class QrScannerDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final qrKey = useMemoized(() => GlobalKey(debugLabel: 'qr_scanner'));
     final qrController = useState<QRViewController?>(null);
 
@@ -73,7 +78,7 @@ class QrScannerDialog extends HookWidget {
     return Dialog.fullscreen(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Scan code'),
+          title: Text(l10n.qrScanner_scanCodeTitle),
           actions: [
             IconButton(
               isSelected: flashState.value,
@@ -107,7 +112,7 @@ class QrScannerDialog extends HookWidget {
                 permissionDeniedHandled.value = true;
                 ui_helper.showErrorMessage(
                   context,
-                  'No Camera Permission granted',
+                  l10n.qrScanner_noCameraPermission,
                 );
                 Navigator.of(context).pop();
               }

@@ -21,12 +21,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/app_initialization_l10n.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/multi_finger_tap_guard.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -37,6 +40,7 @@ class MainApp extends HookConsumerWidget {
   final ThemeMode? themeMode;
   final double uiScaleFactor;
   final bool disableAnimations;
+  final Locale? locale;
 
   const MainApp({
     required this.theme,
@@ -44,6 +48,7 @@ class MainApp extends HookConsumerWidget {
     required this.themeMode,
     required this.uiScaleFactor,
     required this.disableAnimations,
+    required this.locale,
     super.key,
   });
 
@@ -51,6 +56,16 @@ class MainApp extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final initializationResult = ref.watch(appInitializationServiceProvider);
     final router = ref.watch(routerProvider);
+
+    // The provider reads the system locale list only when it builds, and has
+    // no binding of its own to hear that the list changed.
+    useEffect(() {
+      final observer = _LocaleChangeObserver(
+        () => ref.invalidate(appLocalizationsProvider),
+      );
+      WidgetsBinding.instance.addObserver(observer);
+      return () => WidgetsBinding.instance.removeObserver(observer);
+    }, const []);
 
     return initializationResult.fold(
       (initializationState) {
@@ -63,6 +78,10 @@ class MainApp extends HookConsumerWidget {
             themeAnimationStyle: disableAnimations
                 ? AnimationStyle.noAnimation
                 : null,
+            locale: locale,
+            localeListResolutionCallback: resolveAppLocale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             builder: (context, child) {
               return _AppMediaQueryOverrides(
                 uiScaleFactor: uiScaleFactor,
@@ -79,7 +98,7 @@ class MainApp extends HookConsumerWidget {
                     if (initializationState.stage != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(initializationState.stage!),
+                        child: Text(initializationState.stage!.label(context)),
                       ),
                   ],
                 ),
@@ -96,6 +115,10 @@ class MainApp extends HookConsumerWidget {
           themeAnimationStyle: disableAnimations
               ? AnimationStyle.noAnimation
               : null,
+          locale: locale,
+          localeListResolutionCallback: resolveAppLocale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           routerConfig: router.value,
           builder: (context, child) {
             return _AppMediaQueryOverrides(
@@ -125,6 +148,10 @@ class MainApp extends HookConsumerWidget {
           themeAnimationStyle: disableAnimations
               ? AnimationStyle.noAnimation
               : null,
+          locale: locale,
+          localeListResolutionCallback: resolveAppLocale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           builder: (context, child) {
             return _AppMediaQueryOverrides(
               uiScaleFactor: uiScaleFactor,
@@ -132,19 +159,27 @@ class MainApp extends HookConsumerWidget {
               child: child ?? const SizedBox.shrink(),
             );
           },
-          home: Scaffold(
-            appBar: AppBar(title: const Text('Initiallization Error')),
-            body: Center(
-              child: FailureWidget(
-                title: 'Could not initialize App',
-                exception: errorMessage.toString(),
-                onRetry: () async {
-                  await ref
-                      .read(appInitializationServiceProvider.notifier)
-                      .reinitialize();
-                },
-              ),
-            ),
+          home: Builder(
+            builder: (context) {
+              final l10n = AppLocalizations.of(context);
+
+              return Scaffold(
+                appBar: AppBar(
+                  title: Text(l10n.mainApp_initializationErrorTitle),
+                ),
+                body: Center(
+                  child: FailureWidget(
+                    title: l10n.mainApp_initializationErrorMessage,
+                    exception: errorMessage.toString(),
+                    onRetry: () async {
+                      await ref
+                          .read(appInitializationServiceProvider.notifier)
+                          .reinitialize();
+                    },
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -166,14 +201,15 @@ class _DownloadStoppedListener extends HookConsumerWidget {
     useOnStreamChange(
       downloadStoppedEvents,
       onData: (download) {
+        final l10n = AppLocalizations.of(context);
         switch (download.status) {
           case DownloadStatus.completed:
             ui_helper.showInfoMessage(
               context,
-              'Download completed',
+              l10n.mainApp_downloadCompleted,
               duration: const Duration(seconds: 6),
               action: SnackBarAction(
-                label: 'Open',
+                label: l10n.common_open,
                 onPressed: () async {
                   final opened = await GeckoDownloadsService()
                       .openDownloadedFile(
@@ -185,7 +221,7 @@ class _DownloadStoppedListener extends HookConsumerWidget {
                   if (!opened && context.mounted) {
                     ui_helper.showErrorMessage(
                       context,
-                      'Could not open downloaded file',
+                      AppLocalizations.of(context).mainApp_downloadOpenFailed,
                     );
                   }
                 },
@@ -194,7 +230,7 @@ class _DownloadStoppedListener extends HookConsumerWidget {
           case DownloadStatus.failed:
             ui_helper.showErrorMessage(
               context,
-              'Download failed: ${download.fileName ?? download.url}',
+              l10n.mainApp_downloadFailed(download.fileName ?? download.url),
               persist: true,
             );
           case DownloadStatus.initiated:
@@ -234,11 +270,12 @@ class _StrictContainerBlockListener extends HookConsumerWidget {
         }
 
         final host = Uri.tryParse(event.url)?.host;
+        final l10n = AppLocalizations.of(context);
         ui_helper.showInfoMessage(
           context,
           host != null && host.isNotEmpty
-              ? '$host is not assigned to this container'
-              : 'This site is not assigned to this container',
+              ? l10n.mainApp_containerBlockedWithHost(host)
+              : l10n.mainApp_containerBlockedNoHost,
         );
       },
     );
@@ -268,6 +305,16 @@ MediaQueryData applyAppMediaQueryOverrides({
   }
 
   return mediaQuery.copyWith(textScaler: textScaler);
+}
+
+/// Bridges [WidgetsBindingObserver.didChangeLocales] to a plain callback.
+class _LocaleChangeObserver extends WidgetsBindingObserver {
+  final VoidCallback onChanged;
+
+  _LocaleChangeObserver(this.onChanged);
+
+  @override
+  void didChangeLocales(List<Locale>? locales) => onChanged();
 }
 
 class _AppMediaQueryOverrides extends StatelessWidget {
@@ -339,21 +386,25 @@ class _SandboxCaptureErrorListener extends ConsumerWidget {
     ref.listen(sandboxCaptureErrorsProvider, (previous, next) {
       final error = next.value;
       if (error == null) return;
+      final l10n = AppLocalizations.of(context);
       final message = switch (error.kind) {
         SandboxCaptureErrorKind.insufficientCredits =>
-          error.detail ??
-              'You have no search credits left. Purchase more to continue.',
+          error.detail ?? l10n.mainApp_sandboxNoCredits,
         SandboxCaptureErrorKind.tokenIssuanceFailed =>
-          error.detail ??
-              'Could not issue new search tokens. Check your connection and try again.',
+          error.detail ?? l10n.mainApp_sandboxTokenIssuanceFailed,
         SandboxCaptureErrorKind.fetchPolicyRejected =>
-          'Capture blocked by fetch policy: ${error.detail ?? 'not allowed'}',
+          l10n.mainApp_sandboxFetchPolicyRejected(
+            error.detail ?? l10n.mainApp_sandboxDetailNotAllowed,
+          ),
         SandboxCaptureErrorKind.captureFailed =>
-          'Capture failed: ${error.detail ?? 'unknown error'}',
+          l10n.mainApp_sandboxCaptureFailed(
+            error.detail ?? l10n.mainApp_sandboxDetailUnknownError,
+          ),
         SandboxCaptureErrorKind.downloadFailed =>
-          'Capture artifact download failed.',
-        SandboxCaptureErrorKind.unknown =>
-          'Sandbox capture error: ${error.detail ?? 'unknown error'}',
+          l10n.mainApp_sandboxDownloadFailed,
+        SandboxCaptureErrorKind.unknown => l10n.mainApp_sandboxUnknownError(
+          error.detail ?? l10n.mainApp_sandboxDetailUnknownError,
+        ),
       };
       ui_helper.showErrorMessage(context, message);
     });
@@ -387,7 +438,7 @@ class _SyncEventListener extends ConsumerWidget {
         case SyncEvent.error:
           ui_helper.showErrorMessage(
             context,
-            syncError ?? 'Synchronization failed',
+            syncError ?? AppLocalizations.of(context).mainApp_syncFailed,
           );
         case SyncEvent.started:
         case SyncEvent.completed:

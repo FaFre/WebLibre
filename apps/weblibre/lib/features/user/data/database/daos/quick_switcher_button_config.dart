@@ -75,7 +75,9 @@ class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
       );
 
   Future<void> assignLongPressAction(String buttonId, BrowserAction? action) =>
-      (update(db.quickSwitcherButtonConfigs)..where((t) => t.buttonId.equals(buttonId))).write(
+      (update(
+        db.quickSwitcherButtonConfigs,
+      )..where((t) => t.buttonId.equals(buttonId))).write(
         QuickSwitcherButtonConfigsCompanion(longPressAction: Value(action)),
       );
 

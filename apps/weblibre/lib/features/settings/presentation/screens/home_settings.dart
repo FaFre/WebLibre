@@ -26,104 +26,95 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/utils/home_search_bar_placement_l10n.dart';
+import 'package:weblibre/features/settings/presentation/utils/home_target_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
-const List<SettingsSectionDefinition> homeSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Startup',
-    keywords: ['startup', 'home', 'resume', 'last tab', 'custom url'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'When there is no tab to show',
-        subtitle: 'On startup, and after closing the last tab',
-        keywords: ['startup', 'resume', 'last tab', 'custom url', 'homepage'],
-        child: _HomeTargetTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Apply when the last tab closes',
-        subtitle: 'Otherwise a tab from another container is opened instead',
-        keywords: ['close', 'last tab', 'container'],
-        child: _HomeTargetOnLastTabClosedTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Appearance',
-    keywords: ['home', 'wallpaper', 'background', 'image', 'blur', 'dim'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Wallpaper',
-        subtitle: 'A background image for the home page',
-        keywords: [
-          'wallpaper',
-          'background',
-          'image',
-          'photo',
-          'picture',
-          'blur',
-          'dim',
-          'home',
-        ],
-        child: _WallpaperTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Layout',
-    keywords: ['home', 'new tab', 'sections', 'modules', 'layout'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Search bar position',
-        subtitle: 'Where the home page offers its search field',
-        keywords: [
-          'search',
-          'bar',
-          'position',
-          'address',
-          'url',
-          'top',
-          'bottom',
-          'tab bar',
-          'home',
-        ],
-        child: _HomeSearchBarPlacementTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Customize home sections',
-        subtitle: 'Choose and order what the home page shows',
-        keywords: [
-          'home',
-          'sections',
-          'shortcuts',
-          'quote',
-          'quick actions',
-          'reorder',
-        ],
-        child: _CustomizeHomeSectionsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Customize new tab sections',
-        subtitle: 'Choose and order what the new tab page shows',
-        keywords: ['new tab', 'sections', 'shortcuts', 'reorder'],
-        child: _CustomizeNewTabSectionsTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> homeSettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_startupSectionTitle,
+      keywords: settingsKeywords(l10n.settings_startupSectionKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_indexHomeTargetTitle,
+          subtitle: l10n.settings_indexHomeTargetSubtitle,
+          keywords: settingsKeywords(l10n.settings_indexHomeTargetKeywords),
+          child: const _HomeTargetTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_applyWhenLastTabClosesTitle,
+          subtitle: l10n.settings_indexHomeTargetOnLastTabClosedSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_applyWhenLastTabClosesKeywords,
+          ),
+          child: const _HomeTargetOnLastTabClosedTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_homeAppearanceSectionTitle,
+      keywords: settingsKeywords(l10n.settings_homeAppearanceSectionKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_wallpaperTitle,
+          subtitle: l10n.settings_indexWallpaperSubtitle,
+          keywords: settingsKeywords(l10n.settings_wallpaperKeywords),
+          child: const _WallpaperTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_layoutSectionTitle,
+      keywords: settingsKeywords(l10n.settings_layoutSectionKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_indexHomeSearchBarPlacementTitle,
+          subtitle: l10n.settings_indexHomeSearchBarPlacementSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_indexHomeSearchBarPlacementKeywords,
+          ),
+          child: const _HomeSearchBarPlacementTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_customizeHomeSectionsTitle,
+          subtitle: l10n.settings_customizeHomeSectionsSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_customizeHomeSectionsKeywords,
+          ),
+          child: const _CustomizeHomeSectionsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_customizeNewTabSectionsTitle,
+          subtitle: l10n.settings_customizeNewTabSectionsSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_customizeNewTabSectionsKeywords,
+          ),
+          child: const _CustomizeNewTabSectionsTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class HomeSettingsScreen extends StatelessWidget {
   const HomeSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Home & New Tab',
-      subtitle: 'What the home and new tab pages show',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_homeAndNewTabTitle,
+      subtitle: l10n.settings_homeAndNewTabSubtitle,
       icon: MdiIcons.homeOutline,
-      sections: homeSettingsSections,
+      sections: homeSettingsSections(context),
     );
   }
 }
@@ -134,6 +125,7 @@ class _HomeTargetTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final l10n = AppLocalizations.of(context);
 
     Future<void> save(GeneralSettings Function(GeneralSettings) update) {
       return ref
@@ -171,8 +163,8 @@ class _HomeTargetTile extends HookConsumerWidget {
               for (final target in HomeTarget.values)
                 RadioListTile<HomeTarget>(
                   value: target,
-                  title: Text(target.label),
-                  subtitle: Text(target.description),
+                  title: Text(target.label(context)),
+                  subtitle: Text(target.description(context)),
                 ),
             ],
           ),
@@ -188,18 +180,18 @@ class _HomeTargetTile extends HookConsumerWidget {
                 controller: urlController,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 keyboardType: TextInputType.url,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
+                decoration: InputDecoration(
+                  labelText: l10n.settings_addressFieldLabel,
                   hintText: 'https://example.com',
-                  border: OutlineInputBorder(),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   final text = value?.trim() ?? '';
                   if (text.isEmpty) {
-                    return 'Enter an address, or the home page is shown instead';
+                    return l10n.settings_homeTargetUrlEmptyError;
                   }
                   if (uri_parser.tryParseUrl(text) == null) {
-                    return 'Not a valid address';
+                    return l10n.settings_homeTargetUrlInvalidError;
                   }
                   return null;
                 },
@@ -222,14 +214,12 @@ class _HomeTargetOnLastTabClosedTile extends ConsumerWidget {
         (s) => s.homeTargetOnLastTabClosed,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
       value: enabled,
-      title: const Text('Apply when the last tab closes'),
-      subtitle: const Text(
-        'Closing the last tab in a container stays there instead of opening a '
-        'tab from somewhere else',
-      ),
+      title: Text(l10n.settings_applyWhenLastTabClosesTitle),
+      subtitle: Text(l10n.settings_applyWhenLastTabClosesSubtitle),
       secondary: const Icon(Icons.tab_unselected),
       onChanged: (value) async {
         await ref
@@ -251,6 +241,7 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final resolved = ref.watch(effectiveHomeSearchBarPlacementProvider);
+    final l10n = AppLocalizations.of(context);
 
     return RadioGroup<HomeSearchBarPlacement>(
       groupValue: settings.homeSearchBarPlacement,
@@ -266,13 +257,15 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
           for (final placement in HomeSearchBarPlacement.values)
             RadioListTile<HomeSearchBarPlacement>(
               value: placement,
-              title: Text(placement.label),
+              title: Text(placement.label(context)),
               // Auto says what it currently resolves to; the fixed choices
               // already describe themselves.
               subtitle: Text(
                 placement == HomeSearchBarPlacement.auto
-                    ? 'Currently: ${resolved.label.toLowerCase()}'
-                    : placement.description,
+                    ? l10n.settings_homeSearchBarCurrentlyLabel(
+                        resolved.label(context),
+                      )
+                    : placement.description(context),
               ),
             ),
         ],
@@ -294,14 +287,15 @@ class _WallpaperTile extends ConsumerWidget {
         (s) => s.homeWallpaperFile != null,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return ListTile(
       leading: const Icon(MdiIcons.imageOutline),
-      title: const Text('Wallpaper'),
+      title: Text(l10n.settings_wallpaperTitle),
       subtitle: Text(
         hasWallpaper
-            ? 'A background image is set for the home page'
-            : 'Set a background image for the home page',
+            ? l10n.settings_wallpaperSetSubtitle
+            : l10n.settings_wallpaperUnsetSubtitle,
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => const WallpaperSettingsRoute().push(context),
@@ -314,10 +308,12 @@ class _CustomizeHomeSectionsTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.homeOutline),
-      title: const Text('Customize home sections'),
-      subtitle: const Text('Choose and order what the home page shows'),
+      title: Text(l10n.settings_customizeHomeSectionsTitle),
+      subtitle: Text(l10n.settings_customizeHomeSectionsSubtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => const HomeModulesSettingsRoute().push(context),
     );
@@ -329,10 +325,12 @@ class _CustomizeNewTabSectionsTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.tabPlus),
-      title: const Text('Customize new tab sections'),
-      subtitle: const Text('Choose and order what the new tab page shows'),
+      title: Text(l10n.settings_customizeNewTabSectionsTitle),
+      subtitle: Text(l10n.settings_customizeNewTabSectionsSubtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () => const NewTabModulesSettingsRoute().push(context),
     );

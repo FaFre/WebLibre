@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/profile_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Opens the menu sheet the way the browser does, so the quit row runs inside a
 /// modal route that is torn down the moment it is tapped.
@@ -36,6 +37,8 @@ Future<void> _pumpMenu(
   await tester.pumpWidget(
     ProviderScope(
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Builder(
             builder: (context) => TextButton(
@@ -71,7 +74,7 @@ void main() {
       onExit: (container) async => containers.add(container),
     );
 
-    await tester.tap(find.text(MenuItemType.quitBrowser.label));
+    await tester.tap(find.text('Quit Browser'));
     await tester.pumpAndSettle();
 
     // The sheet is gone — and with it the section — while the confirmation is
@@ -97,7 +100,7 @@ void main() {
       onExit: (container) async => containers.add(container),
     );
 
-    await tester.tap(find.text(MenuItemType.quitBrowser.label));
+    await tester.tap(find.text('Quit Browser'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
@@ -115,7 +118,7 @@ void main() {
       onExit: (container) async => containers.add(container),
     );
 
-    await tester.longPress(find.text(MenuItemType.quitBrowser.label));
+    await tester.longPress(find.text('Quit Browser'));
     await tester.pumpAndSettle();
 
     expect(find.text('Quit Browser'), findsNothing);

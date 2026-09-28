@@ -25,6 +25,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class CopyLink extends HookConsumerWidget {
   final HitResult hitResult;
@@ -37,9 +38,11 @@ class CopyLink extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.contentCopy),
-      title: const Text('Copy link'),
+      title: Text(l10n.contextmenu_copyLink),
       onTap: () async {
         await hitResult.tryGetLink().mapNotNull((link) async {
           await Clipboard.setData(ClipboardData(text: link.toString()));

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
 import 'package:weblibre/core/maintenance/maintenance_lease.dart';
+import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/maintenance_runner.dart';
 import 'package:weblibre/core/startup/models/maintenance_journal.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
@@ -194,7 +195,11 @@ void main() {
 
     expect(result.effectiveState, MaintenanceTaskState.failed);
     expect(result.error, contains('destination folder'));
-    expect(result.failureKind, MaintenanceFailureKind.unknown);
+    expect(result.failureKind, MaintenanceFailureKind.taskNotRunnable);
+    expect(
+      result.errorDetailId,
+      TaskNotRunnableReason.backupDestinationMissing.name,
+    );
     // Never even transitioned to running: there was nothing runnable.
     expect(workRoot.listSync(), isEmpty);
   });
@@ -233,7 +238,7 @@ void main() {
 
     expect(result.effectiveState, MaintenanceTaskState.failed);
     expect(result.error, contains('created by a newer version'));
-    expect(result.failureKind, MaintenanceFailureKind.unknown);
+    expect(result.failureKind, MaintenanceFailureKind.taskNotRunnable);
   });
 
   test('a quarantined task is left exactly as it was', () async {
@@ -401,9 +406,9 @@ void main() {
       );
       await MaintenanceJournalStore(paths).write(journal);
 
-      final summary = await runnerFor(journaled: true).recoverJournal(journal);
+      final outcome = await runnerFor(journaled: true).recoverJournal(journal);
 
-      expect(summary, contains('deletion'));
+      expect(outcome, MaintenanceRecoveryOutcome.deletionCompleted);
       final stored = (await store.read(useCache: false)).taskById('task-1');
       expect(stored?.effectiveState, MaintenanceTaskState.completed);
       expect((await store.read(useCache: false)).requiresMaintenance, isFalse);

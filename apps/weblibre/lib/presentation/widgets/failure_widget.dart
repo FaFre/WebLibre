@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/error_l10n.dart';
 
 class FailureWidget extends StatelessWidget {
   const FailureWidget({
@@ -35,17 +37,16 @@ class FailureWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           ListTile(
-            title: Text(title ?? 'Something went wrong'),
+            title: Text(title ?? l10n.failureWidget_defaultTitle),
             subtitle: exception != null
-                ? switch (exception) {
-                    final String string => Text(string),
-                    _ => Text(exception.runtimeType.toString()),
-                  }
+                ? Text(describeError(l10n, exception as Object))
                 : null,
             trailing: compact && onRetry != null
                 ? IconButton.outlined(
@@ -71,7 +72,7 @@ class FailureWidget extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  label: const Text('Retry'),
+                  label: Text(l10n.common_retry),
                   icon: const Icon(Icons.refresh_outlined),
                 ),
               ),

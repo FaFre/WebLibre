@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The persisted order without its storage: [SearchModuleOrder.build] normally
 /// goes through `persist()` and a database this test has no use for.
@@ -54,6 +55,8 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: CustomScrollView(
               slivers: [

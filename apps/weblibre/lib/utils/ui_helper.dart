@@ -22,6 +22,7 @@ import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
 /// Creates a floating snackbar.
@@ -109,13 +110,15 @@ void showFindInPageSuggestion(
   Duration duration = const Duration(seconds: 5),
   bool persist = false,
 }) {
+  final l10n = AppLocalizations.of(context);
+
   final snackBar = _createFloatingSnackBar(
     content: Text(
-      'Find "${_truncateForSnackBar(query)}" on this page?',
+      l10n.uiHelper_findInPageSuggestion(_truncateForSnackBar(query)),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     ),
-    action: SnackBarAction(label: 'Find', onPressed: onFind),
+    action: SnackBarAction(label: l10n.uiHelper_actionFind, onPressed: onFind),
     duration: duration,
     persist: persist,
   );
@@ -133,9 +136,9 @@ void showOpenedTabsFromAnotherDeviceMessage(
     return;
   }
 
-  final message = openedTabs == 1
-      ? 'Opened 1 tab received from another device'
-      : 'Opened $openedTabs tabs received from another device';
+  final message = AppLocalizations.of(
+    context,
+  ).uiHelper_openedTabsFromAnotherDevice(openedTabs);
 
   showInfoMessage(context, message, duration: duration, persist: persist);
 }
@@ -146,10 +149,14 @@ void showTabBackButtonMessage(
   Duration duration, {
   bool persist = false,
 }) {
+  final l10n = AppLocalizations.of(context);
+
   final snackbar = _createFloatingSnackBar(
-    content: closesTab
-        ? const Text('Navigate BACK again to close current tab')
-        : const Text('Navigate BACK again to exit app'),
+    content: Text(
+      closesTab
+          ? l10n.uiHelper_navigateBackToCloseTab
+          : l10n.uiHelper_navigateBackToExitApp,
+    ),
     duration: duration,
     persist: persist,
   );
@@ -166,15 +173,18 @@ void showTabOpenedMessage(
   Duration duration = const Duration(seconds: 3),
   bool persist = false,
 }) {
+  final l10n = AppLocalizations.of(context);
+
   final message = switch (tabName.whenNotEmpty) {
-    String() => "New tab '$tabName' opened in background",
-    null => 'New tab opened in background',
+    String() => l10n.uiHelper_newTabOpenedInBackgroundNamed(tabName!),
+    null => l10n.uiHelper_newTabOpenedInBackground,
   };
 
   final snackBar = _createFloatingSnackBar(
     content: Text(message),
     action: onShow.mapNotNull(
-      (onPressed) => SnackBarAction(label: 'Show', onPressed: onPressed),
+      (onPressed) =>
+          SnackBarAction(label: l10n.uiHelper_actionShow, onPressed: onPressed),
     ),
     duration: duration,
     persist: persist,
@@ -192,10 +202,13 @@ Future<void> showSuggestNewTabMessage(
   final clipboardUrl = await tryGetUriFromClipboard();
 
   if (clipboardUrl != null) {
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+
     final snackBar = _createFloatingSnackBar(
-      content: const Text('Want to open link from clipboard?'),
+      content: Text(l10n.uiHelper_wantToOpenLinkFromClipboard),
       action: SnackBarAction(
-        label: 'Open',
+        label: l10n.common_open,
         onPressed: () {
           onAdd(clipboardUrl.toString());
         },
@@ -204,9 +217,7 @@ Future<void> showSuggestNewTabMessage(
       persist: persist,
     );
 
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
 
@@ -219,15 +230,20 @@ void showTabSwitchMessage(
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
+  final l10n = AppLocalizations.of(context);
+
   final message = switch (tabName.whenNotEmpty) {
-    String() => "New tab '$tabName' opened",
-    null => 'New tab opened',
+    String() => l10n.uiHelper_newTabOpenedNamed(tabName!),
+    null => l10n.uiHelper_newTabOpened,
   };
 
   final snackBar = _createFloatingSnackBar(
     content: Text(message),
     action: onSwitch.mapNotNull(
-      (onPressed) => SnackBarAction(label: 'Switch', onPressed: onPressed),
+      (onPressed) => SnackBarAction(
+        label: l10n.uiHelper_actionSwitch,
+        onPressed: onPressed,
+      ),
     ),
     duration: duration,
     persist: persist,
@@ -245,18 +261,27 @@ Future<void> launchUrlFeedback(
     try {
       if (!await launchUrl(url, mode: mode)) {
         if (context.mounted) {
-          showErrorMessage(context, 'Could not launch URL ($url)');
+          showErrorMessage(
+            context,
+            AppLocalizations.of(context).uiHelper_couldNotLaunchUrl('$url'),
+          );
         }
       }
     } catch (e, s) {
       logger.e('Failed to launch URL: $url', error: e, stackTrace: s);
       if (context.mounted) {
-        showErrorMessage(context, 'Could not launch URL ($url)');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(context).uiHelper_couldNotLaunchUrl('$url'),
+        );
       }
     }
   } else {
     if (context.mounted) {
-      showErrorMessage(context, 'Can not handle "${url.scheme}"');
+      showErrorMessage(
+        context,
+        AppLocalizations.of(context).uiHelper_canNotHandleScheme(url.scheme),
+      );
     }
   }
 }
@@ -270,11 +295,11 @@ void showTabUndoClose(
 }) {
   ScaffoldMessenger.of(context).clearSnackBars();
 
+  final l10n = AppLocalizations.of(context);
+
   final snackBar = _createFloatingSnackBar(
-    content: (count > 1)
-        ? Text('$count Tabs closed')
-        : const Text('Tab closed'),
-    action: SnackBarAction(label: 'Undo', onPressed: onUndo),
+    content: Text(l10n.uiHelper_tabsClosedCount(count)),
+    action: SnackBarAction(label: l10n.common_undo, onPressed: onUndo),
     duration: duration,
     persist: persist,
   );
@@ -288,46 +313,27 @@ Future<bool> confirmIsolatedTabClose(
   BuildContext context, {
   int groupCount = 1,
 }) async {
-  final message = groupCount == 1
-      ? 'This will permanently clear all browsing data for this isolated session.'
-      : 'This will permanently clear browsing data for $groupCount isolated sessions.';
+  final l10n = AppLocalizations.of(context);
+  final message = l10n.uiHelper_closeIsolatedTabsConfirm(groupCount);
 
   final result = await showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
-      title: const Text('Close isolated tabs?'),
+      title: Text(l10n.uiHelper_closeIsolatedTabsTitle),
       content: Text(message),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Close'),
+          child: Text(l10n.common_close),
         ),
       ],
     ),
   );
 
   return result ?? false;
-}
-
-void showDismissOverrideMessage(
-  BuildContext context,
-  VoidCallback onDismiss, {
-  Duration duration = const Duration(seconds: 4),
-  bool persist = false,
-}) {
-  ScaffoldMessenger.of(context).clearSnackBars();
-
-  final snackBar = _createFloatingSnackBar(
-    content: const Text('Hiding disabled by site'),
-    action: SnackBarAction(label: 'Dismiss', onPressed: onDismiss),
-    duration: duration,
-    persist: persist,
-  );
-
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }

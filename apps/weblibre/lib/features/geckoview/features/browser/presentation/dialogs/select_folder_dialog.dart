@@ -28,6 +28,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Bottom sheet to select a bookmark folder.
 /// Returns the selected folder GUID or null if cancelled.
@@ -46,6 +47,7 @@ class _SelectFolderSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedFolderGuid = useState(BookmarkRoot.mobile.id);
+    final l10n = AppLocalizations.of(context);
 
     return SafeArea(
       child: Padding(
@@ -55,7 +57,7 @@ class _SelectFolderSheet extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Select folder',
+              l10n.browser_selectFolderTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
@@ -93,12 +95,12 @@ class _SelectFolderSheet extends HookConsumerWidget {
               children: [
                 TextButton(
                   onPressed: () => context.pop(),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.common_cancel),
                 ),
                 const SizedBox(width: 8),
                 FilledButton(
                   onPressed: () => context.pop(selectedFolderGuid.value),
-                  child: const Text('Select'),
+                  child: Text(l10n.browser_actionSelect),
                 ),
               ],
             ),

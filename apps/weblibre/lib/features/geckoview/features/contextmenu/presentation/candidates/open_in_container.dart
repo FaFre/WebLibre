@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 sealed class _PickerResult {}
@@ -62,6 +63,7 @@ class OpenInContainer extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     if (!settings.showContainerUi) {
       return const SizedBox.shrink();
@@ -69,7 +71,7 @@ class OpenInContainer extends HookConsumerWidget {
 
     return ListTile(
       leading: const Icon(MdiIcons.selectGroup),
-      title: const Text('Open in container'),
+      title: Text(l10n.contextmenu_openInContainer),
       onTap: () async {
         final result = await showModalBottomSheet<_PickerResult?>(
           context: context,
@@ -126,6 +128,7 @@ class OpenInContainer extends HookConsumerWidget {
 class _ContainerPickerSheet extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final containersAsync = ref.watch(watchContainersWithCountProvider);
 
     return SafeArea(
@@ -135,7 +138,7 @@ class _ContainerPickerSheet extends HookConsumerWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Select Container',
+              l10n.contextmenu_selectContainerTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
@@ -167,7 +170,7 @@ class _ContainerPickerSheet extends HookConsumerWidget {
                 ),
                 error: (error, stackTrace) => Center(
                   child: FailureWidget(
-                    title: 'Failed to load containers',
+                    title: l10n.contextmenu_loadContainersFailedTitle,
                     exception: error,
                     onRetry: () =>
                         ref.invalidate(watchContainersWithCountProvider),
@@ -192,7 +195,7 @@ class _ContainerPickerSheet extends HookConsumerWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.add),
-            title: const Text('New Container'),
+            title: Text(l10n.contextmenu_newContainer),
             onTap: () => Navigator.pop(context, _CreateNewContainer()),
           ),
         ],

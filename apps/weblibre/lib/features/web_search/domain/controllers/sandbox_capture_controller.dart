@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'dart:async';
 
 import 'package:fast_equatable/fast_equatable.dart';
@@ -355,9 +374,6 @@ class SandboxCaptureController extends _$SandboxCaptureController {
           final kind = outcome == TokenTopUpOutcome.noCredits
               ? SandboxCaptureErrorKind.insufficientCredits
               : SandboxCaptureErrorKind.tokenIssuanceFailed;
-          final detail = outcome == TokenTopUpOutcome.noCredits
-              ? 'You have no search credits left. Purchase more to continue.'
-              : 'Could not issue new search tokens. Check your connection and try again.';
           logger.w(
             'Sandbox capture: auto-issuance did not yield a token '
             '(outcome=$outcome, host=${targetUrl.host})',
@@ -367,7 +383,11 @@ class SandboxCaptureController extends _$SandboxCaptureController {
             captureId: placeholderId,
             url: targetUrl,
             kind: kind,
-            detail: detail,
+            // No detail: main_app.dart's `_SandboxCaptureErrorListener`
+            // already has a localized fallback for these two kinds
+            // (mainApp_sandboxNoCredits/mainApp_sandboxTokenIssuanceFailed) —
+            // this used to shadow it with byte-identical hardcoded English,
+            // leaving that fallback dead.
           );
           return;
         }
@@ -548,7 +568,7 @@ class SandboxCaptureController extends _$SandboxCaptureController {
     required String captureId,
     required Uri url,
     required SandboxCaptureErrorKind kind,
-    required String detail,
+    String? detail,
   }) async {
     final dao = ref.read(tabDatabaseProvider).captureTabDao;
     await dao.updateStatus(tabId, CaptureTabStatus.failed);

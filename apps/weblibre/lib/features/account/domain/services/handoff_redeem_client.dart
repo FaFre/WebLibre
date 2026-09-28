@@ -21,22 +21,22 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/account/data/models/account_auth_state.dart';
 import 'package:weblibre/features/account/data/supabase_config.dart';
 import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'handoff_redeem_client.g.dart';
 
-/// Thrown by [HandoffRedeemClient.redeem] when we want to surface a
-/// specific, already-safe message to the user (e.g. a server-supplied error
-/// string). Distinguishes "messages we trust to show verbatim" from
+/// Thrown by the sign-in flow when it knows what went wrong well enough to
+/// tell the user ([error]). Distinguishes "errors we trust to show" from
 /// arbitrary `Exception.toString()` output, which may carry HTTP bodies,
 /// tokens, or stack frames.
 class AccountAuthFlowException implements Exception {
-  final String userMessage;
-  AccountAuthFlowException(this.userMessage);
+  final AccountAuthError error;
+  AccountAuthFlowException(this.error);
 
   @override
-  String toString() => userMessage;
+  String toString() => 'AccountAuthFlowException($error)';
 }
 
 /// Successful response from the `handoff-redeem` Supabase function. Holds
@@ -97,7 +97,9 @@ class HandoffRedeemClient {
         // echo HTML/HTTP detail to the user.
       }
       throw AccountAuthFlowException(
-        serverMessage ?? 'Sign-in failed. Please try again.',
+        serverMessage != null
+            ? AccountAuthError.server(serverMessage)
+            : AccountAuthError(AccountAuthErrorKind.signInFailed),
       );
     }
 

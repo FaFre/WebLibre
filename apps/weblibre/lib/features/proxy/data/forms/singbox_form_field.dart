@@ -42,8 +42,15 @@ enum SingboxFieldKind {
 
 class SingboxProxyFormField {
   final String key;
-  final String label;
-  final String? helperText;
+
+  /// Identifies this field for display-label/helper-text lookup
+  /// (`presentation/utils/singbox_form_field_l10n.dart`) — kept separate from
+  /// [key] because [key] is the sing-box wire-format field name, and two
+  /// different protocols occasionally reuse the same wire name for
+  /// differently-labeled fields (e.g. `version` on SOCKS vs. ShadowTLS).
+  /// Defaults to [key] itself, which is unique except for those few cases.
+  final String labelKey;
+
   final String? defaultValue;
   final bool required;
   final SingboxFieldKind kind;
@@ -57,8 +64,7 @@ class SingboxProxyFormField {
 
   const SingboxProxyFormField({
     required this.key,
-    required this.label,
-    this.helperText,
+    String? labelKey,
     this.defaultValue,
     this.required = false,
     this.kind = SingboxFieldKind.text,
@@ -66,7 +72,7 @@ class SingboxProxyFormField {
     this.minValue,
     this.maxValue,
     this.allowedValues,
-  });
+  }) : labelKey = labelKey ?? key;
 
   bool get isSecret => kind == SingboxFieldKind.secret;
   bool get isNumber =>

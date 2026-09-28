@@ -27,61 +27,70 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> extensionsSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Extensions',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Manage Extensions',
-        subtitle:
-            'Browse installed, disabled, available, and unsupported extensions',
-        keywords: ['addons', 'browser extensions'],
-        child: _ManageExtensionsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Custom Collection',
-        subtitle: 'Use a custom Mozilla addon collection',
-        keywords: ['addons'],
-        child: _AddonCollectionTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Updates',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Automatic updates',
-        subtitle:
-            'Automatically check for and install extension updates every 12 hours',
-        keywords: ['addons'],
-        child: _AutoUpdateTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Security',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Allow unsigned extensions',
-        subtitle: 'Unsigned extensions have not been verified by Mozilla',
-        keywords: ['addons'],
-        child: _AllowUnsignedExtensionsTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> extensionsSettingsSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_extensionsSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_manageExtensionsTitle,
+          subtitle: l10n.settings_manageExtensionsSubtitle,
+          keywords: settingsKeywords(l10n.settings_manageExtensionsKeywords),
+          child: const _ManageExtensionsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_customCollectionTitle,
+          subtitle: l10n.settings_customCollectionSubtitle,
+          keywords: settingsKeywords(l10n.settings_customCollectionKeywords),
+          child: const _AddonCollectionTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_updatesSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_automaticUpdatesTitle,
+          subtitle: l10n.settings_automaticUpdatesSubtitle,
+          keywords: settingsKeywords(l10n.settings_automaticUpdatesKeywords),
+          child: const _AutoUpdateTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_securitySectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_allowUnsignedExtensionsTitle,
+          subtitle: l10n.settings_allowUnsignedExtensionsSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_allowUnsignedExtensionsKeywords,
+          ),
+          child: const _AllowUnsignedExtensionsTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class ExtensionsSettingsScreen extends StatelessWidget {
   const ExtensionsSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Extensions',
-      subtitle: 'Manage add-ons, update behavior, and extension security.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_extensionsTitle,
+      subtitle: l10n.settings_extensionsSubtitle,
       icon: MdiIcons.puzzleOutline,
-      sections: extensionsSettingsSections,
+      sections: extensionsSettingsSections(context),
     );
   }
 }
@@ -91,15 +100,15 @@ class _ManageExtensionsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: Icon(
         MdiIcons.puzzleEdit,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
-      title: const Text('Manage Extensions'),
-      subtitle: const Text(
-        'Browse installed, disabled, available, and unsupported extensions',
-      ),
+      title: Text(l10n.settings_manageExtensionsTitle),
+      subtitle: Text(l10n.settings_manageExtensionsSubtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await const AddonManagerRoute().push<void>(context);
@@ -113,13 +122,15 @@ class _AddonCollectionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: Icon(
         MdiIcons.folderMultiple,
         color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
-      title: const Text('Custom Collection'),
-      subtitle: const Text('Use a custom Mozilla addon collection'),
+      title: Text(l10n.settings_customCollectionTitle),
+      subtitle: Text(l10n.settings_customCollectionSubtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await AddonCollectionRoute().push(context);
@@ -134,13 +145,12 @@ class _AutoUpdateTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final autoUpdate = ref.watch(addonAutoUpdateProvider);
+    final l10n = AppLocalizations.of(context);
 
     return autoUpdate.when(
       data: (enabled) => SwitchListTile.adaptive(
-        title: const Text('Automatic updates'),
-        subtitle: const Text(
-          'Automatically check for and install extension updates every 12 hours',
-        ),
+        title: Text(l10n.settings_automaticUpdatesTitle),
+        subtitle: Text(l10n.settings_automaticUpdatesSubtitle),
         secondary: const Icon(Icons.system_update_alt),
         value: enabled,
         onChanged: (value) async {
@@ -149,19 +159,17 @@ class _AutoUpdateTile extends ConsumerWidget {
               .setEnabled(enabled: value);
         },
       ),
-      loading: () => const SwitchListTile.adaptive(
-        title: Text('Automatic updates'),
-        subtitle: Text(
-          'Automatically check for and install extension updates every 12 hours',
-        ),
-        secondary: Icon(Icons.system_update_alt),
+      loading: () => SwitchListTile.adaptive(
+        title: Text(l10n.settings_automaticUpdatesTitle),
+        subtitle: Text(l10n.settings_automaticUpdatesSubtitle),
+        secondary: const Icon(Icons.system_update_alt),
         value: true,
         onChanged: null,
       ),
       error: (error, stack) => ListTile(
         leading: const Icon(Icons.error_outline),
-        title: const Text('Automatic updates'),
-        subtitle: Text('Failed to load: $error'),
+        title: Text(l10n.settings_automaticUpdatesTitle),
+        subtitle: Text(l10n.settings_failedToLoadMessage('$error')),
       ),
     );
   }
@@ -173,15 +181,14 @@ class _AllowUnsignedExtensionsTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allowUnsigned = ref.watch(allowUnsignedExtensionsProvider);
+    final l10n = AppLocalizations.of(context);
 
     return allowUnsigned.when(
       data: (allowed) => Column(
         children: [
           SwitchListTile.adaptive(
-            title: const Text('Allow unsigned extensions'),
-            subtitle: const Text(
-              'Unsigned extensions have not been verified by Mozilla',
-            ),
+            title: Text(l10n.settings_allowUnsignedExtensionsTitle),
+            subtitle: Text(l10n.settings_allowUnsignedExtensionsSubtitle),
             secondary: const Icon(Icons.extension_off),
             value: allowed,
             onChanged: (value) async {
@@ -220,8 +227,7 @@ class _AllowUnsignedExtensionsTile extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Only install unsigned extensions from sources you trust. '
-                        'They may contain malicious code.',
+                        l10n.settings_allowUnsignedWarningText,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onErrorContainer,
                           fontSize: 12,
@@ -234,17 +240,17 @@ class _AllowUnsignedExtensionsTile extends ConsumerWidget {
             ),
         ],
       ),
-      loading: () => const SwitchListTile.adaptive(
-        title: Text('Allow unsigned extensions'),
-        subtitle: Text('Unsigned extensions have not been verified by Mozilla'),
-        secondary: Icon(Icons.extension_off),
+      loading: () => SwitchListTile.adaptive(
+        title: Text(l10n.settings_allowUnsignedExtensionsTitle),
+        subtitle: Text(l10n.settings_allowUnsignedExtensionsSubtitle),
+        secondary: const Icon(Icons.extension_off),
         value: false,
         onChanged: null,
       ),
       error: (error, stack) => ListTile(
         leading: const Icon(Icons.error_outline),
-        title: const Text('Allow unsigned extensions'),
-        subtitle: Text('Failed to load: $error'),
+        title: Text(l10n.settings_allowUnsignedExtensionsTitle),
+        subtitle: Text(l10n.settings_failedToLoadMessage('$error')),
       ),
     );
   }
@@ -278,6 +284,7 @@ class _AllowUnsignedConfirmationDialog extends HookWidget {
 
     final theme = Theme.of(context);
     final canConfirm = remaining.value == 0;
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       icon: Icon(
@@ -285,40 +292,26 @@ class _AllowUnsignedConfirmationDialog extends HookWidget {
         color: theme.colorScheme.error,
         size: 40,
       ),
-      title: const Text('Allow unsigned extensions?'),
+      title: Text(l10n.settings_allowUnsignedConfirmDialogTitle),
       content: Text.rich(
         TextSpan(
           children: [
             TextSpan(
-              text:
-                  "Warning: This significantly weakens your browser's security."
-                  '\n\n',
+              text: '${l10n.settings_allowUnsignedConfirmWarningBold}\n\n',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.error,
               ),
             ),
-            const TextSpan(
-              text:
-                  "Unsigned extensions bypass Mozilla's safety review process. "
-                  'Malicious extensions can:\n\n'
-                  '\u2022 Read and modify everything you see on any website\n'
-                  '\u2022 Steal passwords, banking details, and personal data\n'
-                  '\u2022 Monitor your browsing activity silently\n'
-                  '\u2022 Install additional malware on your device\n\n',
-            ),
-            const TextSpan(
-              text:
-                  'Only enable this if you are a developer installing your own '
-                  'extension or absolutely trust the source.',
-            ),
+            TextSpan(text: '${l10n.settings_allowUnsignedConfirmBody}\n\n'),
+            TextSpan(text: l10n.settings_allowUnsignedConfirmFooter),
           ],
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: canConfirm ? () => Navigator.of(context).pop(true) : null,
@@ -326,7 +319,11 @@ class _AllowUnsignedConfirmationDialog extends HookWidget {
             backgroundColor: theme.colorScheme.error,
             foregroundColor: theme.colorScheme.onError,
           ),
-          child: Text(canConfirm ? 'Allow' : 'Allow (${remaining.value})'),
+          child: Text(
+            canConfirm
+                ? l10n.settings_allowAction
+                : l10n.settings_allowActionCountdown(remaining.value),
+          ),
         ),
       ],
     );

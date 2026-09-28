@@ -27,6 +27,7 @@ import 'package:weblibre/features/app_links/domain/entities/context_app_link_pol
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Per-container app-link settings (§ container isolation), bound to
 /// `GeneralSettings.appLinkContextOverrides[contextId]`. Mirrors the global
@@ -68,6 +69,7 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final override = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.appLinkContextOverrides[contextId],
@@ -83,8 +85,8 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
         appBar: AppBar(
           title: Text(
             containerName != null
-                ? 'App Links — $containerName'
-                : 'Container App Links',
+                ? l10n.appLinks_settingsTitleWithContainer(containerName!)
+                : l10n.appLinks_settingsTitleDefault,
           ),
           leading: IconButton(
             icon: const Icon(Icons.close),
@@ -94,12 +96,9 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
         body: ListView(
           padding: const EdgeInsets.symmetric(vertical: 8),
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(
-                'These settings apply only to this container and fully replace '
-                'the global app-link settings for its tabs.',
-              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Text(l10n.appLinks_settingsIntro),
             ),
             RadioGroup(
               groupValue: policy.mode,
@@ -108,37 +107,31 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
                   await _updateOverride(ref, (c) => c.copyWith.mode(value));
                 }
               },
-              child: const Column(
+              child: Column(
                 children: [
                   RadioListTile.adaptive(
                     value: AppLinksMode.always,
-                    title: Text('Always'),
-                    subtitle: Text(
-                      'Always open links in their native apps without asking',
-                    ),
+                    title: Text(l10n.appLinks_modeAlwaysTitle),
+                    subtitle: Text(l10n.appLinks_modeAlwaysSubtitle),
                   ),
                   RadioListTile.adaptive(
                     value: AppLinksMode.ask,
-                    title: Text('Ask before opening'),
-                    subtitle: Text(
-                      'Show a prompt before opening links in apps',
-                    ),
+                    title: Text(l10n.appLinks_modeAskTitle),
+                    subtitle: Text(l10n.appLinks_modeAskSubtitle),
                   ),
                   RadioListTile.adaptive(
                     value: AppLinksMode.never,
-                    title: Text('Never'),
-                    subtitle: Text(
-                      'Always open links in the browser instead of apps',
-                    ),
+                    title: Text(l10n.appLinks_modeNeverTitle),
+                    subtitle: Text(l10n.appLinks_modeNeverSubtitle),
                   ),
                 ],
               ),
             ),
             if (rules.isNotEmpty) ...[
               const Divider(),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-                child: Text('Remembered site rules'),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Text(l10n.appLinks_rememberedRulesHeader),
               ),
               for (final MapEntry(:key, :value) in rules)
                 ListTile(
@@ -151,12 +144,12 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
                   title: Text(displayAppLinkScope(key)),
                   subtitle: Text(
                     value.decision == AppLinkRuleDecision.alwaysOpen
-                        ? 'Always open in the app'
-                        : 'Always keep in the browser',
+                        ? l10n.appLinks_ruleAlwaysOpenSubtitle
+                        : l10n.appLinks_ruleAlwaysKeepSubtitle,
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete_outline),
-                    tooltip: 'Remove rule',
+                    tooltip: l10n.appLinks_removeRuleTooltip,
                     onPressed: () async {
                       await _updateOverride(
                         ref,

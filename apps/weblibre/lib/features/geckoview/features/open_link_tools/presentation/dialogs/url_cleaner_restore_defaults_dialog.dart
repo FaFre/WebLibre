@@ -19,26 +19,29 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<bool?> showUrlCleanerRestoreDefaultsDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: const Text('Restore defaults?'),
-      content: const Text(
-        'This will reset URL cleaner settings and remove the locally stored catalog.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Restore'),
-        ),
-      ],
-    ),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        title: Text(l10n.openLinkTools_restoreDefaultsTitle),
+        content: Text(l10n.openLinkTools_restoreDefaultsContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.common_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.openLinkTools_actionRestore),
+          ),
+        ],
+      );
+    },
   );
 }

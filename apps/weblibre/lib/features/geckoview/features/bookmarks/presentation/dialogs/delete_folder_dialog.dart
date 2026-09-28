@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Confirms deleting a folder and everything inside it.
 ///
@@ -33,33 +34,30 @@ Future<bool?> showDeleteFolderDialog(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
         icon: const Icon(Icons.warning),
-        title: const Text('Delete Folder'),
-        content: Text(switch (bookmarkCount) {
-          null =>
-            'Are you sure you want to delete this Folder including '
-                'all bookmarks?',
-          0 => 'Are you sure you want to delete this Folder?',
-          1 =>
-            'Are you sure you want to delete this Folder and the '
-                '1 bookmark inside it?',
-          final count =>
-            'Are you sure you want to delete this Folder and the '
-                '$count bookmarks inside it?',
-        }),
+        title: Text(l10n.bookmarks_deleteFolderTitle),
+        // `bookmarkCount == null` is not a plural form — it means the count
+        // wasn't computed, distinct copy from "the count is zero".
+        content: Text(
+          bookmarkCount == null
+              ? l10n.bookmarks_deleteFolderConfirmUnknown
+              : l10n.bookmarks_deleteFolderConfirmCount(bookmarkCount),
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Delete'),
+            child: Text(l10n.common_delete),
           ),
         ],
       );

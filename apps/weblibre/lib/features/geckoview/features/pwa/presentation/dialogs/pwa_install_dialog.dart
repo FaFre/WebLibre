@@ -25,6 +25,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -154,6 +155,7 @@ class _InstallConfigSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -182,7 +184,7 @@ class _InstallConfigSheet extends HookConsumerWidget {
             !isIsolatedContextId(containerContextId)) {
           list.add(
             _StorageContainer(
-              label: containerData.name ?? 'Container',
+              label: containerData.name ?? l10n.pwa_defaultContainerLabel,
               contextId: containerContextId,
             ),
           );
@@ -250,7 +252,10 @@ class _InstallConfigSheet extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Add to Home Screen', style: textTheme.titleMedium),
+                  Text(
+                    l10n.pwa_addToHomeScreenTitle,
+                    style: textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -274,9 +279,9 @@ class _InstallConfigSheet extends HookConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: TextField(
                 controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.pwa_nameFieldLabel,
+                  border: const OutlineInputBorder(),
                   isDense: true,
                 ),
                 textInputAction: TextInputAction.done,
@@ -285,7 +290,7 @@ class _InstallConfigSheet extends HookConsumerWidget {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text(
-                'Storage',
+                l10n.pwa_storageLabel,
                 style: textTheme.labelLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -311,15 +316,15 @@ class _InstallConfigSheet extends HookConsumerWidget {
             if (showAppOption)
               ListTile(
                 leading: const Icon(Icons.install_mobile),
-                title: const Text('Install as App'),
-                subtitle: const Text('Runs standalone with its own window.'),
+                title: Text(l10n.pwa_installAsAppTitle),
+                subtitle: Text(l10n.pwa_installAsAppSubtitle),
                 onTap: () => submit(ShortcutInstallType.app),
               ),
             if (showShortcutOption)
               ListTile(
                 leading: const Icon(Icons.shortcut),
-                title: const Text('Add Shortcut'),
-                subtitle: const Text('Opens as a standard tab in the browser.'),
+                title: Text(l10n.pwa_addShortcutTitle),
+                subtitle: Text(l10n.pwa_addShortcutSubtitle),
                 onTap: () => submit(ShortcutInstallType.shortcut),
               ),
             const SizedBox(height: 8),
@@ -338,25 +343,26 @@ class _StorageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final (title, subtitle, icon) = switch (option) {
       _StorageDefault() => (
-        'Default',
-        'Uses the default browser storage (no container).',
+        l10n.pwa_storageDefaultTitle,
+        l10n.pwa_storageDefaultSubtitle,
         Icons.public,
       ),
       _StorageContainer(:final label) => (
-        'Container "$label"',
-        'Shares cookies and data with the selected container.',
+        l10n.pwa_storageContainerTitle(label),
+        l10n.pwa_storageContainerSubtitle,
         Icons.folder_outlined,
       ),
       _StorageInheritIsolated() => (
-        'Inherit current isolated context',
-        'Shares storage with the currently open isolated session.',
+        l10n.pwa_storageInheritIsolatedTitle,
+        l10n.pwa_storageInheritIsolatedSubtitle,
         Icons.link,
       ),
       _StorageNewIsolated() => (
-        'New isolated context',
-        'Creates a fresh storage jar just for this installation.',
+        l10n.pwa_storageNewIsolatedTitle,
+        l10n.pwa_storageNewIsolatedSubtitle,
         Icons.shield_outlined,
       ),
     };

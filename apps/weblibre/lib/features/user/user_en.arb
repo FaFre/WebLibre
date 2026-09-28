@@ -1,0 +1,786 @@
+{
+  "@@locale": "en",
+  "user_profilesTitle": "Profiles",
+  "@user_profilesTitle": {
+    "description": "Title of the screen listing browser profiles. Each profile is a fully separate browser with its own tabs, history and settings."
+  },
+  "user_activeProfileLabel": "Active",
+  "@user_activeProfileLabel": {
+    "description": "Line under the profile currently in use, in the profile list."
+  },
+  "user_loadProfilesFailedTitle": "Could not load profiles",
+  "@user_loadProfilesFailedTitle": {
+    "description": "Error heading when the list of profiles could not be loaded."
+  },
+  "user_askWhichProfileTitle": "Ask which profile to open",
+  "@user_askWhichProfileTitle": {
+    "description": "Switch in the profile list: show a profile picker every time the app starts."
+  },
+  "user_askWhichProfileSubtitle": "At startup, when more than one profile exists",
+  "@user_askWhichProfileSubtitle": {
+    "description": "Explanation under that switch."
+  },
+  "user_createBackupTitle": "Create Backup",
+  "@user_createBackupTitle": {
+    "description": "Title of the screen for backing up a profile to an encrypted file."
+  },
+  "user_restartingToTakeBackup": "Restarting to take the backup",
+  "@user_restartingToTakeBackup": {
+    "description": "Message shown when the app restarts to create the backup."
+  },
+  "user_backupRestartsTitle": "WebLibre restarts to do this",
+  "@user_backupRestartsTitle": {
+    "description": "Row on the backup screen explaining that the app restarts to take the backup. WebLibre is the app name."
+  },
+  "user_backupRestartsSubtitle": "{restartClosesCurrentProfile} The backup is taken while the profile is closed, so its contents cannot change during the backup.",
+  "@user_backupRestartsSubtitle": {
+    "description": "Explanation under that row. restartClosesCurrentProfile is a full sentence saying the restart also closes the profile currently in use.",
+    "placeholders": {
+      "restartClosesCurrentProfile": {
+        "type": "String"
+      }
+    }
+  },
+  "user_setPasswordNextTitle": "You set the password next",
+  "@user_setPasswordNextTitle": {
+    "description": "Row on the backup screen: the backup password is asked for in the next step, after the restart."
+  },
+  "user_setPasswordNextSubtitle": "After restarting, WebLibre asks for the backup file password.",
+  "@user_setPasswordNextSubtitle": {
+    "description": "Explanation under that row."
+  },
+  "user_verifyBackupIntegrityTitle": "Verify backup integrity",
+  "@user_verifyBackupIntegrityTitle": {
+    "description": "Switch on the backup screen: check the finished backup file by test-reading it."
+  },
+  "user_verifyBackupIntegritySubtitle": "Check that the backup can be restored",
+  "@user_verifyBackupIntegritySubtitle": {
+    "description": "Explanation under that switch."
+  },
+  "user_tempDataSkippedTitle": "Temporary data is skipped",
+  "@user_tempDataSkippedTitle": {
+    "description": "Row on the backup screen: temporary data is not included in backups."
+  },
+  "user_tempDataSkippedSubtitle": "Cache files and other data WebLibre can rebuild are not saved. {shortcutsNeedPinningAgain}",
+  "@user_tempDataSkippedSubtitle": {
+    "description": "Explanation under that row. shortcutsNeedPinningAgain is a full sentence about re-adding home-screen shortcuts after restoring.",
+    "placeholders": {
+      "shortcutsNeedPinningAgain": {
+        "type": "String"
+      }
+    }
+  },
+  "user_accountDataIncludedTitle": "WebLibre account data is included",
+  "@user_accountDataIncludedTitle": {
+    "description": "Row on the backup screen: WebLibre account sign-in data is included in the backup file."
+  },
+  "user_accountDataIncludedSubtitle": "The backup file includes this profile’s {profileSecretDataDescription}. Replacing a profile restores them; creating a new profile does not. Use a strong password.",
+  "@user_accountDataIncludedSubtitle": {
+    "description": "Explanation under that row. profileSecretDataDescription is a lowercase list such as \"WebLibre account sign-in, sync setup and proxy details\".",
+    "placeholders": {
+      "profileSecretDataDescription": {
+        "type": "String"
+      }
+    }
+  },
+  "user_closingToTakeBackup": "Closing WebLibre to take the backup…",
+  "@user_closingToTakeBackup": {
+    "description": "Progress text while the app closes to take a backup."
+  },
+  "user_actionBackup": "Backup",
+  "@user_actionBackup": {
+    "description": "Button that starts a profile backup (asks for confirmation)."
+  },
+  "user_backupsTitle": "Backups",
+  "@user_backupsTitle": {
+    "description": "Title of the screen listing backup files in the chosen folder."
+  },
+  "user_changeBackupFolderTooltip": "Change backup folder",
+  "@user_changeBackupFolderTooltip": {
+    "description": "Tooltip of the button that picks a different folder for backups."
+  },
+  "user_chooseBackupFolderPrompt": "Choose where to store your backups.",
+  "@user_chooseBackupFolderPrompt": {
+    "description": "Shown on the backups screen before a backup folder is chosen."
+  },
+  "user_chooseBackupFolderHint": "Pick a location outside the app, so the backups survive uninstalling it.",
+  "@user_chooseBackupFolderHint": {
+    "description": "Advice under that prompt: choose a folder outside the app's own storage."
+  },
+  "user_chooseFolderButtonLabel": "Choose folder",
+  "@user_chooseFolderButtonLabel": {
+    "description": "Button that opens the system folder picker for backups."
+  },
+  "user_noBackupsFound": "No backups found",
+  "@user_noBackupsFound": {
+    "description": "Shown when the backup folder contains no backups."
+  },
+  "user_loadBackupsFailedTitle": "Could not load backups",
+  "@user_loadBackupsFailedTitle": {
+    "description": "Error heading when the list of backups could not be loaded."
+  },
+  "user_authReasonRequireAuth": "Require authentication for profile",
+  "@user_authReasonRequireAuth": {
+    "description": "Reason shown in the system fingerprint/PIN prompt when turning on authentication for an existing profile."
+  },
+  "user_authReasonConfirmUnlock": "Confirm you can unlock this profile",
+  "@user_authReasonConfirmUnlock": {
+    "description": "Reason shown in the system fingerprint/PIN prompt when creating a locked profile, to prove the device can unlock it."
+  },
+  "user_authReasonUnlockProfile": "Unlock profile",
+  "@user_authReasonUnlockProfile": {
+    "description": "Reason shown in the system biometric or device-credential prompt when opening a locked profile."
+  },
+  "user_authFailedExisting": "Could not confirm your identity. {nothingChanged}",
+  "@user_authFailedExisting": {
+    "description": "Error message when authentication failed while changing a profile's lock. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "user_authFailedNew": "Could not confirm your identity. A locked profile is only created once this device can unlock it.",
+  "@user_authFailedNew": {
+    "description": "Error message when authentication failed while creating a locked profile."
+  },
+  "user_editProfileTitle": "Edit Profile",
+  "@user_editProfileTitle": {
+    "description": "Title of the screen for editing a profile."
+  },
+  "user_createProfileTitle": "Create Profile",
+  "@user_createProfileTitle": {
+    "description": "Title of the screen for creating a profile."
+  },
+  "user_nameFieldLabel": "Name",
+  "@user_nameFieldLabel": {
+    "description": "Label of the profile name field."
+  },
+  "user_authenticationSectionTitle": "Authentication",
+  "@user_authenticationSectionTitle": {
+    "description": "Section heading in the profile editor for locking the profile behind fingerprint or device PIN."
+  },
+  "user_requireAuthenticationTitle": "Require authentication",
+  "@user_requireAuthenticationTitle": {
+    "description": "Switch: require fingerprint or device PIN to open this profile."
+  },
+  "user_requireAuthenticationSubtitle": "Ask before this profile can be opened",
+  "@user_requireAuthenticationSubtitle": {
+    "description": "Explanation under that switch."
+  },
+  "user_autoLockTitle": "Auto-lock",
+  "@user_autoLockTitle": {
+    "description": "Heading of the choice of when a locked profile locks again."
+  },
+  "user_autoLockSubtitle": "When to lock the profile again",
+  "@user_autoLockSubtitle": {
+    "description": "Explanation under \"Auto-lock\"."
+  },
+  "user_lockInBackgroundTitle": "Lock in background",
+  "@user_lockInBackgroundTitle": {
+    "description": "Auto-lock option: lock as soon as the app is left."
+  },
+  "user_lockInBackgroundSubtitle": "As soon as WebLibre leaves the screen",
+  "@user_lockInBackgroundSubtitle": {
+    "description": "Explanation under \"Lock in background\". WebLibre is the app name."
+  },
+  "user_lockAfterTimeoutTitle": "Lock after a timeout",
+  "@user_lockAfterTimeoutTitle": {
+    "description": "Auto-lock option: lock after a period without use."
+  },
+  "user_lockAfterTimeoutSubtitle": "After a period of inactivity",
+  "@user_lockAfterTimeoutSubtitle": {
+    "description": "Explanation under \"Lock after a timeout\"."
+  },
+  "user_lockOnStartupTitle": "Lock on startup only",
+  "@user_lockOnStartupTitle": {
+    "description": "Auto-lock option: lock only when the app starts."
+  },
+  "user_lockOnStartupSubtitle": "Unlock once at startup, then stay unlocked until WebLibre is fully closed",
+  "@user_lockOnStartupSubtitle": {
+    "description": "Explanation under \"Lock on startup only\". WebLibre is the app name."
+  },
+  "user_timeoutFieldTitle": "Timeout",
+  "@user_timeoutFieldTitle": {
+    "description": "Row for choosing how long before the profile locks."
+  },
+  "user_timeoutFieldSubtitle": "How long to wait before locking",
+  "@user_timeoutFieldSubtitle": {
+    "description": "Explanation under \"Timeout\"."
+  },
+  "user_timeoutOneMinute": "1 minute",
+  "@user_timeoutOneMinute": {
+    "description": "Auto-lock timeout option."
+  },
+  "user_timeoutFiveMinutes": "5 minutes",
+  "@user_timeoutFiveMinutes": {
+    "description": "Auto-lock timeout option."
+  },
+  "user_timeoutFifteenMinutes": "15 minutes",
+  "@user_timeoutFifteenMinutes": {
+    "description": "Auto-lock timeout option."
+  },
+  "user_timeoutOneHour": "1 hour",
+  "@user_timeoutOneHour": {
+    "description": "Auto-lock timeout option."
+  },
+  "user_profileActionsSectionTitle": "Profile actions",
+  "@user_profileActionsSectionTitle": {
+    "description": "Section heading in the profile editor for backup, switch and delete buttons."
+  },
+  "user_switchDeleteUnavailableForActive": "Switching and deleting are unavailable for the profile you are using.",
+  "@user_switchDeleteUnavailableForActive": {
+    "description": "Note in the profile editor for the profile in use."
+  },
+  "user_switchToThisProfileLabel": "Switch to this profile",
+  "@user_switchToThisProfileLabel": {
+    "description": "Button in the profile editor that restarts the app with this profile."
+  },
+  "user_deleteFailedWithError": "Could not delete: {error}",
+  "@user_deleteFailedWithError": {
+    "description": "Error message when deleting a profile failed. error is a translated failure description.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "user_deleteProfileFailedGeneric": "Could not delete this profile",
+  "@user_deleteProfileFailedGeneric": {
+    "description": "Error message when a profile could not be deleted (already gone or damaged)."
+  },
+  "user_restoreBackupTitle": "Restore Backup",
+  "@user_restoreBackupTitle": {
+    "description": "Title of the screen for restoring a profile backup file."
+  },
+  "user_backupRestoredMessage": "Backup restored",
+  "@user_backupRestoredMessage": {
+    "description": "Confirmation after a backup was restored into a new profile."
+  },
+  "user_passwordFieldLabel": "Password",
+  "@user_passwordFieldLabel": {
+    "description": "Label of the backup password field."
+  },
+  "user_wrongBackupPassword": "This password did not open the backup file",
+  "@user_wrongBackupPassword": {
+    "description": "Error under the password field when it does not open the backup file."
+  },
+  "user_passwordHelperText": "The password this backup file was created with.",
+  "@user_passwordHelperText": {
+    "description": "Help text under the backup password field."
+  },
+  "user_createNewProfileTitle": "Create a new profile",
+  "@user_createNewProfileTitle": {
+    "description": "Restore option: restore the backup as an additional new profile."
+  },
+  "user_createNewProfileSubtitle": "Keep your existing profiles and add this backup",
+  "@user_createNewProfileSubtitle": {
+    "description": "Explanation under \"Create a new profile\"."
+  },
+  "user_replaceExistingProfileTitle": "Replace an existing profile",
+  "@user_replaceExistingProfileTitle": {
+    "description": "Restore option: overwrite an existing profile with the backup."
+  },
+  "user_replaceExistingProfileSubtitle": "Restart and overwrite one profile with this backup",
+  "@user_replaceExistingProfileSubtitle": {
+    "description": "Explanation under \"Replace an existing profile\"."
+  },
+  "user_newProfileNoSignInTitle": "A new profile starts without WebLibre sign-in",
+  "@user_newProfileNoSignInTitle": {
+    "description": "Note when restoring as a new profile: WebLibre account sign-in is not carried over."
+  },
+  "user_newProfileNoSignInSubtitle": "Tabs, history and bookmarks are restored. Sign-in and sync data stay with the original profile.",
+  "@user_newProfileNoSignInSubtitle": {
+    "description": "Explanation under that note."
+  },
+  "user_restoringIntoTitle": "Restoring into \"{profileLabel}\"",
+  "@user_restoringIntoTitle": {
+    "description": "Line naming the profile the backup will replace. profileLabel is its name.",
+    "placeholders": {
+      "profileLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupKeepsLockConfigured": "The backup keeps the lock you configured.",
+  "@user_backupKeepsLockConfigured": {
+    "description": "Line under \"Restoring into …\" when the profile takes the backup's name: the lock settings stay."
+  },
+  "user_profileKeepsNameAndLock": "The profile keeps its name and lock.",
+  "@user_profileKeepsNameAndLock": {
+    "description": "Line under \"Restoring into …\": the profile keeps its name and lock settings."
+  },
+  "user_profileToReplaceLabel": "Profile to replace",
+  "@user_profileToReplaceLabel": {
+    "description": "Label of the drop-down for choosing which profile the backup replaces."
+  },
+  "user_selectProfileToReplaceValidator": "Select a profile to replace",
+  "@user_selectProfileToReplaceValidator": {
+    "description": "Validation error when no profile to replace was chosen."
+  },
+  "user_multipleProfilesShareNameTitle": "{count, plural, other{{count} profiles are called \"{name}\"}}",
+  "@user_multipleProfilesShareNameTitle": {
+    "description": "Heading when several profiles have the name the backup refers to. count is how many (always more than one); name is the profile name.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "user_multipleProfilesShareNameSubtitle": "The backup names a profile but cannot say which one, so pick the one to replace. {cannotBeUndone}",
+  "@user_multipleProfilesShareNameSubtitle": {
+    "description": "Explanation under that heading. cannotBeUndone is \"This cannot be undone.\"",
+    "placeholders": {
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupTakenFromTitle": "This backup was taken from \"{name}\"",
+  "@user_backupTakenFromTitle": {
+    "description": "Heading when the backup comes from a different profile than the one being replaced. name is the original profile's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupTakenFromSubtitle": "It replaces \"{targetLabel}\", which keeps its name and lock. {shortcutsNeedPinningAgain}",
+  "@user_backupTakenFromSubtitle": {
+    "description": "Explanation under that heading. targetLabel is the profile being replaced; shortcutsNeedPinningAgain is a full sentence about re-adding home-screen shortcuts.",
+    "placeholders": {
+      "targetLabel": {
+        "type": "String"
+      },
+      "shortcutsNeedPinningAgain": {
+        "type": "String"
+      }
+    }
+  },
+  "user_profileWillBeCalledTitle": "This profile will be called \"{name}\"",
+  "@user_profileWillBeCalledTitle": {
+    "description": "Heading when the replaced profile takes the backup's name. name is that name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "user_profileWillBeCalledSubtitle": "The name comes from the backup. {shortcutsNeedPinningAgain}",
+  "@user_profileWillBeCalledSubtitle": {
+    "description": "Explanation under that heading. shortcutsNeedPinningAgain is a full sentence about re-adding home-screen shortcuts.",
+    "placeholders": {
+      "shortcutsNeedPinningAgain": {
+        "type": "String"
+      }
+    }
+  },
+  "user_accountDataRestoredTitle": "WebLibre account data is restored",
+  "@user_accountDataRestoredTitle": {
+    "description": "Note when replacing a profile: WebLibre account sign-in data from the backup is restored."
+  },
+  "user_accountDataRestoredSubtitle": "Replacing restores the backup file's {profileSecretDataDescription}. {signedInFromBackup} {olderBackupKeepsCredentials}",
+  "@user_accountDataRestoredSubtitle": {
+    "description": "Explanation under that note. profileSecretDataDescription is a lowercase list; signedInFromBackup and olderBackupKeepsCredentials are full sentences.",
+    "placeholders": {
+      "profileSecretDataDescription": {
+        "type": "String"
+      },
+      "signedInFromBackup": {
+        "type": "String"
+      },
+      "olderBackupKeepsCredentials": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replacesSetupProfileTitle": "This replaces the profile you are setting up",
+  "@user_replacesSetupProfileTitle": {
+    "description": "Warning heading when the restore replaces the profile being created during first-run setup."
+  },
+  "user_replacesEverythingTitle": "This replaces everything in that profile",
+  "@user_replacesEverythingTitle": {
+    "description": "Warning heading when the restore replaces an existing profile."
+  },
+  "user_replacesSetupProfileSubtitle": "{restartsThenAsksPassword} Anything already in this profile will be replaced when the restore starts.",
+  "@user_replacesSetupProfileSubtitle": {
+    "description": "Warning text under that heading. restartsThenAsksPassword is two sentences: the app restarts, then asks for the backup password.",
+    "placeholders": {
+      "restartsThenAsksPassword": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replacesEverythingSubtitle": "{restartsThenAsksPassword} When the restore starts, it replaces the current {profileDataDescription} in {targetDescription}.",
+  "@user_replacesEverythingSubtitle": {
+    "description": "Warning text. restartsThenAsksPassword is two sentences about the restart; profileDataDescription is a lowercase list such as \"tabs, history, bookmarks, settings and saved site logins\"; targetDescription is the quoted profile name or \"that profile\".",
+    "placeholders": {
+      "restartsThenAsksPassword": {
+        "type": "String"
+      },
+      "profileDataDescription": {
+        "type": "String"
+      },
+      "targetDescription": {
+        "type": "String"
+      }
+    }
+  },
+  "user_thatProfileFallbackLabel": "that profile",
+  "@user_thatProfileFallbackLabel": {
+    "description": "Fallback phrase inserted as targetDescription in the replace warning when no profile is chosen yet. Lowercase."
+  },
+  "user_restoringBackupProgress": "Restoring backup…",
+  "@user_restoringBackupProgress": {
+    "description": "Progress text while a backup is restored into a new profile."
+  },
+  "user_closingToRestoreProgress": "Closing WebLibre to restore…",
+  "@user_closingToRestoreProgress": {
+    "description": "Progress text while the app closes to replace a profile with a backup. WebLibre is the app name."
+  },
+  "user_actionRestore": "Restore",
+  "@user_actionRestore": {
+    "description": "Button that starts restoring the backup."
+  },
+  "user_switchToProfileTitle": "Switch to \"{profileName}\"?",
+  "@user_switchToProfileTitle": {
+    "description": "Title of the confirmation dialog before switching profiles. profileName is the target profile.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_switchClosesReopensAs": "WebLibre closes and reopens as \"{profileName}\".",
+  "@user_switchClosesReopensAs": {
+    "description": "Body of that dialog. profileName is the target profile; WebLibre is the app name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_switchConsequencesList": "• Private tabs are cleared.\n• Web notifications for the profile you leave are paused.",
+  "@user_switchConsequencesList": {
+    "description": "Bulleted list in the switch dialog. Keep the \"•\" bullets and line break (\\n)."
+  },
+  "user_actionNotNow": "Not now",
+  "@user_actionNotNow": {
+    "description": "Button that cancels the profile switch dialog."
+  },
+  "user_actionSwitchAndRestart": "Switch and restart",
+  "@user_actionSwitchAndRestart": {
+    "description": "Button that confirms switching profiles, which restarts the app."
+  },
+  "user_passwordConfirmationTitle": "Password Confirmation",
+  "@user_passwordConfirmationTitle": {
+    "description": "Title of a dialog asking the user to type a password again."
+  },
+  "user_actionConfirm": "Confirm",
+  "@user_actionConfirm": {
+    "description": "Button that confirms the entered password."
+  },
+  "user_selectProfileTitle": "Select profile",
+  "@user_selectProfileTitle": {
+    "description": "Title of the sheet for choosing a profile to switch to."
+  },
+  "user_manageProfilesLabel": "Manage profiles",
+  "@user_manageProfilesLabel": {
+    "description": "Button in the profile picker that opens the profile list."
+  },
+  "user_profileAvatarHint": "Switch to this profile. Long press to edit it.",
+  "@user_profileAvatarHint": {
+    "description": "Accessibility hint read by screen readers for a profile in the picker."
+  },
+  "user_profileAvatarTooltip": "{label}\nLong press to edit",
+  "@user_profileAvatarTooltip": {
+    "description": "Tooltip of a profile in the picker. label is the profile's name. Keep the line break (\\n).",
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "user_addProfileLabel": "Add a profile",
+  "@user_addProfileLabel": {
+    "description": "Accessibility label of the \"+\" tile in the profile picker that creates a profile."
+  },
+  "user_addProfileButtonLabel": "Add profile",
+  "@user_addProfileButtonLabel": {
+    "description": "Text under the \"+\" tile in the profile picker. Keep it short."
+  },
+  "user_quitBrowserTitle": "Quit Browser",
+  "@user_quitBrowserTitle": {
+    "description": "Title of the confirmation dialog before quitting the app."
+  },
+  "user_quitBrowserContent": "This will shut down the browser cleanly and clear private-tab data.",
+  "@user_quitBrowserContent": {
+    "description": "Body of that dialog."
+  },
+  "user_actionQuit": "Quit",
+  "@user_actionQuit": {
+    "description": "Confirm button of that dialog."
+  },
+  "user_deleteProfileTitle": "Delete \"{profileName}\"?",
+  "@user_deleteProfileTitle": {
+    "description": "Title of the confirmation dialog before deleting a profile. profileName is its name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_deleteProfileContent": "Its {profileDataDescription} are removed. {cannotBeUndone}",
+  "@user_deleteProfileContent": {
+    "description": "Body of that dialog. profileDataDescription is a lowercase list such as \"tabs, history, bookmarks, settings and saved site logins\"; cannotBeUndone is \"This cannot be undone.\"",
+    "placeholders": {
+      "profileDataDescription": {
+        "type": "String"
+      },
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "user_deleteProfileRestartNote": "{restartsToWork} {restartClosesCurrentProfile} The profile being deleted is closed first.",
+  "@user_deleteProfileRestartNote": {
+    "description": "Restart note in the delete dialog. restartsToWork and restartClosesCurrentProfile are full sentences about the restart.",
+    "placeholders": {
+      "restartsToWork": {
+        "type": "String"
+      },
+      "restartClosesCurrentProfile": {
+        "type": "String"
+      }
+    }
+  },
+  "user_actionDeleteAndRestart": "Delete and restart",
+  "@user_actionDeleteAndRestart": {
+    "description": "Confirm button of the delete-profile dialog."
+  },
+  "user_replaceProfileTitle": "Replace \"{profileName}\" with this backup?",
+  "@user_replaceProfileTitle": {
+    "description": "Title of the confirmation dialog before replacing a profile with a backup. profileName is its name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replaceProfilePlaceholderContent": "The backup replaces the profile you are setting up. Anything already in it is lost. {cannotBeUndone}",
+  "@user_replaceProfilePlaceholderContent": {
+    "description": "Body of that dialog during first-run setup. cannotBeUndone is \"This cannot be undone.\"",
+    "placeholders": {
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replaceProfileContent": "The backup replaces everything in \"{profileName}\" — its {profileDataDescription}. Anything added after the backup is lost. {cannotBeUndone}",
+  "@user_replaceProfileContent": {
+    "description": "Body of that dialog. profileName is the profile; profileDataDescription is a lowercase list; cannotBeUndone is \"This cannot be undone.\"",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      },
+      "profileDataDescription": {
+        "type": "String"
+      },
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replaceProfileAccountNote": "{signedInFromBackup} The restore also includes {profileSecretDataDescription} from the backup. {olderBackupKeepsCredentials}",
+  "@user_replaceProfileAccountNote": {
+    "description": "Note in that dialog. signedInFromBackup and olderBackupKeepsCredentials are full sentences; profileSecretDataDescription is a lowercase list.",
+    "placeholders": {
+      "signedInFromBackup": {
+        "type": "String"
+      },
+      "profileSecretDataDescription": {
+        "type": "String"
+      },
+      "olderBackupKeepsCredentials": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replaceProfileRenamedNote": "The profile is renamed to \"{adoptedName}\" and keeps its lock. {shortcutsNeedPinningAgain}",
+  "@user_replaceProfileRenamedNote": {
+    "description": "Note in that dialog. adoptedName is the name taken from the backup; shortcutsNeedPinningAgain is a full sentence.",
+    "placeholders": {
+      "adoptedName": {
+        "type": "String"
+      },
+      "shortcutsNeedPinningAgain": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replaceProfileFromSourceNote": "The backup came from \"{sourceProfileName}\". \"{profileName}\" keeps its name and lock. {shortcutsNeedPinningAgain}",
+  "@user_replaceProfileFromSourceNote": {
+    "description": "Note in that dialog. sourceProfileName is the profile the backup came from; profileName is the profile being replaced; shortcutsNeedPinningAgain is a full sentence.",
+    "placeholders": {
+      "sourceProfileName": {
+        "type": "String"
+      },
+      "profileName": {
+        "type": "String"
+      },
+      "shortcutsNeedPinningAgain": {
+        "type": "String"
+      }
+    }
+  },
+  "user_replaceProfileRestartNote": "{restartsThenAsksPassword} Nothing is replaced before that. {restartClosesCurrentProfile}",
+  "@user_replaceProfileRestartNote": {
+    "description": "Restart note in that dialog. restartsThenAsksPassword and restartClosesCurrentProfile are full sentences.",
+    "placeholders": {
+      "restartsThenAsksPassword": {
+        "type": "String"
+      },
+      "restartClosesCurrentProfile": {
+        "type": "String"
+      }
+    }
+  },
+  "user_actionReplaceAndRestart": "Replace and restart",
+  "@user_actionReplaceAndRestart": {
+    "description": "Confirm button of the replace-profile dialog."
+  },
+  "user_backupProfileTitle": "Back up \"{profileName}\"?",
+  "@user_backupProfileTitle": {
+    "description": "Title of the confirmation dialog before backing up a profile. profileName is its name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupProfileContent": "The backup is taken with the profile closed, so nothing in it changes.",
+  "@user_backupProfileContent": {
+    "description": "Body of that dialog."
+  },
+  "user_backupProfileRestartNote": "{restartsToWork} {restartClosesCurrentProfile}",
+  "@user_backupProfileRestartNote": {
+    "description": "Restart note in that dialog; both placeholders are full sentences about the restart. Usually kept as-is.",
+    "placeholders": {
+      "restartsToWork": {
+        "type": "String"
+      },
+      "restartClosesCurrentProfile": {
+        "type": "String"
+      }
+    }
+  },
+  "user_actionBackupAndRestart": "Back up and restart",
+  "@user_actionBackupAndRestart": {
+    "description": "Confirm button of the backup dialog."
+  },
+  "user_profileAlreadyActive": "This profile is already active",
+  "@user_profileAlreadyActive": {
+    "description": "Message when choosing the profile already in use."
+  },
+  "user_switchProfileFailedWithError": "Could not switch profile: {error}",
+  "@user_switchProfileFailedWithError": {
+    "description": "Error message when switching profiles failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "user_profileLockedTitle": "Profile is locked",
+  "@user_profileLockedTitle": {
+    "description": "Heading of the lock screen shown while a profile is locked."
+  },
+  "user_unlockingLabel": "Unlocking...",
+  "@user_unlockingLabel": {
+    "description": "Label of the unlock button while authentication runs."
+  },
+  "user_unlockButtonLabel": "Unlock",
+  "@user_unlockButtonLabel": {
+    "description": "Button on the lock screen that starts fingerprint or PIN authentication."
+  },
+  "user_restartFailedWithError": "Could not restart: {error}",
+  "@user_restartFailedWithError": {
+    "description": "Error message when restarting into another profile failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "user_restartingLabel": "Restarting…",
+  "@user_restartingLabel": {
+    "description": "Label of the choose-another-profile button while the app restarts."
+  },
+  "user_chooseAnotherProfileLabel": "Choose another profile",
+  "@user_chooseAnotherProfileLabel": {
+    "description": "Button on the lock screen that restarts the app with a different profile."
+  },
+  "user_searchSuggestionProviderNone": "Disabled",
+  "@user_searchSuggestionProviderNone": {
+    "description": "Option for the search suggestion service: no suggestions while typing."
+  },
+  "user_searchSuggestionProviderBrave": "Brave",
+  "@user_searchSuggestionProviderBrave": {
+    "description": "Search suggestion service option. Brand name; do not translate."
+  },
+  "user_searchSuggestionProviderDdg": "DuckDuckGo",
+  "@user_searchSuggestionProviderDdg": {
+    "description": "Search suggestion service option. Brand name; do not translate."
+  },
+  "user_searchSuggestionProviderKagi": "Kagi",
+  "@user_searchSuggestionProviderKagi": {
+    "description": "Search suggestion service option. Brand name; do not translate."
+  },
+  "user_searchSuggestionProviderQwant": "Qwant",
+  "@user_searchSuggestionProviderQwant": {
+    "description": "Search suggestion service option. Brand name; do not translate."
+  },
+  "user_deleteBrowsingDataTypeTabsTitle": "Open tabs",
+  "@user_deleteBrowsingDataTypeTabsTitle": {
+    "description": "Checkbox in the delete browsing data dialog: close all open tabs."
+  },
+  "user_deleteBrowsingDataTypeHistoryTitle": "Browsing history",
+  "@user_deleteBrowsingDataTypeHistoryTitle": {
+    "description": "Checkbox in the delete browsing data dialog."
+  },
+  "user_deleteBrowsingDataTypeRecentSearchesTitle": "Recent searches",
+  "@user_deleteBrowsingDataTypeRecentSearchesTitle": {
+    "description": "Checkbox in the delete browsing data dialog: the list of recent search terms."
+  },
+  "user_deleteBrowsingDataTypeRecentSearchesDescription": "Queries shown on the search page",
+  "@user_deleteBrowsingDataTypeRecentSearchesDescription": {
+    "description": "Explanation under \"Recent searches\"."
+  },
+  "user_deleteBrowsingDataTypeCookiesTitle": "Cookies and site data",
+  "@user_deleteBrowsingDataTypeCookiesTitle": {
+    "description": "Checkbox in the delete browsing data dialog."
+  },
+  "user_deleteBrowsingDataTypeCookiesDescription": "You’ll be logged out of most sites",
+  "@user_deleteBrowsingDataTypeCookiesDescription": {
+    "description": "Explanation under \"Cookies and site data\"."
+  },
+  "user_deleteBrowsingDataTypeCacheTitle": "Cached images and files",
+  "@user_deleteBrowsingDataTypeCacheTitle": {
+    "description": "Checkbox in the delete browsing data dialog: temporary copies of web content."
+  },
+  "user_deleteBrowsingDataTypeCacheDescription": "Frees up storage space",
+  "@user_deleteBrowsingDataTypeCacheDescription": {
+    "description": "Explanation under \"Cached images and files\"."
+  },
+  "user_deleteBrowsingDataTypePermissionsTitle": "Site permissions",
+  "@user_deleteBrowsingDataTypePermissionsTitle": {
+    "description": "Checkbox in the delete browsing data dialog: permissions granted to websites (camera, location, etc.)."
+  },
+  "user_deleteBrowsingDataTypeDownloadsTitle": "Downloads",
+  "@user_deleteBrowsingDataTypeDownloadsTitle": {
+    "description": "Checkbox in the delete browsing data dialog: the list of downloads."
+  }
+}

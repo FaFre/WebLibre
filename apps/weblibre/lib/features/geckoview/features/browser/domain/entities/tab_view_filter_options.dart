@@ -29,14 +29,10 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 part 'tab_view_filter_options.g.dart';
 
 enum TabTypeFilter {
-  all('All Tabs'),
-  regularOnly('Regular'),
-  privateOnly('Private'),
-  isolatedOnly('Isolated');
-
-  final String label;
-
-  const TabTypeFilter(this.label);
+  all,
+  regularOnly,
+  privateOnly,
+  isolatedOnly;
 
   bool matches(TabMode? tabMode) => switch (this) {
     all => true,
@@ -47,33 +43,31 @@ enum TabTypeFilter {
 }
 
 enum TabSortType {
-  manual('Default', null),
-  titleAsc('Title A-Z', SortField.titleAsc),
-  titleDesc('Title Z-A', SortField.titleDesc),
-  urlAsc('URL A-Z', SortField.urlAsc),
-  urlDesc('URL Z-A', SortField.urlDesc),
-  newestFirst('Newest First', SortField.dateDesc),
-  oldestFirst('Oldest First', SortField.dateAsc);
+  manual(null),
+  titleAsc(SortField.titleAsc),
+  titleDesc(SortField.titleDesc),
+  urlAsc(SortField.urlAsc),
+  urlDesc(SortField.urlDesc),
+  newestFirst(SortField.dateDesc),
+  oldestFirst(SortField.dateAsc);
 
-  final String label;
   final SortField? sortField;
 
-  const TabSortType(this.label, this.sortField);
+  const TabSortType(this.sortField);
 }
 
 enum TabQuickInterval {
-  last1h('Last Hour', Duration(hours: 1)),
-  last3h('Last 3 Hours', Duration(hours: 3)),
-  last8h('Last 8 Hours', Duration(hours: 8)),
-  last1d('Last Day', Duration(days: 1)),
-  last3d('Last 3 Days', Duration(days: 3)),
-  last1w('Last Week', Duration(days: 7)),
-  last1m('Last Month', Duration(days: 30));
+  last1h(Duration(hours: 1)),
+  last3h(Duration(hours: 3)),
+  last8h(Duration(hours: 8)),
+  last1d(Duration(days: 1)),
+  last3d(Duration(days: 3)),
+  last1w(Duration(days: 7)),
+  last1m(Duration(days: 30));
 
-  final String label;
   final Duration duration;
 
-  const TabQuickInterval(this.label, this.duration);
+  const TabQuickInterval(this.duration);
 
   DateTimeRange<DateTime> toDateRange() {
     final now = DateTime.now();

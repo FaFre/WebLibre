@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+
+  "failureWidget_defaultTitle": "Something went wrong",
+  "@failureWidget_defaultTitle": {
+    "description": "Generic heading of an error panel shown in place of content that failed to load, when the caller gives no specific title. The error details appear below it."
+  },
+  "failureWidget_unknownError": "Unknown error",
+  "@failureWidget_unknownError": {
+    "description": "Shown as the error details when a failure carries no message of its own."
+  }
+}

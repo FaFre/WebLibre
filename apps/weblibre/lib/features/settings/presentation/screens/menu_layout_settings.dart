@@ -22,8 +22,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_layout_slivers.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Arranges the browser menu from Settings, editing the same saved layout as
 /// the "Customize menu" button inside the menu itself.
@@ -36,6 +38,7 @@ class MenuLayoutSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final sections = ref.watch(menuLayoutProvider);
     final focusedSection = useState<MenuSectionType?>(null);
     final focusedItem = useState<MenuItemType?>(null);
@@ -64,7 +67,10 @@ class MenuLayoutSettingsScreen extends HookConsumerWidget {
         stepBack();
       },
       child: SettingsCustomScrollScaffold(
-        title: item?.type.label ?? section?.type.label ?? 'Customize Menu',
+        title:
+            item?.type.label(context) ??
+            section?.type.label(context) ??
+            l10n.settings_menuLayoutTitle,
         actions: [
           if (section == null)
             MenuAnchor(
@@ -74,7 +80,7 @@ class MenuLayoutSettingsScreen extends HookConsumerWidget {
                   onPressed: ref
                       .read(menuLayoutProvider.notifier)
                       .resetToDefaults,
-                  child: const Text('Reset to Defaults'),
+                  child: Text(l10n.settings_actionResetToDefaults),
                 ),
               ],
               builder: (context, controller, child) => IconButton(
@@ -90,11 +96,9 @@ class MenuLayoutSettingsScreen extends HookConsumerWidget {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: Text(
                 switch ((section, item)) {
-                  (null, _) =>
-                    'Drag to reorder. Switch a section off to hide it from the '
-                        'menu.',
-                  (_, null) => 'Drag to reorder the rows in this section.',
-                  _ => 'Drag to reorder the rows this one opens.',
+                  (null, _) => l10n.settings_menuLayoutHintSections,
+                  (_, null) => l10n.settings_menuLayoutHintSectionItems,
+                  _ => l10n.settings_menuLayoutHintSubItems,
                 },
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

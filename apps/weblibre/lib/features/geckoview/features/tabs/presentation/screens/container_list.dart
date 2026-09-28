@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerListScreen extends HookConsumerWidget {
@@ -42,6 +43,7 @@ class ContainerListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final containersAsync = ref.watch(watchContainersWithCountProvider);
     final selectedContainer = ref.watch(selectedContainerProvider);
     final repository = ref.watch(containerRepositoryProvider.notifier);
@@ -65,7 +67,7 @@ class ContainerListScreen extends HookConsumerWidget {
     Widget buildList(List<ContainerDataWithCount> containers) {
       return CustomScrollView(
         slivers: [
-          const SliverAppBar.large(title: Text('Containers')),
+          SliverAppBar.large(title: Text(l10n.tabs_containersTitle)),
           if (containers.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
@@ -73,7 +75,7 @@ class ContainerListScreen extends HookConsumerWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(32),
                   child: Text(
-                    'No containers yet.',
+                    l10n.tabs_noContainersYet,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -124,7 +126,7 @@ class ContainerListScreen extends HookConsumerWidget {
           data: buildList,
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load containers',
+              title: l10n.tabs_loadContainersFailedTitle,
               exception: error,
               onRetry: () => ref.invalidate(watchContainersWithCountProvider),
             ),
@@ -155,7 +157,7 @@ class ContainerListScreen extends HookConsumerWidget {
             containerData: jsonEncode(newContainer.toJson()),
           ).push(context);
         },
-        label: const Text('Container'),
+        label: Text(l10n.tabs_containerFabLabel),
         icon: const Icon(Icons.add),
       ),
     );
@@ -179,6 +181,7 @@ class _ContainerCard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final containerColor = container.color;
@@ -248,18 +251,17 @@ class _ContainerCard extends HookConsumerWidget {
                             children: [
                               _ContainerInfoChip(
                                 icon: Icons.tab_outlined,
-                                label:
-                                    '$tabCount ${tabCount == 1 ? 'tab' : 'tabs'}',
+                                label: l10n.tabs_tabCountChip(tabCount),
                               ),
                               if (container.isPinned)
-                                const _ContainerInfoChip(
+                                _ContainerInfoChip(
                                   icon: MdiIcons.pin,
-                                  label: 'Pinned',
+                                  label: l10n.tabs_chipPinned,
                                 ),
                               if (container.metadata.contextualIdentity != null)
-                                const _ContainerInfoChip(
+                                _ContainerInfoChip(
                                   icon: Icons.cookie_outlined,
-                                  label: 'Isolated',
+                                  label: l10n.tabs_chipIsolated,
                                 ),
                               if (container.metadata.proxyConnectionId != null)
                                 _ContainerInfoChip(
@@ -267,20 +269,21 @@ class _ContainerCard extends HookConsumerWidget {
                                   label: proxyConnectionTitle(
                                     proxyOptions,
                                     container.metadata.proxyConnectionId!,
+                                    l10n,
                                     isLoading: proxyOptionsLoading,
                                   ),
                                 ),
                               if (container.metadata.proxyConnectionId ==
                                       null &&
                                   container.metadata.bypassGlobalProxy)
-                                const _ContainerInfoChip(
+                                _ContainerInfoChip(
                                   icon: Icons.public,
-                                  label: 'Direct',
+                                  label: l10n.tabs_chipDirect,
                                 ),
                               if (container.metadata.clearDataOnExit)
-                                const _ContainerInfoChip(
+                                _ContainerInfoChip(
                                   icon: Icons.cleaning_services_outlined,
-                                  label: 'Clear on exit',
+                                  label: l10n.tabs_chipClearOnExit,
                                 ),
                             ],
                           ),
@@ -309,7 +312,7 @@ class _ContainerCard extends HookConsumerWidget {
                           size: 16,
                           color: palette.onContainerColor,
                         ),
-                        label: const Text('Active'),
+                        label: Text(l10n.tabs_chipActive),
                         side: BorderSide.none,
                         visualDensity: VisualDensity.compact,
                         backgroundColor: palette.containerColor,
@@ -321,7 +324,11 @@ class _ContainerCard extends HookConsumerWidget {
                     FilledButton.tonalIcon(
                       onPressed: onSelect,
                       icon: Icon(isSelected ? Icons.close : Icons.check),
-                      label: Text(isSelected ? 'Unselect' : 'Select'),
+                      label: Text(
+                        isSelected
+                            ? l10n.tabs_actionUnselect
+                            : l10n.tabs_actionSelect,
+                      ),
                     ),
                   ],
                 ),

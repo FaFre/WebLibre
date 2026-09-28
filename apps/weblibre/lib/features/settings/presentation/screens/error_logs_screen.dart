@@ -31,6 +31,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/settings/domain/providers/log_filter.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/log_details_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
@@ -90,14 +91,16 @@ class ErrorLogsScreen extends HookConsumerWidget {
   }
 
   Future<void> _copyToClipboard(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     await Clipboard.setData(ClipboardData(text: _logsText()));
     if (context.mounted) {
-      showInfoMessage(context, 'Logs copied');
+      showInfoMessage(context, l10n.settings_errorLogsCopiedMessage);
     }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final minLogLevel = ref.watch(logFilterProvider);
     final search = useSettingsSearch();
     final query = search.normalizedQuery;
@@ -119,9 +122,9 @@ class ErrorLogsScreen extends HookConsumerWidget {
     );
 
     return SettingsCustomScrollScaffold(
-      title: 'Error Logs',
+      title: l10n.settings_errorLogsTitle,
       searchController: search.controller,
-      searchHintText: 'Search log messages',
+      searchHintText: l10n.settings_errorLogsSearchHint,
       actions: [
         MenuAnchor(
           builder: (context, controller, childAnchor) {
@@ -144,14 +147,14 @@ class ErrorLogsScreen extends HookConsumerWidget {
         IconButton(
           onPressed: () => _copyToClipboard(context),
           icon: const Icon(Icons.copy),
-          tooltip: 'Copy logs',
+          tooltip: l10n.settings_errorLogsCopyTooltip,
         ),
       ],
       slivers: [
         if (sortedLogs.isEmpty)
-          const SliverFillRemaining(
+          SliverFillRemaining(
             hasScrollBody: false,
-            child: Center(child: Text('No logs available')),
+            child: Center(child: Text(l10n.settings_errorLogsEmptyLabel)),
           )
         else
           SliverPadding(

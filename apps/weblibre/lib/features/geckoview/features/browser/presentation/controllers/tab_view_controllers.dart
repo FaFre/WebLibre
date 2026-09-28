@@ -31,14 +31,13 @@ import 'package:weblibre/features/user/data/providers.dart';
 part 'tab_view_controllers.g.dart';
 
 enum TabsViewMode {
-  list(MdiIcons.folderTable, 'List'),
-  grid(MdiIcons.table, 'Grid'),
-  tree(MdiIcons.familyTree, 'Tree');
+  list(MdiIcons.folderTable),
+  grid(MdiIcons.table),
+  tree(MdiIcons.familyTree);
 
   final IconData icon;
-  final String label;
 
-  const TabsViewMode(this.icon, this.label);
+  const TabsViewMode(this.icon);
 }
 
 @Riverpod(keepAlive: true)

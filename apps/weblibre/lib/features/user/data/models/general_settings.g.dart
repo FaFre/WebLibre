@@ -9,6 +9,8 @@ part of 'general_settings.dart';
 abstract class _$GeneralSettingsCWProxy {
   GeneralSettings themeMode(ThemeMode themeMode);
 
+  GeneralSettings appLocale(String? appLocale);
+
   GeneralSettings uiScaleFactor(double uiScaleFactor);
 
   GeneralSettings disableAnimations(bool disableAnimations);
@@ -226,6 +228,7 @@ abstract class _$GeneralSettingsCWProxy {
   /// ```
   GeneralSettings call({
     ThemeMode themeMode,
+    String? appLocale,
     double uiScaleFactor,
     bool disableAnimations,
     RefreshRateMode refreshRateMode,
@@ -326,6 +329,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
 
   @override
   GeneralSettings themeMode(ThemeMode themeMode) => call(themeMode: themeMode);
+
+  @override
+  GeneralSettings appLocale(String? appLocale) => call(appLocale: appLocale);
 
   @override
   GeneralSettings uiScaleFactor(double uiScaleFactor) =>
@@ -716,6 +722,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings call({
     Object? themeMode = const $CopyWithPlaceholder(),
+    Object? appLocale = const $CopyWithPlaceholder(),
     Object? uiScaleFactor = const $CopyWithPlaceholder(),
     Object? disableAnimations = const $CopyWithPlaceholder(),
     Object? refreshRateMode = const $CopyWithPlaceholder(),
@@ -812,6 +819,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.themeMode
           // ignore: cast_nullable_to_non_nullable
           : themeMode as ThemeMode,
+      appLocale: appLocale == const $CopyWithPlaceholder()
+          ? _value.appLocale
+          // ignore: cast_nullable_to_non_nullable
+          : appLocale as String?,
       uiScaleFactor:
           uiScaleFactor == const $CopyWithPlaceholder() || uiScaleFactor == null
           ? _value.uiScaleFactor
@@ -1343,6 +1354,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   Map<String, dynamic> json,
 ) => GeneralSettings.withDefaults(
   themeMode: $enumDecodeNullable(_$ThemeModeEnumMap, json['themeMode']),
+  appLocale: json['appLocale'] as String?,
   uiScaleFactor: (json['uiScaleFactor'] as num?)?.toDouble(),
   disableAnimations: json['disableAnimations'] as bool?,
   refreshRateMode: $enumDecodeNullable(
@@ -1522,6 +1534,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   GeneralSettings instance,
 ) => <String, dynamic>{
   'themeMode': _$ThemeModeEnumMap[instance.themeMode]!,
+  'appLocale': instance.appLocale,
   'uiScaleFactor': instance.uiScaleFactor,
   'disableAnimations': instance.disableAnimations,
   'refreshRateMode': _$RefreshRateModeEnumMap[instance.refreshRateMode]!,

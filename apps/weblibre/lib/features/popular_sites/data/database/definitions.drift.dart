@@ -116,7 +116,16 @@ class $SitesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.Sites, i1.Site>(table),
+                  i0.BaseReferences<i0.GeneratedDatabase, i1.Sites, i1.Site>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -325,8 +334,8 @@ class DefinitionsDrift extends i2.ModularAccessor {
     return customSelect(
       'SELECT * FROM sites WHERE domain LIKE ?1 ESCAPE \'\\\' ORDER BY rank ASC LIMIT ?2',
       variables: [i0.Variable<String>(pattern), i0.Variable<int>(limit)],
-      readsFrom: {sites},
-    ).asyncMap(sites.mapFromRow);
+      readsFrom: {this.sites},
+    ).asyncMap(this.sites.mapFromRow);
   }
 
   i1.Sites get sites =>

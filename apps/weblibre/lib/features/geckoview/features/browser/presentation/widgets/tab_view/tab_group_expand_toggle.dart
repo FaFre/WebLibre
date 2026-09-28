@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 enum TabGroupToggleStyle {
   /// Standard `IconButton`, sits inside a list-tile trailing row alongside
@@ -45,6 +46,7 @@ class TabGroupExpandToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isCollapsed = ref.watch(
       collapsedGroupsProvider.select((set) => set.contains(parentId)),
     );
@@ -55,7 +57,9 @@ class TabGroupExpandToggle extends ConsumerWidget {
     final chevron = isCollapsed
         ? Icons.keyboard_arrow_down_rounded
         : Icons.keyboard_arrow_up_rounded;
-    final tooltip = isCollapsed ? 'Expand group' : 'Collapse group';
+    final tooltip = isCollapsed
+        ? l10n.browser_tooltipExpandGroup
+        : l10n.browser_tooltipCollapseGroup;
 
     void onTap() {
       ref.read(collapsedGroupsProvider.notifier).toggle(parentId);

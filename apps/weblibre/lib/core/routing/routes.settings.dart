@@ -418,7 +418,9 @@ class HomeModulesSettingsRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ModuleSurfaceSettingsScreen();
+    return ModuleSurfaceSettingsScreen(
+      title: AppLocalizations.of(context).settings_moduleSurfaceTitleHome,
+    );
   }
 }
 
@@ -437,9 +439,9 @@ class NewTabModulesSettingsRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ModuleSurfaceSettingsScreen(
+    return ModuleSurfaceSettingsScreen(
       surface: ModuleSurface.newTab,
-      title: 'Customize New Tab',
+      title: AppLocalizations.of(context).settings_moduleSurfaceTitleNewTab,
     );
   }
 }
@@ -450,7 +452,11 @@ class ContextualToolbarSettingsRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ContextualToolbarSettingsScreen();
+    return ContextualToolbarSettingsScreen(
+      title: AppLocalizations.of(
+        context,
+      ).settings_contextualToolbarTitleDefault,
+    );
   }
 }
 
@@ -470,9 +476,11 @@ class QuickSwitcherToolbarSettingsRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const ContextualToolbarSettingsScreen(
+    return ContextualToolbarSettingsScreen(
       location: ToolbarConfigLocation.quickSwitcher,
-      title: 'Customize Switcher Buttons',
+      title: AppLocalizations.of(
+        context,
+      ).settings_contextualToolbarTitleQuickSwitcher,
     );
   }
 }

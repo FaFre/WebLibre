@@ -30,6 +30,7 @@ import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_strip.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/sliding_pill_toggle.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -181,6 +182,7 @@ class _TabbedBangSelector extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final tabController = useTabController(
       initialLength: 2,
       initialIndex: isSiteSelected ? 1 : 0,
@@ -201,7 +203,10 @@ class _TabbedBangSelector extends HookConsumerWidget {
           padding: const EdgeInsets.only(right: 12.0),
           child: SlidingPillToggle(
             selectedIndex: tabIndex.value,
-            labels: const ['All Providers', 'Search On This Site'],
+            labels: [
+              l10n.search_bangTabAllProviders,
+              l10n.search_bangTabSearchOnThisSite,
+            ],
             onChanged: (index) => tabController.animateTo(index),
           ),
         ),

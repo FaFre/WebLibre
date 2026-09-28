@@ -28,6 +28,7 @@ import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart'
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/rounded_text.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -39,6 +40,7 @@ class FeedCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Card(
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -104,7 +106,11 @@ class FeedCard extends HookConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Last fetched: ${(feed.lastFetched != null) ? timeago.format(feed.lastFetched!) : 'N/A'}',
+                    l10n.webFeed_lastFetchedLabel(
+                      (feed.lastFetched != null)
+                          ? timeago.format(feed.lastFetched!)
+                          : l10n.webFeed_notAvailable,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
@@ -146,7 +152,8 @@ class FeedCard extends HookConsumerWidget {
                             ),
                           );
                         },
-                        error: (error, stackTrace) => const Text('N/A'),
+                        error: (error, stackTrace) =>
+                            Text(l10n.webFeed_notAvailable),
                         loading: () => const SizedBox(
                           height: 16,
                           width: 16,

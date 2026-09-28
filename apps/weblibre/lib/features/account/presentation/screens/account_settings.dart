@@ -28,27 +28,30 @@ import 'package:weblibre/features/account/domain/repositories/account_auth.dart'
 import 'package:weblibre/features/account/domain/repositories/subscription_repository.dart';
 import 'package:weblibre/features/account/domain/services/prefs_sync_service.dart';
 import 'package:weblibre/features/account/domain/services/settings_sync_service.dart';
+import 'package:weblibre/features/account/presentation/utils/account_auth_error_l10n.dart';
 import 'package:weblibre/features/account/presentation/widgets/account_auth_status_card.dart';
 import 'package:weblibre/features/account/presentation/widgets/subscription_card.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_list_section.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_setup_card.dart';
 import 'package:weblibre/features/search_credits/presentation/widgets/search_credits_section.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class AccountSettingsScreen extends HookConsumerWidget {
   const AccountSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final authAsync = ref.watch(accountAuthRepositoryProvider);
     final subscriptionAsync = ref.watch(subscriptionRepositoryProvider);
     final search = useSettingsSearch();
 
     Widget buildBody(Widget sliver) {
       return SettingsCustomScrollScaffold(
-        title: 'WebLibre Account',
+        title: l10n.account_screenTitle,
         searchController: search.controller,
-        searchHintText: 'Search account settings',
+        searchHintText: l10n.account_searchHint,
         slivers: [sliver],
       );
     }
@@ -61,13 +64,14 @@ class AccountSettingsScreen extends HookConsumerWidget {
         ),
       ),
       error: (_, _) => buildBody(
-        const SliverFillRemaining(
+        SliverFillRemaining(
           hasScrollBody: false,
-          child: Center(child: Text('Failed to load account')),
+          child: Center(child: Text(l10n.account_loadFailed)),
         ),
       ),
       data: (authState) {
         final sections = _buildSections(
+          l10n: l10n,
           ref: ref,
           authState: authState,
           subscriptionAsync: subscriptionAsync,
@@ -94,6 +98,7 @@ class AccountSettingsScreen extends HookConsumerWidget {
   }
 
   List<SettingsSectionDefinition> _buildSections({
+    required AppLocalizations l10n,
     required WidgetRef ref,
     required AccountAuthState authState,
     required AsyncValue<SubscriptionStatus> subscriptionAsync,
@@ -114,28 +119,29 @@ class AccountSettingsScreen extends HookConsumerWidget {
 
     return <SettingsSectionDefinition>[
       SettingsSectionDefinition(
-        title: 'Account',
+        title: l10n.account_sectionAccount,
         entries: [
           SettingsEntryDefinition(
             title: switch (authState.status) {
-              AccountAuthStatus.signedOut => 'Sign in to WebLibre Account',
-              AccountAuthStatus.signingIn => 'Signing in',
-              AccountAuthStatus.signedIn => 'Signed in account',
-              AccountAuthStatus.error => 'Sign-in failed',
+              AccountAuthStatus.signedOut => l10n.account_signInTitle,
+              AccountAuthStatus.signingIn => l10n.account_signingInTitle,
+              AccountAuthStatus.signedIn => l10n.account_signedInTitle,
+              AccountAuthStatus.error => l10n.account_signInFailedTitle,
             },
             subtitle: switch (authState.status) {
               AccountAuthStatus.signedOut =>
-                'Sync your settings across devices',
-              AccountAuthStatus.signingIn => 'Complete sign-in in your browser',
+                l10n.account_syncAcrossDevicesSubtitle,
+              AccountAuthStatus.signingIn => l10n.account_signingInSubtitle,
               AccountAuthStatus.signedIn =>
-                authState.displayName ?? authState.email ?? 'Signed in',
-              AccountAuthStatus.error => authState.lastError,
+                authState.displayName ??
+                    authState.email ??
+                    l10n.account_signedInFallback,
+              AccountAuthStatus.error => authState.lastError?.describe(l10n),
             },
             keywords: [
-              'sign in',
-              'account',
-              'authentication',
-              if (authState.hasSyncKey) ...['sync key', 'reset sync key'],
+              ...settingsKeywords(l10n.account_signInKeywords),
+              if (authState.hasSyncKey)
+                ...settingsKeywords(l10n.account_signInSyncKeyKeywords),
             ],
             child: AccountAuthStatusCard(authState: authState),
           ),
@@ -143,37 +149,43 @@ class AccountSettingsScreen extends HookConsumerWidget {
       ),
       if (authState.isSignedIn)
         SettingsSectionDefinition(
-          title: 'Subscription',
+          title: l10n.account_sectionSubscription,
           entries: [
             SettingsEntryDefinition(
-              title: 'Supporter subscription',
-              subtitle: 'Status, billing, and subscription management',
-              keywords: const ['billing', 'supporter'],
+              title: l10n.account_entrySupporterSubscriptionTitle,
+              subtitle: l10n.account_entrySupporterSubscriptionSubtitle,
+              keywords: settingsKeywords(
+                l10n.account_entrySupporterSubscriptionKeywords,
+              ),
               child: SubscriptionCard(subscriptionAsync: subscriptionAsync),
             ),
           ],
         ),
       if (authState.isSignedIn)
-        const SettingsSectionDefinition(
-          title: 'Search Credits',
+        SettingsSectionDefinition(
+          title: l10n.account_sectionSearchCredits,
           entries: [
             SettingsEntryDefinition(
-              title: 'Search credits',
-              subtitle: 'Credits balance, token issuance, and purchases',
-              keywords: ['tokens', 'search pack'],
-              child: SearchCreditsSection(embedded: true),
+              title: l10n.account_entrySearchCreditsTitle,
+              subtitle: l10n.account_entrySearchCreditsSubtitle,
+              keywords: settingsKeywords(
+                l10n.account_entrySearchCreditsKeywords,
+              ),
+              child: const SearchCreditsSection(embedded: true),
             ),
           ],
         ),
       if (showSyncSnapshots && syncRepo != null)
         if (authState.hasSyncKey) ...[
           SettingsSectionDefinition(
-            title: 'Settings Snapshots',
+            title: l10n.account_sectionSettingsSnapshots,
             entries: [
               SettingsEntryDefinition(
-                title: 'Settings snapshots',
-                subtitle: 'Store and restore synced application settings',
-                keywords: const ['backups', 'settings sync'],
+                title: l10n.account_entrySettingsSnapshotsTitle,
+                subtitle: l10n.account_entrySettingsSnapshotsSubtitle,
+                keywords: settingsKeywords(
+                  l10n.account_entrySettingsSnapshotsKeywords,
+                ),
                 child: SyncDocumentListSection(
                   service: ref.read(settingsSyncServiceProvider.notifier),
                   syncRepo: syncRepo,
@@ -186,12 +198,14 @@ class AccountSettingsScreen extends HookConsumerWidget {
             ],
           ),
           SettingsSectionDefinition(
-            title: 'Preferences Snapshots',
+            title: l10n.account_sectionPreferencesSnapshots,
             entries: [
               SettingsEntryDefinition(
-                title: 'Preferences snapshots',
-                subtitle: 'Store and restore synced preference documents',
-                keywords: const ['backups', 'prefs sync'],
+                title: l10n.account_entryPreferencesSnapshotsTitle,
+                subtitle: l10n.account_entryPreferencesSnapshotsSubtitle,
+                keywords: settingsKeywords(
+                  l10n.account_entryPreferencesSnapshotsKeywords,
+                ),
                 child: SyncDocumentListSection(
                   service: ref.read(prefsSyncServiceProvider.notifier),
                   syncRepo: syncRepo,
@@ -205,13 +219,14 @@ class AccountSettingsScreen extends HookConsumerWidget {
           ),
         ] else
           SettingsSectionDefinition(
-            title: 'Encrypted Sync',
+            title: l10n.account_sectionEncryptedSync,
             entries: [
               SettingsEntryDefinition(
-                title: 'Set up encrypted sync',
-                subtitle:
-                    'Enable end-to-end encrypted sync using your account password',
-                keywords: const ['sync key', 'backups', 'snapshots'],
+                title: l10n.account_entrySetupEncryptedSyncTitle,
+                subtitle: l10n.account_entrySetupEncryptedSyncSubtitle,
+                keywords: settingsKeywords(
+                  l10n.account_entrySetupEncryptedSyncKeywords,
+                ),
                 child: SyncSetupCard(email: authState.email),
               ),
             ],

@@ -25,6 +25,7 @@ import 'package:weblibre/features/browser_actions/domain/services/browser_action
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_swipe_actions.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class _RecordingDispatcher extends BrowserActionDispatcher {
   final runs = <(BrowserAction, String?)>[];
@@ -58,6 +59,8 @@ void main() {
           browserActionDispatcherProvider.overrideWith(() => dispatcher),
         ],
         child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Center(
               child: SizedBox(

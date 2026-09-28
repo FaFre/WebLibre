@@ -28,6 +28,7 @@ import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ProfileListScreen extends HookConsumerWidget {
@@ -36,10 +37,11 @@ class ProfileListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usersAsync = ref.watch(profileRepositoryProvider);
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profiles'),
+        title: Text(l10n.user_profilesTitle),
         actions: [
           IconButton(
             onPressed: () async {
@@ -77,7 +79,9 @@ class ProfileListScreen extends HookConsumerWidget {
                 return ListTile(
                   leading: const Icon(Icons.person),
                   title: Text(labelOfProfile(profile, labels)),
-                  subtitle: isSelected ? const Text('Active') : null,
+                  subtitle: isSelected
+                      ? Text(l10n.user_activeProfileLabel)
+                      : null,
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     await EditProfileRoute(
@@ -90,7 +94,7 @@ class ProfileListScreen extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Could not load profiles',
+              title: l10n.user_loadProfilesFailedTitle,
               exception: error,
             ),
           ),
@@ -121,11 +125,12 @@ class _StartupPromptTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final setting = ref.watch(profilePromptSettingProvider);
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile(
       secondary: const Icon(MdiIcons.accountQuestion),
-      title: const Text('Ask which profile to open'),
-      subtitle: const Text('At startup, when more than one profile exists'),
+      title: Text(l10n.user_askWhichProfileTitle),
+      subtitle: Text(l10n.user_askWhichProfileSubtitle),
       value: setting.value == ProfilePromptMode.browserOnly,
       onChanged: setting.isLoading
           ? null

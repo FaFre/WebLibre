@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class IpChip extends StatelessWidget {
   final String ip;
@@ -29,7 +30,7 @@ class IpChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
 
     return Tooltip(
-      message: 'Egress IP $ip',
+      message: AppLocalizations.of(context).proxy_egressIpTooltip(ip),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(

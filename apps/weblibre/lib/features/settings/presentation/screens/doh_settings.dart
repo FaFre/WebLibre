@@ -21,32 +21,40 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> dohSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Resolver Settings',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'DNS over HTTPS',
-        subtitle:
-            'Protection level, provider choice, and saved custom resolvers',
-        keywords: ['doh', 'resolver', 'dns provider', 'custom resolver'],
-        child: DohSettingsContent(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> dohSettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_resolverSettingsSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_indexDnsOverHttpsResolverTitle,
+          subtitle: l10n.settings_indexDnsOverHttpsResolverSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_indexDnsOverHttpsResolverKeywords,
+          ),
+          child: const DohSettingsContent(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class DohSettingsScreen extends HookConsumerWidget {
   const DohSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const SettingsDetailScaffold(
-      title: 'DNS over HTTPS',
-      subtitle: 'Encrypted DNS protection level and resolver selection.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_dohTitle,
+      subtitle: l10n.settings_dohSubtitle,
       icon: Icons.dns_outlined,
-      sections: dohSettingsSections,
+      sections: dohSettingsSections(context),
     );
   }
 }

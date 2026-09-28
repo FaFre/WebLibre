@@ -1,0 +1,8 @@
+{
+  "@@locale": "de",
+  "formValidators_urlRequired": "Eine URL ist erforderlich",
+  "formValidators_invalidUrl": "Ungültige URL",
+  "formValidators_valueRequired": "Wert erforderlich",
+  "formValidators_nameRequired": "Name erforderlich",
+  "formValidators_nameInvalidCharacters": "Der Name enthält ungültige Zeichen"
+}

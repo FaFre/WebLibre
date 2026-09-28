@@ -22,8 +22,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:saf_util/saf_util.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
-import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
@@ -31,6 +29,8 @@ import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/maintenance_outcome_l10n.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -41,6 +41,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final integrityVerification = useState(true);
 
     final backupFuture = useState<Future<bool>?>(null);
@@ -56,14 +57,14 @@ class ProfileBackupScreen extends HookConsumerWidget {
           if (!context.mounted) return;
           showErrorMessage(
             context,
-            describeMaintenanceFailure(backupState.error!),
+            describeMaintenanceFailure(l10n, backupState.error!),
           );
         });
       } else if (backupState.hasData && !successHandled.value) {
         successHandled.value = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
-          showInfoMessage(context, 'Restarting to take the backup');
+          showInfoMessage(context, l10n.user_restartingToTakeBackup);
           ProfileListRoute().go(context);
         });
       }
@@ -75,7 +76,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
         backupState.connectionState == ConnectionState.waiting;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Backup')),
+      appBar: AppBar(title: Text(l10n.user_createBackupTitle)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -87,24 +88,24 @@ class ProfileBackupScreen extends HookConsumerWidget {
               // profile is closed", which is only half of it: the profile that
               // closes is *this* one, whether or not it is the one being
               // backed up.
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.restart_alt),
-                title: Text('WebLibre restarts to do this'),
+                leading: const Icon(Icons.restart_alt),
+                title: Text(l10n.user_backupRestartsTitle),
                 subtitle: Text(
-                  '$restartClosesCurrentProfile The backup is then taken with '
-                  'nothing writing to the profile it copies, which is what '
-                  'makes it consistent.',
+                  l10n.user_backupRestartsSubtitle(
+                    l10n.profileCopy_restartClosesCurrentProfile,
+                  ),
                 ),
               ),
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.lock_outline),
-                title: Text('You set the password next'),
+                leading: const Icon(Icons.lock_outline),
+                title: Text(l10n.user_setPasswordNextTitle),
                 // Asked for after the restart instead of here. A password is
                 // the one thing that must not be written into the durable task
                 // record that survives it.
-                subtitle: Text(asksPasswordAfterRestart),
+                subtitle: Text(l10n.user_setPasswordNextSubtitle),
               ),
               const SizedBox(height: 16),
               SwitchListTile(
@@ -115,23 +116,24 @@ class ProfileBackupScreen extends HookConsumerWidget {
                     : (value) {
                         integrityVerification.value = value;
                       },
-                title: const Text('Verify backup integrity'),
-                subtitle: const Text('Check that the backup can be restored'),
+                title: Text(l10n.user_verifyBackupIntegrityTitle),
+                subtitle: Text(l10n.user_verifyBackupIntegritySubtitle),
               ),
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.info_outline),
-                title: Text('Temporary data is skipped'),
+                leading: const Icon(Icons.info_outline),
+                title: Text(l10n.user_tempDataSkippedTitle),
                 // Not a toggle any more: the exclusion list is part of the
                 // backup format, so a restored profile can rely on it.
                 subtitle: Text(
-                  'Cache files and other data WebLibre can rebuild are not '
-                  'saved. $shortcutsNeedPinningAgain',
+                  l10n.user_tempDataSkippedSubtitle(
+                    l10n.profileCopy_shortcutsNeedPinningAgain,
+                  ),
                 ),
               ),
-              const ListTile(
+              ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.key_outlined),
+                leading: const Icon(Icons.key_outlined),
                 // Said plainly, because it changes what the file is. It also has
                 // to say *when* they are used: the archive always carries them,
                 // but only replacing a user installs them — restoring into a new
@@ -140,23 +142,23 @@ class ProfileBackupScreen extends HookConsumerWidget {
                 // profiles is the isolation failure the profile boundary exists
                 // to prevent. Saying only the first half read as a contradiction
                 // of what the restore screen says.
-                title: Text('WebLibre account data is included'),
+                title: Text(l10n.user_accountDataIncludedTitle),
                 subtitle: Text(
-                  'The backup file includes this profile’s '
-                  '$profileSecretDataDescription. Replacing a profile restores '
-                  'them; creating a new profile does not. Use a strong password.',
+                  l10n.user_accountDataIncludedSubtitle(
+                    l10n.profileCopy_secretDataDescription,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               if (disableInteraction)
-                const Column(
+                Column(
                   children: [
-                    LinearProgressIndicator(),
-                    SizedBox(height: 8),
+                    const LinearProgressIndicator(),
+                    const SizedBox(height: 8),
                     // Not "Creating Backup": nothing is written here. This
                     // records the task and closes the app, and the next
                     // process takes the archive.
-                    Text('Closing WebLibre to take the backup…'),
+                    Text(l10n.user_closingToTakeBackup),
                   ],
                 )
               else
@@ -216,7 +218,7 @@ class ProfileBackupScreen extends HookConsumerWidget {
                       integrityCheck: integrityVerification.value,
                     );
                   },
-                  label: const Text('Backup'),
+                  label: Text(l10n.user_actionBackup),
                 ),
             ],
           ),

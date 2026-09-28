@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/startup/profile_discovery.dart';
 import 'package:weblibre/utils/filesystem.dart' as fs;
 import 'package:weblibre/utils/form_validators.dart';
@@ -113,7 +114,13 @@ void main() {
     await repairDamagedProfiles(await discoverProfiles(profilesDir));
 
     final after = await discoverProfiles(profilesDir);
-    expect(validateProfileName(after.profiles.single.name), isNull);
+    expect(
+      validateProfileName(
+        after.profiles.single.name,
+        l10n: contextFreeAppLocalizations,
+      ),
+      isNull,
+    );
   });
 
   test('a uuid mismatch is never repaired', () async {

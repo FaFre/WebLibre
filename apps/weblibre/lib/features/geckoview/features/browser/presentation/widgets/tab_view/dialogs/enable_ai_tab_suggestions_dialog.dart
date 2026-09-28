@@ -20,32 +20,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<bool?> showEnableAiTabSuggestionsDialog(BuildContext context) {
   return showDialog<bool?>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
         icon: const Icon(MdiIcons.download),
-        title: const Text('Enable AI Tab Suggestions'),
-        content: const Text(
-          'Enabling this feature may require downloading AI models. '
-          'The download size and progress cannot be determined in advance.\n\n'
-          'Do you want to continue?',
-        ),
+        title: Text(l10n.browser_enableAiTabSuggestionsTitle),
+        content: Text(l10n.browser_enableAiTabSuggestionsContent),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Enable'),
+            child: Text(l10n.browser_actionEnable),
           ),
         ],
       );

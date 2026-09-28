@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a confirmation dialog for deleting all tracking protection exceptions.
 ///
@@ -27,21 +28,23 @@ Future<bool?> showDeleteAllExceptionsDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: const Text('Delete All Exceptions?'),
-      content: const Text(
-        'This will re-enable tracking protection for all exception sites.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Delete'),
-        ),
-      ],
-    ),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        title: Text(l10n.settings_deleteAllExceptionsTitle),
+        content: Text(l10n.settings_deleteAllExceptionsContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.common_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.common_delete),
+          ),
+        ],
+      );
+    },
   );
 }

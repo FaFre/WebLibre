@@ -35,7 +35,7 @@ final class GeneralSettingsRepositoryProvider
 }
 
 String _$generalSettingsRepositoryHash() =>
-    r'37cfacab1b4a9d67e185df4232d8e57349396296';
+    r'2f00342d0b7584afe6f77d8e48ab49691c88c990';
 
 abstract class _$GeneralSettingsRepository
     extends $StreamNotifier<GeneralSettings> {
@@ -242,6 +242,68 @@ final class EffectiveTabBarStackingModeProvider
 
 String _$effectiveTabBarStackingModeHash() =>
     r'5edf9bb20ad74e0133423f4864b9f54d9f7cef64';
+
+/// The app UI locale to pass to `MaterialApp.locale`, resolved from
+/// [GeneralSettings.appLocale].
+///
+/// Null means "let Flutter resolve the system locale" — both when the user
+/// has not picked one, and defensively when a previously-picked tag is no
+/// longer supported (e.g. a translation was dropped).
+
+@ProviderFor(effectiveAppLocale)
+final effectiveAppLocaleProvider = EffectiveAppLocaleProvider._();
+
+/// The app UI locale to pass to `MaterialApp.locale`, resolved from
+/// [GeneralSettings.appLocale].
+///
+/// Null means "let Flutter resolve the system locale" — both when the user
+/// has not picked one, and defensively when a previously-picked tag is no
+/// longer supported (e.g. a translation was dropped).
+
+final class EffectiveAppLocaleProvider
+    extends $FunctionalProvider<Locale?, Locale?, Locale?>
+    with $Provider<Locale?> {
+  /// The app UI locale to pass to `MaterialApp.locale`, resolved from
+  /// [GeneralSettings.appLocale].
+  ///
+  /// Null means "let Flutter resolve the system locale" — both when the user
+  /// has not picked one, and defensively when a previously-picked tag is no
+  /// longer supported (e.g. a translation was dropped).
+  EffectiveAppLocaleProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveAppLocaleProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveAppLocaleHash();
+
+  @$internal
+  @override
+  $ProviderElement<Locale?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Locale? create(Ref ref) {
+    return effectiveAppLocale(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Locale? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Locale?>(value),
+    );
+  }
+}
+
+String _$effectiveAppLocaleHash() =>
+    r'df378dcfc9fae60e588e1955f8c1689b8bd4d7b8';
 
 /// [GeneralSettings.effectiveHomeSearchBarPlacement] resolved against the
 /// current window.

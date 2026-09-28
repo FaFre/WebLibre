@@ -38,20 +38,6 @@ part 'proxy_diagnostics_settings.g.dart';
 enum ProxyLogLevel { warn, info, debug, trace }
 
 extension ProxyLogLevelX on ProxyLogLevel {
-  String get label => switch (this) {
-    ProxyLogLevel.warn => 'Warnings and errors',
-    ProxyLogLevel.info => 'Info',
-    ProxyLogLevel.debug => 'Debug',
-    ProxyLogLevel.trace => 'Trace',
-  };
-
-  String get description => switch (this) {
-    ProxyLogLevel.warn => 'Normal operation. Problems are still logged.',
-    ProxyLogLevel.info => 'Every connection and DNS lookup. Slows browsing.',
-    ProxyLogLevel.debug => 'Info plus protocol detail. Slows browsing.',
-    ProxyLogLevel.trace => 'Everything sing-box can say. Slows browsing a lot.',
-  };
-
   /// Whether this level makes sing-box log per connection, which is the point
   /// at which the log stops being free.
   bool get isVerbose => this != ProxyLogLevel.warn;

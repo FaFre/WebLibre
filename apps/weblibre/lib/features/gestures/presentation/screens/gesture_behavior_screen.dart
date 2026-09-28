@@ -24,43 +24,49 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 
-const List<SettingsSectionDefinition> _behaviorSections = [
-  SettingsSectionDefinition(
-    title: 'Strokes',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Minimum stroke length',
-        subtitle: 'Minimum swipe length recognised as a direction',
-        keywords: ['size', 'length', 'sensitivity'],
-        child: _StrokeLengthSection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Timing',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Timeout',
-        subtitle: 'Drop a stroke if no new direction is drawn',
-        keywords: ['delay'],
-        child: _TimeoutSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Cooldown',
-        subtitle: 'Minimum delay between two gestures firing',
-        keywords: ['interval'],
-        child: _CooldownSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Stroke interval',
-        subtitle: 'Reject a gesture when direction changes come too fast',
-        keywords: ['debounce', 'jitter', 'accidental'],
-        child: _StrokeIntervalSection(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> _behaviorSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.gestures_strokesSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.gestures_minStrokeLengthTitle,
+          subtitle: l10n.gestures_indexMinStrokeLengthSubtitle,
+          keywords: settingsKeywords(l10n.gestures_minStrokeLengthKeywords),
+          child: const _StrokeLengthSection(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.gestures_timingSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.gestures_timeoutTitle,
+          subtitle: l10n.gestures_indexTimeoutSubtitle,
+          keywords: settingsKeywords(l10n.gestures_timeoutKeywords),
+          child: const _TimeoutSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.gestures_cooldownTitle,
+          subtitle: l10n.gestures_indexCooldownSubtitle,
+          keywords: settingsKeywords(l10n.gestures_cooldownKeywords),
+          child: const _CooldownSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.gestures_strokeIntervalTitle,
+          subtitle: l10n.gestures_indexStrokeIntervalSubtitle,
+          keywords: settingsKeywords(l10n.gestures_strokeIntervalKeywords),
+          child: const _StrokeIntervalSection(),
+        ),
+      ],
+    ),
+  ];
+}
 
 /// Tuning for the gesture recognizer: stroke size, idle timeout and cooldown.
 class GestureBehaviorScreen extends StatelessWidget {
@@ -68,12 +74,14 @@ class GestureBehaviorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Behavior & timing',
-      subtitle: 'Stroke length, timeout, and cooldown.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.gestures_behaviorTimingTitle,
+      subtitle: l10n.gestures_behaviorTimingScreenSubtitle,
       icon: Icons.tune,
-      sections: _behaviorSections,
-      actions: [_ResetBehaviorButton()],
+      sections: _behaviorSections(context),
+      actions: const [_ResetBehaviorButton()],
     );
   }
 }
@@ -86,29 +94,27 @@ class _ResetBehaviorButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return IconButton(
       icon: const Icon(Icons.settings_backup_restore),
-      tooltip: 'Reset to defaults',
+      tooltip: l10n.gestures_resetToDefaultsTooltip,
       onPressed: () async {
         final confirmed = await showDialog<bool>(
           context: context,
           anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
           builder: (context) => AlertDialog(
             icon: const Icon(Icons.settings_backup_restore),
-            title: const Text('Reset behavior & timing?'),
-            content: const Text(
-              'Stroke length, timeout, cooldown and stroke interval will be '
-              'restored to their defaults. Your gesture bindings and other '
-              'settings are kept.',
-            ),
+            title: Text(l10n.gestures_resetBehaviorTimingConfirmTitle),
+            content: Text(l10n.gestures_resetBehaviorTimingConfirmContent),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.common_cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Reset'),
+                child: Text(l10n.common_reset),
               ),
             ],
           ),
@@ -136,11 +142,12 @@ class _StrokeLengthSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
 
     return ListTile(
       leading: const Icon(MdiIcons.gestureTap),
-      title: const Text('Minimum stroke length'),
+      title: Text(l10n.gestures_minStrokeLengthTitle),
       subtitle: Slider.adaptive(
         min: minGestureStrokeSize.toDouble(),
         max: maxGestureStrokeSize.toDouble(),
@@ -166,6 +173,7 @@ class _TimeoutSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
 
     return Column(
@@ -173,7 +181,7 @@ class _TimeoutSection extends HookConsumerWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.hourglass_empty),
-          title: const Text('Timeout'),
+          title: Text(l10n.gestures_timeoutTitle),
           subtitle: Slider.adaptive(
             min: minGestureTimeoutMs.toDouble(),
             max: maxGestureTimeoutMs.toDouble(),
@@ -181,7 +189,7 @@ class _TimeoutSection extends HookConsumerWidget {
             value: settings.timeoutMs
                 .clamp(minGestureTimeoutMs, maxGestureTimeoutMs)
                 .toDouble(),
-            label: '${settings.timeoutMs} ms',
+            label: formatMilliseconds(l10n, settings.timeoutMs),
             onChanged: (value) async {
               await ref
                   .read(gestureSettingsRepositoryProvider.notifier)
@@ -191,11 +199,9 @@ class _TimeoutSection extends HookConsumerWidget {
             },
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(72, 0, 16, 8),
-          child: Text(
-            'A stroke is dropped if no new direction is drawn within this time.',
-          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(72, 0, 16, 8),
+          child: Text(l10n.gestures_timeoutDescription),
         ),
       ],
     );
@@ -207,6 +213,7 @@ class _CooldownSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
 
     return Column(
@@ -214,7 +221,7 @@ class _CooldownSection extends HookConsumerWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.timer_outlined),
-          title: const Text('Cooldown'),
+          title: Text(l10n.gestures_cooldownTitle),
           subtitle: Slider.adaptive(
             min: minGestureIntervalMs.toDouble(),
             max: maxGestureIntervalMs.toDouble(),
@@ -223,8 +230,8 @@ class _CooldownSection extends HookConsumerWidget {
                 .clamp(minGestureIntervalMs, maxGestureIntervalMs)
                 .toDouble(),
             label: settings.intervalMs == 0
-                ? 'Off'
-                : '${settings.intervalMs} ms',
+                ? l10n.gestures_offLabel
+                : formatMilliseconds(l10n, settings.intervalMs),
             onChanged: (value) async {
               await ref
                   .read(gestureSettingsRepositoryProvider.notifier)
@@ -234,9 +241,9 @@ class _CooldownSection extends HookConsumerWidget {
             },
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(72, 0, 16, 8),
-          child: Text('Minimum delay between two gestures firing.'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(72, 0, 16, 8),
+          child: Text(l10n.gestures_cooldownDescription),
         ),
       ],
     );
@@ -248,6 +255,7 @@ class _StrokeIntervalSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
 
     return Column(
@@ -255,7 +263,7 @@ class _StrokeIntervalSection extends HookConsumerWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.gesture),
-          title: const Text('Stroke interval'),
+          title: Text(l10n.gestures_strokeIntervalTitle),
           subtitle: Slider.adaptive(
             min: minGestureStrokeIntervalMs.toDouble(),
             max: maxGestureStrokeIntervalMs.toDouble(),
@@ -265,8 +273,8 @@ class _StrokeIntervalSection extends HookConsumerWidget {
                 .clamp(minGestureStrokeIntervalMs, maxGestureStrokeIntervalMs)
                 .toDouble(),
             label: settings.minStrokeIntervalMs == 0
-                ? 'Off'
-                : '${settings.minStrokeIntervalMs} ms',
+                ? l10n.gestures_offLabel
+                : formatMilliseconds(l10n, settings.minStrokeIntervalMs),
             onChanged: (value) async {
               await ref
                   .read(gestureSettingsRepositoryProvider.notifier)
@@ -277,13 +285,9 @@ class _StrokeIntervalSection extends HookConsumerWidget {
             },
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(72, 0, 16, 8),
-          child: Text(
-            'Minimum time between direction changes within one gesture. '
-            'Faster changes abort the gesture, guarding against accidental '
-            'triggers.',
-          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(72, 0, 16, 8),
+          child: Text(l10n.gestures_strokeIntervalDescription),
         ),
       ],
     );

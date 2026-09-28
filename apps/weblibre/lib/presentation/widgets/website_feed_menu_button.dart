@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/widgets/rounded_text.dart';
 
@@ -64,7 +65,7 @@ class WebsiteFeedMenuButton extends HookConsumerWidget {
                 ),
               ).push(context);
             },
-            child: const Text('Available Web Feeds'),
+            child: Text(AppLocalizations.of(context).menu_fetchFeedsAvailable),
           );
         },
         error: (error, stackTrace) {
@@ -77,9 +78,9 @@ class WebsiteFeedMenuButton extends HookConsumerWidget {
           //   onRetry: () => ref.refresh(pageInfoProvider(url)),
           // );
         },
-        loading: () => const MenuItemButton(
-          leadingIcon: Icon(Icons.rss_feed),
-          child: Text('Available Web Feeds'),
+        loading: () => MenuItemButton(
+          leadingIcon: const Icon(Icons.rss_feed),
+          child: Text(AppLocalizations.of(context).menu_fetchFeedsAvailable),
         ),
       ),
     );

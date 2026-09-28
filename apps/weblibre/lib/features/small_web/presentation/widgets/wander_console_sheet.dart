@@ -24,8 +24,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/small_web/domain/providers.dart';
+import 'package:weblibre/features/small_web/domain/services/wander_source_service.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_session_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_menu_sheet.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -51,6 +53,7 @@ class _WanderConsoleSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final sessionAsync = ref.watch(smallWebSessionControllerProvider);
 
     final searchController = useTextEditingController();
@@ -86,7 +89,7 @@ class _WanderConsoleSheet extends HookConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Select Console',
+                    l10n.smallWeb_selectConsoleTitle,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(),
@@ -105,7 +108,7 @@ class _WanderConsoleSheet extends HookConsumerWidget {
                             await notifier.discover(forceNewConsole: true);
                           },
                     icon: const Icon(Icons.shuffle, size: 18),
-                    label: const Text('Random'),
+                    label: Text(l10n.smallWeb_randomButtonLabel),
                   ),
                 ],
               ),
@@ -169,6 +172,7 @@ class _WanderConsoleSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final currentConsoleUrl = session.currentConsoleUrl;
 
@@ -180,7 +184,7 @@ class _WanderConsoleSheetContent extends StatelessWidget {
             controller: searchController,
             autocorrect: false,
             decoration: InputDecoration(
-              hintText: 'Filter consoles...',
+              hintText: l10n.smallWeb_filterConsolesHint,
               prefixIcon: const Icon(Icons.search, size: 20),
               suffixIcon: searchQuery.isNotEmpty
                   ? IconButton(
@@ -205,7 +209,10 @@ class _WanderConsoleSheetContent extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SlidingPillToggle(
               selectedIndex: showAllConsoles ? 1 : 0,
-              labels: const ['Linked', 'All'],
+              labels: [
+                l10n.smallWeb_linkedConsolesToggleLabel,
+                l10n.smallWeb_allConsolesToggleLabel,
+              ],
               onChanged: (index) => onToggleAllConsoles(index == 1),
             ),
           ),
@@ -223,9 +230,7 @@ class _WanderConsoleSheetContent extends StatelessWidget {
                   isLoading: false,
                 )
               else if (currentConsoleUrl == null)
-                const Center(
-                  child: Text('No console selected yet. Press Discover.'),
-                )
+                Center(child: Text(l10n.smallWeb_noConsoleSelectedYetMessage))
               else
                 _LinkedConsoleList(
                   consoleUrl: currentConsoleUrl,
@@ -239,7 +244,7 @@ class _WanderConsoleSheetContent extends StatelessWidget {
                 bottom: 16,
                 child: FloatingActionButton.small(
                   onPressed: onAddConsole,
-                  tooltip: 'Add console by URL',
+                  tooltip: l10n.smallWeb_addConsoleByUrlTooltip,
                   child: const Icon(Icons.add),
                 ),
               ),
@@ -258,6 +263,8 @@ class _WanderConsoleSheetLoading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Skeletonizer(
       child: FadingScroll(
         controller: scrollController,
@@ -266,14 +273,16 @@ class _WanderConsoleSheetLoading extends StatelessWidget {
           return ListView(
             controller: controller,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            children: const [
+            children: [
               TextField(
-                decoration: InputDecoration(hintText: 'Filter consoles...'),
+                decoration: InputDecoration(
+                  hintText: l10n.smallWeb_filterConsolesHint,
+                ),
               ),
-              SizedBox(height: 12),
-              _SkeletonConsoleTile(),
-              _SkeletonConsoleTile(),
-              _SkeletonConsoleTile(),
+              const SizedBox(height: 12),
+              const _SkeletonConsoleTile(),
+              const _SkeletonConsoleTile(),
+              const _SkeletonConsoleTile(),
             ],
           );
         },
@@ -325,6 +334,8 @@ class _WanderConsoleSheetError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return FadingScroll(
       controller: scrollController,
       fadingSize: 25,
@@ -336,8 +347,10 @@ class _WanderConsoleSheetError extends StatelessWidget {
             SizedBox(
               height: 240,
               child: FailureWidget(
-                title: 'Could not load Small Web session',
-                exception: error,
+                title: l10n.smallWeb_couldNotLoadSessionTitle,
+                exception: error is SmallWebDiscoveryFailedException
+                    ? l10n.smallWeb_discoveryFailedMessage
+                    : error,
                 onRetry: onRetry,
               ),
             ),
@@ -365,6 +378,7 @@ class _LinkedConsoleList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final neighborsAsync = ref.watch(
       wanderNeighborConsolesProvider(consoleUrl),
     );
@@ -384,8 +398,8 @@ class _LinkedConsoleList extends ConsumerWidget {
           return Center(
             child: Text(
               searchQuery.isEmpty
-                  ? 'No linked consoles found.'
-                  : 'No consoles matching "$searchQuery".',
+                  ? l10n.smallWeb_noLinkedConsolesFound
+                  : l10n.smallWeb_noConsolesMatchingQuery(searchQuery),
             ),
           );
         }
@@ -411,7 +425,7 @@ class _LinkedConsoleList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const Center(child: Text('Failed to load consoles.')),
+      error: (_, _) => Center(child: Text(l10n.smallWeb_failedToLoadConsoles)),
     );
   }
 }
@@ -431,6 +445,7 @@ class _AllConsoleList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final consolesAsync = ref.watch(wanderAllConsolesProvider(searchQuery));
 
     return consolesAsync.when(
@@ -439,8 +454,8 @@ class _AllConsoleList extends ConsumerWidget {
           return Center(
             child: Text(
               searchQuery.isEmpty
-                  ? 'No consoles discovered yet.'
-                  : 'No consoles matching "$searchQuery".',
+                  ? l10n.smallWeb_noConsolesDiscoveredYet
+                  : l10n.smallWeb_noConsolesMatchingQuery(searchQuery),
             ),
           );
         }
@@ -466,7 +481,7 @@ class _AllConsoleList extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const Center(child: Text('Failed to load consoles.')),
+      error: (_, _) => Center(child: Text(l10n.smallWeb_failedToLoadConsoles)),
     );
   }
 }
@@ -486,6 +501,7 @@ class _ConsoleListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final isSelected = selectedConsoleUrl == url;
@@ -548,7 +564,7 @@ class _ConsoleListTile extends ConsumerWidget {
                       if (pageCount > 0) ...[
                         const SizedBox(height: 3),
                         Text(
-                          '$pageCount pages',
+                          l10n.smallWeb_pageCount(pageCount),
                           style: textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurfaceVariant,
                           ),
@@ -587,6 +603,7 @@ class _AddConsoleDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final textController = useTextEditingController();
@@ -616,8 +633,19 @@ class _AddConsoleDialog extends HookWidget {
 
         // Show the snackbar first so it's anchored to a still-mounted context;
         // popping the dialog afterwards deactivates this BuildContext.
-        showInfoMessage(context, 'Added console ${consoleUrl.host}');
+        showInfoMessage(context, l10n.smallWeb_addedConsole(consoleUrl.host));
         Navigator.of(context).pop();
+      } on WanderConsoleValidationException catch (e) {
+        if (!context.mounted) return;
+        isLoading.value = false;
+        errorMessage.value = switch (e.reason) {
+          WanderConsoleValidationFailure.fetchFailed =>
+            l10n.smallWeb_wanderConsoleFetchFailed,
+          WanderConsoleValidationFailure.noConsolesOrPages =>
+            l10n.smallWeb_wanderConsoleEmpty,
+          WanderConsoleValidationFailure.alreadyAdded =>
+            l10n.smallWeb_wanderConsoleAlreadyAdded,
+        };
       } on Exception catch (e) {
         if (!context.mounted) return;
         isLoading.value = false;
@@ -626,7 +654,7 @@ class _AddConsoleDialog extends HookWidget {
     }
 
     return AlertDialog(
-      title: const Text('Add Console'),
+      title: Text(l10n.smallWeb_addConsoleDialogTitle),
       content: Form(
         key: formKey,
         child: Column(
@@ -634,14 +662,13 @@ class _AddConsoleDialog extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Enter the URL of a Wander console. '
-              'The URL can point to the site root or the /wander/ path.',
+              l10n.smallWeb_addConsoleDialogBody,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
             TextFormField(
-              decoration: const InputDecoration(
-                label: Text('URL'),
+              decoration: InputDecoration(
+                label: Text(l10n.smallWeb_urlFieldLabel),
                 hintText: 'https://example.com/wander/',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
               ),
@@ -653,6 +680,7 @@ class _AddConsoleDialog extends HookWidget {
                 value,
                 onlyHttpProtocol: true,
                 eagerParsing: true,
+                l10n: l10n,
               ),
             ),
             if (errorMessage.value != null) ...[
@@ -670,7 +698,7 @@ class _AddConsoleDialog extends HookWidget {
       actions: [
         TextButton(
           onPressed: isLoading.value ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: isLoading.value ? null : submit,
@@ -680,7 +708,7 @@ class _AddConsoleDialog extends HookWidget {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Add'),
+              : Text(l10n.common_add),
         ),
       ],
     );

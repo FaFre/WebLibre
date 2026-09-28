@@ -25,7 +25,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/wallpaper/domain/entities/home_wallpaper.dart';
 import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/wallpaper/domain/services/wallpaper_store.dart';
+import 'package:weblibre/features/wallpaper/presentation/utils/wallpaper_import_failure_reason_l10n.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_backdrop.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -69,12 +71,13 @@ class WallpaperEditor extends HookConsumerWidget {
     required this.onFileChanged,
     required this.onBlurChanged,
     required this.onDimChanged,
-    this.emptyDescription = 'The home page keeps its default backdrop.',
+    required this.emptyDescription,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final importing = useState(false);
 
     // Live slider values, so dragging updates the preview without a write per
@@ -92,7 +95,7 @@ class WallpaperEditor extends HookConsumerWidget {
       final path = result.first.path;
       if (path == null) {
         if (context.mounted) {
-          showErrorMessage(context, 'That file could not be read');
+          showErrorMessage(context, l10n.wallpaper_importErrorUnreadable);
         }
         return;
       }
@@ -108,7 +111,9 @@ class WallpaperEditor extends HookConsumerWidget {
         // exactly what the startup sweep collects.
         if (context.mounted) onFileChanged(imported);
       } on WallpaperImportException catch (e) {
-        if (context.mounted) showErrorMessage(context, e.message);
+        if (context.mounted) {
+          showErrorMessage(context, e.reason.describe(context));
+        }
       } finally {
         if (context.mounted) importing.value = false;
       }
@@ -138,7 +143,11 @@ class WallpaperEditor extends HookConsumerWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(MdiIcons.imageOutline),
-                label: Text(fileName == null ? 'Choose image' : 'Replace'),
+                label: Text(
+                  fileName == null
+                      ? l10n.wallpaper_chooseImage
+                      : l10n.wallpaper_replace,
+                ),
               ),
             ),
             if (fileName != null) ...[
@@ -146,7 +155,7 @@ class WallpaperEditor extends HookConsumerWidget {
               TextButton.icon(
                 onPressed: importing.value ? null : () => onFileChanged(null),
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('Remove'),
+                label: Text(l10n.common_remove),
               ),
             ],
           ],
@@ -156,7 +165,7 @@ class WallpaperEditor extends HookConsumerWidget {
         // explains what a wallpaper here can look like, and hiding them would
         // make the section jump in size on every pick.
         _TreatmentSlider(
-          label: 'Blur',
+          label: l10n.wallpaper_blurLabel,
           icon: MdiIcons.blur,
           travel: homeWallpaperBlurToSlider(blurValue.value),
           enabled: fileName != null,
@@ -166,7 +175,7 @@ class WallpaperEditor extends HookConsumerWidget {
               onBlurChanged(homeWallpaperBlurFromSlider(travel)),
         ),
         _TreatmentSlider(
-          label: 'Dim',
+          label: l10n.wallpaper_dimLabel,
           icon: MdiIcons.brightness6,
           travel: dimValue.value / maxHomeWallpaperDim,
           enabled: fileName != null,
@@ -174,8 +183,7 @@ class WallpaperEditor extends HookConsumerWidget {
           onChangeEnd: (travel) => onDimChanged(travel * maxHomeWallpaperDim),
         ),
         Text(
-          'Dim blends the image into the app background, so page text stays '
-          'readable in both light and dark themes.',
+          l10n.wallpaper_dimDescription,
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -294,6 +302,7 @@ class _HomeMock extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16 * scale),
@@ -337,9 +346,10 @@ class _HomeMock extends StatelessWidget {
           ),
           SizedBox(height: 20 * scale),
           // A section header, drawn straight on the wallpaper in theme colours
-          // — the thing the dim slider has to keep readable.
+          // — the thing the dim slider has to keep readable. Reuses the real
+          // home page heading so the sample cannot drift from it.
           Text(
-            'Top sites',
+            l10n.search_moduleLabelTopSites,
             style: theme.textTheme.titleMedium?.copyWith(
               fontSize: (theme.textTheme.titleMedium?.fontSize ?? 16) * scale,
               fontWeight: FontWeight.w700,

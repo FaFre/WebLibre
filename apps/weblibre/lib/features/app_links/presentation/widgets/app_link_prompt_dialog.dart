@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_details.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Build the `alwaysOpen` rule for a target, or null when it cannot be remembered
 /// (ambiguous resolution / no bound package).
@@ -64,6 +65,7 @@ class AppLinkPromptDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final target = request.target;
     final appName = target.appName;
     final remember = useState(false);
@@ -96,13 +98,15 @@ class AppLinkPromptDialog extends HookConsumerWidget {
     return AlertDialog(
       icon: const Icon(Icons.open_in_new),
       title: Text(
-        appName != null ? 'Open in $appName?' : 'Open in another app?',
+        appName != null
+            ? l10n.appLinks_dialogTitleNamed(appName)
+            : l10n.appLinks_dialogTitleGeneric,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('This link is handled by an app outside WebLibre.'),
+          Text(l10n.appLinks_dialogBody),
           const SizedBox(height: 8),
           AppLinkPromptDetails(request: request),
           if (request.canRemember)
@@ -112,7 +116,9 @@ class AppLinkPromptDialog extends HookConsumerWidget {
               value: remember.value,
               onChanged: (value) => remember.value = value ?? false,
               title: Text(
-                'Remember my choice for ${displayAppLinkScope(target.scopeKey)}',
+                l10n.appLinks_dialogRememberFor(
+                  displayAppLinkScope(target.scopeKey),
+                ),
               ),
             ),
         ],
@@ -120,11 +126,11 @@ class AppLinkPromptDialog extends HookConsumerWidget {
       actions: [
         TextButton(
           onPressed: () => resolve(AppLinkDecision.cancel),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () => resolve(AppLinkDecision.open),
-          child: const Text('Open'),
+          child: Text(l10n.common_open),
         ),
       ],
     );

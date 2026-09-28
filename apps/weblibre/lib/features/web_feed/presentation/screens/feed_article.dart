@@ -35,6 +35,7 @@ import 'package:weblibre/features/web_feed/extensions/atom.dart';
 import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/utils/markdown/image_extractor.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -48,6 +49,7 @@ class FeedArticleScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final articleAsync = ref.watch(
       feedArticleProvider(articleId, updateReadDate: true),
     );
@@ -124,7 +126,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                         bottom: bottomHeight + 16,
                       ),
                       title: Text(
-                        article.displayTitle,
+                        article.displayTitle(context),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -148,13 +150,23 @@ class FeedArticleScreen extends HookConsumerWidget {
                           children: [
                             const Divider(),
                             Text(
-                              'Published: ${hasArticleCreated ? ref.read(formatProvider.notifier).fullDateTime(article.created!) : 'N/A'}',
+                              l10n.webFeed_publishedLabel(
+                                hasArticleCreated
+                                    ? ref
+                                          .read(formatProvider.notifier)
+                                          .fullDateTime(article.created!)
+                                    : l10n.webFeed_notAvailable,
+                              ),
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(fontStyle: FontStyle.italic),
                             ),
                             if (hasArticleUpdated)
                               Text(
-                                'Updated: ${ref.read(formatProvider.notifier).fullDateTime(article.updated!)}',
+                                l10n.webFeed_updatedLabel(
+                                  ref
+                                      .read(formatProvider.notifier)
+                                      .fullDateTime(article.updated!),
+                                ),
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(fontStyle: FontStyle.italic),
                               ),
@@ -163,7 +175,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Row(
                                   children: [
-                                    const Text('Authors:'),
+                                    Text(l10n.webFeed_authorsLabel),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: AuthorsHorizontalList(
@@ -178,7 +190,7 @@ class FeedArticleScreen extends HookConsumerWidget {
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: Row(
                                   children: [
-                                    const Text('Tags:'),
+                                    Text(l10n.webFeed_tagsLabel),
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: TagsHorizontalList(
@@ -296,7 +308,7 @@ class FeedArticleScreen extends HookConsumerWidget {
         },
         error: (error, stackTrace) => Center(
           child: FailureWidget(
-            title: 'Failed reading article',
+            title: l10n.webFeed_readArticleFailedTitle,
             exception: error,
           ),
         ),

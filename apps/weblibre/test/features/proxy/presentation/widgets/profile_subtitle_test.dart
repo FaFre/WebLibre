@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/autostart_chip.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_subtitle.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('autostart marker does not crowd out the type label', (
@@ -9,6 +10,8 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: Center(
             // Deliberately narrow: the marker used to share the label's line,
@@ -42,6 +45,8 @@ void main() {
   testWidgets('renders the bare label when nothing is flagged', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: ProfileSubtitle(typeLabel: 'Onion routing', latency: null),
         ),

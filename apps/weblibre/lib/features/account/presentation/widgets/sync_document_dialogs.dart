@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 // -- Metadata display helpers ------------------------------------------------
 
@@ -70,32 +71,36 @@ Future<String?> showStoreLabelDialog(BuildContext context) {
   return showDialog<String?>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: const Text('Store Snapshot'),
-      content: TextField(
-        controller: controller,
-        decoration: const InputDecoration(
-          labelText: 'Label (optional)',
-          hintText: 'e.g. "Before update", "Home setup"',
-          border: OutlineInputBorder(),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        title: Text(l10n.account_storeSnapshotTitle),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: l10n.account_fieldLabelOptional,
+            hintText: l10n.account_labelHintExample,
+            border: const OutlineInputBorder(),
+          ),
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
         ),
-        autofocus: true,
-        textCapitalization: TextCapitalization.sentences,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final label = controller.text.trim();
-            Navigator.of(context).pop(label.isEmpty ? '' : label);
-          },
-          child: const Text('Store'),
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final label = controller.text.trim();
+              Navigator.of(context).pop(label.isEmpty ? '' : label);
+            },
+            child: Text(l10n.account_actionStore),
+          ),
+        ],
+      );
+    },
   );
 }
 
@@ -108,31 +113,35 @@ Future<String?> showEditLabelDialog(
   return showDialog<String?>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: const Text('Edit Label'),
-      content: TextField(
-        controller: controller,
-        decoration: const InputDecoration(
-          labelText: 'Label',
-          border: OutlineInputBorder(),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        title: Text(l10n.account_actionEditLabel),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            labelText: l10n.account_fieldLabel,
+            border: const OutlineInputBorder(),
+          ),
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
         ),
-        autofocus: true,
-        textCapitalization: TextCapitalization.sentences,
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            final label = controller.text.trim();
-            Navigator.of(context).pop(label.isEmpty ? '' : label);
-          },
-          child: const Text('Save'),
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () {
+              final label = controller.text.trim();
+              Navigator.of(context).pop(label.isEmpty ? '' : label);
+            },
+            child: Text(l10n.common_save),
+          ),
+        ],
+      );
+    },
   );
 }
 
@@ -143,40 +152,50 @@ Future<bool?> showRestoreConfirmation(
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: const Text('Restore Snapshot'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('This will overwrite your current local settings.'),
-          const SizedBox(height: 16),
-          if (metadata.label != null && metadata.label!.isNotEmpty)
-            MetadataRow(label: 'Label', value: metadata.label!),
-          MetadataRow(
-            label: 'Stored',
-            value: formatDateTime(metadata.updatedAt),
-          ),
-          if (metadata.sourceAppVersion != null)
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        title: Text(l10n.account_restoreSnapshotTitle),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.account_restoreOverwriteWarning),
+            const SizedBox(height: 16),
+            if (metadata.label != null && metadata.label!.isNotEmpty)
+              MetadataRow(
+                label: l10n.account_metaLabel,
+                value: metadata.label!,
+              ),
             MetadataRow(
-              label: 'App version',
-              value: metadata.sourceAppVersion!,
+              label: l10n.account_metaStored,
+              value: formatDateTime(metadata.updatedAt),
             ),
-          if (metadata.sourceDeviceId != null)
-            MetadataRow(label: 'Device', value: metadata.sourceDeviceId!),
+            if (metadata.sourceAppVersion != null)
+              MetadataRow(
+                label: l10n.account_metaAppVersion,
+                value: metadata.sourceAppVersion!,
+              ),
+            if (metadata.sourceDeviceId != null)
+              MetadataRow(
+                label: l10n.account_metaDevice,
+                value: metadata.sourceDeviceId!,
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.account_actionRestore),
+          ),
         ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Restore'),
-        ),
-      ],
-    ),
+      );
+    },
   );
 }
 
@@ -184,29 +203,32 @@ Future<bool?> showDeleteConfirmation(
   BuildContext context, {
   required SyncDocumentMetadata metadata,
 }) {
-  final label = metadata.label?.isNotEmpty == true
-      ? '"${metadata.label}"'
-      : 'this snapshot';
-
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: const Text('Delete Snapshot'),
-      content: Text('Are you sure you want to delete $label?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+      final label = metadata.label?.isNotEmpty == true
+          ? '"${metadata.label}"'
+          : l10n.account_thisSnapshotFallback;
+
+      return AlertDialog(
+        title: Text(l10n.account_deleteSnapshotTitle),
+        content: Text(l10n.account_deleteSnapshotConfirm(label)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.common_cancel),
           ),
-          onPressed: () => Navigator.of(context).pop(true),
-          child: const Text('Delete'),
-        ),
-      ],
-    ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.common_delete),
+          ),
+        ],
+      );
+    },
   );
 }

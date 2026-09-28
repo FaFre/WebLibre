@@ -26,6 +26,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -237,7 +238,7 @@ class _SwipeActionHint extends StatelessWidget {
               child: Icon(
                 action.icon,
                 color: armed ? activeColor : colorScheme.onSurfaceVariant,
-                semanticLabel: action.title,
+                semanticLabel: action.label(context),
               ),
             ),
           ),

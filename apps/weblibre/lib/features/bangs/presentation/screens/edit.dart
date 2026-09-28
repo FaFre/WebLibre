@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/features/bangs/presentation/dialogs/delete_bang_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -48,6 +49,7 @@ class EditBangScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     // A fork looks like an edit but behaves like a new bang: there is no
@@ -93,10 +95,10 @@ class EditBangScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(
           fork
-              ? 'Customize Bang'
+              ? l10n.bangs_editTitleCustomize
               : initialBang == null
-              ? 'New Bang'
-              : 'Edit Bang',
+              ? l10n.bangs_editTitleNew
+              : l10n.bangs_editTitleEdit,
         ),
         actions: [
           IconButton(
@@ -117,7 +119,7 @@ class EditBangScreen extends HookConsumerWidget {
                   if (context.mounted) {
                     ui_helper.showErrorMessage(
                       context,
-                      'A Bang with Trigger "$trigger" does already exist',
+                      l10n.bangs_triggerAlreadyExists(trigger),
                     );
                   }
 
@@ -185,36 +187,32 @@ class EditBangScreen extends HookConsumerWidget {
               children: [
                 TextFormField(
                   controller: nameTextController,
-                  decoration: const InputDecoration(
-                    label: Text('Name'),
-                    helper: Text(
-                      'The name of the website associated with the bang',
-                    ),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bangs_fieldNameLabel),
+                    helper: Text(l10n.bangs_fieldNameHelper),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  validator: (value) => validateRequired(value?.trim()),
+                  validator: (value) =>
+                      validateRequired(value?.trim(), l10n: l10n),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: triggerTextController,
-                  decoration: const InputDecoration(
-                    label: Text('Trigger'),
-                    helper: Text(
-                      'The specific trigger word or phrase used to invoke the bang.',
-                    ),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bangs_fieldTriggerLabel),
+                    helper: Text(l10n.bangs_fieldTriggerHelper),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  validator: (value) => validateRequired(value?.trim()),
+                  validator: (value) =>
+                      validateRequired(value?.trim(), l10n: l10n),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: aliasTextController,
                   autocorrect: false,
-                  decoration: const InputDecoration(
-                    label: Text('Additional triggers'),
-                    helper: Text(
-                      'Other words that invoke this bang, separated by commas or spaces. A leading ! is optional.',
-                    ),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bangs_fieldAdditionalTriggersLabel),
+                    helper: Text(l10n.bangs_fieldAdditionalTriggersHelper),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                 ),
@@ -222,24 +220,23 @@ class EditBangScreen extends HookConsumerWidget {
                 TextFormField(
                   controller: urlTextController,
                   keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(
-                    label: Text('URL'),
-                    helper: Text(
-                      "The URL template to use when the bang is invoked, where `{{{s}}}` is replaced by the user's query.",
-                    ),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bangs_fieldUrlLabel),
+                    helper: Text(l10n.bangs_fieldUrlHelper('{{{s}}}')),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   validator: (value) {
                     final urlTemplate = value?.trim();
 
                     if (urlTemplate?.contains('{{{s}}}') != true) {
-                      return 'Must contain the query placeholder {{{s}}}';
+                      return l10n.bangs_fieldUrlMissingPlaceholder('{{{s}}}');
                     }
 
                     return validateUrl(
                       urlTemplate,
                       eagerParsing: false,
                       onlyHttpProtocol: true,
+                      l10n: l10n,
                     );
                   },
                 ),
@@ -248,7 +245,7 @@ class EditBangScreen extends HookConsumerWidget {
                   key: ValueKey(EquatableValue([category.value, categories])),
                   enableFilter: true,
                   requestFocusOnTap: true,
-                  label: const Text('Category'),
+                  label: Text(l10n.bangs_fieldCategoryLabel),
                   expandedInsets: EdgeInsets.zero,
                   initialSelection: category.value,
                   dropdownMenuEntries: [
@@ -270,7 +267,7 @@ class EditBangScreen extends HookConsumerWidget {
                   ),
                   enableFilter: true,
                   requestFocusOnTap: true,
-                  label: const Text('Sub Category'),
+                  label: Text(l10n.bangs_fieldSubCategoryLabel),
                   expandedInsets: EdgeInsets.zero,
                   initialSelection: subCategory.value,
                   dropdownMenuEntries: [
@@ -285,15 +282,16 @@ class EditBangScreen extends HookConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 16),
-                Text('Flags', style: Theme.of(context).textTheme.labelMedium),
+                Text(
+                  l10n.bangs_flagsLabel,
+                  style: Theme.of(context).textTheme.labelMedium,
+                ),
                 const SizedBox(height: 4),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
                   value: formatFlags.value.contains(BangFormat.openBasePath),
-                  title: const Text('Open Base Path'),
-                  subtitle: const Text(
-                    'When the bang is invoked with no query, opens the base path of the URL (/) instead of any path given in the template (g., /search)',
-                  ),
+                  title: Text(l10n.bangs_flagOpenBasePathTitle),
+                  subtitle: Text(l10n.bangs_flagOpenBasePathSubtitle),
                   onChanged: (value) {
                     if (value != null) {
                       updateFormatFlag(BangFormat.openBasePath, value);
@@ -305,10 +303,8 @@ class EditBangScreen extends HookConsumerWidget {
                   value: formatFlags.value.contains(
                     BangFormat.urlEncodePlaceholder,
                   ),
-                  title: const Text('URL Encode Placeholder'),
-                  subtitle: const Text(
-                    'URL encode the search terms. Some sites do not work with this, so it can be disabled by omitting this.',
-                  ),
+                  title: Text(l10n.bangs_flagUrlEncodePlaceholderTitle),
+                  subtitle: Text(l10n.bangs_flagUrlEncodePlaceholderSubtitle),
                   onChanged: (value) {
                     if (value != null) {
                       updateFormatFlag(BangFormat.urlEncodePlaceholder, value);
@@ -320,10 +316,8 @@ class EditBangScreen extends HookConsumerWidget {
                   value: formatFlags.value.contains(
                     BangFormat.urlEncodeSpaceToPlus,
                   ),
-                  title: const Text('URL Encode Space to Plus'),
-                  subtitle: const Text(
-                    'URL encodes spaces as +, instead of %20. Some sites only work correctly with one or the other.',
-                  ),
+                  title: Text(l10n.bangs_flagUrlEncodeSpaceToPlusTitle),
+                  subtitle: Text(l10n.bangs_flagUrlEncodeSpaceToPlusSubtitle),
                   onChanged: (value) {
                     if (value != null) {
                       updateFormatFlag(BangFormat.urlEncodeSpaceToPlus, value);
@@ -341,7 +335,7 @@ class EditBangScreen extends HookConsumerWidget {
                         foregroundColor: Theme.of(context).colorScheme.error,
                         iconColor: Theme.of(context).colorScheme.error,
                       ),
-                      label: const Text('Delete'),
+                      label: Text(l10n.common_delete),
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
                         final result = await showDeleteBangDialog(context);

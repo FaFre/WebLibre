@@ -27,12 +27,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_listing_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class AddonBrowseView extends HookConsumerWidget {
   const AddonBrowseView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final app = ref.watch(addonStoreAppFilterProvider);
 
     final searchController = useTextEditingController();
@@ -64,16 +66,16 @@ class AddonBrowseView extends HookConsumerWidget {
           child: SizedBox(
             width: double.infinity,
             child: SegmentedButton<AddonStoreApp>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: AddonStoreApp.android,
-                  icon: Icon(Icons.phone_android),
-                  label: Text('Android'),
+                  icon: const Icon(Icons.phone_android),
+                  label: Text(l10n.addons_platformAndroid),
                 ),
                 ButtonSegment(
                   value: AddonStoreApp.firefox,
-                  icon: Icon(Icons.desktop_windows),
-                  label: Text('Desktop'),
+                  icon: const Icon(Icons.desktop_windows),
+                  label: Text(l10n.addons_platformDesktop),
                 ),
               ],
               selected: {app},
@@ -88,7 +90,7 @@ class AddonBrowseView extends HookConsumerWidget {
           child: TextField(
             controller: searchController,
             decoration: InputDecoration(
-              hintText: 'Search addons.mozilla.org',
+              hintText: l10n.addons_searchHint,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: query.value.isEmpty
                   ? null
@@ -130,7 +132,7 @@ class AddonBrowseView extends HookConsumerWidget {
                   children: [
                     const Icon(Icons.error_outline, size: 40),
                     const SizedBox(height: 12),
-                    const Text('Failed to load extensions'),
+                    Text(l10n.addons_loadFailedTitle),
                     const SizedBox(height: 8),
                     Text(error.toString(), textAlign: TextAlign.center),
                   ],
@@ -150,6 +152,7 @@ class _DesktopCompatibilityWarning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -165,8 +168,7 @@ class _DesktopCompatibilityWarning extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Desktop extensions are not reviewed for mobile. Some may not '
-              'work, may crash, or may behave unexpectedly on Android.',
+              l10n.addons_desktopCompatibilityWarning,
               style: TextStyle(
                 color: theme.colorScheme.onTertiaryContainer,
                 fontSize: 12,
@@ -188,7 +190,9 @@ class _ListingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (listings.isEmpty) {
-      return const Center(child: Text('No extensions found.'));
+      return Center(
+        child: Text(AppLocalizations.of(context).addons_noExtensionsFound),
+      );
     }
 
     return FadingScroll(

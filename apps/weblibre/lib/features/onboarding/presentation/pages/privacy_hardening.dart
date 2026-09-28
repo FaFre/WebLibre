@@ -27,6 +27,7 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class PrivacyHardeningPage extends ConsumerWidget {
@@ -35,6 +36,7 @@ class PrivacyHardeningPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return BrowserPage(
       child: BrowserPageContent(
@@ -44,7 +46,7 @@ class PrivacyHardeningPage extends ConsumerWidget {
             const SizedBox(height: 24),
             Center(
               child: Text(
-                'Privacy & Hardening',
+                l10n.onboarding_privacyTitle,
                 style: theme.textTheme.headlineMedium,
               ),
             ),
@@ -52,10 +54,8 @@ class PrivacyHardeningPage extends ConsumerWidget {
             const _LanguageFingerprintWarning(),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Browser Languages'),
-              subtitle: const Text(
-                'Configure language preferences exposed to websites',
-              ),
+              title: Text(l10n.onboarding_privacyBrowserLanguagesTitle),
+              subtitle: Text(l10n.onboarding_privacyBrowserLanguagesSubtitle),
               leading: const Icon(Icons.translate),
               trailing: const Icon(Icons.chevron_right),
               onTap: () async {
@@ -81,6 +81,7 @@ class _LanguageFingerprintWarning extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final configuredLocales = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.locales),
@@ -109,7 +110,7 @@ class _LanguageFingerprintWarning extends ConsumerWidget {
               ),
               children: [
                 TextSpan(
-                  text: 'Multiple Languages Detected\n\n',
+                  text: '${l10n.onboarding_multipleLanguagesDetectedTitle}\n\n',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                     fontWeight: FontWeight.w600,
@@ -118,17 +119,10 @@ class _LanguageFingerprintWarning extends ConsumerWidget {
                 const TextSpan(text: '• '),
                 TextSpan(
                   text:
-                      'Your browser has ${configuredLocales.length} languages '
-                      'configured (${configuredLocales.join(', ')}). '
-                      'Websites can use your unique language combination to '
-                      'fingerprint and track you across the web.\n\n',
+                      '${l10n.onboarding_multipleLanguagesWarning(configuredLocales.length, configuredLocales.join(', '))}\n\n',
                 ),
                 const TextSpan(text: '• '),
-                const TextSpan(
-                  text:
-                      'Consider reducing your browser languages to a single '
-                      'language to minimize your fingerprint surface.',
-                ),
+                TextSpan(text: l10n.onboarding_multipleLanguagesSuggestion),
               ],
             ),
           ),
@@ -144,7 +138,7 @@ class _LanguageFingerprintWarning extends ConsumerWidget {
                 await LocaleSettingsRoute().push(context);
               },
               icon: const Icon(Icons.translate),
-              label: const Text('Review Languages'),
+              label: Text(l10n.onboarding_reviewLanguages),
             ),
           ),
         ],
@@ -158,6 +152,8 @@ class _WebEngineHardeningToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     final preferenceGroups = ref.watch(
       unifiedPreferenceSettingsRepositoryProvider(PreferencePartition.user),
     );
@@ -170,10 +166,8 @@ class _WebEngineHardeningToggle extends ConsumerWidget {
 
     return SwitchListTile.adaptive(
       contentPadding: EdgeInsets.zero,
-      title: const Text('Complete Web Engine Hardening'),
-      subtitle: const Text(
-        'Apply all recommended security hardening preferences to the web engine',
-      ),
+      title: Text(l10n.onboarding_webEngineHardeningTitle),
+      subtitle: Text(l10n.onboarding_webEngineHardeningSubtitle),
       secondary: const Icon(MdiIcons.shieldLock),
       value: allGroupsActive,
       onChanged: preferenceGroups.hasValue
@@ -201,6 +195,7 @@ class _FingerprintProtectionToggle extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final currentOverrides = ref.watch(
       engineSettingsWithDefaultsProvider.select(
@@ -215,10 +210,8 @@ class _FingerprintProtectionToggle extends ConsumerWidget {
       children: [
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Hardened Fingerprint Protection'),
-          subtitle: const Text(
-            'Load comprehensive fingerprint protection defaults',
-          ),
+          title: Text(l10n.onboarding_fingerprintProtectionTitle),
+          subtitle: Text(l10n.onboarding_fingerprintProtectionSubtitle),
           secondary: const Icon(MdiIcons.fingerprint),
           value: isHardened,
           onChanged: (value) async {
@@ -254,26 +247,21 @@ class _FingerprintProtectionToggle extends ConsumerWidget {
                       ),
                       children: [
                         TextSpan(
-                          text: 'Compatibility Warning\n\n',
+                          text:
+                              '${l10n.onboarding_compatibilityWarningTitle}\n\n',
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: theme.colorScheme.onError,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const TextSpan(text: '• '),
-                        const TextSpan(
+                        TextSpan(
                           text:
-                              'Hardened fingerprint protection enables 60+ '
-                              'protection targets including canvas '
-                              'randomization, navigator spoofing, media device '
-                              'masking, and more.\n\n',
+                              '${l10n.onboarding_fingerprintWarningPoint1}\n\n',
                         ),
                         const TextSpan(text: '• '),
-                        const TextSpan(
-                          text:
-                              'This may cause websites to break or behave '
-                              'unexpectedly. You can fine-tune individual '
-                              'targets in settings.',
+                        TextSpan(
+                          text: l10n.onboarding_fingerprintWarningPoint2,
                         ),
                       ],
                     ),
@@ -291,6 +279,8 @@ class _LocalNetworkAccessSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     final lnaBlocking = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.lnaBlocking),
     );
@@ -298,25 +288,17 @@ class _LocalNetworkAccessSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const ListTile(
-          title: Text('Local Network Protection'),
-          subtitle: Text(
-            'Websites can try to reach your device and other devices '
-            'on your home network, like routers, printers, or smart home '
-            'devices. By default, known trackers are automatically blocked '
-            'from doing this.',
-          ),
-          leading: Icon(MdiIcons.lanDisconnect),
+        ListTile(
+          title: Text(l10n.onboarding_localNetworkProtectionTitle),
+          subtitle: Text(l10n.onboarding_localNetworkProtectionSubtitle),
+          leading: const Icon(MdiIcons.lanDisconnect),
           contentPadding: EdgeInsets.zero,
         ),
         const SizedBox(height: 8),
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Block All Local Network Requests'),
-          subtitle: const Text(
-            'Ask for permission before any website accesses devices '
-            'on your home network, not just known trackers',
-          ),
+          title: Text(l10n.onboarding_blockAllLocalNetworkTitle),
+          subtitle: Text(l10n.onboarding_blockAllLocalNetworkSubtitle),
           secondary: const Icon(MdiIcons.shieldLockOpen),
           value: lnaBlocking ?? false,
           onChanged: (value) async {

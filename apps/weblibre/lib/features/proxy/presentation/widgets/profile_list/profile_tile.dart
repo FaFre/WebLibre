@@ -24,10 +24,10 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_share.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/proxy/domain/extensions/singbox_proxy_profile_type_x.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
+import 'package:weblibre/features/proxy/presentation/utils/singbox_proxy_profile_type_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/menu_row.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_subtitle.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/protocol_badge.dart';
@@ -35,6 +35,7 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_list/run_sw
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/share_profile_dialog.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 enum ProfileAction { edit, testLatency, share, delete }
@@ -57,6 +58,7 @@ class ProfileTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isBusy = runtimeBusy || isDeleting;
     final latencyResult = ref.watch(
       proxyLatencyResultsProvider.select(
@@ -82,7 +84,7 @@ class ProfileTile extends ConsumerWidget {
         ),
       ),
       subtitle: ProfileSubtitle(
-        typeLabel: profile.type.label,
+        typeLabel: profile.type.label(context),
         latency: latencyResult,
         autostart: profile.autostart,
       ),
@@ -93,9 +95,12 @@ class ProfileTile extends ConsumerWidget {
             enabled: !isBusy,
             onSelected: (action) => _onAction(context, ref, action),
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: ProfileAction.edit,
-                child: MenuRow(icon: Icons.edit_outlined, label: 'Edit'),
+                child: MenuRow(
+                  icon: Icons.edit_outlined,
+                  label: l10n.common_edit,
+                ),
               ),
               PopupMenuItem(
                 value: ProfileAction.testLatency,
@@ -104,16 +109,22 @@ class ProfileTile extends ConsumerWidget {
                   icon: latencyResult is AsyncLoading
                       ? Icons.hourglass_bottom
                       : Icons.network_check,
-                  label: 'Test connection',
+                  label: l10n.proxy_actionTestConnection,
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: ProfileAction.share,
-                child: MenuRow(icon: Icons.share_outlined, label: 'Share'),
+                child: MenuRow(
+                  icon: Icons.share_outlined,
+                  label: l10n.proxy_actionShare,
+                ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: ProfileAction.delete,
-                child: MenuRow(icon: Icons.delete_outline, label: 'Delete'),
+                child: MenuRow(
+                  icon: Icons.delete_outline,
+                  label: l10n.common_delete,
+                ),
               ),
             ],
           ),
@@ -147,11 +158,12 @@ class ProfileTile extends ConsumerWidget {
         stackTrace: stackTrace,
       );
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
         showErrorMessage(
           context,
           isRunning
-              ? 'Failed to stop proxy: $error'
-              : 'Failed to start proxy: $error',
+              ? l10n.proxy_stopProxyFailed(error.toString())
+              : l10n.proxy_startProxyFailed(error.toString()),
         );
       }
     }
@@ -205,24 +217,27 @@ class ProfileTile extends ConsumerWidget {
   }
 
   Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => AlertDialog(
-        title: const Text('Delete Profile?'),
+        title: Text(l10n.proxy_deleteProfileTitle),
         content: Text(
           isRunning
-              ? 'Stop ${profile.name}, then delete it and its stored secrets? Tabs and containers assigned to this profile will be blocked until you choose another proxy or clear the assignment.'
-              : 'Delete ${profile.name} and its stored secrets? Tabs and containers assigned to this profile will be blocked until you choose another proxy or clear the assignment.',
+              ? l10n.proxy_deleteProfileConfirmRunning(profile.name)
+              : l10n.proxy_deleteProfileConfirm(profile.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(isRunning ? 'Stop and Delete' : 'Delete'),
+            child: Text(
+              isRunning ? l10n.proxy_actionStopAndDelete : l10n.common_delete,
+            ),
           ),
         ],
       ),
@@ -244,7 +259,12 @@ class ProfileTile extends ConsumerWidget {
         stackTrace: stackTrace,
       );
       if (context.mounted) {
-        showErrorMessage(context, 'Failed to delete profile: $error');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(
+            context,
+          ).proxy_deleteProfileFailed(error.toString()),
+        );
       }
     } finally {
       if (context.mounted) onDeletingChanged(profile.id, false);

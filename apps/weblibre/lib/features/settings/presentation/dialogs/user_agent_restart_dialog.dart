@@ -20,31 +20,34 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<bool?> showUserAgentRestartDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      icon: const Icon(Icons.warning),
-      title: const Text('User Agent Changed'),
-      content: const Text(
-        'The Browser needs to get restarted for the new user agent to take effect',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            context.pop(false);
-          },
-          child: const Text('Later'),
-        ),
-        TextButton(
-          onPressed: () {
-            context.pop(true);
-          },
-          child: const Text('Restart Now'),
-        ),
-      ],
-    ),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        icon: const Icon(Icons.warning),
+        title: Text(l10n.settings_userAgentChangedTitle),
+        content: Text(l10n.settings_userAgentChangedContent),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.pop(false);
+            },
+            child: Text(l10n.settings_later),
+          ),
+          TextButton(
+            onPressed: () {
+              context.pop(true);
+            },
+            child: Text(l10n.settings_restartNow),
+          ),
+        ],
+      );
+    },
   );
 }

@@ -1,0 +1,74 @@
+{
+  "@@locale": "en",
+
+  "profileCopy_pickerContents": "tabs, history and settings",
+  "@profileCopy_pickerContents": {
+    "description": "List fragment inserted into another sentence on the startup profile picker (\"each profile keeps its own …\"). Names what a browser profile holds. Lowercase, no final period."
+  },
+  "profileCopy_dataDescription": "tabs, history, bookmarks, settings and saved site logins",
+  "@profileCopy_dataDescription": {
+    "description": "List fragment inserted into sentences about deleting, restoring or replacing a browser profile. Names everything the profile holds that would be lost. Lowercase, no final period."
+  },
+  "profileCopy_secretDataDescription": "WebLibre account sign-in, sync setup and proxy details",
+  "@profileCopy_secretDataDescription": {
+    "description": "List fragment inserted into sentences about profile backups. Names the sensitive account data that backups include. Lowercase, no final period. WebLibre is the app name."
+  },
+  "profileCopy_cannotBeUndone": "This cannot be undone.",
+  "@profileCopy_cannotBeUndone": {
+    "description": "Standalone sentence appended to warnings before deleting or overwriting a browser profile."
+  },
+  "profileCopy_nothingChanged": "Nothing has been changed.",
+  "@profileCopy_nothingChanged": {
+    "description": "Standalone sentence appended to error messages when a profile backup, restore or delete stopped before touching any data, reassuring the user that it is safe to retry."
+  },
+  "profileCopy_restartsToWork": "WebLibre must restart to do this.",
+  "@profileCopy_restartsToWork": {
+    "description": "Standalone sentence in profile backup, restore and delete screens: the app has to restart to carry out the operation. Always followed by further sentences."
+  },
+  "profileCopy_asksPasswordAfterRestart": "After restarting, WebLibre asks for the backup file password.",
+  "@profileCopy_asksPasswordAfterRestart": {
+    "description": "Standalone sentence in the backup restore flow: after restarting, the app asks for the backup file password."
+  },
+  "profileCopy_reopenToContinue": "Close WebLibre and open it again.",
+  "@profileCopy_reopenToContinue": {
+    "description": "Standalone instruction appended to startup error messages that can only be cleared by fully closing and reopening the app."
+  },
+  "profileCopy_signedInFromBackup": "The restored profile uses the WebLibre account from the backup.",
+  "@profileCopy_signedInFromBackup": {
+    "description": "Standalone sentence in the warning before restoring a backup over an existing profile: account sign-ins are taken from the backup, not kept from the replaced profile."
+  },
+  "profileCopy_olderBackupKeepsCredentials": "A backup made by an older version of WebLibre carries none of these, and the profile keeps the ones it has now.",
+  "@profileCopy_olderBackupKeepsCredentials": {
+    "description": "Standalone sentence that follows the note that a restored profile uses the account from the backup. \"These\" refers to the account sign-in and credentials; backups from older app versions have none, so the current ones are kept."
+  },
+
+  "profileCopy_restartCouldNotBeScheduled": "WebLibre could not schedule the restart required for this operation. {nothingChanged}",
+  "@profileCopy_restartCouldNotBeScheduled": {
+    "description": "Error message when a profile backup, restore or delete needs an app restart that the system refused to schedule. nothingChanged is the sentence \"Nothing has been changed.\"",
+    "placeholders": { "nothingChanged": { "type": "String" } }
+  },
+
+  "profileCopy_shortcutsNeedPinningAgain": "Pin home-screen shortcuts again after restore.",
+  "@profileCopy_shortcutsNeedPinningAgain": {
+    "description": "Standalone sentence in profile backup and restore screens: home-screen shortcuts that open a profile stop working after a restore and must be added to the home screen again."
+  },
+  "profileCopy_restartClosesCurrentProfile": "It also closes the profile you are using now, which is not always the profile named here.",
+  "@profileCopy_restartClosesCurrentProfile": {
+    "description": "Standalone sentence that follows a note that the app restarts for a profile operation: the restart also closes the profile the user is currently browsing in, which may differ from the profile being backed up or deleted."
+  },
+  "profileCopy_restartKeepsOtherTabs": "Your other tabs reopen afterward.",
+  "@profileCopy_restartKeepsOtherTabs": {
+    "description": "Reassurance under the list of what an app restart for a profile operation will lose: regular tabs are restored after the restart."
+  },
+
+  "profileCopy_privateTabsClosedByRestart": "{count, plural, =1{1 private tab closes and its browsing data is cleared.} other{{count} private tabs close and their browsing data is cleared.}}",
+  "@profileCopy_privateTabsClosedByRestart": {
+    "description": "Item in the list of what an app restart for a profile operation will lose. count is the number of open private tabs, which do not survive a restart.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "profileCopy_containersClearedByRestart": "{count, plural, =1{1 container set to clear data on exit is cleared.} other{{count} containers set to clear data on exit are cleared.}}",
+  "@profileCopy_containersClearedByRestart": {
+    "description": "Item in the list of what an app restart for a profile operation will lose. count is the number of containers (separate browsing identities) configured to delete their browsing data when the app exits.",
+    "placeholders": { "count": { "type": "int" } }
+  }
+}

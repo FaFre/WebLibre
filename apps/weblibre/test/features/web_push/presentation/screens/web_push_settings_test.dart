@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:weblibre/features/web_push/domain/providers.dart';
 import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('refreshes notification permission when the app resumes', (
@@ -87,7 +88,11 @@ Future<void> _pumpSettings(
           permissionService ?? _FakePermissionService(),
         ),
       ],
-      child: const MaterialApp(home: WebPushSettingsScreen()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: WebPushSettingsScreen(),
+      ),
     ),
   );
   await tester.pumpAndSettle();

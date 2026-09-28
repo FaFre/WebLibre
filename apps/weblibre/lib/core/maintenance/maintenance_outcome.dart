@@ -18,11 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:secure_archive/secure_archive.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/maintenance/backup_operation.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart' as saf;
+import 'package:weblibre/core/startup/models/json_read.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/utils/number_format.dart';
+
+/// The opposite of a destructive action, and just as load-bearing: it is what
+/// makes retrying safe to offer, so it belongs in the same breath as the
+/// failure rather than being left for the user to assume.
+///
+/// Kept English and un-localized on purpose: [MaintenanceFailure.message] is
+/// diagnostic text for logs and for [MaintenanceAborted.toString], not what
+/// the user sees — `MaintenanceFailureL10n.describe` builds the translated
+/// sentence separately, from `AppLocalizations.profileCopy_nothingChanged`.
+const _nothingChanged = 'Nothing has been changed.';
 
 /// The operation stopped before it changed anything, and cleaned up after
 /// itself.
@@ -73,6 +83,9 @@ sealed class MaintenanceFailure {
 
   String get message;
 
+  /// Persisted beside [kind] as `MaintenanceTask.errorDetailId`; see there.
+  String? get detailId => null;
+
   bool get blamesPassword => kind.blamesPassword;
 }
 
@@ -86,7 +99,7 @@ final class WrongArchivePassword extends MaintenanceFailure {
   @override
   String get message =>
       'The password did not open this backup file. Check it and try again. '
-      '$nothingChanged';
+      '$_nothingChanged';
 }
 
 /// The archive would not open and the cause cannot be pinned down.
@@ -105,7 +118,7 @@ final class UnreadableArchive extends MaintenanceFailure {
   @override
   String get message =>
       'The password did not open this backup file, or the file is damaged. '
-      'Check the password and try again. $nothingChanged';
+      'Check the password and try again. $_nothingChanged';
 }
 
 /// The archive authenticated and its contents still could not be read.
@@ -122,7 +135,7 @@ final class DamagedArchive extends MaintenanceFailure {
 
   @override
   String get message =>
-      'This backup file is damaged and could not be read. $nothingChanged';
+      'This backup file is damaged and could not be read. $_nothingChanged';
 }
 
 /// The archive was written in a format this build does not know.
@@ -140,7 +153,7 @@ final class UnsupportedArchiveVersion extends MaintenanceFailure {
   @override
   String get message =>
       'This backup file was created by a newer version of WebLibre and cannot be '
-      'read here. $nothingChanged';
+      'read here. $_nothingChanged';
 }
 
 /// There is not enough room to do the work.
@@ -164,9 +177,9 @@ final class NotEnoughStorage extends MaintenanceFailure {
       return 'There is not enough free space: this needs about '
           '${formatBytes(required)}'
           '${free == null ? '' : ', and ${formatBytes(free)} is free'}. '
-          '$nothingChanged';
+          '$_nothingChanged';
     }
-    return 'There is not enough free space to do this. $nothingChanged';
+    return 'There is not enough free space to do this. $_nothingChanged';
   }
 }
 
@@ -181,23 +194,46 @@ final class BackupFolderUnavailableFailure extends MaintenanceFailure {
   @override
   String get message =>
       'The backup could not be written to the folder. Choose the folder again '
-      'and retry. $nothingChanged';
+      'and retry. $_nothingChanged';
+}
+
+/// Which way a staged restore archive failed to be what it has to be.
+///
+/// A stable code rather than the free-text sentence this used to be: the
+/// sentence was written where the check ran, in English, with no way for
+/// `MaintenanceFailureL10n` to tell one failure from another well enough to
+/// translate it. [malformedMetadata] collapses several distinct checks
+/// (unreadable JSON, not an object, no id, an unparsable id) into one case —
+/// from the person restoring a backup, all four read the same: the file is
+/// broken. The specific one stays in [ArchiveRejected.detail], for logs.
+enum RestoreValidationReason {
+  wrongProfile,
+  incomplete,
+  noMetadata,
+  malformedMetadata,
+  noProfileData,
 }
 
 /// The staged archive is not what it has to be to be installed.
 ///
-/// Its [reason] is written where the check is, because only that code knows what
-/// it was looking for.
+/// [detail] is written where the check is, because only that code knows what
+/// it was looking for — kept for logs, never shown to the user. [reason] is
+/// what `MaintenanceFailureL10n` translates.
 final class ArchiveRejected extends MaintenanceFailure {
-  const ArchiveRejected(this.reason);
+  const ArchiveRejected(this.reason, [this.detail]);
 
-  final String reason;
+  final RestoreValidationReason reason;
+  final String? detail;
 
   @override
   MaintenanceFailureKind get kind => MaintenanceFailureKind.archiveRejected;
 
   @override
-  String get message => reason;
+  String get detailId => reason.name;
+
+  @override
+  String get message =>
+      detail == null ? reason.name : '${reason.name}: $detail';
 }
 
 /// A failure this build has no case for.
@@ -222,9 +258,23 @@ final class UnknownMaintenanceFailure extends MaintenanceFailure {
 /// Shared so that a delete, a replace and a backup all say it the same way: it
 /// is one situation — a task naming a profile that is not there — and which
 /// operation happened to notice it is not something the user has to care about.
-const profileNoLongerExists = UnknownMaintenanceFailure(
-  'That profile no longer exists.',
-);
+///
+/// Its own class and [kind] rather than a plain [UnknownMaintenanceFailure]:
+/// [UnknownMaintenanceFailure.detail] is raw, unlocalizable exception text,
+/// and this sentence is fixed copy that has to be translated — including when
+/// it is read back from a persisted task after a restart.
+final class ProfileNoLongerExistsFailure extends MaintenanceFailure {
+  const ProfileNoLongerExistsFailure();
+
+  @override
+  MaintenanceFailureKind get kind =>
+      MaintenanceFailureKind.profileNoLongerExists;
+
+  @override
+  String get message => 'That profile no longer exists.';
+}
+
+const profileNoLongerExists = ProfileNoLongerExistsFailure();
 
 /// A restore was asked to start over a record of an earlier attempt.
 ///
@@ -232,10 +282,125 @@ const profileNoLongerExists = UnknownMaintenanceFailure(
 /// at is the only thing that can clear it, and telling the user to "try again"
 /// here would be telling them to do the one thing that destroys the copy of their
 /// profile the interrupted attempt set aside.
-const restoreEvidenceUnresolved = UnknownMaintenanceFailure(
-  'An earlier attempt at this restore left a record that has not been '
-  'resolved yet.',
-);
+///
+/// Its own class and [kind] for the same reason as
+/// [ProfileNoLongerExistsFailure].
+final class RestoreEvidenceUnresolvedFailure extends MaintenanceFailure {
+  const RestoreEvidenceUnresolvedFailure();
+
+  @override
+  MaintenanceFailureKind get kind =>
+      MaintenanceFailureKind.restoreEvidenceUnresolved;
+
+  @override
+  String get message =>
+      'An earlier attempt at this restore left a record that has not been '
+      'resolved yet.';
+}
+
+const restoreEvidenceUnresolved = RestoreEvidenceUnresolvedFailure();
+
+/// Why [TaskNotRunnable] refused a task before touching anything.
+enum TaskNotRunnableReason {
+  /// An action this build does not run from maintenance (a newer build's, or
+  /// a restore into a new profile, which the normal app handles).
+  unsupportedAction,
+  backupDestinationMissing,
+  restoreSourceMissing,
+
+  /// The runner was built without what a destructive action needs to journal
+  /// itself — the startup screen cannot run it.
+  restoreUnavailableHere,
+  deleteUnavailableHere,
+}
+
+/// The task cannot run at all, as recorded. Fixed copy per [reason], so it is
+/// translated rather than shown as raw text — also after a restart, through
+/// the persisted [detailId].
+final class TaskNotRunnable extends MaintenanceFailure {
+  const TaskNotRunnable(this.reason);
+
+  final TaskNotRunnableReason reason;
+
+  @override
+  MaintenanceFailureKind get kind => MaintenanceFailureKind.taskNotRunnable;
+
+  @override
+  String get detailId => reason.name;
+
+  @override
+  String get message => switch (reason) {
+    TaskNotRunnableReason.unsupportedAction =>
+      'This task was created by a newer version of WebLibre and cannot run '
+          'here.',
+    TaskNotRunnableReason.backupDestinationMissing =>
+      'This backup has no destination folder recorded.',
+    TaskNotRunnableReason.restoreSourceMissing =>
+      'This restore has no backup file recorded.',
+    TaskNotRunnableReason.restoreUnavailableHere =>
+      'WebLibre cannot restore from this startup screen.',
+    TaskNotRunnableReason.deleteUnavailableHere =>
+      'WebLibre cannot delete a profile from this startup screen.',
+  };
+}
+
+/// The task was queued, but the restart it runs on could not be armed, so it
+/// was unqueued again before anything was touched.
+///
+/// Thrown from the normal app as a [MaintenanceAborted] rather than recorded
+/// on a task — the task no longer exists by then — but a [MaintenanceFailure]
+/// all the same, so the screens that queue maintenance translate it through
+/// the one describer they already use.
+final class RestartNotScheduledFailure extends MaintenanceFailure {
+  const RestartNotScheduledFailure();
+
+  @override
+  MaintenanceFailureKind get kind => MaintenanceFailureKind.restartNotScheduled;
+
+  @override
+  String get message =>
+      'WebLibre could not schedule the restart this needs. $_nothingChanged';
+}
+
+/// The failure recorded on a [MaintenanceTask], rebuilt from what survives a
+/// process restart: [MaintenanceTask.errorKindId] and
+/// [MaintenanceTask.errorDetailId]. Byte counts, archive versions and the
+/// caught error do not survive, so [NotEnoughStorage] comes back without its
+/// numbers.
+///
+/// `null` when there is nothing to rebuild from: no failure, a kind or detail
+/// written by a newer build, or [MaintenanceFailureKind.unknown], whose only
+/// content is the raw [MaintenanceTask.error].
+extension RecordedMaintenanceFailure on MaintenanceTask {
+  MaintenanceFailure? get recordedFailure => switch (failureKind) {
+    MaintenanceFailureKind.wrongPassword => const WrongArchivePassword(),
+    MaintenanceFailureKind.unreadableArchive => const UnreadableArchive(),
+    MaintenanceFailureKind.damagedArchive => const DamagedArchive(),
+    MaintenanceFailureKind.unsupportedArchiveVersion =>
+      const UnsupportedArchiveVersion(),
+    MaintenanceFailureKind.notEnoughStorage => const NotEnoughStorage(),
+    MaintenanceFailureKind.backupTargetUnavailable =>
+      const BackupFolderUnavailableFailure(),
+    MaintenanceFailureKind.archiveRejected => switch (RestoreValidationReason
+        .values
+        .tryByName(errorDetailId)) {
+      final reason? => ArchiveRejected(reason),
+      null => null,
+    },
+    MaintenanceFailureKind.profileNoLongerExists => profileNoLongerExists,
+    MaintenanceFailureKind.restoreEvidenceUnresolved =>
+      restoreEvidenceUnresolved,
+    MaintenanceFailureKind.taskNotRunnable => switch (TaskNotRunnableReason
+        .values
+        .tryByName(errorDetailId)) {
+      final reason? => TaskNotRunnable(reason),
+      null => null,
+    },
+    MaintenanceFailureKind.restartNotScheduled =>
+      const RestartNotScheduledFailure(),
+    MaintenanceFailureKind.unknown || null => null,
+  };
+}
 
 /// Classifies a raw error into the one shape the rest of the app handles.
 ///
@@ -304,6 +469,22 @@ MaintenanceFailure classifyMaintenanceFailure(Object error) {
   return UnknownMaintenanceFailure(text);
 }
 
-/// Turns a maintenance failure into something worth showing a user.
-String describeMaintenanceFailure(Object error) =>
-    classifyMaintenanceFailure(error).message;
+/// What finishing an interrupted operation on startup amounted to.
+enum MaintenanceRecoveryOutcome {
+  restoreCompleted,
+  restoreRolledBack,
+  restoreReconciled,
+  deletionCompleted;
+
+  /// Diagnostic English for the retired task record and logs. What the user
+  /// reads comes from `MaintenanceRecoveryOutcomeL10n.describe` instead.
+  String get message => switch (this) {
+    restoreCompleted => 'An interrupted restore was completed.',
+    restoreRolledBack =>
+      'An interrupted restore was undone. The profile was left as it was.',
+    restoreReconciled =>
+      'An interrupted restore was reconciled. Check the profile to see '
+          'whether the backup was applied.',
+    deletionCompleted => 'An interrupted deletion was completed.',
+  };
+}

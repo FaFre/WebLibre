@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -39,6 +40,7 @@ class BookmarkSearch extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final bookmarkResults = ref.watch(bookmarkSearchResultsProvider);
     final totalResults = bookmarkResults.length;
 
@@ -57,7 +59,7 @@ class BookmarkSearch extends HookConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Bookmarks',
+      title: l10n.search_moduleLabelBookmarks,
       moduleType: SearchModuleType.bookmarks,
       totalCount: totalResults,
       contentSliverBuilder:

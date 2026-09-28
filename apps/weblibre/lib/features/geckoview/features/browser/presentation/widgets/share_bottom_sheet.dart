@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -69,6 +70,7 @@ class ShareBottomSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
 
@@ -97,13 +99,13 @@ class ShareBottomSheet extends HookConsumerWidget {
 
     void applyCleanUrl() {
       if (cleaner.applyCleanUrl()) {
-        ui_helper.showInfoMessage(context, 'URL cleaned');
+        ui_helper.showInfoMessage(context, l10n.browser_urlCleaned);
       }
     }
 
     void applySelectedTrackingRemovals(String previewUrl) {
       if (cleaner.applyPreviewUrl(previewUrl)) {
-        ui_helper.showInfoMessage(context, 'URL preview applied');
+        ui_helper.showInfoMessage(context, l10n.browser_urlPreviewApplied);
       }
     }
 
@@ -142,7 +144,7 @@ class ShareBottomSheet extends HookConsumerWidget {
             // Copy Address
             ListTile(
               leading: const Icon(MdiIcons.contentCopy),
-              title: const Text('Copy Address'),
+              title: Text(l10n.browser_copyAddress),
               trailing: trackingStatusTrailing,
               onTap: () async {
                 await Clipboard.setData(
@@ -159,7 +161,7 @@ class ShareBottomSheet extends HookConsumerWidget {
             if (canShareScreenshot)
               ListTile(
                 leading: const Icon(Icons.mobile_screen_share),
-                title: const Text('Share Screenshot'),
+                title: Text(l10n.browser_shareScreenshot),
                 onTap: () async {
                   final screenshot = await ref
                       .read(selectedTabSessionProvider)
@@ -189,7 +191,7 @@ class ShareBottomSheet extends HookConsumerWidget {
             // Share Link
             ListTile(
               leading: const Icon(Icons.share),
-              title: const Text('Share Link'),
+              title: Text(l10n.browser_shareLink),
               trailing: trackingStatusTrailing,
               onTap: () async {
                 await SharePlus.instance.share(ShareParams(uri: effectiveUrl));
@@ -203,7 +205,7 @@ class ShareBottomSheet extends HookConsumerWidget {
             // Show QR Code
             ListTile(
               leading: const Icon(Icons.qr_code),
-              title: const Text('Show QR Code'),
+              title: Text(l10n.browser_showQrCode),
               trailing: trackingStatusTrailing,
               onTap: () async {
                 if (context.mounted) {
@@ -236,6 +238,7 @@ class _ShareHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final hasTappableDetails = cleanerResult?.removedParams.isNotEmpty ?? false;
 
@@ -300,9 +303,7 @@ class _ShareHeader extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          paramCount == 1
-                              ? '1 tracking parameter detected'
-                              : '$paramCount tracking parameters detected',
+                          l10n.browser_trackingParametersDetected(paramCount),
                           style: TextStyle(
                             fontSize: 12,
                             color: colorScheme.error,
@@ -320,7 +321,7 @@ class _ShareHeader extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          'Link is clean',
+                          l10n.browser_linkIsClean,
                           style: TextStyle(
                             fontSize: 12,
                             color: colorScheme.primary,
@@ -335,7 +336,7 @@ class _ShareHeader extends StatelessWidget {
               IconButton.filledTonal(
                 onPressed: onClean,
                 icon: const Icon(MdiIcons.linkVariantRemove),
-                tooltip: 'Remove tracking',
+                tooltip: l10n.browser_removeTrackingTooltip,
               ),
           ],
         ),
@@ -363,11 +364,16 @@ class _OpenInAppTile extends HookConsumerWidget {
     final target = appLink.data;
     if (target == null) return const SizedBox.shrink();
 
+    final l10n = AppLocalizations.of(context);
     final appName = target.appName;
 
     return ListTile(
       leading: const Icon(Icons.open_in_new),
-      title: Text(appName != null ? 'Open in $appName' : 'Open in App'),
+      title: Text(
+        appName != null
+            ? l10n.browser_openInNamedApp(appName)
+            : l10n.browser_openInApp,
+      ),
       onTap: () async {
         if (url == null) return;
         final success = await _service.launchAppLink(url);
@@ -384,6 +390,7 @@ class _SendToDeviceTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final devices = ref.watch(syncDevicesProvider);
 
@@ -395,7 +402,7 @@ class _SendToDeviceTile extends ConsumerWidget {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           leading: const Icon(Icons.send_outlined),
-          title: const Text('Send To Device'),
+          title: Text(l10n.browser_sendToDevice),
           children: devices.when(
             data: (deviceList) {
               final targets = deviceList
@@ -405,10 +412,10 @@ class _SendToDeviceTile extends ConsumerWidget {
                   .toList(growable: false);
 
               if (targets.isEmpty) {
-                return const [
+                return [
                   ListTile(
-                    contentPadding: EdgeInsets.only(left: 72, right: 16),
-                    title: Text('No target devices'),
+                    contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                    title: Text(l10n.browser_noTargetDevices),
                   ),
                 ];
               }
@@ -454,12 +461,12 @@ class _SendToDeviceTile extends ConsumerWidget {
                           if (success) {
                             ui_helper.showInfoMessage(
                               context,
-                              'Sent tab to ${device.displayName}',
+                              l10n.browser_sentTabToDevice(device.displayName),
                             );
                           } else {
                             ui_helper.showErrorMessage(
                               context,
-                              'Failed to send tab',
+                              l10n.browser_failedToSendTab,
                             );
                           }
                         }
@@ -468,17 +475,17 @@ class _SendToDeviceTile extends ConsumerWidget {
                   )
                   .toList(growable: false);
             },
-            loading: () => const [
+            loading: () => [
               ListTile(
-                contentPadding: EdgeInsets.only(left: 72, right: 16),
-                leading: Icon(Icons.devices_other, size: 18),
-                title: Text('Loading devices...'),
+                contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                leading: const Icon(Icons.devices_other, size: 18),
+                title: Text(l10n.browser_loadingDevices),
               ),
             ],
-            error: (_, _) => const [
+            error: (_, _) => [
               ListTile(
-                contentPadding: EdgeInsets.only(left: 72, right: 16),
-                title: Text('Failed to load devices'),
+                contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                title: Text(l10n.browser_failedToLoadDevices),
               ),
             ],
           ),

@@ -1,0 +1,56 @@
+{
+  "@@locale": "en",
+
+  "wallpaper_title": "Wallpaper",
+  "@wallpaper_title": {
+    "description": "Title of the settings screen for choosing the home page wallpaper image."
+  },
+  "wallpaper_settingsDescription": "Shown behind the home page, in every container that does not set its own.",
+  "@wallpaper_settingsDescription": {
+    "description": "Explanation at the top of the wallpaper settings screen. Containers (separate browsing identities) can set their own wallpaper, which overrides this one."
+  },
+
+  "wallpaper_chooseImage": "Choose image",
+  "@wallpaper_chooseImage": {
+    "description": "Button that opens the file picker to pick a wallpaper image, shown while no wallpaper is set."
+  },
+  "wallpaper_replace": "Replace",
+  "@wallpaper_replace": {
+    "description": "Button that opens the file picker to pick a different wallpaper image, shown while a wallpaper is already set."
+  },
+
+  "wallpaper_blurLabel": "Blur",
+  "@wallpaper_blurLabel": {
+    "description": "Label of the slider that controls how strongly the wallpaper image is blurred."
+  },
+  "wallpaper_dimLabel": "Dim",
+  "@wallpaper_dimLabel": {
+    "description": "Label of the slider that controls how strongly the wallpaper image is faded into the app background color."
+  },
+  "wallpaper_dimDescription": "Dim blends the image into the app background, so page text stays readable in both light and dark themes.",
+  "@wallpaper_dimDescription": {
+    "description": "Help text under the wallpaper dim slider explaining why the image is dimmed."
+  },
+
+  "wallpaper_editorDefaultDescription": "The home page keeps its default backdrop.",
+  "@wallpaper_editorDefaultDescription": {
+    "description": "Shown in the wallpaper editor while no image is chosen, explaining that the home page then uses its normal background."
+  },
+
+  "wallpaper_importErrorUnreadable": "That file could not be read",
+  "@wallpaper_importErrorUnreadable": {
+    "description": "Error message when the file picked as a wallpaper could not be opened or read."
+  },
+  "wallpaper_importErrorTooLarge": "That image is too large",
+  "@wallpaper_importErrorTooLarge": {
+    "description": "Error message when the image picked as a wallpaper exceeds the size limit."
+  },
+  "wallpaper_importErrorNotAnImage": "That file is not an image",
+  "@wallpaper_importErrorNotAnImage": {
+    "description": "Error message when the file picked as a wallpaper is not an image file."
+  },
+  "wallpaper_importErrorDecodeFailed": "That image could not be read",
+  "@wallpaper_importErrorDecodeFailed": {
+    "description": "Error message when the file picked as a wallpaper looks like an image but its contents could not be decoded (e.g. corrupt or unsupported format)."
+  }
+}

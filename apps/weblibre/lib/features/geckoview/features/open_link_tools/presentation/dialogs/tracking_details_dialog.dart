@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class TrackingDetailsDialog extends HookWidget {
   final String currentUrl;
@@ -71,6 +72,7 @@ class TrackingDetailsDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final items = result.removedParams;
     final selected = useState(_initialSelection());
 
@@ -103,10 +105,13 @@ class TrackingDetailsDialog extends HookWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Remove Tracking Parameters', style: textTheme.titleLarge),
+              Text(
+                l10n.openLinkTools_removeTrackingParametersTitle,
+                style: textTheme.titleLarge,
+              ),
               const SizedBox(height: 8),
               Text(
-                'Select parameters to strip from this URL.',
+                l10n.openLinkTools_removeTrackingParametersSubtitle,
                 style: textTheme.bodyMedium?.copyWith(color: subtitleColor),
               ),
               const SizedBox(height: 16),
@@ -154,7 +159,7 @@ class TrackingDetailsDialog extends HookWidget {
                                       borderRadius: BorderRadius.circular(999),
                                     ),
                                     child: Text(
-                                      'Referral marketing',
+                                      l10n.openLinkTools_referralMarketingBadge,
                                       style: TextStyle(
                                         color: colorScheme.onTertiaryContainer,
                                         fontSize: 11,
@@ -191,14 +196,17 @@ class TrackingDetailsDialog extends HookWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
-                  '$selectedCount of ${items.length} selected for removal',
+                  l10n.openLinkTools_selectedForRemovalCount(
+                    selectedCount,
+                    items.length,
+                  ),
                   style: textTheme.bodySmall?.copyWith(
                     fontStyle: FontStyle.italic,
                   ),
                 ),
               ),
               Text(
-                'Cleaned URL:',
+                l10n.openLinkTools_cleanedUrlLabel,
                 style: textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -226,7 +234,9 @@ class TrackingDetailsDialog extends HookWidget {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(canApply ? 'Cancel' : 'Close'),
+                    child: Text(
+                      canApply ? l10n.common_cancel : l10n.common_close,
+                    ),
                   ),
                   if (canApply) ...[
                     const SizedBox(width: 8),
@@ -239,7 +249,7 @@ class TrackingDetailsDialog extends HookWidget {
                         backgroundColor: colorScheme.primary,
                         foregroundColor: colorScheme.onPrimary,
                       ),
-                      child: const Text('Apply Changes'),
+                      child: Text(l10n.openLinkTools_actionApplyChanges),
                     ),
                   ],
                 ],

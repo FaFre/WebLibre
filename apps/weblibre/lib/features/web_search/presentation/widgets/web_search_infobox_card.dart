@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -320,6 +340,7 @@ class _InfoboxLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasOverflow = links.length > _collapsedCount;
     final visible = (hasOverflow && !showAll)
         ? links.sublist(0, _collapsedCount)
@@ -346,7 +367,9 @@ class _InfoboxLinks extends StatelessWidget {
                 size: 18,
               ),
               label: Text(
-                showAll ? 'Show less' : 'Show $hiddenCount more links',
+                showAll
+                    ? l10n.common_showLess
+                    : l10n.webSearch_showMoreLinks(hiddenCount),
               ),
               style: TextButton.styleFrom(
                 foregroundColor: colorScheme.primary,
@@ -447,6 +470,7 @@ class _Factsheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -458,7 +482,7 @@ class _Factsheet extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Factsheet',
+                    l10n.webSearch_factsheetHeading,
                     style: textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),

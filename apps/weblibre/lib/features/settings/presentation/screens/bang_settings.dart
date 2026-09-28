@@ -25,56 +25,63 @@ import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_group_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> bangSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Usage Data',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Bang Frequencies',
-        subtitle: 'Tracked usage for bang recommendations',
-        keywords: ['usage', 'recommendations'],
-        child: _BangFrequenciesTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Repositories',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'General Bangs',
-        subtitle: 'Sync on demand from GitHub',
-        keywords: ['repository'],
-        child: BangGroupListTile(
-          group: BangGroup.general,
-          title: 'General Bangs',
-          subtitle: 'Sync on demand from GitHub',
+List<SettingsSectionDefinition> bangSettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_usageDataSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_bangFrequenciesTitle,
+          subtitle: l10n.settings_bangFrequenciesSubtitle,
+          keywords: settingsKeywords(l10n.settings_bangFrequenciesKeywords),
+          child: const _BangFrequenciesTile(),
         ),
-      ),
-      SettingsEntryDefinition(
-        title: 'Kagi Bangs',
-        subtitle: 'Sync on demand from GitHub',
-        keywords: ['repository'],
-        child: BangGroupListTile(
-          group: BangGroup.kagi,
-          title: 'Kagi Bangs',
-          subtitle: 'Sync on-demand from GitHub',
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_repositoriesSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_generalBangsTileTitle,
+          subtitle: l10n.settings_indexGeneralBangsSubtitle,
+          keywords: settingsKeywords(l10n.settings_generalBangsTileKeywords),
+          child: BangGroupListTile(
+            group: BangGroup.general,
+            title: l10n.settings_generalBangsTileTitle,
+            subtitle: l10n.settings_generalBangsTileSubtitle,
+          ),
         ),
-      ),
-    ],
-  ),
-];
+        SettingsEntryDefinition(
+          title: l10n.settings_kagiBangsTileTitle,
+          subtitle: l10n.settings_indexKagiBangsSubtitle,
+          keywords: settingsKeywords(l10n.settings_kagiBangsTileKeywords),
+          child: BangGroupListTile(
+            group: BangGroup.kagi,
+            title: l10n.settings_kagiBangsTileTitle,
+            subtitle: l10n.settings_kagiBangsTileSubtitle,
+          ),
+        ),
+      ],
+    ),
+  ];
+}
 
 class BangSettingsScreen extends HookConsumerWidget {
   const BangSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return const SettingsDetailScaffold(
-      title: 'Bang Settings',
-      subtitle: 'Bang shortcuts usage, repositories, and on-demand sync.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_bangSettingsTitle,
+      subtitle: l10n.settings_bangSettingsSubtitle,
       icon: MdiIcons.exclamationThick,
-      sections: bangSettingsSections,
+      sections: bangSettingsSections(context),
     );
   }
 }
@@ -84,9 +91,11 @@ class _BangFrequenciesTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return CustomListTile(
-      title: 'Bang Frequencies',
-      subtitle: 'Tracked usage for bang recommendations',
+      title: l10n.settings_bangFrequenciesTitle,
+      subtitle: l10n.settings_bangFrequenciesSubtitle,
       suffix: FilledButton.icon(
         onPressed: () async {
           await ref
@@ -94,7 +103,7 @@ class _BangFrequenciesTile extends HookConsumerWidget {
               .resetFrequencies();
         },
         icon: const Icon(Icons.delete),
-        label: const Text('Clear'),
+        label: Text(l10n.common_clear),
       ),
     );
   }

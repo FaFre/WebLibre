@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class ContainerSelectionScreen extends HookConsumerWidget {
@@ -43,13 +44,14 @@ class ContainerSelectionScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final containersAsync = ref.watch(watchContainersWithCountProvider);
     final selectedContainerId = ref.watch(selectedContainerProvider);
 
     Widget buildList(List<ContainerDataWithCount> containers) {
       return CustomScrollView(
         slivers: [
-          const SliverAppBar.large(title: Text('Select Container')),
+          SliverAppBar.large(title: Text(l10n.tabs_selectContainerTitle)),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
             sliver: SliverList(
@@ -96,7 +98,7 @@ class ContainerSelectionScreen extends HookConsumerWidget {
           data: buildList,
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load containers',
+              title: l10n.tabs_loadContainersFailedTitle,
               exception: error,
               onRetry: () => ref.invalidate(watchContainersWithCountProvider),
             ),
@@ -127,7 +129,7 @@ class ContainerSelectionScreen extends HookConsumerWidget {
             containerData: jsonEncode(newContainer.toJson()),
           ).push(context);
         },
-        label: const Text('Container'),
+        label: Text(l10n.tabs_containerFabLabel),
         icon: const Icon(Icons.add),
       ),
     );
@@ -145,6 +147,7 @@ class _UnassignedSelectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final accentColor = colorScheme.primary;
     final palette = ContainerColors.palette(context, accentColor);
@@ -184,7 +187,7 @@ class _UnassignedSelectionCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Unassigned',
+                        l10n.tabs_unassignedTitle,
                         style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
                               color: colorScheme.onSurface,
@@ -193,7 +196,7 @@ class _UnassignedSelectionCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Tabs without a container',
+                        l10n.tabs_unassignedSubtitle,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -208,7 +211,7 @@ class _UnassignedSelectionCard extends StatelessWidget {
                       size: 16,
                       color: palette.onContainerColor,
                     ),
-                    label: const Text('Active'),
+                    label: Text(l10n.tabs_chipActive),
                     side: BorderSide.none,
                     visualDensity: VisualDensity.compact,
                     backgroundColor: palette.containerColor,
@@ -236,6 +239,7 @@ class _SelectionContainerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final containerColor = container.color;
@@ -309,13 +313,12 @@ class _SelectionContainerCard extends ConsumerWidget {
                             children: [
                               _SelectionInfoChip(
                                 icon: Icons.tab_outlined,
-                                label:
-                                    '$tabCount ${tabCount == 1 ? 'tab' : 'tabs'}',
+                                label: l10n.tabs_tabCountChip(tabCount),
                               ),
                               if (container.metadata.contextualIdentity != null)
-                                const _SelectionInfoChip(
+                                _SelectionInfoChip(
                                   icon: Icons.cookie_outlined,
-                                  label: 'Isolated',
+                                  label: l10n.tabs_chipIsolated,
                                 ),
                               if (container.metadata.proxyConnectionId != null)
                                 _SelectionInfoChip(
@@ -323,20 +326,21 @@ class _SelectionContainerCard extends ConsumerWidget {
                                   label: proxyConnectionTitle(
                                     proxyOptions,
                                     container.metadata.proxyConnectionId!,
+                                    l10n,
                                     isLoading: proxyOptionsLoading,
                                   ),
                                 ),
                               if (container.metadata.proxyConnectionId ==
                                       null &&
                                   container.metadata.bypassGlobalProxy)
-                                const _SelectionInfoChip(
+                                _SelectionInfoChip(
                                   icon: Icons.public,
-                                  label: 'Direct',
+                                  label: l10n.tabs_chipDirect,
                                 ),
                               if (container.metadata.clearDataOnExit)
-                                const _SelectionInfoChip(
+                                _SelectionInfoChip(
                                   icon: Icons.cleaning_services_outlined,
-                                  label: 'Clear on exit',
+                                  label: l10n.tabs_chipClearOnExit,
                                 ),
                             ],
                           ),
@@ -350,7 +354,7 @@ class _SelectionContainerCard extends ConsumerWidget {
                           size: 16,
                           color: palette.onContainerColor,
                         ),
-                        label: const Text('Active'),
+                        label: Text(l10n.tabs_chipActive),
                         side: BorderSide.none,
                         visualDensity: VisualDensity.compact,
                         backgroundColor: palette.containerColor,

@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/utils/search_module_type_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class SearchModuleReorderView extends ConsumerWidget {
   final ModuleSurface surface;
@@ -29,6 +31,7 @@ class SearchModuleReorderView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final entries = ref.watch(searchModuleOrderProvider(surface));
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -43,7 +46,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                   child: Semantics(
                     header: true,
                     child: Text(
-                      'Customize Sections',
+                      l10n.search_customizeSectionsHeading,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -58,7 +61,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                       onPressed: ref
                           .read(searchModuleOrderProvider(surface).notifier)
                           .resetToDefaults,
-                      child: const Text('Reset to Defaults'),
+                      child: Text(l10n.search_resetToDefaults),
                     ),
                   ],
                   builder: (context, controller, child) => IconButton(
@@ -72,7 +75,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                   onPressed: () => ref
                       .read(searchReorderModeProvider(surface).notifier)
                       .deactivate(),
-                  child: const Text('Done'),
+                  child: Text(l10n.common_done),
                 ),
               ],
             ),
@@ -103,7 +106,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                       .toggleVisibility(entry.type),
                 ),
                 title: Text(
-                  entry.type.label.toUpperCase(),
+                  entry.type.label(context).toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: entry.visible
                         ? null

@@ -31,6 +31,7 @@ import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/repositories/feed_repository.dart';
 import 'package:weblibre/features/web_feed/presentation/dialogs/delete_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tag_field.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -55,6 +56,7 @@ class FeedEditScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final initialFeedAsync = switch (_mode) {
       _DialogMode.create => ref.watch(
         fetchWebFeedProvider(
@@ -71,8 +73,8 @@ class FeedEditScreen extends HookConsumerWidget {
           return Scaffold(
             key: const ValueKey('data'),
             appBar: AppBar(),
-            body: const Center(
-              child: FailureWidget(title: 'Failed to load feed'),
+            body: Center(
+              child: FailureWidget(title: l10n.webFeed_loadFeedFailedTitle),
             ),
           );
         }
@@ -83,25 +85,28 @@ class FeedEditScreen extends HookConsumerWidget {
         key: const ValueKey('error'),
         appBar: AppBar(),
         body: Center(
-          child: FailureWidget(title: 'Failed to load feed', exception: error),
+          child: FailureWidget(
+            title: l10n.webFeed_loadFeedFailedTitle,
+            exception: error,
+          ),
         ),
       ),
       loading: () => Scaffold(
         key: const ValueKey('loading'),
         appBar: AppBar(
           title: Text(switch (_mode) {
-            _DialogMode.create => 'New Feed',
-            _DialogMode.edit => 'Edit Feed',
+            _DialogMode.create => l10n.webFeed_newFeedTitle,
+            _DialogMode.edit => l10n.webFeed_editFeedTitle,
           }),
         ),
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
+              const CircularProgressIndicator(),
               Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text('Fetching feed...'),
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(l10n.webFeed_fetchingFeedMessage),
               ),
             ],
           ),
@@ -121,6 +126,7 @@ class _FeedEditContent extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final initialTags = useMemoized(
       () => initialFeed.tags?.map((tag) => tag.id).toSet(),
@@ -147,8 +153,8 @@ class _FeedEditContent extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(switch (_mode) {
-          _DialogMode.create => 'New Feed',
-          _DialogMode.edit => 'Edit Feed',
+          _DialogMode.create => l10n.webFeed_newFeedTitle,
+          _DialogMode.edit => l10n.webFeed_editFeedTitle,
         }),
         actions: [
           IconButton(
@@ -209,14 +215,14 @@ class _FeedEditContent extends HookConsumerWidget {
                                   initialFeed.url.base,
                             ], iconSize: 24.0),
                           ),
-                          label: const Text('Title'),
+                          label: Text(l10n.webFeed_fieldTitleLabel),
                         ),
                         controller: titleTextController,
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(
-                          label: Text('Description'),
-                          prefixIcon: Icon(Icons.short_text),
+                        decoration: InputDecoration(
+                          label: Text(l10n.webFeed_fieldDescriptionLabel),
+                          prefixIcon: const Icon(Icons.short_text),
                         ),
                         minLines: 1,
                         maxLines: 3,
@@ -224,9 +230,9 @@ class _FeedEditContent extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 32),
                       TextFormField(
-                        decoration: const InputDecoration(
-                          label: Text('Icon URL'),
-                          prefixIcon: Icon(Icons.image),
+                        decoration: InputDecoration(
+                          label: Text(l10n.webFeed_fieldIconUrlLabel),
+                          prefixIcon: const Icon(Icons.image),
                         ),
                         keyboardType: TextInputType.url,
                         minLines: 1,
@@ -239,13 +245,14 @@ class _FeedEditContent extends HookConsumerWidget {
                             onlyHttpProtocol: true,
                             required: false,
                             eagerParsing: false,
+                            l10n: l10n,
                           );
                         },
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(
-                          label: Text('Site Link'),
-                          prefixIcon: Icon(Icons.link),
+                        decoration: InputDecoration(
+                          label: Text(l10n.webFeed_fieldSiteLinkLabel),
+                          prefixIcon: const Icon(Icons.link),
                         ),
                         keyboardType: TextInputType.url,
                         minLines: 1,
@@ -258,6 +265,7 @@ class _FeedEditContent extends HookConsumerWidget {
                             onlyHttpProtocol: true,
                             required: false,
                             eagerParsing: false,
+                            l10n: l10n,
                           );
                         },
                       ),
@@ -270,9 +278,9 @@ class _FeedEditContent extends HookConsumerWidget {
                       ),
                       const SizedBox(height: 32),
                       TextFormField(
-                        decoration: const InputDecoration(
-                          label: Text('Feed URL'),
-                          prefixIcon: Icon(MdiIcons.rss),
+                        decoration: InputDecoration(
+                          label: Text(l10n.webFeed_fieldFeedUrlLabel),
+                          prefixIcon: const Icon(MdiIcons.rss),
                         ),
                         keyboardType: TextInputType.url,
                         minLines: 1,
@@ -284,6 +292,7 @@ class _FeedEditContent extends HookConsumerWidget {
                             value,
                             onlyHttpProtocol: true,
                             eagerParsing: false,
+                            l10n: l10n,
                           );
                         },
                       ),
@@ -302,7 +311,7 @@ class _FeedEditContent extends HookConsumerWidget {
                       foregroundColor: Theme.of(context).colorScheme.error,
                       iconColor: Theme.of(context).colorScheme.error,
                     ),
-                    label: const Text('Delete'),
+                    label: Text(l10n.common_delete),
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
                       final result = await showDeleteFeedDialog(context);

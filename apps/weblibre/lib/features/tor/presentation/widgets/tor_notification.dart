@@ -24,6 +24,7 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
 import 'package:weblibre/presentation/widgets/animate_gradient_shader.dart';
 
@@ -32,6 +33,7 @@ class TorNotification extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final appColors = AppColors.of(context);
 
     ref.listen(torProxyServiceProvider, (previous, next) {
@@ -69,7 +71,9 @@ class TorNotification extends HookConsumerWidget {
                     ),
                     Expanded(
                       child: Text(
-                        '$torProxyLabel is connecting...',
+                        l10n.tor_connectingNotification(
+                          l10n.tor_proxyLabel(torBrand),
+                        ),
                         style: Theme.of(
                           context,
                         ).textTheme.bodyMedium?.copyWith(color: Colors.white),

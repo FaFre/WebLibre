@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -15,6 +34,7 @@ import 'package:weblibre/features/web_search/presentation/open_in_new_tab.dart';
 import 'package:weblibre/features/web_search/presentation/screens/page_preview.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_result_card.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/web_search_infobox_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 /// Number of result cards from the bottom at which to prefetch the next
@@ -45,6 +65,7 @@ class WebSearchResultsSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     useOnAppLifecycleStateChange((previous, current) async {
       if (current == AppLifecycleState.resumed) {
         await ref.read(searchCreditsRepositoryProvider.notifier).refresh();
@@ -108,7 +129,7 @@ class WebSearchResultsSection extends HookConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: FailureWidget(
-            title: 'Search failed',
+            title: l10n.webSearch_searchFailedTitle,
             exception: state.errorMessage,
           ),
         ),
@@ -116,15 +137,15 @@ class WebSearchResultsSection extends HookConsumerWidget {
     }
 
     if (state.status == WebSearchStatus.submitting && state.results.isEmpty) {
-      return const SliverToBoxAdapter(
+      return SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Searching the web...'),
+              const CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(l10n.webSearch_searchingLabel),
             ],
           ),
         ),
@@ -207,7 +228,7 @@ class WebSearchResultsSection extends HookConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'No results found for "${state.query}".',
+            l10n.webSearch_noResultsFor(state.query),
             textAlign: TextAlign.center,
           ),
         ),
@@ -223,6 +244,7 @@ class WebSearchStatusChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final creditsAsync = ref.watch(searchCreditsRepositoryProvider);
     final stashAsync = ref.watch(searchTokenStashCountProvider);
 
@@ -257,7 +279,7 @@ class WebSearchStatusChip extends ConsumerWidget {
               Icon(Icons.stars_rounded, color: colorScheme.primary, size: 18),
               const SizedBox(width: 6),
               Text(
-                '$credits credits  |  $stash tokens',
+                l10n.webSearch_creditsTokensStatus(credits, stash),
                 style: textTheme.labelLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
@@ -276,19 +298,17 @@ class _NeedsCredits extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'No search credits or tokens are available for a new web search.',
-            textAlign: TextAlign.center,
-          ),
+          Text(l10n.webSearch_needsCreditsMessage, textAlign: TextAlign.center),
           const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.shopping_cart_outlined),
-            label: const Text('Buy a search pack'),
+            label: Text(l10n.webSearch_buySearchPackButton),
             onPressed: () async {
               await launchUrl(
                 Uri.parse('${SupabaseConfig.accountWebUrl}?view=search-pack'),

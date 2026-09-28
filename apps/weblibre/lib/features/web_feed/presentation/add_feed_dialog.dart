@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 class AddFeedDialog extends HookConsumerWidget {
@@ -32,6 +33,7 @@ class AddFeedDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final textController = useTextEditingController(
@@ -39,13 +41,13 @@ class AddFeedDialog extends HookConsumerWidget {
     );
 
     return AlertDialog(
-      title: const Text('Add Feed'),
+      title: Text(l10n.webFeed_addFeedTitle),
       // contentPadding: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 16.0),
       content: Form(
         key: formKey,
         child: TextFormField(
-          decoration: const InputDecoration(
-            label: Text('URL'),
+          decoration: InputDecoration(
+            label: Text(l10n.webFeed_fieldUrlLabel),
             hintText: 'https://example.com/feed',
             floatingLabelBehavior: FloatingLabelBehavior.always,
           ),
@@ -58,6 +60,7 @@ class AddFeedDialog extends HookConsumerWidget {
               value,
               onlyHttpProtocol: true,
               eagerParsing: false,
+              l10n: l10n,
             );
           },
         ),
@@ -71,13 +74,13 @@ class AddFeedDialog extends HookConsumerWidget {
                   .ignore(initialUri!);
               context.pop();
             },
-            child: const Text('Ignore'),
+            child: Text(l10n.webFeed_actionIgnore),
           ),
         TextButton(
           onPressed: () {
             context.pop();
           },
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () {
@@ -94,7 +97,7 @@ class AddFeedDialog extends HookConsumerWidget {
               FeedCreateRoute(feedId: feedId).pushReplacement(context);
             }
           },
-          child: const Text('Add'),
+          child: Text(l10n.common_add),
         ),
       ],
     );

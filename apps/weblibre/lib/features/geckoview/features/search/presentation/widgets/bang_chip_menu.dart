@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/reset_bang_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
 
@@ -64,6 +65,7 @@ class BangChipMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final controller = useMenuController();
 
     final isPinned = ref.watch(
@@ -86,7 +88,9 @@ class BangChipMenu extends HookConsumerWidget {
           onPressed: () async {
             await ref.read(pinnedBangsProvider.notifier).toggle(bang.toKey());
           },
-          child: Text(isPinned ? 'Unpin' : 'Pin'),
+          child: Text(
+            isPinned ? l10n.search_actionUnpin : l10n.search_actionPin,
+          ),
         ),
         if (canResetBangFrequency(bang: bang, defaultBang: defaultBang))
           MenuItemButton(
@@ -103,7 +107,7 @@ class BangChipMenu extends HookConsumerWidget {
                     .resetFrequency(bang.toKey());
               }
             },
-            child: const Text('Reset frequency'),
+            child: Text(l10n.search_actionResetFrequency),
           ),
         MenuItemButton(
           leadingIcon: const Icon(MdiIcons.pencilBoxOutline),
@@ -116,7 +120,11 @@ class BangChipMenu extends HookConsumerWidget {
               fork: !isUserBang,
             ).push(context);
           },
-          child: Text(isUserBang ? 'Edit bang' : 'Customize as your own bang'),
+          child: Text(
+            isUserBang
+                ? l10n.search_actionEditBang
+                : l10n.search_actionCustomizeAsOwnBang,
+          ),
         ),
       ],
       builder: (context, controller, _) => HoldMenuListener(

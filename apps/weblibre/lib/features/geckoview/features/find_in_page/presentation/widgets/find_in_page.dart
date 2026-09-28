@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.da
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/debouncer.dart';
 
 class FindInPageWidget extends HookConsumerWidget {
@@ -41,6 +42,7 @@ class FindInPageWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final findInPageState = ref.watch(findInPageControllerProvider(tabId));
     final searchResult = ref.watch(tabFindResultStateProvider(tabId));
     final privateTabMode =
@@ -103,8 +105,8 @@ class FindInPageWidget extends HookConsumerWidget {
                     autofocus: true,
                     autocorrect: false,
                     enableIMEPersonalizedLearning: !privateTabMode,
-                    decoration: const InputDecoration.collapsed(
-                      hintText: 'Find in Page',
+                    decoration: InputDecoration.collapsed(
+                      hintText: l10n.findInPage_hint,
                     ),
                     keyboardType: TextInputType.text,
                     onChanged: onSearchTextChanged,
@@ -125,8 +127,11 @@ class FindInPageWidget extends HookConsumerWidget {
                 ),
                 Text(
                   searchResult.hasMatches
-                      ? '${searchResult.activeMatchOrdinal + 1} of ${searchResult.numberOfMatches}'
-                      : 'Not found',
+                      ? l10n.findInPage_matchPosition(
+                          searchResult.activeMatchOrdinal + 1,
+                          searchResult.numberOfMatches,
+                        )
+                      : l10n.findInPage_noMatches,
                 ),
                 IconButton(
                   icon: const Icon(Icons.arrow_upward),

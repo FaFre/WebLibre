@@ -161,7 +161,16 @@ class $QuotesTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.Quotes, i1.Quote>(table),
+                  i0.BaseReferences<i0.GeneratedDatabase, i1.Quotes, i1.Quote>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),

@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a confirmation dialog before clearing site data.
 ///
@@ -31,23 +32,24 @@ Future<bool?> showClearSiteDataDialog(
   return showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      icon: const Icon(Icons.warning),
-      title: const Text('Clear Site Data'),
-      content: Text(
-        'This will clear $formattedTypes for $host.\n\n'
-        'You may need to log in again.',
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Clear'),
-        ),
-      ],
-    ),
+    builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        icon: const Icon(Icons.warning),
+        title: Text(l10n.browser_clearSiteDataTitle),
+        content: Text(l10n.browser_clearSiteDataContent(formattedTypes, host)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.common_clear),
+          ),
+        ],
+      );
+    },
   );
 }

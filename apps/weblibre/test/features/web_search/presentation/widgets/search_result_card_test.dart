@@ -29,6 +29,7 @@ import 'package:weblibre/features/search_credits/domain/repositories/web_search_
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_result_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 import '../../test_harness.dart';
 
@@ -52,6 +53,8 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: WebSearchResultCard(
               result: CompactSearchResult(
@@ -101,6 +104,8 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: WebSearchResultCard(
                 result: CompactSearchResult(

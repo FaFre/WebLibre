@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -38,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 /// Actions on the page in front of the user.
@@ -59,6 +61,7 @@ class PageActionsSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     // Resolving an app link is a native round trip, so it is only started when
     // the row that shows the result is actually part of the layout. The hook
     // itself stays unconditional; it is the work it schedules that is skipped.
@@ -79,7 +82,7 @@ class PageActionsSection extends HookConsumerWidget {
         case MenuItemType.addBookmark:
           tiles[item] = ListTile(
             leading: const Icon(MdiIcons.bookmarkPlus),
-            title: Text(item.label),
+            title: Text(item.label(context)),
             trailing: const KeyboardShortcutHint(BrowserAction.toggleBookmark),
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
@@ -103,7 +106,7 @@ class PageActionsSection extends HookConsumerWidget {
         case MenuItemType.findInPage:
           tiles[item] = ListTile(
             leading: const Icon(Icons.search),
-            title: Text(item.label),
+            title: Text(item.label(context)),
             trailing: const KeyboardShortcutHint(BrowserAction.findInPage),
             onTap: () {
               ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
@@ -135,7 +138,7 @@ class PageActionsSection extends HookConsumerWidget {
 
           tiles[item] = ListTile(
             leading: const Icon(Icons.add_to_home_screen),
-            title: Text(item.label),
+            title: Text(item.label(context)),
             onTap: () async {
               if (isInstallable) {
                 // Site has a valid manifest — use the PWA install flow.
@@ -155,7 +158,11 @@ class PageActionsSection extends HookConsumerWidget {
           final appName = target.appName;
           tiles[item] = ListTile(
             leading: const Icon(Icons.open_in_new),
-            title: Text(appName != null ? 'Open in $appName' : item.label),
+            title: Text(
+              appName != null
+                  ? l10n.menu_openInApp(appName)
+                  : item.label(context),
+            ),
             onTap: () async {
               final success = await _appLinksService.launchAppLink(appLinkUrl);
               if (success && context.mounted) Navigator.pop(context);
@@ -181,6 +188,7 @@ class _TranslatePageTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isTranslated = ref.watch(
       tabTranslationStateProvider(
         selectedTabId,
@@ -193,7 +201,9 @@ class _TranslatePageTile extends ConsumerWidget {
         color: isTranslated ? Theme.of(context).colorScheme.primary : null,
       ),
       title: Text(
-        isTranslated ? 'Translated' : MenuItemType.translatePage.label,
+        isTranslated
+            ? l10n.menu_pageTranslated
+            : MenuItemType.translatePage.label(context),
       ),
       onTap: () async {
         Navigator.pop(context);

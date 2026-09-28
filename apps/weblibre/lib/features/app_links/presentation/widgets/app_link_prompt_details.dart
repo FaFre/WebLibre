@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show AppLinkPromptRequest;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 /// A reason this prompt was raised whatever the user's "open links in apps"
@@ -40,7 +41,10 @@ class AppLinkPromptWarning {
 ///
 /// Empty for an ordinary prompt, which needs no justification beyond the mode
 /// the user chose.
-List<AppLinkPromptWarning> appLinkPromptWarnings(AppLinkPromptRequest request) {
+List<AppLinkPromptWarning> appLinkPromptWarnings(
+  AppLocalizations l10n,
+  AppLinkPromptRequest request,
+) {
   return [
     // Deliberately does not name a proxy. `isProtectedContext` covers three different
     // arrangements — a container routed through a proxy, a strict container with no proxy at
@@ -48,25 +52,19 @@ List<AppLinkPromptWarning> appLinkPromptWarnings(AppLinkPromptRequest request) {
     // the verdict, not which one it was. Naming the proxy would promise an assurance that is
     // simply absent in two of the three cases.
     if (request.isProtectedContext)
-      const AppLinkPromptWarning(
+      AppLinkPromptWarning(
         icon: Icons.shield_outlined,
-        message:
-            'This link is protected here. The app opens its own connection, '
-            'outside the rules this tab follows.',
+        message: l10n.appLinks_warningProtectedContext,
       ),
     if (request.isPrivate)
-      const AppLinkPromptWarning(
+      AppLinkPromptWarning(
         icon: Icons.visibility_off_outlined,
-        message:
-            'This is a private tab. The app keeps its own history and '
-            'sign-in state.',
+        message: l10n.appLinks_warningPrivateTab,
       ),
     if (request.isWallet)
-      const AppLinkPromptWarning(
+      AppLinkPromptWarning(
         icon: Icons.badge_outlined,
-        message:
-            'This link asks a wallet app for credentials. Open it only if '
-            'you started this.',
+        message: l10n.appLinks_warningWallet,
       ),
   ];
 }
@@ -90,8 +88,9 @@ class AppLinkPromptDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final warnings = appLinkPromptWarnings(request);
+    final warnings = appLinkPromptWarnings(l10n, request);
     final targetUri = Uri.tryParse(request.target.url);
     final targetStyle = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
@@ -115,11 +114,7 @@ class AppLinkPromptDetails extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                warning.icon,
-                size: 16,
-                color: theme.colorScheme.tertiary,
-              ),
+              Icon(warning.icon, size: 16, color: theme.colorScheme.tertiary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

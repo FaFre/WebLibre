@@ -28,6 +28,10 @@ import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
 
 part 'app_initialization.g.dart';
 
+/// The step [AppInitializationService.initialize] is waiting on, shown under
+/// the startup spinner (labels in `AppInitializationStageL10n`).
+enum AppInitializationStage { loadingFormats, loadingPackageInfo, syncingBangs }
+
 @Riverpod(keepAlive: true)
 class AppInitializationService extends _$AppInitializationService {
   /// Will de facto restart the app
@@ -90,7 +94,10 @@ class AppInitializationService extends _$AppInitializationService {
   /// The stage is set here rather than where the work starts, so the label still
   /// tracks what the user is waiting on even when the work itself already ran
   /// during engine startup.
-  Future<T> _stage<T>(String stage, Future<T>? Function() work) {
+  Future<T> _stage<T>(
+    AppInitializationStage stage,
+    Future<T>? Function() work,
+  ) {
     state = Result.success((
       initialized: false,
       stage: stage,
@@ -105,7 +112,7 @@ class AppInitializationService extends _$AppInitializationService {
       final errors = <ErrorMessage>[];
 
       await _stage(
-        'Loading Formats...',
+        AppInitializationStage.loadingFormats,
         // Bang: `??=` is typed by the nullable field, though it never yields
         // null here.
         () => _format ??= ref.read(formatProvider.future),
@@ -115,7 +122,7 @@ class AppInitializationService extends _$AppInitializationService {
       }
 
       await _stage(
-        'Loading Package Info...',
+        AppInitializationStage.loadingPackageInfo,
         () => _packageInfo ??= ref.read(packageInfoProvider.future),
       );
       if (!ref.mounted) {
@@ -123,7 +130,7 @@ class AppInitializationService extends _$AppInitializationService {
       }
 
       final bangSyncResults = await _stage(
-        'Synchronizing Bangs...',
+        AppInitializationStage.syncingBangs,
         () => _bangs ??= ref
             .read(bangSyncRepositoryProvider.notifier)
             .syncBundledBangGroups(),
@@ -154,7 +161,13 @@ class AppInitializationService extends _$AppInitializationService {
   }
 
   @override
-  Result<({bool initialized, String? stage, List<ErrorMessage> errors})>
+  Result<
+    ({
+      bool initialized,
+      AppInitializationStage? stage,
+      List<ErrorMessage> errors,
+    })
+  >
   build() {
     return Result.success((
       initialized: false,

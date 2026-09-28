@@ -44,3 +44,13 @@ extension LocaleConverter on ui.Locale {
     );
   }
 }
+
+extension LocaleConverterIntl on intl.Locale {
+  ui.Locale toUiLocale() {
+    return ui.Locale.fromSubtags(
+      languageCode: languageCode,
+      countryCode: countryCode,
+      scriptCode: scriptCode,
+    );
+  }
+}

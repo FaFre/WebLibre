@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The splitter on the side panel's inner edge that resizes it: the boundary
 /// line between panel and page, which is all it draws.
@@ -76,6 +77,7 @@ class SideRailResizeHandle extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final hovered = useState(false);
     final dragging = useState(false);
     final startWidth = useRef(0.0);
@@ -148,7 +150,7 @@ class SideRailResizeHandle extends HookConsumerWidget {
         onHorizontalDragEnd: (_) => unawaited(finish()),
         onHorizontalDragCancel: () => unawaited(finish()),
         child: Semantics(
-          label: 'Resize side panel',
+          label: l10n.browser_resizeSidePanel,
           child: Align(
             alignment: railOnLeft
                 ? Alignment.centerRight

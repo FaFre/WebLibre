@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 Future<bool?> showInstallLocalAddonDialog(BuildContext context) {
@@ -44,6 +45,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
     final selectedFile = useState<String?>(null);
     final isInstalling = useState(false);
     final errorMessage = useState<String?>(null);
+    final l10n = AppLocalizations.of(context);
 
     Future<void> pickFile() async {
       try {
@@ -57,12 +59,14 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
               selectedFile.value = path;
               errorMessage.value = null;
             } else {
-              errorMessage.value = 'Please select an .xpi file';
+              errorMessage.value = l10n.browser_installAddonNotXpiError;
             }
           }
         }
       } catch (e) {
-        errorMessage.value = 'Failed to pick file: $e';
+        errorMessage.value = l10n.browser_installAddonPickFileFailed(
+          e.toString(),
+        );
       }
     }
 
@@ -78,20 +82,18 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
             .installFromFile(selectedFile.value!);
 
         if (context.mounted) {
-          showInfoMessage(
-            context,
-            'Extension installed. Automatic updates are disabled for this local version.',
-          );
+          showInfoMessage(context, l10n.browser_installAddonInstalledMessage);
           context.pop(true);
         }
       } catch (e) {
         final errorString = e.toString();
         if (errorString.contains('NotSigned') ||
             errorString.contains('SIGNEDSTATE')) {
-          errorMessage.value =
-              'This extension is not signed by Mozilla. Enable "Allow unsigned extensions" in Extensions settings to install it.';
+          errorMessage.value = l10n.browser_installAddonNotSignedError;
         } else {
-          errorMessage.value = 'Installation failed: $errorString';
+          errorMessage.value = l10n.browser_installAddonInstallFailed(
+            errorString,
+          );
         }
       } finally {
         isInstalling.value = false;
@@ -100,7 +102,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
 
     final fileName = selectedFile.value != null
         ? p.basename(selectedFile.value!)
-        : 'No file selected';
+        : l10n.browser_installAddonNoFileSelected;
 
     return SafeArea(
       child: Padding(
@@ -115,14 +117,14 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Install Extension from File',
+              l10n.browser_installAddonSheetTitle,
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: isInstalling.value ? null : pickFile,
               icon: const Icon(Icons.folder_open),
-              label: const Text('Select XPI File'),
+              label: Text(l10n.browser_installAddonSelectFileButton),
             ),
             const SizedBox(height: 8),
             Container(
@@ -156,7 +158,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Extensions installed from a local XPI stay pinned to that version and will not update automatically.',
+              l10n.browser_installAddonPinnedNotice,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             if (errorMessage.value != null) ...[
@@ -187,7 +189,7 @@ class _InstallLocalAddonSheet extends HookConsumerWidget {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Install'),
+                  : Text(l10n.browser_actionInstall),
             ),
           ],
         ),

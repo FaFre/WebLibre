@@ -20,7 +20,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_layout_slivers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Replaces the menu's scrolling content while the user is arranging it.
 ///
@@ -68,6 +70,7 @@ class MenuReorderHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final reorderMode = ref.watch(menuReorderModeProvider);
     final reorderNotifier = ref.read(menuReorderModeProvider.notifier);
+    final l10n = AppLocalizations.of(context);
 
     final (:section, :item) = resolveMenuLayoutFocus(
       ref.watch(menuLayoutProvider),
@@ -76,12 +79,14 @@ class MenuReorderHeader extends ConsumerWidget {
     );
 
     return _Header(
-      title: item?.type.label ?? section?.type.label ?? 'Customize Menu',
+      title:
+          item?.type.label(context) ??
+          section?.type.label(context) ??
+          l10n.menu_reorderDefaultTitle,
       subtitle: switch ((section, item)) {
-        (null, _) =>
-          'Drag to reorder. Switch a section off to hide it from the menu.',
-        (_, null) => 'Drag to reorder the rows in this section.',
-        _ => 'Drag to reorder the rows this one opens.',
+        (null, _) => l10n.menu_reorderSubtitleSections,
+        (_, null) => l10n.menu_reorderSubtitleSectionRows,
+        _ => l10n.menu_reorderSubtitleItemRows,
       },
       onBack: section == null ? null : reorderNotifier.stepBack,
       onDone: reorderNotifier.deactivate,
@@ -124,6 +129,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final leadingWidth = onBack == null ? _margin : _leadingSlot;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(_margin, 4, _margin, 4),
@@ -135,7 +141,7 @@ class _Header extends StatelessWidget {
               if (onBack case final onBack?)
                 IconButton(
                   icon: const Icon(Icons.arrow_back),
-                  tooltip: 'Back to sections',
+                  tooltip: l10n.menu_reorderBackTooltip,
                   onPressed: onBack,
                 )
               else
@@ -155,7 +161,7 @@ class _Header extends StatelessWidget {
                     MenuItemButton(
                       leadingIcon: const Icon(Icons.restore),
                       onPressed: onReset,
-                      child: const Text('Reset to Defaults'),
+                      child: Text(l10n.menu_reorderResetToDefaults),
                     ),
                   ],
                   builder: (context, controller, child) => IconButton(
@@ -165,7 +171,7 @@ class _Header extends StatelessWidget {
                         : controller.open(),
                   ),
                 ),
-              TextButton(onPressed: onDone, child: const Text('Done')),
+              TextButton(onPressed: onDone, child: Text(l10n.common_done)),
             ],
           ),
           Padding(

@@ -1,0 +1,139 @@
+{
+  "@@locale": "en",
+
+  "webFeed_addFeedTitle": "Add Feed",
+  "@webFeed_addFeedTitle": {
+    "description": "Title of the dialog for subscribing to an RSS/Atom news feed."
+  },
+  "webFeed_fieldUrlLabel": "URL",
+  "@webFeed_fieldUrlLabel": {
+    "description": "Label of the field for the web address of the feed to subscribe to."
+  },
+  "webFeed_actionIgnore": "Ignore",
+  "@webFeed_actionIgnore": {
+    "description": "Button in the add-feed dialog offered when a site's feed was detected automatically: do not subscribe and stop suggesting this feed."
+  },
+
+  "webFeed_unnamedFeedTitle": "Untitled Feed",
+  "@webFeed_unnamedFeedTitle": {
+    "description": "Fallback name for a news feed that has no title."
+  },
+  "webFeed_unnamedArticleTitle": "Unnamed Article",
+  "@webFeed_unnamedArticleTitle": {
+    "description": "Fallback title for a feed article that has no title."
+  },
+  "webFeed_fetchFeedFailedTitle": "Failed to fetch feed",
+  "@webFeed_fetchFeedFailedTitle": {
+    "description": "Error heading when a news feed could not be downloaded."
+  },
+
+  "webFeed_feedsTitle": "Feeds",
+  "@webFeed_feedsTitle": {
+    "description": "Title of the screen listing the user's subscribed news feeds."
+  },
+  "webFeed_loadFeedsFailedTitle": "Failed to load feeds",
+  "@webFeed_loadFeedsFailedTitle": {
+    "description": "Error heading when the list of subscribed news feeds could not be loaded."
+  },
+  "webFeed_feedFabLabel": "Add Feed",
+  "@webFeed_feedFabLabel": {
+    "description": "Label of the floating button on the feeds screen that adds a new feed subscription."
+  },
+
+  "webFeed_loadFeedFailedTitle": "Failed to load feed",
+  "@webFeed_loadFeedFailedTitle": {
+    "description": "Error heading when a single news feed could not be loaded for editing."
+  },
+  "webFeed_newFeedTitle": "New Feed",
+  "@webFeed_newFeedTitle": {
+    "description": "Title of the screen for setting up a new feed subscription."
+  },
+  "webFeed_editFeedTitle": "Edit Feed",
+  "@webFeed_editFeedTitle": {
+    "description": "Title of the screen for editing an existing feed subscription."
+  },
+  "webFeed_fetchingFeedMessage": "Fetching feed…",
+  "@webFeed_fetchingFeedMessage": {
+    "description": "Progress text while a news feed is being downloaded."
+  },
+  "webFeed_fieldTitleLabel": "Title",
+  "@webFeed_fieldTitleLabel": {
+    "description": "Label of the field for the feed's display name."
+  },
+  "webFeed_fieldDescriptionLabel": "Description",
+  "@webFeed_fieldDescriptionLabel": {
+    "description": "Label of the field for the feed's description text."
+  },
+  "webFeed_fieldIconUrlLabel": "Icon URL",
+  "@webFeed_fieldIconUrlLabel": {
+    "description": "Label of the field for the web address of the feed's icon image."
+  },
+  "webFeed_fieldSiteLinkLabel": "Site Link",
+  "@webFeed_fieldSiteLinkLabel": {
+    "description": "Label of the field for the address of the website the feed belongs to."
+  },
+  "webFeed_fieldFeedUrlLabel": "Feed URL",
+  "@webFeed_fieldFeedUrlLabel": {
+    "description": "Label of the field for the address of the feed file itself."
+  },
+
+  "webFeed_deleteFeedTitle": "Delete Feed",
+  "@webFeed_deleteFeedTitle": {
+    "description": "Title of the confirmation dialog before unsubscribing from a feed."
+  },
+  "webFeed_deleteFeedConfirm": "Are you sure you want to delete this feed and all its articles?",
+  "@webFeed_deleteFeedConfirm": {
+    "description": "Body of the confirmation dialog before unsubscribing from a feed; its downloaded articles are deleted too."
+  },
+
+  "webFeed_articlesTitle": "Articles",
+  "@webFeed_articlesTitle": {
+    "description": "Title of the article list when showing articles from all feeds, or when the feed has no name."
+  },
+  "webFeed_searchLabel": "Search",
+  "@webFeed_searchLabel": {
+    "description": "Label of the search field above the list of feed articles."
+  },
+  "webFeed_loadArticlesFailedTitle": "Failed to load articles",
+  "@webFeed_loadArticlesFailedTitle": {
+    "description": "Error heading when the list of feed articles could not be loaded."
+  },
+
+  "webFeed_publishedLabel": "Published: {date}",
+  "@webFeed_publishedLabel": {
+    "description": "Publication date line of a feed article. date is a full date or a relative time such as \"3 hours ago\", or \"N/A\".",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "webFeed_notAvailable": "N/A",
+  "@webFeed_notAvailable": {
+    "description": "Abbreviation for \"not available\", inserted as the date in feed article and feed date lines when the date is unknown."
+  },
+  "webFeed_updatedLabel": "Updated: {date}",
+  "@webFeed_updatedLabel": {
+    "description": "Last-modified date line of a feed article. date is a full date or a relative time such as \"3 hours ago\".",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "webFeed_authorsLabel": "Authors:",
+  "@webFeed_authorsLabel": {
+    "description": "Label in front of the list of authors of a feed article."
+  },
+  "webFeed_tagsLabel": "Tags:",
+  "@webFeed_tagsLabel": {
+    "description": "Label in front of the list of tags (categories) of a feed article."
+  },
+  "webFeed_readArticleFailedTitle": "Failed to load article",
+  "@webFeed_readArticleFailedTitle": {
+    "description": "Error heading when a feed article could not be opened."
+  },
+
+  "webFeed_lastFetchedLabel": "Last fetched: {date}",
+  "@webFeed_lastFetchedLabel": {
+    "description": "Line on a feed card saying when the feed was last downloaded. date is a relative time such as \"5 minutes ago\", or \"N/A\".",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "webFeed_tagsFieldLabel": "Tags",
+  "@webFeed_tagsFieldLabel": {
+    "description": "Label of the field for adding tags (categories) to a feed."
+  }
+}

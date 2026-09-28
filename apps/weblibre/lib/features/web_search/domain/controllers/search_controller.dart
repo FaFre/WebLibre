@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -6,6 +25,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/search_credits/domain/providers.dart';
@@ -302,8 +322,9 @@ class MetaSearchController extends _$MetaSearchController {
     if (!await _ensureTorReadyIfRequested()) {
       state = state.copyWith(
         status: WebSearchStatus.error,
-        errorMessage:
-            'Could not start $torBrand for the search. Disable the $torBrand toggle or try again.',
+        errorMessage: ref
+            .read(appLocalizationsProvider)
+            .webSearch_torStartFailed(torBrand),
         hasOpenSession: false,
       );
       return;
@@ -322,7 +343,9 @@ class MetaSearchController extends _$MetaSearchController {
           );
       state = state.copyWith(
         status: WebSearchStatus.error,
-        errorMessage: 'Could not check search credits. Please try again.',
+        errorMessage: ref
+            .read(appLocalizationsProvider)
+            .webSearch_creditCheckFailed,
         hasOpenSession: false,
       );
       return;
@@ -339,7 +362,9 @@ class MetaSearchController extends _$MetaSearchController {
       case TokenAvailabilityOutcome.issuanceFailed:
         state = state.copyWith(
           status: WebSearchStatus.error,
-          errorMessage: 'Could not issue search tokens. Please try again.',
+          errorMessage: ref
+              .read(appLocalizationsProvider)
+              .webSearch_tokenIssuanceFailed,
           hasOpenSession: false,
         );
         return;
@@ -365,7 +390,9 @@ class MetaSearchController extends _$MetaSearchController {
             .e('Search socket error', error: error, stackTrace: stackTrace);
         final message = error is SearchSessionCloseException
             ? _closeCodeUserMessage(error.closeCode)
-            : 'Search connection error. Please try again.';
+            : ref
+                  .read(appLocalizationsProvider)
+                  .webSearch_socketConnectionError;
         _applyError(message, sessionClosed: true);
       },
       onDone: () {
@@ -560,7 +587,7 @@ class MetaSearchController extends _$MetaSearchController {
     Map<Uri, Map<FetchMethodChoice, CapturedPageState>> source,
     Uri url, {
     required Set<FetchMethodChoice> capturingMethods,
-    String errorMessage = 'Capture was interrupted',
+    required String errorMessage,
   }) {
     final urlCaptures = source[url] ?? const {};
     var changed = false;
@@ -603,7 +630,7 @@ class MetaSearchController extends _$MetaSearchController {
   _failAllInProgressCaptures(
     Map<Uri, Map<FetchMethodChoice, CapturedPageState>> source, {
     required Map<Uri, Set<FetchMethodChoice>> capturingByUrl,
-    String errorMessage = 'Capture was interrupted',
+    required String errorMessage,
   }) {
     var changed = false;
     final result = <Uri, Map<FetchMethodChoice, CapturedPageState>>{};
@@ -1025,17 +1052,14 @@ class MetaSearchController extends _$MetaSearchController {
     }
   }
 
-  static String _closeCodeUserMessage(int code) {
+  String _closeCodeUserMessage(int code) {
+    final l10n = ref.read(appLocalizationsProvider);
     return switch (code) {
-      4001 => 'Search session timed out. Please try again.',
-      4401 =>
-        'Your search credit could not be validated. '
-            'The credit may have been spent — please try again.',
-      4403 => 'The requested page is not permitted by the search policy.',
-      4500 => 'The search failed on the server. Please try again.',
-      _ =>
-        'Search connection closed unexpectedly (code $code). '
-            'Please try again.',
+      4001 => l10n.webSearch_closeErrorSessionTimeout,
+      4401 => l10n.webSearch_closeErrorCreditInvalid,
+      4403 => l10n.webSearch_closeErrorPolicyForbidden,
+      4500 => l10n.webSearch_closeErrorServerFailed,
+      _ => l10n.webSearch_closeErrorUnknown(code),
     };
   }
 
@@ -1044,25 +1068,25 @@ class MetaSearchController extends _$MetaSearchController {
   /// `fetch_not_allowed`, `capture_failed`, `document_extract_failed`) into
   /// a user-facing message. The raw server `detail` is appended so the
   /// detail dialog has something specific to show.
-  static String _userMessageForStreamError(String? code, String detail) {
-    final fallbackDetail = detail.isEmpty ? 'unknown error' : detail;
+  String _userMessageForStreamError(String? code, String detail) {
+    final l10n = ref.read(appLocalizationsProvider);
+    final fallbackDetail = detail.isEmpty
+        ? l10n.webSearch_unknownErrorDetail
+        : detail;
     return switch (code) {
-      'protocol_error' =>
-        'Search protocol error. The session has ended — please try '
-            'again. ($fallbackDetail)',
-      'search_failed' =>
-        'The search failed on the server. Please try again. '
-            '($fallbackDetail)',
-      'fetch_failed' =>
-        'Could not fetch this page from the source. ($fallbackDetail)',
-      'document_extract_failed' =>
-        'Could not extract a readable preview from this page. '
-            '($fallbackDetail)',
-      'fetch_not_allowed' =>
-        'This page is not permitted by the search policy. '
-            '($fallbackDetail)',
-      'capture_failed' => 'Page capture failed. ($fallbackDetail)',
-      _ => 'Search error: $fallbackDetail',
+      'protocol_error' => l10n.webSearch_streamErrorProtocol(fallbackDetail),
+      'search_failed' => l10n.webSearch_streamErrorSearchFailed(fallbackDetail),
+      'fetch_failed' => l10n.webSearch_streamErrorFetchFailed(fallbackDetail),
+      'document_extract_failed' => l10n.webSearch_streamErrorExtractFailed(
+        fallbackDetail,
+      ),
+      'fetch_not_allowed' => l10n.webSearch_streamErrorNotAllowed(
+        fallbackDetail,
+      ),
+      'capture_failed' => l10n.webSearch_streamErrorCaptureFailed(
+        fallbackDetail,
+      ),
+      _ => l10n.webSearch_streamErrorGeneric(fallbackDetail),
     };
   }
 

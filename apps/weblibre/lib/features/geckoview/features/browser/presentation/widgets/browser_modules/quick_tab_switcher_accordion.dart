@@ -53,6 +53,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/scroll_to_active_chip.dart';
 import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 import 'package:weblibre/presentation/widgets/reorderable_hold_drag.dart';
@@ -86,6 +87,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isVertical = axis == Axis.vertical;
     final isWideRail = isVertical && BrowserTabBar.isWideRailWidth(railWidth);
     final scrollController = useScrollController();
@@ -322,7 +324,9 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       return canManualReorder
           ? withMenu
           : HoldDragDisabledHint(
-              message: tabReorderBlockedMessage,
+              message: AppLocalizations.of(
+                context,
+              ).browser_tabReorderBlockedMessage,
               child: withMenu,
             );
     }
@@ -430,7 +434,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
 
     void showCannotMove() {
       if (context.mounted) {
-        ui_helper.showInfoMessage(context, 'Tab cannot be moved here');
+        ui_helper.showInfoMessage(context, l10n.browser_tabCannotBeMovedHere);
       }
     }
 
@@ -779,7 +783,9 @@ class _AccordionHeaderChip extends StatelessWidget {
                             children: [
                               Flexible(
                                 child: Text(
-                                  'Unassigned',
+                                  AppLocalizations.of(
+                                    context,
+                                  ).browser_unassignedContainerLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(color: nullForeground),

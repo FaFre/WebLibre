@@ -23,7 +23,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:secure_archive/secure_archive.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/filesystem.dart';
@@ -37,6 +36,8 @@ import 'package:weblibre/core/startup/maintenance_scanner.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_bootstrap.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/maintenance_outcome_l10n.dart';
 import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
 
 /// How often the screen proves it is still here.
@@ -73,6 +74,7 @@ class StartupMaintenanceScreen extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final store = useMemoized(
       () => StartupConfigStore(filesystem.startupPaths),
     );
@@ -248,7 +250,7 @@ class StartupMaintenanceScreen extends HookWidget {
     /// task runs. A journal is durable evidence that a mutation was interrupted;
     /// starting new work on top of one would layer a second incomplete operation
     /// over the first.
-    Future<String?> recoverJournals() async {
+    Future<MaintenanceRecoveryOutcome?> recoverJournals() async {
       final scan = await MaintenanceScanner(filesystem.startupPaths).scan();
       if (!scan.hasDurableEvidence) return null;
 
@@ -257,18 +259,18 @@ class StartupMaintenanceScreen extends HookWidget {
         syncDirectory: GeckoProfileService().syncDirectory,
       );
 
-      String? summary;
+      MaintenanceRecoveryOutcome? outcome;
       for (final entry in scan.incompleteJournals) {
         final journal = await journals.read(entry.taskId);
         if (journal == null) continue;
 
-        activity.value = 'Finishing work interrupted by a previous restart…';
+        activity.value = l10n.startup_maintenanceFinishingInterrupted;
         final runner = await buildRunner(journal.taskId);
-        summary = await runner.recoverJournal(journal);
+        outcome = await runner.recoverJournal(journal);
       }
 
       await sweepHarmlessArtifacts(filesystem.startupPaths, scan);
-      return summary;
+      return outcome;
     }
 
     Future<void> runTask(MaintenanceTask task) async {
@@ -276,7 +278,8 @@ class StartupMaintenanceScreen extends HookWidget {
       outcome.value = null;
       retryable.value = null;
       passwordRejected.value = false;
-      activity.value = _activity(task);
+      final copy = _copyFor(l10n, task);
+      activity.value = copy.activity;
 
       try {
         final runner = await buildRunner(task.id);
@@ -284,7 +287,11 @@ class StartupMaintenanceScreen extends HookWidget {
 
         final done = result.effectiveState == MaintenanceTaskState.completed;
         outcome.value = _Outcome(
-          done ? _describeDone(task) : (result.error ?? 'It did not finish.'),
+          done
+              ? copy.describeDone
+              : (result.describeFailure(l10n) ??
+                    result.error ??
+                    l10n.startup_maintenanceTaskDidNotFinish),
           failed: !done,
         );
         if (done) {
@@ -311,14 +318,16 @@ class StartupMaintenanceScreen extends HookWidget {
         // The reservation moved on while this screen held it. Nothing was
         // damaged — the boundary check is what stopped the work — but this
         // process can no longer act, and only a restart clears that.
-        outcome.value = const _Outcome(
-          'WebLibre can no longer safely work on this profile. '
-          '$nothingChanged $reopenToContinue',
+        outcome.value = _Outcome(
+          l10n.startup_maintenanceLeaseLost(
+            l10n.profileCopy_nothingChanged,
+            l10n.profileCopy_reopenToContinue,
+          ),
           failed: true,
         );
       } catch (error) {
         outcome.value = _Outcome(
-          describeMaintenanceFailure(error),
+          describeMaintenanceFailure(l10n, error),
           failed: true,
         );
       } finally {
@@ -341,11 +350,11 @@ class StartupMaintenanceScreen extends HookWidget {
       try {
         final recovered = await recoverJournals();
         if (recovered != null) {
-          outcome.value = _Outcome(recovered);
+          outcome.value = _Outcome(recovered.describe(l10n));
         }
       } catch (error) {
         outcome.value = _Outcome(
-          describeMaintenanceFailure(error),
+          describeMaintenanceFailure(l10n, error),
           failed: true,
         );
       } finally {
@@ -392,7 +401,9 @@ class StartupMaintenanceScreen extends HookWidget {
       busy.value = true;
       try {
         await store.removeTask(task.id);
-        outcome.value = _Outcome('${_describe(task)} was cancelled.');
+        outcome.value = _Outcome(
+          l10n.startup_maintenanceTaskCancelled(_copyFor(l10n, task).describe),
+        );
       } finally {
         busy.value = false;
         await reload();
@@ -413,14 +424,12 @@ class StartupMaintenanceScreen extends HookWidget {
         final parked = await discardUnresolvedEvidence(filesystem.startupPaths);
         outcome.value = _Outcome(
           parked == 0
-              ? 'The interrupted record was discarded.'
-              : 'The interrupted record was discarded. WebLibre could not tell '
-                    'which profile the saved data belonged to, so it kept it on '
-                    'the device instead of removing it.',
+              ? l10n.startup_maintenanceEvidenceDiscarded
+              : l10n.startup_maintenanceEvidenceDiscardedKept,
         );
       } catch (error) {
         outcome.value = _Outcome(
-          describeMaintenanceFailure(error),
+          describeMaintenanceFailure(l10n, error),
           failed: true,
         );
       } finally {
@@ -486,7 +495,7 @@ class StartupMaintenanceScreen extends HookWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Profile maintenance',
+                l10n.startup_maintenanceHeadline,
                 style: theme.textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
@@ -494,12 +503,9 @@ class StartupMaintenanceScreen extends HookWidget {
               Text(
                 switch ((next, unresolved.value.isEmpty)) {
                   (final MaintenanceTask _, _) =>
-                    'This must finish before any profile can open. WebLibre '
-                        'keeps the profile closed while it works.',
-                  (null, true) => 'Nothing is left to finish.',
-                  (null, false) =>
-                    'WebLibre found interrupted profile work, but cannot read '
-                        'its record.',
+                    l10n.startup_maintenanceMustFinish,
+                  (null, true) => l10n.startup_maintenanceNothingLeft,
+                  (null, false) => l10n.startup_maintenanceCannotReadRecord,
                 },
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -529,23 +535,19 @@ class StartupMaintenanceScreen extends HookWidget {
                       }
                     },
                     decoration: InputDecoration(
-                      labelText: 'Backup file password',
+                      labelText: l10n.startup_maintenancePasswordLabel,
                       errorText: passwordRejected.value
-                          ? 'This password did not open the backup file'
+                          ? l10n.startup_maintenancePasswordRejected
                           : null,
                       // Says why the button is dark rather than leaving the
                       // user to work it out from a control that does nothing.
                       helperText: passwordMissing
                           ? (next.action == MaintenanceAction.backup
-                                ? 'Required. You need this to restore the '
-                                      'backup, and it is not stored anywhere.'
-                                : 'Required. The password this backup file was '
-                                      'created with.')
+                                ? l10n.startup_maintenancePasswordHelperRequiredBackup
+                                : l10n.startup_maintenancePasswordHelperRequiredRestore)
                           : (next.action == MaintenanceAction.backup
-                                ? 'You need this to restore the backup. It is '
-                                      'not stored anywhere.'
-                                : 'The password this backup file was created '
-                                      'with.'),
+                                ? l10n.startup_maintenancePasswordHelperBackup
+                                : l10n.startup_maintenancePasswordHelperRestore),
                       helperMaxLines: 3,
                       border: const OutlineInputBorder(),
                     ),
@@ -557,7 +559,7 @@ class StartupMaintenanceScreen extends HookWidget {
                       ? null
                       : () => runTask(next),
                   icon: Icon(_actionIcon(next)),
-                  label: Text(_action(next)),
+                  label: Text(_copyFor(l10n, next).verb),
                 ),
                 // Whatever is blocking the task, shown *with* the task rather
                 // than only on the no-tasks branch. Disabling the button and
@@ -573,7 +575,7 @@ class StartupMaintenanceScreen extends HookWidget {
                     FilledButton.icon(
                       onPressed: busy.value ? null : () => runRecovery(),
                       icon: const Icon(Icons.restart_alt),
-                      label: const Text('Try finishing it again'),
+                      label: Text(l10n.startup_maintenanceTryFinishingAgain),
                     ),
                   ],
                   if (unresolved.value.isNotEmpty) ...[
@@ -585,7 +587,9 @@ class StartupMaintenanceScreen extends HookWidget {
                           ? null
                           : () => discardEvidence(context),
                       icon: const Icon(Icons.report_problem_outlined),
-                      label: const Text('Discard the record and continue'),
+                      label: Text(
+                        l10n.startup_maintenanceDiscardAndContinueBlocked,
+                      ),
                     ),
                   ],
                 ],
@@ -620,19 +624,19 @@ class StartupMaintenanceScreen extends HookWidget {
                             }
                           },
                     icon: const Icon(Icons.refresh),
-                    label: Text('Try the ${_noun(failed)} again'),
+                    label: Text(_copyFor(l10n, failed).retry),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton.icon(
                     onPressed: busy.value ? null : onFinished,
                     icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Open WebLibre'),
+                    label: Text(l10n.startup_maintenanceOpenWebLibreRetry),
                   ),
                 ] else
                   FilledButton.icon(
                     onPressed: busy.value ? null : onFinished,
                     icon: const Icon(Icons.arrow_forward),
-                    label: const Text('Open WebLibre'),
+                    label: Text(l10n.startup_maintenanceOpenWebLibre),
                   ),
               ] else ...[
                 // Nothing queued, but evidence remains — so `onFinished` would
@@ -644,7 +648,9 @@ class StartupMaintenanceScreen extends HookWidget {
                 FilledButton.icon(
                   onPressed: busy.value ? null : () => discardEvidence(context),
                   icon: const Icon(Icons.report_problem_outlined),
-                  label: const Text('Discard the record and continue'),
+                  label: Text(
+                    l10n.startup_maintenanceDiscardAndContinueNoTasks,
+                  ),
                 ),
               ],
 
@@ -660,7 +666,7 @@ class StartupMaintenanceScreen extends HookWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'This can take several minutes. Keep WebLibre open.',
+                    l10n.startup_maintenanceTakesSeveralMinutes,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -679,7 +685,7 @@ class StartupMaintenanceScreen extends HookWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Then, after this one',
+                    l10n.startup_maintenanceThenAfterThisOne,
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
@@ -697,7 +703,7 @@ class StartupMaintenanceScreen extends HookWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            _describe(task),
+                            _copyFor(l10n, task).describe,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -713,12 +719,12 @@ class StartupMaintenanceScreen extends HookWidget {
                 if (canAbandon)
                   TextButton(
                     onPressed: busy.value ? null : () => abandon(next),
-                    child: Text('Cancel this ${_noun(next)}'),
+                    child: Text(_copyFor(l10n, next).cancel),
                   )
                 else if (!phase.blocking)
                   TextButton(
                     onPressed: busy.value ? null : onFinished,
-                    child: const Text('Skip for now'),
+                    child: Text(l10n.startup_maintenanceSkipForNow),
                   ),
                 if (!canAbandon)
                   Padding(
@@ -733,16 +739,11 @@ class StartupMaintenanceScreen extends HookWidget {
                         recoverableTasks.value.contains(next.id),
                       )) {
                         (true, _) =>
-                          'This was interrupted after it started. It must '
-                              'finish before any profile can open.',
+                          l10n.startup_maintenanceInterruptedMustFinish,
                         (false, true) =>
-                          'This was interrupted after it started, and finishing '
-                              'it did not succeed. It cannot be started over '
-                              'until it has been finished.',
+                          l10n.startup_maintenanceInterruptedFinishFailed,
                         (false, false) =>
-                          'This was interrupted after it started, and WebLibre '
-                              'cannot read what it was doing. It cannot be run '
-                              'again until that record is dealt with.',
+                          l10n.startup_maintenanceInterruptedUnreadable,
                       },
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -805,29 +806,25 @@ class _UnresolvedEvidencePanel extends StatelessWidget {
 Future<bool?> _confirmDiscardEvidence(BuildContext context) => showDialog<bool>(
   context: context,
   anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-  builder: (context) => AlertDialog(
-    icon: const Icon(Icons.report_problem_outlined),
-    title: const Text('Discard the interrupted record?'),
-    content: const Text(
-      'WebLibre cannot read what a backup, restore or deletion was doing when '
-      'it stopped. Discarding the record lets the browser open again, but a '
-      'profile that was being replaced may need to be checked afterwards.\n\n'
-      'If the profile is missing, WebLibre puts back the data it saved before '
-      'the replacement. If the profile is already there, that saved data is '
-      'removed. If WebLibre cannot tell which profile the saved data belongs '
-      'to, it keeps it rather than removing it.',
-    ),
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context, false),
-        child: const Text('Cancel'),
-      ),
-      TextButton(
-        onPressed: () => Navigator.pop(context, true),
-        child: const Text('Discard it'),
-      ),
-    ],
-  ),
+  builder: (context) {
+    final l10n = AppLocalizations.of(context);
+
+    return AlertDialog(
+      icon: const Icon(Icons.report_problem_outlined),
+      title: Text(l10n.startup_maintenanceDiscardDialogTitle),
+      content: Text(l10n.startup_maintenanceDiscardDialogContent),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.common_cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l10n.startup_maintenanceDiscardIt),
+        ),
+      ],
+    );
+  },
 );
 
 /// What the operation is, stated so the user can check it before it runs.
@@ -840,6 +837,7 @@ class _TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final copy = _copyFor(AppLocalizations.of(context), task);
     final destructive = task.action?.isDestructive ?? false;
 
     return Card(
@@ -864,7 +862,7 @@ class _TaskCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _describe(task),
+                    copy.describe,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: destructive
                           ? theme.colorScheme.onErrorContainer
@@ -873,7 +871,7 @@ class _TaskCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _consequence(task),
+                    copy.consequence,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: destructive
                           ? theme.colorScheme.onErrorContainer
@@ -942,24 +940,22 @@ class _OutcomeBanner extends StatelessWidget {
   }
 }
 
-/// Everything this screen says and decides about one queued action.
+/// The non-text facts about one queued action, chosen by one exhaustive
+/// switch. This used to be ten parallel switches over [MaintenanceAction],
+/// which meant adding an action was ten edits — and `needsPassword`, written
+/// as a boolean expression rather than a switch, would not even have failed
+/// to compile.
 ///
-/// One row per action, chosen by one exhaustive switch. This used to be ten
-/// parallel switches over [MaintenanceAction], which meant adding an action
-/// was ten edits — and `needsPassword`, written as a boolean expression rather
-/// than a switch, would not even have failed to compile.
-class _ActionCopy {
-  const _ActionCopy({
+/// Kept apart from [_ActionText]: these are read from a `useEffect` callback
+/// that runs after an `await` with no widget guaranteed still mounted, so
+/// they must never need an [AppLocalizations]/[BuildContext] the way the text
+/// fields do.
+class _ActionFlags {
+  const _ActionFlags({
     required this.needsInput,
     required this.needsPassword,
     required this.isRunnable,
-    required this.verb,
     required this.icon,
-    required this.noun,
-    required this.describe,
-    required this.consequence,
-    required this.activity,
-    required this.describeDone,
   });
 
   /// Whether the task cannot start until the user gives it something.
@@ -979,111 +975,147 @@ class _ActionCopy {
   /// has nothing to do with it.
   final bool isRunnable;
 
-  /// The verb for the primary button, so it never says "Continue" while the
-  /// thing it actually does is delete a profile.
-  final String verb;
-
   final IconData icon;
-  final String noun;
-  final String describe;
-  final String consequence;
-  final String activity;
-  final String describeDone;
 }
 
-_ActionCopy _copyFor(MaintenanceTask task) => switch (task.action) {
-  MaintenanceAction.backup => _ActionCopy(
+_ActionFlags _flagsFor(MaintenanceTask task) => switch (task.action) {
+  MaintenanceAction.backup => const _ActionFlags(
     needsInput: true,
     needsPassword: true,
     isRunnable: true,
-    verb: 'Back up now',
     icon: Icons.lock_outline,
-    noun: 'backup',
-    describe: 'Back up "${task.profileName}"',
-    consequence:
-        'Writes an encrypted backup file of this profile, including its '
-        '$profileSecretDataDescription.',
-    activity: 'Packing "${task.profileName}"…',
-    describeDone:
-        '"${task.profileName}" was backed up to the folder you chose.',
   ),
-  MaintenanceAction.restoreOver => _ActionCopy(
+  MaintenanceAction.restoreOver => const _ActionFlags(
     needsInput: true,
     needsPassword: true,
     isRunnable: true,
-    verb: 'Replace now',
     icon: Icons.settings_backup_restore,
-    noun: 'restore',
-    describe: 'Replace "${task.profileName}"',
-    consequence:
-        'Replaces everything in this profile with the backup. '
-        '$signedInFromBackup $olderBackupKeepsCredentials'
-        '${task.adoptArchiveName ? " It also takes the backup's name." : ""}'
-        ' $cannotBeUndone',
-    activity: 'Replacing "${task.profileName}"…',
-    describeDone: '"${task.profileName}" was replaced with the backup.',
   ),
-  MaintenanceAction.delete => _ActionCopy(
+  MaintenanceAction.delete => const _ActionFlags(
     needsInput: false,
     needsPassword: false,
     isRunnable: true,
-    verb: 'Delete now',
     icon: Icons.delete_outline,
-    noun: 'deletion',
-    describe: 'Delete "${task.profileName}"',
-    consequence:
-        'Removes this profile and its $profileDataDescription. $cannotBeUndone',
-    activity: 'Deleting "${task.profileName}"…',
-    describeDone: '"${task.profileName}" was deleted.',
   ),
-  MaintenanceAction.restoreClone => _ActionCopy(
+  MaintenanceAction.restoreClone => const _ActionFlags(
     // Not "needs a password" but "must not start on its own":
     // `MaintenanceRunner` refuses this action, so running it unattended only
     // produces a failure the user did not ask for and cannot act on.
     needsInput: true,
     needsPassword: false,
     isRunnable: false,
-    verb: 'Cannot run this',
     icon: Icons.restore_page_outlined,
-    noun: 'restore',
-    describe: 'Restore "${task.profileName}"',
-    consequence:
-        'This restore was created by a newer version of WebLibre and cannot '
-        'run here.',
-    activity: 'Restoring "${task.profileName}"…',
-    describeDone: '"${task.profileName}" was restored.',
   ),
-  null => _ActionCopy(
+  null => const _ActionFlags(
     needsInput: true,
     needsPassword: false,
     isRunnable: false,
-    verb: 'Run',
     icon: Icons.help_outline,
-    noun: 'task',
-    describe: 'Unknown task ${task.id}',
-    consequence:
-        'This task was created by a newer version of WebLibre and cannot run.',
-    activity: 'Working…',
-    describeDone: 'Done.',
   ),
 };
 
-bool _needsInput(MaintenanceTask task) => _copyFor(task).needsInput;
+bool _needsInput(MaintenanceTask task) => _flagsFor(task).needsInput;
 
-bool _needsPassword(MaintenanceTask task) => _copyFor(task).needsPassword;
+bool _needsPassword(MaintenanceTask task) => _flagsFor(task).needsPassword;
 
-bool _isRunnable(MaintenanceTask task) => _copyFor(task).isRunnable;
+bool _isRunnable(MaintenanceTask task) => _flagsFor(task).isRunnable;
 
-String _action(MaintenanceTask task) => _copyFor(task).verb;
+IconData _actionIcon(MaintenanceTask task) => _flagsFor(task).icon;
 
-IconData _actionIcon(MaintenanceTask task) => _copyFor(task).icon;
+/// Everything this screen *says* about one queued action. See [_ActionFlags]
+/// for why this is a separate switch rather than one combined class.
+class _ActionText {
+  const _ActionText({
+    required this.verb,
+    required this.retry,
+    required this.cancel,
+    required this.describe,
+    required this.consequence,
+    required this.activity,
+    required this.describeDone,
+  });
 
-String _noun(MaintenanceTask task) => _copyFor(task).noun;
+  /// The verb for the primary button, so it never says "Continue" while the
+  /// thing it actually does is delete a profile.
+  final String verb;
 
-String _describe(MaintenanceTask task) => _copyFor(task).describe;
+  /// Whole button labels rather than one noun slotted into a shared sentence:
+  /// the article and adjective around the noun agree with its gender, which
+  /// differs per task in most languages.
+  final String retry;
+  final String cancel;
+  final String describe;
+  final String consequence;
+  final String activity;
+  final String describeDone;
+}
 
-String _consequence(MaintenanceTask task) => _copyFor(task).consequence;
-
-String _activity(MaintenanceTask task) => _copyFor(task).activity;
-
-String _describeDone(MaintenanceTask task) => _copyFor(task).describeDone;
+_ActionText _copyFor(
+  AppLocalizations l10n,
+  MaintenanceTask task,
+) => switch (task.action) {
+  MaintenanceAction.backup => _ActionText(
+    verb: l10n.startup_maintenanceBackupVerb,
+    retry: l10n.startup_maintenanceBackupRetry,
+    cancel: l10n.startup_maintenanceBackupCancel,
+    describe: l10n.startup_maintenanceBackupDescribe(task.profileName),
+    consequence: l10n.startup_maintenanceBackupConsequence(
+      l10n.profileCopy_secretDataDescription,
+    ),
+    activity: l10n.startup_maintenanceBackupActivity(task.profileName),
+    describeDone: l10n.startup_maintenanceBackupDescribeDone(task.profileName),
+  ),
+  MaintenanceAction.restoreOver => _ActionText(
+    verb: l10n.startup_maintenanceRestoreOverVerb,
+    retry: l10n.startup_maintenanceRestoreOverRetry,
+    cancel: l10n.startup_maintenanceRestoreOverCancel,
+    describe: l10n.startup_maintenanceRestoreOverDescribe(task.profileName),
+    consequence: task.adoptArchiveName
+        ? l10n.startup_maintenanceRestoreOverConsequenceWithRename(
+            l10n.profileCopy_signedInFromBackup,
+            l10n.profileCopy_olderBackupKeepsCredentials,
+            l10n.profileCopy_cannotBeUndone,
+          )
+        : l10n.startup_maintenanceRestoreOverConsequencePlain(
+            l10n.profileCopy_signedInFromBackup,
+            l10n.profileCopy_olderBackupKeepsCredentials,
+            l10n.profileCopy_cannotBeUndone,
+          ),
+    activity: l10n.startup_maintenanceRestoreOverActivity(task.profileName),
+    describeDone: l10n.startup_maintenanceRestoreOverDescribeDone(
+      task.profileName,
+    ),
+  ),
+  MaintenanceAction.delete => _ActionText(
+    verb: l10n.startup_maintenanceDeleteVerb,
+    retry: l10n.startup_maintenanceDeleteRetry,
+    cancel: l10n.startup_maintenanceDeleteCancel,
+    describe: l10n.startup_maintenanceDeleteDescribe(task.profileName),
+    consequence: l10n.startup_maintenanceDeleteConsequence(
+      l10n.profileCopy_dataDescription,
+      l10n.profileCopy_cannotBeUndone,
+    ),
+    activity: l10n.startup_maintenanceDeleteActivity(task.profileName),
+    describeDone: l10n.startup_maintenanceDeleteDescribeDone(task.profileName),
+  ),
+  MaintenanceAction.restoreClone => _ActionText(
+    verb: l10n.startup_maintenanceRestoreCloneVerb,
+    retry: l10n.startup_maintenanceRestoreCloneRetry,
+    cancel: l10n.startup_maintenanceRestoreCloneCancel,
+    describe: l10n.startup_maintenanceRestoreCloneDescribe(task.profileName),
+    consequence: l10n.startup_maintenanceRestoreCloneConsequence,
+    activity: l10n.startup_maintenanceRestoreCloneActivity(task.profileName),
+    describeDone: l10n.startup_maintenanceRestoreCloneDescribeDone(
+      task.profileName,
+    ),
+  ),
+  null => _ActionText(
+    verb: l10n.startup_maintenanceUnknownVerb,
+    retry: l10n.startup_maintenanceUnknownRetry,
+    cancel: l10n.startup_maintenanceUnknownCancel,
+    describe: l10n.startup_maintenanceUnknownDescribe(task.id),
+    consequence: l10n.startup_maintenanceUnknownConsequence,
+    activity: l10n.startup_maintenanceUnknownActivity,
+    describeDone: l10n.startup_maintenanceUnknownDescribeDone,
+  ),
+};

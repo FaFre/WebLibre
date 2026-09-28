@@ -1,0 +1,9 @@
+{
+  "@@locale": "de",
+  "intentGatekeeper_dialogTitle": "Link in WebLibre öffnen?",
+  "intentGatekeeper_appIsTryingToOpenLink": "{appName} möchte einen Link in {browserName} öffnen.",
+  "intentGatekeeper_alwaysAllow": "Immer erlauben",
+  "intentGatekeeper_allowOnce": "Einmal erlauben",
+  "intentGatekeeper_blockOnce": "Einmal blockieren",
+  "intentGatekeeper_alwaysBlock": "Immer blockieren"
+}

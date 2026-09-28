@@ -24,6 +24,8 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_connection_option_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Radio sentinels. Neither can collide with an encoded [ProxyConnectionId],
 /// whose forms are `tor` and `singbox:<id>`.
@@ -60,9 +62,9 @@ Future<ProxyPickerOutcome?> showProxyConnectionPicker(
   BuildContext context, {
   required ProxyConnectionId? selectedProxyConnectionId,
   bool isDirectSelected = false,
-  String title = 'Proxy Connection',
-  String noneTitle = 'None',
-  String noneSubtitle = 'Use the normal browser connection',
+  String? title,
+  String? noneTitle,
+  String? noneSubtitle,
   String? directTitle,
   String? directSubtitle,
 }) {
@@ -92,12 +94,12 @@ class ProxyConnectionPickerSheet extends ConsumerWidget {
   /// the "none" option. Only meaningful when [directTitle] is set.
   final bool isDirectSelected;
 
-  final String title;
+  final String? title;
 
   /// Wording for the "no proxy" option, which means different things per
   /// caller: no connection assigned, or an explicit direct connection.
-  final String noneTitle;
-  final String noneSubtitle;
+  final String? noneTitle;
+  final String? noneSubtitle;
 
   /// When set, an explicit direct-connection choice is offered alongside the
   /// proxies, returning [ProxyPickerDirect].
@@ -107,9 +109,9 @@ class ProxyConnectionPickerSheet extends ConsumerWidget {
   const ProxyConnectionPickerSheet({
     required this.selectedProxyConnectionId,
     this.isDirectSelected = false,
-    this.title = 'Proxy Connection',
-    this.noneTitle = 'None',
-    this.noneSubtitle = 'Use the normal browser connection',
+    this.title,
+    this.noneTitle,
+    this.noneSubtitle,
     this.directTitle,
     this.directSubtitle,
     super.key,
@@ -117,6 +119,10 @@ class ProxyConnectionPickerSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final resolvedTitle = title ?? l10n.proxy_connectionPickerTitle;
+    final resolvedNoneTitle = noneTitle ?? l10n.proxy_routingNoneTitle;
+    final resolvedNoneSubtitle = noneSubtitle ?? l10n.proxy_routingNoneSubtitle;
     final options = ref.watch(proxyConnectionOptionsProvider);
     // Only a loaded profile list can prove a selection is stale; until then an
     // unknown id is simply one that has not arrived yet.
@@ -153,12 +159,15 @@ class ProxyConnectionPickerSheet extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
-              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+              child: Text(
+                resolvedTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
             RadioListTile<String>(
               value: _noneKey,
-              title: Text(noneTitle),
-              subtitle: Text(noneSubtitle),
+              title: Text(resolvedNoneTitle),
+              subtitle: Text(resolvedNoneSubtitle),
               secondary: const Icon(Icons.public),
             ),
             if (directTitle != null)
@@ -174,19 +183,19 @@ class ProxyConnectionPickerSheet extends ConsumerWidget {
                   Icons.warning_amber_outlined,
                   color: Theme.of(context).colorScheme.error,
                 ),
-                title: const Text('Unknown proxy'),
-                subtitle: const Text('This proxy profile no longer exists'),
+                title: Text(l10n.proxy_unknownProxyTitle),
+                subtitle: Text(l10n.proxy_pickerUnknownProxySubtitle),
                 trailing: TextButton(
                   onPressed: () =>
                       Navigator.pop(context, const ProxyPickerCleared()),
-                  child: const Text('Clear'),
+                  child: Text(l10n.common_clear),
                 ),
               ),
             for (final option in options)
               RadioListTile<String>(
                 value: option.id.encode(),
                 title: Text(option.title),
-                subtitle: Text(option.subtitle),
+                subtitle: Text(option.description(context)),
                 secondary: const Icon(Icons.route_outlined),
               ),
             const SizedBox(height: 12),

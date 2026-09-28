@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class ShareProfileDialog extends StatelessWidget {
@@ -34,8 +35,10 @@ class ShareProfileDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
-      title: Text('Share "$profileName"'),
+      title: Text(l10n.proxy_shareDialogTitle(profileName)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -55,8 +58,7 @@ class ShareProfileDialog extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'This link contains the full profile, including any '
-                    'stored credentials. Share carefully.',
+                    l10n.proxy_shareDialogWarning,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onErrorContainer,
                     ),
@@ -87,17 +89,17 @@ class ShareProfileDialog extends StatelessWidget {
       actions: [
         TextButton.icon(
           icon: const Icon(Icons.copy),
-          label: const Text('Copy'),
+          label: Text(l10n.common_copy),
           onPressed: () async {
             await Clipboard.setData(ClipboardData(text: shareUri));
             if (context.mounted) {
-              showInfoMessage(context, 'Copied to clipboard');
+              showInfoMessage(context, l10n.proxy_copiedToClipboard);
             }
           },
         ),
         TextButton.icon(
           icon: const Icon(Icons.share),
-          label: const Text('Share'),
+          label: Text(l10n.proxy_actionShare),
           onPressed: () async {
             await SharePlus.instance.share(
               ShareParams(text: shareUri, subject: profileName),
@@ -106,7 +108,7 @@ class ShareProfileDialog extends StatelessWidget {
         ),
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+          child: Text(l10n.common_close),
         ),
       ],
     );

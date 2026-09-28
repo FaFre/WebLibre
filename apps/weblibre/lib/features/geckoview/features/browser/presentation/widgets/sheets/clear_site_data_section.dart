@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/clear_site_data_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget for clearing site data
@@ -43,6 +44,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isExpanded = useState(false);
     final isClearing = useState(false);
     final closeTabAfterClear = useState(false);
@@ -74,11 +76,11 @@ class ClearSiteDataSection extends HookConsumerWidget {
       children: [
         ListTile(
           leading: const Icon(Icons.delete_sweep),
-          title: const Text('Clear Site Data'),
+          title: Text(l10n.browser_clearSiteDataTitle),
           subtitle: Text(
             isExpanded.value
-                ? 'Select data types to clear'
-                : 'Cookies, cache, and site data',
+                ? l10n.browser_selectDataTypesToClear
+                : l10n.browser_cookiesCacheAndSiteData,
           ),
           trailing: Icon(
             isExpanded.value ? Icons.expand_less : Icons.expand_more,
@@ -91,8 +93,8 @@ class ClearSiteDataSection extends HookConsumerWidget {
         ),
         if (isExpanded.value) ...[
           _DataTypeCheckbox(
-            label: 'Auth Sessions',
-            subtitle: 'Saved logins, active sessions',
+            label: l10n.browser_dataTypeAuthSessions,
+            subtitle: l10n.browser_dataTypeAuthSessionsSubtitle,
             type: ClearDataType.authSessions,
             isSelected: selectedTypes.value.contains(
               ClearDataType.authSessions,
@@ -100,8 +102,8 @@ class ClearSiteDataSection extends HookConsumerWidget {
             onChanged: (selected) => toggleType(ClearDataType.authSessions),
           ),
           _DataTypeCheckbox(
-            label: 'Site Data',
-            subtitle: 'Offline storage, databases, local files',
+            label: l10n.browser_dataTypeSiteData,
+            subtitle: l10n.browser_dataTypeSiteDataSubtitle,
             type: ClearDataType.allSiteData,
             isSelected: selectedTypes.value.contains(ClearDataType.allSiteData),
             onChanged: (selected) => toggleType(ClearDataType.allSiteData),
@@ -109,8 +111,8 @@ class ClearSiteDataSection extends HookConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 16.0),
             child: _DataTypeCheckbox(
-              label: 'Cookies',
-              subtitle: 'Login tokens, preferences, tracking data',
+              label: l10n.browser_dataTypeCookies,
+              subtitle: l10n.browser_dataTypeCookiesSubtitle,
               type: ClearDataType.onlyCookies,
               isSelected:
                   selectedTypes.value.contains(ClearDataType.allSiteData) ||
@@ -123,8 +125,8 @@ class ClearSiteDataSection extends HookConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 16.0),
             child: _DataTypeCheckbox(
-              label: 'Cached Files',
-              subtitle: 'Images, scripts, stylesheets',
+              label: l10n.browser_dataTypeCachedFiles,
+              subtitle: l10n.browser_dataTypeCachedFilesSubtitle,
               type: ClearDataType.onlyCaches,
               isSelected:
                   selectedTypes.value.contains(ClearDataType.allSiteData) ||
@@ -135,8 +137,8 @@ class ClearSiteDataSection extends HookConsumerWidget {
             ),
           ),
           CheckboxListTile(
-            title: const Text('Close tab after clearing'),
-            subtitle: const Text('Close this tab once data is cleared'),
+            title: Text(l10n.browser_closeTabAfterClearing),
+            subtitle: Text(l10n.browser_closeTabAfterClearingSubtitle),
             value: closeTabAfterClear.value,
             onChanged: isClearing.value
                 ? null
@@ -167,7 +169,11 @@ class ClearSiteDataSection extends HookConsumerWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.delete),
-                label: Text(isClearing.value ? 'Clearing...' : 'Clear Now'),
+                label: Text(
+                  isClearing.value
+                      ? l10n.browser_clearingEllipsis
+                      : l10n.browser_clearNow,
+                ),
               ),
             ),
           ),
@@ -184,14 +190,17 @@ class ClearSiteDataSection extends HookConsumerWidget {
     bool closeTabAfterClear,
   ) async {
     if (selectedTypes.isEmpty) {
-      showErrorMessage(context, 'Select at least one data type');
+      showErrorMessage(
+        context,
+        AppLocalizations.of(context).browser_selectAtLeastOneDataType,
+      );
       return;
     }
 
     final confirmed = await showClearSiteDataDialog(
       context,
       host: url.host,
-      formattedTypes: _formatTypes(selectedTypes),
+      formattedTypes: _formatTypes(AppLocalizations.of(context), selectedTypes),
     );
 
     if (confirmed == true && context.mounted) {
@@ -199,13 +208,21 @@ class ClearSiteDataSection extends HookConsumerWidget {
       try {
         await _clearData(ref, selectedTypes, closeTabAfterClear);
         if (context.mounted) {
-          showInfoMessage(context, 'Site data cleared');
+          showInfoMessage(
+            context,
+            AppLocalizations.of(context).browser_siteDataCleared,
+          );
           ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
         }
       } catch (e, s) {
         logger.e('Failed to clear site data', error: e, stackTrace: s);
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to clear site data: $e');
+          showErrorMessage(
+            context,
+            AppLocalizations.of(
+              context,
+            ).browser_failedToClearSiteData(e.toString()),
+          );
         }
       } finally {
         isClearing.value = false;
@@ -213,23 +230,20 @@ class ClearSiteDataSection extends HookConsumerWidget {
     }
   }
 
-  String _formatTypes(Set<ClearDataType> types) {
-    final labels = types.map((t) {
-      switch (t) {
-        case ClearDataType.onlyCookies:
-          return 'cookies';
-        case ClearDataType.onlyCaches:
-          return 'cached files';
-        case ClearDataType.allSiteData:
-          return 'site data';
-        case ClearDataType.authSessions:
-          return 'auth sessions';
-      }
-    }).toList();
-
-    if (labels.length == 1) return labels.first;
-    if (labels.length == 2) return '${labels[0]} and ${labels[1]}';
-    return '${labels.sublist(0, labels.length - 1).join(', ')}, and ${labels.last}';
+  /// One bulleted line per selected type, in checkbox order, using the
+  /// checkbox labels — a list rather than a joined phrase, so no language has
+  /// to fit a translated "and" around them.
+  String _formatTypes(AppLocalizations l10n, Set<ClearDataType> types) {
+    return [
+      if (types.contains(ClearDataType.authSessions))
+        l10n.browser_dataTypeAuthSessions,
+      if (types.contains(ClearDataType.allSiteData))
+        l10n.browser_dataTypeSiteData,
+      if (types.contains(ClearDataType.onlyCookies))
+        l10n.browser_dataTypeCookies,
+      if (types.contains(ClearDataType.onlyCaches))
+        l10n.browser_dataTypeCachedFiles,
+    ].map((label) => '• $label').join('\n');
   }
 
   Future<void> _clearData(

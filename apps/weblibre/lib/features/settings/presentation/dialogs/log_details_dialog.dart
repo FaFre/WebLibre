@@ -27,6 +27,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
@@ -98,12 +99,17 @@ class LogDetailsDialog extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: text.toString()));
 
     if (context.mounted) {
-      showInfoMessage(context, 'Entry copied');
+      showInfoMessage(
+        context,
+        AppLocalizations.of(context).settings_entryCopied,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return AlertDialog(
       title: Row(
         children: [
@@ -135,7 +141,7 @@ class LogDetailsDialog extends StatelessWidget {
                 children: [
                   if (message.isNotEmpty) ...[
                     Text(
-                      'Message:',
+                      l10n.settings_messageLabel,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -150,7 +156,7 @@ class LogDetailsDialog extends StatelessWidget {
                   ],
                   if (error != null) ...[
                     Text(
-                      'Error:',
+                      l10n.settings_errorLabel,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _levelColor(level),
@@ -165,7 +171,7 @@ class LogDetailsDialog extends StatelessWidget {
                   ],
                   if (stackTrace != null) ...[
                     Text(
-                      'Stack Trace:',
+                      l10n.settings_stackTraceLabel,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -186,12 +192,12 @@ class LogDetailsDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Close'),
+          child: Text(l10n.common_close),
         ),
         TextButton.icon(
           onPressed: () => _copyEntryToClipboard(context),
           icon: const Icon(Icons.copy),
-          label: const Text('Copy'),
+          label: Text(l10n.common_copy),
         ),
       ],
     );

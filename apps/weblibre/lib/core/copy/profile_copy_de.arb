@@ -1,0 +1,19 @@
+{
+  "@@locale": "de",
+  "profileCopy_pickerContents": "Tabs, Verlauf und Einstellungen",
+  "profileCopy_dataDescription": "Tabs, Verlauf, Lesezeichen, Einstellungen und gespeicherte Website-Zugangsdaten",
+  "profileCopy_secretDataDescription": "Anmeldung beim WebLibre-Konto, Sync-Einrichtung und Proxy-Details",
+  "profileCopy_cannotBeUndone": "Dies kann nicht rückgängig gemacht werden.",
+  "profileCopy_nothingChanged": "Es wurde nichts geändert.",
+  "profileCopy_restartsToWork": "WebLibre muss dafür neu starten.",
+  "profileCopy_asksPasswordAfterRestart": "Nach dem Neustart fragt WebLibre nach dem Passwort der Sicherungsdatei.",
+  "profileCopy_reopenToContinue": "WebLibre schließen und erneut öffnen.",
+  "profileCopy_signedInFromBackup": "Das wiederhergestellte Profil verwendet das WebLibre-Konto aus der Sicherung.",
+  "profileCopy_olderBackupKeepsCredentials": "Eine Sicherung aus einer älteren WebLibre-Version enthält nichts davon; das Profil behält dann die aktuellen Daten.",
+  "profileCopy_restartCouldNotBeScheduled": "WebLibre konnte den für diesen Vorgang nötigen Neustart nicht planen. {nothingChanged}",
+  "profileCopy_shortcutsNeedPinningAgain": "Startbildschirm-Verknüpfungen nach der Wiederherstellung erneut anheften.",
+  "profileCopy_restartClosesCurrentProfile": "Dabei wird auch das gerade verwendete Profil geschlossen – das ist nicht immer das hier genannte.",
+  "profileCopy_restartKeepsOtherTabs": "Die übrigen Tabs werden danach wieder geöffnet.",
+  "profileCopy_privateTabsClosedByRestart": "{count, plural, =1{1 privater Tab wird geschlossen und seine Browserdaten werden gelöscht.} other{{count} private Tabs werden geschlossen und ihre Browserdaten werden gelöscht.}}",
+  "profileCopy_containersClearedByRestart": "{count, plural, =1{1 Container, der Daten beim Beenden löscht, wird geleert.} other{{count} Container, die Daten beim Beenden löschen, werden geleert.}}"
+}

@@ -27,6 +27,8 @@ import 'package:weblibre/features/small_web/data/models/small_web_source_kind.da
 import 'package:weblibre/features/small_web/data/providers.dart';
 import 'package:weblibre/features/small_web/domain/providers.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_session_controller.dart';
+import 'package:weblibre/features/small_web/presentation/utils/kagi_small_web_mode_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -42,13 +44,17 @@ class SmallWebHistoryHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final modeLabel = mode?.label;
+    final modeLabel = mode?.label(context);
 
     return Row(
       children: [
-        Text('Recent Discoveries', style: theme.textTheme.titleSmall),
+        Text(
+          l10n.smallWeb_recentDiscoveriesTitle,
+          style: theme.textTheme.titleSmall,
+        ),
         const Spacer(),
         MenuAnchor(
           builder: (context, controller, _) => IconButton(
@@ -78,7 +84,7 @@ class SmallWebHistoryHeader extends ConsumerWidget {
                         mode: mode,
                       );
                 },
-                child: Text('Clear $modeLabel'),
+                child: Text(l10n.smallWeb_clearModeHistory(modeLabel)),
               ),
             MenuItemButton(
               leadingIcon: Icon(
@@ -91,18 +97,18 @@ class SmallWebHistoryHeader extends ConsumerWidget {
                   context: context,
                   anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
                   builder: (context) => AlertDialog(
-                    title: const Text('Clear all discoveries?'),
-                    content: const Text(
-                      'This will permanently remove all recent discovery history across every mode and source.',
+                    title: Text(l10n.smallWeb_clearAllDiscoveriesConfirmTitle),
+                    content: Text(
+                      l10n.smallWeb_clearAllDiscoveriesConfirmContent,
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                        child: Text(l10n.common_cancel),
                       ),
                       FilledButton(
                         onPressed: () => Navigator.pop(context, true),
-                        child: const Text('Clear All'),
+                        child: Text(l10n.smallWeb_actionClearAll),
                       ),
                     ],
                   ),
@@ -115,7 +121,7 @@ class SmallWebHistoryHeader extends ConsumerWidget {
                 }
               },
               child: Text(
-                'Clear all discoveries',
+                l10n.smallWeb_clearAllDiscoveriesMenuItem,
                 style: TextStyle(color: colorScheme.error),
               ),
             ),
@@ -140,6 +146,7 @@ class SmallWebHistoryList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final visitsAsync = ref.watch(
       smallWebRecentVisitsProvider(sourceKind, mode),
     );
@@ -153,7 +160,7 @@ class SmallWebHistoryList extends HookConsumerWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Center(
               child: Text(
-                'No discoveries yet.\nTap Discover to start exploring!',
+                l10n.smallWeb_noDiscoveriesYetMessage,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -188,14 +195,16 @@ class SmallWebHistoryList extends HookConsumerWidget {
             if (hasMore && !expanded.value)
               TextButton(
                 onPressed: () => expanded.value = true,
-                child: Text('Show ${visits.length - _initialCount} more'),
+                child: Text(
+                  l10n.smallWeb_showMoreCount(visits.length - _initialCount),
+                ),
               ),
           ],
         );
       },
       error: (error, _) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Center(child: Text('Failed to load history: $error')),
+        child: Center(child: Text(l10n.smallWeb_failedToLoadHistory('$error'))),
       ),
       loading: () => const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),

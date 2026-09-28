@@ -6,6 +6,7 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.d
 import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_logs.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   Future<void> pumpScreen(
@@ -21,7 +22,11 @@ void main() {
             ProxyDiagnosticsSettings(logLevel: logLevel),
           ),
         ],
-        child: const MaterialApp(home: SingboxProxyLogsScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SingboxProxyLogsScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();

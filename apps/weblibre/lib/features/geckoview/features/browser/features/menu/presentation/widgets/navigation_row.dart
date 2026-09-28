@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -46,6 +47,7 @@ class MenuNavigationRow extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final history = ref.watch(tabHistoryStateProvider(selectedTabId));
     final host = ref.watch(
       tabStateProvider(selectedTabId).select((value) => value?.url.host),
@@ -75,7 +77,7 @@ class MenuNavigationRow extends HookConsumerWidget {
           direction: HistoryMenuDirection.back,
           child: _buildNavIcon(
             icon: isLoading ? Icons.close : Icons.arrow_back,
-            label: isLoading ? 'Stop' : 'Back',
+            label: isLoading ? l10n.menu_navStop : l10n.menu_navBack,
             disabled: !isLoading && !history.canGoBack,
             onTap: () async {
               final controller = ref.read(
@@ -109,7 +111,7 @@ class MenuNavigationRow extends HookConsumerWidget {
           direction: HistoryMenuDirection.forward,
           child: _buildNavIcon(
             icon: Icons.arrow_forward,
-            label: 'Forward',
+            label: l10n.menu_navForward,
             disabled: !history.canGoForward,
             onTap: () async {
               await ref
@@ -146,7 +148,7 @@ class MenuNavigationRow extends HookConsumerWidget {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Close Others'),
+              child: Text(l10n.menu_navCloseOthers),
             ),
             if (host != null && host.isNotEmpty)
               MenuItemButton(
@@ -164,7 +166,7 @@ class MenuNavigationRow extends HookConsumerWidget {
                     Navigator.pop(context);
                   }
                 },
-                child: const Text('Close from Same Host'),
+                child: Text(l10n.menu_navCloseFromSameHost),
               ),
             MenuItemButton(
               leadingIcon: const Icon(Icons.account_tree),
@@ -182,12 +184,12 @@ class MenuNavigationRow extends HookConsumerWidget {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Close Tab and Descendants'),
+              child: Text(l10n.menu_navCloseTabAndDescendants),
             ),
           ],
           child: _buildNavIcon(
             icon: MdiIcons.tabMinus,
-            label: 'Close Tab',
+            label: l10n.menu_navCloseTab,
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId));
               if (tabState != null && tabState.tabMode is IsolatedTabMode) {
@@ -241,12 +243,12 @@ class MenuNavigationRow extends HookConsumerWidget {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Hard Refresh'),
+              child: Text(l10n.menu_navHardRefresh),
             ),
           ],
           child: _buildNavIcon(
             icon: Icons.refresh,
-            label: 'Reload',
+            label: l10n.menu_navReload,
             onTap: () async {
               await ref
                   .read(tabSessionProvider(tabId: selectedTabId).notifier)

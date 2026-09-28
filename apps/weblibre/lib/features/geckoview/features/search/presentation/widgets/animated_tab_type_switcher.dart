@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// An animated tab type switcher that only shows the label for the currently
 /// active option. Inactive options collapse to show only their icon.
@@ -41,6 +42,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final borderColor = colorScheme.outline;
@@ -59,7 +61,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
               _Segment(
                 tabType: TabType.regular,
                 icon: MdiIcons.tab,
-                label: 'Regular',
+                label: l10n.search_tabTypeRegular,
                 isSelected: selected == TabType.regular,
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.regular),
@@ -69,7 +71,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 _Segment(
                   tabType: TabType.child,
                   icon: MdiIcons.fileTree,
-                  label: 'Child',
+                  label: l10n.search_tabTypeChild,
                   isSelected: selected == TabType.child,
                   selectedBackgroundColor: selectedBackgroundColor,
                   onTap: () => onChanged(TabType.child),
@@ -79,7 +81,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
               _Segment(
                 tabType: TabType.private,
                 icon: MdiIcons.dominoMask,
-                label: 'Private',
+                label: l10n.search_tabTypePrivate,
                 isSelected: selected == TabType.private,
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.private),
@@ -89,7 +91,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 _Segment(
                   tabType: TabType.isolated,
                   icon: MdiIcons.snowflake,
-                  label: 'Isolated',
+                  label: l10n.search_tabTypeIsolated,
                   isSelected: selected == TabType.isolated,
                   selectedBackgroundColor: selectedBackgroundColor,
                   onTap: () => onChanged(TabType.isolated),

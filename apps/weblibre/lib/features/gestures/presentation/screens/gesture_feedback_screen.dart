@@ -22,29 +22,34 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> _feedbackSections = [
-  SettingsSectionDefinition(
-    title: 'Overlay',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Live feedback',
-        subtitle: 'Show the stroke and its action while you draw',
-        child: _LiveFeedbackTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Suggest next',
-        subtitle: 'Also show the other gestures you can complete',
-        child: _SuggestNextTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Suggest after',
-        subtitle: 'Number of strokes to draw before suggestions appear',
-        child: _SuggestAfterSection(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> _feedbackSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.gestures_overlaySectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.gestures_liveFeedbackTitle,
+          subtitle: l10n.gestures_liveFeedbackSubtitle,
+          child: const _LiveFeedbackTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.gestures_suggestNextTitle,
+          subtitle: l10n.gestures_suggestNextSubtitle,
+          child: const _SuggestNextTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.gestures_suggestAfterTitle,
+          subtitle: l10n.gestures_indexSuggestAfterSubtitle,
+          child: const _SuggestAfterSection(),
+        ),
+      ],
+    ),
+  ];
+}
 
 /// Controls the live feedback overlay shown while drawing a gesture.
 class GestureFeedbackScreen extends StatelessWidget {
@@ -52,11 +57,13 @@ class GestureFeedbackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Feedback',
-      subtitle: 'Live overlay and gesture suggestions.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.gestures_feedbackTitle,
+      subtitle: l10n.gestures_feedbackScreenSubtitle,
       icon: Icons.bolt_outlined,
-      sections: _feedbackSections,
+      sections: _feedbackSections(context),
     );
   }
 }
@@ -66,14 +73,15 @@ class _LiveFeedbackTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final showFeedback = ref.watch(
       gestureSettingsWithDefaultsProvider.select((s) => s.showFeedback),
     );
 
     return SwitchListTile.adaptive(
       secondary: const Icon(Icons.bolt_outlined),
-      title: const Text('Live feedback'),
-      subtitle: const Text('Show the stroke and its action while you draw'),
+      title: Text(l10n.gestures_liveFeedbackTitle),
+      subtitle: Text(l10n.gestures_liveFeedbackSubtitle),
       value: showFeedback,
       onChanged: (value) async {
         await ref
@@ -89,12 +97,13 @@ class _SuggestNextTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
 
     return SwitchListTile.adaptive(
       secondary: const Icon(Icons.lightbulb_outline),
-      title: const Text('Suggest next'),
-      subtitle: const Text('Also show the other gestures you can complete'),
+      title: Text(l10n.gestures_suggestNextTitle),
+      subtitle: Text(l10n.gestures_suggestNextSubtitle),
       value: settings.suggestNext,
       onChanged: settings.showFeedback
           ? (value) async {
@@ -114,6 +123,7 @@ class _SuggestAfterSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
     final enabled = settings.showFeedback && settings.suggestNext;
 
@@ -123,7 +133,7 @@ class _SuggestAfterSection extends HookConsumerWidget {
         ListTile(
           enabled: enabled,
           leading: const Icon(Icons.straighten),
-          title: const Text('Suggest after'),
+          title: Text(l10n.gestures_suggestAfterTitle),
           subtitle: Slider.adaptive(
             min: minGestureMinSuggestionStroke.toDouble(),
             max: maxGestureMinSuggestionStroke.toDouble(),
@@ -135,7 +145,7 @@ class _SuggestAfterSection extends HookConsumerWidget {
                   maxGestureMinSuggestionStroke,
                 )
                 .toDouble(),
-            label: '${settings.minSuggestionStroke} strokes',
+            label: l10n.gestures_strokeCount(settings.minSuggestionStroke),
             onChanged: enabled
                 ? (value) async {
                     await ref
@@ -149,9 +159,9 @@ class _SuggestAfterSection extends HookConsumerWidget {
                 : null,
           ),
         ),
-        const Padding(
-          padding: EdgeInsets.fromLTRB(72, 0, 16, 8),
-          child: Text('Number of strokes to draw before suggestions appear.'),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(72, 0, 16, 8),
+          child: Text(l10n.gestures_suggestAfterDescription),
         ),
       ],
     );

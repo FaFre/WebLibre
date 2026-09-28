@@ -24,6 +24,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/dialogs/key_chord_recorder_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<void> press(
   WidgetTester tester,
@@ -52,6 +53,8 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) => TextButton(
             onPressed: () async {

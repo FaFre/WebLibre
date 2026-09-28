@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 class AiConfigurationPage extends HookConsumerWidget {
@@ -31,6 +32,7 @@ class AiConfigurationPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final enableLocalAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -45,15 +47,16 @@ class AiConfigurationPage extends HookConsumerWidget {
           children: [
             const SizedBox(height: 24),
             Center(
-              child: Text('AI Features', style: theme.textTheme.headlineMedium),
+              child: Text(
+                l10n.onboarding_aiFeaturesTitle,
+                style: theme.textTheme.headlineMedium,
+              ),
             ),
             const SizedBox(height: 24),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
-              title: const Text('On Device AI'),
-              subtitle: const Text(
-                'Local on-device features including container topic and tab suggestions',
-              ),
+              title: Text(l10n.onboarding_aiOnDeviceTitle),
+              subtitle: Text(l10n.onboarding_aiOnDeviceSubtitle),
               secondary: const Icon(MdiIcons.creation),
               value: enableLocalAiFeatures,
               onChanged: (value) async {
@@ -81,7 +84,7 @@ class AiConfigurationPage extends HookConsumerWidget {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Things to keep in mind\n\n',
+                      text: '${l10n.onboarding_aiWarningTitle}\n\n',
                       style: Theme.of(context).textTheme.headlineSmall
                           ?.copyWith(
                             color: Theme.of(context).colorScheme.onError,
@@ -89,20 +92,11 @@ class AiConfigurationPage extends HookConsumerWidget {
                           ),
                     ),
                     const TextSpan(text: '• '),
-                    const TextSpan(
-                      text:
-                          'WebLibre uses a local AI model to analyze your open tab titles and suggest container tabs and names. All processing happens entirely on your device.\n\n',
-                    ),
+                    TextSpan(text: '${l10n.onboarding_aiWarningPoint1}\n\n'),
                     const TextSpan(text: '• '),
-                    const TextSpan(
-                      text:
-                          'AI enhancements operate entirely within your browser, keeping all data on your device. Local AI processing respects your privacy and provides faster suggestions for container groups and names. You can control this behavior anytime through settings.\n\n',
-                    ),
+                    TextSpan(text: '${l10n.onboarding_aiWarningPoint2}\n\n'),
                     const TextSpan(text: '• '),
-                    const TextSpan(
-                      text:
-                          'AI can sometimes make mistakes, so please review suggested group names and tab selections.',
-                    ),
+                    TextSpan(text: l10n.onboarding_aiWarningPoint3),
                   ],
                 ),
               ),

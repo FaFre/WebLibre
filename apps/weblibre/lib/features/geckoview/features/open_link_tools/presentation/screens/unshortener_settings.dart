@@ -29,60 +29,74 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> unshortenerSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Overview',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Description',
-        subtitle: 'Resolve shortened URLs using the unshorten.me service',
-        keywords: ['short links', 'redirects'],
-        child: _UnshortenerDescriptionTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Behavior',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Enable Unshortener',
-        subtitle: 'Resolve shortened URLs to their destination',
-        keywords: ['short links'],
-        child: _UnshortenerEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'API Token',
-        subtitle: 'Optional token for higher request limits',
-        keywords: ['token'],
-        child: _UnshortenerTokenField(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Attribution',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Service attribution',
-        subtitle: 'Rate limits, service homepage, and privacy policy',
-        keywords: ['privacy policy', 'rate limit'],
-        child: _UnshortenerAttributionTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> unshortenerSettingsSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_unshortenerOverviewSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_indexUnshortenerDescriptionTitle,
+          subtitle: l10n.openLinkTools_indexUnshortenerDescriptionSubtitle,
+          keywords: settingsKeywords(
+            l10n.openLinkTools_indexUnshortenerDescriptionKeywords,
+          ),
+          child: const _UnshortenerDescriptionTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_unshortenerBehaviorSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_unshortenerEnabledTitle,
+          subtitle: l10n.openLinkTools_unshortenerEnabledSubtitle,
+          keywords: settingsKeywords(
+            l10n.openLinkTools_unshortenerEnabledKeywords,
+          ),
+          child: const _UnshortenerEnabledTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_apiTokenLabel,
+          subtitle: l10n.openLinkTools_indexUnshortenerApiTokenSubtitle,
+          keywords: settingsKeywords(l10n.openLinkTools_apiTokenLabelKeywords),
+          child: const _UnshortenerTokenField(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.openLinkTools_unshortenerAttributionSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.openLinkTools_indexUnshortenerAttributionTitle,
+          subtitle: l10n.openLinkTools_indexUnshortenerAttributionSubtitle,
+          keywords: settingsKeywords(
+            l10n.openLinkTools_indexUnshortenerAttributionKeywords,
+          ),
+          child: const _UnshortenerAttributionTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class UnshortenerSettingsScreen extends StatelessWidget {
   const UnshortenerSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Unshortener',
-      subtitle:
-          'Short-link resolution behavior, token configuration, and attribution.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.openLinkTools_unshortenerSettingsTitle,
+      subtitle: l10n.openLinkTools_unshortenerSettingsSubtitle,
       icon: MdiIcons.linkVariant,
-      sections: unshortenerSettingsSections,
+      sections: unshortenerSettingsSections(context),
     );
   }
 }
@@ -92,13 +106,14 @@ class _UnshortenerEnabledTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.unshortenerEnabled),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Enable Unshortener'),
-      subtitle: const Text('Resolve shortened URLs to their destination'),
+      title: Text(l10n.openLinkTools_unshortenerEnabledTitle),
+      subtitle: Text(l10n.openLinkTools_unshortenerEnabledSubtitle),
       secondary: const Icon(MdiIcons.linkVariant),
       value: enabled,
       onChanged: (value) async {
@@ -115,14 +130,12 @@ class _UnshortenerDescriptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ListTile(
-      leading: Icon(MdiIcons.linkVariant),
-      title: Text('Description'),
-      subtitle: Text(
-        'This module will unshort links by sending them to unshorten.me, '
-        'which evaluates them on their servers and saves the redirection for future requests. '
-        'Avoid unshortening links with private or sensitive data.',
-      ),
+    final l10n = AppLocalizations.of(context);
+
+    return ListTile(
+      leading: const Icon(MdiIcons.linkVariant),
+      title: Text(l10n.openLinkTools_descriptionLabel),
+      subtitle: Text(l10n.openLinkTools_unshortenerDescriptionBody),
     );
   }
 }
@@ -132,6 +145,8 @@ class _UnshortenerAttributionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
       leading: const Icon(MdiIcons.informationOutline),
       title: Padding(
@@ -141,17 +156,17 @@ class _UnshortenerAttributionTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'The free API is rate limited to 10 requests per hour for new checks.',
+              l10n.openLinkTools_unshortenerRateLimitNotice,
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
-            const _AttributionLinkRow(
-              label: 'Service',
+            _AttributionLinkRow(
+              label: l10n.openLinkTools_attributionServiceLabel,
               url: 'https://unshorten.me/',
             ),
             const SizedBox(height: 8),
-            const _AttributionLinkRow(
-              label: 'Privacy policy',
+            _AttributionLinkRow(
+              label: l10n.openLinkTools_attributionPrivacyPolicyLabel,
               url: 'https://unshorten.me/privacy-policy',
             ),
           ],
@@ -166,6 +181,7 @@ class _UnshortenerTokenField extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final token = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.unshortenerToken),
     );
@@ -189,9 +205,9 @@ class _UnshortenerTokenField extends HookConsumerWidget {
       child: TextField(
         controller: controller,
         focusNode: focusNode,
-        decoration: const InputDecoration(
-          labelText: 'API Token',
-          hintText: 'Optional token for higher limits',
+        decoration: InputDecoration(
+          labelText: l10n.openLinkTools_apiTokenLabel,
+          hintText: l10n.openLinkTools_apiTokenHint,
           floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
         obscureText: true,

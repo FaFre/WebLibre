@@ -27,12 +27,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
-import 'package:weblibre/features/proxy/domain/extensions/singbox_proxy_profile_type_x.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_draft_controller.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_profile_draft_error_l10n.dart';
+import 'package:weblibre/features/proxy/presentation/utils/singbox_proxy_profile_type_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/custom_outbound_profile_form.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_dns_override_section.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_editor_section.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/structured_profile_form.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/button_spinner.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -44,6 +46,7 @@ class SingboxProxyProfileEditorScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final draftProvider = proxyProfileDraftProvider(
       profileId: profileId,
       seed: seed,
@@ -52,18 +55,18 @@ class SingboxProxyProfileEditorScreen extends ConsumerWidget {
 
     if (draft.isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Edit Profile')),
+        appBar: AppBar(title: Text(l10n.proxy_editProfileTitle)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (draft.loadError != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Edit Profile')),
+        appBar: AppBar(title: Text(l10n.proxy_editProfileTitle)),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(draft.loadError!),
+            child: Text(draft.loadError!.describe(context)),
           ),
         ),
       );
@@ -81,6 +84,8 @@ class _Editor extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     Future<void> handleSave() async {
       final outcome = await ref.read(draftProvider.notifier).save();
       if (!context.mounted) return;
@@ -88,8 +93,8 @@ class _Editor extends ConsumerWidget {
       switch (outcome) {
         case SaveSucceeded():
           Navigator.pop(context);
-        case SaveFailed(:final message):
-          showErrorMessage(context, message);
+        case SaveFailed(:final error):
+          showErrorMessage(context, error.describe(context));
       }
     }
 
@@ -110,7 +115,11 @@ class _Editor extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            label: Text(draft.isEditing ? 'Save Changes' : 'Create Profile'),
+            label: Text(
+              draft.isEditing
+                  ? l10n.proxy_saveChanges
+                  : l10n.proxy_createProfile,
+            ),
           ),
         ),
       ),
@@ -124,14 +133,18 @@ class _Editor extends ConsumerWidget {
               slivers: [
                 SliverAppBar.large(
                   centerTitle: false,
-                  title: Text(draft.isEditing ? 'Edit Profile' : 'New Profile'),
+                  title: Text(
+                    draft.isEditing
+                        ? l10n.proxy_editProfileTitle
+                        : l10n.proxy_newProfileTitle,
+                  ),
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate.fixed([
                       ProfileEditorSection(
-                        title: 'General',
+                        title: l10n.proxy_sectionGeneral,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: _GeneralSection(
@@ -144,7 +157,7 @@ class _Editor extends ConsumerWidget {
                       _ProtocolForm(draftProvider: draftProvider, draft: draft),
                       const SizedBox(height: 24),
                       ProfileEditorSection(
-                        title: 'DNS Override',
+                        title: l10n.proxy_sectionDnsOverride,
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                           child: ProfileDnsOverrideSection(
@@ -157,9 +170,7 @@ class _Editor extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: Text(
-                            'Tip: use the add menu on the previous screen to '
-                            'import from a file, paste a share link, or scan '
-                            'a QR code.',
+                            l10n.proxy_addMenuTip,
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: scheme.onSurfaceVariant),
                           ),
@@ -185,13 +196,12 @@ class _WireGuardDisclaimer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Text(
-        '$wireGuardBrand is a registered trademark of Jason A. Donenfeld; all '
-        'rights reserved. WebLibre is not endorsed or sponsored by, or '
-        'affiliated with, Jason A. Donenfeld.',
+        l10n.proxy_wireGuardTrademarkDisclaimer(wireGuardBrand),
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
@@ -208,6 +218,7 @@ class _GeneralSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final nameController = useTextEditingController(text: draft.name);
     useEffect(() {
       if (nameController.text != draft.name) {
@@ -222,9 +233,9 @@ class _GeneralSection extends HookConsumerWidget {
         TextField(
           controller: nameController,
           textInputAction: TextInputAction.next,
-          decoration: const InputDecoration(
-            labelText: 'Profile Name',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.proxy_fieldProfileName,
+            border: const OutlineInputBorder(),
           ),
           onChanged: ref.read(draftProvider.notifier).setName,
         ),
@@ -235,24 +246,24 @@ class _GeneralSection extends HookConsumerWidget {
           // rewrite the profile under a foreign schema. To change protocol,
           // create a new profile.
           InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Protocol',
-              border: OutlineInputBorder(),
-              helperText: 'Protocol is fixed once a profile is created.',
+            decoration: InputDecoration(
+              labelText: l10n.proxy_fieldProtocol,
+              border: const OutlineInputBorder(),
+              helperText: l10n.proxy_protocolFixedHelper,
             ),
-            child: Text(draft.type.label),
+            child: Text(draft.type.label(context)),
           )
         else
           DropdownButtonFormField<SingboxProxyProfileType>(
             key: ValueKey(draft.type),
             initialValue: draft.type,
-            decoration: const InputDecoration(
-              labelText: 'Protocol',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.proxy_fieldProtocol,
+              border: const OutlineInputBorder(),
             ),
             items: [
               for (final type in SingboxProxyProfileType.values)
-                DropdownMenuItem(value: type, child: Text(type.label)),
+                DropdownMenuItem(value: type, child: Text(type.label(context))),
             ],
             onChanged: (value) {
               if (value != null) {
@@ -264,11 +275,8 @@ class _GeneralSection extends HookConsumerWidget {
         SwitchListTile.adaptive(
           contentPadding: EdgeInsets.zero,
           secondary: const Icon(MdiIcons.rocketLaunchOutline),
-          title: const Text('Start Automatically'),
-          subtitle: const Text(
-            'Connect this profile when WebLibre starts, so tabs using it are '
-            'ready without a prompt',
-          ),
+          title: Text(l10n.proxy_startAutomaticallyTitle),
+          subtitle: Text(l10n.proxy_startAutomaticallySubtitle),
           value: draft.autostart,
           onChanged: ref.read(draftProvider.notifier).setAutostart,
         ),

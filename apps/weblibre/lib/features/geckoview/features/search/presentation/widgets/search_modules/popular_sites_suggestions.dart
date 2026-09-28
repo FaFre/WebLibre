@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/popular_sites/domain/providers/popular_sites_search.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -42,6 +43,7 @@ class PopularSitesSuggestions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final results = ref.watch(popularSitesSearchResultsProvider);
 
     useOnListenableChangeSelector(
@@ -59,7 +61,7 @@ class PopularSitesSuggestions extends HookConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Popular Sites',
+      title: l10n.search_moduleLabelPopularSites,
       moduleType: SearchModuleType.popularSites,
       totalCount: results.length,
       contentSliverBuilder:

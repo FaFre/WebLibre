@@ -1,13 +1,34 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class SearchModeSelector extends ConsumerWidget {
   const SearchModeSelector({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -31,7 +52,7 @@ class SearchModeSelector extends ConsumerWidget {
               Icon(_iconFor(searchMode), color: colorScheme.primary, size: 18),
               const SizedBox(width: 6),
               Text(
-                _labelFor(searchMode),
+                _labelFor(l10n, searchMode),
                 style: textTheme.labelLarge?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.bold,
@@ -73,7 +94,7 @@ class SearchModeSelector extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _labelFor(mode),
+                  _labelFor(l10n, mode),
                   style: textTheme.bodyMedium?.copyWith(
                     fontWeight: mode == searchMode
                         ? FontWeight.bold
@@ -81,7 +102,7 @@ class SearchModeSelector extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  _descriptionFor(mode),
+                  _descriptionFor(l10n, mode),
                   style: textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -99,15 +120,18 @@ class SearchModeSelector extends ConsumerWidget {
     SearchMode.smallWeb => Icons.explore,
   };
 
-  static String _labelFor(SearchMode mode) => switch (mode) {
-    SearchMode.general => 'General',
-    SearchMode.independentWeb => 'Independent Web',
-    SearchMode.smallWeb => 'Small Web',
-  };
+  static String _labelFor(AppLocalizations l10n, SearchMode mode) =>
+      switch (mode) {
+        SearchMode.general => l10n.webSearch_modeGeneralLabel,
+        SearchMode.independentWeb => l10n.webSearch_modeIndependentWebLabel,
+        SearchMode.smallWeb => l10n.webSearch_modeSmallWebLabel,
+      };
 
-  static String _descriptionFor(SearchMode mode) => switch (mode) {
-    SearchMode.general => 'Balanced results across the open web',
-    SearchMode.independentWeb => 'Favor smaller and less corporate sources',
-    SearchMode.smallWeb => 'Independent, personal & niche sites',
-  };
+  static String _descriptionFor(AppLocalizations l10n, SearchMode mode) =>
+      switch (mode) {
+        SearchMode.general => l10n.webSearch_modeGeneralDescription,
+        SearchMode.independentWeb =>
+          l10n.webSearch_modeIndependentWebDescription,
+        SearchMode.smallWeb => l10n.webSearch_modeSmallWebDescription,
+      };
 }

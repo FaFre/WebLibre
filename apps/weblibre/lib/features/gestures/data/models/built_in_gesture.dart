@@ -23,15 +23,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 /// Where in the app a [BuiltInGesture] is made.
-enum BuiltInGestureSurface {
-  tabBar('Tab Bar Swipes', 'Swipes on the tab bar or the side rail'),
-  tabView('Tab View Swipes', 'Swipes on a tab in the tab list or grid');
-
-  final String title;
-  final String description;
-
-  const BuiltInGestureSurface(this.title, this.description);
-}
+enum BuiltInGestureSurface { tabBar, tabView }
 
 /// The swipes WebLibre recognizes outside web content, each bound to a
 /// [BrowserAction] the user can change or switch off (issue #626).
@@ -40,58 +32,26 @@ enum BuiltInGestureSurface {
 /// silently drops the user's choice for it.
 enum BuiltInGesture {
   /// Leftward along a horizontal bar, upward along the side rail.
-  tabBarSwipeBackward(
-    BuiltInGestureSurface.tabBar,
-    Icons.swipe_left_outlined,
-    'Swipe left along the bar',
-    'Also triggers up on the side rail',
-  ),
+  tabBarSwipeBackward(BuiltInGestureSurface.tabBar, Icons.swipe_left_outlined),
 
   /// Rightward along a horizontal bar, downward along the side rail.
-  tabBarSwipeForward(
-    BuiltInGestureSurface.tabBar,
-    Icons.swipe_right_outlined,
-    'Swipe right along the bar',
-    'Also triggers down on the side rail',
-  ),
+  tabBarSwipeForward(BuiltInGestureSurface.tabBar, Icons.swipe_right_outlined),
 
   /// Off the screen edge the bar is docked to.
-  tabBarSwipeOutward(
-    BuiltInGestureSurface.tabBar,
-    MdiIcons.gestureSwipeDown,
-    'Swipe toward the screen edge',
-    'Down on a bottom bar, up on a top bar, sideways off a rail',
-  ),
+  tabBarSwipeOutward(BuiltInGestureSurface.tabBar, MdiIcons.gestureSwipeDown),
 
   /// Away from the edge the bar is docked to.
-  tabBarSwipeInward(
-    BuiltInGestureSurface.tabBar,
-    MdiIcons.gestureSwipeUp,
-    'Swipe away from the screen edge',
-    'Up on a bottom bar, down on a top bar, sideways into the page on a rail',
-  ),
+  tabBarSwipeInward(BuiltInGestureSurface.tabBar, MdiIcons.gestureSwipeUp),
 
-  tabSwipeLeft(
-    BuiltInGestureSurface.tabView,
-    MdiIcons.gestureSwipeLeft,
-    'Swipe a tab left',
-    'Acts on the swiped tab, not the open one',
-  ),
-  tabSwipeRight(
-    BuiltInGestureSurface.tabView,
-    MdiIcons.gestureSwipeRight,
-    'Swipe a tab right',
-    'Acts on the swiped tab, not the open one',
-  );
+  tabSwipeLeft(BuiltInGestureSurface.tabView, MdiIcons.gestureSwipeLeft),
+  tabSwipeRight(BuiltInGestureSurface.tabView, MdiIcons.gestureSwipeRight);
 
   final BuiltInGestureSurface surface;
 
   /// Pictures the movement itself, not the action it is bound to.
   final IconData icon;
-  final String title;
-  final String description;
 
-  const BuiltInGesture(this.surface, this.icon, this.title, this.description);
+  const BuiltInGesture(this.surface, this.icon);
 
   /// Whether the action runs on the tab the gesture was made on rather than on
   /// the selected tab, which limits it to [tabActions].

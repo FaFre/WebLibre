@@ -24,6 +24,7 @@ import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class RecentSearchesSection extends ConsumerWidget {
   final TextEditingController searchTextController;
@@ -37,13 +38,14 @@ class RecentSearchesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final searchHistory = ref.watch(
       searchHistoryProvider.select((value) => value.value ?? const []),
     );
     final queries = searchHistory.map((entry) => entry.searchQuery).toList();
 
     return SearchModuleSection(
-      title: 'Recent Searches',
+      title: l10n.search_moduleLabelRecentSearches,
       moduleType: SearchModuleType.recentSearches,
       totalCount: queries.length,
       contentSliverBuilder:

@@ -34,57 +34,86 @@ class SingboxProxyFormSpec {
     required this.fields,
   });
 
-  String? validate(Map<String, String> values) {
+  /// Returns the first invalid field, or null when every field is valid.
+  SingboxFormFieldError? validate(Map<String, String> values) {
     for (final field in fields) {
       final value = values[field.key]?.trim() ?? '';
       if (field.required && value.isEmpty) {
-        return '${field.label} is required.';
+        return SingboxFormFieldError(field, SingboxFieldErrorKind.required);
       }
       if (field.isNumber && value.isNotEmpty) {
         final parsed = int.tryParse(value);
         if (parsed == null || parsed < 1) {
-          return '${field.label} must be a positive number.';
+          return SingboxFormFieldError(
+            field,
+            SingboxFieldErrorKind.notPositiveNumber,
+          );
         }
         if (field.isPort && parsed > 65535) {
-          return '${field.label} must be between 1 and 65535.';
+          return SingboxFormFieldError(
+            field,
+            SingboxFieldErrorKind.outOfPortRange,
+          );
         }
       }
       if (field.isIntegerList && value.isNotEmpty) {
         final items = splitFormStringList(value);
         final exactListLength = field.exactListLength;
         if (exactListLength != null && items.length != exactListLength) {
-          return '${field.label} must contain $exactListLength numbers.';
+          return SingboxFormFieldError(
+            field,
+            SingboxFieldErrorKind.wrongListLength,
+            intParam: exactListLength,
+          );
         }
         for (final item in items) {
           final parsed = int.tryParse(item);
           if (parsed == null) {
-            return '${field.label} must contain only numbers.';
+            return SingboxFormFieldError(
+              field,
+              SingboxFieldErrorKind.notAllNumbers,
+            );
           }
           final minValue = field.minValue;
           if (minValue != null && parsed < minValue) {
-            return '${field.label} must contain numbers greater than or equal to $minValue.';
+            return SingboxFormFieldError(
+              field,
+              SingboxFieldErrorKind.belowMinValue,
+              intParam: minValue,
+            );
           }
           final maxValue = field.maxValue;
           if (maxValue != null && parsed > maxValue) {
-            return '${field.label} must contain numbers less than or equal to $maxValue.';
+            return SingboxFormFieldError(
+              field,
+              SingboxFieldErrorKind.aboveMaxValue,
+              intParam: maxValue,
+            );
           }
         }
       }
       if (field.isCidrList && value.isNotEmpty) {
         for (final item in splitFormStringList(value)) {
           if (tryParseCidr(item) == null) {
-            return '${field.label} must contain IP addresses, '
-                'optionally with a /prefix — "$item" is not one.';
+            return SingboxFormFieldError(
+              field,
+              SingboxFieldErrorKind.invalidCidr,
+              stringParam: item,
+            );
           }
         }
       }
       if (field.isBoolean && value.isNotEmpty && parseFormBool(value) == null) {
-        return '${field.label} must be true or false.';
+        return SingboxFormFieldError(field, SingboxFieldErrorKind.notBoolean);
       }
       if (field.isChoice && value.isNotEmpty) {
         final allowedValues = field.allowedValues;
         if (allowedValues != null && !allowedValues.contains(value)) {
-          return '${field.label} must be one of: ${allowedValues.join(', ')}.';
+          return SingboxFormFieldError(
+            field,
+            SingboxFieldErrorKind.notAllowedValue,
+            listParam: allowedValues,
+          );
         }
       }
     }
@@ -188,4 +217,37 @@ Object? _jsonValueAt(Map<String, dynamic> source, String path) {
     current = current[segment];
   }
   return current;
+}
+
+enum SingboxFieldErrorKind {
+  required,
+  notPositiveNumber,
+  outOfPortRange,
+  wrongListLength,
+  notAllNumbers,
+  belowMinValue,
+  aboveMaxValue,
+  invalidCidr,
+  notBoolean,
+  notAllowedValue,
+}
+
+/// A single failed [SingboxProxyFormField], plus whatever the failure needs
+/// to describe itself (a count, a bound, the offending value, or the choices
+/// it had to be one of). Resolved to display text in
+/// `presentation/utils/singbox_form_field_l10n.dart`.
+class SingboxFormFieldError {
+  final SingboxProxyFormField field;
+  final SingboxFieldErrorKind kind;
+  final int? intParam;
+  final String? stringParam;
+  final List<String>? listParam;
+
+  const SingboxFormFieldError(
+    this.field,
+    this.kind, {
+    this.intParam,
+    this.stringParam,
+    this.listParam,
+  });
 }

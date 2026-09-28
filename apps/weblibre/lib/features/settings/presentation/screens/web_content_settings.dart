@@ -26,93 +26,100 @@ import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 
-const List<SettingsSectionDefinition> webContentSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Display',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Web Fonts',
-        subtitle: 'Allow websites to use custom fonts',
-        keywords: ['fonts'],
-        child: _WebFontsEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Automatic Font Size',
-        subtitle: 'Adjust font size based on system settings',
-        keywords: ['text size'],
-        child: _AutomaticFontSizeAdjustmentTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Font Size Factor',
-        subtitle: 'Scale web page text size',
-        keywords: ['zoom', 'text'],
-        child: _FontSizeFactorSlider(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Font Inflation',
-        subtitle: 'Enlarge text on pages without a mobile viewport',
-        keywords: ['readability'],
-        child: _FontInflationTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Input Auto Zoom',
-        subtitle: 'Automatically zoom when focusing text inputs',
-        keywords: ['forms'],
-        child: _InputAutoZoomEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Zoom on All Websites',
-        subtitle:
-            'Allow pinch and zoom, even on websites that prevent this '
-            'gesture',
-        keywords: ['pinch', 'accessibility'],
-        child: _ForceUserScalableContentTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Content Features',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Built-in PDF Viewer',
-        subtitle: 'Open PDF files directly in the browser',
-        keywords: ['pdf'],
-        child: _PdfViewerTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Enable Reader Mode',
-        subtitle: 'Extract and simplify pages for readability',
-        keywords: ['reader', 'readability'],
-        child: _EnableReaderModeTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Enforce Reader Mode',
-        subtitle: 'Always show Reader Mode capabilities',
-        keywords: ['reader'],
-        child: _EnforceReaderModeTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'On Device AI',
-        subtitle: 'Local AI features including topic and tab suggestions',
-        keywords: ['local ai', 'suggestions'],
-        child: _OnDeviceAiTile(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> webContentSettingsSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_webContentSectionDisplayTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_webFontsTitle,
+          subtitle: l10n.settings_webFontsSubtitle,
+          keywords: settingsKeywords(l10n.settings_webFontsKeywords),
+          child: const _WebFontsEnabledTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_automaticFontSizeTitle,
+          subtitle: l10n.settings_indexAutomaticFontSizeSubtitle,
+          keywords: settingsKeywords(l10n.settings_automaticFontSizeKeywords),
+          child: const _AutomaticFontSizeAdjustmentTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_fontSizeFactorTitle,
+          subtitle: l10n.settings_fontSizeFactorSubtitle,
+          keywords: settingsKeywords(l10n.settings_fontSizeFactorKeywords),
+          child: const _FontSizeFactorSlider(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_fontInflationTitle,
+          subtitle: l10n.settings_indexFontInflationSubtitle,
+          keywords: settingsKeywords(l10n.settings_fontInflationKeywords),
+          child: const _FontInflationTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_inputAutoZoomTitle,
+          subtitle: l10n.settings_indexInputAutoZoomSubtitle,
+          keywords: settingsKeywords(l10n.settings_inputAutoZoomKeywords),
+          child: const _InputAutoZoomEnabledTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_forceUserScalableTitle,
+          subtitle: l10n.settings_forceUserScalableSubtitle,
+          keywords: settingsKeywords(l10n.settings_forceUserScalableKeywords),
+          child: const _ForceUserScalableContentTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_webContentSectionContentFeaturesTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_pdfViewerTitle,
+          subtitle: l10n.settings_indexPdfViewerSubtitle,
+          keywords: settingsKeywords(l10n.settings_pdfViewerKeywords),
+          child: const _PdfViewerTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_enableReaderModeTitle,
+          subtitle: l10n.settings_indexEnableReaderModeSubtitle,
+          keywords: settingsKeywords(l10n.settings_enableReaderModeKeywords),
+          child: const _EnableReaderModeTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_enforceReaderModeTitle,
+          subtitle: l10n.settings_indexEnforceReaderModeSubtitle,
+          keywords: settingsKeywords(l10n.settings_enforceReaderModeKeywords),
+          child: const _EnforceReaderModeTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_onDeviceAiTitle,
+          subtitle: l10n.settings_indexOnDeviceAiSubtitle,
+          keywords: settingsKeywords(l10n.settings_onDeviceAiKeywords),
+          child: const _OnDeviceAiTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class WebContentSettingsScreen extends StatelessWidget {
   const WebContentSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Web Content',
-      subtitle: 'Text rendering, reader mode, PDFs, and local AI features.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_webContentTitle,
+      subtitle: l10n.settings_webContentSubtitle,
       icon: MdiIcons.fileDocumentOutline,
-      sections: webContentSettingsSections,
+      sections: webContentSettingsSections(context),
     );
   }
 }
@@ -122,13 +129,14 @@ class _WebFontsEnabledTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final webFontsEnabled = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.webFontsEnabled),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Web Fonts'),
-      subtitle: const Text('Allow websites to use custom fonts'),
+      title: Text(l10n.settings_webFontsTitle),
+      subtitle: Text(l10n.settings_webFontsSubtitle),
       secondary: const Icon(MdiIcons.formatFont),
       value: webFontsEnabled,
       onChanged: (value) async {
@@ -148,6 +156,7 @@ class _AutomaticFontSizeAdjustmentTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final automaticFontSizeAdjustment = ref.watch(
       engineSettingsWithDefaultsProvider.select(
         (s) => s.automaticFontSizeAdjustment,
@@ -155,10 +164,8 @@ class _AutomaticFontSizeAdjustmentTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Automatic Font Size'),
-      subtitle: const Text(
-        'Automatically adjust font size based on system settings. Disable to manually control font size factor and inflation.',
-      ),
+      title: Text(l10n.settings_automaticFontSizeTitle),
+      subtitle: Text(l10n.settings_automaticFontSizeSubtitle),
       secondary: const Icon(MdiIcons.formatFontSizeIncrease),
       value: automaticFontSizeAdjustment,
       onChanged: (value) async {
@@ -178,6 +185,7 @@ class _FontSizeFactorSlider extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final automaticFontSizeAdjustment = ref.watch(
       engineSettingsWithDefaultsProvider.select(
         (s) => s.automaticFontSizeAdjustment,
@@ -197,11 +205,11 @@ class _FontSizeFactorSlider extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            title: const Text('Font Size Factor'),
+            title: Text(l10n.settings_fontSizeFactorTitle),
             subtitle: Text(
               automaticFontSizeAdjustment
-                  ? 'Disabled while automatic font size is enabled'
-                  : 'Scale web page text size',
+                  ? l10n.settings_disabledWhileAutomaticFontSize
+                  : l10n.settings_fontSizeFactorSubtitle,
             ),
             leading: const Icon(MdiIcons.formatSize),
             contentPadding: EdgeInsets.zero,
@@ -258,6 +266,7 @@ class _FontInflationTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final automaticFontSizeAdjustment = ref.watch(
       engineSettingsWithDefaultsProvider.select(
         (s) => s.automaticFontSizeAdjustment,
@@ -268,11 +277,11 @@ class _FontInflationTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Font Inflation'),
+      title: Text(l10n.settings_fontInflationTitle),
       subtitle: Text(
         automaticFontSizeAdjustment
-            ? 'Disabled while automatic font size is enabled'
-            : 'Enlarge text on pages that lack a mobile viewport meta tag',
+            ? l10n.settings_disabledWhileAutomaticFontSize
+            : l10n.settings_fontInflationSubtitle,
       ),
       secondary: const Icon(MdiIcons.formatTextVariantOutline),
       value: fontInflationEnabled,
@@ -295,13 +304,14 @@ class _InputAutoZoomEnabledTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final inputAutoZoomEnabled = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.inputAutoZoomEnabled),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Input Auto Zoom'),
-      subtitle: const Text('Automatically zoom in when focusing text inputs'),
+      title: Text(l10n.settings_inputAutoZoomTitle),
+      subtitle: Text(l10n.settings_inputAutoZoomSubtitle),
       secondary: const Icon(MdiIcons.formTextbox),
       value: inputAutoZoomEnabled,
       onChanged: (value) async {
@@ -321,6 +331,7 @@ class _ForceUserScalableContentTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final forceUserScalableContent = ref.watch(
       engineSettingsWithDefaultsProvider.select(
         (s) => s.forceUserScalableContent,
@@ -328,10 +339,8 @@ class _ForceUserScalableContentTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Zoom on All Websites'),
-      subtitle: const Text(
-        'Allow pinch and zoom, even on websites that prevent this gesture',
-      ),
+      title: Text(l10n.settings_forceUserScalableTitle),
+      subtitle: Text(l10n.settings_forceUserScalableSubtitle),
       secondary: const Icon(MdiIcons.gesturePinch),
       value: forceUserScalableContent,
       onChanged: (value) async {
@@ -351,15 +360,14 @@ class _PdfViewerTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enablePdfJs = ref.watch(
       engineSettingsWithDefaultsProvider.select((s) => s.enablePdfJs),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Built-in PDF Viewer'),
-      subtitle: const Text(
-        'Open PDF files directly in the browser without downloading',
-      ),
+      title: Text(l10n.settings_pdfViewerTitle),
+      subtitle: Text(l10n.settings_pdfViewerSubtitle),
       secondary: const Icon(MdiIcons.filePdfBox),
       value: enablePdfJs,
       onChanged: (value) async {
@@ -378,15 +386,14 @@ class _EnableReaderModeTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enableReadability = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Enable Reader Mode'),
-      subtitle: const Text(
-        'Optional browser app bar tool that extracts and simplifies web pages for improved readability by removing ads, sidebars, and other non-essential elements.',
-      ),
+      title: Text(l10n.settings_enableReaderModeTitle),
+      subtitle: Text(l10n.settings_enableReaderModeSubtitle),
       secondary: const Icon(MdiIcons.bookOpen),
       value: enableReadability,
       onChanged: (value) async {
@@ -406,6 +413,7 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enableReadability = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
     );
@@ -414,10 +422,8 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('Enforce Reader Mode'),
-      subtitle: const Text(
-        'Override readability probability of websites and always show Reader Mode capabilities even the site might not be compatible.',
-      ),
+      title: Text(l10n.settings_enforceReaderModeTitle),
+      subtitle: Text(l10n.settings_enforceReaderModeSubtitle),
       secondary: const Icon(MdiIcons.bookCheck),
       value: enableReadability && enforceReadability,
       onChanged: enableReadability
@@ -439,6 +445,7 @@ class _OnDeviceAiTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final enableLocalAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.enableLocalAiFeatures,
@@ -446,10 +453,8 @@ class _OnDeviceAiTile extends HookConsumerWidget {
     );
 
     return SwitchListTile.adaptive(
-      title: const Text('On Device AI'),
-      subtitle: const Text(
-        'Local on-device features including container topic and tab suggestions',
-      ),
+      title: Text(l10n.settings_onDeviceAiTitle),
+      subtitle: Text(l10n.settings_onDeviceAiSubtitle),
       secondary: const Icon(MdiIcons.creation),
       value: enableLocalAiFeatures,
       onChanged: (value) async {

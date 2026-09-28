@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -163,6 +164,7 @@ class GridTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final appColors = AppColors.of(context);
@@ -260,13 +262,13 @@ class GridTabPreview extends HookConsumerWidget {
                               onDeleteAll?.call(displayUrl.host);
                             },
                             leadingIcon: const Icon(Icons.language),
-                            child: const Text('Close from Same Host'),
+                            child: Text(l10n.browser_closeFromSameHost),
                           ),
                           if (onCloseSubtree != null)
                             MenuItemButton(
                               onPressed: onCloseSubtree,
                               leadingIcon: const Icon(Icons.account_tree),
-                              child: const Text('Close Tab and Descendants'),
+                              child: Text(l10n.browser_closeTabAndDescendants),
                             ),
                         ],
                         child: SizedBox(
@@ -350,9 +352,9 @@ class GridTabPreview extends HookConsumerWidget {
                                       if (context.mounted) {
                                         ui_helper.showInfoMessage(
                                           context,
-                                          'Tab unpinned',
+                                          l10n.browser_tabUnpinned,
                                           action: SnackBarAction(
-                                            label: 'Undo',
+                                            label: l10n.common_undo,
                                             onPressed: () async {
                                               await ref
                                                   .read(
@@ -473,6 +475,7 @@ class ListTabPreview extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final appColors = AppColors.of(context);
@@ -641,13 +644,13 @@ class ListTabPreview extends HookConsumerWidget {
                           onDeleteAll?.call(displayUrl.host);
                         },
                         leadingIcon: const Icon(Icons.language),
-                        child: const Text('Close from Same Host'),
+                        child: Text(l10n.browser_closeFromSameHost),
                       ),
                       if (onCloseSubtree != null)
                         MenuItemButton(
                           onPressed: onCloseSubtree,
                           leadingIcon: const Icon(Icons.account_tree),
-                          child: const Text('Close Tab and Descendants'),
+                          child: Text(l10n.browser_closeTabAndDescendants),
                         ),
                     ],
                     child: IconButton(

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class RunSwitch extends StatelessWidget {
   final bool isRunning;
@@ -33,6 +34,7 @@ class RunSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final background = isRunning
         ? scheme.primary
@@ -40,7 +42,7 @@ class RunSwitch extends StatelessWidget {
     final foreground = isRunning ? scheme.onPrimary : scheme.onSurface;
 
     return IconButton.filled(
-      tooltip: isRunning ? 'Stop' : 'Start',
+      tooltip: isRunning ? l10n.proxy_actionStop : l10n.proxy_actionStart,
       onPressed: disabled ? null : onTap,
       style: IconButton.styleFrom(
         backgroundColor: background,

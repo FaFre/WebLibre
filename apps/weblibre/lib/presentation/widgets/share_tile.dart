@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ShareTile extends StatelessWidget {
   final void Function()? onTap;
@@ -29,7 +30,7 @@ class ShareTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: const Icon(Icons.share),
-      title: const Text('Share link'),
+      title: Text(AppLocalizations.of(context).browser_shareLink),
       onTap: onTap,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

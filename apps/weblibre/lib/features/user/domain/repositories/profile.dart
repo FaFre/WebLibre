@@ -21,9 +21,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:uuid/uuid.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/profile_discovery.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
@@ -155,7 +155,7 @@ class ProfileRepository extends _$ProfileRepository {
       reason: 'maintenanceDelete',
     )) {
       await store.removeTask(task.id);
-      throw Exception(restartCouldNotBeScheduled);
+      throw const MaintenanceAborted(RestartNotScheduledFailure());
     }
 
     return true;

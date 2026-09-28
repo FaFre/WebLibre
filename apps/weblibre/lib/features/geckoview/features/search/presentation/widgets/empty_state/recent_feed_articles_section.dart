@@ -28,6 +28,7 @@ import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/extensions/atom.dart';
 import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class RecentFeedArticlesSection extends ConsumerWidget {
@@ -37,6 +38,7 @@ class RecentFeedArticlesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final articles = ref.watch(
       searchEmptyRecentFeedArticlesProvider().select(
         (value) => value.value ?? [],
@@ -48,7 +50,7 @@ class RecentFeedArticlesSection extends ConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Recent Articles',
+      title: l10n.search_moduleLabelRecentArticles,
       moduleType: SearchModuleType.recentArticles,
       totalCount: articles.length,
       contentSliverBuilder:
@@ -72,7 +74,7 @@ class RecentFeedArticlesSection extends ConsumerWidget {
                       ], iconSize: 24.0),
                     ),
                     title: Text(
-                      article.displayTitle,
+                      article.displayTitle(context),
                       style: Theme.of(context).textTheme.titleMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

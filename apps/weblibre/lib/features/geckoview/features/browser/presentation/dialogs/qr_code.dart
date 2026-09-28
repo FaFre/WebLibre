@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<void> showQrCode(BuildContext context, String data) {
   final colorScheme = Theme.of(context).colorScheme;
@@ -28,6 +29,8 @@ Future<void> showQrCode(BuildContext context, String data) {
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) {
+      final l10n = AppLocalizations.of(context);
+
       return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
@@ -35,9 +38,12 @@ Future<void> showQrCode(BuildContext context, String data) {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Share QR Code',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              Text(
+                l10n.browser_qrCodeTitle,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               Container(
@@ -64,7 +70,7 @@ Future<void> showQrCode(BuildContext context, String data) {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Close'),
+                    child: Text(l10n.common_close),
                   ),
                 ],
               ),

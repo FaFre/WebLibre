@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/b
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_folder_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 class BookmarkFolderEditScreen extends HookConsumerWidget {
@@ -40,6 +41,7 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final nameTextController = useTextEditingController(text: folder?.title);
 
@@ -56,8 +58,8 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: (folder != null)
-            ? const Text('Edit Folder')
-            : const Text('Create Folder'),
+            ? Text(l10n.bookmarks_editFolderTitle)
+            : Text(l10n.bookmarks_createFolderTitle),
         actions: [
           IconButton(
             onPressed: () async {
@@ -108,11 +110,11 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
               children: [
                 TextFormField(
                   controller: nameTextController,
-                  decoration: const InputDecoration(
-                    label: Text('Name'),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bookmarks_fieldNameLabel),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  validator: validateRequired,
+                  validator: (value) => validateRequired(value, l10n: l10n),
                 ),
                 const SizedBox(height: 16),
                 if (!isBookmarkRoot) ...[
@@ -127,7 +129,7 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                     const SizedBox(height: 8),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Add to top'),
+                      title: Text(l10n.bookmarks_addToTop),
                       value: addToTop.value,
                       onChanged: (value) => addToTop.value = value,
                     ),
@@ -145,7 +147,7 @@ class BookmarkFolderEditScreen extends HookConsumerWidget {
                         foregroundColor: Theme.of(context).colorScheme.error,
                         iconColor: Theme.of(context).colorScheme.error,
                       ),
-                      label: const Text('Delete'),
+                      label: Text(l10n.common_delete),
                       icon: const Icon(Icons.delete),
                       onPressed: () async {
                         final result = await showDeleteFolderDialog(context);

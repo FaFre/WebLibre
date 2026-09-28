@@ -74,29 +74,7 @@ enum SearchModuleType {
   /// New tab / View tabs / Resume last tab. These act on the browser shell
   /// around the surface, so they are only offered on [ModuleSurface.home] —
   /// on the new-tab page "New tab" is the page you are already looking at.
-  quickActions;
-
-  String get label => switch (this) {
-    recentSearches => 'Recent Searches',
-    searchProviders => 'Search Providers',
-    searchSuggestions => 'Suggestions',
-    tabs => 'Tabs',
-    articles => 'Articles',
-    bookmarks => 'Bookmarks',
-    history => 'History (engine)',
-    localHistory => 'Local content',
-    combinedHistory => 'History',
-    popularSites => 'Popular Sites',
-    historyHighlights => 'History Highlights',
-    topSites => 'Shortcuts',
-    recentHistory => 'Recent History',
-    recentArticles => 'Recent Articles',
-    recentTabs => 'Recent Tabs',
-    containers => 'Containers',
-    frequentBangs => 'Frequent Bangs',
-    quote => 'Quote',
-    quickActions => 'Quick Actions',
-  };
+  quickActions,
 }
 
 /// One module slot on a surface: which module, and whether it starts enabled.

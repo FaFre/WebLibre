@@ -28,6 +28,7 @@ import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 enum _TabDropAction { createContainer, assignParent }
@@ -135,9 +136,12 @@ class TabDropTarget extends HookConsumerWidget {
       await tabRepo.assignContainer(targetTabId, result);
 
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
         showInfoMessage(
           context,
-          'Created container "${result.name ?? 'New Container'}"',
+          l10n.browser_createdContainerNamed(
+            result.name ?? l10n.browser_newContainerFallback,
+          ),
         );
       }
     }
@@ -155,10 +159,11 @@ class TabDropTarget extends HookConsumerWidget {
 
     if (!context.mounted) return;
 
+    final l10n = AppLocalizations.of(context);
     if (didAssign) {
-      showInfoMessage(context, 'Assigned parent tab');
+      showInfoMessage(context, l10n.browser_assignedParentTab);
     } else {
-      showErrorMessage(context, 'Could not assign parent tab');
+      showErrorMessage(context, l10n.browser_couldNotAssignParentTab);
     }
   }
 }
@@ -168,25 +173,27 @@ class _TabDropActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const ListTile(
-            title: Text('Drop tab onto tab'),
-            subtitle: Text('Choose how these tabs should be related.'),
+          ListTile(
+            title: Text(l10n.browser_dropTabOntoTabTitle),
+            subtitle: Text(l10n.browser_chooseHowTabsRelated),
           ),
           ListTile(
             leading: const Icon(MdiIcons.folderPlus),
-            title: const Text('Create container'),
-            subtitle: const Text('Create a new container with both tabs.'),
+            title: Text(l10n.browser_createContainerOption),
+            subtitle: Text(l10n.browser_createContainerOptionSubtitle),
             onTap: () =>
                 Navigator.of(context).pop(_TabDropAction.createContainer),
           ),
           ListTile(
             leading: const Icon(MdiIcons.fileTree),
-            title: const Text('Assign new parent'),
-            subtitle: const Text('Make the dropped-on tab the parent.'),
+            title: Text(l10n.browser_assignNewParentOption),
+            subtitle: Text(l10n.browser_assignNewParentOptionSubtitle),
             onTap: () => Navigator.of(context).pop(_TabDropAction.assignParent),
           ),
         ],

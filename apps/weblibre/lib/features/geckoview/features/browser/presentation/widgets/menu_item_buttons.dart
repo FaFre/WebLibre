@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -47,6 +48,8 @@ class ShareMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(Icons.share),
       closeOnActivate: false,
@@ -62,7 +65,7 @@ class ShareMenuItemButton extends HookConsumerWidget {
           MenuController.maybeOf(context)?.close();
         }
       },
-      child: const Text('Share Link'),
+      child: Text(l10n.browser_shareLink),
     );
   }
 }
@@ -74,6 +77,8 @@ class ShowQrCodeMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(Icons.qr_code),
       closeOnActivate: false,
@@ -89,7 +94,7 @@ class ShowQrCodeMenuItemButton extends HookConsumerWidget {
           MenuController.maybeOf(context)?.close();
         }
       },
-      child: const Text('Show QR Code'),
+      child: Text(l10n.browser_showQrCode),
     );
   }
 }
@@ -101,6 +106,8 @@ class SaveToPdfMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.filePdfBox),
       closeOnActivate: false,
@@ -113,7 +120,7 @@ class SaveToPdfMenuItemButton extends HookConsumerWidget {
           MenuController.maybeOf(context)?.close();
         }
       },
-      child: const Text('Export as PDF'),
+      child: Text(l10n.browser_exportAsPdf),
     );
   }
 }
@@ -125,6 +132,8 @@ class PrintMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.printer),
       closeOnActivate: false,
@@ -135,7 +144,7 @@ class PrintMenuItemButton extends HookConsumerWidget {
               .printContent();
         } catch (e) {
           if (context.mounted) {
-            ui_helper.showErrorMessage(context, 'Failed to print page');
+            ui_helper.showErrorMessage(context, l10n.browser_failedToPrintPage);
           }
         }
 
@@ -143,7 +152,7 @@ class PrintMenuItemButton extends HookConsumerWidget {
           MenuController.maybeOf(context)?.close();
         }
       },
-      child: const Text('Print'),
+      child: Text(l10n.browser_print),
     );
   }
 }
@@ -223,10 +232,12 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(Icons.mobile_screen_share),
       closeOnActivate: false,
-      child: const Text('Share Screenshot'),
+      child: Text(l10n.browser_shareScreenshot),
       onPressed: () async {
         final screenshot = await ref
             .read(selectedTabSessionProvider)
@@ -264,10 +275,12 @@ class ExportScreenshotMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.fileImage),
       closeOnActivate: false,
-      child: const Text('Export as PNG'),
+      child: Text(l10n.browser_exportAsPng),
       onPressed: () async {
         final screenshot = await ref
             .read(selectedTabSessionProvider)
@@ -318,12 +331,17 @@ class OpenInAppMenuItemButton extends HookConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final appName = target.appName;
 
     return MenuItemButton(
       leadingIcon: const Icon(Icons.open_in_new),
       closeOnActivate: false,
-      child: Text(appName != null ? 'Open in $appName' : 'Open in App'),
+      child: Text(
+        appName != null
+            ? l10n.browser_openInNamedApp(appName)
+            : l10n.browser_openInApp,
+      ),
       onPressed: () async {
         if (url == null) return;
 
@@ -344,10 +362,12 @@ class CopyAddressMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.contentCopy),
       closeOnActivate: false,
-      child: const Text('Copy Address'),
+      child: Text(l10n.browser_copyAddress),
       onPressed: () async {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
         final copyUrl =
@@ -375,6 +395,7 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    final l10n = AppLocalizations.of(context);
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final devices = ref.watch(syncDevicesProvider);
 
@@ -393,7 +414,9 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
                 .toList(growable: false);
 
             if (targets.isEmpty) {
-              return const [MenuItemButton(child: Text('No target devices'))];
+              return [
+                MenuItemButton(child: Text(l10n.browser_noTargetDevices)),
+              ];
             }
 
             return targets
@@ -432,12 +455,12 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
                         if (success) {
                           ui_helper.showInfoMessage(
                             context,
-                            'Sent tab to ${device.displayName}',
+                            l10n.browser_sentTabToDevice(device.displayName),
                           );
                         } else {
                           ui_helper.showErrorMessage(
                             context,
-                            'Failed to send tab',
+                            l10n.browser_failedToSendTab,
                           );
                         }
 
@@ -448,17 +471,17 @@ class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
                 })
                 .toList(growable: false);
           },
-          loading: () => const [
+          loading: () => [
             MenuItemButton(
-              leadingIcon: Icon(Icons.devices_other),
-              child: Text('Loading devices...'),
+              leadingIcon: const Icon(Icons.devices_other),
+              child: Text(l10n.browser_loadingDevices),
             ),
           ],
-          error: (_, _) => const [
-            MenuItemButton(child: Text('Failed to load devices')),
+          error: (_, _) => [
+            MenuItemButton(child: Text(l10n.browser_failedToLoadDevices)),
           ],
         ),
-        child: const Text('Send To Device'),
+        child: Text(l10n.browser_sendToDevice),
       ),
     );
   }

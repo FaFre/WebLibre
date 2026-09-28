@@ -11,7 +11,7 @@ abstract class _$ProxyProfileDraftStateCWProxy {
 
   ProxyProfileDraftState existingProfile(ProxyProfile? existingProfile);
 
-  ProxyProfileDraftState loadError(String? loadError);
+  ProxyProfileDraftState loadError(ProxyProfileLoadError? loadError);
 
   ProxyProfileDraftState name(String name);
 
@@ -41,7 +41,7 @@ abstract class _$ProxyProfileDraftStateCWProxy {
   ProxyProfileDraftState call({
     String? profileId,
     ProxyProfile? existingProfile,
-    String? loadError,
+    ProxyProfileLoadError? loadError,
     String name,
     SingboxProxyProfileType type,
     Map<String, String> values,
@@ -71,7 +71,7 @@ class _$ProxyProfileDraftStateCWProxyImpl
       call(existingProfile: existingProfile);
 
   @override
-  ProxyProfileDraftState loadError(String? loadError) =>
+  ProxyProfileDraftState loadError(ProxyProfileLoadError? loadError) =>
       call(loadError: loadError);
 
   @override
@@ -141,7 +141,7 @@ class _$ProxyProfileDraftStateCWProxyImpl
       loadError: loadError == const $CopyWithPlaceholder()
           ? _value.loadError
           // ignore: cast_nullable_to_non_nullable
-          : loadError as String?,
+          : loadError as ProxyProfileLoadError?,
       name: name == const $CopyWithPlaceholder() || name == null
           ? _value.name
           // ignore: cast_nullable_to_non_nullable
@@ -251,7 +251,7 @@ final class ProxyProfileDraftProvider
   }
 }
 
-String _$proxyProfileDraftHash() => r'c3aa75ca326d6c9ff2a4e8bd9319d143086271c3';
+String _$proxyProfileDraftHash() => r'16d51df4446ff0a04c2e2803e0b089f786346160';
 
 final class ProxyProfileDraftFamily extends $Family
     with

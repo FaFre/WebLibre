@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:weblibre/core/routing/routes.dart';
 
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 
 /// The about screen, on its own so it can be moved or switched off like any
@@ -40,7 +41,7 @@ class AboutSection extends StatelessWidget {
           if (item == MenuItemType.about)
             ListTile(
               leading: const Icon(Icons.info),
-              title: Text(item.label),
+              title: Text(item.label(context)),
               onTap: () async {
                 Navigator.pop(context);
                 await AboutRoute().push(context);

@@ -18,32 +18,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/proxy/domain/extensions/singbox_proxy_profile_type_x.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 part 'proxy_connection_options.g.dart';
-
-const loadingProxyTitle = 'Loading proxy...';
-const unknownProxyTitle = 'Unknown proxy';
 
 class ProxyConnectionOption with FastEquatable {
   final ProxyConnectionId id;
   final String title;
-  final String subtitle;
+
+  /// The sing-box protocol, or null for the built-in Tor connection. The
+  /// displayed subtitle is derived from it in presentation
+  /// (`ProxyConnectionOptionL10n.subtitle`).
+  final SingboxProxyProfileType? profileType;
 
   ProxyConnectionOption({
     required this.id,
     required this.title,
-    required this.subtitle,
+    required this.profileType,
   });
 
   @override
-  List<Object?> get hashParameters => [id, title, subtitle];
+  List<Object?> get hashParameters => [id, title, profileType];
 }
 
 @Riverpod(keepAlive: true)
@@ -63,20 +65,24 @@ List<ProxyConnectionOption> proxyConnectionOptions(Ref ref) {
     ProxyConnectionOption(
       id: const TorProxyConnectionId(),
       title: torBrand,
-      subtitle: 'Route through the $torNetworkLabel',
+      profileType: null,
     ),
     for (final profile in singboxProfiles)
       ProxyConnectionOption(
         id: profile.proxyConnection,
         title: profile.name,
-        subtitle: profile.type.label,
+        profileType: profile.type,
       ),
   ];
 }
 
+/// The title of [proxyConnectionId] among [options], or a placeholder when it
+/// is not (yet) one of them. Takes [l10n] because it is called from widgets
+/// and from `Ref`-only providers alike.
 String proxyConnectionTitle(
   List<ProxyConnectionOption> options,
-  ProxyConnectionId proxyConnectionId, {
+  ProxyConnectionId proxyConnectionId,
+  AppLocalizations l10n, {
   bool isLoading = false,
 }) {
   for (final option in options) {
@@ -85,7 +91,9 @@ String proxyConnectionTitle(
     }
   }
 
-  return isLoading ? loadingProxyTitle : unknownProxyTitle;
+  return isLoading
+      ? l10n.proxy_loadingProxyTitle
+      : l10n.proxy_unknownProxyTitle;
 }
 
 bool proxyConnectionOptionExists(

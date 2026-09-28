@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
@@ -5,6 +24,8 @@ import 'package:weblibre/features/web_search/domain/controllers/search_controlle
 import 'package:weblibre/features/web_search/domain/entities/captured_page_state.dart';
 import 'package:weblibre/features/web_search/domain/entities/fetch_method.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_artifact_downloader.dart';
+import 'package:weblibre/features/web_search/presentation/utils/fetch_method_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -41,6 +62,7 @@ class _FetchMethodSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(metaSearchControllerProvider);
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -57,7 +79,10 @@ class _FetchMethodSheet extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Fetch Page Data', style: textTheme.titleLarge),
+                  Text(
+                    l10n.webSearch_fetchPageDataTitle,
+                    style: textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 4),
                   UriBreadcrumb(
                     uri: url,
@@ -102,6 +127,7 @@ class _MethodTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
@@ -120,7 +146,8 @@ class _MethodTile extends ConsumerWidget {
     } else if (choice == FetchMethodChoice.trafilatura) {
       errorMessage = state.fetchError(url);
     } else if (captured?.status == CapturedPageStatus.downloadFailed) {
-      errorMessage = captured?.errorMessage ?? 'Download failed — tap to retry';
+      errorMessage =
+          captured?.errorMessage ?? l10n.webSearch_downloadFailedTapToRetry;
     } else {
       errorMessage = null;
     }
@@ -144,9 +171,9 @@ class _MethodTile extends ConsumerWidget {
       enabled: enabled,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
       leading: Icon(choice.icon, color: leadingColor),
-      title: Text(choice.title),
+      title: Text(choice.label(context)),
       subtitle: Text(
-        failed ? errorMessage : choice.subtitle,
+        failed ? errorMessage : choice.description(context),
         style: textTheme.bodySmall?.copyWith(color: subtitleColor),
       ),
       trailing: _StatusIndicator(

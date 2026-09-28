@@ -21,104 +21,58 @@ import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_field.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_spec.dart';
 
-const _serverField = SingboxProxyFormField(
-  key: 'server',
-  label: 'Server Address',
-  required: true,
-);
+const _serverField = SingboxProxyFormField(key: 'server', required: true);
 const _serverPortField = SingboxProxyFormField(
   key: 'server_port',
-  label: 'Server Port',
   required: true,
   kind: SingboxFieldKind.port,
 );
 const _usernameField = SingboxProxyFormField(
   key: 'username',
-  label: 'Username',
   kind: SingboxFieldKind.secret,
 );
 const _passwordField = SingboxProxyFormField(
   key: 'password',
-  label: 'Password',
   required: true,
   kind: SingboxFieldKind.secret,
 );
 const _optionalPasswordField = SingboxProxyFormField(
   key: 'password',
-  label: 'Password',
   kind: SingboxFieldKind.secret,
 );
 const _uuidField = SingboxProxyFormField(
   key: 'uuid',
-  label: 'UUID',
   required: true,
   kind: SingboxFieldKind.secret,
 );
 const _tlsFields = [
-  SingboxProxyFormField(
-    key: 'tls.enabled',
-    label: 'TLS Enabled',
-    helperText: 'true or false.',
-    kind: SingboxFieldKind.boolean,
-  ),
-  SingboxProxyFormField(key: 'tls.server_name', label: 'TLS Server Name'),
-  SingboxProxyFormField(
-    key: 'tls.insecure',
-    label: 'Allow Invalid TLS Certificates',
-    helperText: 'true or false.',
-    kind: SingboxFieldKind.boolean,
-  ),
-  SingboxProxyFormField(
-    key: 'tls.alpn',
-    label: 'TLS ALPN',
-    helperText: 'Comma-separated or one value per line.',
-    kind: SingboxFieldKind.stringList,
-  ),
+  SingboxProxyFormField(key: 'tls.enabled', kind: SingboxFieldKind.boolean),
+  SingboxProxyFormField(key: 'tls.server_name'),
+  SingboxProxyFormField(key: 'tls.insecure', kind: SingboxFieldKind.boolean),
+  SingboxProxyFormField(key: 'tls.alpn', kind: SingboxFieldKind.stringList),
 ];
 const _transportFields = [
-  SingboxProxyFormField(
-    key: 'transport.type',
-    label: 'Transport Type',
-    helperText: 'For example ws, http, grpc, or quic.',
-  ),
-  SingboxProxyFormField(key: 'transport.path', label: 'Transport Path'),
-  SingboxProxyFormField(
-    key: 'transport.service_name',
-    label: 'gRPC Service Name',
-  ),
+  SingboxProxyFormField(key: 'transport.type'),
+  SingboxProxyFormField(key: 'transport.path'),
+  SingboxProxyFormField(key: 'transport.service_name'),
 ];
 const _multiplexFields = [
   SingboxProxyFormField(
     key: 'multiplex.enabled',
-    label: 'Multiplex Enabled',
-    helperText: 'true or false.',
     kind: SingboxFieldKind.boolean,
   ),
-  SingboxProxyFormField(key: 'multiplex.protocol', label: 'Multiplex Protocol'),
+  SingboxProxyFormField(key: 'multiplex.protocol'),
   SingboxProxyFormField(
     key: 'multiplex.max_connections',
-    label: 'Multiplex Max Connections',
     kind: SingboxFieldKind.integer,
   ),
 ];
 const _dialFields = [
-  SingboxProxyFormField(key: 'detour', label: 'Dial Detour'),
-  SingboxProxyFormField(key: 'bind_interface', label: 'Bind Interface'),
-  SingboxProxyFormField(
-    key: 'routing_mark',
-    label: 'Routing Mark',
-    kind: SingboxFieldKind.integer,
-  ),
-  SingboxProxyFormField(
-    key: 'domain_strategy',
-    label: 'Domain Strategy',
-    helperText: 'For example prefer_ipv4 or prefer_ipv6.',
-  ),
-  SingboxProxyFormField(
-    key: 'connect_timeout',
-    label: 'Connect Timeout',
-    helperText: 'For example 5s.',
-  ),
+  SingboxProxyFormField(key: 'detour'),
+  SingboxProxyFormField(key: 'bind_interface'),
+  SingboxProxyFormField(key: 'routing_mark', kind: SingboxFieldKind.integer),
+  SingboxProxyFormField(key: 'domain_strategy'),
+  SingboxProxyFormField(key: 'connect_timeout'),
 ];
 const _v2rayAdvancedFields = [
   ..._tlsFields,
@@ -137,7 +91,6 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverPortField,
       SingboxProxyFormField(
         key: 'version',
-        label: 'SOCKS Version',
         defaultValue: '5',
         // sing-box expects this as a JSON string enum, not a number.
         kind: SingboxFieldKind.choice,
@@ -168,7 +121,6 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverPortField,
       SingboxProxyFormField(
         key: 'method',
-        label: 'Method',
         defaultValue: '2022-blake3-aes-128-gcm',
         required: true,
       ),
@@ -183,16 +135,8 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverField,
       _serverPortField,
       _uuidField,
-      SingboxProxyFormField(
-        key: 'security',
-        label: 'Security',
-        defaultValue: 'auto',
-      ),
-      SingboxProxyFormField(
-        key: 'alter_id',
-        label: 'Alter ID',
-        kind: SingboxFieldKind.integer,
-      ),
+      SingboxProxyFormField(key: 'security', defaultValue: 'auto'),
+      SingboxProxyFormField(key: 'alter_id', kind: SingboxFieldKind.integer),
       ..._v2rayAdvancedFields,
     ],
   ),
@@ -203,7 +147,7 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverField,
       _serverPortField,
       _uuidField,
-      SingboxProxyFormField(key: 'flow', label: 'Flow'),
+      SingboxProxyFormField(key: 'flow'),
       ..._v2rayAdvancedFields,
     ],
   ),
@@ -235,32 +179,17 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
     fields: [
       _serverField,
       _serverPortField,
-      SingboxProxyFormField(
-        key: 'auth_str',
-        label: 'Auth String',
-        kind: SingboxFieldKind.secret,
-      ),
-      SingboxProxyFormField(key: 'up', label: 'Upload Bandwidth'),
-      SingboxProxyFormField(key: 'down', label: 'Download Bandwidth'),
-      SingboxProxyFormField(
-        key: 'obfs',
-        label: 'Obfuscation',
-        kind: SingboxFieldKind.secret,
-      ),
+      SingboxProxyFormField(key: 'auth_str', kind: SingboxFieldKind.secret),
+      SingboxProxyFormField(key: 'up'),
+      SingboxProxyFormField(key: 'down'),
+      SingboxProxyFormField(key: 'obfs', kind: SingboxFieldKind.secret),
       SingboxProxyFormField(
         key: 'recv_window_conn',
-        label: 'Receive Window Conn',
         kind: SingboxFieldKind.integer,
       ),
-      SingboxProxyFormField(
-        key: 'recv_window',
-        label: 'Receive Window',
-        kind: SingboxFieldKind.integer,
-      ),
+      SingboxProxyFormField(key: 'recv_window', kind: SingboxFieldKind.integer),
       SingboxProxyFormField(
         key: 'disable_mtu_discovery',
-        label: 'Disable MTU Discovery',
-        helperText: 'true or false.',
         kind: SingboxFieldKind.boolean,
       ),
       ..._tlsFields,
@@ -274,20 +203,11 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverField,
       _serverPortField,
       _passwordField,
-      SingboxProxyFormField(
-        key: 'up_mbps',
-        label: 'Upload Mbps',
-        kind: SingboxFieldKind.integer,
-      ),
-      SingboxProxyFormField(
-        key: 'down_mbps',
-        label: 'Download Mbps',
-        kind: SingboxFieldKind.integer,
-      ),
-      SingboxProxyFormField(key: 'obfs.type', label: 'Obfuscation Type'),
+      SingboxProxyFormField(key: 'up_mbps', kind: SingboxFieldKind.integer),
+      SingboxProxyFormField(key: 'down_mbps', kind: SingboxFieldKind.integer),
+      SingboxProxyFormField(key: 'obfs.type'),
       SingboxProxyFormField(
         key: 'obfs.password',
-        label: 'Obfuscation Password',
         kind: SingboxFieldKind.secret,
       ),
       ..._tlsFields,
@@ -302,20 +222,10 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverPortField,
       _uuidField,
       _passwordField,
-      SingboxProxyFormField(
-        key: 'congestion_control',
-        label: 'Congestion Control',
-        defaultValue: 'cubic',
-      ),
-      SingboxProxyFormField(
-        key: 'udp_relay_mode',
-        label: 'UDP Relay Mode',
-        defaultValue: 'native',
-      ),
+      SingboxProxyFormField(key: 'congestion_control', defaultValue: 'cubic'),
+      SingboxProxyFormField(key: 'udp_relay_mode', defaultValue: 'native'),
       SingboxProxyFormField(
         key: 'zero_rtt_handshake',
-        label: 'Zero RTT Handshake',
-        helperText: 'true or false.',
         kind: SingboxFieldKind.boolean,
       ),
       ..._tlsFields,
@@ -328,16 +238,11 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
     fields: [
       _serverField,
       _serverPortField,
-      SingboxProxyFormField(key: 'user', label: 'User', required: true),
+      SingboxProxyFormField(key: 'user', required: true),
       _optionalPasswordField,
-      SingboxProxyFormField(
-        key: 'private_key',
-        label: 'Private Key',
-        kind: SingboxFieldKind.secret,
-      ),
+      SingboxProxyFormField(key: 'private_key', kind: SingboxFieldKind.secret),
       SingboxProxyFormField(
         key: 'private_key_passphrase',
-        label: 'Private Key Passphrase',
         kind: SingboxFieldKind.secret,
       ),
       ..._commonAdvancedFields,
@@ -351,58 +256,35 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverPortField,
       SingboxProxyFormField(
         key: 'local_address',
-        label: 'Local Address',
-        helperText:
-            'The address this device has inside the tunnel, one per line — for '
-            'example 10.0.0.2/32. A bare address is read as a single one (/32, '
-            'or /128 for IPv6).',
         required: true,
         kind: SingboxFieldKind.cidrList,
       ),
-      SingboxProxyFormField(
-        key: 'peer_public_key',
-        label: 'Peer Public Key',
-        required: true,
-      ),
+      SingboxProxyFormField(key: 'peer_public_key', required: true),
       SingboxProxyFormField(
         key: 'private_key',
-        label: 'Private Key',
-        helperText: 'Stored in secure storage, not profile JSON.',
+        // Distinct from SSH's 'private_key' field: same wire-format name,
+        // but WireGuard's carries different helper text.
+        labelKey: 'wireguardPrivateKey',
         required: true,
         kind: SingboxFieldKind.secret,
       ),
       SingboxProxyFormField(
         key: 'pre_shared_key',
-        label: 'Pre-shared Key',
-        helperText: 'Optional. Stored in secure storage.',
         kind: SingboxFieldKind.secret,
       ),
       SingboxProxyFormField(
         key: 'mtu',
-        label: 'MTU',
-        helperText:
-            'Lower this if the tunnel connects but pages never load: packets '
-            'larger than the path allows are dropped outright. 1280 is safe '
-            'almost everywhere, around 1200 when already on another VPN.',
         defaultValue: '1280',
         kind: SingboxFieldKind.integer,
       ),
       SingboxProxyFormField(
         key: 'persistent_keepalive_interval',
-        label: 'Persistent Keepalive',
-        helperText:
-            'Seconds between keepalive packets. A phone sits behind NAT, and '
-            'without these the mapping expires while idle: the peer can no '
-            'longer reach us, so connections stall until the next handshake. '
-            '0 disables.',
         defaultValue: '25',
         kind: SingboxFieldKind.integer,
         minValue: 0,
       ),
       SingboxProxyFormField(
         key: 'reserved',
-        label: 'Reserved Bytes',
-        helperText: 'Optional. Three comma-separated numbers, e.g. 0,0,0.',
         kind: SingboxFieldKind.integerList,
         exactListLength: 3,
         minValue: 0,
@@ -418,7 +300,9 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
       _serverPortField,
       SingboxProxyFormField(
         key: 'version',
-        label: 'Version',
+        // Distinct from SOCKS's 'version' field (also key: 'version', but a
+        // different, choice-typed field with its own label).
+        labelKey: 'shadowTlsVersion',
         defaultValue: '3',
         kind: SingboxFieldKind.integer,
       ),

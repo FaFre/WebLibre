@@ -1,0 +1,229 @@
+{
+  "@@locale": "en",
+  "webPush_screenTitle": "Notifications",
+  "@webPush_screenTitle": {
+    "description": "Title of the settings screen for website push notifications. \"Web Push\" is the name of the web standard that lets websites send notifications."
+  },
+  "webPush_screenSubtitle": "Website notifications delivered through UnifiedPush",
+  "@webPush_screenSubtitle": {
+    "description": "Subtitle of the web push settings screen. UnifiedPush is the name of an open notification delivery system and must not be translated."
+  },
+  "webPush_distributorTileTitle": "UnifiedPush Distributor",
+  "@webPush_distributorTileTitle": {
+    "description": "Title of the setting for the UnifiedPush distributor: a separate app (such as ntfy) that receives push messages from the internet and passes them to WebLibre. UnifiedPush is a product name."
+  },
+  "webPush_distributorTileKeywords": "notifications, push, unifiedpush, ntfy",
+  "@webPush_distributorTileKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "webPush_checking": "Checking…",
+  "@webPush_checking": {
+    "description": "Status text while the app checks the push distributor or the notification permission."
+  },
+  "webPush_couldNotReadStatus": "Could not read push status: {error}",
+  "@webPush_couldNotReadStatus": {
+    "description": "Error line under the distributor setting when its state could not be read. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "webPush_updatingDistributor": "Updating…",
+  "@webPush_updatingDistributor": {
+    "description": "Status text under the distributor setting while a new distributor is being set or removed."
+  },
+  "webPush_registrationRecovering": "Recovering from a registration error…",
+  "@webPush_registrationRecovering": {
+    "description": "Status text under the distributor setting while the app retries after a failed registration with the distributor."
+  },
+  "webPush_lastRegistrationError": "Last registration error: {error}",
+  "@webPush_lastRegistrationError": {
+    "description": "Error line under the distributor setting. error is the technical error from the last failed registration, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "webPush_disablingWebPush": "Disabling…",
+  "@webPush_disablingWebPush": {
+    "description": "Label of the disable button while web push is being turned off."
+  },
+  "webPush_disableWebPush": "Disable web push",
+  "@webPush_disableWebPush": {
+    "description": "Button that turns web push off by removing the chosen distributor."
+  },
+  "webPush_statusNoneAvailable": "No distributor available",
+  "@webPush_statusNoneAvailable": {
+    "description": "Short status of the push distributor: no distributor app is installed on the device. Shown after the distributor's name or alone."
+  },
+  "webPush_statusNotSelected": "Not configured",
+  "@webPush_statusNotSelected": {
+    "description": "Short status of the push distributor: distributor apps are installed but none is chosen."
+  },
+  "webPush_statusPending": "Connecting…",
+  "@webPush_statusPending": {
+    "description": "Short status of the push distributor: registration with the distributor is in progress."
+  },
+  "webPush_statusReady": "Active",
+  "@webPush_statusReady": {
+    "description": "Short status of the push distributor: working and delivering notifications. Shown after the distributor's name, e.g. \"ntfy — Active\"."
+  },
+  "webPush_statusUnavailable": "Distributor unavailable",
+  "@webPush_statusUnavailable": {
+    "description": "Short status of the push distributor: the chosen distributor app can no longer be reached."
+  },
+  "webPush_statusDescNoneAvailable": "Install a UnifiedPush distributor app, such as ntfy, to receive website notifications.",
+  "@webPush_statusDescNoneAvailable": {
+    "description": "Explanation under the distributor setting when no distributor app is installed. ntfy is an app name."
+  },
+  "webPush_statusDescNotSelected": "Choose a distributor below to enable website notifications.",
+  "@webPush_statusDescNotSelected": {
+    "description": "Explanation under the distributor setting when distributor apps are installed but none is chosen."
+  },
+  "webPush_statusDescPending": "Waiting for the distributor to acknowledge registration.",
+  "@webPush_statusDescPending": {
+    "description": "Explanation under the distributor setting while waiting for the distributor app to confirm registration."
+  },
+  "webPush_statusDescReady": "Website notifications are delivered through this distributor.",
+  "@webPush_statusDescReady": {
+    "description": "Explanation under the distributor setting when push notifications are working."
+  },
+  "webPush_statusDescUnavailable": "The chosen distributor is no longer installed. Website notifications will not be delivered until you choose another one.",
+  "@webPush_statusDescUnavailable": {
+    "description": "Explanation under the distributor setting when the previously chosen distributor app was uninstalled."
+  },
+  "webPush_noDistributorInstalled": "No UnifiedPush distributor is installed. Install one, such as ntfy, and try again.",
+  "@webPush_noDistributorInstalled": {
+    "description": "Error message when the user tries to choose a distributor but no UnifiedPush distributor app is installed. ntfy is an app name."
+  },
+  "webPush_chooseDistributorTitle": "Choose distributor",
+  "@webPush_chooseDistributorTitle": {
+    "description": "Title of the dialog listing installed UnifiedPush distributor apps to choose from."
+  },
+  "webPush_distributorConfigured": "UnifiedPush distributor configured.",
+  "@webPush_distributorConfigured": {
+    "description": "Confirmation after a push distributor was chosen successfully."
+  },
+  "webPush_couldNotConfigureDistributor": "Could not configure distributor: {error}",
+  "@webPush_couldNotConfigureDistributor": {
+    "description": "Error message when setting the chosen push distributor failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "webPush_webPushDisabled": "Web push disabled.",
+  "@webPush_webPushDisabled": {
+    "description": "Confirmation after web push was turned off."
+  },
+  "webPush_couldNotDisableWebPush": "Could not disable web push: {error}",
+  "@webPush_couldNotDisableWebPush": {
+    "description": "Error message when turning web push off failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "webPush_notificationPermissionTitle": "Notification Permission",
+  "@webPush_notificationPermissionTitle": {
+    "description": "Title of the setting showing whether WebLibre has the Android permission to show notifications."
+  },
+  "webPush_notificationPermissionKeywords": "notifications, permission",
+  "@webPush_notificationPermissionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "webPush_notificationPermissionCouldNotRead": "Could not read permission state: {error}",
+  "@webPush_notificationPermissionCouldNotRead": {
+    "description": "Error line under the notification permission setting. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "webPush_notificationPermissionGranted": "Granted",
+  "@webPush_notificationPermissionGranted": {
+    "description": "Status under the notification permission setting: the permission is granted."
+  },
+  "webPush_notificationPermissionDenied": "Denied. Push messages still arrive, but no notifications can be shown.",
+  "@webPush_notificationPermissionDenied": {
+    "description": "Status under the notification permission setting when the permission is denied: push messages still arrive but cannot be shown to the user."
+  },
+  "webPush_grantAction": "Grant",
+  "@webPush_grantAction": {
+    "description": "Button next to the denied notification permission that asks Android for the permission or opens the app's system settings."
+  },
+  "webPush_couldNotUpdatePermission": "Could not update notification permission: {error}",
+  "@webPush_couldNotUpdatePermission": {
+    "description": "Error message when requesting the notification permission failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "webPush_loadingSubscriptions": "Loading subscriptions…",
+  "@webPush_loadingSubscriptions": {
+    "description": "Placeholder while the list of websites subscribed to push notifications loads."
+  },
+  "webPush_couldNotReadSubscriptions": "Could not read subscriptions",
+  "@webPush_couldNotReadSubscriptions": {
+    "description": "Error heading when the list of push subscriptions could not be read; technical details follow below."
+  },
+  "webPush_noSiteSubscriptions": "No site subscriptions",
+  "@webPush_noSiteSubscriptions": {
+    "description": "Shown in place of the subscription list when no website is subscribed to push notifications."
+  },
+  "webPush_noSiteSubscriptionsDescription": "Websites you allow to send notifications will appear here.",
+  "@webPush_noSiteSubscriptionsDescription": {
+    "description": "Explanation under \"No site subscriptions\"."
+  },
+  "webPush_subscriptionActive": "Active",
+  "@webPush_subscriptionActive": {
+    "description": "Status under a website in the push subscription list: notifications from it are delivered."
+  },
+  "webPush_subscriptionDelayedDelivery": "Endpoint saved; delivery is paused until the distributor is ready",
+  "@webPush_subscriptionDelayedDelivery": {
+    "description": "Status under a website in the push subscription list: the delivery address (\"endpoint\") is set up, but notifications are held back until the distributor app works again."
+  },
+  "webPush_subscriptionWaitingForEndpoint": "Waiting for the distributor to assign an endpoint",
+  "@webPush_subscriptionWaitingForEndpoint": {
+    "description": "Status under a website in the push subscription list: the distributor app has not yet provided the delivery address (\"endpoint\") for it."
+  },
+  "webPush_revokeSubscriptionHint": "To stop a site from sending notifications, revoke its notification permission in the site settings.",
+  "@webPush_revokeSubscriptionHint": {
+    "description": "Hint under the push subscription list explaining how to stop a website's notifications: via that site's permissions."
+  },
+  "webPush_deliverySectionTitle": "Delivery",
+  "@webPush_deliverySectionTitle": {
+    "description": "Section heading on the web push settings screen for how notifications are delivered (distributor app and notification permission)."
+  },
+  "webPush_indexDistributorSubtitle": "The app that delivers website push notifications",
+  "@webPush_indexDistributorSubtitle": {
+    "description": "Short explanation of the UnifiedPush distributor setting, shown as a settings search result."
+  },
+  "webPush_indexNotificationPermissionSubtitle": "Required to display website notifications",
+  "@webPush_indexNotificationPermissionSubtitle": {
+    "description": "Short explanation of the notification permission setting, shown as a settings search result."
+  },
+  "webPush_subscriptionsSectionTitle": "Subscriptions",
+  "@webPush_subscriptionsSectionTitle": {
+    "description": "Section heading on the web push settings screen for the list of websites that receive push notifications."
+  },
+  "webPush_indexSiteSubscriptionsTitle": "Site Subscriptions",
+  "@webPush_indexSiteSubscriptionsTitle": {
+    "description": "Title of the list of websites subscribed to push notifications."
+  },
+  "webPush_indexSiteSubscriptionsKeywords": "sites, subscriptions",
+  "@webPush_indexSiteSubscriptionsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "webPush_indexSiteSubscriptionsSubtitle": "Websites subscribed to push notifications",
+  "@webPush_indexSiteSubscriptionsSubtitle": {
+    "description": "Short explanation of the site subscriptions list, shown as a settings search result."
+  }
+}

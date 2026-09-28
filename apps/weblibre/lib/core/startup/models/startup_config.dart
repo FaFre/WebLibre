@@ -141,6 +141,10 @@ enum MaintenanceFailureKind {
   notEnoughStorage,
   backupTargetUnavailable,
   archiveRejected,
+  profileNoLongerExists,
+  restoreEvidenceUnresolved,
+  taskNotRunnable,
+  restartNotScheduled,
   unknown;
 
   /// Whether the archive password could account for this.
@@ -157,6 +161,10 @@ enum MaintenanceFailureKind {
     MaintenanceFailureKind.notEnoughStorage ||
     MaintenanceFailureKind.backupTargetUnavailable ||
     MaintenanceFailureKind.archiveRejected ||
+    MaintenanceFailureKind.profileNoLongerExists ||
+    MaintenanceFailureKind.restoreEvidenceUnresolved ||
+    MaintenanceFailureKind.taskNotRunnable ||
+    MaintenanceFailureKind.restartNotScheduled ||
     MaintenanceFailureKind.unknown => false,
   };
 }
@@ -190,11 +198,20 @@ class MaintenanceTask with FastEquatable {
 
   /// The [MaintenanceFailureKind] id behind [error], when there is one.
   ///
-  /// Stored beside the message rather than instead of it: the message is what a
-  /// person reads, and the kind is what code branches on. Raw, like [actionId]
+  /// Stored beside the message rather than instead of it: the kind is what code
+  /// branches on and what the screen translates, and the English message stays
+  /// for diagnostics and for [MaintenanceFailureKind.unknown]. Raw, like [actionId]
   /// and [stateId], so a kind written by a newer build round-trips instead of
   /// being rewritten as something this build understands.
   final String? errorKindId;
+
+  /// What the kind alone cannot say, as a raw id: the `RestoreValidationReason`
+  /// behind [MaintenanceFailureKind.archiveRejected], the
+  /// `TaskNotRunnableReason` behind [MaintenanceFailureKind.taskNotRunnable].
+  /// Lets the screen translate
+  /// a failure read back from disk instead of showing the stored English
+  /// [error], which stays for diagnostics.
+  final String? errorDetailId;
 
   MaintenanceTask({
     required this.id,
@@ -211,6 +228,7 @@ class MaintenanceTask with FastEquatable {
     this.startedAt,
     this.error,
     this.errorKindId,
+    this.errorDetailId,
   });
 
   MaintenanceTask.create({
@@ -228,6 +246,7 @@ class MaintenanceTask with FastEquatable {
     this.startedAt,
     this.error,
     this.errorKindId,
+    this.errorDetailId,
   }) : actionId = action.name,
        stateId = state.name;
 
@@ -252,7 +271,13 @@ class MaintenanceTask with FastEquatable {
     MaintenanceTaskState next, {
     String? error,
     String? errorKindId,
-  }) => copyWith(stateId: next.name, error: error, errorKindId: errorKindId);
+    String? errorDetailId,
+  }) => copyWith(
+    stateId: next.name,
+    error: error,
+    errorKindId: errorKindId,
+    errorDetailId: errorDetailId,
+  );
 
   static MaintenanceTask? tryFromJson(Map<String, Object?> json) {
     final id = json['id'];
@@ -279,6 +304,7 @@ class MaintenanceTask with FastEquatable {
       startedAt: dateTimeOrNull(json['startedAt']),
       error: stringOrNull(json['error']),
       errorKindId: stringOrNull(json['errorKind']),
+      errorDetailId: stringOrNull(json['errorDetail']),
     );
   }
 
@@ -297,6 +323,7 @@ class MaintenanceTask with FastEquatable {
     'startedAt': startedAt?.toUtc().toIso8601String(),
     'error': error,
     'errorKind': errorKindId,
+    'errorDetail': errorDetailId,
   };
 
   @override
@@ -315,6 +342,7 @@ class MaintenanceTask with FastEquatable {
     startedAt,
     error,
     errorKindId,
+    errorDetailId,
   ];
 }
 

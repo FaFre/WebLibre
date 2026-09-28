@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/emp
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_list_tile.dart';
 
 class RecentTabsSection extends ConsumerWidget {
@@ -33,6 +34,7 @@ class RecentTabsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final tabs = ref.watch(searchEmptyRecentTabsProvider());
 
     if (tabs.isEmpty) {
@@ -40,7 +42,7 @@ class RecentTabsSection extends ConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Recent Tabs',
+      title: l10n.search_moduleLabelRecentTabs,
       moduleType: SearchModuleType.recentTabs,
       totalCount: tabs.length,
       contentSliverBuilder:

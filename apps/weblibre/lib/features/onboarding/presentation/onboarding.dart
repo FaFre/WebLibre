@@ -43,6 +43,7 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_backu
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class OnboardingScreen extends HookConsumerWidget {
@@ -58,6 +59,7 @@ class OnboardingScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
 
     final pageController = usePageController();
@@ -156,7 +158,7 @@ class OnboardingScreen extends HookConsumerWidget {
                           }
                         },
                         icon: const Icon(Icons.chevron_left),
-                        label: const Text('Previous'),
+                        label: Text(l10n.onboarding_actionPrevious),
                       ),
                     ),
                   ),
@@ -192,7 +194,7 @@ class OnboardingScreen extends HookConsumerWidget {
                               },
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.chevron_right),
-                        label: const Text('Next'),
+                        label: Text(l10n.onboarding_actionNext),
                       ),
                     )
                   else if (onboardingMode == OnboardingMode.restore &&
@@ -204,7 +206,7 @@ class OnboardingScreen extends HookConsumerWidget {
                             : null,
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.settings_backup_restore),
-                        label: const Text('Restore'),
+                        label: Text(l10n.onboarding_actionRestore),
                       ),
                     )
                   else
@@ -234,7 +236,7 @@ class OnboardingScreen extends HookConsumerWidget {
                         },
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.done),
-                        label: const Text('Done'),
+                        label: Text(l10n.common_done),
                       ),
                     ),
                 ],
@@ -280,7 +282,7 @@ Future<void> _restoreIntoThisUser(BuildContext context, WidgetRef ref) async {
     // target is the one thing the confirmation has to be able to do.
     showErrorMessage(
       context,
-      'This profile could not be read, so nothing can be restored into it.',
+      AppLocalizations.of(context).onboarding_restoreTargetUnreadable,
     );
     return;
   }

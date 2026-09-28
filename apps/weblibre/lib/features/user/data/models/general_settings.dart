@@ -159,22 +159,6 @@ enum TabBarPositionSetting {
   left,
   right;
 
-  String get label => switch (this) {
-    auto => 'Automatic',
-    top => 'Top',
-    bottom => 'Bottom',
-    left => 'Left',
-    right => 'Right',
-  };
-
-  String get description => switch (this) {
-    auto => 'A side rail on large screens, a bottom bar on phones',
-    top => 'Persistent tab bar without auto-hide',
-    bottom => 'Tab bar with auto-hide support',
-    left => 'Vertical side rail, swipe to hide',
-    right => 'Vertical side rail, swipe to hide',
-  };
-
   /// The concrete edge this resolves to in [window].
   ///
   /// Only [auto] consults the window; every explicit choice is returned
@@ -226,43 +210,27 @@ enum TabChipCloseButtonMode {
 /// home surface. [auto] picks whichever sits on the same edge the user already
 /// chose for the tab bar, so a bottom tab bar keeps the search entry within
 /// thumb reach instead of moving it to the top of the screen.
-enum HomeSearchBarPlacement {
-  auto,
-  top,
-  tabBar;
-
-  String get label => switch (this) {
-    auto => 'Follow the tab bar',
-    top => 'Top of the home page',
-    tabBar => 'In the tab bar',
-  };
-
-  String get description => switch (this) {
-    auto => 'Whichever edge the tab bar is on',
-    top => 'A pinned search bar above the home sections',
-    tabBar => "The tab bar's address field, with QR and voice search",
-  };
-}
+enum HomeSearchBarPlacement { auto, top, tabBar }
 
 enum DeleteBrowsingDataType {
-  tabs('Open tabs'),
-  history('Browsing history'),
-  recentSearches('Recent searches', 'Queries shown on the search page'),
-  cookies('Cookies and site data', 'You’ll be logged out of most sites'),
-  cache('Cached images and files', 'Frees up storage space'),
-  permissions('Site permissions'),
-  downloads('Downloads');
-
-  final String title;
-  final String? description;
-
-  const DeleteBrowsingDataType(this.title, [this.description]);
+  tabs,
+  history,
+  recentSearches,
+  cookies,
+  cache,
+  permissions,
+  downloads,
 }
 
 @CopyWith()
 @JsonSerializable(includeIfNull: true, constructor: 'withDefaults')
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
+
+  /// The app UI language, as a BCP-47 tag (e.g. `"en"`, `"de"`). Null follows
+  /// the system locale. Distinct from `EngineSettings.locales`, which is the
+  /// Accept-Language list exposed to websites, not the app's own UI language.
+  final String? appLocale;
   final double uiScaleFactor;
   final bool disableAnimations;
 
@@ -534,6 +502,7 @@ class GeneralSettings with FastEquatable {
 
   GeneralSettings({
     required this.themeMode,
+    required this.appLocale,
     required this.uiScaleFactor,
     required this.disableAnimations,
     required this.refreshRateMode,
@@ -626,6 +595,7 @@ class GeneralSettings with FastEquatable {
 
   GeneralSettings.withDefaults({
     ThemeMode? themeMode,
+    this.appLocale,
     double? uiScaleFactor,
     bool? disableAnimations,
     RefreshRateMode? refreshRateMode,
@@ -991,6 +961,7 @@ class GeneralSettings with FastEquatable {
   @override
   List<Object?> get hashParameters => [
     themeMode,
+    appLocale,
     uiScaleFactor,
     disableAnimations,
     refreshRateMode,

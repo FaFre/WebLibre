@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/c
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -125,6 +126,7 @@ class ContainerMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final controller = this.controller ?? useMenuController();
 
     final showIsolatedTabUi = ref.watch(
@@ -193,7 +195,7 @@ class ContainerMenu extends HookConsumerWidget {
                     }
                   }
                 : null,
-            child: const Text('New Tab'),
+            child: Text(l10n.browser_containerMenuNewTab),
           ),
         if (enablePin && container != null)
           MenuItemButton(
@@ -216,7 +218,9 @@ class ContainerMenu extends HookConsumerWidget {
                   }
                 : null,
             child: Text(
-              container.isPinned ? 'Unpin Container' : 'Pin Container',
+              container.isPinned
+                  ? l10n.browser_unpinContainer
+                  : l10n.browser_pinContainer,
             ),
           ),
         if (enableNewTab || enablePin && container != null) const Divider(),
@@ -234,7 +238,7 @@ class ContainerMenu extends HookConsumerWidget {
                         }
                       }
                     : null,
-                child: const Text('All Tabs'),
+                child: Text(l10n.browser_closeSubmenuAllTabs),
               ),
               MenuItemButton(
                 leadingIcon: Icon(
@@ -254,7 +258,7 @@ class ContainerMenu extends HookConsumerWidget {
                         }
                       }
                     : null,
-                child: const Text('Private Tabs'),
+                child: Text(l10n.browser_closeSubmenuPrivateTabs),
               ),
               if (showIsolatedTabUi)
                 MenuItemButton(
@@ -292,7 +296,7 @@ class ContainerMenu extends HookConsumerWidget {
                           );
                         }
                       : null,
-                  child: const Text('Isolated Tabs'),
+                  child: Text(l10n.browser_closeSubmenuIsolatedTabs),
                 ),
               if (enableCloseFilteredTabs)
                 MenuItemButton(
@@ -332,10 +336,10 @@ class ContainerMenu extends HookConsumerWidget {
                           }
                         }
                       : null,
-                  child: const Text('Filtered Tabs'),
+                  child: Text(l10n.browser_closeSubmenuFilteredTabs),
                 ),
             ],
-            child: const Text('Close Tabs'),
+            child: Text(l10n.browser_menuCloseTabs),
           ),
         if (enableBookmarkAll)
           MenuItemButton(
@@ -343,7 +347,7 @@ class ContainerMenu extends HookConsumerWidget {
             onPressed: enabled
                 ? () => _bookmarkAllTabs(context, ref, scopeContainerId)
                 : null,
-            child: const Text('Bookmark all'),
+            child: Text(l10n.browser_menuBookmarkAll),
           ),
         if (hasTrailingSection) const Divider(),
         if (enableAssignedSites && container != null)
@@ -352,7 +356,7 @@ class ContainerMenu extends HookConsumerWidget {
             onPressed: canEdit
                 ? () => _editAssignedSites(context, ref, container)
                 : null,
-            child: const Text('Assigned Sites…'),
+            child: Text(l10n.browser_menuAssignedSites),
           ),
         if (clearDataContextId != null)
           MenuItemButton(
@@ -372,7 +376,7 @@ class ContainerMenu extends HookConsumerWidget {
                     }
                   }
                 : null,
-            child: const Text('Clear Container Data'),
+            child: Text(l10n.browser_menuClearContainerData),
           ),
         if (enableEdit && container != null)
           MenuItemButton(
@@ -384,7 +388,7 @@ class ContainerMenu extends HookConsumerWidget {
                     ).push(context);
                   }
                 : null,
-            child: const Text('Edit Container…'),
+            child: Text(l10n.browser_menuEditContainer),
           ),
         if (enableDelete && container != null) ...[
           const Divider(),
@@ -398,7 +402,7 @@ class ContainerMenu extends HookConsumerWidget {
                     await confirmAndDeleteContainer(context, ref, container);
                   }
                 : null,
-            child: const Text('Delete Container'),
+            child: Text(l10n.browser_menuDeleteContainer),
           ),
         ],
       ],
@@ -437,7 +441,11 @@ Future<void> _bookmarkAllTabs(
     }
 
     if (context.mounted) {
-      ui_helper.showInfoMessage(context, '${tabData.length} bookmark(s) added');
+      final l10n = AppLocalizations.of(context);
+      ui_helper.showInfoMessage(
+        context,
+        l10n.browser_bookmarksAddedCount(tabData.length),
+      );
     }
   } else {
     for (final tab in tabData) {
@@ -540,17 +548,22 @@ Future<void> _clearContainerData(
     }
 
     if (context.mounted) {
+      final l10n = AppLocalizations.of(context);
       ui_helper.showInfoMessage(
         context,
         shouldReopenTabs
-            ? 'Container data cleared successfully'
-            : 'Container data cleared. ${tabs.length} tab(s) closed.',
+            ? l10n.browser_containerDataClearedSuccess
+            : l10n.browser_containerDataClearedWithTabsClosed(tabs.length),
       );
     }
   } catch (e, s) {
     logger.e('Failed to clear container data', error: e, stackTrace: s);
     if (context.mounted) {
-      ui_helper.showErrorMessage(context, 'Error clearing data: $e');
+      final l10n = AppLocalizations.of(context);
+      ui_helper.showErrorMessage(
+        context,
+        l10n.browser_errorClearingData(e.toString()),
+      );
     }
   }
 }

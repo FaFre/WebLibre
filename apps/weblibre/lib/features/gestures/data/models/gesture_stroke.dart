@@ -27,20 +27,19 @@ part 'gesture_stroke.g.dart';
 /// Where a gesture must begin. Mirrors the reference add-on's start-position
 /// tokens (the trailing colon is part of the canonical key prefix).
 enum GestureStartPosition {
-  anywhere('', 'Anywhere', MdiIcons.borderNone),
-  leftEdge('L:', 'Left edge', MdiIcons.borderLeft),
-  rightEdge('R:', 'Right edge', MdiIcons.borderRight),
-  topEdge('T:', 'Top edge', MdiIcons.borderTop),
-  bottomEdge('B:', 'Bottom edge', MdiIcons.borderBottom),
-  leftHalf('W:', 'Left half', MdiIcons.borderLeftVariant),
-  rightHalf('E:', 'Right half', MdiIcons.borderRightVariant);
+  anywhere('', MdiIcons.borderNone),
+  leftEdge('L:', MdiIcons.borderLeft),
+  rightEdge('R:', MdiIcons.borderRight),
+  topEdge('T:', MdiIcons.borderTop),
+  bottomEdge('B:', MdiIcons.borderBottom),
+  leftHalf('W:', MdiIcons.borderLeftVariant),
+  rightHalf('E:', MdiIcons.borderRightVariant);
 
   /// Canonical key prefix, e.g. `R:` (empty for [anywhere]).
   final String prefix;
-  final String label;
   final IconData icon;
 
-  const GestureStartPosition(this.prefix, this.label, this.icon);
+  const GestureStartPosition(this.prefix, this.icon);
 
   static GestureStartPosition fromPrefixLetter(String letter) {
     return GestureStartPosition.values.firstWhere(
@@ -128,16 +127,6 @@ class GestureStroke with FastEquatable {
 
   /// Whether this stroke is complete enough to be bound to an action.
   bool get isValid => arrows.isNotEmpty;
-
-  /// Human-readable rendering, e.g. `Right edge · ✌ · ↓→`.
-  String get displayLabel {
-    final parts = <String>[
-      if (startPosition != GestureStartPosition.anywhere) startPosition.label,
-      if (fingers >= 2) '$fingers fingers',
-      arrows.map((arrow) => arrow.symbol).join(),
-    ];
-    return parts.join(' · ');
-  }
 
   @override
   List<Object?> get hashParameters => [startPosition, fingers, arrows];

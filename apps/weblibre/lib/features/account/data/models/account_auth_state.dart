@@ -25,13 +25,50 @@ part 'account_auth_state.g.dart';
 
 enum AccountAuthStatus { signedOut, signingIn, signedIn, error }
 
+/// Why the account is in [AccountAuthStatus.error]. Translated where it is
+/// shown (`AccountAuthErrorL10n`), so a stored error follows the UI language.
+enum AccountAuthErrorKind {
+  network,
+  sessionExpiredWithKey,
+  sessionExpiredNoKey,
+  restoreFailed,
+  signInTimedOut,
+  signInOpenPageFailed,
+  noPendingSignIn,
+  signInVerificationFailed,
+  signInNotCompleted,
+  signInFailed,
+
+  /// The auth server's own wording, shown verbatim: it is already meant for
+  /// users and cannot be translated here.
+  server,
+}
+
+class AccountAuthError with FastEquatable {
+  final AccountAuthErrorKind kind;
+
+  /// The server's message for [AccountAuthErrorKind.server]; null otherwise.
+  final String? serverMessage;
+
+  AccountAuthError(this.kind) : serverMessage = null;
+
+  AccountAuthError.server(String this.serverMessage)
+    : kind = AccountAuthErrorKind.server;
+
+  @override
+  List<Object?> get hashParameters => [kind, serverMessage];
+
+  @override
+  String toString() => serverMessage ?? kind.name;
+}
+
 @CopyWith()
 class AccountAuthState with FastEquatable {
   final AccountAuthStatus status;
   final String? email;
   final String? displayName;
   final String? userId;
-  final String? lastError;
+  final AccountAuthError? lastError;
   final String? syncKey;
   // The SupabaseClient is intentionally excluded from equality. Two auth
   // states for the same user but with distinct client instances are still

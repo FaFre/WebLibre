@@ -355,7 +355,10 @@ class $FeedTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) => (e.readTable(table), i1.$FeedReferences(db, table, e)),
+                (e) => (
+                  e.readTable<i1.Feed, i1.FeedData>(table),
+                  i1.$FeedReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({articleRefs = false}) {
@@ -909,8 +912,10 @@ class $ArticleTableManager
               ),
           withReferenceMapper: (p0) => p0
               .map(
-                (e) =>
-                    (e.readTable(table), i1.$ArticleReferences(db, table, e)),
+                (e) => (
+                  e.readTable<i1.Article, i7.FeedArticle>(table),
+                  i1.$ArticleReferences(db, table, e),
+                ),
               )
               .toList(),
           prefetchHooksCallback: ({feedId = false}) {
@@ -1118,7 +1123,16 @@ class $ArticleFtsTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.ArticleFts, i1.ArticleFt>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.ArticleFts,
+                    i1.ArticleFt
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2837,7 +2851,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
     return customInsert(
       'INSERT INTO article_fts (article_fts) VALUES (\'optimize\')',
       variables: [],
-      updates: {articleFts},
+      updates: {this.articleFts},
     );
   }
 
@@ -2853,7 +2867,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
         i0.Variable<String>(feedId),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {feed, articleFts, article},
+      readsFrom: {this.feed, this.articleFts, this.article},
     ).map(
       (i0.QueryRow row) => i12.FeedArticleQueryResult(
         id: row.read<String>('id'),
@@ -2909,7 +2923,7 @@ class DefinitionsDrift extends i11.ModularAccessor {
         i0.Variable<String>(feedId),
         i0.Variable<int>(limit),
       ],
-      readsFrom: {feed, articleFts, article},
+      readsFrom: {this.feed, this.articleFts, this.article},
     ).map(
       (i0.QueryRow row) => i12.FeedArticleQueryResult(
         id: row.read<String>('id'),

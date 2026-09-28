@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
 final List<ContainerIconOption> _mdiContainerIconOptions = List.unmodifiable([
@@ -54,6 +55,7 @@ class ContainerIconPickerSheet extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final palette = ContainerColors.palette(
       context,
@@ -93,11 +95,11 @@ class ContainerIconPickerSheet extends HookWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Choose Icon',
+                            l10n.tabs_chooseIconTitle,
                             style: theme.textTheme.titleMedium,
                           ),
                           Text(
-                            '${filteredIcons.length} mdi icons',
+                            l10n.tabs_iconCountLabel(filteredIcons.length),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
@@ -127,7 +129,7 @@ class ContainerIconPickerSheet extends HookWidget {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                 child: SearchBar(
                   controller: searchController,
-                  hintText: 'Search MDI icons',
+                  hintText: l10n.tabs_searchIconsHint,
                   leading: const Icon(Icons.search),
                   trailing: [
                     if (searchController.text.isNotEmpty)
@@ -146,7 +148,7 @@ class ContainerIconPickerSheet extends HookWidget {
                 child: filteredIcons.isEmpty
                     ? Center(
                         child: Text(
-                          'No icons found.',
+                          l10n.tabs_noIconsFound,
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

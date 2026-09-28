@@ -24,7 +24,9 @@ String formatCompactNumber(num value) {
   return NumberFormat.compact().format(value);
 }
 
-/// Formats a byte count as a short, human-readable string (B/KB/MB).
+/// Formats a byte count as a short English string (B/KB/MB) for log and
+/// diagnostic text. UI text uses `formatByteSize` in
+/// `lib/presentation/utils/units_l10n.dart`.
 String formatBytes(int bytes) {
   if (bytes < 1024) return '$bytes B';
   if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';

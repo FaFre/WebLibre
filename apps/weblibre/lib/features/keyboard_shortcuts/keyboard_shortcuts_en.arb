@@ -1,0 +1,109 @@
+{
+  "@@locale": "en",
+
+  "keyboardShortcuts_title": "Keyboard Shortcuts",
+  "@keyboardShortcuts_title": {
+    "description": "Title of the settings screen and of the overview dialog listing keyboard shortcuts for a hardware keyboard."
+  },
+  "keyboardShortcuts_searchHint": "Search actions or keys",
+  "@keyboardShortcuts_searchHint": {
+    "description": "Placeholder of the search field on the keyboard shortcuts screen; the user can search by action name or by key."
+  },
+  "keyboardShortcuts_noMatchingActions": "No matching actions.",
+  "@keyboardShortcuts_noMatchingActions": {
+    "description": "Shown on the keyboard shortcuts screen when the search matches no action."
+  },
+
+  "keyboardShortcuts_overviewNoneAssigned": "No keys are assigned to browser actions.",
+  "@keyboardShortcuts_overviewNoneAssigned": {
+    "description": "Shown in the keyboard shortcuts overview dialog when no browser action has a key assigned."
+  },
+  "keyboardShortcuts_overviewDisabled": "Keyboard shortcuts are switched off.",
+  "@keyboardShortcuts_overviewDisabled": {
+    "description": "Shown in the keyboard shortcuts overview dialog when the user has turned keyboard shortcuts off in settings."
+  },
+
+  "keyboardShortcuts_enableTitle": "Enable Keyboard Shortcuts",
+  "@keyboardShortcuts_enableTitle": {
+    "description": "Title of the switch at the top of the keyboard shortcuts screen that turns all shortcuts on or off."
+  },
+  "keyboardShortcuts_enableSubtitle": "Browser actions on a hardware keyboard, even while a page has focus",
+  "@keyboardShortcuts_enableSubtitle": {
+    "description": "Explanation under the switch that turns keyboard shortcuts on: browser actions can be triggered with keys on a physical keyboard, even while the web page is focused."
+  },
+
+  "keyboardShortcuts_noShortcut": "No shortcut",
+  "@keyboardShortcuts_noShortcut": {
+    "description": "Shown under a browser action in the keyboard shortcuts list when it has no key assigned."
+  },
+  "keyboardShortcuts_tooltipChange": "Change",
+  "@keyboardShortcuts_tooltipChange": {
+    "description": "Tooltip of a key-combination chip under an action; tapping it records a different combination."
+  },
+  "keyboardShortcuts_tooltipRemoveChord": "Remove {chord}",
+  "@keyboardShortcuts_tooltipRemoveChord": {
+    "description": "Tooltip of the remove button on a key-combination chip. chord is the key combination as shown, e.g. \"Ctrl+T\".",
+    "placeholders": { "chord": { "type": "String" } }
+  },
+  "keyboardShortcuts_tooltipResetToDefault": "Reset to default",
+  "@keyboardShortcuts_tooltipResetToDefault": {
+    "description": "Tooltip of the button that restores one action's default key combinations."
+  },
+  "keyboardShortcuts_addShortcut": "Add shortcut",
+  "@keyboardShortcuts_addShortcut": {
+    "description": "Tooltip of the button that records a new key combination for an action, and title of the recording dialog opened by it."
+  },
+  "keyboardShortcuts_changeShortcutTitle": "Change shortcut",
+  "@keyboardShortcuts_changeShortcutTitle": {
+    "description": "Title of the dialog that records a replacement for an existing key combination."
+  },
+
+  "keyboardShortcuts_restoreDefaultsTooltip": "Restore default shortcuts",
+  "@keyboardShortcuts_restoreDefaultsTooltip": {
+    "description": "Tooltip of the toolbar button that resets all keyboard shortcuts to their defaults."
+  },
+  "keyboardShortcuts_restoreDefaultsTitle": "Restore default shortcuts?",
+  "@keyboardShortcuts_restoreDefaultsTitle": {
+    "description": "Title of the confirmation dialog before resetting all keyboard shortcuts."
+  },
+  "keyboardShortcuts_restoreDefaultsContent": "Every action goes back to its Firefox default keys. Your changes are lost.",
+  "@keyboardShortcuts_restoreDefaultsContent": {
+    "description": "Body of the confirmation dialog before resetting all keyboard shortcuts. The defaults are the keys Firefox uses."
+  },
+
+  "keyboardShortcuts_recorderInstructions": "Press the key combination for \"{actionTitle}\".",
+  "@keyboardShortcuts_recorderInstructions": {
+    "description": "Instruction in the dialog that records a key combination. actionTitle is the name of the browser action being assigned.",
+    "placeholders": { "actionTitle": { "type": "String" } }
+  },
+  "keyboardShortcuts_recorderWaitingForKeys": "Waiting for keys…",
+  "@keyboardShortcuts_recorderWaitingForKeys": {
+    "description": "Placeholder in the key recording dialog until the user presses keys; replaced by the pressed combination."
+  },
+  "keyboardShortcuts_recorderProblemNotAssignable": "Web pages need this key. Hold Ctrl, Alt or Meta with it, or use a function key.",
+  "@keyboardShortcuts_recorderProblemNotAssignable": {
+    "description": "Error in the key recording dialog when the pressed key alone would be taken away from web pages (e.g. a letter or arrow key). Ctrl, Alt and Meta are keyboard key names."
+  },
+  "keyboardShortcuts_recorderProblemAlreadyBound": "This is already a shortcut for this action.",
+  "@keyboardShortcuts_recorderProblemAlreadyBound": {
+    "description": "Error in the key recording dialog when the pressed combination is already assigned to this same action."
+  },
+  "keyboardShortcuts_recorderTakesFromOther": "Currently used by \"{ownerTitle}\". Saving moves it here.",
+  "@keyboardShortcuts_recorderTakesFromOther": {
+    "description": "Warning in the key recording dialog when the pressed combination belongs to another action. ownerTitle is that other action's name; saving removes the combination from it.",
+    "placeholders": { "ownerTitle": { "type": "String" } }
+  },
+
+  "keyboardShortcuts_actionCustomize": "Customize",
+  "@keyboardShortcuts_actionCustomize": {
+    "description": "Button in the keyboard shortcuts overview dialog that opens the settings screen for editing shortcuts."
+  },
+  "keyboardShortcuts_actionReassign": "Reassign",
+  "@keyboardShortcuts_actionReassign": {
+    "description": "Save button of the key recording dialog when the combination will be moved from another action to this one."
+  },
+  "keyboardShortcuts_actionRestore": "Restore",
+  "@keyboardShortcuts_actionRestore": {
+    "description": "Confirm button of the dialog that resets all keyboard shortcuts to their defaults."
+  }
+}

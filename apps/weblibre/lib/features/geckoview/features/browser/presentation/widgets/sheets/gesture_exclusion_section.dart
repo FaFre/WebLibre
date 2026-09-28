@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/host_rules.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -35,6 +36,7 @@ class GestureExclusionSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final masterEnabled = ref.watch(
       gestureSettingsWithDefaultsProvider.select((s) => s.enabled),
     );
@@ -53,15 +55,15 @@ class GestureExclusionSection extends HookConsumerWidget {
 
     final String subtitle;
     if (!masterEnabled) {
-      subtitle = 'Gestures are turned off globally';
+      subtitle = l10n.browser_gesturesTurnedOffGlobally;
     } else if (host == null) {
-      subtitle = 'Gestures are unavailable on this page';
+      subtitle = l10n.browser_gesturesUnavailableOnThisPage;
     } else if (parentRule != null) {
-      subtitle = 'Disabled by a rule for $parentRule';
+      subtitle = l10n.browser_gesturesDisabledByRuleFor(parentRule);
     } else if (isExcluded) {
-      subtitle = 'Gestures are disabled on this site';
+      subtitle = l10n.browser_gesturesDisabledOnThisSite;
     } else {
-      subtitle = 'Gestures are enabled on this site';
+      subtitle = l10n.browser_gesturesEnabledOnThisSite;
     }
 
     return SwitchListTile.adaptive(
@@ -72,7 +74,7 @@ class GestureExclusionSection extends HookConsumerWidget {
       onChanged: (masterEnabled && host != null && parentRule == null)
           ? (enabled) => _toggleExclusion(context, ref, host, enabled)
           : null,
-      title: const Text('Gestures'),
+      title: Text(l10n.browser_gesturesTitle),
       subtitle: Text(subtitle),
       secondary: Icon(
         isEnabledHere ? Icons.gesture : Icons.do_not_touch_outlined,
@@ -106,7 +108,12 @@ class GestureExclusionSection extends HookConsumerWidget {
     } catch (e, s) {
       logger.e('Failed to toggle gesture exclusion', error: e, stackTrace: s);
       if (context.mounted) {
-        showErrorMessage(context, 'Failed to toggle gestures: $e');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(
+            context,
+          ).browser_failedToToggleGestures(e.toString()),
+        );
       }
     }
   }

@@ -21,9 +21,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
+import 'package:weblibre/features/gestures/presentation/utils/gesture_start_position_l10n.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_stroke_view.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 typedef GestureBindingResult = ({GestureStroke stroke, BrowserAction action});
 
@@ -68,6 +71,7 @@ class _GestureBindingEditor extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final action = useState(initialAction ?? BrowserAction.values.first);
     final startPosition = useState(
       initialStroke?.startPosition ?? GestureStartPosition.anywhere,
@@ -102,19 +106,20 @@ class _GestureBindingEditor extends HookWidget {
           anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
           builder: (context) => AlertDialog(
             icon: const Icon(Icons.warning_amber),
-            title: const Text('Replace existing gesture?'),
+            title: Text(l10n.gestures_replaceExistingGestureTitle),
             content: Text(
-              'This stroke is already assigned to "${collisionAction.title}". '
-              'Saving will replace that binding.',
+              l10n.gestures_replaceExistingGestureContent(
+                collisionAction.label(context),
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.common_cancel),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Replace'),
+                child: Text(l10n.gestures_actionReplace),
               ),
             ],
           ),
@@ -129,7 +134,11 @@ class _GestureBindingEditor extends HookWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(initialStroke == null ? 'Create gesture' : 'Edit gesture'),
+        title: Text(
+          initialStroke == null
+              ? l10n.gestures_createGestureTitle
+              : l10n.gestures_editGestureTitle,
+        ),
       ),
       body: Column(
         children: [
@@ -149,8 +158,8 @@ class _GestureBindingEditor extends HookWidget {
                     clipBehavior: Clip.antiAlias,
                     child: ListTile(
                       leading: Icon(action.value.icon),
-                      title: const Text('Target action'),
-                      subtitle: Text(action.value.title),
+                      title: Text(l10n.gestures_targetActionLabel),
+                      subtitle: Text(action.value.label(context)),
                       trailing: const Icon(Icons.unfold_more),
                       onTap: () async {
                         final picked = await showGestureActionPicker(
@@ -166,7 +175,7 @@ class _GestureBindingEditor extends HookWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Start position',
+                      l10n.gestures_startPositionLabel,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -179,7 +188,7 @@ class _GestureBindingEditor extends HookWidget {
                         ChoiceChip(
                           avatar: Icon(value.icon),
                           showCheckmark: false,
-                          label: Text(value.label),
+                          label: Text(value.label(context)),
                           selected: startPosition.value == value,
                           onSelected: (selected) {
                             if (selected) startPosition.value = value;
@@ -191,7 +200,7 @@ class _GestureBindingEditor extends HookWidget {
 
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Fingers'),
+                    title: Text(l10n.gestures_fingersLabel),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -216,7 +225,7 @@ class _GestureBindingEditor extends HookWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Stroke pattern',
+                      l10n.gestures_strokePatternLabel,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
@@ -237,7 +246,7 @@ class _GestureBindingEditor extends HookWidget {
                     alignment: Alignment.center,
                     child: arrows.value.isEmpty
                         ? Text(
-                            'Draw a stroke pattern below',
+                            l10n.gestures_drawStrokePatternPlaceholder,
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   color: Theme.of(
@@ -285,7 +294,7 @@ class _GestureBindingEditor extends HookWidget {
                               arrows.value.length - 1,
                             ),
                       icon: const Icon(Icons.backspace_outlined),
-                      label: const Text('Undo last'),
+                      label: Text(l10n.gestures_undoLastAction),
                     ),
                   ),
                 ],
@@ -315,8 +324,8 @@ class _GestureBindingEditor extends HookWidget {
                     onPressed: stroke.isValid ? save : null,
                     child: Text(
                       collisionAction != null
-                          ? 'Replace gesture'
-                          : 'Save gesture',
+                          ? l10n.gestures_replaceGestureButtonLabel
+                          : l10n.gestures_saveGestureButtonLabel,
                     ),
                   ),
                 ],
@@ -338,6 +347,7 @@ class _CollisionWarning extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -356,7 +366,7 @@ class _CollisionWarning extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Already assigned to "${action.title}". Saving replaces it.',
+              l10n.gestures_collisionWarning(action.label(context)),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onErrorContainer,
               ),

@@ -1,0 +1,1186 @@
+{
+  "@@locale": "en",
+
+  "browser_actionSelect": "Select",
+  "@browser_actionSelect": {
+    "description": "Confirm button of the bookmark folder picker dialog."
+  },
+  "browser_actionKeep": "Keep",
+  "@browser_actionKeep": {
+    "description": "Button in the \"Keep tab?\" dialog: keep the tab that was opened by another app."
+  },
+  "browser_actionInstall": "Install",
+  "@browser_actionInstall": {
+    "description": "Button that installs the chosen extension file."
+  },
+
+  "browser_bookmarkAllTitle": "Bookmark All Tabs",
+  "@browser_bookmarkAllTitle": {
+    "description": "Title of the dialog for bookmarking all open tabs at once."
+  },
+  "browser_bookmarkAllFastTitle": "Fast",
+  "@browser_bookmarkAllFastTitle": {
+    "description": "Option in that dialog: bookmark everything into one folder without further questions."
+  },
+  "browser_bookmarkAllFastSubtitle": "Automatically add all tabs to a selected folder",
+  "@browser_bookmarkAllFastSubtitle": {
+    "description": "Explanation under \"Fast\"."
+  },
+  "browser_bookmarkAllDetailedTitle": "Detailed",
+  "@browser_bookmarkAllDetailedTitle": {
+    "description": "Option in that dialog: go through the bookmarks one by one."
+  },
+  "browser_bookmarkAllDetailedSubtitle": "Review and edit each bookmark individually",
+  "@browser_bookmarkAllDetailedSubtitle": {
+    "description": "Explanation under \"Detailed\"."
+  },
+
+  "browser_clearSiteDataTitle": "Clear Site Data",
+  "@browser_clearSiteDataTitle": {
+    "description": "Title of the dialog, and row in the site info sheet, for deleting data stored by the current website."
+  },
+  "browser_clearSiteDataContent": "This will clear the following data for {host}:\n{formattedTypes}\n\nYou may need to log in again.",
+  "@browser_clearSiteDataContent": {
+    "description": "Body of the clear site data dialog. host is the website domain; formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. \"• Cookies\"). Keep the line breaks (\\n) around it.",
+    "placeholders": {
+      "formattedTypes": { "type": "String" },
+      "host": { "type": "String" }
+    }
+  },
+
+  "browser_contentSelectionExtractedTitle": "Extracted Content",
+  "@browser_contentSelectionExtractedTitle": {
+    "description": "Option in the page content dialog (e.g. for copying or exporting as Markdown): use only the main article text."
+  },
+  "browser_contentSelectionExtractedSubtitle": "Reader-optimized content without navigation and ads",
+  "@browser_contentSelectionExtractedSubtitle": {
+    "description": "Explanation under \"Extracted Content\"."
+  },
+  "browser_contentSelectionFullTitle": "Full Content",
+  "@browser_contentSelectionFullTitle": {
+    "description": "Option in the page content dialog: use the whole page."
+  },
+  "browser_contentSelectionFullSubtitle": "Complete page including all elements and structure",
+  "@browser_contentSelectionFullSubtitle": {
+    "description": "Explanation under \"Full Content\"."
+  },
+
+  "browser_deleteDataTitle": "Delete Browsing Data",
+  "@browser_deleteDataTitle": {
+    "description": "Title of the sheet for deleting browsing data (history, cookies, cache, etc.)."
+  },
+
+  "browser_installAddonSheetTitle": "Install Extension from File",
+  "@browser_installAddonSheetTitle": {
+    "description": "Title of the sheet for installing a browser extension from a file on the device."
+  },
+  "browser_installAddonSelectFileButton": "Select XPI File",
+  "@browser_installAddonSelectFileButton": {
+    "description": "Button that opens the file picker for an extension file. XPI is the extension file format; keep it unchanged."
+  },
+  "browser_installAddonNoFileSelected": "No file selected",
+  "@browser_installAddonNoFileSelected": {
+    "description": "Shown in place of the file name until an extension file is chosen."
+  },
+  "browser_installAddonPinnedNotice": "Extensions installed from a local XPI stay pinned to that version and will not update automatically.",
+  "@browser_installAddonPinnedNotice": {
+    "description": "Note in the install sheet: extensions installed from a file do not update themselves. XPI is the file format."
+  },
+  "browser_installAddonNotXpiError": "Please select an .xpi file",
+  "@browser_installAddonNotXpiError": {
+    "description": "Error when the chosen file is not an extension file. \".xpi\" is a file extension; keep it unchanged."
+  },
+  "browser_installAddonPickFileFailed": "Failed to pick file: {error}",
+  "@browser_installAddonPickFileFailed": {
+    "description": "Error when the file picker failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "browser_installAddonInstalledMessage": "Extension installed. Automatic updates are disabled for this local version.",
+  "@browser_installAddonInstalledMessage": {
+    "description": "Confirmation after installing an extension from a file."
+  },
+  "browser_installAddonNotSignedError": "This extension is not signed by Mozilla. Enable \"Allow unsigned extensions\" in Extensions settings to install it.",
+  "@browser_installAddonNotSignedError": {
+    "description": "Error when the extension file is not signed by Mozilla. \"Allow unsigned extensions\" is the name of a setting and must match its translation."
+  },
+  "browser_installAddonInstallFailed": "Installation failed: {error}",
+  "@browser_installAddonInstallFailed": {
+    "description": "Error when installing an extension file failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_keepTabTitle": "Keep tab?",
+  "@browser_keepTabTitle": {
+    "description": "Title of the dialog asking whether to keep a tab another app opened, after returning from it."
+  },
+  "browser_keepTabContent": "Do you want to keep this tab or discard it?",
+  "@browser_keepTabContent": {
+    "description": "Body of the \"Keep tab?\" dialog."
+  },
+
+  "browser_qrCodeTitle": "Share QR Code",
+  "@browser_qrCodeTitle": {
+    "description": "Title of the dialog showing the page address as a QR code for another device to scan."
+  },
+
+  "browser_selectFolderTitle": "Select folder",
+  "@browser_selectFolderTitle": {
+    "description": "Title of the bookmark folder picker dialog."
+  },
+
+  "browser_tabTreeCurrentTabNotInTree": "The current tab is not part of this tree",
+  "@browser_tabTreeCurrentTabNotInTree": {
+    "description": "Message in the tab tree view (tabs shown with the tabs they were opened from) when the current tab is in a different tree."
+  },
+
+  "browser_menuManageExtensions": "Manage extensions",
+  "@browser_menuManageExtensions": {
+    "description": "Last item of the extensions menu: open extension management."
+  },
+
+  "browser_menuAddRegularTab": "Add Regular Tab",
+  "@browser_menuAddRegularTab": {
+    "description": "Item of the new-tab menu: open a regular tab."
+  },
+  "browser_menuAddChildTab": "Add Child Tab",
+  "@browser_menuAddChildTab": {
+    "description": "Item of the new-tab menu: open a tab nested under the current tab."
+  },
+  "browser_menuAddPrivateTab": "Add Private Tab",
+  "@browser_menuAddPrivateTab": {
+    "description": "Item of the new-tab menu: open a private tab."
+  },
+  "browser_menuAddIsolatedTab": "Add Isolated Tab",
+  "@browser_menuAddIsolatedTab": {
+    "description": "Item of the new-tab menu: open an isolated tab (own separate cookies and site data)."
+  },
+
+  "browser_fontSizeTitle": "Text Size",
+  "@browser_fontSizeTitle": {
+    "description": "Title of the sheet for changing the page text size."
+  },
+  "browser_fontSizeAutomaticNotice": "Automatic font size is enabled. Disable in Settings to adjust manually.",
+  "@browser_fontSizeAutomaticNotice": {
+    "description": "Note in the text size sheet while automatic font size is on."
+  },
+  "browser_fontSizeResetButton": "Reset to 100%",
+  "@browser_fontSizeResetButton": {
+    "description": "Button that restores the normal text size. Keep \"100%\" as a percentage in your locale's format."
+  },
+
+  "browser_historyNoPreviousPages": "No previous pages",
+  "@browser_historyNoPreviousPages": {
+    "description": "Shown in the back-button history list when there is no earlier page."
+  },
+  "browser_historyNoForwardPages": "No forward pages",
+  "@browser_historyNoForwardPages": {
+    "description": "Shown in the forward-button history list when there is no later page."
+  },
+
+  "browser_certSandboxedCaptureTitle": "Sandboxed capture",
+  "@browser_certSandboxedCaptureTitle": {
+    "description": "Connection status in the site info sheet for a page shown from a server-made capture (not loaded live)."
+  },
+  "browser_certSandboxedCaptureSubtitle": "The page is served from an offline archive — no live connection.",
+  "@browser_certSandboxedCaptureSubtitle": {
+    "description": "Explanation under \"Sandboxed capture\"."
+  },
+  "browser_certConnectionNotSecure": "Connection is not secure",
+  "@browser_certConnectionNotSecure": {
+    "description": "Connection status in the site info sheet when the page is not loaded over a secure (HTTPS) connection."
+  },
+  "browser_certConnectionSecure": "Connection is secure",
+  "@browser_certConnectionSecure": {
+    "description": "Connection status in the site info sheet when the connection is encrypted."
+  },
+  "browser_certVerifiedBy": "Verified By: {issuer}",
+  "@browser_certVerifiedBy": {
+    "description": "Line under \"Connection is secure\". issuer is the name of the certificate authority.",
+    "placeholders": { "issuer": { "type": "String" } }
+  },
+
+  "browser_containerFallbackName": "Container",
+  "@browser_containerFallbackName": {
+    "description": "Fallback name shown on the home page for a container without a name."
+  },
+  "browser_actionEnable": "Enable",
+  "@browser_actionEnable": {
+    "description": "Confirm button of the dialog enabling AI tab suggestions."
+  },
+
+  "browser_closeAllPrivateTabsTitle": "Close All Private Tabs",
+  "@browser_closeAllPrivateTabsTitle": {
+    "description": "Title of the confirmation dialog before closing all shown private tabs."
+  },
+  "browser_closeAllPrivateTabsContent": "Are you sure you want to close all displayed private tabs?",
+  "@browser_closeAllPrivateTabsContent": {
+    "description": "Body of that dialog."
+  },
+  "browser_closeAllTabsTitle": "Close All Tabs",
+  "@browser_closeAllTabsTitle": {
+    "description": "Title of the confirmation dialog before closing all shown tabs."
+  },
+  "browser_closeAllTabsContent": "Are you sure you want to close all displayed tabs?",
+  "@browser_closeAllTabsContent": {
+    "description": "Body of that dialog."
+  },
+
+  "browser_enableAiTabSuggestionsTitle": "Enable AI Tab Suggestions",
+  "@browser_enableAiTabSuggestionsTitle": {
+    "description": "Title of the dialog before enabling on-device AI suggestions for grouping tabs."
+  },
+  "browser_enableAiTabSuggestionsContent": "Enabling this feature may require downloading AI models. The download size and progress cannot be determined in advance.\n\nDo you want to continue?",
+  "@browser_enableAiTabSuggestionsContent": {
+    "description": "Body of that dialog: AI model files may need to be downloaded. Keep the blank line (\\n\\n)."
+  },
+
+  "browser_tooltipExpandGroup": "Expand group",
+  "@browser_tooltipExpandGroup": {
+    "description": "Tooltip of the button that expands a collapsed group of tabs in the tab overview."
+  },
+  "browser_tooltipCollapseGroup": "Collapse group",
+  "@browser_tooltipCollapseGroup": {
+    "description": "Tooltip of the button that collapses a group of tabs in the tab overview."
+  },
+
+  "browser_searchOrEnterUrl": "Search or enter URL",
+  "@browser_searchOrEnterUrl": {
+    "description": "Placeholder of the address bar: type a search or a web address."
+  },
+  "browser_tabCannotBeMovedHere": "Tab cannot be moved here",
+  "@browser_tabCannotBeMovedHere": {
+    "description": "Message when a dragged tab is dropped where it is not allowed."
+  },
+
+  "browser_quickActionNewTab": "New Tab",
+  "@browser_quickActionNewTab": {
+    "description": "Android app shortcut (long-press on the app icon): open a new tab."
+  },
+  "browser_quickActionNewPrivateTab": "New Private Tab",
+  "@browser_quickActionNewPrivateTab": {
+    "description": "Android app shortcut (long-press on the app icon): open a new private tab."
+  },
+  "browser_quickActionNewIsolatedTab": "New Isolated Tab",
+  "@browser_quickActionNewIsolatedTab": {
+    "description": "Android app shortcut (long-press on the app icon): open a new isolated tab."
+  },
+
+  "browser_shareLink": "Share Link",
+  "@browser_shareLink": {
+    "description": "Menu item or row that shares the page address."
+  },
+  "browser_showQrCode": "Show QR Code",
+  "@browser_showQrCode": {
+    "description": "Menu item or row that shows the page address as a QR code."
+  },
+  "browser_exportAsPdf": "Export as PDF",
+  "@browser_exportAsPdf": {
+    "description": "Menu item that saves the page as a PDF file."
+  },
+  "browser_failedToPrintPage": "Failed to print page",
+  "@browser_failedToPrintPage": {
+    "description": "Error message when printing the page failed."
+  },
+  "browser_print": "Print",
+  "@browser_print": {
+    "description": "Menu item that prints the page."
+  },
+  "browser_shareScreenshot": "Share Screenshot",
+  "@browser_shareScreenshot": {
+    "description": "Menu item or row that shares a screenshot of the page."
+  },
+  "browser_exportAsPng": "Export as PNG",
+  "@browser_exportAsPng": {
+    "description": "Menu item that saves the page as a PNG image."
+  },
+  "browser_openInNamedApp": "Open in {appName}",
+  "@browser_openInNamedApp": {
+    "description": "Menu item or row that opens the page in an installed app. appName is that app's name.",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+  "browser_openInApp": "Open in App",
+  "@browser_openInApp": {
+    "description": "Menu item or row that opens the page in an installed app, when its name is unknown."
+  },
+  "browser_copyAddress": "Copy Address",
+  "@browser_copyAddress": {
+    "description": "Menu item or row that copies the page address."
+  },
+  "browser_noTargetDevices": "No target devices",
+  "@browser_noTargetDevices": {
+    "description": "Shown in the send-to-device list when no other synced device can receive tabs."
+  },
+  "browser_sentTabToDevice": "Sent tab to {deviceName}",
+  "@browser_sentTabToDevice": {
+    "description": "Confirmation after sending the tab to another device. deviceName is that device's name.",
+    "placeholders": { "deviceName": { "type": "String" } }
+  },
+  "browser_failedToSendTab": "Failed to send tab",
+  "@browser_failedToSendTab": {
+    "description": "Error message when sending the tab to another device failed."
+  },
+  "browser_loadingDevices": "Loading devices...",
+  "@browser_loadingDevices": {
+    "description": "Placeholder while the list of synced devices loads."
+  },
+  "browser_failedToLoadDevices": "Failed to load devices",
+  "@browser_failedToLoadDevices": {
+    "description": "Error when the list of synced devices could not be loaded."
+  },
+  "browser_sendToDevice": "Send To Device",
+  "@browser_sendToDevice": {
+    "description": "Menu item or expandable row listing synced devices (Firefox Sync) to send the current tab to."
+  },
+
+  "browser_containerMenuNewTab": "New Tab",
+  "@browser_containerMenuNewTab": {
+    "description": "Item in a container's menu: open a new tab in this container."
+  },
+  "browser_unpinContainer": "Unpin Container",
+  "@browser_unpinContainer": {
+    "description": "Item in a container's menu: stop keeping this container at the top."
+  },
+  "browser_pinContainer": "Pin Container",
+  "@browser_pinContainer": {
+    "description": "Item in a container's menu: keep this container at the top of lists."
+  },
+  "browser_closeSubmenuAllTabs": "All Tabs",
+  "@browser_closeSubmenuAllTabs": {
+    "description": "Item in the \"Close Tabs\" submenu: close all tabs of this container or view."
+  },
+  "browser_closeSubmenuPrivateTabs": "Private Tabs",
+  "@browser_closeSubmenuPrivateTabs": {
+    "description": "Item in the \"Close Tabs\" submenu: close only private tabs."
+  },
+  "browser_closeSubmenuIsolatedTabs": "Isolated Tabs",
+  "@browser_closeSubmenuIsolatedTabs": {
+    "description": "Item in the \"Close Tabs\" submenu: close only isolated tabs."
+  },
+  "browser_closeSubmenuFilteredTabs": "Filtered Tabs",
+  "@browser_closeSubmenuFilteredTabs": {
+    "description": "Item in the \"Close Tabs\" submenu: close the tabs matching the current search filter."
+  },
+  "browser_menuCloseTabs": "Close Tabs",
+  "@browser_menuCloseTabs": {
+    "description": "Submenu in a container's menu with options for closing several tabs."
+  },
+  "browser_menuBookmarkAll": "Bookmark all",
+  "@browser_menuBookmarkAll": {
+    "description": "Item in a container's menu: bookmark all its tabs."
+  },
+  "browser_menuAssignedSites": "Assigned Sites…",
+  "@browser_menuAssignedSites": {
+    "description": "Item in a container's menu: edit the websites that always open in it."
+  },
+  "browser_menuClearContainerData": "Clear Container Data",
+  "@browser_menuClearContainerData": {
+    "description": "Item in a container's menu, and title of its dialog: delete the container's cookies and site data."
+  },
+  "browser_menuEditContainer": "Edit Container…",
+  "@browser_menuEditContainer": {
+    "description": "Item in a container's menu: open the container editor."
+  },
+  "browser_menuDeleteContainer": "Delete Container",
+  "@browser_menuDeleteContainer": {
+    "description": "Item in a container's menu: delete the container."
+  },
+  "browser_bookmarksAddedCount": "{count, plural, =1{1 bookmark added} other{{count} bookmarks added}}",
+  "@browser_bookmarksAddedCount": {
+    "description": "Confirmation after bookmarking all tabs. count is the number of bookmarks.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_containerDataClearedSuccess": "Container data cleared successfully",
+  "@browser_containerDataClearedSuccess": {
+    "description": "Confirmation after clearing a container's data (its tabs were reopened)."
+  },
+  "browser_containerDataClearedWithTabsClosed": "{count, plural, =1{Container data cleared. 1 tab closed.} other{Container data cleared. {count} tabs closed.}}",
+  "@browser_containerDataClearedWithTabsClosed": {
+    "description": "Confirmation after clearing a container's data. count is how many of its tabs were closed.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_errorClearingData": "Error clearing data: {error}",
+  "@browser_errorClearingData": {
+    "description": "Error message when clearing container data failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_appLinksSectionTitle": "App Links",
+  "@browser_appLinksSectionTitle": {
+    "description": "Section heading in the site info sheet for opening this site's links in installed apps."
+  },
+  "browser_openLinksForThisSite": "Open links for this site",
+  "@browser_openLinksForThisSite": {
+    "description": "Row in that section with a choice of how links to this site open."
+  },
+  "browser_followsTheDefault": "Follows the default",
+  "@browser_followsTheDefault": {
+    "description": "Line under that row while its value is loading: the app-wide setting applies."
+  },
+  "browser_followDefault": "Follow default",
+  "@browser_followDefault": {
+    "description": "Choice in that row: use the app-wide setting for this site."
+  },
+  "browser_openInAppOption": "Open in app",
+  "@browser_openInAppOption": {
+    "description": "Choice in that row: always open this site's links in its app."
+  },
+  "browser_keepInBrowser": "Keep in browser",
+  "@browser_keepInBrowser": {
+    "description": "Choice in that row: always keep this site's links in the browser."
+  },
+  "browser_noAppFoundForSite": "No app found for this site",
+  "@browser_noAppFoundForSite": {
+    "description": "Line under that row when no installed app handles this site."
+  },
+  "browser_alwaysOpensInApp": "Always opens in {appName}",
+  "@browser_alwaysOpensInApp": {
+    "description": "Line under that row. appName is the app's package name or \"the app\".",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+  "browser_theAppFallback": "the app",
+  "@browser_theAppFallback": {
+    "description": "Fallback phrase inserted into \"Always opens in {appName}\" when the app is unknown. Lowercase."
+  },
+  "browser_alwaysStaysInBrowser": "Always stays in the browser",
+  "@browser_alwaysStaysInBrowser": {
+    "description": "Line under that row when this site's links always stay in the browser."
+  },
+  "browser_followsDefaultOpensInApps": "Follows the default: opens in apps",
+  "@browser_followsDefaultOpensInApps": {
+    "description": "Line under that row: following the app-wide setting, which opens links in apps."
+  },
+  "browser_followsDefaultNoAppFound": "Follows the default: no app found",
+  "@browser_followsDefaultNoAppFound": {
+    "description": "Line under that row: following the app-wide setting, but no app handles this site."
+  },
+  "browser_followsDefaultAsksFirst": "Follows the default: asks first",
+  "@browser_followsDefaultAsksFirst": {
+    "description": "Line under that row: following the app-wide setting, which asks each time."
+  },
+  "browser_followsDefaultStaysInBrowser": "Follows the default: stays in the browser",
+  "@browser_followsDefaultStaysInBrowser": {
+    "description": "Line under that row: following the app-wide setting, which keeps links in the browser."
+  },
+  "browser_selectDataTypesToClear": "Select data types to clear",
+  "@browser_selectDataTypesToClear": {
+    "description": "Line under \"Clear Site Data\" while its options are expanded."
+  },
+  "browser_cookiesCacheAndSiteData": "Cookies, cache, and site data",
+  "@browser_cookiesCacheAndSiteData": {
+    "description": "Line under \"Clear Site Data\" while collapsed, listing what can be cleared."
+  },
+  "browser_dataTypeAuthSessions": "Auth Sessions",
+  "@browser_dataTypeAuthSessions": {
+    "description": "Checkbox in the clear site data options: sign-in sessions for this site."
+  },
+  "browser_dataTypeAuthSessionsSubtitle": "Saved logins, active sessions",
+  "@browser_dataTypeAuthSessionsSubtitle": {
+    "description": "Explanation under \"Auth Sessions\"."
+  },
+  "browser_dataTypeSiteData": "Site Data",
+  "@browser_dataTypeSiteData": {
+    "description": "Checkbox in the clear site data options: everything the site stores (includes cookies and cache)."
+  },
+  "browser_dataTypeSiteDataSubtitle": "Offline storage, databases, local files",
+  "@browser_dataTypeSiteDataSubtitle": {
+    "description": "Explanation under \"Site Data\"."
+  },
+  "browser_dataTypeCookies": "Cookies",
+  "@browser_dataTypeCookies": {
+    "description": "Checkbox in the clear site data options: only cookies."
+  },
+  "browser_dataTypeCookiesSubtitle": "Login tokens, preferences, tracking data",
+  "@browser_dataTypeCookiesSubtitle": {
+    "description": "Explanation under \"Cookies\"."
+  },
+  "browser_dataTypeCachedFiles": "Cached Files",
+  "@browser_dataTypeCachedFiles": {
+    "description": "Checkbox in the clear site data options: only temporary copies of files."
+  },
+  "browser_dataTypeCachedFilesSubtitle": "Images, scripts, stylesheets",
+  "@browser_dataTypeCachedFilesSubtitle": {
+    "description": "Explanation under \"Cached Files\"."
+  },
+  "browser_closeTabAfterClearing": "Close tab after clearing",
+  "@browser_closeTabAfterClearing": {
+    "description": "Checkbox in the clear site data options."
+  },
+  "browser_closeTabAfterClearingSubtitle": "Close this tab once data is cleared",
+  "@browser_closeTabAfterClearingSubtitle": {
+    "description": "Explanation under that checkbox."
+  },
+  "browser_clearingEllipsis": "Clearing...",
+  "@browser_clearingEllipsis": {
+    "description": "Label of the clear button while clearing runs."
+  },
+  "browser_clearNow": "Clear Now",
+  "@browser_clearNow": {
+    "description": "Button that clears the selected site data."
+  },
+  "browser_selectAtLeastOneDataType": "Select at least one data type",
+  "@browser_selectAtLeastOneDataType": {
+    "description": "Error when clearing site data with nothing selected."
+  },
+  "browser_siteDataCleared": "Site data cleared",
+  "@browser_siteDataCleared": {
+    "description": "Confirmation after clearing site data."
+  },
+  "browser_failedToClearSiteData": "Failed to clear site data: {error}",
+  "@browser_failedToClearSiteData": {
+    "description": "Error message when clearing site data failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_alwaysUseDesktopSite": "Always use desktop site",
+  "@browser_alwaysUseDesktopSite": {
+    "description": "Switch in the site info sheet: always load this site's desktop version."
+  },
+  "browser_unavailableOnThisPage": "Unavailable on this page",
+  "@browser_unavailableOnThisPage": {
+    "description": "Line under a site setting when the page has no website domain (e.g. a local file)."
+  },
+  "browser_setByRuleFor": "Set by a rule for {host}",
+  "@browser_setByRuleFor": {
+    "description": "Line under a site setting controlled by a broader rule. host is the domain the rule is for.",
+    "placeholders": { "host": { "type": "String" } }
+  },
+  "browser_siteAlwaysLoadsInDesktopMode": "This site always loads in desktop mode",
+  "@browser_siteAlwaysLoadsInDesktopMode": {
+    "description": "Line under the desktop site switch when it is on."
+  },
+  "browser_siteFollowsDefaultMode": "This site follows the default mode",
+  "@browser_siteFollowsDefaultMode": {
+    "description": "Line under the desktop site switch when it is off."
+  },
+  "browser_failedToToggleDesktopMode": "Failed to toggle desktop mode: {error}",
+  "@browser_failedToToggleDesktopMode": {
+    "description": "Error message when changing the desktop site setting failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_gesturesTitle": "Gestures",
+  "@browser_gesturesTitle": {
+    "description": "Switch in the site info sheet: allow drawn gestures on this site."
+  },
+  "browser_gesturesTurnedOffGlobally": "Gestures are turned off globally",
+  "@browser_gesturesTurnedOffGlobally": {
+    "description": "Line under that switch when gestures are off in settings."
+  },
+  "browser_gesturesUnavailableOnThisPage": "Gestures are unavailable on this page",
+  "@browser_gesturesUnavailableOnThisPage": {
+    "description": "Line under that switch when the page has no website domain."
+  },
+  "browser_gesturesDisabledByRuleFor": "Disabled by a rule for {host}",
+  "@browser_gesturesDisabledByRuleFor": {
+    "description": "Line under that switch when a broader rule turns gestures off. host is the domain the rule is for.",
+    "placeholders": { "host": { "type": "String" } }
+  },
+  "browser_gesturesDisabledOnThisSite": "Gestures are disabled on this site",
+  "@browser_gesturesDisabledOnThisSite": {
+    "description": "Line under that switch when it is off for this site."
+  },
+  "browser_gesturesEnabledOnThisSite": "Gestures are enabled on this site",
+  "@browser_gesturesEnabledOnThisSite": {
+    "description": "Line under that switch when it is on for this site."
+  },
+  "browser_failedToToggleGestures": "Failed to toggle gestures: {error}",
+  "@browser_failedToToggleGestures": {
+    "description": "Error message when changing the gesture setting for this site failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_errorLoadingPermissions": "Error loading permissions: {error}",
+  "@browser_errorLoadingPermissions": {
+    "description": "Error when the site's permissions could not be loaded. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "browser_permissionsSectionTitle": "Permissions",
+  "@browser_permissionsSectionTitle": {
+    "description": "Section heading in the site info sheet for permissions granted to this site (camera, location, etc.)."
+  },
+  "browser_showAll": "Show all",
+  "@browser_showAll": {
+    "description": "Button that shows all site permissions, including ones with default values; toggles with \"Show less\"."
+  },
+  "browser_noPermissionsSetForSite": "No permissions set for this site",
+  "@browser_noPermissionsSetForSite": {
+    "description": "Shown in the permissions section of the site info sheet when the site has no permission decisions."
+  },
+  "browser_permissionAsk": "Ask",
+  "@browser_permissionAsk": {
+    "description": "Option for a site permission: ask each time the site wants it."
+  },
+  "browser_permissionAllow": "Allow",
+  "@browser_permissionAllow": {
+    "description": "Option for a site permission: always allow."
+  },
+  "browser_permissionBlock": "Block",
+  "@browser_permissionBlock": {
+    "description": "Option for a site permission: always block."
+  },
+  "browser_autoplayTitle": "Autoplay",
+  "@browser_autoplayTitle": {
+    "description": "Row in the permissions section for whether media plays automatically on this site."
+  },
+  "browser_autoplayAllowAll": "Allow All",
+  "@browser_autoplayAllowAll": {
+    "description": "Autoplay option: let audio and video play automatically."
+  },
+  "browser_autoplayBlockAudible": "Block Audible",
+  "@browser_autoplayBlockAudible": {
+    "description": "Autoplay option: block only media with sound."
+  },
+  "browser_autoplayBlockAll": "Block All",
+  "@browser_autoplayBlockAll": {
+    "description": "Autoplay option: block all automatic playback."
+  },
+
+  "browser_failedToLoadTrackingProtection": "Failed to load tracking protection",
+  "@browser_failedToLoadTrackingProtection": {
+    "description": "Error when the tracking protection state for this site could not be loaded."
+  },
+  "browser_enhancedTrackingProtection": "Enhanced Tracking Protection",
+  "@browser_enhancedTrackingProtection": {
+    "description": "Switch in the site info sheet for Firefox's tracker blocking on this site. \"Enhanced Tracking Protection\" is Mozilla's feature name; use Firefox's translation if available."
+  },
+  "browser_trackersBeingBlocked": "Trackers on this site are being blocked",
+  "@browser_trackersBeingBlocked": {
+    "description": "Line under that switch when it is on."
+  },
+  "browser_trackersAllowed": "Trackers on this site are allowed",
+  "@browser_trackersAllowed": {
+    "description": "Line under that switch when it is off for this site."
+  },
+  "browser_failedToToggleTrackingProtection": "Failed to toggle tracking protection: {error}",
+  "@browser_failedToToggleTrackingProtection": {
+    "description": "Error message when changing tracking protection for this site failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_resizeSidePanel": "Resize side panel",
+  "@browser_resizeSidePanel": {
+    "description": "Screen-reader label of the handle for resizing the side tab panel."
+  },
+  "browser_unassignedContainerLabel": "Unassigned",
+  "@browser_unassignedContainerLabel": {
+    "description": "Label of the group of tabs that belong to no container."
+  },
+  "browser_tooltipCloseTab": "Close tab",
+  "@browser_tooltipCloseTab": {
+    "description": "Tooltip of the close button on a tab chip."
+  },
+
+  "browser_urlCleaned": "URL cleaned",
+  "@browser_urlCleaned": {
+    "description": "Confirmation after tracking parameters were removed from the address being shared."
+  },
+  "browser_urlPreviewApplied": "URL preview applied",
+  "@browser_urlPreviewApplied": {
+    "description": "Confirmation after the chosen tracking parameters were removed from the address being shared."
+  },
+  "browser_trackingParametersDetected": "{count, plural, =1{1 tracking parameter detected} other{{count} tracking parameters detected}}",
+  "@browser_trackingParametersDetected": {
+    "description": "Warning in the share sheet. count is the number of tracking parameters found in the page address.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_linkIsClean": "Link is clean",
+  "@browser_linkIsClean": {
+    "description": "Note in the share sheet: the page address contains no tracking parameters."
+  },
+  "browser_removeTrackingTooltip": "Remove tracking",
+  "@browser_removeTrackingTooltip": {
+    "description": "Tooltip of the button in the share sheet that removes tracking parameters."
+  },
+
+  "browser_menuFindInPage": "Find in Page",
+  "@browser_menuFindInPage": {
+    "description": "Item of the tab menu: search for text on the page."
+  },
+  "browser_menuReaderMode": "Reader Mode",
+  "@browser_menuReaderMode": {
+    "description": "Item of the tab menu with a checkbox: simplified, easy-to-read view of the page."
+  },
+  "browser_menuFetchFeedsOnPage": "Fetch Feeds on Page",
+  "@browser_menuFetchFeedsOnPage": {
+    "description": "Item of the tab menu: look for news feeds (RSS/Atom) on the page."
+  },
+  "browser_menuAddBookmark": "Add Bookmark",
+  "@browser_menuAddBookmark": {
+    "description": "Item of the tab menu: bookmark the page."
+  },
+  "browser_cloneRegular": "Regular",
+  "@browser_cloneRegular": {
+    "description": "Item in the tab menu's clone submenu: copy into a regular tab."
+  },
+  "browser_clonePrivate": "Private",
+  "@browser_clonePrivate": {
+    "description": "Item in the tab menu's clone submenu: copy into a private tab."
+  },
+  "browser_cloneIsolated": "Isolated",
+  "@browser_cloneIsolated": {
+    "description": "Item in the tab menu's clone submenu: copy into an isolated tab."
+  },
+  "browser_menuCloneTab": "Clone Tab",
+  "@browser_menuCloneTab": {
+    "description": "Submenu of the tab menu for copying the current tab."
+  },
+  "browser_menuAssignContainer": "Assign Container",
+  "@browser_menuAssignContainer": {
+    "description": "Item in the tab menu's container submenu: move the tab into a container."
+  },
+  "browser_menuUrlRelation": "URL relation",
+  "@browser_menuUrlRelation": {
+    "description": "Item in the tab menu's container submenu: link this site to a container so it always opens there."
+  },
+  "browser_menuUnassignUrlRelation": "Unassign URL relation",
+  "@browser_menuUnassignUrlRelation": {
+    "description": "Item in the tab menu's container submenu: remove this site's link to the container."
+  },
+  "browser_menuUnassignContainer": "Unassign Container",
+  "@browser_menuUnassignContainer": {
+    "description": "Item in the tab menu's container submenu: take the tab out of its container."
+  },
+  "browser_menuContainerSubmenu": "Container",
+  "@browser_menuContainerSubmenu": {
+    "description": "Submenu of the tab menu with container actions."
+  },
+  "browser_menuMoveUp": "Move up",
+  "@browser_menuMoveUp": {
+    "description": "Item in the tab menu's reorder submenu: move the tab one place up in the list."
+  },
+  "browser_menuMoveDown": "Move down",
+  "@browser_menuMoveDown": {
+    "description": "Item in the tab menu's reorder submenu: move the tab one place down in the list."
+  },
+  "browser_menuReorder": "Reorder",
+  "@browser_menuReorder": {
+    "description": "Submenu of the tab menu for moving the tab in the list."
+  },
+  "browser_menuShare": "Share",
+  "@browser_menuShare": {
+    "description": "Submenu of the tab menu with sharing actions."
+  },
+  "browser_menuCopyAsMarkdown": "Copy as Markdown",
+  "@browser_menuCopyAsMarkdown": {
+    "description": "Item in the tab menu's export submenu: copy the page text as Markdown."
+  },
+  "browser_markdownCopiedToClipboard": "Markdown copied to clipboard",
+  "@browser_markdownCopiedToClipboard": {
+    "description": "Confirmation after copying the page as Markdown."
+  },
+  "browser_menuExportAsMarkdown": "Export as Markdown",
+  "@browser_menuExportAsMarkdown": {
+    "description": "Item in the tab menu's export submenu: save the page text as a Markdown file."
+  },
+  "browser_menuExportSubmenu": "Export",
+  "@browser_menuExportSubmenu": {
+    "description": "Submenu of the tab menu for saving the page in other formats."
+  },
+  "browser_menuCloseTab": "Close Tab",
+  "@browser_menuCloseTab": {
+    "description": "Item of the tab menu: close the tab."
+  },
+  "browser_menuReload": "Reload",
+  "@browser_menuReload": {
+    "description": "Item of the tab menu: reload the page."
+  },
+  "browser_menuDesktopMode": "Desktop Mode",
+  "@browser_menuDesktopMode": {
+    "description": "Item of the tab menu with a checkbox: request the desktop version of the website."
+  },
+  "browser_menuAddToHomeScreen": "Add to Home Screen",
+  "@browser_menuAddToHomeScreen": {
+    "description": "Item of the tab menu: add the site to the Android home screen."
+  },
+  "browser_menuChangeParent": "Change parent…",
+  "@browser_menuChangeParent": {
+    "description": "Item in the tab menu's hierarchy submenu: choose which tab this tab is nested under."
+  },
+  "browser_menuDetachFromParent": "Detach from parent",
+  "@browser_menuDetachFromParent": {
+    "description": "Item in the tab menu's hierarchy submenu: stop nesting this tab under its parent tab."
+  },
+  "browser_menuHierarchy": "Hierarchy",
+  "@browser_menuHierarchy": {
+    "description": "Submenu of the tab menu for tab nesting (parent and child tabs)."
+  },
+  "browser_pageTranslated": "Translated",
+  "@browser_pageTranslated": {
+    "description": "Label of the translate item after the page was translated."
+  },
+  "browser_menuTranslatePage": "Translate Page",
+  "@browser_menuTranslatePage": {
+    "description": "Item of the tab menu, and title of the translation sheet: translate the page."
+  },
+  "browser_unpinTab": "Unpin tab",
+  "@browser_unpinTab": {
+    "description": "Item of the tab menu for a pinned tab: unpin it."
+  },
+  "browser_pinTab": "Pin tab",
+  "@browser_pinTab": {
+    "description": "Item of the tab menu: pin the tab to the start of the tab bar."
+  },
+
+  "browser_errorGeneric": "Error: {error}",
+  "@browser_errorGeneric": {
+    "description": "Generic error line in the parent tab picker. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "browser_tabNoLongerExists": "Tab no longer exists",
+  "@browser_tabNoLongerExists": {
+    "description": "Shown in the parent tab picker when the tab was closed meanwhile."
+  },
+  "browser_chooseAParentTab": "Choose a parent tab",
+  "@browser_chooseAParentTab": {
+    "description": "Heading of the sheet for choosing which tab to nest this tab under."
+  },
+  "browser_makeStandalone": "Make standalone",
+  "@browser_makeStandalone": {
+    "description": "Option in the parent tab picker: make the tab top-level."
+  },
+  "browser_detachFromCurrentParent": "Detach from current parent",
+  "@browser_detachFromCurrentParent": {
+    "description": "Explanation under \"Make standalone\"."
+  },
+  "browser_noCandidateTabsInContainer": "No candidate tabs in this container.",
+  "@browser_noCandidateTabsInContainer": {
+    "description": "Shown in the parent tab picker when no other tab in the container can be the parent."
+  },
+
+  "browser_clearContainerDataIntro": "This will clear all data for this container:",
+  "@browser_clearContainerDataIntro": {
+    "description": "First line of the clear container data dialog; a bulleted list follows."
+  },
+  "browser_bulletCookies": "• Cookies",
+  "@browser_bulletCookies": {
+    "description": "Bullet in the clear container data list. Keep the \"•\" bullet."
+  },
+  "browser_bulletSiteData": "• Site data",
+  "@browser_bulletSiteData": {
+    "description": "Bullet in the clear container data list. Keep the \"•\" bullet."
+  },
+  "browser_bulletCache": "• Cache",
+  "@browser_bulletCache": {
+    "description": "Bullet in the clear container data list. Keep the \"•\" bullet."
+  },
+  "browser_bulletPermissions": "• Permissions",
+  "@browser_bulletPermissions": {
+    "description": "Bullet in the clear container data list. Keep the \"•\" bullet."
+  },
+  "browser_tabsWillBeClosedCount": "{count, plural, =1{1 tab will be closed.} other{{count} tabs will be closed.}}",
+  "@browser_tabsWillBeClosedCount": {
+    "description": "Warning in the clear container data dialog. count is the number of the container's tabs that will close.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_recreateTabsAfterClearing": "Recreate tabs after clearing",
+  "@browser_recreateTabsAfterClearing": {
+    "description": "Checkbox in that dialog: reopen the container's tabs after clearing."
+  },
+  "browser_actionClearData": "Clear Data",
+  "@browser_actionClearData": {
+    "description": "Confirm button of the clear container data dialog."
+  },
+
+  "browser_closeFromSameHost": "Close from Same Host",
+  "@browser_closeFromSameHost": {
+    "description": "Long-press menu item on a tab card: close all tabs from the same website. \"Host\" means the website's domain."
+  },
+  "browser_closeTabAndDescendants": "Close Tab and Descendants",
+  "@browser_closeTabAndDescendants": {
+    "description": "Long-press menu item on a tab card: close the tab and all tabs opened from it."
+  },
+  "browser_tabUnpinned": "Tab unpinned",
+  "@browser_tabUnpinned": {
+    "description": "Confirmation after unpinning a tab, with an Undo button."
+  },
+
+  "browser_createdContainerNamed": "Created container \"{containerName}\"",
+  "@browser_createdContainerNamed": {
+    "description": "Confirmation after creating a container by dropping one tab onto another. containerName is its name.",
+    "placeholders": { "containerName": { "type": "String" } }
+  },
+  "browser_newContainerFallback": "New Container",
+  "@browser_newContainerFallback": {
+    "description": "Fallback name inserted into that confirmation when the new container has no name."
+  },
+  "browser_assignedParentTab": "Assigned parent tab",
+  "@browser_assignedParentTab": {
+    "description": "Confirmation after nesting a dropped tab under another tab."
+  },
+  "browser_couldNotAssignParentTab": "Could not assign parent tab",
+  "@browser_couldNotAssignParentTab": {
+    "description": "Error when nesting a dropped tab under another tab failed."
+  },
+  "browser_dropTabOntoTabTitle": "Drop tab onto tab",
+  "@browser_dropTabOntoTabTitle": {
+    "description": "Title of the sheet shown after dropping a tab onto another tab."
+  },
+  "browser_chooseHowTabsRelated": "Choose how these tabs should be related.",
+  "@browser_chooseHowTabsRelated": {
+    "description": "Line under that title."
+  },
+  "browser_createContainerOption": "Create container",
+  "@browser_createContainerOption": {
+    "description": "Option in that sheet: put both tabs into a new container."
+  },
+  "browser_createContainerOptionSubtitle": "Create a new container with both tabs.",
+  "@browser_createContainerOptionSubtitle": {
+    "description": "Explanation under \"Create container\"."
+  },
+  "browser_assignNewParentOption": "Assign new parent",
+  "@browser_assignNewParentOption": {
+    "description": "Option in that sheet: nest the dragged tab under the other tab."
+  },
+  "browser_assignNewParentOptionSubtitle": "Make the dropped-on tab the parent.",
+  "@browser_assignNewParentOptionSubtitle": {
+    "description": "Explanation under \"Assign new parent\"."
+  },
+
+  "browser_tabReorderingOnlyInDefaultMode": "Tab reordering is only available in default manual mode",
+  "@browser_tabReorderingOnlyInDefaultMode": {
+    "description": "Message when trying to reorder tabs while a sort order other than manual is active."
+  },
+  "browser_tooltipSearchInsideTabs": "Search inside tabs",
+  "@browser_tooltipSearchInsideTabs": {
+    "description": "Tooltip of the button that searches the text of open tabs."
+  },
+  "browser_filterTabType": "Tab Type",
+  "@browser_filterTabType": {
+    "description": "Submenu of the tab overview filter menu: show only a kind of tab."
+  },
+  "browser_sortPinnedFirst": "Sort Pinned First",
+  "@browser_sortPinnedFirst": {
+    "description": "Checkbox item in the sort submenu: list pinned tabs first."
+  },
+  "browser_filterSort": "Sort",
+  "@browser_filterSort": {
+    "description": "Submenu of the tab overview filter menu for sort order."
+  },
+  "browser_hierarchicalView": "Hierarchical View",
+  "@browser_hierarchicalView": {
+    "description": "Checkbox item in the filter menu: show child tabs nested under their parents."
+  },
+  "browser_filterDate": "Filter Date",
+  "@browser_filterDate": {
+    "description": "Filter menu item that opens a date range picker; replaced by the chosen range once set."
+  },
+  "browser_quickInterval": "Quick Interval",
+  "@browser_quickInterval": {
+    "description": "Submenu of the filter menu with preset time ranges (last hour, last day…)."
+  },
+  "browser_resetFilter": "Reset Filter",
+  "@browser_resetFilter": {
+    "description": "Filter menu item that clears all tab filters."
+  },
+  "browser_tooltipFilterAndSort": "Filter & Sort",
+  "@browser_tooltipFilterAndSort": {
+    "description": "Tooltip of the button that opens the tab filter and sort menu."
+  },
+  "browser_tooltipChangeViewMode": "Change view mode",
+  "@browser_tooltipChangeViewMode": {
+    "description": "Tooltip of the button that switches between list, grid and tree views of tabs."
+  },
+  "browser_downloadingAiModelsProgress": "Downloading AI models ({percent}%)",
+  "@browser_downloadingAiModelsProgress": {
+    "description": "Tooltip of the AI suggestions button while AI model files download. percent is the progress; keep the \"%\" sign in your locale's format.",
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "browser_disableAiTabSuggestions": "Disable AI tab suggestions",
+  "@browser_disableAiTabSuggestions": {
+    "description": "Tooltip of the AI suggestions button while suggestions are on."
+  },
+  "browser_enableAiTabSuggestionsTooltip": "Enable AI tab suggestions",
+  "@browser_enableAiTabSuggestionsTooltip": {
+    "description": "Tooltip of the AI suggestions button while suggestions are off."
+  },
+  "browser_disableReorderingMode": "Disable reordering mode",
+  "@browser_disableReorderingMode": {
+    "description": "Tooltip of the reorder button while tab reordering is on."
+  },
+  "browser_enableReorderingMode": "Enable reordering mode",
+  "@browser_enableReorderingMode": {
+    "description": "Tooltip of the reorder button while tab reordering is off."
+  },
+  "browser_reorderingRequiresDefaultManualMode": "Reordering requires default manual mode",
+  "@browser_reorderingRequiresDefaultManualMode": {
+    "description": "Tooltip of the disabled reorder button when a sort order other than manual is active."
+  },
+  "browser_dragAndDropTabsToReorder": "Drag and drop tabs to reorder them",
+  "@browser_dragAndDropTabsToReorder": {
+    "description": "Hint shown after turning tab reordering on."
+  },
+  "browser_tooltipTabActions": "Tab actions",
+  "@browser_tooltipTabActions": {
+    "description": "Tooltip of the menu button with actions for the tabs shown (close all, bookmark all…)."
+  },
+  "browser_hintSearchTabs": "Search tabs",
+  "@browser_hintSearchTabs": {
+    "description": "Placeholder of the tab search field in the tab overview."
+  },
+
+  "browser_noSyncedTabsAvailable": "No synced tabs available",
+  "@browser_noSyncedTabsAvailable": {
+    "description": "Shown in the synced tabs view when no tabs from other devices are available."
+  },
+  "browser_failedToLoadSyncedTabs": "Failed to load synced tabs: {error}",
+  "@browser_failedToLoadSyncedTabs": {
+    "description": "Error when tabs from other devices could not be loaded. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "browser_translateFromLabel": "From",
+  "@browser_translateFromLabel": {
+    "description": "Label of the source language drop-down in the translation sheet."
+  },
+  "browser_translateToLabel": "To",
+  "@browser_translateToLabel": {
+    "description": "Label of the target language drop-down in the translation sheet."
+  },
+  "browser_translationError": "Translation error: {error}",
+  "@browser_translationError": {
+    "description": "Error in the translation sheet. error is the engine's technical error name (English).",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "browser_failedToRestorePage": "Failed to restore the page",
+  "@browser_failedToRestorePage": {
+    "description": "Error when showing the untranslated page again failed."
+  },
+  "browser_showOriginal": "Show Original",
+  "@browser_showOriginal": {
+    "description": "Button in the translation sheet that shows the untranslated page."
+  },
+  "browser_failedToTranslatePage": "Failed to translate the page",
+  "@browser_failedToTranslatePage": {
+    "description": "Error message when translating the page failed."
+  },
+  "browser_retranslate": "Retranslate",
+  "@browser_retranslate": {
+    "description": "Button in the translation sheet that translates again with the chosen languages."
+  },
+  "browser_translateAction": "Translate",
+  "@browser_translateAction": {
+    "description": "Button in the translation sheet that starts translating."
+  },
+
+  "browser_tabTypeFilterAll": "All Tabs",
+  "@browser_tabTypeFilterAll": {
+    "description": "Tab kind filter option: show all tabs."
+  },
+  "browser_tabTypeFilterRegular": "Regular",
+  "@browser_tabTypeFilterRegular": {
+    "description": "Tab kind filter option: show only regular tabs."
+  },
+  "browser_tabTypeFilterPrivate": "Private",
+  "@browser_tabTypeFilterPrivate": {
+    "description": "Tab kind filter option: show only private tabs."
+  },
+  "browser_tabTypeFilterIsolated": "Isolated",
+  "@browser_tabTypeFilterIsolated": {
+    "description": "Tab kind filter option: show only isolated tabs."
+  },
+
+  "browser_tabSortDefault": "Default",
+  "@browser_tabSortDefault": {
+    "description": "Tab sort option: manual order."
+  },
+  "browser_tabSortTitleAsc": "Title A-Z",
+  "@browser_tabSortTitleAsc": {
+    "description": "Tab sort option: by title, A to Z."
+  },
+  "browser_tabSortTitleDesc": "Title Z-A",
+  "@browser_tabSortTitleDesc": {
+    "description": "Tab sort option: by title, Z to A."
+  },
+  "browser_tabSortUrlAsc": "URL A-Z",
+  "@browser_tabSortUrlAsc": {
+    "description": "Tab sort option: by web address, A to Z."
+  },
+  "browser_tabSortUrlDesc": "URL Z-A",
+  "@browser_tabSortUrlDesc": {
+    "description": "Tab sort option: by web address, Z to A."
+  },
+  "browser_tabSortNewestFirst": "Newest First",
+  "@browser_tabSortNewestFirst": {
+    "description": "Tab sort option: newest tabs first."
+  },
+  "browser_tabSortOldestFirst": "Oldest First",
+  "@browser_tabSortOldestFirst": {
+    "description": "Tab sort option: oldest tabs first."
+  },
+
+  "browser_tabIntervalLastHour": "Last Hour",
+  "@browser_tabIntervalLastHour": {
+    "description": "Quick time filter for tabs used in the last hour."
+  },
+  "browser_tabIntervalLast3Hours": "Last 3 Hours",
+  "@browser_tabIntervalLast3Hours": {
+    "description": "Quick time filter for tabs used in the last 3 hours."
+  },
+  "browser_tabIntervalLast8Hours": "Last 8 Hours",
+  "@browser_tabIntervalLast8Hours": {
+    "description": "Quick time filter for tabs used in the last 8 hours."
+  },
+  "browser_tabIntervalLastDay": "Last Day",
+  "@browser_tabIntervalLastDay": {
+    "description": "Quick time filter for tabs used in the last 24 hours."
+  },
+  "browser_tabIntervalLast3Days": "Last 3 Days",
+  "@browser_tabIntervalLast3Days": {
+    "description": "Quick time filter for tabs used in the last 3 days."
+  },
+  "browser_tabIntervalLastWeek": "Last Week",
+  "@browser_tabIntervalLastWeek": {
+    "description": "Quick time filter for tabs used in the last 7 days."
+  },
+  "browser_tabIntervalLastMonth": "Last Month",
+  "@browser_tabIntervalLastMonth": {
+    "description": "Quick time filter for tabs used in the last month."
+  },
+
+  "browser_tabsViewModeList": "List",
+  "@browser_tabsViewModeList": {
+    "description": "Tab overview layout option: list."
+  },
+  "browser_tabsViewModeGrid": "Grid",
+  "@browser_tabsViewModeGrid": {
+    "description": "Tab overview layout option: grid of tab previews."
+  },
+  "browser_tabsViewModeTree": "Tree",
+  "@browser_tabsViewModeTree": {
+    "description": "Tab overview layout option: tree of parent and child tabs."
+  },
+
+  "browser_permissionCamera": "Camera",
+  "@browser_permissionCamera": {
+    "description": "Name of a site permission in the site info sheet."
+  },
+  "browser_permissionMicrophone": "Microphone",
+  "@browser_permissionMicrophone": {
+    "description": "Name of a site permission in the site info sheet."
+  },
+  "browser_permissionLocation": "Location",
+  "@browser_permissionLocation": {
+    "description": "Name of a site permission in the site info sheet: access to the device's location."
+  },
+  "browser_permissionNotification": "Notifications",
+  "@browser_permissionNotification": {
+    "description": "Name of a site permission in the site info sheet: showing notifications."
+  },
+  "browser_permissionPersistentStorage": "Persistent Storage",
+  "@browser_permissionPersistentStorage": {
+    "description": "Name of a site permission: keep the site's stored data even when space runs low."
+  },
+  "browser_permissionCrossOriginStorage": "Cross-Origin Storage",
+  "@browser_permissionCrossOriginStorage": {
+    "description": "Name of a site permission: let embedded content from other sites use its storage (storage access)."
+  },
+  "browser_permissionMediaKeySystem": "Media Key System (DRM)",
+  "@browser_permissionMediaKeySystem": {
+    "description": "Name of a site permission: play copy-protected (DRM) media. DRM is a technical abbreviation."
+  },
+
+  "browser_tabReorderBlockedMessage": "Clear the tab view filter or search to reorder tabs",
+  "@browser_tabReorderBlockedMessage": {
+    "description": "Message when trying to drag a tab while the tab overview is filtered or searched."
+  }
+}

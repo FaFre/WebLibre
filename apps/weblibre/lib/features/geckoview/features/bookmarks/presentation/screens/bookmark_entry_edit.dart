@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/b
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/delete_bookmark_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/widgets/folder_tree_picker.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/uri_input_parser.dart';
 
@@ -42,6 +43,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final nameTextController = useTextEditingController(
@@ -62,8 +64,8 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: (exisitingEntry != null)
-            ? const Text('Edit Bookmark')
-            : const Text('Create Bookmark'),
+            ? Text(l10n.bookmarks_editBookmarkTitle)
+            : Text(l10n.bookmarks_createBookmarkTitle),
         actions: [
           IconButton(
             onPressed: () async {
@@ -128,13 +130,13 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
               children: [
                 TextFormField(
                   controller: nameTextController,
-                  decoration: const InputDecoration(
-                    label: Text('Name'),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bookmarks_fieldNameLabel),
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
                   minLines: 1,
                   maxLines: 3,
-                  validator: validateRequired,
+                  validator: (value) => validateRequired(value, l10n: l10n),
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -142,8 +144,8 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                   keyboardType: TextInputType.url,
                   minLines: 1,
                   maxLines: 10,
-                  decoration: const InputDecoration(
-                    label: Text('URL'),
+                  decoration: InputDecoration(
+                    label: Text(l10n.bookmarks_fieldUrlLabel),
                     hintText: 'https://example.com/',
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
@@ -152,6 +154,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                       value,
                       onlyHttpProtocol: true,
                       eagerParsing: true,
+                      l10n: l10n,
                     );
                   },
                 ),
@@ -164,7 +167,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                   const SizedBox(height: 8),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Add to top'),
+                    title: Text(l10n.bookmarks_addToTop),
                     value: addToTop.value,
                     onChanged: (value) => addToTop.value = value,
                   ),
@@ -181,7 +184,7 @@ class BookmarkEntryEditScreen extends HookConsumerWidget {
                         foregroundColor: Theme.of(context).colorScheme.error,
                         iconColor: Theme.of(context).colorScheme.error,
                       ),
-                      label: const Text('Delete'),
+                      label: Text(l10n.common_delete),
                       icon: const Icon(MdiIcons.bookmarkRemove),
                       onPressed: () async {
                         final result = await showDeleteBookmarkDialog(context);

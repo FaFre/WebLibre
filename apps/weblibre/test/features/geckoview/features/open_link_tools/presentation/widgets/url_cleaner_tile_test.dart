@@ -23,6 +23,7 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/enti
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_rule.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   Future<void> pumpTile(
@@ -32,6 +33,8 @@ void main() {
   }) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: UrlCleanerTile(
             result: result,

@@ -22,6 +22,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ContainersSection extends StatelessWidget {
   final void Function(ContainerDataWithCount container) onContainerSelected;
@@ -30,8 +31,10 @@ class ContainersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SearchModuleSection(
-      title: 'Containers',
+      title: l10n.search_moduleLabelContainers,
       moduleType: SearchModuleType.containers,
       totalCount: 1,
       contentSliverBuilder:

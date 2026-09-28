@@ -29,6 +29,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The installed extensions, as one expandable row.
 ///
@@ -39,6 +40,7 @@ class ExtensionsSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final addonService = ref.watch(addonServiceProvider);
     final extensionsExpanded = ref.watch(
       persistedBoolProvider(PersistedBoolKey.extensionsExpanded),
@@ -66,7 +68,7 @@ class ExtensionsSection extends HookConsumerWidget {
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
             leading: const Icon(MdiIcons.puzzle),
-            title: const Text('Extensions'),
+            title: Text(l10n.menu_extensionsTitle),
             initiallyExpanded: extensionsExpanded,
             onExpansionChanged: (_) => ref
                 .read(
@@ -83,7 +85,7 @@ class ExtensionsSection extends HookConsumerWidget {
                     contentPadding: const EdgeInsets.only(left: 56, right: 16),
                     leading: ExtensionBadgeIcon(extension),
                     title: Text(
-                      extension.title ?? 'Extension',
+                      extension.title ?? l10n.menu_extensionFallbackTitle,
                       style: const TextStyle(fontSize: 14),
                     ),
                     dense: true,
@@ -93,7 +95,7 @@ class ExtensionsSection extends HookConsumerWidget {
                         const VerticalDivider(indent: 4, endIndent: 4),
                         IconButton(
                           icon: const Icon(Icons.settings, size: 20),
-                          tooltip: 'Extension settings',
+                          tooltip: l10n.menu_extensionsSettingsTooltip,
                           onPressed: () async {
                             await openExtensionSettings(extension.extensionId);
                           },
@@ -118,7 +120,7 @@ class ExtensionsSection extends HookConsumerWidget {
                     contentPadding: const EdgeInsets.only(left: 56, right: 16),
                     leading: ExtensionBadgeIcon(extension),
                     title: Text(
-                      extension.title ?? 'Extension',
+                      extension.title ?? l10n.menu_extensionFallbackTitle,
                       style: const TextStyle(fontSize: 14),
                     ),
                     dense: true,
@@ -128,7 +130,7 @@ class ExtensionsSection extends HookConsumerWidget {
                         const VerticalDivider(indent: 4, endIndent: 4),
                         IconButton(
                           icon: const Icon(Icons.settings, size: 20),
-                          tooltip: 'Extension settings',
+                          tooltip: l10n.menu_extensionsSettingsTooltip,
                           onPressed: () async {
                             await openExtensionSettings(extension.extensionId);
                           },
@@ -148,7 +150,7 @@ class ExtensionsSection extends HookConsumerWidget {
               ],
               // Management
               buildMenuSubTile(
-                'Manage Extensions',
+                l10n.menu_extensionsManage,
                 icon: MdiIcons.puzzleEdit,
                 onTap: () async {
                   Navigator.pop(context);

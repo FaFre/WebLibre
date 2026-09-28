@@ -26,73 +26,79 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/web_push/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-const List<SettingsSectionDefinition> webPushSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Delivery',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'UnifiedPush Distributor',
-        subtitle: 'The app that delivers website push notifications',
-        keywords: ['notifications', 'push', 'unifiedpush', 'ntfy'],
-        child: _DistributorTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Notification Permission',
-        subtitle: 'Required to display website notifications',
-        keywords: ['notifications', 'permission'],
-        child: _NotificationPermissionTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Subscriptions',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Site Subscriptions',
-        subtitle: 'Websites subscribed to push notifications',
-        keywords: ['sites', 'subscriptions'],
-        child: _SubscriptionList(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> webPushSettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.webPush_deliverySectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.webPush_distributorTileTitle,
+          subtitle: l10n.webPush_indexDistributorSubtitle,
+          keywords: settingsKeywords(l10n.webPush_distributorTileKeywords),
+          child: const _DistributorTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.webPush_notificationPermissionTitle,
+          subtitle: l10n.webPush_indexNotificationPermissionSubtitle,
+          keywords: settingsKeywords(
+            l10n.webPush_notificationPermissionKeywords,
+          ),
+          child: const _NotificationPermissionTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.webPush_subscriptionsSectionTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.webPush_indexSiteSubscriptionsTitle,
+          subtitle: l10n.webPush_indexSiteSubscriptionsSubtitle,
+          keywords: settingsKeywords(
+            l10n.webPush_indexSiteSubscriptionsKeywords,
+          ),
+          child: const _SubscriptionList(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class WebPushSettingsScreen extends StatelessWidget {
   const WebPushSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Notifications',
-      subtitle: 'Web push delivery, distributor, and site subscriptions.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.webPush_screenTitle,
+      subtitle: l10n.webPush_screenSubtitle,
       icon: MdiIcons.bellBadgeOutline,
-      sections: webPushSettingsSections,
+      sections: webPushSettingsSections(context),
     );
   }
 }
 
 extension on PushDistributorStatus {
-  String get label => switch (this) {
-    PushDistributorStatus.noneAvailable => 'No distributor installed',
-    PushDistributorStatus.notSelected => 'No distributor selected',
-    PushDistributorStatus.pending => 'Waiting for distributor',
-    PushDistributorStatus.ready => 'Active',
-    PushDistributorStatus.unavailable => 'Distributor uninstalled',
+  String label(AppLocalizations l10n) => switch (this) {
+    PushDistributorStatus.noneAvailable => l10n.webPush_statusNoneAvailable,
+    PushDistributorStatus.notSelected => l10n.webPush_statusNotSelected,
+    PushDistributorStatus.pending => l10n.webPush_statusPending,
+    PushDistributorStatus.ready => l10n.webPush_statusReady,
+    PushDistributorStatus.unavailable => l10n.webPush_statusUnavailable,
   };
 
-  String get description => switch (this) {
-    PushDistributorStatus.noneAvailable =>
-      'Install a UnifiedPush distributor such as ntfy to receive website push notifications.',
-    PushDistributorStatus.notSelected =>
-      'Choose which app should deliver website push notifications to WebLibre.',
-    PushDistributorStatus.pending =>
-      'The selected app has not confirmed registration yet. This usually resolves on its own.',
-    PushDistributorStatus.ready =>
-      'Website push notifications are delivered through this app.',
-    PushDistributorStatus.unavailable =>
-      'The app that delivered push notifications was uninstalled. Website notifications will not arrive until you choose another.',
+  String description(AppLocalizations l10n) => switch (this) {
+    PushDistributorStatus.noneAvailable => l10n.webPush_statusDescNoneAvailable,
+    PushDistributorStatus.notSelected => l10n.webPush_statusDescNotSelected,
+    PushDistributorStatus.pending => l10n.webPush_statusDescPending,
+    PushDistributorStatus.ready => l10n.webPush_statusDescReady,
+    PushDistributorStatus.unavailable => l10n.webPush_statusDescUnavailable,
   };
 
   bool get isProblem =>
@@ -105,20 +111,21 @@ class _DistributorTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final status = ref.watch(pushStatusProvider);
     final mutation = ref.watch(pushDistributorMutationProvider);
     final isMutating = mutation.isLoading;
 
     return status.when(
-      loading: () => const ListTile(
-        leading: Icon(MdiIcons.bellBadgeOutline),
-        title: Text('UnifiedPush Distributor'),
-        subtitle: Text('Checking…'),
+      loading: () => ListTile(
+        leading: const Icon(MdiIcons.bellBadgeOutline),
+        title: Text(l10n.webPush_distributorTileTitle),
+        subtitle: Text(l10n.webPush_checking),
       ),
       error: (error, _) => ListTile(
         leading: const Icon(MdiIcons.alertCircleOutline),
-        title: const Text('UnifiedPush Distributor'),
-        subtitle: Text('Could not read push status: $error'),
+        title: Text(l10n.webPush_distributorTileTitle),
+        subtitle: Text(l10n.webPush_couldNotReadStatus('$error')),
       ),
       data: (pushStatus) {
         final theme = Theme.of(context);
@@ -136,13 +143,13 @@ class _DistributorTile extends HookConsumerWidget {
                     : MdiIcons.bellBadgeOutline,
                 color: isProblem ? theme.colorScheme.error : null,
               ),
-              title: const Text('UnifiedPush Distributor'),
+              title: Text(l10n.webPush_distributorTileTitle),
               subtitle: Text(
                 isMutating
-                    ? 'Updating distributor...'
+                    ? l10n.webPush_updatingDistributor
                     : current != null
-                    ? '${current.label ?? current.packageName} — ${pushStatus.status.label}'
-                    : pushStatus.status.label,
+                    ? '${current.label ?? current.packageName} — ${pushStatus.status.label(l10n)}'
+                    : pushStatus.status.label(l10n),
                 style: isProblem
                     ? TextStyle(color: theme.colorScheme.error)
                     : null,
@@ -163,8 +170,8 @@ class _DistributorTile extends HookConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   failure == null
-                      ? pushStatus.status.description
-                      : 'Push delivery may be temporarily unavailable while the distributor registration recovers.',
+                      ? pushStatus.status.description(l10n)
+                      : l10n.webPush_registrationRecovering,
                   style: theme.textTheme.bodySmall,
                 ),
               ),
@@ -175,7 +182,7 @@ class _DistributorTile extends HookConsumerWidget {
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Last registration error: $failure',
+                    l10n.webPush_lastRegistrationError(failure),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.error,
                     ),
@@ -190,7 +197,9 @@ class _DistributorTile extends HookConsumerWidget {
                   child: TextButton.icon(
                     icon: const Icon(MdiIcons.bellOffOutline),
                     label: Text(
-                      isMutating ? 'Disabling web push...' : 'Disable web push',
+                      isMutating
+                          ? l10n.webPush_disablingWebPush
+                          : l10n.webPush_disableWebPush,
                     ),
                     onPressed: isMutating
                         ? null
@@ -214,11 +223,10 @@ class _DistributorTile extends HookConsumerWidget {
     WidgetRef ref,
     PushStatus pushStatus,
   ) async {
+    final l10n = AppLocalizations.of(context);
+
     if (pushStatus.available.isEmpty) {
-      showErrorMessage(
-        context,
-        'No UnifiedPush distributor installed. Install one, such as ntfy, and try again.',
-      );
+      showErrorMessage(context, l10n.webPush_noDistributorInstalled);
       return;
     }
 
@@ -226,7 +234,7 @@ class _DistributorTile extends HookConsumerWidget {
       context: context,
       anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => SimpleDialog(
-        title: const Text('Choose distributor'),
+        title: Text(l10n.webPush_chooseDistributorTitle),
         children: [
           for (final distributor in pushStatus.available)
             SimpleDialogOption(
@@ -254,26 +262,34 @@ class _DistributorTile extends HookConsumerWidget {
           .read(pushDistributorMutationProvider.notifier)
           .setDistributor(selected.packageName);
       if (context.mounted) {
-        showInfoMessage(context, 'UnifiedPush distributor configured.');
+        showInfoMessage(context, l10n.webPush_distributorConfigured);
       }
     } catch (error) {
       if (context.mounted) {
-        showErrorMessage(context, 'Could not configure distributor: $error');
+        showErrorMessage(
+          context,
+          l10n.webPush_couldNotConfigureDistributor('$error'),
+        );
       }
     }
   }
 
   Future<void> _removeDistributor(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+
     try {
       await ref
           .read(pushDistributorMutationProvider.notifier)
           .removeDistributor();
       if (context.mounted) {
-        showInfoMessage(context, 'Web push disabled.');
+        showInfoMessage(context, l10n.webPush_webPushDisabled);
       }
     } catch (error) {
       if (context.mounted) {
-        showErrorMessage(context, 'Could not disable web push: $error');
+        showErrorMessage(
+          context,
+          l10n.webPush_couldNotDisableWebPush('$error'),
+        );
       }
     }
   }
@@ -284,6 +300,7 @@ class _NotificationPermissionTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isUpdating = useState(false);
     final granted = ref.watch(notificationPermissionGrantedProvider);
     final theme = Theme.of(context);
@@ -295,25 +312,27 @@ class _NotificationPermissionTile extends HookConsumerWidget {
     });
 
     return granted.when(
-      loading: () => const ListTile(
-        leading: Icon(MdiIcons.bellBadgeOutline),
-        title: Text('Notification Permission'),
-        subtitle: Text('Checking…'),
+      loading: () => ListTile(
+        leading: const Icon(MdiIcons.bellBadgeOutline),
+        title: Text(l10n.webPush_notificationPermissionTitle),
+        subtitle: Text(l10n.webPush_checking),
       ),
       error: (error, _) => ListTile(
         leading: Icon(
           MdiIcons.alertCircleOutline,
           color: theme.colorScheme.error,
         ),
-        title: const Text('Notification Permission'),
-        subtitle: Text('Could not read permission state: $error'),
+        title: Text(l10n.webPush_notificationPermissionTitle),
+        subtitle: Text(
+          l10n.webPush_notificationPermissionCouldNotRead('$error'),
+        ),
       ),
       data: (isGranted) {
         if (isGranted) {
-          return const ListTile(
-            leading: Icon(MdiIcons.bellCheckOutline),
-            title: Text('Notification Permission'),
-            subtitle: Text('Granted'),
+          return ListTile(
+            leading: const Icon(MdiIcons.bellCheckOutline),
+            title: Text(l10n.webPush_notificationPermissionTitle),
+            subtitle: Text(l10n.webPush_notificationPermissionGranted),
           );
         }
 
@@ -322,9 +341,9 @@ class _NotificationPermissionTile extends HookConsumerWidget {
             MdiIcons.bellRemoveOutline,
             color: theme.colorScheme.error,
           ),
-          title: const Text('Notification Permission'),
+          title: Text(l10n.webPush_notificationPermissionTitle),
           subtitle: Text(
-            'Denied. Push messages arrive but no notification can be shown.',
+            l10n.webPush_notificationPermissionDenied,
             style: TextStyle(color: theme.colorScheme.error),
           ),
           trailing: TextButton(
@@ -345,7 +364,7 @@ class _NotificationPermissionTile extends HookConsumerWidget {
                       if (context.mounted) {
                         showErrorMessage(
                           context,
-                          'Could not update notification permission: $error',
+                          l10n.webPush_couldNotUpdatePermission('$error'),
                         );
                       }
                     } finally {
@@ -360,7 +379,7 @@ class _NotificationPermissionTile extends HookConsumerWidget {
                     dimension: 18,
                     child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                   )
-                : const Text('Grant'),
+                : Text(l10n.webPush_grantAction),
           ),
         );
       },
@@ -373,32 +392,31 @@ class _SubscriptionList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final subscriptions = ref.watch(pushSubscriptionsProvider);
     final distributorReady =
         ref.watch(pushStatusProvider).value?.status ==
         PushDistributorStatus.ready;
 
     return subscriptions.when(
-      loading: () => const ListTile(
-        leading: SizedBox.square(
+      loading: () => ListTile(
+        leading: const SizedBox.square(
           dimension: 24,
           child: CircularProgressIndicator.adaptive(strokeWidth: 2),
         ),
-        title: Text('Loading subscriptions…'),
+        title: Text(l10n.webPush_loadingSubscriptions),
       ),
       error: (error, _) => ListTile(
         leading: const Icon(MdiIcons.alertCircleOutline),
-        title: const Text('Could not read subscriptions'),
+        title: Text(l10n.webPush_couldNotReadSubscriptions),
         subtitle: Text('$error'),
       ),
       data: (items) {
         if (items.isEmpty) {
-          return const ListTile(
-            leading: Icon(MdiIcons.webOff),
-            title: Text('No site subscriptions'),
-            subtitle: Text(
-              'Websites you allow to send notifications will appear here.',
-            ),
+          return ListTile(
+            leading: const Icon(MdiIcons.webOff),
+            title: Text(l10n.webPush_noSiteSubscriptions),
+            subtitle: Text(l10n.webPush_noSiteSubscriptionsDescription),
           );
         }
 
@@ -414,19 +432,16 @@ class _SubscriptionList extends HookConsumerWidget {
                 subtitle: Text(
                   subscription.hasEndpoint
                       ? distributorReady
-                            ? 'Active'
-                            : 'Endpoint saved; delivery is paused until the distributor is ready'
-                      : 'Waiting for the distributor to assign an endpoint',
+                            ? l10n.webPush_subscriptionActive
+                            : l10n.webPush_subscriptionDelayedDelivery
+                      : l10n.webPush_subscriptionWaitingForEndpoint,
                 ),
               ),
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 12),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  'To stop a site from sending notifications, revoke its '
-                  'notification permission in the site settings.',
-                ),
+                child: Text(l10n.webPush_revokeSubscriptionHint),
               ),
             ),
           ],

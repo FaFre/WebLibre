@@ -149,10 +149,7 @@ class MaintenanceRunner {
         // lease to protect.
         return await _fail(
           task,
-          const UnknownMaintenanceFailure(
-            'This task was created by a newer version of WebLibre and cannot '
-            'run here.',
-          ),
+          const TaskNotRunnable(TaskNotRunnableReason.unsupportedAction),
         );
     }
 
@@ -160,9 +157,7 @@ class MaintenanceRunner {
     if (targetTreeUri == null || targetTreeUri.isEmpty) {
       return await _fail(
         task,
-        const UnknownMaintenanceFailure(
-          'This backup has no destination folder recorded.',
-        ),
+        const TaskNotRunnable(TaskNotRunnableReason.backupDestinationMissing),
       );
     }
 
@@ -257,17 +252,13 @@ class MaintenanceRunner {
     if (startupPaths == null || unpack == null) {
       return await _fail(
         task,
-        const UnknownMaintenanceFailure(
-          'WebLibre cannot restore from this startup screen.',
-        ),
+        const TaskNotRunnable(TaskNotRunnableReason.restoreUnavailableHere),
       );
     }
     if (sourceFileUri == null || sourceFileUri.isEmpty) {
       return await _fail(
         task,
-        const UnknownMaintenanceFailure(
-          'This restore has no backup file recorded.',
-        ),
+        const TaskNotRunnable(TaskNotRunnableReason.restoreSourceMissing),
       );
     }
 
@@ -334,9 +325,7 @@ class MaintenanceRunner {
     if (startupPaths == null) {
       return await _fail(
         task,
-        const UnknownMaintenanceFailure(
-          'WebLibre cannot delete a profile from this startup screen.',
-        ),
+        const TaskNotRunnable(TaskNotRunnableReason.deleteUnavailableHere),
       );
     }
 
@@ -375,15 +364,18 @@ class MaintenanceRunner {
   }
 
   /// Resumes whatever an interrupted journal describes, under a renewed lease.
-  Future<String> recoverJournal(MaintenanceJournal journal) =>
-      lease.keepAlive(() => _recoverJournal(journal));
+  Future<MaintenanceRecoveryOutcome> recoverJournal(
+    MaintenanceJournal journal,
+  ) => lease.keepAlive(() => _recoverJournal(journal));
 
   /// Resumes whatever an interrupted journal describes.
   ///
   /// Runs before any task is picked up: a journal is durable evidence that a
   /// mutation was in flight, and the task list is not — a corrupt or lost task
   /// record must never be able to release that.
-  Future<String> _recoverJournal(MaintenanceJournal journal) async {
+  Future<MaintenanceRecoveryOutcome> _recoverJournal(
+    MaintenanceJournal journal,
+  ) async {
     final startupPaths = paths;
     if (startupPaths == null) {
       throw StateError('Recovery requires the global startup paths');
@@ -412,17 +404,16 @@ class MaintenanceRunner {
               throw StateError('Recovery does not unpack'),
         ).recover(journal);
 
-        final summary = switch (recovery.result) {
+        final outcome = switch (recovery.result) {
           RestoreRecoveryResult.restored =>
-            'An interrupted restore was completed.',
+            MaintenanceRecoveryOutcome.restoreCompleted,
           RestoreRecoveryResult.rolledBack =>
-            'An interrupted restore was undone. The profile was left as it was.',
+            MaintenanceRecoveryOutcome.restoreRolledBack,
           RestoreRecoveryResult.indeterminate =>
-            'An interrupted restore was reconciled. Check the profile to see '
-                'whether the backup was applied.',
+            MaintenanceRecoveryOutcome.restoreReconciled,
         };
-        await _retireRecoveredTask(journal.taskId, summary);
-        return summary;
+        await _retireRecoveredTask(journal.taskId, outcome.message);
+        return outcome;
 
       case MaintenanceJournalKind.delete:
         await DeleteOperation(
@@ -434,9 +425,9 @@ class MaintenanceRunner {
         ).recover(journal);
 
         // Forward-only, so reaching the end means the profile is gone.
-        const summary = 'An interrupted deletion was completed.';
-        await _retireRecoveredTask(journal.taskId, summary);
-        return summary;
+        const outcome = MaintenanceRecoveryOutcome.deletionCompleted;
+        await _retireRecoveredTask(journal.taskId, outcome.message);
+        return outcome;
 
       case null:
         // Never optimistically discarded: an unreadable journal is exactly the
@@ -482,9 +473,10 @@ class MaintenanceRunner {
 
   /// Records [failure] against [task], message and kind together.
   ///
-  /// Both, never one: the message is what the maintenance screen shows, and the
-  /// kind is what it branches on — it is the only thing that survives the
-  /// process to tell the next one whether the password was to blame.
+  /// Both, never one: the kind (and detail) is what the maintenance screen
+  /// branches on and translates — the only thing that survives the process to
+  /// tell the next one whether the password was to blame — and the English
+  /// message stays for diagnostics and for failures no kind describes.
   Future<MaintenanceTask> _mark(
     MaintenanceTask task,
     MaintenanceTaskState state,
@@ -496,6 +488,7 @@ class MaintenanceRunner {
         state,
         error: failure.message,
         errorKindId: failure.kind.name,
+        errorDetailId: failure.detailId,
       ),
     );
     return config.taskById(task.id) ?? task;

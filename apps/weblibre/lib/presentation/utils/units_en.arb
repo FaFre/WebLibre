@@ -1,0 +1,24 @@
+{
+  "@@locale": "en",
+
+  "units_bytes": "{value} B",
+  "@units_bytes": {
+    "description": "A file or storage size in bytes, e.g. \"512 B\". value is the already formatted number. Use your language's usual unit symbol.",
+    "placeholders": { "value": { "type": "String" } }
+  },
+  "units_kilobytes": "{value} KB",
+  "@units_kilobytes": {
+    "description": "A file or storage size in kilobytes, e.g. \"12.5 KB\". value is the already formatted number. Use your language's usual unit symbol.",
+    "placeholders": { "value": { "type": "String" } }
+  },
+  "units_megabytes": "{value} MB",
+  "@units_megabytes": {
+    "description": "A file or storage size in megabytes, e.g. \"3.25 MB\". value is the already formatted number. Use your language's usual unit symbol.",
+    "placeholders": { "value": { "type": "String" } }
+  },
+  "units_milliseconds": "{value} ms",
+  "@units_milliseconds": {
+    "description": "A duration in milliseconds, e.g. \"300 ms\" on a slider. value is the already formatted number. Use your language's usual unit symbol.",
+    "placeholders": { "value": { "type": "String" } }
+  }
+}

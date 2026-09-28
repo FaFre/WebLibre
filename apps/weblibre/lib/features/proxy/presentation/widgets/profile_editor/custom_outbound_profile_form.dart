@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_draft_controller.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_editor_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
 
 class CustomOutboundProfileForm extends HookConsumerWidget {
@@ -36,6 +37,7 @@ class CustomOutboundProfileForm extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final configController = useTextEditingController(
       text: draft.customConfigJson,
     );
@@ -63,7 +65,7 @@ class CustomOutboundProfileForm extends HookConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ProfileEditorSection(
-          title: 'Outbound',
+          title: l10n.proxy_sectionOutbound,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -71,11 +73,11 @@ class CustomOutboundProfileForm extends HookConsumerWidget {
               minLines: 10,
               maxLines: 18,
               keyboardType: TextInputType.multiline,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 alignLabelWithHint: true,
-                labelText: 'Outbound JSON',
-                helperText: 'Public sing-box outbound object.',
-                border: OutlineInputBorder(),
+                labelText: l10n.proxy_fieldOutboundJson,
+                helperText: l10n.proxy_outboundJsonHelper,
+                border: const OutlineInputBorder(),
               ),
               onChanged: notifier.setCustomConfigJson,
             ),
@@ -83,7 +85,7 @@ class CustomOutboundProfileForm extends HookConsumerWidget {
         ),
         const SizedBox(height: 24),
         ProfileEditorSection(
-          title: 'Secrets',
+          title: l10n.proxy_sectionSecrets,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: ObscurableTextField(
@@ -91,12 +93,11 @@ class CustomOutboundProfileForm extends HookConsumerWidget {
               enabled: draft.secretLoaded,
               revealedMinLines: 4,
               revealedMaxLines: 10,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 alignLabelWithHint: true,
-                labelText: 'Secret JSON',
-                helperText:
-                    'Optional values merged into the outbound at runtime.',
-                border: OutlineInputBorder(),
+                labelText: l10n.proxy_fieldSecretJson,
+                helperText: l10n.proxy_secretJsonHelper,
+                border: const OutlineInputBorder(),
               ),
               onChanged: notifier.setCustomSecretJson,
             ),

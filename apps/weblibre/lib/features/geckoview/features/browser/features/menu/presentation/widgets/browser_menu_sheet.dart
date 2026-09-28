@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_links_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_toggles_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
@@ -206,7 +207,7 @@ class _CustomizeMenuButton extends ConsumerWidget {
           ),
           icon: const Icon(Icons.tune, size: 18),
           label: Text(
-            'Customize menu',
+            AppLocalizations.of(context).menu_customizeMenuButton,
             style: Theme.of(context).textTheme.labelLarge,
           ),
         ),

@@ -1,0 +1,611 @@
+{
+  "@@locale": "en",
+
+  "addons_managerTitle": "Extensions",
+  "@addons_managerTitle": {
+    "description": "Title of the screen for managing browser extensions (add-ons)."
+  },
+  "addons_tabInstalled": "Installed",
+  "@addons_tabInstalled": {
+    "description": "Tab on the extensions screen listing installed extensions."
+  },
+  "addons_tabBrowse": "Browse",
+  "@addons_tabBrowse": {
+    "description": "Tab on the extensions screen for finding extensions in Mozilla's add-on store."
+  },
+  "addons_loadFailedTitle": "Failed to load extensions",
+  "@addons_loadFailedTitle": {
+    "description": "Error heading when the list of extensions could not be loaded; technical details follow below."
+  },
+  "addons_noExtensionsFound": "No extensions found.",
+  "@addons_noExtensionsFound": {
+    "description": "Shown when a search in the add-on store finds nothing."
+  },
+  "addons_noneInstalledMessage": "No extensions installed yet.\nBrowse the store to find some.",
+  "@addons_noneInstalledMessage": {
+    "description": "Shown on the Installed tab when no extension is installed. Keep the line break (\\n)."
+  },
+  "addons_genericTitle": "Extension",
+  "@addons_genericTitle": {
+    "description": "Title of the extension details screen when the extension could not be loaded."
+  },
+  "addons_notFound": "This extension could not be found.",
+  "@addons_notFound": {
+    "description": "Message when the requested extension does not exist (e.g. it was removed)."
+  },
+
+  "addons_platformAndroid": "Android",
+  "@addons_platformAndroid": {
+    "description": "Segment of the store switch: browse extensions made for Firefox on Android."
+  },
+  "addons_platformDesktop": "Desktop",
+  "@addons_platformDesktop": {
+    "description": "Segment of the store switch: browse extensions made for desktop Firefox."
+  },
+  "addons_searchHint": "Search addons.mozilla.org",
+  "@addons_searchHint": {
+    "description": "Placeholder of the add-on store search field. addons.mozilla.org is a web address; keep it unchanged."
+  },
+  "addons_desktopCompatibilityWarning": "Desktop extensions are not reviewed for mobile. Some may not work, may crash, or may behave unexpectedly on Android.",
+  "@addons_desktopCompatibilityWarning": {
+    "description": "Warning shown while browsing desktop extensions: they were not tested on phones."
+  },
+  "addons_actionInstall": "Install",
+  "@addons_actionInstall": {
+    "description": "Button on an add-on store listing that installs the extension."
+  },
+  "addons_actionInstallExtension": "Install Extension",
+  "@addons_actionInstallExtension": {
+    "description": "Button on the extension details screen that installs the extension."
+  },
+  "addons_actionInstallFromFile": "Install from file",
+  "@addons_actionInstallFromFile": {
+    "description": "Menu item that installs an extension from a file on the device."
+  },
+  "addons_actionViewPermissions": "View Permissions",
+  "@addons_actionViewPermissions": {
+    "description": "Button that opens the list of permissions the extension asks for."
+  },
+  "addons_actionRemoveExtension": "Remove Extension",
+  "@addons_actionRemoveExtension": {
+    "description": "Row on the extension details screen that uninstalls the extension (asks for confirmation)."
+  },
+  "addons_actionNotNow": "Not now",
+  "@addons_actionNotNow": {
+    "description": "Button in the update dialog that postpones the update."
+  },
+  "addons_actionUpdate": "Update",
+  "@addons_actionUpdate": {
+    "description": "Button in the update dialog that installs the new version."
+  },
+  "addons_actionCheckForUpdates": "Check for updates",
+  "@addons_actionCheckForUpdates": {
+    "description": "Menu item on the extensions screen that checks all extensions for updates in the background."
+  },
+  "addons_actionCheckForUpdatesButton": "Check for Updates",
+  "@addons_actionCheckForUpdatesButton": {
+    "description": "Button on an extension's details screen that checks that extension for an update."
+  },
+  "addons_actionCheckingForUpdates": "Checking for Updates",
+  "@addons_actionCheckingForUpdates": {
+    "description": "Label of that button while the check runs."
+  },
+  "addons_actionLearnMore": "Learn More",
+  "@addons_actionLearnMore": {
+    "description": "Button on the permissions screen that opens Mozilla's help page about extension permissions."
+  },
+  "addons_actionReadMore": "Read more",
+  "@addons_actionReadMore": {
+    "description": "Button that expands a shortened extension description; toggles with \"Show less\"."
+  },
+
+  "addons_sectionEnabled": "Enabled",
+  "@addons_sectionEnabled": {
+    "description": "Section heading on the Installed tab for extensions that are turned on."
+  },
+  "addons_sectionDisabled": "Disabled",
+  "@addons_sectionDisabled": {
+    "description": "Section heading on the Installed tab for extensions that are turned off."
+  },
+  "addons_sectionUnsupported": "Unsupported",
+  "@addons_sectionUnsupported": {
+    "description": "Section heading on the Installed tab for extensions that cannot run in this app."
+  },
+  "addons_sectionDetails": "Details",
+  "@addons_sectionDetails": {
+    "description": "Section heading on the extension details screen for author, version and links."
+  },
+  "addons_sectionDescription": "Description",
+  "@addons_sectionDescription": {
+    "description": "Section heading on the extension details screen for the extension's description."
+  },
+  "addons_sectionManagement": "Management",
+  "@addons_sectionManagement": {
+    "description": "Section heading on the extension details screen for its switches (enabled, private browsing, updates)."
+  },
+  "addons_sectionUpdates": "Updates",
+  "@addons_sectionUpdates": {
+    "description": "Section heading on the extension details screen for update status."
+  },
+  "addons_sectionAboutExtension": "About this extension",
+  "@addons_sectionAboutExtension": {
+    "description": "Section heading on a store listing above the full description."
+  },
+  "addons_sectionTechnicalPermissions": "Technical permissions",
+  "@addons_sectionTechnicalPermissions": {
+    "description": "Section heading on a store listing for permissions that have no plain-language description (raw technical names)."
+  },
+  "addons_sectionMoreInformation": "More information",
+  "@addons_sectionMoreInformation": {
+    "description": "Section heading on a store listing for version, license and links."
+  },
+  "addons_requiredDataCollectionTitle": "Required Data Collection",
+  "@addons_requiredDataCollectionTitle": {
+    "description": "Heading on the permissions screen for data the extension says it must collect."
+  },
+
+  "addons_tooltipRemoveExtension": "Remove extension",
+  "@addons_tooltipRemoveExtension": {
+    "description": "Tooltip of the remove button on an extension card."
+  },
+
+  "addons_extensionRemoved": "{name} removed",
+  "@addons_extensionRemoved": {
+    "description": "Confirmation after uninstalling an extension. name is the extension's name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "addons_extensionInstalled": "{name} installed",
+  "@addons_extensionInstalled": {
+    "description": "Confirmation after installing an extension. name is the extension's name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "addons_installFailed": "Install failed: {error}",
+  "@addons_installFailed": {
+    "description": "Error message when installing an extension failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "addons_updateChecksStarted": "Background update checks started for installed extensions",
+  "@addons_updateChecksStarted": {
+    "description": "Confirmation after starting background update checks for all extensions."
+  },
+
+  "addons_statusInstalled": "Installed",
+  "@addons_statusInstalled": {
+    "description": "Status chip or disabled button label: the extension is installed and enabled."
+  },
+  "addons_statusDisabled": "Disabled",
+  "@addons_statusDisabled": {
+    "description": "Status chip: the extension is installed but turned off."
+  },
+  "addons_statusAvailable": "Available",
+  "@addons_statusAvailable": {
+    "description": "Status chip: the extension is not installed and can be installed."
+  },
+  "addons_chipPrivateBrowsing": "Private Browsing",
+  "@addons_chipPrivateBrowsing": {
+    "description": "Chip on an extension card: it is allowed to run in private tabs."
+  },
+  "addons_chipRecommended": "Recommended",
+  "@addons_chipRecommended": {
+    "description": "Chip on a store listing: Mozilla recommends this extension."
+  },
+
+  "addons_removeConfirmTitle": "Remove extension?",
+  "@addons_removeConfirmTitle": {
+    "description": "Title of the confirmation dialog before uninstalling an extension."
+  },
+  "addons_removeConfirmContent": "Remove {name} from WebLibre?",
+  "@addons_removeConfirmContent": {
+    "description": "Body of that dialog. name is the extension's name; WebLibre is the app name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "addons_autoUpdateGloballyDisabled": "Global automatic updates are disabled.",
+  "@addons_autoUpdateGloballyDisabled": {
+    "description": "Line under the automatic updates switch when automatic extension updates are turned off app-wide."
+  },
+  "addons_autoUpdateNeedsManualRun": "Run a manual update once and restart the app before automatic updates can be enabled.",
+  "@addons_autoUpdateNeedsManualRun": {
+    "description": "Line under the automatic updates switch for an extension installed from a file: it must be updated manually once, then the app restarted."
+  },
+  "addons_autoUpdateAllow": "Allow this extension to receive background updates.",
+  "@addons_autoUpdateAllow": {
+    "description": "Line under the automatic updates switch while it is on."
+  },
+  "addons_autoUpdateDisabledForExtension": "Background updates are disabled for this extension.",
+  "@addons_autoUpdateDisabledForExtension": {
+    "description": "Line under the automatic updates switch while it is off."
+  },
+
+  "addons_switchEnabledTitle": "Enabled",
+  "@addons_switchEnabledTitle": {
+    "description": "Switch on the extension details screen that turns the extension on or off."
+  },
+  "addons_switchEnabledSubtitleAllow": "Allow this extension to run in WebLibre.",
+  "@addons_switchEnabledSubtitleAllow": {
+    "description": "Line under the enabled switch."
+  },
+  "addons_switchEnabledSubtitleCannot": "This extension cannot be safely enabled.",
+  "@addons_switchEnabledSubtitleCannot": {
+    "description": "Line under the enabled switch when it cannot be turned on for safety reasons."
+  },
+  "addons_switchPrivateBrowsingTitle": "Allow in Private Browsing",
+  "@addons_switchPrivateBrowsingTitle": {
+    "description": "Switch: allow the extension to run in private tabs."
+  },
+  "addons_switchPrivateBrowsingSubtitle": "Let this extension run in private browsing tabs.",
+  "@addons_switchPrivateBrowsingSubtitle": {
+    "description": "Line under that switch."
+  },
+  "addons_switchAutoUpdateTitle": "Automatic updates",
+  "@addons_switchAutoUpdateTitle": {
+    "description": "Switch: let this extension update itself in the background."
+  },
+  "addons_switchPinTitle": "Pin to toolbar",
+  "@addons_switchPinTitle": {
+    "description": "Switch: show the extension's button in the browser toolbar."
+  },
+  "addons_switchPinSubtitle": "Show this extension as an icon in the main tab bar.",
+  "@addons_switchPinSubtitle": {
+    "description": "Line under the pin switch."
+  },
+
+  "addons_menuExtensionSettingsTitle": "Extension Settings",
+  "@addons_menuExtensionSettingsTitle": {
+    "description": "Row that opens the extension's own settings page."
+  },
+  "addons_menuExtensionSettingsSubtitleTab": "Open the extension options page in a browser tab",
+  "@addons_menuExtensionSettingsSubtitleTab": {
+    "description": "Line under \"Extension Settings\" when the settings page opens in a browser tab."
+  },
+  "addons_menuExtensionSettingsSubtitleInline": "Open the extension options page",
+  "@addons_menuExtensionSettingsSubtitleInline": {
+    "description": "Line under \"Extension Settings\" when the settings page opens inside this screen."
+  },
+  "addons_menuFilterListsTitle": "Filter Lists & Hardenings",
+  "@addons_menuFilterListsTitle": {
+    "description": "Row shown only for the uBlock Origin extension: manage its filter lists and WebLibre's extra hardening lists."
+  },
+  "addons_menuFilterListsSubtitle": "Manage filter lists and apply WebLibre hardenings",
+  "@addons_menuFilterListsSubtitle": {
+    "description": "Line under \"Filter Lists & Hardenings\"."
+  },
+  "addons_permissionsTitle": "Permissions",
+  "@addons_permissionsTitle": {
+    "description": "Heading of the list of permissions, and row opening that list, on the extension screens."
+  },
+
+  "addons_updateAvailable": "Update available: {from} → {to}",
+  "@addons_updateAvailable": {
+    "description": "Line on the extension details screen. from is the installed version; to is the new version. Keep the arrow.",
+    "placeholders": {
+      "from": { "type": "String" },
+      "to": { "type": "String" }
+    }
+  },
+  "addons_noUpdateAttemptYet": "No recent update attempt information is available yet.",
+  "@addons_noUpdateAttemptYet": {
+    "description": "Line on the extension details screen when no update check has been recorded."
+  },
+  "addons_lastChecked": "Last checked: {date}",
+  "@addons_lastChecked": {
+    "description": "Line on the extension details screen. date is when updates were last checked.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "addons_noUpdateAvailable": "No update available",
+  "@addons_noUpdateAvailable": {
+    "description": "Result of an update check: the extension is up to date."
+  },
+  "addons_noRemoteUpdateSource": "This locally installed extension has no remote update source.",
+  "@addons_noRemoteUpdateSource": {
+    "description": "Error message when checking for updates of an extension installed from a file, which has no online source."
+  },
+  "addons_updateCheckFailed": "Failed to start update check.",
+  "@addons_updateCheckFailed": {
+    "description": "Error message when an update check could not be started."
+  },
+
+  "addons_updateAvailableDialogTitle": "Update available",
+  "@addons_updateAvailableDialogTitle": {
+    "description": "Title of the dialog offering to install an extension update."
+  },
+  "addons_updateConfirmContent": "Update {name} from {from} to {to}?",
+  "@addons_updateConfirmContent": {
+    "description": "Body of that dialog. name is the extension's name; from and to are the old and new version numbers.",
+    "placeholders": {
+      "name": { "type": "String" },
+      "from": { "type": "String" },
+      "to": { "type": "String" }
+    }
+  },
+
+  "addons_noDescriptionProvided": "No description provided.",
+  "@addons_noDescriptionProvided": {
+    "description": "Shown when the extension has no description."
+  },
+  "addons_loadingDescription": "Loading description…",
+  "@addons_loadingDescription": {
+    "description": "Placeholder while the extension description loads."
+  },
+
+  "addons_fieldAuthor": "Author",
+  "@addons_fieldAuthor": {
+    "description": "Label of the row showing the extension's author."
+  },
+  "addons_fieldVersion": "Version",
+  "@addons_fieldVersion": {
+    "description": "Label of the row showing the extension's version."
+  },
+  "addons_fieldLastUpdated": "Last Updated",
+  "@addons_fieldLastUpdated": {
+    "description": "Label of the row showing when the installed extension was last updated."
+  },
+  "addons_fieldLastUpdatedInfo": "Last updated",
+  "@addons_fieldLastUpdatedInfo": {
+    "description": "Label of the row on a store listing showing when the extension was last updated."
+  },
+  "addons_fieldHomepage": "Homepage",
+  "@addons_fieldHomepage": {
+    "description": "Label of the link to the extension's website."
+  },
+  "addons_fieldAddonListing": "Addon Listing",
+  "@addons_fieldAddonListing": {
+    "description": "Label of the link to the extension's page in the add-on store."
+  },
+  "addons_fieldSize": "Size",
+  "@addons_fieldSize": {
+    "description": "Label of the row showing the extension's download size."
+  },
+  "addons_fieldCategories": "Categories",
+  "@addons_fieldCategories": {
+    "description": "Label of the row showing the extension's store categories."
+  },
+  "addons_fieldLicense": "License",
+  "@addons_fieldLicense": {
+    "description": "Label of the row showing the extension's software license."
+  },
+  "addons_fieldSupportSite": "Support site",
+  "@addons_fieldSupportSite": {
+    "description": "Label of the link to the extension's support website."
+  },
+  "addons_fieldReviews": "Reviews",
+  "@addons_fieldReviews": {
+    "description": "Label of the link to user reviews of the extension."
+  },
+  "addons_fieldPrivacyPolicy": "Privacy policy",
+  "@addons_fieldPrivacyPolicy": {
+    "description": "Label of the link to the extension's privacy policy."
+  },
+  "addons_linkViewOnAmo": "View on addons.mozilla.org",
+  "@addons_linkViewOnAmo": {
+    "description": "Link that opens the listing on Mozilla's add-on website. addons.mozilla.org is a web address; keep it unchanged."
+  },
+
+  "addons_settingsTitleGeneric": "Extension Settings",
+  "@addons_settingsTitleGeneric": {
+    "description": "Title of the screen showing an extension's own settings page, when the name is unknown."
+  },
+  "addons_settingsTitleNamed": "{name} Settings",
+  "@addons_settingsTitleNamed": {
+    "description": "Title of the screen showing an extension's own settings page. name is the extension's name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "addons_settingsLoadFailed": "Failed to load extension settings: {error}",
+  "@addons_settingsLoadFailed": {
+    "description": "Error message when the extension's settings page could not be loaded. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "addons_noSettingsPage": "This extension does not expose a settings page.",
+  "@addons_noSettingsPage": {
+    "description": "Shown when the extension has no settings page."
+  },
+
+  "addons_permissionsTitleGeneric": "Extension Permissions",
+  "@addons_permissionsTitleGeneric": {
+    "description": "Title of the extension permissions screen when the name is unknown."
+  },
+  "addons_permissionsTitleNamed": "{name} Permissions",
+  "@addons_permissionsTitleNamed": {
+    "description": "Title of the extension permissions screen. name is the extension's name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "addons_permissionsLoadFailed": "Failed to load extension permissions: {error}",
+  "@addons_permissionsLoadFailed": {
+    "description": "Error message when the permissions could not be loaded. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "addons_noSpecialPermissions": "No special permissions listed",
+  "@addons_noSpecialPermissions": {
+    "description": "Shown when the extension requests no permissions that need explaining."
+  },
+  "addons_noTranslatedPermissionDetails": "This extension does not currently expose any translated permission details.",
+  "@addons_noTranslatedPermissionDetails": {
+    "description": "Line under \"No special permissions listed\"."
+  },
+
+  "addons_versionSentence": "Version {version}",
+  "@addons_versionSentence": {
+    "description": "Line on a store listing. version is the latest version number.",
+    "placeholders": { "version": { "type": "String" } }
+  },
+  "addons_usersCount": "{count, plural, =1{1 user} other{{count} users}}",
+  "@addons_usersCount": {
+    "description": "Chip on a store listing. count is the average number of daily users, shown in compact form (e.g. 1.2K).",
+    "placeholders": { "count": { "type": "int", "format": "compact" } }
+  },
+  "addons_byAuthor": "by {name}",
+  "@addons_byAuthor": {
+    "description": "Author line on a store listing. name is the author's name.",
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "addons_permGroupRequired": "Required",
+  "@addons_permGroupRequired": {
+    "description": "Heading of the permissions the extension needs in order to work."
+  },
+  "addons_permGroupWebsites": "Websites",
+  "@addons_permGroupWebsites": {
+    "description": "Heading of the list of websites whose data the extension can access."
+  },
+  "addons_permGroupOptional": "Optional",
+  "@addons_permGroupOptional": {
+    "description": "Heading of the permissions the extension may ask for later."
+  },
+  "addons_permGroupDataCollection": "Data collection",
+  "@addons_permGroupDataCollection": {
+    "description": "Heading of the kinds of data the extension says it collects."
+  },
+
+  "addons_dateUnknown": "Unknown",
+  "@addons_dateUnknown": {
+    "description": "Shown in place of a date that is unknown."
+  },
+  "addons_statusUpdatedSuccessfully": "Updated successfully",
+  "@addons_statusUpdatedSuccessfully": {
+    "description": "Result of the last update check: the extension was updated."
+  },
+  "addons_statusNotInstalled": "Extension not installed",
+  "@addons_statusNotInstalled": {
+    "description": "Result of the last update check: the extension is no longer installed."
+  },
+  "addons_updateFailedWithMessage": "Update failed: {message}",
+  "@addons_updateFailedWithMessage": {
+    "description": "Result of the last update check when it failed. message is technical error text, usually English.",
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "addons_updateFailedGeneric": "Update failed",
+  "@addons_updateFailedGeneric": {
+    "description": "Result of the last update check when it failed without details."
+  },
+  "addons_noUpdateChecksRecorded": "No update checks recorded yet",
+  "@addons_noUpdateChecksRecorded": {
+    "description": "Shown when no update check has been recorded for the extension."
+  },
+
+  "addons_statusBlocklisted": "This extension has been blocklisted and should remain disabled.",
+  "@addons_statusBlocklisted": {
+    "description": "Warning on an extension that Mozilla has blocked for security or policy reasons."
+  },
+  "addons_statusNotCorrectlySigned": "This extension is not correctly signed and cannot be safely enabled.",
+  "@addons_statusNotCorrectlySigned": {
+    "description": "Warning on an extension whose Mozilla signature is missing or invalid."
+  },
+  "addons_statusIncompatible": "This extension is incompatible with the current app version.",
+  "@addons_statusIncompatible": {
+    "description": "Warning on an extension that does not work with this app version."
+  },
+  "addons_statusSoftBlockedEnabled": "This extension is soft-blocked. Use caution while it remains enabled.",
+  "@addons_statusSoftBlockedEnabled": {
+    "description": "Warning on an enabled extension that Mozilla marked as risky (\"soft-blocked\") but still allows."
+  },
+  "addons_statusSoftBlockedDisabled": "This extension is soft-blocked, but it can still be re-enabled.",
+  "@addons_statusSoftBlockedDisabled": {
+    "description": "Warning on a disabled extension that Mozilla marked as risky (\"soft-blocked\"); it can still be turned on."
+  },
+  "addons_statusUnsupported": "This extension is installed, but WebLibre does not currently support it.",
+  "@addons_statusUnsupported": {
+    "description": "Warning on an installed extension this app cannot run. WebLibre is the app name."
+  },
+
+  "addons_permissionBookmarks": "Read and modify bookmarks",
+  "@addons_permissionBookmarks": {
+    "description": "Plain-language description of the \"bookmarks\" extension permission, shown in permission lists. Mirrors Firefox's wording; reuse its translation if available."
+  },
+  "addons_permissionBrowserSettings": "Read and modify browser settings",
+  "@addons_permissionBrowserSettings": {
+    "description": "Plain-language description of the \"browserSettings\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionBrowsingData": "Clear recent browsing history, cookies, and related data",
+  "@addons_permissionBrowsingData": {
+    "description": "Plain-language description of the \"browsingData\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionClipboardRead": "Read data you copy and paste",
+  "@addons_permissionClipboardRead": {
+    "description": "Plain-language description of the \"clipboardRead\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionClipboardWrite": "Input data to the clipboard",
+  "@addons_permissionClipboardWrite": {
+    "description": "Plain-language description of the \"clipboardWrite\" extension permission (writing to the clipboard), shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionContextualIdentities": "Access and modify container tabs",
+  "@addons_permissionContextualIdentities": {
+    "description": "Plain-language description of the \"contextualIdentities\" extension permission (containers), shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionCookies": "Access cookies for visited sites",
+  "@addons_permissionCookies": {
+    "description": "Plain-language description of the \"cookies\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionDownloads": "Download files and read/modify download history",
+  "@addons_permissionDownloads": {
+    "description": "Plain-language description of the \"downloads\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionDownloadsOpen": "Open files downloaded to your computer",
+  "@addons_permissionDownloadsOpen": {
+    "description": "Plain-language description of the \"downloads.open\" extension permission, shown in permission lists. Mirrors Firefox's wording (\"computer\" comes from Firefox)."
+  },
+  "addons_permissionFind": "Read the text of all open tabs",
+  "@addons_permissionFind": {
+    "description": "Plain-language description of the \"find\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionGeolocation": "Access your location",
+  "@addons_permissionGeolocation": {
+    "description": "Plain-language description of the \"geolocation\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionHistory": "Access browsing history",
+  "@addons_permissionHistory": {
+    "description": "Plain-language description of the \"history\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionManagement": "Monitor extension usage and manage themes",
+  "@addons_permissionManagement": {
+    "description": "Plain-language description of the \"management\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionNativeMessaging": "Exchange messages with programs other than the browser",
+  "@addons_permissionNativeMessaging": {
+    "description": "Plain-language description of the \"nativeMessaging\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionNotifications": "Display notifications",
+  "@addons_permissionNotifications": {
+    "description": "Plain-language description of the \"notifications\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionPkcs11": "Provide cryptographic authentication services",
+  "@addons_permissionPkcs11": {
+    "description": "Plain-language description of the \"pkcs11\" extension permission (security devices), shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionPrivacy": "Read and modify privacy settings",
+  "@addons_permissionPrivacy": {
+    "description": "Plain-language description of the \"privacy\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionProxy": "Control browser proxy settings",
+  "@addons_permissionProxy": {
+    "description": "Plain-language description of the \"proxy\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionSessions": "Access recently closed tabs",
+  "@addons_permissionSessions": {
+    "description": "Plain-language description of the \"sessions\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionTabs": "Access browser tabs",
+  "@addons_permissionTabs": {
+    "description": "Plain-language description of the \"tabs\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionTabHide": "Hide and show browser tabs",
+  "@addons_permissionTabHide": {
+    "description": "Plain-language description of the \"tabHide\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionTopSites": "Access browsing history",
+  "@addons_permissionTopSites": {
+    "description": "Plain-language description of the \"topSites\" extension permission, shown in permission lists. Same wording as the history permission, as in Firefox."
+  },
+  "addons_permissionWebNavigation": "Access browser activity during navigation",
+  "@addons_permissionWebNavigation": {
+    "description": "Plain-language description of the \"webNavigation\" extension permission, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionAllUrls": "Access your data for all websites",
+  "@addons_permissionAllUrls": {
+    "description": "Plain-language description of the permission to access every website, shown in permission lists. Mirrors Firefox's wording."
+  },
+  "addons_permissionAccessDataFor": "Access your data for {host}",
+  "@addons_permissionAccessDataFor": {
+    "description": "Plain-language description of a permission to access specific websites. host is a website pattern such as \"*://*.example.com/*\".",
+    "placeholders": { "host": { "type": "String" } }
+  }
+}

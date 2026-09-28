@@ -25,6 +25,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/features/account/data/models/subscription_status.dart';
 import 'package:weblibre/features/account/data/supabase_config.dart';
 import 'package:weblibre/features/account/domain/repositories/subscription_repository.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Visual presentation of one subscription state. All branches of the
 /// subscription UI render through the same ListTile + badge + note + manage
@@ -104,13 +105,14 @@ class _SubscriptionErrorTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
     return ListTile(
       leading: Icon(Icons.error_outline, color: scheme.error),
-      title: const Text('Could not load subscription'),
-      subtitle: const Text('Check your connection and try again.'),
+      title: Text(l10n.account_subscriptionLoadFailed),
+      subtitle: Text(l10n.account_checkConnectionRetry),
       trailing: IconButton(
         icon: const Icon(Icons.refresh),
-        tooltip: 'Retry',
+        tooltip: l10n.common_retry,
         onPressed: onRetry,
       ),
     );
@@ -123,7 +125,8 @@ _SubscriptionPresentation _resolvePresentation(
 ) {
   final theme = Theme.of(context);
   final scheme = theme.colorScheme;
-  final planTitle = status.planLabel ?? 'Supporter';
+  final l10n = AppLocalizations.of(context);
+  final planTitle = status.planLabel ?? l10n.account_planFallbackSupporter;
 
   if (status.isActive) {
     final isWindingDown = status.isWindingDown;
@@ -132,7 +135,9 @@ _SubscriptionPresentation _resolvePresentation(
       leadingIcon: Icons.verified,
       leadingIconColor: scheme.primary,
       planTitle: planTitle,
-      badgeLabel: isWindingDown ? 'Will not renew' : 'Active',
+      badgeLabel: isWindingDown
+          ? l10n.account_badgeWillNotRenew
+          : l10n.account_badgeActive,
       badgeColor: isWindingDown
           ? scheme.surfaceContainerHighest
           : scheme.primaryContainer,
@@ -140,10 +145,10 @@ _SubscriptionPresentation _resolvePresentation(
           ? scheme.onSurface
           : scheme.onPrimaryContainer,
       subtitle: status.entitledUntil != null
-          ? 'Until ${_formatDate(status.entitledUntil!)}'
+          ? l10n.account_untilDate(_formatDate(status.entitledUntil!))
           : null,
       expiryHint: isWindingDown ? endDate : null,
-      manageLabel: 'Manage Subscription',
+      manageLabel: l10n.account_actionManageSubscription,
     );
   }
   if (status.isPaused) {
@@ -151,14 +156,12 @@ _SubscriptionPresentation _resolvePresentation(
       leadingIcon: Icons.pause_circle_outline,
       leadingIconColor: scheme.onSurfaceVariant,
       planTitle: planTitle,
-      badgeLabel: 'Paused',
+      badgeLabel: l10n.account_badgePaused,
       badgeColor: scheme.tertiaryContainer,
       badgeTextColor: scheme.onTertiaryContainer,
-      note:
-          'Your subscription is paused. Resume it from the customer '
-          'portal to restore access.',
+      note: l10n.account_pausedNote,
       noteColor: scheme.onSurfaceVariant,
-      manageLabel: 'Manage Subscription',
+      manageLabel: l10n.account_actionManageSubscription,
     );
   }
   if (status.isPastDue) {
@@ -166,14 +169,12 @@ _SubscriptionPresentation _resolvePresentation(
       leadingIcon: Icons.error_outline,
       leadingIconColor: scheme.onSurfaceVariant,
       planTitle: planTitle,
-      badgeLabel: 'Past due',
+      badgeLabel: l10n.account_badgePastDue,
       badgeColor: scheme.errorContainer,
       badgeTextColor: scheme.onErrorContainer,
-      note:
-          'Payment failed. Update your payment method to keep your '
-          'subscription active.',
+      note: l10n.account_pastDueNote,
       noteColor: scheme.error,
-      manageLabel: 'Update Payment Method',
+      manageLabel: l10n.account_actionUpdatePaymentMethod,
     );
   }
   if (status.isWindingDown) {
@@ -183,14 +184,12 @@ _SubscriptionPresentation _resolvePresentation(
       leadingIcon: Icons.history_toggle_off,
       leadingIconColor: scheme.onSurfaceVariant,
       planTitle: planTitle,
-      badgeLabel: 'Will not renew',
+      badgeLabel: l10n.account_badgeWillNotRenew,
       badgeColor: scheme.surfaceContainerHighest,
       badgeTextColor: scheme.onSurface,
-      note:
-          'Your subscription has ended. Renew from the customer '
-          'portal to continue.',
+      note: l10n.account_endedNote,
       noteColor: scheme.onSurfaceVariant,
-      manageLabel: 'Renew Subscription',
+      manageLabel: l10n.account_actionRenewSubscription,
     );
   }
   return _inactivePresentation(context);
@@ -198,15 +197,16 @@ _SubscriptionPresentation _resolvePresentation(
 
 _SubscriptionPresentation _inactivePresentation(BuildContext context) {
   final scheme = Theme.of(context).colorScheme;
+  final l10n = AppLocalizations.of(context);
   return _SubscriptionPresentation(
     leadingIcon: Icons.card_membership,
     leadingIconColor: scheme.onSurfaceVariant,
-    planTitle: 'Supporter Subscription',
-    subtitle: 'Subscribe to unlock sync features',
-    badgeLabel: 'Inactive',
+    planTitle: l10n.account_planSupporterSubscription,
+    subtitle: l10n.account_subscribeSubtitle,
+    badgeLabel: l10n.account_badgeInactive,
     badgeColor: scheme.surfaceContainerHighest,
     badgeTextColor: scheme.onSurface,
-    manageLabel: 'Subscribe',
+    manageLabel: l10n.account_actionSubscribe,
   );
 }
 
@@ -228,6 +228,7 @@ class _SubscriptionStateBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
@@ -260,7 +261,7 @@ class _SubscriptionStateBody extends ConsumerWidget {
               : null,
           trailing: IconButton(
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh status',
+            tooltip: l10n.account_tooltipRefreshStatus,
             onPressed: () async {
               await ref.read(subscriptionRepositoryProvider.notifier).refresh();
             },
@@ -275,8 +276,9 @@ class _SubscriptionStateBody extends ConsumerWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    'Your subscription will end on '
-                    '${_formatDate(presentation.expiryHint!)}',
+                    l10n.account_subscriptionEndsOn(
+                      _formatDate(presentation.expiryHint!),
+                    ),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: scheme.error,
                     ),

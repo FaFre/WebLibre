@@ -19,30 +19,30 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<bool?> showImportBookmarksDialog(BuildContext context) {
   return showDialog<bool?>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
-        title: const Text('Import Bookmarks'),
-        content: const Text(
-          'Do you want to erase all existing bookmarks before importing?\n\n'
-          'Choose "Replace" to delete existing bookmarks, or "Merge" to keep them.',
-        ),
+        title: Text(l10n.bookmarks_importDialogTitle),
+        content: Text(l10n.bookmarks_importDialogContent),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Merge'),
+            child: Text(l10n.bookmarks_actionMerge),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Replace'),
+            child: Text(l10n.bookmarks_actionReplace),
           ),
         ],
       );

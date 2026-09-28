@@ -33,7 +33,10 @@ import 'package:weblibre/features/settings/domain/entities/settings_export_docum
 import 'package:weblibre/features/settings/domain/providers/settings_export_directory.dart';
 import 'package:weblibre/features/settings/domain/services/settings_transfer_service.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/settings_import_dialog.dart';
+import 'package:weblibre/features/settings/presentation/utils/settings_export_document_l10n.dart';
+import 'package:weblibre/features/settings/presentation/utils/settings_transfer_service_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// MIME type an export is written and picked with. Kept plain `application/json`
@@ -138,6 +141,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     final selected = useState<Set<SettingsTransferSection>>(
@@ -201,7 +205,10 @@ class SettingsTransferScreen extends HookConsumerWidget {
       exportDirectory.set(Uri.parse(picked.uri));
 
       if (!context.mounted) return;
-      showInfoMessage(context, 'Exports will be saved to ${picked.name}');
+      showInfoMessage(
+        context,
+        l10n.settings_transferExportFolderChanged(picked.name),
+      );
     }
 
     Future<void> exportToFile() async {
@@ -240,7 +247,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
         if (!context.mounted) return;
         // The name SAF actually created, which is not always the one asked
         // for — a second export in the same second gets a suffix.
-        showInfoMessage(context, 'Saved as $written');
+        showInfoMessage(context, l10n.settings_transferSavedAs(written));
       } catch (error, stackTrace) {
         logger.e(
           'Failed to export settings to a file',
@@ -251,9 +258,8 @@ class SettingsTransferScreen extends HookConsumerWidget {
           showErrorMessage(
             context,
             targetForgotten
-                ? 'The export folder is no longer there. Choose one again and '
-                      'retry.'
-                : 'Could not save the export: $error',
+                ? l10n.settings_transferExportFolderGone
+                : l10n.settings_transferSaveFailed('$error'),
           );
         }
       } finally {
@@ -267,7 +273,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
         await Clipboard.setData(ClipboardData(text: await buildExport()));
 
         if (!context.mounted) return;
-        showInfoMessage(context, 'Settings copied to the clipboard');
+        showInfoMessage(context, l10n.settings_transferCopiedToClipboard);
       } catch (error, stackTrace) {
         logger.e(
           'Failed to copy settings to the clipboard',
@@ -275,7 +281,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Could not copy the export: $error');
+          showErrorMessage(context, l10n.settings_transferCopyFailed('$error'));
         }
       } finally {
         busy.value = false;
@@ -289,7 +295,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
       try {
         document = decodeSettingsExport(text);
       } on SettingsExportFormatException catch (error) {
-        if (context.mounted) showErrorMessage(context, error.message);
+        if (context.mounted) showErrorMessage(context, error.describe(l10n));
         return;
       }
 
@@ -298,7 +304,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
         if (context.mounted) {
           showErrorMessage(
             context,
-            'This export holds nothing this version of WebLibre can apply.',
+            l10n.settings_transferImportNothingApplicable,
           );
         }
         return;
@@ -317,7 +323,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
         await service.import(document: document, sections: sections);
 
         if (!context.mounted) return;
-        showInfoMessage(context, 'Settings imported');
+        showInfoMessage(context, l10n.settings_transferImportedSuccess);
       } on SettingsImportPartialFailure catch (error, stackTrace) {
         logger.e(
           'Settings import applied only some sections',
@@ -328,7 +334,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
           // Deliberately not "the import failed": part of it did not, and a
           // user told otherwise would go looking for settings that are already
           // replaced.
-          showErrorMessage(context, error.message, persist: true);
+          showErrorMessage(context, error.describe(l10n), persist: true);
         }
       } catch (error, stackTrace) {
         logger.e(
@@ -340,8 +346,8 @@ class SettingsTransferScreen extends HookConsumerWidget {
           showErrorMessage(
             context,
             error is SettingsExportFormatException
-                ? error.message
-                : 'Could not import the settings: $error',
+                ? error.describe(l10n)
+                : l10n.settings_transferImportFailed('$error'),
           );
         }
       } finally {
@@ -362,7 +368,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
       } on FormatException {
         // Reached when the picked file is not even text.
         if (context.mounted) {
-          showErrorMessage(context, 'That file is not a settings export.');
+          showErrorMessage(context, l10n.settings_transferNotASettingsFile);
         }
       } catch (error, stackTrace) {
         logger.e(
@@ -371,7 +377,10 @@ class SettingsTransferScreen extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Could not read the file: $error');
+          showErrorMessage(
+            context,
+            l10n.settings_transferReadFileFailed('$error'),
+          );
         }
       } finally {
         busy.value = false;
@@ -385,7 +394,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
         final text = data?.text;
         if (text == null || text.trim().isEmpty) {
           if (context.mounted) {
-            showErrorMessage(context, 'The clipboard is empty.');
+            showErrorMessage(context, l10n.settings_transferClipboardEmpty);
           }
           return;
         }
@@ -402,7 +411,10 @@ class SettingsTransferScreen extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Could not read the clipboard: $error');
+          showErrorMessage(
+            context,
+            l10n.settings_transferReadClipboardFailed('$error'),
+          );
         }
       } finally {
         busy.value = false;
@@ -410,13 +422,13 @@ class SettingsTransferScreen extends HookConsumerWidget {
     }
 
     return SettingsCustomScrollScaffold(
-      title: 'Export & Import',
+      title: l10n.settings_transferTitle,
       actions: [
         MenuAnchor(
           menuChildren: [
             MenuItemButton(
               onPressed: busy.value ? null : chooseExportFolder,
-              child: const Text('Change export folder'),
+              child: Text(l10n.settings_transferChangeExportFolder),
             ),
           ],
           builder: (context, controller, child) => IconButton(
@@ -435,10 +447,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
               spacing: 12,
               children: [
                 Text(
-                  'Move settings between profiles or devices, or attach them '
-                  'to a bug report. This carries settings only — no tabs, '
-                  'history, bookmarks or logins. For those, back up the whole '
-                  'profile.',
+                  l10n.settings_transferIntro,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -447,8 +456,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
                 // settings repositories an export reads, so neither this nor
                 // account sync carries them yet.
                 Text(
-                  'Web search preferences, home and new-tab layout, menu '
-                  'order and pinned add-ons stay on this device',
+                  l10n.settings_transferDeviceOnlyNote,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -466,13 +474,10 @@ class SettingsTransferScreen extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const ListTile(
-                    leading: Icon(MdiIcons.fileExportOutline),
-                    title: Text('Export'),
-                    subtitle: Text(
-                      'Write the sections you pick as a file you '
-                      'can read',
-                    ),
+                  ListTile(
+                    leading: const Icon(MdiIcons.fileExportOutline),
+                    title: Text(l10n.settings_transferExportSectionTitle),
+                    subtitle: Text(l10n.settings_transferExportSectionSubtitle),
                   ),
                   for (final section in SettingsTransferSection.values)
                     CheckboxListTile(
@@ -489,8 +494,8 @@ class SettingsTransferScreen extends HookConsumerWidget {
                                     candidate,
                               };
                             },
-                      title: Text(section.title),
-                      subtitle: Text(section.description),
+                      title: Text(section.label(l10n)),
+                      subtitle: Text(section.description(l10n)),
                     ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -503,7 +508,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
                                 ? null
                                 : exportToFile,
                             icon: const Icon(Icons.save_outlined),
-                            label: const Text('Save file'),
+                            label: Text(l10n.settings_transferSaveFileButton),
                           ),
                         ),
                         Expanded(
@@ -512,7 +517,7 @@ class SettingsTransferScreen extends HookConsumerWidget {
                                 ? null
                                 : exportToClipboard,
                             icon: const Icon(Icons.copy_outlined),
-                            label: const Text('Copy'),
+                            label: Text(l10n.common_copy),
                           ),
                         ),
                       ],
@@ -532,13 +537,10 @@ class SettingsTransferScreen extends HookConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const ListTile(
-                    leading: Icon(MdiIcons.fileImportOutline),
-                    title: Text('Import'),
-                    subtitle: Text(
-                      'You choose what to apply after the file is '
-                      'read',
-                    ),
+                  ListTile(
+                    leading: const Icon(MdiIcons.fileImportOutline),
+                    title: Text(l10n.settings_transferImportSectionTitle),
+                    subtitle: Text(l10n.settings_transferImportSectionSubtitle),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -549,14 +551,14 @@ class SettingsTransferScreen extends HookConsumerWidget {
                           child: FilledButton.icon(
                             onPressed: busy.value ? null : importFromFile,
                             icon: const Icon(Icons.folder_open_outlined),
-                            label: const Text('Open file'),
+                            label: Text(l10n.settings_transferOpenFileButton),
                           ),
                         ),
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: busy.value ? null : importFromClipboard,
                             icon: const Icon(Icons.paste_outlined),
-                            label: const Text('Paste'),
+                            label: Text(l10n.settings_transferPasteButton),
                           ),
                         ),
                       ],

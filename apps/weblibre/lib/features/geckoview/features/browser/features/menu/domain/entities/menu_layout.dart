@@ -56,17 +56,6 @@ enum MenuSectionType {
   /// The about screen.
   about;
 
-  String get label => switch (this) {
-    quickToggles => 'Quick Toggles',
-    pageActions => 'Page Actions',
-    extensions => 'Extensions',
-    tabActions => 'Tab Actions',
-    quickLinks => 'Quick Links',
-    connection => 'Connection',
-    profile => 'Profile & App',
-    about => 'About',
-  };
-
   /// Identity icon for the arrangement UI. The sheet itself draws no section
   /// headers, so this exists only to make the section list scannable.
   IconData get icon => switch (this) {
@@ -155,54 +144,6 @@ enum MenuItemType {
   // About
   about;
 
-  String get label => switch (this) {
-    desktopMode => 'Desktop',
-    readerMode => 'Reader',
-    gestures => 'Gestures',
-    addBookmark => 'Add Bookmark',
-    findInPage => 'Find in Page',
-    translatePage => 'Translate Page',
-    addToHomeScreen => 'Add to Home Screen',
-    openInApp => 'Open in App',
-    containers => 'Containers',
-    manageContainers => 'Manage Containers',
-    assignContainer => 'Assign Container',
-    assignUrlToContainer => 'Assign URL to Container',
-    unassignUrlFromContainer => 'Unassign URL from Container',
-    unassignContainer => 'Unassign Container',
-    share => 'Share',
-    copyAddress => 'Copy Address',
-    shareScreenshot => 'Share Screenshot',
-    shareLink => 'Share Link',
-    sendToDevice => 'Send To Device',
-    showQrCode => 'Show QR Code',
-    moreDisclosure => 'More',
-    cloneTab => 'Clone Tab',
-    cloneRegularTab => 'Regular',
-    clonePrivateTab => 'Private',
-    cloneIsolatedTab => 'Isolated',
-    export => 'Export',
-    copyAsMarkdown => 'Copy as Markdown',
-    exportAsMarkdown => 'Export as Markdown',
-    exportAsPdf => 'Export as PDF',
-    exportAsPng => 'Export as PNG',
-    printPage => 'Print',
-    pinTopSite => 'Pin to Shortcuts',
-    fetchFeeds => 'Fetch Feeds',
-    history => 'History',
-    bookmarks => 'Bookmarks',
-    downloads => 'Downloads',
-    bangs => 'Bangs',
-    feeds => 'Feeds',
-    smallWeb => 'Small Web',
-    clearData => 'Clear Data',
-    profileSwitch => 'Profile',
-    syncNow => 'Sync Now',
-    appSettings => 'Settings',
-    quitBrowser => 'Quit Browser',
-    about => 'About',
-  };
-
   /// Identity icon for the arrangement UI.
   ///
   /// One fixed icon per row, where the row itself may draw a different one for
@@ -257,14 +198,6 @@ enum MenuItemType {
     appSettings => Icons.settings,
     quitBrowser => MdiIcons.power,
     about => Icons.info,
-  };
-
-  /// Shown under the label while arranging, for rows whose behaviour is not
-  /// obvious from the name alone.
-  String? get description => switch (this) {
-    moreDisclosure => 'Folds everything below it behind a "More" row',
-    sendToDevice => 'The devices themselves come from your account',
-    _ => null,
   };
 }
 

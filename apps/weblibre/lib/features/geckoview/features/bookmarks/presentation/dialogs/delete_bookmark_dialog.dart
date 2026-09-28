@@ -19,28 +19,31 @@
  */
 import 'package:flutter/material.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 Future<bool?> showDeleteBookmarkDialog(BuildContext context) {
   return showDialog<bool?>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
       return AlertDialog(
         icon: const Icon(Icons.warning),
-        title: const Text('Delete Bookmark'),
-        content: const Text('Are you sure you want to delete this Bookmark?'),
+        title: Text(l10n.bookmarks_deleteBookmarkTitle),
+        content: Text(l10n.bookmarks_deleteBookmarkContent),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.pop(context, false);
             },
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, true);
             },
-            child: const Text('Delete'),
+            child: Text(l10n.common_delete),
           ),
         ],
       );

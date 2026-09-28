@@ -1,0 +1,1240 @@
+{
+  "@@locale": "en",
+  "proxy_actionChange": "Change",
+  "@proxy_actionChange": {
+    "description": "Button next to the current log level on the proxy logs screen; opens the log level sheet."
+  },
+  "proxy_actionFetch": "Fetch",
+  "@proxy_actionFetch": {
+    "description": "Button that downloads the proxy list from the entered subscription address."
+  },
+  "proxy_actionSelectAll": "Select all",
+  "@proxy_actionSelectAll": {
+    "description": "Button that selects every usable proxy found in a subscription for import."
+  },
+  "proxy_actionShare": "Share",
+  "@proxy_actionShare": {
+    "description": "Tooltip or menu item: share the proxy logs, or share a proxy profile as a link."
+  },
+  "proxy_actionStart": "Start",
+  "@proxy_actionStart": {
+    "description": "Button or tooltip that starts a proxy connection."
+  },
+  "proxy_actionStop": "Stop",
+  "@proxy_actionStop": {
+    "description": "Tooltip of the run button while a proxy connection is running: stop it."
+  },
+  "proxy_actionStopAndDelete": "Stop and Delete",
+  "@proxy_actionStopAndDelete": {
+    "description": "Confirm button of the delete dialog when the proxy profile is running."
+  },
+  "proxy_actionTestConnection": "Test connection",
+  "@proxy_actionTestConnection": {
+    "description": "Menu item that measures how fast a running proxy responds."
+  },
+  "proxy_connectionsTitle": "Proxy Connections",
+  "@proxy_connectionsTitle": {
+    "description": "Title of the screen listing proxy connections (Tor and user-configured proxy profiles)."
+  },
+  "proxy_addProfile": "Add Profile",
+  "@proxy_addProfile": {
+    "description": "Floating button that adds a proxy profile."
+  },
+  "proxy_viewLogsTooltip": "View logs",
+  "@proxy_viewLogsTooltip": {
+    "description": "Tooltip of the button that opens the proxy logs."
+  },
+  "proxy_profilesSectionTitle": "Profiles",
+  "@proxy_profilesSectionTitle": {
+    "description": "Section heading above the list of user-configured proxy profiles."
+  },
+  "proxy_loadProfilesFailed": "Failed to load proxy profiles:\n{error}",
+  "@proxy_loadProfilesFailed": {
+    "description": "Error when proxy profiles could not be loaded. error is technical error text, usually English. Keep the line break (\\n).",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_statusActive": "Active",
+  "@proxy_statusActive": {
+    "description": "Heading of the status card when at least one proxy is running."
+  },
+  "proxy_statusDisconnected": "Disconnected",
+  "@proxy_statusDisconnected": {
+    "description": "Heading of the status card when no proxy is running."
+  },
+  "proxy_statusRoutingTraffic": "{total, plural, =1{{running} of 1 proxy running} other{{running} of {total} proxies running}}",
+  "@proxy_statusRoutingTraffic": {
+    "description": "Line on the status card. running is how many proxies are running; total is how many exist.",
+    "placeholders": {
+      "running": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_statusTapToConnect": "Tap a profile to connect",
+  "@proxy_statusTapToConnect": {
+    "description": "Line on the status card when no proxy is running."
+  },
+  "proxy_stopAllTooltip": "Stop all",
+  "@proxy_stopAllTooltip": {
+    "description": "Tooltip of the button that stops every running proxy."
+  },
+  "proxy_onionRoutingLabel": "Onion routing",
+  "@proxy_onionRoutingLabel": {
+    "description": "Type label under the Tor entry in the proxy list (\"onion routing\" is how Tor works)."
+  },
+  "proxy_autostartLabel": "Autostart",
+  "@proxy_autostartLabel": {
+    "description": "Small chip on a proxy that starts automatically with the app. Keep it short."
+  },
+  "proxy_autostartTooltip": "Starts with WebLibre",
+  "@proxy_autostartTooltip": {
+    "description": "Tooltip of the autostart chip. WebLibre is the app name."
+  },
+  "proxy_egressIpTooltip": "Egress IP {ip}",
+  "@proxy_egressIpTooltip": {
+    "description": "Tooltip of the chip showing the public IP address websites see when using this proxy. ip is that address.",
+    "placeholders": {
+      "ip": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_latencyTesting": "Testing...",
+  "@proxy_latencyTesting": {
+    "description": "Chip text while a connection speed test runs. Keep it short."
+  },
+  "proxy_latencyTestRunningTooltip": "Latency test running",
+  "@proxy_latencyTestRunningTooltip": {
+    "description": "Tooltip of that chip."
+  },
+  "proxy_latencyNotRunningTooltip": "The profile is not running",
+  "@proxy_latencyNotRunningTooltip": {
+    "description": "Tooltip on a failed latency chip: the test could not run because this proxy profile is not started."
+  },
+  "proxy_latencyFailed": "Failed",
+  "@proxy_latencyFailed": {
+    "description": "Chip text when the connection speed test failed. Keep it short."
+  },
+  "proxy_latencyMilliseconds": "{ms} ms",
+  "@proxy_latencyMilliseconds": {
+    "description": "Chip showing the measured response time. ms is the number of milliseconds; \"ms\" is the unit abbreviation.",
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_latencyHttpStatusTooltip": "HTTP {statusCode} in {ms} ms",
+  "@proxy_latencyHttpStatusTooltip": {
+    "description": "Tooltip of the response time chip. statusCode is the HTTP status number (e.g. 204); ms is milliseconds.",
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      },
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_startProxyFailed": "Failed to start proxy: {error}",
+  "@proxy_startProxyFailed": {
+    "description": "Error message when starting a proxy failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_stopProxyFailed": "Failed to stop proxy: {error}",
+  "@proxy_stopProxyFailed": {
+    "description": "Error message when stopping a proxy failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_startBrandFailed": "Failed to start {brand}: {error}",
+  "@proxy_startBrandFailed": {
+    "description": "Error message when starting Tor failed. brand is \"Tor™\"; error is technical error text, usually English.",
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_stopBrandFailed": "Failed to stop {brand}: {error}",
+  "@proxy_stopBrandFailed": {
+    "description": "Error message when stopping Tor failed. brand is \"Tor™\"; error is technical error text, usually English.",
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_startConnectionDialogTitle": "Start Proxy Connection?",
+  "@proxy_startConnectionDialogTitle": {
+    "description": "Title of the dialog asking to start a proxy that a tab needs."
+  },
+  "proxy_startConnectionDialogContent": "This tab needs {proxyTitle}, but that connection is not running. Start it now?",
+  "@proxy_startConnectionDialogContent": {
+    "description": "Body of that dialog. proxyTitle is the proxy's name.",
+    "placeholders": {
+      "proxyTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_deleteProfileTitle": "Delete Profile?",
+  "@proxy_deleteProfileTitle": {
+    "description": "Title of the confirmation dialog before deleting a proxy profile."
+  },
+  "proxy_deleteProfileConfirm": "Delete {name} and its stored secrets? Tabs and containers assigned to this profile will be blocked until you choose another proxy or clear the assignment.",
+  "@proxy_deleteProfileConfirm": {
+    "description": "Body of that dialog. name is the profile's name. Secrets are stored passwords and keys.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_deleteProfileConfirmRunning": "Stop {name}, then delete it and its stored secrets? Tabs and containers assigned to this profile will be blocked until you choose another proxy or clear the assignment.",
+  "@proxy_deleteProfileConfirmRunning": {
+    "description": "Body of that dialog when the profile is running. name is the profile's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_deleteProfileFailed": "Failed to delete profile: {error}",
+  "@proxy_deleteProfileFailed": {
+    "description": "Error message when deleting a proxy profile failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_shareDialogTitle": "Share \"{name}\"",
+  "@proxy_shareDialogTitle": {
+    "description": "Title of the dialog that shares a proxy profile as a link or QR code. name is the profile's name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_shareDialogWarning": "This link contains the full profile, including any stored credentials. Share carefully.",
+  "@proxy_shareDialogWarning": {
+    "description": "Warning in that dialog: the link includes passwords and keys."
+  },
+  "proxy_copiedToClipboard": "Copied to clipboard",
+  "@proxy_copiedToClipboard": {
+    "description": "Confirmation after copying the share link."
+  },
+  "proxy_editProfileTitle": "Edit Profile",
+  "@proxy_editProfileTitle": {
+    "description": "Title of the proxy profile editor for an existing profile."
+  },
+  "proxy_newProfileTitle": "New Profile",
+  "@proxy_newProfileTitle": {
+    "description": "Title of the proxy profile editor for a new profile."
+  },
+  "proxy_saveChanges": "Save Changes",
+  "@proxy_saveChanges": {
+    "description": "Button that saves changes to an existing proxy profile."
+  },
+  "proxy_createProfile": "Create Profile",
+  "@proxy_createProfile": {
+    "description": "Button that creates the new proxy profile."
+  },
+  "proxy_sectionGeneral": "General",
+  "@proxy_sectionGeneral": {
+    "description": "Section heading in the proxy editor for name, protocol and autostart."
+  },
+  "proxy_sectionDnsOverride": "DNS Override",
+  "@proxy_sectionDnsOverride": {
+    "description": "Section heading in the proxy editor for a custom DNS server (the service that turns website names into addresses)."
+  },
+  "proxy_addMenuTip": "Tip: Use the add menu on the previous screen to import from a file, paste a share link, or scan a QR code.",
+  "@proxy_addMenuTip": {
+    "description": "Tip at the bottom of the new-profile editor pointing to other ways to add a profile."
+  },
+  "proxy_wireGuardTrademarkDisclaimer": "{brand} is a registered trademark of Jason A. Donenfeld; all rights reserved. WebLibre is not endorsed or sponsored by, or affiliated with, Jason A. Donenfeld.",
+  "@proxy_wireGuardTrademarkDisclaimer": {
+    "description": "Legal trademark notice. brand is \"WireGuard®\"; Jason A. Donenfeld is a person's name; WebLibre is the app name. Keep the legal meaning exact.",
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_wireGuardConfigLabel": "{brand} config",
+  "@proxy_wireGuardConfigLabel": {
+    "description": "Import option for a WireGuard configuration file. brand is \"WireGuard®\".",
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldProfileName": "Profile Name",
+  "@proxy_fieldProfileName": {
+    "description": "Label of the proxy profile name field."
+  },
+  "proxy_fieldProtocol": "Protocol",
+  "@proxy_fieldProtocol": {
+    "description": "Label of the proxy protocol field (e.g. SOCKS, Shadowsocks, WireGuard)."
+  },
+  "proxy_protocolFixedHelper": "Protocol is fixed once a profile is created.",
+  "@proxy_protocolFixedHelper": {
+    "description": "Help text under the protocol field when editing an existing profile."
+  },
+  "proxy_customOutboundLabel": "Custom Outbound",
+  "@proxy_customOutboundLabel": {
+    "description": "Protocol option in the proxy editor: enter a raw sing-box outbound configuration in JSON. \"Outbound\" is a sing-box term."
+  },
+  "proxy_startAutomaticallyTitle": "Start Automatically",
+  "@proxy_startAutomaticallyTitle": {
+    "description": "Switch in the proxy editor: connect this proxy when the app starts."
+  },
+  "proxy_startAutomaticallySubtitle": "Connect this profile when WebLibre starts, so tabs using it are ready without a prompt",
+  "@proxy_startAutomaticallySubtitle": {
+    "description": "Explanation under that switch. WebLibre is the app name."
+  },
+  "proxy_dnsOverrideExplanation": "Resolve names through a DNS server reachable over this connection (e.g., an internal DoH server behind a corporate {brand} tunnel). Leave this off to use automatic DNS handling.",
+  "@proxy_dnsOverrideExplanation": {
+    "description": "Explanation of the DNS override section. brand is \"WireGuard®\". DoH means DNS over HTTPS.",
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_dnsOverrideSwitchTitle": "Use a profile-specific resolver",
+  "@proxy_dnsOverrideSwitchTitle": {
+    "description": "Switch that turns on a custom DNS server for this proxy profile."
+  },
+  "proxy_fieldDnsServerAddress": "DNS server address",
+  "@proxy_fieldDnsServerAddress": {
+    "description": "Label of the DNS server address field."
+  },
+  "proxy_sectionOutbound": "Outbound",
+  "@proxy_sectionOutbound": {
+    "description": "Section heading in the custom outbound editor for the JSON configuration. \"Outbound\" is a sing-box term."
+  },
+  "proxy_sectionSecrets": "Secrets",
+  "@proxy_sectionSecrets": {
+    "description": "Section heading in the custom outbound editor for stored passwords and keys."
+  },
+  "proxy_fieldOutboundJson": "Outbound JSON",
+  "@proxy_fieldOutboundJson": {
+    "description": "Label of the field for the sing-box outbound JSON. Technical term."
+  },
+  "proxy_outboundJsonHelper": "Public sing-box outbound object.",
+  "@proxy_outboundJsonHelper": {
+    "description": "Help text under the outbound JSON field. sing-box is a product name."
+  },
+  "proxy_fieldSecretJson": "Secret JSON",
+  "@proxy_fieldSecretJson": {
+    "description": "Label of the field for secret values (passwords, keys) as JSON."
+  },
+  "proxy_secretJsonHelper": "Optional values merged into the outbound at runtime.",
+  "@proxy_secretJsonHelper": {
+    "description": "Help text under the secret JSON field."
+  },
+  "proxy_sectionConnection": "Connection",
+  "@proxy_sectionConnection": {
+    "description": "Section heading in the proxy editor for server address and port."
+  },
+  "proxy_sectionCredentials": "Credentials",
+  "@proxy_sectionCredentials": {
+    "description": "Section heading in the proxy editor for username, password and keys."
+  },
+  "proxy_sectionProtocolOptions": "Protocol Options",
+  "@proxy_sectionProtocolOptions": {
+    "description": "Section heading in the proxy editor for protocol-specific settings."
+  },
+  "proxy_sectionTls": "TLS",
+  "@proxy_sectionTls": {
+    "description": "Section heading in the proxy editor for TLS encryption settings. Technical abbreviation."
+  },
+  "proxy_sectionTransport": "Transport",
+  "@proxy_sectionTransport": {
+    "description": "Section heading in the proxy editor for the transport layer (WebSocket, gRPC, etc.)."
+  },
+  "proxy_sectionMultiplex": "Multiplex",
+  "@proxy_sectionMultiplex": {
+    "description": "Section heading in the proxy editor for connection multiplexing (sharing one connection for many requests)."
+  },
+  "proxy_sectionDial": "Dial",
+  "@proxy_sectionDial": {
+    "description": "Section heading in the proxy editor for low-level connection (\"dial\") options. sing-box term."
+  },
+  "proxy_advancedOptionsHint": "Advanced protocol options can still be entered with Custom Outbound JSON.",
+  "@proxy_advancedOptionsHint": {
+    "description": "Note under the proxy form: other options can be set with the Custom Outbound protocol."
+  },
+  "proxy_storedInSecureStorage": "Stored in secure storage.",
+  "@proxy_storedInSecureStorage": {
+    "description": "Default help text under secret fields: the value is kept in the device's encrypted storage."
+  },
+  "proxy_booleanFieldUnset": "Unset (uses default)",
+  "@proxy_booleanFieldUnset": {
+    "description": "Value of an on/off field in the proxy editor that is not set, so the default applies."
+  },
+  "proxy_booleanFieldEnabled": "Enabled",
+  "@proxy_booleanFieldEnabled": {
+    "description": "Value of an on/off field in the proxy editor that is on."
+  },
+  "proxy_booleanFieldDisabled": "Disabled",
+  "@proxy_booleanFieldDisabled": {
+    "description": "Value of an on/off field in the proxy editor that is off."
+  },
+  "proxy_addConnectionTitle": "Add Connection",
+  "@proxy_addConnectionTitle": {
+    "description": "Title of the sheet with the ways to add a proxy profile."
+  },
+  "proxy_addConnectionSubtitle": "Choose how you want to add a proxy profile.",
+  "@proxy_addConnectionSubtitle": {
+    "description": "Line under that title."
+  },
+  "proxy_methodClipboardTitle": "Clipboard",
+  "@proxy_methodClipboardTitle": {
+    "description": "Card in the add-proxy sheet: import from a link on the clipboard."
+  },
+  "proxy_methodClipboardSubtitle": "Paste a share link or URI",
+  "@proxy_methodClipboardSubtitle": {
+    "description": "Explanation under \"Clipboard\". URI means a proxy link such as ss://… or vless://…."
+  },
+  "proxy_methodScanQrTitle": "Scan QR",
+  "@proxy_methodScanQrTitle": {
+    "description": "Card in the add-proxy sheet: scan a QR code containing a proxy link."
+  },
+  "proxy_methodScanQrSubtitle": "From another device",
+  "@proxy_methodScanQrSubtitle": {
+    "description": "Explanation under \"Scan QR\"."
+  },
+  "proxy_methodSubscriptionTitle": "Subscription",
+  "@proxy_methodSubscriptionTitle": {
+    "description": "Card in the add-proxy sheet: import a list of proxies from a subscription address."
+  },
+  "proxy_methodSubscriptionSubtitle": "Fetch from URL",
+  "@proxy_methodSubscriptionSubtitle": {
+    "description": "Explanation under \"Subscription\"."
+  },
+  "proxy_methodImportFileTitle": "Import file",
+  "@proxy_methodImportFileTitle": {
+    "description": "Card in the add-proxy sheet: import a configuration file."
+  },
+  "proxy_methodImportFileSubtitle": ".conf or sing-box JSON",
+  "@proxy_methodImportFileSubtitle": {
+    "description": "Explanation under \"Import file\". \".conf\" and \"sing-box JSON\" are file types; keep them unchanged."
+  },
+  "proxy_enterManually": "Enter manually",
+  "@proxy_enterManually": {
+    "description": "Button in the add-proxy sheet that opens an empty profile editor."
+  },
+  "proxy_clipboardEmpty": "The clipboard is empty.",
+  "@proxy_clipboardEmpty": {
+    "description": "Message when the clipboard has no text to import."
+  },
+  "proxy_importFromFileTitle": "Import from file",
+  "@proxy_importFromFileTitle": {
+    "description": "Title of the list of importable file types."
+  },
+  "proxy_importFileWireGuardSubtitle": ".conf file with [Interface]/[Peer]",
+  "@proxy_importFileWireGuardSubtitle": {
+    "description": "Explanation under the WireGuard config option. \"[Interface]\" and \"[Peer]\" are literal file section names; keep them unchanged."
+  },
+  "proxy_importFileSingboxJsonTitle": "Sing-box outbound JSON",
+  "@proxy_importFileSingboxJsonTitle": {
+    "description": "Import option for a sing-box outbound configuration in JSON. sing-box is a product name."
+  },
+  "proxy_importFileSingboxJsonSubtitle": "Shadowsocks, Trojan, VMess, VLESS, Hysteria, …",
+  "@proxy_importFileSingboxJsonSubtitle": {
+    "description": "List of protocol names supported by that import. Keep the names unchanged."
+  },
+  "proxy_importedProfileNamed": "Imported profile \"{name}\"",
+  "@proxy_importedProfileNamed": {
+    "description": "Confirmation after importing a proxy profile. name is its name.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_importSubscriptionTitle": "Import Subscription",
+  "@proxy_importSubscriptionTitle": {
+    "description": "Title of the screen that imports proxies from a subscription address."
+  },
+  "proxy_fieldSubscriptionUrl": "Subscription URL",
+  "@proxy_fieldSubscriptionUrl": {
+    "description": "Label of the subscription address field."
+  },
+  "proxy_subscriptionUrlRequired": "Enter a full https:// subscription URL.",
+  "@proxy_subscriptionUrlRequired": {
+    "description": "Error when the subscription address is not a complete https address."
+  },
+  "proxy_subscriptionHttpError": "The subscription server answered with HTTP {statusCode}.",
+  "@proxy_subscriptionHttpError": {
+    "description": "Error on the subscription import screen: the server returned an error status. statusCode is the HTTP status number (such as 404).",
+    "placeholders": {
+      "statusCode": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_subscriptionTimedOut": "The subscription server did not answer in time.",
+  "@proxy_subscriptionTimedOut": {
+    "description": "Error on the subscription import screen: the request timed out."
+  },
+  "proxy_subscriptionFetchFailed": "Could not fetch the subscription: {error}",
+  "@proxy_subscriptionFetchFailed": {
+    "description": "Error on the subscription import screen for any other failure. error is the technical reason, often English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_subscriptionFormatHint": "Supports the v2rayN-style format: a base64-encoded list of ss://, vless://, vmess://, trojan://, hysteria2://, tuic:// and similar URIs. Routing rules from the subscription are ignored — only proxy nodes are imported.",
+  "@proxy_subscriptionFormatHint": {
+    "description": "Explanation of supported subscription formats. v2rayN is a product name; the ss://… entries are literal link prefixes."
+  },
+  "proxy_importedProfileDefaultName": "Imported {n}",
+  "@proxy_importedProfileDefaultName": {
+    "description": "Default name for an imported proxy without a name. n is a sequence number.",
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_importedProfilesCount": "{count, plural, =1{Imported 1 profile} other{Imported {count} profiles}}",
+  "@proxy_importedProfilesCount": {
+    "description": "Confirmation after importing proxies from a subscription. count is the number imported.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_importProfilesCount": "{count, plural, =1{Import 1 profile} other{Import {count} profiles}}",
+  "@proxy_importProfilesCount": {
+    "description": "Import button on the subscription screen. count is the number of selected proxies.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_subscriptionNodeSummary": "{failed, plural, =0{{usable, plural, =1{1 usable node} other{{usable} usable nodes}}} =1{{usable, plural, =1{1 usable node, 1 failed} other{{usable} usable nodes, 1 failed}}} other{{usable, plural, =1{1 usable node, {failed} failed} other{{usable} usable nodes, {failed} failed}}}}",
+  "@proxy_subscriptionNodeSummary": {
+    "description": "Summary of a fetched subscription. usable is how many proxies (\"nodes\") can be imported; failed is how many could not be read.",
+    "placeholders": {
+      "usable": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_logsTitle": "Proxy Logs",
+  "@proxy_logsTitle": {
+    "description": "Title of the proxy logs screen."
+  },
+  "proxy_logsCopyAllTooltip": "Copy all",
+  "@proxy_logsCopyAllTooltip": {
+    "description": "Tooltip of the button that copies all shown log lines."
+  },
+  "proxy_logsClearTooltip": "Clear log",
+  "@proxy_logsClearTooltip": {
+    "description": "Tooltip of the button that deletes the log."
+  },
+  "proxy_logsShareSubject": "proxy logs",
+  "@proxy_logsShareSubject": {
+    "description": "Subject line used when sharing the proxy logs (e.g. as an email subject). Lowercase."
+  },
+  "proxy_logsNoLinesMatchFilter": "No log lines match the current filter",
+  "@proxy_logsNoLinesMatchFilter": {
+    "description": "Message when copying or sharing is not possible because the level filter hides all lines."
+  },
+  "proxy_logsCopiedCount": "{count, plural, =1{Copied 1 line to clipboard} other{Copied {count} lines to clipboard}}",
+  "@proxy_logsCopiedCount": {
+    "description": "Confirmation after copying log lines. count is the number of lines.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_logsShowAllLevels": "Show all levels",
+  "@proxy_logsShowAllLevels": {
+    "description": "Screen-reader label of the \"All\" log level filter chip."
+  },
+  "proxy_logsShowErrorsOnly": "Show errors only",
+  "@proxy_logsShowErrorsOnly": {
+    "description": "Screen-reader label of the \"Errors\" log level filter chip."
+  },
+  "proxy_logsShowWarningsAndAbove": "Show warnings and above",
+  "@proxy_logsShowWarningsAndAbove": {
+    "description": "Screen-reader label of the \"Warnings\" log filter chip: shows lines of this level and every more severe one."
+  },
+  "proxy_logsShowInfoAndAbove": "Show info and above",
+  "@proxy_logsShowInfoAndAbove": {
+    "description": "Screen-reader label of the \"Info\" log filter chip: shows lines of this level and every more severe one."
+  },
+  "proxy_logsShowDebugAndAbove": "Show debug and above",
+  "@proxy_logsShowDebugAndAbove": {
+    "description": "Screen-reader label of the \"Debug\" log filter chip: shows lines of this level and every more severe one."
+  },
+  "proxy_logsShowTraceAndAbove": "Show trace and above",
+  "@proxy_logsShowTraceAndAbove": {
+    "description": "Screen-reader label of the \"Trace\" log filter chip: shows lines of this level and every more severe one."
+  },
+  "proxy_logsLatest": "Latest",
+  "@proxy_logsLatest": {
+    "description": "Button that jumps to the newest log lines."
+  },
+  "proxy_logsEmptyFiltered": "No log lines at this level. Lower the display filter or increase the proxy's logging level.",
+  "@proxy_logsEmptyFiltered": {
+    "description": "Shown when the log has lines but none at the selected level."
+  },
+  "proxy_logsEmpty": "No log lines yet. Start a proxy or {brand} to see output here.",
+  "@proxy_logsEmpty": {
+    "description": "Shown when the log is empty. brand is \"Tor™\".",
+    "placeholders": {
+      "brand": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_recordingLevelWarn": "Recording warnings and errors",
+  "@proxy_recordingLevelWarn": {
+    "description": "Line showing that the proxy log records only warnings and errors (the default). Shown on the proxy logs screen and under \"Proxy Logs\" in settings."
+  },
+  "proxy_recordingLevelInfo": "Recording info — this slows browsing",
+  "@proxy_recordingLevelInfo": {
+    "description": "Line showing that the proxy log records informational messages, which slows browsing. Shown on the proxy logs screen and under \"Proxy Logs\" in settings. \"Info\" is the log level name as shown in proxy_logVerbosityInfoLabel."
+  },
+  "proxy_recordingLevelDebug": "Recording debug — this slows browsing",
+  "@proxy_recordingLevelDebug": {
+    "description": "Line showing that the proxy log records debugging messages, which slows browsing. Shown on the proxy logs screen and under \"Proxy Logs\" in settings. \"Debug\" is the log level name as shown in proxy_logVerbosityDebugLabel."
+  },
+  "proxy_recordingLevelTrace": "Recording trace — this slows browsing",
+  "@proxy_recordingLevelTrace": {
+    "description": "Line showing that the proxy log records everything, which slows browsing. Shown on the proxy logs screen and under \"Proxy Logs\" in settings. \"Trace\" is the log level name as shown in proxy_logVerbosityTraceLabel."
+  },
+  "proxy_logLevelAll": "All",
+  "@proxy_logLevelAll": {
+    "description": "Log filter chip: show all lines. Keep it short."
+  },
+  "proxy_logLevelTrace": "Trace",
+  "@proxy_logLevelTrace": {
+    "description": "Log filter chip and level name: most detailed messages. Technical term; keep short."
+  },
+  "proxy_logLevelDebug": "Debug",
+  "@proxy_logLevelDebug": {
+    "description": "Log filter chip and level name: debugging messages. Technical term; keep short."
+  },
+  "proxy_logLevelInfo": "Info",
+  "@proxy_logLevelInfo": {
+    "description": "Log filter chip and level name: informational messages. Keep short."
+  },
+  "proxy_logLevelWarnings": "Warnings",
+  "@proxy_logLevelWarnings": {
+    "description": "Log filter chip: warnings and worse. Keep short."
+  },
+  "proxy_logLevelErrors": "Errors",
+  "@proxy_logLevelErrors": {
+    "description": "Log filter chip: errors only. Keep short."
+  },
+  "proxy_logLevelSheetTitle": "Proxy log level",
+  "@proxy_logLevelSheetTitle": {
+    "description": "Title of the sheet for choosing how much the proxy records in its log."
+  },
+  "proxy_logLevelSheetExplanation": "Raise this only while diagnosing a problem, then put it back. Changing it restarts any running proxy.",
+  "@proxy_logLevelSheetExplanation": {
+    "description": "Explanation in that sheet."
+  },
+  "proxy_verboseLoggingWarning": "Verbose logging writes a line for every connection and DNS lookup, which noticeably slows browsing.",
+  "@proxy_verboseLoggingWarning": {
+    "description": "Warning in that sheet when a detailed level is selected."
+  },
+  "proxy_logVerbosityWarnLabel": "Warnings and errors",
+  "@proxy_logVerbosityWarnLabel": {
+    "description": "Log level option: record only warnings and errors."
+  },
+  "proxy_logVerbosityInfoLabel": "Info",
+  "@proxy_logVerbosityInfoLabel": {
+    "description": "Log level option: record informational messages. Technical term."
+  },
+  "proxy_logVerbosityDebugLabel": "Debug",
+  "@proxy_logVerbosityDebugLabel": {
+    "description": "Log level option: record debugging messages. Technical term."
+  },
+  "proxy_logVerbosityTraceLabel": "Trace",
+  "@proxy_logVerbosityTraceLabel": {
+    "description": "Log level option: record everything. Technical term."
+  },
+  "proxy_logVerbosityWarnDescription": "Normal operation. Problems are still logged.",
+  "@proxy_logVerbosityWarnDescription": {
+    "description": "Explanation under the \"Warnings and errors\" log level."
+  },
+  "proxy_logVerbosityInfoDescription": "Every connection and DNS lookup. Slows browsing.",
+  "@proxy_logVerbosityInfoDescription": {
+    "description": "Explanation under the \"Info\" log level."
+  },
+  "proxy_logVerbosityDebugDescription": "Info plus protocol detail. Slows browsing.",
+  "@proxy_logVerbosityDebugDescription": {
+    "description": "Explanation under the \"Debug\" log level."
+  },
+  "proxy_logVerbosityTraceDescription": "Everything sing-box can say. Slows browsing a lot.",
+  "@proxy_logVerbosityTraceDescription": {
+    "description": "Explanation under the \"Trace\" log level. sing-box is a product name."
+  },
+  "proxy_loadingProxyTitle": "Loading proxy...",
+  "@proxy_loadingProxyTitle": {
+    "description": "Placeholder name while the proxy list loads."
+  },
+  "proxy_torConnectionSubtitle": "Route through the {torBrand} network",
+  "@proxy_torConnectionSubtitle": {
+    "description": "Description of the Tor entry in proxy pickers. torBrand is \"Tor™\"; keep it unchanged.",
+    "placeholders": {
+      "torBrand": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_routingTitle": "Proxy Routing",
+  "@proxy_routingTitle": {
+    "description": "Title of the settings screen for which proxy carries which tabs' traffic."
+  },
+  "proxy_routingSubtitle": "Choose which proxy carries regular and private tab traffic.",
+  "@proxy_routingSubtitle": {
+    "description": "Subtitle of the proxy routing screen."
+  },
+  "proxy_routingSectionRegularTabs": "Regular Tabs",
+  "@proxy_routingSectionRegularTabs": {
+    "description": "Section heading for routing regular (non-private) tabs."
+  },
+  "proxy_routingSectionRegularTabsKeywords": "routing",
+  "@proxy_routingSectionRegularTabsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "proxy_routingSectionPrivateTabs": "Private Tabs",
+  "@proxy_routingSectionPrivateTabs": {
+    "description": "Section heading for routing private tabs."
+  },
+  "proxy_routingSectionPrivateTabsKeywords": "private, incognito",
+  "@proxy_routingSectionPrivateTabsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "proxy_routingRegularTabsModeTitle": "Regular Tabs Routing Mode",
+  "@proxy_routingRegularTabsModeTitle": {
+    "description": "Setting for how regular tabs are routed (per container or all through one proxy)."
+  },
+  "proxy_routingRegularTabsModeKeywords": "container, global",
+  "@proxy_routingRegularTabsModeKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "proxy_routingRegularTabsModeSubtitle": "Choose how regular tabs are routed through proxies",
+  "@proxy_routingRegularTabsModeSubtitle": {
+    "description": "Explanation of that setting, also shown as a settings search result."
+  },
+  "proxy_routingGlobalProxyTitle": "Proxy for global routing",
+  "@proxy_routingGlobalProxyTitle": {
+    "description": "Setting for the proxy used when all regular tabs are routed through one proxy."
+  },
+  "proxy_routingGlobalProxyKeywords": "proxy",
+  "@proxy_routingGlobalProxyKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "proxy_routingGlobalProxySubtitle": "Selected proxy when global routing is enabled",
+  "@proxy_routingGlobalProxySubtitle": {
+    "description": "Explanation of that setting, shown as a settings search result."
+  },
+  "proxy_routingPrivateTabsProxyTitle": "Proxy for private tabs",
+  "@proxy_routingPrivateTabsProxyTitle": {
+    "description": "Setting for the proxy used by private tabs."
+  },
+  "proxy_routingPrivateTabsProxyKeywords": "proxy",
+  "@proxy_routingPrivateTabsProxyKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "proxy_routingPrivateTabsProxySubtitle": "Selected proxy that carries private-tab traffic",
+  "@proxy_routingPrivateTabsProxySubtitle": {
+    "description": "Explanation of that setting, shown as a settings search result."
+  },
+  "proxy_routingContainerBasedTitle": "Container-Based Routing",
+  "@proxy_routingContainerBasedTitle": {
+    "description": "Routing mode option: each container chooses its own proxy."
+  },
+  "proxy_routingContainerBasedSubtitle": "Only tabs in containers with a proxy assigned are routed.",
+  "@proxy_routingContainerBasedSubtitle": {
+    "description": "Explanation under \"Container-Based Routing\"."
+  },
+  "proxy_routingGlobalRoutingTitle": "Global Routing",
+  "@proxy_routingGlobalRoutingTitle": {
+    "description": "Routing mode option: all regular tabs go through one proxy."
+  },
+  "proxy_routingGlobalRoutingSubtitle": "Route regular tabs through the selected proxy unless a container bypasses it.",
+  "@proxy_routingGlobalRoutingSubtitle": {
+    "description": "Explanation under \"Global Routing\"."
+  },
+  "proxy_routingNotUsedTitle": "Not used in container-based routing",
+  "@proxy_routingNotUsedTitle": {
+    "description": "Shown instead of the proxy choice while container-based routing is selected."
+  },
+  "proxy_routingNotUsedSubtitle": "Switch to global routing above to pick the proxy that carries every regular tab.",
+  "@proxy_routingNotUsedSubtitle": {
+    "description": "Explanation under that message."
+  },
+  "proxy_routingNoneTitle": "None",
+  "@proxy_routingNoneTitle": {
+    "description": "Option in proxy pickers: use no proxy. Keep it short."
+  },
+  "proxy_routingNoneSubtitle": "Use the normal browser connection",
+  "@proxy_routingNoneSubtitle": {
+    "description": "Explanation under \"None\"."
+  },
+  "proxy_routingUnknownProxySubtitle": "The selected proxy no longer exists.",
+  "@proxy_routingUnknownProxySubtitle": {
+    "description": "Line under \"Unknown proxy\" when the chosen proxy was deleted."
+  },
+  "proxy_unknownProxyTitle": "Unknown proxy",
+  "@proxy_unknownProxyTitle": {
+    "description": "Name shown for a chosen proxy that no longer exists."
+  },
+  "proxy_connectionPickerTitle": "Proxy Connection",
+  "@proxy_connectionPickerTitle": {
+    "description": "Default title of the sheet for picking a proxy connection."
+  },
+  "proxy_pickerUnknownProxySubtitle": "This proxy profile no longer exists",
+  "@proxy_pickerUnknownProxySubtitle": {
+    "description": "Line under \"Unknown proxy\" in the proxy picker."
+  },
+  "proxy_fieldServerAddress": "Server Address",
+  "@proxy_fieldServerAddress": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"server\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldServerPort": "Server Port",
+  "@proxy_fieldServerPort": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"server_port\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldUsername": "Username",
+  "@proxy_fieldUsername": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"username\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldPassword": "Password",
+  "@proxy_fieldPassword": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"password\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldUuid": "UUID",
+  "@proxy_fieldUuid": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"uuid\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldTlsEnabled": "TLS Enabled",
+  "@proxy_fieldTlsEnabled": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"tls.enabled\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldTlsEnabledHelper": "true or false.",
+  "@proxy_fieldTlsEnabledHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"tls.enabled\"). \"true\" and \"false\" are literal values; keep them unchanged. Keep literal examples unchanged."
+  },
+  "proxy_fieldTlsServerName": "TLS Server Name",
+  "@proxy_fieldTlsServerName": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"tls.server_name\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldTlsInsecure": "Allow Invalid TLS Certificates",
+  "@proxy_fieldTlsInsecure": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"tls.insecure\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldTlsInsecureHelper": "true or false.",
+  "@proxy_fieldTlsInsecureHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"tls.insecure\"). \"true\" and \"false\" are literal values; keep them unchanged. Keep literal examples unchanged."
+  },
+  "proxy_fieldTlsAlpn": "TLS ALPN",
+  "@proxy_fieldTlsAlpn": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"tls.alpn\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldTlsAlpnHelper": "Comma-separated or one value per line.",
+  "@proxy_fieldTlsAlpnHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"tls.alpn\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldTransportType": "Transport Type",
+  "@proxy_fieldTransportType": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"transport.type\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldTransportTypeHelper": "For example ws, http, grpc, or quic.",
+  "@proxy_fieldTransportTypeHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"transport.type\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldTransportPath": "Transport Path",
+  "@proxy_fieldTransportPath": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"transport.path\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldGrpcServiceName": "gRPC Service Name",
+  "@proxy_fieldGrpcServiceName": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"transport.service_name\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldMultiplexEnabled": "Multiplex Enabled",
+  "@proxy_fieldMultiplexEnabled": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"multiplex.enabled\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldMultiplexEnabledHelper": "true or false.",
+  "@proxy_fieldMultiplexEnabledHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"multiplex.enabled\"). \"true\" and \"false\" are literal values; keep them unchanged. Keep literal examples unchanged."
+  },
+  "proxy_fieldMultiplexProtocol": "Multiplex Protocol",
+  "@proxy_fieldMultiplexProtocol": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"multiplex.protocol\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldMultiplexMaxConnections": "Multiplex Max Connections",
+  "@proxy_fieldMultiplexMaxConnections": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"multiplex.max_connections\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDialDetour": "Dial Detour",
+  "@proxy_fieldDialDetour": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"detour\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldBindInterface": "Bind Interface",
+  "@proxy_fieldBindInterface": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"bind_interface\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldRoutingMark": "Routing Mark",
+  "@proxy_fieldRoutingMark": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"routing_mark\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDomainStrategy": "Domain Strategy",
+  "@proxy_fieldDomainStrategy": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"domain_strategy\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDomainStrategyHelper": "For example prefer_ipv4 or prefer_ipv6.",
+  "@proxy_fieldDomainStrategyHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"domain_strategy\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldConnectTimeout": "Connect Timeout",
+  "@proxy_fieldConnectTimeout": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"connect_timeout\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldConnectTimeoutHelper": "For example 5s.",
+  "@proxy_fieldConnectTimeoutHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"connect_timeout\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldSocksVersion": "SOCKS Version",
+  "@proxy_fieldSocksVersion": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"version\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldMethod": "Method",
+  "@proxy_fieldMethod": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"method\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldSecurity": "Security",
+  "@proxy_fieldSecurity": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"security\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldAlterId": "Alter ID",
+  "@proxy_fieldAlterId": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"alter_id\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldFlow": "Flow",
+  "@proxy_fieldFlow": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"flow\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldAuthString": "Auth String",
+  "@proxy_fieldAuthString": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"auth_str\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldUploadBandwidth": "Upload Bandwidth",
+  "@proxy_fieldUploadBandwidth": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"up\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDownloadBandwidth": "Download Bandwidth",
+  "@proxy_fieldDownloadBandwidth": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"down\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldObfuscation": "Obfuscation",
+  "@proxy_fieldObfuscation": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"obfs\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldReceiveWindowConn": "Receive Window Conn",
+  "@proxy_fieldReceiveWindowConn": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"recv_window_conn\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldReceiveWindow": "Receive Window",
+  "@proxy_fieldReceiveWindow": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"recv_window\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDisableMtuDiscovery": "Disable MTU Discovery",
+  "@proxy_fieldDisableMtuDiscovery": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"disable_mtu_discovery\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDisableMtuDiscoveryHelper": "true or false.",
+  "@proxy_fieldDisableMtuDiscoveryHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"disable_mtu_discovery\"). \"true\" and \"false\" are literal values; keep them unchanged. Keep literal examples unchanged."
+  },
+  "proxy_fieldUploadMbps": "Upload Mbps",
+  "@proxy_fieldUploadMbps": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"up_mbps\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldDownloadMbps": "Download Mbps",
+  "@proxy_fieldDownloadMbps": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"down_mbps\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldObfuscationType": "Obfuscation Type",
+  "@proxy_fieldObfuscationType": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"obfs.type\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldObfuscationPassword": "Obfuscation Password",
+  "@proxy_fieldObfuscationPassword": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"obfs.password\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldCongestionControl": "Congestion Control",
+  "@proxy_fieldCongestionControl": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"congestion_control\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldUdpRelayMode": "UDP Relay Mode",
+  "@proxy_fieldUdpRelayMode": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"udp_relay_mode\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldZeroRttHandshake": "Zero RTT Handshake",
+  "@proxy_fieldZeroRttHandshake": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"zero_rtt_handshake\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldZeroRttHandshakeHelper": "true or false.",
+  "@proxy_fieldZeroRttHandshakeHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"zero_rtt_handshake\"). \"true\" and \"false\" are literal values; keep them unchanged. Keep literal examples unchanged."
+  },
+  "proxy_fieldUser": "User",
+  "@proxy_fieldUser": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"user\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldPrivateKey": "Private Key",
+  "@proxy_fieldPrivateKey": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"private_key\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldPrivateKeyPassphrase": "Private Key Passphrase",
+  "@proxy_fieldPrivateKeyPassphrase": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"private_key_passphrase\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldLocalAddress": "Local Address",
+  "@proxy_fieldLocalAddress": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"local_address\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldLocalAddressHelper": "The address this device has inside the tunnel, one per line — for example, 10.0.0.2/32. A bare address is treated as a single address (/32, or /128 for IPv6).",
+  "@proxy_fieldLocalAddressHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"local_address\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldPeerPublicKey": "Peer Public Key",
+  "@proxy_fieldPeerPublicKey": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"peer_public_key\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldWireguardPrivateKey": "Private Key",
+  "@proxy_fieldWireguardPrivateKey": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"wireguardPrivateKey\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldWireguardPrivateKeyHelper": "Stored in secure storage, not profile JSON.",
+  "@proxy_fieldWireguardPrivateKeyHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"wireguardPrivateKey\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldPreSharedKey": "Pre-shared Key",
+  "@proxy_fieldPreSharedKey": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"pre_shared_key\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldPreSharedKeyHelper": "Optional. Stored in secure storage.",
+  "@proxy_fieldPreSharedKeyHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"pre_shared_key\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldMtu": "MTU",
+  "@proxy_fieldMtu": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"mtu\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldMtuHelper": "Lower this if the tunnel connects but pages never load: packets larger than the path allows are dropped outright. A value of 1280 is safe almost everywhere; use around 1200 when already connected to another VPN.",
+  "@proxy_fieldMtuHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"mtu\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldPersistentKeepalive": "Persistent Keepalive",
+  "@proxy_fieldPersistentKeepalive": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"persistent_keepalive_interval\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldPersistentKeepaliveHelper": "Seconds between keepalive packets. Phones often sit behind NAT; without keepalives, the mapping can expire while idle. The peer can then no longer reach the phone, so connections stall until the next handshake. Set to 0 to disable.",
+  "@proxy_fieldPersistentKeepaliveHelper": {
+    "description": "Help text under the WireGuard persistent keepalive field (sing-box option \"persistent_keepalive_interval\"). NAT is a networking abbreviation; \"0\" is a literal value."
+  },
+  "proxy_fieldReservedBytes": "Reserved Bytes",
+  "@proxy_fieldReservedBytes": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"reserved\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldReservedBytesHelper": "Optional. Three comma-separated numbers, e.g. 0,0,0.",
+  "@proxy_fieldReservedBytesHelper": {
+    "description": "Help text under a proxy editor field (sing-box option \"reserved\"). Keep literal examples unchanged."
+  },
+  "proxy_fieldShadowTlsVersion": "Version",
+  "@proxy_fieldShadowTlsVersion": {
+    "description": "Label of a field in the proxy profile editor for the sing-box option \"shadowTlsVersion\". Technical networking term; keep established English terms where usual."
+  },
+  "proxy_fieldErrorRequired": "{field} is required.",
+  "@proxy_fieldErrorRequired": {
+    "description": "Validation error in the proxy editor. field is the field's label.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldErrorNotPositiveNumber": "{field} must be a positive number.",
+  "@proxy_fieldErrorNotPositiveNumber": {
+    "description": "Validation error in the proxy editor. field is the field's label.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldErrorPortRange": "{field} must be between 1 and 65535.",
+  "@proxy_fieldErrorPortRange": {
+    "description": "Validation error for a network port in the proxy editor. field is the field's label.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldErrorListLength": "{count, plural, =1{{field} must contain 1 number.} other{{field} must contain {count} numbers.}}",
+  "@proxy_fieldErrorListLength": {
+    "description": "Validation error in the proxy editor. field is the field's label; count is the required number of values.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_fieldErrorNotAllNumbers": "{field} must contain only numbers.",
+  "@proxy_fieldErrorNotAllNumbers": {
+    "description": "Validation error in the proxy editor. field is the field's label.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldErrorBelowMin": "{field} must contain numbers greater than or equal to {min}.",
+  "@proxy_fieldErrorBelowMin": {
+    "description": "Validation error in the proxy editor. field is the field's label; min is the smallest allowed value.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_fieldErrorAboveMax": "{field} must contain numbers less than or equal to {max}.",
+  "@proxy_fieldErrorAboveMax": {
+    "description": "Validation error in the proxy editor. field is the field's label; max is the largest allowed value.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "proxy_fieldErrorInvalidCidr": "{field} must contain IP addresses, optionally with a /prefix — \"{value}\" is not one.",
+  "@proxy_fieldErrorInvalidCidr": {
+    "description": "Validation error in the proxy editor. field is the field's label; value is the invalid entry. \"/prefix\" refers to network notation like /32.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldErrorNotBoolean": "{field} must be true or false.",
+  "@proxy_fieldErrorNotBoolean": {
+    "description": "Validation error in the proxy editor. field is the field's label. \"true\" and \"false\" are literal values; keep them unchanged.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_fieldErrorNotAllowedValue": "{field} must be one of: {values}.",
+  "@proxy_fieldErrorNotAllowedValue": {
+    "description": "Validation error in the proxy editor. field is the field's label; values is a comma-separated list of allowed literal values.",
+    "placeholders": {
+      "field": {
+        "type": "String"
+      },
+      "values": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_saveErrorAlreadySaving": "Profile is already saving.",
+  "@proxy_saveErrorAlreadySaving": {
+    "description": "Error when saving a proxy profile while a save is still running."
+  },
+  "proxy_saveErrorNameRequired": "Profile name is required.",
+  "@proxy_saveErrorNameRequired": {
+    "description": "Error when saving a proxy profile without a name."
+  },
+  "proxy_saveErrorStillLoading": "The profile is still loading. Please wait.",
+  "@proxy_saveErrorStillLoading": {
+    "description": "Error when saving a proxy profile before it finished loading."
+  },
+  "proxy_saveErrorConfigNotJson": "Config must be a JSON object.",
+  "@proxy_saveErrorConfigNotJson": {
+    "description": "Error when the custom outbound configuration is not a JSON object."
+  },
+  "proxy_saveErrorSecretsNotJson": "Secrets must be a JSON object.",
+  "@proxy_saveErrorSecretsNotJson": {
+    "description": "Error when the secret values are not a JSON object."
+  },
+  "proxy_saveErrorUnexpected": "Failed to save proxy profile: {error}",
+  "@proxy_saveErrorUnexpected": {
+    "description": "Error message when saving a proxy profile failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_loadErrorNotFound": "Proxy profile not found.",
+  "@proxy_loadErrorNotFound": {
+    "description": "Error when the proxy profile to edit no longer exists."
+  },
+  "proxy_loadErrorFailed": "Failed to load proxy profile: {error}",
+  "@proxy_loadErrorFailed": {
+    "description": "Error message when a proxy profile could not be loaded. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+}

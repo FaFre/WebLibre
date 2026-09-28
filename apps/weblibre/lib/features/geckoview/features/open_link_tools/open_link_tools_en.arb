@@ -1,0 +1,412 @@
+{
+  "@@locale": "en",
+
+  "openLinkTools_openLinkTitle": "Open link",
+  "@openLinkTools_openLinkTitle": {
+    "description": "Title of the sheet shown when a link is shared to or opened in WebLibre, offering ways to open it (new tab, custom tab, app) and to clean it."
+  },
+  "openLinkTools_urlCleanedMessage": "URL cleaned",
+  "@openLinkTools_urlCleanedMessage": {
+    "description": "Confirmation after tracking parameters were removed from the link in the open-link sheet."
+  },
+  "openLinkTools_urlPreviewAppliedMessage": "URL preview applied",
+  "@openLinkTools_urlPreviewAppliedMessage": {
+    "description": "Confirmation after the user picked which tracking parameters to remove and the cleaned link was applied."
+  },
+  "openLinkTools_urlBlockedByClearUrls": "URL blocked by ClearURLs",
+  "@openLinkTools_urlBlockedByClearUrls": {
+    "description": "Warning in the open-link sheet when the link's destination is on the ClearURLs block list (e.g. a known tracking or ad domain). ClearURLs is a project name."
+  },
+  "openLinkTools_unshortenFailedWithError": "Could not unshorten the link: {error}",
+  "@openLinkTools_unshortenFailedWithError": {
+    "description": "Error line when resolving a shortened link (e.g. bit.ly) to its real destination failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "openLinkTools_unshortenRemainingCalls": "Remaining calls: {remaining}/{limit}",
+  "@openLinkTools_unshortenRemainingCalls": {
+    "description": "Line under the unshorten action when the free quota is running low. remaining is the number of requests left; limit is the hourly limit.",
+    "placeholders": {
+      "remaining": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+  "openLinkTools_unshortenTileTitle": "Unshorten",
+  "@openLinkTools_unshortenTileTitle": {
+    "description": "Action in the open-link sheet that resolves a shortened link (e.g. bit.ly) to its real destination."
+  },
+  "openLinkTools_unshortenTileSubtitle": "Resolve shortened URL",
+  "@openLinkTools_unshortenTileSubtitle": {
+    "description": "Explanation under the \"Unshorten\" action."
+  },
+  "openLinkTools_unshortenerInfoTooltip": "Unshortener info",
+  "@openLinkTools_unshortenerInfoTooltip": {
+    "description": "Tooltip of the info button next to the \"Unshorten\" action; opens details about the online service used."
+  },
+  "openLinkTools_openInAppNamed": "Open in {appName}",
+  "@openLinkTools_openInAppNamed": {
+    "description": "Action in the open-link sheet that opens the link in the installed app that handles it. appName is that app's name.",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+  "openLinkTools_openInAppGeneric": "Open in App",
+  "@openLinkTools_openInAppGeneric": {
+    "description": "Action in the open-link sheet that opens the link in the installed app that handles it, when the app's name is unknown."
+  },
+  "openLinkTools_openInAppSubtitle": "Open in an installed app",
+  "@openLinkTools_openInAppSubtitle": {
+    "description": "Explanation under the open-in-app action."
+  },
+  "openLinkTools_couldNotOpenInApp": "Could not open in app",
+  "@openLinkTools_couldNotOpenInApp": {
+    "description": "Error message when the link could not be handed to the app."
+  },
+  "openLinkTools_openInNewTabTitle": "Open in new tab",
+  "@openLinkTools_openInNewTabTitle": {
+    "description": "Action in the open-link sheet that opens the link in a new browser tab."
+  },
+  "openLinkTools_openInNewTabSubtitle": "Add to your browser tabs",
+  "@openLinkTools_openInNewTabSubtitle": {
+    "description": "Explanation under the \"Open in new tab\" action: the link is added to the regular tab list."
+  },
+  "openLinkTools_openInCustomTabTitle": "Open in custom tab",
+  "@openLinkTools_openInCustomTabTitle": {
+    "description": "Action in the open-link sheet that opens the link in a custom tab: a lightweight browser window that closes back to the app it came from, without joining the regular tab list."
+  },
+  "openLinkTools_openInCustomTabSubtitle": "Open in a separate window",
+  "@openLinkTools_openInCustomTabSubtitle": {
+    "description": "Explanation under the \"Open in custom tab\" action."
+  },
+
+  "openLinkTools_unshortenerAttributionTitle": "Unshortener Attribution",
+  "@openLinkTools_unshortenerAttributionTitle": {
+    "description": "Title of the dialog explaining which online service resolves shortened links."
+  },
+  "openLinkTools_unshortenerAttributionBody": "This module resolves shortened links by sending them to {service}. The service checks each link on its servers and saves the redirect for future requests. Avoid sending links that contain private or sensitive data.",
+  "@openLinkTools_unshortenerAttributionBody": {
+    "description": "Body of the unshortener info dialog: links are sent to an online service. service is the service's name (unshorten.me), rendered as a tappable link.",
+    "placeholders": { "service": { "type": "String" } }
+  },
+  "openLinkTools_unshortenerRateLimitNotice": "The free API is rate limited to 10 requests per hour for new checks.",
+  "@openLinkTools_unshortenerRateLimitNotice": {
+    "description": "Notice in the unshortener info dialog and settings about the free service's limit of 10 new lookups per hour."
+  },
+  "openLinkTools_privacyPolicyLabel": "Privacy policy: {link}",
+  "@openLinkTools_privacyPolicyLabel": {
+    "description": "Line in the unshortener info dialog. link is the address of the service's privacy policy, rendered as a tappable link.",
+    "placeholders": { "link": { "type": "String" } }
+  },
+
+  "openLinkTools_removeTrackingParametersTitle": "Remove Tracking Parameters",
+  "@openLinkTools_removeTrackingParametersTitle": {
+    "description": "Title of the dialog for choosing which tracking parameters to remove from a link. Tracking parameters are parts of a web address (such as utm_source=…) used to follow the user."
+  },
+  "openLinkTools_removeTrackingParametersSubtitle": "Select parameters to strip from this URL.",
+  "@openLinkTools_removeTrackingParametersSubtitle": {
+    "description": "Instruction under the title of the tracking-parameter dialog."
+  },
+  "openLinkTools_referralMarketingBadge": "Referral marketing",
+  "@openLinkTools_referralMarketingBadge": {
+    "description": "Small badge on a tracking parameter that is used for referral or affiliate programs (the sender earns money from the click)."
+  },
+  "openLinkTools_selectedForRemovalCount": "{selected} of {total} selected for removal",
+  "@openLinkTools_selectedForRemovalCount": {
+    "description": "Counter in the tracking-parameter dialog. selected is how many parameters are ticked for removal; total is how many were found.",
+    "placeholders": {
+      "selected": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "openLinkTools_cleanedUrlLabel": "Cleaned URL:",
+  "@openLinkTools_cleanedUrlLabel": {
+    "description": "Label above the preview of the link after removing the selected parameters."
+  },
+
+  "openLinkTools_restoreDefaultsTitle": "Restore defaults?",
+  "@openLinkTools_restoreDefaultsTitle": {
+    "description": "Title of the confirmation dialog before resetting the URL cleaner."
+  },
+  "openLinkTools_restoreDefaultsContent": "This will reset URL cleaner settings and remove the locally stored catalog.",
+  "@openLinkTools_restoreDefaultsContent": {
+    "description": "Body of the confirmation dialog before resetting the URL cleaner: settings return to defaults and the downloaded rule catalog is deleted."
+  },
+  "openLinkTools_actionRestore": "Restore",
+  "@openLinkTools_actionRestore": {
+    "description": "Confirm button of the dialog that resets the URL cleaner."
+  },
+  "openLinkTools_actionApplyChanges": "Apply Changes",
+  "@openLinkTools_actionApplyChanges": {
+    "description": "Button in the tracking-parameter dialog that applies the chosen removals to the link."
+  },
+
+  "openLinkTools_couldNotOpenLink": "Could not open link: {url}",
+  "@openLinkTools_couldNotOpenLink": {
+    "description": "Error message when a link could not be opened in a custom tab. url is the link text.",
+    "placeholders": { "url": { "type": "String" } }
+  },
+
+  "openLinkTools_tileTitleCleaned": "URL cleaned",
+  "@openLinkTools_tileTitleCleaned": {
+    "description": "Title of the URL cleaner row in the open-link sheet after all tracking parameters were removed."
+  },
+  "openLinkTools_tileSubtitleRemovedCount": "{count, plural, =1{1 tracking parameter removed} other{{count} tracking parameters removed}}",
+  "@openLinkTools_tileSubtitleRemovedCount": {
+    "description": "Line under \"URL cleaned\". count is the number of tracking parameters removed.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "openLinkTools_tileTitlePartiallyCleaned": "URL partially cleaned",
+  "@openLinkTools_tileTitlePartiallyCleaned": {
+    "description": "Title of the URL cleaner row when only some tracking parameters were removed."
+  },
+  "openLinkTools_tileSubtitlePartiallyCleaned": "{total, plural, =1{{removed} of 1 tracking parameter removed} other{{removed} of {total} tracking parameters removed}}",
+  "@openLinkTools_tileSubtitlePartiallyCleaned": {
+    "description": "Line under \"URL partially cleaned\". removed is how many were removed; total is how many were found.",
+    "placeholders": {
+      "removed": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "openLinkTools_tileTitleTrackingDetected": "Tracking detected",
+  "@openLinkTools_tileTitleTrackingDetected": {
+    "description": "Title of the URL cleaner row when the link contains tracking parameters that are not removed yet."
+  },
+  "openLinkTools_tileSubtitleFoundCount": "{count, plural, =1{1 tracking parameter found} other{{count} tracking parameters found}}",
+  "@openLinkTools_tileSubtitleFoundCount": {
+    "description": "Line under \"Tracking detected\". count is the number of tracking parameters found.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "openLinkTools_cleanUrlTooltip": "Clean URL",
+  "@openLinkTools_cleanUrlTooltip": {
+    "description": "Tooltip of the button that removes the tracking parameters from the link."
+  },
+
+  "openLinkTools_unshortenerSettingsTitle": "Unshortener",
+  "@openLinkTools_unshortenerSettingsTitle": {
+    "description": "Title of the settings screen for resolving shortened links to their destination."
+  },
+  "openLinkTools_unshortenerSettingsSubtitle": "Short-link resolution behavior, token configuration, and attribution.",
+  "@openLinkTools_unshortenerSettingsSubtitle": {
+    "description": "Subtitle of the unshortener settings screen listing what it contains."
+  },
+  "openLinkTools_unshortenerEnabledTitle": "Enable Unshortener",
+  "@openLinkTools_unshortenerEnabledTitle": {
+    "description": "Switch that turns on the option to resolve shortened links."
+  },
+  "openLinkTools_unshortenerEnabledKeywords": "short links",
+  "@openLinkTools_unshortenerEnabledKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_unshortenerEnabledSubtitle": "Resolve shortened URLs to their destination",
+  "@openLinkTools_unshortenerEnabledSubtitle": {
+    "description": "Explanation under \"Enable Unshortener\"."
+  },
+  "openLinkTools_descriptionLabel": "Description",
+  "@openLinkTools_descriptionLabel": {
+    "description": "Heading of the row explaining what the URL cleaner or unshortener does."
+  },
+  "openLinkTools_unshortenerDescriptionBody": "This module resolves shortened links by sending them to unshorten.me. The service checks each link on its servers and saves the redirect for future requests. Avoid sending links that contain private or sensitive data.",
+  "@openLinkTools_unshortenerDescriptionBody": {
+    "description": "Explanation of the unshortener in its settings: links are sent to the online service unshorten.me (a service name; keep unchanged)."
+  },
+  "openLinkTools_attributionServiceLabel": "Service",
+  "@openLinkTools_attributionServiceLabel": {
+    "description": "Label in front of the link to the unshortener service's website."
+  },
+  "openLinkTools_attributionPrivacyPolicyLabel": "Privacy policy",
+  "@openLinkTools_attributionPrivacyPolicyLabel": {
+    "description": "Label in front of the link to the unshortener service's privacy policy."
+  },
+  "openLinkTools_apiTokenLabel": "API Token",
+  "@openLinkTools_apiTokenLabel": {
+    "description": "Label of the field for a personal access key of the unshortener service. API is a technical abbreviation."
+  },
+  "openLinkTools_apiTokenLabelKeywords": "token",
+  "@openLinkTools_apiTokenLabelKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_apiTokenHint": "Optional token for higher limits",
+  "@openLinkTools_apiTokenHint": {
+    "description": "Placeholder of the API token field: a token is optional and raises the request limit."
+  },
+
+  "openLinkTools_urlCleanerSettingsTitle": "URL Cleaner",
+  "@openLinkTools_urlCleanerSettingsTitle": {
+    "description": "Title of the settings screen for the URL cleaner, which removes tracking parameters from links."
+  },
+  "openLinkTools_urlCleanerSettingsSubtitle": "URL cleanup behavior, rule catalog updates, and attribution.",
+  "@openLinkTools_urlCleanerSettingsSubtitle": {
+    "description": "Subtitle of the URL cleaner settings screen listing what it contains. The catalog is the downloadable list of cleaning rules."
+  },
+  "openLinkTools_urlCleanerDescriptionBody": "This module removes tracking, referrer, and other unnecessary parameters from URLs. It can also resolve common URL redirects offline.",
+  "@openLinkTools_urlCleanerDescriptionBody": {
+    "description": "Explanation of the URL cleaner in its settings. \"Offline redirections\" means resolving known redirect links on the device without contacting the server."
+  },
+  "openLinkTools_urlCleanerEnabledTitle": "Enable URL Cleaner",
+  "@openLinkTools_urlCleanerEnabledTitle": {
+    "description": "Switch that turns the URL cleaner on."
+  },
+  "openLinkTools_urlCleanerEnabledKeywords": "clean urls",
+  "@openLinkTools_urlCleanerEnabledKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_urlCleanerEnabledSubtitle": "Remove tracking parameters from URLs",
+  "@openLinkTools_urlCleanerEnabledSubtitle": {
+    "description": "Explanation under \"Enable URL Cleaner\"."
+  },
+  "openLinkTools_autoApplyTitle": "Auto-apply",
+  "@openLinkTools_autoApplyTitle": {
+    "description": "Switch in the URL cleaner settings: clean links automatically without asking."
+  },
+  "openLinkTools_autoApplyKeywords": "auto apply",
+  "@openLinkTools_autoApplyKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_autoApplySubtitle": "Automatically replace the URL with a cleaned version",
+  "@openLinkTools_autoApplySubtitle": {
+    "description": "Explanation under \"Auto-apply\"."
+  },
+  "openLinkTools_allowReferralTitle": "Allow referral marketing",
+  "@openLinkTools_allowReferralTitle": {
+    "description": "Switch in the URL cleaner settings: do not remove referral and affiliate parameters (which may pay the site that shared the link)."
+  },
+  "openLinkTools_allowReferralKeywords": "affiliate, referral",
+  "@openLinkTools_allowReferralKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_allowReferralSubtitle": "Keep referral and affiliate tracking parameters",
+  "@openLinkTools_allowReferralSubtitle": {
+    "description": "Explanation under \"Allow referral marketing\"."
+  },
+  "openLinkTools_autoUpdateCatalogTitle": "Auto-update catalog",
+  "@openLinkTools_autoUpdateCatalogTitle": {
+    "description": "Switch in the URL cleaner settings: download updated cleaning rules automatically."
+  },
+  "openLinkTools_autoUpdateCatalogSubtitle": "Check for rule updates weekly",
+  "@openLinkTools_autoUpdateCatalogSubtitle": {
+    "description": "Explanation under \"Auto-update catalog\"."
+  },
+  "openLinkTools_updateCatalogTitle": "Update catalog",
+  "@openLinkTools_updateCatalogTitle": {
+    "description": "Row in the URL cleaner settings that downloads the latest cleaning rules now."
+  },
+  "openLinkTools_lastUpdateNotAvailable": "Last update: not available",
+  "@openLinkTools_lastUpdateNotAvailable": {
+    "description": "Line under \"Update catalog\" when the rules were never updated."
+  },
+  "openLinkTools_lastUpdateWithDate": "Last update: {date}",
+  "@openLinkTools_lastUpdateWithDate": {
+    "description": "Line under \"Update catalog\". date is the date of the last manual rule update.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "openLinkTools_lastAutoUpdateWithDate": "Last update: {date} (auto)",
+  "@openLinkTools_lastAutoUpdateWithDate": {
+    "description": "Line under \"Update catalog\". date is the date of the last rule update, which happened automatically.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "openLinkTools_lastCheckWithDate": "Last check: {date}",
+  "@openLinkTools_lastCheckWithDate": {
+    "description": "Line under \"Update catalog\". date is when the app last checked for new rules.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "openLinkTools_catalogUpdatedMessage": "Catalog updated",
+  "@openLinkTools_catalogUpdatedMessage": {
+    "description": "Confirmation after the URL cleaner rules were updated."
+  },
+  "openLinkTools_updateFailedWithError": "Update failed: {error}",
+  "@openLinkTools_updateFailedWithError": {
+    "description": "Error message when updating the URL cleaner rules failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "openLinkTools_restoreDefaultsButtonTitle": "Restore defaults",
+  "@openLinkTools_restoreDefaultsButtonTitle": {
+    "description": "Row in the URL cleaner settings that resets it (asks for confirmation)."
+  },
+  "openLinkTools_restoreDefaultsButtonSubtitle": "Reset to bundled catalog and default settings",
+  "@openLinkTools_restoreDefaultsButtonSubtitle": {
+    "description": "Explanation under \"Restore defaults\": return to the rule catalog shipped with the app and the default settings."
+  },
+  "openLinkTools_clearUrlAttributionText": "This module is based on the ClearURL rules:",
+  "@openLinkTools_clearUrlAttributionText": {
+    "description": "Credit line in the URL cleaner settings, followed by a link to the ClearURLs rules. ClearURL is a project name."
+  },
+
+  "openLinkTools_urlCleanerOverviewSectionTitle": "Overview",
+  "@openLinkTools_urlCleanerOverviewSectionTitle": {
+    "description": "Section heading on the URL cleaner settings screen for the feature description."
+  },
+  "openLinkTools_indexUrlCleanerDescriptionTitle": "Description",
+  "@openLinkTools_indexUrlCleanerDescriptionTitle": {
+    "description": "Title of the URL cleaner description entry, shown as a settings search result."
+  },
+  "openLinkTools_indexUrlCleanerDescriptionKeywords": "tracking parameters, redirects",
+  "@openLinkTools_indexUrlCleanerDescriptionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_indexUrlCleanerDescriptionSubtitle": "Tracking parameter removal and offline redirect cleanup",
+  "@openLinkTools_indexUrlCleanerDescriptionSubtitle": {
+    "description": "Summary of the URL cleaner, shown as a settings search result."
+  },
+  "openLinkTools_urlCleanerBehaviorSectionTitle": "Behavior",
+  "@openLinkTools_urlCleanerBehaviorSectionTitle": {
+    "description": "Section heading on the URL cleaner settings screen for how cleaning works."
+  },
+  "openLinkTools_urlCleanerCatalogSectionTitle": "Catalog",
+  "@openLinkTools_urlCleanerCatalogSectionTitle": {
+    "description": "Section heading on the URL cleaner settings screen for the downloadable rule list."
+  },
+  "openLinkTools_indexUrlCleanerUpdateCatalogSubtitle": "Fetch the latest URL cleaner rules",
+  "@openLinkTools_indexUrlCleanerUpdateCatalogSubtitle": {
+    "description": "Summary of the \"Update catalog\" setting, shown as a settings search result."
+  },
+  "openLinkTools_urlCleanerAttributionSectionTitle": "Attribution",
+  "@openLinkTools_urlCleanerAttributionSectionTitle": {
+    "description": "Section heading on the URL cleaner settings screen for credits to the rule list's creators."
+  },
+  "openLinkTools_indexUrlCleanerAttributionTitle": "Attribution",
+  "@openLinkTools_indexUrlCleanerAttributionTitle": {
+    "description": "Title of the URL cleaner credits entry, shown as a settings search result."
+  },
+  "openLinkTools_indexUrlCleanerAttributionSubtitle": "Credits and source links",
+  "@openLinkTools_indexUrlCleanerAttributionSubtitle": {
+    "description": "Summary of the URL cleaner credits entry, shown as a settings search result."
+  },
+
+  "openLinkTools_unshortenerOverviewSectionTitle": "Overview",
+  "@openLinkTools_unshortenerOverviewSectionTitle": {
+    "description": "Section heading on the unshortener settings screen for the feature description."
+  },
+  "openLinkTools_indexUnshortenerDescriptionTitle": "Description",
+  "@openLinkTools_indexUnshortenerDescriptionTitle": {
+    "description": "Title of the unshortener description entry, shown as a settings search result."
+  },
+  "openLinkTools_indexUnshortenerDescriptionKeywords": "short links, redirects",
+  "@openLinkTools_indexUnshortenerDescriptionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_indexUnshortenerDescriptionSubtitle": "Resolve shortened URLs using the unshorten.me service",
+  "@openLinkTools_indexUnshortenerDescriptionSubtitle": {
+    "description": "Summary of the unshortener, shown as a settings search result. unshorten.me is a service name."
+  },
+  "openLinkTools_unshortenerBehaviorSectionTitle": "Behavior",
+  "@openLinkTools_unshortenerBehaviorSectionTitle": {
+    "description": "Section heading on the unshortener settings screen for how it works."
+  },
+  "openLinkTools_indexUnshortenerApiTokenSubtitle": "Optional token for higher request limits",
+  "@openLinkTools_indexUnshortenerApiTokenSubtitle": {
+    "description": "Summary of the API token setting, shown as a settings search result."
+  },
+  "openLinkTools_unshortenerAttributionSectionTitle": "Attribution",
+  "@openLinkTools_unshortenerAttributionSectionTitle": {
+    "description": "Section heading on the unshortener settings screen for information about the online service used."
+  },
+  "openLinkTools_indexUnshortenerAttributionTitle": "Service attribution",
+  "@openLinkTools_indexUnshortenerAttributionTitle": {
+    "description": "Title of the unshortener service information entry, shown as a settings search result."
+  },
+  "openLinkTools_indexUnshortenerAttributionKeywords": "privacy policy, rate limit",
+  "@openLinkTools_indexUnshortenerAttributionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "openLinkTools_indexUnshortenerAttributionSubtitle": "Rate limits, service homepage, and privacy policy",
+  "@openLinkTools_indexUnshortenerAttributionSubtitle": {
+    "description": "Summary of the unshortener service information entry, shown as a settings search result."
+  }
+}

@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 final _tagSplitPatter = RegExp(r'[,\s]+');
 
@@ -35,6 +36,7 @@ class TagField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final textController = useTextEditingController();
     final tags = useState(initialTags);
 
@@ -45,7 +47,10 @@ class TagField extends HookWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Tags', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          l10n.webFeed_tagsFieldLabel,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         const SizedBox(height: 4),
         Wrap(
           spacing: 8.0,

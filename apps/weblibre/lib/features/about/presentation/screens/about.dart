@@ -26,12 +26,14 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class AboutDialogScreen extends HookConsumerWidget {
   const AboutDialogScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final packageInfo = ref.watch(
       packageInfoProvider.select(
         //During startup we make sure
@@ -46,16 +48,16 @@ class AboutDialogScreen extends HookConsumerWidget {
       ),
       applicationName: packageInfo.appName,
       applicationVersion: packageInfo.version,
-      applicationLegalese: 'Copyright © Fabian Freund, 2024-2026',
+      applicationLegalese: l10n.about_copyright,
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Gecko Version'),
+          title: Text(l10n.about_geckoVersionTitle),
           subtitle: Consumer(
             builder: (context, ref, child) {
               final geckoVersion = ref.watch(geckoVersionProvider);
 
-              return Text(geckoVersion.value ?? 'N/A');
+              return Text(geckoVersion.value ?? l10n.about_notAvailable);
             },
           ),
         ),
@@ -63,7 +65,7 @@ class AboutDialogScreen extends HookConsumerWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(MdiIcons.charity),
-          title: const Text('Feedback'),
+          title: Text(l10n.about_feedbackTitle),
           onTap: () async {
             await ref
                 .read(tabRepositoryProvider.notifier)
@@ -81,7 +83,7 @@ class AboutDialogScreen extends HookConsumerWidget {
         ListTile(
           contentPadding: EdgeInsets.zero,
           leading: const Icon(MdiIcons.handHeart),
-          title: const Text('Donate'),
+          title: Text(l10n.about_donateTitle),
           onTap: () async {
             await ref
                 .read(tabRepositoryProvider.notifier)
@@ -100,7 +102,7 @@ class AboutDialogScreen extends HookConsumerWidget {
           contentPadding: EdgeInsets.zero,
           // ignore: deprecated_member_use
           leading: const Icon(Icons.book),
-          title: const Text('Documentation'),
+          title: Text(l10n.about_documentationTitle),
           onTap: () async {
             await ref
                 .read(tabRepositoryProvider.notifier)
@@ -119,7 +121,7 @@ class AboutDialogScreen extends HookConsumerWidget {
           contentPadding: EdgeInsets.zero,
           // ignore: deprecated_member_use
           leading: const Icon(MdiIcons.github),
-          title: const Text('Github'),
+          title: Text(l10n.about_githubTitle),
           onTap: () async {
             await ref
                 .read(tabRepositoryProvider.notifier)

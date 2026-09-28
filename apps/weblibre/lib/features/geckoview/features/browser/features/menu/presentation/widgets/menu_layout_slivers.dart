@@ -23,6 +23,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The arrangement lists themselves, without any chrome around them.
 ///
@@ -69,8 +71,8 @@ class MenuLayoutSlivers extends ConsumerWidget {
             key: ValueKey(entry.type),
             index: index,
             icon: entry.type.icon,
-            label: entry.type.label,
-            subtitle: _shownSummary(entry.items),
+            label: entry.type.label(context),
+            subtitle: _shownSummary(context, entry.items),
             visible: entry.visible,
             onToggleVisibility: () =>
                 notifier.toggleSectionVisibility(entry.type),
@@ -93,8 +95,10 @@ class MenuLayoutSlivers extends ConsumerWidget {
           key: ValueKey(entry.type),
           index: index,
           icon: entry.type.icon,
-          label: entry.type.label,
-          subtitle: entry.type.description ?? _shownSummary(entry.items),
+          label: entry.type.label(context),
+          subtitle:
+              entry.type.description(context) ??
+              _shownSummary(context, entry.items),
           visible: entry.visible,
           onToggleVisibility: () => notifier.toggleItemVisibility(
             section!.type,
@@ -137,11 +141,13 @@ class MenuLayoutSlivers extends ConsumerWidget {
   return (section: section, item: item);
 }
 
-String? _shownSummary(List<MenuItemEntry> items) {
+String? _shownSummary(BuildContext context, List<MenuItemEntry> items) {
   if (items.isEmpty) return null;
 
   final shown = items.where((item) => item.visible).length;
-  return '$shown of ${items.length} rows shown';
+  return AppLocalizations.of(
+    context,
+  ).menu_reorderRowsShown(shown, items.length);
 }
 
 class _ReorderRow extends StatelessWidget {
@@ -168,6 +174,7 @@ class _ReorderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final dimmed = colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
+    final l10n = AppLocalizations.of(context);
 
     return Material(
       color: Colors.transparent,
@@ -175,7 +182,9 @@ class _ReorderRow extends StatelessWidget {
         leading: IconButton(
           icon: Icon(visible ? Icons.visibility : Icons.visibility_off),
           color: visible ? colorScheme.primary : colorScheme.onSurfaceVariant,
-          tooltip: visible ? 'Hide' : 'Show',
+          tooltip: visible
+              ? l10n.menu_reorderHideTooltip
+              : l10n.menu_reorderShowTooltip,
           onPressed: onToggleVisibility,
         ),
         // The row's own icon sits with its label rather than in the leading

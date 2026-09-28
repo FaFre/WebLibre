@@ -70,9 +70,9 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
           .write(ToolbarButtonConfigsCompanion(fallbackId: Value(fallbackId)));
 
   Future<void> assignLongPressAction(String buttonId, BrowserAction? action) =>
-      (update(db.toolbarButtonConfigs)..where((t) => t.buttonId.equals(buttonId))).write(
-        ToolbarButtonConfigsCompanion(longPressAction: Value(action)),
-      );
+      (update(db.toolbarButtonConfigs)
+            ..where((t) => t.buttonId.equals(buttonId)))
+          .write(ToolbarButtonConfigsCompanion(longPressAction: Value(action)));
 
   Future<void> replaceAll(List<ToolbarButtonConfig> configs) =>
       transaction(() async {

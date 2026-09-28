@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Shows a confirmation dialog for switching user profiles.
 ///
@@ -33,22 +34,22 @@ Future<bool?> showSwitchProfileDialog(
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) {
       final theme = Theme.of(context);
+      final l10n = AppLocalizations.of(context);
 
       return AlertDialog(
         icon: const Icon(Icons.swap_horiz),
-        title: Text('Switch to "$profileName"?'),
+        title: Text(l10n.user_switchToProfileTitle(profileName)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('WebLibre closes and reopens as "$profileName".'),
+            Text(l10n.user_switchClosesReopensAs(profileName)),
             const SizedBox(height: 12),
             // The two consequences worth knowing, as their own lines rather than
             // one bolded paragraph: emphasising everything emphasises nothing,
             // and these are consequences to read, not a warning to alarm.
             Text(
-              '• Private tabs are cleared.\n'
-              '• Web notifications for the profile you leave are paused.',
+              l10n.user_switchConsequencesList,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -60,13 +61,13 @@ Future<bool?> showSwitchProfileDialog(
             onPressed: () {
               context.pop(false);
             },
-            child: const Text('Not now'),
+            child: Text(l10n.user_actionNotNow),
           ),
           FilledButton(
             onPressed: () {
               context.pop(true);
             },
-            child: const Text('Switch and restart'),
+            child: Text(l10n.user_actionSwitchAndRestart),
           ),
         ],
       );

@@ -23,7 +23,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_field.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_spec.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_draft_controller.dart';
+import 'package:weblibre/features/proxy/presentation/utils/singbox_form_field_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_editor_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
 
 class StructuredProfileForm extends HookConsumerWidget {
@@ -40,6 +42,7 @@ class StructuredProfileForm extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final controllers = useMemoized(
       () => {
         for (final field in spec.fields) field.key: TextEditingController(),
@@ -60,7 +63,7 @@ class StructuredProfileForm extends HookConsumerWidget {
       return null;
     }, [controllers, draft.values]);
 
-    final sections = _structuredFieldSections(spec.fields);
+    final sections = _structuredFieldSections(spec.fields, l10n);
     final notifier = ref.read(draftProvider.notifier);
 
     return Column(
@@ -83,7 +86,7 @@ class StructuredProfileForm extends HookConsumerWidget {
         ],
         const SizedBox(height: 12),
         Text(
-          'Advanced protocol options can still be entered with Custom Outbound JSON.',
+          l10n.proxy_advancedOptionsHint,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
@@ -136,8 +139,12 @@ class _SectionFields extends StatelessWidget {
               revealedMinLines: field.key == 'private_key' ? 4 : null,
               revealedMaxLines: field.key == 'private_key' ? 8 : 1,
               decoration: InputDecoration(
-                labelText: field.required ? '${field.label} *' : field.label,
-                helperText: field.helperText ?? 'Stored in secure storage.',
+                labelText: field.required
+                    ? '${field.label(context)} *'
+                    : field.label(context),
+                helperText:
+                    field.helperText(context) ??
+                    AppLocalizations.of(context).proxy_storedInSecureStorage,
                 border: const OutlineInputBorder(),
               ),
               onChanged: (value) => onChanged(field.key, value),
@@ -158,8 +165,10 @@ class _SectionFields extends StatelessWidget {
               minLines: field.isStringList ? 2 : 1,
               maxLines: field.isStringList ? 4 : 1,
               decoration: InputDecoration(
-                labelText: field.required ? '${field.label} *' : field.label,
-                helperText: field.helperText,
+                labelText: field.required
+                    ? '${field.label(context)} *'
+                    : field.label(context),
+                helperText: field.helperText(context),
                 border: const OutlineInputBorder(),
               ),
               onChanged: (value) => onChanged(field.key, value),
@@ -178,7 +187,10 @@ class _SectionFields extends StatelessWidget {
 }
 
 List<({String title, List<SingboxProxyFormField> fields})>
-_structuredFieldSections(List<SingboxProxyFormField> fields) {
+_structuredFieldSections(
+  List<SingboxProxyFormField> fields,
+  AppLocalizations l10n,
+) {
   final basic = <SingboxProxyFormField>[];
   final tls = <SingboxProxyFormField>[];
   final transport = <SingboxProxyFormField>[];
@@ -206,13 +218,14 @@ _structuredFieldSections(List<SingboxProxyFormField> fields) {
   }
 
   return [
-    if (basic.isNotEmpty) _section('Connection', basic),
-    if (secrets.isNotEmpty) _section('Credentials', secrets),
-    if (protocol.isNotEmpty) _section('Protocol Options', protocol),
-    if (tls.isNotEmpty) _section('TLS', tls),
-    if (transport.isNotEmpty) _section('Transport', transport),
-    if (multiplex.isNotEmpty) _section('Multiplex', multiplex),
-    if (dial.isNotEmpty) _section('Dial', dial),
+    if (basic.isNotEmpty) _section(l10n.proxy_sectionConnection, basic),
+    if (secrets.isNotEmpty) _section(l10n.proxy_sectionCredentials, secrets),
+    if (protocol.isNotEmpty)
+      _section(l10n.proxy_sectionProtocolOptions, protocol),
+    if (tls.isNotEmpty) _section(l10n.proxy_sectionTls, tls),
+    if (transport.isNotEmpty) _section(l10n.proxy_sectionTransport, transport),
+    if (multiplex.isNotEmpty) _section(l10n.proxy_sectionMultiplex, multiplex),
+    if (dial.isNotEmpty) _section(l10n.proxy_sectionDial, dial),
   ];
 }
 
@@ -256,6 +269,7 @@ class _BooleanField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final value = useListenableSelector(
       controller,
       () => parseFormBool(controller.text),
@@ -263,8 +277,10 @@ class _BooleanField extends HookWidget {
 
     return InputDecorator(
       decoration: InputDecoration(
-        labelText: field.required ? '${field.label} *' : field.label,
-        helperText: field.helperText,
+        labelText: field.required
+            ? '${field.label(context)} *'
+            : field.label(context),
+        helperText: field.helperText(context),
         helperMaxLines: 3,
         border: const OutlineInputBorder(),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -274,14 +290,16 @@ class _BooleanField extends HookWidget {
           Expanded(
             child: Text(
               value == null
-                  ? 'Unset (uses default)'
-                  : (value ? 'Enabled' : 'Disabled'),
+                  ? l10n.proxy_booleanFieldUnset
+                  : (value
+                        ? l10n.proxy_booleanFieldEnabled
+                        : l10n.proxy_booleanFieldDisabled),
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           if (value != null)
             IconButton(
-              tooltip: 'Clear',
+              tooltip: l10n.common_clear,
               icon: const Icon(Icons.clear, size: 18),
               onPressed: () {
                 controller.text = '';
@@ -324,8 +342,10 @@ class _ChoiceField extends HookWidget {
     return DropdownButtonFormField<String>(
       initialValue: value,
       decoration: InputDecoration(
-        labelText: field.required ? '${field.label} *' : field.label,
-        helperText: field.helperText,
+        labelText: field.required
+            ? '${field.label(context)} *'
+            : field.label(context),
+        helperText: field.helperText(context),
         helperMaxLines: 3,
         border: const OutlineInputBorder(),
       ),

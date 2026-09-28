@@ -1,0 +1,449 @@
+{
+  "@@locale": "en",
+
+  "gestures_screenTitle": "Gestures",
+  "@gestures_screenTitle": {
+    "description": "Title of the gesture settings screen (swipes and drawn gestures that trigger browser actions)."
+  },
+  "gestures_builtInGestureKeywords": "swipe",
+  "@gestures_builtInGestureKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_resetSwipesToDefaultsAction": "Reset Swipes to Defaults",
+  "@gestures_resetSwipesToDefaultsAction": {
+    "description": "Menu item on the gesture settings screen that restores the default actions of the built-in tab bar and tab swipes."
+  },
+  "gestures_twoFingerSwipeTitle": "Two-finger swipe",
+  "@gestures_twoFingerSwipeTitle": {
+    "description": "Name of a fixed gesture in the tab overview: swiping sideways with two fingers."
+  },
+  "gestures_twoFingerSwipeKeywords": "container",
+  "@gestures_twoFingerSwipeKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_twoFingerSwipeAction": "Next or previous container",
+  "@gestures_twoFingerSwipeAction": {
+    "description": "What the two-finger swipe in the tab overview does: switch to the next or previous container (a separate browsing identity)."
+  },
+  "gestures_pinchTitle": "Pinch",
+  "@gestures_pinchTitle": {
+    "description": "Name of a fixed gesture in the tab overview: pinching with two fingers."
+  },
+  "gestures_pinchKeywords": "grid, list, tree, layout",
+  "@gestures_pinchKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_pinchAction": "Grid, list or tree layout",
+  "@gestures_pinchAction": {
+    "description": "What pinching in the tab overview does: switch between grid, list and tree layouts of the tabs."
+  },
+  "gestures_webPagesSectionTitle": "Web Pages",
+  "@gestures_webPagesSectionTitle": {
+    "description": "Section heading on the gesture settings screen for gestures used on web pages."
+  },
+  "gestures_drawnGesturesTitle": "Drawn gestures",
+  "@gestures_drawnGesturesTitle": {
+    "description": "Switch that enables drawn gestures: drawing a stroke pattern (like \"left, then down\") on a page to run an action."
+  },
+  "gestures_drawnGesturesKeywords": "stroke",
+  "@gestures_drawnGesturesKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_drawnGesturesSubtitle": "Draw strokes on a page to run actions",
+  "@gestures_drawnGesturesSubtitle": {
+    "description": "Explanation under \"Drawn gestures\"."
+  },
+  "gestures_gestureBindingsTitle": "Gesture bindings",
+  "@gestures_gestureBindingsTitle": {
+    "description": "Row, and screen title, for the list of drawn stroke patterns and the action each one runs."
+  },
+  "gestures_gestureBindingsSubtitle": "Strokes mapped to actions",
+  "@gestures_gestureBindingsSubtitle": {
+    "description": "Explanation under \"Gesture bindings\"."
+  },
+  "gestures_behaviorTimingTitle": "Behavior & timing",
+  "@gestures_behaviorTimingTitle": {
+    "description": "Row, and screen title, for the sensitivity and timing settings of drawn gestures."
+  },
+  "gestures_behaviorTimingSubtitleShort": "Stroke length, timeout, cooldown",
+  "@gestures_behaviorTimingSubtitleShort": {
+    "description": "Summary under \"Behavior & timing\" listing the settings inside. A cooldown is a waiting time between gestures."
+  },
+  "gestures_excludedSitesTitle": "Excluded sites",
+  "@gestures_excludedSitesTitle": {
+    "description": "Row, and screen title, for the list of websites where drawn gestures are turned off."
+  },
+  "gestures_excludedSitesSubtitle": "Disable gestures per site",
+  "@gestures_excludedSitesSubtitle": {
+    "description": "Explanation under \"Excluded sites\"."
+  },
+  "gestures_feedbackTitle": "Feedback",
+  "@gestures_feedbackTitle": {
+    "description": "Row, and screen title, for the visual feedback shown while drawing a gesture."
+  },
+  "gestures_feedbackSubtitleShort": "Live overlay and suggestions",
+  "@gestures_feedbackSubtitleShort": {
+    "description": "Summary under \"Feedback\": an on-screen overlay while drawing and suggestions of gestures that can be completed."
+  },
+  "gestures_pullToRefreshTitle": "Pull to refresh",
+  "@gestures_pullToRefreshTitle": {
+    "description": "Switch for pull to refresh: dragging down at the top of a page reloads it."
+  },
+  "gestures_pullToRefreshKeywords": "reload",
+  "@gestures_pullToRefreshKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_pullToRefreshSubtitle": "Swipe down at the top of a page to reload it",
+  "@gestures_pullToRefreshSubtitle": {
+    "description": "Explanation under \"Pull to refresh\"."
+  },
+  "gestures_toolbarSectionTitle": "Toolbar",
+  "@gestures_toolbarSectionTitle": {
+    "description": "Section heading on the gesture settings screen for gestures on toolbar buttons."
+  },
+  "gestures_longPressButtonsTitle": "Long press on buttons",
+  "@gestures_longPressButtonsTitle": {
+    "description": "Row about long-pressing toolbar buttons; opens the toolbar customization where each button's long-press action is chosen."
+  },
+  "gestures_longPressButtonsSubtitle": "Chosen per button when customizing the toolbar",
+  "@gestures_longPressButtonsSubtitle": {
+    "description": "Explanation under \"Long press on buttons\"."
+  },
+  "gestures_builtInCannotBeChangedDescription": "Built-in, cannot be changed",
+  "@gestures_builtInCannotBeChangedDescription": {
+    "description": "Line under a fixed gesture (such as pinch) that cannot be reassigned."
+  },
+  "gestures_doNothingTitle": "Do nothing",
+  "@gestures_doNothingTitle": {
+    "description": "Option when choosing the action of a built-in swipe: the swipe does nothing."
+  },
+  "gestures_doNothingSubtitle": "The swipe is ignored",
+  "@gestures_doNothingSubtitle": {
+    "description": "Explanation under \"Do nothing\"."
+  },
+
+  "gestures_restoreDefaultGesturesTooltip": "Restore default gestures",
+  "@gestures_restoreDefaultGesturesTooltip": {
+    "description": "Tooltip of the button that restores the default list of drawn gestures."
+  },
+  "gestures_addGestureButtonLabel": "Add gesture",
+  "@gestures_addGestureButtonLabel": {
+    "description": "Floating button that creates a new drawn gesture."
+  },
+  "gestures_restoreDefaultGesturesConfirmTitle": "Restore default gestures?",
+  "@gestures_restoreDefaultGesturesConfirmTitle": {
+    "description": "Title of the confirmation dialog before restoring the default drawn gestures."
+  },
+  "gestures_restoreDefaultGesturesConfirmContent": "Every gesture goes back to its default action. Your changes are lost.",
+  "@gestures_restoreDefaultGesturesConfirmContent": {
+    "description": "Body of the confirmation dialog before restoring the default drawn gestures."
+  },
+  "gestures_noGesturesAssignedMessage": "No gestures assigned yet.",
+  "@gestures_noGesturesAssignedMessage": {
+    "description": "Shown when the list of drawn gestures is empty."
+  },
+
+  "gestures_replaceExistingGestureTitle": "Replace existing gesture?",
+  "@gestures_replaceExistingGestureTitle": {
+    "description": "Title of the dialog shown when saving a drawn gesture whose stroke pattern is already used."
+  },
+  "gestures_replaceExistingGestureContent": "This stroke is already assigned to \"{action}\". Saving will replace that binding.",
+  "@gestures_replaceExistingGestureContent": {
+    "description": "Body of that dialog. action is the name of the action the pattern currently runs.",
+    "placeholders": { "action": { "type": "String" } }
+  },
+  "gestures_createGestureTitle": "Create gesture",
+  "@gestures_createGestureTitle": {
+    "description": "Title of the editor for a new drawn gesture."
+  },
+  "gestures_editGestureTitle": "Edit gesture",
+  "@gestures_editGestureTitle": {
+    "description": "Title of the editor for an existing drawn gesture."
+  },
+  "gestures_targetActionLabel": "Target action",
+  "@gestures_targetActionLabel": {
+    "description": "Label of the row in the gesture editor showing the action the gesture runs; tapping it changes the action."
+  },
+  "gestures_startPositionLabel": "Start position",
+  "@gestures_startPositionLabel": {
+    "description": "Heading in the gesture editor for where on the screen the stroke must start."
+  },
+  "gestures_fingersLabel": "Fingers",
+  "@gestures_fingersLabel": {
+    "description": "Label in the gesture editor for how many fingers draw the stroke."
+  },
+  "gestures_strokePatternLabel": "Stroke pattern",
+  "@gestures_strokePatternLabel": {
+    "description": "Heading in the gesture editor for the sequence of directions the gesture consists of."
+  },
+  "gestures_drawStrokePatternPlaceholder": "Draw a stroke pattern below",
+  "@gestures_drawStrokePatternPlaceholder": {
+    "description": "Placeholder in the stroke pattern box until directions are entered with the arrow buttons below."
+  },
+  "gestures_undoLastAction": "Undo last",
+  "@gestures_undoLastAction": {
+    "description": "Button in the gesture editor that removes the last direction from the stroke pattern."
+  },
+  "gestures_replaceGestureButtonLabel": "Replace gesture",
+  "@gestures_replaceGestureButtonLabel": {
+    "description": "Save button of the gesture editor when the pattern is already used by another action and will be moved."
+  },
+  "gestures_saveGestureButtonLabel": "Save gesture",
+  "@gestures_saveGestureButtonLabel": {
+    "description": "Save button of the gesture editor."
+  },
+  "gestures_collisionWarning": "Already assigned to \"{action}\". Saving replaces it.",
+  "@gestures_collisionWarning": {
+    "description": "Warning in the gesture editor. action is the name of the action the pattern currently runs.",
+    "placeholders": { "action": { "type": "String" } }
+  },
+
+  "gestures_chooseActionTitle": "Choose action",
+  "@gestures_chooseActionTitle": {
+    "description": "Title of the list of browser actions to choose from for a gesture."
+  },
+
+  "gestures_behaviorTimingScreenSubtitle": "Stroke length, timeout, and cooldown.",
+  "@gestures_behaviorTimingScreenSubtitle": {
+    "description": "Subtitle of the gesture behavior & timing screen listing what it contains."
+  },
+  "gestures_resetToDefaultsTooltip": "Reset to defaults",
+  "@gestures_resetToDefaultsTooltip": {
+    "description": "Tooltip of the button that resets the gesture behavior & timing settings."
+  },
+  "gestures_resetBehaviorTimingConfirmTitle": "Reset behavior & timing?",
+  "@gestures_resetBehaviorTimingConfirmTitle": {
+    "description": "Title of the confirmation dialog before resetting the gesture behavior & timing settings."
+  },
+  "gestures_resetBehaviorTimingConfirmContent": "Stroke length, timeout, cooldown and stroke interval will be restored to their defaults. Your gesture bindings and other settings are kept.",
+  "@gestures_resetBehaviorTimingConfirmContent": {
+    "description": "Body of the confirmation dialog before resetting gesture behavior & timing."
+  },
+  "gestures_minStrokeLengthTitle": "Minimum stroke length",
+  "@gestures_minStrokeLengthTitle": {
+    "description": "Slider: how far a finger must move before the movement counts as a direction in a drawn gesture."
+  },
+  "gestures_minStrokeLengthKeywords": "size, length, sensitivity",
+  "@gestures_minStrokeLengthKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_timeoutTitle": "Timeout",
+  "@gestures_timeoutTitle": {
+    "description": "Slider: how long drawing may pause before an unfinished gesture is dropped."
+  },
+  "gestures_timeoutKeywords": "delay",
+  "@gestures_timeoutKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_timeoutDescription": "A stroke is dropped if no new direction is drawn within this time.",
+  "@gestures_timeoutDescription": {
+    "description": "Explanation under the gesture timeout slider."
+  },
+  "gestures_cooldownTitle": "Cooldown",
+  "@gestures_cooldownTitle": {
+    "description": "Slider: the waiting time after one gesture before another can run."
+  },
+  "gestures_cooldownKeywords": "interval",
+  "@gestures_cooldownKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_cooldownDescription": "Minimum delay between two gestures firing.",
+  "@gestures_cooldownDescription": {
+    "description": "Explanation under the gesture cooldown slider."
+  },
+  "gestures_strokeIntervalTitle": "Stroke interval",
+  "@gestures_strokeIntervalTitle": {
+    "description": "Slider: the shortest allowed time between two direction changes in one gesture."
+  },
+  "gestures_strokeIntervalKeywords": "debounce, jitter, accidental",
+  "@gestures_strokeIntervalKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "gestures_strokeIntervalDescription": "Minimum time between direction changes within one gesture. Faster changes abort the gesture, guarding against accidental triggers.",
+  "@gestures_strokeIntervalDescription": {
+    "description": "Explanation under the stroke interval slider."
+  },
+  "gestures_offLabel": "Off",
+  "@gestures_offLabel": {
+    "description": "Value shown on a gesture timing slider when it is set to zero (the check is turned off)."
+  },
+
+  "gestures_excludedSitesDescription": "Gestures are disabled on these sites. Subdomains are included (e.g. \"example.com\" also covers \"m.example.com\").",
+  "@gestures_excludedSitesDescription": {
+    "description": "Explanation at the top of the excluded sites list. The domains are examples; keep them unchanged."
+  },
+  "gestures_noSitesExcludedMessage": "No sites excluded.",
+  "@gestures_noSitesExcludedMessage": {
+    "description": "Shown when the excluded sites list is empty."
+  },
+
+  "gestures_feedbackScreenSubtitle": "Live overlay and gesture suggestions.",
+  "@gestures_feedbackScreenSubtitle": {
+    "description": "Subtitle of the gesture feedback screen listing what it contains."
+  },
+  "gestures_liveFeedbackTitle": "Live feedback",
+  "@gestures_liveFeedbackTitle": {
+    "description": "Switch: show the stroke being drawn and the action it will run."
+  },
+  "gestures_liveFeedbackSubtitle": "Show the stroke and its action while you draw",
+  "@gestures_liveFeedbackSubtitle": {
+    "description": "Explanation under \"Live feedback\"."
+  },
+  "gestures_suggestNextTitle": "Suggest next",
+  "@gestures_suggestNextTitle": {
+    "description": "Switch: while drawing, also show which other gestures can still be completed from the current stroke."
+  },
+  "gestures_suggestNextSubtitle": "Also show the other gestures you can complete",
+  "@gestures_suggestNextSubtitle": {
+    "description": "Explanation under \"Suggest next\"."
+  },
+  "gestures_suggestAfterTitle": "Suggest after",
+  "@gestures_suggestAfterTitle": {
+    "description": "Slider: how many directions must be drawn before gesture suggestions appear."
+  },
+  "gestures_strokeCount": "{count, plural, =1{1 stroke} other{{count} strokes}}",
+  "@gestures_strokeCount": {
+    "description": "Value label of the \"Suggest after\" slider. count is the number of strokes (directions) drawn.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "gestures_suggestAfterDescription": "Number of strokes to draw before suggestions appear.",
+  "@gestures_suggestAfterDescription": {
+    "description": "Explanation under the \"Suggest after\" slider."
+  },
+  "gestures_actionRestore": "Restore",
+  "@gestures_actionRestore": {
+    "description": "Confirm button of the dialog that restores the default drawn gestures."
+  },
+  "gestures_actionReplace": "Replace",
+  "@gestures_actionReplace": {
+    "description": "Confirm button of the dialog that moves a stroke pattern from another action to this one."
+  },
+
+  "gestures_tabBarSurfaceTitle": "Tab Bar Swipes",
+  "@gestures_tabBarSurfaceTitle": {
+    "description": "Section heading for the configurable swipes on the tab bar."
+  },
+  "gestures_tabBarSurfaceDescription": "Swipes on the tab bar or the side rail",
+  "@gestures_tabBarSurfaceDescription": {
+    "description": "Explanation of the tab bar swipes section. The side rail is the tab bar placed vertically at the side of the screen."
+  },
+  "gestures_tabViewSurfaceTitle": "Tab View Swipes",
+  "@gestures_tabViewSurfaceTitle": {
+    "description": "Section heading for the configurable swipes on tabs in the tab overview."
+  },
+  "gestures_tabViewSurfaceDescription": "Swipes on a tab in the tab list or grid",
+  "@gestures_tabViewSurfaceDescription": {
+    "description": "Explanation of the tab overview swipes section."
+  },
+  "gestures_tabBarSwipeBackwardTitle": "Swipe left along the bar",
+  "@gestures_tabBarSwipeBackwardTitle": {
+    "description": "Name of a built-in swipe: swiping left along the tab bar."
+  },
+  "gestures_tabBarSwipeBackwardDescription": "Swiping up on the side rail does the same",
+  "@gestures_tabBarSwipeBackwardDescription": {
+    "description": "Note under that swipe: when the tab bar is a vertical side rail, swiping up does the same."
+  },
+  "gestures_tabBarSwipeForwardTitle": "Swipe right along the bar",
+  "@gestures_tabBarSwipeForwardTitle": {
+    "description": "Name of a built-in swipe: swiping right along the tab bar."
+  },
+  "gestures_tabBarSwipeForwardDescription": "Swiping down on the side rail does the same",
+  "@gestures_tabBarSwipeForwardDescription": {
+    "description": "Note under that swipe: when the tab bar is a vertical side rail, swiping down does the same."
+  },
+  "gestures_tabBarSwipeOutwardTitle": "Swipe toward the screen edge",
+  "@gestures_tabBarSwipeOutwardTitle": {
+    "description": "Name of a built-in swipe: swiping from the tab bar toward the nearest screen edge."
+  },
+  "gestures_tabBarSwipeOutwardDescription": "Down on a bottom bar, up on a top bar, sideways off a rail",
+  "@gestures_tabBarSwipeOutwardDescription": {
+    "description": "Explanation of which direction that is for each tab bar position (bottom, top or side rail)."
+  },
+  "gestures_tabBarSwipeInwardTitle": "Swipe away from the screen edge",
+  "@gestures_tabBarSwipeInwardTitle": {
+    "description": "Name of a built-in swipe: swiping from the tab bar away from the screen edge, into the page."
+  },
+  "gestures_tabBarSwipeInwardDescription": "Up on a bottom bar, down on a top bar, sideways into the page on a rail",
+  "@gestures_tabBarSwipeInwardDescription": {
+    "description": "Explanation of which direction that is for each tab bar position (bottom, top or side rail)."
+  },
+  "gestures_tabSwipeLeftTitle": "Swipe a tab left",
+  "@gestures_tabSwipeLeftTitle": {
+    "description": "Name of a built-in swipe: swiping a tab card to the left in the tab overview."
+  },
+  "gestures_tabSwipeLeftDescription": "Acts on the swiped tab, not the open one",
+  "@gestures_tabSwipeLeftDescription": {
+    "description": "Note under that swipe: it affects the tab that was swiped, not the tab currently open."
+  },
+  "gestures_tabSwipeRightTitle": "Swipe a tab right",
+  "@gestures_tabSwipeRightTitle": {
+    "description": "Name of a built-in swipe: swiping a tab card to the right in the tab overview."
+  },
+  "gestures_tabSwipeRightDescription": "Acts on the swiped tab, not the open one",
+  "@gestures_tabSwipeRightDescription": {
+    "description": "Note under that swipe: it affects the tab that was swiped, not the tab currently open."
+  },
+
+  "gestures_startPositionAnywhere": "Anywhere",
+  "@gestures_startPositionAnywhere": {
+    "description": "Start position option for a drawn gesture: the stroke may start anywhere on the screen."
+  },
+  "gestures_startPositionLeftEdge": "Left edge",
+  "@gestures_startPositionLeftEdge": {
+    "description": "Start position option for a drawn gesture: the stroke must start at the left edge of the screen."
+  },
+  "gestures_startPositionRightEdge": "Right edge",
+  "@gestures_startPositionRightEdge": {
+    "description": "Start position option for a drawn gesture: the stroke must start at the right edge of the screen."
+  },
+  "gestures_startPositionTopEdge": "Top edge",
+  "@gestures_startPositionTopEdge": {
+    "description": "Start position option for a drawn gesture: the stroke must start at the top edge of the screen."
+  },
+  "gestures_startPositionBottomEdge": "Bottom edge",
+  "@gestures_startPositionBottomEdge": {
+    "description": "Start position option for a drawn gesture: the stroke must start at the bottom edge of the screen."
+  },
+  "gestures_startPositionLeftHalf": "Left half",
+  "@gestures_startPositionLeftHalf": {
+    "description": "Start position option for a drawn gesture: the stroke must start in the left half of the screen."
+  },
+  "gestures_startPositionRightHalf": "Right half",
+  "@gestures_startPositionRightHalf": {
+    "description": "Start position option for a drawn gesture: the stroke must start in the right half of the screen."
+  },
+
+  "gestures_strokesSectionTitle": "Strokes",
+  "@gestures_strokesSectionTitle": {
+    "description": "Section heading on the behavior & timing screen for stroke recognition settings."
+  },
+  "gestures_indexMinStrokeLengthSubtitle": "Minimum swipe length recognized as a direction",
+  "@gestures_indexMinStrokeLengthSubtitle": {
+    "description": "Summary of the minimum stroke length setting, shown as a settings search result."
+  },
+  "gestures_timingSectionTitle": "Timing",
+  "@gestures_timingSectionTitle": {
+    "description": "Section heading on the behavior & timing screen for timing settings."
+  },
+  "gestures_indexTimeoutSubtitle": "Drop a stroke if no new direction is drawn",
+  "@gestures_indexTimeoutSubtitle": {
+    "description": "Summary of the gesture timeout setting, shown as a settings search result."
+  },
+  "gestures_indexCooldownSubtitle": "Minimum delay between two gestures firing",
+  "@gestures_indexCooldownSubtitle": {
+    "description": "Summary of the gesture cooldown setting, shown as a settings search result."
+  },
+  "gestures_indexStrokeIntervalSubtitle": "Reject a gesture when direction changes come too fast",
+  "@gestures_indexStrokeIntervalSubtitle": {
+    "description": "Summary of the stroke interval setting, shown as a settings search result."
+  },
+
+  "gestures_overlaySectionTitle": "Overlay",
+  "@gestures_overlaySectionTitle": {
+    "description": "Section heading on the gesture feedback screen for the on-screen overlay shown while drawing."
+  },
+  "gestures_indexSuggestAfterSubtitle": "Number of strokes to draw before suggestions appear",
+  "@gestures_indexSuggestAfterSubtitle": {
+    "description": "Summary of the \"Suggest after\" setting, shown as a settings search result."
+  }
+}

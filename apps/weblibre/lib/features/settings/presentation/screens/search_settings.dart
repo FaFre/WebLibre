@@ -32,109 +32,129 @@ import 'package:weblibre/features/settings/presentation/widgets/default_search_s
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/presentation/utils/search_suggestion_providers_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> searchSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Providers',
-    keywords: ['engines'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Default Search Provider',
-        subtitle: 'Choose the default engine for searches',
-        keywords: ['search engine'],
-        child: _DefaultSearchProviderSection(),
+List<SettingsSectionDefinition> searchSettingsSections(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_searchSectionProvidersTitle,
+      keywords: settingsKeywords(l10n.settings_searchSectionProvidersKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_defaultSearchProviderTitle,
+          subtitle: l10n.settings_indexDefaultSearchProviderSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_defaultSearchProviderKeywords,
+          ),
+          child: const _DefaultSearchProviderSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_defaultAutocompleteProviderTitle,
+          subtitle: l10n.settings_indexDefaultAutocompleteProviderSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_defaultAutocompleteProviderKeywords,
+          ),
+          child: const _AutocompleteProviderSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_customSearchEnginesTitle,
+          subtitle: l10n.settings_customSearchEnginesSubtitle,
+          keywords: settingsKeywords(l10n.settings_customSearchEnginesKeywords),
+          child: const _CustomSearchEnginesTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_searchSectionBangShortcutsTitle,
+      keywords: settingsKeywords(
+        l10n.settings_searchSectionBangShortcutsKeywords,
       ),
-      SettingsEntryDefinition(
-        title: 'Default Autocomplete Provider',
-        subtitle: 'Choose the provider for search suggestions',
-        keywords: ['suggestions'],
-        child: _AutocompleteProviderSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Custom Search Engines',
-        subtitle: 'Add and manage your own search providers',
-        keywords: ['user bangs', 'providers'],
-        child: _CustomSearchEnginesTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Bang Shortcuts',
-    keywords: ['bangs'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Bang Settings',
-        subtitle: 'Manage bang repositories and usage data',
-        keywords: ['shortcuts', 'bangs'],
-        child: _BangsTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'History & Suggestions',
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Search History Limit',
-        subtitle: 'Maximum number of recent searches to remember',
-        keywords: ['history', 'entries'],
-        child: _MaxSearchHistoryEntriesSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Allow clipboard access for suggestions',
-        subtitle: 'Browser can read clipboard to suggest URLs',
-        keywords: ['clipboard'],
-        child: _AllowClipboardAccessTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Autocomplete on enter',
-        subtitle: 'Accept the inline suggestion when pressing enter',
-        keywords: ['submit', 'keyboard', 'suggestions'],
-        child: _AcceptSuggestionOnSubmitTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Popular site suggestions',
-        subtitle: 'Complete typed text with well-known domains',
-        keywords: ['popular sites', 'domains', 'ghost text', 'autocomplete'],
-        child: _PopularSitesAutocompleteTile(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Local Search Index',
-    keywords: ['on device search', 'index'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Enable local search index',
-        subtitle: 'Index visited pages locally for content search',
-        keywords: ['page text', 'history'],
-        child: _LocalIndexEnabledTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Index private tabs',
-        subtitle: 'Include private tabs in the local index',
-        keywords: ['incognito'],
-        child: _IndexPrivateTabsTile(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Indexed pages',
-        subtitle: 'View and clear the local index',
-        keywords: ['clear index', 'stats'],
-        child: _LocalIndexStatsTile(),
-      ),
-    ],
-  ),
-];
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_bangSettingsTitle,
+          subtitle: l10n.settings_bangSettingsListSubtitle,
+          keywords: settingsKeywords(l10n.settings_bangSettingsKeywords),
+          child: const _BangsTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_searchSectionHistorySuggestionsTitle,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_searchHistoryLimitTitle,
+          subtitle: l10n.settings_searchHistoryLimitSubtitle,
+          keywords: settingsKeywords(l10n.settings_searchHistoryLimitKeywords),
+          child: const _MaxSearchHistoryEntriesSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_allowClipboardAccessTitle,
+          subtitle: l10n.settings_allowClipboardAccessSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_allowClipboardAccessKeywords,
+          ),
+          child: const _AllowClipboardAccessTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_acceptSuggestionOnSubmitTitle,
+          subtitle: l10n.settings_indexAcceptSuggestionOnSubmitSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_acceptSuggestionOnSubmitKeywords,
+          ),
+          child: const _AcceptSuggestionOnSubmitTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_popularSitesAutocompleteTitle,
+          subtitle: l10n.settings_indexPopularSitesAutocompleteSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_popularSitesAutocompleteKeywords,
+          ),
+          child: const _PopularSitesAutocompleteTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_searchSectionLocalIndexTitle,
+      keywords: settingsKeywords(l10n.settings_searchSectionLocalIndexKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_localIndexEnabledTitle,
+          subtitle: l10n.settings_indexLocalIndexEnabledSubtitle,
+          keywords: settingsKeywords(l10n.settings_localIndexEnabledKeywords),
+          child: const _LocalIndexEnabledTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_indexPrivateTabsTitle,
+          subtitle: l10n.settings_indexIndexPrivateTabsSubtitle,
+          keywords: settingsKeywords(l10n.settings_indexPrivateTabsKeywords),
+          child: const _IndexPrivateTabsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_localIndexStatsTitle,
+          subtitle: l10n.settings_indexLocalIndexStatsSubtitle,
+          keywords: settingsKeywords(l10n.settings_localIndexStatsKeywords),
+          child: const _LocalIndexStatsTile(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class SearchSettingsScreen extends StatelessWidget {
   const SearchSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Search',
-      subtitle: 'Providers, bangs, history suggestions, and on-device search.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.settings_searchTitle,
+      subtitle: l10n.settings_searchSubtitle,
       icon: MdiIcons.magnify,
-      sections: searchSettingsSections,
+      sections: searchSettingsSections(context),
     );
   }
 }
@@ -144,18 +164,20 @@ class _DefaultSearchProviderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            title: Text('Default Search Provider'),
-            leading: Icon(MdiIcons.cloudSearch),
+            title: Text(l10n.settings_defaultSearchProviderTitle),
+            leading: const Icon(MdiIcons.cloudSearch),
             contentPadding: EdgeInsets.zero,
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.only(left: 40),
             child: DefaultSearchSelector(),
           ),
@@ -176,6 +198,7 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
       ),
     );
     final relatedBang = defaultSearchSuggestionsProvider.relatedBang;
+    final l10n = AppLocalizations.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -183,9 +206,9 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            title: Text('Default Autocomplete Provider'),
-            leading: Icon(MdiIcons.weatherCloudyArrowRight),
+          ListTile(
+            title: Text(l10n.settings_defaultAutocompleteProviderTitle),
+            leading: const Icon(MdiIcons.weatherCloudyArrowRight),
             contentPadding: EdgeInsets.zero,
           ),
           Padding(
@@ -206,7 +229,7 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
               ) {
                 return DropdownMenuEntry(
                   value: provider,
-                  label: provider.label,
+                  label: provider.label(context),
                   leadingIcon: provider.relatedBang.mapNotNull(
                     (trigger) => BangIcon(trigger: trigger),
                   ),
@@ -235,9 +258,11 @@ class _CustomSearchEnginesTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
-      title: const Text('Custom Search Engines'),
-      subtitle: const Text('Add and manage your own search providers'),
+      title: Text(l10n.settings_customSearchEnginesTitle),
+      subtitle: Text(l10n.settings_customSearchEnginesSubtitle),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,
@@ -256,9 +281,11 @@ class _BangsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return ListTile(
-      title: const Text('Bang Settings'),
-      subtitle: const Text('Manage bang repositories and usage data'),
+      title: Text(l10n.settings_bangSettingsListTitle),
+      subtitle: Text(l10n.settings_bangSettingsListSubtitle),
       contentPadding: const EdgeInsets.symmetric(
         vertical: 8.0,
         horizontal: 16.0,
@@ -277,6 +304,7 @@ class _MaxSearchHistoryEntriesSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final maxSearchHistoryEntries = ref.watch(
@@ -291,10 +319,10 @@ class _MaxSearchHistoryEntriesSection extends HookConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const ListTile(
-            title: Text('Search History Limit'),
-            subtitle: Text('Maximum number of recent searches to remember'),
-            leading: Icon(MdiIcons.history),
+          ListTile(
+            title: Text(l10n.settings_searchHistoryLimitTitle),
+            subtitle: Text(l10n.settings_searchHistoryLimitSubtitle),
+            leading: const Icon(MdiIcons.history),
             contentPadding: EdgeInsets.zero,
           ),
           Padding(
@@ -304,17 +332,19 @@ class _MaxSearchHistoryEntriesSection extends HookConsumerWidget {
               child: TextFormField(
                 initialValue: maxSearchHistoryEntries.toString(),
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(suffixText: 'entries'),
+                decoration: InputDecoration(
+                  suffixText: l10n.settings_searchHistoryLimitSuffix,
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return l10n.settings_validationEnterValue;
                   }
                   final parsedValue = int.tryParse(value);
                   if (parsedValue == null) {
-                    return 'Please enter a valid number';
+                    return l10n.settings_validationEnterValidNumber;
                   }
                   if (parsedValue < 0 || parsedValue > 100) {
-                    return 'Value must be between 0 and 100';
+                    return l10n.settings_validationValueBetween0And100;
                   }
                   return null;
                 },
@@ -346,10 +376,11 @@ class _AllowClipboardAccessTile extends HookConsumerWidget {
     final allowClipboardAccess = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.allowClipboardAccess),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Allow clipboard access for suggestions'),
-      subtitle: const Text('Browser can read clipboard to suggest URLs'),
+      title: Text(l10n.settings_allowClipboardAccessTitle),
+      subtitle: Text(l10n.settings_allowClipboardAccessSubtitle),
       secondary: const Icon(MdiIcons.clipboardTextOutline),
       value: allowClipboardAccess,
       onChanged: (value) async {
@@ -374,12 +405,11 @@ class _AcceptSuggestionOnSubmitTile extends HookConsumerWidget {
         (s) => s.acceptSuggestionOnSubmit,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Autocomplete on enter'),
-      subtitle: const Text(
-        'Accept the inline suggestion when pressing enter on the keyboard',
-      ),
+      title: Text(l10n.settings_acceptSuggestionOnSubmitTitle),
+      subtitle: Text(l10n.settings_acceptSuggestionOnSubmitSubtitle),
       secondary: const Icon(Icons.keyboard_return),
       value: acceptSuggestionOnSubmit,
       onChanged: (value) async {
@@ -404,12 +434,11 @@ class _PopularSitesAutocompleteTile extends HookConsumerWidget {
         (s) => s.popularSitesAutocompleteEnabled,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Popular site suggestions'),
-      subtitle: const Text(
-        'Complete typed text with well-known domains when your history has no match',
-      ),
+      title: Text(l10n.settings_popularSitesAutocompleteTitle),
+      subtitle: Text(l10n.settings_popularSitesAutocompleteSubtitle),
       secondary: const Icon(MdiIcons.web),
       value: popularSitesAutocompleteEnabled,
       onChanged: (value) async {
@@ -434,14 +463,11 @@ class _LocalIndexEnabledTile extends HookConsumerWidget {
         (s) => s.enableLocalSearchIndex,
       ),
     );
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Enable local search index'),
-      subtitle: const Text(
-        'Index visited pages locally so the browser can search their '
-        'content. Visit metadata stays in the engine; only page text is '
-        'stored on-device.',
-      ),
+      title: Text(l10n.settings_localIndexEnabledTitle),
+      subtitle: Text(l10n.settings_localIndexEnabledSubtitle),
       secondary: const Icon(MdiIcons.bookSearchOutline),
       value: enabled,
       onChanged: (value) async {
@@ -464,13 +490,11 @@ class _IndexPrivateTabsTile extends HookConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final enabled = settings.enableLocalSearchIndex;
     final indexPrivate = settings.indexPrivateTabs;
+    final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
-      title: const Text('Index private tabs'),
-      subtitle: const Text(
-        'Include pages opened in private tabs in the local index. '
-        'Off by default.',
-      ),
+      title: Text(l10n.settings_indexPrivateTabsTitle),
+      subtitle: Text(l10n.settings_indexPrivateTabsSubtitle),
       secondary: const Icon(MdiIcons.incognito),
       value: indexPrivate,
       onChanged: enabled
@@ -491,23 +515,22 @@ class _LocalIndexStatsTile extends HookConsumerWidget {
   const _LocalIndexStatsTile();
 
   Future<bool?> _confirmClear(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return showDialog<bool>(
       context: context,
       anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
       builder: (context) => AlertDialog(
-        title: const Text('Clear local search index?'),
-        content: const Text(
-          'This removes all locally indexed page content. Engine history '
-          '(visit metadata) is not affected.',
-        ),
+        title: Text(l10n.settings_clearLocalIndexDialogTitle),
+        content: Text(l10n.settings_clearLocalIndexDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Clear'),
+            child: Text(l10n.common_clear),
           ),
         ],
       ),
@@ -516,6 +539,7 @@ class _LocalIndexStatsTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     // Bump on Clear to re-trigger the count query.
     final refreshTick = useState(0);
     final countSnapshot = useFuture(
@@ -527,11 +551,14 @@ class _LocalIndexStatsTile extends HookConsumerWidget {
 
     return ListTile(
       leading: const Icon(MdiIcons.databaseOutline),
-      title: const Text('Indexed pages'),
-      subtitle: Text(count.mapNotNull((c) => '$c pages indexed') ?? 'Loading…'),
+      title: Text(l10n.settings_localIndexStatsTitle),
+      subtitle: Text(
+        count.mapNotNull(l10n.settings_localIndexPagesIndexed) ??
+            l10n.common_loading,
+      ),
       trailing: TextButton.icon(
         icon: const Icon(MdiIcons.deleteOutline),
-        label: const Text('Clear'),
+        label: Text(l10n.common_clear),
         onPressed: count == null || count == 0
             ? null
             : () async {

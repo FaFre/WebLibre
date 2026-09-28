@@ -30,6 +30,7 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtim
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Single entry point that prompts the user to start whichever proxy backend
@@ -130,27 +131,27 @@ Future<bool> _maybeStartSingboxProxy(
   final proxyTitle = await _proxyConnectionTitleForPrompt(
     ref,
     proxyConnectionId,
+    AppLocalizations.of(context),
   );
 
   if (!context.mounted) return false;
 
+  final l10n = AppLocalizations.of(context);
   final shouldStart = await showDialog<bool>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.route_outlined),
-      title: const Text('Start Proxy Connection?'),
-      content: Text(
-        'This tab needs $proxyTitle, but that connection is not running. Start it now?',
-      ),
+      title: Text(l10n.proxy_startConnectionDialogTitle),
+      content: Text(l10n.proxy_startConnectionDialogContent(proxyTitle)),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Start'),
+          child: Text(l10n.proxy_actionStart),
         ),
       ],
     ),
@@ -170,7 +171,10 @@ Future<bool> _maybeStartSingboxProxy(
       stackTrace: stackTrace,
     );
     if (context.mounted) {
-      showErrorMessage(context, 'Failed to start proxy: $error');
+      showErrorMessage(
+        context,
+        AppLocalizations.of(context).proxy_startProxyFailed(error.toString()),
+      );
     }
     return false;
   }
@@ -179,12 +183,11 @@ Future<bool> _maybeStartSingboxProxy(
 Future<String> _proxyConnectionTitleForPrompt(
   WidgetRef ref,
   ProxyConnectionId proxyConnectionId,
+  AppLocalizations l10n,
 ) async {
   final options = ref.read(proxyConnectionOptionsProvider);
-  final title = proxyConnectionTitle(options, proxyConnectionId);
-
-  if (title != unknownProxyTitle) {
-    return title;
+  if (proxyConnectionOptionExists(options, proxyConnectionId)) {
+    return proxyConnectionTitle(options, proxyConnectionId, l10n);
   }
 
   if (proxyConnectionId is SingboxProxyConnectionId) {
@@ -202,7 +205,7 @@ Future<String> _proxyConnectionTitleForPrompt(
     }
   }
 
-  return proxyConnectionTitle(options, proxyConnectionId);
+  return proxyConnectionTitle(options, proxyConnectionId, l10n);
 }
 
 Future<SingboxProxyRuntimeState> _resolveRuntimeStateForPrompt(

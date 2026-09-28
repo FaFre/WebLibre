@@ -21,12 +21,10 @@
 import 'package:flutter/material.dart';
 
 enum SmallWebSourceKind {
-  kagi('Kagi', Icons.travel_explore, 'Small Web by Kagi Search'),
-  wander('Wander', Icons.dns, 'Console-based web ring');
+  kagi(Icons.travel_explore),
+  wander(Icons.dns);
 
-  final String label;
   final IconData icon;
-  final String description;
 
-  const SmallWebSourceKind(this.label, this.icon, this.description);
+  const SmallWebSourceKind(this.icon);
 }

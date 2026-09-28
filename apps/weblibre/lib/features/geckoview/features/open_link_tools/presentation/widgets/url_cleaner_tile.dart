@@ -25,6 +25,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/entities/url_cleaner_result.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class UrlCleanerTile extends StatelessWidget {
   final UrlCleanerResult result;
@@ -44,6 +45,7 @@ class UrlCleanerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final paramCount = result.removedParams.length;
     final hasParams = paramCount > 0;
 
@@ -57,18 +59,17 @@ class UrlCleanerTile extends StatelessWidget {
     final String title;
     final String subtitle;
     if (isClean) {
-      title = 'URL cleaned';
-      subtitle = removedCount == 1
-          ? '1 tracking parameter removed'
-          : '$removedCount tracking parameters removed';
+      title = l10n.openLinkTools_tileTitleCleaned;
+      subtitle = l10n.openLinkTools_tileSubtitleRemovedCount(removedCount);
     } else if (removedCount > 0) {
-      title = 'URL partially cleaned';
-      subtitle = '$removedCount of $paramCount tracking parameters removed';
+      title = l10n.openLinkTools_tileTitlePartiallyCleaned;
+      subtitle = l10n.openLinkTools_tileSubtitlePartiallyCleaned(
+        removedCount,
+        paramCount,
+      );
     } else {
-      title = 'Tracking detected';
-      subtitle = paramCount == 1
-          ? '1 tracking parameter found'
-          : '$paramCount tracking parameters found';
+      title = l10n.openLinkTools_tileTitleTrackingDetected;
+      subtitle = l10n.openLinkTools_tileSubtitleFoundCount(paramCount);
     }
 
     return ListTile(
@@ -89,7 +90,7 @@ class UrlCleanerTile extends StatelessWidget {
 
                 IconButton(
                   icon: const Icon(MdiIcons.linkVariantRemove),
-                  tooltip: 'Clean URL',
+                  tooltip: l10n.openLinkTools_cleanUrlTooltip,
                   onPressed: onClean,
                 ),
               ],

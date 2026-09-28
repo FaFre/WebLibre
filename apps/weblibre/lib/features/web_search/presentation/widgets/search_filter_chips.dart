@@ -17,11 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:search_protocol/search_protocol.dart';
+import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/web_search/data/locale_options.dart';
+import 'package:weblibre/features/web_search/domain/providers/localized_locale_options.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class _FilterPill extends StatelessWidget {
   final IconData icon;
@@ -148,27 +152,48 @@ class _MenuRow extends StatelessWidget {
   }
 }
 
+/// The device's own locale, which the search "device default" choices describe.
+///
+/// Not `Localizations.localeOf`: that is the app's UI locale, which follows the
+/// in-app language override and is narrowed to the languages WebLibre ships.
+Locale _deviceLocale(BuildContext context) =>
+    View.of(context).platformDispatcher.locale;
+
 class LanguageSelector extends ConsumerWidget {
   const LanguageSelector({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = Localizations.localeOf(context);
+    final l10n = AppLocalizations.of(context);
+    final deviceLanguage = _deviceLocale(context).languageCode;
+    final options =
+        ref
+            .watch(
+              localizedLanguageOptionsProvider(
+                Localizations.localeOf(context).toIntlLocale(),
+              ),
+            )
+            .value ??
+        supportedLanguages;
 
     final selected = ref.watch(
       webSearchSettingsControllerProvider.select((s) => s.language),
     );
 
-    final isHighlighted = selected != null && selected != locale.languageCode;
+    final isHighlighted = selected != null && selected != deviceLanguage;
 
-    final selectedOption = findLanguage(selected);
+    LanguageOption? find(String? code) => options.firstWhereOrNull(
+      (option) => option.code == code?.toLowerCase(),
+    );
+
+    final selectedOption = find(selected);
     final label = selected == null
-        ? 'Auto'
+        ? l10n.webSearch_languageAuto
         : (selectedOption?.name ?? selected);
 
-    final defaultOption = findLanguage(locale.languageCode);
+    final defaultOption = find(deviceLanguage);
     final others = [
-      for (final l in supportedLanguages)
+      for (final l in options)
         if (l.code != defaultOption?.code) l,
     ]..sort((a, b) => a.name.compareTo(b.name));
 
@@ -187,8 +212,8 @@ class LanguageSelector extends ConsumerWidget {
                 .setLanguage(null);
           },
           child: _MenuRow(
-            label: 'Auto (device default)',
-            subtitle: defaultOption?.code ?? locale.languageCode,
+            label: l10n.webSearch_languageAutoDeviceDefault,
+            subtitle: defaultOption?.code ?? deviceLanguage,
             isSelected: selected == null,
           ),
         ),
@@ -216,21 +241,37 @@ class CountrySelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = Localizations.localeOf(context);
+    final l10n = AppLocalizations.of(context);
+    final deviceCountry = _deviceLocale(context).countryCode;
+    final options =
+        ref
+            .watch(
+              localizedCountryOptionsProvider(
+                Localizations.localeOf(context).toIntlLocale(),
+              ),
+            )
+            .value ??
+        supportedCountries;
 
     final selected = ref.watch(
       webSearchSettingsControllerProvider.select((s) => s.region),
     );
 
-    final isHighlighted = selected != null && selected != locale.countryCode;
+    final isHighlighted = selected != null && selected != deviceCountry;
 
-    final selectedOption = findCountry(selected);
-    final label = selected == null ? 'Any' : (selectedOption?.name ?? selected);
+    CountryOption? find(String? code) => options.firstWhereOrNull(
+      (option) => option.code == code?.toUpperCase(),
+    );
 
-    final defaultOption = findCountry(locale.countryCode);
+    final selectedOption = find(selected);
+    final label = selected == null
+        ? l10n.webSearch_countryAny
+        : (selectedOption?.name ?? selected);
+
+    final defaultOption = find(deviceCountry);
 
     final others = [
-      for (final c in supportedCountries)
+      for (final c in options)
         if (c.code != defaultOption?.code) c,
     ]..sort((a, b) => a.name.compareTo(b.name));
 
@@ -248,7 +289,10 @@ class CountrySelector extends ConsumerWidget {
                 .read(webSearchSettingsControllerProvider.notifier)
                 .setRegion(null);
           },
-          child: _MenuRow(label: 'Any region', isSelected: selected == null),
+          child: _MenuRow(
+            label: l10n.webSearch_countryAnyRegion,
+            isSelected: selected == null,
+          ),
         ),
         if (defaultOption != null) ...[
           const Divider(),
@@ -259,7 +303,7 @@ class CountrySelector extends ConsumerWidget {
                   .setRegion(defaultOption.code);
             },
             child: _MenuRow(
-              label: '${defaultOption.name} (device)',
+              label: l10n.webSearch_countryDeviceDefault(defaultOption.name),
               subtitle: defaultOption.code,
               isSelected: selected == defaultOption.code,
             ),
@@ -287,15 +331,16 @@ class CountrySelector extends ConsumerWidget {
 class SafeSearchSelector extends ConsumerWidget {
   const SafeSearchSelector({super.key});
 
-  String _label(SafeSearch? value) => switch (value) {
-    null => 'Safe: default',
-    SafeSearch.none => 'Safe: off',
-    SafeSearch.moderate => 'Safe: moderate',
-    SafeSearch.strict => 'Safe: strict',
+  String _label(AppLocalizations l10n, SafeSearch? value) => switch (value) {
+    null => l10n.webSearch_safeSearchPillDefault,
+    SafeSearch.none => l10n.webSearch_safeSearchPillOff,
+    SafeSearch.moderate => l10n.webSearch_safeSearchPillModerate,
+    SafeSearch.strict => l10n.webSearch_safeSearchPillStrict,
   };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final selected = ref.watch(
       webSearchSettingsControllerProvider.select((s) => s.safeSearch),
     );
@@ -305,7 +350,7 @@ class SafeSearchSelector extends ConsumerWidget {
     return MenuAnchor(
       builder: (context, controller, _) => _FilterPill(
         icon: Icons.shield_moon_outlined,
-        label: _label(selected),
+        label: _label(l10n, selected),
         isHighlighted: isHighlighted,
         onTap: () => controller.isOpen ? controller.close() : controller.open(),
       ),
@@ -317,7 +362,7 @@ class SafeSearchSelector extends ConsumerWidget {
                 .setSafeSearch(null);
           },
           child: _MenuRow(
-            label: 'Default (moderate)',
+            label: l10n.webSearch_safeSearchMenuDefault,
             isSelected: selected == null,
           ),
         ),
@@ -329,7 +374,7 @@ class SafeSearchSelector extends ConsumerWidget {
                 .setSafeSearch(SafeSearch.none);
           },
           child: _MenuRow(
-            label: 'Off',
+            label: l10n.webSearch_safeSearchMenuOff,
             isSelected: selected == SafeSearch.none,
             isHighlighted: true,
           ),
@@ -341,7 +386,7 @@ class SafeSearchSelector extends ConsumerWidget {
                 .setSafeSearch(SafeSearch.moderate);
           },
           child: _MenuRow(
-            label: 'Moderate',
+            label: l10n.webSearch_safeSearchMenuModerate,
             isSelected: selected == SafeSearch.moderate,
           ),
         ),
@@ -352,7 +397,7 @@ class SafeSearchSelector extends ConsumerWidget {
                 .setSafeSearch(SafeSearch.strict);
           },
           child: _MenuRow(
-            label: 'Strict',
+            label: l10n.webSearch_safeSearchMenuStrict,
             isSelected: selected == SafeSearch.strict,
             isHighlighted: true,
           ),
@@ -365,16 +410,17 @@ class SafeSearchSelector extends ConsumerWidget {
 class FreshnessSelector extends ConsumerWidget {
   const FreshnessSelector({super.key});
 
-  String _label(TimeRange? value) => switch (value) {
-    null => 'Any time',
-    TimeRange.day => 'Past day',
-    TimeRange.week => 'Past week',
-    TimeRange.month => 'Past month',
-    TimeRange.year => 'Past year',
+  String _label(AppLocalizations l10n, TimeRange? value) => switch (value) {
+    null => l10n.webSearch_freshnessAnyTime,
+    TimeRange.day => l10n.webSearch_freshnessPastDay,
+    TimeRange.week => l10n.webSearch_freshnessPastWeek,
+    TimeRange.month => l10n.webSearch_freshnessPastMonth,
+    TimeRange.year => l10n.webSearch_freshnessPastYear,
   };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final selected = ref.watch(
       webSearchSettingsControllerProvider.select((s) => s.timeRange),
     );
@@ -384,7 +430,7 @@ class FreshnessSelector extends ConsumerWidget {
     return MenuAnchor(
       builder: (context, controller, _) => _FilterPill(
         icon: Icons.schedule_rounded,
-        label: _label(selected),
+        label: _label(l10n, selected),
         isHighlighted: isHighlighted,
         onTap: () => controller.isOpen ? controller.close() : controller.open(),
       ),
@@ -395,7 +441,10 @@ class FreshnessSelector extends ConsumerWidget {
                 .read(webSearchSettingsControllerProvider.notifier)
                 .setTimeRange(null);
           },
-          child: _MenuRow(label: 'Any time', isSelected: selected == null),
+          child: _MenuRow(
+            label: l10n.webSearch_freshnessAnyTime,
+            isSelected: selected == null,
+          ),
         ),
         const Divider(),
         for (final value in TimeRange.values)
@@ -406,7 +455,7 @@ class FreshnessSelector extends ConsumerWidget {
                   .setTimeRange(value);
             },
             child: _MenuRow(
-              label: _label(value),
+              label: _label(l10n, value),
               isSelected: selected == value,
             ),
           ),

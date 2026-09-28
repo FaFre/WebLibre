@@ -1,0 +1,264 @@
+{
+  "@@locale": "en",
+
+  "contextualToolbar_tooltipHome": "Home",
+  "@contextualToolbar_tooltipHome": {
+    "description": "Tooltip of the toolbar button that opens the home page."
+  },
+  "contextualToolbar_tooltipHideTabBar": "Hide tab bar",
+  "@contextualToolbar_tooltipHideTabBar": {
+    "description": "Tooltip of the toolbar button that hides the tab bar; a floating button brings it back."
+  },
+  "contextualToolbar_tooltipClearBrowsingData": "Clear browsing data",
+  "@contextualToolbar_tooltipClearBrowsingData": {
+    "description": "Tooltip of the toolbar button that deletes browsing data (history, cookies, cache)."
+  },
+  "contextualToolbar_tooltipAddBookmark": "Add bookmark",
+  "@contextualToolbar_tooltipAddBookmark": {
+    "description": "Tooltip of the toolbar bookmark button when the current page is not bookmarked."
+  },
+  "contextualToolbar_tooltipRemoveBookmark": "Remove bookmark",
+  "@contextualToolbar_tooltipRemoveBookmark": {
+    "description": "Tooltip of the toolbar bookmark button when the current page is already bookmarked."
+  },
+  "contextualToolbar_tooltipEnableGestures": "Enable gestures",
+  "@contextualToolbar_tooltipEnableGestures": {
+    "description": "Tooltip of the toolbar button that turns swipe gestures on, shown while they are off."
+  },
+  "contextualToolbar_tooltipDisableGestures": "Disable gestures",
+  "@contextualToolbar_tooltipDisableGestures": {
+    "description": "Tooltip of the toolbar button that turns swipe gestures off, shown while they are on."
+  },
+
+  "contextualToolbar_actionHardRefresh": "Hard Refresh",
+  "@contextualToolbar_actionHardRefresh": {
+    "description": "Item in the long-press menu of the toolbar reload button: reload the page ignoring cached copies."
+  },
+  "contextualToolbar_actionCloseOthers": "Close Others",
+  "@contextualToolbar_actionCloseOthers": {
+    "description": "Item in the long-press menu of the toolbar close-tab button: close all tabs except the current one."
+  },
+  "contextualToolbar_actionCloseFromSameHost": "Close from Same Host",
+  "@contextualToolbar_actionCloseFromSameHost": {
+    "description": "Item in the long-press menu of the toolbar close-tab button: close all tabs from the same website as the current one. \"Host\" means the website's domain."
+  },
+  "contextualToolbar_actionCloseTabAndDescendants": "Close Tab and Descendants",
+  "@contextualToolbar_actionCloseTabAndDescendants": {
+    "description": "Item in the long-press menu of the toolbar close-tab button: close the current tab and every tab opened from it (its child tabs, their children, and so on)."
+  },
+  "contextualToolbar_actionAddBookmark": "Add Bookmark",
+  "@contextualToolbar_actionAddBookmark": {
+    "description": "Item in the long-press menu of the toolbar bookmarks button: bookmark the current page."
+  },
+  "contextualToolbar_actionRemoveBookmark": "Remove Bookmark",
+  "@contextualToolbar_actionRemoveBookmark": {
+    "description": "Item in the long-press menu of the toolbar bookmarks button: remove the current page's bookmark."
+  },
+  "contextualToolbar_actionCloneAsRegular": "Clone as Regular",
+  "@contextualToolbar_actionCloneAsRegular": {
+    "description": "Item in the long-press menu of the toolbar duplicate-tab button: copy the current tab into a new regular tab."
+  },
+  "contextualToolbar_actionCloneAsPrivate": "Clone as Private",
+  "@contextualToolbar_actionCloneAsPrivate": {
+    "description": "Item in the long-press menu of the toolbar duplicate-tab button: copy the current tab into a new private tab."
+  },
+  "contextualToolbar_actionCloneAsIsolated": "Clone as Isolated",
+  "@contextualToolbar_actionCloneAsIsolated": {
+    "description": "Item in the long-press menu of the toolbar duplicate-tab button: copy the current tab into a new isolated tab (with its own separate cookies and site data)."
+  },
+
+  "contextualToolbar_bookmarkAdded": "Bookmark added",
+  "@contextualToolbar_bookmarkAdded": {
+    "description": "Confirmation after the current page was bookmarked from the toolbar."
+  },
+  "contextualToolbar_bookmarkRemoved": "Bookmark removed",
+  "@contextualToolbar_bookmarkRemoved": {
+    "description": "Confirmation after the current page's bookmark was removed from the toolbar."
+  },
+  "contextualToolbar_fontSizeAutoAdjustmentHint": "Disable automatic font size in settings to adjust manually",
+  "@contextualToolbar_fontSizeAutoAdjustmentHint": {
+    "description": "Message when a text size toolbar button is tapped while automatic font size is on: it must be turned off in settings first."
+  },
+
+  "contextualToolbar_buttonLabelBack": "Back",
+  "@contextualToolbar_buttonLabelBack": {
+    "description": "Name of the Back toolbar button (previous page), shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelForward": "Forward",
+  "@contextualToolbar_buttonLabelForward": {
+    "description": "Name of the Forward toolbar button (next page), shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelHome": "Home",
+  "@contextualToolbar_buttonLabelHome": {
+    "description": "Name of the Home toolbar button, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelHistory": "History",
+  "@contextualToolbar_buttonLabelHistory": {
+    "description": "Name of the toolbar button that opens browsing history, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelBookmarks": "Bookmarks",
+  "@contextualToolbar_buttonLabelBookmarks": {
+    "description": "Name of the toolbar button that opens the bookmarks list, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelBookmarkToggle": "Bookmark",
+  "@contextualToolbar_buttonLabelBookmarkToggle": {
+    "description": "Name of the toolbar button that bookmarks or un-bookmarks the current page, shown in toolbar customization. Verb or noun as fits a button name."
+  },
+  "contextualToolbar_buttonLabelShare": "Share",
+  "@contextualToolbar_buttonLabelShare": {
+    "description": "Name of the toolbar button that shares the current page, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelAddTab": "New Tab",
+  "@contextualToolbar_buttonLabelAddTab": {
+    "description": "Name of the toolbar button that opens a new tab, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelTabsCount": "Tabs",
+  "@contextualToolbar_buttonLabelTabsCount": {
+    "description": "Name of the toolbar button that shows the number of open tabs and opens the tab overview, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelNavigationMenu": "Menu",
+  "@contextualToolbar_buttonLabelNavigationMenu": {
+    "description": "Name of the toolbar button that opens the main browser menu, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelReload": "Reload",
+  "@contextualToolbar_buttonLabelReload": {
+    "description": "Name of the toolbar button that reloads the page, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelReaderMode": "Reader Mode",
+  "@contextualToolbar_buttonLabelReaderMode": {
+    "description": "Name of the toolbar button that shows the page as simplified, easy-to-read text, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelDesktop": "Desktop Site",
+  "@contextualToolbar_buttonLabelDesktop": {
+    "description": "Name of the toolbar button that requests the desktop version of the website, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelTranslation": "Translate",
+  "@contextualToolbar_buttonLabelTranslation": {
+    "description": "Name of the toolbar button that translates the page, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelFindInPage": "Find in Page",
+  "@contextualToolbar_buttonLabelFindInPage": {
+    "description": "Name of the toolbar button that searches for text on the page, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelCloseTab": "Close Tab",
+  "@contextualToolbar_buttonLabelCloseTab": {
+    "description": "Name of the toolbar button that closes the current tab, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelInputUrl": "Address Bar",
+  "@contextualToolbar_buttonLabelInputUrl": {
+    "description": "Name of the toolbar item that shows the address field for typing a web address or search, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelQrScan": "Scan QR Code",
+  "@contextualToolbar_buttonLabelQrScan": {
+    "description": "Name of the toolbar button that scans a QR code with the camera, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelVoiceSearch": "Voice Search",
+  "@contextualToolbar_buttonLabelVoiceSearch": {
+    "description": "Name of the toolbar button that starts a search by voice, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelDuplicateTab": "Duplicate Tab",
+  "@contextualToolbar_buttonLabelDuplicateTab": {
+    "description": "Name of the toolbar button that copies the current tab into a new tab, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelIncreaseFont": "Increase Font",
+  "@contextualToolbar_buttonLabelIncreaseFont": {
+    "description": "Name of the toolbar button that makes page text larger, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelDecreaseFont": "Decrease Font",
+  "@contextualToolbar_buttonLabelDecreaseFont": {
+    "description": "Name of the toolbar button that makes page text smaller, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelMoveToBackground": "Background",
+  "@contextualToolbar_buttonLabelMoveToBackground": {
+    "description": "Name of the toolbar button that sends the app to the background (like pressing Home), shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelToggleGestures": "Gestures",
+  "@contextualToolbar_buttonLabelToggleGestures": {
+    "description": "Name of the toolbar button that turns swipe gestures on or off, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelHideTabBar": "Hide Tab Bar",
+  "@contextualToolbar_buttonLabelHideTabBar": {
+    "description": "Name of the toolbar button that hides the tab bar, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelPageUp": "Page Up",
+  "@contextualToolbar_buttonLabelPageUp": {
+    "description": "Name of the toolbar button that scrolls the page up by one screen, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelPageDown": "Page Down",
+  "@contextualToolbar_buttonLabelPageDown": {
+    "description": "Name of the toolbar button that scrolls the page down by one screen, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelFont": "Text Size",
+  "@contextualToolbar_buttonLabelFont": {
+    "description": "Name of the toolbar button for adjusting the page's text size, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelExtensionShortcut": "Extensions",
+  "@contextualToolbar_buttonLabelExtensionShortcut": {
+    "description": "Name of the toolbar button that opens the menu of installed browser extensions, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelClearBrowsingData": "Clear Data",
+  "@contextualToolbar_buttonLabelClearBrowsingData": {
+    "description": "Name of the toolbar button that deletes browsing data, shown in toolbar customization."
+  },
+  "contextualToolbar_buttonLabelQuit": "Quit",
+  "@contextualToolbar_buttonLabelQuit": {
+    "description": "Name of the toolbar button that closes the app completely, shown in toolbar customization."
+  },
+
+  "contextualToolbar_longPressBackHistoryMenu": "History Menu (Previous pages)",
+  "@contextualToolbar_longPressBackHistoryMenu": {
+    "description": "Description, in toolbar customization, of what long-pressing the Back button does: shows a list of previous pages in this tab."
+  },
+  "contextualToolbar_longPressForwardHistoryMenu": "History Menu (Forward pages)",
+  "@contextualToolbar_longPressForwardHistoryMenu": {
+    "description": "Description, in toolbar customization, of what long-pressing the Forward button does: shows a list of later pages in this tab."
+  },
+  "contextualToolbar_longPressOpenBookmarks": "Open Bookmarks",
+  "@contextualToolbar_longPressOpenBookmarks": {
+    "description": "Description, in toolbar customization, of what long-pressing the bookmark button does: opens the bookmarks list."
+  },
+  "contextualToolbar_longPressAddRegularTab": "Add Regular Tab",
+  "@contextualToolbar_longPressAddRegularTab": {
+    "description": "Description, in toolbar customization, of an option offered by long-pressing the new-tab or tab-count button: open a new regular tab."
+  },
+  "contextualToolbar_longPressAddChildTab": "Add Child Tab",
+  "@contextualToolbar_longPressAddChildTab": {
+    "description": "Description, in toolbar customization, of an option offered by long-pressing the new-tab or tab-count button: open a new tab nested under the current tab."
+  },
+  "contextualToolbar_longPressAddPrivateTab": "Add Private Tab",
+  "@contextualToolbar_longPressAddPrivateTab": {
+    "description": "Description, in toolbar customization, of an option offered by long-pressing the new-tab or tab-count button: open a new private tab."
+  },
+  "contextualToolbar_longPressAddIsolatedTab": "Add Isolated Tab",
+  "@contextualToolbar_longPressAddIsolatedTab": {
+    "description": "Description, in toolbar customization, of an option offered by long-pressing the new-tab or tab-count button: open a new isolated tab (with its own separate cookies and site data)."
+  },
+  "contextualToolbar_longPressOpenSettings": "Open Settings",
+  "@contextualToolbar_longPressOpenSettings": {
+    "description": "Description, in toolbar customization, of what long-pressing the menu button does: opens settings."
+  },
+  "contextualToolbar_longPressHardRefresh": "Hard Refresh (bypass cache)",
+  "@contextualToolbar_longPressHardRefresh": {
+    "description": "Description, in toolbar customization, of what long-pressing the reload button does: reload without using cached copies."
+  },
+  "contextualToolbar_longPressShowTranslationOptions": "Show Translation Options",
+  "@contextualToolbar_longPressShowTranslationOptions": {
+    "description": "Description, in toolbar customization, of what long-pressing the translate button does: shows language and translation options."
+  },
+  "contextualToolbar_longPressScrollToTop": "Scroll to Top",
+  "@contextualToolbar_longPressScrollToTop": {
+    "description": "Description, in toolbar customization, of what long-pressing the Page Up button does."
+  },
+  "contextualToolbar_longPressScrollToBottom": "Scroll to Bottom",
+  "@contextualToolbar_longPressScrollToBottom": {
+    "description": "Description, in toolbar customization, of what long-pressing the Page Down button does."
+  },
+  "contextualToolbar_longPressExtensionsMenu": "Extensions Menu",
+  "@contextualToolbar_longPressExtensionsMenu": {
+    "description": "Description, in toolbar customization, of what long-pressing the extensions button does: opens the menu of installed extensions."
+  },
+  "contextualToolbar_longPressQuitWithoutConfirmation": "Quit without confirmation",
+  "@contextualToolbar_longPressQuitWithoutConfirmation": {
+    "description": "Description, in toolbar customization, of what long-pressing the Quit button does: closes the app without asking first."
+  }
+}

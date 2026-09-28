@@ -33,7 +33,7 @@ final class ProfileRepositoryProvider
   ProfileRepository create() => ProfileRepository();
 }
 
-String _$profileRepositoryHash() => r'75c419b151b84820e6bbdb75b10b6bfa1df63f74';
+String _$profileRepositoryHash() => r'b547fcad1eacbe94160e249a81e07d0c2a044435';
 
 abstract class _$ProfileRepository extends $AsyncNotifier<List<Profile>> {
   FutureOr<List<Profile>> build();

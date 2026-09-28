@@ -16,7 +16,13 @@ final class AppInitializationServiceProvider
     extends
         $NotifierProvider<
           AppInitializationService,
-          Result<({List<ErrorMessage> errors, bool initialized, String? stage})>
+          Result<
+            ({
+              List<ErrorMessage> errors,
+              bool initialized,
+              AppInitializationStage? stage,
+            })
+          >
         > {
   AppInitializationServiceProvider._()
     : super(
@@ -38,7 +44,13 @@ final class AppInitializationServiceProvider
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(
-    Result<({List<ErrorMessage> errors, bool initialized, String? stage})>
+    Result<
+      ({
+        List<ErrorMessage> errors,
+        bool initialized,
+        AppInitializationStage? stage,
+      })
+    >
     value,
   ) {
     return $ProviderOverride(
@@ -46,7 +58,11 @@ final class AppInitializationServiceProvider
       providerOverride:
           $SyncValueProvider<
             Result<
-              ({List<ErrorMessage> errors, bool initialized, String? stage})
+              ({
+                List<ErrorMessage> errors,
+                bool initialized,
+                AppInitializationStage? stage,
+              })
             >
           >(value),
     );
@@ -54,14 +70,26 @@ final class AppInitializationServiceProvider
 }
 
 String _$appInitializationServiceHash() =>
-    r'1e4a966b63509fcf314a0bfcfae0662d293f3536';
+    r'714ebc2573a1e19f45cfbd038c425c21bfaa3a3d';
 
 abstract class _$AppInitializationService
     extends
         $Notifier<
-          Result<({List<ErrorMessage> errors, bool initialized, String? stage})>
+          Result<
+            ({
+              List<ErrorMessage> errors,
+              bool initialized,
+              AppInitializationStage? stage,
+            })
+          >
         > {
-  Result<({List<ErrorMessage> errors, bool initialized, String? stage})>
+  Result<
+    ({
+      List<ErrorMessage> errors,
+      bool initialized,
+      AppInitializationStage? stage,
+    })
+  >
   build();
   @$mustCallSuper
   @override
@@ -70,10 +98,18 @@ abstract class _$AppInitializationService
         this.ref
             as $Ref<
               Result<
-                ({List<ErrorMessage> errors, bool initialized, String? stage})
+                ({
+                  List<ErrorMessage> errors,
+                  bool initialized,
+                  AppInitializationStage? stage,
+                })
               >,
               Result<
-                ({List<ErrorMessage> errors, bool initialized, String? stage})
+                ({
+                  List<ErrorMessage> errors,
+                  bool initialized,
+                  AppInitializationStage? stage,
+                })
               >
             >;
     final element =
@@ -81,14 +117,26 @@ abstract class _$AppInitializationService
             as $ClassProviderElement<
               AnyNotifier<
                 Result<
-                  ({List<ErrorMessage> errors, bool initialized, String? stage})
+                  ({
+                    List<ErrorMessage> errors,
+                    bool initialized,
+                    AppInitializationStage? stage,
+                  })
                 >,
                 Result<
-                  ({List<ErrorMessage> errors, bool initialized, String? stage})
+                  ({
+                    List<ErrorMessage> errors,
+                    bool initialized,
+                    AppInitializationStage? stage,
+                  })
                 >
               >,
               Result<
-                ({List<ErrorMessage> errors, bool initialized, String? stage})
+                ({
+                  List<ErrorMessage> errors,
+                  bool initialized,
+                  AppInitializationStage? stage,
+                })
               >,
               Object?,
               Object?

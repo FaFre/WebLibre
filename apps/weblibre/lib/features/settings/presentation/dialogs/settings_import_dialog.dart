@@ -22,6 +22,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_dialogs.dart';
 import 'package:weblibre/features/settings/domain/entities/settings_export_document.dart';
 import 'package:weblibre/features/settings/domain/services/settings_transfer_service.dart';
+import 'package:weblibre/features/settings/presentation/utils/settings_transfer_service_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Confirms an import and picks which of the file's sections to apply.
 ///
@@ -53,6 +55,7 @@ class _SettingsImportDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final selected = useState<Set<SettingsTransferSection>>({...available});
     final theme = Theme.of(context);
 
@@ -64,16 +67,13 @@ class _SettingsImportDialog extends HookWidget {
         .toList();
 
     return AlertDialog(
-      title: const Text('Import settings'),
+      title: Text(l10n.settings_importSettingsTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'The sections you pick replace what this profile has now. '
-              'Anything you leave unchecked stays as it is.',
-            ),
+            Text(l10n.settings_importSettingsDescription),
             const SizedBox(height: 16),
             for (final section in SettingsTransferSection.values)
               if (available.contains(section))
@@ -91,13 +91,16 @@ class _SettingsImportDialog extends HookWidget {
                           candidate,
                     };
                   },
-                  title: Text(section.title),
-                  subtitle: Text(section.description),
+                  title: Text(section.label(l10n)),
+                  subtitle: Text(section.description(l10n)),
                 ),
             if (unknown.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                'This build cannot read: ${unknown.join(', ')}.',
+                l10n.settings_unreadableSections(
+                  unknown.length,
+                  unknown.map((key) => '"$key"').join(', '),
+                ),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -105,14 +108,19 @@ class _SettingsImportDialog extends HookWidget {
             ],
             const SizedBox(height: 16),
             if (document.exportedAt case final exportedAt?)
-              MetadataRow(label: 'Exported', value: formatDateTime(exportedAt)),
+              MetadataRow(
+                label: l10n.settings_exportedLabel,
+                value: formatDateTime(exportedAt),
+              ),
             if (document.appVersion case final appVersion?)
-              MetadataRow(label: 'App version', value: appVersion),
+              MetadataRow(
+                label: l10n.settings_appVersionLabel,
+                value: appVersion,
+              ),
             if (selected.value.contains(SettingsTransferSection.settings)) ...[
               const SizedBox(height: 12),
               Text(
-                'Saved credentials and your wallpaper image are not carried '
-                'by an export — this device keeps its own.',
+                l10n.settings_credentialsNotCarried,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -123,8 +131,7 @@ class _SettingsImportDialog extends HookWidget {
             )) ...[
               const SizedBox(height: 12),
               Text(
-                'Some engine preferences only take effect after restarting '
-                'the browser.',
+                l10n.settings_geckoPrefsRestartNote,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -136,13 +143,13 @@ class _SettingsImportDialog extends HookWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         FilledButton(
           onPressed: selected.value.isEmpty
               ? null
               : () => Navigator.of(context).pop(selected.value),
-          child: const Text('Replace'),
+          child: Text(l10n.settings_replace),
         ),
       ],
     );

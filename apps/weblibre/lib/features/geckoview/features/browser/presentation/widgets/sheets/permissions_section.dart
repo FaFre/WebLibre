@@ -25,6 +25,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/permission_type.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/site_permissions.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/site_permissions.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/permission_type_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Section widget displaying site permissions with toggles
 class PermissionsSection extends HookConsumerWidget {
@@ -55,7 +57,11 @@ class PermissionsSection extends HookConsumerWidget {
       ),
       error: (error, stack) => Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text('Error loading permissions: $error'),
+        child: Text(
+          AppLocalizations.of(
+            context,
+          ).browser_errorLoadingPermissions(error.toString()),
+        ),
       ),
     );
   }
@@ -74,6 +80,7 @@ class _PermissionsList extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final showAll = useState(false);
 
     // Memoize the update callback to avoid recreating closures
@@ -95,7 +102,7 @@ class _PermissionsList extends HookConsumerWidget {
           .map(
             (type) => _PermissionEntry(
               icon: type.icon,
-              label: type.label,
+              label: type.label(context),
               status: permissions.getStatus(type),
               onChanged: (status) =>
                   updatePermission((w) => w.withStatus(type, status)),
@@ -129,7 +136,7 @@ class _PermissionsList extends HookConsumerWidget {
           child: Row(
             children: [
               Text(
-                'Permissions',
+                l10n.browser_permissionsSectionTitle,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   color: Theme.of(context).colorScheme.primary,
                 ),
@@ -138,7 +145,9 @@ class _PermissionsList extends HookConsumerWidget {
               if (hiddenCount > 0)
                 TextButton(
                   onPressed: () => showAll.value = !showAll.value,
-                  child: Text(showAll.value ? 'Show less' : 'Show all'),
+                  child: Text(
+                    showAll.value ? l10n.common_showLess : l10n.browser_showAll,
+                  ),
                 ),
             ],
           ),
@@ -158,7 +167,7 @@ class _PermissionsList extends HookConsumerWidget {
               vertical: 8.0,
             ),
             child: Text(
-              'No permissions set for this site',
+              l10n.browser_noPermissionsSetForSite,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -209,6 +218,7 @@ class _PermissionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final currentStatus = status ?? SitePermissionStatus.noDecision;
 
     return ListTile(
@@ -217,18 +227,18 @@ class _PermissionTile extends StatelessWidget {
       trailing: DropdownButton<SitePermissionStatus>(
         value: currentStatus,
         underline: const SizedBox(),
-        items: const [
+        items: [
           DropdownMenuItem(
             value: SitePermissionStatus.noDecision,
-            child: Text('Ask'),
+            child: Text(l10n.browser_permissionAsk),
           ),
           DropdownMenuItem(
             value: SitePermissionStatus.allowed,
-            child: Text('Allow'),
+            child: Text(l10n.browser_permissionAllow),
           ),
           DropdownMenuItem(
             value: SitePermissionStatus.blocked,
-            child: Text('Block'),
+            child: Text(l10n.browser_permissionBlock),
           ),
         ],
         onChanged: (value) {
@@ -254,27 +264,28 @@ class _AutoplayTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Determine the combined autoplay setting
     final combinedStatus = _getCombinedStatus();
 
     return ListTile(
       leading: const Icon(Icons.play_circle),
-      title: const Text('Autoplay'),
+      title: Text(l10n.browser_autoplayTitle),
       trailing: DropdownButton<_AutoplayCombined>(
         value: combinedStatus,
         underline: const SizedBox(),
-        items: const [
+        items: [
           DropdownMenuItem(
             value: _AutoplayCombined.allowAll,
-            child: Text('Allow All'),
+            child: Text(l10n.browser_autoplayAllowAll),
           ),
           DropdownMenuItem(
             value: _AutoplayCombined.blockAudible,
-            child: Text('Block Audible'),
+            child: Text(l10n.browser_autoplayBlockAudible),
           ),
           DropdownMenuItem(
             value: _AutoplayCombined.blockAll,
-            child: Text('Block All'),
+            child: Text(l10n.browser_autoplayBlockAll),
           ),
         ],
         onChanged: (value) {

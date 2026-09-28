@@ -28,6 +28,7 @@ import 'package:weblibre/features/small_web/presentation/controllers/small_web_m
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_session_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_bottom_bar.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_menu_sheet.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class SmallWebBrowserOverlay extends HookConsumerWidget {
@@ -37,6 +38,7 @@ class SmallWebBrowserOverlay extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final sessionAsync = ref.watch(smallWebSessionControllerProvider);
     final selectedTabId = ref.watch(selectedTabProvider);
 
@@ -65,7 +67,12 @@ class SmallWebBrowserOverlay extends HookConsumerWidget {
           error: error,
           stackTrace: asError?.stackTrace,
         );
-        showErrorMessage(context, 'Small web error: $error');
+        showErrorMessage(
+          context,
+          error is SmallWebDiscoveryFailedException
+              ? l10n.smallWeb_discoveryFailedMessage
+              : l10n.smallWeb_sessionErrorWithDetails('$error'),
+        );
       }
     });
 

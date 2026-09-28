@@ -25,6 +25,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 // What words does the wanderer whisper?
@@ -168,6 +169,7 @@ class SmallWebBottomBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final label = useState(_incantations.first);
 
     final tabUrl = currentTabUrl;
@@ -191,7 +193,7 @@ class SmallWebBottomBar extends HookConsumerWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.menu),
-            tooltip: 'Menu',
+            tooltip: l10n.smallWeb_menuTooltip,
             onPressed: onMenuTap,
           ),
           Expanded(
@@ -220,7 +222,9 @@ class SmallWebBottomBar extends HookConsumerWidget {
           ),
           IconButton(
             icon: Icon(isBookmarked ? Icons.bookmark : Icons.bookmark_border),
-            tooltip: isBookmarked ? 'Remove bookmark' : 'Add bookmark',
+            tooltip: isBookmarked
+                ? l10n.smallWeb_removeBookmarkTooltip
+                : l10n.smallWeb_addBookmarkTooltip,
             onPressed: !canToggleBookmark
                 ? null
                 : () async {
@@ -231,7 +235,10 @@ class SmallWebBottomBar extends HookConsumerWidget {
                             .delete(guid);
                       }
                       if (context.mounted) {
-                        ui_helper.showInfoMessage(context, 'Bookmark removed');
+                        ui_helper.showInfoMessage(
+                          context,
+                          l10n.smallWeb_bookmarkRemovedMessage,
+                        );
                       }
                     } else {
                       await ref
@@ -242,14 +249,17 @@ class SmallWebBottomBar extends HookConsumerWidget {
                             title: currentTabTitle ?? tabUrl.host,
                           );
                       if (context.mounted) {
-                        ui_helper.showInfoMessage(context, 'Bookmark added');
+                        ui_helper.showInfoMessage(
+                          context,
+                          l10n.smallWeb_bookmarkAddedMessage,
+                        );
                       }
                     }
                   },
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            tooltip: 'Exit Small Web',
+            tooltip: l10n.smallWeb_exitTooltip,
             onPressed: onExit,
           ),
         ],

@@ -23,6 +23,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 
 class LaunchExternal extends HookConsumerWidget {
@@ -41,6 +42,7 @@ class LaunchExternal extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final url = hitResult.tryGetLink();
     final appLink = useCachedFuture(
       () => url != null ? _service.resolveAppLink(url) : Future.value(null),
@@ -50,7 +52,11 @@ class LaunchExternal extends HookConsumerWidget {
 
     return ListTile(
       leading: const Icon(Icons.open_in_new),
-      title: Text(appName != null ? 'Open in $appName' : 'Open in App'),
+      title: Text(
+        appName != null
+            ? l10n.contextmenu_openInAppNamed(appName)
+            : l10n.contextmenu_openInApp,
+      ),
       onTap: () async {
         await hitResult.tryGetLink().mapNotNull((url) async {
           final success = await _service.launchAppLink(url);

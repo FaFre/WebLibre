@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// How a host opens the things its modules surface.
 ///
@@ -169,6 +170,7 @@ class CustomizeSectionsButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     // Low emphasis on purpose: this is a settings affordance sitting at the end
@@ -189,7 +191,7 @@ class CustomizeSectionsButton extends ConsumerWidget {
             ),
             icon: const Icon(Icons.tune, size: 18),
             label: Text(
-              'Customize sections',
+              l10n.search_customizeSectionsButton,
               style: Theme.of(context).textTheme.labelLarge,
             ),
           ),

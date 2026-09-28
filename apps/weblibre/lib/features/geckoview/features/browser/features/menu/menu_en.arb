@@ -1,0 +1,658 @@
+{
+  "@@locale": "en",
+
+  "menu_sectionQuickToggles": "Quick Toggles",
+  "@menu_sectionQuickToggles": {
+    "description": "Name of a section of the main browser menu with on/off toggles (desktop site, reader mode, gestures); shown when customizing the menu."
+  },
+  "menu_sectionPageActions": "Page Actions",
+  "@menu_sectionPageActions": {
+    "description": "Name of the browser menu section with actions on the current page; shown when customizing the menu."
+  },
+  "menu_sectionExtensions": "Extensions",
+  "@menu_sectionExtensions": {
+    "description": "Name of the browser menu section listing browser extensions; shown when customizing the menu."
+  },
+  "menu_sectionTabActions": "Tab Actions",
+  "@menu_sectionTabActions": {
+    "description": "Name of the browser menu section with actions on the current tab (share, clone, export…); shown when customizing the menu."
+  },
+  "menu_sectionQuickLinks": "Quick Links",
+  "@menu_sectionQuickLinks": {
+    "description": "Name of the browser menu section with links to history, bookmarks and other screens; shown when customizing the menu."
+  },
+  "menu_sectionConnection": "Connection",
+  "@menu_sectionConnection": {
+    "description": "Name of the browser menu section showing how the tab connects (proxy/Tor routing); shown when customizing the menu."
+  },
+  "menu_sectionProfile": "Profile & App",
+  "@menu_sectionProfile": {
+    "description": "Name of the browser menu section with profile switching, sync and settings; shown when customizing the menu."
+  },
+  "menu_sectionAbout": "About",
+  "@menu_sectionAbout": {
+    "description": "Name of the browser menu section with app information; shown when customizing the menu."
+  },
+
+  "menu_itemDesktopMode": "Desktop",
+  "@menu_itemDesktopMode": {
+    "description": "Browser menu toggle and its name in menu customization: request the desktop version of the website. Keep it short (shown under an icon)."
+  },
+  "menu_itemReaderMode": "Reader",
+  "@menu_itemReaderMode": {
+    "description": "Browser menu toggle and its name in menu customization: simplified, easy-to-read view of the page. Keep it short (shown under an icon)."
+  },
+  "menu_itemGestures": "Gestures",
+  "@menu_itemGestures": {
+    "description": "Browser menu toggle and its name in menu customization: turn drawn gestures on or off. Keep it short (shown under an icon)."
+  },
+  "menu_itemAddBookmark": "Add Bookmark",
+  "@menu_itemAddBookmark": {
+    "description": "Browser menu row and its name in menu customization: bookmark the current page."
+  },
+  "menu_itemFindInPage": "Find in Page",
+  "@menu_itemFindInPage": {
+    "description": "Browser menu row and its name in menu customization: search for text on the page."
+  },
+  "menu_itemTranslatePage": "Translate Page",
+  "@menu_itemTranslatePage": {
+    "description": "Browser menu row and its name in menu customization: translate the page."
+  },
+  "menu_itemAddToHomeScreen": "Add to Home Screen",
+  "@menu_itemAddToHomeScreen": {
+    "description": "Browser menu row and its name in menu customization: add the site to the Android home screen."
+  },
+  "menu_itemOpenInApp": "Open in App",
+  "@menu_itemOpenInApp": {
+    "description": "Browser menu row and its name in menu customization: open the page in the installed app that handles it."
+  },
+  "menu_itemContainers": "Containers",
+  "@menu_itemContainers": {
+    "description": "Name, in menu customization, of the expandable browser menu group with container actions."
+  },
+  "menu_itemManageContainers": "Manage Containers",
+  "@menu_itemManageContainers": {
+    "description": "Name, in menu customization, of the menu row that opens the container list."
+  },
+  "menu_itemAssignContainer": "Assign Container",
+  "@menu_itemAssignContainer": {
+    "description": "Name, in menu customization, of the menu row that moves the current tab into a container."
+  },
+  "menu_itemAssignUrlToContainer": "Assign URL to Container",
+  "@menu_itemAssignUrlToContainer": {
+    "description": "Name, in menu customization, of the menu row that makes the current site always open in the tab's container."
+  },
+  "menu_itemUnassignUrlFromContainer": "Unassign URL from Container",
+  "@menu_itemUnassignUrlFromContainer": {
+    "description": "Name, in menu customization, of the menu row that removes the current site from the container's assigned sites."
+  },
+  "menu_itemUnassignContainer": "Unassign Container",
+  "@menu_itemUnassignContainer": {
+    "description": "Name, in menu customization, of the menu row that takes the current tab out of its container."
+  },
+  "menu_itemShare": "Share",
+  "@menu_itemShare": {
+    "description": "Name, in menu customization, of the expandable browser menu group with sharing actions."
+  },
+  "menu_itemCopyAddress": "Copy Address",
+  "@menu_itemCopyAddress": {
+    "description": "Name, in menu customization, of the menu row that copies the page address."
+  },
+  "menu_itemShareScreenshot": "Share Screenshot",
+  "@menu_itemShareScreenshot": {
+    "description": "Name, in menu customization, of the menu row that shares a screenshot of the page."
+  },
+  "menu_itemShareLink": "Share Link",
+  "@menu_itemShareLink": {
+    "description": "Name, in menu customization, of the menu row that shares the page address."
+  },
+  "menu_itemSendToDevice": "Send To Device",
+  "@menu_itemSendToDevice": {
+    "description": "Name, in menu customization, of the menu row that sends the tab to another device via sync."
+  },
+  "menu_itemShowQrCode": "Show QR Code",
+  "@menu_itemShowQrCode": {
+    "description": "Name, in menu customization, of the menu row that shows the page address as a QR code."
+  },
+  "menu_itemMoreDisclosure": "More",
+  "@menu_itemMoreDisclosure": {
+    "description": "Name, in menu customization, of a row that collapses the rows after it behind \"More\"."
+  },
+  "menu_itemCloneTab": "Clone Tab",
+  "@menu_itemCloneTab": {
+    "description": "Name, in menu customization, of the expandable menu group for copying the current tab."
+  },
+  "menu_itemCloneRegularTab": "Regular",
+  "@menu_itemCloneRegularTab": {
+    "description": "Name, in menu customization, of the clone option that copies the tab into a regular tab."
+  },
+  "menu_itemClonePrivateTab": "Private",
+  "@menu_itemClonePrivateTab": {
+    "description": "Name, in menu customization, of the clone option that copies the tab into a private tab."
+  },
+  "menu_itemCloneIsolatedTab": "Isolated",
+  "@menu_itemCloneIsolatedTab": {
+    "description": "Name, in menu customization, of the clone option that copies the tab into an isolated tab (own separate cookies and site data)."
+  },
+  "menu_itemExport": "Export",
+  "@menu_itemExport": {
+    "description": "Name, in menu customization, of the expandable menu group for saving the page in other formats."
+  },
+  "menu_itemCopyAsMarkdown": "Copy as Markdown",
+  "@menu_itemCopyAsMarkdown": {
+    "description": "Name, in menu customization, of the menu row that copies the page text as Markdown. Markdown is a text format name."
+  },
+  "menu_itemExportAsMarkdown": "Export as Markdown",
+  "@menu_itemExportAsMarkdown": {
+    "description": "Name, in menu customization, of the menu row that saves the page text as a Markdown file."
+  },
+  "menu_itemExportAsPdf": "Export as PDF",
+  "@menu_itemExportAsPdf": {
+    "description": "Name, in menu customization, of the menu row that saves the page as a PDF file."
+  },
+  "menu_itemExportAsPng": "Export as PNG",
+  "@menu_itemExportAsPng": {
+    "description": "Name, in menu customization, of the menu row that saves the page as a PNG image."
+  },
+  "menu_itemPrintPage": "Print",
+  "@menu_itemPrintPage": {
+    "description": "Name, in menu customization, of the menu row that prints the page."
+  },
+  "menu_itemPinTopSite": "Pin to Shortcuts",
+  "@menu_itemPinTopSite": {
+    "description": "Name, in menu customization, of the menu row that pins the site to the home screen shortcuts."
+  },
+  "menu_itemFetchFeeds": "Fetch Feeds",
+  "@menu_itemFetchFeeds": {
+    "description": "Name, in menu customization, of the menu row that looks for news feeds (RSS/Atom) on the page."
+  },
+  "menu_itemHistory": "History",
+  "@menu_itemHistory": {
+    "description": "Browser menu link and its name in menu customization: opens browsing history."
+  },
+  "menu_itemBookmarks": "Bookmarks",
+  "@menu_itemBookmarks": {
+    "description": "Browser menu link and its name in menu customization: opens bookmarks."
+  },
+  "menu_itemDownloads": "Downloads",
+  "@menu_itemDownloads": {
+    "description": "Browser menu link and its name in menu customization: opens downloads."
+  },
+  "menu_itemBangs": "Bangs",
+  "@menu_itemBangs": {
+    "description": "Browser menu link and its name in menu customization: opens bang search shortcuts. Keep \"Bangs\" consistent with the bangs feature."
+  },
+  "menu_itemFeeds": "Feeds",
+  "@menu_itemFeeds": {
+    "description": "Browser menu link and its name in menu customization: opens subscribed news feeds."
+  },
+  "menu_itemSmallWeb": "Small Web",
+  "@menu_itemSmallWeb": {
+    "description": "Browser menu link and its name in menu customization: opens Small Web discovery. Keep consistent with the Small Web feature."
+  },
+  "menu_itemClearData": "Clear Data",
+  "@menu_itemClearData": {
+    "description": "Browser menu link and its name in menu customization: opens the delete browsing data dialog. Shown under an icon in a four-column grid: keep it to about 10 characters."
+  },
+  "menu_itemProfileSwitch": "Profile",
+  "@menu_itemProfileSwitch": {
+    "description": "Name, in menu customization, of the menu row showing the current profile; tapping it switches profiles."
+  },
+  "menu_itemSyncNow": "Sync Now",
+  "@menu_itemSyncNow": {
+    "description": "Browser menu row and its name in menu customization: run Firefox Sync now."
+  },
+  "menu_itemAppSettings": "Settings",
+  "@menu_itemAppSettings": {
+    "description": "Browser menu row and its name in menu customization: open settings."
+  },
+  "menu_itemQuitBrowser": "Quit Browser",
+  "@menu_itemQuitBrowser": {
+    "description": "Browser menu row and its name in menu customization: close the app completely."
+  },
+  "menu_itemAbout": "About",
+  "@menu_itemAbout": {
+    "description": "Browser menu row and its name in menu customization: show app information."
+  },
+
+  "menu_itemMoreDisclosureDescription": "Folds everything below it behind a \"More\" row",
+  "@menu_itemMoreDisclosureDescription": {
+    "description": "Explanation, in menu customization, of the \"More\" row. \"More\" must match the translation of that row's name."
+  },
+  "menu_itemSendToDeviceDescription": "The devices themselves come from your account",
+  "@menu_itemSendToDeviceDescription": {
+    "description": "Explanation, in menu customization, of the \"Send To Device\" row: the list of devices comes from the Firefox Sync account."
+  },
+
+  "menu_reorderHideTooltip": "Hide",
+  "@menu_reorderHideTooltip": {
+    "description": "Tooltip of the eye button in menu customization while a row is visible: hide it from the menu."
+  },
+  "menu_reorderShowTooltip": "Show",
+  "@menu_reorderShowTooltip": {
+    "description": "Tooltip of the eye button in menu customization while a row is hidden: show it in the menu."
+  },
+  "menu_reorderRowsShown": "{total, plural, =1{{shown} of 1 row shown} other{{shown} of {total} rows shown}}",
+  "@menu_reorderRowsShown": {
+    "description": "Summary under a section in menu customization. shown is how many rows are visible; total is how many rows the section has.",
+    "placeholders": {
+      "shown": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "menu_reorderDefaultTitle": "Customize Menu",
+  "@menu_reorderDefaultTitle": {
+    "description": "Heading of the menu customization view."
+  },
+  "menu_reorderSubtitleSections": "Drag to reorder. Switch a section off to hide it from the menu.",
+  "@menu_reorderSubtitleSections": {
+    "description": "Instruction under the menu customization heading at the section level."
+  },
+  "menu_reorderSubtitleSectionRows": "Drag to reorder the rows in this section.",
+  "@menu_reorderSubtitleSectionRows": {
+    "description": "Instruction under the heading while editing the rows of one section."
+  },
+  "menu_reorderSubtitleItemRows": "Drag to reorder the rows this one opens.",
+  "@menu_reorderSubtitleItemRows": {
+    "description": "Instruction under the heading while editing the rows inside an expandable row."
+  },
+  "menu_reorderBackTooltip": "Back to sections",
+  "@menu_reorderBackTooltip": {
+    "description": "Tooltip of the back button in menu customization: return to the list of sections."
+  },
+  "menu_reorderResetToDefaults": "Reset to Defaults",
+  "@menu_reorderResetToDefaults": {
+    "description": "Menu item that restores the default menu layout."
+  },
+  "menu_customizeMenuButton": "Customize menu",
+  "@menu_customizeMenuButton": {
+    "description": "Button at the bottom of the browser menu that opens menu customization."
+  },
+
+  "menu_navStop": "Stop",
+  "@menu_navStop": {
+    "description": "Label of the navigation button while a page loads: stop loading. Keep it short (shown under an icon)."
+  },
+  "menu_navBack": "Back",
+  "@menu_navBack": {
+    "description": "Label of the navigation button in the browser menu: previous page. Keep it short (shown under an icon)."
+  },
+  "menu_navForward": "Forward",
+  "@menu_navForward": {
+    "description": "Label of the navigation button in the browser menu: next page. Keep it short (shown under an icon)."
+  },
+  "menu_navCloseTab": "Close Tab",
+  "@menu_navCloseTab": {
+    "description": "Label of the button in the browser menu that closes the current tab; long-press shows more close options. Keep it short."
+  },
+  "menu_navReload": "Reload",
+  "@menu_navReload": {
+    "description": "Label of the reload button in the browser menu; long-press offers a hard refresh. Keep it short."
+  },
+  "menu_navCloseOthers": "Close Others",
+  "@menu_navCloseOthers": {
+    "description": "Long-press option of the close-tab button: close all tabs except the current one."
+  },
+  "menu_navCloseFromSameHost": "Close from Same Host",
+  "@menu_navCloseFromSameHost": {
+    "description": "Long-press option of the close-tab button: close all tabs from the same website. \"Host\" means the website's domain."
+  },
+  "menu_navCloseTabAndDescendants": "Close Tab and Descendants",
+  "@menu_navCloseTabAndDescendants": {
+    "description": "Long-press option of the close-tab button: close the current tab and all tabs opened from it."
+  },
+  "menu_navHardRefresh": "Hard Refresh",
+  "@menu_navHardRefresh": {
+    "description": "Long-press option of the reload button: reload ignoring cached copies."
+  },
+
+  "menu_profileTapToSwitch": "Tap to switch profile",
+  "@menu_profileTapToSwitch": {
+    "description": "Line under the profile name in the browser menu."
+  },
+  "menu_profileSyncComplete": "Synchronization complete",
+  "@menu_profileSyncComplete": {
+    "description": "Confirmation after a manual Firefox Sync finished."
+  },
+
+  "menu_openInApp": "Open in {appName}",
+  "@menu_openInApp": {
+    "description": "Browser menu row. appName is the installed app that can open the page.",
+    "placeholders": { "appName": { "type": "String" } }
+  },
+  "menu_pageTranslated": "Translated",
+  "@menu_pageTranslated": {
+    "description": "Label of the translate row after the page has been translated."
+  },
+
+  "menu_extensionsTitle": "Extensions",
+  "@menu_extensionsTitle": {
+    "description": "Title of the expandable extensions group in the browser menu."
+  },
+  "menu_extensionFallbackTitle": "Extension",
+  "@menu_extensionFallbackTitle": {
+    "description": "Fallback name for an extension with no title in the browser menu."
+  },
+  "menu_extensionsSettingsTooltip": "Extension settings",
+  "@menu_extensionsSettingsTooltip": {
+    "description": "Tooltip of the gear button next to an extension in the browser menu."
+  },
+  "menu_extensionsManage": "Manage Extensions",
+  "@menu_extensionsManage": {
+    "description": "Row in the browser menu's extensions group that opens extension management."
+  },
+
+  "menu_containersExpansionTitle": "Containers",
+  "@menu_containersExpansionTitle": {
+    "description": "Title of the expandable containers group in the browser menu."
+  },
+  "menu_containersManage": "Manage Containers",
+  "@menu_containersManage": {
+    "description": "Row in the containers group that opens the container list."
+  },
+  "menu_containersAssign": "Assign Container",
+  "@menu_containersAssign": {
+    "description": "Row in the containers group that moves the current tab into a container."
+  },
+  "menu_containersAssignUrl": "Assign URL to Container",
+  "@menu_containersAssignUrl": {
+    "description": "Row in the containers group that makes the current site always open in this tab's container."
+  },
+  "menu_containersUnassignUrl": "Unassign URL from Container",
+  "@menu_containersUnassignUrl": {
+    "description": "Row in the containers group that removes the current site from the container's assigned sites."
+  },
+  "menu_containersUnassign": "Unassign Container",
+  "@menu_containersUnassign": {
+    "description": "Row in the containers group that takes the current tab out of its container."
+  },
+
+  "menu_shareExpansionTitle": "Share",
+  "@menu_shareExpansionTitle": {
+    "description": "Title of the expandable share group in the browser menu."
+  },
+  "menu_shareUrlCleaned": "URL cleaned",
+  "@menu_shareUrlCleaned": {
+    "description": "Confirmation after tracking parameters were removed from the address being shared."
+  },
+  "menu_shareUrlPreviewApplied": "URL preview applied",
+  "@menu_shareUrlPreviewApplied": {
+    "description": "Confirmation after the chosen tracking parameters were removed from the address being shared."
+  },
+  "menu_shareCopyAddress": "Copy Address",
+  "@menu_shareCopyAddress": {
+    "description": "Row in the share group that copies the page address."
+  },
+  "menu_shareScreenshot": "Share Screenshot",
+  "@menu_shareScreenshot": {
+    "description": "Row in the share group that shares a screenshot of the visible page."
+  },
+  "menu_shareLink": "Share Link",
+  "@menu_shareLink": {
+    "description": "Row in the share group that shares the page address."
+  },
+  "menu_shareShowQrCode": "Show QR Code",
+  "@menu_shareShowQrCode": {
+    "description": "Row in the share group that shows the page address as a QR code."
+  },
+
+  "menu_sendToDeviceExpansionTitle": "Send To Device",
+  "@menu_sendToDeviceExpansionTitle": {
+    "description": "Title of the expandable list of synced devices to send the tab to."
+  },
+  "menu_sendToDeviceNone": "No target devices",
+  "@menu_sendToDeviceNone": {
+    "description": "Shown when no other synced device can receive tabs."
+  },
+  "menu_sendToDeviceLoading": "Loading devices...",
+  "@menu_sendToDeviceLoading": {
+    "description": "Placeholder while the list of synced devices loads."
+  },
+  "menu_sendToDeviceLoadFailed": "Failed to load devices",
+  "@menu_sendToDeviceLoadFailed": {
+    "description": "Error when the list of synced devices could not be loaded."
+  },
+  "menu_sendToDeviceSuccess": "Sent tab to {deviceName}",
+  "@menu_sendToDeviceSuccess": {
+    "description": "Confirmation after sending the tab. deviceName is the receiving device's name.",
+    "placeholders": { "deviceName": { "type": "String" } }
+  },
+  "menu_sendToDeviceSendFailed": "Failed to send tab",
+  "@menu_sendToDeviceSendFailed": {
+    "description": "Error message when sending the tab failed."
+  },
+
+  "menu_cloneTabExpansionTitle": "Clone Tab",
+  "@menu_cloneTabExpansionTitle": {
+    "description": "Title of the expandable group for copying the current tab into a new tab."
+  },
+  "menu_cloneTypeRegular": "Regular",
+  "@menu_cloneTypeRegular": {
+    "description": "Clone option: copy into a regular tab."
+  },
+  "menu_cloneTypePrivate": "Private",
+  "@menu_cloneTypePrivate": {
+    "description": "Clone option: copy into a private tab."
+  },
+  "menu_cloneTypeIsolated": "Isolated",
+  "@menu_cloneTypeIsolated": {
+    "description": "Clone option: copy into an isolated tab (own separate cookies and site data)."
+  },
+
+  "menu_exportExpansionTitle": "Export",
+  "@menu_exportExpansionTitle": {
+    "description": "Title of the expandable group for saving the page in other formats."
+  },
+  "menu_exportCopyAsMarkdown": "Copy as Markdown",
+  "@menu_exportCopyAsMarkdown": {
+    "description": "Row in the export group that copies the page text as Markdown. Markdown is a text format name."
+  },
+  "menu_exportAsMarkdown": "Export as Markdown",
+  "@menu_exportAsMarkdown": {
+    "description": "Row in the export group that saves the page text as a Markdown file."
+  },
+  "menu_exportAsPdf": "Export as PDF",
+  "@menu_exportAsPdf": {
+    "description": "Row in the export group that saves the page as a PDF file."
+  },
+  "menu_exportAsPng": "Export as PNG",
+  "@menu_exportAsPng": {
+    "description": "Row in the export group that saves the page as a PNG image."
+  },
+  "menu_exportMarkdownCopied": "Markdown copied to clipboard",
+  "@menu_exportMarkdownCopied": {
+    "description": "Confirmation after copying the page as Markdown."
+  },
+  "menu_exportPrint": "Print",
+  "@menu_exportPrint": {
+    "description": "Row in the export group that prints the page."
+  },
+  "menu_exportPrintFailed": "Failed to print page",
+  "@menu_exportPrintFailed": {
+    "description": "Error message when printing failed."
+  },
+
+  "menu_pinUnpinFromShortcuts": "Unpin from Shortcuts",
+  "@menu_pinUnpinFromShortcuts": {
+    "description": "Browser menu row when the site is pinned: remove it from the home screen shortcuts."
+  },
+  "menu_pinPinToShortcuts": "Pin to Shortcuts",
+  "@menu_pinPinToShortcuts": {
+    "description": "Browser menu row when the site is not pinned: add it to the home screen shortcuts."
+  },
+  "menu_pinUnpinnedMessage": "Unpinned from Shortcuts",
+  "@menu_pinUnpinnedMessage": {
+    "description": "Confirmation after removing the site from the home screen shortcuts."
+  },
+  "menu_pinPinnedMessage": "Pinned to Shortcuts",
+  "@menu_pinPinnedMessage": {
+    "description": "Confirmation after adding the site to the home screen shortcuts."
+  },
+  "menu_pinUpdateFailed": "Failed to update Shortcuts",
+  "@menu_pinUpdateFailed": {
+    "description": "Error message when changing the home screen shortcuts failed."
+  },
+
+  "menu_fetchFeedsTitle": "Fetch Feeds on Page",
+  "@menu_fetchFeedsTitle": {
+    "description": "Browser menu row that looks for news feeds (RSS/Atom) on the current page."
+  },
+  "menu_fetchFeedsNone": "No Web Feeds Found",
+  "@menu_fetchFeedsNone": {
+    "description": "Shown when the page offers no news feeds."
+  },
+  "menu_fetchFeedsAvailable": "Available Web Feeds",
+  "@menu_fetchFeedsAvailable": {
+    "description": "Row or menu item listing the news feeds found on the page; opens a dialog to subscribe."
+  },
+  "menu_fetchFeedsLoading": "Fetching Web Feeds...",
+  "@menu_fetchFeedsLoading": {
+    "description": "Progress text while looking for news feeds on the page."
+  },
+
+  "menu_connectionTitle": "Connection",
+  "@menu_connectionTitle": {
+    "description": "Title of the connection group in the browser menu, summarizing how this tab's traffic is routed (directly, via proxy or Tor)."
+  },
+  "menu_connectionRegularTabs": "Regular tabs",
+  "@menu_connectionRegularTabs": {
+    "description": "Row label for how regular (non-private) tabs are routed; also title of its proxy picker."
+  },
+  "menu_connectionPrivateTabs": "Private tabs",
+  "@menu_connectionPrivateTabs": {
+    "description": "Row label for how private tabs are routed; also title of its proxy picker."
+  },
+  "menu_connectionAllThrough": "All through {proxyTitle}",
+  "@menu_connectionAllThrough": {
+    "description": "Value of the regular tabs route when all of them go through one proxy. proxyTitle is the proxy's name.",
+    "placeholders": { "proxyTitle": { "type": "String" } }
+  },
+  "menu_connectionPerContainer": "Per container",
+  "@menu_connectionPerContainer": {
+    "description": "Value, and picker option, meaning each container decides its own route."
+  },
+  "menu_connectionPerContainerSubtitle": "Only containers with a proxy assigned are routed",
+  "@menu_connectionPerContainerSubtitle": {
+    "description": "Explanation under the \"Per container\" picker option."
+  },
+  "menu_connectionDirect": "Direct",
+  "@menu_connectionDirect": {
+    "description": "Route value and picker option: no proxy, connect directly."
+  },
+  "menu_connectionPrivateNeverInheritSubtitle": "Private tabs never inherit the global route",
+  "@menu_connectionPrivateNeverInheritSubtitle": {
+    "description": "Explanation under the \"Direct\" option for private tabs."
+  },
+  "menu_connectionThisIsolatedTab": "This isolated tab",
+  "@menu_connectionThisIsolatedTab": {
+    "description": "Row label for the route of the current isolated tab; also title of its proxy picker."
+  },
+  "menu_connectionFollowsContainer": "Follows its container",
+  "@menu_connectionFollowsContainer": {
+    "description": "Route value of an isolated tab that uses its container's route."
+  },
+  "menu_connectionFollowContainerOption": "Follow its container",
+  "@menu_connectionFollowContainerOption": {
+    "description": "Picker option for an isolated tab: use its container's route."
+  },
+  "menu_connectionFollowContainerOptionSubtitle": "Use the route assigned to this tab's container",
+  "@menu_connectionFollowContainerOptionSubtitle": {
+    "description": "Explanation under \"Follow its container\"."
+  },
+  "menu_connectionIsolatedDirectSubtitle": "Bypass the route its container would apply",
+  "@menu_connectionIsolatedDirectSubtitle": {
+    "description": "Explanation under \"Direct\" for an isolated tab."
+  },
+  "menu_connectionThisContainer": "This container",
+  "@menu_connectionThisContainer": {
+    "description": "Fallback row label for the current container's route when it has no name."
+  },
+  "menu_connectionFollowsGlobalRouting": "Follows global routing",
+  "@menu_connectionFollowsGlobalRouting": {
+    "description": "Route value of a container that uses the app-wide route."
+  },
+  "menu_connectionContainerFallbackTitle": "Container",
+  "@menu_connectionContainerFallbackTitle": {
+    "description": "Fallback title of the proxy picker for an unnamed container."
+  },
+  "menu_connectionFollowGlobalRoutingOption": "Follow global routing",
+  "@menu_connectionFollowGlobalRoutingOption": {
+    "description": "Picker option for a container: use the app-wide route."
+  },
+  "menu_connectionFollowGlobalRoutingOptionSubtitle": "Use the same route as regular tabs",
+  "@menu_connectionFollowGlobalRoutingOptionSubtitle": {
+    "description": "Explanation under \"Follow global routing\"."
+  },
+  "menu_connectionContainerDirectSubtitle": "Bypass the global proxy for this container",
+  "@menu_connectionContainerDirectSubtitle": {
+    "description": "Explanation under \"Direct\" for a container."
+  },
+  "menu_connectionFailedToChangeRoute": "Failed to change route: {error}",
+  "@menu_connectionFailedToChangeRoute": {
+    "description": "Error message when changing a route failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "menu_connectionProxyError": "Proxy error: {error}",
+  "@menu_connectionProxyError": {
+    "description": "Error message when starting a proxy failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "menu_connectionNotRoutedByContainer": "Not routed by container \"{container}\"",
+  "@menu_connectionNotRoutedByContainer": {
+    "description": "Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "menu_connectionNotRoutedByTabContainer": "Not routed by this tab's container",
+  "@menu_connectionNotRoutedByTabContainer": {
+    "description": "Same summary line when the container has no name."
+  },
+  "menu_connectionCheckingRouting": "Checking routing…",
+  "@menu_connectionCheckingRouting": {
+    "description": "Summary line while the tab's routing is being determined."
+  },
+  "menu_connectionStartingRouting": "Starting routing…",
+  "@menu_connectionStartingRouting": {
+    "description": "Summary line while the tab's proxy is starting."
+  },
+  "menu_connectionBlockedNotRunning": "Blocked — {proxyTitle} is not running",
+  "@menu_connectionBlockedNotRunning": {
+    "description": "Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name.",
+    "placeholders": { "proxyTitle": { "type": "String" } }
+  },
+  "menu_connectionThisTabVia": "This tab: {proxyTitle}",
+  "@menu_connectionThisTabVia": {
+    "description": "Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name.",
+    "placeholders": { "proxyTitle": { "type": "String" } }
+  },
+  "menu_connectionThisTabDirect": "This tab: direct connection",
+  "@menu_connectionThisTabDirect": {
+    "description": "Summary line: this tab connects directly without a proxy."
+  },
+  "menu_connectionStartProxy": "Start {proxyTitle}",
+  "@menu_connectionStartProxy": {
+    "description": "Button that starts the stopped proxy. proxyTitle is the proxy's name.",
+    "placeholders": { "proxyTitle": { "type": "String" } }
+  },
+  "menu_connectionProxySettings": "Proxy Settings",
+  "@menu_connectionProxySettings": {
+    "description": "Row in the connection group that opens proxy settings."
+  },
+  "menu_connectionUnused": "Not used by any route",
+  "@menu_connectionUnused": {
+    "description": "Line under a proxy in the connection group when no route uses it."
+  },
+  "menu_connectionUsageContainerCount": "{count, plural, =1{1 container} other{{count} containers}}",
+  "@menu_connectionUsageContainerCount": {
+    "description": "Part of a proxy's usage line. count is how many containers use it.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "menu_connectionUsageIsolatedTabCount": "{count, plural, =1{1 isolated tab} other{{count} isolated tabs}}",
+  "@menu_connectionUsageIsolatedTabCount": {
+    "description": "Part of a proxy's usage line. count is how many isolated tabs use it.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "menu_connectionUsageBlocked": "Blocked",
+  "@menu_connectionUsageBlocked": {
+    "description": "First word of a proxy's usage line when tabs using it are blocked because it is off."
+  }
+}

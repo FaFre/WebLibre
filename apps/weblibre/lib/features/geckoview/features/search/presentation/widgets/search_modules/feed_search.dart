@@ -32,6 +32,7 @@ import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/extensions/atom.dart';
 import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -47,6 +48,7 @@ class FeedSearch extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     final articlesAsync = ref.watch(articleSearchProvider(null));
@@ -71,7 +73,7 @@ class FeedSearch extends HookConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Articles',
+      title: l10n.search_moduleLabelArticles,
       moduleType: SearchModuleType.articles,
       totalCount: totalResults,
       contentSliverBuilder:
@@ -138,7 +140,7 @@ class FeedSearch extends HookConsumerWidget {
                                 overflow: TextOverflow.ellipsis,
                               )
                             : Text(
-                                article.displayTitle,
+                                article.displayTitle(context),
                                 style: theme.textTheme.titleMedium,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
@@ -207,7 +209,7 @@ class FeedSearch extends HookConsumerWidget {
                 error: (error, stackTrace) {
                   return SliverToBoxAdapter(
                     child: FailureWidget(
-                      title: 'Failed searching Articles',
+                      title: l10n.search_failedSearchingArticles,
                       exception: error,
                     ),
                   );

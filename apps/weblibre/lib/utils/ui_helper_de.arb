@@ -1,0 +1,20 @@
+{
+  "@@locale": "de",
+  "uiHelper_findInPageSuggestion": "„{query}“ auf dieser Seite suchen?",
+  "uiHelper_actionFind": "Suchen",
+  "uiHelper_openedTabsFromAnotherDevice": "{count, plural, =1{1 Tab von einem anderen Gerät geöffnet} other{{count} Tabs von einem anderen Gerät geöffnet}}",
+  "uiHelper_navigateBackToCloseTab": "Erneut ZURÜCK drücken, um den aktuellen Tab zu schließen",
+  "uiHelper_navigateBackToExitApp": "Erneut ZURÜCK drücken, um die App zu beenden",
+  "uiHelper_newTabOpenedInBackgroundNamed": "Neuer Tab „{tabName}“ im Hintergrund geöffnet",
+  "uiHelper_newTabOpenedInBackground": "Neuer Tab im Hintergrund geöffnet",
+  "uiHelper_actionShow": "Anzeigen",
+  "uiHelper_wantToOpenLinkFromClipboard": "Link aus der Zwischenablage öffnen?",
+  "uiHelper_newTabOpenedNamed": "Neuer Tab „{tabName}“ geöffnet",
+  "uiHelper_newTabOpened": "Neuer Tab geöffnet",
+  "uiHelper_actionSwitch": "Wechseln",
+  "uiHelper_couldNotLaunchUrl": "URL konnte nicht geöffnet werden ({url})",
+  "uiHelper_canNotHandleScheme": "„{scheme}“ kann nicht verarbeitet werden",
+  "uiHelper_tabsClosedCount": "{count, plural, =1{Tab geschlossen} other{{count} Tabs geschlossen}}",
+  "uiHelper_closeIsolatedTabsTitle": "Isolierte Tabs schließen?",
+  "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{Dadurch werden alle Browserdaten dieser isolierten Sitzung endgültig gelöscht.} other{Dadurch werden die Browserdaten von {count} isolierten Sitzungen endgültig gelöscht.}}"
+}

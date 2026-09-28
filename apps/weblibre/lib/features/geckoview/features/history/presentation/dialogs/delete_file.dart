@@ -22,6 +22,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path/path.dart' as p;
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/localized_spans.dart';
 
 typedef DeleteDecision = ({bool delete, bool remember});
 
@@ -38,11 +40,12 @@ Future<DeleteDecision?> showDeleteFileDialog(
 
       return HookBuilder(
         builder: (context) {
+          final l10n = AppLocalizations.of(context);
           final remember = useState(false);
 
           return AlertDialog(
             icon: const Icon(Icons.warning),
-            title: const Text('Delete Downloaded File?'),
+            title: Text(l10n.history_deleteFileTitle),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,19 +53,20 @@ Future<DeleteDecision?> showDeleteFileDialog(
                 RichText(
                   text: TextSpan(
                     style: Theme.of(context).textTheme.bodyMedium,
-                    children: [
-                      const TextSpan(text: 'Would you like to delete '),
-                      TextSpan(
-                        text: fileName,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      const TextSpan(text: ' from your device?'),
-                    ],
+                    children: localizedSpans(
+                      l10n.history_deleteFileConfirm(spanPlaceholder(0)),
+                      spans: [
+                        TextSpan(
+                          text: fileName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'This action cannot be undone.',
+                  l10n.history_deleteFileWarning,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
@@ -76,7 +80,7 @@ Future<DeleteDecision?> showDeleteFileDialog(
                     onChanged: (value) {
                       remember.value = value!;
                     },
-                    title: const Text('Remember my choice for remaining files'),
+                    title: Text(l10n.history_deleteFileRememberChoice),
                   ),
                 ],
               ],
@@ -89,7 +93,7 @@ Future<DeleteDecision?> showDeleteFileDialog(
                     remember: remember.value,
                   ));
                 },
-                child: const Text('Keep File'),
+                child: Text(l10n.history_deleteFileActionKeep),
               ),
               FilledButton(
                 onPressed: () {
@@ -102,7 +106,7 @@ Future<DeleteDecision?> showDeleteFileDialog(
                   backgroundColor: Theme.of(context).colorScheme.error,
                   foregroundColor: Theme.of(context).colorScheme.onError,
                 ),
-                child: const Text('Delete'),
+                child: Text(l10n.common_delete),
               ),
             ],
           );

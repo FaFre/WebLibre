@@ -121,6 +121,11 @@ jobs:
           dart pub global activate melos 7.8.1
           melos bootstrap
 
+      # `flutter build` regenerates AppLocalizations from lib/l10n/app_en.arb
+      # but never re-merges the per-feature fragments into it.
+      - name: Check localization template is up to date
+        run: python3 scripts/merge_l10n_arb.py --check
+
       - name: Update external assets
         run: melos run update-assets --no-select
 

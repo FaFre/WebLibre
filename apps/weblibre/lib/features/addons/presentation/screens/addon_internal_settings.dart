@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/extensions/addon_info.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/web_content_keyboard.dart';
 
 Future<void> openAddonSettingsFlow(
@@ -85,6 +86,7 @@ class AddonInternalSettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final addonAsync = ref.watch(addonDetailsProvider(addonId));
 
     final addon = addonAsync.value;
@@ -94,8 +96,8 @@ class AddonInternalSettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           addon == null
-              ? 'Extension Settings'
-              : '${addon.displayName} Settings',
+              ? l10n.addons_settingsTitleGeneric
+              : l10n.addons_settingsTitleNamed(addon.displayName),
         ),
       ),
       body: switch (addonAsync) {
@@ -106,7 +108,7 @@ class AddonInternalSettingsScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
-              'Failed to load extension settings: $error',
+              l10n.addons_settingsLoadFailed(error.toString()),
               textAlign: TextAlign.center,
             ),
           ),
@@ -115,9 +117,7 @@ class AddonInternalSettingsScreen extends ConsumerWidget {
             when addon == null ||
                 optionsPageUrl == null ||
                 optionsPageUrl.isEmpty =>
-          const Center(
-            child: Text('This extension does not expose a settings page.'),
-          ),
+          Center(child: Text(l10n.addons_noSettingsPage)),
         _ => _AddonSettingsPlatformView(optionsPageUrl: optionsPageUrl),
       },
     );

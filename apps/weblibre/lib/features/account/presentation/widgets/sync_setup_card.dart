@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/features/account/data/repositories/account_sync_repository.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Lets a signed-in user derive an end-to-end encryption key from their
 /// account password.
@@ -50,6 +51,7 @@ class SyncSetupCard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final passwordController = useTextEditingController();
     final confirmController = useTextEditingController();
     useListenable(passwordController);
@@ -64,11 +66,11 @@ class SyncSetupCard extends HookConsumerWidget {
 
     Future<void> setupSyncKey() async {
       if (password.isEmpty) {
-        error.value = 'Please enter your password';
+        error.value = l10n.account_syncSetupEnterPassword;
         return;
       }
       if (password != confirm) {
-        error.value = 'Passwords do not match';
+        error.value = l10n.account_syncSetupPasswordsMismatch;
         return;
       }
 
@@ -88,8 +90,7 @@ class SyncSetupCard extends HookConsumerWidget {
         if (probe != null) {
           final ok = await _canDecrypt(probe.contentBlob, syncKey);
           if (!ok) {
-            error.value =
-                'Password did not match your existing encrypted backups.';
+            error.value = l10n.account_syncSetupPasswordMismatchBackup;
             return;
           }
         } else {
@@ -108,7 +109,7 @@ class SyncSetupCard extends HookConsumerWidget {
             .read(accountAuthRepositoryProvider.notifier)
             .setSyncKey(syncKey);
       } catch (e) {
-        error.value = 'Failed to set up sync: $e';
+        error.value = l10n.account_syncSetupFailed(e.toString());
       } finally {
         busy.value = false;
       }
@@ -124,23 +125,21 @@ class SyncSetupCard extends HookConsumerWidget {
               const Icon(Icons.lock_outlined),
               const SizedBox(width: 8),
               Text(
-                'Set Up Encrypted Sync',
+                l10n.account_syncSetupTitle,
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
-            'Enter your account password to enable end-to-end encrypted '
-            'sync. Your data is encrypted on-device before upload — '
-            'the server never sees your settings.',
+            l10n.account_syncSetupDescription,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: passwordController,
             decoration: InputDecoration(
-              labelText: 'Account Password',
+              labelText: l10n.account_fieldAccountPassword,
               border: const OutlineInputBorder(),
               errorText: error.value,
             ),
@@ -151,9 +150,9 @@ class SyncSetupCard extends HookConsumerWidget {
           const SizedBox(height: 12),
           TextField(
             controller: confirmController,
-            decoration: const InputDecoration(
-              labelText: 'Confirm Password',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.account_fieldConfirmPassword,
+              border: const OutlineInputBorder(),
             ),
             obscureText: true,
             enabled: !busy.value,
@@ -170,7 +169,7 @@ class SyncSetupCard extends HookConsumerWidget {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Enable Sync'),
+                  : Text(l10n.account_actionEnableSync),
             ),
           ),
         ],

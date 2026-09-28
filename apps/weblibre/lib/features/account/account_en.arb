@@ -1,0 +1,568 @@
+{
+  "@@locale": "en",
+
+  "account_screenTitle": "WebLibre Account",
+  "@account_screenTitle": {
+    "description": "Title of the settings screen for the WebLibre Account (the app's own optional online account for the supporter subscription, search credits and encrypted settings sync). WebLibre is the app name."
+  },
+  "account_searchHint": "Search account settings",
+  "@account_searchHint": {
+    "description": "Placeholder of the search field on the WebLibre Account screen."
+  },
+  "account_loadFailed": "Failed to load account",
+  "@account_loadFailed": {
+    "description": "Error shown in place of the account screen content when the account state could not be loaded."
+  },
+
+  "account_sectionAccount": "Account",
+  "@account_sectionAccount": {
+    "description": "Section heading on the WebLibre Account screen for sign-in status."
+  },
+  "account_sectionSubscription": "Subscription",
+  "@account_sectionSubscription": {
+    "description": "Section heading on the WebLibre Account screen for the supporter subscription."
+  },
+  "account_sectionSearchCredits": "Search Credits",
+  "@account_sectionSearchCredits": {
+    "description": "Section heading on the WebLibre Account screen for prepaid search credits."
+  },
+  "account_sectionSettingsSnapshots": "Settings Snapshots",
+  "@account_sectionSettingsSnapshots": {
+    "description": "Section heading for encrypted copies of the app's settings stored in the account (\"snapshots\")."
+  },
+  "account_sectionPreferencesSnapshots": "Preferences Snapshots",
+  "@account_sectionPreferencesSnapshots": {
+    "description": "Section heading for encrypted copies of the browser engine preferences stored in the account."
+  },
+  "account_sectionEncryptedSync": "Encrypted Sync",
+  "@account_sectionEncryptedSync": {
+    "description": "Section heading for setting up end-to-end encrypted sync of settings."
+  },
+
+  "account_signInTitle": "Sign in to WebLibre Account",
+  "@account_signInTitle": {
+    "description": "Row that starts signing in to the WebLibre Account; also the title of the account section while signed out."
+  },
+  "account_signInKeywords": "sign in, account, authentication",
+  "@account_signInKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_signInSyncKeyKeywords": "sync key, reset sync key",
+  "@account_signInSyncKeyKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_signingInTitle": "Signing in",
+  "@account_signingInTitle": {
+    "description": "Title of the account section while sign-in is in progress."
+  },
+  "account_signedInTitle": "Signed in account",
+  "@account_signedInTitle": {
+    "description": "Title of the account section while signed in."
+  },
+  "account_signInFailedTitle": "Sign-in failed",
+  "@account_signInFailedTitle": {
+    "description": "Title of the account section, and heading of the error card, when signing in failed."
+  },
+  "account_syncAcrossDevicesSubtitle": "Sync your settings across devices",
+  "@account_syncAcrossDevicesSubtitle": {
+    "description": "Line under the sign-in row explaining what the account is for."
+  },
+  "account_signingInSubtitle": "Complete sign-in in your browser",
+  "@account_signingInSubtitle": {
+    "description": "Line under the account section while sign-in waits for the user to finish it on the sign-in web page."
+  },
+  "account_signedInFallback": "Signed in",
+  "@account_signedInFallback": {
+    "description": "Shown in place of the user's name or email when signed in but neither is known."
+  },
+
+  "account_entrySupporterSubscriptionTitle": "Supporter subscription",
+  "@account_entrySupporterSubscriptionTitle": {
+    "description": "Title of the supporter subscription entry, shown as a settings search result."
+  },
+  "account_entrySupporterSubscriptionKeywords": "billing, supporter",
+  "@account_entrySupporterSubscriptionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_entrySupporterSubscriptionSubtitle": "Status, billing, and subscription management",
+  "@account_entrySupporterSubscriptionSubtitle": {
+    "description": "Summary of the supporter subscription entry, shown as a settings search result."
+  },
+  "account_entrySearchCreditsTitle": "Search credits",
+  "@account_entrySearchCreditsTitle": {
+    "description": "Title of the search credits entry, shown as a settings search result."
+  },
+  "account_entrySearchCreditsKeywords": "tokens, search pack",
+  "@account_entrySearchCreditsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_entrySearchCreditsSubtitle": "Credits balance, token issuance, and purchases",
+  "@account_entrySearchCreditsSubtitle": {
+    "description": "Summary of the search credits entry, shown as a settings search result. Tokens are anonymous search tokens created from credits."
+  },
+  "account_entrySettingsSnapshotsTitle": "Settings snapshots",
+  "@account_entrySettingsSnapshotsTitle": {
+    "description": "Title of the settings snapshots entry, shown as a settings search result."
+  },
+  "account_entrySettingsSnapshotsKeywords": "backups, settings sync",
+  "@account_entrySettingsSnapshotsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_entrySettingsSnapshotsSubtitle": "Store and restore synced application settings",
+  "@account_entrySettingsSnapshotsSubtitle": {
+    "description": "Summary of the settings snapshots entry, shown as a settings search result."
+  },
+  "account_entryPreferencesSnapshotsTitle": "Preferences snapshots",
+  "@account_entryPreferencesSnapshotsTitle": {
+    "description": "Title of the preferences snapshots entry, shown as a settings search result."
+  },
+  "account_entryPreferencesSnapshotsKeywords": "backups, prefs sync",
+  "@account_entryPreferencesSnapshotsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_entryPreferencesSnapshotsSubtitle": "Store and restore synced preference documents",
+  "@account_entryPreferencesSnapshotsSubtitle": {
+    "description": "Summary of the preferences snapshots entry, shown as a settings search result."
+  },
+  "account_entrySetupEncryptedSyncTitle": "Set up encrypted sync",
+  "@account_entrySetupEncryptedSyncTitle": {
+    "description": "Title of the encrypted sync setup entry, shown as a settings search result."
+  },
+  "account_entrySetupEncryptedSyncKeywords": "sync key, backups, snapshots",
+  "@account_entrySetupEncryptedSyncKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_entrySetupEncryptedSyncSubtitle": "Enable end-to-end encrypted sync using your account password",
+  "@account_entrySetupEncryptedSyncSubtitle": {
+    "description": "Summary of the encrypted sync setup entry, shown as a settings search result."
+  },
+  "account_actionRestore": "Restore",
+  "@account_actionRestore": {
+    "description": "Menu item of a stored snapshot, and confirm button of the restore dialog: replace the current settings with the snapshot."
+  },
+  "account_actionEditLabel": "Edit Label",
+  "@account_actionEditLabel": {
+    "description": "Menu item of a stored snapshot that renames it, and title of the rename dialog."
+  },
+  "account_actionStore": "Store",
+  "@account_actionStore": {
+    "description": "Confirm button of the dialog that uploads a new encrypted snapshot."
+  },
+  "account_actionTryAgain": "Try Again",
+  "@account_actionTryAgain": {
+    "description": "Button on the sign-in error card that starts sign-in again."
+  },
+  "account_actionSignOut": "Sign Out",
+  "@account_actionSignOut": {
+    "description": "Confirm button of the sign-out dialog."
+  },
+  "account_actionEnableSync": "Enable Sync",
+  "@account_actionEnableSync": {
+    "description": "Button that sets up encrypted sync with the entered password."
+  },
+
+  "account_adoptTitleUsable": "An older sign-in is still on this device",
+  "@account_adoptTitleUsable": {
+    "description": "Heading of a card about an account sign-in left over from an older app version, before each profile had its own account."
+  },
+  "account_adoptTitleUnusable": "An older sign-in cannot be read",
+  "@account_adoptTitleUnusable": {
+    "description": "Heading of the same card when the leftover sign-in is damaged."
+  },
+  "account_adoptBodyUsable": "WebLibre kept a sign-in for {name} from before profiles had separate accounts. It is not from a backup, and nothing on this device records which profile it belonged to, so WebLibre will not guess.",
+  "@account_adoptBodyUsable": {
+    "description": "Body of the leftover sign-in card. name is the account's email or name, or \"a previous sign-in\".",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "account_adoptBodyUnusable": "WebLibre kept a sign-in from before profiles had separate accounts, but the saved data is damaged and cannot be used to sign in. Signing in again is the only way back; removing it clears this message.",
+  "@account_adoptBodyUnusable": {
+    "description": "Body of the card when the leftover sign-in is damaged and can only be removed."
+  },
+  "account_adoptRetryError": "That did not work. Check your connection and try again.",
+  "@account_adoptRetryError": {
+    "description": "Error on the leftover sign-in card when using or removing it failed."
+  },
+  "account_adoptNotMine": "Not mine",
+  "@account_adoptNotMine": {
+    "description": "Button on the leftover sign-in card: this sign-in does not belong to this profile (removes it after confirmation)."
+  },
+  "account_adoptRemoveIt": "Remove it",
+  "@account_adoptRemoveIt": {
+    "description": "Button on the damaged leftover sign-in card that deletes it."
+  },
+  "account_adoptUseItHere": "Use it here",
+  "@account_adoptUseItHere": {
+    "description": "Button on the leftover sign-in card that signs this profile in with it."
+  },
+  "account_forgetSignInTitle": "Forget this sign-in?",
+  "@account_forgetSignInTitle": {
+    "description": "Title of the confirmation dialog before deleting a leftover sign-in."
+  },
+  "account_forgetSignInContent": "The saved session for {name} is deleted from this device. If it belonged to another profile, you have to sign in again there.",
+  "@account_forgetSignInContent": {
+    "description": "Body of that dialog. name is the account's email or name, or \"a previous sign-in\".",
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "account_actionForgetIt": "Forget it",
+  "@account_actionForgetIt": {
+    "description": "Confirm button of that dialog."
+  },
+  "account_previousSignInFallback": "a previous sign-in",
+  "@account_previousSignInFallback": {
+    "description": "Fallback phrase for a leftover sign-in with no known email or name, inserted into sentences such as \"…a sign-in for {name}…\". Lowercase."
+  },
+
+  "account_signInAgainAs": "Sign in again as {account}",
+  "@account_signInAgainAs": {
+    "description": "Row and heading prompting to sign in again with a known account. account is the email address.",
+    "placeholders": { "account": { "type": "String" } }
+  },
+  "account_signInExpiredSubtitle": "This profile's saved sign-in expired. Your sync key is kept.",
+  "@account_signInExpiredSubtitle": {
+    "description": "Line under \"Sign in again as …\": the saved session expired but the sync encryption key is still on the device."
+  },
+  "account_signingInEllipsis": "Signing in...",
+  "@account_signingInEllipsis": {
+    "description": "Progress text while sign-in is in progress."
+  },
+  "account_completeSignInInApp": "Complete sign-in in WebLibre",
+  "@account_completeSignInInApp": {
+    "description": "Instruction under the sign-in progress: finish signing in on the web page opened in WebLibre."
+  },
+  "account_tooltipSignOut": "Sign Out",
+  "@account_tooltipSignOut": {
+    "description": "Tooltip of the sign-out button on the signed-in account row."
+  },
+  "account_signOutConfirmTitle": "Sign out?",
+  "@account_signOutConfirmTitle": {
+    "description": "Title of the sign-out confirmation dialog."
+  },
+  "account_signOutConfirmContent": "Are you sure you want to sign out of your WebLibre Account?",
+  "@account_signOutConfirmContent": {
+    "description": "Body of the sign-out confirmation dialog. \"WebLibre Account\" is the account's name."
+  },
+
+  "account_resetSyncKeyTitle": "Reset Sync Key",
+  "@account_resetSyncKeyTitle": {
+    "description": "Row, and dialog title, for resetting the encryption key used for sync; the account password must be entered again."
+  },
+  "account_resetSyncKeySubtitle": "Re-enter your password if you mistyped it or changed it",
+  "@account_resetSyncKeySubtitle": {
+    "description": "Explanation under \"Reset Sync Key\"."
+  },
+  "account_resetSyncKeyConfirmContent": "You will need to re-enter your account password. If your password changed, existing snapshots encrypted with the old password will no longer be decryptable.",
+  "@account_resetSyncKeyConfirmContent": {
+    "description": "Body of the reset sync key dialog: snapshots encrypted with an old password become unreadable."
+  },
+
+  "account_subscriptionLoadFailed": "Could not load subscription",
+  "@account_subscriptionLoadFailed": {
+    "description": "Error heading when the subscription status could not be loaded."
+  },
+  "account_checkConnectionRetry": "Check your connection and try again.",
+  "@account_checkConnectionRetry": {
+    "description": "Line under that error heading."
+  },
+  "account_planFallbackSupporter": "Supporter",
+  "@account_planFallbackSupporter": {
+    "description": "Name shown for the subscription plan when the server gives none. Plan name."
+  },
+  "account_badgeWillNotRenew": "Will not renew",
+  "@account_badgeWillNotRenew": {
+    "description": "Status badge on the subscription card: the subscription was canceled and ends at the end of the period, or has ended."
+  },
+  "account_badgeActive": "Active",
+  "@account_badgeActive": {
+    "description": "Status badge on the subscription card: the subscription is active."
+  },
+  "account_untilDate": "Until {date}",
+  "@account_untilDate": {
+    "description": "Line on the subscription card. date is the formatted end date of the paid period.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "account_actionManageSubscription": "Manage Subscription",
+  "@account_actionManageSubscription": {
+    "description": "Button on the subscription card that opens the billing portal website."
+  },
+  "account_badgePaused": "Paused",
+  "@account_badgePaused": {
+    "description": "Status badge on the subscription card: the subscription is paused."
+  },
+  "account_pausedNote": "Your subscription is paused. Resume it from the customer portal to restore access.",
+  "@account_pausedNote": {
+    "description": "Note on the subscription card while it is paused. The customer portal is the billing website."
+  },
+  "account_badgePastDue": "Past due",
+  "@account_badgePastDue": {
+    "description": "Status badge on the subscription card: the last payment failed."
+  },
+  "account_pastDueNote": "Payment failed. Update your payment method to keep your subscription active.",
+  "@account_pastDueNote": {
+    "description": "Note on the subscription card after a failed payment."
+  },
+  "account_actionUpdatePaymentMethod": "Update Payment Method",
+  "@account_actionUpdatePaymentMethod": {
+    "description": "Button on the subscription card that opens the billing portal to change the payment method."
+  },
+  "account_endedNote": "Your subscription has ended. Renew from the customer portal to continue.",
+  "@account_endedNote": {
+    "description": "Note on the subscription card after the subscription ended. The customer portal is the billing website."
+  },
+  "account_actionRenewSubscription": "Renew Subscription",
+  "@account_actionRenewSubscription": {
+    "description": "Button on the subscription card that opens the billing portal to subscribe again."
+  },
+  "account_planSupporterSubscription": "Supporter Subscription",
+  "@account_planSupporterSubscription": {
+    "description": "Title of the subscription card for users without a subscription. Plan name."
+  },
+  "account_subscribeSubtitle": "Subscribe to unlock sync features",
+  "@account_subscribeSubtitle": {
+    "description": "Line under the subscription title for users without a subscription."
+  },
+  "account_badgeInactive": "Inactive",
+  "@account_badgeInactive": {
+    "description": "Status badge on the subscription card: no subscription."
+  },
+  "account_actionSubscribe": "Subscribe",
+  "@account_actionSubscribe": {
+    "description": "Button on the subscription card that opens the page for subscribing."
+  },
+  "account_tooltipRefreshStatus": "Refresh status",
+  "@account_tooltipRefreshStatus": {
+    "description": "Tooltip of the button that reloads the subscription status."
+  },
+  "account_subscriptionEndsOn": "Your subscription will end on {date}",
+  "@account_subscriptionEndsOn": {
+    "description": "Warning on the subscription card after canceling. date is the formatted end date.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+
+  "account_bannerTitle": "Support WebLibre",
+  "@account_bannerTitle": {
+    "description": "Heading of the home screen banner inviting users to become supporters."
+  },
+  "account_bannerBody": "Supporter is an optional subscription that funds WebLibre's development and provides the features that need a hosted service to work. The browser and its privacy features need no subscription. <learnMore>Learn more</learnMore>.",
+  "@account_bannerBody": {
+    "description": "Body of the supporter banner on the home screen. The text between <learnMore>…</learnMore> becomes a tappable link to more information; keep the tag pair and translate the text inside it. WebLibre is the app name."
+  },
+  "account_featureSearchLabel": "WebLibre Search",
+  "@account_featureSearchLabel": {
+    "description": "Bullet heading in the supporter banner naming the search feature. Product name."
+  },
+  "account_featureSearchDescription": "A private, ad-free search built into the browser. It blends results from several independent sources, offers tunable search modes, can route over Tor, and lets you preview pages safely — while keeping your searches unlinkable to your account by design.",
+  "@account_featureSearchDescription": {
+    "description": "Bullet text in the supporter banner describing WebLibre Search. Tor is a product name."
+  },
+  "account_featureSyncLabel": "Encrypted account sync",
+  "@account_featureSyncLabel": {
+    "description": "Bullet heading in the supporter banner naming encrypted settings sync."
+  },
+  "account_featureSyncDescription": "Store and restore your WebLibre settings and preferences across profiles and devices. Everything is encrypted on your device before upload, so only you can read it.",
+  "@account_featureSyncDescription": {
+    "description": "Bullet text in the supporter banner describing encrypted settings sync."
+  },
+  "account_becomeSupporter": "Become a Supporter",
+  "@account_becomeSupporter": {
+    "description": "Button in the supporter banner that opens the account screen to subscribe."
+  },
+
+  "account_syncSetupEnterPassword": "Please enter your password",
+  "@account_syncSetupEnterPassword": {
+    "description": "Error under the password field when setting up encrypted sync without a password."
+  },
+  "account_syncSetupPasswordsMismatch": "Passwords do not match",
+  "@account_syncSetupPasswordsMismatch": {
+    "description": "Error when the password and its confirmation differ."
+  },
+  "account_syncSetupPasswordMismatchBackup": "Password did not match your existing encrypted backups.",
+  "@account_syncSetupPasswordMismatchBackup": {
+    "description": "Error when the entered password cannot decrypt snapshots already stored in the account."
+  },
+  "account_syncSetupFailed": "Failed to set up sync: {error}",
+  "@account_syncSetupFailed": {
+    "description": "Error message when setting up encrypted sync failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "account_syncSetupTitle": "Set Up Encrypted Sync",
+  "@account_syncSetupTitle": {
+    "description": "Heading of the card for setting up encrypted sync."
+  },
+  "account_syncSetupDescription": "Enter your account password to enable end-to-end encrypted sync. Your data is encrypted on-device before upload — the server never sees your settings.",
+  "@account_syncSetupDescription": {
+    "description": "Explanation on the encrypted sync setup card."
+  },
+  "account_fieldAccountPassword": "Account Password",
+  "@account_fieldAccountPassword": {
+    "description": "Label of the password field on the encrypted sync setup card."
+  },
+  "account_fieldConfirmPassword": "Confirm Password",
+  "@account_fieldConfirmPassword": {
+    "description": "Label of the field for typing the password a second time."
+  },
+
+  "account_failedLoadSnapshots": "Failed to load snapshots: {error}",
+  "@account_failedLoadSnapshots": {
+    "description": "Error message when the list of stored snapshots could not be loaded. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "account_syncKindStored": "{kind, select, weblibreSettings{Settings stored} geckoUserJs{Gecko Prefs stored} other{Snapshot stored}}",
+  "@account_syncKindStored": {
+    "description": "Confirmation after uploading a snapshot. kind selects the kind of data: weblibreSettings is WebLibre's own settings, geckoUserJs the browser engine preferences. Translate each case; keep the case names unchanged.",
+    "placeholders": { "kind": { "type": "String" } }
+  },
+  "account_syncKindSnapshotsTitle": "{kind, select, weblibreSettings{Settings Snapshots} geckoUserJs{Gecko Prefs Snapshots} other{Snapshots}}",
+  "@account_syncKindSnapshotsTitle": {
+    "description": "Heading of a list of stored snapshots. kind selects the kind of data: weblibreSettings is WebLibre's own settings, geckoUserJs the browser engine preferences (Gecko is the engine's name). Translate each case; keep the case names unchanged.",
+    "placeholders": { "kind": { "type": "String" } }
+  },
+  "account_storeCurrentTitle": "Store Current",
+  "@account_storeCurrentTitle": {
+    "description": "Row that encrypts and uploads the current data as a new snapshot."
+  },
+  "account_storeCurrentSubtitle": "{kind, select, weblibreSettings{Encrypt and upload the current settings} geckoUserJs{Encrypt and upload the current Gecko prefs} other{Encrypt and upload the current data}}",
+  "@account_storeCurrentSubtitle": {
+    "description": "Line under \"Store Current\". kind selects the kind of data: weblibreSettings is WebLibre's own settings, geckoUserJs the browser engine preferences. Translate each case; keep the case names unchanged.",
+    "placeholders": { "kind": { "type": "String" } }
+  },
+  "account_noSnapshotsYet": "No snapshots stored yet",
+  "@account_noSnapshotsYet": {
+    "description": "Shown when no snapshots are stored in the account."
+  },
+  "account_failedToStore": "Failed to store: {error}",
+  "@account_failedToStore": {
+    "description": "Error message when uploading a snapshot failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "account_syncKindRestored": "{kind, select, weblibreSettings{Settings restored} geckoUserJs{Gecko Prefs restored} other{Snapshot restored}}",
+  "@account_syncKindRestored": {
+    "description": "Confirmation after restoring a snapshot. kind selects the kind of data: weblibreSettings is WebLibre's own settings, geckoUserJs the browser engine preferences. Translate each case; keep the case names unchanged.",
+    "placeholders": { "kind": { "type": "String" } }
+  },
+  "account_snapshotNotFound": "Snapshot not found",
+  "@account_snapshotNotFound": {
+    "description": "Error message when the chosen snapshot no longer exists on the server."
+  },
+  "account_decryptionFailed": "Decryption failed — wrong password or data corrupted. Try resetting your sync key.",
+  "@account_decryptionFailed": {
+    "description": "Error message when a snapshot could not be decrypted."
+  },
+  "account_failedToRestore": "Failed to restore: {error}",
+  "@account_failedToRestore": {
+    "description": "Error message when restoring a snapshot failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "account_failedUpdateLabel": "Failed to update label: {error}",
+  "@account_failedUpdateLabel": {
+    "description": "Error message when renaming a snapshot failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "account_snapshotDeleted": "Snapshot deleted",
+  "@account_snapshotDeleted": {
+    "description": "Confirmation after deleting a stored snapshot."
+  },
+  "account_failedToDelete": "Failed to delete: {error}",
+  "@account_failedToDelete": {
+    "description": "Error message when deleting a stored snapshot failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "account_untitledSnapshot": "Untitled",
+  "@account_untitledSnapshot": {
+    "description": "Fallback name of a snapshot without a label."
+  },
+
+  "account_metaLabel": "Label",
+  "@account_metaLabel": {
+    "description": "Label of a snapshot detail row showing its name."
+  },
+  "account_metaStored": "Stored",
+  "@account_metaStored": {
+    "description": "Label of a snapshot detail row showing when it was stored."
+  },
+  "account_metaAppVersion": "App version",
+  "@account_metaAppVersion": {
+    "description": "Label of a snapshot detail row showing the app version that stored it."
+  },
+  "account_metaDevice": "Device",
+  "@account_metaDevice": {
+    "description": "Label of a snapshot detail row showing the device that stored it."
+  },
+  "account_storeSnapshotTitle": "Store Snapshot",
+  "@account_storeSnapshotTitle": {
+    "description": "Title of the dialog for uploading a new snapshot."
+  },
+  "account_fieldLabelOptional": "Label (optional)",
+  "@account_fieldLabelOptional": {
+    "description": "Label of the optional name field in the store-snapshot dialog."
+  },
+  "account_labelHintExample": "e.g. \"Before update\", \"Home setup\"",
+  "@account_labelHintExample": {
+    "description": "Example placeholder of the snapshot name field. The quoted examples may be translated."
+  },
+  "account_fieldLabel": "Label",
+  "@account_fieldLabel": {
+    "description": "Label of the name field in the rename-snapshot dialog."
+  },
+  "account_restoreSnapshotTitle": "Restore Snapshot",
+  "@account_restoreSnapshotTitle": {
+    "description": "Title of the dialog confirming a snapshot restore."
+  },
+  "account_restoreOverwriteWarning": "This will overwrite your current local settings.",
+  "@account_restoreOverwriteWarning": {
+    "description": "Warning in the restore-snapshot dialog."
+  },
+  "account_thisSnapshotFallback": "this snapshot",
+  "@account_thisSnapshotFallback": {
+    "description": "Fallback phrase inserted into \"Are you sure you want to delete {label}?\" when the snapshot has no name. Lowercase."
+  },
+  "account_deleteSnapshotTitle": "Delete Snapshot",
+  "@account_deleteSnapshotTitle": {
+    "description": "Title of the confirmation dialog before deleting a stored snapshot."
+  },
+  "account_deleteSnapshotConfirm": "Are you sure you want to delete {label}?",
+  "@account_deleteSnapshotConfirm": {
+    "description": "Body of that dialog. label is the snapshot's name in quotes, or \"this snapshot\".",
+    "placeholders": { "label": { "type": "String" } }
+  },
+
+  "account_authNetworkError": "Network error. Please check your connection and try again.",
+  "@account_authNetworkError": {
+    "description": "Account sign-in error: no network connection."
+  },
+  "account_authSessionExpiredWithKey": "Your saved sign-in is no longer valid. Sign in again to finish restoring this account — your sync key is kept.",
+  "@account_authSessionExpiredWithKey": {
+    "description": "Account error when the saved session expired but the sync key was kept."
+  },
+  "account_authSessionExpiredNoKey": "Your saved sign-in is no longer valid. Sign in again to continue.",
+  "@account_authSessionExpiredNoKey": {
+    "description": "Account error when the saved session expired."
+  },
+  "account_authRestoreFailedFallback": "Could not restore your account session. Retrying shortly.",
+  "@account_authRestoreFailedFallback": {
+    "description": "Account error when the saved session could not be restored at startup; the app retries automatically."
+  },
+  "account_authSignInTimedOut": "Sign-in timed out. Please try again.",
+  "@account_authSignInTimedOut": {
+    "description": "Account error when sign-in took too long."
+  },
+  "account_authSignInOpenPageFailed": "Could not open the sign-in page. Please try again.",
+  "@account_authSignInOpenPageFailed": {
+    "description": "Account error when the sign-in web page could not be opened."
+  },
+  "account_authNoPendingSignIn": "No pending sign-in found. Please start sign-in again.",
+  "@account_authNoPendingSignIn": {
+    "description": "Account error when the sign-in web page returned but the app had no sign-in in progress."
+  },
+  "account_authSignInVerificationFailed": "Sign-in could not be verified. Please try again.",
+  "@account_authSignInVerificationFailed": {
+    "description": "Account error when the sign-in response could not be verified as genuine."
+  },
+  "account_authSignInNotCompleted": "Sign-in could not be completed. Please try again.",
+  "@account_authSignInNotCompleted": {
+    "description": "Account error when sign-in was left unfinished."
+  },
+  "account_authSignInFailedFallback": "Sign-in failed. Please try again.",
+  "@account_authSignInFailedFallback": {
+    "description": "Generic account sign-in error."
+  }
+}

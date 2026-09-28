@@ -1,0 +1,360 @@
+{
+  "@@locale": "en",
+  "bookmarks_title": "Bookmarks",
+  "@bookmarks_title": {
+    "description": "Title of the bookmarks screen."
+  },
+  "bookmarks_filterHint": "Filter bookmarks...",
+  "@bookmarks_filterHint": {
+    "description": "Placeholder of the search field on the bookmarks screen."
+  },
+  "bookmarks_emptyFolder": "Empty",
+  "@bookmarks_emptyFolder": {
+    "description": "Shown inside a bookmark folder that contains nothing."
+  },
+  "bookmarks_searchHiddenByFoldersOnly": "Search matches bookmarks hidden by \"Folders Only\"",
+  "@bookmarks_searchHiddenByFoldersOnly": {
+    "description": "Shown when a bookmark search finds bookmarks but the \"Folders Only\" view hides them. \"Folders Only\" is the menu option of that name and must match it."
+  },
+  "bookmarks_noSearchMatches": "No bookmarks match \"{query}\"",
+  "@bookmarks_noSearchMatches": {
+    "description": "Shown when no bookmark matches the search. query is the search text.",
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "bookmarks_loadFailedTitle": "Failed to load bookmarks",
+  "@bookmarks_loadFailedTitle": {
+    "description": "Error heading when bookmarks could not be loaded."
+  },
+  "bookmarks_loadFoldersFailedTitle": "Failed to load bookmark folders",
+  "@bookmarks_loadFoldersFailedTitle": {
+    "description": "Error heading when the bookmark folder tree could not be loaded in the folder picker."
+  },
+  "bookmarks_folderLabel": "Folder",
+  "@bookmarks_folderLabel": {
+    "description": "Label above the folder picker in the bookmark and folder editors."
+  },
+  "bookmarks_unnamedFolder": "Unnamed Folder",
+  "@bookmarks_unnamedFolder": {
+    "description": "Shown in place of the name of a bookmark folder that has none."
+  },
+  "bookmarks_selectionCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "@bookmarks_selectionCount": {
+    "description": "Title of the bookmarks screen while items are selected. count is the number of selected items.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_tooltipOpenInBackground": "Open in background",
+  "@bookmarks_tooltipOpenInBackground": {
+    "description": "Tooltip of the button that opens all selected bookmarks in new tabs without switching to them."
+  },
+  "bookmarks_tooltipMoveSelected": "Move selected",
+  "@bookmarks_tooltipMoveSelected": {
+    "description": "Tooltip of the button that moves the selected bookmarks to another folder."
+  },
+  "bookmarks_tooltipDeleteSelected": "Delete selected",
+  "@bookmarks_tooltipDeleteSelected": {
+    "description": "Tooltip of the button that deletes the selected bookmarks."
+  },
+  "bookmarks_tooltipClearSearch": "Clear search",
+  "@bookmarks_tooltipClearSearch": {
+    "description": "Tooltip of the search button while the search field has text: clears it."
+  },
+  "bookmarks_tooltipSearchBookmarks": "Search bookmarks",
+  "@bookmarks_tooltipSearchBookmarks": {
+    "description": "Tooltip of the search button that opens the bookmark search field."
+  },
+  "bookmarks_tooltipCollapse": "Collapse",
+  "@bookmarks_tooltipCollapse": {
+    "description": "Tooltip of the folder icon of an expanded bookmark folder: collapses it."
+  },
+  "bookmarks_tooltipExpand": "Expand",
+  "@bookmarks_tooltipExpand": {
+    "description": "Tooltip of the folder icon of a collapsed bookmark folder: shows its contents inline."
+  },
+  "bookmarks_menuAddBookmarkHere": "Add Bookmark Here",
+  "@bookmarks_menuAddBookmarkHere": {
+    "description": "Item in the bookmarks screen menu that creates a new bookmark in the folder currently shown."
+  },
+  "bookmarks_menuAddSubfolderHere": "Add Subfolder Here",
+  "@bookmarks_menuAddSubfolderHere": {
+    "description": "Item in the bookmarks screen menu that creates a new folder inside the folder currently shown."
+  },
+  "bookmarks_menuCollapseAll": "Collapse All",
+  "@bookmarks_menuCollapseAll": {
+    "description": "Item in the bookmarks screen menu that collapses all expanded folders."
+  },
+  "bookmarks_menuShowEmptyFolders": "Show Empty Folders",
+  "@bookmarks_menuShowEmptyFolders": {
+    "description": "Item in the bookmarks visibility menu: show built-in folders that contain nothing."
+  },
+  "bookmarks_menuHideEmptyFolders": "Hide Empty Folders",
+  "@bookmarks_menuHideEmptyFolders": {
+    "description": "Item in the bookmarks visibility menu: hide built-in folders that contain nothing."
+  },
+  "bookmarks_menuShowBookmarks": "Show Bookmarks",
+  "@bookmarks_menuShowBookmarks": {
+    "description": "Item in the bookmarks visibility menu: show bookmarks again after \"Folders Only\" was chosen."
+  },
+  "bookmarks_menuFoldersOnly": "Folders Only",
+  "@bookmarks_menuFoldersOnly": {
+    "description": "Item in the bookmarks visibility menu: show only folders, hiding the bookmarks in them."
+  },
+  "bookmarks_menuVisibility": "Visibility",
+  "@bookmarks_menuVisibility": {
+    "description": "Submenu in the bookmarks screen menu with options for what is shown."
+  },
+  "bookmarks_menuSort": "Sort",
+  "@bookmarks_menuSort": {
+    "description": "Submenu in the bookmarks screen menu for choosing the sort order."
+  },
+  "bookmarks_menuImport": "Import",
+  "@bookmarks_menuImport": {
+    "description": "Submenu in the bookmarks screen menu for importing bookmarks from a file."
+  },
+  "bookmarks_menuExport": "Export",
+  "@bookmarks_menuExport": {
+    "description": "Submenu in the bookmarks screen menu for saving bookmarks to a file."
+  },
+  "bookmarks_formatJson": "JSON",
+  "@bookmarks_formatJson": {
+    "description": "File format option in the bookmark import and export menus. Technical name; do not translate."
+  },
+  "bookmarks_formatHtml": "HTML",
+  "@bookmarks_formatHtml": {
+    "description": "File format option in the bookmark import and export menus (the standard format browsers use for bookmark files). Technical name; do not translate."
+  },
+  "bookmarks_actionOpenInNewTab": "Open in New Tab",
+  "@bookmarks_actionOpenInNewTab": {
+    "description": "Menu item of a bookmark: open it in a new tab and switch to it."
+  },
+  "bookmarks_actionOpenInBackground": "Open in Background",
+  "@bookmarks_actionOpenInBackground": {
+    "description": "Menu item of a bookmark: open it in a new tab without switching to it."
+  },
+  "bookmarks_actionShare": "Share",
+  "@bookmarks_actionShare": {
+    "description": "Menu item of a bookmark: share its address."
+  },
+  "bookmarks_actionMove": "Move",
+  "@bookmarks_actionMove": {
+    "description": "Menu item of a bookmark or folder: move it to another folder."
+  },
+  "bookmarks_actionFlatten": "Flatten",
+  "@bookmarks_actionFlatten": {
+    "description": "Menu item of a bookmark folder: remove the folder but keep its contents by moving them up one level."
+  },
+  "bookmarks_actionAddSubfolder": "Add Subfolder",
+  "@bookmarks_actionAddSubfolder": {
+    "description": "Menu item of a bookmark folder: create a new folder inside it."
+  },
+  "bookmarks_actionAddBookmark": "Add Bookmark",
+  "@bookmarks_actionAddBookmark": {
+    "description": "Menu item of a bookmark folder: create a new bookmark inside it."
+  },
+  "bookmarks_actionMerge": "Merge",
+  "@bookmarks_actionMerge": {
+    "description": "Button in the import dialog: keep existing bookmarks and add the imported ones."
+  },
+  "bookmarks_actionReplace": "Replace",
+  "@bookmarks_actionReplace": {
+    "description": "Button in the import dialog: delete existing bookmarks, then import."
+  },
+  "bookmarks_noEntriesSelected": "No bookmark entries selected",
+  "@bookmarks_noEntriesSelected": {
+    "description": "Message when \"open in background\" is used but the selection contains only folders and no bookmarks."
+  },
+  "bookmarks_openedTabsInBackground": "{count, plural, =1{Opened 1 tab in background} other{Opened {count} tabs in background}}",
+  "@bookmarks_openedTabsInBackground": {
+    "description": "Confirmation after opening selected bookmarks in background tabs. count is the number of tabs opened.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_movedItemsCount": "{count, plural, =1{Moved 1 item} other{Moved {count} items}}",
+  "@bookmarks_movedItemsCount": {
+    "description": "Confirmation after moving selected bookmarks and folders. count is the number of items moved.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_deletedItemsCount": "{count, plural, =1{Deleted 1 item} other{Deleted {count} items}}",
+  "@bookmarks_deletedItemsCount": {
+    "description": "Confirmation after deleting selected bookmarks and folders. count is the number of items deleted.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_importFailedToReadFile": "Failed to read file",
+  "@bookmarks_importFailedToReadFile": {
+    "description": "Error message when the file chosen for bookmark import could not be opened."
+  },
+  "bookmarks_importSuccessCount": "{count, plural, =1{Imported 1 bookmark successfully} other{Imported {count} bookmarks successfully}}",
+  "@bookmarks_importSuccessCount": {
+    "description": "Confirmation after a bookmark import. count is the number of bookmarks imported.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_importFailedWithError": "Import failed: {error}",
+  "@bookmarks_importFailedWithError": {
+    "description": "Error message when a bookmark import failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bookmarks_exportDialogTitle": "Export Bookmarks",
+  "@bookmarks_exportDialogTitle": {
+    "description": "Title of the system file dialog for choosing where to save exported bookmarks."
+  },
+  "bookmarks_exportSuccess": "Bookmarks exported successfully",
+  "@bookmarks_exportSuccess": {
+    "description": "Confirmation after bookmarks were saved to a file."
+  },
+  "bookmarks_exportFailedWithError": "Export failed: {error}",
+  "@bookmarks_exportFailedWithError": {
+    "description": "Error message when saving bookmarks to a file failed. error is technical error text, usually English.",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "bookmarks_sortDefault": "Default",
+  "@bookmarks_sortDefault": {
+    "description": "Sort order option for bookmarks: the order they were arranged in (manual order)."
+  },
+  "bookmarks_sortTitleAsc": "Title A-Z",
+  "@bookmarks_sortTitleAsc": {
+    "description": "Sort order option for bookmarks: by name, alphabetically A to Z."
+  },
+  "bookmarks_sortTitleDesc": "Title Z-A",
+  "@bookmarks_sortTitleDesc": {
+    "description": "Sort order option for bookmarks: by name, alphabetically Z to A."
+  },
+  "bookmarks_sortUrlAsc": "URL A-Z",
+  "@bookmarks_sortUrlAsc": {
+    "description": "Sort order option for bookmarks: by web address, alphabetically A to Z."
+  },
+  "bookmarks_sortUrlDesc": "URL Z-A",
+  "@bookmarks_sortUrlDesc": {
+    "description": "Sort order option for bookmarks: by web address, alphabetically Z to A."
+  },
+  "bookmarks_sortDateAddedDesc": "Newest First",
+  "@bookmarks_sortDateAddedDesc": {
+    "description": "Sort order option for bookmarks: most recently added first."
+  },
+  "bookmarks_sortDateAddedAsc": "Oldest First",
+  "@bookmarks_sortDateAddedAsc": {
+    "description": "Sort order option for bookmarks: earliest added first."
+  },
+  "bookmarks_deleteBookmarkTitle": "Delete Bookmark",
+  "@bookmarks_deleteBookmarkTitle": {
+    "description": "Title of the confirmation dialog before deleting a bookmark."
+  },
+  "bookmarks_deleteBookmarkContent": "Are you sure you want to delete this bookmark?",
+  "@bookmarks_deleteBookmarkContent": {
+    "description": "Body of the confirmation dialog before deleting a bookmark."
+  },
+  "bookmarks_deleteFolderTitle": "Delete Folder",
+  "@bookmarks_deleteFolderTitle": {
+    "description": "Title of the confirmation dialog before deleting a bookmark folder."
+  },
+  "bookmarks_deleteFolderConfirmUnknown": "Are you sure you want to delete this folder, including all its bookmarks?",
+  "@bookmarks_deleteFolderConfirmUnknown": {
+    "description": "Body of the confirmation dialog before deleting a bookmark folder, used when the number of bookmarks inside is not known."
+  },
+  "bookmarks_deleteFolderConfirmCount": "{count, plural, =0{Are you sure you want to delete this folder?} =1{Are you sure you want to delete this folder and its one bookmark?} other{Are you sure you want to delete this folder and its {count} bookmarks?}}",
+  "@bookmarks_deleteFolderConfirmCount": {
+    "description": "Body of the confirmation dialog before deleting a bookmark folder. count is the number of bookmarks inside it, which are deleted too.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_importDialogTitle": "Import Bookmarks",
+  "@bookmarks_importDialogTitle": {
+    "description": "Title of the dialog asking whether imported bookmarks replace or add to the existing ones."
+  },
+  "bookmarks_importDialogContent": "Do you want to erase all existing bookmarks before importing?\n\nChoose \"Replace\" to delete existing bookmarks, or \"Merge\" to keep them.",
+  "@bookmarks_importDialogContent": {
+    "description": "Body of the import dialog. \"Replace\" and \"Merge\" are the dialog's button labels and must match their translations. Keep the blank line (\\n\\n)."
+  },
+  "bookmarks_importProgressTitle": "Importing bookmarks",
+  "@bookmarks_importProgressTitle": {
+    "description": "Title of the progress dialog while bookmarks are imported."
+  },
+  "bookmarks_importPhaseParsing": "Reading the file…",
+  "@bookmarks_importPhaseParsing": {
+    "description": "Progress step while the import file is read."
+  },
+  "bookmarks_importPhaseErasing": "Removing existing bookmarks…",
+  "@bookmarks_importPhaseErasing": {
+    "description": "Progress step while existing bookmarks are deleted before a \"Replace\" import."
+  },
+  "bookmarks_importPhaseInsertingProgress": "{total, plural, =1{{inserted} of 1 bookmark} other{{inserted} of {total} bookmarks}}",
+  "@bookmarks_importPhaseInsertingProgress": {
+    "description": "Progress step while imported bookmarks are saved. inserted is how many are done; total is how many there are.",
+    "placeholders": {
+      "inserted": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "bookmarks_importPhaseInsertingIndeterminate": "Saving bookmarks…",
+  "@bookmarks_importPhaseInsertingIndeterminate": {
+    "description": "Progress step while imported bookmarks are saved, when the total is not known."
+  },
+  "bookmarks_moveToFolderTitle": "Move to Folder",
+  "@bookmarks_moveToFolderTitle": {
+    "description": "Title of the dialog for choosing the folder to move bookmarks to."
+  },
+  "bookmarks_editBookmarkTitle": "Edit Bookmark",
+  "@bookmarks_editBookmarkTitle": {
+    "description": "Title of the screen for editing an existing bookmark."
+  },
+  "bookmarks_createBookmarkTitle": "Create Bookmark",
+  "@bookmarks_createBookmarkTitle": {
+    "description": "Title of the screen for creating a new bookmark."
+  },
+  "bookmarks_editFolderTitle": "Edit Folder",
+  "@bookmarks_editFolderTitle": {
+    "description": "Title of the screen for editing an existing bookmark folder."
+  },
+  "bookmarks_createFolderTitle": "Create Folder",
+  "@bookmarks_createFolderTitle": {
+    "description": "Title of the screen for creating a new bookmark folder."
+  },
+  "bookmarks_fieldNameLabel": "Name",
+  "@bookmarks_fieldNameLabel": {
+    "description": "Label of the name field in the bookmark and folder editors."
+  },
+  "bookmarks_fieldUrlLabel": "URL",
+  "@bookmarks_fieldUrlLabel": {
+    "description": "Label of the web address field in the bookmark editor."
+  },
+  "bookmarks_addToTop": "Add to top",
+  "@bookmarks_addToTop": {
+    "description": "Switch in the bookmark and folder editors: place the new item first in its folder instead of last."
+  }
+}

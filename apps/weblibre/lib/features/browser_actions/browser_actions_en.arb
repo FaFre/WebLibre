@@ -1,0 +1,498 @@
+{
+  "@@locale": "en",
+
+  "browserActions_categoryNavigation": "Navigation",
+  "@browserActions_categoryNavigation": {
+    "description": "Heading of a group of browser actions (moving between pages) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+  "browserActions_categoryScrolling": "Scrolling",
+  "@browserActions_categoryScrolling": {
+    "description": "Heading of a group of browser actions (scrolling the page) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+  "browserActions_categoryTabs": "Tabs",
+  "@browserActions_categoryTabs": {
+    "description": "Heading of a group of browser actions (opening, closing and switching tabs) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+  "browserActions_categoryPage": "Page",
+  "@browserActions_categoryPage": {
+    "description": "Heading of a group of browser actions (actions on the current page) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+  "browserActions_categoryOpen": "Open",
+  "@browserActions_categoryOpen": {
+    "description": "Heading of a group of browser actions (opening screens such as history or settings) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+  "browserActions_categoryApp": "App",
+  "@browserActions_categoryApp": {
+    "description": "Heading of a group of browser actions (app-level actions such as quitting) in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions."
+  },
+
+  "browserActions_focusAddressBarTitle": "Address Bar",
+  "@browserActions_focusAddressBarTitle": {
+    "description": "Name of the browser action that puts the cursor in the address field to type a web address or search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_focusAddressBarDescription": "Edit the address or start a search",
+  "@browserActions_focusAddressBarDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it puts the cursor in the address field to type a web address or search."
+  },
+  "browserActions_backTitle": "Back",
+  "@browserActions_backTitle": {
+    "description": "Name of the browser action that goes to the previous page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_backDescription": "Go back in history",
+  "@browserActions_backDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it goes to the previous page in the tab."
+  },
+  "browserActions_forwardTitle": "Forward",
+  "@browserActions_forwardTitle": {
+    "description": "Name of the browser action that goes to the next page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_forwardDescription": "Go forward in history",
+  "@browserActions_forwardDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it goes to the next page in the tab."
+  },
+  "browserActions_reloadTitle": "Reload",
+  "@browserActions_reloadTitle": {
+    "description": "Name of the browser action that reloads the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_reloadDescription": "Reload the current page",
+  "@browserActions_reloadDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it reloads the page."
+  },
+  "browserActions_hardReloadTitle": "Hard Reload",
+  "@browserActions_hardReloadTitle": {
+    "description": "Name of the browser action that reloads the page ignoring cached copies, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_hardReloadDescription": "Reload the current page, bypassing the cache",
+  "@browserActions_hardReloadDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it reloads the page ignoring cached copies."
+  },
+
+  "browserActions_scrollTopTitle": "Scroll to Top",
+  "@browserActions_scrollTopTitle": {
+    "description": "Name of the browser action that scrolls to the top of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_scrollTopDescription": "Jump to the top of the page",
+  "@browserActions_scrollTopDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it scrolls to the top of the page."
+  },
+  "browserActions_scrollBottomTitle": "Scroll to Bottom",
+  "@browserActions_scrollBottomTitle": {
+    "description": "Name of the browser action that scrolls to the bottom of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_scrollBottomDescription": "Jump to the bottom of the page",
+  "@browserActions_scrollBottomDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it scrolls to the bottom of the page."
+  },
+  "browserActions_pageUpTitle": "Page Up",
+  "@browserActions_pageUpTitle": {
+    "description": "Name of the browser action that scrolls up by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_pageUpDescription": "Scroll up by one screen",
+  "@browserActions_pageUpDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it scrolls up by one screen height."
+  },
+  "browserActions_pageDownTitle": "Page Down",
+  "@browserActions_pageDownTitle": {
+    "description": "Name of the browser action that scrolls down by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_pageDownDescription": "Scroll down by one screen",
+  "@browserActions_pageDownDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it scrolls down by one screen height."
+  },
+
+  "browserActions_newTabTitle": "New Tab",
+  "@browserActions_newTabTitle": {
+    "description": "Name of the browser action that opens a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_newTabDescription": "Open a new tab",
+  "@browserActions_newTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens a new tab."
+  },
+  "browserActions_newPrivateTabTitle": "New Private Tab",
+  "@browserActions_newPrivateTabTitle": {
+    "description": "Name of the browser action that opens a new private tab, which keeps no history, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_newPrivateTabDescription": "Open a new private tab",
+  "@browserActions_newPrivateTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens a new private tab, which keeps no history."
+  },
+  "browserActions_closeTabTitle": "Close Tab",
+  "@browserActions_closeTabTitle": {
+    "description": "Name of the browser action that closes the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_closeTabDescription": "Close the current tab",
+  "@browserActions_closeTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it closes the current tab."
+  },
+  "browserActions_reopenClosedTabTitle": "Reopen Closed Tab",
+  "@browserActions_reopenClosedTabTitle": {
+    "description": "Name of the browser action that reopens the most recently closed tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_reopenClosedTabDescription": "Bring back the most recently closed tab",
+  "@browserActions_reopenClosedTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it reopens the most recently closed tab."
+  },
+  "browserActions_duplicateTabTitle": "Duplicate Tab",
+  "@browserActions_duplicateTabTitle": {
+    "description": "Name of the browser action that copies the current tab into a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_duplicateTabDescription": "Open a copy of the current tab",
+  "@browserActions_duplicateTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it copies the current tab into a new tab."
+  },
+  "browserActions_nextTabTitle": "Next Tab",
+  "@browserActions_nextTabTitle": {
+    "description": "Name of the browser action that switches to the next tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_nextTabDescription": "Switch to the next tab",
+  "@browserActions_nextTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the next tab."
+  },
+  "browserActions_previousTabTitle": "Previous Tab",
+  "@browserActions_previousTabTitle": {
+    "description": "Name of the browser action that switches to the previous tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_previousTabDescription": "Switch to the previous tab",
+  "@browserActions_previousTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the previous tab."
+  },
+  "browserActions_lastUsedTabTitle": "Last Used Tab",
+  "@browserActions_lastUsedTabTitle": {
+    "description": "Name of the browser action that switches back to the tab used before the current one, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_lastUsedTabDescription": "Switch to the previously used tab",
+  "@browserActions_lastUsedTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches back to the tab used before the current one."
+  },
+  "browserActions_selectTab1Title": "Tab 1",
+  "@browserActions_selectTab1Title": {
+    "description": "Name of the browser action that switches to the first tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab1Description": "Switch to the first tab in the tab bar",
+  "@browserActions_selectTab1Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the first tab in the tab bar."
+  },
+  "browserActions_selectTab2Title": "Tab 2",
+  "@browserActions_selectTab2Title": {
+    "description": "Name of the browser action that switches to the second tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab2Description": "Switch to the second tab in the tab bar",
+  "@browserActions_selectTab2Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the second tab in the tab bar."
+  },
+  "browserActions_selectTab3Title": "Tab 3",
+  "@browserActions_selectTab3Title": {
+    "description": "Name of the browser action that switches to the third tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab3Description": "Switch to the third tab in the tab bar",
+  "@browserActions_selectTab3Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the third tab in the tab bar."
+  },
+  "browserActions_selectTab4Title": "Tab 4",
+  "@browserActions_selectTab4Title": {
+    "description": "Name of the browser action that switches to the fourth tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab4Description": "Switch to the fourth tab in the tab bar",
+  "@browserActions_selectTab4Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the fourth tab in the tab bar."
+  },
+  "browserActions_selectTab5Title": "Tab 5",
+  "@browserActions_selectTab5Title": {
+    "description": "Name of the browser action that switches to the fifth tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab5Description": "Switch to the fifth tab in the tab bar",
+  "@browserActions_selectTab5Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the fifth tab in the tab bar."
+  },
+  "browserActions_selectTab6Title": "Tab 6",
+  "@browserActions_selectTab6Title": {
+    "description": "Name of the browser action that switches to the sixth tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab6Description": "Switch to the sixth tab in the tab bar",
+  "@browserActions_selectTab6Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the sixth tab in the tab bar."
+  },
+  "browserActions_selectTab7Title": "Tab 7",
+  "@browserActions_selectTab7Title": {
+    "description": "Name of the browser action that switches to the seventh tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab7Description": "Switch to the seventh tab in the tab bar",
+  "@browserActions_selectTab7Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the seventh tab in the tab bar."
+  },
+  "browserActions_selectTab8Title": "Tab 8",
+  "@browserActions_selectTab8Title": {
+    "description": "Name of the browser action that switches to the eighth tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. \"Tab 1\" to \"Tab 8\" are numbered positions; keep the number. Keep it short."
+  },
+  "browserActions_selectTab8Description": "Switch to the eighth tab in the tab bar",
+  "@browserActions_selectTab8Description": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the eighth tab in the tab bar."
+  },
+  "browserActions_selectLastTabTitle": "Last Tab",
+  "@browserActions_selectLastTabTitle": {
+    "description": "Name of the browser action that switches to the last tab in the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_selectLastTabDescription": "Switch to the last tab in the tab bar",
+  "@browserActions_selectLastTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the last tab in the tab bar."
+  },
+  "browserActions_togglePinTabTitle": "Pin / Unpin Tab",
+  "@browserActions_togglePinTabTitle": {
+    "description": "Name of the browser action that pins or unpins the current tab (pinned tabs stay at the start of the tab bar), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_togglePinTabDescription": "Toggle the pinned state of the current tab",
+  "@browserActions_togglePinTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it pins or unpins the current tab (pinned tabs stay at the start of the tab bar)."
+  },
+  "browserActions_moveTabBackwardTitle": "Move Tab Back",
+  "@browserActions_moveTabBackwardTitle": {
+    "description": "Name of the browser action that moves the current tab one place toward the start of the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_moveTabBackwardDescription": "Move the current tab one place toward the start of the tab bar",
+  "@browserActions_moveTabBackwardDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it moves the current tab one place toward the start of the tab bar."
+  },
+  "browserActions_moveTabForwardTitle": "Move Tab Forward",
+  "@browserActions_moveTabForwardTitle": {
+    "description": "Name of the browser action that moves the current tab one place toward the end of the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_moveTabForwardDescription": "Move the current tab one place toward the end of the tab bar",
+  "@browserActions_moveTabForwardDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it moves the current tab one place toward the end of the tab bar."
+  },
+  "browserActions_moveTabToStartTitle": "Move Tab to Start",
+  "@browserActions_moveTabToStartTitle": {
+    "description": "Name of the browser action that moves the current tab to the start of its group, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_moveTabToStartDescription": "Move the current tab to the start of its group in the tab bar",
+  "@browserActions_moveTabToStartDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it moves the current tab to the start of its group."
+  },
+  "browserActions_moveTabToEndTitle": "Move Tab to End",
+  "@browserActions_moveTabToEndTitle": {
+    "description": "Name of the browser action that moves the current tab to the end of its group, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_moveTabToEndDescription": "Move the current tab to the end of its group in the tab bar",
+  "@browserActions_moveTabToEndDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it moves the current tab to the end of its group."
+  },
+  "browserActions_nextContainerTitle": "Next Container",
+  "@browserActions_nextContainerTitle": {
+    "description": "Name of the browser action that switches to the next container (a separate browsing identity with its own tabs), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_nextContainerDescription": "Switch to the next container and its last used tab",
+  "@browserActions_nextContainerDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the next container (a separate browsing identity with its own tabs)."
+  },
+  "browserActions_previousContainerTitle": "Previous Container",
+  "@browserActions_previousContainerTitle": {
+    "description": "Name of the browser action that switches to the previous container (a separate browsing identity with its own tabs), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_previousContainerDescription": "Switch to the previous container and its last used tab",
+  "@browserActions_previousContainerDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches to the previous container (a separate browsing identity with its own tabs)."
+  },
+
+  "browserActions_toggleReaderModeTitle": "Reader Mode",
+  "@browserActions_toggleReaderModeTitle": {
+    "description": "Name of the browser action that turns reader mode (simplified, easy-to-read text) on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_toggleReaderModeDescription": "Toggle reader mode for the current page",
+  "@browserActions_toggleReaderModeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it turns reader mode (simplified, easy-to-read text) on or off."
+  },
+  "browserActions_toggleDesktopModeTitle": "Desktop Site",
+  "@browserActions_toggleDesktopModeTitle": {
+    "description": "Name of the browser action that switches between the mobile and desktop version of the website, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_toggleDesktopModeDescription": "Toggle desktop site for the current page",
+  "@browserActions_toggleDesktopModeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it switches between the mobile and desktop version of the website."
+  },
+  "browserActions_findInPageTitle": "Find in Page",
+  "@browserActions_findInPageTitle": {
+    "description": "Name of the browser action that opens the bar for searching text on the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_findInPageDescription": "Open find in page",
+  "@browserActions_findInPageDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the bar for searching text on the page."
+  },
+  "browserActions_findNextTitle": "Find Next",
+  "@browserActions_findNextTitle": {
+    "description": "Name of the browser action that jumps to the next match of the last find-in-page search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_findNextDescription": "Jump to the next match of the last search",
+  "@browserActions_findNextDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it jumps to the next match of the last find-in-page search."
+  },
+  "browserActions_findPreviousTitle": "Find Previous",
+  "@browserActions_findPreviousTitle": {
+    "description": "Name of the browser action that jumps to the previous match of the last find-in-page search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_findPreviousDescription": "Jump to the previous match of the last search",
+  "@browserActions_findPreviousDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it jumps to the previous match of the last find-in-page search."
+  },
+  "browserActions_increaseFontSizeTitle": "Increase Font",
+  "@browserActions_increaseFontSizeTitle": {
+    "description": "Name of the browser action that makes page text larger, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_increaseFontSizeDescription": "Increase the page font size",
+  "@browserActions_increaseFontSizeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it makes page text larger."
+  },
+  "browserActions_decreaseFontSizeTitle": "Decrease Font",
+  "@browserActions_decreaseFontSizeTitle": {
+    "description": "Name of the browser action that makes page text smaller, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_decreaseFontSizeDescription": "Decrease the page font size",
+  "@browserActions_decreaseFontSizeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it makes page text smaller."
+  },
+  "browserActions_resetFontSizeTitle": "Reset Font",
+  "@browserActions_resetFontSizeTitle": {
+    "description": "Name of the browser action that restores the default page text size, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_resetFontSizeDescription": "Restore the default page font size",
+  "@browserActions_resetFontSizeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it restores the default page text size."
+  },
+  "browserActions_toggleBookmarkTitle": "Bookmark",
+  "@browserActions_toggleBookmarkTitle": {
+    "description": "Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_toggleBookmarkDescription": "Bookmark or unbookmark the current page",
+  "@browserActions_toggleBookmarkDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it bookmarks the current page, or removes its bookmark."
+  },
+  "browserActions_sharePageTitle": "Share",
+  "@browserActions_sharePageTitle": {
+    "description": "Name of the browser action that shares the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_sharePageDescription": "Share the current page",
+  "@browserActions_sharePageDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it shares the current page."
+  },
+  "browserActions_translatePageTitle": "Translate",
+  "@browserActions_translatePageTitle": {
+    "description": "Name of the browser action that opens the page translation options, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_translatePageDescription": "Open the page translation sheet",
+  "@browserActions_translatePageDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the page translation options."
+  },
+  "browserActions_printPageTitle": "Print",
+  "@browserActions_printPageTitle": {
+    "description": "Name of the browser action that prints the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_printPageDescription": "Print the current page",
+  "@browserActions_printPageDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it prints the current page."
+  },
+
+  "browserActions_showHomeTitle": "Home",
+  "@browserActions_showHomeTitle": {
+    "description": "Name of the browser action that opens the home screen, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showHomeDescription": "Open the home screen",
+  "@browserActions_showHomeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the home screen."
+  },
+  "browserActions_showHistoryTitle": "History",
+  "@browserActions_showHistoryTitle": {
+    "description": "Name of the browser action that opens browsing history, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showHistoryDescription": "Open browsing history",
+  "@browserActions_showHistoryDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens browsing history."
+  },
+  "browserActions_showBookmarksTitle": "Bookmarks",
+  "@browserActions_showBookmarksTitle": {
+    "description": "Name of the browser action that opens the bookmarks list, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showBookmarksDescription": "Open bookmarks",
+  "@browserActions_showBookmarksDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the bookmarks list."
+  },
+  "browserActions_showContainersTitle": "Containers",
+  "@browserActions_showContainersTitle": {
+    "description": "Name of the browser action that opens the list of containers, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showContainersDescription": "Open the container list",
+  "@browserActions_showContainersDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the list of containers."
+  },
+  "browserActions_showTabViewTitle": "Tab View",
+  "@browserActions_showTabViewTitle": {
+    "description": "Name of the browser action that opens the overview of all open tabs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showTabViewDescription": "Open the tab overview",
+  "@browserActions_showTabViewDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the overview of all open tabs."
+  },
+  "browserActions_showDownloadsTitle": "Downloads",
+  "@browserActions_showDownloadsTitle": {
+    "description": "Name of the browser action that opens the list of downloads, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showDownloadsDescription": "Open downloads",
+  "@browserActions_showDownloadsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the list of downloads."
+  },
+  "browserActions_showAddonsTitle": "Add-ons",
+  "@browserActions_showAddonsTitle": {
+    "description": "Name of the browser action that opens the browser extensions (add-ons) screen, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showAddonsDescription": "Manage extensions",
+  "@browserActions_showAddonsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the browser extensions (add-ons) screen."
+  },
+  "browserActions_openSettingsTitle": "Settings",
+  "@browserActions_openSettingsTitle": {
+    "description": "Name of the browser action that opens settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_openSettingsDescription": "Open settings",
+  "@browserActions_openSettingsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens settings."
+  },
+  "browserActions_showKeyboardShortcutsTitle": "Keyboard Shortcuts",
+  "@browserActions_showKeyboardShortcutsTitle": {
+    "description": "Name of the browser action that shows the list of keyboard shortcuts, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_showKeyboardShortcutsDescription": "List the keys that run browser actions",
+  "@browserActions_showKeyboardShortcutsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it shows the list of keyboard shortcuts."
+  },
+
+  "browserActions_toggleTabBarTitle": "Hide / Show Tab Bar",
+  "@browserActions_toggleTabBarTitle": {
+    "description": "Name of the browser action that hides the tab bar, or shows it again, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_toggleTabBarDescription": "Hide the tab bar, or bring it back",
+  "@browserActions_toggleTabBarDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it hides the tab bar, or shows it again."
+  },
+  "browserActions_clearBrowsingDataTitle": "Clear Browsing Data",
+  "@browserActions_clearBrowsingDataTitle": {
+    "description": "Name of the browser action that opens the dialog for deleting browsing data, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_clearBrowsingDataDescription": "Choose browsing data to delete",
+  "@browserActions_clearBrowsingDataDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the dialog for deleting browsing data."
+  },
+  "browserActions_moveToBackgroundTitle": "Minimize",
+  "@browserActions_moveToBackgroundTitle": {
+    "description": "Name of the browser action that sends the app to the background, like pressing the Home button, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_moveToBackgroundDescription": "Send WebLibre to the background",
+  "@browserActions_moveToBackgroundDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it sends the app to the background, like pressing the Home button. WebLibre is the app name."
+  },
+  "browserActions_quitBrowserTitle": "Quit",
+  "@browserActions_quitBrowserTitle": {
+    "description": "Name of the browser action that closes all tabs and exits the app, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+  },
+  "browserActions_quitBrowserDescription": "Close all tabs and quit WebLibre",
+  "@browserActions_quitBrowserDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it closes all tabs and exits the app. WebLibre is the app name."
+  }
+}

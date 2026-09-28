@@ -25,12 +25,14 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class CertificateTile extends HookConsumerWidget {
   const CertificateTile({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final tabState = ref.watch(selectedTabStateProvider);
 
     if (tabState == null) {
@@ -48,10 +50,8 @@ class CertificateTile extends HookConsumerWidget {
           MdiIcons.archiveLockOutline,
           color: Theme.of(context).colorScheme.tertiary,
         ),
-        title: const Text('Sandboxed capture'),
-        subtitle: const Text(
-          'Page is served from an offline archive — no live connection.',
-        ),
+        title: Text(l10n.browser_certSandboxedCaptureTitle),
+        subtitle: Text(l10n.browser_certSandboxedCaptureSubtitle),
       );
     }
 
@@ -63,7 +63,7 @@ class CertificateTile extends HookConsumerWidget {
             color: Theme.of(context).colorScheme.error,
           ),
           title: Text(
-            'Connection is not secure',
+            l10n.browser_certConnectionNotSecure,
             style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         );
@@ -76,7 +76,7 @@ class CertificateTile extends HookConsumerWidget {
             color: Theme.of(context).colorScheme.errorContainer,
           ),
           title: Text(
-            'Connection is not secure',
+            l10n.browser_certConnectionNotSecure,
             style: TextStyle(
               color: Theme.of(context).colorScheme.errorContainer,
             ),
@@ -85,8 +85,10 @@ class CertificateTile extends HookConsumerWidget {
       } else if (!tabState.isLoading) {
         return ListTile(
           leading: const Icon(MdiIcons.lock),
-          title: const Text('Connection is secure'),
-          subtitle: Text('Verified By: ${tabState.securityInfoState.issuer}'),
+          title: Text(l10n.browser_certConnectionSecure),
+          subtitle: Text(
+            l10n.browser_certVerifiedBy(tabState.securityInfoState.issuer),
+          ),
         );
       } else {
         return Skeletonizer(

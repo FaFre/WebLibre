@@ -24,6 +24,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/domain/repositories/sync.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sync_details_table.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class BangGroupListTile extends HookConsumerWidget {
   final BangGroup group;
@@ -40,6 +41,8 @@ class BangGroupListTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     final lastSync = ref.watch(
       lastSyncOfGroupProvider(group).select((value) => value.value),
     );
@@ -62,7 +65,7 @@ class BangGroupListTile extends HookConsumerWidget {
               .syncRemoteBangGroup(group, null);
         },
         icon: const Icon(Icons.sync),
-        label: const Text('Sync'),
+        label: Text(l10n.settings_sync),
       ),
     );
   }

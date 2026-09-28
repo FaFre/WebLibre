@@ -26,9 +26,12 @@ import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_log_message.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_log_level_l10n.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_log_severity_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/proxy_log_level_sheet.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Built once. Constructing a [DateFormat] parses its pattern, and doing that
@@ -50,6 +53,7 @@ class SingboxProxyLogsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final minimumSeverity = useState<ProxyLogSeverity?>(null);
 
     // Only whether there is *anything* to act on, so a chatty proxy publishing
@@ -65,44 +69,47 @@ class SingboxProxyLogsScreen extends HookConsumerWidget {
     Future<void> copyAll() async {
       final lines = currentLines();
       if (lines.isEmpty) {
-        showInfoMessage(context, 'No log lines match the current filter');
+        showInfoMessage(context, l10n.proxy_logsNoLinesMatchFilter);
         return;
       }
 
       await Clipboard.setData(ClipboardData(text: _formatLogs(lines)));
       if (context.mounted) {
-        showInfoMessage(context, 'Copied ${lines.length} lines to clipboard');
+        showInfoMessage(context, l10n.proxy_logsCopiedCount(lines.length));
       }
     }
 
     Future<void> share() async {
       final lines = currentLines();
       if (lines.isEmpty) {
-        showInfoMessage(context, 'No log lines match the current filter');
+        showInfoMessage(context, l10n.proxy_logsNoLinesMatchFilter);
         return;
       }
 
       await SharePlus.instance.share(
-        ShareParams(text: _formatLogs(lines), subject: 'proxy logs'),
+        ShareParams(
+          text: _formatLogs(lines),
+          subject: l10n.proxy_logsShareSubject,
+        ),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Proxy Logs'),
+        title: Text(l10n.proxy_logsTitle),
         actions: [
           IconButton(
-            tooltip: 'Copy all',
+            tooltip: l10n.proxy_logsCopyAllTooltip,
             icon: const Icon(Icons.copy_all),
             onPressed: hasLogs ? copyAll : null,
           ),
           IconButton(
-            tooltip: 'Share',
+            tooltip: l10n.proxy_actionShare,
             icon: const Icon(Icons.share),
             onPressed: hasLogs ? share : null,
           ),
           IconButton(
-            tooltip: 'Clear log',
+            tooltip: l10n.proxy_logsClearTooltip,
             icon: const Icon(Icons.delete_outline),
             onPressed: hasLogs
                 ? () => ref.read(singboxProxyLogsProvider.notifier).clear()
@@ -141,6 +148,7 @@ class _RecordingLevelBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final logLevel = ref
         .watch(proxyDiagnosticsSettingsWithDefaultsProvider)
@@ -162,9 +170,7 @@ class _RecordingLevelBanner extends ConsumerWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              logLevel.isVerbose
-                  ? 'Recording ${logLevel.label.toLowerCase()} — this slows browsing'
-                  : 'Recording ${logLevel.label.toLowerCase()}',
+              logLevel.recordingSummary(context),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: logLevel.isVerbose
                     ? theme.colorScheme.error
@@ -174,7 +180,7 @@ class _RecordingLevelBanner extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => showProxyLogLevelSheet(context),
-            child: const Text('Change'),
+            child: Text(l10n.proxy_actionChange),
           ),
         ],
       ),
@@ -199,6 +205,8 @@ class _SeverityFilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -206,17 +214,15 @@ class _SeverityFilterBar extends StatelessWidget {
         spacing: 8,
         children: [
           _SeverityChip(
-            label: 'All',
-            semanticsLabel: 'Show all levels',
+            label: l10n.proxy_logLevelAll,
+            semanticsLabel: l10n.proxy_logsShowAllLevels,
             selected: minimumSeverity == null,
             onSelected: () => onChanged(null),
           ),
           for (final severity in ProxyLogSeverity.values.reversed)
             _SeverityChip(
-              label: severity.filterLabel,
-              semanticsLabel: severity == ProxyLogSeverity.error
-                  ? 'Show errors only'
-                  : 'Show ${severity.filterLabel.toLowerCase()} and above',
+              label: severity.filterLabel(context),
+              semanticsLabel: severity.filterSemanticsLabel(context),
               selected: minimumSeverity == severity,
               onSelected: () => onChanged(severity),
             ),
@@ -329,7 +335,7 @@ class _ProxyLogList extends HookConsumerWidget {
                     curve: Curves.easeOutCubic,
                   ),
                   icon: const Icon(Icons.arrow_downward),
-                  label: const Text('Latest'),
+                  label: Text(AppLocalizations.of(context).proxy_logsLatest),
                 ),
               ),
             ),
@@ -405,14 +411,15 @@ class _EmptyLogs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
           hasFilter
-              ? 'No log lines at this level. Lower the filter, or raise what '
-                    'the proxy records.'
-              : 'No log lines yet. Start a proxy or $torBrand to see output here.',
+              ? l10n.proxy_logsEmptyFiltered
+              : l10n.proxy_logsEmpty(torBrand),
           textAlign: TextAlign.center,
         ),
       ),

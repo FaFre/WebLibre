@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/account/data/models/subscription_status.dart';
 import 'package:weblibre/features/account/domain/repositories/subscription_repository.dart';
 import 'package:weblibre/features/account/presentation/widgets/subscription_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('refreshes subscription status when the app resumes', (
@@ -36,6 +37,8 @@ void main() {
           subscriptionRepositoryProvider.overrideWith(() => repository),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: SubscriptionCard(
               subscriptionAsync: AsyncData(SubscriptionStatus.inactive),
@@ -66,6 +69,8 @@ void main() {
             subscriptionRepositoryProvider.overrideWith(() => repository),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: Scaffold(
               body: SubscriptionCard(
                 subscriptionAsync: AsyncError(

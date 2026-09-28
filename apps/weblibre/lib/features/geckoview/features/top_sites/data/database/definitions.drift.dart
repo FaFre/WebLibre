@@ -210,7 +210,16 @@ class $TopSiteTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.TopSite, i1.TopSiteData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.TopSite,
+                    i1.TopSiteData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -330,7 +339,16 @@ class $HiddenTopSiteTableManager
                 i0.Value<int> rowid = const i0.Value.absent(),
               }) => i1.HiddenTopSiteCompanion.insert(url: url, rowid: rowid),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.HiddenTopSite, i1.HiddenTopSiteData>(table),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.HiddenTopSite,
+                    i1.HiddenTopSiteData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -461,7 +479,18 @@ class $HiddenTopSiteHostTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), i0.BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<i1.HiddenTopSiteHost, i1.HiddenTopSiteHostData>(
+                    table,
+                  ),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i1.HiddenTopSiteHost,
+                    i1.HiddenTopSiteHostData
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1165,7 +1194,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_previous(?1, (SELECT order_key FROM top_site ORDER BY order_key LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket)],
-      readsFrom: {topSite},
+      readsFrom: {this.topSite},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -1173,7 +1202,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'SELECT lexo_rank_next(?1, (SELECT order_key FROM top_site ORDER BY order_key DESC LIMIT 1)) AS _c0',
       variables: [i0.Variable<int>(bucket)],
-      readsFrom: {topSite},
+      readsFrom: {this.topSite},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -1181,7 +1210,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT id, order_key, LEAD(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS next_order_key FROM top_site) SELECT lexo_rank_reorder_after(order_key, next_order_key) AS _c0 FROM ordered_table WHERE id = ?1',
       variables: [i0.Variable<String>(siteId)],
-      readsFrom: {topSite},
+      readsFrom: {this.topSite},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 
@@ -1189,7 +1218,7 @@ class DefinitionsDrift extends i4.ModularAccessor {
     return customSelect(
       'WITH ordered_table AS (SELECT id, order_key, LAG(order_key)OVER (ORDER BY order_key RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE NO OTHERS) AS prev_order_key FROM top_site) SELECT lexo_rank_reorder_before(order_key, prev_order_key) AS _c0 FROM ordered_table WHERE id = ?1',
       variables: [i0.Variable<String>(siteId)],
-      readsFrom: {topSite},
+      readsFrom: {this.topSite},
     ).map((i0.QueryRow row) => row.read<String>('_c0'));
   }
 

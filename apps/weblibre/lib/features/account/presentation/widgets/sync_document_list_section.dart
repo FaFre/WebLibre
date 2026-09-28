@@ -28,6 +28,7 @@ import 'package:weblibre/features/account/data/repositories/account_sync_reposit
 import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/account/presentation/widgets/sync_document_dialogs.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_content_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class SyncDocumentListSection extends HookWidget {
@@ -50,6 +51,7 @@ class SyncDocumentListSection extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final documents = useState<List<SyncDocumentMetadata>?>(null);
     final loading = useState(true);
     final busy = useState(false);
@@ -72,7 +74,10 @@ class SyncDocumentListSection extends HookWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to load snapshots: $error');
+          showErrorMessage(
+            context,
+            l10n.account_failedLoadSnapshots(error.toString()),
+          );
         }
       } finally {
         if (context.mounted) {
@@ -111,7 +116,10 @@ class SyncDocumentListSection extends HookWidget {
         );
 
         if (context.mounted) {
-          showInfoMessage(context, '${service.kind.displayName} stored');
+          showInfoMessage(
+            context,
+            l10n.account_syncKindStored(service.kind.name),
+          );
         }
         await refresh();
       } catch (error, stackTrace) {
@@ -121,7 +129,10 @@ class SyncDocumentListSection extends HookWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to store: $error');
+          showErrorMessage(
+            context,
+            l10n.account_failedToStore(error.toString()),
+          );
         }
       } finally {
         if (context.mounted) {
@@ -142,7 +153,7 @@ class SyncDocumentListSection extends HookWidget {
         final result = await syncRepo.fetchDocument(id: metadata.id);
         if (result == null) {
           if (context.mounted) {
-            showErrorMessage(context, 'Snapshot not found');
+            showErrorMessage(context, l10n.account_snapshotNotFound);
           }
           return;
         }
@@ -152,7 +163,10 @@ class SyncDocumentListSection extends HookWidget {
         await service.applyRestored(plaintext);
 
         if (context.mounted) {
-          showInfoMessage(context, '${service.kind.displayName} restored');
+          showInfoMessage(
+            context,
+            l10n.account_syncKindRestored(service.kind.name),
+          );
         }
       } catch (error, stackTrace) {
         logger.e(
@@ -162,13 +176,12 @@ class SyncDocumentListSection extends HookWidget {
         );
         if (context.mounted) {
           if (_isDecryptionFailure(error)) {
+            showErrorMessage(context, l10n.account_decryptionFailed);
+          } else {
             showErrorMessage(
               context,
-              'Decryption failed — wrong password or data corrupted. '
-              'Try resetting your sync key.',
+              l10n.account_failedToRestore(error.toString()),
             );
-          } else {
-            showErrorMessage(context, 'Failed to restore: $error');
           }
         }
       } finally {
@@ -198,7 +211,10 @@ class SyncDocumentListSection extends HookWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to update label: $error');
+          showErrorMessage(
+            context,
+            l10n.account_failedUpdateLabel(error.toString()),
+          );
         }
       }
     }
@@ -213,7 +229,7 @@ class SyncDocumentListSection extends HookWidget {
       try {
         await syncRepo.deleteDocument(id: metadata.id);
         if (context.mounted) {
-          showInfoMessage(context, 'Snapshot deleted');
+          showInfoMessage(context, l10n.account_snapshotDeleted);
         }
         await refresh();
       } catch (error, stackTrace) {
@@ -223,7 +239,10 @@ class SyncDocumentListSection extends HookWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to delete: $error');
+          showErrorMessage(
+            context,
+            l10n.account_failedToDelete(error.toString()),
+          );
         }
       }
     }
@@ -234,7 +253,7 @@ class SyncDocumentListSection extends HookWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
           child: Text(
-            '${service.kind.displayName} Snapshots',
+            l10n.account_syncKindSnapshotsTitle(service.kind.name),
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
@@ -246,10 +265,8 @@ class SyncDocumentListSection extends HookWidget {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.cloud_upload_outlined),
-          title: const Text('Store Current'),
-          subtitle: Text(
-            'Encrypt and upload current ${service.kind.displayName.toLowerCase()}',
-          ),
+          title: Text(l10n.account_storeCurrentTitle),
+          subtitle: Text(l10n.account_storeCurrentSubtitle(service.kind.name)),
           enabled: !busy.value,
           onTap: storeCurrent,
         ),
@@ -262,7 +279,7 @@ class SyncDocumentListSection extends HookWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
             child: Text(
-              'No snapshots stored yet',
+              l10n.account_noSnapshotsYet,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -303,9 +320,10 @@ class _DocumentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final title = metadata.label?.isNotEmpty == true
         ? metadata.label!
-        : 'Untitled';
+        : l10n.account_untitledSnapshot;
     final subtitle = StringBuffer(formatDateTime(metadata.updatedAt));
     if (metadata.sourceDeviceId != null) {
       subtitle.write(' · ${metadata.sourceDeviceId}');
@@ -331,12 +349,12 @@ class _DocumentTile extends StatelessWidget {
           MenuItemButton(
             leadingIcon: const Icon(Icons.cloud_download_outlined),
             onPressed: onRestore,
-            child: const Text('Restore'),
+            child: Text(l10n.account_actionRestore),
           ),
           MenuItemButton(
             leadingIcon: const Icon(Icons.edit_outlined),
             onPressed: onEditLabel,
-            child: const Text('Edit Label'),
+            child: Text(l10n.account_actionEditLabel),
           ),
           MenuItemButton(
             leadingIcon: Icon(
@@ -345,7 +363,7 @@ class _DocumentTile extends StatelessWidget {
             ),
             onPressed: onDelete,
             child: Text(
-              'Delete',
+              l10n.common_delete,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),

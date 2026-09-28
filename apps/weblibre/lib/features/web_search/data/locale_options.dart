@@ -21,21 +21,23 @@
 // Curated picker options for the web-search language and country selectors.
 //
 // Codes intersect what Brave (`search_lang`/`country`) and Mojeek
-// (`lb`/`rb`) accept; English display names so the menu doesn't need a
-// per-locale translation pass. The protocol carries just the primary
+// (`lb`/`rb`) accept. The names here are English fallbacks: the pickers show
+// the platform's CLDR names in the UI language instead
+// (`localizedLanguageOptionsProvider`), which needs no translation pass and
+// falls back to these when a name cannot be resolved. The protocol carries just the primary
 // ISO 639-1 / ISO 3166-1 alpha-2 codes — region qualifiers (`en-gb`,
 // `pt-br`, etc.) are reconstructed server-side from the language+country
 // pair.
 
 class LanguageOption {
   final String code; // ISO 639-1
-  final String name; // English display name
+  final String name; // Display name (English in the constant lists)
   const LanguageOption(this.code, this.name);
 }
 
 class CountryOption {
   final String code; // ISO 3166-1 alpha-2 (uppercase)
-  final String name; // English display name
+  final String name; // Display name (English in the constant lists)
   const CountryOption(this.code, this.name);
 }
 
@@ -130,21 +132,3 @@ const supportedCountries = <CountryOption>[
   CountryOption('US', 'United States'),
   CountryOption('ZA', 'South Africa'),
 ];
-
-LanguageOption? findLanguage(String? code) {
-  if (code == null) return null;
-  final lower = code.toLowerCase();
-  for (final l in supportedLanguages) {
-    if (l.code == lower) return l;
-  }
-  return null;
-}
-
-CountryOption? findCountry(String? code) {
-  if (code == null) return null;
-  final upper = code.toUpperCase();
-  for (final c in supportedCountries) {
-    if (c.code == upper) return c;
-  }
-  return null;
-}

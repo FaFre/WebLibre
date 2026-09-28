@@ -30,6 +30,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class BangDetails extends HookConsumerWidget {
@@ -50,6 +51,7 @@ class BangDetails extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
     final isPinned = ref.watch(
@@ -89,9 +91,9 @@ class BangDetails extends HookConsumerWidget {
                     ),
                   ),
                   if (bangData.group == BangGroup.weblibre)
-                    const Tooltip(
-                      message: 'Official WebLibre search',
-                      child: Icon(
+                    Tooltip(
+                      message: l10n.bangs_tooltipOfficialSearch,
+                      child: const Icon(
                         MdiIcons.crown,
                         color: Colors.amber,
                         size: 20.0,
@@ -99,7 +101,7 @@ class BangDetails extends HookConsumerWidget {
                     ),
                   if (bangData.group != BangGroup.user)
                     IconButton(
-                      tooltip: 'Customize as your own bang',
+                      tooltip: l10n.bangs_tooltipCustomizeAsOwn,
                       icon: const Icon(MdiIcons.pencilBoxOutline),
                       onPressed: () async {
                         // Seeds a user bang from this one. With user bangs
@@ -113,8 +115,8 @@ class BangDetails extends HookConsumerWidget {
                     ),
                   IconButton(
                     tooltip: isPinned
-                        ? 'Unpin from search providers'
-                        : 'Pin to search providers',
+                        ? l10n.bangs_tooltipUnpin
+                        : l10n.bangs_tooltipPin,
                     icon: Icon(
                       isPinned ? MdiIcons.pin : MdiIcons.pinOutline,
                       color: isPinned ? theme.colorScheme.primary : null,
@@ -157,8 +159,9 @@ class BangDetails extends HookConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Tooltip(
-                      message:
-                          'Triggers: ${bangData.trigger}${bangData.additionalTriggers.mapNotNull((triggers) => ', ${triggers.map((trigger) => '!$trigger').join(', ')}') ?? ''}',
+                      message: l10n.bangs_tooltipTriggers(
+                        '${bangData.trigger}${bangData.additionalTriggers.mapNotNull((triggers) => ', ${triggers.map((trigger) => '!$trigger').join(', ')}') ?? ''}',
+                      ),
                       child: Text(
                         '!${bangData.trigger}',
                         style: theme.textTheme.titleSmall,

@@ -26,6 +26,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Outcome of the add-proxy bottom sheet. The sheet itself does not navigate
@@ -61,6 +62,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
 
     void popWith(AddProxyAction action) {
@@ -83,7 +85,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
       final text = data?.text?.trim();
       if (text == null || text.isEmpty) {
         if (context.mounted) {
-          showInfoMessage(context, 'Clipboard is empty.');
+          showInfoMessage(context, l10n.proxy_clipboardEmpty);
         }
         return;
       }
@@ -117,7 +119,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Add Connection',
+                l10n.proxy_addConnectionTitle,
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
@@ -127,7 +129,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Choose how you want to add a proxy profile.',
+                l10n.proxy_addConnectionSubtitle,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -144,27 +146,27 @@ class AddProxyMethodSheet extends ConsumerWidget {
               children: [
                 _MethodCard(
                   icon: Icons.content_paste,
-                  title: 'Clipboard',
-                  subtitle: 'Paste share link or URI',
+                  title: l10n.proxy_methodClipboardTitle,
+                  subtitle: l10n.proxy_methodClipboardSubtitle,
                   onTap: pasteClipboard,
                   isPrimary: true,
                 ),
                 _MethodCard(
                   icon: Icons.qr_code_scanner,
-                  title: 'Scan QR',
-                  subtitle: 'From another device',
+                  title: l10n.proxy_methodScanQrTitle,
+                  subtitle: l10n.proxy_methodScanQrSubtitle,
                   onTap: scanQr,
                 ),
                 _MethodCard(
                   icon: Icons.cloud_download_outlined,
-                  title: 'Subscription',
-                  subtitle: 'Fetch from URL',
+                  title: l10n.proxy_methodSubscriptionTitle,
+                  subtitle: l10n.proxy_methodSubscriptionSubtitle,
                   onTap: () => popWith(const AddProxySubscription()),
                 ),
                 _MethodCard(
                   icon: Icons.upload_file_outlined,
-                  title: 'Import file',
-                  subtitle: '.conf or sing-box JSON',
+                  title: l10n.proxy_methodImportFileTitle,
+                  subtitle: l10n.proxy_methodImportFileSubtitle,
                   onTap: importFromFile,
                 ),
               ],
@@ -174,7 +176,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
               child: TextButton.icon(
                 onPressed: () => popWith(const AddProxyManual()),
                 icon: const Icon(Icons.edit_note),
-                label: const Text('Enter manually'),
+                label: Text(l10n.proxy_enterManually),
               ),
             ),
           ],
@@ -255,6 +257,8 @@ class _FileKindPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(8, 0, 8, 12),
@@ -266,24 +270,22 @@ class _FileKindPicker extends StatelessWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Import from file',
+                  l10n.proxy_importFromFileTitle,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
             ),
             ListTile(
               leading: const Icon(Icons.vpn_lock),
-              title: const Text(wireGuardConfigLabel),
-              subtitle: const Text('.conf file with [Interface]/[Peer]'),
+              title: Text(l10n.proxy_wireGuardConfigLabel(wireGuardBrand)),
+              subtitle: Text(l10n.proxy_importFileWireGuardSubtitle),
               onTap: () =>
                   Navigator.of(context).pop(ProxyFileImportKind.wireguardConf),
             ),
             ListTile(
               leading: const Icon(Icons.data_object),
-              title: const Text('Sing-box outbound JSON'),
-              subtitle: const Text(
-                'Shadowsocks, Trojan, VMess, VLESS, Hysteria, …',
-              ),
+              title: Text(l10n.proxy_importFileSingboxJsonTitle),
+              subtitle: Text(l10n.proxy_importFileSingboxJsonSubtitle),
               onTap: () => Navigator.of(
                 context,
               ).pop(ProxyFileImportKind.singboxOutboundJson),
@@ -326,9 +328,10 @@ AddProxyAction? _actionFromOutcome(
   BuildContext context,
   ProxyInputOutcome outcome,
 ) {
+  final l10n = AppLocalizations.of(context);
   switch (outcome) {
     case ProxyInputImported(:final created):
-      return AddProxyImported('Imported profile "${created.name}"');
+      return AddProxyImported(l10n.proxy_importedProfileNamed(created.name));
     case ProxyInputSeed(:final seed):
       return AddProxyWithSeed(seed);
     case ProxyInputError(:final message):

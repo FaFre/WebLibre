@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Marks a connection that comes up on its own when WebLibre starts.
 class AutostartChip extends StatelessWidget {
@@ -26,10 +27,11 @@ class AutostartChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
 
     return Tooltip(
-      message: 'Starts with WebLibre',
+      message: l10n.proxy_autostartTooltip,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         decoration: BoxDecoration(
@@ -46,7 +48,7 @@ class AutostartChip extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              'Autostart',
+              l10n.proxy_autostartLabel,
               style: Theme.of(
                 context,
               ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),

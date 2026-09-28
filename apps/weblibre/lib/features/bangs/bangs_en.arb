@@ -1,0 +1,172 @@
+{
+  "@@locale": "en",
+
+  "bangs_menuTitle": "Bangs",
+  "@bangs_menuTitle": {
+    "description": "Title of the bangs screen. A \"bang\" is a shortcut such as \"!w\" typed before a search to search a specific website directly (a DuckDuckGo convention); keep the term unless your language has an established equivalent."
+  },
+  "bangs_menuManageUserBangs": "Manage User Bangs",
+  "@bangs_menuManageUserBangs": {
+    "description": "Row on the bangs screen that opens the list of bangs the user created or customized."
+  },
+  "bangs_menuSearchBangs": "Search Bangs",
+  "@bangs_menuSearchBangs": {
+    "description": "Row on the bangs screen that opens a search across all available bangs."
+  },
+  "bangs_menuBrowseCategories": "Browse Categories",
+  "@bangs_menuBrowseCategories": {
+    "description": "Row on the bangs screen that opens the list of bang categories (e.g. News, Shopping)."
+  },
+
+  "bangs_categoriesTitle": "Bang Categories",
+  "@bangs_categoriesTitle": {
+    "description": "Title of the screen listing the categories bangs are grouped in."
+  },
+  "bangs_loadCategoriesFailedTitle": "Failed to load Bang Categories",
+  "@bangs_loadCategoriesFailedTitle": {
+    "description": "Error heading when the list of bang categories could not be loaded."
+  },
+  "bangs_loadBangsFailedTitle": "Failed to load Bangs",
+  "@bangs_loadBangsFailedTitle": {
+    "description": "Error heading when a list of bangs could not be loaded."
+  },
+
+  "bangs_searchHint": "Search",
+  "@bangs_searchHint": {
+    "description": "Placeholder of the search field on the bang search screen."
+  },
+  "bangs_searchFailedTitle": "Bang Search failed",
+  "@bangs_searchFailedTitle": {
+    "description": "Error heading when searching the list of bangs failed."
+  },
+
+  "bangs_userBangsTitle": "User Bangs",
+  "@bangs_userBangsTitle": {
+    "description": "Title of the screen listing bangs the user created or customized."
+  },
+
+  "bangs_deleteBangTitle": "Delete Bang",
+  "@bangs_deleteBangTitle": {
+    "description": "Title of the confirmation dialog before deleting a user-created bang."
+  },
+  "bangs_deleteBangConfirm": "Are you sure you want to delete this Bang?",
+  "@bangs_deleteBangConfirm": {
+    "description": "Body of the confirmation dialog before deleting a user-created bang."
+  },
+
+  "bangs_editTitleCustomize": "Customize Bang",
+  "@bangs_editTitleCustomize": {
+    "description": "Title of the bang editor when making an editable personal copy of a built-in bang."
+  },
+  "bangs_editTitleNew": "New Bang",
+  "@bangs_editTitleNew": {
+    "description": "Title of the bang editor when creating a new bang."
+  },
+  "bangs_editTitleEdit": "Edit Bang",
+  "@bangs_editTitleEdit": {
+    "description": "Title of the bang editor when changing an existing user bang."
+  },
+  "bangs_triggerAlreadyExists": "A bang with the trigger \"{trigger}\" already exists",
+  "@bangs_triggerAlreadyExists": {
+    "description": "Error message when saving a bang whose trigger word is already used by another bang. trigger is that word, without the \"!\".",
+    "placeholders": { "trigger": { "type": "String" } }
+  },
+
+  "bangs_fieldNameLabel": "Name",
+  "@bangs_fieldNameLabel": {
+    "description": "Label of the field for the bang's display name."
+  },
+  "bangs_fieldNameHelper": "The name of the website associated with the bang",
+  "@bangs_fieldNameHelper": {
+    "description": "Help text under the bang name field."
+  },
+  "bangs_fieldTriggerLabel": "Trigger",
+  "@bangs_fieldTriggerLabel": {
+    "description": "Label of the field for the bang's trigger: the word typed after \"!\" to use the bang (e.g. \"w\" for Wikipedia)."
+  },
+  "bangs_fieldTriggerHelper": "The specific trigger word or phrase used to invoke the bang.",
+  "@bangs_fieldTriggerHelper": {
+    "description": "Help text under the bang trigger field."
+  },
+  "bangs_fieldAdditionalTriggersLabel": "Additional triggers",
+  "@bangs_fieldAdditionalTriggersLabel": {
+    "description": "Label of the field for extra trigger words that also invoke the same bang."
+  },
+  "bangs_fieldAdditionalTriggersHelper": "Other words that invoke this bang, separated by commas or spaces. A leading ! is optional.",
+  "@bangs_fieldAdditionalTriggersHelper": {
+    "description": "Help text under the additional triggers field. Keep the \"!\" character."
+  },
+  "bangs_fieldUrlLabel": "URL",
+  "@bangs_fieldUrlLabel": {
+    "description": "Label of the field for the bang's search address template."
+  },
+  "bangs_fieldUrlHelper": "The URL template to use when the bang is invoked, where `{token}` is replaced by the user's query.",
+  "@bangs_fieldUrlHelper": {
+    "description": "Help text under the bang URL field. token is the literal marker {{{s}}} that must appear in the address and is replaced by the search terms. Keep the backticks around it.",
+    "placeholders": { "token": { "type": "String" } }
+  },
+  "bangs_fieldUrlMissingPlaceholder": "Must contain the query placeholder {token}",
+  "@bangs_fieldUrlMissingPlaceholder": {
+    "description": "Validation error under the bang URL field when the address lacks the search-terms marker. token is the literal marker {{{s}}}.",
+    "placeholders": { "token": { "type": "String" } }
+  },
+  "bangs_fieldCategoryLabel": "Category",
+  "@bangs_fieldCategoryLabel": {
+    "description": "Label of the drop-down for the bang's category."
+  },
+  "bangs_fieldSubCategoryLabel": "Subcategory",
+  "@bangs_fieldSubCategoryLabel": {
+    "description": "Label of the drop-down for the bang's subcategory within its category."
+  },
+
+  "bangs_flagsLabel": "Flags",
+  "@bangs_flagsLabel": {
+    "description": "Heading above the checkboxes for technical options of a bang."
+  },
+  "bangs_flagOpenBasePathTitle": "Open Base Path",
+  "@bangs_flagOpenBasePathTitle": {
+    "description": "Checkbox in the bang editor for how a bang used without search terms behaves. \"Base path\" is the root of the website's address."
+  },
+  "bangs_flagOpenBasePathSubtitle": "When a bang is invoked with no query, it opens the base path of the URL (/) instead of the path in the template (e.g., /search)",
+  "@bangs_flagOpenBasePathSubtitle": {
+    "description": "Explanation under \"Open Base Path\": when the bang is used with no search terms, open the site's root address instead of the path in the template. \"/\" and \"/search\" are literal address parts."
+  },
+  "bangs_flagUrlEncodePlaceholderTitle": "URL Encode Placeholder",
+  "@bangs_flagUrlEncodePlaceholderTitle": {
+    "description": "Checkbox in the bang editor: encode the search terms for safe use in a web address (percent-encoding)."
+  },
+  "bangs_flagUrlEncodePlaceholderSubtitle": "URL-encode the search terms. Some sites do not work with encoded terms, so disable this option for those sites.",
+  "@bangs_flagUrlEncodePlaceholderSubtitle": {
+    "description": "Explanation under \"URL Encode Placeholder\": some sites break when search terms are encoded, so this can be turned off."
+  },
+  "bangs_flagUrlEncodeSpaceToPlusTitle": "URL Encode Space to Plus",
+  "@bangs_flagUrlEncodeSpaceToPlusTitle": {
+    "description": "Checkbox in the bang editor: encode spaces in the search terms as \"+\"."
+  },
+  "bangs_flagUrlEncodeSpaceToPlusSubtitle": "Encode spaces as + instead of %20. Some sites require one format or the other.",
+  "@bangs_flagUrlEncodeSpaceToPlusSubtitle": {
+    "description": "Explanation under \"URL Encode Space to Plus\". \"+\" and \"%20\" are literal characters and must stay unchanged."
+  },
+
+  "bangs_tooltipOfficialSearch": "Official WebLibre search",
+  "@bangs_tooltipOfficialSearch": {
+    "description": "Tooltip of the crown icon marking a bang provided by WebLibre itself."
+  },
+  "bangs_tooltipCustomizeAsOwn": "Customize as your own bang",
+  "@bangs_tooltipCustomizeAsOwn": {
+    "description": "Tooltip of the button that makes an editable personal copy of a built-in bang."
+  },
+  "bangs_tooltipUnpin": "Unpin from search providers",
+  "@bangs_tooltipUnpin": {
+    "description": "Tooltip of the pin button when the bang is pinned: removes it from the quick list of search providers."
+  },
+  "bangs_tooltipPin": "Pin to search providers",
+  "@bangs_tooltipPin": {
+    "description": "Tooltip of the pin button when the bang is not pinned: adds it to the quick list of search providers."
+  },
+  "bangs_tooltipTriggers": "Triggers: {triggers}",
+  "@bangs_tooltipTriggers": {
+    "description": "Tooltip listing all words that invoke a bang. triggers is a comma-separated list such as \"w, !wiki\".",
+    "placeholders": { "triggers": { "type": "String" } }
+  }
+}

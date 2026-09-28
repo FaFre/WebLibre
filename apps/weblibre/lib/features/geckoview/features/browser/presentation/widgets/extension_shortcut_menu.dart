@@ -26,6 +26,7 @@ import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ExtensionShortcutMenu extends HookConsumerWidget {
   final Widget child;
@@ -39,6 +40,7 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final pinnedIds = ref.watch(pinnedAddonIdsProvider);
     final browserExtensions = ref.watch(
       webExtensionsStateProvider(
@@ -82,7 +84,7 @@ class ExtensionShortcutMenu extends HookConsumerWidget {
             await const AddonManagerRoute().push<void>(context);
           },
           leadingIcon: const Icon(MdiIcons.puzzleEdit),
-          child: const Text('Manage extensions'),
+          child: Text(l10n.browser_menuManageExtensions),
         ),
       ],
       child: Visibility(

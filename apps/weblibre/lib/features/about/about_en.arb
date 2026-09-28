@@ -1,0 +1,32 @@
+{
+  "@@locale": "en",
+
+  "about_copyright": "Copyright © Fabian Freund, 2024-2026",
+  "@about_copyright": {
+    "description": "Copyright line in the About dialog. Keep the name and years unchanged."
+  },
+  "about_geckoVersionTitle": "Gecko Version",
+  "@about_geckoVersionTitle": {
+    "description": "Row title in the About dialog; the version number of the Gecko browser engine is shown below it. Gecko is a product name."
+  },
+  "about_notAvailable": "N/A",
+  "@about_notAvailable": {
+    "description": "Abbreviation for \"not available\", shown in the About dialog when the Gecko engine version cannot be determined."
+  },
+  "about_feedbackTitle": "Feedback",
+  "@about_feedbackTitle": {
+    "description": "Row in the About dialog that opens the page for sending feedback or reporting issues."
+  },
+  "about_donateTitle": "Donate",
+  "@about_donateTitle": {
+    "description": "Row in the About dialog that opens the page for donating to the project."
+  },
+  "about_documentationTitle": "Documentation",
+  "@about_documentationTitle": {
+    "description": "Row in the About dialog that opens the online documentation."
+  },
+  "about_githubTitle": "GitHub",
+  "@about_githubTitle": {
+    "description": "Row in the About dialog that opens the project repository on GitHub. GitHub is a brand name."
+  }
+}

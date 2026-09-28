@@ -20,6 +20,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/models/auth_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
 
 /// The screen the first-run "Restore from Backup" flow opens.
@@ -36,7 +37,15 @@ void main() {
   );
 
   Future<void> pump(WidgetTester tester, Widget screen) async {
-    await tester.pumpWidget(ProviderScope(child: MaterialApp(home: screen)));
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: screen,
+        ),
+      ),
+    );
     await tester.pump();
   }
 

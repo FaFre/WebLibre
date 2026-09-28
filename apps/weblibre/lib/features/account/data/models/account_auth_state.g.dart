@@ -15,7 +15,7 @@ abstract class _$AccountAuthStateCWProxy {
 
   AccountAuthState userId(String? userId);
 
-  AccountAuthState lastError(String? lastError);
+  AccountAuthState lastError(AccountAuthError? lastError);
 
   AccountAuthState syncKey(String? syncKey);
 
@@ -33,7 +33,7 @@ abstract class _$AccountAuthStateCWProxy {
     String? email,
     String? displayName,
     String? userId,
-    String? lastError,
+    AccountAuthError? lastError,
     String? syncKey,
     SupabaseClient? client,
   });
@@ -60,7 +60,8 @@ class _$AccountAuthStateCWProxyImpl implements _$AccountAuthStateCWProxy {
   AccountAuthState userId(String? userId) => call(userId: userId);
 
   @override
-  AccountAuthState lastError(String? lastError) => call(lastError: lastError);
+  AccountAuthState lastError(AccountAuthError? lastError) =>
+      call(lastError: lastError);
 
   @override
   AccountAuthState syncKey(String? syncKey) => call(syncKey: syncKey);
@@ -105,7 +106,7 @@ class _$AccountAuthStateCWProxyImpl implements _$AccountAuthStateCWProxy {
       lastError: lastError == const $CopyWithPlaceholder()
           ? _value.lastError
           // ignore: cast_nullable_to_non_nullable
-          : lastError as String?,
+          : lastError as AccountAuthError?,
       syncKey: syncKey == const $CopyWithPlaceholder()
           ? _value.syncKey
           // ignore: cast_nullable_to_non_nullable

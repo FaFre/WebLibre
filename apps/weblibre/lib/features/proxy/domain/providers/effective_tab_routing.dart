@@ -19,6 +19,7 @@
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -87,6 +88,7 @@ TabRouting effectiveTabRouting(Ref ref, String? tabId) {
   final container = ref.watch(watchTabContainerDataProvider(tabId)).value;
 
   final options = ref.watch(proxyConnectionOptionsProvider);
+  final l10n = ref.watch(appLocalizationsProvider);
   final optionsLoading = ref
       .watch(singboxProxyProfilesRepositoryProvider)
       .isLoading;
@@ -107,6 +109,6 @@ TabRouting effectiveTabRouting(Ref ref, String? tabId) {
     contextId: contextId,
     containerName: container?.name,
     proxyTitle: (id) =>
-        proxyConnectionTitle(options, id, isLoading: optionsLoading),
+        proxyConnectionTitle(options, id, l10n, isLoading: optionsLoading),
   );
 }

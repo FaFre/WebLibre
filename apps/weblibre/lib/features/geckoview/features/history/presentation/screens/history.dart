@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -139,21 +140,51 @@ class Section extends MultiSliver {
                              _ => null,
                            },
                            label: switch (item.visitType) {
-                             VisitType.link => const Text('Followed Link'),
-                             VisitType.typed => const Text('Typed Address'),
-                             VisitType.embed => const Text(
-                               'Embedded Page Element',
+                             VisitType.link => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeFollowedLink,
                              ),
-                             VisitType.redirectPermanent => const Text(
-                               'Temporary Redirect',
+                             VisitType.typed => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeTypedAddress,
                              ),
-                             VisitType.redirectTemporary => const Text(
-                               'Permanent Redirect',
+                             VisitType.embed => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeEmbeddedPageElement,
                              ),
-                             VisitType.download => const Text('Download'),
-                             VisitType.framedLink => const Text('Frame'),
-                             VisitType.reload => const Text('Page Reload'),
-                             VisitType.bookmark => const Text('Bookmark'),
+                             VisitType.redirectPermanent => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypePermanentRedirect,
+                             ),
+                             VisitType.redirectTemporary => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeTemporaryRedirect,
+                             ),
+                             VisitType.download => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeDownload,
+                             ),
+                             VisitType.framedLink => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeFrame,
+                             ),
+                             VisitType.reload => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypePageReload,
+                             ),
+                             VisitType.bookmark => Text(
+                               AppLocalizations.of(
+                                 context,
+                               ).history_visitTypeBookmark,
+                             ),
                            },
                          ),
                          Chip(
@@ -173,7 +204,12 @@ class Section extends MultiSliver {
                                  backgroundColor: container.color,
                                  radius: 8,
                                ),
-                               label: Text(container.name ?? 'Container'),
+                               label: Text(
+                                 container.name ??
+                                     AppLocalizations.of(
+                                       context,
+                                     ).history_unnamedContainer,
+                               ),
                              ),
                        ],
                      ),
@@ -195,6 +231,7 @@ class HistoryScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isDownloadsMode = mode == HistoryScreenMode.downloads;
 
     final textFilterEnabled = useState(false);
@@ -274,20 +311,20 @@ class HistoryScreen extends HookConsumerWidget {
         anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         builder: (context) => AlertDialog(
           icon: const Icon(Icons.warning),
-          title: const Text('Clear Container History'),
+          title: Text(l10n.history_clearContainerHistoryTitle),
           content: Text(
-            'Delete all browsing history recorded for '
-            '"${container.name ?? 'Container'}"? The visits are removed from '
-            'history.',
+            l10n.history_clearContainerHistoryContent(
+              container.name ?? l10n.history_unnamedContainer,
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(l10n.common_cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Clear'),
+              child: Text(l10n.common_clear),
             ),
           ],
         ),
@@ -314,21 +351,25 @@ class HistoryScreen extends HookConsumerWidget {
                   isCollapsed: true,
                   border: InputBorder.none,
                   hintText: isDownloadsMode
-                      ? 'Filter downloads...'
-                      : 'Filter history...',
+                      ? l10n.history_filterHintDownloads
+                      : l10n.history_filterHintHistory,
                 ),
               )
             : selectedItems.value.isEmpty
-            ? Text(isDownloadsMode ? 'Downloads' : 'History')
-            : Text('${selectedItems.value.length} selected'),
+            ? Text(
+                isDownloadsMode
+                    ? l10n.history_titleDownloads
+                    : l10n.history_titleHistory,
+              )
+            : Text(l10n.history_selectionCount(selectedItems.value.length)),
         actions: [
           if (selectedItems.value.isEmpty)
             IconButton(
               tooltip: textFilterEnabled.value
-                  ? 'Clear search'
+                  ? l10n.history_tooltipClearSearch
                   : isDownloadsMode
-                  ? 'Search downloads'
-                  : 'Search history',
+                  ? l10n.history_tooltipSearchDownloads
+                  : l10n.history_tooltipSearchHistory,
               onPressed: () {
                 if (!textFilterEnabled.value) {
                   textFilterEnabled.value = true;
@@ -384,7 +425,9 @@ class HistoryScreen extends HookConsumerWidget {
               // active, clear only that container's history; otherwise fall
               // back to the full delete-browsing-data sheet.
               tooltip: filterContainer != null
-                  ? 'Clear "${filterContainer.name ?? 'Container'}" history'
+                  ? l10n.history_tooltipClearContainerHistory(
+                      filterContainer.name ?? l10n.history_unnamedContainer,
+                    )
                   : null,
               onPressed: () async {
                 if (filterContainer != null) {
@@ -428,7 +471,7 @@ class HistoryScreen extends HookConsumerWidget {
                           '${DateFormat.yMd().format(range.start)} - ${DateFormat.yMd().format(range.end)}',
                         ),
                       ) ??
-                      const Text('Filter Date'),
+                      Text(l10n.history_filterDate),
                   onPressed: () async {
                     final range = await showDateRangePicker(
                       context: context,
@@ -467,19 +510,33 @@ class HistoryScreen extends HookConsumerWidget {
                         }
                       },
                       child: switch (type) {
-                        VisitType.link => const Text('Followed Links'),
-                        VisitType.typed => const Text('Typed Addresses'),
-                        VisitType.embed => const Text('Embedded Page Elements'),
-                        VisitType.redirectPermanent => const Text(
-                          'Temporary Redirects',
+                        VisitType.link => Text(
+                          l10n.history_filterTypeFollowedLinks,
                         ),
-                        VisitType.redirectTemporary => const Text(
-                          'Permanent Redirects',
+                        VisitType.typed => Text(
+                          l10n.history_filterTypeTypedAddresses,
                         ),
-                        VisitType.download => const Text('Downloads'),
-                        VisitType.framedLink => const Text('Frames'),
-                        VisitType.reload => const Text('Page Reloads'),
-                        VisitType.bookmark => const Text('Bookmarks'),
+                        VisitType.embed => Text(
+                          l10n.history_filterTypeEmbeddedPageElements,
+                        ),
+                        VisitType.redirectPermanent => Text(
+                          l10n.history_filterTypePermanentRedirects,
+                        ),
+                        VisitType.redirectTemporary => Text(
+                          l10n.history_filterTypeTemporaryRedirects,
+                        ),
+                        VisitType.download => Text(
+                          l10n.history_filterTypeDownloads,
+                        ),
+                        VisitType.framedLink => Text(
+                          l10n.history_filterTypeFrames,
+                        ),
+                        VisitType.reload => Text(
+                          l10n.history_filterTypePageReloads,
+                        ),
+                        VisitType.bookmark => Text(
+                          l10n.history_filterTypeBookmarks,
+                        ),
                       },
                     ),
                   ),
@@ -499,7 +556,7 @@ class HistoryScreen extends HookConsumerWidget {
                               .read(historyVisitsFilterProvider.notifier)
                               .setContainer(null);
                         },
-                        child: const Text('All Containers'),
+                        child: Text(l10n.history_allContainers),
                       ),
                       for (final container in containers!)
                         MenuItemButton(
@@ -514,20 +571,25 @@ class HistoryScreen extends HookConsumerWidget {
                                 .read(historyVisitsFilterProvider.notifier)
                                 .setContainer(container.id);
                           },
-                          child: Text(container.name ?? 'Container'),
+                          child: Text(
+                            container.name ?? l10n.history_unnamedContainer,
+                          ),
                         ),
                     ],
                     child: Text(
                       filterContainer != null
-                          ? 'Container: ${filterContainer.name ?? 'Container'}'
-                          : 'Filter Container',
+                          ? l10n.history_containerFilterLabel(
+                              filterContainer.name ??
+                                  l10n.history_unnamedContainer,
+                            )
+                          : l10n.history_filterContainer,
                     ),
                   ),
                 ],
                 const Divider(),
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.restore),
-                  child: const Text('Reset Filter'),
+                  child: Text(l10n.history_resetFilter),
                   onPressed: () {
                     textFilterController.clear();
                     textFilterEnabled.value = false;
@@ -625,7 +687,7 @@ class HistoryScreen extends HookConsumerWidget {
                                     if (context.mounted) {
                                       ui_helper.showErrorMessage(
                                         context,
-                                        'Downloaded file not found',
+                                        l10n.history_downloadedFileNotFound,
                                       );
                                     }
                                     return;
@@ -641,7 +703,7 @@ class HistoryScreen extends HookConsumerWidget {
                                   if (!opened && context.mounted) {
                                     ui_helper.showErrorMessage(
                                       context,
-                                      'Could not open downloaded file',
+                                      l10n.history_couldNotOpenDownloadedFile,
                                     );
                                   }
                                 } else {
@@ -670,8 +732,8 @@ class HistoryScreen extends HookConsumerWidget {
           error: (error, stackTrace) => Center(
             child: FailureWidget(
               title: isDownloadsMode
-                  ? 'Failed to load Downloads'
-                  : 'Failed to load History',
+                  ? l10n.history_loadDownloadsFailedTitle
+                  : l10n.history_loadHistoryFailedTitle,
               exception: error,
             ),
           ),

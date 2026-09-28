@@ -14,6 +14,7 @@ import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets('deleting a running profile stops through runtime repository', (
@@ -50,7 +51,11 @@ void main() {
             _FakeTorSettingsRepository.new,
           ),
         ],
-        child: const MaterialApp(home: SingboxProxyProfilesScreen()),
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: SingboxProxyProfilesScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -157,6 +162,8 @@ Future<void> _pumpEditor(
         ),
       ],
       child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: SingboxProxyProfileEditorScreen(profileId: profileId, seed: seed),
       ),
     ),

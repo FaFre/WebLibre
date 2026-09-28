@@ -10,6 +10,7 @@ import 'package:weblibre/features/proxy/domain/providers/proxy_connection_option
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
   testWidgets(
@@ -26,6 +27,8 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: ContainerEditScreen.create(
               initialContainer: ContainerData(
                 id: 'container-1',
@@ -71,6 +74,8 @@ void main() {
             ),
           ],
           child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             home: ContainerEditScreen.create(
               initialContainer: ContainerData(
                 id: 'container-1',
@@ -111,6 +116,8 @@ void main() {
           ),
         ],
         child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: ContainerEditScreen.create(
             initialContainer: ContainerData(
               id: 'container-1',

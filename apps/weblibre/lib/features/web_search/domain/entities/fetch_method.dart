@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'package:flutter/material.dart';
 
 /// Capture pipeline selector. Each choice maps to a (method, variant) pair
@@ -32,31 +51,6 @@ enum FetchMethodChoice {
     }
     return null;
   }
-
-  String get title => switch (this) {
-    FetchMethodChoice.trafilatura => 'Extracted Preview',
-    FetchMethodChoice.singlefileHtml => 'Full Page Capture',
-    FetchMethodChoice.shotScraperPdf => 'PDF Snapshot',
-    FetchMethodChoice.shotScraperPng => 'Image Snapshot',
-  };
-
-  String get shortLabel => switch (this) {
-    FetchMethodChoice.trafilatura => 'Preview',
-    FetchMethodChoice.singlefileHtml => 'Archive',
-    FetchMethodChoice.shotScraperPdf => 'PDF',
-    FetchMethodChoice.shotScraperPng => 'Image',
-  };
-
-  String get subtitle => switch (this) {
-    FetchMethodChoice.trafilatura =>
-      'Reader-optimized text and metadata for the in-app preview',
-    FetchMethodChoice.singlefileHtml =>
-      'Archive the full page with layout and assets for later use',
-    FetchMethodChoice.shotScraperPdf =>
-      'Render the page to a PDF for offline reading and sharing',
-    FetchMethodChoice.shotScraperPng =>
-      'Capture a full-page PNG screenshot of the rendered page',
-  };
 
   IconData get icon => switch (this) {
     FetchMethodChoice.trafilatura => Icons.description_outlined,

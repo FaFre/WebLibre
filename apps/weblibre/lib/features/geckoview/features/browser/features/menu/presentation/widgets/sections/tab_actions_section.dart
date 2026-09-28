@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
@@ -56,6 +57,7 @@ import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboa
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -111,8 +113,10 @@ class TabActionsSection extends HookConsumerWidget {
         if (folded.isNotEmpty && !showMore.value)
           ListTile(
             leading: const Icon(Icons.more_horiz),
-            title: Text(MenuItemType.moreDisclosure.label),
-            subtitle: Text(folded.map((item) => item.type.label).join(', ')),
+            title: Text(MenuItemType.moreDisclosure.label(context)),
+            subtitle: Text(
+              folded.map((item) => item.type.label(context)).join(', '),
+            ),
             trailing: const Icon(Icons.expand_more),
             onTap: () => showMore.value = true,
           )
@@ -153,14 +157,16 @@ class _ContainerExpansion extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         leading: const Icon(MdiIcons.folder),
-        title: const Text('Containers'),
+        title: Text(l10n.menu_containersExpansionTitle),
         children: orderMenuChildren(items, {
           MenuItemType.manageContainers: () => buildMenuSubTile(
-            'Manage Containers',
+            l10n.menu_containersManage,
             icon: MdiIcons.folder,
             onTap: () async {
               Navigator.pop(context);
@@ -168,7 +174,7 @@ class _ContainerExpansion extends ConsumerWidget {
             },
           ),
           MenuItemType.assignContainer: () => buildMenuSubTile(
-            'Assign Container',
+            l10n.menu_containersAssign,
             icon: MdiIcons.folderArrowUpDownOutline,
             onTap: () async {
               final selection = await const ContainerSelectionRoute()
@@ -201,7 +207,7 @@ class _ContainerExpansion extends ConsumerWidget {
           MenuItemType.assignUrlToContainer: () =>
               ContainerRelationUnassignedVisibility(
                 child: buildMenuSubTile(
-                  'Assign URL to Container',
+                  l10n.menu_containersAssignUrl,
                   icon: MdiIcons.webPlus,
                   onTap: () async {
                     final selection = await const ContainerSelectionRoute()
@@ -246,7 +252,7 @@ class _ContainerExpansion extends ConsumerWidget {
           MenuItemType.unassignUrlFromContainer: () =>
               ContainerRelationAssignedVisibility(
                 child: buildMenuSubTile(
-                  'Unassign URL from Container',
+                  l10n.menu_containersUnassignUrl,
                   icon: MdiIcons.webMinus,
                   onTap: () async {
                     final tabState = ref.read(tabStateProvider(selectedTabId));
@@ -289,7 +295,7 @@ class _ContainerExpansion extends ConsumerWidget {
           MenuItemType.unassignContainer: () => ContainerAssignedVisibility(
             tabId: selectedTabId,
             child: buildMenuSubTile(
-              'Unassign Container',
+              l10n.menu_containersUnassign,
               icon: MdiIcons.folderCancelOutline,
               onTap: () async {
                 final tabState = ref.read(tabStateProvider(selectedTabId))!;
@@ -314,6 +320,7 @@ class _ShareExpansion extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
     final tabState = ref.watch(tabStateProvider(selectedTabId));
@@ -339,13 +346,13 @@ class _ShareExpansion extends HookConsumerWidget {
 
     void applyCleanUrl() {
       if (cleaner.applyCleanUrl()) {
-        ui_helper.showInfoMessage(context, 'URL cleaned');
+        ui_helper.showInfoMessage(context, l10n.menu_shareUrlCleaned);
       }
     }
 
     void applySelectedTrackingRemovals(String previewUrl) {
       if (cleaner.applyPreviewUrl(previewUrl)) {
-        ui_helper.showInfoMessage(context, 'URL preview applied');
+        ui_helper.showInfoMessage(context, l10n.menu_shareUrlPreviewApplied);
       }
     }
 
@@ -367,7 +374,7 @@ class _ShareExpansion extends HookConsumerWidget {
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         leading: const Icon(Icons.share),
-        title: const Text('Share'),
+        title: Text(l10n.menu_shareExpansionTitle),
         children: [
           if (showCleanerTile)
             UrlCleanerTile(
@@ -379,7 +386,7 @@ class _ShareExpansion extends HookConsumerWidget {
             ),
           ...orderMenuChildren(items, {
             MenuItemType.copyAddress: () => buildMenuSubTile(
-              'Copy Address',
+              l10n.menu_shareCopyAddress,
               icon: MdiIcons.contentCopy,
               trailing: cleanedTrailing,
               onTap: () async {
@@ -390,7 +397,7 @@ class _ShareExpansion extends HookConsumerWidget {
               },
             ),
             MenuItemType.shareScreenshot: () => buildMenuSubTile(
-              'Share Screenshot',
+              l10n.menu_shareScreenshot,
               icon: Icons.mobile_screen_share,
               onTap: () async {
                 final screenshot = await ref
@@ -415,7 +422,7 @@ class _ShareExpansion extends HookConsumerWidget {
               },
             ),
             MenuItemType.shareLink: () => buildMenuSubTile(
-              'Share Link',
+              l10n.menu_shareLink,
               icon: Icons.share,
               trailing: cleanedTrailing,
               onTap: () async {
@@ -426,7 +433,7 @@ class _ShareExpansion extends HookConsumerWidget {
             MenuItemType.sendToDevice: () =>
                 _SendToDeviceExpansion(selectedTabId: selectedTabId),
             MenuItemType.showQrCode: () => buildMenuSubTile(
-              'Show QR Code',
+              l10n.menu_shareShowQrCode,
               icon: Icons.qr_code,
               trailing: cleanedTrailing,
               onTap: () async {
@@ -450,6 +457,7 @@ class _SendToDeviceExpansion extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final devices = ref.watch(syncDevicesProvider);
 
@@ -462,7 +470,10 @@ class _SendToDeviceExpansion extends ConsumerWidget {
         child: ExpansionTile(
           tilePadding: const EdgeInsets.only(left: 56, right: 16),
           leading: const Icon(Icons.send_outlined, size: 20),
-          title: const Text('Send To Device', style: TextStyle(fontSize: 14)),
+          title: Text(
+            l10n.menu_sendToDeviceExpansionTitle,
+            style: const TextStyle(fontSize: 14),
+          ),
           children: devices.when(
             data: (deviceList) {
               final targets = deviceList
@@ -473,11 +484,11 @@ class _SendToDeviceExpansion extends ConsumerWidget {
 
               if (targets.isEmpty) {
                 return [
-                  const ListTile(
-                    contentPadding: EdgeInsets.only(left: 72, right: 16),
+                  ListTile(
+                    contentPadding: const EdgeInsets.only(left: 72, right: 16),
                     title: Text(
-                      'No target devices',
-                      style: TextStyle(fontSize: 13),
+                      l10n.menu_sendToDeviceNone,
+                      style: const TextStyle(fontSize: 13),
                     ),
                   ),
                 ];
@@ -527,12 +538,12 @@ class _SendToDeviceExpansion extends ConsumerWidget {
                           if (success) {
                             ui_helper.showInfoMessage(
                               context,
-                              'Sent tab to ${device.displayName}',
+                              l10n.menu_sendToDeviceSuccess(device.displayName),
                             );
                           } else {
                             ui_helper.showErrorMessage(
                               context,
-                              'Failed to send tab',
+                              l10n.menu_sendToDeviceSendFailed,
                             );
                           }
                         }
@@ -541,22 +552,22 @@ class _SendToDeviceExpansion extends ConsumerWidget {
                   )
                   .toList(growable: false);
             },
-            loading: () => const [
+            loading: () => [
               ListTile(
-                contentPadding: EdgeInsets.only(left: 72, right: 16),
-                leading: Icon(Icons.devices_other, size: 18),
+                contentPadding: const EdgeInsets.only(left: 72, right: 16),
+                leading: const Icon(Icons.devices_other, size: 18),
                 title: Text(
-                  'Loading devices...',
-                  style: TextStyle(fontSize: 13),
+                  l10n.menu_sendToDeviceLoading,
+                  style: const TextStyle(fontSize: 13),
                 ),
               ),
             ],
-            error: (_, _) => const [
+            error: (_, _) => [
               ListTile(
-                contentPadding: EdgeInsets.only(left: 72, right: 16),
+                contentPadding: const EdgeInsets.only(left: 72, right: 16),
                 title: Text(
-                  'Failed to load devices',
-                  style: TextStyle(fontSize: 13),
+                  l10n.menu_sendToDeviceLoadFailed,
+                  style: const TextStyle(fontSize: 13),
                 ),
               ),
             ],
@@ -575,6 +586,7 @@ class _CloneTabExpansion extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final appColors = AppColors.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
@@ -582,10 +594,10 @@ class _CloneTabExpansion extends ConsumerWidget {
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         leading: const Icon(MdiIcons.contentDuplicate),
-        title: const Text('Clone Tab'),
+        title: Text(l10n.menu_cloneTabExpansionTitle),
         children: orderMenuChildren(items, {
           MenuItemType.cloneRegularTab: () => buildMenuSubTile(
-            'Regular',
+            l10n.menu_cloneTypeRegular,
             icon: MdiIcons.tab,
             onTap: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
@@ -624,7 +636,7 @@ class _CloneTabExpansion extends ConsumerWidget {
             },
           ),
           MenuItemType.clonePrivateTab: () => buildMenuSubTile(
-            'Private',
+            l10n.menu_cloneTypePrivate,
             icon: MdiIcons.dominoMask,
             iconColor: appColors.privateTabPurple,
             onTap: () async {
@@ -665,7 +677,7 @@ class _CloneTabExpansion extends ConsumerWidget {
           ),
           if (settings.showIsolatedTabUi)
             MenuItemType.cloneIsolatedTab: () => buildMenuSubTile(
-              'Isolated',
+              l10n.menu_cloneTypeIsolated,
               icon: MdiIcons.snowflake,
               iconColor: appColors.isolatedTabTeal,
               onTap: () async {
@@ -710,14 +722,16 @@ class _ExportExpansion extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         leading: const Icon(MdiIcons.fileExport),
-        title: const Text('Export'),
+        title: Text(l10n.menu_exportExpansionTitle),
         children: orderMenuChildren(items, {
           MenuItemType.copyAsMarkdown: () => buildMenuSubTile(
-            'Copy as Markdown',
+            l10n.menu_exportCopyAsMarkdown,
             // ignore: deprecated_member_use
             icon: MdiIcons.languageMarkdownOutline,
             onTap: () async {
@@ -729,14 +743,14 @@ class _ExportExpansion extends ConsumerWidget {
                 if (context.mounted) {
                   ui_helper.showInfoMessage(
                     context,
-                    'Markdown copied to clipboard',
+                    l10n.menu_exportMarkdownCopied,
                   );
                 }
-              }, const Text('Copy as Markdown'));
+              }, Text(l10n.menu_exportCopyAsMarkdown));
             },
           ),
           MenuItemType.exportAsMarkdown: () => buildMenuSubTile(
-            'Export as Markdown',
+            l10n.menu_exportAsMarkdown,
             // ignore: deprecated_member_use
             icon: MdiIcons.languageMarkdown,
             onTap: () async {
@@ -750,11 +764,11 @@ class _ExportExpansion extends ConsumerWidget {
                   allowedExtensions: ['md'],
                   bytes: utf8.encode(content),
                 );
-              }, const Text('Export as Markdown'));
+              }, Text(l10n.menu_exportAsMarkdown));
             },
           ),
           MenuItemType.exportAsPdf: () => buildMenuSubTile(
-            'Export as PDF',
+            l10n.menu_exportAsPdf,
             icon: MdiIcons.filePdfBox,
             onTap: () async {
               await ref
@@ -764,7 +778,7 @@ class _ExportExpansion extends ConsumerWidget {
             },
           ),
           MenuItemType.exportAsPng: () => buildMenuSubTile(
-            'Export as PNG',
+            l10n.menu_exportAsPng,
             icon: MdiIcons.fileImage,
             onTap: () async {
               final screenshot = await ref
@@ -790,7 +804,7 @@ class _ExportExpansion extends ConsumerWidget {
             },
           ),
           MenuItemType.printPage: () => buildMenuSubTile(
-            'Print',
+            l10n.menu_exportPrint,
             icon: MdiIcons.printer,
             trailing: const KeyboardShortcutHint(BrowserAction.printPage),
             onTap: () async {
@@ -800,7 +814,10 @@ class _ExportExpansion extends ConsumerWidget {
                     .printContent();
               } catch (e) {
                 if (context.mounted) {
-                  ui_helper.showErrorMessage(context, 'Failed to print page');
+                  ui_helper.showErrorMessage(
+                    context,
+                    l10n.menu_exportPrintFailed,
+                  );
                 }
               }
               if (context.mounted) Navigator.pop(context);
@@ -856,6 +873,7 @@ class _PinTopSiteTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final tabState = ref.watch(tabStateProvider(selectedTabId));
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: selectedTabId),
@@ -873,7 +891,9 @@ class _PinTopSiteTile extends HookConsumerWidget {
 
     return ListTile(
       leading: Icon(pinned ? MdiIcons.pinOff : MdiIcons.pin),
-      title: Text(pinned ? 'Unpin from Shortcuts' : 'Pin to Shortcuts'),
+      title: Text(
+        pinned ? l10n.menu_pinUnpinFromShortcuts : l10n.menu_pinPinToShortcuts,
+      ),
       onTap: () async {
         if (tabState == null || url == null) return;
         Navigator.pop(context);
@@ -883,19 +903,19 @@ class _PinTopSiteTile extends HookConsumerWidget {
                 .read(topSiteRepositoryProvider.notifier)
                 .unpinSiteByUrl(url);
             if (context.mounted) {
-              ui_helper.showInfoMessage(context, 'Unpinned from Shortcuts');
+              ui_helper.showInfoMessage(context, l10n.menu_pinUnpinnedMessage);
             }
           } else {
             await ref
                 .read(topSiteRepositoryProvider.notifier)
                 .addPinnedSite(title: tabState.titleOrAuthority, url: url);
             if (context.mounted) {
-              ui_helper.showInfoMessage(context, 'Pinned to Shortcuts');
+              ui_helper.showInfoMessage(context, l10n.menu_pinPinnedMessage);
             }
           }
         } catch (e) {
           if (context.mounted) {
-            ui_helper.showErrorMessage(context, 'Failed to update Shortcuts');
+            ui_helper.showErrorMessage(context, l10n.menu_pinUpdateFailed);
           }
         }
       },
@@ -910,12 +930,13 @@ class _FetchFeedsTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final showFeeds = useState(false);
 
     if (!showFeeds.value) {
       return ListTile(
         leading: const Icon(Icons.rss_feed),
-        title: const Text('Fetch Feeds on Page'),
+        title: Text(l10n.menu_fetchFeedsTitle),
         onTap: () {
           showFeeds.value = true;
         },
@@ -928,16 +949,16 @@ class _FetchFeedsTile extends HookConsumerWidget {
       skipLoadingOnReload: true,
       data: (feeds) {
         if (feeds.value.isEmpty) {
-          return const ListTile(
-            leading: Icon(Icons.rss_feed_outlined),
-            title: Text('No Web Feeds Found'),
+          return ListTile(
+            leading: const Icon(Icons.rss_feed_outlined),
+            title: Text(l10n.menu_fetchFeedsNone),
             enabled: false,
           );
         }
 
         return ListTile(
           leading: const Icon(Icons.rss_feed),
-          title: const Text('Available Web Feeds'),
+          title: Text(l10n.menu_fetchFeedsAvailable),
           trailing: Badge(label: Text(feeds.value!.length.toString())),
           onTap: () async {
             Navigator.pop(context);
@@ -950,10 +971,10 @@ class _FetchFeedsTile extends HookConsumerWidget {
         );
       },
       error: (_, _) => const SizedBox.shrink(),
-      loading: () => const ListTile(
-        leading: Icon(Icons.rss_feed),
-        title: Text('Fetching Web Feeds...'),
-        trailing: SizedBox(
+      loading: () => ListTile(
+        leading: const Icon(Icons.rss_feed),
+        title: Text(l10n.menu_fetchFeedsLoading),
+        trailing: const SizedBox(
           width: 20,
           height: 20,
           child: CircularProgressIndicator(strokeWidth: 2),

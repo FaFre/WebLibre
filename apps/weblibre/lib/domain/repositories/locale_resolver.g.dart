@@ -108,8 +108,20 @@ abstract class _$LocaleResolverRepository extends $Notifier<void> {
   }
 }
 
+/// The language and country names of [locale], written in [displayLocale].
+///
+/// Pass the UI locale (`Localizations.localeOf(context)`) for names shown in
+/// running text, so they follow the in-app language rather than the device's,
+/// or [locale] itself where each entry should name itself (a language picker).
+
 @ProviderFor(resolveLocale)
 final resolveLocaleProvider = ResolveLocaleFamily._();
+
+/// The language and country names of [locale], written in [displayLocale].
+///
+/// Pass the UI locale (`Localizations.localeOf(context)`) for names shown in
+/// running text, so they follow the in-app language rather than the device's,
+/// or [locale] itself where each entry should name itself (a language picker).
 
 final class ResolveLocaleProvider
     extends
@@ -119,9 +131,14 @@ final class ResolveLocaleProvider
           FutureOr<LocalizedResult>
         >
     with $FutureModifier<LocalizedResult>, $FutureProvider<LocalizedResult> {
+  /// The language and country names of [locale], written in [displayLocale].
+  ///
+  /// Pass the UI locale (`Localizations.localeOf(context)`) for names shown in
+  /// running text, so they follow the in-app language rather than the device's,
+  /// or [locale] itself where each entry should name itself (a language picker).
   ResolveLocaleProvider._({
     required ResolveLocaleFamily super.from,
-    required intl.Locale super.argument,
+    required (intl.Locale, intl.Locale) super.argument,
   }) : super(
          retry: null,
          name: r'resolveLocaleProvider',
@@ -137,7 +154,7 @@ final class ResolveLocaleProvider
   String toString() {
     return r'resolveLocaleProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -148,8 +165,8 @@ final class ResolveLocaleProvider
 
   @override
   FutureOr<LocalizedResult> create(Ref ref) {
-    final argument = this.argument as intl.Locale;
-    return resolveLocale(ref, argument);
+    final argument = this.argument as (intl.Locale, intl.Locale);
+    return resolveLocale(ref, argument.$1, argument.$2);
   }
 
   @override
@@ -163,10 +180,20 @@ final class ResolveLocaleProvider
   }
 }
 
-String _$resolveLocaleHash() => r'94d7a9b307a81de372b8b40b06f046acc76e01c8';
+String _$resolveLocaleHash() => r'536cfb90fae191dfacffb41f2461d8ffedca4585';
+
+/// The language and country names of [locale], written in [displayLocale].
+///
+/// Pass the UI locale (`Localizations.localeOf(context)`) for names shown in
+/// running text, so they follow the in-app language rather than the device's,
+/// or [locale] itself where each entry should name itself (a language picker).
 
 final class ResolveLocaleFamily extends $Family
-    with $FunctionalFamilyOverride<FutureOr<LocalizedResult>, intl.Locale> {
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<LocalizedResult>,
+          (intl.Locale, intl.Locale)
+        > {
   ResolveLocaleFamily._()
     : super(
         retry: null,
@@ -176,8 +203,14 @@ final class ResolveLocaleFamily extends $Family
         isAutoDispose: true,
       );
 
-  ResolveLocaleProvider call(intl.Locale locale) =>
-      ResolveLocaleProvider._(argument: locale, from: this);
+  /// The language and country names of [locale], written in [displayLocale].
+  ///
+  /// Pass the UI locale (`Localizations.localeOf(context)`) for names shown in
+  /// running text, so they follow the in-app language rather than the device's,
+  /// or [locale] itself where each entry should name itself (a language picker).
+
+  ResolveLocaleProvider call(intl.Locale locale, intl.Locale displayLocale) =>
+      ResolveLocaleProvider._(argument: (locale, displayLocale), from: this);
 
   @override
   String toString() => r'resolveLocaleProvider';

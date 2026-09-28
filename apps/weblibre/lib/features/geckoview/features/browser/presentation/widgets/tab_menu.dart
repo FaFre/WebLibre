@@ -58,6 +58,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_o
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/website_feed_menu_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -108,6 +109,7 @@ class TabMenu extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final showFeeds = useState(false);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
@@ -130,7 +132,7 @@ class TabMenu extends HookConsumerWidget {
                   .show();
             },
             leadingIcon: const Icon(Icons.search),
-            child: const Text('Find in Page'),
+            child: Text(l10n.browser_menuFindInPage),
           ),
         if (enableReaderMode)
           ReaderButton(
@@ -154,7 +156,7 @@ class TabMenu extends HookConsumerWidget {
                   }
                 },
               ),
-              child: const Text('Reader Mode'),
+              child: Text(l10n.browser_menuReaderMode),
             ),
           ),
         if (enableDesktopMode)
@@ -178,7 +180,7 @@ class TabMenu extends HookConsumerWidget {
             replacement: MenuItemButton(
               closeOnActivate: false,
               leadingIcon: const Icon(Icons.rss_feed),
-              child: const Text('Fetch Feeds on Page'),
+              child: Text(l10n.browser_menuFetchFeedsOnPage),
               onPressed: () {
                 showFeeds.value = true;
               },
@@ -188,7 +190,7 @@ class TabMenu extends HookConsumerWidget {
         if (enableAddBookmark)
           MenuItemButton(
             leadingIcon: const Icon(MdiIcons.bookmarkPlus),
-            child: const Text('Add Bookmark'),
+            child: Text(l10n.browser_menuAddBookmark),
             onPressed: () async {
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
               final bookmarkUrl =
@@ -213,7 +215,7 @@ class TabMenu extends HookConsumerWidget {
             menuChildren: [
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.tab),
-                child: const Text('Regular'),
+                child: Text(l10n.browser_cloneRegular),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
                   final containerData = await ref
@@ -256,7 +258,7 @@ class TabMenu extends HookConsumerWidget {
                   MdiIcons.dominoMask,
                   color: AppColors.of(context).privateTabPurple,
                 ),
-                child: const Text('Private'),
+                child: Text(l10n.browser_clonePrivate),
                 onPressed: () async {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
                   final containerData = await ref
@@ -300,7 +302,7 @@ class TabMenu extends HookConsumerWidget {
                     MdiIcons.snowflake,
                     color: AppColors.of(context).isolatedTabTeal,
                   ),
-                  child: const Text('Isolated'),
+                  child: Text(l10n.browser_cloneIsolated),
                   onPressed: () async {
                     final tabState = ref.read(tabStateProvider(selectedTabId))!;
                     final containerData = await ref
@@ -330,14 +332,14 @@ class TabMenu extends HookConsumerWidget {
                 ),
             ],
             leadingIcon: const Icon(MdiIcons.contentDuplicate),
-            child: const Text('Clone Tab'),
+            child: Text(l10n.browser_menuCloneTab),
           ),
         if (enableContainer && settings.showContainerUi)
           SubmenuButton(
             menuChildren: [
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
-                child: const Text('Assign Container'),
+                child: Text(l10n.browser_menuAssignContainer),
                 onPressed: () async {
                   final selection = await const ContainerSelectionRoute()
                       .push<ContainerSelectionResult?>(context);
@@ -373,7 +375,7 @@ class TabMenu extends HookConsumerWidget {
               ContainerRelationUnassignedVisibility(
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.webPlus),
-                  child: const Text('URL relation'),
+                  child: Text(l10n.browser_menuUrlRelation),
                   onPressed: () async {
                     final selection = await const ContainerSelectionRoute()
                         .push<ContainerSelectionResult?>(context);
@@ -415,7 +417,7 @@ class TabMenu extends HookConsumerWidget {
               ContainerRelationAssignedVisibility(
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.webMinus),
-                  child: const Text('Unassign URL relation'),
+                  child: Text(l10n.browser_menuUnassignUrlRelation),
                   onPressed: () async {
                     final tabState = ref.read(tabStateProvider(selectedTabId));
                     final origin = tabState?.url.origin.mapNotNull(Uri.parse);
@@ -456,7 +458,7 @@ class TabMenu extends HookConsumerWidget {
                 tabId: selectedTabId,
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.folderCancelOutline),
-                  child: const Text('Unassign Container'),
+                  child: Text(l10n.browser_menuUnassignContainer),
                   onPressed: () async {
                     final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
@@ -468,7 +470,7 @@ class TabMenu extends HookConsumerWidget {
               ),
             ],
             leadingIcon: const Icon(MdiIcons.folder),
-            child: const Text('Container'),
+            child: Text(l10n.browser_menuContainerSubmenu),
           ),
         if (enableHierarchy)
           _TabHierarchySubmenu(
@@ -503,7 +505,7 @@ class TabMenu extends HookConsumerWidget {
                             TabDirection.newestFirst,
                       );
                 },
-                child: const Text('Move up'),
+                child: Text(l10n.browser_menuMoveUp),
               ),
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.chevronDown),
@@ -517,10 +519,10 @@ class TabMenu extends HookConsumerWidget {
                             TabDirection.newestFirst,
                       );
                 },
-                child: const Text('Move down'),
+                child: Text(l10n.browser_menuMoveDown),
               ),
             ],
-            child: const Text('Reorder'),
+            child: Text(l10n.browser_menuReorder),
           ),
         if (enableShare)
           SubmenuButton(
@@ -533,14 +535,14 @@ class TabMenu extends HookConsumerWidget {
               ShowQrCodeMenuItemButton(selectedTabId: selectedTabId),
             ],
             leadingIcon: const Icon(Icons.share),
-            child: const Text('Share'),
+            child: Text(l10n.browser_menuShare),
           ),
         if (enableExport)
           SubmenuButton(
             menuChildren: [
               ShareMarkdownActionMenuItemButton(
                 selectedTabId: selectedTabId,
-                title: const Text('Copy as Markdown'),
+                title: Text(l10n.browser_menuCopyAsMarkdown),
                 // ignore: deprecated_member_use
                 icon: const Icon(MdiIcons.languageMarkdownOutline),
                 shareMarkdownAction: (content, fileName) async {
@@ -549,14 +551,14 @@ class TabMenu extends HookConsumerWidget {
                   if (context.mounted) {
                     ui_helper.showInfoMessage(
                       context,
-                      'Markdown copied to clipboard',
+                      l10n.browser_markdownCopiedToClipboard,
                     );
                   }
                 },
               ),
               ShareMarkdownActionMenuItemButton(
                 selectedTabId: selectedTabId,
-                title: const Text('Export as Markdown'),
+                title: Text(l10n.browser_menuExportAsMarkdown),
                 // ignore: deprecated_member_use
                 icon: const Icon(MdiIcons.languageMarkdown),
                 shareMarkdownAction: (content, fileName) async {
@@ -573,7 +575,7 @@ class TabMenu extends HookConsumerWidget {
               PrintMenuItemButton(selectedTabId: selectedTabId),
             ],
             leadingIcon: const Icon(MdiIcons.fileExport),
-            child: const Text('Export'),
+            child: Text(l10n.browser_menuExportSubmenu),
           ),
         _TranslatePageMenuItem(
           selectedTabId: selectedTabId,
@@ -585,7 +587,7 @@ class TabMenu extends HookConsumerWidget {
             onPressed: () =>
                 closeTabWithConfirmationAndUndo(context, ref, selectedTabId),
             leadingIcon: const Icon(MdiIcons.tabMinus),
-            child: const Text('Close Tab'),
+            child: Text(l10n.browser_menuCloseTab),
           ),
         if (enableReloadButton || enableNavigationButtons) const Divider(),
         if (enableReloadButton)
@@ -599,7 +601,7 @@ class TabMenu extends HookConsumerWidget {
               controller.close();
             },
             leadingIcon: const Icon(Icons.refresh),
-            child: const Text('Reload'),
+            child: Text(l10n.browser_menuReload),
           ),
         if (enableNavigationButtons)
           _NavigationButtonsRow(
@@ -640,7 +642,7 @@ class _DesktopModeMenuItem extends ConsumerWidget {
           }
         },
       ),
-      child: const Text('Desktop Mode'),
+      child: Text(AppLocalizations.of(context).browser_menuDesktopMode),
     );
   }
 }
@@ -658,7 +660,7 @@ class _AddToHomeScreenMenuItem extends ConsumerWidget {
       child: MenuItemButton(
         closeOnActivate: false,
         leadingIcon: const Icon(Icons.add_to_home_screen),
-        child: const Text('Add to Home Screen'),
+        child: Text(AppLocalizations.of(context).browser_menuAddToHomeScreen),
         onPressed: () async {
           if (isInstallable) {
             await showPwaInstallDialog(context, ref);
@@ -697,6 +699,7 @@ class _TabHierarchySubmenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final movingTab = ref.watch(watchTabDbDataProvider(selectedTabId));
     final tabData = movingTab.value;
     final hasParent = tabData?.parentId != null;
@@ -710,15 +713,15 @@ class _TabHierarchySubmenu extends ConsumerWidget {
             controller.close();
             onChangeParent();
           },
-          child: const Text('Change parent…'),
+          child: Text(l10n.browser_menuChangeParent),
         ),
         MenuItemButton(
           leadingIcon: const Icon(MdiIcons.fileTreeOutline),
           onPressed: hasParent ? onDetachFromParent : null,
-          child: const Text('Detach from parent'),
+          child: Text(l10n.browser_menuDetachFromParent),
         ),
       ],
-      child: const Text('Hierarchy'),
+      child: Text(l10n.browser_menuHierarchy),
     );
   }
 }
@@ -766,7 +769,11 @@ class _TranslatePageMenuItem extends ConsumerWidget {
           );
         }
       },
-      child: Text(isTranslated ? 'Translated' : 'Translate Page'),
+      child: Text(
+        isTranslated
+            ? AppLocalizations.of(context).browser_pageTranslated
+            : AppLocalizations.of(context).browser_menuTranslatePage,
+      ),
     );
   }
 }
@@ -796,7 +803,11 @@ class _PinTabMenuItem extends ConsumerWidget {
         }
       },
       leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
-      child: Text(isPinned ? 'Unpin tab' : 'Pin tab'),
+      child: Text(
+        isPinned
+            ? AppLocalizations.of(context).browser_unpinTab
+            : AppLocalizations.of(context).browser_pinTab,
+      ),
     );
   }
 }

@@ -24,6 +24,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 /// Bottom sheet widget to select a feed from discovered feeds.
@@ -34,6 +35,8 @@ class SelectFeedDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -41,7 +44,10 @@ class SelectFeedDialog extends HookConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Add Feed', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              l10n.webFeed_addFeedTitle,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 16),
             ...feedUris.map(
               (uri) => HookConsumer(
@@ -53,7 +59,8 @@ class SelectFeedDialog extends HookConsumerWidget {
                     data: (data) {
                       return ListTile(
                         title: Text(
-                          data.feedData.title.whenNotEmpty ?? 'Unnamed Feed',
+                          data.feedData.title.whenNotEmpty ??
+                              l10n.webFeed_unnamedFeedTitle,
                         ),
                         subtitle: Text(uri.displayString),
                         trailing: const Icon(Icons.add),
@@ -63,7 +70,7 @@ class SelectFeedDialog extends HookConsumerWidget {
                       );
                     },
                     error: (error, stackTrace) => FailureWidget(
-                      title: 'Failed to fetch Feed',
+                      title: l10n.webFeed_fetchFeedFailedTitle,
                       exception: error,
                       onRetry: () {
                         // ignore: unused_result

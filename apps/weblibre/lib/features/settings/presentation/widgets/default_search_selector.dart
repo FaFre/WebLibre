@@ -25,6 +25,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 class DefaultSearchSelector extends HookConsumerWidget {
@@ -32,6 +33,8 @@ class DefaultSearchSelector extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     final activeBang = ref.watch(
       defaultSearchBangDataProvider.select((value) => value.value),
     );
@@ -61,7 +64,7 @@ class DefaultSearchSelector extends HookConsumerWidget {
                 ? OutlinedButton.icon(
                     onPressed: pickProvider,
                     icon: const Icon(Icons.search),
-                    label: const Text('Choose a search provider'),
+                    label: Text(l10n.settings_chooseSearchProvider),
                   )
                 : ActionChip(
                     avatar: UrlIcon([activeBang.getDefaultUrl()], iconSize: 20),

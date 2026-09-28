@@ -28,6 +28,7 @@ import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 /// Bottom sheet widget to select a user profile.
@@ -37,6 +38,7 @@ class SelectProfileDialog extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final usersAsync = ref.watch(profileRepositoryProvider);
+    final l10n = AppLocalizations.of(context);
 
     return SafeArea(
       child: Padding(
@@ -46,7 +48,7 @@ class SelectProfileDialog extends HookConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Select profile',
+              l10n.user_selectProfileTitle,
               style: Theme.of(context).textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
@@ -91,7 +93,7 @@ class SelectProfileDialog extends HookConsumerWidget {
               },
               error: (error, stackTrace) => Center(
                 child: FailureWidget(
-                  title: 'Could not load profiles',
+                  title: l10n.user_loadProfilesFailedTitle,
                   exception: error,
                 ),
               ),
@@ -103,7 +105,7 @@ class SelectProfileDialog extends HookConsumerWidget {
                 await ProfileListRoute().push(context);
               },
               icon: const Icon(MdiIcons.accountGroup),
-              label: const Text('Manage profiles'),
+              label: Text(l10n.user_manageProfilesLabel),
             ),
           ],
         ),
@@ -133,6 +135,7 @@ class _ProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     // `InkWell` rather than `GestureDetector`: this is a button, and a bare
     // detector gives it no ripple, no focus ring, no keyboard activation, and
@@ -143,9 +146,9 @@ class _ProfileAvatar extends StatelessWidget {
       button: true,
       selected: isActive,
       label: label,
-      hint: 'Switch to this profile. Long press to edit it.',
+      hint: l10n.user_profileAvatarHint,
       child: Tooltip(
-        message: '$label\nLong press to edit',
+        message: l10n.user_profileAvatarTooltip(label),
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
@@ -196,10 +199,11 @@ class _AddProfileAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
 
     return Semantics(
       button: true,
-      label: 'Add a profile',
+      label: l10n.user_addProfileLabel,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -230,7 +234,7 @@ class _AddProfileAvatar extends StatelessWidget {
               SizedBox(
                 width: 72,
                 child: Text(
-                  'Add profile',
+                  l10n.user_addProfileButtonLabel,
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
                   maxLines: 1,

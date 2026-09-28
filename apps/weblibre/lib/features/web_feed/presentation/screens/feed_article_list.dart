@@ -26,6 +26,7 @@ import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/article_filter.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/feed_article_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 
@@ -36,6 +37,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final tags = ref.watch(articleFilterProvider);
     final articlesAsync = ref.watch(
       // ignore: provider_parameters
@@ -79,7 +81,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
           return [
             SliverAppBar(
               floating: true,
-              title: Text(feedTitle ?? 'Articles'),
+              title: Text(feedTitle ?? l10n.webFeed_articlesTitle),
               bottom: PreferredSize(
                 preferredSize: Size(double.infinity, bottomHeight),
                 child: Padding(
@@ -90,7 +92,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
                         focusNode: focusNode,
                         controller: searchTextController,
                         decoration: InputDecoration(
-                          label: const Text('Search'),
+                          label: Text(l10n.webFeed_searchLabel),
                           suffixIcon: hasText
                               ? IconButton(
                                   onPressed: () {
@@ -186,7 +188,7 @@ class FeedArticleListScreen extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load Articles',
+              title: l10n.webFeed_loadArticlesFailedTitle,
               exception: error,
             ),
           ),

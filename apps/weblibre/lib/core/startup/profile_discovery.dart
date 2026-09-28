@@ -22,6 +22,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid_value.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/data/models/auth_settings.dart';
 import 'package:weblibre/utils/filesystem.dart' as fs;
@@ -252,7 +253,9 @@ Future<int> repairDamagedProfiles(ProfileDiscovery found) async {
 /// see the cause of.
 String recoveredProfileName(UuidValue uuid) {
   final id = uuid.uuid;
-  return 'Recovered profile ${id.substring(id.length - 8)}';
+  return contextFreeAppLocalizations.profileDiscovery_recoveredProfileName(
+    id.substring(id.length - 8),
+  );
 }
 
 /// Classifies one candidate directory, never throwing.

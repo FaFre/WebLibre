@@ -25,6 +25,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bang_chip_strip.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 // Both helpers are conceptually `FrequentBangsSection`-private — they
 // implement the section's own display-ordering and delete-affordance
@@ -58,6 +59,7 @@ class FrequentBangsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final frequentBangs = ref.watch(
       frequentBangListProvider.select((v) => v.value ?? const <BangData>[]),
     );
@@ -90,7 +92,7 @@ class FrequentBangsSection extends ConsumerWidget {
     }
 
     return SearchModuleSection(
-      title: 'Frequent Bangs',
+      title: l10n.search_moduleLabelFrequentBangs,
       moduleType: SearchModuleType.frequentBangs,
       totalCount: bangs.length,
       contentSliverBuilder:

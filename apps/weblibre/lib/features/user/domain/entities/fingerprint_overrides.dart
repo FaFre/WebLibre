@@ -20,6 +20,11 @@
 import 'package:exceptions/exceptions.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 
+/// Why a stored override string could not be parsed, carried in
+/// [ErrorMessage.details] so the settings screen can say it in the UI
+/// language ([ErrorMessage.message] stays English, for logs).
+enum FingerprintOverrideParseFailure { invalidOverride, unknownTarget }
+
 class FingerprintOverrides with FastEquatable {
   static final pattern = RegExp('([+-])([a-zA-Z_][a-zA-Z0-9_]{1,64})');
 
@@ -128,7 +133,11 @@ class FingerprintOverrides with FastEquatable {
       final match = pattern.firstMatch(word);
       if (match == null) {
         return Result.failure(
-          const ErrorMessage(source: 'FpParser', message: 'Invalid Override'),
+          const ErrorMessage(
+            source: 'FpParser',
+            message: 'Invalid Override',
+            details: FingerprintOverrideParseFailure.invalidOverride,
+          ),
         );
       }
 
@@ -145,6 +154,7 @@ class FingerprintOverrides with FastEquatable {
           const ErrorMessage(
             source: 'FpParser',
             message: 'Invalid target name',
+            details: FingerprintOverrideParseFailure.unknownTarget,
           ),
         );
       }

@@ -60,7 +60,7 @@ final class ProxyLatencyResultsProvider
 }
 
 String _$proxyLatencyResultsHash() =>
-    r'85dec80ca28c86cf0cb62c6548d82986de79f61d';
+    r'36ea5a9b3afc33e1283d74bf53ad330d2bc6b1ec';
 
 /// Per-profile latency results, keyed by profile id. Holds the latest result
 /// only; we don't keep history because the test is user-triggered and the user

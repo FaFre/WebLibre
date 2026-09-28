@@ -25,17 +25,19 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangCategoriesScreen extends HookConsumerWidget {
   const BangCategoriesScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final categoriesAsync = ref.watch(bangCategoriesProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bang Categories'),
+        title: Text(l10n.bangs_categoriesTitle),
         actions: [
           IconButton(
             onPressed: () async {
@@ -115,7 +117,7 @@ class BangCategoriesScreen extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load Bang Categories',
+              title: l10n.bangs_loadCategoriesFailedTitle,
               exception: error,
             ),
           ),

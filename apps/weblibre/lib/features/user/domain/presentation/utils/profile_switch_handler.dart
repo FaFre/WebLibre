@@ -23,6 +23,7 @@ import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/switch_profile_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -42,7 +43,10 @@ Future<void> handleSwitchProfile(
   // Don't allow switching to the already active profile
   if (isSelected) {
     if (context.mounted) {
-      ui_helper.showInfoMessage(context, 'This profile is already active');
+      ui_helper.showInfoMessage(
+        context,
+        AppLocalizations.of(context).user_profileAlreadyActive,
+      );
     }
     return;
   }
@@ -61,7 +65,12 @@ Future<void> handleSwitchProfile(
           .switchProfile(profile.id);
     } catch (error) {
       if (context.mounted) {
-        ui_helper.showErrorMessage(context, 'Could not switch profile: $error');
+        ui_helper.showErrorMessage(
+          context,
+          AppLocalizations.of(
+            context,
+          ).user_switchProfileFailedWithError(error.toString()),
+        );
       }
       return;
     }

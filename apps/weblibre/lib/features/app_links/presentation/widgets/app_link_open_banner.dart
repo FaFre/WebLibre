@@ -26,6 +26,7 @@ import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/services/app_links_coordinator.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_details.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Non-modal banner for an http(s) app link (§2.2). The page is allowed to load
 /// while the banner is up; nothing blocks on it. Declining leaves the page
@@ -37,6 +38,7 @@ class AppLinkOpenBanner extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final target = request.target;
     final appName = target.appName;
     final remember = useState(false);
@@ -84,8 +86,8 @@ class AppLinkOpenBanner extends HookConsumerWidget {
                     children: [
                       Text(
                         appName != null
-                            ? 'Open this link in $appName?'
-                            : 'Open this link in an app?',
+                            ? l10n.appLinks_bannerTitleNamed(appName)
+                            : l10n.appLinks_bannerTitleGeneric,
                         style: theme.textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 2),
@@ -95,7 +97,7 @@ class AppLinkOpenBanner extends HookConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
-                  tooltip: 'Dismiss',
+                  tooltip: l10n.common_dismiss,
                   // A back/swipe/cancel resolves as dismiss (§2.6).
                   onPressed: () => resolve(AppLinkDecision.dismiss),
                 ),
@@ -110,7 +112,9 @@ class AppLinkOpenBanner extends HookConsumerWidget {
                   ),
                   Flexible(
                     child: Text(
-                      'Remember for ${displayAppLinkScope(target.scopeKey)}',
+                      l10n.appLinks_bannerRememberFor(
+                        displayAppLinkScope(target.scopeKey),
+                      ),
                     ),
                   ),
                 ],
@@ -122,12 +126,12 @@ class AppLinkOpenBanner extends HookConsumerWidget {
                 children: [
                   TextButton(
                     onPressed: () => resolve(AppLinkDecision.cancel),
-                    child: const Text('Stay in browser'),
+                    child: Text(l10n.appLinks_bannerStayInBrowser),
                   ),
                   const SizedBox(width: 8),
                   FilledButton(
                     onPressed: () => resolve(AppLinkDecision.open),
-                    child: const Text('Open app'),
+                    child: Text(l10n.appLinks_bannerOpenApp),
                   ),
                 ],
               ),

@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/number_format.dart';
 
 class AddonListingIcon extends StatelessWidget {
@@ -76,6 +77,7 @@ class AddonListingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Card(
       color: theme.colorScheme.surfaceContainerHigh,
       margin: const EdgeInsets.only(bottom: 12),
@@ -107,9 +109,9 @@ class AddonListingCard extends StatelessWidget {
                       spacing: 8,
                       children: [
                         if (listing.promoted == AddonStorePromoted.recommended)
-                          const Chip(
-                            avatar: Icon(Icons.verified, size: 16),
-                            label: Text('Recommended'),
+                          Chip(
+                            avatar: const Icon(Icons.verified, size: 16),
+                            label: Text(l10n.addons_chipRecommended),
                           ),
                         if (listing.ratingAverage != null)
                           Chip(
@@ -126,9 +128,9 @@ class AddonListingCard extends StatelessWidget {
                             ),
                           ),
                         if (isInstalled)
-                          const Chip(
-                            avatar: Icon(Icons.check, size: 16),
-                            label: Text('Installed'),
+                          Chip(
+                            avatar: const Icon(Icons.check, size: 16),
+                            label: Text(l10n.addons_statusInstalled),
                           ),
                       ],
                     ),

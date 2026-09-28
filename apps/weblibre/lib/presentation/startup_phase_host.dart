@@ -22,10 +22,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:weblibre/core/copy/profile_copy.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/startup/startup_bootstrap.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/startup_maintenance_screen.dart';
 import 'package:weblibre/presentation/startup_profile_picker.dart';
 
@@ -260,6 +261,12 @@ class _StartupShell extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _startupLightTheme,
       darkTheme: _startupDarkTheme,
+      // No `locale:` here — the profile setting that would pick one is not
+      // readable yet (see the class doc), so this falls back to Flutter's own
+      // platform-locale resolution, exactly like the stock theming above.
+      localeListResolutionCallback: resolveAppLocale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(body: SafeArea(child: child)),
     );
   }
@@ -321,36 +328,35 @@ class StartupHaltScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final (icon, title, body) = switch (halted.kind) {
       StartupHaltKind.maintenance => (
         Icons.build_outlined,
-        'Unfinished profile work',
-        'A backup, restore or deletion from an earlier run did not finish. '
-            'WebLibre must finish it before any profile can open.',
+        l10n.startup_haltMaintenanceTitle,
+        l10n.startup_haltMaintenanceBody,
       ),
       StartupHaltKind.unavailable => (
         Icons.hourglass_empty,
-        'Startup is not ready',
-        'WebLibre needs to restart before it can choose a profile. '
-            '$reopenToContinue',
+        l10n.startup_haltUnavailableTitle,
+        l10n.startup_haltUnavailableBody(l10n.profileCopy_reopenToContinue),
       ),
       StartupHaltKind.profileAccessBusy => (
         Icons.lock_clock,
-        'Profile is in use',
-        'Another WebLibre task is still using this profile. Try again in a '
-            'moment.',
+        l10n.startup_haltProfileAccessBusyTitle,
+        l10n.startup_haltProfileAccessBusyBody,
       ),
       StartupHaltKind.noProfile => (
         Icons.person_off_outlined,
-        'No usable profile',
-        'WebLibre could not read an existing profile or create a new one. '
-            'Storage may be full or unavailable.',
+        l10n.startup_haltNoProfileTitle,
+        l10n.startup_haltNoProfileBody,
       ),
       StartupHaltKind.arbitrationFailed => (
         Icons.error_outline,
-        'Cannot tell which profile to open',
-        'WebLibre will not guess which profile to use. $reopenToContinue',
+        l10n.startup_haltArbitrationFailedTitle,
+        l10n.startup_haltArbitrationFailedBody(
+          l10n.profileCopy_reopenToContinue,
+        ),
       ),
     };
 
@@ -382,7 +388,9 @@ class StartupHaltScreen extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: busy ? null : () => unawaited(onRetry!()),
                   icon: const Icon(Icons.refresh),
-                  label: Text(busy ? 'Trying again…' : 'Try again'),
+                  label: Text(
+                    busy ? l10n.startup_tryingAgain : l10n.startup_tryAgain,
+                  ),
                 ),
               const SizedBox(height: 8),
               OutlinedButton.icon(
@@ -393,7 +401,7 @@ class StartupHaltScreen extends StatelessWidget {
                 // user.
                 onPressed: busy ? null : () => unawaited(SystemNavigator.pop()),
                 icon: const Icon(Icons.close),
-                label: const Text('Close WebLibre'),
+                label: Text(l10n.startup_closeWebLibre),
               ),
               const SizedBox(height: 24),
               // Folded away rather than dropped. None of it means anything to a
@@ -420,6 +428,7 @@ class _HaltDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Theme(
       // The divider lines an ExpansionTile draws by default read as a broken
@@ -427,7 +436,10 @@ class _HaltDetails extends StatelessWidget {
       data: theme.copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
-        title: Text('Technical details', style: theme.textTheme.bodySmall),
+        title: Text(
+          l10n.startup_technicalDetails,
+          style: theme.textTheme.bodySmall,
+        ),
         children: [
           Align(
             alignment: Alignment.centerLeft,
@@ -446,7 +458,7 @@ class _HaltDetails extends StatelessWidget {
               onPressed: () =>
                   unawaited(Clipboard.setData(ClipboardData(text: details))),
               icon: const Icon(Icons.copy, size: 16),
-              label: const Text('Copy details'),
+              label: Text(l10n.startup_copyDetails),
             ),
           ),
         ],

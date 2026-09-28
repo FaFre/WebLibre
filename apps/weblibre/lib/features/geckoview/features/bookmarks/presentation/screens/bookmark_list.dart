@@ -48,6 +48,8 @@ import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dial
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_bookmarks_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/import_progress_dialog.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/presentation/dialogs/select_bookmark_folder_dialog.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/utils/bookmark_item_l10n.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/utils/bookmark_sort_type_l10n.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/utils/bookmark_import_isolate.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -55,6 +57,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -77,6 +80,7 @@ class BookmarkListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final hideEmptyRoots = useState(true);
     final uiState = ref.watch(bookmarkListUiStateProvider);
     final uiStateNotifier = ref.read(bookmarkListUiStateProvider.notifier);
@@ -171,9 +175,8 @@ class BookmarkListScreen extends HookConsumerWidget {
                     uiStateNotifier,
                     expandedGuids,
                     emptyLabel: searchSuppressedByFilter
-                        ? 'Search matches bookmarks, which "Folders Only" is '
-                              'hiding'
-                        : 'No bookmarks match "${searchQuery.value}"',
+                        ? l10n.bookmarks_searchHiddenByFoldersOnly
+                        : l10n.bookmarks_noSearchMatches(searchQuery.value),
                   )
                 : folderAsync.when(
                     skipLoadingOnReload: true,
@@ -184,11 +187,11 @@ class BookmarkListScreen extends HookConsumerWidget {
                       uiState,
                       uiStateNotifier,
                       expandedGuids,
-                      emptyLabel: 'Empty',
+                      emptyLabel: l10n.bookmarks_emptyFolder,
                     ),
                     error: (error, stackTrace) => Center(
                       child: FailureWidget(
-                        title: 'Failed to load Bookmarks',
+                        title: l10n.bookmarks_loadFailedTitle,
                         exception: error,
                         onRetry: () {
                           ref.invalidate(bookmarkFolderProvider(entryGuid));
@@ -338,31 +341,32 @@ class BookmarkListScreen extends HookConsumerWidget {
     BookmarkListUiStateNotifier uiStateNotifier,
     List<BookmarkRow> rows,
   ) {
+    final l10n = AppLocalizations.of(context);
     final count = uiState.selectedGuids.length;
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.close),
         onPressed: () => uiStateNotifier.exitSelectionMode(),
       ),
-      title: Text('$count selected'),
+      title: Text(l10n.bookmarks_selectionCount(count)),
       actions: [
         IconButton(
           icon: const Icon(MdiIcons.tabPlus),
-          tooltip: 'Open in background',
+          tooltip: l10n.bookmarks_tooltipOpenInBackground,
           onPressed: count > 0
               ? () => _bulkOpenInBackground(context, ref, uiState, rows)
               : null,
         ),
         IconButton(
           icon: const Icon(MdiIcons.folderMove),
-          tooltip: 'Move selected',
+          tooltip: l10n.bookmarks_tooltipMoveSelected,
           onPressed: count > 0
               ? () => _bulkMove(context, ref, uiState, rows)
               : null,
         ),
         IconButton(
           icon: const Icon(MdiIcons.delete),
-          tooltip: 'Delete selected',
+          tooltip: l10n.bookmarks_tooltipDeleteSelected,
           onPressed: count > 0
               ? () => _bulkDelete(context, ref, uiState, uiStateNotifier, rows)
               : null,
@@ -381,29 +385,31 @@ class BookmarkListScreen extends HookConsumerWidget {
     BookmarkListUiStateNotifier uiStateNotifier,
     BookmarkListUiState uiState,
   ) {
+    final l10n = AppLocalizations.of(context);
+
     return AppBar(
       title: textFilterEnabled.value
           ? TextField(
               controller: textFilterController,
               textAlignVertical: TextAlignVertical.center,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 // Collapsed so the box is exactly the text: any asymmetric
                 // content padding would offset the text from the centre the
                 // app bar aligns the action icons to.
                 isCollapsed: true,
                 border: InputBorder.none,
-                hintText: 'Filter bookmarks...',
+                hintText: l10n.bookmarks_filterHint,
               ),
             )
-          : const Text('Bookmarks'),
+          : Text(l10n.bookmarks_title),
       actions: [
         // One button, one slot: it opens the search, then clears it, then
         // closes it. A clear button attached to the field would sit left of
         // this slot and appear to jump when the field opens.
         IconButton(
           tooltip: textFilterEnabled.value
-              ? 'Clear search'
-              : 'Search bookmarks',
+              ? l10n.bookmarks_tooltipClearSearch
+              : l10n.bookmarks_tooltipSearchBookmarks,
           onPressed: () {
             if (!textFilterEnabled.value) {
               textFilterEnabled.value = true;
@@ -424,7 +430,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             if (entryGuid != BookmarkRoot.root.id) ...[
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.bookmarkPlus),
-                child: const Text('Add Bookmark Here'),
+                child: Text(l10n.bookmarks_menuAddBookmarkHere),
                 onPressed: () async {
                   await BookmarkEntryAddRoute(
                     bookmarkInfo: jsonEncode(
@@ -435,7 +441,7 @@ class BookmarkListScreen extends HookConsumerWidget {
               ),
               MenuItemButton(
                 leadingIcon: const Icon(MdiIcons.folderPlus),
-                child: const Text('Add Subfolder Here'),
+                child: Text(l10n.bookmarks_menuAddSubfolderHere),
                 onPressed: () async {
                   await BookmarkFolderAddRoute(
                     parentGuid: entryGuid,
@@ -451,7 +457,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                   onPressed: expandedGuids.value.isEmpty
                       ? null
                       : () => expandedGuids.value = <String>{},
-                  child: const Text('Collapse All'),
+                  child: Text(l10n.bookmarks_menuCollapseAll),
                 ),
                 if (entryGuid == BookmarkRoot.root.id)
                   MenuItemButton(
@@ -462,8 +468,8 @@ class BookmarkListScreen extends HookConsumerWidget {
                     ),
                     child: Text(
                       hideEmptyRoots.value
-                          ? 'Show Empty Folders'
-                          : 'Hide Empty Folders',
+                          ? l10n.bookmarks_menuShowEmptyFolders
+                          : l10n.bookmarks_menuHideEmptyFolders,
                     ),
                     onPressed: () {
                       hideEmptyRoots.value = !hideEmptyRoots.value;
@@ -477,11 +483,13 @@ class BookmarkListScreen extends HookConsumerWidget {
                   ),
                   onPressed: uiStateNotifier.toggleFoldersOnly,
                   child: Text(
-                    uiState.foldersOnly ? 'Show Bookmarks' : 'Folders Only',
+                    uiState.foldersOnly
+                        ? l10n.bookmarks_menuShowBookmarks
+                        : l10n.bookmarks_menuFoldersOnly,
                   ),
                 ),
               ],
-              child: const Text('Visibility'),
+              child: Text(l10n.bookmarks_menuVisibility),
             ),
             SubmenuButton(
               leadingIcon: const Icon(MdiIcons.sort),
@@ -491,45 +499,45 @@ class BookmarkListScreen extends HookConsumerWidget {
                     leadingIcon: sortType == uiState.sortType
                         ? const Icon(Icons.check)
                         : const SizedBox(width: 24),
-                    child: Text(sortType.label),
+                    child: Text(sortType.label(context)),
                     onPressed: () => uiStateNotifier.setSortType(sortType),
                   ),
               ],
-              child: const Text('Sort'),
+              child: Text(l10n.bookmarks_menuSort),
             ),
             SubmenuButton(
               leadingIcon: const Icon(MdiIcons.import),
               menuChildren: [
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.codeJson),
-                  child: const Text('JSON'),
+                  child: Text(l10n.bookmarks_formatJson),
                   onPressed: () =>
                       _handleImport(context, ref, BookmarkImportFormat.json),
                 ),
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.xml),
-                  child: const Text('HTML'),
+                  child: Text(l10n.bookmarks_formatHtml),
                   onPressed: () =>
                       _handleImport(context, ref, BookmarkImportFormat.html),
                 ),
               ],
-              child: const Text('Import'),
+              child: Text(l10n.bookmarks_menuImport),
             ),
             SubmenuButton(
               leadingIcon: const Icon(MdiIcons.export),
               menuChildren: [
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.codeJson),
-                  child: const Text('JSON'),
+                  child: Text(l10n.bookmarks_formatJson),
                   onPressed: () => _handleExport(context, ref, 'json'),
                 ),
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.xml),
-                  child: const Text('HTML'),
+                  child: Text(l10n.bookmarks_formatHtml),
                   onPressed: () => _handleExport(context, ref, 'html'),
                 ),
               ],
-              child: const Text('Export'),
+              child: Text(l10n.bookmarks_menuExport),
             ),
           ],
           builder: (context, controller, child) => IconButton(
@@ -598,6 +606,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     return HookBuilder(
       builder: (context) {
         final controller = useMenuController();
+        final l10n = AppLocalizations.of(context);
 
         return MenuAnchor(
           controller: controller,
@@ -617,7 +626,7 @@ class BookmarkListScreen extends HookConsumerWidget {
           menuChildren: [
             MenuItemButton(
               leadingIcon: const Icon(MdiIcons.openInNew),
-              child: const Text('Open'),
+              child: Text(l10n.common_open),
               onPressed: () async {
                 final result = await OpenSharedContentRoute(
                   sharedUrl: bookmark.url.toString(),
@@ -629,7 +638,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             ),
             MenuItemButton(
               leadingIcon: const Icon(MdiIcons.tabPlus),
-              child: const Text('Open in New Tab'),
+              child: Text(l10n.bookmarks_actionOpenInNewTab),
               onPressed: () async {
                 await _openInNewTab(
                   context,
@@ -641,7 +650,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             ),
             MenuItemButton(
               leadingIcon: const Icon(MdiIcons.tab),
-              child: const Text('Open in Background'),
+              child: Text(l10n.bookmarks_actionOpenInBackground),
               onPressed: () async {
                 await _openInNewTab(
                   context,
@@ -653,7 +662,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             ),
             MenuItemButton(
               leadingIcon: const Icon(Icons.share),
-              child: const Text('Share'),
+              child: Text(l10n.bookmarks_actionShare),
               onPressed: () async {
                 await SharePlus.instance.share(
                   ShareParams(text: bookmark.url.toString()),
@@ -662,7 +671,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             ),
             MenuItemButton(
               leadingIcon: const Icon(MdiIcons.folderMove),
-              child: const Text('Move'),
+              child: Text(l10n.bookmarks_actionMove),
               onPressed: () async {
                 final targetGuid = await showSelectBookmarkFolderDialog(
                   context,
@@ -680,7 +689,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             ),
             MenuItemButton(
               leadingIcon: const Icon(Icons.edit),
-              child: const Text('Edit'),
+              child: Text(l10n.common_edit),
               onPressed: () async {
                 await BookmarkEntryEditRoute(
                   bookmarkEntry: jsonEncode(bookmark.toJson()),
@@ -689,7 +698,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             ),
             MenuItemButton(
               leadingIcon: const Icon(MdiIcons.bookmarkRemove),
-              child: const Text('Delete'),
+              child: Text(l10n.common_delete),
               onPressed: () async {
                 final result = await showDeleteBookmarkDialog(context);
                 if (result == true) {
@@ -726,7 +735,7 @@ class BookmarkListScreen extends HookConsumerWidget {
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           leading: Icon(isExpanded ? MdiIcons.folderOpen : MdiIcons.folder),
-          title: Text(folder.title),
+          title: Text(folder.displayTitle(context)),
           trailing: isRoot
               ? null
               : Checkbox(
@@ -747,6 +756,7 @@ class BookmarkListScreen extends HookConsumerWidget {
       child: HookBuilder(
         builder: (context) {
           final controller = useMenuController();
+          final l10n = AppLocalizations.of(context);
 
           return ListTile(
             contentPadding: EdgeInsets.zero,
@@ -755,10 +765,12 @@ class BookmarkListScreen extends HookConsumerWidget {
             // into it, as it did before.
             leading: IconButton(
               icon: Icon(isExpanded ? MdiIcons.folderOpen : MdiIcons.folder),
-              tooltip: isExpanded ? 'Collapse' : 'Expand',
+              tooltip: isExpanded
+                  ? l10n.bookmarks_tooltipCollapse
+                  : l10n.bookmarks_tooltipExpand,
               onPressed: onToggleExpanded,
             ),
-            title: Text(folder.title),
+            title: Text(folder.displayTitle(context)),
             trailing: MenuAnchor(
               controller: controller,
               builder: (context, controller, child) => InkWell(
@@ -781,7 +793,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                 if (!isRoot) ...[
                   MenuItemButton(
                     leadingIcon: const Icon(MdiIcons.folderMove),
-                    child: const Text('Move'),
+                    child: Text(l10n.bookmarks_actionMove),
                     onPressed: () async {
                       final repo = ref.read(
                         bookmarksRepositoryProvider.notifier,
@@ -806,7 +818,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                   if (canFlattenFolder(folder))
                     MenuItemButton(
                       leadingIcon: const Icon(MdiIcons.folderRemove),
-                      child: const Text('Flatten'),
+                      child: Text(l10n.bookmarks_actionFlatten),
                       onPressed: () async {
                         await ref
                             .read(bookmarksRepositoryProvider.notifier)
@@ -815,7 +827,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                     ),
                   MenuItemButton(
                     leadingIcon: const Icon(MdiIcons.folderEdit),
-                    child: const Text('Edit'),
+                    child: Text(l10n.common_edit),
                     onPressed: () async {
                       await BookmarkFolderEditRoute(
                         folder: jsonEncode(folder.toJson()),
@@ -824,7 +836,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                   ),
                   MenuItemButton(
                     leadingIcon: const Icon(Icons.delete),
-                    child: const Text('Delete'),
+                    child: Text(l10n.common_delete),
                     onPressed: () async {
                       final result = await showDeleteFolderDialog(context);
                       if (result == true) {
@@ -837,7 +849,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                 ],
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.folderPlus),
-                  child: const Text('Add Subfolder'),
+                  child: Text(l10n.bookmarks_actionAddSubfolder),
                   onPressed: () async {
                     await BookmarkFolderAddRoute(
                       parentGuid: folder.guid,
@@ -846,7 +858,7 @@ class BookmarkListScreen extends HookConsumerWidget {
                 ),
                 MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.bookmarkPlus),
-                  child: const Text('Add Bookmark'),
+                  child: Text(l10n.bookmarks_actionAddBookmark),
                   onPressed: () async {
                     await BookmarkEntryAddRoute(
                       bookmarkInfo: jsonEncode(
@@ -892,7 +904,10 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     if (entries.isEmpty) {
       if (context.mounted) {
-        showInfoMessage(context, 'No bookmark entries selected');
+        showInfoMessage(
+          context,
+          AppLocalizations.of(context).bookmarks_noEntriesSelected,
+        );
       }
       return;
     }
@@ -915,7 +930,12 @@ class BookmarkListScreen extends HookConsumerWidget {
     ref.read(bookmarkListUiStateProvider.notifier).exitSelectionMode();
 
     if (context.mounted) {
-      showInfoMessage(context, 'Opened ${entries.length} tabs in background');
+      showInfoMessage(
+        context,
+        AppLocalizations.of(
+          context,
+        ).bookmarks_openedTabsInBackground(entries.length),
+      );
     }
   }
 
@@ -954,7 +974,10 @@ class BookmarkListScreen extends HookConsumerWidget {
     ref.read(bookmarkListUiStateProvider.notifier).exitSelectionMode();
 
     if (context.mounted) {
-      showInfoMessage(context, 'Moved ${items.length} items');
+      showInfoMessage(
+        context,
+        AppLocalizations.of(context).bookmarks_movedItemsCount(items.length),
+      );
     }
   }
 
@@ -993,7 +1016,10 @@ class BookmarkListScreen extends HookConsumerWidget {
     uiStateNotifier.exitSelectionMode();
 
     if (context.mounted) {
-      showInfoMessage(context, 'Deleted ${guids.length} items');
+      showInfoMessage(
+        context,
+        AppLocalizations.of(context).bookmarks_deletedItemsCount(guids.length),
+      );
     }
   }
 
@@ -1145,7 +1171,10 @@ class BookmarkListScreen extends HookConsumerWidget {
       final file = result.first;
       if (file.path == null) {
         if (context.mounted) {
-          showErrorMessage(context, 'Failed to read file');
+          showErrorMessage(
+            context,
+            AppLocalizations.of(context).bookmarks_importFailedToReadFile,
+          );
         }
         return;
       }
@@ -1192,12 +1221,18 @@ class BookmarkListScreen extends HookConsumerWidget {
       }
 
       if (context.mounted) {
-        showInfoMessage(context, 'Imported $count bookmarks successfully');
+        showInfoMessage(
+          context,
+          AppLocalizations.of(context).bookmarks_importSuccessCount(count),
+        );
       }
     } catch (e, s) {
       logger.e('Bookmark import failed', error: e, stackTrace: s);
       if (context.mounted) {
-        showErrorMessage(context, 'Import failed: $e');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(context).bookmarks_importFailedWithError('$e'),
+        );
       }
     }
   }
@@ -1231,8 +1266,9 @@ class BookmarkListScreen extends HookConsumerWidget {
       final defaultFileName =
           'bookmarks_$timestamp.${format == 'json' ? 'json' : 'html'}';
 
+      if (!context.mounted) return;
       final outputPath = await FilePicker.saveFile(
-        dialogTitle: 'Export Bookmarks',
+        dialogTitle: AppLocalizations.of(context).bookmarks_exportDialogTitle,
         fileName: defaultFileName,
         type: FileType.custom,
         allowedExtensions: format == 'json' ? ['json'] : ['html', 'htm'],
@@ -1242,12 +1278,18 @@ class BookmarkListScreen extends HookConsumerWidget {
       if (outputPath == null) return;
 
       if (context.mounted) {
-        showInfoMessage(context, 'Bookmarks exported successfully');
+        showInfoMessage(
+          context,
+          AppLocalizations.of(context).bookmarks_exportSuccess,
+        );
       }
     } catch (e, s) {
       logger.e('Bookmark export failed', error: e, stackTrace: s);
       if (context.mounted) {
-        showErrorMessage(context, 'Export failed: $e');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(context).bookmarks_exportFailedWithError('$e'),
+        );
       }
     }
   }

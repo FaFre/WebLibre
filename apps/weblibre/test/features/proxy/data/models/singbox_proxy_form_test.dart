@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/proxy/data/forms/singbox_form_spec.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/parsers/singbox_proxy_uri.dart';
 
@@ -82,10 +83,14 @@ void main() {
     test('rejects invalid server ports', () {
       final spec = singboxProxyFormSpecs[SingboxProxyProfileType.http]!;
 
-      expect(
-        spec.validate({'server': 'proxy.example.com', 'server_port': '70000'}),
-        'Server Port must be between 1 and 65535.',
-      );
+      final error = spec.validate({
+        'server': 'proxy.example.com',
+        'server_port': '70000',
+      });
+
+      expect(error, isNotNull);
+      expect(error!.field.key, 'server_port');
+      expect(error.kind, SingboxFieldErrorKind.outOfPortRange);
     });
 
     test('builds nested advanced config fields', () {
@@ -187,7 +192,11 @@ void main() {
         'peer_public_key': 'peer-public-key',
       };
 
-      expect(spec.validate(values), contains('not-an-address'));
+      final error = spec.validate(values);
+
+      expect(error, isNotNull);
+      expect(error!.kind, SingboxFieldErrorKind.invalidCidr);
+      expect(error.stringParam, 'not-an-address');
     });
 
     test('hydrates WireGuard values from public and secret JSON', () {
@@ -224,18 +233,20 @@ void main() {
     test('rejects invalid WireGuard reserved bytes', () {
       final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
 
-      expect(
-        spec.validate({
-          'server': 'wg.example.com',
-          'server_port': '51820',
-          'local_address': '10.0.0.2/32',
-          'private_key': 'private-key',
-          'peer_public_key': 'peer-public-key',
-          'mtu': '1420',
-          'reserved': '1, 2',
-        }),
-        'Reserved Bytes must contain 3 numbers.',
-      );
+      final error = spec.validate({
+        'server': 'wg.example.com',
+        'server_port': '51820',
+        'local_address': '10.0.0.2/32',
+        'private_key': 'private-key',
+        'peer_public_key': 'peer-public-key',
+        'mtu': '1420',
+        'reserved': '1, 2',
+      });
+
+      expect(error, isNotNull);
+      expect(error!.field.key, 'reserved');
+      expect(error.kind, SingboxFieldErrorKind.wrongListLength);
+      expect(error.intParam, 3);
     });
   });
 

@@ -30,6 +30,8 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/presentation/utils/search_suggestion_providers_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -42,6 +44,7 @@ class DefaultSearchPage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final bangs = ref.watch(bangListProvider(triggers: defaultBangs));
 
@@ -73,12 +76,15 @@ class DefaultSearchPage extends HookConsumerWidget {
               children: [
                 const SizedBox(height: 24),
                 Center(
-                  child: Text('Search', style: theme.textTheme.headlineMedium),
+                  child: Text(
+                    l10n.onboarding_searchTitle,
+                    style: theme.textTheme.headlineMedium,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                const ListTile(
-                  title: Text('Default Search Provider'),
-                  leading: Icon(MdiIcons.cloudSearch),
+                ListTile(
+                  title: Text(l10n.onboarding_searchDefaultProviderLabel),
+                  leading: const Icon(MdiIcons.cloudSearch),
                   contentPadding: EdgeInsets.zero,
                 ),
                 if (activeBang != null)
@@ -112,7 +118,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                       ),
                     ),
                     ActionChip(
-                      label: const Text('Search more'),
+                      label: Text(l10n.onboarding_searchMore),
                       avatar: const Icon(Icons.search),
                       onPressed: () async {
                         final trigger = await const BangSearchRoute()
@@ -126,9 +132,9 @@ class DefaultSearchPage extends HookConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
-                const ListTile(
-                  title: Text('Default Autocomplete Provider'),
-                  leading: Icon(MdiIcons.weatherCloudyArrowRight),
+                ListTile(
+                  title: Text(l10n.onboarding_searchDefaultAutocompleteLabel),
+                  leading: const Icon(MdiIcons.weatherCloudyArrowRight),
                   contentPadding: EdgeInsets.zero,
                 ),
                 DropdownMenu<SearchSuggestionProviders>(
@@ -147,7 +153,7 @@ class DefaultSearchPage extends HookConsumerWidget {
                   ) {
                     return DropdownMenuEntry(
                       value: provider,
-                      label: provider.label,
+                      label: provider.label(context),
                       leadingIcon: provider.relatedBang.mapNotNull(
                         (trigger) => BangIcon(trigger: trigger),
                       ),
@@ -169,7 +175,7 @@ class DefaultSearchPage extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Could not load search engines',
+              title: l10n.onboarding_searchLoadFailedTitle,
               exception: error,
               onRetry: () =>
                   ref.refresh(bangListProvider(triggers: defaultBangs)),

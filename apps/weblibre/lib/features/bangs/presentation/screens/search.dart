@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/domain/providers/search.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_details.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class BangSearchScreen extends HookConsumerWidget {
@@ -35,6 +36,7 @@ class BangSearchScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final resultsAsync = ref.watch(seamlessBangProvider);
     final incognitoEnabled = ref.watch(incognitoModeEnabledProvider);
 
@@ -57,7 +59,9 @@ class BangSearchScreen extends HookConsumerWidget {
           controller: textEditingController,
           autofocus: true,
           autocorrect: false,
-          decoration: const InputDecoration.collapsed(hintText: 'Search'),
+          decoration: InputDecoration.collapsed(
+            hintText: l10n.bangs_searchHint,
+          ),
         ),
         actions: [
           IconButton(
@@ -97,7 +101,10 @@ class BangSearchScreen extends HookConsumerWidget {
             );
           },
           error: (error, stackTrace) => Center(
-            child: FailureWidget(title: 'Bang Search failed', exception: error),
+            child: FailureWidget(
+              title: l10n.bangs_searchFailedTitle,
+              exception: error,
+            ),
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
         ),

@@ -27,6 +27,7 @@ import 'package:weblibre/features/addons/extensions/addon_info.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_browse.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/install_local_addon_dialog.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class AddonManagerScreen extends ConsumerWidget {
@@ -34,6 +35,7 @@ class AddonManagerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final addonsAsync = ref.watch(addonListProvider);
 
     Future<void> refresh() => ref.read(addonListProvider.notifier).refresh();
@@ -42,11 +44,11 @@ class AddonManagerScreen extends ConsumerWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Extensions'),
-          bottom: const TabBar(
+          title: Text(l10n.addons_managerTitle),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Installed'),
-              Tab(text: 'Browse'),
+              Tab(text: l10n.addons_tabInstalled),
+              Tab(text: l10n.addons_tabBrowse),
             ],
           ),
           actions: [
@@ -93,6 +95,7 @@ class _AddonManagerOverflowMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final updatesBusy = ref.watch(
       bulkAddonUpdateProvider.select((value) => value.isLoading),
     );
@@ -116,20 +119,17 @@ class _AddonManagerOverflowMenu extends ConsumerWidget {
               ? () async {
                   await ref.read(bulkAddonUpdateProvider.notifier).triggerAll();
                   if (!context.mounted) return;
-                  showInfoMessage(
-                    context,
-                    'Background update checks started for installed extensions',
-                  );
+                  showInfoMessage(context, l10n.addons_updateChecksStarted);
                 }
               : null,
-          child: const Text('Check for updates'),
+          child: Text(l10n.addons_actionCheckForUpdates),
         ),
         MenuItemButton(
           leadingIcon: const Icon(Icons.file_open),
           onPressed: () async {
             await showInstallLocalAddonDialog(context);
           },
-          child: const Text('Install from file'),
+          child: Text(l10n.addons_actionInstallFromFile),
         ),
       ],
     );
@@ -143,6 +143,7 @@ class _AddonList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final enabled = addons
         .where((a) => a.isInstalled && a.isSupported && a.isEnabled)
         .toList();
@@ -163,17 +164,17 @@ class _AddonList extends StatelessWidget {
           children: [
             if (enabled.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const _Section(title: 'Enabled'),
+              _Section(title: l10n.addons_sectionEnabled),
               for (final addon in enabled) _AddonCard(addon: addon),
             ],
             if (disabled.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const _Section(title: 'Disabled'),
+              _Section(title: l10n.addons_sectionDisabled),
               for (final addon in disabled) _AddonCard(addon: addon),
             ],
             if (unsupported.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const _Section(title: 'Unsupported'),
+              _Section(title: l10n.addons_sectionUnsupported),
               for (final addon in unsupported)
                 _AddonCard(
                   addon: addon,
@@ -181,11 +182,11 @@ class _AddonList extends StatelessWidget {
                 ),
             ],
             if (installed == 0)
-              const Padding(
-                padding: EdgeInsets.only(top: 48),
+              Padding(
+                padding: const EdgeInsets.only(top: 48),
                 child: Center(
                   child: Text(
-                    'No extensions installed yet.\nBrowse the store to find some.',
+                    l10n.addons_noneInstalledMessage,
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -204,15 +205,19 @@ class _UninstallAction extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final busy = ref.watch(addonBusyIdsProvider).contains(addon.id);
     return IconButton(
-      tooltip: 'Remove extension',
+      tooltip: l10n.addons_tooltipRemoveExtension,
       onPressed: busy
           ? null
           : () async {
               await ref.read(addonListProvider.notifier).uninstall(addon);
               if (!context.mounted) return;
-              showInfoMessage(context, '${addon.displayName} removed');
+              showInfoMessage(
+                context,
+                l10n.addons_extensionRemoved(addon.displayName),
+              );
             },
       icon: const Icon(Icons.delete_outline),
     );
@@ -241,6 +246,7 @@ class _AddonCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final busy = ref.watch(addonBusyIdsProvider).contains(addon.id);
 
     return Card(
@@ -278,7 +284,9 @@ class _AddonCard extends ConsumerWidget {
                           spacing: 8,
                           children: [
                             if (addon.isAllowedInPrivateBrowsing)
-                              const Chip(label: Text('Private Browsing')),
+                              Chip(
+                                label: Text(l10n.addons_chipPrivateBrowsing),
+                              ),
                             if (addon.ratingAverage != null)
                               Chip(
                                 avatar: const Icon(Icons.star, size: 16),
@@ -295,7 +303,7 @@ class _AddonCard extends ConsumerWidget {
                   action ?? const Icon(Icons.chevron_right),
                 ],
               ),
-              if (addon.statusBannerMessage != null) ...[
+              if (addon.statusBannerMessage(context) != null) ...[
                 const SizedBox(height: 12),
                 AddonStatusBanner(addon: addon),
               ],
@@ -315,6 +323,8 @@ class _AddonLoadError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -323,11 +333,11 @@ class _AddonLoadError extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 40),
             const SizedBox(height: 12),
-            const Text('Failed to load extensions'),
+            Text(l10n.addons_loadFailedTitle),
             const SizedBox(height: 8),
             Text(error.toString(), textAlign: TextAlign.center),
             const SizedBox(height: 16),
-            FilledButton(onPressed: onRetry, child: const Text('Retry')),
+            FilledButton(onPressed: onRetry, child: Text(l10n.common_retry)),
           ],
         ),
       ),

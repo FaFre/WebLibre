@@ -62,16 +62,6 @@ enum ProxyLogSeverity {
         _ => info,
       };
 
-  /// Label for the viewer's filter. Plural because it selects a range: picking
-  /// [warn] shows warnings *and* everything worse.
-  String get filterLabel => switch (this) {
-    ProxyLogSeverity.trace => 'Trace',
-    ProxyLogSeverity.debug => 'Debug',
-    ProxyLogSeverity.info => 'Info',
-    ProxyLogSeverity.warn => 'Warnings',
-    ProxyLogSeverity.error => 'Errors',
-  };
-
   bool get isAtLeastWarn => index >= ProxyLogSeverity.warn.index;
 
   bool isAtLeast(ProxyLogSeverity minimum) => index >= minimum.index;

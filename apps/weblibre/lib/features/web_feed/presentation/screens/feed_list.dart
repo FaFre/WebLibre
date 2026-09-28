@@ -25,6 +25,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/feed_card.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 class FeedListScreen extends HookConsumerWidget {
@@ -32,11 +33,12 @@ class FeedListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final feeds = ref.watch(feedListProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Feeds'),
+        title: Text(l10n.webFeed_feedsTitle),
         actions: [
           HookBuilder(
             builder: (context) {
@@ -86,7 +88,7 @@ class FeedListScreen extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load Feeds',
+              title: l10n.webFeed_loadFeedsFailedTitle,
               exception: error,
               onRetry: () {
                 // ignore: unused_result
@@ -98,7 +100,7 @@ class FeedListScreen extends HookConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        label: const Text('Feed'),
+        label: Text(l10n.webFeed_feedFabLabel),
         icon: const Icon(Icons.add),
         onPressed: () async {
           await const FeedAddRoute(uri: null).push(context);

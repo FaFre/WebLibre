@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+
+  "httpErrorHandler_socketError": "Could not contact remote service",
+  "@httpErrorHandler_socketError": {
+    "description": "Error message when a network request failed because the server could not be reached (no connection, DNS or socket failure)."
+  },
+  "httpErrorHandler_httpError": "The web request returned an error",
+  "@httpErrorHandler_httpError": {
+    "description": "Error message when a server answered a network request with an HTTP error status."
+  },
+  "httpErrorHandler_formatError": "Bad response format",
+  "@httpErrorHandler_formatError": {
+    "description": "Error message when a server answered but its response could not be parsed."
+  },
+  "httpErrorHandler_clientError": "Could not contact remote service",
+  "@httpErrorHandler_clientError": {
+    "description": "Error message when a network request failed inside the HTTP client before any response arrived."
+  }
+}

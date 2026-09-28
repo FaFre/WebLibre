@@ -1,0 +1,204 @@
+{
+  "@@locale": "en",
+  "history_titleHistory": "History",
+  "@history_titleHistory": {
+    "description": "Title of the browsing history screen."
+  },
+  "history_titleDownloads": "Downloads",
+  "@history_titleDownloads": {
+    "description": "Title of the same screen when it shows downloaded files instead of browsing history."
+  },
+  "history_filterHintHistory": "Filter history…",
+  "@history_filterHintHistory": {
+    "description": "Placeholder of the search field on the history screen."
+  },
+  "history_filterHintDownloads": "Filter downloads…",
+  "@history_filterHintDownloads": {
+    "description": "Placeholder of the search field on the downloads screen."
+  },
+  "history_selectionCount": "{count, plural, =1{1 selected} other{{count} selected}}",
+  "@history_selectionCount": {
+    "description": "Title of the history or downloads screen while entries are selected. count is the number of selected entries.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "history_tooltipClearSearch": "Clear search",
+  "@history_tooltipClearSearch": {
+    "description": "Tooltip of the button that closes and empties the search field on the history or downloads screen."
+  },
+  "history_tooltipSearchHistory": "Search history",
+  "@history_tooltipSearchHistory": {
+    "description": "Tooltip of the button that opens the search field on the history screen."
+  },
+  "history_tooltipSearchDownloads": "Search downloads",
+  "@history_tooltipSearchDownloads": {
+    "description": "Tooltip of the button that opens the search field on the downloads screen."
+  },
+  "history_tooltipClearContainerHistory": "Clear history for \"{container}\"",
+  "@history_tooltipClearContainerHistory": {
+    "description": "Tooltip of the button that deletes the history of the container the list is filtered to. container is the container name. A container is a separate browsing identity with its own cookies and history.",
+    "placeholders": {
+      "container": {
+        "type": "String"
+      }
+    }
+  },
+  "history_filterDate": "Date",
+  "@history_filterDate": {
+    "description": "Label of the filter button that restricts history to a date range; replaced by the chosen range once set."
+  },
+  "history_filterContainer": "Container",
+  "@history_filterContainer": {
+    "description": "Label of the filter button that restricts history to one container, when no container is selected."
+  },
+  "history_allContainers": "All Containers",
+  "@history_allContainers": {
+    "description": "Choice in the container filter: show history from all containers."
+  },
+  "history_unnamedContainer": "Unnamed Container",
+  "@history_unnamedContainer": {
+    "description": "Fallback name for a container that has no name."
+  },
+  "history_containerFilterLabel": "Container: {container}",
+  "@history_containerFilterLabel": {
+    "description": "Label of the container filter button while a container is selected. container is its name.",
+    "placeholders": {
+      "container": {
+        "type": "String"
+      }
+    }
+  },
+  "history_resetFilter": "Reset Filter",
+  "@history_resetFilter": {
+    "description": "Menu item that clears all history filters."
+  },
+  "history_filterTypeFollowedLinks": "Followed Links",
+  "@history_filterTypeFollowedLinks": {
+    "description": "Checkbox in the history filter menu: show visits reached by clicking a link."
+  },
+  "history_filterTypeTypedAddresses": "Typed Addresses",
+  "@history_filterTypeTypedAddresses": {
+    "description": "Checkbox in the history filter menu: show visits reached by typing the address."
+  },
+  "history_filterTypeEmbeddedPageElements": "Embedded Page Elements",
+  "@history_filterTypeEmbeddedPageElements": {
+    "description": "Checkbox in the history filter menu: show loads of content embedded in a page (such as images or scripts), not pages the user opened."
+  },
+  "history_filterTypePermanentRedirects": "Permanent Redirects",
+  "@history_filterTypePermanentRedirects": {
+    "description": "Checkbox in the history filter menu: show visits that were permanent redirects (HTTP 301) to another address."
+  },
+  "history_filterTypeTemporaryRedirects": "Temporary Redirects",
+  "@history_filterTypeTemporaryRedirects": {
+    "description": "Checkbox in the history filter menu: show visits that were temporary redirects (HTTP 302) to another address."
+  },
+  "history_filterTypeDownloads": "Downloads",
+  "@history_filterTypeDownloads": {
+    "description": "Checkbox in the history filter menu: show visits that started a file download."
+  },
+  "history_filterTypeFrames": "Frames",
+  "@history_filterTypeFrames": {
+    "description": "Checkbox in the history filter menu: show pages loaded inside a frame of another page."
+  },
+  "history_filterTypePageReloads": "Page Reloads",
+  "@history_filterTypePageReloads": {
+    "description": "Checkbox in the history filter menu: show visits caused by reloading a page."
+  },
+  "history_filterTypeBookmarks": "Bookmarks",
+  "@history_filterTypeBookmarks": {
+    "description": "Checkbox in the history filter menu: show visits reached by opening a bookmark."
+  },
+  "history_visitTypeFollowedLink": "Followed link",
+  "@history_visitTypeFollowedLink": {
+    "description": "Label on a history entry: the page was reached by clicking a link."
+  },
+  "history_visitTypeTypedAddress": "Typed address",
+  "@history_visitTypeTypedAddress": {
+    "description": "Label on a history entry: the page was reached by typing its address."
+  },
+  "history_visitTypeEmbeddedPageElement": "Embedded page element",
+  "@history_visitTypeEmbeddedPageElement": {
+    "description": "Label on a history entry: content embedded in another page (such as an image or script), not a page the user opened."
+  },
+  "history_visitTypePermanentRedirect": "Permanent redirect",
+  "@history_visitTypePermanentRedirect": {
+    "description": "Label on a history entry: the address permanently redirected (HTTP 301) to another one."
+  },
+  "history_visitTypeTemporaryRedirect": "Temporary redirect",
+  "@history_visitTypeTemporaryRedirect": {
+    "description": "Label on a history entry: the address temporarily redirected (HTTP 302) to another one."
+  },
+  "history_visitTypeDownload": "Download",
+  "@history_visitTypeDownload": {
+    "description": "Label on a history entry: the visit started a file download."
+  },
+  "history_visitTypeFrame": "Frame",
+  "@history_visitTypeFrame": {
+    "description": "Label on a history entry: the page was loaded inside a frame of another page."
+  },
+  "history_visitTypePageReload": "Page reload",
+  "@history_visitTypePageReload": {
+    "description": "Label on a history entry: the visit was a reload of the page."
+  },
+  "history_visitTypeBookmark": "Bookmark",
+  "@history_visitTypeBookmark": {
+    "description": "Label on a history entry: the page was reached by opening a bookmark."
+  },
+  "history_clearContainerHistoryTitle": "Clear Container History",
+  "@history_clearContainerHistoryTitle": {
+    "description": "Title of the confirmation dialog before deleting all history of one container."
+  },
+  "history_clearContainerHistoryContent": "Are you sure you want to clear all history for \"{container}\"?",
+  "@history_clearContainerHistoryContent": {
+    "description": "Body of the confirmation dialog before deleting all history of one container. container is the container name.",
+    "placeholders": {
+      "container": {
+        "type": "String"
+      }
+    }
+  },
+  "history_downloadedFileNotFound": "Downloaded file not found",
+  "@history_downloadedFileNotFound": {
+    "description": "Error message when opening a download whose file no longer exists on the device."
+  },
+  "history_couldNotOpenDownloadedFile": "Could not open downloaded file",
+  "@history_couldNotOpenDownloadedFile": {
+    "description": "Error message when no app can open a downloaded file."
+  },
+  "history_loadHistoryFailedTitle": "Failed to load history",
+  "@history_loadHistoryFailedTitle": {
+    "description": "Error heading when browsing history could not be loaded."
+  },
+  "history_loadDownloadsFailedTitle": "Failed to load downloads",
+  "@history_loadDownloadsFailedTitle": {
+    "description": "Error heading when the list of downloads could not be loaded."
+  },
+  "history_deleteFileTitle": "Delete File",
+  "@history_deleteFileTitle": {
+    "description": "Title of the dialog asking whether to delete the downloaded file from the device when removing a download from the list."
+  },
+  "history_deleteFileConfirm": "Are you sure you want to delete {fileName}?",
+  "@history_deleteFileConfirm": {
+    "description": "Question in the delete-file dialog. fileName is the downloaded file's name, rendered in bold.",
+    "placeholders": {
+      "fileName": {
+        "type": "String"
+      }
+    }
+  },
+  "history_deleteFileWarning": "This will permanently delete the file from your device.",
+  "@history_deleteFileWarning": {
+    "description": "Small warning under the delete-file question: the file is removed from the device's storage, not only from the list."
+  },
+  "history_deleteFileRememberChoice": "Remember my choice for the remaining files",
+  "@history_deleteFileRememberChoice": {
+    "description": "Checkbox in the delete-file dialog when several downloads are removed at once: apply the same answer to the selected files that have not been asked about yet."
+  },
+  "history_deleteFileActionKeep": "Keep",
+  "@history_deleteFileActionKeep": {
+    "description": "Button in the delete-file dialog: remove the download from the list but keep the file on the device."
+  }
+}

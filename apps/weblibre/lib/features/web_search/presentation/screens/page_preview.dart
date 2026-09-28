@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -5,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
 import 'package:weblibre/features/web_search/presentation/open_in_new_tab.dart';
 import 'package:weblibre/features/web_search/presentation/widgets/search_result_metadata_chips.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -21,6 +41,7 @@ class PagePreviewScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     // The preview screen only depends on the document for this one URL and
     // the matching result row. Selecting both via a record means unrelated
     // controller updates (favicons, image streams, other URLs' fetches)
@@ -38,10 +59,9 @@ class PagePreviewScreen extends ConsumerWidget {
     if (document == null) {
       return Scaffold(
         appBar: AppBar(title: Text(title)),
-        body: const FailureWidget(
-          title: 'Preview unavailable',
-          exception:
-              'Fetch the page from the result list before opening a preview.',
+        body: FailureWidget(
+          title: l10n.webSearch_previewUnavailableTitle,
+          exception: l10n.webSearch_previewUnavailableMessage,
         ),
       );
     }
@@ -51,7 +71,7 @@ class PagePreviewScreen extends ConsumerWidget {
         title: Text(title),
         actions: [
           IconButton(
-            tooltip: 'Open in browser',
+            tooltip: l10n.webSearch_openInBrowserTooltip,
             onPressed: () async {
               await ref
                   .read(webSearchTabOpenerProvider)

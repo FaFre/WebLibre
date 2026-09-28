@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+
+  "speechToTextButton_serviceNotAvailable": "Speech recognition is not available",
+  "@speechToTextButton_serviceNotAvailable": {
+    "description": "Error message shown when the user taps the voice-input button but the device has no speech recognition service."
+  }
+}

@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -57,6 +58,7 @@ class TabSearch extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final selectedContainer = useState<ContainerData?>(null);
     ref.listen(selectedContainerDataProvider, (previous, next) {
       next.whenData((container) {
@@ -138,7 +140,7 @@ class TabSearch extends HookConsumerWidget {
     final filteredResultCount = filteredTabs.length;
 
     return SearchModuleSection(
-      title: 'Tabs',
+      title: l10n.search_moduleLabelTabs,
       moduleType: SearchModuleType.tabs,
       totalCount: filteredResultCount,
       contentSliverBuilder:

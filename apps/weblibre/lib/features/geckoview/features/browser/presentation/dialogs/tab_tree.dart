@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class TabTreeDialog extends HookConsumerWidget {
@@ -99,7 +100,9 @@ class TabTreeDialog extends HookConsumerWidget {
               } else {
                 showErrorMessage(
                   context,
-                  'The current tab is not part of this tree',
+                  AppLocalizations.of(
+                    context,
+                  ).browser_tabTreeCurrentTabNotInTree,
                 );
               }
             }

@@ -28,6 +28,8 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_listing_card.dart';
 import 'package:weblibre/features/addons/utils/permissions.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 import 'package:weblibre/utils/number_format.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -39,6 +41,7 @@ class AddonListingDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final installedAsync = ref.watch(addonListProvider);
 
@@ -76,7 +79,7 @@ class AddonListingDetailsScreen extends ConsumerWidget {
                           ],
                           const SizedBox(height: 8),
                           Text(
-                            'Version ${listing.latestVersion}',
+                            l10n.addons_versionSentence(listing.latestVersion),
                             style: theme.textTheme.bodySmall,
                           ),
                         ],
@@ -91,9 +94,9 @@ class AddonListingDetailsScreen extends ConsumerWidget {
                   spacing: 8,
                   children: [
                     if (listing.promoted == AddonStorePromoted.recommended)
-                      const Chip(
-                        avatar: Icon(Icons.verified, size: 16),
-                        label: Text('Recommended'),
+                      Chip(
+                        avatar: const Icon(Icons.verified, size: 16),
+                        label: Text(l10n.addons_chipRecommended),
                       ),
                     if (listing.ratingAverage != null)
                       Chip(
@@ -107,7 +110,7 @@ class AddonListingDetailsScreen extends ConsumerWidget {
                       Chip(
                         avatar: const Icon(Icons.group_outlined, size: 16),
                         label: Text(
-                          '${formatCompactNumber(listing.averageDailyUsers!)} users',
+                          l10n.addons_usersCount(listing.averageDailyUsers!),
                         ),
                       ),
                   ],
@@ -122,24 +125,26 @@ class AddonListingDetailsScreen extends ConsumerWidget {
                 ],
                 if ((listing.description ?? '').isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  const _SectionHeader(title: 'About this extension'),
+                  _SectionHeader(title: l10n.addons_sectionAboutExtension),
                   const SizedBox(height: 8),
                   _ExpandableDescription(html: listing.description!),
                 ],
-                if (_hasFriendlyPermissions(listing)) ...[
+                if (_hasFriendlyPermissions(context, listing)) ...[
                   const SizedBox(height: 24),
-                  const _SectionHeader(title: 'Permissions'),
+                  _SectionHeader(title: l10n.addons_permissionsTitle),
                   const SizedBox(height: 8),
                   _PermissionsSection(listing: listing),
                 ],
-                if (_hasTechnicalPermissions(listing)) ...[
+                if (_hasTechnicalPermissions(context, listing)) ...[
                   const SizedBox(height: 24),
-                  const _SectionHeader(title: 'Technical permissions'),
+                  _SectionHeader(
+                    title: l10n.addons_sectionTechnicalPermissions,
+                  ),
                   const SizedBox(height: 8),
                   _TechnicalPermissionsSection(listing: listing),
                 ],
                 const SizedBox(height: 24),
-                const _SectionHeader(title: 'More information'),
+                _SectionHeader(title: l10n.addons_sectionMoreInformation),
                 const SizedBox(height: 8),
                 _MoreInformationSection(listing: listing),
               ],
@@ -170,11 +175,12 @@ class _AuthorLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.bodyMedium;
-    if (url == null) return Text('by $name', style: style);
+    final text = AppLocalizations.of(context).addons_byAuthor(name);
+    if (url == null) return Text(text, style: style);
     return InkWell(
       onTap: () => launchUrl(Uri.parse(url!)),
       child: Text(
-        'by $name',
+        text,
         style: style?.copyWith(
           color: Theme.of(context).colorScheme.primary,
           decoration: TextDecoration.underline,
@@ -192,13 +198,14 @@ class _InstallButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final busy = ref.watch(addonBusyIdsProvider).contains(listing.id);
 
     if (isInstalled) {
       return FilledButton.icon(
         onPressed: null,
         icon: const Icon(Icons.check),
-        label: const Text('Installed'),
+        label: Text(l10n.addons_statusInstalled),
       );
     }
 
@@ -214,10 +221,16 @@ class _InstallButton extends ConsumerWidget {
                     .read(addonListProvider.notifier)
                     .installListing(listing);
                 if (!context.mounted) return;
-                showInfoMessage(context, '${listing.name} installed');
+                showInfoMessage(
+                  context,
+                  l10n.addons_extensionInstalled(listing.name),
+                );
               } catch (error) {
                 if (!context.mounted) return;
-                showInfoMessage(context, 'Install failed: $error');
+                showInfoMessage(
+                  context,
+                  l10n.addons_installFailed(error.toString()),
+                );
               }
             },
       icon: busy
@@ -227,7 +240,7 @@ class _InstallButton extends ConsumerWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : const Icon(Icons.download_outlined),
-      label: const Text('Install'),
+      label: Text(l10n.addons_actionInstall),
     );
   }
 }
@@ -349,7 +362,11 @@ class _ExpandableDescription extends HookConsumerWidget {
         ),
         TextButton(
           onPressed: () => expanded.value = !expanded.value,
-          child: Text(expanded.value ? 'Show less' : 'Read more'),
+          child: Text(
+            expanded.value
+                ? AppLocalizations.of(context).common_showLess
+                : AppLocalizations.of(context).addons_actionReadMore,
+          ),
         ),
       ],
     );
@@ -365,18 +382,25 @@ class _PermissionsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final items = <Widget>[];
 
     final groups = <_PermissionGroup>[
-      (title: 'Required', perms: listing.permissions),
-      (title: 'Websites', perms: listing.hostPermissions),
-      (title: 'Optional', perms: listing.optionalPermissions),
-      (title: 'Data collection', perms: listing.dataCollectionPermissions),
+      (title: l10n.addons_permGroupRequired, perms: listing.permissions),
+      (title: l10n.addons_permGroupWebsites, perms: listing.hostPermissions),
+      (
+        title: l10n.addons_permGroupOptional,
+        perms: listing.optionalPermissions,
+      ),
+      (
+        title: l10n.addons_permGroupDataCollection,
+        perms: listing.dataCollectionPermissions,
+      ),
     ];
 
     for (final group in groups) {
       final friendly = group.perms
-          .map(describePermission)
+          .map((p) => describePermission(context, p))
           .where((d) => !d.technical)
           .toList();
       if (friendly.isEmpty) continue;
@@ -410,13 +434,20 @@ class _TechnicalPermissionsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final items = <Widget>[];
 
     final groups = <_PermissionGroup>[
-      (title: 'Required', perms: listing.permissions),
-      (title: 'Websites', perms: listing.hostPermissions),
-      (title: 'Optional', perms: listing.optionalPermissions),
-      (title: 'Data collection', perms: listing.dataCollectionPermissions),
+      (title: l10n.addons_permGroupRequired, perms: listing.permissions),
+      (title: l10n.addons_permGroupWebsites, perms: listing.hostPermissions),
+      (
+        title: l10n.addons_permGroupOptional,
+        perms: listing.optionalPermissions,
+      ),
+      (
+        title: l10n.addons_permGroupDataCollection,
+        perms: listing.dataCollectionPermissions,
+      ),
     ];
 
     final monoStyle = TextStyle(
@@ -427,7 +458,7 @@ class _TechnicalPermissionsSection extends StatelessWidget {
 
     for (final group in groups) {
       final technical = group.perms
-          .map(describePermission)
+          .map((p) => describePermission(context, p))
           .where((d) => d.technical)
           .toList();
       if (technical.isEmpty) continue;
@@ -462,18 +493,18 @@ class _TechnicalPermissionsSection extends StatelessWidget {
   }
 }
 
-bool _hasTechnicalPermissions(AddonListing l) {
+bool _hasTechnicalPermissions(BuildContext context, AddonListing l) {
   bool any(List<String> list) =>
-      list.any((p) => describePermission(p).technical);
+      list.any((p) => describePermission(context, p).technical);
   return any(l.permissions) ||
       any(l.hostPermissions) ||
       any(l.optionalPermissions) ||
       any(l.dataCollectionPermissions);
 }
 
-bool _hasFriendlyPermissions(AddonListing l) {
+bool _hasFriendlyPermissions(BuildContext context, AddonListing l) {
   bool any(List<String> list) =>
-      list.any((p) => !describePermission(p).technical);
+      list.any((p) => !describePermission(context, p).technical);
   return any(l.permissions) ||
       any(l.hostPermissions) ||
       any(l.optionalPermissions) ||
@@ -486,18 +517,26 @@ class _MoreInformationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final rows = <Widget>[];
 
-    rows.add(_InfoRow(label: 'Version', value: listing.latestVersion));
+    rows.add(
+      _InfoRow(label: l10n.addons_fieldVersion, value: listing.latestVersion),
+    );
 
     if (listing.fileSize != null) {
-      rows.add(_InfoRow(label: 'Size', value: formatBytes(listing.fileSize!)));
+      rows.add(
+        _InfoRow(
+          label: l10n.addons_fieldSize,
+          value: formatByteSize(l10n, listing.fileSize!),
+        ),
+      );
     }
 
     if (listing.lastUpdated != null) {
       rows.add(
         _InfoRow(
-          label: 'Last updated',
+          label: l10n.addons_fieldLastUpdatedInfo,
           value: formatIsoDate(listing.lastUpdated!),
         ),
       );
@@ -505,14 +544,17 @@ class _MoreInformationSection extends StatelessWidget {
 
     if (listing.categories.isNotEmpty) {
       rows.add(
-        _InfoRow(label: 'Categories', value: listing.categories.join(', ')),
+        _InfoRow(
+          label: l10n.addons_fieldCategories,
+          value: listing.categories.join(', '),
+        ),
       );
     }
 
     if (listing.licenseName != null) {
       rows.add(
         _InfoRow(
-          label: 'License',
+          label: l10n.addons_fieldLicense,
           value: listing.licenseName!,
           url: listing.licenseUrl,
         ),
@@ -524,7 +566,7 @@ class _MoreInformationSection extends StatelessWidget {
       links.add(
         _LinkTile(
           icon: Icons.home_outlined,
-          label: 'Homepage',
+          label: l10n.addons_fieldHomepage,
           url: listing.homepageUrl!,
         ),
       );
@@ -533,7 +575,7 @@ class _MoreInformationSection extends StatelessWidget {
       links.add(
         _LinkTile(
           icon: Icons.help_outline,
-          label: 'Support site',
+          label: l10n.addons_fieldSupportSite,
           url: listing.supportUrl!,
         ),
       );
@@ -550,7 +592,7 @@ class _MoreInformationSection extends StatelessWidget {
     links.add(
       _LinkTile(
         icon: Icons.public,
-        label: 'View on addons.mozilla.org',
+        label: l10n.addons_linkViewOnAmo,
         url: listing.detailUrl,
       ),
     );
@@ -558,7 +600,7 @@ class _MoreInformationSection extends StatelessWidget {
       links.add(
         _LinkTile(
           icon: Icons.reviews_outlined,
-          label: 'Reviews',
+          label: l10n.addons_fieldReviews,
           url: listing.ratingUrl!,
         ),
       );
@@ -567,7 +609,7 @@ class _MoreInformationSection extends StatelessWidget {
       links.add(
         _LinkTile(
           icon: Icons.privacy_tip_outlined,
-          label: 'Privacy policy',
+          label: l10n.addons_fieldPrivacyPolicy,
           url: 'https://addons.mozilla.org/addon/${listing.slug}/privacy/',
         ),
       );

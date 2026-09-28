@@ -42,12 +42,22 @@ melos:
       exec: |
         dart pub global run dependency_validator
     build-watch:
+      description: Merge l10n ARB fragments, then generate and watch files with build_runner in the workspace
+      steps:
+        - build-l10n
+        - build-watch-codegen
+    build-watch-codegen:
       description: Generate and watch files with build_runner in the workspace
       packageFilters:
         dependsOn: build_runner
       exec: |
         dart run build_runner watch --delete-conflicting-outputs
     build:
+      description: Merge l10n ARB fragments, then generate files with build_runner in the workspace
+      steps:
+        - build-l10n
+        - build-codegen
+    build-codegen:
       description: Generate files with build_runner in the workspace
       packageFilters:
         dependsOn: build_runner
@@ -68,6 +78,13 @@ melos:
         done
       packageFilters:
         dirExists: 'pigeons'
+    build-l10n:
+      description: Merge per-feature ARB fragments and regenerate AppLocalizations
+      run: |
+        set -e
+        python3 scripts/merge_l10n_arb.py
+        cd apps/weblibre
+        flutter gen-l10n
     format:
       description: Format all Dart files in the workspace
       exec: dart format .

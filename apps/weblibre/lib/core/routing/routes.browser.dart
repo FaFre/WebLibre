@@ -297,9 +297,7 @@ class KeyboardShortcutsOverviewRoute extends GoRouteData
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(
-      builder: (_) => const KeyboardShortcutsOverviewDialog(),
-    );
+    return DialogPage(builder: (_) => const KeyboardShortcutsOverviewDialog());
   }
 }
 

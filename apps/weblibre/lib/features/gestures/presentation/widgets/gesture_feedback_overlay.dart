@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -154,7 +155,7 @@ class _SuggestionCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            suggestion.action.title,
+                            suggestion.action.label(context),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onInverseSurface,
                               fontWeight: suggestion.exact

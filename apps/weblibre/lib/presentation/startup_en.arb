@@ -1,0 +1,624 @@
+{
+  "@@locale": "en",
+  "startup_pickerTitle": "Choose a profile",
+  "@startup_pickerTitle": {
+    "description": "Heading of the screen shown at app start when the user must choose which browser profile to open."
+  },
+  "startup_pickerEachProfileKeepsOwn": "Each profile keeps its own {contents}.",
+  "@startup_pickerEachProfileKeepsOwn": {
+    "description": "Line under the profile picker heading. contents is a lowercase list such as \"tabs, history and settings\".",
+    "placeholders": {
+      "contents": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_pickerOpensByDefaultLocked": "Opens by default · Locked",
+  "@startup_pickerOpensByDefaultLocked": {
+    "description": "Line under a profile in the startup picker: it is the one opened by default, and it requires authentication (such as fingerprint or device PIN) to open. Keep the \"·\" separator."
+  },
+  "startup_pickerOpensByDefault": "Opens by default",
+  "@startup_pickerOpensByDefault": {
+    "description": "Line under a profile in the startup picker: it is the one opened by default."
+  },
+  "startup_pickerLocked": "Locked",
+  "@startup_pickerLocked": {
+    "description": "Line under a profile in the startup picker: it requires authentication (such as fingerprint or device PIN) to open."
+  },
+  "startup_haltMaintenanceTitle": "Unfinished profile work",
+  "@startup_haltMaintenanceTitle": {
+    "description": "Heading of the startup screen shown when a profile backup, restore or deletion from a previous session did not finish."
+  },
+  "startup_haltMaintenanceBody": "A backup, restore or deletion from an earlier run did not finish. WebLibre must finish it before any profile can open.",
+  "@startup_haltMaintenanceBody": {
+    "description": "Body of that startup screen. WebLibre is the app name."
+  },
+  "startup_haltUnavailableTitle": "Startup is not ready",
+  "@startup_haltUnavailableTitle": {
+    "description": "Heading of the startup screen shown when the app cannot choose a profile yet and must restart."
+  },
+  "startup_haltUnavailableBody": "WebLibre needs to restart before it can choose a profile. {reopenToContinue}",
+  "@startup_haltUnavailableBody": {
+    "description": "Body of that startup screen. reopenToContinue is the sentence \"Close WebLibre and open it again.\"",
+    "placeholders": {
+      "reopenToContinue": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_haltProfileAccessBusyTitle": "Profile is in use",
+  "@startup_haltProfileAccessBusyTitle": {
+    "description": "Heading of the startup screen shown when the chosen profile is still being used by a background task."
+  },
+  "startup_haltProfileAccessBusyBody": "Another WebLibre task is still using this profile. Try again in a moment.",
+  "@startup_haltProfileAccessBusyBody": {
+    "description": "Body of that startup screen."
+  },
+  "startup_haltNoProfileTitle": "No usable profile",
+  "@startup_haltNoProfileTitle": {
+    "description": "Heading of the startup screen shown when no browser profile can be opened or created."
+  },
+  "startup_haltNoProfileBody": "WebLibre could not read an existing profile or create a new one. Storage may be full or unavailable.",
+  "@startup_haltNoProfileBody": {
+    "description": "Body of that startup screen: probably a storage problem."
+  },
+  "startup_haltArbitrationFailedTitle": "Cannot tell which profile to open",
+  "@startup_haltArbitrationFailedTitle": {
+    "description": "Heading of the startup screen shown when the app cannot safely decide which profile to open."
+  },
+  "startup_haltArbitrationFailedBody": "WebLibre will not guess which profile to use. {reopenToContinue}",
+  "@startup_haltArbitrationFailedBody": {
+    "description": "Body of that startup screen. reopenToContinue is the sentence \"Close WebLibre and open it again.\"",
+    "placeholders": {
+      "reopenToContinue": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_tryAgain": "Try again",
+  "@startup_tryAgain": {
+    "description": "Button on a startup problem screen that retries opening a profile."
+  },
+  "startup_tryingAgain": "Trying again…",
+  "@startup_tryingAgain": {
+    "description": "Label of the retry button on a startup problem screen while the retry is running."
+  },
+  "startup_closeWebLibre": "Close WebLibre",
+  "@startup_closeWebLibre": {
+    "description": "Button on a startup problem screen that closes the app. WebLibre is the app name."
+  },
+  "startup_technicalDetails": "Technical details",
+  "@startup_technicalDetails": {
+    "description": "Expandable section on a startup problem screen showing technical error details."
+  },
+  "startup_copyDetails": "Copy details",
+  "@startup_copyDetails": {
+    "description": "Button that copies the technical error details to the clipboard, e.g. for a bug report."
+  },
+  "startup_maintenanceFinishingInterrupted": "Finishing work interrupted by a previous restart…",
+  "@startup_maintenanceFinishingInterrupted": {
+    "description": "Progress text on the profile maintenance screen while the app completes a backup, restore or deletion that was interrupted by a restart."
+  },
+  "startup_maintenanceNotRunnableUnsupported": "This task was created by a newer version of WebLibre and cannot run here.",
+  "@startup_maintenanceNotRunnableUnsupported": {
+    "description": "Reason shown when a pending profile task cannot be run: a newer app version created it."
+  },
+  "startup_maintenanceNotRunnableNoDestination": "This backup has no destination folder recorded.",
+  "@startup_maintenanceNotRunnableNoDestination": {
+    "description": "Reason shown when a pending profile backup cannot be run: the folder to save it to is unknown."
+  },
+  "startup_maintenanceNotRunnableNoBackupFile": "This restore has no backup file recorded.",
+  "@startup_maintenanceNotRunnableNoBackupFile": {
+    "description": "Reason shown when a pending profile restore cannot be run: the backup file to restore is unknown."
+  },
+  "startup_maintenanceNotRunnableRestoreHere": "WebLibre cannot restore from this startup screen.",
+  "@startup_maintenanceNotRunnableRestoreHere": {
+    "description": "Reason shown when a pending restore cannot be run from the startup maintenance screen."
+  },
+  "startup_maintenanceNotRunnableDeleteHere": "WebLibre cannot delete a profile from this startup screen.",
+  "@startup_maintenanceNotRunnableDeleteHere": {
+    "description": "Reason shown when a pending profile deletion cannot be run from the startup maintenance screen."
+  },
+  "startup_maintenanceRecoveredRestore": "An interrupted restore was completed.",
+  "@startup_maintenanceRecoveredRestore": {
+    "description": "Result message after the app completed a profile restore that had been interrupted."
+  },
+  "startup_maintenanceRecoveredRestoreRolledBack": "An interrupted restore was undone. The profile was left as it was.",
+  "@startup_maintenanceRecoveredRestoreRolledBack": {
+    "description": "Result message after the app reversed an interrupted profile restore, leaving the profile unchanged."
+  },
+  "startup_maintenanceRecoveredRestoreReconciled": "An interrupted restore was reconciled. Check the profile to see whether the backup was applied.",
+  "@startup_maintenanceRecoveredRestoreReconciled": {
+    "description": "Result message after the app cleaned up an interrupted restore but cannot tell whether the backup ended up applied."
+  },
+  "startup_maintenanceRecoveredDeletion": "An interrupted deletion was completed.",
+  "@startup_maintenanceRecoveredDeletion": {
+    "description": "Result message after the app completed a profile deletion that had been interrupted."
+  },
+  "startup_maintenanceTaskDidNotFinish": "It did not finish.",
+  "@startup_maintenanceTaskDidNotFinish": {
+    "description": "Generic result message when a profile backup, restore or deletion failed without a more specific reason."
+  },
+  "startup_maintenanceLeaseLost": "WebLibre can no longer safely work on this profile. {nothingChanged} {reopenToContinue}",
+  "@startup_maintenanceLeaseLost": {
+    "description": "Error message when the profile task had to stop because another part of the app took over the profile. nothingChanged is \"Nothing has been changed.\"; reopenToContinue is \"Close WebLibre and open it again.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      },
+      "reopenToContinue": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceTaskCancelled": "{task} was canceled.",
+  "@startup_maintenanceTaskCancelled": {
+    "description": "Result message after the user canceled a pending profile task. task is the task's title, e.g. 'Back up \"Work\"'.",
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceEvidenceDiscarded": "The interrupted record was discarded.",
+  "@startup_maintenanceEvidenceDiscarded": {
+    "description": "Result message after the user discarded the leftover record of an interrupted profile task."
+  },
+  "startup_maintenanceEvidenceDiscardedKept": "The interrupted record was discarded. WebLibre could not tell which profile the saved data belonged to, so it kept the saved data on the device rather than removing it.",
+  "@startup_maintenanceEvidenceDiscardedKept": {
+    "description": "Result message after discarding that record, when saved profile data of unknown ownership was kept on the device."
+  },
+  "startup_maintenanceWrongPassword": "The password did not open this backup file. Check it and try again. {nothingChanged}",
+  "@startup_maintenanceWrongPassword": {
+    "description": "Error message when the entered password does not open the backup file. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceUnreadableArchive": "The password did not open this backup file, or the file is damaged. Check the password and try again. {nothingChanged}",
+  "@startup_maintenanceUnreadableArchive": {
+    "description": "Error message when the backup file could not be opened: wrong password or damaged file. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceDamagedArchive": "This backup file is damaged and could not be read. {nothingChanged}",
+  "@startup_maintenanceDamagedArchive": {
+    "description": "Error message when the backup file is damaged. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceUnsupportedArchiveVersion": "This backup file was created by a newer version of WebLibre and cannot be read here. {nothingChanged}",
+  "@startup_maintenanceUnsupportedArchiveVersion": {
+    "description": "Error message when the backup file comes from a newer app version. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceNotEnoughStorageWithFree": "There is not enough free space: this needs about {required}, but only {free} is available. {nothingChanged}",
+  "@startup_maintenanceNotEnoughStorageWithFree": {
+    "description": "Error message when the device lacks space for a profile task. required and free are formatted sizes such as \"1.2 GB\"; nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "required": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceNotEnoughStorageKnown": "There is not enough free space: this needs about {required}. {nothingChanged}",
+  "@startup_maintenanceNotEnoughStorageKnown": {
+    "description": "Error message when the device lacks space for a profile task. required is a formatted size such as \"1.2 GB\"; nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "required": {
+        "type": "String"
+      },
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceNotEnoughStorageUnknown": "There is not enough free space to do this. {nothingChanged}",
+  "@startup_maintenanceNotEnoughStorageUnknown": {
+    "description": "Error message when the device lacks space for a profile task and the amounts are unknown. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupFolderUnavailable": "The backup could not be written to the folder. Choose the folder again and retry. {nothingChanged}",
+  "@startup_maintenanceBackupFolderUnavailable": {
+    "description": "Error message when the backup file could not be written to the chosen folder (e.g. access to it was lost). nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceProfileNoLongerExists": "That profile no longer exists.",
+  "@startup_maintenanceProfileNoLongerExists": {
+    "description": "Error message when a pending profile task refers to a profile that has since been deleted."
+  },
+  "startup_maintenanceRestoreEvidenceUnresolved": "An earlier attempt at this restore left a record that has not been resolved yet.",
+  "@startup_maintenanceRestoreEvidenceUnresolved": {
+    "description": "Error message when a restore cannot start because a record left by an earlier attempt still needs to be dealt with."
+  },
+  "startup_maintenanceRestoreWrongProfile": "This backup does not match the profile it was going to replace.",
+  "@startup_maintenanceRestoreWrongProfile": {
+    "description": "Reason a backup file was rejected for restore: it belongs to a different profile than the one to be replaced."
+  },
+  "startup_maintenanceRestoreRejected": "This backup file cannot be restored.",
+  "@startup_maintenanceRestoreRejected": {
+    "description": "Fallback when the specific reason a backup was rejected is not known to this version."
+  },
+  "startup_maintenanceRestoreIncomplete": "The backup file is incomplete.",
+  "@startup_maintenanceRestoreIncomplete": {
+    "description": "Reason a backup file was rejected for restore: parts of it are missing."
+  },
+  "startup_maintenanceRestoreNoMetadata": "The backup file has no profile metadata.",
+  "@startup_maintenanceRestoreNoMetadata": {
+    "description": "Reason a backup file was rejected for restore: it lacks the information describing the profile."
+  },
+  "startup_maintenanceRestoreMalformedMetadata": "The backup file's profile metadata could not be read.",
+  "@startup_maintenanceRestoreMalformedMetadata": {
+    "description": "Reason a backup file was rejected for restore: the information describing the profile is corrupt."
+  },
+  "startup_maintenanceRestoreNoProfileData": "The backup file has no profile data.",
+  "@startup_maintenanceRestoreNoProfileData": {
+    "description": "Reason a backup file was rejected for restore: it contains no profile data."
+  },
+  "startup_maintenanceHeadline": "Profile maintenance",
+  "@startup_maintenanceHeadline": {
+    "description": "Heading of the startup screen for pending profile backups, restores and deletions."
+  },
+  "startup_maintenanceMustFinish": "This task must finish before any profile can open. WebLibre keeps the profile closed while it works.",
+  "@startup_maintenanceMustFinish": {
+    "description": "Line under the maintenance heading while a task is pending. WebLibre is the app name."
+  },
+  "startup_maintenanceNothingLeft": "Nothing is left to finish.",
+  "@startup_maintenanceNothingLeft": {
+    "description": "Line under the maintenance heading when all pending tasks are done."
+  },
+  "startup_maintenanceCannotReadRecord": "WebLibre found interrupted profile work, but cannot read its record.",
+  "@startup_maintenanceCannotReadRecord": {
+    "description": "Line under the maintenance heading when interrupted work was found but its record is unreadable."
+  },
+  "startup_maintenancePasswordLabel": "Backup file password",
+  "@startup_maintenancePasswordLabel": {
+    "description": "Label of the password field for encrypting a new backup file or opening one to restore."
+  },
+  "startup_maintenancePasswordRejected": "This password did not open the backup file",
+  "@startup_maintenancePasswordRejected": {
+    "description": "Error under the password field when the password does not open the backup file."
+  },
+  "startup_maintenancePasswordHelperRequiredBackup": "Required. You need this to restore the backup, and it is not stored anywhere.",
+  "@startup_maintenancePasswordHelperRequiredBackup": {
+    "description": "Help text under the empty password field when creating a backup: a password is required and cannot be recovered later."
+  },
+  "startup_maintenancePasswordHelperRequiredRestore": "Required. Enter the password used to create this backup file.",
+  "@startup_maintenancePasswordHelperRequiredRestore": {
+    "description": "Help text under the empty password field when restoring a backup: enter the password the backup was created with."
+  },
+  "startup_maintenancePasswordHelperBackup": "You need this to restore the backup. It is not stored anywhere.",
+  "@startup_maintenancePasswordHelperBackup": {
+    "description": "Help text under the password field when creating a backup: remember it, it is not stored."
+  },
+  "startup_maintenancePasswordHelperRestore": "The password this backup file was created with.",
+  "@startup_maintenancePasswordHelperRestore": {
+    "description": "Help text under the password field when restoring a backup."
+  },
+  "startup_maintenanceTryFinishingAgain": "Try finishing it again",
+  "@startup_maintenanceTryFinishingAgain": {
+    "description": "Button that retries completing an interrupted profile task."
+  },
+  "startup_maintenanceDiscardAndContinueBlocked": "Discard the record and continue",
+  "@startup_maintenanceDiscardAndContinueBlocked": {
+    "description": "Button that throws away the unreadable record of an interrupted task so the browser can open (asks for confirmation). Shown while a task is blocked."
+  },
+  "startup_maintenanceDiscardAndContinueNoTasks": "Discard the record and continue",
+  "@startup_maintenanceDiscardAndContinueNoTasks": {
+    "description": "Same button as the previous one, shown when no task is listed but an unreadable record remains. Same wording."
+  },
+  "startup_maintenanceOpenWebLibreRetry": "Open WebLibre",
+  "@startup_maintenanceOpenWebLibreRetry": {
+    "description": "Secondary button after a failed profile task: leave the maintenance screen and open the browser anyway. WebLibre is the app name."
+  },
+  "startup_maintenanceOpenWebLibre": "Open WebLibre",
+  "@startup_maintenanceOpenWebLibre": {
+    "description": "Button after all profile tasks are done: continue into the browser. WebLibre is the app name."
+  },
+  "startup_maintenanceTakesSeveralMinutes": "This can take several minutes. Keep WebLibre open.",
+  "@startup_maintenanceTakesSeveralMinutes": {
+    "description": "Note under the progress text while a profile task runs."
+  },
+  "startup_maintenanceThenAfterThisOne": "Then, after this one",
+  "@startup_maintenanceThenAfterThisOne": {
+    "description": "Heading above the list of profile tasks queued after the current one."
+  },
+  "startup_maintenanceSkipForNow": "Skip for now",
+  "@startup_maintenanceSkipForNow": {
+    "description": "Button that postpones the pending profile tasks and opens the browser."
+  },
+  "startup_maintenanceInterruptedMustFinish": "This was interrupted after it started. It must finish before any profile can open.",
+  "@startup_maintenanceInterruptedMustFinish": {
+    "description": "Note on a task that was interrupted midway: it must be completed before any profile opens."
+  },
+  "startup_maintenanceInterruptedFinishFailed": "This was interrupted after it started, and finishing it did not succeed. It cannot be started over until it has been finished.",
+  "@startup_maintenanceInterruptedFinishFailed": {
+    "description": "Note on an interrupted task whose completion attempt also failed."
+  },
+  "startup_maintenanceInterruptedUnreadable": "This was interrupted after it started, and WebLibre cannot read what it was doing. It cannot be run again until that record is dealt with.",
+  "@startup_maintenanceInterruptedUnreadable": {
+    "description": "Note on an interrupted task whose record cannot be read."
+  },
+  "startup_maintenanceDiscardDialogTitle": "Discard the interrupted record?",
+  "@startup_maintenanceDiscardDialogTitle": {
+    "description": "Title of the confirmation dialog before discarding the record of an interrupted profile task."
+  },
+  "startup_maintenanceDiscardDialogContent": "WebLibre cannot read what a backup, restore or deletion was doing when it stopped. Discarding the record lets the browser open again, but a profile that was being replaced may need to be checked afterward.\n\nIf the profile is missing, WebLibre restores the data it saved before replacing it. If the profile is present, WebLibre removes that saved data. If WebLibre cannot tell which profile the saved data belongs to, it keeps the data rather than removing it.",
+  "@startup_maintenanceDiscardDialogContent": {
+    "description": "Body of that dialog explaining what happens to data saved during an interrupted profile replacement. Keep the blank line (\\n\\n)."
+  },
+  "startup_maintenanceDiscardIt": "Discard it",
+  "@startup_maintenanceDiscardIt": {
+    "description": "Confirm button of that dialog."
+  },
+  "startup_maintenanceBackupVerb": "Back up now",
+  "@startup_maintenanceBackupVerb": {
+    "description": "Button that starts a pending profile backup."
+  },
+  "startup_maintenanceBackupRetry": "Try the backup again",
+  "@startup_maintenanceBackupRetry": {
+    "description": "Button that retries a profile backup after it failed."
+  },
+  "startup_maintenanceBackupCancel": "Cancel this backup",
+  "@startup_maintenanceBackupCancel": {
+    "description": "Button that cancels a profile backup before it starts."
+  },
+  "startup_maintenanceBackupDescribe": "Back up \"{profileName}\"",
+  "@startup_maintenanceBackupDescribe": {
+    "description": "Title of a pending backup task, also inserted into \"{task} was canceled.\". profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupConsequence": "Writes an encrypted backup file of this profile, including its {secretDataDescription}.",
+  "@startup_maintenanceBackupConsequence": {
+    "description": "Explanation under a pending backup task. secretDataDescription is a lowercase list such as \"WebLibre account sign-in, sync setup and proxy details\".",
+    "placeholders": {
+      "secretDataDescription": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupActivity": "Packing \"{profileName}\"…",
+  "@startup_maintenanceBackupActivity": {
+    "description": "Progress text while a backup is created. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupDescribeDone": "\"{profileName}\" was backed up to the folder you chose.",
+  "@startup_maintenanceBackupDescribeDone": {
+    "description": "Result message after a backup finished. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreOverVerb": "Replace now",
+  "@startup_maintenanceRestoreOverVerb": {
+    "description": "Button that starts a pending restore that replaces an existing profile with a backup."
+  },
+  "startup_maintenanceRestoreOverRetry": "Try the restore again",
+  "@startup_maintenanceRestoreOverRetry": {
+    "description": "Button that retries a restore that replaces an existing profile after it failed."
+  },
+  "startup_maintenanceRestoreOverCancel": "Cancel this restore",
+  "@startup_maintenanceRestoreOverCancel": {
+    "description": "Button that cancels a restore that replaces an existing profile before it starts."
+  },
+  "startup_maintenanceRestoreOverDescribe": "Replace \"{profileName}\"",
+  "@startup_maintenanceRestoreOverDescribe": {
+    "description": "Title of a pending task that replaces a profile with a backup, also inserted into \"{task} was canceled.\". profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreOverConsequenceWithRename": "Replaces everything in this profile with the backup. {signedInFromBackup} {olderBackupKeepsCredentials} It also takes the backup's name. {cannotBeUndone}",
+  "@startup_maintenanceRestoreOverConsequenceWithRename": {
+    "description": "Explanation under a pending replace task where the profile also takes the backup's name. The placeholders are complete sentences: signedInFromBackup, olderBackupKeepsCredentials, and cannotBeUndone (\"This cannot be undone.\").",
+    "placeholders": {
+      "signedInFromBackup": {
+        "type": "String"
+      },
+      "olderBackupKeepsCredentials": {
+        "type": "String"
+      },
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreOverConsequencePlain": "Replaces everything in this profile with the backup. {signedInFromBackup} {olderBackupKeepsCredentials} {cannotBeUndone}",
+  "@startup_maintenanceRestoreOverConsequencePlain": {
+    "description": "Explanation under a pending replace task. The placeholders are complete sentences: signedInFromBackup, olderBackupKeepsCredentials, and cannotBeUndone (\"This cannot be undone.\").",
+    "placeholders": {
+      "signedInFromBackup": {
+        "type": "String"
+      },
+      "olderBackupKeepsCredentials": {
+        "type": "String"
+      },
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreOverActivity": "Replacing \"{profileName}\"…",
+  "@startup_maintenanceRestoreOverActivity": {
+    "description": "Progress text while a profile is replaced with a backup. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreOverDescribeDone": "\"{profileName}\" was replaced with the backup.",
+  "@startup_maintenanceRestoreOverDescribeDone": {
+    "description": "Result message after a profile was replaced with a backup. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceDeleteVerb": "Delete now",
+  "@startup_maintenanceDeleteVerb": {
+    "description": "Button that starts a pending profile deletion."
+  },
+  "startup_maintenanceDeleteRetry": "Try the deletion again",
+  "@startup_maintenanceDeleteRetry": {
+    "description": "Button that retries a profile deletion after it failed."
+  },
+  "startup_maintenanceDeleteCancel": "Cancel this deletion",
+  "@startup_maintenanceDeleteCancel": {
+    "description": "Button that cancels a profile deletion before it starts."
+  },
+  "startup_maintenanceDeleteDescribe": "Delete \"{profileName}\"",
+  "@startup_maintenanceDeleteDescribe": {
+    "description": "Title of a pending deletion task, also inserted into \"{task} was canceled.\". profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceDeleteConsequence": "Removes this profile and its {profileDataDescription}. {cannotBeUndone}",
+  "@startup_maintenanceDeleteConsequence": {
+    "description": "Explanation under a pending deletion task. profileDataDescription is a lowercase list such as \"tabs, history, bookmarks, settings and saved site logins\"; cannotBeUndone is \"This cannot be undone.\"",
+    "placeholders": {
+      "profileDataDescription": {
+        "type": "String"
+      },
+      "cannotBeUndone": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceDeleteActivity": "Deleting \"{profileName}\"…",
+  "@startup_maintenanceDeleteActivity": {
+    "description": "Progress text while a profile is deleted. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceDeleteDescribeDone": "\"{profileName}\" was deleted.",
+  "@startup_maintenanceDeleteDescribeDone": {
+    "description": "Result message after a profile was deleted. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreCloneVerb": "Cannot run this",
+  "@startup_maintenanceRestoreCloneVerb": {
+    "description": "Disabled button label for a restore-as-new-profile task that this screen cannot run."
+  },
+  "startup_maintenanceRestoreCloneRetry": "Try the restore again",
+  "@startup_maintenanceRestoreCloneRetry": {
+    "description": "Button that retries a restore into a new profile after it failed."
+  },
+  "startup_maintenanceRestoreCloneCancel": "Cancel this restore",
+  "@startup_maintenanceRestoreCloneCancel": {
+    "description": "Button that cancels a restore into a new profile before it starts."
+  },
+  "startup_maintenanceRestoreCloneDescribe": "Restore \"{profileName}\"",
+  "@startup_maintenanceRestoreCloneDescribe": {
+    "description": "Title of a pending task that restores a backup as a new profile, also inserted into \"{task} was canceled.\". profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreCloneConsequence": "This restore was created by a newer version of WebLibre and cannot run here.",
+  "@startup_maintenanceRestoreCloneConsequence": {
+    "description": "Explanation under that task: it cannot run here."
+  },
+  "startup_maintenanceRestoreCloneActivity": "Restoring \"{profileName}\"…",
+  "@startup_maintenanceRestoreCloneActivity": {
+    "description": "Progress text while a backup is restored as a new profile. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceRestoreCloneDescribeDone": "\"{profileName}\" was restored.",
+  "@startup_maintenanceRestoreCloneDescribeDone": {
+    "description": "Result message after a backup was restored as a new profile. profileName is the profile's name.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceUnknownVerb": "Run",
+  "@startup_maintenanceUnknownVerb": {
+    "description": "Button label for a pending task of an unknown kind."
+  },
+  "startup_maintenanceUnknownRetry": "Try the task again",
+  "@startup_maintenanceUnknownRetry": {
+    "description": "Button that retries a task of a kind this version does not know after it failed."
+  },
+  "startup_maintenanceUnknownCancel": "Cancel this task",
+  "@startup_maintenanceUnknownCancel": {
+    "description": "Button that cancels a task of a kind this version does not know before it starts."
+  },
+  "startup_maintenanceUnknownDescribe": "Unknown task {taskId}",
+  "@startup_maintenanceUnknownDescribe": {
+    "description": "Title of a pending task of an unknown kind. taskId is its technical identifier.",
+    "placeholders": {
+      "taskId": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceUnknownConsequence": "This task was created by a newer version of WebLibre and cannot run.",
+  "@startup_maintenanceUnknownConsequence": {
+    "description": "Explanation under a task of an unknown kind: it was created by a newer app version."
+  },
+  "startup_maintenanceUnknownActivity": "Working…",
+  "@startup_maintenanceUnknownActivity": {
+    "description": "Progress text while a task of an unknown kind runs."
+  },
+  "startup_maintenanceUnknownDescribeDone": "Done.",
+  "@startup_maintenanceUnknownDescribeDone": {
+    "description": "Result message after a task of an unknown kind finished."
+  }
+}

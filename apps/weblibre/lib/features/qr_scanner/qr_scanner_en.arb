@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+
+  "qrScanner_noCameraPermission": "Camera permission has not been granted.",
+  "@qrScanner_noCameraPermission": {
+    "description": "Error message shown when the QR code scanner cannot open because camera access was denied."
+  },
+  "qrScanner_scanCodeTitle": "Scan code",
+  "@qrScanner_scanCodeTitle": {
+    "description": "Title of the full-screen QR code scanner."
+  }
+}

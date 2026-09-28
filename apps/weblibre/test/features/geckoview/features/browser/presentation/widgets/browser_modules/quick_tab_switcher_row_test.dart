@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 const _title = 'A page title long enough to need more than a chip';
 const _avatarKey = ValueKey('avatar');
@@ -52,6 +53,8 @@ Future<void> pumpRow(
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Align(
           alignment: Alignment.topLeft,

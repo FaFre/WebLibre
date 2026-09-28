@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/quotes/data/database/definitions.drift.dart';
 import 'package:weblibre/features/quotes/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The daily quote card.
 ///
@@ -40,10 +41,11 @@ class QuoteSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final quoteAsync = ref.watch(randomQuoteProvider);
 
     return SearchModuleSection(
-      title: 'A thought for the road',
+      title: l10n.search_quoteCardTitle,
       moduleType: SearchModuleType.quote,
       // A single card rather than a list: nothing to count or paginate.
       totalCount: 0,
@@ -51,7 +53,7 @@ class QuoteSection extends ConsumerWidget {
       card: true,
       headerLeading: const _QuoteMark(),
       headerTrailing: IconButton.filledTonal(
-        tooltip: 'Refresh quote',
+        tooltip: l10n.search_refreshQuoteTooltip,
         onPressed: () => ref.invalidate(randomQuoteProvider),
         icon: const Icon(Icons.refresh_rounded),
       ),
@@ -98,9 +100,10 @@ class _QuotePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return Text(
-      'Open a new tab and make this space your own.',
+      l10n.search_quotePlaceholder,
       style: theme.textTheme.bodyLarge?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
         height: 1.5,

@@ -120,6 +120,7 @@ import 'package:weblibre/features/web_feed/presentation/screens/feed_edit.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_list.dart';
 import 'package:weblibre/features/web_feed/presentation/select_feed_dialog.dart';
 import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 part 'routes.addons.dart';
 part 'routes.bangs.dart';

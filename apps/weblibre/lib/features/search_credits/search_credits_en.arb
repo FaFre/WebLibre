@@ -1,0 +1,90 @@
+{
+  "@@locale": "en",
+
+  "searchCredits_couldNotLoadTitle": "Could not load credits",
+  "@searchCredits_couldNotLoadTitle": {
+    "description": "Title of the search credits panel in account settings when the credit balance could not be loaded from the server."
+  },
+  "searchCredits_title": "Search credits",
+  "@searchCredits_title": {
+    "description": "Title of the panel in account settings showing the user's balance of prepaid search credits (paid units for privacy-preserving web search)."
+  },
+  "searchCredits_errorSubtitle": "Check your connection and tap refresh to retry.",
+  "@searchCredits_errorSubtitle": {
+    "description": "Line under \"Could not load credits\" telling the user to retry with the refresh button next to it."
+  },
+  "searchCredits_emptySubtitle": "Buy a search pack to get started",
+  "@searchCredits_emptySubtitle": {
+    "description": "Line under the search credits title when the user has never bought credits."
+  },
+  "searchCredits_creditsWithAllowance": "Credits: {credits} / {allowance}  ·  Stashed tokens: {stash}",
+  "@searchCredits_creditsWithAllowance": {
+    "description": "Balance line of the search credits panel. credits is the remaining credits, allowance is the monthly allowance of the user's plan, stash is the number of anonymous search tokens already downloaded to the device. Keep the \"·\" separators.",
+    "placeholders": {
+      "credits": { "type": "int" },
+      "allowance": { "type": "int" },
+      "stash": { "type": "int" }
+    }
+  },
+  "searchCredits_creditsNoAllowance": "Credits: {credits}  ·  Stashed tokens: {stash}",
+  "@searchCredits_creditsNoAllowance": {
+    "description": "Balance line of the search credits panel for users without a monthly allowance. credits is the remaining credits, stash is the number of anonymous search tokens already downloaded to the device. Keep the \"·\" separator.",
+    "placeholders": {
+      "credits": { "type": "int" },
+      "stash": { "type": "int" }
+    }
+  },
+  "searchCredits_tooltipRefresh": "Refresh",
+  "@searchCredits_tooltipRefresh": {
+    "description": "Tooltip of the button that reloads the search credit balance."
+  },
+
+  "searchCredits_resetsOn": "Resets on {date}",
+  "@searchCredits_resetsOn": {
+    "description": "Line in the search credits panel. date is the formatted date when the monthly credit allowance renews.",
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "searchCredits_lastIssuance": "Last issuance: {relative}  ({absolute})",
+  "@searchCredits_lastIssuance": {
+    "description": "Line in the search credits panel about when search tokens were last downloaded. relative is a relative time such as \"5 minutes ago\"; absolute is the formatted date and time.",
+    "placeholders": {
+      "relative": { "type": "String" },
+      "absolute": { "type": "String" }
+    }
+  },
+  "searchCredits_requestingTokens": "Requesting tokens...",
+  "@searchCredits_requestingTokens": {
+    "description": "Progress text shown while the app downloads new anonymous search tokens."
+  },
+  "searchCredits_issuanceFailed": "Token issuance failed: {error}",
+  "@searchCredits_issuanceFailed": {
+    "description": "Error line when downloading anonymous search tokens failed. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "searchCredits_needsReauth": "Please sign in again to request tokens.",
+  "@searchCredits_needsReauth": {
+    "description": "Error line when downloading search tokens failed because the account session expired; the user must sign in to their WebLibre account again."
+  },
+
+  "searchCredits_buySearchPackTitle": "Buy a search pack",
+  "@searchCredits_buySearchPackTitle": {
+    "description": "Row in the search credits panel that opens the store page for buying a first pack of search credits."
+  },
+  "searchCredits_getTokensTitle": "Get tokens",
+  "@searchCredits_getTokensTitle": {
+    "description": "Row in the search credits panel that converts credits into anonymous search tokens stored on the device."
+  },
+  "searchCredits_requestTokensCount": "{count, plural, =1{Request 1 token} other{Request {count} tokens}}",
+  "@searchCredits_requestTokensCount": {
+    "description": "Subtitle under \"Get tokens\" saying how many search tokens a tap will request. count is at most 25.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "searchCredits_noCreditsRemaining": "No credits remaining",
+  "@searchCredits_noCreditsRemaining": {
+    "description": "Subtitle under \"Get tokens\" when no credits are left to convert into tokens."
+  },
+  "searchCredits_buyMoreTitle": "Buy more",
+  "@searchCredits_buyMoreTitle": {
+    "description": "Row in the search credits panel that opens the store page for buying more search credits."
+  }
+}

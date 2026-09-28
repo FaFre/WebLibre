@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -77,6 +78,7 @@ class ContainerSitesScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
     final textController = useTextEditingController();
 
@@ -97,7 +99,7 @@ class ContainerSitesScreen extends HookConsumerWidget {
               context.pop(sites.value);
             },
           ),
-          title: const Text('Site Assignments'),
+          title: Text(l10n.tabs_siteAssignmentsTitle),
         ),
         body: SafeArea(
           child: Column(
@@ -108,9 +110,9 @@ class ContainerSitesScreen extends HookConsumerWidget {
                   key: formKey,
                   child: TextFormField(
                     decoration: InputDecoration(
-                      label: const Text('Add Site'),
-                      hintText: 'example.com or *.example.com',
-                      helperText: 'Use *.example.com to match all subdomains',
+                      label: Text(l10n.tabs_addSiteLabel),
+                      hintText: l10n.tabs_addSiteHint,
+                      helperText: l10n.tabs_addSiteHelperText,
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       suffix: TextButton(
                         onPressed: () {
@@ -118,23 +120,23 @@ class ContainerSitesScreen extends HookConsumerWidget {
                             formKey.currentState?.save();
                           }
                         },
-                        child: const Text('Add'),
+                        child: Text(l10n.common_add),
                       ),
                     ),
                     controller: textController,
                     keyboardType: TextInputType.url,
                     validator: (value) {
                       if (value.isEmpty) {
-                        return 'URL must be provided';
+                        return l10n.tabs_urlMustBeProvided;
                       }
 
                       final entry = _parseSiteAssignmentInput(value);
                       if (entry == null) {
-                        return 'Invalid URL';
+                        return l10n.tabs_invalidUrl;
                       }
 
                       if (sites.value.contains(entry)) {
-                        return 'This site has been already assigned';
+                        return l10n.tabs_siteAlreadyAssigned;
                       }
 
                       return null;
@@ -173,8 +175,13 @@ class ContainerSitesScreen extends HookConsumerWidget {
                           ui_helper.showErrorMessage(
                             context,
                             (assignedContainer?.name.isNotEmpty ?? false)
-                                ? '$entry has already been assigned to container "${assignedContainer?.name}"'
-                                : '$entry has already been assigned to another container',
+                                ? l10n.tabs_siteAlreadyAssignedToNamedContainer(
+                                    '$entry',
+                                    assignedContainer!.name!,
+                                  )
+                                : l10n.tabs_siteAlreadyAssignedToAnotherContainer(
+                                    '$entry',
+                                  ),
                           );
                         }
                       }

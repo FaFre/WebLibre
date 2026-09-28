@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/readerable.da
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -57,7 +58,7 @@ class QuickTogglesSection extends ConsumerWidget {
       final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId));
       toggles[MenuItemType.desktopMode] = _QuickToggle(
         icon: MdiIcons.monitor,
-        label: MenuItemType.desktopMode.label,
+        label: MenuItemType.desktopMode.label(context),
         active: desktopEnabled,
         onTap: () {
           ref
@@ -96,7 +97,7 @@ class QuickTogglesSection extends ConsumerWidget {
         icon: (readerVisible && isReaderActive)
             ? MdiIcons.bookOpen
             : MdiIcons.bookOpenOutline,
-        label: MenuItemType.readerMode.label,
+        label: MenuItemType.readerMode.label(context),
         active: readerVisible && isReaderActive,
         enabled: readerVisible && !isReaderLoading,
         onTap: () async {
@@ -113,7 +114,7 @@ class QuickTogglesSection extends ConsumerWidget {
       if (gestureSettings.enabled) {
         toggles[MenuItemType.gestures] = _QuickToggle(
           icon: MdiIcons.gestureSwipe,
-          label: MenuItemType.gestures.label,
+          label: MenuItemType.gestures.label(context),
           active: gestureSettings.active,
           onTap: () async {
             await ref

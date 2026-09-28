@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -52,6 +53,7 @@ class ContextMenuDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
     final showContainerUi = settings.showContainerUi;
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
@@ -76,13 +78,13 @@ class ContextMenuDialog extends HookConsumerWidget {
 
     void applyCleanUrl() {
       if (cleaner.applyCleanUrl()) {
-        showInfoMessage(context, 'URL cleaned');
+        showInfoMessage(context, l10n.contextmenu_urlCleanedMessage);
       }
     }
 
     void applySelectedTrackingRemovals(String previewUrl) {
       if (cleaner.applyPreviewUrl(previewUrl)) {
-        showInfoMessage(context, 'URL preview applied');
+        showInfoMessage(context, l10n.contextmenu_urlPreviewAppliedMessage);
       }
     }
 

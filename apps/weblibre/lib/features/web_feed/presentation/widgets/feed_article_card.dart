@@ -32,6 +32,7 @@ import 'package:weblibre/features/web_feed/extensions/atom.dart';
 import 'package:weblibre/features/web_feed/extensions/feed_article.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/authors_horizontal_list.dart';
 import 'package:weblibre/features/web_feed/presentation/widgets/tags_horizontal_list.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_highlight.dart';
 
@@ -46,6 +47,7 @@ class FeedArticleCard extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final tags = ref.watch(articleFilterProvider);
 
@@ -106,7 +108,7 @@ class FeedArticleCard extends HookConsumerWidget {
                           ),
                         if (titleHighlight.isEmpty)
                           Text(
-                            article.displayTitle,
+                            article.displayTitle(context),
                             style: theme.textTheme.titleMedium,
                           ),
                         if (searchSnippet.isNotEmpty)
@@ -186,7 +188,11 @@ class FeedArticleCard extends HookConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'Published: ${(article.created != null) ? timeago.format(article.created!) : 'N/A'}',
+                    l10n.webFeed_publishedLabel(
+                      (article.created != null)
+                          ? timeago.format(article.created!)
+                          : l10n.webFeed_notAvailable,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontStyle: FontStyle.italic,
                     ),
@@ -194,7 +200,9 @@ class FeedArticleCard extends HookConsumerWidget {
                   if (article.updated != null &&
                       article.updated != article.created)
                     Text(
-                      'Updated: ${timeago.format(article.updated!)}',
+                      l10n.webFeed_updatedLabel(
+                        timeago.format(article.updated!),
+                      ),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontStyle: FontStyle.italic,
                       ),

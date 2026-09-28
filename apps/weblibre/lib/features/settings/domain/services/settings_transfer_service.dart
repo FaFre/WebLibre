@@ -39,23 +39,15 @@ part 'settings_transfer_service.g.dart';
 /// settings: `GeneralSettings` alone has ninety-odd fields, and a hand-kept map
 /// from field to category is a list that silently goes stale — a new setting
 /// left out of it would just quietly stop being exported.
+///
+/// Display names live in `SettingsTransferSectionL10n`.
 enum SettingsTransferSection {
-  settings(
-    SyncDocumentKind.weblibreSettings,
-    'App settings',
-    'Appearance, browsing, tabs, privacy, Tor and web engine settings',
-  ),
-  geckoPrefs(
-    SyncDocumentKind.geckoUserJs,
-    'Gecko preferences',
-    'Advanced engine preferences you changed by hand',
-  );
+  settings(SyncDocumentKind.weblibreSettings),
+  geckoPrefs(SyncDocumentKind.geckoUserJs);
 
-  const SettingsTransferSection(this.kind, this.title, this.description);
+  const SettingsTransferSection(this.kind);
 
   final SyncDocumentKind kind;
-  final String title;
-  final String description;
 
   static SettingsTransferSection? forKindValue(String value) {
     for (final section in SettingsTransferSection.values) {
@@ -89,11 +81,13 @@ class SettingsImportPartialFailure implements Exception {
   final SettingsTransferSection failed;
   final Object cause;
 
+  /// English, for logs. The UI builds its own sentence from [applied] and
+  /// [failed] (`SettingsImportPartialFailureL10n.describe`).
   String get message {
-    final done = applied.map((section) => section.title).join(', ');
+    final done = applied.map((section) => section.name).join(', ');
     final start = done.isEmpty ? '' : '$done was imported, but ';
 
-    return '$start${failed.title} failed part way through and may be '
+    return '$start${failed.name} failed part way through and may be '
         'half-applied: $cause';
   }
 
@@ -287,7 +281,8 @@ class SettingsTransferService extends _$SettingsTransferService {
         final content = entry.content;
         if (content is! Map<String, dynamic>) {
           throw SettingsExportFormatException(
-            'The "${section.title}" section is malformed.',
+            SettingsExportFormatErrorKind.malformedSection,
+            sectionKey: section.kind.value,
           );
         }
 
@@ -299,7 +294,8 @@ class SettingsTransferService extends _$SettingsTransferService {
         final content = entry.content;
         if (content is! String) {
           throw SettingsExportFormatException(
-            'The "${section.title}" section is malformed.',
+            SettingsExportFormatErrorKind.malformedSection,
+            sectionKey: section.kind.value,
           );
         }
 
@@ -308,7 +304,7 @@ class SettingsTransferService extends _$SettingsTransferService {
         // that resets every preference this device has set.
         final parsed = requireGeckoPrefsDocument(
           content,
-          label: '"${section.title}"',
+          sectionKey: section.kind.value,
         );
 
         final schemaVersion = _requireReadableSchema(
@@ -350,8 +346,10 @@ class SettingsTransferService extends _$SettingsTransferService {
 
     if (claimed > supported) {
       throw SettingsExportFormatException(
-        'The "${section.title}" section was written by a newer version of '
-        'WebLibre (schema $claimed, this build reads up to $supported).',
+        SettingsExportFormatErrorKind.newerSectionSchema,
+        sectionKey: section.kind.value,
+        version: claimed,
+        supportedVersion: supported,
       );
     }
 

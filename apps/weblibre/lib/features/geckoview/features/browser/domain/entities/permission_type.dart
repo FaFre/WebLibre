@@ -23,17 +23,16 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/sit
 
 /// Permission types with their display configuration
 enum PermissionType {
-  camera(Icons.videocam, 'Camera'),
-  microphone(Icons.mic, 'Microphone'),
-  location(Icons.location_on, 'Location'),
-  notification(Icons.notifications, 'Notifications'),
-  persistentStorage(Icons.storage, 'Persistent Storage'),
-  crossOriginStorage(Icons.cookie, 'Cross-Origin Storage'),
-  mediaKeySystem(Icons.key, 'Media Key System (DRM)');
+  camera(Icons.videocam),
+  microphone(Icons.mic),
+  location(Icons.location_on),
+  notification(Icons.notifications),
+  persistentStorage(Icons.storage),
+  crossOriginStorage(Icons.cookie),
+  mediaKeySystem(Icons.key);
 
-  const PermissionType(this.icon, this.label);
+  const PermissionType(this.icon);
   final IconData icon;
-  final String label;
 }
 
 extension SitePermissionsGetter on SitePermissions? {

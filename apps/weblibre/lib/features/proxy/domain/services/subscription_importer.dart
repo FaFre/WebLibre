@@ -59,6 +59,17 @@ class SubscriptionImportResult {
       entries.whereType<SubscriptionEntryFailure>();
 }
 
+/// The subscription server answered with an error status.
+///
+/// A [http.ClientException] like any other failed request, with the status
+/// kept as a number so the UI can word it in its own language.
+class SubscriptionHttpException extends http.ClientException {
+  SubscriptionHttpException(this.statusCode, Uri url)
+    : super('Subscription returned HTTP $statusCode.', url);
+
+  final int statusCode;
+}
+
 /// Fetches a v2rayN-style subscription URL and parses its contents.
 ///
 /// Most subscription servers serve a base64-encoded blob whose decoded body is
@@ -76,10 +87,7 @@ Future<SubscriptionImportResult> fetchSubscription(
         .get(url, headers: {'User-Agent': 'WebLibre/sing-box-subscriber'})
         .timeout(const Duration(seconds: 30));
     if (response.statusCode >= 400) {
-      throw http.ClientException(
-        'Subscription returned HTTP ${response.statusCode}.',
-        url,
-      );
+      throw SubscriptionHttpException(response.statusCode, url);
     }
     return parseSubscriptionBody(response.body);
   } finally {

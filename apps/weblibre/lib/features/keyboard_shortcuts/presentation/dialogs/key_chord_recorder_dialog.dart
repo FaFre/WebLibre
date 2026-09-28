@@ -22,8 +22,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/keyboard_shortcut_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Asks for a key combination for [action] and returns it, or null when
 /// cancelled.
@@ -62,6 +64,7 @@ class KeyChordRecorderDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final recorded = useState<KeyChord?>(null);
 
     final chord = recorded.value;
@@ -70,9 +73,9 @@ class KeyChordRecorderDialog extends HookWidget {
     final problem = switch (chord) {
       null => null,
       _ when !chord.isAssignable =>
-        'Web pages need this key. Hold Ctrl, Alt or Meta with it, or use a '
-            'function key.',
-      _ when owner == action => 'This is already a shortcut for this action.',
+        l10n.keyboardShortcuts_recorderProblemNotAssignable,
+      _ when owner == action =>
+        l10n.keyboardShortcuts_recorderProblemAlreadyBound,
       _ => null,
     };
     final takesFromOther = problem == null && owner != null;
@@ -110,13 +113,19 @@ class KeyChordRecorderDialog extends HookWidget {
       autofocus: true,
       onKeyEvent: onKeyEvent,
       child: AlertDialog(
-        title: Text(replacing == null ? 'Add shortcut' : 'Change shortcut'),
+        title: Text(
+          replacing == null
+              ? l10n.keyboardShortcuts_addShortcut
+              : l10n.keyboardShortcuts_changeShortcutTitle,
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Press the key combination for "${action.title}".',
+              l10n.keyboardShortcuts_recorderInstructions(
+                action.label(context),
+              ),
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -129,7 +138,7 @@ class KeyChordRecorderDialog extends HookWidget {
               ),
               alignment: Alignment.center,
               child: Text(
-                chord?.label ?? 'Waiting for keys…',
+                chord?.label ?? l10n.keyboardShortcuts_recorderWaitingForKeys,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge?.copyWith(
                   color: chord == null
@@ -149,7 +158,9 @@ class KeyChordRecorderDialog extends HookWidget {
             ] else if (takesFromOther) ...[
               const SizedBox(height: 12),
               Text(
-                'Currently used by "${owner.title}". Saving moves it here.',
+                l10n.keyboardShortcuts_recorderTakesFromOther(
+                  owner.label(context),
+                ),
                 style: theme.textTheme.bodySmall,
               ),
             ],
@@ -158,11 +169,15 @@ class KeyChordRecorderDialog extends HookWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.common_cancel),
           ),
           FilledButton(
             onPressed: canSave ? save : null,
-            child: Text(takesFromOther ? 'Reassign' : 'Save'),
+            child: Text(
+              takesFromOther
+                  ? l10n.keyboardShortcuts_actionReassign
+                  : l10n.common_save,
+            ),
           ),
         ],
       ),

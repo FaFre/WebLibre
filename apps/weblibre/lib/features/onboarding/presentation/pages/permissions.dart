@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
@@ -36,6 +37,7 @@ class PermissionsPage extends HookConsumerWidget implements IFormPage {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     final notificationPermissionEnabled = useCachedFuture(
       () => Permission.notification.isGranted,
@@ -56,7 +58,7 @@ class PermissionsPage extends HookConsumerWidget implements IFormPage {
               const SizedBox(height: 24),
               Center(
                 child: Text(
-                  'Permissions',
+                  l10n.onboarding_permissionsTitle,
                   style: theme.textTheme.headlineMedium,
                 ),
               ),
@@ -74,9 +76,9 @@ class PermissionsPage extends HookConsumerWidget implements IFormPage {
                   builder: (field) => SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: field.value ?? true,
-                    title: const Text('Notifications'),
-                    subtitle: const Text(
-                      'Required to inform about download status',
+                    title: Text(l10n.onboarding_permissionsNotificationsTitle),
+                    subtitle: Text(
+                      l10n.onboarding_permissionsNotificationsSubtitle,
                     ),
                     onChanged: (notificationPermissionEnabled.data == true)
                         ? null
@@ -99,9 +101,9 @@ class PermissionsPage extends HookConsumerWidget implements IFormPage {
                   builder: (field) => SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     value: field.value ?? isCurrentDefaultBrowser,
-                    title: const Text('Default Browser'),
-                    subtitle: const Text(
-                      'Set WebLibre as your default browser',
+                    title: Text(l10n.onboarding_permissionsDefaultBrowserTitle),
+                    subtitle: Text(
+                      l10n.onboarding_permissionsDefaultBrowserSubtitle,
                     ),
                     onChanged: isCurrentDefaultBrowser
                         ? null

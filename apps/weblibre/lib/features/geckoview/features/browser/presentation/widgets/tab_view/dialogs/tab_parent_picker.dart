@@ -24,6 +24,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 
 /// Matches the fixed itemExtent used by the main tab list
@@ -87,6 +88,7 @@ class _TabParentPickerSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final movingTabAsync = ref.watch(watchTabDbDataProvider(tabId));
     final descendantsAsync = ref.watch(watchTabDescendantsProvider(tabId));
 
@@ -98,14 +100,16 @@ class _TabParentPickerSheet extends HookConsumerWidget {
       builder: (context, scrollController) {
         return movingTabAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text('Error: $e')),
+          error: (e, _) =>
+              Center(child: Text(l10n.browser_errorGeneric(e.toString()))),
           data: (movingTab) {
             if (movingTab == null) {
-              return const Center(child: Text('Tab no longer exists'));
+              return Center(child: Text(l10n.browser_tabNoLongerExists));
             }
             return descendantsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) =>
+                  Center(child: Text(l10n.browser_errorGeneric(e.toString()))),
               data: (descendants) {
                 final excluded = descendants.keys.toSet()..add(tabId);
                 final containerId = movingTab.containerId;
@@ -115,7 +119,9 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                 return candidatesAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('Error: $e')),
+                  error: (e, _) => Center(
+                    child: Text(l10n.browser_errorGeneric(e.toString())),
+                  ),
                   data: (tabs) {
                     final candidates = tabs
                         .where((t) => !excluded.contains(t.id))
@@ -123,12 +129,12 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                     return CustomScrollView(
                       controller: scrollController,
                       slivers: [
-                        const SliverPadding(
-                          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        SliverPadding(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                           sliver: SliverToBoxAdapter(
                             child: Text(
-                              'Choose a parent tab',
-                              style: TextStyle(
+                              l10n.browser_chooseAParentTab,
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -138,8 +144,10 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                         SliverToBoxAdapter(
                           child: ListTile(
                             leading: const Icon(MdiIcons.fileTreeOutline),
-                            title: const Text('Make standalone'),
-                            subtitle: const Text('Detach from current parent'),
+                            title: Text(l10n.browser_makeStandalone),
+                            subtitle: Text(
+                              l10n.browser_detachFromCurrentParent,
+                            ),
                             enabled: movingTab.parentId != null,
                             onTap: () => Navigator.of(
                               context,
@@ -148,11 +156,11 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                         ),
                         const SliverToBoxAdapter(child: Divider(height: 1)),
                         if (candidates.isEmpty)
-                          const SliverToBoxAdapter(
+                          SliverToBoxAdapter(
                             child: Padding(
-                              padding: EdgeInsets.all(24),
+                              padding: const EdgeInsets.all(24),
                               child: Text(
-                                'No candidate tabs in this container.',
+                                l10n.browser_noCandidateTabsInContainer,
                                 textAlign: TextAlign.center,
                               ),
                             ),

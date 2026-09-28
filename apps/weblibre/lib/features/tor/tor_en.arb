@@ -1,0 +1,240 @@
+{
+  "@@locale": "en",
+
+  "tor_sectionService": "Service",
+  "@tor_sectionService": {
+    "description": "Section heading on the Tor settings screen for starting and stopping the Tor service. Tor is an anonymity network."
+  },
+  "tor_sectionServiceKeywords": "power, start, stop",
+  "@tor_sectionServiceKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_sectionCircumvention": "Circumvention",
+  "@tor_sectionCircumvention": {
+    "description": "Section heading on the Tor settings screen for ways of reaching Tor where it is blocked or censored (\"censorship circumvention\")."
+  },
+  "tor_sectionCircumventionKeywords": "bridges, transport, obfs4, snowflake",
+  "@tor_sectionCircumventionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_sectionCountryRestrictions": "Country Restrictions",
+  "@tor_sectionCountryRestrictions": {
+    "description": "Section heading on the Tor settings screen for limiting which countries the Tor connection enters or leaves the network through."
+  },
+  "tor_sectionCountryRestrictionsKeywords": "entry, exit, country",
+  "@tor_sectionCountryRestrictionsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_sectionAbout": "About",
+  "@tor_sectionAbout": {
+    "description": "Section heading on the Tor settings screen for legal information."
+  },
+  "tor_sectionAboutKeywords": "trademark, legal",
+  "@tor_sectionAboutKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+
+  "tor_proxyLabel": "{brand} Proxy",
+  "@tor_proxyLabel": {
+    "description": "Name of the built-in Tor proxy, used as screen title, dialog title and connection menu label. brand is \"Tor™\" (trademark, never translated).",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "tor_serviceLabel": "{brand} Service",
+  "@tor_serviceLabel": {
+    "description": "Title of the switch that starts or stops the Tor service. brand is \"Tor™\".",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "tor_serviceLabelKeywords": "enable, connect",
+  "@tor_serviceLabelKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+
+  "tor_serviceSubtitle": "Start or stop the {brand} service",
+  "@tor_serviceSubtitle": {
+    "description": "Explanation under the Tor service switch. brand is \"Tor™\".",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+
+  "tor_startAutomaticallyTitle": "Start Automatically",
+  "@tor_startAutomaticallyTitle": {
+    "description": "Switch on the Tor settings screen: connect to Tor automatically when the app starts."
+  },
+  "tor_startAutomaticallyKeywords": "autostart, launch, startup, boot",
+  "@tor_startAutomaticallyKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_startAutomaticallySectionSubtitle": "Connect the {brand} service when WebLibre starts",
+  "@tor_startAutomaticallySectionSubtitle": {
+    "description": "Short explanation of the Tor auto-start switch, shown as a settings search result. brand is \"Tor™\"; WebLibre is the app name.",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "tor_startAutomaticallySubtitle": "Connect the {brand} service when WebLibre starts, so tabs using it are ready without a prompt",
+  "@tor_startAutomaticallySubtitle": {
+    "description": "Explanation under the Tor auto-start switch: tabs that must use Tor can load right away without asking to start it. brand is \"Tor™\"; WebLibre is the app name.",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+
+  "tor_requestNewIdentityTitle": "Request New Identity",
+  "@tor_requestNewIdentityTitle": {
+    "description": "Row that switches Tor to new routes through the network, so new connections appear to come from a different place. \"New Identity\" is Tor's own term."
+  },
+  "tor_requestNewIdentityKeywords": "circuit",
+  "@tor_requestNewIdentityKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_requestNewIdentitySubtitle": "Use a fresh circuit for new connections",
+  "@tor_requestNewIdentitySubtitle": {
+    "description": "Explanation under \"Request New Identity\". A circuit is the path of relays a Tor connection goes through."
+  },
+  "tor_requestingNewIdentityMessage": "Requesting new {brand} identity...",
+  "@tor_requestingNewIdentityMessage": {
+    "description": "Confirmation shown after requesting a new Tor identity. brand is \"Tor™\".",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+
+  "tor_autoConfigureTransportTitle": "Auto Configure Transport",
+  "@tor_autoConfigureTransportTitle": {
+    "description": "Switch: let the app detect automatically how to connect to Tor on the current network. A transport is the method used to disguise the connection."
+  },
+  "tor_autoConfigureTransportKeywords": "auto",
+  "@tor_autoConfigureTransportKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_autoConfigureSectionSubtitle": "Pick the right pluggable transport for your network automatically",
+  "@tor_autoConfigureSectionSubtitle": {
+    "description": "Short explanation of the automatic transport setting, shown as a settings search result. \"Pluggable transport\" is Tor's term for a method that disguises Tor traffic to get past censorship."
+  },
+  "tor_autoConfigureSubtitle": "From some locations, it is necessary to use a pluggable transport to connect to {brand}",
+  "@tor_autoConfigureSubtitle": {
+    "description": "Explanation under the automatic transport switch. brand is \"Tor™\". \"Pluggable transport\" is Tor's term for a method that disguises Tor traffic.",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "tor_requireBridgeTitle": "I'm sure I cannot connect without a bridge",
+  "@tor_requireBridgeTitle": {
+    "description": "Switch shown with automatic transport selection: tells it to only use connection methods through a bridge (a hidden entry point to Tor). Written in the first person, as a statement by the user."
+  },
+
+  "tor_transportTitle": "Transport",
+  "@tor_transportTitle": {
+    "description": "Title of the setting for manually choosing how to connect to Tor."
+  },
+  "tor_transportKeywords": "direct, obfs4, snowflake",
+  "@tor_transportKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_transportSectionSubtitle": "Choose how to reach the {torBrand} network when not auto-configured",
+  "@tor_transportSectionSubtitle": {
+    "description": "Short explanation of the manual transport setting, shown as a settings search result. torBrand is \"Tor™\"; keep it unchanged.",
+    "placeholders": { "torBrand": { "type": "String" } }
+  },
+  "tor_transportAutoConfiguredTitle": "Auto-configured",
+  "@tor_transportAutoConfiguredTitle": {
+    "description": "Shown in place of the manual transport choices while automatic configuration is on."
+  },
+  "tor_transportAutoConfiguredSubtitle": "Disable auto-configure above to pick a transport manually.",
+  "@tor_transportAutoConfiguredSubtitle": {
+    "description": "Explanation under \"Auto-configured\": turn off the switch above to choose manually."
+  },
+  "tor_transportDirectTitle": "Direct Connection",
+  "@tor_transportDirectTitle": {
+    "description": "Choice of Tor transport: connect to Tor directly, without disguise."
+  },
+  "tor_transportDirectSubtitle": "The best way to connect to {brand} if {brand} is not blocked",
+  "@tor_transportDirectSubtitle": {
+    "description": "Explanation under \"Direct Connection\". brand is \"Tor™\" and appears twice.",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "tor_transportObfs4Title": "obfs4",
+  "@tor_transportObfs4Title": {
+    "description": "Choice of Tor transport named obfs4. Technical name; do not translate."
+  },
+  "tor_transportObfs4Subtitle": "Suitable for lightly censored networks and high-bandwidth use",
+  "@tor_transportObfs4Subtitle": {
+    "description": "Explanation under the obfs4 transport choice: suited to networks with little censorship where speed matters."
+  },
+  "tor_transportSnowflakeTitle": "Snowflake",
+  "@tor_transportSnowflakeTitle": {
+    "description": "Choice of Tor transport named Snowflake. Product name; do not translate."
+  },
+  "tor_transportSnowflakeSubtitle": "Suitable for heavy censorship",
+  "@tor_transportSnowflakeSubtitle": {
+    "description": "Explanation under the Snowflake transport choice: suited to networks with strong censorship."
+  },
+  "tor_fetchFreshBridgesTitle": "Fetch fresh bridges before connecting",
+  "@tor_fetchFreshBridgesTitle": {
+    "description": "Checkbox: download an up-to-date list of bridges (hidden entry points to Tor) before connecting, instead of only using the built-in ones."
+  },
+
+  "tor_entryCountryTitle": "Entry Country",
+  "@tor_entryCountryTitle": {
+    "description": "Title of the setting for the country of the first relay the Tor connection enters through."
+  },
+  "tor_entryCountrySubtitle": "Choose the country of the entry guard",
+  "@tor_entryCountrySubtitle": {
+    "description": "Explanation of the entry country setting. The entry guard is the first relay of a Tor connection."
+  },
+  "tor_entryCountryKeywords": "guard",
+  "@tor_entryCountryKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_exitCountryTitle": "Exit Country",
+  "@tor_exitCountryTitle": {
+    "description": "Title of the setting for the country of the last relay, where the connection leaves Tor and reaches websites."
+  },
+  "tor_exitCountrySubtitle": "Choose the country of the exit node",
+  "@tor_exitCountrySubtitle": {
+    "description": "Explanation of the exit country setting. The exit node is the last relay of a Tor connection; websites see its address."
+  },
+  "tor_exitCountryKeywords": "exit",
+  "@tor_exitCountryKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_automaticOption": "Automatic",
+  "@tor_automaticOption": {
+    "description": "Choice in the Tor country settings: let Tor pick the country. Also shown as the current value when no country is chosen."
+  },
+
+  "tor_trademarkTitle": "Trademark",
+  "@tor_trademarkTitle": {
+    "description": "Title of the trademark notice on the Tor settings screen."
+  },
+  "tor_trademarkKeywords": "legal",
+  "@tor_trademarkKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "tor_trademarkDisclaimer": "{brand} is a trademark of The Tor Project; all rights reserved. WebLibre is not endorsed or sponsored by, or affiliated with, the Tor Project.",
+  "@tor_trademarkDisclaimer": {
+    "description": "Legal trademark notice. brand is \"Tor™\". \"The Tor Project\" is an organization name; WebLibre is the app name. Keep the legal meaning exact.",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+
+  "tor_screenSubtitle": "Onion routing, pluggable transports, bridges and country restrictions.",
+  "@tor_screenSubtitle": {
+    "description": "Subtitle of the Tor settings screen listing what it configures. \"Onion routing\" is how Tor works; bridges are hidden entry points; pluggable transports disguise the traffic."
+  },
+
+  "tor_dialogContent": "This container requires a {brand} proxy for secure connections, which is not currently running.",
+  "@tor_dialogContent": {
+    "description": "Body of the dialog shown when opening a container that must use Tor while the Tor proxy is not running. brand is \"Tor™\". A container is a separate browsing identity.",
+    "placeholders": { "brand": { "type": "String" } }
+  },
+  "tor_actionEnable": "Enable",
+  "@tor_actionEnable": {
+    "description": "Confirm button of that dialog: start the Tor proxy."
+  },
+
+  "tor_connectingNotification": "{proxyLabel} is connecting...",
+  "@tor_connectingNotification": {
+    "description": "Status banner while the Tor proxy connects. proxyLabel is the proxy's name, \"Tor™ Proxy\" (already translated).",
+    "placeholders": { "proxyLabel": { "type": "String" } }
+  },
+
+  "tor_countrySearchHint": "Search countries...",
+  "@tor_countrySearchHint": {
+    "description": "Placeholder of the search field in the country picker for Tor entry and exit countries."
+  },
+  "tor_unnamedCountry": "Unnamed Country",
+  "@tor_unnamedCountry": {
+    "description": "Fallback name in the country picker for a country with no known name."
+  }
+}

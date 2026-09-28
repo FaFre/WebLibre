@@ -24,19 +24,18 @@ import 'package:weblibre/features/account/domain/repositories/account_auth.dart'
 part 'account_sync_repository.g.dart';
 
 enum SyncDocumentKind {
-  weblibreSettings('weblibre_settings', 'Settings'),
-  geckoUserJs('gecko_user_js', 'Gecko Prefs'),
+  weblibreSettings('weblibre_settings'),
+  geckoUserJs('gecko_user_js'),
 
   /// Small encrypted canary written on first-device sync setup so a second
   /// device can verify the candidate sync key before persisting it. Not
   /// surfaced in any settings UI — it has no corresponding
   /// [SyncDocumentService] wired in [AccountSettingsScreen].
-  syncValidationProbe('sync_validation_probe', 'Sync Validation Probe');
+  syncValidationProbe('sync_validation_probe');
 
   final String value;
-  final String displayName;
 
-  const SyncDocumentKind(this.value, this.displayName);
+  const SyncDocumentKind(this.value);
 }
 
 class SyncDocumentMetadata {

@@ -21,6 +21,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Result of the delete-container confirmation.
 class DeleteContainerDecision {
@@ -50,18 +51,16 @@ class _DeleteContainerDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final wipeHistory = useState(false);
+    final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       icon: const Icon(Icons.warning),
-      title: const Text('Delete Container'),
+      title: Text(l10n.tabs_deleteContainerTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Are you sure you want to delete this container and close all '
-            'attached tabs?',
-          ),
+          Text(l10n.tabs_deleteContainerConfirm),
           const SizedBox(height: 8),
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
@@ -70,10 +69,8 @@ class _DeleteContainerDialog extends HookWidget {
             onChanged: (value) {
               wipeHistory.value = value ?? false;
             },
-            title: const Text("Also delete this container's history"),
-            subtitle: const Text(
-              'Otherwise it is kept and shown as uncontained',
-            ),
+            title: Text(l10n.tabs_deleteContainerAlsoDeleteHistory),
+            subtitle: Text(l10n.tabs_deleteContainerHistoryKeptNote),
           ),
         ],
       ),
@@ -82,7 +79,7 @@ class _DeleteContainerDialog extends HookWidget {
           onPressed: () {
             Navigator.pop(context, null);
           },
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () {
@@ -91,7 +88,7 @@ class _DeleteContainerDialog extends HookWidget {
               DeleteContainerDecision(wipeHistory: wipeHistory.value),
             );
           },
-          child: const Text('Delete'),
+          child: Text(l10n.common_delete),
         ),
       ],
     );

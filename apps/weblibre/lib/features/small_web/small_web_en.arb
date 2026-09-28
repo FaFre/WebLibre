@@ -1,0 +1,321 @@
+{
+  "@@locale": "en",
+
+  "smallWeb_sheetTitle": "Small Web",
+  "@smallWeb_sheetTitle": {
+    "description": "Title of the Small Web panel. The \"small web\" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout."
+  },
+  "smallWeb_refineCategoryTitle": "Refine Category",
+  "@smallWeb_refineCategoryTitle": {
+    "description": "Label above the category chips that narrow which kind of small web pages are discovered."
+  },
+  "smallWeb_allCategoriesChip": "All",
+  "@smallWeb_allCategoriesChip": {
+    "description": "Category chip that removes the category filter (all categories)."
+  },
+  "smallWeb_searchingModeTitle": "Searching {mode}",
+  "@smallWeb_searchingModeTitle": {
+    "description": "Progress text while looking for a small web page. mode is the name of the chosen discovery mode, e.g. \"Videos\" or \"Comics\".",
+    "placeholders": { "mode": { "type": "String" } }
+  },
+  "smallWeb_discoverButtonLabel": "Discover",
+  "@smallWeb_discoverButtonLabel": {
+    "description": "Main button of the Small Web panel: open a new randomly discovered page."
+  },
+  "smallWeb_browseConsolesButtonLabel": "Browse Consoles",
+  "@smallWeb_browseConsolesButtonLabel": {
+    "description": "Button that opens the list of Wander consoles. A console is a small website that lists other personal sites, forming a web ring."
+  },
+  "smallWeb_unavailableTitle": "Small Web unavailable",
+  "@smallWeb_unavailableTitle": {
+    "description": "Error heading when the Small Web panel could not be loaded."
+  },
+  "smallWeb_noConsoleSelectedMessage": "No console selected",
+  "@smallWeb_noConsoleSelectedMessage": {
+    "description": "Shown on the console card when no Wander console has been picked yet."
+  },
+  "smallWeb_consoleStats": "{linkedConsoles, plural, =1{1 linked console} other{{linkedConsoles} linked consoles}} · {pages, plural, =1{1 page} other{{pages} pages}}",
+  "@smallWeb_consoleStats": {
+    "description": "Statistics of the current Wander console. linkedConsoles is how many other consoles it links to; pages is how many pages it lists. Keep the \"·\" separator.",
+    "placeholders": {
+      "linkedConsoles": { "type": "int" },
+      "pages": { "type": "int" }
+    }
+  },
+
+  "smallWeb_modeWebLabel": "Web",
+  "@smallWeb_modeWebLabel": {
+    "description": "Discovery mode of Kagi Small Web: recent posts from personal websites and blogs."
+  },
+  "smallWeb_modeAppreciatedLabel": "Appreciated",
+  "@smallWeb_modeAppreciatedLabel": {
+    "description": "Discovery mode of Kagi Small Web: posts readers marked as appreciated (liked)."
+  },
+  "smallWeb_modeVideosLabel": "Videos",
+  "@smallWeb_modeVideosLabel": {
+    "description": "Discovery mode of Kagi Small Web: videos from independent creators."
+  },
+  "smallWeb_modeCodeLabel": "Code",
+  "@smallWeb_modeCodeLabel": {
+    "description": "Discovery mode of Kagi Small Web: programming-related posts."
+  },
+  "smallWeb_modeComicsLabel": "Comics",
+  "@smallWeb_modeComicsLabel": {
+    "description": "Discovery mode of Kagi Small Web: web comics."
+  },
+
+  "smallWeb_modeDescriptionAppreciated": "Browse highly curated, user-appreciated links from the small web community.",
+  "@smallWeb_modeDescriptionAppreciated": {
+    "description": "Explanation shown when the \"Appreciated\" discovery mode is selected."
+  },
+  "smallWeb_modeDescriptionVideos": "Discover video content from independent creators across the small web.",
+  "@smallWeb_modeDescriptionVideos": {
+    "description": "Explanation shown when the \"Videos\" discovery mode is selected."
+  },
+  "smallWeb_modeDescriptionCode": "Find code snippets, repositories, and technical articles from personal sites.",
+  "@smallWeb_modeDescriptionCode": {
+    "description": "Explanation shown when the \"Code\" discovery mode is selected."
+  },
+  "smallWeb_modeDescriptionComics": "Explore indie comics and web graphics by independent illustrators.",
+  "@smallWeb_modeDescriptionComics": {
+    "description": "Explanation shown when the \"Comics\" discovery mode is selected."
+  },
+
+  "smallWeb_sourceKagiLabel": "Kagi",
+  "@smallWeb_sourceKagiLabel": {
+    "description": "Name of a small web discovery source run by the Kagi search engine. Brand name; do not translate."
+  },
+  "smallWeb_sourceKagiDescription": "Small Web by Kagi Search",
+  "@smallWeb_sourceKagiDescription": {
+    "description": "Short description of the Kagi small web source. Kagi Search is a brand name."
+  },
+  "smallWeb_sourceWanderLabel": "Wander",
+  "@smallWeb_sourceWanderLabel": {
+    "description": "Name of a small web discovery source called Wander. Project name; do not translate."
+  },
+  "smallWeb_sourceWanderDescription": "Console-based web ring",
+  "@smallWeb_sourceWanderDescription": {
+    "description": "Short description of the Wander source: a web ring (a chain of linked personal sites) built from \"consoles\"."
+  },
+
+  "smallWeb_noNewItemsFoundMessage": "No new items found. Try a different mode or category.",
+  "@smallWeb_noNewItemsFoundMessage": {
+    "description": "Message when discovery found no page the user has not already seen."
+  },
+  "smallWeb_discoveryFailedMessage": "Discovery failed. Please try again.",
+  "@smallWeb_discoveryFailedMessage": {
+    "description": "Error message when finding a new small web page failed."
+  },
+  "smallWeb_sessionErrorWithDetails": "Small web error: {error}",
+  "@smallWeb_sessionErrorWithDetails": {
+    "description": "Error message for other small web failures. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "smallWeb_kagiTitle": "Kagi Small Web",
+  "@smallWeb_kagiTitle": {
+    "description": "Title of the information card about the Kagi Small Web source. Brand name."
+  },
+  "smallWeb_kagiAttributionLine": "By Kagi Search - open source under the MIT License.",
+  "@smallWeb_kagiAttributionLine": {
+    "description": "Credit line on the Kagi Small Web card. Kagi Search and MIT License are names."
+  },
+  "smallWeb_kagiBlogPostAction": "Blog Post",
+  "@smallWeb_kagiBlogPostAction": {
+    "description": "Button on the Kagi Small Web card that opens Kagi's blog post about the project."
+  },
+  "smallWeb_kagiGithubAction": "GitHub",
+  "@smallWeb_kagiGithubAction": {
+    "description": "Button on the Kagi Small Web card that opens the project's source code on GitHub. Brand name."
+  },
+  "smallWeb_kagiDescriptionWeb": "Kagi Small Web surfaces recent posts from personal sites and blogs by individual authors across the small web.",
+  "@smallWeb_kagiDescriptionWeb": {
+    "description": "Description on the Kagi Small Web card while the \"Web\" mode is selected."
+  },
+  "smallWeb_kagiDescriptionAppreciated": "This Kagi Small Web mode highlights appreciated posts from the small web as curated by the open-source project.",
+  "@smallWeb_kagiDescriptionAppreciated": {
+    "description": "Description on the Kagi Small Web card while the \"Appreciated\" mode is selected."
+  },
+  "smallWeb_kagiDescriptionVideos": "This Kagi Small Web mode focuses on video posts from smaller independent creators and curated channel seeds.",
+  "@smallWeb_kagiDescriptionVideos": {
+    "description": "Description on the Kagi Small Web card while the \"Videos\" mode is selected. \"Channel seeds\" are the starting list of channels the project collects from."
+  },
+  "smallWeb_kagiDescriptionCode": "This Kagi Small Web mode focuses on code-oriented posts from personal sites and other small web sources.",
+  "@smallWeb_kagiDescriptionCode": {
+    "description": "Description on the Kagi Small Web card while the \"Code\" mode is selected."
+  },
+  "smallWeb_kagiDescriptionComics": "This Kagi Small Web mode focuses on comics and illustrated posts surfaced through the Small Web project.",
+  "@smallWeb_kagiDescriptionComics": {
+    "description": "Description on the Kagi Small Web card while the \"Comics\" mode is selected."
+  },
+
+  "smallWeb_wanderTitle": "Wander",
+  "@smallWeb_wanderTitle": {
+    "description": "Title of the information card about the Wander source. Project name."
+  },
+  "smallWeb_wanderDescription": "Wander is a network of personal websites connected through shared consoles that help people browse pages across the wider Wander community.",
+  "@smallWeb_wanderDescription": {
+    "description": "Description on the Wander card. A console is a page on a personal site that links to other members' pages."
+  },
+  "smallWeb_wanderAttributionLine": "By Susam Pal - open source under the MIT License.",
+  "@smallWeb_wanderAttributionLine": {
+    "description": "Credit line on the Wander card. Susam Pal is a person's name; MIT License is a license name."
+  },
+  "smallWeb_wanderProjectAction": "Project",
+  "@smallWeb_wanderProjectAction": {
+    "description": "Button on the Wander card that opens the project's website."
+  },
+  "smallWeb_wanderSetupConsoleAction": "Set up your Console",
+  "@smallWeb_wanderSetupConsoleAction": {
+    "description": "Button on the Wander card that opens instructions for running your own Wander console on your website."
+  },
+
+  "smallWeb_menuTooltip": "Menu",
+  "@smallWeb_menuTooltip": {
+    "description": "Tooltip of the button in the Small Web bottom bar that opens the Small Web panel."
+  },
+  "smallWeb_removeBookmarkTooltip": "Remove bookmark",
+  "@smallWeb_removeBookmarkTooltip": {
+    "description": "Tooltip of the bookmark button in the Small Web bottom bar when the current page is bookmarked."
+  },
+  "smallWeb_addBookmarkTooltip": "Add bookmark",
+  "@smallWeb_addBookmarkTooltip": {
+    "description": "Tooltip of the bookmark button in the Small Web bottom bar when the current page is not bookmarked."
+  },
+  "smallWeb_bookmarkRemovedMessage": "Bookmark removed",
+  "@smallWeb_bookmarkRemovedMessage": {
+    "description": "Confirmation after removing the current small web page's bookmark."
+  },
+  "smallWeb_bookmarkAddedMessage": "Bookmark added",
+  "@smallWeb_bookmarkAddedMessage": {
+    "description": "Confirmation after bookmarking the current small web page."
+  },
+  "smallWeb_exitTooltip": "Exit Small Web",
+  "@smallWeb_exitTooltip": {
+    "description": "Tooltip of the button that leaves Small Web browsing and returns to the normal browser."
+  },
+
+  "smallWeb_selectConsoleTitle": "Select Console",
+  "@smallWeb_selectConsoleTitle": {
+    "description": "Title of the sheet for choosing which Wander console to discover pages from."
+  },
+  "smallWeb_randomButtonLabel": "Random",
+  "@smallWeb_randomButtonLabel": {
+    "description": "Button in the console sheet that switches to a randomly chosen console."
+  },
+  "smallWeb_filterConsolesHint": "Filter consoles...",
+  "@smallWeb_filterConsolesHint": {
+    "description": "Placeholder of the search field that filters the list of Wander consoles."
+  },
+  "smallWeb_linkedConsolesToggleLabel": "Linked",
+  "@smallWeb_linkedConsolesToggleLabel": {
+    "description": "Toggle option in the console sheet: show only consoles linked from the current one. Keep it short."
+  },
+  "smallWeb_allConsolesToggleLabel": "All",
+  "@smallWeb_allConsolesToggleLabel": {
+    "description": "Toggle option in the console sheet: show all known consoles. Keep it short."
+  },
+  "smallWeb_noConsoleSelectedYetMessage": "No console selected yet. Press Discover.",
+  "@smallWeb_noConsoleSelectedYetMessage": {
+    "description": "Shown in the console sheet when no console is chosen yet. \"Discover\" is the button label in the Small Web panel and must match it."
+  },
+  "smallWeb_addConsoleByUrlTooltip": "Add console by URL",
+  "@smallWeb_addConsoleByUrlTooltip": {
+    "description": "Tooltip of the \"+\" button that adds a Wander console by entering its web address."
+  },
+  "smallWeb_couldNotLoadSessionTitle": "Could not load Small Web session",
+  "@smallWeb_couldNotLoadSessionTitle": {
+    "description": "Error heading when the Small Web browsing state could not be loaded."
+  },
+  "smallWeb_noLinkedConsolesFound": "No linked consoles found.",
+  "@smallWeb_noLinkedConsolesFound": {
+    "description": "Shown when the current console links to no other consoles."
+  },
+  "smallWeb_noConsolesMatchingQuery": "No consoles match \"{query}\".",
+  "@smallWeb_noConsolesMatchingQuery": {
+    "description": "Shown when no console matches the filter text. query is the text typed in the filter field.",
+    "placeholders": { "query": { "type": "String" } }
+  },
+  "smallWeb_failedToLoadConsoles": "Failed to load consoles.",
+  "@smallWeb_failedToLoadConsoles": {
+    "description": "Error message when the list of Wander consoles could not be loaded."
+  },
+  "smallWeb_pageCount": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@smallWeb_pageCount": {
+    "description": "Number of pages listed by a Wander console, shown under its name. count is the page count.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "smallWeb_noConsolesDiscoveredYet": "No consoles discovered yet.",
+  "@smallWeb_noConsolesDiscoveredYet": {
+    "description": "Shown in the list of all consoles when none has been found yet."
+  },
+  "smallWeb_addedConsole": "Added console {host}",
+  "@smallWeb_addedConsole": {
+    "description": "Confirmation after adding a Wander console. host is the console's domain, e.g. example.com.",
+    "placeholders": { "host": { "type": "String" } }
+  },
+  "smallWeb_addConsoleDialogTitle": "Add Console",
+  "@smallWeb_addConsoleDialogTitle": {
+    "description": "Title of the dialog for adding a Wander console by address."
+  },
+  "smallWeb_addConsoleDialogBody": "Enter the URL of a Wander console. The URL can point to the site root or the /wander/ path.",
+  "@smallWeb_addConsoleDialogBody": {
+    "description": "Explanation in the add-console dialog. \"/wander/\" is a literal address path and must stay unchanged."
+  },
+  "smallWeb_urlFieldLabel": "URL",
+  "@smallWeb_urlFieldLabel": {
+    "description": "Label of the web address field in the add-console dialog."
+  },
+  "smallWeb_wanderConsoleFetchFailed": "Could not fetch wander.js from this console.",
+  "@smallWeb_wanderConsoleFetchFailed": {
+    "description": "Error in the add-console dialog when the console's configuration file could not be downloaded. wander.js is a file name; keep it unchanged."
+  },
+  "smallWeb_wanderConsoleEmpty": "The wander.js file contains no consoles or pages",
+  "@smallWeb_wanderConsoleEmpty": {
+    "description": "Error in the add-console dialog when the console's configuration file lists nothing. wander.js is a file name; keep it unchanged."
+  },
+  "smallWeb_wanderConsoleAlreadyAdded": "This console has already been added",
+  "@smallWeb_wanderConsoleAlreadyAdded": {
+    "description": "Error in the add-console dialog when the console is already in the list."
+  },
+
+  "smallWeb_recentDiscoveriesTitle": "Recent Discoveries",
+  "@smallWeb_recentDiscoveriesTitle": {
+    "description": "Heading of the list of recently discovered small web pages."
+  },
+  "smallWeb_clearModeHistory": "Clear {mode}",
+  "@smallWeb_clearModeHistory": {
+    "description": "Menu item that deletes the discovery history of one mode. mode is the mode's name, e.g. \"Videos\".",
+    "placeholders": { "mode": { "type": "String" } }
+  },
+  "smallWeb_clearAllDiscoveriesConfirmTitle": "Clear all discoveries?",
+  "@smallWeb_clearAllDiscoveriesConfirmTitle": {
+    "description": "Title of the confirmation dialog before deleting the whole small web discovery history."
+  },
+  "smallWeb_clearAllDiscoveriesConfirmContent": "This will permanently remove all recent discovery history across every mode and source.",
+  "@smallWeb_clearAllDiscoveriesConfirmContent": {
+    "description": "Body of the confirmation dialog before deleting the whole small web discovery history."
+  },
+  "smallWeb_actionClearAll": "Clear All",
+  "@smallWeb_actionClearAll": {
+    "description": "Confirm button of the dialog that deletes the whole small web discovery history."
+  },
+  "smallWeb_clearAllDiscoveriesMenuItem": "Clear all discoveries",
+  "@smallWeb_clearAllDiscoveriesMenuItem": {
+    "description": "Menu item that deletes the whole small web discovery history (asks for confirmation first)."
+  },
+  "smallWeb_noDiscoveriesYetMessage": "No discoveries yet.\nTap Discover to start exploring!",
+  "@smallWeb_noDiscoveriesYetMessage": {
+    "description": "Shown when the discovery history is empty. \"Discover\" is the button label and must match it. Keep the line break (\\n)."
+  },
+  "smallWeb_showMoreCount": "{count, plural, other{Show {count} more}}",
+  "@smallWeb_showMoreCount": {
+    "description": "Button under the discovery history that reveals older entries. count is the number of hidden entries (at least 1).",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "smallWeb_failedToLoadHistory": "Failed to load history: {error}",
+  "@smallWeb_failedToLoadHistory": {
+    "description": "Error message when the discovery history could not be loaded. error is technical error text, usually English.",
+    "placeholders": { "error": { "type": "String" } }
+  }
+}

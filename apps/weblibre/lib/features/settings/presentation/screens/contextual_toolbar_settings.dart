@@ -23,24 +23,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_id_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/settings/presentation/widgets/setting_value_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   const ContextualToolbarSettingsScreen({
     super.key,
     this.location = ToolbarConfigLocation.contextual,
-    this.title = 'Customize Toolbar',
+    required this.title,
   });
 
   /// Which independently-configured toolbar this screen edits.
@@ -51,6 +54,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final configs = ref.watch(effectiveToolbarButtonConfigsProvider(location));
     final repository = ref.watch(toolbarConfigRepositoryProvider(location));
     final search = useSettingsSearch();
@@ -61,8 +65,8 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
       final def = toolbarButtonRegistryById[config.buttonId];
       if (def == null) return false;
       return matchesSettingsSearch(query, [
-        def.label,
-        ...def.longPressActions,
+        def.spec.id.label(context),
+        ...def.spec.id.longPressActions(context),
         config.buttonId,
       ]);
     }
@@ -85,7 +89,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
     return SettingsCustomScrollScaffold(
       title: title,
       searchController: search.controller,
-      searchHintText: 'Search toolbar buttons',
+      searchHintText: l10n.settings_contextualToolbarSearchHint,
       actions: [
         MenuAnchor(
           builder: (context, controller, child) => IconButton(
@@ -102,7 +106,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
             MenuItemButton(
               leadingIcon: const Icon(Icons.restore),
               onPressed: () => _resetToDefaults(ref, location),
-              child: const Text('Reset to Defaults'),
+              child: Text(l10n.settings_contextualToolbarResetToDefaults),
             ),
           ],
         ),
@@ -116,9 +120,13 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
             location: location,
           ),
         ),
-        const SliverPadding(
-          padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
-          sliver: SliverToBoxAdapter(child: _SectionLabel(label: 'Enabled')),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          sliver: SliverToBoxAdapter(
+            child: _SectionLabel(
+              label: l10n.settings_contextualToolbarEnabledSection,
+            ),
+          ),
         ),
         if (visibleConfigs.isEmpty)
           SliverToBoxAdapter(
@@ -126,8 +134,10 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 query.isEmpty
-                    ? 'No enabled buttons. Toggle a button below to enable it.'
-                    : 'No enabled buttons match "${search.rawQuery}".',
+                    ? l10n.settings_contextualToolbarNoEnabledButtons
+                    : l10n.settings_contextualToolbarNoEnabledButtonsMatch(
+                        search.rawQuery,
+                      ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -154,9 +164,13 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
               );
             },
           ),
-        const SliverPadding(
-          padding: EdgeInsets.fromLTRB(16, 20, 16, 8),
-          sliver: SliverToBoxAdapter(child: _SectionLabel(label: 'Disabled')),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+          sliver: SliverToBoxAdapter(
+            child: _SectionLabel(
+              label: l10n.settings_contextualToolbarDisabledSection,
+            ),
+          ),
         ),
         if (hiddenConfigs.isEmpty)
           SliverToBoxAdapter(
@@ -164,8 +178,10 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
                 query.isEmpty
-                    ? 'All buttons are enabled.'
-                    : 'No disabled buttons match "${search.rawQuery}".',
+                    ? l10n.settings_contextualToolbarAllButtonsEnabled
+                    : l10n.settings_contextualToolbarNoDisabledButtonsMatch(
+                        search.rawQuery,
+                      ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -322,7 +338,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
         )
         .toList();
 
-    final longPressActions = def.longPressActions;
+    final longPressActions = def.spec.id.longPressActions(context);
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -350,7 +366,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      def.label,
+                      def.spec.id.label(context),
                       style: theme.textTheme.titleMedium?.copyWith(
                         color: colorScheme.onSurface,
                         fontWeight: FontWeight.w600,
@@ -432,28 +448,30 @@ class _LongPressPicker extends StatelessWidget {
 
   /// The button's own long press, named by what it does rather than as a
   /// generic "default".
-  UnsetActionOption get _builtInOption => builtInActions.isEmpty
+  UnsetActionOption _builtInOption(AppLocalizations l10n) =>
+      builtInActions.isEmpty
       ? (
-          title: 'None',
-          description: 'Default for this button: holding it does nothing extra',
+          title: l10n.settings_longPressNoneTitle,
+          description: l10n.settings_longPressNoneDescription,
           icon: Icons.block,
         )
       : (
           title: builtInActions.join(', '),
-          description: 'Default for this button',
+          description: l10n.settings_longPressDefaultDescription,
           icon: Icons.touch_app_outlined,
         );
 
   @override
   Widget build(BuildContext context) {
-    final builtIn = _builtInOption;
+    final l10n = AppLocalizations.of(context);
+    final builtIn = _builtInOption(l10n);
 
     return SettingValueTile(
       padding: _settingPadding,
       icon: Icons.touch_app_outlined,
-      title: 'Long press',
-      description: 'What holding the button does',
-      value: current?.title ?? builtIn.title,
+      title: l10n.settings_longPressTitle,
+      description: l10n.settings_longPressDescription,
+      value: current?.label(context) ?? builtIn.title,
       valueIcon: current?.icon ?? builtIn.icon,
       onTap: () async {
         final picked = await showOptionalBrowserActionPicker(
@@ -484,13 +502,14 @@ class _FallbackPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final currentId = current.resolveRuntimeFallbackId();
     final currentDef = currentId == null
         ? null
         : toolbarButtonRegistryById[currentId];
     final currentLabel = currentId == null
-        ? 'Grey out'
-        : (currentDef?.label ?? currentId);
+        ? l10n.settings_fallbackGreyOutLabel
+        : (currentDef?.spec.id.label(context) ?? currentId);
     final checkColor = Theme.of(context).colorScheme.primary;
 
     Widget? check(bool selected) =>
@@ -502,7 +521,7 @@ class _FallbackPicker extends StatelessWidget {
           leadingIcon: const Icon(Icons.block, size: 18),
           trailingIcon: check(currentId == null),
           onPressed: () => onChanged(ToolbarFallbackNone()),
-          child: const Text('Grey out'),
+          child: Text(l10n.settings_fallbackGreyOutLabel),
         ),
         for (final opt in options)
           MenuItemButton(
@@ -510,14 +529,14 @@ class _FallbackPicker extends StatelessWidget {
             trailingIcon: check(currentId == opt.spec.id.name),
             onPressed: () =>
                 onChanged(ToolbarFallbackButton(buttonId: opt.spec.id.name)),
-            child: Text(opt.label),
+            child: Text(opt.spec.id.label(context)),
           ),
       ],
       builder: (context, controller, _) => SettingValueTile(
         padding: _settingPadding,
         icon: Icons.swap_horiz,
-        title: 'If unavailable',
-        description: "Shown instead while this button can't be used",
+        title: l10n.settings_fallbackIfUnavailableTitle,
+        description: l10n.settings_fallbackIfUnavailableDescription,
         value: currentLabel,
         valueIcon: currentDef?.icon ?? Icons.block,
         onTap: () => controller.isOpen ? controller.close() : controller.open(),

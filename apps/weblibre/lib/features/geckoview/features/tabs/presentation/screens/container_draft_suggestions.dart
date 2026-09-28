@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 
@@ -43,6 +44,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final suggestionsAsync = ref.watch(suggestClustersProvider);
 
     final selectedContainer = useState<SuggestedContainer?>(null);
@@ -68,7 +70,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
     }, [screenWidth, selectedContainer.value?.tabIds.length]);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Draft Containers')),
+      appBar: AppBar(title: Text(l10n.tabs_draftContainersTitle)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -153,7 +155,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
             },
             error: (error, stackTrace) {
               return FailureWidget(
-                title: 'Failed to create suggestions',
+                title: l10n.tabs_suggestionsFailedTitle,
                 onRetry: () {
                   ref.invalidate(suggestClustersProvider);
                 },
@@ -229,6 +231,7 @@ class _SuggestedContainerLabel extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final items = useListenableSelector(
       selectedContainerTabs,
       () => selectedContainerTabs.value[container],
@@ -240,7 +243,7 @@ class _SuggestedContainerLabel extends HookConsumerWidget {
 
     return topic.when(
       skipLoadingOnReload: true,
-      data: (topic) => Text(topic ?? 'Untitled'),
+      data: (topic) => Text(topic ?? l10n.tabs_untitledContainer),
       error: (error, stackTrace) {
         logger.e(
           'Failed predicting selected tabs topic',
@@ -248,9 +251,9 @@ class _SuggestedContainerLabel extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
 
-        return Text(container.topic ?? 'Untitled');
+        return Text(container.topic ?? l10n.tabs_untitledContainer);
       },
-      loading: () => const Skeletonizer(child: Text('Untitled')),
+      loading: () => Skeletonizer(child: Text(l10n.tabs_untitledContainer)),
     );
   }
 }

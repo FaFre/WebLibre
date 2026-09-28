@@ -28,11 +28,14 @@ import 'package:weblibre/features/small_web/data/models/small_web_source_kind.da
 import 'package:weblibre/features/small_web/data/providers.dart';
 import 'package:weblibre/features/small_web/domain/providers.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_session_controller.dart';
+import 'package:weblibre/features/small_web/presentation/utils/kagi_small_web_mode_l10n.dart';
+import 'package:weblibre/features/small_web/presentation/utils/small_web_source_kind_l10n.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_attribution_card.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_attribution_navigation.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_history_list.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_mode_chips.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/wander_console_sheet.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -75,6 +78,7 @@ class _SmallWebMenuSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final sessionAsync = ref.watch(smallWebSessionControllerProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -94,7 +98,7 @@ class _SmallWebMenuSheet extends ConsumerWidget {
                   Icon(Icons.explore, color: colorScheme.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'Small Web',
+                    l10n.smallWeb_sheetTitle,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const Spacer(),
@@ -118,7 +122,7 @@ class _SmallWebMenuSheet extends ConsumerWidget {
                           .read(smallWebSessionControllerProvider.notifier)
                           .discover,
                       icon: const Icon(Icons.refresh),
-                      tooltip: 'Retry',
+                      tooltip: l10n.common_retry,
                     ),
                   ),
                 ],
@@ -167,7 +171,7 @@ class _SourceKindChip extends StatelessWidget {
           label: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(sourceKind.label),
+              Text(sourceKind.label(context)),
               const SizedBox(width: 2),
               const Icon(Icons.arrow_drop_down, size: 18),
             ],
@@ -186,9 +190,9 @@ class _SourceKindChip extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(kind.label),
+                Text(kind.label(context)),
                 Text(
-                  kind.description,
+                  kind.description(context),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -292,6 +296,7 @@ class _WebCategoriesPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final categoriesAsync = ref.watch(kagiCategoriesProvider);
 
@@ -311,9 +316,12 @@ class _WebCategoriesPanel extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Refine Category', style: theme.textTheme.titleSmall),
+                  Text(
+                    l10n.smallWeb_refineCategoryTitle,
+                    style: theme.textTheme.titleSmall,
+                  ),
                   FilterChip(
-                    label: const Text('All'),
+                    label: Text(l10n.smallWeb_allCategoriesChip),
                     selected: session.currentCategory == null,
                     showCheckmark: false,
                     onSelected: (_) async {
@@ -349,6 +357,7 @@ class _WebCategoriesPanel extends ConsumerWidget {
               ],
               SmallWebAttributionCard(
                 data: SmallWebAttributionData.forSelection(
+                  context: context,
                   sourceKind: session.sourceKind,
                   mode: session.mode,
                 ),
@@ -391,25 +400,26 @@ class _ModeContextPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
     final (IconData icon, String description) = switch (mode) {
       KagiSmallWebMode.appreciated => (
         Icons.volunteer_activism,
-        'Browse highly curated, user-appreciated links from the small web community.',
+        l10n.smallWeb_modeDescriptionAppreciated,
       ),
       KagiSmallWebMode.videos => (
         Icons.video_library,
-        'Discover video content from independent creators across the small web.',
+        l10n.smallWeb_modeDescriptionVideos,
       ),
       KagiSmallWebMode.code => (
         Icons.data_object,
-        'Find code snippets, repositories, and technical articles from personal sites.',
+        l10n.smallWeb_modeDescriptionCode,
       ),
       KagiSmallWebMode.comics => (
         Icons.auto_stories,
-        'Explore indie comics and web-graphics from independent illustrators.',
+        l10n.smallWeb_modeDescriptionComics,
       ),
       KagiSmallWebMode.web => (Icons.language, ''),
     };
@@ -443,7 +453,7 @@ class _ModeContextPanel extends ConsumerWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Searching ${mode.label}',
+              l10n.smallWeb_searchingModeTitle(mode.label(context)),
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium,
             ),
@@ -458,6 +468,7 @@ class _ModeContextPanel extends ConsumerWidget {
             const SizedBox(height: 16),
             SmallWebAttributionCard(
               data: SmallWebAttributionData.forSelection(
+                context: context,
                 sourceKind: session.sourceKind,
                 mode: session.mode,
               ),
@@ -495,6 +506,8 @@ class _DefaultContentPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
     return FadingScroll(
       controller: scrollController,
       fadingSize: 25,
@@ -509,6 +522,7 @@ class _DefaultContentPanel extends ConsumerWidget {
             ],
             SmallWebAttributionCard(
               data: SmallWebAttributionData.forSelection(
+                context: context,
                 sourceKind: session.sourceKind,
                 mode: session.mode,
               ),
@@ -522,7 +536,7 @@ class _DefaultContentPanel extends ConsumerWidget {
                 onPressed: () =>
                     Navigator.of(context).pop(SmallWebSheetRequest.showWander),
                 icon: const Icon(Icons.dns, size: 18),
-                label: const Text('Browse Consoles'),
+                label: Text(l10n.smallWeb_browseConsolesButtonLabel),
               ),
               const SizedBox(height: 12),
             ],
@@ -551,6 +565,7 @@ class _DiscoverButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isLoading = ref.watch(
       smallWebSessionControllerProvider.select((s) => s.isLoading),
     );
@@ -575,20 +590,25 @@ class _DiscoverButton extends ConsumerWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
             : const Icon(Icons.explore, size: 20),
-        label: const Text('Discover'),
+        label: Text(l10n.smallWeb_discoverButtonLabel),
       ),
     );
   }
 }
 
 class _InfoMessageCard extends StatelessWidget {
-  final String message;
+  final SmallWebInfoMessage message;
 
   const _InfoMessageCard({required this.message});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final text = switch (message) {
+      SmallWebInfoMessage.noNewItemsFound =>
+        l10n.smallWeb_noNewItemsFoundMessage,
+    };
 
     return Card(
       color: colorScheme.secondaryContainer,
@@ -604,7 +624,7 @@ class _InfoMessageCard extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                message,
+                text,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSecondaryContainer,
                 ),
@@ -847,6 +867,8 @@ class _SmallWebMenuError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return FadingScroll(
       controller: scrollController,
       fadingSize: 25,
@@ -858,8 +880,10 @@ class _SmallWebMenuError extends StatelessWidget {
             SizedBox(
               height: 240,
               child: FailureWidget(
-                title: 'Small Web unavailable',
-                exception: error,
+                title: l10n.smallWeb_unavailableTitle,
+                exception: error is SmallWebDiscoveryFailedException
+                    ? l10n.smallWeb_discoveryFailedMessage
+                    : error,
                 onRetry: onRetry,
               ),
             ),
@@ -879,6 +903,7 @@ class _WanderConsoleCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
 
     if (currentConsoleUrl == null) {
@@ -895,7 +920,7 @@ class _WanderConsoleCard extends ConsumerWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'No console selected',
+                l10n.smallWeb_noConsoleSelectedMessage,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
@@ -936,7 +961,7 @@ class _WanderConsoleCard extends ConsumerWidget {
             const SizedBox(height: 8),
             statsAsync.when(
               data: (stats) => Text(
-                '${stats.linkedConsoles} linked consoles \u00b7 ${stats.pages} pages',
+                l10n.smallWeb_consoleStats(stats.linkedConsoles, stats.pages),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),

@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/string_list_settings_screen.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/host_rules.dart';
 
 /// Manages the list of sites on which gestures are disabled.
@@ -30,19 +31,18 @@ class GestureExcludedSitesScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final excludedSites = ref.watch(
       gestureSettingsWithDefaultsProvider.select((s) => s.excludedSites),
     );
 
     return StringListSettingsScreen(
-      title: 'Excluded sites',
-      description:
-          'Gestures are disabled on these sites. Subdomains are included '
-          '(e.g. "example.com" also covers "m.example.com").',
+      title: l10n.gestures_excludedSitesTitle,
+      description: l10n.gestures_excludedSitesDescription,
       values: excludedSites,
       hintText: 'example.com',
       itemIcon: Icons.public_off,
-      emptyLabel: 'No sites excluded.',
+      emptyLabel: l10n.gestures_noSitesExcludedMessage,
       normalize: normalizeRuleHost,
       onChanged: (next) async {
         await ref

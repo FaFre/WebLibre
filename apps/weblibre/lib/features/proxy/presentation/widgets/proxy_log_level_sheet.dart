@@ -20,8 +20,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_log_level_l10n.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// How much the proxy runtimes write to the log, asked where the log is read.
 ///
@@ -43,6 +45,7 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final logLevel = ref
         .watch(proxyDiagnosticsSettingsWithDefaultsProvider)
@@ -56,13 +59,15 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 4),
-              child: Text('Proxy log level', style: theme.textTheme.titleLarge),
+              child: Text(
+                l10n.proxy_logLevelSheetTitle,
+                style: theme.textTheme.titleLarge,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
               child: Text(
-                'Raise this only while diagnosing a problem, then put it back. '
-                'Changing it restarts any running proxy.',
+                l10n.proxy_logLevelSheetExplanation,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
@@ -82,8 +87,8 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
                   for (final level in ProxyLogLevel.values)
                     RadioListTile.adaptive(
                       value: level,
-                      title: Text(level.label),
-                      subtitle: Text(level.description),
+                      title: Text(level.label(context)),
+                      subtitle: Text(level.description(context)),
                     ),
                 ],
               ),
@@ -102,8 +107,7 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Verbose logging writes a line for every connection and '
-                        'DNS lookup, which noticeably slows browsing.',
+                        l10n.proxy_verboseLoggingWarning,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.error,
                         ),

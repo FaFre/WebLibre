@@ -22,24 +22,43 @@ import 'dart:io';
 import 'package:exceptions/exceptions.dart';
 import 'package:http/http.dart';
 
+/// Why an HTTP call failed.
+///
+/// Travels in [ErrorMessage.details] so the UI can translate it when it shows
+/// the error (`describeError`); [message] is the English diagnostic text that
+/// lands in [ErrorMessage.message] and the logs.
+enum HttpFailure {
+  socket('Could not contact remote service'),
+  http('Web request returned error'),
+  format('Bad response format'),
+  client('Could not contact remote service');
+
+  const HttpFailure(this.message);
+
+  final String message;
+}
+
+/// `ExceptionHandler` for HTTP-backed [Result]s. Deliberately free of
+/// localization: it runs deep in data services with no `BuildContext` or
+/// `Ref`, and the error may be shown long after, in whatever language the UI
+/// is in by then.
 ErrorMessage handleHttpError(Exception exception, StackTrace stackTrace) {
-  return switch (exception) {
-    SocketException() => const ErrorMessage(
-      source: 'http',
-      message: 'Could not contact remote service',
-    ),
-    HttpException() => const ErrorMessage(
-      source: 'http',
-      message: 'Web request returned error',
-    ),
-    FormatException() => const ErrorMessage(
-      source: 'http',
-      message: 'Bad response format',
-    ),
-    ClientException() => const ErrorMessage(
-      source: 'http',
-      message: 'Could not contact remote service',
-    ),
-    _ => ErrorMessage.fromException(exception, stackTrace),
+  final failure = switch (exception) {
+    SocketException() => HttpFailure.socket,
+    HttpException() => HttpFailure.http,
+    FormatException() => HttpFailure.format,
+    ClientException() => HttpFailure.client,
+    _ => null,
   };
+
+  if (failure == null) {
+    return ErrorMessage.fromException(exception, stackTrace);
+  }
+
+  return ErrorMessage(
+    source: 'http',
+    message: failure.message,
+    details: failure,
+    stackTrace: stackTrace,
+  );
 }

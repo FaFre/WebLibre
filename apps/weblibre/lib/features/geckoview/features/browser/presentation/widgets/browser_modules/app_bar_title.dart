@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/qr_scanner_button.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -790,6 +791,7 @@ class _EmptyRailAddressField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -804,7 +806,7 @@ class _EmptyRailAddressField extends StatelessWidget {
         child: RotatedBox(
           quarterTurns: quarterTurns,
           child: Text(
-            'Search or enter URL',
+            l10n.browser_searchOrEnterUrl,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -876,6 +878,7 @@ class _EmptyAppBarAddressField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
 
     void openSearch([String? initialText]) {
       unawaited(
@@ -891,7 +894,7 @@ class _EmptyAppBarAddressField extends StatelessWidget {
     }
 
     final label = Text(
-      'Search or enter URL',
+      l10n.browser_searchOrEnterUrl,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.bodyMedium?.copyWith(

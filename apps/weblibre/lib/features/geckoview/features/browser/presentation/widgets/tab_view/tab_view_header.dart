@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_enums_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -38,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -179,6 +181,7 @@ class TabViewHeader extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final searchMode = useState(false);
     final searchTextFocus = useFocusNode();
     final searchTextController = useTextEditingController();
@@ -229,7 +232,7 @@ class TabViewHeader extends HookConsumerWidget {
             if (context.mounted) {
               ui_helper.showInfoMessage(
                 context,
-                'Tab reordering is only available in default manual mode',
+                l10n.browser_tabReorderingOnlyInDefaultMode,
               );
             }
           }
@@ -294,7 +297,7 @@ class TabViewHeader extends HookConsumerWidget {
                         icon: const Icon(MdiIcons.tabSearch),
                         iconSize: 18,
                         padding: EdgeInsets.zero,
-                        tooltip: 'Search inside tabs',
+                        tooltip: l10n.browser_tooltipSearchInsideTabs,
                         onPressed: () {
                           searchMode.value = true;
                           searchTextFocus.requestFocus();
@@ -343,7 +346,7 @@ class TabViewHeader extends HookConsumerWidget {
                                           : Icons.radio_button_unchecked,
                                     ),
                                     trailingIcon: Icon(icon, color: color),
-                                    child: Text(type.label),
+                                    child: Text(type.label(context)),
                                     onPressed: () {
                                       ref
                                           .read(
@@ -354,7 +357,7 @@ class TabViewHeader extends HookConsumerWidget {
                                     },
                                   );
                                 }).toList(),
-                                child: const Text('Tab Type'),
+                                child: Text(l10n.browser_filterTabType),
                               ),
                               // Sort
                               SubmenuButton(
@@ -367,7 +370,7 @@ class TabViewHeader extends HookConsumerWidget {
                                             ? Icons.radio_button_checked
                                             : Icons.radio_button_unchecked,
                                       ),
-                                      child: Text(sort.label),
+                                      child: Text(sort.label(context)),
                                       onPressed: () {
                                         ref
                                             .read(
@@ -403,10 +406,10 @@ class TabViewHeader extends HookConsumerWidget {
                                                       .sortPinnedFirst,
                                                 );
                                           },
-                                    child: const Text('Sort Pinned First'),
+                                    child: Text(l10n.browser_sortPinnedFirst),
                                   ),
                                 ],
-                                child: const Text('Sort'),
+                                child: Text(l10n.browser_filterSort),
                               ),
                               MenuItemButton(
                                 leadingIcon: Icon(
@@ -424,7 +427,7 @@ class TabViewHeader extends HookConsumerWidget {
                                         !filterOptions.showHierarchicalTabs,
                                       );
                                 },
-                                child: const Text('Hierarchical View'),
+                                child: Text(l10n.browser_hierarchicalView),
                               ),
                               const Divider(),
                               // Date range picker
@@ -448,7 +451,7 @@ class TabViewHeader extends HookConsumerWidget {
                                     ? Text(
                                         '${DateFormat.yMd().format(filterOptions.dateRange!.start)} - ${DateFormat.yMd().format(filterOptions.dateRange!.end)}',
                                       )
-                                    : const Text('Filter Date'),
+                                    : Text(l10n.browser_filterDate),
                                 onPressed: () async {
                                   final range = await showDateRangePicker(
                                     context: context,
@@ -490,7 +493,7 @@ class TabViewHeader extends HookConsumerWidget {
                                               ? Icons.radio_button_checked
                                               : Icons.radio_button_unchecked,
                                         ),
-                                        child: Text(interval.label),
+                                        child: Text(interval.label(context)),
                                         onPressed: () {
                                           ref
                                               .read(
@@ -507,13 +510,13 @@ class TabViewHeader extends HookConsumerWidget {
                                       ),
                                     )
                                     .toList(),
-                                child: const Text('Quick Interval'),
+                                child: Text(l10n.browser_quickInterval),
                               ),
                               const Divider(),
                               // Reset
                               MenuItemButton(
                                 leadingIcon: const Icon(MdiIcons.restore),
-                                child: const Text('Reset Filter'),
+                                child: Text(l10n.browser_resetFilter),
                                 onPressed: () {
                                   ref
                                       .read(
@@ -525,7 +528,7 @@ class TabViewHeader extends HookConsumerWidget {
                               ),
                             ],
                             child: IconButton(
-                              tooltip: 'Filter & Sort',
+                              tooltip: l10n.browser_tooltipFilterAndSort,
                               onPressed: () {
                                 if (filterMenuController.isOpen) {
                                   filterMenuController.close();
@@ -548,7 +551,7 @@ class TabViewHeader extends HookConsumerWidget {
                           .map(
                             (mode) => MenuItemButton(
                               leadingIcon: Icon(mode.icon),
-                              child: Text(mode.label),
+                              child: Text(mode.label(context)),
                               onPressed: () {
                                 if (mode == TabsViewMode.tree) {
                                   searchTextController.clear();
@@ -565,7 +568,7 @@ class TabViewHeader extends HookConsumerWidget {
                           )
                           .toList(),
                       child: IconButton(
-                        tooltip: 'Change view mode',
+                        tooltip: l10n.browser_tooltipChangeViewMode,
                         onPressed: isSyncedScope
                             ? null
                             : () {
@@ -615,10 +618,12 @@ class TabViewHeader extends HookConsumerWidget {
                               iconSize: 18,
                               padding: EdgeInsets.zero,
                               tooltip: downloadProgress != null
-                                  ? 'Downloading AI models (${downloadProgress.progress.toInt()}%)'
+                                  ? l10n.browser_downloadingAiModelsProgress(
+                                      downloadProgress.progress.toInt(),
+                                    )
                                   : tabSuggestionsEnabled
-                                  ? 'Disable AI tab suggestions'
-                                  : 'Enable AI tab suggestions',
+                                  ? l10n.browser_disableAiTabSuggestions
+                                  : l10n.browser_enableAiTabSuggestionsTooltip,
                               onPressed: () async {
                                 if (!tabSuggestionsEnabled) {
                                   final result =
@@ -659,10 +664,10 @@ class TabViewHeader extends HookConsumerWidget {
                         iconSize: 18,
                         padding: EdgeInsets.zero,
                         tooltip: tabsReorderable
-                            ? 'Disable reordering mode'
+                            ? l10n.browser_disableReorderingMode
                             : canManualReorder
-                            ? 'Enable reordering mode'
-                            : 'Reordering requires default manual mode',
+                            ? l10n.browser_enableReorderingMode
+                            : l10n.browser_reorderingRequiresDefaultManualMode,
                         onPressed: canManualReorder
                             ? () {
                                 final wasEnabled = tabsReorderable;
@@ -678,7 +683,7 @@ class TabViewHeader extends HookConsumerWidget {
                                 if (!wasEnabled && context.mounted) {
                                   ui_helper.showInfoMessage(
                                     context,
-                                    'Drag and drop tabs to reorder them',
+                                    l10n.browser_dragAndDropTabsToReorder,
                                   );
                                 }
                               }
@@ -714,7 +719,7 @@ class TabViewHeader extends HookConsumerWidget {
                           enableCloseFilteredTabs:
                               tabsViewMode != TabsViewMode.tree,
                           builder: (context, controller, _) => IconButton(
-                            tooltip: 'Tab actions',
+                            tooltip: l10n.browser_tooltipTabActions,
                             onPressed: () {
                               if (controller.isOpen) {
                                 controller.close();
@@ -736,7 +741,7 @@ class TabViewHeader extends HookConsumerWidget {
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     prefixIcon: const Icon(MdiIcons.tabSearch, size: 18),
-                    hintText: 'Search tabs',
+                    hintText: l10n.browser_hintSearchTabs,
                     floatingLabelBehavior: FloatingLabelBehavior.always,
                     suffixIcon: Row(
                       mainAxisSize: MainAxisSize.min,

@@ -25,6 +25,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_item.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/presentation/utils/bookmark_item_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
 /// Indentation applied per level of folder nesting.
@@ -64,11 +66,15 @@ class FolderTreePicker extends HookConsumerWidget {
     final expandedGuids = useState(<String>{entryGuid});
 
     final rootFolder = ref.watch(bookmarkFolderProvider(entryGuid));
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Folder', style: Theme.of(context).textTheme.labelMedium),
+        Text(
+          l10n.bookmarks_folderLabel,
+          style: Theme.of(context).textTheme.labelMedium,
+        ),
         rootFolder.when(
           skipLoadingOnReload: true,
           data: (folder) {
@@ -96,7 +102,7 @@ class FolderTreePicker extends HookConsumerWidget {
           },
           error: (error, stackTrace) => Center(
             child: FailureWidget(
-              title: 'Failed to load Bookmark Folders',
+              title: l10n.bookmarks_loadFoldersFailedTitle,
               exception: error,
               onRetry: () {
                 ref.invalidate(bookmarkFolderProvider(entryGuid));
@@ -229,7 +235,7 @@ class _FolderRow extends HookConsumerWidget {
             ),
           ],
         ),
-        title: Text(folder.title),
+        title: Text(folder.displayTitle(context)),
         onTap: !isRootFolder
             ? () {
                 selectedFolderGuid.value = folder.guid;

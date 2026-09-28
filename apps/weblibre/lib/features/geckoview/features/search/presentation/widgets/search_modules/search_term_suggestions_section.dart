@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_query_chips.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 
 class SearchTermSuggestionsSection extends HookConsumerWidget {
@@ -38,6 +39,7 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final searchText = useListenableSelector(
       searchTextController,
       () => searchTextController.text,
@@ -65,7 +67,7 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
     ];
 
     return SearchModuleSection(
-      title: 'Suggestions',
+      title: l10n.search_moduleLabelSearchSuggestions,
       moduleType: SearchModuleType.searchSuggestions,
       totalCount: queries.length,
       contentSliverBuilder:

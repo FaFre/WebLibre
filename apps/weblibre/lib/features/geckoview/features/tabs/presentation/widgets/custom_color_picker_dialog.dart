@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Freeform color picker for power users.
 ///
@@ -35,6 +36,7 @@ class CustomColorPickerDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hsl = useState<HSLColor>(HSLColor.fromColor(initialColor));
     final hexController = useTextEditingController(text: _toHex(initialColor));
 
@@ -69,7 +71,7 @@ class CustomColorPickerDialog extends HookWidget {
         horizontal: 20.0,
         vertical: 8.0,
       ),
-      title: const Text('Custom Color'),
+      title: Text(l10n.tabs_customColorTitle),
       content: SizedBox(
         width: 320,
         child: Column(
@@ -79,11 +81,11 @@ class CustomColorPickerDialog extends HookWidget {
             const SizedBox(height: 16),
             TextField(
               controller: hexController,
-              decoration: const InputDecoration(
-                labelText: 'Hex',
+              decoration: InputDecoration(
+                labelText: l10n.tabs_hexLabel,
                 prefixText: '#',
                 isDense: true,
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               textCapitalization: TextCapitalization.characters,
               inputFormatters: [
@@ -97,7 +99,7 @@ class CustomColorPickerDialog extends HookWidget {
             ),
             const SizedBox(height: 12),
             _GradientSlider(
-              label: 'Hue',
+              label: l10n.tabs_hueLabel,
               value: hsl.value.hue,
               max: 360,
               gradient: const LinearGradient(
@@ -114,7 +116,7 @@ class CustomColorPickerDialog extends HookWidget {
               onChanged: (v) => updateHsl(hsl.value.withHue(v)),
             ),
             _GradientSlider(
-              label: 'Saturation',
+              label: l10n.tabs_saturationLabel,
               value: hsl.value.saturation,
               max: 1,
               gradient: LinearGradient(
@@ -136,7 +138,7 @@ class CustomColorPickerDialog extends HookWidget {
               onChanged: (v) => updateHsl(hsl.value.withSaturation(v)),
             ),
             _GradientSlider(
-              label: 'Lightness',
+              label: l10n.tabs_lightnessLabel,
               value: hsl.value.lightness,
               max: 1,
               gradient: LinearGradient(
@@ -159,11 +161,11 @@ class CustomColorPickerDialog extends HookWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop<Color?>(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.common_cancel),
         ),
         TextButton(
           onPressed: () => Navigator.pop<Color?>(context, color),
-          child: const Text('Select'),
+          child: Text(l10n.tabs_actionSelect),
         ),
       ],
     );

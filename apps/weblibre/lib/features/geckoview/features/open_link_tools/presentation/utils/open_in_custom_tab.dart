@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show GeckoBrowserService;
 
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 import 'package:weblibre/utils/uri_input_parser.dart';
 import 'package:weblibre/utils/uri_policy.dart';
@@ -35,7 +36,10 @@ Future<void> openInPrivateCustomTab(BuildContext context, String url) async {
     );
     if (parsedUrl == null) {
       if (context.mounted) {
-        showErrorMessage(context, 'Could not open link: $url');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(context).openLinkTools_couldNotOpenLink(url),
+        );
       }
       return;
     }
@@ -43,7 +47,10 @@ Future<void> openInPrivateCustomTab(BuildContext context, String url) async {
     await GeckoBrowserService().openInCustomTab(url: parsedUrl, private: true);
   } catch (e) {
     if (context.mounted) {
-      showErrorMessage(context, 'Could not open link: $url');
+      showErrorMessage(
+        context,
+        AppLocalizations.of(context).openLinkTools_couldNotOpenLink(url),
+      );
     }
   }
 }

@@ -18,66 +18,71 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:flutter/widgets.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+
 typedef PermissionDescription = ({String text, bool technical});
 
-PermissionDescription describePermission(String raw) {
+PermissionDescription describePermission(BuildContext context, String raw) {
+  final l10n = AppLocalizations.of(context);
+
   String? mapped;
   switch (raw) {
     case 'bookmarks':
-      mapped = 'Read and modify bookmarks';
+      mapped = l10n.addons_permissionBookmarks;
     case 'browserSettings':
-      mapped = 'Read and modify browser settings';
+      mapped = l10n.addons_permissionBrowserSettings;
     case 'browsingData':
-      mapped = 'Clear recent browsing history, cookies, and related data';
+      mapped = l10n.addons_permissionBrowsingData;
     case 'clipboardRead':
-      mapped = 'Read data you copy and paste';
+      mapped = l10n.addons_permissionClipboardRead;
     case 'clipboardWrite':
-      mapped = 'Input data to the clipboard';
+      mapped = l10n.addons_permissionClipboardWrite;
     case 'contextualIdentities':
-      mapped = 'Access and modify container tabs';
+      mapped = l10n.addons_permissionContextualIdentities;
     case 'cookies':
-      mapped = 'Access cookies for visited sites';
+      mapped = l10n.addons_permissionCookies;
     case 'downloads':
-      mapped = 'Download files and read/modify download history';
+      mapped = l10n.addons_permissionDownloads;
     case 'downloads.open':
-      mapped = 'Open files downloaded to your computer';
+      mapped = l10n.addons_permissionDownloadsOpen;
     case 'find':
-      mapped = 'Read the text of all open tabs';
+      mapped = l10n.addons_permissionFind;
     case 'geolocation':
-      mapped = 'Access your location';
+      mapped = l10n.addons_permissionGeolocation;
     case 'history':
-      mapped = 'Access browsing history';
+      mapped = l10n.addons_permissionHistory;
     case 'management':
-      mapped = 'Monitor extension usage and manage themes';
+      mapped = l10n.addons_permissionManagement;
     case 'nativeMessaging':
-      mapped = 'Exchange messages with programs other than the browser';
+      mapped = l10n.addons_permissionNativeMessaging;
     case 'notifications':
-      mapped = 'Display notifications';
+      mapped = l10n.addons_permissionNotifications;
     case 'pkcs11':
-      mapped = 'Provide cryptographic authentication services';
+      mapped = l10n.addons_permissionPkcs11;
     case 'privacy':
-      mapped = 'Read and modify privacy settings';
+      mapped = l10n.addons_permissionPrivacy;
     case 'proxy':
-      mapped = 'Control browser proxy settings';
+      mapped = l10n.addons_permissionProxy;
     case 'sessions':
-      mapped = 'Access recently closed tabs';
+      mapped = l10n.addons_permissionSessions;
     case 'tabs':
-      mapped = 'Access browser tabs';
+      mapped = l10n.addons_permissionTabs;
     case 'tabHide':
-      mapped = 'Hide and show browser tabs';
+      mapped = l10n.addons_permissionTabHide;
     case 'topSites':
-      mapped = 'Access browsing history';
+      mapped = l10n.addons_permissionTopSites;
     case 'webNavigation':
-      mapped = 'Access browser activity during navigation';
+      mapped = l10n.addons_permissionWebNavigation;
     case '<all_urls>':
-      mapped = 'Access your data for all websites';
+      mapped = l10n.addons_permissionAllUrls;
   }
   if (mapped != null) return (text: mapped, technical: false);
   if (raw.startsWith('http') ||
       raw.contains('://') ||
       raw.contains('*') ||
       raw.startsWith('file:')) {
-    return (text: 'Access your data for $raw', technical: false);
+    return (text: l10n.addons_permissionAccessDataFor(raw), technical: false);
   }
   return (text: raw, technical: true);
 }

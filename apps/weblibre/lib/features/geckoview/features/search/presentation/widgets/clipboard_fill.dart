@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
@@ -32,6 +33,7 @@ class ClipboardFillLink extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final allowClipboardAccess = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.allowClipboardAccess),
     );
@@ -49,7 +51,7 @@ class ClipboardFillLink extends HookConsumerWidget {
           clipboardUrl.data.toString() != currentText.text,
       child: ListTile(
         leading: const Icon(MdiIcons.linkPlus),
-        title: const Text('Fill link from clipboard'),
+        title: Text(l10n.search_fillLinkFromClipboard),
         onTap: () {
           controller.text = clipboardUrl.data.toString();
         },

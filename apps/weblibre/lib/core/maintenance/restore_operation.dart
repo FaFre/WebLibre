@@ -33,12 +33,18 @@ import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// The staged archive does not describe the profile it claims to.
 class RestoreValidationFailure implements Exception {
-  const RestoreValidationFailure(this.reason);
+  const RestoreValidationFailure(this.reason, [this.detail]);
 
-  final String reason;
+  final RestoreValidationReason reason;
+
+  /// Diagnostic text for logs — the uuid involved, a caught error's message.
+  /// Never shown to the user; [reason] is what `MaintenanceFailureL10n`
+  /// translates for that.
+  final String? detail;
 
   @override
-  String toString() => 'RestoreValidationFailure($reason)';
+  String toString() =>
+      'RestoreValidationFailure($reason${detail == null ? '' : ': $detail'})';
 }
 
 /// The operation cannot be completed *or* rolled back without help.
@@ -333,7 +339,7 @@ class RestoreOperation {
       // did not raise itself.
       throw MaintenanceAborted(
         error is RestoreValidationFailure
-            ? ArchiveRejected(error.reason)
+            ? ArchiveRejected(error.reason, error.detail)
             : classifyMaintenanceFailure(error),
         cause: error,
       );
@@ -581,7 +587,8 @@ class RestoreOperation {
       // profile would stop existing for the picker with all of its data intact
       // on disk.
       throw RestoreValidationFailure(
-        'The staged data is addressed to ${embedded.uuid}, not $targetProfileId',
+        RestoreValidationReason.wrongProfile,
+        'addressed to ${embedded.uuid}, not $targetProfileId',
       );
     }
   }
@@ -594,30 +601,37 @@ class RestoreOperation {
   /// later. Returns the id the archive arrived with.
   Future<UuidValue> validateStagedStructure(Directory staging) async {
     if (!staging.existsSync()) {
-      throw const RestoreValidationFailure('The backup file is incomplete.');
+      throw const RestoreValidationFailure(RestoreValidationReason.incomplete);
     }
 
     final metadataFile = File(p.join(staging.path, fs.profileMetadataFileName));
     if (!metadataFile.existsSync()) {
-      throw const RestoreValidationFailure(
-        'The backup file has no profile metadata.',
-      );
+      throw const RestoreValidationFailure(RestoreValidationReason.noMetadata);
     }
 
     final Object? decoded;
     try {
       decoded = jsonDecode(await metadataFile.readAsString());
     } catch (error) {
-      throw RestoreValidationFailure('Staged metadata is unreadable: $error');
+      throw RestoreValidationFailure(
+        RestoreValidationReason.malformedMetadata,
+        'unreadable: $error',
+      );
     }
 
     if (decoded is! Map<String, Object?>) {
-      throw const RestoreValidationFailure('Staged metadata is not an object');
+      throw const RestoreValidationFailure(
+        RestoreValidationReason.malformedMetadata,
+        'not an object',
+      );
     }
 
     final rawId = decoded['id'];
     if (rawId is! String) {
-      throw const RestoreValidationFailure('Staged metadata has no profile id');
+      throw const RestoreValidationFailure(
+        RestoreValidationReason.malformedMetadata,
+        'no profile id',
+      );
     }
 
     final UuidValue embedded;
@@ -625,13 +639,14 @@ class RestoreOperation {
       embedded = UuidValue.withValidation(rawId.toLowerCase());
     } on FormatException catch (error) {
       throw RestoreValidationFailure(
-        'Staged metadata has no usable id: $error',
+        RestoreValidationReason.malformedMetadata,
+        'no usable id: $error',
       );
     }
 
     if (!Directory(p.join(staging.path, 'databases')).existsSync()) {
       throw const RestoreValidationFailure(
-        'The backup file has no profile data.',
+        RestoreValidationReason.noProfileData,
       );
     }
 

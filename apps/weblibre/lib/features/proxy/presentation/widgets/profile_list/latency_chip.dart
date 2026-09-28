@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class LatencyChip extends StatelessWidget {
   final AsyncValue<ProxyLatencyData> result;
@@ -37,32 +38,25 @@ class LatencyChip extends StatelessWidget {
 }
 
 class _LatencyStatusChip extends StatelessWidget {
-  final String label;
-  final String tooltip;
-  final bool isError;
+  /// Null means the test is still running; non-null carries the failure.
+  final Object? error;
 
-  const _LatencyStatusChip({
-    required this.label,
-    required this.tooltip,
-    required this.isError,
-  });
+  const _LatencyStatusChip.loading() : error = null;
 
-  const _LatencyStatusChip.loading()
-    : this(
-        label: 'Testing...',
-        tooltip: 'Latency test running',
-        isError: false,
-      );
-
-  _LatencyStatusChip.error(Object error)
-    : this(label: 'Failed', tooltip: error.toString(), isError: true);
+  const _LatencyStatusChip.error(Object this.error);
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final isError = error != null;
     return _LatencyChipContainer(
-      label: label,
-      tooltip: tooltip,
+      label: isError ? l10n.proxy_latencyFailed : l10n.proxy_latencyTesting,
+      tooltip: switch (error) {
+        null => l10n.proxy_latencyTestRunningTooltip,
+        ProxyNotRunningError() => l10n.proxy_latencyNotRunningTooltip,
+        final other => other.toString(),
+      },
       backgroundColor: isError
           ? scheme.errorContainer
           : scheme.surfaceContainerHighest,
@@ -80,12 +74,16 @@ class _LatencySuccessChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final (background, foreground) = _latencyColors(scheme, value.latency);
 
     return _LatencyChipContainer(
-      label: '${value.latency.inMilliseconds} ms',
-      tooltip: 'HTTP ${value.statusCode} in ${value.latency.inMilliseconds} ms',
+      label: l10n.proxy_latencyMilliseconds(value.latency.inMilliseconds),
+      tooltip: l10n.proxy_latencyHttpStatusTooltip(
+        value.statusCode,
+        value.latency.inMilliseconds,
+      ),
       backgroundColor: background,
       foregroundColor: foreground,
     );

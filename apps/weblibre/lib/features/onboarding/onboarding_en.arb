@@ -1,0 +1,264 @@
+{
+  "@@locale": "en",
+
+  "onboarding_actionPrevious": "Previous",
+  "@onboarding_actionPrevious": {
+    "description": "Button at the bottom of the first-run setup that goes back to the previous page."
+  },
+  "onboarding_actionNext": "Next",
+  "@onboarding_actionNext": {
+    "description": "Button at the bottom of the first-run setup that goes to the next page."
+  },
+  "onboarding_actionRestore": "Restore",
+  "@onboarding_actionRestore": {
+    "description": "Button at the bottom of the first-run setup's welcome page when \"Restore from Backup\" is chosen; starts restoring a backup file."
+  },
+  "onboarding_restoreTargetUnreadable": "This profile could not be read, so nothing can be restored into it.",
+  "@onboarding_restoreTargetUnreadable": {
+    "description": "Error message when restoring a backup during first-run setup fails because the current profile's data could not be read."
+  },
+
+  "onboarding_welcomeBackTitle": "Welcome back!",
+  "@onboarding_welcomeBackTitle": {
+    "description": "Heading of the first-run welcome page when the user has used WebLibre before (e.g. after a major update)."
+  },
+  "onboarding_welcomeReadyTitle": "WebLibre is ready",
+  "@onboarding_welcomeReadyTitle": {
+    "description": "Heading of the first-run welcome page for a new user. WebLibre is the app name."
+  },
+  "onboarding_chooseExperience": "Choose your onboarding experience:",
+  "@onboarding_chooseExperience": {
+    "description": "Label above the choice between quick start, custom setup and restoring a backup on the first-run welcome page."
+  },
+  "onboarding_modeExpressTitle": "Quick Start",
+  "@onboarding_modeExpressTitle": {
+    "description": "First-run setup choice: skip configuration and use recommended settings."
+  },
+  "onboarding_modeExpressSubtitle": "Use recommended defaults and get browsing.",
+  "@onboarding_modeExpressSubtitle": {
+    "description": "Explanation under \"Quick Start\"."
+  },
+  "onboarding_modeDetailedTitle": "Custom Setup",
+  "@onboarding_modeDetailedTitle": {
+    "description": "First-run setup choice: go through configuration pages one by one."
+  },
+  "onboarding_modeDetailedSubtitle": "Configure DNS, toolbar, extensions, and more.",
+  "@onboarding_modeDetailedSubtitle": {
+    "description": "Explanation under \"Custom Setup\" listing what can be configured. DNS is a technical abbreviation."
+  },
+  "onboarding_modeRestoreTitle": "Restore from Backup",
+  "@onboarding_modeRestoreTitle": {
+    "description": "First-run setup choice: restore a profile from a backup file made earlier."
+  },
+  "onboarding_modeRestoreSubtitle": "Import a profile from an encrypted backup file.",
+  "@onboarding_modeRestoreSubtitle": {
+    "description": "Explanation under \"Restore from Backup\"."
+  },
+  "onboarding_updateNoticeTitle": "A lot has changed!",
+  "@onboarding_updateNoticeTitle": {
+    "description": "Heading of a notice on the welcome page shown to existing users after a major update."
+  },
+  "onboarding_updateNoticeBody": "This update includes significant changes that require you to review your settings. Please go through the following pages to check your configuration.",
+  "@onboarding_updateNoticeBody": {
+    "description": "Body of the notice shown to existing users after a major update, asking them to go through the setup pages again."
+  },
+  "onboarding_updateNoticeExtensions": "Please re-check your extensions after this update due to known migration issues.",
+  "@onboarding_updateNoticeExtensions": {
+    "description": "Point in the update notice: browser extensions may need to be checked because of known problems carrying them over to the new version."
+  },
+  "onboarding_updateNoticeSettingsPreserved": "Your existing settings will not be overridden unless you explicitly change them during this setup.",
+  "@onboarding_updateNoticeSettingsPreserved": {
+    "description": "Point in the update notice: going through setup does not reset existing settings."
+  },
+  "onboarding_eulaAcceptance": "I have read and accept the <eula>EULA</eula> and <privacy>Privacy Policy</privacy>.",
+  "@onboarding_eulaAcceptance": {
+    "description": "Checkbox on the welcome page that must be ticked to continue. The text between <eula>…</eula> and <privacy>…</privacy> becomes a tappable link to the license agreement and the privacy policy; keep both tag pairs and translate the text inside them. EULA is short for End User License Agreement."
+  },
+  "onboarding_privacyPolicy": "Privacy Policy",
+  "@onboarding_privacyPolicy": {
+    "description": "Title of the page showing the full privacy policy."
+  },
+  "onboarding_eulaDocumentTitle": "End User License Agreement",
+  "@onboarding_eulaDocumentTitle": {
+    "description": "Title of the page showing the full license agreement."
+  },
+
+  "onboarding_aiFeaturesTitle": "AI Features",
+  "@onboarding_aiFeaturesTitle": {
+    "description": "Heading of the first-run setup page about optional AI features."
+  },
+  "onboarding_aiOnDeviceTitle": "On-device AI",
+  "@onboarding_aiOnDeviceTitle": {
+    "description": "Switch that enables AI features that run only on the device, without sending data anywhere."
+  },
+  "onboarding_aiOnDeviceSubtitle": "Local on-device features including container topic and tab suggestions",
+  "@onboarding_aiOnDeviceSubtitle": {
+    "description": "Explanation under the on-device AI switch. Containers are separate browsing identities; the AI suggests topics for them and which tabs belong together."
+  },
+  "onboarding_aiWarningTitle": "Things to keep in mind",
+  "@onboarding_aiWarningTitle": {
+    "description": "Heading of the notice box listing things to know about the AI features."
+  },
+  "onboarding_aiWarningPoint1": "WebLibre uses a local AI model to analyze your open tab titles and suggest which containers to group the tabs into and what to name those containers. All processing happens entirely on your device.",
+  "@onboarding_aiWarningPoint1": {
+    "description": "Bullet point in the AI notice box."
+  },
+  "onboarding_aiWarningPoint2": "AI enhancements operate entirely within your browser, keeping all data on your device. Local AI processing respects your privacy and provides faster suggestions for container groups and names. You can control this behavior at any time in Settings.",
+  "@onboarding_aiWarningPoint2": {
+    "description": "Bullet point in the AI notice box."
+  },
+  "onboarding_aiWarningPoint3": "AI can sometimes make mistakes, so please review suggested group names and tab selections.",
+  "@onboarding_aiWarningPoint3": {
+    "description": "Bullet point in the AI notice box."
+  },
+
+  "onboarding_searchTitle": "Search",
+  "@onboarding_searchTitle": {
+    "description": "Heading of the first-run setup page for choosing search engines."
+  },
+  "onboarding_searchDefaultProviderLabel": "Default Search Provider",
+  "@onboarding_searchDefaultProviderLabel": {
+    "description": "Label above the choice of default search engine."
+  },
+  "onboarding_searchMore": "Search more",
+  "@onboarding_searchMore": {
+    "description": "Button after the suggested search engines that opens a search across all available engines."
+  },
+  "onboarding_searchDefaultAutocompleteLabel": "Default Autocomplete Provider",
+  "@onboarding_searchDefaultAutocompleteLabel": {
+    "description": "Label above the choice of service that suggests search terms while typing."
+  },
+  "onboarding_searchLoadFailedTitle": "Could not load search engines",
+  "@onboarding_searchLoadFailedTitle": {
+    "description": "Error heading when the list of search engines could not be loaded."
+  },
+
+  "onboarding_dohTitle": "DNS over HTTPS",
+  "@onboarding_dohTitle": {
+    "description": "Heading of the first-run setup page for DNS over HTTPS, which encrypts the lookups that turn website names into addresses. Technical term; usually kept in English."
+  },
+
+  "onboarding_permissionsTitle": "Permissions",
+  "@onboarding_permissionsTitle": {
+    "description": "Heading of the first-run setup page for Android permissions."
+  },
+  "onboarding_permissionsNotificationsTitle": "Notifications",
+  "@onboarding_permissionsNotificationsTitle": {
+    "description": "Switch that asks Android for permission to show notifications."
+  },
+  "onboarding_permissionsNotificationsSubtitle": "Required to notify you about downloads",
+  "@onboarding_permissionsNotificationsSubtitle": {
+    "description": "Explanation under the notifications permission switch: needed to report progress of downloads."
+  },
+  "onboarding_permissionsDefaultBrowserTitle": "Default Browser",
+  "@onboarding_permissionsDefaultBrowserTitle": {
+    "description": "Switch that makes WebLibre the device's default browser."
+  },
+  "onboarding_permissionsDefaultBrowserSubtitle": "Set WebLibre as your default browser",
+  "@onboarding_permissionsDefaultBrowserSubtitle": {
+    "description": "Explanation under the default browser switch. WebLibre is the app name."
+  },
+
+  "onboarding_privacyTitle": "Privacy & Hardening",
+  "@onboarding_privacyTitle": {
+    "description": "Heading of the first-run setup page for privacy and security settings. \"Hardening\" means stricter security settings."
+  },
+  "onboarding_privacyBrowserLanguagesTitle": "Browser Languages",
+  "@onboarding_privacyBrowserLanguagesTitle": {
+    "description": "Row that opens the settings for which languages websites are told the user prefers."
+  },
+  "onboarding_privacyBrowserLanguagesSubtitle": "Configure language preferences exposed to websites",
+  "@onboarding_privacyBrowserLanguagesSubtitle": {
+    "description": "Explanation under \"Browser Languages\"."
+  },
+  "onboarding_multipleLanguagesDetectedTitle": "Multiple Languages Detected",
+  "@onboarding_multipleLanguagesDetectedTitle": {
+    "description": "Heading of a warning shown when several preferred languages are configured, which makes the browser easier to identify."
+  },
+  "onboarding_multipleLanguagesWarning": "{count, plural, other{Your browser has {count} languages configured ({locales}).}} Websites can use your unique language combination to fingerprint and track you across the web.",
+  "@onboarding_multipleLanguagesWarning": {
+    "description": "Warning body. count is the number of configured languages; locales is a comma-separated list of language codes such as \"en-US, de-DE\". \"Fingerprint\" means to identify a browser by its unique characteristics.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "locales": { "type": "String" }
+    }
+  },
+  "onboarding_multipleLanguagesSuggestion": "Consider reducing your browser languages to a single language to minimize your fingerprint surface.",
+  "@onboarding_multipleLanguagesSuggestion": {
+    "description": "Suggestion in the language warning. \"Fingerprint surface\" means the characteristics that make the browser identifiable."
+  },
+  "onboarding_reviewLanguages": "Review Languages",
+  "@onboarding_reviewLanguages": {
+    "description": "Button in the language warning that opens the language settings."
+  },
+  "onboarding_webEngineHardeningTitle": "Complete Web Engine Hardening",
+  "@onboarding_webEngineHardeningTitle": {
+    "description": "Switch that applies all recommended security settings to the browser engine (Gecko)."
+  },
+  "onboarding_webEngineHardeningSubtitle": "Apply all recommended security hardening preferences to the web engine",
+  "@onboarding_webEngineHardeningSubtitle": {
+    "description": "Explanation under the web engine hardening switch."
+  },
+  "onboarding_fingerprintProtectionTitle": "Hardened Fingerprint Protection",
+  "@onboarding_fingerprintProtectionTitle": {
+    "description": "Switch that turns on the strict set of protections against browser fingerprinting (identifying a browser by its unique characteristics)."
+  },
+  "onboarding_fingerprintProtectionSubtitle": "Load comprehensive fingerprint protection defaults",
+  "@onboarding_fingerprintProtectionSubtitle": {
+    "description": "Explanation under the fingerprint protection switch."
+  },
+  "onboarding_compatibilityWarningTitle": "Compatibility Warning",
+  "@onboarding_compatibilityWarningTitle": {
+    "description": "Heading of the warning box shown when strict fingerprint protection is on."
+  },
+  "onboarding_fingerprintWarningPoint1": "Hardened fingerprint protection enables 60+ protection targets including canvas randomization, navigator spoofing, media device masking, and more.",
+  "@onboarding_fingerprintWarningPoint1": {
+    "description": "Bullet point in the fingerprint protection warning. Canvas, navigator and media devices are names of web technologies that websites read to identify browsers."
+  },
+  "onboarding_fingerprintWarningPoint2": "This may cause websites to break or behave unexpectedly. You can fine-tune individual targets in settings.",
+  "@onboarding_fingerprintWarningPoint2": {
+    "description": "Bullet point in the fingerprint protection warning."
+  },
+  "onboarding_localNetworkProtectionTitle": "Local Network Protection",
+  "@onboarding_localNetworkProtectionTitle": {
+    "description": "Heading of the settings that stop websites from reaching devices on the user's local network."
+  },
+  "onboarding_localNetworkProtectionSubtitle": "Websites can try to reach your device and other devices on your home network, like routers, printers, or smart home devices. By default, known trackers are automatically blocked from doing this.",
+  "@onboarding_localNetworkProtectionSubtitle": {
+    "description": "Explanation under \"Local Network Protection\"."
+  },
+  "onboarding_blockAllLocalNetworkTitle": "Block All Local Network Requests",
+  "@onboarding_blockAllLocalNetworkTitle": {
+    "description": "Switch: require permission for every website that tries to reach local network devices, not only known trackers."
+  },
+  "onboarding_blockAllLocalNetworkSubtitle": "Ask for permission before any website accesses devices on your home network, not just known trackers",
+  "@onboarding_blockAllLocalNetworkSubtitle": {
+    "description": "Explanation under the switch that blocks all local network requests."
+  },
+
+  "onboarding_toolbarLayoutTitle": "Toolbar & Layout",
+  "@onboarding_toolbarLayoutTitle": {
+    "description": "Heading of the first-run setup page for arranging the browser toolbar and screen layout."
+  },
+
+  "onboarding_ublockTitle": "uBlock Origin",
+  "@onboarding_ublockTitle": {
+    "description": "Heading of the first-run setup page offering the uBlock Origin ad blocker. Product name; do not translate."
+  },
+  "onboarding_ublockDescription": "uBlock Origin (uBO) is a CPU- and memory-efficient **wide-spectrum content blocker** by **Raymond Hill** and is available as a browser extension for WebLibre.\n\nBy default, it blocks ads, trackers, coin miners, pop-ups, annoying anti-blockers, malware sites, and more using **EasyList, EasyPrivacy, Peter Lowe's Blocklist, Online Malicious URL Blocklist, and uBO filter lists**.\n\nMany other lists are available to block additional content.",
+  "@onboarding_ublockDescription": {
+    "description": "Description of the uBlock Origin extension on its setup page. Uses Markdown: keep the ** markers around bold text. Names of people, products and filter lists stay unchanged."
+  },
+  "onboarding_ublockInstallTitle": "Install uBlock Origin Extension",
+  "@onboarding_ublockInstallTitle": {
+    "description": "Switch that installs the uBlock Origin browser extension. Product name; do not translate."
+  },
+  "onboarding_ublockApplyDefaultsTitle": "Apply optimized defaults",
+  "@onboarding_ublockApplyDefaultsTitle": {
+    "description": "Switch, available once uBlock Origin is being installed: apply WebLibre's recommended uBlock Origin settings."
+  },
+  "onboarding_ublockApplyDefaultsSubtitle": "Enable WebLibre hardening filter lists.",
+  "@onboarding_ublockApplyDefaultsSubtitle": {
+    "description": "Explanation under \"Apply optimized defaults\": turns on WebLibre's own stricter filter lists in uBlock Origin."
+  }
+}

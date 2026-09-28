@@ -22,53 +22,63 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_connection_option_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-const List<SettingsSectionDefinition> proxyRoutingSettingsSections = [
-  SettingsSectionDefinition(
-    title: 'Regular Tabs',
-    keywords: ['routing'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Regular Tabs Routing Mode',
-        subtitle: 'Choose how regular tabs are routed through proxies',
-        keywords: ['container', 'global'],
-        child: _RegularTabsModeSection(),
-      ),
-      SettingsEntryDefinition(
-        title: 'Proxy for global routing',
-        subtitle: 'Selected proxy when global routing is enabled',
-        keywords: ['proxy'],
-        child: _GlobalRoutingProxySection(),
-      ),
-    ],
-  ),
-  SettingsSectionDefinition(
-    title: 'Private Tabs',
-    keywords: ['private', 'incognito'],
-    entries: [
-      SettingsEntryDefinition(
-        title: 'Proxy for private tabs',
-        subtitle: 'Selected proxy that carries private-tab traffic',
-        keywords: ['proxy'],
-        child: _PrivateTabsProxySection(),
-      ),
-    ],
-  ),
-];
+List<SettingsSectionDefinition> _proxyRoutingSettingsSections(
+  AppLocalizations l10n,
+) {
+  return [
+    SettingsSectionDefinition(
+      title: l10n.proxy_routingSectionRegularTabs,
+      keywords: settingsKeywords(l10n.proxy_routingSectionRegularTabsKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.proxy_routingRegularTabsModeTitle,
+          subtitle: l10n.proxy_routingRegularTabsModeSubtitle,
+          keywords: settingsKeywords(l10n.proxy_routingRegularTabsModeKeywords),
+          child: const _RegularTabsModeSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.proxy_routingGlobalProxyTitle,
+          subtitle: l10n.proxy_routingGlobalProxySubtitle,
+          keywords: settingsKeywords(l10n.proxy_routingGlobalProxyKeywords),
+          child: const _GlobalRoutingProxySection(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.proxy_routingSectionPrivateTabs,
+      keywords: settingsKeywords(l10n.proxy_routingSectionPrivateTabsKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.proxy_routingPrivateTabsProxyTitle,
+          subtitle: l10n.proxy_routingPrivateTabsProxySubtitle,
+          keywords: settingsKeywords(
+            l10n.proxy_routingPrivateTabsProxyKeywords,
+          ),
+          child: const _PrivateTabsProxySection(),
+        ),
+      ],
+    ),
+  ];
+}
 
 class ProxyRoutingSettingsScreen extends StatelessWidget {
   const ProxyRoutingSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const SettingsDetailScaffold(
-      title: 'Proxy Routing',
-      subtitle: 'Choose which proxy carries regular and private tab traffic.',
+    final l10n = AppLocalizations.of(context);
+
+    return SettingsDetailScaffold(
+      title: l10n.proxy_routingTitle,
+      subtitle: l10n.proxy_routingSubtitle,
       icon: Icons.route_outlined,
-      sections: proxyRoutingSettingsSections,
+      sections: _proxyRoutingSettingsSections(l10n),
     );
   }
 }
@@ -78,6 +88,7 @@ class _RegularTabsModeSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(proxyRoutingSettingsWithDefaultsProvider);
 
     return RadioGroup<ProxyRegularTabRoutingMode>(
@@ -91,21 +102,17 @@ class _RegularTabsModeSection extends ConsumerWidget {
               );
         }
       },
-      child: const Column(
+      child: Column(
         children: [
           RadioListTile<ProxyRegularTabRoutingMode>.adaptive(
             value: ProxyRegularTabRoutingMode.container,
-            title: Text('Container-Based Routing'),
-            subtitle: Text(
-              'Only tabs in containers with a proxy assigned are routed.',
-            ),
+            title: Text(l10n.proxy_routingContainerBasedTitle),
+            subtitle: Text(l10n.proxy_routingContainerBasedSubtitle),
           ),
           RadioListTile<ProxyRegularTabRoutingMode>.adaptive(
             value: ProxyRegularTabRoutingMode.all,
-            title: Text('Global Routing'),
-            subtitle: Text(
-              'Route regular tabs through the selected proxy unless a container bypasses it.',
-            ),
+            title: Text(l10n.proxy_routingGlobalRoutingTitle),
+            subtitle: Text(l10n.proxy_routingGlobalRoutingSubtitle),
           ),
         ],
       ),
@@ -118,14 +125,13 @@ class _GlobalRoutingProxySection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final settings = ref.watch(proxyRoutingSettingsWithDefaultsProvider);
     if (settings.regularTabsMode != ProxyRegularTabRoutingMode.all) {
-      return const ListTile(
-        leading: Icon(Icons.info_outline),
-        title: Text('Not used in container-based routing'),
-        subtitle: Text(
-          'Switch to global routing above to pick the proxy that carries every regular tab.',
-        ),
+      return ListTile(
+        leading: const Icon(Icons.info_outline),
+        title: Text(l10n.proxy_routingNotUsedTitle),
+        subtitle: Text(l10n.proxy_routingNotUsedSubtitle),
       );
     }
 
@@ -180,6 +186,7 @@ class _ProxyConnectionPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final hasUnknownSelection =
         selectedId != null &&
         optionsLoaded &&
@@ -190,11 +197,11 @@ class _ProxyConnectionPicker extends StatelessWidget {
       onChanged: onChanged,
       child: Column(
         children: [
-          const RadioListTile<ProxyConnectionId?>.adaptive(
+          RadioListTile<ProxyConnectionId?>.adaptive(
             value: null,
-            title: Text('None'),
-            subtitle: Text('Use the normal browser connection'),
-            secondary: Icon(Icons.public),
+            title: Text(l10n.proxy_routingNoneTitle),
+            subtitle: Text(l10n.proxy_routingNoneSubtitle),
+            secondary: const Icon(Icons.public),
           ),
           if (hasUnknownSelection)
             ListTile(
@@ -202,18 +209,18 @@ class _ProxyConnectionPicker extends StatelessWidget {
                 Icons.warning_amber_outlined,
                 color: Theme.of(context).colorScheme.error,
               ),
-              title: const Text('Unknown proxy'),
-              subtitle: const Text('The selected proxy no longer exists.'),
+              title: Text(l10n.proxy_unknownProxyTitle),
+              subtitle: Text(l10n.proxy_routingUnknownProxySubtitle),
               trailing: TextButton(
                 onPressed: () => onChanged(null),
-                child: const Text('Clear'),
+                child: Text(l10n.common_clear),
               ),
             ),
           for (final option in options)
             RadioListTile<ProxyConnectionId?>.adaptive(
               value: option.id,
               title: Text(option.title),
-              subtitle: Text(option.subtitle),
+              subtitle: Text(option.description(context)),
               secondary: const Icon(Icons.route_outlined),
             ),
         ],

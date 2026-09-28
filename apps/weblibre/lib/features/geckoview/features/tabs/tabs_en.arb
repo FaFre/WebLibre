@@ -1,0 +1,350 @@
+{
+  "@@locale": "en",
+
+  "tabs_actionSelect": "Select",
+  "@tabs_actionSelect": {
+    "description": "Button that picks an item: a container in the container list, or the chosen color in the color picker."
+  },
+  "tabs_actionUnselect": "Unselect",
+  "@tabs_actionUnselect": {
+    "description": "Button in the container list that deselects the currently selected container."
+  },
+
+  "tabs_unsavedChangesTitle": "Unsaved Changes",
+  "@tabs_unsavedChangesTitle": {
+    "description": "Title of the dialog shown when leaving the container editor with unsaved changes."
+  },
+  "tabs_unsavedChangesConfirm": "You have unsaved changes. Do you want to discard them or save?",
+  "@tabs_unsavedChangesConfirm": {
+    "description": "Body of the unsaved-changes dialog in the container editor; its buttons are Cancel, Discard and Save."
+  },
+
+  "tabs_deleteContainerTitle": "Delete Container",
+  "@tabs_deleteContainerTitle": {
+    "description": "Title of the confirmation dialog before deleting a container (a separate browsing identity with its own tabs and cookies)."
+  },
+  "tabs_deleteContainerConfirm": "Are you sure you want to delete this container? Its tabs will be closed.",
+  "@tabs_deleteContainerConfirm": {
+    "description": "Body of the confirmation dialog before deleting a container."
+  },
+  "tabs_deleteContainerAlsoDeleteHistory": "Also delete browsing history",
+  "@tabs_deleteContainerAlsoDeleteHistory": {
+    "description": "Checkbox in the delete-container dialog: also delete the browsing history recorded in this container."
+  },
+  "tabs_deleteContainerHistoryKeptNote": "When this is unchecked, visits remain in history but are no longer assigned to a container.",
+  "@tabs_deleteContainerHistoryKeptNote": {
+    "description": "Explanation under that checkbox: if left unticked, the history remains but no longer belongs to any container."
+  },
+  "tabs_deleteContainerButton": "Delete Container",
+  "@tabs_deleteContainerButton": {
+    "description": "Button at the bottom of the container editor that deletes the container (asks for confirmation)."
+  },
+
+  "tabs_containersTitle": "Containers",
+  "@tabs_containersTitle": {
+    "description": "Title of the screen listing all containers. A container is a separate browsing identity with its own tabs, cookies and settings."
+  },
+  "tabs_noContainersYet": "No containers yet",
+  "@tabs_noContainersYet": {
+    "description": "Shown on the containers screen when no container exists."
+  },
+  "tabs_loadContainersFailedTitle": "Failed to load Containers",
+  "@tabs_loadContainersFailedTitle": {
+    "description": "Error heading when the list of containers could not be loaded."
+  },
+  "tabs_containerFabLabel": "New Container",
+  "@tabs_containerFabLabel": {
+    "description": "Label of the floating button that creates a new container."
+  },
+  "tabs_untitledContainer": "Untitled",
+  "@tabs_untitledContainer": {
+    "description": "Fallback name of a container that has tabs but no name."
+  },
+  "tabs_emptyContainerLabel": "Empty",
+  "@tabs_emptyContainerLabel": {
+    "description": "Fallback label of a container that has no name and no tabs."
+  },
+
+  "tabs_tabCountChip": "{count, plural, =1{1 tab} other{{count} tabs}}",
+  "@tabs_tabCountChip": {
+    "description": "Small label on a container card. count is the number of tabs in it.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tabs_chipPinned": "Pinned",
+  "@tabs_chipPinned": {
+    "description": "Small label on a container card: the container is pinned to the top of the list."
+  },
+  "tabs_chipIsolated": "Isolated",
+  "@tabs_chipIsolated": {
+    "description": "Small label on a container card: the container keeps its own separate cookies and site data."
+  },
+  "tabs_chipDirect": "Direct",
+  "@tabs_chipDirect": {
+    "description": "Small label on a container card: the container ignores the app-wide proxy and connects directly."
+  },
+  "tabs_chipClearOnExit": "Clears on Exit",
+  "@tabs_chipClearOnExit": {
+    "description": "Small label on a container card: its cookies and site data are deleted when the app closes."
+  },
+  "tabs_chipActive": "Active",
+  "@tabs_chipActive": {
+    "description": "Small label on the currently selected container."
+  },
+
+  "tabs_selectContainerTitle": "Select Container",
+  "@tabs_selectContainerTitle": {
+    "description": "Title of the screen for choosing which container to switch to."
+  },
+  "tabs_unassignedTitle": "Unassigned",
+  "@tabs_unassignedTitle": {
+    "description": "Name of the pseudo-container holding tabs that belong to no container; shown in container pickers."
+  },
+  "tabs_unassignedSubtitle": "Tabs not assigned to a container",
+  "@tabs_unassignedSubtitle": {
+    "description": "Explanation under \"Unassigned\" in the container picker."
+  },
+
+  "tabs_draftContainersTitle": "Suggested Containers",
+  "@tabs_draftContainersTitle": {
+    "description": "Title of the screen where on-device AI suggests grouping open tabs into new containers."
+  },
+  "tabs_suggestionsFailedTitle": "Failed to load suggestions",
+  "@tabs_suggestionsFailedTitle": {
+    "description": "Error heading when AI container suggestions could not be created."
+  },
+
+  "tabs_siteAssignmentsTitle": "Site Assignments",
+  "@tabs_siteAssignmentsTitle": {
+    "description": "Title of the screen listing websites that always open in this container."
+  },
+  "tabs_addSiteLabel": "Add site",
+  "@tabs_addSiteLabel": {
+    "description": "Label of the field for adding a website to the container's assigned sites."
+  },
+  "tabs_addSiteHint": "example.com or *.example.com",
+  "@tabs_addSiteHint": {
+    "description": "Example placeholder of the add-site field. Domain examples; keep them unchanged."
+  },
+  "tabs_addSiteHelperText": "Match a single site, or use *.example.com to match all its subdomains",
+  "@tabs_addSiteHelperText": {
+    "description": "Help text under the add-site field: \"*.\" matches all subdomains. Keep \"*.example.com\" unchanged."
+  },
+  "tabs_urlMustBeProvided": "A URL must be provided",
+  "@tabs_urlMustBeProvided": {
+    "description": "Validation error when the add-site field is empty."
+  },
+  "tabs_invalidUrl": "Invalid URL",
+  "@tabs_invalidUrl": {
+    "description": "Validation error when the add-site field does not contain a valid domain."
+  },
+  "tabs_siteAlreadyAssigned": "This site is already assigned",
+  "@tabs_siteAlreadyAssigned": {
+    "description": "Validation error when the site is already in this container's list."
+  },
+  "tabs_siteAlreadyAssignedToNamedContainer": "{site} is already assigned to \"{containerName}\"",
+  "@tabs_siteAlreadyAssignedToNamedContainer": {
+    "description": "Error message when the site is already assigned to a different container. site is the domain; containerName is that container's name.",
+    "placeholders": {
+      "site": { "type": "String" },
+      "containerName": { "type": "String" }
+    }
+  },
+  "tabs_siteAlreadyAssignedToAnotherContainer": "{site} is already assigned to another container",
+  "@tabs_siteAlreadyAssignedToAnotherContainer": {
+    "description": "Error message when the site is already assigned to a different, unnamed container. site is the domain.",
+    "placeholders": { "site": { "type": "String" } }
+  },
+
+  "tabs_newContainerTitle": "New Container",
+  "@tabs_newContainerTitle": {
+    "description": "Title of the container editor when creating a container."
+  },
+  "tabs_editContainerTitle": "Edit Container",
+  "@tabs_editContainerTitle": {
+    "description": "Title of the container editor when changing an existing container."
+  },
+  "tabs_containerNameHint": "Container Name",
+  "@tabs_containerNameHint": {
+    "description": "Placeholder of the name field in the container editor."
+  },
+  "tabs_changeColor": "Change Color",
+  "@tabs_changeColor": {
+    "description": "Item in the container appearance menu that opens the color picker."
+  },
+  "tabs_changeIcon": "Change Icon",
+  "@tabs_changeIcon": {
+    "description": "Item in the container appearance menu that opens the icon picker."
+  },
+
+  "tabs_sectionDisplay": "Display",
+  "@tabs_sectionDisplay": {
+    "description": "Section heading in the container editor for appearance settings."
+  },
+  "tabs_pinContainer": "Pin Container",
+  "@tabs_pinContainer": {
+    "description": "Switch in the container editor: keep the container at the top of lists."
+  },
+  "tabs_pinContainerSubtitle": "Keep this container at the top of the list",
+  "@tabs_pinContainerSubtitle": {
+    "description": "Explanation under the pin-container switch."
+  },
+  "tabs_wallpaperLabel": "Wallpaper",
+  "@tabs_wallpaperLabel": {
+    "description": "Title of the expandable section in the container editor for this container's own home page wallpaper."
+  },
+  "tabs_wallpaperSelectedSubtitle": "Shown on home while this container is selected",
+  "@tabs_wallpaperSelectedSubtitle": {
+    "description": "Line under \"Wallpaper\" when the container has its own wallpaper."
+  },
+  "tabs_wallpaperDefaultSubtitle": "Uses the wallpaper from settings",
+  "@tabs_wallpaperDefaultSubtitle": {
+    "description": "Line under \"Wallpaper\" when the container uses the app-wide wallpaper."
+  },
+  "tabs_wallpaperEmptyDescription": "This container falls back to the wallpaper set in settings.",
+  "@tabs_wallpaperEmptyDescription": {
+    "description": "Shown in the container's wallpaper editor while no image is chosen."
+  },
+
+  "tabs_sectionPrivacySecurity": "Privacy & Security",
+  "@tabs_sectionPrivacySecurity": {
+    "description": "Section heading in the container editor for privacy and security settings."
+  },
+  "tabs_cookieIsolation": "Cookie Isolation",
+  "@tabs_cookieIsolation": {
+    "description": "Switch in the container editor: give the container its own separate cookies and site data. Can only be set when the container is created."
+  },
+  "tabs_proxyConnectionLabel": "Proxy Connection",
+  "@tabs_proxyConnectionLabel": {
+    "description": "Row in the container editor for choosing a proxy that all of the container's traffic goes through."
+  },
+  "tabs_proxyConnectionNone": "None",
+  "@tabs_proxyConnectionNone": {
+    "description": "Value of the proxy row when the container uses no proxy of its own."
+  },
+  "tabs_bypassGlobalProxy": "Bypass Global Proxy",
+  "@tabs_bypassGlobalProxy": {
+    "description": "Switch in the container editor: this container does not use the app-wide proxy."
+  },
+  "tabs_bypassGlobalProxySubtitle": "Use the normal connection for this container when global routing is enabled",
+  "@tabs_bypassGlobalProxySubtitle": {
+    "description": "Explanation under \"Bypass Global Proxy\": the container connects directly even when a proxy is set for the whole app."
+  },
+  "tabs_clearDataOnExit": "Clear Data on Exit",
+  "@tabs_clearDataOnExit": {
+    "description": "Switch in the container editor: delete this container's cookies and site data when the app closes."
+  },
+  "tabs_clearDataOnExitSubtitle": "Clear cookies and site data for this container's regular tabs when the app closes. Isolated tabs keep separate data.",
+  "@tabs_clearDataOnExitSubtitle": {
+    "description": "Explanation under \"Clear Data on Exit\". Isolated tabs are tabs with their own separate temporary storage."
+  },
+  "tabs_excludeFromSearchIndex": "Exclude from Search Index",
+  "@tabs_excludeFromSearchIndex": {
+    "description": "Switch in the container editor: do not add pages from this container to the on-device full-text search."
+  },
+  "tabs_excludeFromSearchIndexSubtitle": "Keep pages in this container out of the local search index",
+  "@tabs_excludeFromSearchIndexSubtitle": {
+    "description": "Explanation under \"Exclude from Search Index\"."
+  },
+  "tabs_excludeFromHistory": "Exclude from History",
+  "@tabs_excludeFromHistory": {
+    "description": "Switch in the container editor: do not record browsing history for this container."
+  },
+  "tabs_excludeFromHistorySubtitle": "Don't record new visits from this container's tabs, and drop its pages from local search. Existing browsing history is kept.",
+  "@tabs_excludeFromHistorySubtitle": {
+    "description": "Explanation under \"Exclude from History\"."
+  },
+
+  "tabs_sectionAssignments": "Assignments",
+  "@tabs_sectionAssignments": {
+    "description": "Section heading in the container editor for rules that send websites into this container."
+  },
+  "tabs_assignedSites": "Assigned Sites",
+  "@tabs_assignedSites": {
+    "description": "Row in the container editor that opens the list of websites always opened in this container."
+  },
+  "tabs_assignedSitesCount": "{count, plural, =1{1 rule configured} other{{count} rules configured}}",
+  "@tabs_assignedSitesCount": {
+    "description": "Line under \"Assigned Sites\". count is the number of site rules.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tabs_assignedSitesEmptySubtitle": "Route matching origins into this container",
+  "@tabs_assignedSitesEmptySubtitle": {
+    "description": "Line under \"Assigned Sites\" when there are none: explains that matching websites are opened in this container. \"Origins\" means websites."
+  },
+  "tabs_strictMode": "Strict Mode",
+  "@tabs_strictMode": {
+    "description": "Switch in the container editor: the container may load only its assigned sites."
+  },
+  "tabs_strictModeSubtitle": "Only allow assigned sites to load; block everything else",
+  "@tabs_strictModeSubtitle": {
+    "description": "Explanation under \"Strict Mode\"."
+  },
+  "tabs_requiresCookieIsolation": "Requires cookie isolation to be enabled",
+  "@tabs_requiresCookieIsolation": {
+    "description": "Line under a disabled container setting explaining that it needs \"Cookie Isolation\" to be turned on."
+  },
+
+  "tabs_sectionAppLinks": "App Links",
+  "@tabs_sectionAppLinks": {
+    "description": "Section heading in the container editor for opening links in installed apps."
+  },
+  "tabs_isolatedAppLinkSettings": "Isolated App Link Settings",
+  "@tabs_isolatedAppLinkSettings": {
+    "description": "Switch in the container editor: use separate open-in-app settings for this container."
+  },
+  "tabs_isolatedAppLinkSettingsSubtitle": "Use a separate open-in-app mode and remembered site rules for this container instead of the global settings",
+  "@tabs_isolatedAppLinkSettingsSubtitle": {
+    "description": "Explanation under \"Isolated App Link Settings\"."
+  },
+  "tabs_appLinkBehavior": "App Link Behavior",
+  "@tabs_appLinkBehavior": {
+    "description": "Row in the container editor that opens this container's own open-in-app settings."
+  },
+  "tabs_appLinkBehaviorSubtitle": "Configure this container's open-in-app mode and remembered sites",
+  "@tabs_appLinkBehaviorSubtitle": {
+    "description": "Explanation under \"App Link Behavior\"."
+  },
+
+  "tabs_selectColorTitle": "Select Color",
+  "@tabs_selectColorTitle": {
+    "description": "Title of the color picker dialog for a container."
+  },
+  "tabs_customColorTitle": "Custom Color",
+  "@tabs_customColorTitle": {
+    "description": "Title of the dialog for mixing a custom container color."
+  },
+  "tabs_hexLabel": "Hex",
+  "@tabs_hexLabel": {
+    "description": "Label of the field for a color as a hexadecimal code (e.g. FF0000). Technical abbreviation."
+  },
+  "tabs_hueLabel": "Hue",
+  "@tabs_hueLabel": {
+    "description": "Label of the slider for the color's hue (its position on the color wheel)."
+  },
+  "tabs_saturationLabel": "Saturation",
+  "@tabs_saturationLabel": {
+    "description": "Label of the slider for the color's saturation (how vivid it is)."
+  },
+  "tabs_lightnessLabel": "Lightness",
+  "@tabs_lightnessLabel": {
+    "description": "Label of the slider for the color's lightness."
+  },
+
+  "tabs_chooseIconTitle": "Choose Icon",
+  "@tabs_chooseIconTitle": {
+    "description": "Title of the sheet for choosing a container icon."
+  },
+  "tabs_iconCountLabel": "{count, plural, =1{1 MDI icon} other{{count} MDI icons}}",
+  "@tabs_iconCountLabel": {
+    "description": "Number of icons shown in the icon picker. count is the number of icons. \"MDI\" is the name of the icon set (Material Design Icons); keep it.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tabs_searchIconsHint": "Search MDI icons",
+  "@tabs_searchIconsHint": {
+    "description": "Placeholder of the search field in the container icon picker. MDI is the name of the icon set (Material Design Icons)."
+  },
+  "tabs_noIconsFound": "No icons found.",
+  "@tabs_noIconsFound": {
+    "description": "Shown when no icon matches the search in the container icon picker."
+  }
+}

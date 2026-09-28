@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Reusable editor for a list of unique string entries: a labelled input field
 /// with an add button, followed by the current entries each with a delete
@@ -36,8 +37,9 @@ class StringListEditor extends HookWidget {
   /// Leading icon for each entry row.
   final IconData itemIcon;
 
-  /// Message shown when the list is empty.
-  final String emptyLabel;
+  /// Message shown when the list is empty. Falls back to a localized
+  /// "Nothing added yet." when not given.
+  final String? emptyLabel;
 
   /// Canonicalises raw input before adding. Returns null to reject the value.
   final String? Function(String input) normalize;
@@ -48,12 +50,13 @@ class StringListEditor extends HookWidget {
     required this.hintText,
     required this.normalize,
     this.itemIcon = Icons.link,
-    this.emptyLabel = 'Nothing added yet.',
+    this.emptyLabel,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final controller = useTextEditingController();
     // Rebuild the add button's enabled state as the field changes.
     useListenable(controller);
@@ -95,7 +98,7 @@ class StringListEditor extends HookWidget {
               const SizedBox(width: 8),
               IconButton.filled(
                 icon: const Icon(Icons.add),
-                tooltip: 'Add',
+                tooltip: l10n.common_add,
                 onPressed: controller.text.trim().isEmpty ? null : add,
               ),
             ],
@@ -105,7 +108,7 @@ class StringListEditor extends HookWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              emptyLabel,
+              emptyLabel ?? l10n.settings_stringListEditorEmpty,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           )
@@ -116,7 +119,7 @@ class StringListEditor extends HookWidget {
               title: Text(value),
               trailing: IconButton(
                 icon: const Icon(Icons.delete_outline),
-                tooltip: 'Remove',
+                tooltip: l10n.common_remove,
                 onPressed: () => remove(value),
               ),
             ),

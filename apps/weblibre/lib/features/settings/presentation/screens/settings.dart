@@ -37,17 +37,19 @@ import 'package:weblibre/features/settings/presentation/screens/web_content_sett
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class SettingsScreen extends HookWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final search = useSettingsSearch();
 
-    final categories = _buildCategories();
+    final categories = _buildCategories(context);
     final sections = search.normalizedQuery.isEmpty
-        ? _buildCategorySections(categories)
+        ? _buildCategorySections(context, categories)
         : _buildSearchSections([
             ...categories.browser,
             ...categories.services,
@@ -68,9 +70,9 @@ class SettingsScreen extends HookWidget {
                 return CustomScrollView(
                   controller: controller,
                   slivers: [
-                    const SliverAppBar.large(
+                    SliverAppBar.large(
                       centerTitle: false,
-                      title: Text('Settings'),
+                      title: Text(l10n.settings_settingsHomeTitle),
                     ),
                     SliverPadding(
                       padding: EdgeInsets.fromLTRB(
@@ -82,7 +84,7 @@ class SettingsScreen extends HookWidget {
                       sliver: SliverToBoxAdapter(
                         child: SettingsSearchField(
                           controller: search.controller,
-                          hintText: 'Search all settings',
+                          hintText: l10n.settings_settingsHomeSearchHint,
                         ),
                       ),
                     ),
@@ -116,160 +118,132 @@ typedef _CategoryGroups = ({
   List<_SettingsCategoryDefinition> services,
 });
 
-_CategoryGroups _buildCategories() {
+_CategoryGroups _buildCategories(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
+
   final browser = [
     _SettingsCategoryDefinition(
-      title: 'General',
-      subtitle: 'Appearance, downloads',
+      title: l10n.settings_categoryGeneralTitle,
+      subtitle: l10n.settings_categoryGeneralSubtitle,
       icon: Icons.tune,
-      keywords: const ['theme', 'ui zoom', 'default browser'],
-      sections: generalSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryGeneralKeywords),
+      sections: generalSettingsSections(context),
       onTap: (context) => GeneralSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Browsing',
-      subtitle: 'Tabs, navigation, external links',
+      title: l10n.settings_categoryBrowsingTitle,
+      subtitle: l10n.settings_categoryBrowsingSubtitle,
       icon: MdiIcons.compassOutline,
-      keywords: const ['tabs', 'small web', 'url cleaner', 'unshortener'],
-      sections: browsingSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryBrowsingKeywords),
+      sections: browsingSettingsSections(context),
       onTap: (context) => BrowsingSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Home & New Tab',
-      subtitle: 'What the home and new tab pages show',
+      title: l10n.settings_categoryHomeNewTabTitle,
+      subtitle: l10n.settings_categoryHomeNewTabSubtitle,
       icon: MdiIcons.homeOutline,
-      keywords: const [
-        'home',
-        'new tab',
-        'start page',
-        'sections',
-        'shortcuts',
-        'top sites',
-        'quote',
-        'wallpaper',
-        'background',
-      ],
-      sections: homeSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryHomeNewTabKeywords),
+      sections: homeSettingsSections(context),
       onTap: (context) => const HomeSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Gestures',
-      subtitle: 'Swipes on the tab bar and tabs, drawn gestures',
+      title: l10n.settings_categoryGesturesTitle,
+      subtitle: l10n.settings_categoryGesturesSubtitle,
       icon: MdiIcons.gestureSwipe,
-      keywords: const [
-        'gesture',
-        'swipe',
-        'stroke',
-        'tab bar',
-        'long press',
-        'pinch',
-      ],
+      keywords: settingsKeywords(l10n.settings_categoryGesturesKeywords),
       onTap: (context) => GestureSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Keyboard Shortcuts',
-      subtitle: 'Hardware keyboard keys for browser actions',
+      title: l10n.settings_categoryKeyboardShortcutsTitle,
+      subtitle: l10n.settings_categoryKeyboardShortcutsSubtitle,
       icon: MdiIcons.keyboardOutline,
-      keywords: const ['keyboard', 'shortcut', 'hotkey', 'key binding'],
+      keywords: settingsKeywords(
+        l10n.settings_categoryKeyboardShortcutsKeywords,
+      ),
       onTap: (context) => const KeyboardShortcutSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Toolbar & Layout',
-      subtitle: 'Tab bar, toolbar, quick switcher, tab view',
+      title: l10n.settings_categoryToolbarLayoutTitle,
+      subtitle: l10n.settings_categoryToolbarLayoutSubtitle,
       icon: MdiIcons.viewDashboardOutline,
-      keywords: const ['contextual toolbar', 'quick tab switcher'],
+      keywords: settingsKeywords(l10n.settings_categoryToolbarLayoutKeywords),
       sections: [
-        ...toolbarLayoutSettingsSections,
-        ...menuLayoutSettingsSections,
+        ...toolbarLayoutSettingsSections(context),
+        ...menuLayoutSettingsSections(context),
       ],
       onTap: (context) => ToolbarLayoutSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Web Content',
-      subtitle: 'Page display, PDF, reader mode, AI',
+      title: l10n.settings_categoryWebContentTitle,
+      subtitle: l10n.settings_categoryWebContentSubtitle,
       icon: MdiIcons.fileDocumentOutline,
-      keywords: const ['reader mode', 'pdf', 'fonts'],
-      sections: webContentSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryWebContentKeywords),
+      sections: webContentSettingsSections(context),
       onTap: (context) => WebContentSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Notifications',
-      subtitle: 'Web push delivery, distributor, site subscriptions',
+      title: l10n.settings_categoryNotificationsTitle,
+      subtitle: l10n.settings_categoryNotificationsSubtitle,
       icon: MdiIcons.bellBadgeOutline,
-      keywords: const ['push', 'unifiedpush', 'ntfy', 'distributor'],
-      sections: webPushSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryNotificationsKeywords),
+      sections: webPushSettingsSections(context),
       onTap: (context) => WebPushSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Search',
-      subtitle: 'Providers, bangs, search history',
+      title: l10n.settings_categorySearchTitle,
+      subtitle: l10n.settings_categorySearchSubtitle,
       icon: MdiIcons.magnify,
-      keywords: const ['bangs', 'suggestions', 'local search index'],
-      sections: searchSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categorySearchKeywords),
+      sections: searchSettingsSections(context),
       onTap: (context) => SearchSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Privacy & Security',
-      subtitle: 'Tracking protection, data clearing',
+      title: l10n.settings_categoryPrivacySecurityTitle,
+      subtitle: l10n.settings_categoryPrivacySecuritySubtitle,
       icon: MdiIcons.shieldLock,
-      keywords: const [
-        'fingerprinting',
-        'https',
-        'doh',
-        'safe browsing',
-        'network protection',
-      ],
-      sections: privacySecuritySettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryPrivacySecurityKeywords),
+      sections: privacySecuritySettingsSections(context),
       onTap: (context) => PrivacySecuritySettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Proxy',
-      subtitle: 'Connections and routing',
+      title: l10n.settings_categoryProxyTitle,
+      subtitle: l10n.settings_categoryProxySubtitle,
       icon: MdiIcons.lanConnect,
-      keywords: const [
-        'proxy',
-        'sing-box',
-        'socks',
-        'vpn',
-        'wireguard',
-        'routing',
-        'tor',
-        'container',
-      ],
-      sections: proxySettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryProxyKeywords),
+      sections: proxySettingsSections(context),
       onTap: (context) => const ProxySettingsRoute().push(context),
     ),
   ];
 
   final services = [
     _SettingsCategoryDefinition(
-      title: 'Extensions',
-      subtitle: 'Install and manage extension sources',
+      title: l10n.settings_categoryExtensionsTitle,
+      subtitle: l10n.settings_categoryExtensionsSubtitle,
       icon: MdiIcons.puzzleOutline,
-      keywords: const ['addons', 'unsigned extensions'],
-      sections: extensionsSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryExtensionsKeywords),
+      sections: extensionsSettingsSections(context),
       onTap: (context) => ExtensionsSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'WebLibre Account',
-      subtitle: 'Sign in, sync settings',
+      title: l10n.settings_categoryAccountTitle,
+      subtitle: l10n.settings_categoryAccountSubtitle,
       icon: Icons.account_circle_outlined,
-      keywords: const ['account', 'subscription'],
+      keywords: settingsKeywords(l10n.settings_categoryAccountKeywords),
       onTap: (context) => AccountSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Firefox Sync',
-      subtitle: 'Account, sync now, engine selection',
+      title: l10n.settings_categorySyncTitle,
+      subtitle: l10n.settings_categorySyncSubtitle,
       icon: Icons.sync,
-      keywords: const ['pair', 'device name', 'engines'],
+      keywords: settingsKeywords(l10n.settings_categorySyncKeywords),
       onTap: (context) => SyncSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
-      title: 'Advanced',
-      subtitle: 'JavaScript, user agent, debugging',
+      title: l10n.settings_categoryAdvancedTitle,
+      subtitle: l10n.settings_categoryAdvancedSubtitle,
       icon: Icons.developer_mode,
-      keywords: const ['experimental', 'error logs', 'javascript'],
-      sections: advancedSettingsSections,
+      keywords: settingsKeywords(l10n.settings_categoryAdvancedKeywords),
+      sections: advancedSettingsSections(context),
       onTap: (context) => AdvancedSettingsRoute().push(context),
     ),
   ];
@@ -278,18 +252,21 @@ _CategoryGroups _buildCategories() {
 }
 
 List<SettingsSectionDefinition> _buildCategorySections(
+  BuildContext context,
   _CategoryGroups categories,
 ) {
+  final l10n = AppLocalizations.of(context);
+
   return [
     SettingsSectionDefinition(
-      title: 'Browser',
+      title: l10n.settings_categoryGroupBrowserTitle,
       entries: [
         for (final category in categories.browser)
           _buildCategoryEntry(category),
       ],
     ),
     SettingsSectionDefinition(
-      title: 'Services & Advanced',
+      title: l10n.settings_categoryGroupServicesAdvancedTitle,
       entries: [
         for (final category in categories.services)
           _buildCategoryEntry(category),

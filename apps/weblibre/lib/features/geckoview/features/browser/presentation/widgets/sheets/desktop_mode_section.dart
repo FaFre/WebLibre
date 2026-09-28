@@ -24,6 +24,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/host_rules.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -38,6 +39,7 @@ class DesktopModeSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final desktopModeSites = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.desktopModeSites),
     );
@@ -55,15 +57,15 @@ class DesktopModeSection extends HookConsumerWidget {
       onChanged: (host != null && parentRule == null)
           ? (enabled) => _toggleRule(context, ref, host, enabled)
           : null,
-      title: const Text('Always use desktop site'),
+      title: Text(l10n.browser_alwaysUseDesktopSite),
       subtitle: Text(
         host == null
-            ? 'Unavailable on this page'
+            ? l10n.browser_unavailableOnThisPage
             : parentRule != null
-            ? 'Set by a rule for $parentRule'
+            ? l10n.browser_setByRuleFor(parentRule)
             : isRuled
-            ? 'This site always loads in desktop mode'
-            : 'This site follows the default mode',
+            ? l10n.browser_siteAlwaysLoadsInDesktopMode
+            : l10n.browser_siteFollowsDefaultMode,
       ),
       secondary: Icon(
         MdiIcons.monitor,
@@ -106,7 +108,12 @@ class DesktopModeSection extends HookConsumerWidget {
     } catch (e, s) {
       logger.e('Failed to toggle desktop mode rule', error: e, stackTrace: s);
       if (context.mounted) {
-        showErrorMessage(context, 'Failed to toggle desktop mode: $e');
+        showErrorMessage(
+          context,
+          AppLocalizations.of(
+            context,
+          ).browser_failedToToggleDesktopMode(e.toString()),
+        );
       }
     }
   }

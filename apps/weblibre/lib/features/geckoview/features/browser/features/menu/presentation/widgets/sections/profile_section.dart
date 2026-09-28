@@ -26,12 +26,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -51,6 +53,7 @@ class ProfileSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final tiles = <MenuItemType, Widget>{};
 
     for (final item in items) {
@@ -65,9 +68,9 @@ class ProfileSection extends HookConsumerWidget {
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
-            title: Text(profile.value?.name ?? item.label),
+            title: Text(profile.value?.name ?? item.label(context)),
             subtitle: Text(
-              'Tap to switch profile',
+              l10n.menu_profileTapToSwitch,
               style: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 12,
@@ -86,7 +89,7 @@ class ProfileSection extends HookConsumerWidget {
         case MenuItemType.appSettings:
           tiles[item] = ListTile(
             leading: const Icon(Icons.settings),
-            title: Text(item.label),
+            title: Text(item.label(context)),
             trailing: const KeyboardShortcutHint(BrowserAction.openSettings),
             onTap: () async {
               Navigator.pop(context);
@@ -98,7 +101,7 @@ class ProfileSection extends HookConsumerWidget {
           tiles[item] = ListTile(
             leading: Icon(MdiIcons.power, color: theme.colorScheme.error),
             title: Text(
-              item.label,
+              item.label(context),
               style: TextStyle(color: theme.colorScheme.error),
             ),
             trailing: const KeyboardShortcutHint(BrowserAction.quitBrowser),
@@ -142,6 +145,7 @@ class _SyncTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final syncInfo = ref.watch(
       syncRepositoryProvider.select((value) => value.value?.account),
     );
@@ -174,7 +178,7 @@ class _SyncTile extends HookConsumerWidget {
         turns: Tween<double>(begin: 0, end: -1).animate(controller),
         child: const Icon(Icons.sync),
       ),
-      title: Text(MenuItemType.syncNow.label),
+      title: Text(MenuItemType.syncNow.label(context)),
       onTap: () async {
         await ref.read(syncRepositoryProvider.notifier).syncNow();
 
@@ -191,7 +195,7 @@ class _SyncTile extends HookConsumerWidget {
           } else {
             ui_helper.showInfoMessage(
               context,
-              'Synchronization complete',
+              l10n.menu_profileSyncComplete,
               duration: const Duration(seconds: 2),
             );
           }

@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -25,6 +27,8 @@ import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/proxy/domain/services/subscription_importer.dart';
+import 'package:weblibre/features/proxy/presentation/utils/singbox_proxy_profile_type_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/button_spinner.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -33,6 +37,7 @@ class SubscriptionImportScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final urlController = useTextEditingController();
     final hasUrl = useListenableSelector(
       urlController,
@@ -49,7 +54,7 @@ class SubscriptionImportScreen extends HookConsumerWidget {
       if (raw.isEmpty) return;
       final uri = Uri.tryParse(raw);
       if (uri == null || !uri.hasScheme) {
-        fetchError.value = 'Enter a full https:// subscription URL.';
+        fetchError.value = l10n.proxy_subscriptionUrlRequired;
         return;
       }
 
@@ -71,7 +76,12 @@ class SubscriptionImportScreen extends HookConsumerWidget {
           error: error,
           stackTrace: stackTrace,
         );
-        fetchError.value = error.toString();
+        fetchError.value = switch (error) {
+          SubscriptionHttpException(:final statusCode) =>
+            l10n.proxy_subscriptionHttpError(statusCode),
+          TimeoutException() => l10n.proxy_subscriptionTimedOut,
+          _ => l10n.proxy_subscriptionFetchFailed(error.toString()),
+        };
         result.value = null;
       } finally {
         if (context.mounted) fetching.value = false;
@@ -95,7 +105,9 @@ class SubscriptionImportScreen extends HookConsumerWidget {
           final spec = singboxProxyFormSpecs[parsed.type];
           if (spec == null) continue;
           await notifier.createProfile(
-            name: parsed.name ?? 'Imported ${imported + 1}',
+            name:
+                parsed.name ??
+                l10n.proxy_importedProfileDefaultName(imported + 1),
             type: parsed.type,
             configJson: spec.toConfigJson(parsed.values),
             secretJson: spec.toSecretJson(parsed.values),
@@ -107,31 +119,28 @@ class SubscriptionImportScreen extends HookConsumerWidget {
       }
 
       if (context.mounted) {
-        showInfoMessage(context, 'Imported $imported profile(s)');
+        showInfoMessage(context, l10n.proxy_importedProfilesCount(imported));
         Navigator.of(context).pop();
       }
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Import Subscription')),
+      appBar: AppBar(title: Text(l10n.proxy_importSubscriptionTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
             controller: urlController,
             keyboardType: TextInputType.url,
-            decoration: const InputDecoration(
-              labelText: 'Subscription URL',
+            decoration: InputDecoration(
+              labelText: l10n.proxy_fieldSubscriptionUrl,
               hintText: 'https://example.com/sub',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Supports the v2rayN-style format: a base64-encoded list of '
-            'ss://, vless://, vmess://, trojan://, hysteria2://, tuic:// '
-            'and similar URIs. Routing rules from the subscription are '
-            'ignored — only proxy nodes are imported.',
+            l10n.proxy_subscriptionFormatHint,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 16),
@@ -140,7 +149,7 @@ class SubscriptionImportScreen extends HookConsumerWidget {
             icon: fetching.value
                 ? const ButtonSpinner()
                 : const Icon(Icons.cloud_download_outlined),
-            label: const Text('Fetch'),
+            label: Text(l10n.proxy_actionFetch),
           ),
           if (fetchError.value != null) ...[
             const SizedBox(height: 12),
@@ -182,6 +191,7 @@ class _ResultsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final successCount = result.successes.length;
     final failureCount = result.failures.length;
 
@@ -209,18 +219,17 @@ class _ResultsSection extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                '$successCount usable node(s)'
-                '${failureCount > 0 ? ', $failureCount failed' : ''}',
+                l10n.proxy_subscriptionNodeSummary(successCount, failureCount),
                 style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
             TextButton(
               onPressed: successCount == 0 ? null : selectAll,
-              child: const Text('Select all'),
+              child: Text(l10n.proxy_actionSelectAll),
             ),
             TextButton(
               onPressed: () => onSelectionChanged(const {}),
-              child: const Text('Clear'),
+              child: Text(l10n.common_clear),
             ),
           ],
         ),
@@ -239,7 +248,7 @@ class _ResultsSection extends StatelessWidget {
           icon: isImporting
               ? const ButtonSpinner()
               : const Icon(Icons.download_done),
-          label: Text('Import ${selectedIndices.length} profile(s)'),
+          label: Text(l10n.proxy_importProfilesCount(selectedIndices.length)),
         ),
       ],
     );
@@ -265,7 +274,7 @@ class _EntryTile extends StatelessWidget {
         onChanged: onChanged,
         title: Text(imported.name ?? entry.rawLine),
         subtitle: Text(
-          imported.type.name,
+          imported.type.label(context),
           style: Theme.of(context).textTheme.bodySmall,
         ),
         dense: true,

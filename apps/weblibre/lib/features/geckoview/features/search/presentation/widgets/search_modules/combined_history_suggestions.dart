@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -58,6 +59,7 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     // Both upstreams need their own kick. Engine sends the suggestion
     // request; local FTS runs the query against the history index.
     useOnListenableChangeSelector(
@@ -97,7 +99,7 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
     final snippetHighlight = snippetBase?.copyWith(fontWeight: FontWeight.bold);
 
     return SearchModuleSection(
-      title: 'History',
+      title: l10n.search_moduleLabelCombinedHistory,
       moduleType: SearchModuleType.combinedHistory,
       totalCount: items.length,
       contentSliverBuilder:
@@ -153,7 +155,7 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
                       : UriBreadcrumb(uri: item.uri, showHttpScheme: false),
                   trailing: item.source == CombinedHistorySource.local
                       ? Tooltip(
-                          message: 'Content match',
+                          message: l10n.search_contentMatchTooltip,
                           child: Icon(
                             MdiIcons.textBoxSearchOutline,
                             size: 16,

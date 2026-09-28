@@ -1,0 +1,76 @@
+{
+  "@@locale": "en",
+
+  "common_cancel": "Cancel",
+  "@common_cancel": {
+    "description": "Generic button that closes a dialog or leaves an editor without doing anything. Used throughout the app."
+  },
+  "common_delete": "Delete",
+  "@common_delete": {
+    "description": "Generic button or menu item that permanently deletes the selected item. Used throughout the app, often in confirmation dialogs."
+  },
+  "common_close": "Close",
+  "@common_close": {
+    "description": "Generic button that closes a dialog or panel; also used as the confirm button of \"close tabs\" dialogs, where it means closing browser tabs. Used throughout the app."
+  },
+  "common_save": "Save",
+  "@common_save": {
+    "description": "Generic button that saves changes in a dialog or editor. Used throughout the app."
+  },
+  "common_add": "Add",
+  "@common_add": {
+    "description": "Generic button that adds the item entered in a dialog or form (e.g. a feed, a site). Used throughout the app."
+  },
+  "common_edit": "Edit",
+  "@common_edit": {
+    "description": "Generic button, menu item or tooltip that opens an editor for the selected item. Used throughout the app."
+  },
+  "common_remove": "Remove",
+  "@common_remove": {
+    "description": "Generic button or menu item that removes an item from a list (e.g. an extension, a shortcut) or confirms its removal. Used throughout the app."
+  },
+  "common_clear": "Clear",
+  "@common_clear": {
+    "description": "Generic button that deletes stored data such as history or site data, usually confirming a dialog. Used throughout the app."
+  },
+  "common_copy": "Copy",
+  "@common_copy": {
+    "description": "Generic button that copies text to the clipboard. Used throughout the app."
+  },
+  "common_open": "Open",
+  "@common_open": {
+    "description": "Generic button or menu item that opens an item, e.g. a finished download or a bookmark. Used throughout the app."
+  },
+  "common_reset": "Reset",
+  "@common_reset": {
+    "description": "Generic button that restores something to its default state, usually confirming a dialog. Used throughout the app."
+  },
+  "common_retry": "Retry",
+  "@common_retry": {
+    "description": "Generic button or tooltip that repeats an action that failed. Used throughout the app."
+  },
+  "common_done": "Done",
+  "@common_done": {
+    "description": "Generic button that ends an editing or reordering mode. Used throughout the app."
+  },
+  "common_undo": "Undo",
+  "@common_undo": {
+    "description": "Generic action on a short message at the bottom of the screen that reverses the action just performed (e.g. closing a tab). Used throughout the app."
+  },
+  "common_dismiss": "Dismiss",
+  "@common_dismiss": {
+    "description": "Generic tooltip or button that hides a banner or notice without acting on it. Used throughout the app."
+  },
+  "common_discard": "Discard",
+  "@common_discard": {
+    "description": "Generic button that throws away unsaved changes or a temporary item instead of keeping it. Used throughout the app."
+  },
+  "common_showLess": "Show less",
+  "@common_showLess": {
+    "description": "Generic button that collapses an expanded list or text back to its short form. Used throughout the app."
+  },
+  "common_loading": "Loading…",
+  "@common_loading": {
+    "description": "Generic placeholder text shown while a value is being loaded. Used throughout the app."
+  }
+}
