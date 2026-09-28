@@ -1,0 +1,8 @@
+{
+  "@@locale": "zh",
+  "formValidators_urlRequired": "必须填写网址",
+  "formValidators_invalidUrl": "网址无效",
+  "formValidators_valueRequired": "必须填写此项",
+  "formValidators_nameRequired": "必须填写名称",
+  "formValidators_nameInvalidCharacters": "名称包含无效字符"
+}

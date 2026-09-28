@@ -1,0 +1,15 @@
+{
+  "@@locale": "zh",
+  "wallpaper_title": "壁纸",
+  "wallpaper_settingsDescription": "显示在主页背景中，适用于所有未设置自有壁纸的容器。",
+  "wallpaper_chooseImage": "选择图片",
+  "wallpaper_replace": "替换",
+  "wallpaper_blurLabel": "模糊",
+  "wallpaper_dimLabel": "调暗",
+  "wallpaper_dimDescription": "调暗会将图片融入应用背景，使页面文字在浅色和深色主题下都清晰可读。",
+  "wallpaper_editorDefaultDescription": "主页将保留默认背景。",
+  "wallpaper_importErrorUnreadable": "无法读取该文件",
+  "wallpaper_importErrorTooLarge": "该图片过大",
+  "wallpaper_importErrorNotAnImage": "该文件不是图片",
+  "wallpaper_importErrorDecodeFailed": "无法读取该图片"
+}

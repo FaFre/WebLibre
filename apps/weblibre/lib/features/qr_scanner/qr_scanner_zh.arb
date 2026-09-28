@@ -1,0 +1,5 @@
+{
+  "@@locale": "zh",
+  "qrScanner_noCameraPermission": "未授予相机权限。",
+  "qrScanner_scanCodeTitle": "扫描二维码"
+}

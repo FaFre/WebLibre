@@ -1,0 +1,20 @@
+{
+  "@@locale": "zh",
+  "searchCredits_couldNotLoadTitle": "无法加载额度",
+  "searchCredits_title": "搜索额度",
+  "searchCredits_errorSubtitle": "请检查网络连接，然后点按刷新重试。",
+  "searchCredits_emptySubtitle": "购买搜索套餐即可开始使用",
+  "searchCredits_creditsWithAllowance": "额度：{credits} / {allowance}  ·  已存令牌：{stash}",
+  "searchCredits_creditsNoAllowance": "额度：{credits}  ·  已存令牌：{stash}",
+  "searchCredits_tooltipRefresh": "刷新",
+  "searchCredits_resetsOn": "将于 {date} 重置",
+  "searchCredits_lastIssuance": "上次发放：{relative}（{absolute}）",
+  "searchCredits_requestingTokens": "正在请求令牌…",
+  "searchCredits_issuanceFailed": "令牌发放失败：{error}",
+  "searchCredits_needsReauth": "请重新登录以请求令牌。",
+  "searchCredits_buySearchPackTitle": "购买搜索套餐",
+  "searchCredits_getTokensTitle": "获取令牌",
+  "searchCredits_requestTokensCount": "{count, plural, other{请求 {count} 个令牌}}",
+  "searchCredits_noCreditsRemaining": "没有剩余额度",
+  "searchCredits_buyMoreTitle": "购买更多"
+}

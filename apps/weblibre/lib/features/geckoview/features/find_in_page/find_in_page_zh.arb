@@ -1,0 +1,6 @@
+{
+  "@@locale": "zh",
+  "findInPage_hint": "在页面中查找",
+  "findInPage_matchPosition": "第 {current} 项，共 {total} 项",
+  "findInPage_noMatches": "未找到"
+}

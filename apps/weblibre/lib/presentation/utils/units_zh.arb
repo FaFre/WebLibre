@@ -1,0 +1,7 @@
+{
+  "@@locale": "zh",
+  "units_bytes": "{value} B",
+  "units_kilobytes": "{value} KB",
+  "units_megabytes": "{value} MB",
+  "units_milliseconds": "{value} 毫秒"
+}

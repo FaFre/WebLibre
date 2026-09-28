@@ -1,0 +1,22 @@
+{
+  "@@locale": "zh",
+  "mainApp_initializationErrorTitle": "初始化错误",
+  "mainApp_initializationErrorMessage": "无法初始化应用",
+  "mainApp_initStageLoadingFormats": "正在加载格式…",
+  "mainApp_initStageLoadingPackageInfo": "正在加载应用信息…",
+  "mainApp_initStageSyncingBangs": "正在同步 Bang…",
+  "mainApp_downloadCompleted": "下载完成",
+  "mainApp_downloadOpenFailed": "无法打开已下载的文件",
+  "mainApp_downloadFailed": "下载失败：{name}",
+  "mainApp_containerBlockedWithHost": "{host} 未分配给此容器",
+  "mainApp_containerBlockedNoHost": "此网站未分配给此容器",
+  "mainApp_sandboxNoCredits": "你的搜索额度已用完。请购买更多额度以继续。",
+  "mainApp_sandboxTokenIssuanceFailed": "无法发放新的搜索令牌。请检查网络连接后重试。",
+  "mainApp_sandboxFetchPolicyRejected": "抓取策略阻止了此次捕获：{detail}",
+  "mainApp_sandboxDetailNotAllowed": "不允许",
+  "mainApp_sandboxCaptureFailed": "捕获失败：{detail}",
+  "mainApp_sandboxDetailUnknownError": "未知错误",
+  "mainApp_sandboxDownloadFailed": "无法下载捕获结果。",
+  "mainApp_sandboxUnknownError": "沙盒捕获错误：{detail}",
+  "mainApp_syncFailed": "同步失败"
+}

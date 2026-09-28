@@ -1,0 +1,21 @@
+{
+  "@@locale": "zh",
+  "common_cancel": "取消",
+  "common_delete": "删除",
+  "common_close": "关闭",
+  "common_save": "保存",
+  "common_add": "添加",
+  "common_edit": "编辑",
+  "common_remove": "移除",
+  "common_clear": "清除",
+  "common_copy": "复制",
+  "common_open": "打开",
+  "common_reset": "重置",
+  "common_retry": "重试",
+  "common_done": "完成",
+  "common_undo": "撤销",
+  "common_dismiss": "忽略",
+  "common_discard": "舍弃",
+  "common_showLess": "收起",
+  "common_loading": "正在加载…"
+}

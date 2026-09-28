@@ -1,0 +1,19 @@
+{
+  "@@locale": "zh",
+  "profileCopy_pickerContents": "标签页、历史记录和设置",
+  "profileCopy_dataDescription": "标签页、历史记录、书签、设置和已保存的网站登录信息",
+  "profileCopy_secretDataDescription": "WebLibre 账户登录信息、同步设置和代理详情",
+  "profileCopy_cannotBeUndone": "此操作无法撤销。",
+  "profileCopy_nothingChanged": "未做任何更改。",
+  "profileCopy_restartsToWork": "WebLibre 必须重启才能执行此操作。",
+  "profileCopy_asksPasswordAfterRestart": "重启后，WebLibre 会要求输入备份文件的密码。",
+  "profileCopy_reopenToContinue": "请关闭 WebLibre 后重新打开。",
+  "profileCopy_signedInFromBackup": "恢复后的配置文件将使用备份中的 WebLibre 账户。",
+  "profileCopy_olderBackupKeepsCredentials": "由旧版 WebLibre 创建的备份不包含这些信息，此时配置文件会保留其现有的登录信息。",
+  "profileCopy_restartCouldNotBeScheduled": "WebLibre 无法安排此操作所需的重启。{nothingChanged}",
+  "profileCopy_shortcutsNeedPinningAgain": "恢复后需要重新固定主屏幕快捷方式。",
+  "profileCopy_restartClosesCurrentProfile": "这还会关闭你当前正在使用的配置文件，它不一定是此处所指的配置文件。",
+  "profileCopy_restartKeepsOtherTabs": "其他标签页会在之后重新打开。",
+  "profileCopy_privateTabsClosedByRestart": "{count, plural, other{{count} 个隐私标签页将被关闭，其浏览数据将被清除。}}",
+  "profileCopy_containersClearedByRestart": "{count, plural, other{{count} 个设为退出时清除数据的容器中的数据将被清除。}}"
+}

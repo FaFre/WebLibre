@@ -1,0 +1,7 @@
+{
+  "@@locale": "zh",
+  "httpErrorHandler_socketError": "无法连接远程服务",
+  "httpErrorHandler_httpError": "网络请求返回了错误",
+  "httpErrorHandler_formatError": "响应格式错误",
+  "httpErrorHandler_clientError": "无法连接远程服务"
+}
