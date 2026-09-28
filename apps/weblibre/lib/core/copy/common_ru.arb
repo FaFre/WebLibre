@@ -1,0 +1,21 @@
+{
+  "@@locale": "ru",
+  "common_cancel": "Отмена",
+  "common_delete": "Удалить",
+  "common_close": "Закрыть",
+  "common_save": "Сохранить",
+  "common_add": "Добавить",
+  "common_edit": "Изменить",
+  "common_remove": "Удалить",
+  "common_clear": "Очистить",
+  "common_copy": "Копировать",
+  "common_open": "Открыть",
+  "common_reset": "Сбросить",
+  "common_retry": "Повторить",
+  "common_done": "Готово",
+  "common_undo": "Отменить",
+  "common_dismiss": "Скрыть",
+  "common_discard": "Отбросить",
+  "common_showLess": "Свернуть",
+  "common_loading": "Загрузка…"
+}

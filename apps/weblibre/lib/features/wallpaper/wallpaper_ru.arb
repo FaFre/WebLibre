@@ -1,0 +1,15 @@
+{
+  "@@locale": "ru",
+  "wallpaper_title": "Обои",
+  "wallpaper_settingsDescription": "Показываются за домашней страницей во всех контейнерах, где не заданы собственные обои.",
+  "wallpaper_chooseImage": "Выбрать изображение",
+  "wallpaper_replace": "Заменить",
+  "wallpaper_blurLabel": "Размытие",
+  "wallpaper_dimLabel": "Затемнение",
+  "wallpaper_dimDescription": "Затемнение смешивает изображение с фоном приложения, чтобы текст на странице оставался читаемым и в светлой, и в тёмной теме.",
+  "wallpaper_editorDefaultDescription": "Домашняя страница сохраняет стандартный фон.",
+  "wallpaper_importErrorUnreadable": "Не удалось прочитать этот файл",
+  "wallpaper_importErrorTooLarge": "Это изображение слишком большое",
+  "wallpaper_importErrorNotAnImage": "Этот файл не является изображением",
+  "wallpaper_importErrorDecodeFailed": "Не удалось прочитать это изображение"
+}

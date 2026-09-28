@@ -1,0 +1,20 @@
+{
+  "@@locale": "ru",
+  "uiHelper_findInPageSuggestion": "Найти «{query}» на этой странице?",
+  "uiHelper_actionFind": "Найти",
+  "uiHelper_openedTabsFromAnotherDevice": "{count, plural, one{Открыта {count} вкладка с другого устройства} few{Открыто {count} вкладки с другого устройства} many{Открыто {count} вкладок с другого устройства} other{Открыто {count} вкладки с другого устройства}}",
+  "uiHelper_navigateBackToCloseTab": "Нажмите НАЗАД ещё раз, чтобы закрыть текущую вкладку",
+  "uiHelper_navigateBackToExitApp": "Нажмите НАЗАД ещё раз, чтобы выйти из приложения",
+  "uiHelper_newTabOpenedInBackgroundNamed": "Новая вкладка «{tabName}» открыта в фоне",
+  "uiHelper_newTabOpenedInBackground": "Новая вкладка открыта в фоне",
+  "uiHelper_actionShow": "Показать",
+  "uiHelper_wantToOpenLinkFromClipboard": "Открыть ссылку из буфера обмена?",
+  "uiHelper_newTabOpenedNamed": "Новая вкладка «{tabName}» открыта",
+  "uiHelper_newTabOpened": "Новая вкладка открыта",
+  "uiHelper_actionSwitch": "Перейти",
+  "uiHelper_couldNotLaunchUrl": "Не удалось открыть URL-адрес ({url})",
+  "uiHelper_canNotHandleScheme": "Невозможно обработать «{scheme}»",
+  "uiHelper_tabsClosedCount": "{count, plural, one{{count} вкладка закрыта} few{{count} вкладки закрыты} many{{count} вкладок закрыто} other{{count} вкладки закрыто}}",
+  "uiHelper_closeIsolatedTabsTitle": "Закрыть изолированные вкладки?",
+  "uiHelper_closeIsolatedTabsConfirm": "{count, plural, one{Данные просмотра {count} изолированного сеанса будут безвозвратно удалены.} few{Данные просмотра {count} изолированных сеансов будут безвозвратно удалены.} many{Данные просмотра {count} изолированных сеансов будут безвозвратно удалены.} other{Данные просмотра {count} изолированного сеанса будут безвозвратно удалены.}}"
+}

@@ -1,0 +1,19 @@
+{
+  "@@locale": "ru",
+  "profileCopy_pickerContents": "вкладки, историю и настройки",
+  "profileCopy_dataDescription": "вкладки, история, закладки, настройки и сохранённые логины сайтов",
+  "profileCopy_secretDataDescription": "вход в аккаунт WebLibre, настройки синхронизации и данные прокси",
+  "profileCopy_cannotBeUndone": "Это действие нельзя отменить.",
+  "profileCopy_nothingChanged": "Ничего не было изменено.",
+  "profileCopy_restartsToWork": "Для этого WebLibre нужно перезапустить.",
+  "profileCopy_asksPasswordAfterRestart": "После перезапуска WebLibre запросит пароль файла резервной копии.",
+  "profileCopy_reopenToContinue": "Закройте WebLibre и откройте снова.",
+  "profileCopy_signedInFromBackup": "Восстановленный профиль использует аккаунт WebLibre из резервной копии.",
+  "profileCopy_olderBackupKeepsCredentials": "Резервная копия, созданная старой версией WebLibre, не содержит данных входа в аккаунт, поэтому текущие данные входа сохранятся.",
+  "profileCopy_restartCouldNotBeScheduled": "WebLibre не удалось запланировать перезапуск, необходимый для этой операции. {nothingChanged}",
+  "profileCopy_shortcutsNeedPinningAgain": "После восстановления заново добавьте ярлыки на главный экран.",
+  "profileCopy_restartClosesCurrentProfile": "Также будет закрыт профиль, который вы используете сейчас, — это не всегда профиль, указанный здесь.",
+  "profileCopy_restartKeepsOtherTabs": "Остальные вкладки откроются снова после перезапуска.",
+  "profileCopy_privateTabsClosedByRestart": "{count, plural, one{{count} приватная вкладка закроется, и её данные просмотра будут удалены.} few{{count} приватные вкладки закроются, и их данные просмотра будут удалены.} many{{count} приватных вкладок закроются, и их данные просмотра будут удалены.} other{{count} приватных вкладок закроются, и их данные просмотра будут удалены.}}",
+  "profileCopy_containersClearedByRestart": "{count, plural, one{{count} контейнер, настроенный на очистку данных при выходе, будет очищен.} few{{count} контейнера, настроенных на очистку данных при выходе, будут очищены.} many{{count} контейнеров, настроенных на очистку данных при выходе, будут очищены.} other{{count} контейнера, настроенных на очистку данных при выходе, будут очищены.}}"
+}

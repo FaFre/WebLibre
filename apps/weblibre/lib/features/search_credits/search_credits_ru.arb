@@ -1,0 +1,20 @@
+{
+  "@@locale": "ru",
+  "searchCredits_couldNotLoadTitle": "Не удалось загрузить кредиты",
+  "searchCredits_title": "Поисковые кредиты",
+  "searchCredits_errorSubtitle": "Проверьте подключение и нажмите «Обновить», чтобы повторить попытку.",
+  "searchCredits_emptySubtitle": "Купите поисковый пакет, чтобы начать",
+  "searchCredits_creditsWithAllowance": "Кредиты: {credits} / {allowance}  ·  Сохранённые токены: {stash}",
+  "searchCredits_creditsNoAllowance": "Кредиты: {credits}  ·  Сохранённые токены: {stash}",
+  "searchCredits_tooltipRefresh": "Обновить",
+  "searchCredits_resetsOn": "Обновится {date}",
+  "searchCredits_lastIssuance": "Последняя выдача: {relative}  ({absolute})",
+  "searchCredits_requestingTokens": "Запрос токенов…",
+  "searchCredits_issuanceFailed": "Не удалось выдать токены: {error}",
+  "searchCredits_needsReauth": "Войдите снова, чтобы запросить токены.",
+  "searchCredits_buySearchPackTitle": "Купить поисковый пакет",
+  "searchCredits_getTokensTitle": "Получить токены",
+  "searchCredits_requestTokensCount": "{count, plural, one{Запросить {count} токен} few{Запросить {count} токена} many{Запросить {count} токенов} other{Запросить {count} токена}}",
+  "searchCredits_noCreditsRemaining": "Кредитов не осталось",
+  "searchCredits_buyMoreTitle": "Купить ещё"
+}

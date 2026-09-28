@@ -1,0 +1,7 @@
+{
+  "@@locale": "ru",
+  "httpErrorHandler_socketError": "Не удалось связаться с удалённым сервисом",
+  "httpErrorHandler_httpError": "Веб-запрос вернул ошибку",
+  "httpErrorHandler_formatError": "Неверный формат ответа",
+  "httpErrorHandler_clientError": "Не удалось связаться с удалённым сервисом"
+}

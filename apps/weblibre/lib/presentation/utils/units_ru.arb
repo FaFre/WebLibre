@@ -1,0 +1,7 @@
+{
+  "@@locale": "ru",
+  "units_bytes": "{value} Б",
+  "units_kilobytes": "{value} КБ",
+  "units_megabytes": "{value} МБ",
+  "units_milliseconds": "{value} мс"
+}

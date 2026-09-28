@@ -1,0 +1,5 @@
+{
+  "@@locale": "ru",
+  "failureWidget_defaultTitle": "Что-то пошло не так",
+  "failureWidget_unknownError": "Неизвестная ошибка"
+}

@@ -1,0 +1,22 @@
+{
+  "@@locale": "ru",
+  "mainApp_initializationErrorTitle": "Ошибка инициализации",
+  "mainApp_initializationErrorMessage": "Не удалось инициализировать приложение",
+  "mainApp_initStageLoadingFormats": "Загрузка форматов…",
+  "mainApp_initStageLoadingPackageInfo": "Загрузка сведений о приложении…",
+  "mainApp_initStageSyncingBangs": "Синхронизация бэнгов…",
+  "mainApp_downloadCompleted": "Загрузка завершена",
+  "mainApp_downloadOpenFailed": "Не удалось открыть загруженный файл",
+  "mainApp_downloadFailed": "Ошибка загрузки: {name}",
+  "mainApp_containerBlockedWithHost": "{host} не назначен этому контейнеру",
+  "mainApp_containerBlockedNoHost": "Этот сайт не назначен этому контейнеру",
+  "mainApp_sandboxNoCredits": "Поисковые кредиты закончились. Купите ещё, чтобы продолжить.",
+  "mainApp_sandboxTokenIssuanceFailed": "Не удалось выдать новые поисковые токены. Проверьте подключение и повторите попытку.",
+  "mainApp_sandboxFetchPolicyRejected": "Снимок заблокирован политикой загрузки: {detail}",
+  "mainApp_sandboxDetailNotAllowed": "не разрешено",
+  "mainApp_sandboxCaptureFailed": "Не удалось сделать снимок: {detail}",
+  "mainApp_sandboxDetailUnknownError": "неизвестная ошибка",
+  "mainApp_sandboxDownloadFailed": "Не удалось загрузить результат снимка.",
+  "mainApp_sandboxUnknownError": "Ошибка снимка в песочнице: {detail}",
+  "mainApp_syncFailed": "Ошибка синхронизации"
+}

@@ -1,0 +1,10 @@
+{
+  "@@locale": "ru",
+  "about_copyright": "Copyright © Fabian Freund, 2024-2026",
+  "about_geckoVersionTitle": "Версия Gecko",
+  "about_notAvailable": "Н/Д",
+  "about_feedbackTitle": "Обратная связь",
+  "about_donateTitle": "Пожертвовать",
+  "about_documentationTitle": "Документация",
+  "about_githubTitle": "GitHub"
+}

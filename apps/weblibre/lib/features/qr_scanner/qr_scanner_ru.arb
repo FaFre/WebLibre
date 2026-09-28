@@ -1,0 +1,5 @@
+{
+  "@@locale": "ru",
+  "qrScanner_noCameraPermission": "Нет разрешения на доступ к камере.",
+  "qrScanner_scanCodeTitle": "Сканировать код"
+}

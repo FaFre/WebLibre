@@ -1,0 +1,9 @@
+{
+  "@@locale": "ru",
+  "intentGatekeeper_dialogTitle": "Открыть ссылку в WebLibre?",
+  "intentGatekeeper_appIsTryingToOpenLink": "{appName} пытается открыть ссылку в {browserName}.",
+  "intentGatekeeper_alwaysAllow": "Всегда разрешать",
+  "intentGatekeeper_allowOnce": "Разрешить один раз",
+  "intentGatekeeper_blockOnce": "Заблокировать один раз",
+  "intentGatekeeper_alwaysBlock": "Всегда блокировать"
+}

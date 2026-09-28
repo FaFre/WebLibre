@@ -1,0 +1,6 @@
+{
+  "@@locale": "ru",
+  "findInPage_hint": "Найти на странице",
+  "findInPage_matchPosition": "{current} из {total}",
+  "findInPage_noMatches": "Не найдено"
+}

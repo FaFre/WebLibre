@@ -1,0 +1,8 @@
+{
+  "@@locale": "ru",
+  "formValidators_urlRequired": "Требуется URL-адрес",
+  "formValidators_invalidUrl": "Недопустимый URL-адрес",
+  "formValidators_valueRequired": "Требуется значение",
+  "formValidators_nameRequired": "Требуется имя",
+  "formValidators_nameInvalidCharacters": "Имя содержит недопустимые символы"
+}
