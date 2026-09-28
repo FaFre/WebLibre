@@ -31,9 +31,18 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
   final TextEditingController searchTextController;
   final Future<void> Function(String query) submitSearch;
 
+  /// Whether the typed text may be sent to the remote suggestion provider.
+  ///
+  /// When false the section still offers the typed text as a search, but never
+  /// asks the provider — nor even builds its request stream. Give the section a
+  /// key that changes with this flag, so a switch rebuilds it from scratch
+  /// rather than carrying a subscription across (see `SearchSourcePolicy`).
+  final bool fetchRemoteSuggestions;
+
   const SearchTermSuggestionsSection({
     required this.searchTextController,
     required this.submitSearch,
+    required this.fetchRemoteSuggestions,
     super.key,
   });
 
@@ -44,9 +53,13 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
       searchTextController,
       () => searchTextController.text,
     );
-    final searchSuggestions = ref.watch(
-      searchSuggestionsProvider().select((value) => value.value ?? const []),
-    );
+    final searchSuggestions = fetchRemoteSuggestions
+        ? ref.watch(
+            searchSuggestionsProvider().select(
+              (value) => value.value ?? const <String>[],
+            ),
+          )
+        : const <String>[];
 
     // Seeded on mount too — this section appears with the first keystroke
     // already in the field, which therefore never arrives as a change event.
@@ -54,6 +67,8 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
       searchTextController,
       () => searchTextController.text,
       () {
+        if (!fetchRemoteSuggestions) return;
+
         ref
             .read(searchSuggestionsProvider().notifier)
             .addQuery(searchTextController.text);

@@ -30,23 +30,31 @@ part 'engine_suggestions.g.dart';
 
 @Riverpod()
 class EngineSuggestions extends _$EngineSuggestions {
-  /// Inline ghost-text completion for the omnibar. Prefers the engine's own
-  /// autocomplete (history/top-domains); when that yields nothing, falls back
-  /// to a popular-domain prefix match from the bundled Tranco-derived
-  /// `sites.db` so typing "git" still completes to "github.com" without any
-  /// local history. The fallback can be turned off via the
-  /// `popularSitesAutocompleteEnabled` setting.
-  Future<String?> getAutocompleteSuggestion(String query) async {
-    final engineResult = await ref
-        .read(engineSuggestionsServiceProvider)
-        .getAutocompleteSuggestion(query)
-        .then((result) => result?.text);
+  /// Inline ghost-text completion for the omnibar.
+  ///
+  /// Sources are tried best first, and the first that completes [query] wins:
+  ///
+  /// 1. The engine's own autofill, which draws on saved history (Places). Only
+  ///    asked when [includeHistory] is set — see `SearchSourcePolicy`.
+  /// 2. A popular-domain prefix match from the bundled Tranco-derived
+  ///    `sites.db`, so typing "git" still completes to "github.com" without any
+  ///    local data. Off with the `popularSitesAutocompleteEnabled` setting.
+  Future<String?> getAutocompleteSuggestion(
+    String query, {
+    bool includeHistory = true,
+  }) async {
+    if (includeHistory) {
+      final engineResult = await ref
+          .read(engineSuggestionsServiceProvider)
+          .getAutocompleteSuggestion(query)
+          .then((result) => result?.text);
 
-    if (engineResult != null) {
-      return engineResult;
+      if (engineResult != null) {
+        return engineResult;
+      }
+
+      if (!ref.mounted) return null;
     }
-
-    if (!ref.mounted) return null;
 
     final popularSitesEnabled = ref.read(
       generalSettingsWithDefaultsProvider.select(

@@ -33,7 +33,7 @@ final class EngineSuggestionsProvider
   EngineSuggestions create() => EngineSuggestions();
 }
 
-String _$engineSuggestionsHash() => r'b2bc587d8df12b5614e2c00494a0d666e2c30746';
+String _$engineSuggestionsHash() => r'496fc2de32b4066a3d65f63476bfc63ce93fb83e';
 
 abstract class _$EngineSuggestions
     extends $StreamNotifier<List<GeckoSuggestion>> {

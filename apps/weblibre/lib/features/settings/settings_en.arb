@@ -2825,6 +2825,18 @@
   "@settings_allowClipboardAccessSubtitle": {
     "description": "Explanation under that switch."
   },
+  "settings_privateSearchSuggestionsTitle": "Suggestions in private tabs",
+  "@settings_privateSearchSuggestionsTitle": {
+    "description": "Switch: let searches typed in a private tab use the search suggestion provider and the saved browsing history, like regular tabs do. Off by default."
+  },
+  "settings_privateSearchSuggestionsKeywords": "private, incognito, search suggestions, history, privacy",
+  "@settings_privateSearchSuggestionsKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_privateSearchSuggestionsSubtitle": "Use the suggestion provider and your history while typing in a private tab. What you type is sent to the provider.",
+  "@settings_privateSearchSuggestionsSubtitle": {
+    "description": "Explanation under that switch. Warns that turning it on sends the text typed in private tabs to the search suggestion provider."
+  },
   "settings_acceptSuggestionOnSubmitTitle": "Autocomplete on Enter",
   "@settings_acceptSuggestionOnSubmitTitle": {
     "description": "Switch: pressing Enter accepts the suggested completion shown in the address field."
@@ -2937,6 +2949,10 @@
   "settings_indexAcceptSuggestionOnSubmitSubtitle": "Accept the inline suggestion when pressing enter",
   "@settings_indexAcceptSuggestionOnSubmitSubtitle": {
     "description": "Summary of the \"Autocomplete on enter\" setting, shown as a settings search result."
+  },
+  "settings_indexPrivateSearchSuggestionsSubtitle": "Use suggestions and history in private tabs",
+  "@settings_indexPrivateSearchSuggestionsSubtitle": {
+    "description": "Summary of the private tab suggestions setting, shown as a settings search result."
   },
   "settings_indexPopularSitesAutocompleteSubtitle": "Complete typed text with well-known domains",
   "@settings_indexPopularSitesAutocompleteSubtitle": {

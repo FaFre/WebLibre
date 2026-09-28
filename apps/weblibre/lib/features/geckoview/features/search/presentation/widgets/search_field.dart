@@ -25,6 +25,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_source_policy.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
 import 'package:weblibre/presentation/widgets/auto_suggest_text_field.dart';
@@ -98,8 +99,27 @@ class SearchField extends HookConsumerWidget {
 
     final safeFocusNode = focusNode ?? useFocusNode();
 
-    final suggestion = useState<String?>(null);
+    // The latest completion, with whether saved history was allowed to supply
+    // it. Kept even when it can no longer be shown, so nothing has to be
+    // cleared in reaction to a policy change.
+    final completion = useState<({String text, bool usedHistory})?>(null);
     final lastText = useRef<String>(textEditingController.text);
+
+    // A completion that may have come from saved history is hidden whenever
+    // history is off limits. The check is made here, at build time, rather
+    // than when the lookup finishes: switching to a private tab must hide one
+    // already on screen, and one still in flight that lands after the switch.
+    final savedHistoryAllowed = ref.watch(
+      searchSourcePolicyProvider(
+        privateMode: privateMode,
+      ).select((policy) => policy.savedHistory),
+    );
+    final suggestion = switch (completion.value) {
+      (:final text, :final usedHistory)
+          when !usedHistory || savedHistoryAllowed =>
+        text,
+      _ => null,
+    };
 
     if (showSuggestions) {
       useOnListenableChangeSelector(
@@ -108,19 +128,31 @@ class SearchField extends HookConsumerWidget {
         () async {
           final text = textEditingController.text;
           if (text.isEmpty) {
-            suggestion.value = null;
+            completion.value = null;
           } else {
             final isDeleting = text.length < lastText.value.length;
 
             if (isDeleting) {
-              suggestion.value = null;
+              completion.value = null;
             } else {
-              await ref
+              final includeHistory = ref
+                  .read(searchSourcePolicyProvider(privateMode: privateMode))
+                  .savedHistory;
+
+              final result = await ref
                   .read(engineSuggestionsProvider.notifier)
-                  .getAutocompleteSuggestion(text)
-                  .then((result) {
-                    suggestion.value = result;
-                  });
+                  .getAutocompleteSuggestion(
+                    text,
+                    includeHistory: includeHistory,
+                  );
+
+              // Lookups finish out of order; one for text the user has since
+              // typed past must not replace the newer completion.
+              if (context.mounted && textEditingController.text == text) {
+                completion.value = result == null
+                    ? null
+                    : (text: result, usedHistory: includeHistory);
+              }
             }
           }
 
@@ -141,7 +173,7 @@ class SearchField extends HookConsumerWidget {
       ),
       child: AutoSuggestTextField(
         controller: textEditingController,
-        suggestion: suggestion.value,
+        suggestion: suggestion,
         acceptSuggestionOnSubmit:
             acceptSuggestionOnSubmit && !explicitBangSelected,
         enableSuggestions: true,
@@ -157,7 +189,7 @@ class SearchField extends HookConsumerWidget {
         minLines: minLines,
         autofocus: autofocus,
         onSuggestionDismiss: () {
-          suggestion.value = null;
+          completion.value = null;
         },
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -214,15 +246,15 @@ class SearchField extends HookConsumerWidget {
             : null,
         onSubmitted: onSubmitted,
         onTap: () {
-          if (suggestion.value != null) {
+          if (suggestion != null) {
             unawaited(HapticFeedback.lightImpact());
 
-            textEditingController.text = suggestion.value!;
+            textEditingController.text = suggestion;
             textEditingController.selection = TextSelection.collapsed(
-              offset: suggestion.value!.length,
+              offset: suggestion.length,
             );
 
-            suggestion.value = null;
+            completion.value = null;
           }
         },
       ),

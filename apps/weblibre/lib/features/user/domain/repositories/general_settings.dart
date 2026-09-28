@@ -131,6 +131,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'indexPrivateTabs': DriftSqlType.bool,
   'acceptSuggestionOnSubmit': DriftSqlType.bool,
   'popularSitesAutocompleteEnabled': DriftSqlType.bool,
+  'privateSearchSuggestionsEnabled': DriftSqlType.bool,
   'pureBlack': DriftSqlType.bool,
   'showSearchCloseButton': DriftSqlType.bool,
   'homeTarget': DriftSqlType.string,

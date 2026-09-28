@@ -43,6 +43,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/search_source_policy.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
@@ -181,6 +182,9 @@ class SearchScreen extends HookConsumerWidget {
           };
 
     final privateTabMode = effectiveTabMode is PrivateTabMode;
+    final sourcePolicy = ref.watch(
+      searchSourcePolicyProvider(privateMode: privateTabMode),
+    );
 
     final previousWebSearchQuery = ref.watch(
       metaSearchControllerProvider.select((s) {
@@ -649,8 +653,12 @@ class SearchScreen extends HookConsumerWidget {
         domain: isEditMode ? existingTabState.url.host : null,
       ),
       SearchModuleType.searchSuggestions: SearchTermSuggestionsSection(
+        // Remounted when the policy flips, so switching to a private tab
+        // cannot leave the regular section's provider subscription behind.
+        key: ValueKey(sourcePolicy.remoteSuggestions),
         searchTextController: searchTextController,
         submitSearch: submitSearch,
+        fetchRemoteSuggestions: sourcePolicy.remoteSuggestions,
       ),
       SearchModuleType.tabs: TabSearch(searchTextListenable: sampledQueryText),
       SearchModuleType.bookmarks: BookmarkSearch(
@@ -683,6 +691,10 @@ class SearchScreen extends HookConsumerWidget {
     );
 
     bool canShowSearchModule(SearchModuleType type) {
+      if (!sourcePolicy.allowsModule(type)) {
+        return false;
+      }
+
       if (!isUrlInput.value) {
         return true;
       }

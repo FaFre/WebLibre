@@ -471,6 +471,12 @@ class GeneralSettings with FastEquatable {
   /// (history/top domains) has no match. Defaults to true.
   final bool popularSitesAutocompleteEnabled;
 
+  /// Whether a search typed into a private tab may use the same suggestion
+  /// sources as a regular one: the remote suggestion provider and saved
+  /// history. Off by default, so private input stays on the device and regular
+  /// history stays out of it.
+  final bool privateSearchSuggestionsEnabled;
+
   /// Whether dark mode should use pure-black ("OLED"/high-contrast) surfaces.
   /// Only takes effect when the effective brightness is dark. Defaults to false.
   final bool pureBlack;
@@ -587,6 +593,7 @@ class GeneralSettings with FastEquatable {
     required this.indexPrivateTabs,
     required this.acceptSuggestionOnSubmit,
     required this.popularSitesAutocompleteEnabled,
+    required this.privateSearchSuggestionsEnabled,
     required this.pureBlack,
     required this.globalDesktopMode,
     required this.desktopModeSites,
@@ -680,6 +687,7 @@ class GeneralSettings with FastEquatable {
     bool? indexPrivateTabs,
     bool? acceptSuggestionOnSubmit,
     bool? popularSitesAutocompleteEnabled,
+    bool? privateSearchSuggestionsEnabled,
     bool? pureBlack,
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
@@ -799,6 +807,8 @@ class GeneralSettings with FastEquatable {
        acceptSuggestionOnSubmit = acceptSuggestionOnSubmit ?? true,
        popularSitesAutocompleteEnabled =
            popularSitesAutocompleteEnabled ?? true,
+       privateSearchSuggestionsEnabled =
+           privateSearchSuggestionsEnabled ?? false,
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
@@ -1046,6 +1056,7 @@ class GeneralSettings with FastEquatable {
     indexPrivateTabs,
     acceptSuggestionOnSubmit,
     popularSitesAutocompleteEnabled,
+    privateSearchSuggestionsEnabled,
     pureBlack,
     globalDesktopMode,
     desktopModeSites,

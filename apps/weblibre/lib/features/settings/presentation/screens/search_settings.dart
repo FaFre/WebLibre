@@ -91,6 +91,14 @@ List<SettingsSectionDefinition> searchSettingsSections(BuildContext context) {
           child: const _MaxSearchHistoryEntriesSection(),
         ),
         SettingsEntryDefinition(
+          title: l10n.settings_privateSearchSuggestionsTitle,
+          subtitle: l10n.settings_indexPrivateSearchSuggestionsSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_privateSearchSuggestionsKeywords,
+          ),
+          child: const _PrivateSearchSuggestionsTile(),
+        ),
+        SettingsEntryDefinition(
           title: l10n.settings_allowClipboardAccessTitle,
           subtitle: l10n.settings_allowClipboardAccessSubtitle,
           keywords: settingsKeywords(
@@ -418,6 +426,35 @@ class _AcceptSuggestionOnSubmitTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.acceptSuggestionOnSubmit(value),
+            );
+      },
+    );
+  }
+}
+
+class _PrivateSearchSuggestionsTile extends HookConsumerWidget {
+  const _PrivateSearchSuggestionsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final privateSearchSuggestionsEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.privateSearchSuggestionsEnabled,
+      ),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_privateSearchSuggestionsTitle),
+      subtitle: Text(l10n.settings_privateSearchSuggestionsSubtitle),
+      secondary: const Icon(MdiIcons.incognito),
+      value: privateSearchSuggestionsEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) => currentSettings.copyWith
+                  .privateSearchSuggestionsEnabled(value),
             );
       },
     );

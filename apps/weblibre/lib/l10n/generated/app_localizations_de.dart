@@ -9220,6 +9220,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Browser kann die Zwischenablage lesen, um URLs vorzuschlagen';
 
   @override
+  String get settings_privateSearchSuggestionsTitle =>
+      'Vorschläge in privaten Tabs';
+
+  @override
+  String get settings_privateSearchSuggestionsKeywords =>
+      'privat, inkognito, Suchvorschläge, Verlauf, Datenschutz';
+
+  @override
+  String get settings_privateSearchSuggestionsSubtitle =>
+      'Beim Tippen in privaten Tabs den Vorschlagsanbieter und den Verlauf nutzen. Die Eingabe wird an den Anbieter gesendet.';
+
+  @override
   String get settings_acceptSuggestionOnSubmitTitle =>
       'Mit Eingabetaste vervollständigen';
 
@@ -9323,6 +9335,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settings_indexAcceptSuggestionOnSubmitSubtitle =>
       'Beim Drücken der Eingabetaste den eingeblendeten Vorschlag übernehmen';
+
+  @override
+  String get settings_indexPrivateSearchSuggestionsSubtitle =>
+      'Vorschläge und Verlauf in privaten Tabs nutzen';
 
   @override
   String get settings_indexPopularSitesAutocompleteSubtitle =>

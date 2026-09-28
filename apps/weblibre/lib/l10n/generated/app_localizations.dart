@@ -15422,6 +15422,24 @@ abstract class AppLocalizations {
   /// **'The browser can read the clipboard to suggest URLs'**
   String get settings_allowClipboardAccessSubtitle;
 
+  /// Switch: let searches typed in a private tab use the search suggestion provider and the saved browsing history, like regular tabs do. Off by default.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions in private tabs'**
+  String get settings_privateSearchSuggestionsTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'private, incognito, search suggestions, history, privacy'**
+  String get settings_privateSearchSuggestionsKeywords;
+
+  /// Explanation under that switch. Warns that turning it on sends the text typed in private tabs to the search suggestion provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the suggestion provider and your history while typing in a private tab. What you type is sent to the provider.'**
+  String get settings_privateSearchSuggestionsSubtitle;
+
   /// Switch: pressing Enter accepts the suggested completion shown in the address field.
   ///
   /// In en, this message translates to:
@@ -15583,6 +15601,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Accept the inline suggestion when pressing enter'**
   String get settings_indexAcceptSuggestionOnSubmitSubtitle;
+
+  /// Summary of the private tab suggestions setting, shown as a settings search result.
+  ///
+  /// In en, this message translates to:
+  /// **'Use suggestions and history in private tabs'**
+  String get settings_indexPrivateSearchSuggestionsSubtitle;
 
   /// Summary of the popular site suggestions setting, shown as a settings search result.
   ///

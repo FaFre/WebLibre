@@ -9037,6 +9037,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'The browser can read the clipboard to suggest URLs';
 
   @override
+  String get settings_privateSearchSuggestionsTitle =>
+      'Suggestions in private tabs';
+
+  @override
+  String get settings_privateSearchSuggestionsKeywords =>
+      'private, incognito, search suggestions, history, privacy';
+
+  @override
+  String get settings_privateSearchSuggestionsSubtitle =>
+      'Use the suggestion provider and your history while typing in a private tab. What you type is sent to the provider.';
+
+  @override
   String get settings_acceptSuggestionOnSubmitTitle => 'Autocomplete on Enter';
 
   @override
@@ -9137,6 +9149,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_indexAcceptSuggestionOnSubmitSubtitle =>
       'Accept the inline suggestion when pressing enter';
+
+  @override
+  String get settings_indexPrivateSearchSuggestionsSubtitle =>
+      'Use suggestions and history in private tabs';
 
   @override
   String get settings_indexPopularSitesAutocompleteSubtitle =>
