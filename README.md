@@ -16,6 +16,9 @@
   <a href="COPYING">
     <img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-blue">
   </a>
+  <a href="https://hosted.weblate.org/engage/weblibre/">
+    <img src="https://hosted.weblate.org/widget/weblibre/language-badge.svg?threshold=0" alt="Translation status">
+  </a>
   <a href="https://liberapay.com/FaFre/donate">
     <img alt="Liberapay patrons" src="https://img.shields.io/liberapay/patrons/FaFre">
   </a>
