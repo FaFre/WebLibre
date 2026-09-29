@@ -1,0 +1,9 @@
+{
+  "@@locale": "id",
+  "intentGatekeeper_dialogTitle": "Buka tautan di WebLibre?",
+  "intentGatekeeper_appIsTryingToOpenLink": "{appName} mencoba membuka tautan di {browserName}.",
+  "intentGatekeeper_alwaysAllow": "Selalu izinkan",
+  "intentGatekeeper_allowOnce": "Izinkan sekali",
+  "intentGatekeeper_blockOnce": "Blokir sekali",
+  "intentGatekeeper_alwaysBlock": "Selalu blokir"
+}

@@ -1,0 +1,8 @@
+{
+  "@@locale": "id",
+  "formValidators_urlRequired": "URL wajib diisi",
+  "formValidators_invalidUrl": "URL tidak valid",
+  "formValidators_valueRequired": "Nilai wajib diisi",
+  "formValidators_nameRequired": "Nama wajib diisi",
+  "formValidators_nameInvalidCharacters": "Nama berisi karakter yang tidak valid"
+}

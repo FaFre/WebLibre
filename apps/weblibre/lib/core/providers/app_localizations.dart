@@ -70,7 +70,10 @@ Locale resolveAppLocale(
   List<Locale>? preferredLocales,
   Iterable<Locale> supportedLocales,
 ) {
-  final locale = basicLocaleListResolution(preferredLocales, supportedLocales);
+  final locale = basicLocaleListResolution(
+    preferredLocales?.map(_withCurrentLanguageCode).toList(),
+    supportedLocales,
+  );
   Intl.defaultLocale = locale.toString();
   return locale;
 }
@@ -83,6 +86,22 @@ Locale resolveAppLocale(
 /// binding, which plain `test()` unit tests for domain/controller code never
 /// initialize.
 Locale get systemAppLocale => basicLocaleListResolution(
-  PlatformDispatcher.instance.locales,
+  PlatformDispatcher.instance.locales.map(_withCurrentLanguageCode).toList(),
   AppLocalizations.supportedLocales,
 );
+
+/// Android reports some languages under their withdrawn ISO 639 codes
+/// (`java.util.Locale.getLanguage()` keeps them, and Flutter passes that on),
+/// so an Indonesian device arrives as `in` and would never match the shipped
+/// `id` translation.
+const _legacyLanguageCodes = {'in': 'id', 'iw': 'he', 'ji': 'yi'};
+
+Locale _withCurrentLanguageCode(Locale locale) {
+  final current = _legacyLanguageCodes[locale.languageCode];
+  if (current == null) return locale;
+  return Locale.fromSubtags(
+    languageCode: current,
+    scriptCode: locale.scriptCode,
+    countryCode: locale.countryCode,
+  );
+}

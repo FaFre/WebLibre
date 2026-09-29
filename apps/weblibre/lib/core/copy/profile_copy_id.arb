@@ -1,0 +1,19 @@
+{
+  "@@locale": "id",
+  "profileCopy_pickerContents": "tab, riwayat, dan pengaturan",
+  "profileCopy_dataDescription": "tab, riwayat, markah, pengaturan, dan info masuk situs yang tersimpan",
+  "profileCopy_secretDataDescription": "info masuk akun WebLibre, penyiapan sinkronisasi, dan detail proksi",
+  "profileCopy_cannotBeUndone": "Tindakan ini tidak dapat diurungkan.",
+  "profileCopy_nothingChanged": "Tidak ada yang diubah.",
+  "profileCopy_restartsToWork": "WebLibre harus dimulai ulang untuk melakukan ini.",
+  "profileCopy_asksPasswordAfterRestart": "Setelah dimulai ulang, WebLibre akan meminta kata sandi berkas cadangan.",
+  "profileCopy_reopenToContinue": "Tutup WebLibre, lalu buka kembali.",
+  "profileCopy_signedInFromBackup": "Profil yang dipulihkan menggunakan akun WebLibre dari cadangan.",
+  "profileCopy_olderBackupKeepsCredentials": "Cadangan yang dibuat oleh versi WebLibre yang lebih lama tidak memuat data tersebut, sehingga profil tetap memakai info masuk dan kredensialnya saat ini.",
+  "profileCopy_restartCouldNotBeScheduled": "WebLibre tidak dapat menjadwalkan mulai ulang yang diperlukan untuk operasi ini. {nothingChanged}",
+  "profileCopy_shortcutsNeedPinningAgain": "Sematkan kembali pintasan layar utama setelah pemulihan.",
+  "profileCopy_restartClosesCurrentProfile": "Ini juga menutup profil yang sedang Anda gunakan, yang belum tentu profil yang disebutkan di sini.",
+  "profileCopy_restartKeepsOtherTabs": "Tab Anda yang lain akan dibuka kembali setelahnya.",
+  "profileCopy_privateTabsClosedByRestart": "{count, plural, =1{1 tab pribadi ditutup dan data penjelajahannya dihapus.} other{{count} tab pribadi ditutup dan data penjelajahannya dihapus.}}",
+  "profileCopy_containersClearedByRestart": "{count, plural, =1{1 kontainer yang diatur untuk menghapus data saat keluar akan dibersihkan.} other{{count} kontainer yang diatur untuk menghapus data saat keluar akan dibersihkan.}}"
+}

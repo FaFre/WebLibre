@@ -1,0 +1,20 @@
+{
+  "@@locale": "id",
+  "uiHelper_findInPageSuggestion": "Cari \"{query}\" di halaman ini?",
+  "uiHelper_actionFind": "Cari",
+  "uiHelper_openedTabsFromAnotherDevice": "{count, plural, =1{1 tab dari perangkat lain dibuka} other{{count} tab dari perangkat lain dibuka}}",
+  "uiHelper_navigateBackToCloseTab": "Tekan KEMBALI sekali lagi untuk menutup tab saat ini",
+  "uiHelper_navigateBackToExitApp": "Tekan KEMBALI sekali lagi untuk keluar dari aplikasi",
+  "uiHelper_newTabOpenedInBackgroundNamed": "Tab baru \"{tabName}\" dibuka di latar belakang",
+  "uiHelper_newTabOpenedInBackground": "Tab baru dibuka di latar belakang",
+  "uiHelper_actionShow": "Tampilkan",
+  "uiHelper_wantToOpenLinkFromClipboard": "Buka tautan dari papan klip Anda?",
+  "uiHelper_newTabOpenedNamed": "Tab baru \"{tabName}\" dibuka",
+  "uiHelper_newTabOpened": "Tab baru dibuka",
+  "uiHelper_actionSwitch": "Beralih",
+  "uiHelper_couldNotLaunchUrl": "Tidak dapat membuka URL ({url})",
+  "uiHelper_canNotHandleScheme": "Tidak dapat menangani \"{scheme}\"",
+  "uiHelper_tabsClosedCount": "{count, plural, =1{Tab ditutup} other{{count} tab ditutup}}",
+  "uiHelper_closeIsolatedTabsTitle": "Tutup tab terisolasi?",
+  "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{Ini akan menghapus permanen semua data penjelajahan untuk sesi terisolasi ini.} other{Ini akan menghapus permanen data penjelajahan untuk {count} sesi terisolasi.}}"
+}

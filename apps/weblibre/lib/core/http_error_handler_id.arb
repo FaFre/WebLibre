@@ -1,0 +1,7 @@
+{
+  "@@locale": "id",
+  "httpErrorHandler_socketError": "Tidak dapat menghubungi layanan jarak jauh",
+  "httpErrorHandler_httpError": "Permintaan web mengembalikan galat",
+  "httpErrorHandler_formatError": "Format respons tidak valid",
+  "httpErrorHandler_clientError": "Tidak dapat menghubungi layanan jarak jauh"
+}

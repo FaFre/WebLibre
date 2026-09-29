@@ -1,0 +1,20 @@
+{
+  "@@locale": "id",
+  "searchCredits_couldNotLoadTitle": "Tidak dapat memuat kredit",
+  "searchCredits_title": "Kredit pencarian",
+  "searchCredits_errorSubtitle": "Periksa koneksi Anda, lalu ketuk segarkan untuk mencoba lagi.",
+  "searchCredits_emptySubtitle": "Beli paket pencarian untuk memulai",
+  "searchCredits_creditsWithAllowance": "Kredit: {credits} / {allowance}  ·  Token tersimpan: {stash}",
+  "searchCredits_creditsNoAllowance": "Kredit: {credits}  ·  Token tersimpan: {stash}",
+  "searchCredits_tooltipRefresh": "Segarkan",
+  "searchCredits_resetsOn": "Diatur ulang pada {date}",
+  "searchCredits_lastIssuance": "Penerbitan terakhir: {relative}  ({absolute})",
+  "searchCredits_requestingTokens": "Meminta token...",
+  "searchCredits_issuanceFailed": "Penerbitan token gagal: {error}",
+  "searchCredits_needsReauth": "Silakan masuk kembali untuk meminta token.",
+  "searchCredits_buySearchPackTitle": "Beli paket pencarian",
+  "searchCredits_getTokensTitle": "Dapatkan token",
+  "searchCredits_requestTokensCount": "{count, plural, =1{Minta 1 token} other{Minta {count} token}}",
+  "searchCredits_noCreditsRemaining": "Kredit sudah habis",
+  "searchCredits_buyMoreTitle": "Beli lagi"
+}

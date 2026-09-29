@@ -1,0 +1,22 @@
+{
+  "@@locale": "id",
+  "mainApp_initializationErrorTitle": "Galat Inisialisasi",
+  "mainApp_initializationErrorMessage": "Tidak dapat menginisialisasi aplikasi",
+  "mainApp_initStageLoadingFormats": "Memuat format…",
+  "mainApp_initStageLoadingPackageInfo": "Memuat informasi aplikasi…",
+  "mainApp_initStageSyncingBangs": "Menyinkronkan bang…",
+  "mainApp_downloadCompleted": "Unduhan selesai",
+  "mainApp_downloadOpenFailed": "Tidak dapat membuka berkas yang diunduh",
+  "mainApp_downloadFailed": "Unduhan gagal: {name}",
+  "mainApp_containerBlockedWithHost": "{host} tidak ditetapkan ke kontainer ini",
+  "mainApp_containerBlockedNoHost": "Situs ini tidak ditetapkan ke kontainer ini",
+  "mainApp_sandboxNoCredits": "Kredit pencarian Anda sudah habis. Beli lagi untuk melanjutkan.",
+  "mainApp_sandboxTokenIssuanceFailed": "Tidak dapat menerbitkan token pencarian baru. Periksa koneksi Anda, lalu coba lagi.",
+  "mainApp_sandboxFetchPolicyRejected": "Tangkapan diblokir oleh kebijakan pengambilan: {detail}",
+  "mainApp_sandboxDetailNotAllowed": "tidak diizinkan",
+  "mainApp_sandboxCaptureFailed": "Tangkapan gagal: {detail}",
+  "mainApp_sandboxDetailUnknownError": "galat tidak dikenal",
+  "mainApp_sandboxDownloadFailed": "Gagal mengunduh hasil tangkapan.",
+  "mainApp_sandboxUnknownError": "Galat tangkapan sandbox: {detail}",
+  "mainApp_syncFailed": "Sinkronisasi gagal"
+}

@@ -1,0 +1,5 @@
+{
+  "@@locale": "id",
+  "qrScanner_noCameraPermission": "Izin kamera belum diberikan.",
+  "qrScanner_scanCodeTitle": "Pindai kode"
+}

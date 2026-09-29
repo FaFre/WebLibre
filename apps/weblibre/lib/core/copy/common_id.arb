@@ -1,0 +1,21 @@
+{
+  "@@locale": "id",
+  "common_cancel": "Batal",
+  "common_delete": "Hapus",
+  "common_close": "Tutup",
+  "common_save": "Simpan",
+  "common_add": "Tambah",
+  "common_edit": "Edit",
+  "common_remove": "Hapus",
+  "common_clear": "Bersihkan",
+  "common_copy": "Salin",
+  "common_open": "Buka",
+  "common_reset": "Atur ulang",
+  "common_retry": "Coba lagi",
+  "common_done": "Selesai",
+  "common_undo": "Urungkan",
+  "common_dismiss": "Tutup",
+  "common_discard": "Buang",
+  "common_showLess": "Tampilkan lebih sedikit",
+  "common_loading": "Memuat…"
+}

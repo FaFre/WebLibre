@@ -1,0 +1,6 @@
+{
+  "@@locale": "id",
+  "findInPage_hint": "Cari di halaman",
+  "findInPage_matchPosition": "{current} dari {total}",
+  "findInPage_noMatches": "Tidak ditemukan"
+}

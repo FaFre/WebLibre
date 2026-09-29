@@ -1,0 +1,15 @@
+{
+  "@@locale": "id",
+  "wallpaper_title": "Wallpaper",
+  "wallpaper_settingsDescription": "Ditampilkan di belakang beranda, di setiap kontainer yang tidak mengatur wallpaper sendiri.",
+  "wallpaper_chooseImage": "Pilih gambar",
+  "wallpaper_replace": "Ganti",
+  "wallpaper_blurLabel": "Buram",
+  "wallpaper_dimLabel": "Redupkan",
+  "wallpaper_dimDescription": "Peredupan memadukan gambar dengan latar belakang aplikasi, sehingga teks halaman tetap terbaca dalam tema terang maupun gelap.",
+  "wallpaper_editorDefaultDescription": "Beranda tetap memakai latar bawaannya.",
+  "wallpaper_importErrorUnreadable": "Berkas tersebut tidak dapat dibaca",
+  "wallpaper_importErrorTooLarge": "Gambar tersebut terlalu besar",
+  "wallpaper_importErrorNotAnImage": "Berkas tersebut bukan gambar",
+  "wallpaper_importErrorDecodeFailed": "Gambar tersebut tidak dapat dibaca"
+}
