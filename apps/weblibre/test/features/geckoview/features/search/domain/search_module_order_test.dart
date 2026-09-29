@@ -215,19 +215,11 @@ void main() {
       );
 
       // ...and modules added since then appear without switching themselves on.
-      // Actions is the one deliberate exception: it was meant to reach every
-      // new-tab page, customized or not.
       final added = merged.where((e) => !decoded.any((d) => d.type == e.type));
       expect(
-        added
-            .where((e) => e.type != SearchModuleType.actions)
-            .every((e) => !e.visible),
+        added.every((e) => !e.visible),
         isTrue,
         reason: 'a module added to a shipped surface must default to off',
-      );
-      expect(
-        added.firstWhere((e) => e.type == SearchModuleType.actions).visible,
-        isTrue,
       );
     });
 

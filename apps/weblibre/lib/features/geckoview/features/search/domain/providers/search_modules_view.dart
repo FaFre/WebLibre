@@ -120,9 +120,11 @@ enum ModuleSurface {
       (type: SearchModuleType.recentSearches, visible: true),
       (type: SearchModuleType.frequentBangs, visible: true),
       (type: SearchModuleType.topSites, visible: true),
-      // On even for pages the user has already customized — unlike Quote,
-      // this one is meant to be found without a trip to "Customize sections".
-      (type: SearchModuleType.actions, visible: true),
+      // Off: before anything is typed it can only list every action, which
+      // is noise on the new-tab page. It comes up on its own once there is a
+      // query and a match (see the search surface), and stays offered here so
+      // it can still be switched on and moved.
+      (type: SearchModuleType.actions, visible: false),
       (type: SearchModuleType.recentArticles, visible: true),
       (type: SearchModuleType.recentTabs, visible: true),
       (type: SearchModuleType.recentHistory, visible: true),

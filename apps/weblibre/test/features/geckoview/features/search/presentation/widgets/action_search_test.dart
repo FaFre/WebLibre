@@ -42,10 +42,19 @@ import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
+/// The surface's defaults with Actions switched on: the new-tab page ships it
+/// off, and these tests are about what the section shows once it is on.
 class _DefaultOrder extends SearchModuleOrder {
   @override
-  List<ModuleOrderEntry> build(ModuleSurface surface) =>
-      mergeModuleOrderWithDefaults(null, surface.defaultModules);
+  List<ModuleOrderEntry> build(ModuleSurface surface) => [
+    for (final entry in mergeModuleOrderWithDefaults(
+      null,
+      surface.defaultModules,
+    ))
+      entry.type == SearchModuleType.actions
+          ? ModuleOrderEntry(type: entry.type, visible: true)
+          : entry,
+  ];
 }
 
 class _NoProfiles extends ProfileRepository {
@@ -137,6 +146,18 @@ void main() {
     expect(find.byType(ListTile), findsNWidgets(browserWide.length));
     // The full list is actions only; containers and settings need a query.
     expect(find.text('Work'), findsNothing);
+  });
+
+  testWidgets('a search without a match hides the whole section', (
+    tester,
+  ) async {
+    final query = ValueNotifier(const TextEditingValue(text: 'qxzvqxzv'));
+    addTearDown(query.dispose);
+
+    await pumpActions(tester, surface: ModuleSurface.search, query: query);
+
+    expect(find.byType(ListTile), findsNothing);
+    expect(find.text('Actions'), findsNothing);
   });
 
   testWidgets('a search ranks the matching action first', (tester) async {
