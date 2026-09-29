@@ -1,0 +1,21 @@
+{
+  "@@locale": "es",
+  "common_cancel": "Cancelar",
+  "common_delete": "Eliminar",
+  "common_close": "Cerrar",
+  "common_save": "Guardar",
+  "common_add": "Añadir",
+  "common_edit": "Editar",
+  "common_remove": "Quitar",
+  "common_clear": "Borrar",
+  "common_copy": "Copiar",
+  "common_open": "Abrir",
+  "common_reset": "Restablecer",
+  "common_retry": "Reintentar",
+  "common_done": "Hecho",
+  "common_undo": "Deshacer",
+  "common_dismiss": "Descartar",
+  "common_discard": "Descartar",
+  "common_showLess": "Mostrar menos",
+  "common_loading": "Cargando…"
+}

@@ -1,0 +1,5 @@
+{
+  "@@locale": "es",
+  "qrScanner_noCameraPermission": "No se ha concedido el permiso de la cámara.",
+  "qrScanner_scanCodeTitle": "Escanear código"
+}

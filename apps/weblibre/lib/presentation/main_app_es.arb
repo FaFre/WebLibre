@@ -1,0 +1,22 @@
+{
+  "@@locale": "es",
+  "mainApp_initializationErrorTitle": "Error de inicialización",
+  "mainApp_initializationErrorMessage": "No se pudo inicializar la aplicación",
+  "mainApp_initStageLoadingFormats": "Cargando formatos…",
+  "mainApp_initStageLoadingPackageInfo": "Cargando información de la aplicación…",
+  "mainApp_initStageSyncingBangs": "Sincronizando bangs…",
+  "mainApp_downloadCompleted": "Descarga completada",
+  "mainApp_downloadOpenFailed": "No se pudo abrir el archivo descargado",
+  "mainApp_downloadFailed": "Error en la descarga: {name}",
+  "mainApp_containerBlockedWithHost": "{host} no está asignado a este contenedor",
+  "mainApp_containerBlockedNoHost": "Este sitio no está asignado a este contenedor",
+  "mainApp_sandboxNoCredits": "No te quedan créditos de búsqueda. Compra más para continuar.",
+  "mainApp_sandboxTokenIssuanceFailed": "No se pudieron emitir nuevos tokens de búsqueda. Comprueba tu conexión y vuelve a intentarlo.",
+  "mainApp_sandboxFetchPolicyRejected": "Captura bloqueada por la política de obtención: {detail}",
+  "mainApp_sandboxDetailNotAllowed": "no permitido",
+  "mainApp_sandboxCaptureFailed": "Error en la captura: {detail}",
+  "mainApp_sandboxDetailUnknownError": "error desconocido",
+  "mainApp_sandboxDownloadFailed": "No se pudo descargar el resultado de la captura.",
+  "mainApp_sandboxUnknownError": "Error en la captura aislada: {detail}",
+  "mainApp_syncFailed": "Error de sincronización"
+}

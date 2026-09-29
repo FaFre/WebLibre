@@ -1,0 +1,15 @@
+{
+  "@@locale": "es",
+  "wallpaper_title": "Fondo de pantalla",
+  "wallpaper_settingsDescription": "Se muestra detrás de la página de inicio en todos los contenedores que no tengan uno propio.",
+  "wallpaper_chooseImage": "Elegir imagen",
+  "wallpaper_replace": "Reemplazar",
+  "wallpaper_blurLabel": "Desenfoque",
+  "wallpaper_dimLabel": "Atenuación",
+  "wallpaper_dimDescription": "La atenuación funde la imagen con el fondo de la aplicación para que el texto siga siendo legible con el tema claro y con el oscuro.",
+  "wallpaper_editorDefaultDescription": "La página de inicio mantiene su fondo predeterminado.",
+  "wallpaper_importErrorUnreadable": "No se pudo leer ese archivo",
+  "wallpaper_importErrorTooLarge": "Esa imagen es demasiado grande",
+  "wallpaper_importErrorNotAnImage": "Ese archivo no es una imagen",
+  "wallpaper_importErrorDecodeFailed": "No se pudo leer esa imagen"
+}

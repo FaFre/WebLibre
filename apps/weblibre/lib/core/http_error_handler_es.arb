@@ -1,0 +1,7 @@
+{
+  "@@locale": "es",
+  "httpErrorHandler_socketError": "No se pudo contactar con el servicio remoto",
+  "httpErrorHandler_httpError": "La solicitud web devolvió un error",
+  "httpErrorHandler_formatError": "Formato de respuesta incorrecto",
+  "httpErrorHandler_clientError": "No se pudo contactar con el servicio remoto"
+}

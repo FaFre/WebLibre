@@ -1,0 +1,5 @@
+{
+  "@@locale": "es",
+  "failureWidget_defaultTitle": "Algo ha salido mal",
+  "failureWidget_unknownError": "Error desconocido"
+}

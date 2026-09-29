@@ -1,0 +1,20 @@
+{
+  "@@locale": "es",
+  "searchCredits_couldNotLoadTitle": "No se pudieron cargar los créditos",
+  "searchCredits_title": "Créditos de búsqueda",
+  "searchCredits_errorSubtitle": "Comprueba tu conexión y pulsa actualizar para reintentarlo.",
+  "searchCredits_emptySubtitle": "Compra un paquete de búsquedas para empezar",
+  "searchCredits_creditsWithAllowance": "Créditos: {credits} / {allowance}  ·  Tokens guardados: {stash}",
+  "searchCredits_creditsNoAllowance": "Créditos: {credits}  ·  Tokens guardados: {stash}",
+  "searchCredits_tooltipRefresh": "Actualizar",
+  "searchCredits_resetsOn": "Se renueva el {date}",
+  "searchCredits_lastIssuance": "Última emisión: {relative}  ({absolute})",
+  "searchCredits_requestingTokens": "Solicitando tokens...",
+  "searchCredits_issuanceFailed": "Error al emitir tokens: {error}",
+  "searchCredits_needsReauth": "Vuelve a iniciar sesión para solicitar tokens.",
+  "searchCredits_buySearchPackTitle": "Comprar un paquete de búsquedas",
+  "searchCredits_getTokensTitle": "Obtener tokens",
+  "searchCredits_requestTokensCount": "{count, plural, =1{Solicitar 1 token} other{Solicitar {count} tokens}}",
+  "searchCredits_noCreditsRemaining": "No quedan créditos",
+  "searchCredits_buyMoreTitle": "Comprar más"
+}

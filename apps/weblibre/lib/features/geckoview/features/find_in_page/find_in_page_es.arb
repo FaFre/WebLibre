@@ -1,0 +1,6 @@
+{
+  "@@locale": "es",
+  "findInPage_hint": "Buscar en la página",
+  "findInPage_matchPosition": "{current} de {total}",
+  "findInPage_noMatches": "No encontrado"
+}

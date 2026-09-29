@@ -1,0 +1,20 @@
+{
+  "@@locale": "es",
+  "uiHelper_findInPageSuggestion": "¿Buscar «{query}» en esta página?",
+  "uiHelper_actionFind": "Buscar",
+  "uiHelper_openedTabsFromAnotherDevice": "{count, plural, =1{Se abrió 1 pestaña de otro dispositivo} other{Se abrieron {count} pestañas de otro dispositivo}}",
+  "uiHelper_navigateBackToCloseTab": "Pulsa ATRÁS otra vez para cerrar la pestaña actual",
+  "uiHelper_navigateBackToExitApp": "Pulsa ATRÁS otra vez para salir de la aplicación",
+  "uiHelper_newTabOpenedInBackgroundNamed": "Nueva pestaña «{tabName}» abierta en segundo plano",
+  "uiHelper_newTabOpenedInBackground": "Nueva pestaña abierta en segundo plano",
+  "uiHelper_actionShow": "Mostrar",
+  "uiHelper_wantToOpenLinkFromClipboard": "¿Abrir el enlace del portapapeles?",
+  "uiHelper_newTabOpenedNamed": "Nueva pestaña «{tabName}» abierta",
+  "uiHelper_newTabOpened": "Nueva pestaña abierta",
+  "uiHelper_actionSwitch": "Cambiar",
+  "uiHelper_couldNotLaunchUrl": "No se pudo abrir la URL ({url})",
+  "uiHelper_canNotHandleScheme": "No se puede abrir «{scheme}»",
+  "uiHelper_tabsClosedCount": "{count, plural, =1{Pestaña cerrada} other{{count} pestañas cerradas}}",
+  "uiHelper_closeIsolatedTabsTitle": "¿Cerrar las pestañas aisladas?",
+  "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{Se borrarán de forma permanente todos los datos de navegación de esta sesión aislada.} other{Se borrarán de forma permanente los datos de navegación de {count} sesiones aisladas.}}"
+}

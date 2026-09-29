@@ -1,0 +1,19 @@
+{
+  "@@locale": "es",
+  "profileCopy_pickerContents": "pestañas, historial y ajustes",
+  "profileCopy_dataDescription": "pestañas, historial, marcadores, ajustes e inicios de sesión guardados",
+  "profileCopy_secretDataDescription": "inicio de sesión de la cuenta de WebLibre, configuración de sincronización y datos de proxy",
+  "profileCopy_cannotBeUndone": "Esta acción no se puede deshacer.",
+  "profileCopy_nothingChanged": "No se ha modificado nada.",
+  "profileCopy_restartsToWork": "WebLibre tiene que reiniciarse para hacer esto.",
+  "profileCopy_asksPasswordAfterRestart": "Tras reiniciarse, WebLibre pide la contraseña del archivo de copia de seguridad.",
+  "profileCopy_reopenToContinue": "Cierra WebLibre y vuelve a abrirlo.",
+  "profileCopy_signedInFromBackup": "El perfil restaurado usa la cuenta de WebLibre de la copia de seguridad.",
+  "profileCopy_olderBackupKeepsCredentials": "Una copia de seguridad creada con una versión anterior de WebLibre no contiene ninguno de estos datos, y el perfil conserva los que tiene ahora.",
+  "profileCopy_restartCouldNotBeScheduled": "WebLibre no pudo programar el reinicio necesario para esta operación. {nothingChanged}",
+  "profileCopy_shortcutsNeedPinningAgain": "Después de restaurar, vuelve a añadir los accesos directos a la pantalla de inicio.",
+  "profileCopy_restartClosesCurrentProfile": "También cierra el perfil que estás usando ahora, que no siempre es el perfil indicado aquí.",
+  "profileCopy_restartKeepsOtherTabs": "Tus demás pestañas se vuelven a abrir después.",
+  "profileCopy_privateTabsClosedByRestart": "{count, plural, =1{Se cierra 1 pestaña privada y se borran sus datos de navegación.} other{Se cierran {count} pestañas privadas y se borran sus datos de navegación.}}",
+  "profileCopy_containersClearedByRestart": "{count, plural, =1{Se borran los datos de 1 contenedor configurado para borrarlos al salir.} other{Se borran los datos de {count} contenedores configurados para borrarlos al salir.}}"
+}

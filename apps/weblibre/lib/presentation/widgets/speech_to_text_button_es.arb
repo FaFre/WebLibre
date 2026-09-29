@@ -1,0 +1,4 @@
+{
+  "@@locale": "es",
+  "speechToTextButton_serviceNotAvailable": "El reconocimiento de voz no está disponible"
+}
