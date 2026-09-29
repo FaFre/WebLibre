@@ -14174,6 +14174,12 @@ abstract class AppLocalizations {
   /// **'Currently: {language}'**
   String settings_appLanguageCurrentlyLabel(String language);
 
+  /// Note above the app language list. Explains that the translations are still new and that the app stays in English until the user picks a language. "System default" is the option label settings_appLanguageSystemDefault; keep it identical to your translation of that label.
+  ///
+  /// In en, this message translates to:
+  /// **'Translations are new and may be incomplete or inaccurate, so WebLibre uses English until you choose another language. Pick \"System default\" to follow your device\'s language.'**
+  String get settings_appLanguageTranslationsNote;
+
   /// Setting for the screen refresh rate the app requests.
   ///
   /// In en, this message translates to:

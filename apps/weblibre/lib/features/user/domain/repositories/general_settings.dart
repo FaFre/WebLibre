@@ -271,17 +271,20 @@ TabBarStackingMode effectiveTabBarStackingMode(Ref ref) {
 }
 
 /// The app UI locale to pass to `MaterialApp.locale`, resolved from
-/// [GeneralSettings.appLocale].
+/// [GeneralSettings.appLocale], or [defaultAppLocale] when the user has not
+/// picked one.
 ///
 /// Null means "let Flutter resolve the system locale" — both when the user
-/// has not picked one, and defensively when a previously-picked tag is no
-/// longer supported (e.g. a translation was dropped).
+/// chose [appLocaleSystem], and defensively when a previously-picked tag is
+/// no longer supported (e.g. a translation was dropped).
 @Riverpod(keepAlive: true)
 Locale? effectiveAppLocale(Ref ref) {
   final tag = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.appLocale),
+    generalSettingsWithDefaultsProvider.select(
+      (s) => s.appLocale ?? defaultAppLocale,
+    ),
   );
-  if (tag == null) return null;
+  if (tag == appLocaleSystem) return null;
 
   final resolved = intl.Locale.tryParse(tag)?.toUiLocale();
   if (resolved == null ||

@@ -544,7 +544,8 @@ class _ThemeSection extends HookConsumerWidget {
 /// "Browser Languages" setting under Privacy & Security (which is the
 /// Accept-Language list exposed to websites, not the app's own interface).
 ///
-/// `null` means "follow the system locale". The choices are
+/// The "System default" option stores [appLocaleSystem]; an unset setting
+/// shows [defaultAppLocale] as selected. The other choices are
 /// [AppLocalizations.supportedLocales], i.e. every locale with an
 /// `app_<locale>.arb`.
 class _AppLanguageSection extends HookConsumerWidget {
@@ -557,6 +558,7 @@ class _AppLanguageSection extends HookConsumerWidget {
     // show that instead of leaving every option unselected.
     final appLocale = ref.watch(effectiveAppLocaleProvider);
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -570,14 +572,42 @@ class _AppLanguageSection extends HookConsumerWidget {
             leading: const Icon(Icons.language),
             contentPadding: EdgeInsets.zero,
           ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondaryContainer.withValues(
+                alpha: 0.5,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    l10n.settings_appLanguageTranslationsNote,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           RadioGroup<String?>(
             groupValue: appLocale?.toLanguageTag(),
             onChanged: (value) async {
               await ref
                   .read(saveGeneralSettingsControllerProvider.notifier)
                   .save(
-                    (currentSettings) =>
-                        currentSettings.copyWith.appLocale(value),
+                    (currentSettings) => currentSettings.copyWith.appLocale(
+                      value ?? appLocaleSystem,
+                    ),
                   );
             },
             child: Column(

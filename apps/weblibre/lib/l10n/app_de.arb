@@ -2343,6 +2343,7 @@
   "settings_themeModeDark": "Dunkel",
   "settings_appLanguageSystemDefault": "Systemstandard",
   "settings_appLanguageCurrentlyLabel": "Derzeit: {language}",
+  "settings_appLanguageTranslationsNote": "Die Übersetzungen sind neu und können unvollständig oder ungenau sein. Deshalb bleibt WebLibre auf Englisch, bis du eine andere Sprache auswählst. Mit „Systemstandard“ folgt die App der Sprache des Geräts.",
   "settings_refreshRateTitle": "Bildwiederholrate",
   "settings_refreshRateKeywords": "fps, hz, hertz, Bildrate, Framerate, 60hz, 90hz, 120hz, flüssig, hohe Bildwiederholrate, Anzeigemodus",
   "settings_refreshRateSubtitle": "„Hoch“ für möglichst flüssiges Scrollen und flüssige Animationen auf Bildschirmen mit 90 oder 120 Hz wählen oder „Niedrig“, um Akku zu sparen.",

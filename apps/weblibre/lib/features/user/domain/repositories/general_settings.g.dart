@@ -244,31 +244,34 @@ String _$effectiveTabBarStackingModeHash() =>
     r'5edf9bb20ad74e0133423f4864b9f54d9f7cef64';
 
 /// The app UI locale to pass to `MaterialApp.locale`, resolved from
-/// [GeneralSettings.appLocale].
+/// [GeneralSettings.appLocale], or [defaultAppLocale] when the user has not
+/// picked one.
 ///
 /// Null means "let Flutter resolve the system locale" — both when the user
-/// has not picked one, and defensively when a previously-picked tag is no
-/// longer supported (e.g. a translation was dropped).
+/// chose [appLocaleSystem], and defensively when a previously-picked tag is
+/// no longer supported (e.g. a translation was dropped).
 
 @ProviderFor(effectiveAppLocale)
 final effectiveAppLocaleProvider = EffectiveAppLocaleProvider._();
 
 /// The app UI locale to pass to `MaterialApp.locale`, resolved from
-/// [GeneralSettings.appLocale].
+/// [GeneralSettings.appLocale], or [defaultAppLocale] when the user has not
+/// picked one.
 ///
 /// Null means "let Flutter resolve the system locale" — both when the user
-/// has not picked one, and defensively when a previously-picked tag is no
-/// longer supported (e.g. a translation was dropped).
+/// chose [appLocaleSystem], and defensively when a previously-picked tag is
+/// no longer supported (e.g. a translation was dropped).
 
 final class EffectiveAppLocaleProvider
     extends $FunctionalProvider<Locale?, Locale?, Locale?>
     with $Provider<Locale?> {
   /// The app UI locale to pass to `MaterialApp.locale`, resolved from
-  /// [GeneralSettings.appLocale].
+  /// [GeneralSettings.appLocale], or [defaultAppLocale] when the user has not
+  /// picked one.
   ///
   /// Null means "let Flutter resolve the system locale" — both when the user
-  /// has not picked one, and defensively when a previously-picked tag is no
-  /// longer supported (e.g. a translation was dropped).
+  /// chose [appLocaleSystem], and defensively when a previously-picked tag is
+  /// no longer supported (e.g. a translation was dropped).
   EffectiveAppLocaleProvider._()
     : super(
         from: null,
@@ -303,7 +306,7 @@ final class EffectiveAppLocaleProvider
 }
 
 String _$effectiveAppLocaleHash() =>
-    r'df378dcfc9fae60e588e1955f8c1689b8bd4d7b8';
+    r'ab79e794177a3521e25451dd865a6a919dd37778';
 
 /// [GeneralSettings.effectiveHomeSearchBarPlacement] resolved against the
 /// current window.

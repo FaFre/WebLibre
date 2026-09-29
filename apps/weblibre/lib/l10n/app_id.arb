@@ -2343,6 +2343,7 @@
   "settings_themeModeDark": "Gelap",
   "settings_appLanguageSystemDefault": "Bawaan sistem",
   "settings_appLanguageCurrentlyLabel": "Saat ini: {language}",
+  "settings_appLanguageTranslationsNote": "Terjemahan masih baru dan mungkin belum lengkap atau kurang akurat, jadi WebLibre menggunakan bahasa Inggris sampai Anda memilih bahasa lain. Pilih \"Bawaan sistem\" untuk mengikuti bahasa perangkat Anda.",
   "settings_refreshRateTitle": "Kecepatan Refresh",
   "settings_refreshRateKeywords": "fps, hz, hertz, frame rate, framerate, 60hz, 90hz, 120hz, mulus, refresh tinggi, mode layar, refresh rate",
   "settings_refreshRateSubtitle": "Pilih \"Tinggi\" untuk guliran dan animasi paling mulus di layar 90/120Hz, atau \"Rendah\" untuk menghemat baterai.",

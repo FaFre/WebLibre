@@ -8454,6 +8454,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get settings_appLanguageTranslationsNote =>
+      'Die Übersetzungen sind neu und können unvollständig oder ungenau sein. Deshalb bleibt WebLibre auf Englisch, bis du eine andere Sprache auswählst. Mit „Systemstandard“ folgt die App der Sprache des Geräts.';
+
+  @override
   String get settings_refreshRateTitle => 'Bildwiederholrate';
 
   @override

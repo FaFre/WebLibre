@@ -346,6 +346,7 @@
   "settings_themeModeDark": "Oscuro",
   "settings_appLanguageSystemDefault": "Predeterminado del sistema",
   "settings_appLanguageCurrentlyLabel": "Actualmente: {language}",
+  "settings_appLanguageTranslationsNote": "Las traducciones son nuevas y pueden estar incompletas o ser inexactas, por eso WebLibre usa el inglés hasta que elijas otro idioma. Elige «Predeterminado del sistema» para usar el idioma de tu dispositivo.",
   "settings_refreshRateTitle": "Frecuencia de actualización",
   "settings_refreshRateKeywords": "fps, hz, hercios, frecuencia de fotogramas, 60hz, 90hz, 120hz, fluidez, alta frecuencia, modo de pantalla",
   "settings_refreshRateSubtitle": "Elige «Alta» para un desplazamiento y unas animaciones más fluidos en pantallas de 90 o 120 Hz, o «Baja» para ahorrar batería.",

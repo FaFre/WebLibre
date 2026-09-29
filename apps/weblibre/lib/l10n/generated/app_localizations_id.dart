@@ -8397,6 +8397,10 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get settings_appLanguageTranslationsNote =>
+      'Terjemahan masih baru dan mungkin belum lengkap atau kurang akurat, jadi WebLibre menggunakan bahasa Inggris sampai Anda memilih bahasa lain. Pilih \"Bawaan sistem\" untuk mengikuti bahasa perangkat Anda.';
+
+  @override
   String get settings_refreshRateTitle => 'Kecepatan Refresh';
 
   @override

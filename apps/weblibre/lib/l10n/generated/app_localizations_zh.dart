@@ -7760,6 +7760,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get settings_appLanguageTranslationsNote =>
+      '翻译刚刚推出，可能不完整或不准确，因此在你选择其他语言之前，WebLibre 将使用英语。选择“系统默认”即可跟随设备语言。';
+
+  @override
   String get settings_refreshRateTitle => '刷新率';
 
   @override

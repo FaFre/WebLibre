@@ -43,6 +43,17 @@ const _fallbackSearchProvider = BangKey(
 );
 const _fallbackAutocompleteProvider = SearchSuggestionProviders.none;
 
+/// [GeneralSettings.appLocale] value that follows the system locale. A stored
+/// null cannot express this: it reads back the same as "never set".
+const appLocaleSystem = 'system';
+
+/// App UI language for users who have not picked one.
+///
+/// English for now, while the translations are new: the user opts into their
+/// language (or [appLocaleSystem]) in settings. Setting this to
+/// [appLocaleSystem] makes the system locale the default instead.
+const defaultAppLocale = 'en';
+
 const defaultUiScaleFactor = 1.0;
 const minUiScaleFactor = 0.5;
 const maxUiScaleFactor = 1.5;
@@ -227,9 +238,11 @@ enum DeleteBrowsingDataType {
 class GeneralSettings with FastEquatable {
   final ThemeMode themeMode;
 
-  /// The app UI language, as a BCP-47 tag (e.g. `"en"`, `"de"`). Null follows
-  /// the system locale. Distinct from `EngineSettings.locales`, which is the
-  /// Accept-Language list exposed to websites, not the app's own UI language.
+  /// The app UI language, as a BCP-47 tag (e.g. `"en"`, `"de"`), or
+  /// [appLocaleSystem] to follow the system locale. Null means the user has
+  /// not picked one and gets [defaultAppLocale]. Distinct from
+  /// `EngineSettings.locales`, which is the Accept-Language list exposed to
+  /// websites, not the app's own UI language.
   final String? appLocale;
   final double uiScaleFactor;
   final bool disableAnimations;

@@ -8515,6 +8515,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get settings_appLanguageTranslationsNote =>
+      'Las traducciones son nuevas y pueden estar incompletas o ser inexactas, por eso WebLibre usa el inglés hasta que elijas otro idioma. Elige «Predeterminado del sistema» para usar el idioma de tu dispositivo.';
+
+  @override
   String get settings_refreshRateTitle => 'Frecuencia de actualización';
 
   @override

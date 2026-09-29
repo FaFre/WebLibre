@@ -2343,6 +2343,7 @@
   "settings_themeModeDark": "Тёмная",
   "settings_appLanguageSystemDefault": "Как в системе",
   "settings_appLanguageCurrentlyLabel": "Сейчас: {language}",
+  "settings_appLanguageTranslationsNote": "Переводы новые и могут быть неполными или неточными, поэтому WebLibre использует английский, пока вы не выберете другой язык. Выберите «Как в системе», чтобы использовать язык устройства.",
   "settings_refreshRateTitle": "Частота обновления",
   "settings_refreshRateKeywords": "fps, гц, герц, частота кадров, 60 гц, 90 гц, 120 гц, плавность, высокая частота, режим экрана",
   "settings_refreshRateSubtitle": "Выберите «Высокая» для самой плавной прокрутки и анимаций на экранах 90/120 Гц или «Низкая» для экономии заряда.",

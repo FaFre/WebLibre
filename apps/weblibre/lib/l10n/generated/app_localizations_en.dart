@@ -8286,6 +8286,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get settings_appLanguageTranslationsNote =>
+      'Translations are new and may be incomplete or inaccurate, so WebLibre uses English until you choose another language. Pick \"System default\" to follow your device\'s language.';
+
+  @override
   String get settings_refreshRateTitle => 'Refresh Rate';
 
   @override

@@ -8509,6 +8509,10 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get settings_appLanguageTranslationsNote =>
+      'Переводы новые и могут быть неполными или неточными, поэтому WebLibre использует английский, пока вы не выберете другой язык. Выберите «Как в системе», чтобы использовать язык устройства.';
+
+  @override
   String get settings_refreshRateTitle => 'Частота обновления';
 
   @override
