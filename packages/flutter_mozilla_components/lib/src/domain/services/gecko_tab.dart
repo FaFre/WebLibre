@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter_mozilla_components/src/data/models/load_url_flags.dart';
 import 'package:flutter_mozilla_components/src/data/models/source.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart'
@@ -190,6 +192,12 @@ class GeckoTabService {
       tabId: tabId,
       alternativeUrl: alternativeUrl?.toString(),
     );
+  }
+
+  /// DER encoding of the server certificate for [tabId], or null when the
+  /// engine reports none (see `GeckoTabsApi.getSecurityCertificate`).
+  Future<Uint8List?> getSecurityCertificate({required String tabId}) {
+    return _api.getSecurityCertificate(tabId: tabId);
   }
 
   Future<List<String>> addMultipleTabs({

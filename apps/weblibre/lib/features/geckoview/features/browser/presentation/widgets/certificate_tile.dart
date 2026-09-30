@@ -17,27 +17,65 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/utils/certificate_viewer.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class CertificateTile extends HookConsumerWidget {
-  const CertificateTile({super.key});
+  /// Dismisses the enclosing sheet before the certificate viewer opens.
+  final VoidCallback onClose;
+
+  const CertificateTile({super.key, required this.onClose});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabState = ref.watch(selectedTabStateProvider);
 
+    // Re-read on every security change: the engine only reports a certificate
+    // for verified connections and sites loaded through a security exception.
+    final certificateFuture = useMemoized(
+      () async => (tabState != null)
+          ? await GeckoTabService().getSecurityCertificate(tabId: tabState.id)
+          : null,
+      [tabState?.id, tabState?.securityInfoState, tabState?.isLoading],
+    );
+    final certificate = useFuture(certificateFuture, preserveState: false).data;
+
     if (tabState == null) {
       return const SizedBox.shrink();
     }
+
+    Future<void> openCertificateViewer(Uint8List derCertificate) async {
+      onClose();
+
+      await ref
+          .read(tabRepositoryProvider.notifier)
+          .addTab(
+            url: certificateViewerUri(derCertificate),
+            parentId: tabState.id,
+            selectTab: true,
+            tabMode: tabState.tabMode,
+          );
+    }
+
+    final onCertificateTap = (certificate != null)
+        ? () => openCertificateViewer(certificate)
+        : null;
+    final certificateTrailing = (certificate != null)
+        ? const Icon(Icons.chevron_right)
+        : null;
 
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: tabState.id),
@@ -81,6 +119,8 @@ class CertificateTile extends HookConsumerWidget {
               color: Theme.of(context).colorScheme.errorContainer,
             ),
           ),
+          trailing: certificateTrailing,
+          onTap: onCertificateTap,
         );
       } else if (!tabState.isLoading) {
         return ListTile(
@@ -89,6 +129,8 @@ class CertificateTile extends HookConsumerWidget {
           subtitle: Text(
             l10n.browser_certVerifiedBy(tabState.securityInfoState.issuer),
           ),
+          trailing: certificateTrailing,
+          onTap: onCertificateTap,
         );
       } else {
         return Skeletonizer(
@@ -99,7 +141,7 @@ class CertificateTile extends HookConsumerWidget {
           ),
         );
       }
-    }, [tabState]);
+    }, [tabState, certificate]);
 
     return icon;
   }

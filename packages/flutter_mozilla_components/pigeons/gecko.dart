@@ -1821,6 +1821,13 @@ abstract class GeckoTabsApi {
     required String tabId,
     required String? alternativeUrl,
   });
+
+  /// DER encoding of the server certificate the engine reports for [tabId].
+  ///
+  /// Null when the engine has none: plain http, an unknown identity, a
+  /// certificate error page, or a page with loaded mixed active content.
+  /// A site loaded through a security exception still has one.
+  Uint8List? getSecurityCertificate({required String tabId});
 }
 
 @HostApi()

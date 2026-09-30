@@ -10310,6 +10310,32 @@ class GeckoTabsApi {
     );
     return pigeonVar_replyValue! as String;
   }
+
+  /// DER encoding of the server certificate the engine reports for [tabId].
+  ///
+  /// Null when the engine has none: plain http, an unknown identity, a
+  /// certificate error page, or a page with loaded mixed active content.
+  /// A site loaded through a security exception still has one.
+  Future<Uint8List?> getSecurityCertificate({required String tabId}) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getSecurityCertificate$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as Uint8List?;
+  }
 }
 
 class GeckoFindApi {

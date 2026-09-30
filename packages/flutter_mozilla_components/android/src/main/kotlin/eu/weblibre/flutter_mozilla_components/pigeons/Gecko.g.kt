@@ -9434,6 +9434,14 @@ interface GeckoTabsApi {
   fun duplicateTab(selectTabId: String?, selectNewTab: Boolean, newContextId: String?, excludeFromHistory: Boolean): String
   fun moveTabs(tabIds: List<String>, targetTabId: String, placeAfter: Boolean)
   fun migratePrivateTabUseCase(tabId: String, alternativeUrl: String?): String
+  /**
+   * DER encoding of the server certificate the engine reports for [tabId].
+   *
+   * Null when the engine has none: plain http, an unknown identity, a
+   * certificate error page, or a page with loaded mixed active content.
+   * A site loaded through a security exception still has one.
+   */
+  fun getSecurityCertificate(tabId: String): ByteArray?
 
   companion object {
     /** The codec used by GeckoTabsApi. */
@@ -9749,6 +9757,23 @@ interface GeckoTabsApi {
             val alternativeUrlArg = args[1] as String?
             val wrapped: List<Any?> = try {
               listOf(api.migratePrivateTabUseCase(tabIdArg, alternativeUrlArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getSecurityCertificate$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.getSecurityCertificate(tabIdArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
