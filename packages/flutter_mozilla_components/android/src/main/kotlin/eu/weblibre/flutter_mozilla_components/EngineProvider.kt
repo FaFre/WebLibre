@@ -26,6 +26,7 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
+import eu.weblibre.flutter_mozilla_components.performance.LadybirdRuntimeConfig
 import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
@@ -159,6 +160,13 @@ object EngineProvider {
             }
 
             val created = GeckoRuntime.create(context, builder.build())
+
+            // === Ladybird/Lightpanda Performance Optimization ===
+            // Apply performance-oriented prefs inspired by Ladybird's zero-bloat
+            // architecture and Lightpanda's 16x memory / 9x speed advantage.
+            // Reduces power consumption, memory footprint, and page load latency.
+            LadybirdRuntimeConfig.applyPerformancePrefs(created)
+
             state = GeckoRuntimeState.Live(profileId, created)
             created
         }
