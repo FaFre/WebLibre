@@ -194,6 +194,14 @@ object EngineProvider {
                 "mozacReaderExtract",
             ).install(it)
 
+            // Fingerprint Shield: per-origin spoofing of UA, screen, canvas,
+            // WebGL, audio, fonts, timezone and WebRTC, applied to both
+            // JavaScript and the outgoing User-Agent header.
+            BuiltInWebExtensionController(
+                "fingerprint-shield@weblibre.eu",
+                "resource://android/assets/extensions/fingerprint_shield/",
+            ).install(it)
+
             SandboxCaptureFeature.install(it)
 
             // Installs Mozilla's reader view extension early and wires the

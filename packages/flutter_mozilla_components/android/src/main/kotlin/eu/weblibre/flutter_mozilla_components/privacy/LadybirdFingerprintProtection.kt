@@ -44,19 +44,20 @@ object LadybirdFingerprintProtection {
         val prefs = runtime.settings
 
         // =========================================================================
-        // Resist Fingerprinting (RFP) — Gecko's built-in fingerprinting countermeasure
+        // Layering
+        //
+        // Gecko's own ResistFingerprinting (privacy.resistFingerprinting) is
+        // deliberately NOT enabled here. It spoofs the UA and platform to a
+        // desktop Windows Firefox identity, which would contradict the
+        // per-origin Android Chrome profile that the Fingerprint Shield
+        // WebExtension exposes to JavaScript and to the User-Agent header.
+        // Two spoofing layers disagreeing is worse than one: the mismatch is
+        // itself a unique, trackable signal.
+        //
+        // This method therefore only sets engine-level prefs that complement
+        // (rather than duplicate) the shield — surfaces the content script
+        // cannot reach from JavaScript.
         // =========================================================================
-
-        // Enable RFP globally. This:
-        // - Spoofs navigator.userAgent to a generic Firefox on Windows string
-        // - Rounds window.devicePixelRatio to nearest integer
-        // - Spoofs CSS media queries (prefers-color-scheme, etc.)
-        // - Reports UTC timezone only
-        // - Reduces canvas fingerprinting entropy
-        prefs.setInt("privacy.resistFingerprinting", 1)
-
-        // Spoof English locale to reduce Accept-Language fingerprinting surface.
-        prefs.setInt("privacy.spoof_english", if (privacyConfig.protectionLevel() == LadybirdPrivacyConfig.ProtectionLevel.Strict) 2 else 1)
 
         // =========================================================================
         // WebGL and Canvas countermeasures
@@ -96,81 +97,16 @@ object LadybirdFingerprintProtection {
         // Disable mDNS hostname obfuscation (can be de-obfuscated).
         prefs.setBoolean("media.peerconnection.ice.obfuscate_host_addresses", false)
 
-        // =========================================================================
-        // Per-origin UA spoofing via content script
-        // =========================================================================
-
+        // UA, screen, canvas, WebGL, audio, fonts and timezone are spoofed by
+        // the Fingerprint Shield WebExtension (assets/extensions/fingerprint_shield),
+        // which derives one coherent per-origin profile and applies it to both
+        // JavaScript and the outgoing User-Agent header.
         if (privacyConfig.shouldSpoofUserAgent()) {
-            // Gecko's RFP spoofs to a generic Windows Firefox UA — which itself
-            // is a fingerprinting signal (it marks the user as an RFP user).
-            // We override this with per-origin mobile UAs that blend in with
-            // normal Android Chrome traffic.
-            logger.debug("Per-origin UA spoofing enabled")
+            logger.debug("Per-origin UA spoofing delegated to the Fingerprint Shield extension")
         }
 
         logger.info(
             "Fingerprint protection applied at ${privacyConfig.protectionLevel().name} level"
         )
-    }
-
-    /**
-     * Returns JavaScript that overrides navigator.userAgent with the per-origin
-     * isolated UA from [LadybirdPrivacyConfig].
-     *
-     * This script is designed to be injected as a content script via the
-     * WebExtension API at document_start, before any page JS runs.
-     *
-     * @param origin The serialized origin of the current document
-     * @return Self-executing JavaScript that patches navigator.userAgent
-     */
-    fun getUAOverrideScript(origin: String): String {
-        val spoofedUA = LadybirdPrivacyConfig.getIsolatedUserAgent(origin)
-        val noiseSeed = LadybirdPrivacyConfig.getNoiseSeedForOrigin(origin)
-
-        val escapedUA = spoofedUA
-            .replace("\\", "\\\\")
-            .replace("'", "\\'")
-            .replace("\"", "\\\"")
-
-        return """
-(function() {
-    if (window.__ladybird_ua_spoof_applied) return;
-    window.__ladybird_ua_spoof_applied = true;
-
-    var SPOOFED_UA = "$escapedUA";
-    var NOISE_SEED = $noiseSeed;
-
-    try {
-        // Override navigator.userAgent
-        var _navigator = window.navigator;
-        Object.defineProperty(_navigator, 'userAgent', {
-            get: function() { return SPOOFED_UA; },
-            configurable: true
-        });
-
-        // Also override navigator.appVersion (derived from UA)
-        Object.defineProperty(_navigator, 'appVersion', {
-            get: function() {
-                var m = SPOOFED_UA.match(/Chrome\/(\d+\.\d+)/);
-                return m ? '5.0 (Android; ' + m[1] + ')' : '5.0 (Android)';
-            },
-            configurable: true
-        });
-
-        // Override User-Agent header in fetch and XHR
-        var _fetch = window.fetch;
-        window.fetch = function(url, opts) {
-            opts = opts || {};
-            opts.headers = opts.headers || {};
-            if (typeof opts.headers === 'object' && !(opts.headers instanceof Headers)) {
-                opts.headers['User-Agent'] = SPOOFED_UA;
-            }
-            return _fetch.call(this, url, opts);
-        };
-    } catch (e) {
-        // Silently fail — better to load the page without spoofing than to break it
-    }
-})();
-""".trimIndent()
     }
 }
