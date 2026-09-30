@@ -36,7 +36,6 @@ import eu.weblibre.flutter_mozilla_components.feature.DownloadAppChooser
 import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
-import eu.weblibre.flutter_mozilla_components.feature.WebExtensionToolbarFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
@@ -49,7 +48,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import mozilla.components.browser.state.selector.findCustomTabOrSelectedTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
 import mozilla.components.browser.state.state.SessionState
-import mozilla.components.browser.state.state.WebExtensionState
 import mozilla.components.browser.thumbnails.BrowserThumbnails
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.accounts.FxaCapability
@@ -80,7 +78,6 @@ import mozilla.components.support.ktx.android.view.enterImmersiveMode
 import mozilla.components.support.ktx.android.view.exitImmersiveMode
 import mozilla.components.support.locale.ActivityContextWrapper
 import mozilla.components.support.utils.DefaultDownloadFileUtils
-import mozilla.components.support.webextensions.WebExtensionPopupObserver
 
 /**
  * Base fragment extended by [BrowserFragment] and [ExternalAppBrowserFragment].
@@ -116,8 +113,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
     val readerViewFeature = ViewBoundFeatureWrapper<ReaderViewIntegration>()
     private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
-    private val webExtensionPopupObserver = ViewBoundFeatureWrapper<WebExtensionPopupObserver>()
-    private val webExtToolbarFeature = ViewBoundFeatureWrapper<WebExtensionToolbarFeature>()
+    // The web extension toolbar feature and popup observer are deliberately
+    // *not* bound here: this fragment only exists once a tab has been painted,
+    // so a start that stayed on the home surface never listed any extension
+    // action nor opened a popup (issue #542). `WebExtensionActionsHost` runs
+    // them for the lifetime of the components instead.
 
     // Keyboard visibility detection feature
     private var keyboardVisibilityFeature: KeyboardVisibilityFeature? = null
@@ -645,18 +645,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
-            webExtensionPopupObserver.set(
-                feature = WebExtensionPopupObserver(components.core.store, ::openPopup),
-                owner = this,
-                view = view,
-            )
-
-            webExtToolbarFeature.set(
-                feature = components.features.webExtensionToolbarFeature,
-                owner = this,
-                view = view,
-            )
-
             components.core.historyStorage.registerStorageMaintenanceWorker()
 
             // Start keyboard visibility detection if viewport events are available
@@ -699,13 +687,6 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * Subclasses can override to perform additional setup that requires an attached engine view.
      */
     protected open fun onEngineSetupComplete() {}
-
-    private fun openPopup(webExtensionState: WebExtensionState) {
-        components.addonEvents.onWebExtensionPopupRequested(
-            webExtensionState.id,
-            webExtensionState.name ?: "",
-        ) {}
-    }
 
     @CallSuper
     @Suppress("LongMethod")

@@ -35,6 +35,7 @@ import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationSe
 import eu.weblibre.flutter_mozilla_components.settings.BrowserSettingsPreferences
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
+import eu.weblibre.flutter_mozilla_components.feature.WebExtensionActionsHost
 import eu.weblibre.flutter_mozilla_components.api.GeckoViewportApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.feature.AppLifecycleFeature
@@ -128,6 +129,7 @@ object GlobalComponents {
         // After the components, so it releases against the absence rather than
         // rebinding to the set being torn down.
         WebExtensionPromptHost.onComponentsChanged()
+        WebExtensionActionsHost.onComponentsChanged()
     }
 
     enum class ComponentsMode {
@@ -525,6 +527,10 @@ object GlobalComponents {
         // own, and a rebuild would leave the running feature answering prompts on
         // the store this call just replaced.
         WebExtensionPromptHost.onComponentsChanged()
+
+        // Mirror extension actions to Dart and hand it popups whether or not a
+        // tab has been painted yet (issue #542).
+        WebExtensionActionsHost.onComponentsChanged()
 
         // Hold a window open across startup. Gecko gates its delayed startup —
         // and with it every already-installed extension's background script —

@@ -33,6 +33,7 @@ import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddlewa
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.push.WebNotificationDrainCoordinator
@@ -281,6 +282,8 @@ class Core(
                     MainScope(),
                     false,
                     isTranslationsEnabled = { true }),
+                // Before the engine middleware; see its KDoc (issue #542).
+                WebExtensionActiveTabMiddleware,
             ) + EngineMiddleware.create(
                 engine,
                 // We are disabling automatic suspending of engine sessions under memory pressure.
