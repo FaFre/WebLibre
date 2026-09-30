@@ -139,10 +139,22 @@ object EngineProvider {
             builder.aboutConfigEnabled(true)
             builder.extensionsProcessEnabled(true)
             builder.extensionsWebAPIEnabled(true)
+
+            // === Titanium-inspired security hardening ===
+            // Disable remote debugging by default to reduce attack surface.
+            // Remote debugging can be re-enabled via about:config for development.
+            builder.remoteDebuggingEnabled(false)
             //builder.debugLogging(components.logLevel == Log.Priority.DEBUG)
             builder.consoleOutput(components.logLevel == Log.Priority.DEBUG)
             builder.contentBlocking(contentBlocking.build())
             builder.locales(arrayOf("en-US", "en")) // Will be overridden later
+
+            // === Titanium-inspired privacy hardening ===
+            // WebRTC IP leak protection: prevent local/private IP exposure via ICE candidates.
+            // Mirrors Titanium's WebRTC IP policy enforcement at the Chromium level.
+            contentBlocking.webRtcIpPolicy(
+                ContentBlocking.WebRtcIpPolicy.DEFAULT_PUBLIC_INTERFACE_ONLY.mode
+            )
 
             // Apply builder-only settings from startup config
             GlobalComponents.startupSettings?.let { settings ->

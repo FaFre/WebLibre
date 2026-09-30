@@ -256,6 +256,21 @@ class GeckoEngineSettingsApiImpl(
         }
         if(settings.fingerprintingProtectionOverrides != null) {
             components.core.engineSettings.fingerprintingProtectionOverrides = settings.fingerprintingProtectionOverrides
+        } else if (settings.trackingProtectionPolicy == eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT) {
+            // === Titanium-inspired RFP hardening ===
+            // When STRICT mode is active and no explicit overrides are provided,
+            // apply a comprehensive set of RFP targets that mirrors Titanium's
+            // Chromium-level fingerprint resistance. This covers canvas noise,
+            // WebGL renderer masking, navigator spoofing, timezone clamping,
+            // font visibility restriction, and screen dimension rounding.
+            components.core.engineSettings.fingerprintingProtectionOverrides =
+                "+CanvasRandomization,+WebGLRandomization,+EfficientCanvasRandomization," +
+                "+NavigatorUserAgent,+NavigatorPlatform,+NavigatorAppVersion," +
+                "+NavigatorHWConcurrency,+NavigatorHWConcurrencyTiered," +
+                "+JSDateTimeUTC,+ReduceTimerPrecision,+FontVisibilityBaseSystem," +
+                "+FontVisibilityRestrictGenerics,+RoundWindowSize,+WindowOuterSize," +
+                "+ScreenRect,+ScreenAvailRect,+CSSDeviceSize,+CSSResolution," +
+                "+MediaDevices,+AudioContext,+StreamVideoFacingMode"
         }
         if(settings.locales != null) {
 //            components.core.engineSettings.automaticLanguageAdjustment = false
@@ -354,7 +369,8 @@ class GeckoEngineSettingsApiImpl(
             components.core.engine.settings.dohDefaultProviderUrl = components.core.engineSettings.dohDefaultProviderUrl
             components.core.engine.settings.dohExceptionsList = components.core.engineSettings.dohExceptionsList
         }
-        if(settings.fingerprintingProtectionOverrides != null) {
+        if(settings.fingerprintingProtectionOverrides != null ||
+           settings.trackingProtectionPolicy == eu.weblibre.flutter_mozilla_components.pigeons.TrackingProtectionPolicy.STRICT) {
             components.core.engine.settings.fingerprintingProtectionOverrides = components.core.engineSettings.fingerprintingProtectionOverrides
         }
 
