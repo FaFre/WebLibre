@@ -16,6 +16,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMo
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
+import eu.weblibre.flutter_mozilla_components.privacy.LadybirdFingerprintProtection
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
@@ -160,6 +161,12 @@ object EngineProvider {
 
             val created = GeckoRuntime.create(context, builder.build())
             state = GeckoRuntimeState.Live(profileId, created)
+
+            // === Ladybird-inspired fingerprint protection ===
+            // Ports Ladybird's LibPrivacy module: per-origin UA spoofing,
+            // deterministic noise seeds, and ResistFingerprinting prefs.
+            LadybirdFingerprintProtection.apply(created)
+
             created
         }
     }
