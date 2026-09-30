@@ -27,6 +27,7 @@ import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
 import eu.weblibre.flutter_mozilla_components.security.FeatureFlagManager
+import eu.weblibre.flutter_mozilla_components.security.ProcessIsolationCompat
 import eu.weblibre.flutter_mozilla_components.security.TitaniumHardeningConfig
 import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.mozilla.geckoview.ContentBlocking
@@ -171,6 +172,19 @@ object EngineProvider {
             // Apply locked feature flags (cannot be overridden by user settings).
             // Mirrors Titanium's compile-time GN flag enforcement model.
             FeatureFlagManager.applyLockedFlags(created)
+
+            // === Process Isolation Compatibility Fix ===
+            // When isolatedProcess or appZygote is enabled, Android's seccomp/SELinux
+            // restrictions compound with Gecko's internal sandbox, breaking Cloudflare
+            // Turnstile verification and Widevine DRM playback. Apply runtime pref
+            // compensations to prevent double-stacking of restrictions.
+            GlobalComponents.startupSettings?.let { settings ->
+                ProcessIsolationCompat.applyCompensations(
+                    runtime = created,
+                    isolatedProcessEnabled = settings.isolatedProcessEnabled ?: false,
+                    appZygoteProcessEnabled = settings.appZygoteProcessEnabled ?: false,
+                )
+            }
 
             state = GeckoRuntimeState.Live(profileId, created)
             created
