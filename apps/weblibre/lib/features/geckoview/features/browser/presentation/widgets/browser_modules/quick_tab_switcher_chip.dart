@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/inline_count_badge.dart';
 import 'package:weblibre/presentation/widgets/selectable_chips.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 
@@ -53,6 +54,14 @@ class QuickTabSwitcherItem with FastEquatable {
   /// closed or reordered.
   final bool isPlaceholder;
 
+  /// Number of tabs this chip stands for. Above 1 it is a tab group chip of
+  /// [TabBarStackingMode.tabGroups]: its tab is the group's root, and the chip
+  /// shows the count, has no close button and no tab menu, since either would
+  /// act on the root alone while the chip reads as the whole group.
+  final int groupSize;
+
+  bool get isGroup => groupSize > 1;
+
   QuickTabSwitcherItem({
     required this.color,
     required this.id,
@@ -67,11 +76,15 @@ class QuickTabSwitcherItem with FastEquatable {
     this.isSandbox = false,
     this.depth = 0,
     this.isPlaceholder = false,
+    this.groupSize = 1,
   });
 
   /// Builds a switcher entry for an open tab. [sandboxSourceUri] is the
   /// canonical source URL when the tab is a sandbox capture (otherwise null),
   /// so the bar shows the real site instead of the loopback capture URL.
+  ///
+  /// [groupTabIds] makes the entry a group chip: active while the selected tab
+  /// is any of them.
   factory QuickTabSwitcherItem.tab(
     TabStateWithContainer state, {
     required String? selectedTabId,
@@ -79,6 +92,7 @@ class QuickTabSwitcherItem with FastEquatable {
     required Map<String, int> tabDepthById,
     required Uri? sandboxSourceUri,
     bool isPlaceholder = false,
+    List<String>? groupTabIds,
   }) {
     final (tab, container) = state;
 
@@ -86,7 +100,9 @@ class QuickTabSwitcherItem with FastEquatable {
       color: container?.color,
       useCustomColor: container?.metadata.useCustomColor ?? false,
       id: tab.id,
-      isActive: tab.id == selectedTabId,
+      isActive: groupTabIds != null && groupTabIds.length > 1
+          ? groupTabIds.contains(selectedTabId)
+          : tab.id == selectedTabId,
       title: sandboxSourceUri != null && tab.title.isEmpty
           ? sandboxSourceUri.authority
           : tab.titleOrAuthority,
@@ -98,6 +114,7 @@ class QuickTabSwitcherItem with FastEquatable {
       url: sandboxSourceUri ?? tab.url,
       avatar: TabIcon(tabState: tab, iconSize: 20),
       isPlaceholder: isPlaceholder,
+      groupSize: groupTabIds?.length ?? 1,
     );
   }
 
@@ -137,6 +154,7 @@ class QuickTabSwitcherItem with FastEquatable {
     url,
     avatar,
     isPlaceholder,
+    groupSize,
   ];
 }
 
@@ -200,6 +218,7 @@ buildQuickTabSwitcherChipDecoration(
             !item.isHistory &&
             !item.isPinned &&
             !item.isSandbox &&
+            !item.isGroup &&
             (item.depth == 0 || hierarchyGlyphs == 0 || isVertical) &&
             item.tabMode is! PrivateTabMode &&
             item.tabMode is! IsolatedTabMode)
@@ -294,6 +313,11 @@ Widget buildQuickTabSwitcherChipLabel(
           padding: EdgeInsets.only(left: 8.0),
           child: Icon(MdiIcons.history, size: 20),
         ),
+      if (item.isGroup)
+        Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: _GroupSizeBadge(item: item),
+        ),
     ],
   );
 
@@ -384,6 +408,41 @@ class _RailDepthAvatar extends StatelessWidget {
 /// paths that can't go through [SelectableChips] itself (the reorderable
 /// list and the accordion view). Stateless wrapper so a parent
 /// `ReorderableListView` can attach its drag-handle gesture recognizer.
+/// The tab count on a tab group chip, coloured like the container chips'
+/// count badges.
+class _GroupSizeBadge extends StatelessWidget {
+  final QuickTabSwitcherItem item;
+
+  const _GroupSizeBadge({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final palette = item.color.mapNotNull(
+      (color) => ContainerColors.palette(
+        context,
+        color,
+        useCustomColor: item.useCustomColor,
+      ),
+    );
+
+    return Semantics(
+      label: AppLocalizations.of(
+        context,
+      ).browser_tabGroupSizeSemantics(item.groupSize),
+      excludeSemantics: true,
+      child: InlineCountBadge(
+        count: item.groupSize,
+        icon: MdiIcons.tabUnselected,
+        backgroundColor:
+            palette?.badgeBackgroundColor ?? scheme.secondaryContainer,
+        foregroundColor:
+            palette?.badgeForegroundColor ?? scheme.onSecondaryContainer,
+      ),
+    );
+  }
+}
+
 class QuickTabSwitcherChip extends StatelessWidget {
   final QuickTabSwitcherItem item;
   final bool isSelected;
@@ -517,6 +576,7 @@ class QuickTabSwitcherRow extends StatelessWidget {
         Icon(MdiIcons.archiveLockOutline, color: scheme.tertiary),
       if (item.isPinned) Icon(MdiIcons.pin, color: scheme.primary),
       if (item.isHistory) const Icon(MdiIcons.history),
+      if (item.isGroup) _GroupSizeBadge(item: item),
     ];
 
     return Padding(

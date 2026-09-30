@@ -242,6 +242,15 @@
   "@browser_tooltipCollapseGroup": {
     "description": "Tooltip of the button that collapses a group of tabs in the tab overview."
   },
+  "browser_tabGroupSizeSemantics": "{count, plural, =1{Group of 1 tab} other{Group of {count} tabs}}",
+  "@browser_tabGroupSizeSemantics": {
+    "description": "Screen reader label of the tab count on a tab group chip in the quick tab switcher bar. A group is a tab together with the tabs opened from it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "browser_searchOrEnterUrl": "Search or enter URL",
   "@browser_searchOrEnterUrl": {

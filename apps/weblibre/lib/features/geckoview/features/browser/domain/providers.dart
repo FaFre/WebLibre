@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/quick_tab_switcher_tab_group.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
@@ -390,6 +391,65 @@ EquatableValue<List<TabStateWithContainer>> containerTabStatesWithContainer(
   return EquatableValue(items);
 }
 
+/// The selected container's tab trees, one per root tab, in the order the
+/// tab bar draws the roots. Backs [TabBarStackingMode.tabGroups].
+///
+/// A group is exactly what the tab view draws as one tree: it comes from the
+/// same presentation-scope grouping, so a tab's group never disagrees with
+/// where the tree puts it. Tabs the tree does not know (restore placeholders,
+/// before the engine reports its tab list) become groups of one after the
+/// rest, so the row never drops a tab the container tabs row would show.
+@Riverpod()
+EquatableValue<List<QuickTabSwitcherTabGroup>> selectedContainerTabGroups(
+  Ref ref,
+) {
+  final containerId = ref.watch(selectedContainerProvider);
+  final tabStates = ref
+      .watch(containerTabStatesWithContainerProvider(containerId))
+      .value;
+  final treeItems = ref
+      .watch(
+        groupedTabListItemsProvider(
+          containerId: containerId,
+          scope: TabListScope.presentation,
+        ),
+      )
+      .value;
+  final timestamps =
+      ref.watch(watchTabTimestampsProvider.select((value) => value.value)) ??
+      const <String, DateTime>{};
+
+  final knownTabIds = {for (final (state, _) in tabStates) state.id};
+
+  // A tree lists its root before any of the root's descendants.
+  final membersByRoot = <String, List<String>>{};
+  for (final item in treeItems) {
+    if (!knownTabIds.contains(item.tabId)) continue;
+    final rootId = switch (item) {
+      TabListChildItem(:final rootId) => rootId,
+      _ => item.tabId,
+    };
+    membersByRoot.putIfAbsent(rootId, () => []).add(item.tabId);
+  }
+
+  final grouped = {for (final ids in membersByRoot.values) ...ids};
+  for (final (state, _) in tabStates) {
+    if (!grouped.contains(state.id)) {
+      membersByRoot[state.id] = [state.id];
+    }
+  }
+
+  final epoch = DateTime.fromMillisecondsSinceEpoch(0);
+  return EquatableValue([
+    for (final ids in membersByRoot.values)
+      QuickTabSwitcherTabGroup(
+        rootId: ids.first,
+        tabIds: ids,
+        lastUsedTabId: maxBy(ids, (id) => timestamps[id] ?? epoch)!,
+      ),
+  ]);
+}
+
 @Riverpod()
 EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
   Ref ref,
@@ -399,9 +459,34 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
 
   final tabStates = switch (mode) {
     QuickTabSwitcherMode.lastUsedTabs => ref.watch(fifoTabStatesProvider).value,
-    QuickTabSwitcherMode.containerTabs =>
+    QuickTabSwitcherMode.containerTabs ||
+    QuickTabSwitcherMode.tabGroups ||
+    QuickTabSwitcherMode.activeTabGroup =>
       ref.watch(selectedContainerTabStatesWithContainerProvider).value,
   };
+
+  if (mode
+      case QuickTabSwitcherMode.tabGroups ||
+          QuickTabSwitcherMode.activeTabGroup) {
+    final groups = ref.watch(selectedContainerTabGroupsProvider).value;
+    final stateById = {for (final state in tabStates) state.$1.id: state};
+
+    final List<String> tabIds;
+    if (mode == QuickTabSwitcherMode.tabGroups) {
+      tabIds = [for (final group in groups) group.rootId];
+    } else {
+      // Only a real group gets the second row: the selected tab alone would
+      // just repeat its own chip in the row below.
+      final activeGroup = groups.firstWhereOrNull(
+        (group) => group.tabIds.contains(selectedTabId),
+      );
+      tabIds = (activeGroup != null && activeGroup.isGroup)
+          ? activeGroup.tabIds
+          : const [];
+    }
+
+    return EquatableValue([for (final id in tabIds) ?stateById[id]]);
+  }
 
   final pinnedTabIds = ref.watch(
     watchPinnedTabIdsProvider.select(
@@ -429,7 +514,7 @@ EquatableValue<List<TabStateWithContainer>> quickTabSwitcherTabStates(
       }
       return filtered;
     }(),
-    QuickTabSwitcherMode.containerTabs => tabStates,
+    _ => tabStates,
   });
 }
 
@@ -524,6 +609,32 @@ AsyncValue<({bool containerRow, bool mruRow})> twoLevelQuickTabSwitcherRows(
   );
 }
 
+/// Which of its two rows the tab groups switcher bar renders: the row of
+/// groups, and the tabs of the selected tab's group.
+///
+/// Serves the bar and [quickTabSwitcherRowCount] alike, for the reason given
+/// on [twoLevelQuickTabSwitcherRows]. The group row falls back to history
+/// suggestions in an empty container, as the container tabs row does; the
+/// active group row never shows them.
+@Riverpod()
+AsyncValue<({bool groupRow, bool activeGroupRow})>
+tabGroupsQuickTabSwitcherRows(Ref ref) {
+  final groupRow = ref.watch(
+    quickTabSwitcherRowHasResultsProvider(QuickTabSwitcherMode.tabGroups),
+  );
+  final activeGroupRow = ref.watch(
+    quickTabSwitcherRowHasResultsProvider(
+      QuickTabSwitcherMode.activeTabGroup,
+      enableHistoryFallback: false,
+    ),
+  );
+
+  return groupRow.whenData(
+    (hasGroups) =>
+        (groupRow: hasGroups, activeGroupRow: activeGroupRow.value ?? false),
+  );
+}
+
 /// Number of 48px rows the quick tab switcher bar currently occupies.
 /// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
 @Riverpod()
@@ -570,6 +681,12 @@ AsyncValue<int> quickTabSwitcherRowCount(Ref ref) {
           .watch(twoLevelQuickTabSwitcherRowsProvider)
           .whenData(
             (rows) => (rows.containerRow ? 1 : 0) + (rows.mruRow ? 1 : 0),
+          );
+    case TabBarStackingMode.tabGroups:
+      return ref
+          .watch(tabGroupsQuickTabSwitcherRowsProvider)
+          .whenData(
+            (rows) => (rows.groupRow ? 1 : 0) + (rows.activeGroupRow ? 1 : 0),
           );
   }
 }

@@ -254,7 +254,8 @@ TabBarPosition effectiveTabBarPosition(Ref ref) {
 }
 
 /// [GeneralSettings.effectiveTabBarStackingMode] resolved against the current
-/// window.
+/// window and the width the side panel is drawn at, including a resize in
+/// progress.
 ///
 /// Watching this rather than resolving at each call site also narrows
 /// rebuilds: it fires when the *resolved* mode changes, not whenever any
@@ -262,12 +263,74 @@ TabBarPosition effectiveTabBarPosition(Ref ref) {
 @Riverpod(keepAlive: true)
 TabBarStackingMode effectiveTabBarStackingMode(Ref ref) {
   final window = ref.watch(windowSizeClassControllerProvider);
+  final sideRailDragWidth = ref.watch(sideRailDragWidthProvider);
 
   return ref.watch(
     generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveTabBarStackingMode(window: window),
+      (settings) => settings.effectiveTabBarStackingMode(
+        window: window,
+        sideRailWidthOverride: sideRailDragWidth,
+      ),
     ),
   );
+}
+
+/// The width the side panel is being resized to, or null when the saved
+/// [GeneralSettings.sideRailWidth] is the whole truth.
+///
+/// Kept past the end of a drag until the saved setting reports the released
+/// width. Clearing it on release would put the panel back at its old width for
+/// the frames the save takes, and every one of those frames resizes the page.
+/// Lives with the settings rather than the rail because the effective
+/// stacking mode depends on it: a panel dragged down to the icon rail has no
+/// room for two lists.
+@Riverpod(keepAlive: true)
+class SideRailDragWidth extends _$SideRailDragWidth {
+  var _dragging = false;
+
+  @override
+  double? build() {
+    ref.listen(
+      generalSettingsWithDefaultsProvider.select((s) => s.sideRailWidth),
+      (previous, next) {
+        if (!_dragging && state == next) {
+          state = null;
+        }
+      },
+    );
+
+    return null;
+  }
+
+  void update(double width) {
+    _dragging = true;
+    state = width;
+  }
+
+  /// Ends the drag and returns the width to save, or null if there is nothing
+  /// to save.
+  ///
+  /// A release at the width already saved clears immediately: saving an
+  /// unchanged value reports nothing back, so waiting for it would hold the
+  /// drag width forever and hide any later change to the setting.
+  double? end() {
+    _dragging = false;
+
+    final width = state;
+    if (width == null) return null;
+
+    if (width == ref.read(generalSettingsWithDefaultsProvider).sideRailWidth) {
+      state = null;
+      return null;
+    }
+    return width;
+  }
+
+  /// Drops the drag without saving, for a save that failed.
+  void cancel() {
+    _dragging = false;
+    state = null;
+  }
 }
 
 /// The app UI locale to pass to `MaterialApp.locale`, resolved from

@@ -3207,6 +3207,15 @@
   "@browser_tooltipCollapseGroup": {
     "description": "Tooltip of the button that collapses a group of tabs in the tab overview."
   },
+  "browser_tabGroupSizeSemantics": "{count, plural, =1{Group of 1 tab} other{Group of {count} tabs}}",
+  "@browser_tabGroupSizeSemantics": {
+    "description": "Screen reader label of the tab count on a tab group chip in the quick tab switcher bar. A group is a tab together with the tabs opened from it.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "browser_searchOrEnterUrl": "Search or enter URL",
   "@browser_searchOrEnterUrl": {
     "description": "Placeholder of the address bar: type a search or a web address."
@@ -12976,7 +12985,7 @@
   "@settings_tabStackingTitle": {
     "description": "Heading of the choice how the quick tab switcher bar (a row of tab chips) arranges tabs."
   },
-  "settings_tabStackingKeywords": "recent tabs, recently used, container tabs, accordion, two level, rows, stacking, disabled",
+  "settings_tabStackingKeywords": "recent tabs, recently used, container tabs, accordion, two level, rows, stacking, tab groups, tab stacks, tab tree, disabled",
   "@settings_tabStackingKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -13015,6 +13024,22 @@
   "settings_twoRowsDescription": "Tabs of the selected container on top, recently used tabs below",
   "@settings_twoRowsDescription": {
     "description": "Explanation under \"Two Rows\"."
+  },
+  "settings_tabGroupsOption": "Tab Groups",
+  "@settings_tabGroupsOption": {
+    "description": "Tab stacking option: tab groups, like Vivaldi's two-level tab stacks. A group is a tab together with the tabs opened from it. Keep it short."
+  },
+  "settings_tabGroupsDescription": "Each tab with the tabs opened from it as one chip, the current group's tabs in a row above",
+  "@settings_tabGroupsDescription": {
+    "description": "Explanation under \"Tab Groups\". Chips are small rounded buttons; the row of the current group's tabs only appears while the current tab belongs to a group."
+  },
+  "settings_tabStackingFallbackAccordion": "Needs more room than this window or side panel has, so Accordion is shown for now",
+  "@settings_tabStackingFallbackAccordion": {
+    "description": "Note under the selected tab stacking option (\"Two Rows\") when the window is too short or the side panel is collapsed, so the \"Accordion\" option is used until there is room again. \"Accordion\" is the option name settings_accordionOption."
+  },
+  "settings_tabStackingFallbackContainerTabs": "Needs more room than this window or side panel has, so Container Tabs is shown for now",
+  "@settings_tabStackingFallbackContainerTabs": {
+    "description": "Note under the selected tab stacking option (\"Tab Groups\") when the window is too short or the side panel is collapsed, so the \"Container Tabs\" option is used until there is room again. \"Container Tabs\" is the option name settings_containerTabsOption."
   },
   "settings_disabledOption": "Disabled",
   "@settings_disabledOption": {

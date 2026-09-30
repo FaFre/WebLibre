@@ -54,6 +54,7 @@
   "browser_enableAiTabSuggestionsContent": "Für diese Funktion müssen möglicherweise KI-Modelle heruntergeladen werden. Downloadgröße und Fortschritt lassen sich vorab nicht bestimmen.\n\nFortfahren?",
   "browser_tooltipExpandGroup": "Gruppe ausklappen",
   "browser_tooltipCollapseGroup": "Gruppe einklappen",
+  "browser_tabGroupSizeSemantics": "{count, plural, =1{Gruppe mit 1 Tab} other{Gruppe mit {count} Tabs}}",
   "browser_searchOrEnterUrl": "Suchen oder URL eingeben",
   "browser_tabCannotBeMovedHere": "Tab kann nicht hierher verschoben werden",
   "browser_quickActionNewTab": "Neuer Tab",

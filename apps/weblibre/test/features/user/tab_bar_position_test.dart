@@ -32,10 +32,12 @@ GeneralSettings settingsWith({
   TabBarPositionSetting? position,
   TabBarStackingMode? stacking,
   bool? showContainerUi,
+  double? sideRailWidth,
 }) => GeneralSettings.withDefaults(
   tabBarPosition: position,
   tabBarStackingMode: stacking,
   showContainerUi: showContainerUi,
+  sideRailWidth: sideRailWidth,
 );
 
 void main() {
@@ -220,11 +222,105 @@ void main() {
       );
     });
 
+    test('tabGroups degrades to container tabs on a narrow rail', () {
+      expect(
+        settingsWith(
+          position: TabBarPositionSetting.left,
+          stacking: TabBarStackingMode.tabGroups,
+        ).effectiveTabBarStackingMode(window: smallTablet),
+        TabBarStackingMode.containerTabs,
+      );
+    });
+
+    test('tabGroups degrades to container tabs in a short window', () {
+      expect(
+        settingsWith(
+          position: TabBarPositionSetting.bottom,
+          stacking: TabBarStackingMode.tabGroups,
+        ).effectiveTabBarStackingMode(window: landscapePhone),
+        TabBarStackingMode.containerTabs,
+      );
+    });
+
+    test('tabGroups survives on a horizontal bar and a wide rail', () {
+      for (final (position, window) in [
+        (TabBarPositionSetting.bottom, phone),
+        (TabBarPositionSetting.left, tablet),
+      ]) {
+        expect(
+          settingsWith(
+            position: position,
+            stacking: TabBarStackingMode.tabGroups,
+          ).effectiveTabBarStackingMode(window: window),
+          TabBarStackingMode.tabGroups,
+          reason: '$position in $window',
+        );
+      }
+    });
+
+    test('stacked modes degrade on a panel collapsed to the icon rail', () {
+      // The window could host a panel, but the user collapsed it to 80dp.
+      for (final (mode, fallback) in const [
+        (TabBarStackingMode.twoLevel, TabBarStackingMode.accordion),
+        (TabBarStackingMode.tabGroups, TabBarStackingMode.containerTabs),
+      ]) {
+        expect(
+          settingsWith(
+            position: TabBarPositionSetting.left,
+            stacking: mode,
+            sideRailWidth: 80,
+          ).effectiveTabBarStackingMode(window: tablet),
+          fallback,
+          reason: '$mode',
+        );
+      }
+    });
+
+    test('a resize in progress decides over the saved panel width', () {
+      final settings = settingsWith(
+        position: TabBarPositionSetting.left,
+        stacking: TabBarStackingMode.tabGroups,
+      );
+
+      // Dragged down to the icon rail before the release is saved.
+      expect(
+        settings.effectiveTabBarStackingMode(
+          window: tablet,
+          sideRailWidthOverride: 80,
+        ),
+        TabBarStackingMode.containerTabs,
+      );
+      // Dragged back open from a collapsed panel.
+      expect(
+        settingsWith(
+          position: TabBarPositionSetting.left,
+          stacking: TabBarStackingMode.tabGroups,
+          sideRailWidth: 80,
+        ).effectiveTabBarStackingMode(
+          window: tablet,
+          sideRailWidthOverride: 240,
+        ),
+        TabBarStackingMode.tabGroups,
+      );
+    });
+
+    test('a collapsed panel does not affect a horizontal bar', () {
+      expect(
+        settingsWith(
+          position: TabBarPositionSetting.bottom,
+          stacking: TabBarStackingMode.tabGroups,
+          sideRailWidth: 80,
+        ).effectiveTabBarStackingMode(window: tablet),
+        TabBarStackingMode.tabGroups,
+      );
+    });
+
     test('container modes still degrade when the container UI is off', () {
       for (final mode in const [
         TabBarStackingMode.containerTabs,
         TabBarStackingMode.accordion,
         TabBarStackingMode.twoLevel,
+        TabBarStackingMode.tabGroups,
       ]) {
         expect(
           settingsWith(

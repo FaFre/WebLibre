@@ -2406,6 +2406,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_tooltipCollapseGroup => '折叠分组';
 
   @override
+  String browser_tabGroupSizeSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '包含 $count 个标签页的分组',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get browser_searchOrEnterUrl => '搜索或输入网址';
 
   @override
@@ -9683,7 +9693,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_tabStackingTitle => '标签页堆叠';
 
   @override
-  String get settings_tabStackingKeywords => '最近标签页,最近使用,容器标签页,手风琴,两级,行,堆叠,停用';
+  String get settings_tabStackingKeywords =>
+      '最近标签页,最近使用,容器标签页,手风琴,两级,行,堆叠,标签页分组,标签页堆叠,标签页树,tab groups,停用';
 
   @override
   String get settings_tabStackingSubtitle => '快速标签页切换栏如何排列标签页';
@@ -9711,6 +9722,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_twoRowsDescription => '上方为所选容器的标签页，下方为最近使用的标签页';
+
+  @override
+  String get settings_tabGroupsOption => '标签页分组';
+
+  @override
+  String get settings_tabGroupsDescription =>
+      '每个标签页与从它打开的标签页合为一个标签块，上方一行显示当前分组的标签页';
+
+  @override
+  String get settings_tabStackingFallbackAccordion => '此窗口或侧边面板空间不足，暂时显示为手风琴';
+
+  @override
+  String get settings_tabStackingFallbackContainerTabs =>
+      '此窗口或侧边面板空间不足，暂时显示为容器标签页';
 
   @override
   String get settings_disabledOption => '停用';

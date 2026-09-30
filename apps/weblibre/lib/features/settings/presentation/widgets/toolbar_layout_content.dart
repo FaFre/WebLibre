@@ -440,6 +440,57 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
         ref.watch(effectiveTabBarPositionProvider).isVertical &&
         !window.allowsWideRail;
 
+    final offeredModes = {
+      TabBarStackingMode.lastUsedTabs,
+      if (settings.showContainerUi) ...[
+        TabBarStackingMode.containerTabs,
+        TabBarStackingMode.accordion,
+        if (!railIsNarrow) ...[
+          TabBarStackingMode.twoLevel,
+          TabBarStackingMode.tabGroups,
+        ],
+      ],
+      TabBarStackingMode.disabled,
+    };
+    // The radio shows what the user picked, not what the current room reduces
+    // it to: a short window or a collapsed side panel stands a stacked mode in
+    // for a single row, and marking that row selected would make picking the
+    // stacked mode look like it did nothing. The stand-in is named under the
+    // choice instead. A choice that is not offered here falls back to the
+    // effective mode, as before.
+    final selectedMode = offeredModes.contains(settings.tabBarStackingMode)
+        ? settings.tabBarStackingMode
+        : stackingMode;
+    final fallbackNote = selectedMode == stackingMode
+        ? null
+        : switch (stackingMode) {
+            TabBarStackingMode.accordion =>
+              l10n.settings_tabStackingFallbackAccordion,
+            TabBarStackingMode.containerTabs =>
+              l10n.settings_tabStackingFallbackContainerTabs,
+            _ => null,
+          };
+
+    Widget optionSubtitle(TabBarStackingMode mode, String description) {
+      if (mode != selectedMode || fallbackNote == null) {
+        return Text(description);
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(description),
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              fallbackNote,
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
       child: Column(
@@ -453,7 +504,7 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
             contentPadding: EdgeInsets.zero,
           ),
           RadioGroup(
-            groupValue: stackingMode,
+            groupValue: selectedMode,
             onChanged: (value) async {
               if (value != null) {
                 await ref
@@ -483,16 +534,28 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                     subtitle: Text(l10n.settings_accordionDescription),
                   ),
                   // Two stacked rows don't fit the *narrow* vertical side
-                  // rail, where the mode degrades to Container Tabs; hide the
-                  // option there to avoid a no-op choice. A rail wide enough
-                  // to be a tab panel has room for both rows, so the option
-                  // stays offered on a large screen.
-                  if (!railIsNarrow)
+                  // rail, which no resize can widen in this window; hide the
+                  // options there to avoid a no-op choice. A short window or a
+                  // collapsed panel can change, so there they stay offered and
+                  // name their stand-in (see selectedMode).
+                  if (!railIsNarrow) ...[
                     RadioListTile.adaptive(
                       value: TabBarStackingMode.twoLevel,
                       title: Text(l10n.settings_twoRowsOption),
-                      subtitle: Text(l10n.settings_twoRowsDescription),
+                      subtitle: optionSubtitle(
+                        TabBarStackingMode.twoLevel,
+                        l10n.settings_twoRowsDescription,
+                      ),
                     ),
+                    RadioListTile.adaptive(
+                      value: TabBarStackingMode.tabGroups,
+                      title: Text(l10n.settings_tabGroupsOption),
+                      subtitle: optionSubtitle(
+                        TabBarStackingMode.tabGroups,
+                        l10n.settings_tabGroupsDescription,
+                      ),
+                    ),
+                  ],
                 ],
                 RadioListTile.adaptive(
                   value: TabBarStackingMode.disabled,

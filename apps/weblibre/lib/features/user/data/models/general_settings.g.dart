@@ -1483,6 +1483,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   tabBarStackingMode: $enumDecodeNullable(
     _$TabBarStackingModeEnumMap,
     json['tabBarStackingMode'],
+    unknownValue: TabBarStackingMode.accordion,
   ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
   useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
@@ -1784,6 +1785,7 @@ const _$TabBarStackingModeEnumMap = {
   TabBarStackingMode.containerTabs: 'containerTabs',
   TabBarStackingMode.accordion: 'accordion',
   TabBarStackingMode.twoLevel: 'twoLevel',
+  TabBarStackingMode.tabGroups: 'tabGroups',
   TabBarStackingMode.disabled: 'disabled',
 };
 

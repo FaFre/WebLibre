@@ -2662,6 +2662,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browser_tooltipCollapseGroup => 'Contraer grupo';
 
   @override
+  String browser_tabGroupSizeSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Grupo de $count pestañas',
+      one: 'Grupo de 1 pestaña',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get browser_searchOrEnterUrl => 'Buscar o escribir una URL';
 
   @override
@@ -10712,7 +10723,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_tabStackingKeywords =>
-      'pestañas recientes, usadas recientemente, pestañas del contenedor, acordeón, dos niveles, filas, agrupación, desactivado';
+      'pestañas recientes, usadas recientemente, pestañas del contenedor, acordeón, dos niveles, filas, agrupación, grupos de pestañas, pilas de pestañas, árbol de pestañas, tab groups, desactivado';
 
   @override
   String get settings_tabStackingSubtitle =>
@@ -10745,6 +10756,21 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_twoRowsDescription =>
       'Pestañas del contenedor seleccionado arriba y pestañas usadas recientemente abajo';
+
+  @override
+  String get settings_tabGroupsOption => 'Grupos de pestañas';
+
+  @override
+  String get settings_tabGroupsDescription =>
+      'Un chip por pestaña junto con las pestañas abiertas desde ella; arriba, las pestañas del grupo actual';
+
+  @override
+  String get settings_tabStackingFallbackAccordion =>
+      'Necesita más espacio del que tienen esta ventana o el panel lateral, así que por ahora se muestra Acordeón';
+
+  @override
+  String get settings_tabStackingFallbackContainerTabs =>
+      'Necesita más espacio del que tienen esta ventana o el panel lateral, así que por ahora se muestra Pestañas del contenedor';
 
   @override
   String get settings_disabledOption => 'Desactivado';

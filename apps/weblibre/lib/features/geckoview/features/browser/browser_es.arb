@@ -54,6 +54,7 @@
   "browser_enableAiTabSuggestionsContent": "Activar esta función puede requerir la descarga de modelos de IA. El tamaño y el progreso de la descarga no se pueden determinar de antemano.\n\n¿Quieres continuar?",
   "browser_tooltipExpandGroup": "Expandir grupo",
   "browser_tooltipCollapseGroup": "Contraer grupo",
+  "browser_tabGroupSizeSemantics": "{count, plural, =1{Grupo de 1 pestaña} other{Grupo de {count} pestañas}}",
   "browser_searchOrEnterUrl": "Buscar o escribir una URL",
   "browser_tabCannotBeMovedHere": "La pestaña no se puede mover aquí",
   "browser_quickActionNewTab": "Nueva pestaña",

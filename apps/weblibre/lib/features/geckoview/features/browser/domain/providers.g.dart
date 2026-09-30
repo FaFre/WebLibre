@@ -717,6 +717,85 @@ final class ContainerTabStatesWithContainerFamily extends $Family
   String toString() => r'containerTabStatesWithContainerProvider';
 }
 
+/// The selected container's tab trees, one per root tab, in the order the
+/// tab bar draws the roots. Backs [TabBarStackingMode.tabGroups].
+///
+/// A group is exactly what the tab view draws as one tree: it comes from the
+/// same presentation-scope grouping, so a tab's group never disagrees with
+/// where the tree puts it. Tabs the tree does not know (restore placeholders,
+/// before the engine reports its tab list) become groups of one after the
+/// rest, so the row never drops a tab the container tabs row would show.
+
+@ProviderFor(selectedContainerTabGroups)
+final selectedContainerTabGroupsProvider =
+    SelectedContainerTabGroupsProvider._();
+
+/// The selected container's tab trees, one per root tab, in the order the
+/// tab bar draws the roots. Backs [TabBarStackingMode.tabGroups].
+///
+/// A group is exactly what the tab view draws as one tree: it comes from the
+/// same presentation-scope grouping, so a tab's group never disagrees with
+/// where the tree puts it. Tabs the tree does not know (restore placeholders,
+/// before the engine reports its tab list) become groups of one after the
+/// rest, so the row never drops a tab the container tabs row would show.
+
+final class SelectedContainerTabGroupsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<QuickTabSwitcherTabGroup>>,
+          EquatableValue<List<QuickTabSwitcherTabGroup>>,
+          EquatableValue<List<QuickTabSwitcherTabGroup>>
+        >
+    with $Provider<EquatableValue<List<QuickTabSwitcherTabGroup>>> {
+  /// The selected container's tab trees, one per root tab, in the order the
+  /// tab bar draws the roots. Backs [TabBarStackingMode.tabGroups].
+  ///
+  /// A group is exactly what the tab view draws as one tree: it comes from the
+  /// same presentation-scope grouping, so a tab's group never disagrees with
+  /// where the tree puts it. Tabs the tree does not know (restore placeholders,
+  /// before the engine reports its tab list) become groups of one after the
+  /// rest, so the row never drops a tab the container tabs row would show.
+  SelectedContainerTabGroupsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedContainerTabGroupsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedContainerTabGroupsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<QuickTabSwitcherTabGroup>>>
+  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<QuickTabSwitcherTabGroup>> create(Ref ref) {
+    return selectedContainerTabGroups(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<List<QuickTabSwitcherTabGroup>> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<QuickTabSwitcherTabGroup>>>(
+            value,
+          ),
+    );
+  }
+}
+
+String _$selectedContainerTabGroupsHash() =>
+    r'6427926d3a72541eb01b2b31396e3438a9edcb00';
+
 @ProviderFor(quickTabSwitcherTabStates)
 final quickTabSwitcherTabStatesProvider = QuickTabSwitcherTabStatesFamily._();
 
@@ -787,7 +866,7 @@ final class QuickTabSwitcherTabStatesProvider
 }
 
 String _$quickTabSwitcherTabStatesHash() =>
-    r'f61847bd68385e799384adfa5bfe735544fedbf5';
+    r'9dd9bb5087c00c3b94bfdc48f9ff40878376c922';
 
 final class QuickTabSwitcherTabStatesFamily extends $Family
     with
@@ -870,7 +949,7 @@ final class QuickTabSwitcherHistorySuggestionsProvider
 }
 
 String _$quickTabSwitcherHistorySuggestionsHash() =>
-    r'3446741dfedf6fda9ab61421c1b74370c7f43f5b';
+    r'f84d131dc5bd443aff6cc7fd6ec4613714cfb359';
 
 final class QuickTabSwitcherHistorySuggestionsFamily extends $Family
     with
@@ -1118,6 +1197,82 @@ final class TwoLevelQuickTabSwitcherRowsProvider
 String _$twoLevelQuickTabSwitcherRowsHash() =>
     r'66ea398c2e868df46ee93a1c8d377e55584b05a5';
 
+/// Which of its two rows the tab groups switcher bar renders: the row of
+/// groups, and the tabs of the selected tab's group.
+///
+/// Serves the bar and [quickTabSwitcherRowCount] alike, for the reason given
+/// on [twoLevelQuickTabSwitcherRows]. The group row falls back to history
+/// suggestions in an empty container, as the container tabs row does; the
+/// active group row never shows them.
+
+@ProviderFor(tabGroupsQuickTabSwitcherRows)
+final tabGroupsQuickTabSwitcherRowsProvider =
+    TabGroupsQuickTabSwitcherRowsProvider._();
+
+/// Which of its two rows the tab groups switcher bar renders: the row of
+/// groups, and the tabs of the selected tab's group.
+///
+/// Serves the bar and [quickTabSwitcherRowCount] alike, for the reason given
+/// on [twoLevelQuickTabSwitcherRows]. The group row falls back to history
+/// suggestions in an empty container, as the container tabs row does; the
+/// active group row never shows them.
+
+final class TabGroupsQuickTabSwitcherRowsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<({bool activeGroupRow, bool groupRow})>,
+          AsyncValue<({bool activeGroupRow, bool groupRow})>,
+          AsyncValue<({bool activeGroupRow, bool groupRow})>
+        >
+    with $Provider<AsyncValue<({bool activeGroupRow, bool groupRow})>> {
+  /// Which of its two rows the tab groups switcher bar renders: the row of
+  /// groups, and the tabs of the selected tab's group.
+  ///
+  /// Serves the bar and [quickTabSwitcherRowCount] alike, for the reason given
+  /// on [twoLevelQuickTabSwitcherRows]. The group row falls back to history
+  /// suggestions in an empty container, as the container tabs row does; the
+  /// active group row never shows them.
+  TabGroupsQuickTabSwitcherRowsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabGroupsQuickTabSwitcherRowsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabGroupsQuickTabSwitcherRowsHash();
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<({bool activeGroupRow, bool groupRow})>>
+  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<({bool activeGroupRow, bool groupRow})> create(Ref ref) {
+    return tabGroupsQuickTabSwitcherRows(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    AsyncValue<({bool activeGroupRow, bool groupRow})> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<
+            AsyncValue<({bool activeGroupRow, bool groupRow})>
+          >(value),
+    );
+  }
+}
+
+String _$tabGroupsQuickTabSwitcherRowsHash() =>
+    r'5382be266161ab151c298705d4881fe165f0635d';
+
 /// Number of 48px rows the quick tab switcher bar currently occupies.
 /// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
 
@@ -1167,7 +1322,7 @@ final class QuickTabSwitcherRowCountProvider
 }
 
 String _$quickTabSwitcherRowCountHash() =>
-    r'd59a8136e426647dd85ae78f48803601be786891';
+    r'528af90c9daa6de35e053eabb691dc88f91d8c00';
 
 @ProviderFor(suggestedTabEntities)
 final suggestedTabEntitiesProvider = SuggestedTabEntitiesFamily._();

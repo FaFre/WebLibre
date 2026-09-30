@@ -2625,6 +2625,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get browser_tooltipCollapseGroup => 'Ciutkan grup';
 
   @override
+  String browser_tabGroupSizeSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Grup berisi $count tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get browser_searchOrEnterUrl => 'Cari atau masukkan URL';
 
   @override
@@ -10582,7 +10592,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_tabStackingKeywords =>
-      'tab terbaru, baru dipakai, tab kontainer, akordeon, dua tingkat, baris, penumpukan, nonaktif, accordion, stacking';
+      'tab terbaru, baru dipakai, tab kontainer, akordeon, dua tingkat, baris, penumpukan, grup tab, tumpukan tab, pohon tab, nonaktif, accordion, stacking, tab groups';
 
   @override
   String get settings_tabStackingSubtitle =>
@@ -10615,6 +10625,21 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settings_twoRowsDescription =>
       'Tab kontainer yang dipilih di atas, tab yang terakhir dipakai di bawah';
+
+  @override
+  String get settings_tabGroupsOption => 'Grup Tab';
+
+  @override
+  String get settings_tabGroupsDescription =>
+      'Satu chip per tab beserta tab yang dibuka darinya, dengan tab grup saat ini di baris atasnya';
+
+  @override
+  String get settings_tabStackingFallbackAccordion =>
+      'Membutuhkan ruang lebih besar daripada jendela atau panel samping ini, jadi Akordeon ditampilkan untuk sementara';
+
+  @override
+  String get settings_tabStackingFallbackContainerTabs =>
+      'Membutuhkan ruang lebih besar daripada jendela atau panel samping ini, jadi Tab Kontainer ditampilkan untuk sementara';
 
   @override
   String get settings_disabledOption => 'Nonaktif';

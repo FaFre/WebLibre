@@ -54,6 +54,7 @@
   "browser_enableAiTabSuggestionsContent": "Mengaktifkan fitur ini mungkin memerlukan pengunduhan model AI. Ukuran dan progres unduhan tidak dapat ditentukan sebelumnya.\n\nLanjutkan?",
   "browser_tooltipExpandGroup": "Luaskan grup",
   "browser_tooltipCollapseGroup": "Ciutkan grup",
+  "browser_tabGroupSizeSemantics": "{count, plural, other{Grup berisi {count} tab}}",
   "browser_searchOrEnterUrl": "Cari atau masukkan URL",
   "browser_tabCannotBeMovedHere": "Tab tidak dapat dipindahkan ke sini",
   "browser_quickActionNewTab": "Tab Baru",

@@ -175,7 +175,8 @@ String _$effectiveTabBarPositionHash() =>
     r'074a9d960c58345eb08015acd3a5b04d95d6d366';
 
 /// [GeneralSettings.effectiveTabBarStackingMode] resolved against the current
-/// window.
+/// window and the width the side panel is drawn at, including a resize in
+/// progress.
 ///
 /// Watching this rather than resolving at each call site also narrows
 /// rebuilds: it fires when the *resolved* mode changes, not whenever any
@@ -186,7 +187,8 @@ final effectiveTabBarStackingModeProvider =
     EffectiveTabBarStackingModeProvider._();
 
 /// [GeneralSettings.effectiveTabBarStackingMode] resolved against the current
-/// window.
+/// window and the width the side panel is drawn at, including a resize in
+/// progress.
 ///
 /// Watching this rather than resolving at each call site also narrows
 /// rebuilds: it fires when the *resolved* mode changes, not whenever any
@@ -201,7 +203,8 @@ final class EffectiveTabBarStackingModeProvider
         >
     with $Provider<TabBarStackingMode> {
   /// [GeneralSettings.effectiveTabBarStackingMode] resolved against the current
-  /// window.
+  /// window and the width the side panel is drawn at, including a resize in
+  /// progress.
   ///
   /// Watching this rather than resolving at each call site also narrows
   /// rebuilds: it fires when the *resolved* mode changes, not whenever any
@@ -241,7 +244,97 @@ final class EffectiveTabBarStackingModeProvider
 }
 
 String _$effectiveTabBarStackingModeHash() =>
-    r'5edf9bb20ad74e0133423f4864b9f54d9f7cef64';
+    r'33890cd07523bca7f4807edf44249ae29a2cd5c9';
+
+/// The width the side panel is being resized to, or null when the saved
+/// [GeneralSettings.sideRailWidth] is the whole truth.
+///
+/// Kept past the end of a drag until the saved setting reports the released
+/// width. Clearing it on release would put the panel back at its old width for
+/// the frames the save takes, and every one of those frames resizes the page.
+/// Lives with the settings rather than the rail because the effective
+/// stacking mode depends on it: a panel dragged down to the icon rail has no
+/// room for two lists.
+
+@ProviderFor(SideRailDragWidth)
+final sideRailDragWidthProvider = SideRailDragWidthProvider._();
+
+/// The width the side panel is being resized to, or null when the saved
+/// [GeneralSettings.sideRailWidth] is the whole truth.
+///
+/// Kept past the end of a drag until the saved setting reports the released
+/// width. Clearing it on release would put the panel back at its old width for
+/// the frames the save takes, and every one of those frames resizes the page.
+/// Lives with the settings rather than the rail because the effective
+/// stacking mode depends on it: a panel dragged down to the icon rail has no
+/// room for two lists.
+final class SideRailDragWidthProvider
+    extends $NotifierProvider<SideRailDragWidth, double?> {
+  /// The width the side panel is being resized to, or null when the saved
+  /// [GeneralSettings.sideRailWidth] is the whole truth.
+  ///
+  /// Kept past the end of a drag until the saved setting reports the released
+  /// width. Clearing it on release would put the panel back at its old width for
+  /// the frames the save takes, and every one of those frames resizes the page.
+  /// Lives with the settings rather than the rail because the effective
+  /// stacking mode depends on it: a panel dragged down to the icon rail has no
+  /// room for two lists.
+  SideRailDragWidthProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sideRailDragWidthProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sideRailDragWidthHash();
+
+  @$internal
+  @override
+  SideRailDragWidth create() => SideRailDragWidth();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(double? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<double?>(value),
+    );
+  }
+}
+
+String _$sideRailDragWidthHash() => r'eb4c2ed888c9f9fae47355d6acd748f969818e06';
+
+/// The width the side panel is being resized to, or null when the saved
+/// [GeneralSettings.sideRailWidth] is the whole truth.
+///
+/// Kept past the end of a drag until the saved setting reports the released
+/// width. Clearing it on release would put the panel back at its old width for
+/// the frames the save takes, and every one of those frames resizes the page.
+/// Lives with the settings rather than the rail because the effective
+/// stacking mode depends on it: a panel dragged down to the icon rail has no
+/// room for two lists.
+
+abstract class _$SideRailDragWidth extends $Notifier<double?> {
+  double? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<double?, double?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<double?, double?>,
+              double?,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
 
 /// The app UI locale to pass to `MaterialApp.locale`, resolved from
 /// [GeneralSettings.appLocale], or [defaultAppLocale] when the user has not

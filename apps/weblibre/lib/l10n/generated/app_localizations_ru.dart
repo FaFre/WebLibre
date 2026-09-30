@@ -2658,6 +2658,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browser_tooltipCollapseGroup => 'Свернуть группу';
 
   @override
+  String browser_tabGroupSizeSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Группа из $count вкладки',
+      many: 'Группа из $count вкладок',
+      few: 'Группа из $count вкладок',
+      one: 'Группа из $count вкладки',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get browser_searchOrEnterUrl => 'Введите запрос или URL-адрес';
 
   @override
@@ -10691,7 +10704,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_tabStackingKeywords =>
-      'недавние вкладки, недавно использованные, вкладки контейнера, аккордеон, два уровня, строки, группировка, отключено';
+      'недавние вкладки, недавно использованные, вкладки контейнера, аккордеон, два уровня, строки, группировка, группы вкладок, стопки вкладок, дерево вкладок, отключено';
 
   @override
   String get settings_tabStackingSubtitle =>
@@ -10724,6 +10737,21 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settings_twoRowsDescription =>
       'Вкладки выбранного контейнера сверху, недавние вкладки снизу';
+
+  @override
+  String get settings_tabGroupsOption => 'Группы вкладок';
+
+  @override
+  String get settings_tabGroupsDescription =>
+      'Один чип на вкладку вместе с открытыми из неё вкладками, над ними — вкладки текущей группы';
+
+  @override
+  String get settings_tabStackingFallbackAccordion =>
+      'Нужно больше места, чем есть в этом окне или на боковой панели, поэтому пока показывается «Аккордеон»';
+
+  @override
+  String get settings_tabStackingFallbackContainerTabs =>
+      'Нужно больше места, чем есть в этом окне или на боковой панели, поэтому пока показываются «Вкладки контейнера»';
 
   @override
   String get settings_disabledOption => 'Отключено';

@@ -70,7 +70,7 @@ class TabBarPreviewHeaderDelegate extends SliverPersistentHeaderDelegate {
       window: window,
     )) {
       TabBarStackingMode.disabled => 0,
-      TabBarStackingMode.twoLevel => 2,
+      TabBarStackingMode.twoLevel || TabBarStackingMode.tabGroups => 2,
       _ => 1,
     };
 
@@ -213,6 +213,32 @@ class TabBarPreviewCard extends HookWidget {
           avatar: const Icon(MdiIcons.web, size: 20),
         ),
     ];
+    // The tab groups row: the tabs above as one group, beside a lone tab.
+    final previewGroupItems = <QuickTabSwitcherItem>[
+      QuickTabSwitcherItem(
+        id: 'regular-preview-tab',
+        isActive: true,
+        title: l10n.settings_previewTabNews,
+        tabMode: TabMode.regular,
+        isHistory: false,
+        isPinned: false,
+        url: Uri.parse('https://example.com/news'),
+        color: settings.showContainerUi ? colorScheme.primary : null,
+        avatar: const Icon(MdiIcons.web, size: 20),
+        groupSize: previewQuickItems.where((item) => !item.isHistory).length,
+      ),
+      QuickTabSwitcherItem(
+        id: 'search-preview-tab',
+        isActive: false,
+        title: l10n.settings_previewTabSearch,
+        tabMode: TabMode.regular,
+        isHistory: false,
+        isPinned: false,
+        url: Uri.parse('https://search.example.com'),
+        color: settings.showContainerUi ? colorScheme.primary : null,
+        avatar: const Icon(MdiIcons.web, size: 20),
+      ),
+    ];
     final previewContainerPalette = settings.showContainerUi
         ? ContainerColors.palette(context, colorScheme.primary)
         : null;
@@ -235,10 +261,12 @@ class TabBarPreviewCard extends HookWidget {
       ScrollController scrollController, {
       Axis axis = Axis.horizontal,
       double railWidth = BrowserTabBar.compactRailWidth,
+      List<QuickTabSwitcherItem>? items,
     }) {
+      final rowItems = items ?? previewQuickItems;
       return QuickTabSwitcherView(
-        availableItems: previewQuickItems,
-        activeItem: previewQuickItems.firstWhere((item) => item.isActive),
+        availableItems: rowItems,
+        activeItem: rowItems.firstWhere((item) => item.isActive),
         scrollController: scrollController,
         axis: axis,
         railWidth: railWidth,
@@ -262,18 +290,26 @@ class TabBarPreviewCard extends HookWidget {
     }) {
       // The accordion preview reuses the single-row layout; container header
       // chips need live container data that the static preview doesn't have.
-      if (settings.effectiveTabBarStackingMode(window: window) ==
-          TabBarStackingMode.twoLevel) {
+      final stackingMode = settings.effectiveTabBarStackingMode(window: window);
+      if (stackingMode == TabBarStackingMode.twoLevel ||
+          stackingMode == TabBarStackingMode.tabGroups) {
         final rows = [
           buildQuickTabSwitcherRow(
             quickTabsController,
             axis: axis,
             railWidth: railWidth,
+            // The active group's row never falls back to history.
+            items: stackingMode == TabBarStackingMode.tabGroups
+                ? previewQuickItems.where((item) => !item.isHistory).toList()
+                : null,
           ),
           buildQuickTabSwitcherRow(
             quickTabsSecondRowController,
             axis: axis,
             railWidth: railWidth,
+            items: stackingMode == TabBarStackingMode.tabGroups
+                ? previewGroupItems
+                : null,
           ),
         ];
         return axis == Axis.vertical

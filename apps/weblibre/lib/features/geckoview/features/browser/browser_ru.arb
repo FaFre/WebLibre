@@ -54,6 +54,7 @@
   "browser_enableAiTabSuggestionsContent": "Для этой функции может понадобиться загрузить модели ИИ. Размер загрузки и её ход нельзя определить заранее.\n\nПродолжить?",
   "browser_tooltipExpandGroup": "Развернуть группу",
   "browser_tooltipCollapseGroup": "Свернуть группу",
+  "browser_tabGroupSizeSemantics": "{count, plural, one{Группа из {count} вкладки} few{Группа из {count} вкладок} many{Группа из {count} вкладок} other{Группа из {count} вкладки}}",
   "browser_searchOrEnterUrl": "Введите запрос или URL-адрес",
   "browser_tabCannotBeMovedHere": "Вкладку нельзя переместить сюда",
   "browser_quickActionNewTab": "Новая вкладка",

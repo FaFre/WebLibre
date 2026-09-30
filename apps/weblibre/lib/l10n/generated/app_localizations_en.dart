@@ -2591,6 +2591,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browser_tooltipCollapseGroup => 'Collapse group';
 
   @override
+  String browser_tabGroupSizeSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Group of $count tabs',
+      one: 'Group of 1 tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get browser_searchOrEnterUrl => 'Search or enter URL';
 
   @override
@@ -10415,7 +10426,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_tabStackingKeywords =>
-      'recent tabs, recently used, container tabs, accordion, two level, rows, stacking, disabled';
+      'recent tabs, recently used, container tabs, accordion, two level, rows, stacking, tab groups, tab stacks, tab tree, disabled';
 
   @override
   String get settings_tabStackingSubtitle =>
@@ -10448,6 +10459,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_twoRowsDescription =>
       'Tabs of the selected container on top, recently used tabs below';
+
+  @override
+  String get settings_tabGroupsOption => 'Tab Groups';
+
+  @override
+  String get settings_tabGroupsDescription =>
+      'Each tab with the tabs opened from it as one chip, the current group\'s tabs in a row above';
+
+  @override
+  String get settings_tabStackingFallbackAccordion =>
+      'Needs more room than this window or side panel has, so Accordion is shown for now';
+
+  @override
+  String get settings_tabStackingFallbackContainerTabs =>
+      'Needs more room than this window or side panel has, so Container Tabs is shown for now';
 
   @override
   String get settings_disabledOption => 'Disabled';

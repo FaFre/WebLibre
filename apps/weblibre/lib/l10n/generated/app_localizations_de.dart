@@ -2640,6 +2640,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get browser_tooltipCollapseGroup => 'Gruppe einklappen';
 
   @override
+  String browser_tabGroupSizeSemantics(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Gruppe mit $count Tabs',
+      one: 'Gruppe mit 1 Tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get browser_searchOrEnterUrl => 'Suchen oder URL eingeben';
 
   @override
@@ -10624,7 +10635,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_tabStackingKeywords =>
-      'letzte Tabs, zuletzt verwendet, Container-Tabs, Akkordeon, zweistufig, Zeilen, Stapeln, deaktiviert';
+      'letzte Tabs, zuletzt verwendet, Container-Tabs, Akkordeon, zweistufig, Zeilen, Stapeln, Tabgruppen, Tabstapel, Tabbaum, deaktiviert';
 
   @override
   String get settings_tabStackingSubtitle =>
@@ -10657,6 +10668,21 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settings_twoRowsDescription =>
       'Oben Tabs des ausgewählten Containers, darunter zuletzt verwendete Tabs';
+
+  @override
+  String get settings_tabGroupsOption => 'Tabgruppen';
+
+  @override
+  String get settings_tabGroupsDescription =>
+      'Ein Chip je Tab samt der daraus geöffneten Tabs, darüber die Tabs der aktuellen Gruppe';
+
+  @override
+  String get settings_tabStackingFallbackAccordion =>
+      'Braucht mehr Platz, als dieses Fenster oder die Seitenleiste bietet. Bis dahin wird Akkordeon angezeigt';
+
+  @override
+  String get settings_tabStackingFallbackContainerTabs =>
+      'Braucht mehr Platz, als dieses Fenster oder die Seitenleiste bietet. Bis dahin werden Container-Tabs angezeigt';
 
   @override
   String get settings_disabledOption => 'Deaktiviert';

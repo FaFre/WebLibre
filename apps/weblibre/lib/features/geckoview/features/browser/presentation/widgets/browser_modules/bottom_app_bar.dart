@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/quick_tab_switcher_tab_group.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -365,7 +366,7 @@ class BrowserTabBar extends HookConsumerWidget {
 
   /// Narrowest the tab panel can be resized to while still carrying titled,
   /// closable rows and an upright address field.
-  static const minExpandedRailWidth = 200.0;
+  static const minExpandedRailWidth = minExpandedSideRailWidth;
 
   /// Widest the tab panel can be resized to. Past this a tab list gains
   /// nothing but empty space after its titles.
@@ -558,6 +559,13 @@ class BrowserTabBar extends HookConsumerWidget {
         : null;
     final showTwoLevelContainerRow = twoLevelRows?.containerRow ?? false;
     final showTwoLevelMruRow = twoLevelRows?.mruRow ?? false;
+
+    // Tab groups follow the same rule, for the same reason.
+    final tabGroupsRows = stackingMode == TabBarStackingMode.tabGroups
+        ? ref.watch(tabGroupsQuickTabSwitcherRowsProvider).value
+        : null;
+    final showTabGroupRow = tabGroupsRows?.groupRow ?? false;
+    final showActiveTabGroupRow = tabGroupsRows?.activeGroupRow ?? false;
 
     final tabBarPosition = ref.watch(effectiveTabBarPositionProvider);
     final isVertical = tabBarPosition.isVertical;
@@ -764,6 +772,61 @@ class BrowserTabBar extends HookConsumerWidget {
                           key: ValueKey(QuickTabSwitcherMode.lastUsedTabs),
                           quickTabSwitcherMode:
                               QuickTabSwitcherMode.lastUsedTabs,
+                        ),
+                    ],
+                  ),
+          // The group row sits nearest the toolbar and the active group's tabs
+          // above it, so the row that comes and goes with the selected tab is
+          // the one furthest from the controls — the layout Vivaldi uses for
+          // its two-level tab stacks. The group row keeps history fallback,
+          // like the container tabs row it replaces; the group's own row never
+          // has any, being hidden outside a group.
+          //
+          // Reachable on a wide rail, where the rows share the height as in
+          // two-level stacking; a narrow rail gets container tabs instead.
+          TabBarStackingMode.tabGroups =>
+            switcherAxis == Axis.vertical
+                ? Column(
+                    children: [
+                      if (showActiveTabGroupRow)
+                        Expanded(
+                          key: const ValueKey(
+                            QuickTabSwitcherMode.activeTabGroup,
+                          ),
+                          child: QuickTabSwitcher(
+                            quickTabSwitcherMode:
+                                QuickTabSwitcherMode.activeTabGroup,
+                            enableHistoryFallback: false,
+                            axis: switcherAxis,
+                            railWidth: railWidth,
+                          ),
+                        ),
+                      if (showTabGroupRow)
+                        Expanded(
+                          key: const ValueKey(QuickTabSwitcherMode.tabGroups),
+                          child: QuickTabSwitcher(
+                            quickTabSwitcherMode:
+                                QuickTabSwitcherMode.tabGroups,
+                            axis: switcherAxis,
+                            railWidth: railWidth,
+                          ),
+                        ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (showActiveTabGroupRow)
+                        const QuickTabSwitcher(
+                          key: ValueKey(QuickTabSwitcherMode.activeTabGroup),
+                          quickTabSwitcherMode:
+                              QuickTabSwitcherMode.activeTabGroup,
+                          enableHistoryFallback: false,
+                        ),
+                      if (showTabGroupRow)
+                        const QuickTabSwitcher(
+                          key: ValueKey(QuickTabSwitcherMode.tabGroups),
+                          quickTabSwitcherMode: QuickTabSwitcherMode.tabGroups,
                         ),
                     ],
                   ),
@@ -1136,7 +1199,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
   /// Whether the row falls back to history suggestion chips when it has no
   /// open tabs. Disabled for the top row in two-level stacking so history
-  /// chips don't show twice.
+  /// chips don't show twice, and for the active tab group row.
   final bool enableHistoryFallback;
 
   /// Direction the chips list flows. Vertical for the side rail.
@@ -1216,10 +1279,22 @@ class QuickTabSwitcher extends HookConsumerWidget {
     );
     final showHierarchicalTabs = hierarchyGlyphs > 0;
     final selectedContainerId = ref.watch(selectedContainerProvider);
-    final hierarchyContainerId =
-        quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs
+    final showsContainerTabs =
+        quickTabSwitcherMode != QuickTabSwitcherMode.lastUsedTabs;
+    final hierarchyContainerId = showsContainerTabs
         ? selectedContainerId
         : null;
+
+    // The tab groups row lists each group by its root tab; the group supplies
+    // the chip's count, its active state and the tab a tap returns to.
+    final tabGroupByRoot =
+        quickTabSwitcherMode == QuickTabSwitcherMode.tabGroups
+        ? {
+            for (final group
+                in ref.watch(selectedContainerTabGroupsProvider).value)
+              group.rootId: group,
+          }
+        : const <String, QuickTabSwitcherTabGroup>{};
 
     final tabDepthById = ref
         .watch(
@@ -1259,6 +1334,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
             sandboxSourceUri: sandboxSourceUris[state.$1.id],
             isPlaceholder:
                 !restoreComplete && !nativeTabIds.contains(state.$1.id),
+            groupTabIds: tabGroupByRoot[state.$1.id]?.tabIds,
           ),
         )
         .toList();
@@ -1343,8 +1419,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         hierarchyGlyphs: hierarchyGlyphs,
         titleMaxWidth: titleMaxWidth,
         closeButtonMode: closeButtonMode,
-        enablePinTabInMenu:
-            quickTabSwitcherMode == QuickTabSwitcherMode.containerTabs,
+        enablePinTabInMenu: showsContainerTabs,
         onCloseItem: (item) =>
             closeTabWithConfirmationAndUndo(context, ref, item.id),
         onSelected: (item) async {
@@ -1360,7 +1435,11 @@ class QuickTabSwitcher extends HookConsumerWidget {
                   selectTab: true,
                 );
           } else {
-            await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
+            // A group chip returns to the group's tab used last, as a Vivaldi
+            // tab stack does, rather than always to its root.
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .selectTab(tabGroupByRoot[item.id]?.lastUsedTabId ?? item.id);
           }
         },
         onReorderItem: !reorderEnabled
@@ -1485,6 +1564,7 @@ class QuickTabSwitcherView extends StatelessWidget {
       onCloseItem != null &&
       !item.isHistory &&
       !item.isPlaceholder &&
+      !item.isGroup &&
       closeButtonMode.showsFor(isActive: item.isActive);
 
   bool get _isVertical => axis == Axis.vertical;
@@ -1665,7 +1745,8 @@ class QuickTabSwitcherView extends StatelessWidget {
   }) {
     return wrapQuickTabSwitcherChipWithMenu(
       itemId: item.id,
-      enabled: !item.isPlaceholder,
+      // A group chip's menu would act on the root tab alone.
+      enabled: !item.isPlaceholder && !item.isGroup,
       enablePinTab: enablePinTabInMenu,
       child: child,
     );

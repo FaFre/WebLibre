@@ -765,6 +765,7 @@ class _ShowContainerUiTile extends HookConsumerWidget {
                 TabBarStackingMode.containerTabs,
                 TabBarStackingMode.accordion,
                 TabBarStackingMode.twoLevel,
+                TabBarStackingMode.tabGroups,
               }.contains(updated.tabBarStackingMode)) {
             updated = updated.copyWith.tabBarStackingMode(
               TabBarStackingMode.lastUsedTabs,

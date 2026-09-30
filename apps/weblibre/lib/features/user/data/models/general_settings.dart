@@ -77,6 +77,11 @@ const quickTabSwitcherTitleWidthStep = 8.0;
 /// Material's extended navigation rail.
 const defaultSideRailWidth = 256.0;
 
+/// Narrowest the side panel can be while still being a tab panel. A
+/// [GeneralSettings.sideRailWidth] below it is the panel collapsed to the icon
+/// rail.
+const minExpandedSideRailWidth = 200.0;
+
 /// Controls the Android display refresh rate the app requests at startup.
 ///
 /// Flutter does not request a high refresh rate by default, so on many devices
@@ -90,19 +95,32 @@ enum TabBarSwipeAction { switchLastOpened, navigateOrderedTabs }
 
 /// Row kind rendered inside the quick tab switcher bar. [TabBarStackingMode]
 /// decides which row(s) are shown; this enum identifies a single row.
-enum QuickTabSwitcherMode { lastUsedTabs, containerTabs }
+///
+/// [tabGroups] and [activeTabGroup] are the two rows of
+/// [TabBarStackingMode.tabGroups]: one chip per tab tree of the selected
+/// container, and the tabs of the tree the selected tab belongs to.
+enum QuickTabSwitcherMode {
+  lastUsedTabs,
+  containerTabs,
+  tabGroups,
+  activeTabGroup,
+}
 
 /// Layout of the quick tab switcher bar. Merges the former
 /// "show tab switcher bar" toggle and [QuickTabSwitcherMode] selection.
 ///
 /// [accordion] renders all containers as header chips with the selected
 /// container's tabs expanded inline. [twoLevel] stacks a container-tabs row
-/// on top of a recently-used row. [disabled] hides the bar entirely.
+/// on top of a recently-used row. [tabGroups] is Vivaldi's two-level tab
+/// stacking: a row with one chip per tab tree (a tab and the tabs opened from
+/// it), and above it the tabs of the tree in use, shown only while that tree
+/// has more than one tab (#628). [disabled] hides the bar entirely.
 enum TabBarStackingMode {
   lastUsedTabs,
   containerTabs,
   accordion,
   twoLevel,
+  tabGroups,
   disabled,
 }
 
@@ -376,6 +394,10 @@ class GeneralSettings with FastEquatable {
   @JsonKey(unknownEnumValue: TabBarPositionSetting.auto)
   final TabBarPositionSetting tabBarPosition;
   final TabBarLayout tabBarLayout;
+
+  /// See [tabBarPosition] for why an unknown value must not throw: the enum
+  /// grows (tabGroups, #628).
+  @JsonKey(unknownEnumValue: TabBarStackingMode.accordion)
   final TabBarStackingMode tabBarStackingMode;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
@@ -960,23 +982,36 @@ class GeneralSettings with FastEquatable {
   /// which has a vertical form) on a *narrow* vertical rail, where two stacked
   /// chip lists have no room. A rail wide enough to be a tab panel has room
   /// for both, so the degradation is keyed on the rail being narrow rather
-  /// than on it being vertical.
+  /// than on it being vertical. Tab groups degrade to container tabs there
+  /// instead: the same tabs, in one row.
   ///
-  /// It also degrades in a short window: the bar stacks up to 56 + 54 + 48x2 =
+  /// A rail is narrow when the window cannot spare a tab panel, and also when
+  /// it can but the user collapsed the panel to the icon rail. That is read
+  /// from [sideRailWidthOverride] (the width of a resize in progress) or else
+  /// the saved [sideRailWidth], the same widths the rail is drawn at, so the
+  /// mode and the rail it is drawn in cannot disagree.
+  ///
+  /// Both also degrade in a short window: the bar stacks up to 56 + 54 + 48x2 =
   /// 206dp, which in a 480dp-tall window is over 40% of the viewport spent on
   /// chrome before the page gets any.
   TabBarStackingMode effectiveTabBarStackingMode({
     required WindowSizeClass window,
+    double? sideRailWidthOverride,
   }) {
     var mode = tabBarStackingMode;
 
     final isNarrowRail =
         effectiveTabBarPosition(window: window).isVertical &&
-        !window.allowsWideRail;
+        !(window.allowsWideRail &&
+            (sideRailWidthOverride ?? sideRailWidth) >=
+                minExpandedSideRailWidth);
 
-    if ((isNarrowRail || window.isHeightConstrained) &&
-        mode == TabBarStackingMode.twoLevel) {
-      mode = TabBarStackingMode.accordion;
+    if (isNarrowRail || window.isHeightConstrained) {
+      mode = switch (mode) {
+        TabBarStackingMode.twoLevel => TabBarStackingMode.accordion,
+        TabBarStackingMode.tabGroups => TabBarStackingMode.containerTabs,
+        _ => mode,
+      };
     }
 
     if (!showContainerUi &&
@@ -984,6 +1019,7 @@ class GeneralSettings with FastEquatable {
           TabBarStackingMode.containerTabs,
           TabBarStackingMode.accordion,
           TabBarStackingMode.twoLevel,
+          TabBarStackingMode.tabGroups,
         }.contains(mode)) {
       return TabBarStackingMode.lastUsedTabs;
     }

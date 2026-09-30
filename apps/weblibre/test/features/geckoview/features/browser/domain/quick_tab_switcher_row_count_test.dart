@@ -48,6 +48,41 @@ ProviderContainer _twoLevelContainer({
         final hasTabs = switch (mode) {
           QuickTabSwitcherMode.containerTabs => containerTabs,
           QuickTabSwitcherMode.lastUsedTabs => mruTabs,
+          QuickTabSwitcherMode.tabGroups ||
+          QuickTabSwitcherMode.activeTabGroup => false,
+        };
+
+        return EquatableValue([
+          if (hasTabs) (TabState.$default('tab-${mode.name}'), null),
+        ]);
+      }),
+      quickTabSwitcherHistorySuggestionsProvider.overrideWith(
+        (ref, mode) => history ? [_visit()] : const <VisitInfo>[],
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+
+  return container;
+}
+
+/// A tab groups bar whose rows are populated exactly as the flags say.
+ProviderContainer _tabGroupsContainer({
+  required bool groups,
+  required bool activeGroup,
+  required bool history,
+}) {
+  final container = ProviderContainer(
+    overrides: [
+      effectiveTabBarStackingModeProvider.overrideWithValue(
+        TabBarStackingMode.tabGroups,
+      ),
+      quickTabSwitcherTabStatesProvider.overrideWith((ref, mode) {
+        final hasTabs = switch (mode) {
+          QuickTabSwitcherMode.tabGroups => groups,
+          QuickTabSwitcherMode.activeTabGroup => activeGroup,
+          QuickTabSwitcherMode.containerTabs ||
+          QuickTabSwitcherMode.lastUsedTabs => false,
         };
 
         return EquatableValue([
@@ -124,6 +159,56 @@ void main() {
       final container = _twoLevelContainer(
         containerTabs: false,
         mruTabs: false,
+        history: false,
+      );
+
+      expect(container.read(quickTabSwitcherRowCountProvider).value, 0);
+    });
+  });
+
+  group('tab groups quick tab switcher rows', () {
+    test('a tab outside any group gets only the group row', () {
+      final container = _tabGroupsContainer(
+        groups: true,
+        activeGroup: false,
+        history: false,
+      );
+
+      expect(container.read(tabGroupsQuickTabSwitcherRowsProvider).value, (
+        groupRow: true,
+        activeGroupRow: false,
+      ));
+      expect(container.read(quickTabSwitcherRowCountProvider).value, 1);
+    });
+
+    test("a tab inside a group adds the group's row", () {
+      final container = _tabGroupsContainer(
+        groups: true,
+        activeGroup: true,
+        history: false,
+      );
+
+      expect(container.read(quickTabSwitcherRowCountProvider).value, 2);
+    });
+
+    test('history suggestions only occupy the group row', () {
+      final container = _tabGroupsContainer(
+        groups: false,
+        activeGroup: false,
+        history: true,
+      );
+
+      expect(container.read(tabGroupsQuickTabSwitcherRowsProvider).value, (
+        groupRow: true,
+        activeGroupRow: false,
+      ));
+      expect(container.read(quickTabSwitcherRowCountProvider).value, 1);
+    });
+
+    test('the bar is hidden when neither row has anything', () {
+      final container = _tabGroupsContainer(
+        groups: false,
+        activeGroup: false,
         history: false,
       );
 

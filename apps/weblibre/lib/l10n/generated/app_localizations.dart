@@ -4450,6 +4450,12 @@ abstract class AppLocalizations {
   /// **'Collapse group'**
   String get browser_tooltipCollapseGroup;
 
+  /// Screen reader label of the tab count on a tab group chip in the quick tab switcher bar. A group is a tab together with the tabs opened from it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Group of 1 tab} other{Group of {count} tabs}}'**
+  String browser_tabGroupSizeSemantics(int count);
+
   /// Placeholder of the address bar: type a search or a web address.
   ///
   /// In en, this message translates to:
@@ -17751,7 +17757,7 @@ abstract class AppLocalizations {
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'recent tabs, recently used, container tabs, accordion, two level, rows, stacking, disabled'**
+  /// **'recent tabs, recently used, container tabs, accordion, two level, rows, stacking, tab groups, tab stacks, tab tree, disabled'**
   String get settings_tabStackingKeywords;
 
   /// Line under that heading.
@@ -17807,6 +17813,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tabs of the selected container on top, recently used tabs below'**
   String get settings_twoRowsDescription;
+
+  /// Tab stacking option: tab groups, like Vivaldi's two-level tab stacks. A group is a tab together with the tabs opened from it. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab Groups'**
+  String get settings_tabGroupsOption;
+
+  /// Explanation under "Tab Groups". Chips are small rounded buttons; the row of the current group's tabs only appears while the current tab belongs to a group.
+  ///
+  /// In en, this message translates to:
+  /// **'Each tab with the tabs opened from it as one chip, the current group\'s tabs in a row above'**
+  String get settings_tabGroupsDescription;
+
+  /// Note under the selected tab stacking option ("Two Rows") when the window is too short or the side panel is collapsed, so the "Accordion" option is used until there is room again. "Accordion" is the option name settings_accordionOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs more room than this window or side panel has, so Accordion is shown for now'**
+  String get settings_tabStackingFallbackAccordion;
+
+  /// Note under the selected tab stacking option ("Tab Groups") when the window is too short or the side panel is collapsed, so the "Container Tabs" option is used until there is room again. "Container Tabs" is the option name settings_containerTabsOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs more room than this window or side panel has, so Container Tabs is shown for now'**
+  String get settings_tabStackingFallbackContainerTabs;
 
   /// Tab stacking option: no quick tab switcher bar. Keep it short.
   ///

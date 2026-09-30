@@ -54,6 +54,7 @@
   "browser_enableAiTabSuggestionsContent": "启用此功能可能需要下载 AI 模型。下载大小和进度无法事先确定。\n\n要继续吗？",
   "browser_tooltipExpandGroup": "展开分组",
   "browser_tooltipCollapseGroup": "折叠分组",
+  "browser_tabGroupSizeSemantics": "{count, plural, other{包含 {count} 个标签页的分组}}",
   "browser_searchOrEnterUrl": "搜索或输入网址",
   "browser_tabCannotBeMovedHere": "无法将标签页移动到此处",
   "browser_quickActionNewTab": "新建标签页",
