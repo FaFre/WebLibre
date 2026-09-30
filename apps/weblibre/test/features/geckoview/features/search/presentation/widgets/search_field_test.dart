@@ -67,7 +67,12 @@ void main() {
   // a `ProviderScope` handed to it directly is the root one, and only a nested
   // scope has to declare `dependencies`. Pumping it again with a different
   // mode keeps the same element, so the field keeps its state.
-  Future<void> pumpHarness(WidgetTester tester, {required bool privateMode}) {
+  Future<void> pumpHarness(
+    WidgetTester tester, {
+    required bool privateMode,
+    bool explicitBangSelected = false,
+    void Function(String)? onSubmitted,
+  }) {
     return tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -86,11 +91,12 @@ void main() {
           home: Scaffold(
             body: SearchField(
               textEditingController: controller,
-              onSubmitted: (_) {},
+              onSubmitted: onSubmitted ?? (_) {},
               activeBang: null,
               showSuggestions: true,
               label: const Text('Search'),
               privateMode: privateMode,
+              explicitBangSelected: explicitBangSelected,
             ),
           ),
         ),
@@ -157,5 +163,48 @@ void main() {
     await landLookup(tester);
 
     expect(ghost('hub.com'), findsOneWidget);
+  });
+
+  testWidgets('enter takes the completion when no provider is picked', (
+    tester,
+  ) async {
+    final submitted = <String>[];
+    await pumpHarness(tester, privateMode: false, onSubmitted: submitted.add);
+
+    controller.text = 'git';
+    await tester.pump();
+    engine.lookups.single.answer.complete('github.com');
+    await landLookup(tester);
+
+    await tester.showKeyboard(find.byType(TextFormField));
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await tester.pump();
+
+    expect(submitted, ['github.com']);
+  });
+
+  testWidgets('a picked provider hides the completion and enter searches', (
+    tester,
+  ) async {
+    final submitted = <String>[];
+    await pumpHarness(
+      tester,
+      privateMode: false,
+      explicitBangSelected: true,
+      onSubmitted: submitted.add,
+    );
+
+    controller.text = 'git';
+    await tester.pump();
+    engine.lookups.single.answer.complete('github.com');
+    await landLookup(tester);
+
+    expect(ghost('hub.com'), findsNothing);
+
+    await tester.showKeyboard(find.byType(TextFormField));
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await tester.pump();
+
+    expect(submitted, ['git']);
   });
 }

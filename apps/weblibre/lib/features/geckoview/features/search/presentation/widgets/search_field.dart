@@ -53,10 +53,10 @@ class SearchField extends HookConsumerWidget {
   /// Whether [activeBang] was explicitly chosen for this search — a provider
   /// chip or an inline `!bang` — rather than being the standing default.
   ///
-  /// Picking a provider states the intent to *search*, so the inline URL
-  /// completion is no longer what submitting should mean. The suggestion stays
-  /// on screen and can still be taken by tapping it; it just no longer wins by
-  /// default when the user hits enter.
+  /// Picking a provider states the intent to *search* with it, so the inline
+  /// URL completion is neither shown nor taken on enter: the field must never
+  /// display a completion that submitting would ignore, and enter must never
+  /// ignore the provider the user just picked.
   final bool explicitBangSelected;
 
   /// Overrides the clear (`x`) button behaviour. When null, the button just
@@ -115,6 +115,7 @@ class SearchField extends HookConsumerWidget {
       ).select((policy) => policy.savedHistory),
     );
     final suggestion = switch (completion.value) {
+      _ when explicitBangSelected => null,
       (:final text, :final usedHistory)
           when !usedHistory || savedHistoryAllowed =>
         text,
@@ -174,8 +175,7 @@ class SearchField extends HookConsumerWidget {
       child: AutoSuggestTextField(
         controller: textEditingController,
         suggestion: suggestion,
-        acceptSuggestionOnSubmit:
-            acceptSuggestionOnSubmit && !explicitBangSelected,
+        acceptSuggestionOnSubmit: acceptSuggestionOnSubmit,
         enableSuggestions: true,
         autocorrect: false,
         enableIMEPersonalizedLearning: !privateMode,

@@ -455,6 +455,28 @@ class SearchScreen extends HookConsumerWidget {
     // enter means: search with that provider, not open the completed URL.
     final showBangIcon = inlineBang != null || selectedBang != null;
 
+    // A picked provider belongs to this visit to the search screen, results
+    // included. Kept past it, the chip silently routes every later search.
+    // The host is tracked per build, since an edited tab can navigate while
+    // this screen is open. Cleared after the frame: the tree is locked while
+    // this screen unmounts, and the chip's listeners must not rebuild then.
+    final selectedBangSiteHost = useRef<String?>(null);
+    selectedBangSiteHost.value = isEditMode ? existingTabState.url.host : null;
+    useEffect(() {
+      final container = ProviderScope.containerOf(context, listen: false);
+      return () {
+        final siteHost = selectedBangSiteHost.value;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (siteHost != null && siteHost.isNotEmpty) {
+            container
+                .read(selectedBangTriggerProvider(domain: siteHost).notifier)
+                .clearTrigger();
+          }
+          container.read(selectedBangTriggerProvider().notifier).clearTrigger();
+        });
+      };
+    }, const []);
+
     // What the rest of the modules should search for. A resolved bang is an
     // instruction, not a search term, so it is lifted out before bookmarks,
     // history and the rest see the text. An unresolved `!foo` stays put — it
