@@ -26,6 +26,8 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
+import eu.weblibre.flutter_mozilla_components.security.FeatureFlagManager
+import eu.weblibre.flutter_mozilla_components.security.TitaniumHardeningConfig
 import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
@@ -159,6 +161,17 @@ object EngineProvider {
             }
 
             val created = GeckoRuntime.create(context, builder.build())
+
+            // === Titanium Architecture: Runtime Hardening ===
+            // Apply centralized security/privacy hardening prefs to the runtime.
+            // This mirrors Titanium's args.gn compile-time feature flags and
+            // patch.sh runtime patches, translated to GeckoView pref equivalents.
+            TitaniumHardeningConfig.applyRuntimeHardening(created)
+
+            // Apply locked feature flags (cannot be overridden by user settings).
+            // Mirrors Titanium's compile-time GN flag enforcement model.
+            FeatureFlagManager.applyLockedFlags(created)
+
             state = GeckoRuntimeState.Live(profileId, created)
             created
         }
@@ -185,6 +198,17 @@ object EngineProvider {
                 "readability-extract@weblibre.eu",
                 "resource://android/assets/extensions/readability_extract/",
                 "mozacReaderExtract",
+            ).install(it)
+
+            // Install Titanium-inspired privacy hardening extension.
+            // Mirrors Titanium's bundle.py + stage_bundled_extensions.inc architecture:
+            // a bundled WebExtension that provides canvas/WebGL noise injection,
+            // navigator property spoofing, and tracker blocking at the content
+            // script level — the GeckoView equivalent of Chromium JS injection patches.
+            BuiltInWebExtensionController(
+                "titanium-privacy@weblibre.eu",
+                "resource://android/assets/extensions/titanium_privacy/",
+                "titaniumPrivacyShield",
             ).install(it)
 
             SandboxCaptureFeature.install(it)

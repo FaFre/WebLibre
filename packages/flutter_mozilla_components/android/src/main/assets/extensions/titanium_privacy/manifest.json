@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "Titanium Privacy Shield",
+  "version": "1.0.0",
+  "description": "Privacy hardening extension ported from Titanium Browser Chromium patches. Provides canvas/WebGL noise injection, navigator property spoofing, and tracker blocking.",
+  "permissions": ["webRequest", "webRequestBlocking", "<all_urls>", "storage"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/privacy-shield.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "background": {
+    "scripts": ["background/tracker-blocker.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "titanium-privacy@weblibre.eu",
+      "strict_min_version": "128.0"
+    }
+  }
+}
