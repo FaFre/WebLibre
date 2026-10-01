@@ -10,7 +10,7 @@ import android.content.ComponentCallbacks2
 import android.content.res.Configuration
 import android.os.Bundle
 import eu.weblibre.flutter_mozilla_components.EngineProvider
-import eu.weblibre.flutter_mozilla_components.GeckoRuntimeState
+import eu.weblibre.flutter_mozilla_components.prefs.GeckoPrefs
 import mozilla.components.support.base.log.logger.Logger
 
 /**
@@ -104,13 +104,12 @@ class LadybirdPowerManager :
         if (target == profile) return
 
         profile = target
-        val runtime = (EngineProvider.runtimeState() as? GeckoRuntimeState.Live)?.runtime
-        if (runtime == null) {
-            logger.debug("Profile ${target.name} recorded; no live runtime to apply it to")
+        val prefs = EngineProvider.prefsWriter()
+        if (prefs == null) {
+            logger.debug("Profile ${target.name} recorded; no engine to apply it to")
             return
         }
 
-        val prefs = runtime.settings
         when (target) {
             Profile.Foreground -> applyForeground(prefs)
             Profile.Background -> applyBackground(prefs)
@@ -124,7 +123,7 @@ class LadybirdPowerManager :
      * Interactive: the browser is on screen, so timers, media and caches run at
      * full speed. This is the profile every other one returns to.
      */
-    private fun applyForeground(prefs: org.mozilla.geckoview.GeckoRuntimeSettings) {
+    private fun applyForeground(prefs: GeckoPrefs) {
         prefs.setInt("dom.min_background_timeout_value", 1000)
         prefs.setInt("dom.timeout.background_throttling_max_budget", -1)
         prefs.setBoolean("media.suspend-bkgnd-video.enabled", true)
@@ -138,7 +137,7 @@ class LadybirdPowerManager :
      * background media immediately. A page left open in the background keeps
      * its state but stops consuming CPU and radio.
      */
-    private fun applyBackground(prefs: org.mozilla.geckoview.GeckoRuntimeSettings) {
+    private fun applyBackground(prefs: GeckoPrefs) {
         prefs.setInt("dom.min_background_timeout_value", 10000)
         prefs.setInt("dom.timeout.background_throttling_max_budget", 50)
         prefs.setBoolean("media.suspend-bkgnd-video.enabled", true)
@@ -152,7 +151,7 @@ class LadybirdPowerManager :
      * Shrink caches and JS headroom so Gecko collects earlier instead of being
      * killed later.
      */
-    private fun applyPressure(prefs: org.mozilla.geckoview.GeckoRuntimeSettings) {
+    private fun applyPressure(prefs: GeckoPrefs) {
         applyBackground(prefs)
         prefs.setInt("javascript.options.mem.high_water_mark", 64)
         prefs.setInt("browser.cache.memory.capacity", 32768)
@@ -165,7 +164,7 @@ class LadybirdPowerManager :
      * Critical: the process is a candidate for the LMK. Release everything that
      * can be rebuilt and let Gecko unload background tabs.
      */
-    private fun applyCritical(prefs: org.mozilla.geckoview.GeckoRuntimeSettings) {
+    private fun applyCritical(prefs: GeckoPrefs) {
         applyPressure(prefs)
         prefs.setInt("javascript.options.mem.high_water_mark", 32)
         prefs.setInt("javascript.options.mem.max", 256)

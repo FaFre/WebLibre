@@ -17,6 +17,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.privacy.LadybirdFingerprintProtection
+import eu.weblibre.flutter_mozilla_components.prefs.GeckoPrefs
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
@@ -55,6 +56,17 @@ object EngineProvider {
 
     @Synchronized
     fun runtimeState(): GeckoRuntimeState = state
+
+    /**
+     * The pref writer for the live engine, or null before an engine exists.
+     *
+     * GeckoRuntimeSettings has no generic pref setter, so prefs go through the
+     * engine's browser-pref API; this is how the power manager reaches it.
+     */
+    @Volatile
+    private var prefsWriter: GeckoPrefs? = null
+
+    fun prefsWriter(): GeckoPrefs? = prefsWriter
 
     private val components: Components
         get() = requireNotNull(GlobalComponents.components) { "Components not initialized" }
@@ -161,12 +173,6 @@ object EngineProvider {
 
             val created = GeckoRuntime.create(context, builder.build())
             state = GeckoRuntimeState.Live(profileId, created)
-
-            // === Ladybird-inspired fingerprint protection ===
-            // Ports Ladybird's LibPrivacy module: per-origin UA spoofing,
-            // deterministic noise seeds, and ResistFingerprinting prefs.
-            LadybirdFingerprintProtection.apply(created)
-
             created
         }
     }
@@ -187,6 +193,15 @@ object EngineProvider {
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
 
+            // Prefs go through the engine, so the writer is created here rather
+            // than at runtime creation, where no engine exists yet.
+            prefsWriter = GeckoPrefs(it)
+
+            // === Ladybird-inspired fingerprint protection ===
+            // Ports Ladybird's LibPrivacy module: per-origin UA spoofing,
+            // deterministic noise seeds, and Fingerprinting Protection targets.
+            LadybirdFingerprintProtection.apply(it)
+
             //Install extensions early
             BuiltInWebExtensionController(
                 "readability-extract@weblibre.eu",
@@ -200,6 +215,7 @@ object EngineProvider {
             BuiltInWebExtensionController(
                 "fingerprint-shield@weblibre.eu",
                 "resource://android/assets/extensions/fingerprint_shield/",
+                "fingerprintShield",
             ).install(it)
 
             SandboxCaptureFeature.install(it)

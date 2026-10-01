@@ -5,7 +5,8 @@
 package eu.weblibre.flutter_mozilla_components.privacy
 
 import mozilla.components.support.base.log.logger.Logger
-import org.mozilla.geckoview.GeckoRuntime
+import eu.weblibre.flutter_mozilla_components.prefs.GeckoPrefs
+import mozilla.components.concept.engine.Engine
 
 /**
  * GeckoView fingerprint protection integration inspired by Ladybird's
@@ -34,14 +35,14 @@ object LadybirdFingerprintProtection {
      * Must be called after [LadybirdRuntimeConfig.applyPerformancePrefs]
      * and [TitaniumHardeningConfig] if present, to avoid pref conflicts.
      */
-    fun apply(runtime: GeckoRuntime) {
+    fun apply(engine: Engine) {
         val privacyConfig = LadybirdPrivacyConfig
         if (privacyConfig.protectionLevel() == LadybirdPrivacyConfig.ProtectionLevel.Off) {
             logger.info("Fingerprint protection disabled by user preference")
             return
         }
 
-        val prefs = runtime.settings
+        val prefs = GeckoPrefs(engine)
 
         // =========================================================================
         // Layering
