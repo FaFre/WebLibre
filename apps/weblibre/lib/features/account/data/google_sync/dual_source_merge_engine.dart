@@ -11,6 +11,7 @@
  */
 
 import 'chrome_bookmarks_parser.dart';
+import 'chrome_history_parser.dart';
 
 /// Result of a merge operation.
 class MergeResult {
@@ -110,5 +111,28 @@ class DualSourceMergeEngine {
     }
 
     return MergeResult(added: added, skipped: skipped);
+  }
+
+  /// Prepare imported history for merging.
+  ///
+  /// History is keyed by URL and is purely additive: an entry already present
+  /// locally is kept unless the imported visit is newer, in which case the
+  /// caller refreshes the existing row instead of inserting a second one. The
+  /// result is what the store should write, newest visit first.
+  static List<ImportedHistoryEntry> prepareHistoryForMerge(
+    List<ImportedHistoryEntry> imported,
+    Map<String, DateTime> existingByUrl,
+  ) {
+    final result = <ImportedHistoryEntry>[];
+
+    for (final entry in imported) {
+      final existing = existingByUrl[entry.url];
+      if (existing == null || entry.lastVisit.isAfter(existing)) {
+        result.add(entry);
+      }
+    }
+
+    result.sort((a, b) => b.lastVisit.compareTo(a.lastVisit));
+    return result;
   }
 }
