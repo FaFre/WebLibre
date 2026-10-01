@@ -16,7 +16,8 @@
       "js": [
         "common.js",
         "content.js",
-        "status_panel.js"
+        "status_panel.js",
+        "test.js"
       ],
       "run_at": "document_start",
       "all_frames": true,
