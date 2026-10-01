@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Non-blocking async task scheduler inspired by Ladybird's LibLightpandaIO.
+ * Non-blocking async task scheduler ported from Ladybird LibLightpandaIO.
  *
  * Ladybird's epoll-based scheduler provides:
  * - Single epoll_wait for all IO events (no busy-waiting)
@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Unlike raw epoll, coroutines provide structured concurrency, automatic
  * cancellation propagation, and lifecycle integration with Android components.
  *
- * Reference: qwerzxcva/ladybird Libraries/LibLightpandaIO/AsyncIOScheduler.cpp
  */
 class LadybirdAsyncScheduler(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO + Job()),

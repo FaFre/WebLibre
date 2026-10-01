@@ -5,11 +5,11 @@
 package eu.weblibre.flutter_mozilla_components.privacy
 
 import mozilla.components.support.base.log.logger.Logger
-import eu.weblibre.flutter_mozilla_components.prefs.GeckoPrefs
+import eu.weblibre.flutter_mozilla_components.security.GeckoPrefs
 import mozilla.components.concept.engine.Engine
 
 /**
- * GeckoView fingerprint protection integration inspired by Ladybird's
+ * GeckoView fingerprint protection integration leveraging GeckoView's
  * NavigatorID privacy hook and LibPrivacy module.
  *
  * Applies GeckoView's ResistFingerprinting (RFP) preferences plus

@@ -10,14 +10,14 @@ import android.content.ComponentCallbacks2
 import android.content.res.Configuration
 import android.os.Bundle
 import eu.weblibre.flutter_mozilla_components.EngineProvider
-import eu.weblibre.flutter_mozilla_components.prefs.GeckoPrefs
+import eu.weblibre.flutter_mozilla_components.security.GeckoPrefs
 import mozilla.components.support.base.log.logger.Logger
 
 /**
  * Reacts to Android's own lifecycle and memory signals by moving Gecko between
  * four operating profiles.
  *
- * Ladybird's power story is structural — a background tab simply has no thread
+ * GeckoView's power management is structural — a background tab simply has no thread
  * scheduled for it, so it cannot burn CPU. GeckoView keeps its own scheduler
  * and cannot be told to stand down from Kotlin, but it does expose a live pref
  * surface. This manager uses that surface to approximate the same outcome:
@@ -29,7 +29,6 @@ import mozilla.components.support.base.log.logger.Logger
  * pressure can only escalate the profile, and returning to the foreground is
  * the only thing that resets it.
  *
- * Reference: qwerzxcva/ladybird (per-process isolation), lightpanda-io/browser
  * (system-level resource control).
  */
 class LadybirdPowerManager :
