@@ -4378,22 +4378,3 @@
     "description": "Summary of the favicons setting, shown as a settings search result."
   }
 }
-  "chromeExtensionPermissionDialogTitle": "Extension Permissions",
-  "@chromeExtensionPermissionDialogTitle": {
-    "description": "Title for the extension permission preview dialog"
-  },
-
-  "chromeExtensionPermissionDialogDescription": "This extension requests the following permissions:",
-  "@chromeExtensionPermissionDialogDescription": {
-    "description": "Description for the permission preview dialog"
-  },
-
-  "chromeExtensionPermissionDialogAccept": "Accept",
-  "@chromeExtensionPermissionDialogAccept": {
-    "description": "Accept button text for permission dialog"
-  },
-
-  "chromeExtensionImportPermissionsDenied": "Import cancelled: permissions not granted",
-  "@chromeExtensionImportPermissionsDenied": {
-    "description": "Message when user denies permissions"
-  }
