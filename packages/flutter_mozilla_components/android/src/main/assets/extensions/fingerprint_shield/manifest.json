@@ -25,5 +25,24 @@
     "webRequest",
     "webRequestBlocking",
     "<all_urls>"
-  ]
+  ],
+  "weblibre_protection": {
+    "parameters": [
+      "userAgent",
+      "platform",
+      "language",
+      "screen",
+      "devicePixelRatio",
+      "hardwareConcurrency",
+      "deviceMemory",
+      "timezone",
+      "canvas",
+      "webgl",
+      "audio",
+      "webRTC",
+      "fonts",
+      "battery"
+    ],
+    "profile": "android-chrome"
+  }
 }
