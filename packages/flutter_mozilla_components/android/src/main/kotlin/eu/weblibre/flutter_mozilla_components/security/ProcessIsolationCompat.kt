@@ -6,7 +6,7 @@ package eu.weblibre.flutter_mozilla_components.security
 
 import android.os.Build
 import mozilla.components.support.base.log.logger.Logger
-import org.mozilla.geckoview.GeckoRuntime
+import mozilla.components.concept.engine.Engine
 
 /**
  * Compatibility layer for Android process isolation features (isolatedProcess,
@@ -39,7 +39,7 @@ object ProcessIsolationCompat {
      * Called after GeckoRuntime creation in EngineProvider.getOrCreateRuntime().
      */
     fun applyCompensations(
-        runtime: GeckoRuntime,
+        engine: Engine,
         isolatedProcessEnabled: Boolean,
         appZygoteProcessEnabled: Boolean,
     ) {
@@ -47,7 +47,7 @@ object ProcessIsolationCompat {
             return
         }
 
-        val prefs = runtime.settings
+        val prefs = GeckoPrefs(engine)
 
         // Disable Gecko's internal content process sandbox level escalation
         // that stacks on top of Android's isolated process seccomp filter.

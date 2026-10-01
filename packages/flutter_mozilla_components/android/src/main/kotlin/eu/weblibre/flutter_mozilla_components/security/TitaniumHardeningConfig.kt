@@ -4,7 +4,7 @@
 
 package eu.weblibre.flutter_mozilla_components.security
 
-import org.mozilla.geckoview.GeckoRuntime
+import mozilla.components.concept.engine.Engine
 
 /**
  * Centralized security hardening configuration inspired by Titanium Browser's
@@ -25,8 +25,8 @@ object TitaniumHardeningConfig {
      * Apply all hardening preferences to the GeckoRuntime.
      * Called once during runtime creation in EngineProvider.getOrCreateRuntime().
      */
-    fun applyRuntimeHardening(runtime: GeckoRuntime) {
-        val prefs = runtime.settings
+    fun applyRuntimeHardening(engine: Engine) {
+        val prefs = GeckoPrefs(engine)
 
         // =========================================================================
         // L3: Feature flags — mirrors Titanium args.gn compile-time feature toggles

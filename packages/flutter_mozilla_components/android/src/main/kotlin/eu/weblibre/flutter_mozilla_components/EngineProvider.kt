@@ -163,29 +163,6 @@ object EngineProvider {
 
             val created = GeckoRuntime.create(context, builder.build())
 
-            // === Titanium Architecture: Runtime Hardening ===
-            // Apply centralized security/privacy hardening prefs to the runtime.
-            // This mirrors Titanium's args.gn compile-time feature flags and
-            // patch.sh runtime patches, translated to GeckoView pref equivalents.
-            TitaniumHardeningConfig.applyRuntimeHardening(created)
-
-            // Apply locked feature flags (cannot be overridden by user settings).
-            // Mirrors Titanium's compile-time GN flag enforcement model.
-            FeatureFlagManager.applyLockedFlags(created)
-
-            // === Process Isolation Compatibility Fix ===
-            // When isolatedProcess or appZygote is enabled, Android's seccomp/SELinux
-            // restrictions compound with Gecko's internal sandbox, breaking Cloudflare
-            // Turnstile verification and Widevine DRM playback. Apply runtime pref
-            // compensations to prevent double-stacking of restrictions.
-            GlobalComponents.startupSettings?.let { settings ->
-                ProcessIsolationCompat.applyCompensations(
-                    runtime = created,
-                    isolatedProcessEnabled = settings.isolatedProcessEnabled ?: false,
-                    appZygoteProcessEnabled = settings.appZygoteProcessEnabled ?: false,
-                )
-            }
-
             state = GeckoRuntimeState.Live(profileId, created)
             created
         }
@@ -206,6 +183,27 @@ object EngineProvider {
             ContainerProxyFeature.install(it, stateEvents)
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
+
+            // === Titanium Architecture: Runtime Hardening ===
+            // The hardening prefs go through the engine's browser-pref API, so
+            // they are applied here, where an Engine exists, rather than at
+            // runtime creation: GeckoRuntimeSettings has no generic pref setter
+            // and the runtime alone cannot carry them.
+            TitaniumHardeningConfig.applyRuntimeHardening(it)
+            FeatureFlagManager.applyLockedFlags(it)
+
+            // === Process Isolation Compatibility Fix ===
+            // When isolatedProcess or appZygote is enabled, Android's seccomp/
+            // SELinux restrictions compound with Gecko's internal sandbox,
+            // breaking Cloudflare Turnstile verification and Widevine DRM
+            // playback. Compensate so the two do not stack.
+            GlobalComponents.startupSettings?.let { settings ->
+                ProcessIsolationCompat.applyCompensations(
+                    engine = it,
+                    isolatedProcessEnabled = settings.isolatedProcessEnabled ?: false,
+                    appZygoteProcessEnabled = settings.appZygoteProcessEnabled ?: false,
+                )
+            }
 
             //Install extensions early
             BuiltInWebExtensionController(

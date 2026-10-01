@@ -4,7 +4,7 @@
 
 package eu.weblibre.flutter_mozilla_components.security
 
-import org.mozilla.geckoview.GeckoRuntime
+import mozilla.components.concept.engine.Engine
 
 /**
  * Compile-time feature flag system mirroring Titanium Browser's args.gn architecture.
@@ -80,8 +80,8 @@ object FeatureFlagManager {
      * This is the GeckoView equivalent of Titanium's compile-time GN flag enforcement:
      * once set, these prefs define the security posture for the entire process lifetime.
      */
-    fun applyLockedFlags(runtime: GeckoRuntime) {
-        val prefs = runtime.settings
+    fun applyLockedFlags(engine: Engine) {
+        val prefs = GeckoPrefs(engine)
         for (flag in FLAGS.filter { it.locked && it.prefKey != null }) {
             when {
                 flag.name == "speculative_connect" -> prefs.setInt(flag.prefKey, 0)
