@@ -37,6 +37,7 @@ import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFe
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
+import eu.weblibre.flutter_mozilla_components.security.TitaniumPermissionGate
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
 import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
@@ -64,8 +65,6 @@ import mozilla.components.feature.session.FullScreenFeature
 import mozilla.components.feature.session.PictureInPictureFeature
 import mozilla.components.feature.session.SessionFeature
 import mozilla.components.feature.sitepermissions.SitePermissionsFeature
-import mozilla.components.feature.sitepermissions.SitePermissionsRules
-import mozilla.components.feature.sitepermissions.SitePermissionsRules.AutoplayAction
 import mozilla.components.feature.tabs.WindowFeature
 import mozilla.components.feature.webauthn.WebAuthnFeature
 import mozilla.components.lib.state.ext.flowScoped
@@ -511,19 +510,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     sessionId = sessionId,
                     storage = components.core.geckoSitePermissionsStorage,
                     fragmentManager = parentFragmentManager,
-                    sitePermissionsRules = SitePermissionsRules(
-                        autoplayAudible = AutoplayAction.BLOCKED,
-                        autoplayInaudible = AutoplayAction.BLOCKED,
-                        camera = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        location = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        notification = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        microphone = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        persistentStorage = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        mediaKeySystemAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        crossOriginStorageAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        localDeviceAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                        localNetworkAccess = SitePermissionsRules.Action.ASK_TO_ALLOW,
-                    ),
+                    sitePermissionsRules = TitaniumPermissionGate.rules(),
                     onNeedToRequestPermissions = { permissions ->
                         requestSitePermissionsLauncher.launch(permissions)
                     },
