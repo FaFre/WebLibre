@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "WebLibre Performance Shield",
+  "version": "1.0",
+  "description": "Stops the browser doing work for content the user cannot see: decorative muted video that has scrolled out of view is paused and resumed on return.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "performance-shield@weblibre.eu"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "geckoViewAddons",
+    "<all_urls>"
+  ]
+}

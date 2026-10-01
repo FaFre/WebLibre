@@ -195,6 +195,14 @@ object EngineProvider {
                 "mozacReaderExtract",
             ).install(it)
 
+            // Performance Shield: pauses decorative muted video that has
+            // scrolled out of view, so the browser stops decoding frames for
+            // content the user cannot see.
+            BuiltInWebExtensionController(
+                "performance-shield@weblibre.eu",
+                "resource://android/assets/extensions/performance_shield/",
+            ).install(it)
+
             SandboxCaptureFeature.install(it)
 
             // Installs Mozilla's reader view extension early and wires the
