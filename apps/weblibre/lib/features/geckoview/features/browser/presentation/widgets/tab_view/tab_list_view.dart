@@ -115,35 +115,39 @@ class _TabDraggable extends HookConsumerWidget {
       }),
     );
 
-    // Cache the tab widget to avoid rebuilding
-    final tab = useMemoized(() {
-      return (suggestedContainerId != null)
-          ? SuggestedSingleListTabPreview(
-              key: ValueKey(tabId),
-              tabId: tabId,
-              activeTabId: activeTab,
-              onTap: () async {
-                final containerData = await ref
-                    .read(containerRepositoryProvider.notifier)
-                    .getContainerData(suggestedContainerId!);
+    // Build the tab widget directly. Flutter's element tree already reuses
+    // widgets with stable ValueKeys across rebuilds — wrapping in useMemoized
+    // with a dependency list caused every item to rebuild whenever activeTab
+    // changed, defeating the purpose of ListView.builder's lazy construction.
+    // Removing useMemoized lets Flutter skip subtree updates for items whose
+    // key hasn't changed, which is the core insight behind Ladybird's
+    // "only repaint what changed" compositor philosophy.
+    final tab = (suggestedContainerId != null)
+        ? SuggestedSingleListTabPreview(
+            key: ValueKey(tabId),
+            tabId: tabId,
+            activeTabId: activeTab,
+            onTap: () async {
+              final containerData = await ref
+                  .read(containerRepositoryProvider.notifier)
+                  .getContainerData(suggestedContainerId!);
 
-                if (containerData != null) {
-                  await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .assignContainer(tabId, containerData);
-                }
-              },
-            )
-          : SingleListTabPreview(
-              key: ValueKey(tabId),
-              tabId: tabId,
-              activeTabId: activeTab,
-              onClose: onClose,
-              sourceSearchQuery: sourceSearchQuery,
-              groupToggle: groupToggle,
-              depth: depth,
-            );
-    }, [tabId, activeTab, suggestedContainerId, groupToggle, depth]);
+              if (containerData != null) {
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .assignContainer(tabId, containerData);
+              }
+            },
+          )
+        : SingleListTabPreview(
+            key: ValueKey(tabId),
+            tabId: tabId,
+            activeTabId: activeTab,
+            onClose: onClose,
+            sourceSearchQuery: sourceSearchQuery,
+            groupToggle: groupToggle,
+            depth: depth,
+          );
 
     return switch (dragData) {
       ContainerDropData() => Opacity(
@@ -369,6 +373,14 @@ class _TabListView extends HookConsumerWidget {
               controller: scrollController,
               itemCount: displayItemCount,
               itemExtent: _itemHeight,
+              // Disable automatic keep-alives so off-screen tab items are
+              // garbage collected rather than held in memory. With hundreds
+              // of tabs this prevents linear memory growth — inspired by
+              // Lightpanda's aggressive resource reclamation strategy.
+              addAutomaticKeepAlives: false,
+              // Reduce pre-rendered area from default (250px) to minimize
+              // GPU memory for off-screen rasterization.
+              cacheExtent: 200,
               itemBuilder: (context, index) {
                 if (index < primaryRows.length) {
                   final row = primaryRows[index];
@@ -422,6 +434,8 @@ class _TabListView extends HookConsumerWidget {
               padding: const EdgeInsets.only(bottom: 56),
               itemCount: displayItemCount,
               itemExtent: _itemHeight,
+              addAutomaticKeepAlives: false,
+              cacheExtent: 200,
               // Drag handles are supplied per item so the drag arms later than
               // the long-press context menu, and so the non-reorderable
               // suggestion rows don't get one at all.
