@@ -83,9 +83,10 @@ object FeatureFlagManager {
     fun applyLockedFlags(engine: Engine) {
         val prefs = GeckoPrefs(engine)
         for (flag in FLAGS.filter { it.locked && it.prefKey != null }) {
+            val key = flag.prefKey ?: continue
             when {
-                flag.name == "speculative_connect" -> prefs.setInt(flag.prefKey, 0)
-                else -> prefs.setBoolean(flag.prefKey, flag.enabled)
+                flag.name == "speculative_connect" -> prefs.setInt(key, 0)
+                else -> prefs.setBoolean(key, flag.enabled)
             }
         }
     }

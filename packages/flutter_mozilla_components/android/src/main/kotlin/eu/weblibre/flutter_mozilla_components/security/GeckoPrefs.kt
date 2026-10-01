@@ -35,7 +35,7 @@ class GeckoPrefs(private val engine: Engine) {
             value,
             Branch.USER,
             onSuccess = {},
-            onError = { error -> logger.warn("Could not set pref $name", error) },
+            onError = { error: Throwable -> logger.warn("Could not set pref $name", error) },
         )
     }
 }
