@@ -60,6 +60,39 @@ object LadybirdFingerprintProtection {
         // =========================================================================
 
         // =========================================================================
+        // Granular Fingerprinting Protection (FPP) targets
+        //
+        // privacy.fingerprintingProtection applies only the targets named in the
+        // overrides string — unlike full RFP it does not force a desktop Windows
+        // identity. The Navigator* targets are deliberately omitted so the engine
+        // does not fight the shield's per-origin Android profile; everything listed
+        // here covers a C++-level surface the content script cannot reach from
+        // JavaScript.
+        // =========================================================================
+        prefs.setBoolean("privacy.fingerprintingProtection", true)
+        prefs.setString(
+            "privacy.fingerprintingProtection.overrides",
+            listOf(
+                "+CanvasRandomization",
+                "+WebGLRandomization",
+                "+EfficientCanvasRandomization",
+                "+ReduceTimerPrecision",
+                "+FontVisibilityBaseSystem",
+                "+FontVisibilityRestrictGenerics",
+                "+ScreenRect",
+                "+ScreenAvailRect",
+                "+CSSDeviceSize",
+                "+CSSResolution",
+                "+NavigatorHWConcurrency",
+                "+NavigatorHWConcurrencyTiered",
+                "+JSDateTimeUTC",
+                "+MediaDevices",
+                "+AudioContext",
+                "+StreamVideoFacingMode",
+            ).joinToString(","),
+        )
+
+        // =========================================================================
         // WebGL and Canvas countermeasures
         // =========================================================================
 

@@ -147,6 +147,29 @@
     } catch (e) {}
 
     // =========================================================================
+    // window.chrome
+    //
+    // A real Android Chrome exposes this object. A page that reads a Chrome UA
+    // but finds no window.chrome can tell the UA is spoofed, so providing it is
+    // part of staying coherent rather than a separate feature.
+    // =========================================================================
+
+    try {
+      if (!window.chrome) {
+        Object.defineProperty(window, 'chrome', {
+          value: {
+            runtime: {},
+            app: {},
+            loadTimes: function () { return {}; },
+            csi: function () { return {}; }
+          },
+          configurable: true,
+          enumerable: true
+        });
+      }
+    } catch (e) {}
+
+    // =========================================================================
     // screen / window metrics
     // =========================================================================
 
