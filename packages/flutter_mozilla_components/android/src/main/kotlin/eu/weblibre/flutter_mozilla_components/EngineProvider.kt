@@ -16,6 +16,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMo
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
+import eu.weblibre.flutter_mozilla_components.protection.ProtectionCoherenceMonitor
+import eu.weblibre.flutter_mozilla_components.protection.ProtectionDeclarationLoader
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
@@ -188,6 +190,13 @@ object EngineProvider {
             ).install(it)
 
             SandboxCaptureFeature.install(it)
+
+            // Publish which fingerprint surfaces the built-in extensions claim,
+            // so the settings screen can tell whether it and an extension are
+            // about to fight over the same one.
+            ProtectionDeclarationLoader.load(context)
+                .forEach(ProtectionCoherenceMonitor::declare)
+            ProtectionCoherenceMonitor.refresh(runtime)
 
             // Installs Mozilla's reader view extension early and wires the
             // WebLibre "pure black" (AMOLED) appearance bridge into it.

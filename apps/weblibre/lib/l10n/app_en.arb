@@ -10030,6 +10030,16 @@
     }
   },
   "settings_allowUnsignedExtensionsTitle": "Allow unsigned extensions",
+  "settings_protectionCoherenceSectionTitle": "Protection coherence",
+  "settings_monitorExtensionConflictsTitle": "Monitor extension conflicts",
+  "settings_monitorExtensionConflictsSubtitle": "Warn when an extension and the settings both control a fingerprint surface, or when an extension changes only part of one.",
+  "settings_followExtensionChangesTitle": "Follow extension changes",
+  "settings_followExtensionChangesSubtitle": "Update the related protection settings when an extension changes one, so the fingerprint stays coherent instead of half-moved.",
+  "settings_extensionProtectionClaimsTitle": "Extension protection claims",
+  "settings_extensionProtectionClaimsLoading": "Reading extension declarations\u2026",
+  "settings_extensionProtectionClaimsNone": "No built-in extension declares a fingerprint surface.",
+  "settings_extensionProtectionClaimsControls": "Controls",
+  "settings_extensionProtectionClaimsIncomplete": "Incomplete",
   "@settings_allowUnsignedExtensionsTitle": {
     "description": "Switch: allow installing extensions that Mozilla has not signed (verified). Must match the reference in the unsigned-extension install error."
   },
