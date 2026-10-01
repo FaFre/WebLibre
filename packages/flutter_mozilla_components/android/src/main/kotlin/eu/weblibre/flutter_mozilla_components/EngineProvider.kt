@@ -218,6 +218,17 @@ object EngineProvider {
                 "fingerprintShield",
             ).install(it)
 
+            // Edge Login: lets Microsoft account sign-in complete on Gecko by
+            // presenting identity pages as Microsoft Edge on Android. Essential
+            // for users who want to log into their Microsoft 365 / Outlook /
+            // OneDrive accounts without hitting the "Browser not supported"
+            // wall. The extension rewrites only the Microsoft identity domains.
+            BuiltInWebExtensionController(
+                "edge-login@weblibre.eu",
+                "resource://android/assets/extensions/edge_login/",
+                "edgeLogin",
+            ).install(it)
+
             SandboxCaptureFeature.install(it)
 
             // Installs Mozilla's reader view extension early and wires the
