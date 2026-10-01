@@ -1028,6 +1028,46 @@
   "@settings_allowUnsignedExtensionsTitle": {
     "description": "Switch: allow installing extensions that Mozilla has not signed (verified). Must match the reference in the unsigned-extension install error."
   },
+  "settings_protectionCoherenceSectionTitle": "Protection coherence",
+  "@settings_protectionCoherenceSectionTitle": {
+    "description": "Section title: whether an extension and the settings screen are moving the same fingerprint surfaces."
+  },
+  "settings_monitorExtensionConflictsTitle": "Monitor extension conflicts",
+  "@settings_monitorExtensionConflictsTitle": {
+    "description": "Switch: warn when an extension and the settings both control a fingerprint surface, or when an extension changes only part of one."
+  },
+  "settings_monitorExtensionConflictsSubtitle": "Warn when an extension and the settings both control a fingerprint surface, or when an extension changes only part of one.",
+  "@settings_monitorExtensionConflictsSubtitle": {
+    "description": "Subtitle for the extension-conflict monitor switch."
+  },
+  "settings_followExtensionChangesTitle": "Follow extension changes",
+  "@settings_followExtensionChangesTitle": {
+    "description": "Switch: adopt an extension's change wholesale, updating the rest of the cluster so the fingerprint stays coherent."
+  },
+  "settings_followExtensionChangesSubtitle": "Update the related protection settings when an extension changes one, so the fingerprint stays coherent instead of half-moved.",
+  "@settings_followExtensionChangesSubtitle": {
+    "description": "Subtitle for the follow-extension-changes switch."
+  },
+  "settings_extensionProtectionClaimsTitle": "Extension protection claims",
+  "@settings_extensionProtectionClaimsTitle": {
+    "description": "Title of the list showing what each built-in protection extension declares it controls."
+  },
+  "settings_extensionProtectionClaimsLoading": "Reading extension declarations\u2026",
+  "@settings_extensionProtectionClaimsLoading": {
+    "description": "Shown while the extension declarations are being read."
+  },
+  "settings_extensionProtectionClaimsNone": "No built-in extension declares a fingerprint surface.",
+  "@settings_extensionProtectionClaimsNone": {
+    "description": "Shown when no built-in extension declares any fingerprint surface."
+  },
+  "settings_extensionProtectionClaimsControls": "Controls",
+  "@settings_extensionProtectionClaimsControls": {
+    "description": "Label before the list of fingerprint surfaces an extension declares it controls."
+  },
+  "settings_extensionProtectionClaimsIncomplete": "Incomplete",
+  "@settings_extensionProtectionClaimsIncomplete": {
+    "description": "Label before a cluster an extension changed only part of."
+  },
   "settings_allowUnsignedExtensionsKeywords": "addons",
   "@settings_allowUnsignedExtensionsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
