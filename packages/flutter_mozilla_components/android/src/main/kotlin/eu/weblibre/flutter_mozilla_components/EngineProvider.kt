@@ -196,7 +196,7 @@ object EngineProvider {
             // about to fight over the same one.
             ProtectionDeclarationLoader.load(context)
                 .forEach(ProtectionCoherenceMonitor::declare)
-            ProtectionCoherenceMonitor.refresh(runtime)
+            ProtectionCoherenceMonitor.publish(it)
 
             // Installs Mozilla's reader view extension early and wires the
             // WebLibre "pure black" (AMOLED) appearance bridge into it.

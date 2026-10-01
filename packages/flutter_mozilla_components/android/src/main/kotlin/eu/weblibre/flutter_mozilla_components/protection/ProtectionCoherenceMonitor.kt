@@ -4,10 +4,12 @@
 
 package eu.weblibre.flutter_mozilla_components.protection
 
+import mozilla.components.ExperimentalAndroidComponentsApi
+import mozilla.components.concept.engine.Engine
+import mozilla.components.concept.engine.preferences.Branch
 import mozilla.components.support.base.log.logger.Logger
 import org.json.JSONArray
 import org.json.JSONObject
-import org.mozilla.geckoview.GeckoRuntime
 
 /**
  * Publishes what the installed protection extensions claim to control, so the
@@ -26,10 +28,9 @@ import org.mozilla.geckoview.GeckoRuntime
  * can decide what conflicts with what and what to do about it. It reads the
  * declarations from [PREF_DECLARATIONS] and does the rest.
  *
- * The publication is a JSON string in the Gecko pref space, which is the
- * channel the settings screen already reads, so no new bridge surface is
- * needed. Only the pref *setter* is used: this layer has no synchronous pref
- * read to depend on.
+ * The publication goes through the engine's browser-pref API rather than
+ * GeckoRuntimeSettings: the latter has no string setter, and this is the same
+ * path the settings screen already uses for its own prefs.
  */
 object ProtectionCoherenceMonitor {
 
@@ -96,8 +97,17 @@ object ProtectionCoherenceMonitor {
      * Publishing is unconditional: the settings screen reads the pref to decide
      * what to show, and a stale pref would be worse than an empty one.
      */
-    fun refresh(runtime: GeckoRuntime) {
-        runtime.settings.setString(PREF_DECLARATIONS, toJson())
+    @OptIn(ExperimentalAndroidComponentsApi::class)
+    fun publish(engine: Engine) {
+        engine.setBrowserPref(
+            PREF_DECLARATIONS,
+            toJson(),
+            Branch.USER,
+            onSuccess = {},
+            onError = { error ->
+                logger.warn("Could not publish protection declarations", error)
+            },
+        )
 
         val incomplete = declarations.values.count { it.incompleteClusters().isNotEmpty() }
         if (incomplete > 0) {
