@@ -17,11 +17,13 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
+import mozilla.components.ExperimentalAndroidComponentsApi
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
 import mozilla.components.concept.engine.DefaultSettings
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.preferences.Branch
 import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
@@ -149,13 +151,6 @@ object EngineProvider {
             builder.contentBlocking(contentBlocking.build())
             builder.locales(arrayOf("en-US", "en")) // Will be overridden later
 
-            // === Titanium-inspired privacy hardening ===
-            // WebRTC IP leak protection: prevent local/private IP exposure via ICE candidates.
-            // Mirrors Titanium's WebRTC IP policy enforcement at the Chromium level.
-            contentBlocking.webRtcIpPolicy(
-                ContentBlocking.WebRtcIpPolicy.DEFAULT_PUBLIC_INTERFACE_ONLY.mode
-            )
-
             // Apply builder-only settings from startup config
             GlobalComponents.startupSettings?.let { settings ->
                 settings.fissionEnabled?.let { builder.fissionEnabled(it) }
@@ -201,6 +196,8 @@ object EngineProvider {
 
             SandboxCaptureFeature.install(it)
 
+            applyWebRtcIpPolicy()
+
             // Installs Mozilla's reader view extension early and wires the
             // WebLibre "pure black" (AMOLED) appearance bridge into it.
             ReaderViewAppearanceFeature.install(
@@ -214,6 +211,28 @@ object EngineProvider {
         Logger.debug("Fetching Client")
         val runtime = getOrCreateRuntime(context)
         return GeckoViewFetchClient(context, runtime)
+    }
+
+    /**
+     * WebRTC IP leak protection: expose only the public interface, so ICE
+     * candidates cannot reveal local or private addresses.
+     *
+     * GeckoView's ContentBlocking has no setting for this, so it goes through
+     * the engine's browser-pref API — which is also the only way to set an
+     * arbitrary pref from here, since GeckoRuntimeSettings has no generic
+     * setter.
+     */
+    @OptIn(ExperimentalAndroidComponentsApi::class)
+    private fun applyWebRtcIpPolicy() {
+        components.core.engine.setBrowserPref(
+            "media.peerconnection.ice.default_address_only",
+            true,
+            Branch.USER,
+            onSuccess = {},
+            onError = { error ->
+                Logger.warn("Could not set the WebRTC IP policy", error)
+            },
+        )
     }
 
     /**

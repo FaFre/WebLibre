@@ -71,12 +71,12 @@ object TitaniumPermissionGate {
         autoplayInaudible = AutoplayAction.BLOCKED,
         camera = Action.ASK_TO_ALLOW,
         location = Action.ASK_TO_ALLOW,
-        notification = Action.DENY,
+        notification = Action.BLOCKED,
         microphone = Action.ASK_TO_ALLOW,
         persistentStorage = Action.ASK_TO_ALLOW,
         mediaKeySystemAccess = Action.ASK_TO_ALLOW,
         crossOriginStorageAccess = Action.ASK_TO_ALLOW,
-        localDeviceAccess = Action.DENY,
-        localNetworkAccess = Action.DENY,
+        localDeviceAccess = Action.BLOCKED,
+        localNetworkAccess = Action.BLOCKED,
     )
 }
