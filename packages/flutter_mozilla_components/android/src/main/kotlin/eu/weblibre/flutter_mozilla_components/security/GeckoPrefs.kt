@@ -30,12 +30,31 @@ class GeckoPrefs(private val engine: Engine) {
     fun setString(name: String, value: String) = write(name, value)
 
     private fun write(name: String, value: Any) {
-        engine.setBrowserPref(
-            name,
-            value,
-            Branch.USER,
-            onSuccess = {},
-            onError = { error: Throwable -> logger.warn("Could not set pref $name", error) },
-        )
+        // setBrowserPref is overloaded per type, so the value has to be narrowed
+        // before it can be passed on.
+        when (value) {
+            is Boolean -> engine.setBrowserPref(
+                name,
+                value,
+                Branch.USER,
+                onSuccess = {},
+                onError = { error: Throwable -> logger.warn("Could not set pref $name", error) },
+            )
+            is Int -> engine.setBrowserPref(
+                name,
+                value,
+                Branch.USER,
+                onSuccess = {},
+                onError = { error: Throwable -> logger.warn("Could not set pref $name", error) },
+            )
+            is String -> engine.setBrowserPref(
+                name,
+                value,
+                Branch.USER,
+                onSuccess = {},
+                onError = { error: Throwable -> logger.warn("Could not set pref $name", error) },
+            )
+            else -> logger.warn("Unsupported pref type for $name")
+        }
     }
 }
