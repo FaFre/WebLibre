@@ -161,12 +161,6 @@ object EngineProvider {
 
             val created = GeckoRuntime.create(context, builder.build())
 
-            // === Ladybird/Lightpanda Performance Optimization ===
-            // Apply performance-oriented prefs inspired by Ladybird's zero-bloat
-            // architecture and Lightpanda's 16x memory / 9x speed advantage.
-            // Reduces power consumption, memory footprint, and page load latency.
-            LadybirdRuntimeConfig.applyPerformancePrefs(created)
-
             state = GeckoRuntimeState.Live(profileId, created)
             created
         }
@@ -188,6 +182,13 @@ object EngineProvider {
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
 
+            // === Ladybird/Lightpanda Performance Optimization ===
+            // Apply performance-oriented prefs inspired by Ladybird's zero-bloat
+            // architecture and Lightpanda's 16x memory / 9x speed advantage.
+            // They go through the engine's browser-pref API, so they are applied
+            // here, where an Engine exists.
+            LadybirdRuntimeConfig.applyPerformancePrefs(it)
+
             //Install extensions early
             BuiltInWebExtensionController(
                 "readability-extract@weblibre.eu",
@@ -201,6 +202,7 @@ object EngineProvider {
             BuiltInWebExtensionController(
                 "performance-shield@weblibre.eu",
                 "resource://android/assets/extensions/performance_shield/",
+                "performanceShield",
             ).install(it)
 
             SandboxCaptureFeature.install(it)

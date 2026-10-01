@@ -4,7 +4,9 @@
 
 package eu.weblibre.flutter_mozilla_components.performance
 
-import org.mozilla.geckoview.GeckoRuntime
+import mozilla.components.ExperimentalAndroidComponentsApi
+import mozilla.components.concept.engine.Engine
+import mozilla.components.concept.engine.preferences.Branch
 
 /**
  * Performance-oriented runtime configuration inspired by Ladybird and Lightpanda.
@@ -31,8 +33,19 @@ object LadybirdRuntimeConfig {
      * Apply performance-oriented preferences to the GeckoRuntime.
      * Called after TitaniumHardeningConfig in EngineProvider.getOrCreateRuntime().
      */
-    fun applyPerformancePrefs(runtime: GeckoRuntime) {
-        val prefs = runtime.settings
+    @OptIn(ExperimentalAndroidComponentsApi::class)
+    fun applyPerformancePrefs(engine: Engine) {
+        // GeckoRuntimeSettings has no generic pref setter, so these go through
+        // the engine's browser-pref API. The writes are asynchronous, which is
+        // fine for runtime prefs Gecko reads on the next navigation.
+        fun setBoolean(name: String, value: Boolean) =
+            engine.setBrowserPref(name, value, Branch.USER, onSuccess = {}, onError = {})
+
+        fun setInt(name: String, value: Int) =
+            engine.setBrowserPref(name, value, Branch.USER, onSuccess = {}, onError = {})
+
+        fun setString(name: String, value: String) =
+            engine.setBrowserPref(name, value, Branch.USER, onSuccess = {}, onError = {})
 
         // =========================================================================
         // Memory reduction — inspired by Lightpanda's 16x memory advantage
@@ -41,17 +54,17 @@ object LadybirdRuntimeConfig {
         // Limit content process memory ceiling. Gecko defaults are tuned for
         // desktop with abundant RAM; mobile devices benefit from tighter limits
         // that trigger earlier GC and prevent OOM kills under memory pressure.
-        prefs.setInt("browser.cache.memory.capacity", 65536) // 64MB cache cap
-        prefs.setInt("javascript.options.mem.high_water_mark", 96) // MB, trigger GC earlier
-        prefs.setInt("javascript.options.mem.max", 512) // MB, hard ceiling per tab
+        setInt("browser.cache.memory.capacity", 65536) // 64MB cache cap
+        setInt("javascript.options.mem.high_water_mark", 96) // MB, trigger GC earlier
+        setInt("javascript.options.mem.max", 512) // MB, hard ceiling per tab
 
         // Reduce image decoding memory. Mobile screens don't need full-resolution
         // decode for off-screen images; downscale-on-decode saves significant RAM.
-        prefs.setBoolean("image.downscale-during-decode.enabled", true)
-        prefs.setInt("image.mem.animated.discardable", 1)
+        setBoolean("image.downscale-during-decode.enabled", true)
+        setInt("image.mem.animated.discardable", 1)
 
         // Limit DOM storage. Most sites don't need the default 10MB localStorage.
-        prefs.setInt("dom.storage.default_quota", 5120) // 5MB in KB
+        setInt("dom.storage.default_quota", 5120) // 5MB in KB
 
         // =========================================================================
         // Power reduction — inspired by Ladybird's zero-main-thread-blocking design
@@ -59,20 +72,20 @@ object LadybirdRuntimeConfig {
 
         // Disable background tab animations and timers. When a tab is not visible,
         // there is no reason to run CSS animations or requestAnimationFrame callbacks.
-        prefs.setBoolean("dom.animations.offscreen-throttling", true)
-        prefs.setInt("dom.animations.throttle-min-duration-ms", 100)
+        setBoolean("dom.animations.offscreen-throttling", true)
+        setInt("dom.animations.throttle-min-duration-ms", 100)
 
         // Suspend media in background tabs immediately rather than waiting.
-        prefs.setBoolean("media.suspend-bkgnd-video.enabled", true)
-        prefs.setInt("media.suspend-bkgnd-video.delay-ms", 0)
+        setBoolean("media.suspend-bkgnd-video.enabled", true)
+        setInt("media.suspend-bkgnd-video.delay-ms", 0)
 
         // Disable speculative connections and prefetching. On mobile with metered
         // connections, the battery/bandwidth cost outweighs the latency benefit.
-        prefs.setInt("network.http.speculative-parallel-limit", 0)
-        prefs.setBoolean("network.dns.disablePrefetch", true)
-        prefs.setBoolean("browser.urlbar.speculativeConnect.enabled", false)
-        prefs.setBoolean("network.predictor.enabled", false)
-        prefs.setBoolean("network.prefetch-next", false)
+        setInt("network.http.speculative-parallel-limit", 0)
+        setBoolean("network.dns.disablePrefetch", true)
+        setBoolean("browser.urlbar.speculativeConnect.enabled", false)
+        setBoolean("network.predictor.enabled", false)
+        setBoolean("network.prefetch-next", false)
 
         // =========================================================================
         // Startup acceleration — inspired by Lightpanda's V8 snapshot approach
@@ -80,18 +93,18 @@ object LadybirdRuntimeConfig {
 
         // Enable bytecode caching for JavaScript. Subsequent loads skip parsing
         // and go straight to execution, similar to Lightpanda's pre-compiled snapshot.
-        prefs.setBoolean("javascript.options.bytecode_cache", true)
-        prefs.setInt("javascript.options.bytecode_cache_size", 32768)
+        setBoolean("javascript.options.bytecode_cache", true)
+        setInt("javascript.options.bytecode_cache_size", 32768)
 
         // Parallelize CSS parsing and style computation across multiple cores.
-        prefs.setBoolean("layout.css.stylo-threads.enabled", true)
-        prefs.setInt("layout.css.stylo-threads.count", 4)
+        setBoolean("layout.css.stylo-threads.enabled", true)
+        setInt("layout.css.stylo-threads.count", 4)
 
         // Enable HTTP/3 (QUIC). Reduces connection setup from 2-3 RTTs to 0-1 RTT.
-        prefs.setBoolean("network.http.http3.enable", true)
+        setBoolean("network.http.http3.enable", true)
 
         // Enable early hints (103) processing for parallel critical resource fetching.
-        prefs.setBoolean("network.early-hints.enabled", true)
+        setBoolean("network.early-hints.enabled", true)
 
         // =========================================================================
         // Rendering optimization — inspired by Ladybird's GPU compositor
@@ -99,16 +112,16 @@ object LadybirdRuntimeConfig {
 
         // Force GPU-accelerated compositing. Ladybird's entire pipeline is GPU-first;
         // Gecko sometimes falls back to software compositing on Android causing jank.
-        prefs.setBoolean("layers.acceleration.force-enabled", true)
-        prefs.setBoolean("gfx.webrender.all", true)
-        prefs.setBoolean("gfx.webrender.compositor", true)
+        setBoolean("layers.acceleration.force-enabled", true)
+        setBoolean("gfx.webrender.all", true)
+        setBoolean("gfx.webrender.compositor", true)
 
         // Enable async scrolling (APZ). Decouples scroll handling from the main
         // thread so scrolling remains smooth even during heavy JS execution.
-        prefs.setBoolean("apz.asyncscroll.throttle", true)
-        prefs.setInt("apz.asyncscroll.timeout", 0)
+        setBoolean("apz.asyncscroll.throttle", true)
+        setInt("apz.asyncscroll.timeout", 0)
 
         // Match paint frequency to display refresh rate, never faster.
-        prefs.setInt("layout.frame_rate", -1)
+        setInt("layout.frame_rate", -1)
     }
 }
