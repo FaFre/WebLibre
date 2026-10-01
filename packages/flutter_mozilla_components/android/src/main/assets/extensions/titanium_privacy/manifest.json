@@ -20,5 +20,17 @@
       "id": "titanium-privacy@weblibre.eu",
       "strict_min_version": "128.0"
     }
+  },
+  "weblibre_protection": {
+    "parameters": [
+      "platform",
+      "language",
+      "hardwareConcurrency",
+      "deviceMemory",
+      "canvas",
+      "webgl",
+      "audio",
+      "battery"
+    ]
   }
 }
