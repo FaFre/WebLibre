@@ -434,7 +434,6 @@ class _TabListView extends HookConsumerWidget {
               padding: const EdgeInsets.only(bottom: 56),
               itemCount: displayItemCount,
               itemExtent: _itemHeight,
-              addAutomaticKeepAlives: false,
               cacheExtent: 200,
               // Drag handles are supplied per item so the drag arms later than
               // the long-press context menu, and so the non-reorderable
