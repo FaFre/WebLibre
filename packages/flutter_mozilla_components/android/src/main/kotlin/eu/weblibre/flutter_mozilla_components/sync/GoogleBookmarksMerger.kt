@@ -7,7 +7,6 @@ package eu.weblibre.flutter_mozilla_components.sync
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.storage.sync.PlacesBookmarksStorage
-import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
 import mozilla.components.support.base.log.logger.Logger
@@ -63,7 +62,7 @@ class GoogleBookmarksMerger(
             // Build a set of existing URLs for O(1) deduplication
             val existingUrls = mutableSetOf<String>()
             try {
-                val tree = storage.getBookmarksTree(rootFolderGuid, recursive = true)
+                val tree = storage.getTree(rootFolderGuid, recursive = true).getOrThrow()
                 collectUrls(tree, existingUrls)
             } catch (e: Exception) {
                 logger.warn("Failed to load existing bookmarks tree for dedup", e)
@@ -71,7 +70,7 @@ class GoogleBookmarksMerger(
 
             // Also check the entire bookmark tree for URLs outside our import folder
             try {
-                val fullTree = storage.getBookmarksTree("root________", recursive = true)
+                val fullTree = storage.getTree("root________", recursive = true).getOrThrow()
                 collectUrls(fullTree, existingUrls)
             } catch (e: Exception) {
                 logger.warn("Failed to load full bookmarks tree for dedup", e)
@@ -99,7 +98,7 @@ class GoogleBookmarksMerger(
                         url = bookmark.url,
                         title = bookmark.title,
                         position = null,
-                    )
+                    ).getOrThrow()
 
                     existingUrls.add(bookmark.url)
                     added++
@@ -122,7 +121,7 @@ class GoogleBookmarksMerger(
     private suspend fun getOrCreateImportRootFolder(
         storage: PlacesBookmarksStorage
     ): String {
-        val mobileRoot = storage.getBookmarksTree("mobile______", recursive = false)
+        val mobileRoot = storage.getTree("mobile______", recursive = false).getOrThrow()
         val children = mobileRoot?.children ?: emptyList()
 
         // Look for existing import folder
@@ -137,7 +136,7 @@ class GoogleBookmarksMerger(
             parentGuid = "mobile______",
             title = "[Chrome Import]",
             position = null,
-        )
+        ).getOrThrow()
     }
 
     /**
@@ -171,7 +170,7 @@ class GoogleBookmarksMerger(
             }
 
             // Look for existing child folder
-            val tree = storage.getBookmarksTree(currentGuid, recursive = false)
+            val tree = storage.getTree(currentGuid, recursive = false).getOrThrow()
             val existingFolder = tree?.children?.find {
                 it.type == BookmarkNodeType.FOLDER && it.title == segment
             }
@@ -184,7 +183,7 @@ class GoogleBookmarksMerger(
                     parentGuid = currentGuid,
                     title = segment,
                     position = null,
-                )
+                ).getOrThrow()
             }
 
             cache[currentPath] = currentGuid
