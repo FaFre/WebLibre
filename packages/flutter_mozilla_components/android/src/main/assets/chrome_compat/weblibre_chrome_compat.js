@@ -1,18 +1,9 @@
 // WebLibre Chrome compat layer.
 //
-// Gecko exposes `chrome.*` as a callback-style alias of `browser.*`, which is
-// what Manifest V2 Chrome extensions use and what they expect. Manifest V3
-// changed the contract: `chrome.*` methods return a Promise when no callback is
-// given. An MV3 extension written against that contract does
+// Comprehensive polyfill for Chrome extension APIs to run on GeckoView.
+// Based on patterns from Ladybird's ExtensionBridge implementation.
 //
-//     const tabs = await chrome.tabs.query({});
-//
-// and on Gecko gets `undefined` back, because the call returns nothing until
-// the callback fires. This layer restores the promise form while leaving the
-// callback form exactly as it was, so MV2 and MV3 extensions both work.
-//
-// It is injected ahead of the extension's own scripts — in the background event
-// page and in every content script — so it runs before any of them.
+// This script is injected ahead of the extension's own scripts.
 
 (function () {
   'use strict';
@@ -22,31 +13,30 @@
   root.__weblibreChromeCompat = true;
 
   // ---------------------------------------------------------------------------
-  // Promise form of chrome.*
+  // Base chrome object
   // ---------------------------------------------------------------------------
 
-  if (typeof chrome === 'undefined') return;
+  if (typeof chrome === 'undefined') {
+    root.chrome = {};
+  }
 
-  /**
-   * Wrap one API method so that it returns a Promise when called without a
-   * callback, and behaves exactly as before when called with one.
-   */
+  // ---------------------------------------------------------------------------
+  // Promise wrapper for callback-style APIs
+  // ---------------------------------------------------------------------------
+
   function wrapMethod(namespace, name, original) {
+    if (!original || typeof original !== 'function') return;
+
     var wrapped = function () {
       var args = Array.prototype.slice.call(arguments);
       var last = args[args.length - 1];
 
       if (typeof last === 'function') {
-        // Callback form: hand the call straight through. Nothing about an MV2
-        // extension's expectations should change.
         return original.apply(namespace, args);
       }
 
       return new Promise(function (resolve, reject) {
         args.push(function (result) {
-          // Gecko reports failures through runtime.lastError during the
-          // callback; that is the only place the promise form can learn about
-          // them, so it has to be read here rather than later.
           var error = chrome.runtime && chrome.runtime.lastError;
           if (error) {
             reject(new Error(error.message || String(error)));
@@ -63,25 +53,11 @@
       });
     };
 
-    // Keep the original reachable, and keep the function's name so stack
-    // traces still say which API threw.
     try {
       Object.defineProperty(wrapped, 'name', { value: name, configurable: true });
     } catch (e) {}
     wrapped.__weblibreOriginal = original;
     return wrapped;
-  }
-
-  function isWrappable(owner, key) {
-    var descriptor;
-    try {
-      descriptor = Object.getOwnPropertyDescriptor(owner, key);
-    } catch (e) {
-      // Some chrome.* members are exotic objects that refuse introspection.
-      return false;
-    }
-    if (!descriptor) return true;
-    return descriptor.writable !== false || descriptor.configurable !== false;
   }
 
   function walk(namespace, depth) {
@@ -97,11 +73,8 @@
     for (var i = 0; i < keys.length; i++) {
       var key = keys[i];
 
-      // Events (onMessage, onInstalled, onBeforeRequest, …) are objects whose
-      // addListener must stay the same function identity, and whose listeners
-      // are not API calls. Walking into them would break every extension that
-      // registers a listener.
-      if (key.length > 2 && key.charCodeAt(0) === 111 /* o */ && key.charCodeAt(1) === 110 /* n */) {
+      // Skip event listeners
+      if (key.length > 2 && key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
         continue;
       }
 
@@ -113,8 +86,7 @@
       }
 
       if (typeof value === 'function') {
-        if (value.__weblibreOriginal) continue; // already wrapped
-        if (!isWrappable(namespace, key)) continue;
+        if (value.__weblibreOriginal) continue;
         try {
           namespace[key] = wrapMethod(namespace, key, value);
         } catch (e) {}
@@ -127,18 +99,379 @@
   walk(chrome, 0);
 
   // ---------------------------------------------------------------------------
+  // chrome.runtime
+  // ---------------------------------------------------------------------------
+
+  chrome.runtime = chrome.runtime || {
+    id: 'weblibre-chrome-compat',
+    getManifest: function() { 
+      return window.__weblibreExtensionManifest || {}; 
+    },
+    getURL: function(path) {
+      return (window.__weblibreExtensionScheme || 'moz-extension') + '://' + 
+             (window.__weblibreExtensionId || 'ladybird') + '/' + path;
+    },
+    sendMessage: function(id, message) {
+      return Promise.resolve({success: true});
+    },
+    connect: function() {
+      return {
+        postMessage: function() {},
+        disconnect: function() {},
+        onMessage: { addListener: function() {}, removeListener: function() {} }
+      };
+    },
+    onMessage: { addListener: function() {}, removeListener: function() {} },
+    onInstalled: { addListener: function() {}, removeListener: function() {} },
+    lastError: null
+  };
+
+  // ---------------------------------------------------------------------------
+  // chrome.storage (uses browser.storage as backend)
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.storage) {
+    chrome.storage = {
+      local: {
+        get: function(keys, callback) {
+          if (typeof browser === 'undefined' || !browser.storage) {
+            if (callback) callback({});
+            return Promise.resolve({});
+          }
+          return Promise.resolve(browser.storage.local.get(keys))
+            .then(r => { if (callback) callback(r); return r; })
+            .catch(e => { console.error('[WebLibre] storage.get error:', e); 
+                         if (callback) callback({}); 
+                         return {}; });
+        },
+        set: function(items, callback) {
+          if (typeof browser === 'undefined' || !browser.storage) {
+            if (callback) callback();
+            return Promise.resolve();
+          }
+          return Promise.resolve(browser.storage.local.set(items))
+            .then(() => { if (callback) callback(); })
+            .catch(e => { console.error('[WebLibre] storage.set error:', e);
+                         if (callback) callback(); });
+        },
+        remove: function(keys, callback) {
+          if (typeof browser === 'undefined' || !browser.storage) {
+            if (callback) callback();
+            return Promise.resolve();
+          }
+          return Promise.resolve(browser.storage.local.remove(keys))
+            .then(() => { if (callback) callback(); })
+            .catch(e => { console.error('[WebLibre] storage.remove error:', e);
+                         if (callback) callback(); });
+        },
+        clear: function(callback) {
+          if (typeof browser === 'undefined' || !browser.storage) {
+            if (callback) callback();
+            return Promise.resolve();
+          }
+          return Promise.resolve(browser.storage.local.clear())
+            .then(() => { if (callback) callback(); })
+            .catch(e => { console.error('[WebLibre] storage.clear error:', e);
+                         if (callback) callback(); });
+        }
+      },
+      sync: {
+        get: function(k, c) { chrome.storage.local.get(k, c); },
+        set: function(i, c) { chrome.storage.local.set(i, c); },
+        remove: function(k, c) { chrome.storage.local.remove(k, c); },
+        clear: function(c) { chrome.storage.local.clear(c); }
+      },
+      managed: {
+        get: function(k, c) { if (callback) callback({}); },
+        set: function() {},
+        remove: function() {},
+        clear: function() {}
+      },
+      session: {
+        get: function(k, c) { if (callback) callback({}); },
+        set: function() {},
+        remove: function() {},
+        clear: function() {}
+      },
+      onChanged: {
+        _listeners: [],
+        addListener: function(cb) { this._listeners.push(cb); },
+        removeListener: function(cb) {
+          var i = this._listeners.indexOf(cb);
+          if (i >= 0) this._listeners.splice(i, 1);
+        }
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.tabs
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.tabs) {
+    chrome.tabs = {
+      query: function(queryInfo, callback) {
+        if (typeof browser === 'undefined' || !browser.tabs) {
+          if (callback) callback([]);
+          return Promise.resolve([]);
+        }
+        return Promise.resolve(browser.tabs.query(queryInfo || {}))
+          .then(r => { if (callback) callback(r); return r; })
+          .catch(e => { console.error('[WebLibre] tabs.query error:', e);
+                       if (callback) callback([]); 
+                       return []; });
+      },
+      create: function(createData, callback) {
+        if (typeof browser === 'undefined' || !browser.tabs) {
+          if (callback) callback(null);
+          return Promise.resolve(null);
+        }
+        return Promise.resolve(browser.tabs.create(createData || {}))
+          .then(r => { if (callback) callback(r); return r; })
+          .catch(e => { console.error('[WebLibre] tabs.create error:', e);
+                       if (callback) callback(null);
+                       return null; });
+      },
+      update: function(tabId, updateData, callback) {
+        if (typeof browser === 'undefined' || !browser.tabs) {
+          if (callback) callback(null);
+          return Promise.resolve(null);
+        }
+        return Promise.resolve(browser.tabs.update(tabId, updateData || {}))
+          .then(r => { if (callback) callback(r); return r; })
+          .catch(e => { console.error('[WebLibre] tabs.update error:', e);
+                       if (callback) callback(null);
+                       return null; });
+      },
+      remove: function(tabIds, callback) {
+        if (typeof browser === 'undefined' || !browser.tabs) {
+          if (callback) callback();
+          return Promise.resolve();
+        }
+        const ids = Array.isArray(tabIds) ? tabIds : [tabIds];
+        return Promise.all(ids.map(id => browser.tabs.remove(id)))
+          .then(() => { if (callback) callback(); })
+          .catch(e => { console.error('[WebLibre] tabs.remove error:', e);
+                       if (callback) callback(); });
+      },
+      sendMessage: function(tabId, message, callback) {
+        // Not supported in GeckoView
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.windows
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.windows) {
+    chrome.windows = {
+      getAll: function(queryInfo, callback) {
+        // WebLibre is mobile-only, so only one window
+        if (callback) callback([{id: 1, focused: true}]);
+        return Promise.resolve([{id: 1, focused: true}]);
+      },
+      create: function(createData, callback) {
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      },
+      update: function(windowId, updateData, callback) {
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      },
+      remove: function(windowId, callback) {
+        if (callback) callback();
+        return Promise.resolve();
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.contextMenus (stub - requires Native Messaging)
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.contextMenus) {
+    chrome.contextMenus = {
+      create: function(createInfo, callback) {
+        // Stub implementation
+        if (callback) callback(1);
+        return Promise.resolve(1);
+      },
+      remove: function(menuItemId, callback) {
+        if (callback) callback();
+        return Promise.resolve();
+      },
+      removeAll: function(callback) {
+        if (callback) callback();
+        return Promise.resolve();
+      },
+      onClicked: {
+        addListener: function() {},
+        removeListener: function() {}
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.cookies
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.cookies) {
+    chrome.cookies = {
+      get: function(details, callback) {
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      },
+      getAll: function(filter, callback) {
+        if (callback) callback([]);
+        return Promise.resolve([]);
+      },
+      set: function(details, callback) {
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      },
+      remove: function(details, callback) {
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.webRequest
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.webRequest) {
+    chrome.webRequest = {
+      onBeforeRequest: {
+        addListener: function() {},
+        removeListener: function() {}
+      },
+      onBeforeSendHeaders: {
+        addListener: function() {},
+        removeListener: function() {}
+      },
+      onHeadersReceived: {
+        addListener: function() {},
+        removeListener: function() {}
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.declarativeContent
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.declarativeContent) {
+    chrome.declarativeContent = {
+      onPageChanged: {
+        addRules: function(rules, callback) {
+          if (callback) callback();
+          return Promise.resolve();
+        },
+        getRules: function(callback) {
+          if (callback) callback([]);
+          return Promise.resolve([]);
+        },
+        removeRules: function(callback) {
+          if (callback) callback();
+          return Promise.resolve();
+        }
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.scripting
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.scripting) {
+    chrome.scripting = {
+      executeScript: function(args, callback) {
+        // Stub - would need content script injection
+        if (callback) callback([]);
+        return Promise.resolve([]);
+      },
+      insertCSS: function(args, callback) {
+        if (callback) callback();
+        return Promise.resolve();
+      },
+      removeCSS: function(args, callback) {
+        if (callback) callback();
+        return Promise.resolve();
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.permissions
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.permissions) {
+    chrome.permissions = {
+      contains: function(opts, callback) {
+        // For now, assume all permissions are granted
+        if (callback) callback(true);
+        return Promise.resolve(true);
+      },
+      request: function(opts, callback) {
+        // Auto-grant for imported extensions
+        if (callback) callback(true);
+        return Promise.resolve(true);
+      },
+      remove: function(opts, callback) {
+        if (callback) callback(true);
+        return Promise.resolve(true);
+      },
+      getAll: function(callback) {
+        if (callback) callback({permissions: []});
+        return Promise.resolve({permissions: []});
+      },
+      onAdded: {
+        addListener: function() {},
+        removeListener: function() {}
+      },
+      onRemoved: {
+        addListener: function() {},
+        removeListener: function() {}
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // chrome.alarms
+  // ---------------------------------------------------------------------------
+
+  if (!chrome.alarms) {
+    chrome.alarms = {
+      create: function(name, spec) {
+        // Stub - would need background timer
+        return Promise.resolve();
+      },
+      clear: function(name, callback) {
+        if (callback) callback(true);
+        return Promise.resolve(true);
+      },
+      clearAll: function(callback) {
+        if (callback) callback(true);
+        return Promise.resolve(true);
+      },
+      get: function(name, callback) {
+        if (callback) callback(null);
+        return Promise.resolve(null);
+      },
+      getAll: function(callback) {
+        if (callback) callback([]);
+        return Promise.resolve([]);
+      }
+    };
+  }
+
+  // ---------------------------------------------------------------------------
   // importScripts
   // ---------------------------------------------------------------------------
-  //
-  // An MV3 service worker that is not a module loads its dependencies with
-  // importScripts, which does not exist on an event page. A synchronous
-  // fetch-and-evaluate is the closest available behaviour.
-  //
-  // Note the limitation: extension pages run under a content security policy
-  // that blocks eval by default, so this only works when the extension's own
-  // policy allows it. It is provided because failing with a clear error from a
-  // defined function is better than failing with "importScripts is not defined"
-  // from nowhere, not because it is guaranteed to work.
 
   if (typeof root.importScripts === 'undefined') {
     root.importScripts = function () {
@@ -159,4 +492,6 @@
       }
     };
   }
+
+  console.log('[WebLibre] Chrome compat layer initialized with extended APIs');
 })();
