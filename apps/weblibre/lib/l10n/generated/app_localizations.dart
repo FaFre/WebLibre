@@ -13604,25 +13604,25 @@ abstract class AppLocalizations {
   /// **'Allow unsigned extensions'**
   String get settings_allowUnsignedExtensionsTitle;
 
-  String get settings_protectionCoherenceSectionTitle => 'Protection coherence';
+  String get settings_protectionCoherenceSectionTitle;
 
-  String get settings_monitorExtensionConflictsTitle => 'Monitor extension conflicts';
+  String get settings_monitorExtensionConflictsTitle;
 
-  String get settings_monitorExtensionConflictsSubtitle => 'Warn when an extension and the settings both control a fingerprint surface, or when an extension changes only part of one.';
+  String get settings_monitorExtensionConflictsSubtitle;
 
-  String get settings_followExtensionChangesTitle => 'Follow extension changes';
+  String get settings_followExtensionChangesTitle;
 
-  String get settings_followExtensionChangesSubtitle => 'Update the related protection settings when an extension changes one, so the fingerprint stays coherent instead of half-moved.';
+  String get settings_followExtensionChangesSubtitle;
 
-  String get settings_extensionProtectionClaimsTitle => 'Extension protection claims';
+  String get settings_extensionProtectionClaimsTitle;
 
-  String get settings_extensionProtectionClaimsLoading => 'Reading extension declarations…';
+  String get settings_extensionProtectionClaimsLoading;
 
-  String get settings_extensionProtectionClaimsNone => 'No built-in extension declares a fingerprint surface.';
+  String get settings_extensionProtectionClaimsNone;
 
-  String get settings_extensionProtectionClaimsControls => 'Controls';
+  String get settings_extensionProtectionClaimsControls;
 
-  String get settings_extensionProtectionClaimsIncomplete => 'Incomplete';
+  String get settings_extensionProtectionClaimsIncomplete;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
