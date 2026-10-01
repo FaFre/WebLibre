@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "WebLibre Fingerprint Shield",
   "version": "1.0",
-  "description": "Comprehensive per-origin fingerprint spoofing: UA, screen, canvas, WebGL, audio, fonts, timezone, WebRTC and more, all derived from a single deterministic seed so every surface — including the outgoing User-Agent header — stays mutually consistent.",
+  "description": "Comprehensive per-origin fingerprint spoofing: UA, screen, canvas, WebGL, audio, fonts, timezone, WebRTC and more, all derived from a single deterministic seed so every surface \u2014 including the outgoing User-Agent header \u2014 stays mutually consistent.",
   "browser_specific_settings": {
     "gecko": {
       "id": "fingerprint-shield@weblibre.eu"
@@ -10,15 +10,24 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["common.js", "content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "common.js",
+        "content.js",
+        "status_panel.js"
+      ],
       "run_at": "document_start",
       "all_frames": true,
       "match_about_blank": true
     }
   ],
   "background": {
-    "scripts": ["common.js", "background.js"]
+    "scripts": [
+      "common.js",
+      "background.js"
+    ]
   },
   "permissions": [
     "geckoViewAddons",
