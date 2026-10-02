@@ -43,6 +43,13 @@ object BrowserExtensionFeature {
         PREF_MANAGER_REPORTER_MESSAGING_ID
     )
 
+    /**
+     * Whether the extension's background script is listening. Until it is,
+     * [BuiltInWebExtensionController.sendBackgroundMessage] drops a request
+     * (logging all of it) and its callback is never called.
+     */
+    fun isConnected(): Boolean = extensionController.portConnected(null)
+
     fun scheduleRequest(
         command: String,
         args: Any,

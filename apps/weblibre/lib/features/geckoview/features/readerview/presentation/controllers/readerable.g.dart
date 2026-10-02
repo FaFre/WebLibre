@@ -35,7 +35,7 @@ final class ReaderableScreenControllerProvider
 }
 
 String _$readerableScreenControllerHash() =>
-    r'46206cfb431c5d36dc6351a8fc52c3b98b86dd0f';
+    r'efdd013069bac1b448ed577b9de1e5b4caa70055';
 
 abstract class _$ReaderableScreenController extends $AsyncNotifier<void> {
   FutureOr<void> build();

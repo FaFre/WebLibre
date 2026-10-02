@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
 import eu.weblibre.flutter_mozilla_components.feature.awaitResult
+import eu.weblibre.flutter_mozilla_components.pigeons.FlutterError
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserExtensionApi
 import org.json.JSONArray
 import org.json.JSONObject
@@ -43,8 +44,23 @@ class GeckoBrowserExtensionApiImpl : GeckoBrowserExtensionApi {
         return list
     }
 
-    override suspend fun getMarkdown(htmlList: List<String>): List<Any> =
-        awaitResult({ BrowserExtensionFeature.scheduleRequest("turndown", htmlList, it) }) { result ->
+    override suspend fun getMarkdown(htmlList: List<String>): List<Any> {
+        // A distinct, immediate error rather than a request nobody answers:
+        // the caller retries later instead of blaming the documents.
+        if (!BrowserExtensionFeature.isConnected()) {
+            throw FlutterError(MARKDOWN_UNAVAILABLE, "The browser extension is not connected yet")
+        }
+
+        return awaitResult({ BrowserExtensionFeature.scheduleRequest("turndown", htmlList, it) }) { result ->
             result.getJSONArray("result").toList()
         }
+    }
+
+    companion object {
+        /**
+         * Error code of a conversion requested before the extension listens.
+         * Must match `GeckoBrowserExtensionService.unavailableErrorCode` in Dart.
+         */
+        const val MARKDOWN_UNAVAILABLE = "unavailable"
+    }
 }

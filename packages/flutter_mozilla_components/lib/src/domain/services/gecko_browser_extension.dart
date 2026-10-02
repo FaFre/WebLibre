@@ -19,7 +19,15 @@ class GeckoBrowserExtensionService extends BrowserExtensionEvents {
 
   Stream<String> get feedRequested => _feedRequest.stream;
 
-  static Future<List<TurndownResults>> turndownHtml(
+  /// [PlatformException.code] of a [turndownHtml] call made before the
+  /// extension listens. Nothing was converted; worth retrying later.
+  static const unavailableErrorCode = 'unavailable';
+
+  /// Converts each of [htmlList] to markdown and plain text, in order.
+  ///
+  /// An entry is `null` when the extension failed to convert that document;
+  /// the others are unaffected.
+  static Future<List<TurndownResults?>> turndownHtml(
     List<String> htmlList, {
     Duration timeout = const Duration(seconds: 1),
   }) async {
@@ -31,17 +39,16 @@ class GeckoBrowserExtensionService extends BrowserExtensionEvents {
         .getMarkdown(htmlList)
         .timeout(timeout);
 
-    final results = markdownResult
-        .cast()
-        .map(
-          (result) => TurndownResults(
-            // ignore: avoid_dynamic_calls valid
-            markdown: result['fullContentMarkdown'] as String,
-            // ignore: avoid_dynamic_calls valid
-            plain: result['fullContentPlain'] as String,
-          ),
-        )
-        .toList();
+    final results = markdownResult.map((result) {
+      final document = result as Map<Object?, Object?>;
+      final markdown = document['fullContentMarkdown'];
+      final plain = document['fullContentPlain'];
+      if (markdown is! String || plain is! String) {
+        return null;
+      }
+
+      return TurndownResults(markdown: markdown, plain: plain);
+    }).toList();
 
     return results;
   }

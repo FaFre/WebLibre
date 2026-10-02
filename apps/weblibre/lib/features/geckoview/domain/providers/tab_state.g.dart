@@ -41,7 +41,7 @@ final class TabStatesProvider
   }
 }
 
-String _$tabStatesHash() => r'7e0e3459175eebc5810dd298fcf61fe6eccf7612';
+String _$tabStatesHash() => r'9cc0a27b36c148b8e09a39ebb3dfa3cb2998eb89';
 
 abstract class _$TabStates extends $Notifier<Map<String, TabState>> {
   Map<String, TabState> build();

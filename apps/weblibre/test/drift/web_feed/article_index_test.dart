@@ -30,6 +30,13 @@ final _body = 'the quick brown fox jumps over the lazy dog. ' * 400;
 
 final _feedUrl = Uri.parse('https://example.invalid/feed.xml');
 
+/// The HTML `article-1` is stored with, which a conversion must match.
+final _source = (
+  id: 'article-1',
+  contentHtml: '<p>$_body</p>',
+  summaryHtml: '<p>summary</p>',
+);
+
 void main() {
   late FeedDatabase db;
 
@@ -91,20 +98,14 @@ void main() {
     test(
       'does not rebuild the index when content is rewritten as-is',
       () async {
-        // What a feed re-serving an unchanged entry does.
+        // A conversion that produces the text the article already holds.
         final before = await ftsBytes();
 
-        await db.articleDao.updateArticleContent([
-          FeedArticle(
-            id: 'article-1',
-            feedId: _feedUrl,
-            fetched: DateTime(2026),
-            title: 'Fox news',
-            summaryHtml: '<p>summary</p>',
-            summaryPlain: 'summary',
-            contentHtml: '<p>$_body</p>',
-            contentMarkdown: _body,
-            contentPlain: _body,
+        await db.articleDao.writeProcessedArticles([
+          (
+            source: _source,
+            content: (markdown: _body, plain: _body),
+            summary: (markdown: 'summary', plain: 'summary'),
           ),
         ]);
 
@@ -115,17 +116,11 @@ void main() {
     test('still rebuilds the index when the indexed text changes', () async {
       final before = await ftsBytes();
 
-      await db.articleDao.updateArticleContent([
-        FeedArticle(
-          id: 'article-1',
-          feedId: _feedUrl,
-          fetched: DateTime(2026),
-          title: 'Fox news',
-          summaryHtml: '<p>summary</p>',
-          summaryPlain: 'summary',
-          contentHtml: '<p>hedgehog</p>',
-          contentMarkdown: 'hedgehog',
-          contentPlain: 'hedgehog',
+      await db.articleDao.writeProcessedArticles([
+        (
+          source: _source,
+          content: (markdown: 'hedgehog', plain: 'hedgehog'),
+          summary: null,
         ),
       ]);
 

@@ -43,7 +43,7 @@ final class ArticleContentProcessorServiceProvider
 }
 
 String _$articleContentProcessorServiceHash() =>
-    r'e7cc3da71f6dcf39b0c10df4dcd061f816d5c12e';
+    r'1c71920fb6c685624ea5e4d8e14495fcc7e3c58f';
 
 abstract class _$ArticleContentProcessorService extends $Notifier<void> {
   void build();
