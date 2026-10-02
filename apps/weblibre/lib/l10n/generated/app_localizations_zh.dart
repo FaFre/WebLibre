@@ -10030,6 +10030,44 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexShowFaviconsSubtitle => '在标签页列表中显示网站图标';
 
   @override
+  String get settings_switcherPlacementTitle => '切换栏位置';
+
+  @override
+  String get settings_switcherPlacementSubtitle => '切换栏相对于地址栏和上下文工具栏的位置';
+
+  @override
+  String get settings_switcherPlacementKeywords =>
+      '位置, 顺序, 上方, 下方, 顶部, 底部, 地址栏, 标签栏';
+
+  @override
+  String get settings_switcherPlacementAutoLabel => '自动';
+
+  @override
+  String get settings_switcherPlacementAutoDescription =>
+      '地址栏在底部时位于其上方，地址栏在顶部时位于上下文工具栏上方';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarLabel => '地址栏上方';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarDescription =>
+      '随地址栏位于顶部或底部';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarLabel => '地址栏下方';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarDescription =>
+      '随地址栏位于顶部或底部';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarLabel => '上下文工具栏下方';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarDescription =>
+      '位于屏幕底边';
+
+  @override
   String get smallWeb_sheetTitle => '小众网络';
 
   @override

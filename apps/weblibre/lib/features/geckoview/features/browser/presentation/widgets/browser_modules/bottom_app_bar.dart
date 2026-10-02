@@ -79,12 +79,20 @@ export 'package:weblibre/features/geckoview/features/browser/presentation/widget
     show QuickTabSwitcherItem;
 
 class BrowserTopAppBar extends StatelessWidget {
+  /// Whether the address bar is drawn here, i.e. the tab bar is at the top.
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
+  final QuickTabSwitcherPlacement quickTabSwitcherPlacement;
   final bool isSmallWebMode;
   final bool enableGestures;
   final bool suppressMainToolbar;
+
+  /// The sheet over the page, if any. The top bar is drawn above the sheet
+  /// layer, so it drops the rows the tab tray replaces (the switcher, and the
+  /// address bar when a contextual toolbar takes over) exactly like the
+  /// bottom bar does, instead of covering the expanded tray.
+  final Sheet? displayedSheet;
 
   late final BrowserTabBar _tabBar;
   late final _size = Size.fromHeight(_tabBar.getToolbarHeight());
@@ -95,14 +103,22 @@ class BrowserTopAppBar extends StatelessWidget {
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
+    this.quickTabSwitcherPlacement = QuickTabSwitcherPlacement.auto,
+    this.displayedSheet,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
   }) {
+    // The switcher only joins the address bar up here; with no address bar
+    // in this bar it belongs to the bottom one.
+    final switcher = quickTabSwitcherPlacement.resolve(TabBarPosition.top);
     _tabBar = BrowserTabBar(
       showMainToolbar: showMainToolbar,
-      displayedSheet: null,
+      displayedSheet: displayedSheet,
       showContextualToolbar: false,
-      quickTabSwitcherRowCount: 0,
+      quickTabSwitcherRowCount: showMainToolbar && switcher.inTopBar
+          ? quickTabSwitcherRowCount
+          : 0,
+      quickTabSwitcherOrder: switcher.order,
       isSmallWebMode: isSmallWebMode,
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
@@ -122,9 +138,11 @@ class BrowserTopAppBar extends StatelessWidget {
 }
 
 class BrowserBottomAppBar extends StatelessWidget {
+  /// Whether the address bar is drawn here, i.e. the tab bar is at the bottom.
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
+  final QuickTabSwitcherPlacement quickTabSwitcherPlacement;
   final bool isSmallWebMode;
   final Sheet? displayedSheet;
   final bool enableGestures;
@@ -140,14 +158,21 @@ class BrowserBottomAppBar extends StatelessWidget {
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
+    this.quickTabSwitcherPlacement = QuickTabSwitcherPlacement.auto,
     this.enableGestures = true,
     this.suppressMainToolbar = false,
   }) {
+    final switcher = quickTabSwitcherPlacement.resolve(
+      showMainToolbar ? TabBarPosition.bottom : TabBarPosition.top,
+    );
     _tabBar = BrowserTabBar(
       displayedSheet: displayedSheet,
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
-      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+      quickTabSwitcherRowCount: switcher.inTopBar
+          ? 0
+          : quickTabSwitcherRowCount,
+      quickTabSwitcherOrder: switcher.order,
       isSmallWebMode: isSmallWebMode,
       enableGestures: enableGestures,
       hideMainToolbarButtonsDuplicatedInContextualToolbar:
@@ -305,6 +330,9 @@ class BrowserTabBar extends HookConsumerWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final int quickTabSwitcherRowCount;
+
+  /// Where the switcher rows go in a horizontal bar. Ignored by the rails.
+  final QuickTabSwitcherOrder quickTabSwitcherOrder;
   final Sheet? displayedSheet;
   final bool hideMainToolbarButtonsDuplicatedInContextualToolbar;
   final bool isSmallWebMode;
@@ -339,6 +367,7 @@ class BrowserTabBar extends HookConsumerWidget {
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
     required this.enableGestures,
+    this.quickTabSwitcherOrder = QuickTabSwitcherOrder.beforeAddressBar,
     this.railWidth = compactRailWidth,
     this.hideMainToolbarButtonsDuplicatedInContextualToolbar = false,
     this.suppressMainToolbar = false,
@@ -654,6 +683,7 @@ class BrowserTabBar extends HookConsumerWidget {
       showMainToolbar: showMainToolbar,
       showContextualToolbar: showContextualToolbar,
       showQuickTabSwitcherBar: quickTabSwitcherRowCount > 0,
+      quickTabSwitcherOrder: quickTabSwitcherOrder,
       displayAppBar: displayAppBar,
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
@@ -952,6 +982,7 @@ class BrowserTabBarView extends StatelessWidget {
     required this.actions,
     required this.quickTabSwitcher,
     required this.contextualToolbar,
+    this.quickTabSwitcherOrder = QuickTabSwitcherOrder.beforeAddressBar,
     this.axis = Axis.horizontal,
     this.isWideRail = false,
     this.railOnLeft = true,
@@ -977,6 +1008,10 @@ class BrowserTabBarView extends StatelessWidget {
   final bool showMainToolbar;
   final bool showContextualToolbar;
   final bool showQuickTabSwitcherBar;
+
+  /// Where [quickTabSwitcher] sits in the horizontal bar. The rails keep
+  /// their own fixed order.
+  final QuickTabSwitcherOrder quickTabSwitcherOrder;
   final bool displayAppBar;
   final bool displayQuickTabSwitcher;
   final Color? backgroundColor;
@@ -1099,6 +1134,14 @@ class BrowserTabBarView extends StatelessWidget {
       );
     }
 
+    final switcherRow = Visibility(
+      visible: displayQuickTabSwitcher,
+      maintainState: true,
+      child: quickTabSwitcher,
+    );
+    bool showSwitcherAt(QuickTabSwitcherOrder order) =>
+        showQuickTabSwitcherBar && quickTabSwitcherOrder == order;
+
     return GestureDetector(
       // Tap handling moved to AppBarTitle for split icon/title behavior
       onHorizontalDragStart: onHorizontalDragStart,
@@ -1110,12 +1153,8 @@ class BrowserTabBarView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (showQuickTabSwitcherBar)
-              Visibility(
-                visible: displayQuickTabSwitcher,
-                maintainState: true,
-                child: quickTabSwitcher,
-              ),
+            if (showSwitcherAt(QuickTabSwitcherOrder.beforeAddressBar))
+              switcherRow,
             if (showMainToolbar)
               Visibility(
                 visible: displayAppBar,
@@ -1134,7 +1173,11 @@ class BrowserTabBarView extends StatelessWidget {
                   actions: actions,
                 ),
               ),
+            if (showSwitcherAt(QuickTabSwitcherOrder.afterAddressBar))
+              switcherRow,
             if (showContextualToolbar) contextualToolbar,
+            if (showSwitcherAt(QuickTabSwitcherOrder.afterContextualBar))
+              switcherRow,
           ],
         ),
       ),

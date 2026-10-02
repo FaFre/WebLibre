@@ -363,10 +363,18 @@ class TabBarPreviewCard extends HookWidget {
         settings.effectiveTabBarStackingMode(window: window) !=
         TabBarStackingMode.disabled;
 
+    final bottomSwitcher = settings.quickTabSwitcherPlacement.resolve(
+      TabBarPosition.bottom,
+    );
+    final topSwitcher = settings.quickTabSwitcherPlacement.resolve(
+      TabBarPosition.top,
+    );
+
     final bottomCombinedToolbar = BrowserTabBarView(
       showMainToolbar: true,
       showContextualToolbar: settings.tabBarShowContextualBar,
       showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      quickTabSwitcherOrder: bottomSwitcher.order,
       displayAppBar: true,
       displayQuickTabSwitcher: true,
       backgroundColor:
@@ -382,23 +390,27 @@ class TabBarPreviewCard extends HookWidget {
     final topMainToolbar = BrowserTabBarView(
       showMainToolbar: true,
       showContextualToolbar: false,
-      showQuickTabSwitcherBar: false,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar && topSwitcher.inTopBar,
+      quickTabSwitcherOrder: topSwitcher.order,
       displayAppBar: true,
-      displayQuickTabSwitcher: false,
+      displayQuickTabSwitcher: true,
       backgroundColor:
           previewContainerPalette?.surfaceColor ?? colorScheme.surfaceContainer,
       title: settings.tabBarLayout == TabBarLayout.compact
           ? _CompactPreviewTitle(tabState: previewTabState)
           : _RegularPreviewTitle(tabState: previewTabState),
       actions: mainToolbarActions,
-      quickTabSwitcher: const SizedBox.shrink(),
+      quickTabSwitcher: topSwitcher.inTopBar
+          ? buildQuickTabSwitcher()
+          : const SizedBox.shrink(),
       contextualToolbar: const SizedBox.shrink(),
     );
 
     final topBottomToolbar = BrowserTabBarView(
       showMainToolbar: false,
       showContextualToolbar: settings.tabBarShowContextualBar,
-      showQuickTabSwitcherBar: showQuickTabSwitcherBar,
+      showQuickTabSwitcherBar: showQuickTabSwitcherBar && !topSwitcher.inTopBar,
+      quickTabSwitcherOrder: topSwitcher.order,
       displayAppBar: false,
       displayQuickTabSwitcher: true,
       backgroundColor: colorScheme.surfaceContainer,

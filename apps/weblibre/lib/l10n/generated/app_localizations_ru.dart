@@ -11091,6 +11091,48 @@ class AppLocalizationsRu extends AppLocalizations {
       'Показывать значки сайтов в списке вкладок';
 
   @override
+  String get settings_switcherPlacementTitle => 'Положение переключателя';
+
+  @override
+  String get settings_switcherPlacementSubtitle =>
+      'Где находится переключатель относительно адресной строки и контекстной панели';
+
+  @override
+  String get settings_switcherPlacementKeywords =>
+      'положение, порядок, над, под, сверху, снизу, адресная строка, панель вкладок';
+
+  @override
+  String get settings_switcherPlacementAutoLabel => 'Автоматически';
+
+  @override
+  String get settings_switcherPlacementAutoDescription =>
+      'Над адресной строкой, когда она внизу, над контекстной панелью, когда адресная строка вверху';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarLabel =>
+      'Над адресной строкой';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarDescription =>
+      'Следует за адресной строкой вверх или вниз';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarLabel =>
+      'Под адресной строкой';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarDescription =>
+      'Следует за адресной строкой вверх или вниз';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarLabel =>
+      'Под контекстной панелью';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarDescription =>
+      'У нижнего края экрана';
+
+  @override
   String get smallWeb_sheetTitle => 'Малый веб';
 
   @override

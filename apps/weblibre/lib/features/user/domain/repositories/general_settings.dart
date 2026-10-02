@@ -92,6 +92,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   // Legacy: folded into tabBarStackingMode.
   'quickTabSwitcherMode': DriftSqlType.string,
   'tabBarStackingMode': DriftSqlType.string,
+  'quickTabSwitcherPlacement': DriftSqlType.string,
   'pullToRefreshEnabled': DriftSqlType.bool,
   'useExternalDownloadManager': DriftSqlType.bool,
   'downloadDirectoryUri': DriftSqlType.string,

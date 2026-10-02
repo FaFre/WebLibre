@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/utils/quick_tab_switcher_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/utils/tab_bar_position_setting_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -100,6 +101,12 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
           subtitle: l10n.settings_indexTabStackingSubtitle,
           keywords: settingsKeywords(l10n.settings_tabStackingKeywords),
           child: const _TabBarStackingModeSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_switcherPlacementTitle,
+          subtitle: l10n.settings_switcherPlacementSubtitle,
+          keywords: settingsKeywords(l10n.settings_switcherPlacementKeywords),
+          child: const _QuickTabSwitcherPlacementSection(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_customizeSwitcherButtons,
@@ -632,6 +639,70 @@ class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
                   title: Text(l10n.settings_neverOption),
                   subtitle: Text(l10n.settings_neverCloseDescription),
                 ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickTabSwitcherPlacementSection extends HookConsumerWidget {
+  const _QuickTabSwitcherPlacementSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final placement = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherPlacement,
+      ),
+    );
+    final switcherEnabled = ref.watch(
+      effectiveTabBarStackingModeProvider.select(
+        (mode) => mode != TabBarStackingMode.disabled,
+      ),
+    );
+    // The side rail keeps its own order and ignores this setting.
+    final isHorizontalBar = ref.watch(
+      effectiveTabBarPositionProvider.select((p) => p.isHorizontal),
+    );
+    final enabled = switcherEnabled && isHorizontalBar;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text(l10n.settings_switcherPlacementTitle),
+            subtitle: Text(l10n.settings_switcherPlacementSubtitle),
+            leading: const Icon(MdiIcons.swapVertical),
+            contentPadding: EdgeInsets.zero,
+          ),
+          RadioGroup(
+            groupValue: placement,
+            onChanged: (value) async {
+              if (value != null) {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) => currentSettings.copyWith
+                          .quickTabSwitcherPlacement(value),
+                    );
+              }
+            },
+            child: Column(
+              children: [
+                for (final option in QuickTabSwitcherPlacement.values)
+                  RadioListTile.adaptive(
+                    value: option,
+                    enabled: enabled,
+                    title: Text(option.label(context)),
+                    subtitle: Text(option.description(context)),
+                  ),
               ],
             ),
           ),

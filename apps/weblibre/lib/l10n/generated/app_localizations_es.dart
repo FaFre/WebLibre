@@ -11112,6 +11112,48 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mostrar los iconos de los sitios en la lista de pestañas';
 
   @override
+  String get settings_switcherPlacementTitle => 'Posición del selector';
+
+  @override
+  String get settings_switcherPlacementSubtitle =>
+      'Dónde se sitúa el selector junto a la barra de direcciones y la barra de herramientas contextual';
+
+  @override
+  String get settings_switcherPlacementKeywords =>
+      'posición, orden, encima, debajo, arriba, abajo, barra de direcciones, barra de pestañas';
+
+  @override
+  String get settings_switcherPlacementAutoLabel => 'Automático';
+
+  @override
+  String get settings_switcherPlacementAutoDescription =>
+      'Encima de la barra de direcciones cuando está abajo, encima de la barra de herramientas contextual cuando está arriba';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarLabel =>
+      'Encima de la barra de direcciones';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarDescription =>
+      'Sigue a la barra de direcciones arriba o abajo';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarLabel =>
+      'Debajo de la barra de direcciones';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarDescription =>
+      'Sigue a la barra de direcciones arriba o abajo';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarLabel =>
+      'Debajo de la barra de herramientas contextual';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarDescription =>
+      'En el borde inferior de la pantalla';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

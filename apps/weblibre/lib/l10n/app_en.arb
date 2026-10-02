@@ -13410,6 +13410,50 @@
   "@settings_indexShowFaviconsSubtitle": {
     "description": "Summary of the favicons setting, shown as a settings search result."
   },
+  "settings_switcherPlacementTitle": "Switcher Position",
+  "@settings_switcherPlacementTitle": {
+    "description": "Heading of the choice where the quick tab switcher row sits relative to the address bar and the contextual toolbar."
+  },
+  "settings_switcherPlacementSubtitle": "Where the switcher sits next to the address bar and contextual toolbar",
+  "@settings_switcherPlacementSubtitle": {
+    "description": "Line under that heading; also shown as a settings search result."
+  },
+  "settings_switcherPlacementKeywords": "position, order, above, below, top, bottom, address bar, tab bar",
+  "@settings_switcherPlacementKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_switcherPlacementAutoLabel": "Automatic",
+  "@settings_switcherPlacementAutoLabel": {
+    "description": "Option for the switcher position: the default layout, which depends on whether the address bar is at the top or the bottom."
+  },
+  "settings_switcherPlacementAutoDescription": "Above the address bar when it is at the bottom, above the contextual toolbar when it is at the top",
+  "@settings_switcherPlacementAutoDescription": {
+    "description": "Explanation under \"Automatic\"."
+  },
+  "settings_switcherPlacementAboveAddressBarLabel": "Above the address bar",
+  "@settings_switcherPlacementAboveAddressBarLabel": {
+    "description": "Option for the switcher position: directly above the address bar."
+  },
+  "settings_switcherPlacementAboveAddressBarDescription": "Follows the address bar to the top or the bottom",
+  "@settings_switcherPlacementAboveAddressBarDescription": {
+    "description": "Explanation under \"Above the address bar\": the switcher moves with the address bar, whichever edge it is on."
+  },
+  "settings_switcherPlacementBelowAddressBarLabel": "Below the address bar",
+  "@settings_switcherPlacementBelowAddressBarLabel": {
+    "description": "Option for the switcher position: directly below the address bar."
+  },
+  "settings_switcherPlacementBelowAddressBarDescription": "Follows the address bar to the top or the bottom",
+  "@settings_switcherPlacementBelowAddressBarDescription": {
+    "description": "Explanation under \"Below the address bar\": the switcher moves with the address bar, whichever edge it is on."
+  },
+  "settings_switcherPlacementBelowContextualBarLabel": "Below the contextual toolbar",
+  "@settings_switcherPlacementBelowContextualBarLabel": {
+    "description": "Option for the switcher position: at the very bottom of the screen, under the contextual toolbar."
+  },
+  "settings_switcherPlacementBelowContextualBarDescription": "On the bottom edge of the screen",
+  "@settings_switcherPlacementBelowContextualBarDescription": {
+    "description": "Explanation under \"Below the contextual toolbar\"."
+  },
   "smallWeb_sheetTitle": "Small Web",
   "@smallWeb_sheetTitle": {
     "description": "Title of the Small Web panel. The \"small web\" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout."

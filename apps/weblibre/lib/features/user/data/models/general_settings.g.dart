@@ -113,6 +113,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings tabBarStackingMode(TabBarStackingMode tabBarStackingMode);
 
+  GeneralSettings quickTabSwitcherPlacement(
+    QuickTabSwitcherPlacement quickTabSwitcherPlacement,
+  );
+
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
 
   GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager);
@@ -281,6 +285,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarPositionSetting tabBarPosition,
     TabBarLayout tabBarLayout,
     TabBarStackingMode tabBarStackingMode,
+    QuickTabSwitcherPlacement quickTabSwitcherPlacement,
     bool pullToRefreshEnabled,
     bool useExternalDownloadManager,
     String? downloadDirectoryUri,
@@ -532,6 +537,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings tabBarStackingMode(TabBarStackingMode tabBarStackingMode) =>
       call(tabBarStackingMode: tabBarStackingMode);
+
+  @override
+  GeneralSettings quickTabSwitcherPlacement(
+    QuickTabSwitcherPlacement quickTabSwitcherPlacement,
+  ) => call(quickTabSwitcherPlacement: quickTabSwitcherPlacement);
 
   @override
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
@@ -792,6 +802,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarPosition = const $CopyWithPlaceholder(),
     Object? tabBarLayout = const $CopyWithPlaceholder(),
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherPlacement = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
     Object? downloadDirectoryUri = const $CopyWithPlaceholder(),
@@ -1104,6 +1115,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.tabBarStackingMode
           // ignore: cast_nullable_to_non_nullable
           : tabBarStackingMode as TabBarStackingMode,
+      quickTabSwitcherPlacement:
+          quickTabSwitcherPlacement == const $CopyWithPlaceholder() ||
+              quickTabSwitcherPlacement == null
+          ? _value.quickTabSwitcherPlacement
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherPlacement as QuickTabSwitcherPlacement,
       pullToRefreshEnabled:
           pullToRefreshEnabled == const $CopyWithPlaceholder() ||
               pullToRefreshEnabled == null
@@ -1500,6 +1517,11 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['tabBarStackingMode'],
     unknownValue: TabBarStackingMode.accordion,
   ),
+  quickTabSwitcherPlacement: $enumDecodeNullable(
+    _$QuickTabSwitcherPlacementEnumMap,
+    json['quickTabSwitcherPlacement'],
+    unknownValue: QuickTabSwitcherPlacement.auto,
+  ),
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
   useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
   downloadDirectoryUri: json['downloadDirectoryUri'] as String?,
@@ -1642,6 +1664,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabBarLayout': _$TabBarLayoutEnumMap[instance.tabBarLayout]!,
   'tabBarStackingMode':
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
+  'quickTabSwitcherPlacement':
+      _$QuickTabSwitcherPlacementEnumMap[instance.quickTabSwitcherPlacement]!,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
   'useExternalDownloadManager': instance.useExternalDownloadManager,
   'downloadDirectoryUri': instance.downloadDirectoryUri,
@@ -1803,6 +1827,13 @@ const _$TabBarStackingModeEnumMap = {
   TabBarStackingMode.twoLevel: 'twoLevel',
   TabBarStackingMode.tabGroups: 'tabGroups',
   TabBarStackingMode.disabled: 'disabled',
+};
+
+const _$QuickTabSwitcherPlacementEnumMap = {
+  QuickTabSwitcherPlacement.auto: 'auto',
+  QuickTabSwitcherPlacement.aboveAddressBar: 'aboveAddressBar',
+  QuickTabSwitcherPlacement.belowAddressBar: 'belowAddressBar',
+  QuickTabSwitcherPlacement.belowContextualBar: 'belowContextualBar',
 };
 
 const _$TabChipCloseButtonModeEnumMap = {

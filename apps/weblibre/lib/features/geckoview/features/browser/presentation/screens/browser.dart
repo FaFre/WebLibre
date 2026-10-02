@@ -276,14 +276,22 @@ class _TabBar extends HookConsumerWidget {
       placement: ref.watch(effectiveHomeSearchBarPlacementProvider),
     );
 
+    final quickTabSwitcherPlacement = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherPlacement,
+      ),
+    );
+
     // Return the toolbar widget - parent handles animation.
     // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
     // are handled here for exhaustiveness/correctness.
     return switch (tabBarPosition) {
       TabBarPosition.top => BrowserTopAppBar(
+        displayedSheet: displayedSheet,
         showMainToolbar: showMainToolbar,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+        quickTabSwitcherPlacement: quickTabSwitcherPlacement,
         isSmallWebMode: isSmallWebMode,
         enableGestures: enableGestures,
         suppressMainToolbar: suppressMainToolbar,
@@ -293,6 +301,7 @@ class _TabBar extends HookConsumerWidget {
         showMainToolbar: showMainToolbar,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+        quickTabSwitcherPlacement: quickTabSwitcherPlacement,
         isSmallWebMode: isSmallWebMode,
         suppressMainToolbar: suppressMainToolbar,
       ),
@@ -1301,6 +1310,13 @@ class BrowserScreen extends HookConsumerWidget {
     final quickTabSwitcherRowCount = isSmallWebActive
         ? 0
         : ref.watch(quickTabSwitcherRowCountProvider).value ?? 0;
+    // Must match what _TabBar resolves, or the browser is inset for a
+    // switcher row drawn in the other bar.
+    final quickTabSwitcherPlacement = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherPlacement,
+      ),
+    );
 
     // Vertical side rail (left/right). Auto-hide is not supported on the rail;
     // it is reserved via a plain content offset and dismissed only by gesture.
@@ -1474,6 +1490,7 @@ class BrowserScreen extends HookConsumerWidget {
         showMainToolbar: tabBarPosition == TabBarPosition.bottom,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+        quickTabSwitcherPlacement: quickTabSwitcherPlacement,
         isSmallWebMode: false,
         displayedSheet: displayedSheet,
         suppressMainToolbar: suppressMainToolbarForHome,
@@ -1484,6 +1501,7 @@ class BrowserScreen extends HookConsumerWidget {
               showMainToolbar: tabBarPosition == TabBarPosition.bottom,
               showContextualToolbar: showContextualToolbar,
               quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+              quickTabSwitcherPlacement: quickTabSwitcherPlacement,
               isSmallWebMode: false,
               displayedSheet: null,
               suppressMainToolbar: suppressMainToolbarForHome,
@@ -1521,11 +1539,45 @@ class BrowserScreen extends HookConsumerWidget {
       showMainToolbar: tabBarPosition == TabBarPosition.top,
       showContextualToolbar: showContextualToolbar,
       quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+      quickTabSwitcherPlacement: quickTabSwitcherPlacement,
       isSmallWebMode: isSmallWebActive,
       enableGestures: !isSmallWebActive,
       suppressMainToolbar: suppressMainToolbarForHome,
     ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
+
+    // [topAppBarTotalHeight] is computed as if no sheet were displayed, for the
+    // same reason as `viewportBottomAppBarContentSize`: it feeds the page
+    // geometry, which must not change under a sheet. What the top bar actually
+    // draws while one is up is smaller — and since it paints above the sheet
+    // layer, an expanded tab tray has to stop below it.
+    final double viewTabsSheetMaxExtent;
+    if (tabBarPosition == TabBarPosition.top && displayedSheet != null) {
+      final sheetTopAppBarTotalHeight =
+          BrowserTopAppBar(
+            showMainToolbar: true,
+            showContextualToolbar: showContextualToolbar,
+            quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+            quickTabSwitcherPlacement: quickTabSwitcherPlacement,
+            displayedSheet: displayedSheet,
+            isSmallWebMode: isSmallWebActive,
+            enableGestures: !isSmallWebActive,
+            suppressMainToolbar: suppressMainToolbarForHome,
+          ).preferredSize.height +
+          topSafeArea;
+      // The sheet lives in the band above the bottom bar, and its extents are
+      // fractions of that band.
+      final sheetAreaHeight =
+          MediaQuery.sizeOf(context).height - bottomAppBarTotalHeight;
+      viewTabsSheetMaxExtent = sheetAreaHeight > 0
+          ? (1.0 - sheetTopAppBarTotalHeight / sheetAreaHeight).clamp(
+              _ViewTabsSheet.initialHeight,
+              1.0,
+            )
+          : relativeSafeArea;
+    } else {
+      viewTabsSheetMaxExtent = relativeSafeArea;
+    }
 
     // Get pixel ratio for converting logical pixels to physical pixels
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
@@ -1794,6 +1846,7 @@ class BrowserScreen extends HookConsumerWidget {
                   child: _SheetContainer(
                     displayedSheet: displayedSheet,
                     relativeSafeArea: relativeSafeArea,
+                    viewTabsMaxExtent: viewTabsSheetMaxExtent,
                     bottomAppBarHeight: bottomAppBarTotalHeight,
                   ),
                 ),
@@ -1924,11 +1977,16 @@ class BrowserScreen extends HookConsumerWidget {
 class _SheetContainer extends HookConsumerWidget {
   final Sheet displayedSheet;
   final double relativeSafeArea;
+
+  /// The tab tray's maximum extent: [relativeSafeArea], or less when the top
+  /// bar stays drawn over the sheet.
+  final double viewTabsMaxExtent;
   final double bottomAppBarHeight;
 
   const _SheetContainer({
     required this.displayedSheet,
     required this.relativeSafeArea,
+    required this.viewTabsMaxExtent,
     required this.bottomAppBarHeight,
   });
 
@@ -1947,7 +2005,7 @@ class _SheetContainer extends HookConsumerWidget {
 
     final (sheet, initialExtent) = switch (displayedSheet) {
       ViewTabsSheet() => (
-        _ViewTabsSheet(maxChildSize: relativeSafeArea),
+        _ViewTabsSheet(maxChildSize: viewTabsMaxExtent),
         _ViewTabsSheet.initialHeight,
       ),
       final SiteSettingsSheet parameter => (

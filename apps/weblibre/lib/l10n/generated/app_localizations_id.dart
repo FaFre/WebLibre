@@ -10974,6 +10974,48 @@ class AppLocalizationsId extends AppLocalizations {
       'Tampilkan ikon situs di daftar tab';
 
   @override
+  String get settings_switcherPlacementTitle => 'Posisi Pengalih';
+
+  @override
+  String get settings_switcherPlacementSubtitle =>
+      'Letak pengalih di samping bilah alamat dan bilah alat kontekstual';
+
+  @override
+  String get settings_switcherPlacementKeywords =>
+      'posisi, urutan, di atas, di bawah, atas, bawah, bilah alamat, bilah tab';
+
+  @override
+  String get settings_switcherPlacementAutoLabel => 'Otomatis';
+
+  @override
+  String get settings_switcherPlacementAutoDescription =>
+      'Di atas bilah alamat saat berada di bawah, di atas bilah alat kontekstual saat bilah alamat berada di atas';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarLabel =>
+      'Di atas bilah alamat';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarDescription =>
+      'Mengikuti bilah alamat ke atas atau ke bawah';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarLabel =>
+      'Di bawah bilah alamat';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarDescription =>
+      'Mengikuti bilah alamat ke atas atau ke bawah';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarLabel =>
+      'Di bawah bilah alat kontekstual';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarDescription =>
+      'Di tepi bawah layar';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

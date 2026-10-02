@@ -1038,5 +1038,16 @@
   "settings_indexShowTitlesSubtitle": "Seitentitel in der Liste des Wechslers anzeigen",
   "settings_indexHierarchyDepthSubtitle": "Wie viele Verschachtelungspfeile die Chips des Wechslers zeigen",
   "settings_indexBottomSheetTabViewSubtitle": "Die Tab-Übersicht von unten einblenden",
-  "settings_indexShowFaviconsSubtitle": "Website-Symbole in der Tab-Liste anzeigen"
+  "settings_indexShowFaviconsSubtitle": "Website-Symbole in der Tab-Liste anzeigen",
+  "settings_switcherPlacementTitle": "Position des Tab-Wechslers",
+  "settings_switcherPlacementSubtitle": "Wo der Tab-Wechsler neben Adressleiste und kontextabhängiger Symbolleiste sitzt",
+  "settings_switcherPlacementKeywords": "Position, Reihenfolge, oberhalb, unterhalb, oben, unten, Adressleiste, Tableiste",
+  "settings_switcherPlacementAutoLabel": "Automatisch",
+  "settings_switcherPlacementAutoDescription": "Über der Adressleiste, wenn sie unten ist, über der kontextabhängigen Symbolleiste, wenn sie oben ist",
+  "settings_switcherPlacementAboveAddressBarLabel": "Über der Adressleiste",
+  "settings_switcherPlacementAboveAddressBarDescription": "Folgt der Adressleiste nach oben oder unten",
+  "settings_switcherPlacementBelowAddressBarLabel": "Unter der Adressleiste",
+  "settings_switcherPlacementBelowAddressBarDescription": "Folgt der Adressleiste nach oben oder unten",
+  "settings_switcherPlacementBelowContextualBarLabel": "Unter der kontextabhängigen Symbolleiste",
+  "settings_switcherPlacementBelowContextualBarDescription": "Am unteren Bildschirmrand"
 }

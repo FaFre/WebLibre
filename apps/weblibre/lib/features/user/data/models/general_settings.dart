@@ -204,6 +204,65 @@ enum TabBarPositionSetting {
 
 enum TabBarLayout { withTitle, compact }
 
+/// Where the quick tab switcher row sits relative to the address bar and the
+/// contextual toolbar (#651). Only the horizontal bars honour it; the side
+/// rail's column keeps its own order.
+///
+/// [auto] is the layout that predates the setting: the row tops the bottom
+/// toolbar — above the address bar when that is at the bottom, above the
+/// contextual toolbar when the address bar is at the top.
+enum QuickTabSwitcherPlacement {
+  auto,
+  aboveAddressBar,
+  belowAddressBar,
+  belowContextualBar;
+
+  /// Which bar draws the row, and where in that bar's stack, when the address
+  /// bar is on [addressBarPosition].
+  ///
+  /// With the address bar at the top, the two address-bar placements move the
+  /// row into the top bar. With it at the bottom everything shares one bar, so
+  /// [auto] and [aboveAddressBar] are the same layout.
+  ({bool inTopBar, QuickTabSwitcherOrder order}) resolve(
+    TabBarPosition addressBarPosition,
+  ) => switch ((addressBarPosition, this)) {
+    (TabBarPosition.top, auto) => (
+      inTopBar: false,
+      order: QuickTabSwitcherOrder.beforeAddressBar,
+    ),
+    (TabBarPosition.top, aboveAddressBar) => (
+      inTopBar: true,
+      order: QuickTabSwitcherOrder.beforeAddressBar,
+    ),
+    (TabBarPosition.top, belowAddressBar) => (
+      inTopBar: true,
+      order: QuickTabSwitcherOrder.afterAddressBar,
+    ),
+    (_, auto || aboveAddressBar) => (
+      inTopBar: false,
+      order: QuickTabSwitcherOrder.beforeAddressBar,
+    ),
+    (_, belowAddressBar) => (
+      inTopBar: false,
+      order: QuickTabSwitcherOrder.afterAddressBar,
+    ),
+    (_, belowContextualBar) => (
+      inTopBar: false,
+      order: QuickTabSwitcherOrder.afterContextualBar,
+    ),
+  };
+}
+
+/// Position of the quick tab switcher row within one horizontal bar's stack
+/// of address bar and contextual toolbar. A slot whose neighbour is not in
+/// that bar collapses onto the nearest end: in the bottom bar of a top tab
+/// bar, [beforeAddressBar] is simply the first row.
+enum QuickTabSwitcherOrder {
+  beforeAddressBar,
+  afterAddressBar,
+  afterContextualBar,
+}
+
 /// Which tab chips in the quick tab switcher and the tab bar carry a close
 /// button.
 ///
@@ -413,6 +472,10 @@ class GeneralSettings with FastEquatable {
   /// grows (tabGroups, #628).
   @JsonKey(unknownEnumValue: TabBarStackingMode.accordion)
   final TabBarStackingMode tabBarStackingMode;
+
+  /// See [QuickTabSwitcherPlacement].
+  @JsonKey(unknownEnumValue: QuickTabSwitcherPlacement.auto)
+  final QuickTabSwitcherPlacement quickTabSwitcherPlacement;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
 
@@ -609,6 +672,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarPosition,
     required this.tabBarLayout,
     required this.tabBarStackingMode,
+    required this.quickTabSwitcherPlacement,
     required this.pullToRefreshEnabled,
     required this.useExternalDownloadManager,
     required this.downloadDirectoryUri,
@@ -705,6 +769,7 @@ class GeneralSettings with FastEquatable {
     TabBarPositionSetting? tabBarPosition,
     TabBarLayout? tabBarLayout,
     TabBarStackingMode? tabBarStackingMode,
+    QuickTabSwitcherPlacement? quickTabSwitcherPlacement,
     bool? pullToRefreshEnabled,
     bool? useExternalDownloadManager,
     this.downloadDirectoryUri,
@@ -816,6 +881,8 @@ class GeneralSettings with FastEquatable {
        tabBarPosition = tabBarPosition ?? TabBarPositionSetting.auto,
        tabBarLayout = tabBarLayout ?? TabBarLayout.compact,
        tabBarStackingMode = tabBarStackingMode ?? TabBarStackingMode.accordion,
+       quickTabSwitcherPlacement =
+           quickTabSwitcherPlacement ?? QuickTabSwitcherPlacement.auto,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
        useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
@@ -1092,6 +1159,7 @@ class GeneralSettings with FastEquatable {
     tabBarPosition,
     tabBarLayout,
     tabBarStackingMode,
+    quickTabSwitcherPlacement,
     pullToRefreshEnabled,
     useExternalDownloadManager,
     downloadDirectoryUri,

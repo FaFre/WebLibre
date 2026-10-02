@@ -11022,6 +11022,48 @@ class AppLocalizationsDe extends AppLocalizations {
       'Website-Symbole in der Tab-Liste anzeigen';
 
   @override
+  String get settings_switcherPlacementTitle => 'Position des Tab-Wechslers';
+
+  @override
+  String get settings_switcherPlacementSubtitle =>
+      'Wo der Tab-Wechsler neben Adressleiste und kontextabhängiger Symbolleiste sitzt';
+
+  @override
+  String get settings_switcherPlacementKeywords =>
+      'Position, Reihenfolge, oberhalb, unterhalb, oben, unten, Adressleiste, Tableiste';
+
+  @override
+  String get settings_switcherPlacementAutoLabel => 'Automatisch';
+
+  @override
+  String get settings_switcherPlacementAutoDescription =>
+      'Über der Adressleiste, wenn sie unten ist, über der kontextabhängigen Symbolleiste, wenn sie oben ist';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarLabel =>
+      'Über der Adressleiste';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarDescription =>
+      'Folgt der Adressleiste nach oben oder unten';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarLabel =>
+      'Unter der Adressleiste';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarDescription =>
+      'Folgt der Adressleiste nach oben oder unten';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarLabel =>
+      'Unter der kontextabhängigen Symbolleiste';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarDescription =>
+      'Am unteren Bildschirmrand';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

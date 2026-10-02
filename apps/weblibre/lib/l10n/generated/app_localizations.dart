@@ -18372,6 +18372,72 @@ abstract class AppLocalizations {
   /// **'Display site icons in the tab list'**
   String get settings_indexShowFaviconsSubtitle;
 
+  /// Heading of the choice where the quick tab switcher row sits relative to the address bar and the contextual toolbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Switcher Position'**
+  String get settings_switcherPlacementTitle;
+
+  /// Line under that heading; also shown as a settings search result.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the switcher sits next to the address bar and contextual toolbar'**
+  String get settings_switcherPlacementSubtitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'position, order, above, below, top, bottom, address bar, tab bar'**
+  String get settings_switcherPlacementKeywords;
+
+  /// Option for the switcher position: the default layout, which depends on whether the address bar is at the top or the bottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get settings_switcherPlacementAutoLabel;
+
+  /// Explanation under "Automatic".
+  ///
+  /// In en, this message translates to:
+  /// **'Above the address bar when it is at the bottom, above the contextual toolbar when it is at the top'**
+  String get settings_switcherPlacementAutoDescription;
+
+  /// Option for the switcher position: directly above the address bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Above the address bar'**
+  String get settings_switcherPlacementAboveAddressBarLabel;
+
+  /// Explanation under "Above the address bar": the switcher moves with the address bar, whichever edge it is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the address bar to the top or the bottom'**
+  String get settings_switcherPlacementAboveAddressBarDescription;
+
+  /// Option for the switcher position: directly below the address bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the address bar'**
+  String get settings_switcherPlacementBelowAddressBarLabel;
+
+  /// Explanation under "Below the address bar": the switcher moves with the address bar, whichever edge it is on.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the address bar to the top or the bottom'**
+  String get settings_switcherPlacementBelowAddressBarDescription;
+
+  /// Option for the switcher position: at the very bottom of the screen, under the contextual toolbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Below the contextual toolbar'**
+  String get settings_switcherPlacementBelowContextualBarLabel;
+
+  /// Explanation under "Below the contextual toolbar".
+  ///
+  /// In en, this message translates to:
+  /// **'On the bottom edge of the screen'**
+  String get settings_switcherPlacementBelowContextualBarDescription;
+
   /// Title of the Small Web panel. The "small web" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout.
   ///
   /// In en, this message translates to:

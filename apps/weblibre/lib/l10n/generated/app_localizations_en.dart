@@ -10801,6 +10801,48 @@ class AppLocalizationsEn extends AppLocalizations {
       'Display site icons in the tab list';
 
   @override
+  String get settings_switcherPlacementTitle => 'Switcher Position';
+
+  @override
+  String get settings_switcherPlacementSubtitle =>
+      'Where the switcher sits next to the address bar and contextual toolbar';
+
+  @override
+  String get settings_switcherPlacementKeywords =>
+      'position, order, above, below, top, bottom, address bar, tab bar';
+
+  @override
+  String get settings_switcherPlacementAutoLabel => 'Automatic';
+
+  @override
+  String get settings_switcherPlacementAutoDescription =>
+      'Above the address bar when it is at the bottom, above the contextual toolbar when it is at the top';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarLabel =>
+      'Above the address bar';
+
+  @override
+  String get settings_switcherPlacementAboveAddressBarDescription =>
+      'Follows the address bar to the top or the bottom';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarLabel =>
+      'Below the address bar';
+
+  @override
+  String get settings_switcherPlacementBelowAddressBarDescription =>
+      'Follows the address bar to the top or the bottom';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarLabel =>
+      'Below the contextual toolbar';
+
+  @override
+  String get settings_switcherPlacementBelowContextualBarDescription =>
+      'On the bottom edge of the screen';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override
