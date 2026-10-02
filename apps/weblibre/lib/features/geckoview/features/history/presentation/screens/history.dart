@@ -21,7 +21,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:fading_scroll/fading_scroll.dart';
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -767,23 +766,40 @@ class HistoryScreen extends HookConsumerWidget {
                     textFilterController,
                     () => textFilterController.text.toLowerCase(),
                   );
+                  final query =
+                      useDebounced(
+                        textFilter,
+                        const Duration(milliseconds: 150),
+                      ) ??
+                      '';
 
-                  final groups = useMemoized(
-                    () => data
-                        .where(
-                          (entry) =>
-                              textFilter.isEmpty ||
-                              entry.matchesText(textFilter),
-                        )
-                        .groupListsBy(
-                          (element) => timeago.format(
-                            DateTime.fromMillisecondsSinceEpoch(
-                              element.visitTime,
-                            ),
-                          ),
-                        ),
-                    [EquatableValue(data), textFilter],
+                  // Grouped once per load rather than on every keystroke:
+                  // formatting a relative time for each entry dominated
+                  // filtering a long history. Keyed on the list itself, as
+                  // comparing it by value walked every entry on each rebuild.
+                  final allGroups = useMemoized(
+                    () => data.groupListsBy(
+                      (entry) => timeago.format(
+                        DateTime.fromMillisecondsSinceEpoch(entry.visitTime),
+                      ),
+                    ),
+                    [data],
                   );
+
+                  final groups = useMemoized(() {
+                    if (query.isEmpty) {
+                      return allGroups;
+                    }
+
+                    return {
+                      for (final MapEntry(:key, :value) in allGroups.entries)
+                        if (value
+                                .where((entry) => entry.matchesText(query))
+                                .toList()
+                            case final matches when matches.isNotEmpty)
+                          key: matches,
+                    };
+                  }, [allGroups, query]);
 
                   void toggleSelected(HistoryEntry item) {
                     if (selectedItems.value.contains(item)) {

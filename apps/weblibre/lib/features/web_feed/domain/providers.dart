@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/web_feed/data/database/definitions.drift.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
@@ -33,38 +34,67 @@ import 'package:weblibre/features/web_feed/domain/services/feed_reader.dart';
 
 part 'providers.g.dart';
 
+/// How long typing has to pause before a feed search runs.
+const _searchDebounce = Duration(milliseconds: 150);
+
 @Riverpod()
 class ArticleSearch extends _$ArticleSearch {
   late StreamController<List<FeedArticleSummary>> _streamController;
+  Timer? _pendingSearch;
 
-  Future<void> search(
+  /// The query whose results are wanted: the one asked for last.
+  String? _query;
+
+  /// Searches for [input] once typing pauses.
+  ///
+  /// Asking for the current query again does nothing — a search field reports
+  /// caret and selection moves as changes too. Results of a query that a newer
+  /// one replaced are dropped, so a slow query cannot overwrite a later one.
+  void search(
     String input, {
     int snippetLength = 120,
     int maxResults = 25,
     String matchPrefix = '***',
     String matchSuffix = '***',
     String ellipsis = '…',
-  }) async {
-    if (input.isNotEmpty) {
-      await ref
-          .read(feedDatabaseProvider)
-          .articleDao
-          .queryArticles(
-            matchPrefix: matchPrefix,
-            matchSuffix: matchSuffix,
-            ellipsis: ellipsis,
-            snippetLength: snippetLength,
-            searchString: input,
-            feedId: feedId,
-            limit: maxResults,
-          )
-          .get()
-          .then((value) {
-            if (!_streamController.isClosed) {
-              _streamController.add(value);
-            }
-          });
+  }) {
+    if (input == _query) {
+      return;
     }
+
+    _query = input;
+    _pendingSearch?.cancel();
+    if (input.isEmpty) {
+      return;
+    }
+
+    _pendingSearch = Timer(_searchDebounce, () async {
+      try {
+        final results = await ref
+            .read(feedDatabaseProvider)
+            .articleDao
+            .queryArticles(
+              matchPrefix: matchPrefix,
+              matchSuffix: matchSuffix,
+              ellipsis: ellipsis,
+              snippetLength: snippetLength,
+              searchString: input,
+              feedId: feedId,
+              limit: maxResults,
+            )
+            .get();
+
+        if (input == _query && !_streamController.isClosed) {
+          _streamController.add(results);
+        }
+      } catch (error, stackTrace) {
+        logger.e(
+          'Error searching feed articles',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }
+    });
   }
 
   @override
@@ -72,6 +102,7 @@ class ArticleSearch extends _$ArticleSearch {
     _streamController = StreamController();
 
     ref.onDispose(() async {
+      _pendingSearch?.cancel();
       await _streamController.close();
     });
 
@@ -122,8 +153,7 @@ class FilteredArticleList extends _$FilteredArticleList {
         ref.invalidateSelf();
       }
 
-      //Don't block
-      unawaited(ref.read(articleSearchProvider(feedId).notifier).search(input));
+      ref.read(articleSearchProvider(feedId).notifier).search(input);
     } else if (_hasSearch) {
       _hasSearch = false;
       ref.invalidateSelf();

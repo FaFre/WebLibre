@@ -81,11 +81,17 @@ class HistoryEntry with FastEquatable {
   /// Whether [lowerCaseQuery] occurs in the title or URL of this visit or of
   /// any visit it stands for. A Distinct URLs row has to match through those
   /// too: downloads of one URL can have different file names (their titles).
-  bool matchesText(String lowerCaseQuery) => allVisits.any(
-    (visit) =>
-        visit.title?.toLowerCase().contains(lowerCaseQuery) == true ||
-        visit.url.toLowerCase().contains(lowerCaseQuery),
-  );
+  bool matchesText(String lowerCaseQuery) =>
+      _searchText.contains(lowerCaseQuery);
+
+  // Derived from fields that are compared already.
+  // ignore: fast_equatable_lint/missing_field_in_equatable_props
+  /// The titles and URLs [matchesText] looks in, lowercased once rather than
+  /// for every entry on every keystroke of the history filter. Line breaks
+  /// keep a query from matching across two of them.
+  late final String _searchText = [
+    for (final visit in allVisits) ...[?visit.title, visit.url],
+  ].join('\n').toLowerCase();
 
   @override
   List<Object?> get hashParameters => [

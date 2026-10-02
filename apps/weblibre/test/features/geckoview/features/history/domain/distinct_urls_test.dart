@@ -100,4 +100,31 @@ void main() {
       expect(distinct, hasLength(3));
     });
   });
+
+  group('matchesText', () {
+    HistoryEntry titled(String title, String url) => HistoryEntry(
+      visit: VisitInfo(
+        url: url,
+        title: title,
+        visitTime: 0,
+        visitType: VisitType.link,
+        isRemote: false,
+      ),
+      containerIds: const [],
+    );
+
+    test('matches the title or URL regardless of case', () {
+      final entry = titled('Fox News', 'https://Example.org/Path');
+
+      expect(entry.matchesText('fox n'), isTrue);
+      expect(entry.matchesText('example.org/path'), isTrue);
+      expect(entry.matchesText('wolf'), isFalse);
+    });
+
+    test('does not match across the end of one field into the next', () {
+      final entry = titled('abc', 'https://def.example/');
+
+      expect(entry.matchesText('chttps'), isFalse);
+    });
+  });
 }

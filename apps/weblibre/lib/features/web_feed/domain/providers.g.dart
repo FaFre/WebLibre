@@ -50,7 +50,7 @@ final class ArticleSearchProvider
   }
 }
 
-String _$articleSearchHash() => r'341fba801fe7ea7d01cb637329d27b9ff11d66f0';
+String _$articleSearchHash() => r'c3ccceeea746a3fcc9010554f7cba5d0da9d13db';
 
 final class ArticleSearchFamily extends $Family
     with
@@ -445,7 +445,7 @@ final class FilteredArticleListProvider
 }
 
 String _$filteredArticleListHash() =>
-    r'54f0ca33749da334e025adda09547dc72f0c4e98';
+    r'269cc9ee90cc7939e15ddda56e6350602706facf';
 
 final class FilteredArticleListFamily extends $Family
     with

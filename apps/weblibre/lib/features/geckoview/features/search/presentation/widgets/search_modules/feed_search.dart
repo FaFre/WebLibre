@@ -57,8 +57,8 @@ class FeedSearch extends HookConsumerWidget {
     useOnListenableChangeSelector(
       searchTextNotifier,
       () => searchTextNotifier.value.text,
-      () async {
-        await ref
+      () {
+        ref
             .read(articleSearchProvider(null).notifier)
             .search(
               searchTextNotifier.value.text,
