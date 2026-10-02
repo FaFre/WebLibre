@@ -45,20 +45,27 @@ class ArticleDao extends DatabaseAccessor<FeedDatabase> with $ArticleDaoMixin {
   ArticleDao(super.attachedDatabase);
 
   /// The feed's articles, newest first — without their bodies. See
-  /// `article_list_view`.
-  Selectable<FeedArticleListEntry> getFeedArticles(Uri? url) {
+  /// `article_list_view`. All feeds' articles when [url] is `null`, and at
+  /// most [limit] of them when given.
+  Selectable<FeedArticleListEntry> getFeedArticles(Uri? url, {int? limit}) {
     final select = db.articleListView.select();
 
     if (url != null) {
       select.where((article) => article.feedId.equalsValue(url));
     }
 
-    return select..orderBy([
+    select.orderBy([
       (row) => OrderingTerm(
         expression: coalesce([row.updated, row.created]),
         mode: OrderingMode.desc,
       ),
     ]);
+
+    if (limit != null) {
+      select.limit(limit);
+    }
+
+    return select;
   }
 
   /// Whether [article] holds HTML whose markdown or plain text is missing.

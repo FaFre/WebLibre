@@ -102,6 +102,15 @@ Stream<List<FeedArticleListEntry>> feedArticleList(Ref ref, Uri? feedId) {
   return repository.watchFeedArticles(feedId);
 }
 
+/// The newest [count] articles across all feeds, limited in the query rather
+/// than cut from the whole list: the stream re-runs on every write to the
+/// article table.
+@Riverpod()
+Stream<List<FeedArticleListEntry>> recentFeedArticles(Ref ref, int count) {
+  final repository = ref.watch(feedRepositoryProvider.notifier);
+  return repository.watchFeedArticles(null, limit: count);
+}
+
 @Riverpod()
 class FilteredArticleList extends _$FilteredArticleList {
   bool _hasSearch = false;

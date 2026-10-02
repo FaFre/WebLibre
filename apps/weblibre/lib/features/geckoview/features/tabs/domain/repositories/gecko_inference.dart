@@ -18,10 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:collection/collection.dart';
 import 'package:exceptions/exceptions.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_mozilla_components/ml_utils.dart';
 import 'package:nullability/nullability.dart';
@@ -56,7 +58,11 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     },
   );
 
-  final _embeddingCache = LRUCache<String, List<double>>(100);
+  /// Embeddings by document. Sized well past the open tab count: clustering
+  /// embeds every unassigned tab on each run, and once those outnumbered the
+  /// capacity, each run re-embedded everything that did not fit. An entry is a
+  /// few KB.
+  final _embeddingCache = LRUCache<String, List<double>>(1000);
 
   void markInitialLoadComplete() {
     if (!_initialLoadComplete.isCompleted) {
@@ -162,9 +168,19 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
     );
   }
 
+  /// Groups [unassignedDocumentsInput] (titles by tab id) into suggested
+  /// containers.
+  ///
+  /// Stops, returning `null`, once [cancelled] completes — a newer run has
+  /// replaced this one, and the clustering and the topic of each cluster are
+  /// work nobody would see. A clustering under way is killed on the spot.
   Future<List<SuggestedContainer>?> suggestClusters({
     required Map<String, String> unassignedDocumentsInput,
+    Future<void>? cancelled,
   }) async {
+    var superseded = false;
+    unawaited(cancelled?.then((_) => superseded = true));
+
     if (!ref.read(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.enableLocalAiFeatures,
@@ -191,49 +207,53 @@ class GeckoInferenceRepository extends _$GeckoInferenceRepository {
 
     return await embeddings.fold(
       (embeddings) async {
-        final clusters = embeddings.mapNotNull(
-          (embeddings) =>
-              clusterEmbeddings(embeddings: embeddings.values.toList())
-                  .map(
-                    (cluster) => cluster
-                        .map((i) => embeddings.keys.elementAt(i))
-                        .toList(),
-                  )
-                  .toList(),
+        if (embeddings == null || superseded) {
+          return null;
+        }
+
+        final indexClusters = await clusterInBackground(
+          embeddings.values.toList(),
+          cancelled: cancelled,
         );
+        if (indexClusters == null || superseded) {
+          return null;
+        }
+
+        final titles = embeddings.keys.toList();
+        final clusters = indexClusters
+            .map((cluster) => cluster.map((i) => titles[i]).toList())
+            .toList();
 
         final idsByTitle = <String, List<String>>{};
         for (final MapEntry(:key, :value) in unassignedDocumentsInput.entries) {
           (idsByTitle[value] ??= []).add(key);
         }
 
-        final clusterResult = await clusters.mapNotNull(
-          (cluster) => Future.wait(
-            cluster.map((clusterTitles) async {
-              final originalTitles = clusterTitles
-                  .map((title) => processedDocuments[title] ?? title)
-                  .toSet();
+        final clusterResult = await Future.wait(
+          clusters.map((clusterTitles) async {
+            final originalTitles = clusterTitles
+                .map((title) => processedDocuments[title] ?? title)
+                .toSet();
 
-              final topic = await predictDocumentTopic(originalTitles);
+            final topic = await predictDocumentTopic(originalTitles);
 
-              return (
-                topic: topic.fold(
-                  (topic) => topic,
-                  onFailure: (errorMessage) {
-                    logger.e(
-                      errorMessage.message,
-                      error: errorMessage.details,
-                      stackTrace: errorMessage.stackTrace,
-                    );
-                    return null;
-                  },
-                ),
-                tabIds: originalTitles
-                    .expand((title) => idsByTitle[title] ?? const <String>[])
-                    .toList(),
-              );
-            }),
-          ),
+            return (
+              topic: topic.fold(
+                (topic) => topic,
+                onFailure: (errorMessage) {
+                  logger.e(
+                    errorMessage.message,
+                    error: errorMessage.details,
+                    stackTrace: errorMessage.stackTrace,
+                  );
+                  return null;
+                },
+              ),
+              tabIds: originalTitles
+                  .expand((title) => idsByTitle[title] ?? const <String>[])
+                  .toList(),
+            );
+          }),
         );
 
         return clusterResult;
@@ -384,6 +404,64 @@ Future<String?> topicSuggestion(
   );
 }
 
+/// Runs [clusterEmbeddings] on another isolate: it tries a range of cluster
+/// counts, several times each, with pairwise distances between every two
+/// tabs, which takes long enough to freeze the UI with a few hundred tabs.
+///
+/// Completes with `null` instead when [cancelled] completes first, killing the
+/// isolate there and then. Left to finish, a clustering nobody will see keeps
+/// a core busy and a copy of every embedding alive, and the run that replaced
+/// it starts another next to it.
+@visibleForTesting
+Future<List<List<int>>?> clusterInBackground(
+  List<List<double>> embeddings, {
+  Future<void>? cancelled,
+}) async {
+  final result = Completer<List<List<int>>?>();
+  // The first message decides: the clusters, an error, or — killed — the
+  // bare exit notice.
+  final port = RawReceivePort();
+  port.handler = (Object? message) {
+    port.close();
+    switch (message) {
+      case (clusters: final List<List<int>> clusters):
+        result.complete(clusters);
+      case [final Object? error, final Object? stackTrace]:
+        result.completeError(RemoteError('$error', '$stackTrace'));
+      default:
+        result.complete(null);
+    }
+  };
+
+  final Isolate isolate;
+  try {
+    isolate = await Isolate.spawn(
+      _clusterIsolateMain,
+      (port.sendPort, embeddings),
+      onExit: port.sendPort,
+      onError: port.sendPort,
+    );
+  } catch (_) {
+    port.close();
+    rethrow;
+  }
+
+  unawaited(
+    cancelled?.then((_) {
+      if (!result.isCompleted) {
+        isolate.kill(priority: Isolate.immediate);
+      }
+    }),
+  );
+
+  return await result.future;
+}
+
+void _clusterIsolateMain((SendPort, List<List<double>>) message) {
+  final (port, embeddings) = message;
+  Isolate.exit(port, (clusters: clusterEmbeddings(embeddings: embeddings)));
+}
+
 @Riverpod()
 Future<List<SuggestedContainer>?> suggestClusters(Ref ref) async {
   final unassignedTitles = await ref.watch(
@@ -398,10 +476,23 @@ Future<List<SuggestedContainer>?> suggestClusters(Ref ref) async {
     ),
   );
 
+  // Titles change in bursts while pages load, and each change rebuilds this
+  // provider: wait for them to settle rather than embed and cluster for every
+  // one of them.
+  await Future<void>.delayed(const Duration(milliseconds: 500));
+
   if (ref.mounted && unassignedTitles.value.isNotEmpty) {
+    // A rebuild disposes this run before the next one starts, so cancelling
+    // on disposal keeps one clustering going at most.
+    final disposed = Completer<void>();
+    ref.onDispose(disposed.complete);
+
     return await ref
         .read(geckoInferenceRepositoryProvider.notifier)
-        .suggestClusters(unassignedDocumentsInput: unassignedTitles.value);
+        .suggestClusters(
+          unassignedDocumentsInput: unassignedTitles.value,
+          cancelled: disposed.future,
+        );
   }
 
   return null;

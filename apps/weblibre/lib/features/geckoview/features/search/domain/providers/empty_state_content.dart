@@ -66,9 +66,7 @@ AsyncValue<List<FeedArticleSummary>> searchEmptyRecentFeedArticles(
     return const AsyncValue.data([]);
   }
 
-  return ref
-      .watch(feedArticleListProvider(null))
-      .whenData((articles) => articles.take(count).toList());
+  return ref.watch(recentFeedArticlesProvider(count));
 }
 
 @Riverpod()

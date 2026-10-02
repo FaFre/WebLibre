@@ -233,7 +233,7 @@ final class SearchEmptyRecentFeedArticlesProvider
 }
 
 String _$searchEmptyRecentFeedArticlesHash() =>
-    r'd9ddafc69ce226342bc63126dd6e1fd9d82d2d9a';
+    r'b0ad09ae55bc5500fe27613a8c737a157684d1a6';
 
 final class SearchEmptyRecentFeedArticlesFamily extends $Family
     with $FunctionalFamilyOverride<AsyncValue<List<FeedArticleSummary>>, int> {

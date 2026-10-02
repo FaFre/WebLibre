@@ -178,5 +178,21 @@ void main() {
       expect(articles.single.feedId, _feedUrl);
       expect(articles.single.created, DateTime(2026));
     });
+
+    test('limits to the newest articles across feeds', () async {
+      await db.articleDao.upsertArticles([
+        for (final month in [3, 5, 4])
+          FeedArticle(
+            id: 'article-$month',
+            feedId: _feedUrl,
+            fetched: DateTime(2026),
+            created: DateTime(2026, month),
+          ),
+      ]);
+
+      final newest = await db.articleDao.getFeedArticles(null, limit: 2).get();
+
+      expect(newest.map((article) => article.id), ['article-5', 'article-4']);
+    });
   });
 }

@@ -76,11 +76,14 @@ class FeedRepository extends _$FeedRepository {
         .watchSingleOrNull();
   }
 
-  Stream<List<FeedArticleListEntry>> watchFeedArticles(Uri? feedId) {
+  Stream<List<FeedArticleListEntry>> watchFeedArticles(
+    Uri? feedId, {
+    int? limit,
+  }) {
     return ref
         .read(feedDatabaseProvider)
         .articleDao
-        .getFeedArticles(feedId)
+        .getFeedArticles(feedId, limit: limit)
         .watch();
   }
 

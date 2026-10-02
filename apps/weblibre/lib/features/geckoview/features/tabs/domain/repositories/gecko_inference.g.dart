@@ -42,7 +42,7 @@ final class GeckoInferenceRepositoryProvider
 }
 
 String _$geckoInferenceRepositoryHash() =>
-    r'18cccac4dbfb806f00af07428c9c039de364aff0';
+    r'1d76334f3d081b094e4044aa6dc30514d57d7aae';
 
 abstract class _$GeckoInferenceRepository extends $Notifier<void> {
   void build();
@@ -330,7 +330,7 @@ final class SuggestClustersProvider
   }
 }
 
-String _$suggestClustersHash() => r'3fa169a2696954589078c7567b6245c708303232';
+String _$suggestClustersHash() => r'85c1b48ae10fa932122d617803ab59e3c20a86fc';
 
 @ProviderFor(containerTabSuggestions)
 final containerTabSuggestionsProvider = ContainerTabSuggestionsFamily._();

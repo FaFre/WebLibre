@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 
 final _apiInstance = GeckoMlApi();
@@ -19,13 +21,18 @@ class GeckoMlService {
     return _apiInstance.predictDocumentTopic(selectedTitles);
   }
 
+  /// One embedding per document, in order.
+  ///
+  /// Copied into [Float64List]s: what arrives is a list of boxed doubles, and
+  /// a cast view over it type-checks every element read in the clustering and
+  /// similarity loops, which read each one many times.
   Future<List<List<double>>> generateDocumentEmbeddings(
     List<String> documents,
   ) async {
     final embeddings = await _apiInstance.generateDocumentEmbeddings(documents);
 
     return embeddings
-        .map((values) => (values! as List).cast<double>())
+        .map((values) => Float64List.fromList((values! as List).cast()))
         .toList();
   }
 

@@ -293,6 +293,103 @@ final class FeedArticleListFamily extends $Family
   String toString() => r'feedArticleListProvider';
 }
 
+/// The newest [count] articles across all feeds, limited in the query rather
+/// than cut from the whole list: the stream re-runs on every write to the
+/// article table.
+
+@ProviderFor(recentFeedArticles)
+final recentFeedArticlesProvider = RecentFeedArticlesFamily._();
+
+/// The newest [count] articles across all feeds, limited in the query rather
+/// than cut from the whole list: the stream re-runs on every write to the
+/// article table.
+
+final class RecentFeedArticlesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<FeedArticleListEntry>>,
+          List<FeedArticleListEntry>,
+          Stream<List<FeedArticleListEntry>>
+        >
+    with
+        $FutureModifier<List<FeedArticleListEntry>>,
+        $StreamProvider<List<FeedArticleListEntry>> {
+  /// The newest [count] articles across all feeds, limited in the query rather
+  /// than cut from the whole list: the stream re-runs on every write to the
+  /// article table.
+  RecentFeedArticlesProvider._({
+    required RecentFeedArticlesFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'recentFeedArticlesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$recentFeedArticlesHash();
+
+  @override
+  String toString() {
+    return r'recentFeedArticlesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<FeedArticleListEntry>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<FeedArticleListEntry>> create(Ref ref) {
+    final argument = this.argument as int;
+    return recentFeedArticles(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RecentFeedArticlesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$recentFeedArticlesHash() =>
+    r'c1c7c1732f01f0a6035f9710741c382350174134';
+
+/// The newest [count] articles across all feeds, limited in the query rather
+/// than cut from the whole list: the stream re-runs on every write to the
+/// article table.
+
+final class RecentFeedArticlesFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<List<FeedArticleListEntry>>, int> {
+  RecentFeedArticlesFamily._()
+    : super(
+        retry: null,
+        name: r'recentFeedArticlesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The newest [count] articles across all feeds, limited in the query rather
+  /// than cut from the whole list: the stream re-runs on every write to the
+  /// article table.
+
+  RecentFeedArticlesProvider call(int count) =>
+      RecentFeedArticlesProvider._(argument: count, from: this);
+
+  @override
+  String toString() => r'recentFeedArticlesProvider';
+}
+
 @ProviderFor(FilteredArticleList)
 final filteredArticleListProvider = FilteredArticleListFamily._();
 
