@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -31,15 +29,11 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/quit_browser.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
-
-/// Tears the app down. Injectable so a test can confirm a quit without the real
-/// implementation ending the process.
-typedef ExitAppCallback = Future<void> Function(ProviderContainer container);
 
 /// Profile switch, sync, settings and quit.
 class ProfileSection extends HookConsumerWidget {
@@ -115,16 +109,17 @@ class ProfileSection extends HookConsumerWidget {
               // nothing.
               final container = ref.container;
               Navigator.pop(context);
-              final result = await showQuitBrowserDialog(context);
-
-              if (result == true) {
-                await onExit(container);
-              }
+              await quitBrowser(context, container, onExit: onExit);
             },
             onLongPress: () async {
               final container = ref.container;
               Navigator.pop(context);
-              await onExit(container);
+              await quitBrowser(
+                context,
+                container,
+                confirm: false,
+                onExit: onExit,
+              );
             },
           );
 

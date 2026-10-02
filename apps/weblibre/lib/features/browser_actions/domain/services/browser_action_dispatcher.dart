@@ -60,13 +60,12 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/quit_browser.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/utils/page_feeds.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
-import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 
 part 'browser_action_dispatcher.g.dart';
@@ -441,10 +440,10 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.quitBrowser:
         final context = await _navigatorContext();
         if (context != null && context.mounted) {
-          final confirmed = await showQuitBrowserDialog(context);
-          if (confirmed == true && context.mounted) {
-            await exitApp(ProviderScope.containerOf(context, listen: false));
-          }
+          await quitBrowser(
+            context,
+            ProviderScope.containerOf(context, listen: false),
+          );
         }
     }
   }

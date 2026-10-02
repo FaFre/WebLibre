@@ -11630,6 +11630,11 @@ class GeckoTabContentEvents(private val binaryMessenger: BinaryMessenger, privat
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoDeleteBrowsingDataController {
   suspend fun deleteTabs()
+  /**
+   * Deletes only the tabs the session restore brought back, once it has
+   * completed — never a tab opened since the engine started.
+   */
+  suspend fun deletePreviousSessionTabs()
   suspend fun deleteBrowsingHistory()
   suspend fun deleteCookiesAndSiteData()
   suspend fun deleteCachedFiles()
@@ -11655,6 +11660,24 @@ interface GeckoDeleteBrowsingDataController {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 api.deleteTabs()
+                listOf(null)
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deletePreviousSessionTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deletePreviousSessionTabs()
                 listOf(null)
               } catch (exception: Throwable) {
                 GeckoPigeonUtils.wrapError(exception)

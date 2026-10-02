@@ -8926,15 +8926,27 @@ class AppLocalizationsId extends AppLocalizations {
       'Situs yang perlindungan pelacakannya dinonaktifkan';
 
   @override
-  String get settings_incognitoModeTitle => 'Mode Penyamaran';
+  String get settings_autoDeleteBrowsingDataTitle =>
+      'Hapus Data Penjelajahan Otomatis';
 
   @override
-  String get settings_incognitoModeKeywords =>
-      'mode pribadi, penyamaran, incognito, private mode';
+  String get settings_autoDeleteBrowsingDataKeywords =>
+      'penyamaran, mode pribadi, keluar, tutup, hapus saat keluar, hapus data, incognito, private mode, quit';
 
   @override
-  String get settings_incognitoModeSubtitle =>
-      'Hapus data penjelajahan yang dipilih saat aplikasi dimulai ulang';
+  String get settings_autoDeleteBrowsingDataSubtitle =>
+      'Hapus data penjelajahan yang dipilih saat keluar atau setiap kali WebLibre dimulai';
+
+  @override
+  String get settings_confirmBeforeQuitTitle => 'Konfirmasi Sebelum Keluar';
+
+  @override
+  String get settings_confirmBeforeQuitKeywords =>
+      'keluar, tutup, konfirmasi, dialog, jangan tanya lagi, quit, exit';
+
+  @override
+  String get settings_confirmBeforeQuitSubtitle =>
+      'Tanyakan sebelum \"Keluar\" menutup WebLibre. Tekan lama \"Keluar\" untuk melewati pertanyaan ini.';
 
   @override
   String get settings_trackingProtectionExceptionsSearchHint =>
@@ -11970,6 +11982,31 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get user_actionQuit => 'Keluar';
+
+  @override
+  String get user_quitBrowserDontAskAgain => 'Jangan tanya lagi';
+
+  @override
+  String get user_quitBrowserDontAskAgainHint =>
+      'Anda dapat mengaktifkannya kembali di pengaturan.';
+
+  @override
+  String get user_quitBrowserDeleteDataTitle => 'Hapus data penjelajahan';
+
+  @override
+  String user_quitBrowserDeleteDataSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count dipilih',
+      zero: 'Tidak ada yang dipilih',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get user_quitBrowserDeletedAutomatically =>
+      'Dihapus otomatis, sesuai pengaturan';
 
   @override
   String user_deleteProfileTitle(String profileName) {

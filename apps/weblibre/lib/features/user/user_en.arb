@@ -524,6 +524,31 @@
   "@user_actionQuit": {
     "description": "Confirm button of that dialog."
   },
+  "user_quitBrowserDontAskAgain": "Don't ask again",
+  "@user_quitBrowserDontAskAgain": {
+    "description": "Checkbox in the quit confirmation dialog: quit without this dialog from now on."
+  },
+  "user_quitBrowserDontAskAgainHint": "You can turn this back on in settings.",
+  "@user_quitBrowserDontAskAgainHint": {
+    "description": "Small text under \"Don't ask again\" in the quit confirmation dialog."
+  },
+  "user_quitBrowserDeleteDataTitle": "Delete browsing data",
+  "@user_quitBrowserDeleteDataTitle": {
+    "description": "Expandable row in the quit confirmation dialog. Expanded, it lists the browsing data types as checkboxes; the ticked ones are deleted on this quit."
+  },
+  "user_quitBrowserDeleteDataSummary": "{count, plural, =0{Nothing selected} other{{count} selected}}",
+  "@user_quitBrowserDeleteDataSummary": {
+    "description": "Subtitle of \"Delete browsing data\" in the quit confirmation dialog: how many browsing data types will be deleted on this quit.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "user_quitBrowserDeletedAutomatically": "Deleted automatically, set in settings",
+  "@user_quitBrowserDeletedAutomatically": {
+    "description": "Under a ticked, locked checkbox in the quit confirmation dialog: this data type is deleted on every quit because of the \"Delete Browsing Data Automatically\" setting, so it cannot be unticked here."
+  },
   "user_deleteProfileTitle": "Delete \"{profileName}\"?",
   "@user_deleteProfileTitle": {
     "description": "Title of the confirmation dialog before deleting a profile. profileName is its name.",

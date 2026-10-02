@@ -2016,17 +2016,29 @@
   "@settings_trackingProtectionExceptionsTileSubtitle": {
     "description": "Explanation under that row."
   },
-  "settings_incognitoModeTitle": "Incognito Mode",
-  "@settings_incognitoModeTitle": {
-    "description": "Switch: delete the chosen browsing data every time the app restarts."
+  "settings_autoDeleteBrowsingDataTitle": "Delete Browsing Data Automatically",
+  "@settings_autoDeleteBrowsingDataTitle": {
+    "description": "Switch: delete the chosen browsing data automatically, both when the user quits the app and every time the app starts. Supersedes the former \"Incognito Mode\" switch."
   },
-  "settings_incognitoModeKeywords": "private mode",
-  "@settings_incognitoModeKeywords": {
+  "settings_autoDeleteBrowsingDataKeywords": "incognito, private mode, quit, exit, clear on exit, delete on quit, clear data",
+  "@settings_autoDeleteBrowsingDataKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_incognitoModeSubtitle": "Delete selected browsing data on app restart",
-  "@settings_incognitoModeSubtitle": {
-    "description": "Explanation under \"Incognito Mode\"."
+  "settings_autoDeleteBrowsingDataSubtitle": "Delete selected browsing data when you quit or every time WebLibre starts",
+  "@settings_autoDeleteBrowsingDataSubtitle": {
+    "description": "Explanation under \"Delete Browsing Data Automatically\"."
+  },
+  "settings_confirmBeforeQuitTitle": "Confirm Before Quitting",
+  "@settings_confirmBeforeQuitTitle": {
+    "description": "Switch: show a confirmation dialog when the user taps Quit. The dialog's \"Don't ask again\" checkbox turns this off."
+  },
+  "settings_confirmBeforeQuitKeywords": "quit, exit, close, confirmation, dialog, don't ask again",
+  "@settings_confirmBeforeQuitKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_confirmBeforeQuitSubtitle": "Ask before Quit closes WebLibre. Long press Quit to skip the question.",
+  "@settings_confirmBeforeQuitSubtitle": {
+    "description": "Explanation under \"Confirm Before Quitting\". \"Quit\" is the Quit button / menu entry."
   },
   "settings_trackingProtectionExceptionsSearchHint": "Search exception URLs",
   "@settings_trackingProtectionExceptionsSearchHint": {

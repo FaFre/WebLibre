@@ -18,6 +18,11 @@ class GeckoDeleteBrowserDataService {
     return _api.deleteTabs();
   }
 
+  /// Deletes only the tabs the session restore brought back, after it completed.
+  Future<void> deletePreviousSessionTabs() {
+    return _api.deletePreviousSessionTabs();
+  }
+
   Future<void> deleteBrowsingHistory() {
     return _api.deleteBrowsingHistory();
   }

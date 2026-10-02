@@ -48,6 +48,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/lifecycle.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/startup_browsing_data_cleanup.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
@@ -202,10 +203,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           .read(generalSettingsRepositoryProvider.notifier)
           .fetchSettings()
           .then((settings) async {
-            await ref
-                .read(browserDataServiceProvider.notifier)
-                .deleteDataOnEngineStart(settings.deleteBrowsingDataOnQuit);
-
             if (settings.historyAutoCleanInterval > Duration.zero) {
               await ref
                   .read(historyRepositoryProvider.notifier)
@@ -508,6 +505,11 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   @override
   void initState() {
     super.initState();
+
+    // Started before the listeners below are registered: tab creation waits
+    // only for a cleanup that has already begun, and a queued launch link can
+    // reach it within the first microtasks.
+    unawaited(ref.read(startupBrowsingDataCleanupProvider.notifier).start());
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref

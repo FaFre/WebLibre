@@ -9036,14 +9036,27 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сайты, на которых защита от отслеживания отключена';
 
   @override
-  String get settings_incognitoModeTitle => 'Режим инкогнито';
+  String get settings_autoDeleteBrowsingDataTitle =>
+      'Автоматическое удаление данных просмотра';
 
   @override
-  String get settings_incognitoModeKeywords => 'приватный режим, инкогнито';
+  String get settings_autoDeleteBrowsingDataKeywords =>
+      'инкогнито, приватный режим, выход, закрыть, удалить при выходе, очистка данных, incognito, quit';
 
   @override
-  String get settings_incognitoModeSubtitle =>
-      'Удалять выбранные данные просмотра при перезапуске приложения';
+  String get settings_autoDeleteBrowsingDataSubtitle =>
+      'Удалять выбранные данные просмотра при выходе или при каждом запуске WebLibre';
+
+  @override
+  String get settings_confirmBeforeQuitTitle => 'Подтверждать выход';
+
+  @override
+  String get settings_confirmBeforeQuitKeywords =>
+      'выход, выйти, закрыть, подтверждение, диалог, больше не спрашивать, quit, exit';
+
+  @override
+  String get settings_confirmBeforeQuitSubtitle =>
+      'Спрашивать, прежде чем «Выйти» закроет WebLibre. Долгое нажатие на «Выйти» пропускает вопрос.';
 
   @override
   String get settings_trackingProtectionExceptionsSearchHint =>
@@ -12100,6 +12113,31 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get user_actionQuit => 'Выйти';
+
+  @override
+  String get user_quitBrowserDontAskAgain => 'Больше не спрашивать';
+
+  @override
+  String get user_quitBrowserDontAskAgainHint =>
+      'Это можно снова включить в настройках.';
+
+  @override
+  String get user_quitBrowserDeleteDataTitle => 'Удалить данные просмотра';
+
+  @override
+  String user_quitBrowserDeleteDataSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Выбрано: $count',
+      zero: 'Ничего не выбрано',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get user_quitBrowserDeletedAutomatically =>
+      'Удаляется автоматически, согласно настройкам';
 
   @override
   String user_deleteProfileTitle(String profileName) {

@@ -11021,17 +11021,29 @@
   "@settings_trackingProtectionExceptionsTileSubtitle": {
     "description": "Explanation under that row."
   },
-  "settings_incognitoModeTitle": "Incognito Mode",
-  "@settings_incognitoModeTitle": {
-    "description": "Switch: delete the chosen browsing data every time the app restarts."
+  "settings_autoDeleteBrowsingDataTitle": "Delete Browsing Data Automatically",
+  "@settings_autoDeleteBrowsingDataTitle": {
+    "description": "Switch: delete the chosen browsing data automatically, both when the user quits the app and every time the app starts. Supersedes the former \"Incognito Mode\" switch."
   },
-  "settings_incognitoModeKeywords": "private mode",
-  "@settings_incognitoModeKeywords": {
+  "settings_autoDeleteBrowsingDataKeywords": "incognito, private mode, quit, exit, clear on exit, delete on quit, clear data",
+  "@settings_autoDeleteBrowsingDataKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_incognitoModeSubtitle": "Delete selected browsing data on app restart",
-  "@settings_incognitoModeSubtitle": {
-    "description": "Explanation under \"Incognito Mode\"."
+  "settings_autoDeleteBrowsingDataSubtitle": "Delete selected browsing data when you quit or every time WebLibre starts",
+  "@settings_autoDeleteBrowsingDataSubtitle": {
+    "description": "Explanation under \"Delete Browsing Data Automatically\"."
+  },
+  "settings_confirmBeforeQuitTitle": "Confirm Before Quitting",
+  "@settings_confirmBeforeQuitTitle": {
+    "description": "Switch: show a confirmation dialog when the user taps Quit. The dialog's \"Don't ask again\" checkbox turns this off."
+  },
+  "settings_confirmBeforeQuitKeywords": "quit, exit, close, confirmation, dialog, don't ask again",
+  "@settings_confirmBeforeQuitKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_confirmBeforeQuitSubtitle": "Ask before Quit closes WebLibre. Long press Quit to skip the question.",
+  "@settings_confirmBeforeQuitSubtitle": {
+    "description": "Explanation under \"Confirm Before Quitting\". \"Quit\" is the Quit button / menu entry."
   },
   "settings_trackingProtectionExceptionsSearchHint": "Search exception URLs",
   "@settings_trackingProtectionExceptionsSearchHint": {
@@ -14694,6 +14706,31 @@
   "user_actionQuit": "Quit",
   "@user_actionQuit": {
     "description": "Confirm button of that dialog."
+  },
+  "user_quitBrowserDontAskAgain": "Don't ask again",
+  "@user_quitBrowserDontAskAgain": {
+    "description": "Checkbox in the quit confirmation dialog: quit without this dialog from now on."
+  },
+  "user_quitBrowserDontAskAgainHint": "You can turn this back on in settings.",
+  "@user_quitBrowserDontAskAgainHint": {
+    "description": "Small text under \"Don't ask again\" in the quit confirmation dialog."
+  },
+  "user_quitBrowserDeleteDataTitle": "Delete browsing data",
+  "@user_quitBrowserDeleteDataTitle": {
+    "description": "Expandable row in the quit confirmation dialog. Expanded, it lists the browsing data types as checkboxes; the ticked ones are deleted on this quit."
+  },
+  "user_quitBrowserDeleteDataSummary": "{count, plural, =0{Nothing selected} other{{count} selected}}",
+  "@user_quitBrowserDeleteDataSummary": {
+    "description": "Subtitle of \"Delete browsing data\" in the quit confirmation dialog: how many browsing data types will be deleted on this quit.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "user_quitBrowserDeletedAutomatically": "Deleted automatically, set in settings",
+  "@user_quitBrowserDeletedAutomatically": {
+    "description": "Under a ticked, locked checkbox in the quit confirmation dialog: this data type is deleted on every quit because of the \"Delete Browsing Data Automatically\" setting, so it cannot be unticked here."
   },
   "user_deleteProfileTitle": "Delete \"{profileName}\"?",
   "@user_deleteProfileTitle": {

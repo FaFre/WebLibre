@@ -23,9 +23,11 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings enforceReadability(bool enforceReadability);
 
-  GeneralSettings deleteBrowsingDataOnQuit(
-    Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
+  GeneralSettings autoDeleteBrowsingData(
+    Set<DeleteBrowsingDataType>? autoDeleteBrowsingData,
   );
+
+  GeneralSettings confirmBeforeQuit(bool confirmBeforeQuit);
 
   GeneralSettings screenshotProtectionEnabled(bool screenshotProtectionEnabled);
 
@@ -241,7 +243,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool showModalBarrier,
     bool enableReadability,
     bool enforceReadability,
-    Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
+    Set<DeleteBrowsingDataType>? autoDeleteBrowsingData,
+    bool confirmBeforeQuit,
     bool screenshotProtectionEnabled,
     bool allowPrivateTabScreenshots,
     BangKey? defaultSearchProvider,
@@ -366,9 +369,13 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(enforceReadability: enforceReadability);
 
   @override
-  GeneralSettings deleteBrowsingDataOnQuit(
-    Set<DeleteBrowsingDataType>? deleteBrowsingDataOnQuit,
-  ) => call(deleteBrowsingDataOnQuit: deleteBrowsingDataOnQuit);
+  GeneralSettings autoDeleteBrowsingData(
+    Set<DeleteBrowsingDataType>? autoDeleteBrowsingData,
+  ) => call(autoDeleteBrowsingData: autoDeleteBrowsingData);
+
+  @override
+  GeneralSettings confirmBeforeQuit(bool confirmBeforeQuit) =>
+      call(confirmBeforeQuit: confirmBeforeQuit);
 
   @override
   GeneralSettings screenshotProtectionEnabled(
@@ -746,7 +753,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showModalBarrier = const $CopyWithPlaceholder(),
     Object? enableReadability = const $CopyWithPlaceholder(),
     Object? enforceReadability = const $CopyWithPlaceholder(),
-    Object? deleteBrowsingDataOnQuit = const $CopyWithPlaceholder(),
+    Object? autoDeleteBrowsingData = const $CopyWithPlaceholder(),
+    Object? confirmBeforeQuit = const $CopyWithPlaceholder(),
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
     Object? defaultSearchProvider = const $CopyWithPlaceholder(),
@@ -877,11 +885,17 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.enforceReadability
           // ignore: cast_nullable_to_non_nullable
           : enforceReadability as bool,
-      deleteBrowsingDataOnQuit:
-          deleteBrowsingDataOnQuit == const $CopyWithPlaceholder()
-          ? _value.deleteBrowsingDataOnQuit
+      autoDeleteBrowsingData:
+          autoDeleteBrowsingData == const $CopyWithPlaceholder()
+          ? _value.autoDeleteBrowsingData
           // ignore: cast_nullable_to_non_nullable
-          : deleteBrowsingDataOnQuit as Set<DeleteBrowsingDataType>?,
+          : autoDeleteBrowsingData as Set<DeleteBrowsingDataType>?,
+      confirmBeforeQuit:
+          confirmBeforeQuit == const $CopyWithPlaceholder() ||
+              confirmBeforeQuit == null
+          ? _value.confirmBeforeQuit
+          // ignore: cast_nullable_to_non_nullable
+          : confirmBeforeQuit as bool,
       screenshotProtectionEnabled:
           screenshotProtectionEnabled == const $CopyWithPlaceholder() ||
               screenshotProtectionEnabled == null
@@ -1395,9 +1409,10 @@ GeneralSettings _$GeneralSettingsFromJson(
   showModalBarrier: json['showModalBarrier'] as bool?,
   enableReadability: json['enableReadability'] as bool?,
   enforceReadability: json['enforceReadability'] as bool?,
-  deleteBrowsingDataOnQuit: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
+  autoDeleteBrowsingData: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
       ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
       .toSet(),
+  confirmBeforeQuit: json['confirmBeforeQuit'] as bool?,
   screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
   allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
   defaultSearchProvider: const BangKeyConverter().fromJson(
@@ -1576,9 +1591,10 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showModalBarrier': instance.showModalBarrier,
   'enableReadability': instance.enableReadability,
   'enforceReadability': instance.enforceReadability,
-  'deleteBrowsingDataOnQuit': instance.deleteBrowsingDataOnQuit
+  'deleteBrowsingDataOnQuit': instance.autoDeleteBrowsingData
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
+  'confirmBeforeQuit': instance.confirmBeforeQuit,
   'screenshotProtectionEnabled': instance.screenshotProtectionEnabled,
   'allowPrivateTabScreenshots': instance.allowPrivateTabScreenshots,
   'defaultSearchProvider': const BangKeyConverter().toJson(

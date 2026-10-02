@@ -28,15 +28,21 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/bro
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 /// Tears down the app and ends the process.
 ///
 /// With [restart] the process is ended natively instead of by `exit(0)`, so the
 /// armed relaunch runs: the trampoline has to be started from a process that is
 /// still alive, and `exit(0)` from Dart skips that.
+///
+/// [deleteBrowsingData] is the automatic deletion an explicit Quit runs. Only
+/// Quit passes it — never a restart, nor a settings prompt asking to quit so a
+/// change can take effect.
 Future<void> exitApp(
   ProviderContainer container, {
   bool restart = false,
+  Set<DeleteBrowsingDataType>? deleteBrowsingData,
 }) async {
   logger.i(restart ? 'Preparing restart' : 'Preparing exit');
 
@@ -51,7 +57,25 @@ Future<void> exitApp(
     logger.e('Failed to close tabs', error: e, stackTrace: st);
   }
 
-  // 1b. Explicit-Quit cleanup for containers with "Clear Data on Exit" enabled.
+  // 1b. The browsing data the user chose to delete automatically. If this
+  //     process dies half way, the next start deletes the same data anyway.
+  if (deleteBrowsingData != null && deleteBrowsingData.isNotEmpty) {
+    try {
+      await container
+          .read(browserDataServiceProvider.notifier)
+          .deleteData(deleteBrowsingData);
+      logger.i('Deleted browsing data on quit');
+    } catch (e, st) {
+      // Every selected type was still attempted; see deleteData.
+      logger.e(
+        'Failed to delete some browsing data on quit',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
+
+  // 1c. Explicit-Quit cleanup for containers with "Clear Data on Exit" enabled.
   //     Done here — while the databases and Gecko engine are still alive — so the
   //     clear gets a chance to run on a deliberate Quit rather than only on the
   //     next launch.

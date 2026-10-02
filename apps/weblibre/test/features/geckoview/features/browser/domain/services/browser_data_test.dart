@@ -1,9 +1,24 @@
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class _FakeGeckoDeleteBrowserDataService extends GeckoDeleteBrowserDataService {
   final clearedContexts = <String>[];
+
+  final deleted = <String>[];
+
+  @override
+  Future<void> deleteBrowsingHistory() {
+    deleted.add('history');
+    return Future.error(Exception('simulated native failure for history'));
+  }
+
+  @override
+  Future<void> deleteCookiesAndSiteData() async => deleted.add('cookies');
+
+  @override
+  Future<void> deleteCachedFiles() async => deleted.add('cache');
 
   /// Contexts for which [clearDataForContext] should throw (simulating a native
   /// failure), so we can assert one failure doesn't block the remaining ones.
@@ -20,22 +35,6 @@ class _FakeGeckoDeleteBrowserDataService extends GeckoDeleteBrowserDataService {
 
 void main() {
   group('BrowserDataService.clearContainerDataOnEngineStart', () {
-    test(
-      'still clears container data after deleteDataOnEngineStart ran '
-      '(regression: shared one-shot flag skipped container clearing, #524)',
-      () async {
-        final gecko = _FakeGeckoDeleteBrowserDataService();
-        final service = BrowserDataService(service: gecko);
-
-        // Startup always runs the global on-start deletion first, even when
-        // no delete-on-quit types are configured (null).
-        await service.deleteDataOnEngineStart(null);
-        await service.clearContainerDataOnEngineStart(['ctx-1', 'ctx-2']);
-
-        expect(gecko.clearedContexts, ['ctx-1', 'ctx-2']);
-      },
-    );
-
     test('clears only once per app start', () async {
       final gecko = _FakeGeckoDeleteBrowserDataService();
       final service = BrowserDataService(service: gecko);
@@ -100,6 +99,25 @@ void main() {
       await service.clearContainerData(['ctx-1', 'ctx-2']);
 
       expect(gecko.clearedContexts, ['ctx-1', 'ctx-2']);
+    });
+  });
+
+  group('BrowserDataService.deleteData', () {
+    test('a failing type does not skip the ones after it', () async {
+      final gecko = _FakeGeckoDeleteBrowserDataService();
+      final service = BrowserDataService(service: gecko);
+
+      // On Quit, history failing used to keep the cookies and the cache.
+      await expectLater(
+        service.deleteData({
+          DeleteBrowsingDataType.history,
+          DeleteBrowsingDataType.cookies,
+          DeleteBrowsingDataType.cache,
+        }),
+        throwsException,
+      );
+
+      expect(gecko.deleted, ['history', 'cookies', 'cache']);
     });
   });
 }

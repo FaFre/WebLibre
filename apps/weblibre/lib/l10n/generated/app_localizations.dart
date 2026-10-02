@@ -15028,23 +15028,41 @@ abstract class AppLocalizations {
   /// **'Sites where tracking protection is disabled'**
   String get settings_trackingProtectionExceptionsTileSubtitle;
 
-  /// Switch: delete the chosen browsing data every time the app restarts.
+  /// Switch: delete the chosen browsing data automatically, both when the user quits the app and every time the app starts. Supersedes the former "Incognito Mode" switch.
   ///
   /// In en, this message translates to:
-  /// **'Incognito Mode'**
-  String get settings_incognitoModeTitle;
+  /// **'Delete Browsing Data Automatically'**
+  String get settings_autoDeleteBrowsingDataTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'private mode'**
-  String get settings_incognitoModeKeywords;
+  /// **'incognito, private mode, quit, exit, clear on exit, delete on quit, clear data'**
+  String get settings_autoDeleteBrowsingDataKeywords;
 
-  /// Explanation under "Incognito Mode".
+  /// Explanation under "Delete Browsing Data Automatically".
   ///
   /// In en, this message translates to:
-  /// **'Delete selected browsing data on app restart'**
-  String get settings_incognitoModeSubtitle;
+  /// **'Delete selected browsing data when you quit or every time WebLibre starts'**
+  String get settings_autoDeleteBrowsingDataSubtitle;
+
+  /// Switch: show a confirmation dialog when the user taps Quit. The dialog's "Don't ask again" checkbox turns this off.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Before Quitting'**
+  String get settings_confirmBeforeQuitTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'quit, exit, close, confirmation, dialog, don\'t ask again'**
+  String get settings_confirmBeforeQuitKeywords;
+
+  /// Explanation under "Confirm Before Quitting". "Quit" is the Quit button / menu entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before Quit closes WebLibre. Long press Quit to skip the question.'**
+  String get settings_confirmBeforeQuitSubtitle;
 
   /// Placeholder of the search field on the exceptions list.
   ///
@@ -19978,6 +19996,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Quit'**
   String get user_actionQuit;
+
+  /// Checkbox in the quit confirmation dialog: quit without this dialog from now on.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t ask again'**
+  String get user_quitBrowserDontAskAgain;
+
+  /// Small text under "Don't ask again" in the quit confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'You can turn this back on in settings.'**
+  String get user_quitBrowserDontAskAgainHint;
+
+  /// Expandable row in the quit confirmation dialog. Expanded, it lists the browsing data types as checkboxes; the ticked ones are deleted on this quit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete browsing data'**
+  String get user_quitBrowserDeleteDataTitle;
+
+  /// Subtitle of "Delete browsing data" in the quit confirmation dialog: how many browsing data types will be deleted on this quit.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nothing selected} other{{count} selected}}'**
+  String user_quitBrowserDeleteDataSummary(int count);
+
+  /// Under a ticked, locked checkbox in the quit confirmation dialog: this data type is deleted on every quit because of the "Delete Browsing Data Automatically" setting, so it cannot be unticked here.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted automatically, set in settings'**
+  String get user_quitBrowserDeletedAutomatically;
 
   /// Title of the confirmation dialog before deleting a profile. profileName is its name.
   ///

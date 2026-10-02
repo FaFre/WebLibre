@@ -171,12 +171,6 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       title: l10n.settings_privacySectionSignalsModesTitle,
       entries: [
         SettingsEntryDefinition(
-          title: l10n.settings_incognitoModeTitle,
-          subtitle: l10n.settings_incognitoModeSubtitle,
-          keywords: settingsKeywords(l10n.settings_incognitoModeKeywords),
-          child: const _IncognitoModeSection(),
-        ),
-        SettingsEntryDefinition(
           title: l10n.settings_screenshotProtectionTitle,
           subtitle: l10n.settings_indexScreenshotProtectionSubtitle,
           keywords: settingsKeywords(
@@ -225,6 +219,20 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
             l10n.settings_deleteBrowsingDataTileKeywords,
           ),
           child: const _DeleteBrowsingDataTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_autoDeleteBrowsingDataTitle,
+          subtitle: l10n.settings_autoDeleteBrowsingDataSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_autoDeleteBrowsingDataKeywords,
+          ),
+          child: const _AutoDeleteBrowsingDataSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_confirmBeforeQuitTitle,
+          subtitle: l10n.settings_confirmBeforeQuitSubtitle,
+          keywords: settingsKeywords(l10n.settings_confirmBeforeQuitKeywords),
+          child: const _ConfirmBeforeQuitTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_autoClearHistoryTitle,
@@ -322,14 +330,14 @@ class _TrackingProtectionExceptionsTile extends StatelessWidget {
   }
 }
 
-class _IncognitoModeSection extends HookConsumerWidget {
-  const _IncognitoModeSection();
+class _AutoDeleteBrowsingDataSection extends HookConsumerWidget {
+  const _AutoDeleteBrowsingDataSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final deleteBrowsingDataOnQuit = ref.watch(
+    final autoDeleteBrowsingData = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.deleteBrowsingDataOnQuit,
+        (s) => s.autoDeleteBrowsingData,
       ),
     );
     final l10n = AppLocalizations.of(context);
@@ -337,22 +345,21 @@ class _IncognitoModeSection extends HookConsumerWidget {
     return Column(
       children: [
         SwitchListTile.adaptive(
-          title: Text(l10n.settings_incognitoModeTitle),
-          subtitle: Text(l10n.settings_incognitoModeSubtitle),
-          secondary: const Icon(MdiIcons.incognito),
-          value: deleteBrowsingDataOnQuit != null,
+          title: Text(l10n.settings_autoDeleteBrowsingDataTitle),
+          subtitle: Text(l10n.settings_autoDeleteBrowsingDataSubtitle),
+          secondary: const Icon(MdiIcons.deleteClockOutline),
+          value: autoDeleteBrowsingData != null,
           onChanged: (value) async {
             await ref
                 .read(saveGeneralSettingsControllerProvider.notifier)
                 .save(
-                  (currentSettings) => value
-                      ? currentSettings.copyWith.deleteBrowsingDataOnQuit({})
-                      : currentSettings.copyWith.deleteBrowsingDataOnQuit(null),
+                  (currentSettings) => currentSettings.copyWith
+                      .autoDeleteBrowsingData(value ? {} : null),
                 );
           },
         ),
-        if (deleteBrowsingDataOnQuit != null)
-          _DeleteBrowsingDataTypes(selectedTypes: deleteBrowsingDataOnQuit),
+        if (autoDeleteBrowsingData != null)
+          _DeleteBrowsingDataTypes(selectedTypes: autoDeleteBrowsingData),
       ],
     );
   }
@@ -385,16 +392,16 @@ class _DeleteBrowsingDataTypes extends HookConsumerWidget {
                 if (value == true) {
                   await notifier.save(
                     (currentSettings) =>
-                        currentSettings.copyWith.deleteBrowsingDataOnQuit({
-                          ...currentSettings.deleteBrowsingDataOnQuit!,
+                        currentSettings.copyWith.autoDeleteBrowsingData({
+                          ...currentSettings.autoDeleteBrowsingData!,
                           type,
                         }),
                   );
                 } else {
                   await notifier.save(
                     (currentSettings) =>
-                        currentSettings.copyWith.deleteBrowsingDataOnQuit(
-                          {...currentSettings.deleteBrowsingDataOnQuit!}
+                        currentSettings.copyWith.autoDeleteBrowsingData(
+                          {...currentSettings.autoDeleteBrowsingData!}
                             ..remove(type),
                         ),
                   );
@@ -403,6 +410,30 @@ class _DeleteBrowsingDataTypes extends HookConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+class _ConfirmBeforeQuitTile extends HookConsumerWidget {
+  const _ConfirmBeforeQuitTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final confirmBeforeQuit = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.confirmBeforeQuit),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_confirmBeforeQuitTitle),
+      subtitle: Text(l10n.settings_confirmBeforeQuitSubtitle),
+      secondary: const Icon(MdiIcons.power),
+      value: confirmBeforeQuit,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save((current) => current.copyWith.confirmBeforeQuit(value));
+      },
     );
   }
 }

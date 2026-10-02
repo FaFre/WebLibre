@@ -76,7 +76,7 @@ Stream<int> iconCacheRevision(Ref ref, String origin) {
 bool incognitoModeEnabled(Ref ref) {
   return ref.watch(
     generalSettingsWithDefaultsProvider.select(
-      (value) => value.deleteBrowsingDataOnQuit != null,
+      (value) => value.autoDeleteBrowsingData != null,
     ),
   );
 }

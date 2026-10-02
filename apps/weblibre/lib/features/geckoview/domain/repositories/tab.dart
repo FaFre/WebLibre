@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/startup_browsing_data_cleanup.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -223,6 +224,11 @@ class TabRepository extends _$TabRepository {
     bool launchedFromIntent = false,
     TabBackBehavior? onBackBehavior,
   }) async {
+    // The startup cleanup deletes the previous session's cookies, cache and
+    // site data; a page opened before it finished would lose its own with them.
+    // (Its tab deletion is scoped to restored tabs and cannot reach this one.)
+    await ref.read(startupBrowsingDataCleanupProvider.notifier).waitUntilDone();
+
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
     var assignedContainer = switch (containerSelection) {

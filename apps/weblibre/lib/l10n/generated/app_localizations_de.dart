@@ -8980,14 +8980,27 @@ class AppLocalizationsDe extends AppLocalizations {
       'Websites, auf denen der Tracking-Schutz deaktiviert ist';
 
   @override
-  String get settings_incognitoModeTitle => 'Inkognito-Modus';
+  String get settings_autoDeleteBrowsingDataTitle =>
+      'Browserdaten automatisch löschen';
 
   @override
-  String get settings_incognitoModeKeywords => 'privater Modus, inkognito';
+  String get settings_autoDeleteBrowsingDataKeywords =>
+      'inkognito, privater Modus, beenden, schließen, beim Beenden löschen, Daten löschen, incognito, quit';
 
   @override
-  String get settings_incognitoModeSubtitle =>
-      'Ausgewählte Browserdaten beim Neustart der App löschen';
+  String get settings_autoDeleteBrowsingDataSubtitle =>
+      'Ausgewählte Browserdaten beim Beenden oder bei jedem Start von WebLibre löschen';
+
+  @override
+  String get settings_confirmBeforeQuitTitle => 'Vor dem Beenden nachfragen';
+
+  @override
+  String get settings_confirmBeforeQuitKeywords =>
+      'beenden, schließen, bestätigen, Bestätigung, Dialog, nicht mehr fragen';
+
+  @override
+  String get settings_confirmBeforeQuitSubtitle =>
+      'Nachfragen, bevor „Beenden“ WebLibre schließt. Langes Drücken auf „Beenden“ überspringt die Frage.';
 
   @override
   String get settings_trackingProtectionExceptionsSearchHint =>
@@ -12023,6 +12036,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get user_actionQuit => 'Beenden';
+
+  @override
+  String get user_quitBrowserDontAskAgain => 'Nicht mehr fragen';
+
+  @override
+  String get user_quitBrowserDontAskAgainHint =>
+      'Lässt sich in den Einstellungen wieder einschalten.';
+
+  @override
+  String get user_quitBrowserDeleteDataTitle => 'Browserdaten löschen';
+
+  @override
+  String user_quitBrowserDeleteDataSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ausgewählt',
+      zero: 'Nichts ausgewählt',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get user_quitBrowserDeletedAutomatically =>
+      'Wird automatisch gelöscht, festgelegt in den Einstellungen';
 
   @override
   String user_deleteProfileTitle(String profileName) {

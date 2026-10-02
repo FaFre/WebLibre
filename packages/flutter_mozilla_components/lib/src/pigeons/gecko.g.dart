@@ -12847,6 +12847,26 @@ class GeckoDeleteBrowsingDataController {
     );
   }
 
+  /// Deletes only the tabs the session restore brought back, once it has
+  /// completed — never a tab opened since the engine started.
+  Future<void> deletePreviousSessionTabs() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deletePreviousSessionTabs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   Future<void> deleteBrowsingHistory() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deleteBrowsingHistory$pigeonVar_messageChannelSuffix';

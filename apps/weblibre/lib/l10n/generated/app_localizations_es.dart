@@ -9045,14 +9045,27 @@ class AppLocalizationsEs extends AppLocalizations {
       'Sitios en los que la protección contra el rastreo está desactivada';
 
   @override
-  String get settings_incognitoModeTitle => 'Modo incógnito';
+  String get settings_autoDeleteBrowsingDataTitle =>
+      'Eliminar datos de navegación automáticamente';
 
   @override
-  String get settings_incognitoModeKeywords => 'modo privado, incógnito';
+  String get settings_autoDeleteBrowsingDataKeywords =>
+      'incógnito, modo privado, salir, cerrar, borrar al salir, eliminar datos, incognito, quit';
 
   @override
-  String get settings_incognitoModeSubtitle =>
-      'Eliminar los datos de navegación seleccionados al reiniciar la aplicación';
+  String get settings_autoDeleteBrowsingDataSubtitle =>
+      'Eliminar los datos de navegación seleccionados al salir o cada vez que se inicia WebLibre';
+
+  @override
+  String get settings_confirmBeforeQuitTitle => 'Confirmar antes de salir';
+
+  @override
+  String get settings_confirmBeforeQuitKeywords =>
+      'salir, cerrar, confirmación, diálogo, no volver a preguntar, quit, exit';
+
+  @override
+  String get settings_confirmBeforeQuitSubtitle =>
+      'Preguntar antes de que «Salir» cierre WebLibre. Mantén pulsado «Salir» para omitir la pregunta.';
 
   @override
   String get settings_trackingProtectionExceptionsSearchHint =>
@@ -12117,6 +12130,32 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get user_actionQuit => 'Salir';
+
+  @override
+  String get user_quitBrowserDontAskAgain => 'No volver a preguntar';
+
+  @override
+  String get user_quitBrowserDontAskAgainHint =>
+      'Puedes volver a activarlo en Ajustes.';
+
+  @override
+  String get user_quitBrowserDeleteDataTitle => 'Eliminar datos de navegación';
+
+  @override
+  String user_quitBrowserDeleteDataSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seleccionados',
+      one: '1 seleccionado',
+      zero: 'Nada seleccionado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get user_quitBrowserDeletedAutomatically =>
+      'Se elimina automáticamente, según tus ajustes';
 
   @override
   String user_deleteProfileTitle(String profileName) {

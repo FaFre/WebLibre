@@ -8803,14 +8803,27 @@ class AppLocalizationsEn extends AppLocalizations {
       'Sites where tracking protection is disabled';
 
   @override
-  String get settings_incognitoModeTitle => 'Incognito Mode';
+  String get settings_autoDeleteBrowsingDataTitle =>
+      'Delete Browsing Data Automatically';
 
   @override
-  String get settings_incognitoModeKeywords => 'private mode';
+  String get settings_autoDeleteBrowsingDataKeywords =>
+      'incognito, private mode, quit, exit, clear on exit, delete on quit, clear data';
 
   @override
-  String get settings_incognitoModeSubtitle =>
-      'Delete selected browsing data on app restart';
+  String get settings_autoDeleteBrowsingDataSubtitle =>
+      'Delete selected browsing data when you quit or every time WebLibre starts';
+
+  @override
+  String get settings_confirmBeforeQuitTitle => 'Confirm Before Quitting';
+
+  @override
+  String get settings_confirmBeforeQuitKeywords =>
+      'quit, exit, close, confirmation, dialog, don\'t ask again';
+
+  @override
+  String get settings_confirmBeforeQuitSubtitle =>
+      'Ask before Quit closes WebLibre. Long press Quit to skip the question.';
 
   @override
   String get settings_trackingProtectionExceptionsSearchHint =>
@@ -11780,6 +11793,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get user_actionQuit => 'Quit';
+
+  @override
+  String get user_quitBrowserDontAskAgain => 'Don\'t ask again';
+
+  @override
+  String get user_quitBrowserDontAskAgainHint =>
+      'You can turn this back on in settings.';
+
+  @override
+  String get user_quitBrowserDeleteDataTitle => 'Delete browsing data';
+
+  @override
+  String user_quitBrowserDeleteDataSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected',
+      zero: 'Nothing selected',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get user_quitBrowserDeletedAutomatically =>
+      'Deleted automatically, set in settings';
 
   @override
   String user_deleteProfileTitle(String profileName) {

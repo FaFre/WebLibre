@@ -2425,6 +2425,11 @@ abstract class GeckoTabContentEvents {
 abstract class GeckoDeleteBrowsingDataController {
   @async
   void deleteTabs();
+
+  /// Deletes only the tabs the session restore brought back, once it has
+  /// completed — never a tab opened since the engine started.
+  @async
+  void deletePreviousSessionTabs();
   @async
   void deleteBrowsingHistory();
   @async

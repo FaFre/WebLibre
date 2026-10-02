@@ -8222,13 +8222,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_trackingProtectionExceptionsTileSubtitle => '已停用跟踪保护的网站';
 
   @override
-  String get settings_incognitoModeTitle => '无痕模式';
+  String get settings_autoDeleteBrowsingDataTitle => '自动删除浏览数据';
 
   @override
-  String get settings_incognitoModeKeywords => '隐私模式,无痕';
+  String get settings_autoDeleteBrowsingDataKeywords =>
+      '无痕,隐私模式,退出,关闭,退出时删除,删除数据,incognito,quit';
 
   @override
-  String get settings_incognitoModeSubtitle => '应用重启时删除所选的浏览数据';
+  String get settings_autoDeleteBrowsingDataSubtitle =>
+      '在退出时或每次启动 WebLibre 时删除所选的浏览数据';
+
+  @override
+  String get settings_confirmBeforeQuitTitle => '退出前确认';
+
+  @override
+  String get settings_confirmBeforeQuitKeywords =>
+      '退出,关闭,确认,对话框,不再询问,quit,exit';
+
+  @override
+  String get settings_confirmBeforeQuitSubtitle =>
+      '在“退出”关闭 WebLibre 前询问。长按“退出”可跳过询问。';
 
   @override
   String get settings_trackingProtectionExceptionsSearchHint => '搜索例外网址';
@@ -10950,6 +10963,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get user_actionQuit => '退出';
+
+  @override
+  String get user_quitBrowserDontAskAgain => '不再询问';
+
+  @override
+  String get user_quitBrowserDontAskAgainHint => '你可以在设置中重新开启。';
+
+  @override
+  String get user_quitBrowserDeleteDataTitle => '删除浏览数据';
+
+  @override
+  String user_quitBrowserDeleteDataSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已选择 $count 项',
+      zero: '未选择',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get user_quitBrowserDeletedAutomatically => '根据设置自动删除';
 
   @override
   String user_deleteProfileTitle(String profileName) {

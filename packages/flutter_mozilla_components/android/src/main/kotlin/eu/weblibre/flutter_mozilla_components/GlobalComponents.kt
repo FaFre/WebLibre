@@ -50,7 +50,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
+import mozilla.components.browser.session.storage.AutoSave
 import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.RestoreCompleteAction
 import mozilla.components.browser.state.action.TabListAction
@@ -356,6 +358,7 @@ object GlobalComponents {
                 val restoredState = newComponents.core.sessionStorage.restore { true }
 
                 if (restoredState != null) {
+                    newComponents.core.recordPreviousSessionTabs(restoredState)
                     newComponents.useCases.tabsUseCases.restore(
                         state = RecoverableBrowserState(
                             tabs = restoredState.tabs,
@@ -371,10 +374,31 @@ object GlobalComponents {
 
                 newComponents.core.store.dispatch(RestoreCompleteAction)
             } else {
-                newComponents.useCases.tabsUseCases.restore(newComponents.core.sessionStorage)
+                // AC's `restore(sessionStorage)` by hand, so the restored tabs are recorded
+                // before they reach the store.
+                val restoredState = withContext(Dispatchers.IO) {
+                    newComponents.core.sessionStorage.restore()
+                }
+
+                if (restoredState != null) {
+                    newComponents.core.recordPreviousSessionTabs(restoredState)
+                    newComponents.useCases.tabsUseCases.restore(
+                        state = restoredState,
+                        restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
+                    )
+                }
+
+                newComponents.core.store.dispatch(RestoreCompleteAction)
             }
 
-            newComponents.core.sessionStorage.autoSave(newComponents.core.store)
+            // Built by hand rather than with `sessionStorage.autoSave(store)` so that
+            // autosaves write through the one serialized writer; see
+            // CurrentStateSessionWriter. The interval is AC's own default.
+            AutoSave(
+                store = newComponents.core.store,
+                sessionStorage = newComponents.core.sessionWriter,
+                minimumIntervalMs = AutoSave.DEFAULT_INTERVAL_MILLISECONDS,
+            )
                 .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
                 .whenGoingToBackground()
                 .whenSessionsChange()

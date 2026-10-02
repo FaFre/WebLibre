@@ -41,6 +41,7 @@ import kotlinx.coroutines.FlowPreview
 import mozilla.components.browser.engine.gecko.permission.GeckoSitePermissionsStorage
 import mozilla.components.browser.engine.gecko.util.EngineDownloadDelegate
 import mozilla.components.browser.icons.BrowserIcons
+import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.session.storage.SessionStorage
 import mozilla.components.browser.state.engine.EngineMiddleware
 import mozilla.components.browser.state.engine.middleware.SessionPrioritizationMiddleware
@@ -64,6 +65,7 @@ import mozilla.components.feature.customtabs.store.CustomTabsServiceStore
 import mozilla.components.feature.pwa.ManifestStorage
 import mozilla.components.feature.pwa.WebAppShortcutManager
 import mozilla.components.feature.downloads.DownloadMiddleware
+import mozilla.components.feature.downloads.DownloadStorage
 import mozilla.components.feature.media.MediaSessionFeature
 import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
 import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
@@ -336,6 +338,40 @@ class Core(
      */
     val sessionStorage: SessionStorage by lazy {
         SessionStorage(context, engine)
+    }
+
+    /**
+     * Every write of the session file goes through this, never through
+     * [sessionStorage] directly. See [CurrentStateSessionWriter].
+     */
+    val sessionWriter: CurrentStateSessionWriter by lazy {
+        CurrentStateSessionWriter(
+            delegate = sessionStorage,
+            currentState = { store.state },
+            isCleared = { sessionStorage.restore() == null },
+        )
+    }
+
+    /**
+     * The ids of the tabs the session restore brought back: the previous session's
+     * tabs, as opposed to any opened since the engine started. Recorded before the
+     * restore reaches the store, so it is complete once `restoreComplete` is set.
+     */
+    @Volatile
+    var previousSessionTabIds: Set<String> = emptySet()
+        private set
+
+    fun recordPreviousSessionTabs(restored: RecoverableBrowserState) {
+        previousSessionTabIds = restored.tabs.map { it.state.id }.toSet()
+    }
+
+    /**
+     * Direct access to the downloads database, for removals that must be durable
+     * when they return. [DownloadMiddleware] keeps its own instance; both resolve to
+     * the same Room singleton.
+     */
+    val downloadStorage: DownloadStorage by lazy {
+        DownloadStorage(context)
     }
 
     /**

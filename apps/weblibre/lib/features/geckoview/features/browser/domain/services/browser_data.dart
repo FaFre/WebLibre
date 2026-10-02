@@ -38,44 +38,65 @@ class BrowserDataService extends _$BrowserDataService {
 
   final GeckoDeleteBrowserDataService _service;
 
-  var _onStartDeleted = false;
   var _onStartContainerDataCleared = false;
 
-  Future<void> deleteDataOnEngineStart(
-    Set<DeleteBrowsingDataType>? types,
-  ) async {
-    if (!_onStartDeleted) {
-      _onStartDeleted = true;
-      return await deleteData(types);
+  /// Deletes every type in [types], each attempted even when one before it
+  /// failed, then throws the first failure, if any.
+  ///
+  /// Stopping at the first failure would leave everything after it in place:
+  /// on Quit, a failed history deletion used to keep the cookies.
+  Future<void> deleteData(Set<DeleteBrowsingDataType>? types) async {
+    if (types == null) return;
+
+    (Object, StackTrace)? firstFailure;
+    for (final type in types) {
+      try {
+        await deleteDataType(type);
+      } catch (e, st) {
+        logger.e('Failed to delete ${type.name}', error: e, stackTrace: st);
+        firstFailure ??= (e, st);
+      }
+    }
+
+    if (firstFailure case (final error, final stackTrace)) {
+      Error.throwWithStackTrace(error, stackTrace);
     }
   }
 
-  Future<void> deleteData(Set<DeleteBrowsingDataType>? types) async {
-    if (types != null) {
-      for (final type in types) {
-        switch (type) {
-          case DeleteBrowsingDataType.tabs:
-            await _service.deleteTabs();
-          case DeleteBrowsingDataType.history:
-            await _service.deleteBrowsingHistory();
-            await ref.read(tabDatabaseProvider).historyDao.clear();
-            // Places visits are gone; drop their container tags too so they
-            // don't dangle (and can't re-attach to a future same-URL visit).
-            await ref.read(tabDatabaseProvider).visitContainerDao.clearAll();
-          case DeleteBrowsingDataType.recentSearches:
-            await ref
-                .read(bangDataRepositoryProvider.notifier)
-                .clearSearchHistory();
-          case DeleteBrowsingDataType.cookies:
-            await _service.deleteCookiesAndSiteData();
-          case DeleteBrowsingDataType.cache:
-            await _service.deleteCachedFiles();
-          case DeleteBrowsingDataType.permissions:
-            await _service.deleteSitePermissions();
-          case DeleteBrowsingDataType.downloads:
-            await _service.deleteDownloads();
+  /// Deletes one kind of browsing data.
+  ///
+  /// With [previousSessionTabsOnly], [DeleteBrowsingDataType.tabs] removes only
+  /// the tabs the session restore brought back, never one opened since the
+  /// engine started. Other types ignore it.
+  Future<void> deleteDataType(
+    DeleteBrowsingDataType type, {
+    bool previousSessionTabsOnly = false,
+  }) async {
+    switch (type) {
+      case DeleteBrowsingDataType.tabs:
+        if (previousSessionTabsOnly) {
+          await _service.deletePreviousSessionTabs();
+        } else {
+          await _service.deleteTabs();
         }
-      }
+      case DeleteBrowsingDataType.history:
+        await _service.deleteBrowsingHistory();
+        await ref.read(tabDatabaseProvider).historyDao.clear();
+        // Places visits are gone; drop their container tags too so they
+        // don't dangle (and can't re-attach to a future same-URL visit).
+        await ref.read(tabDatabaseProvider).visitContainerDao.clearAll();
+      case DeleteBrowsingDataType.recentSearches:
+        await ref
+            .read(bangDataRepositoryProvider.notifier)
+            .clearSearchHistory();
+      case DeleteBrowsingDataType.cookies:
+        await _service.deleteCookiesAndSiteData();
+      case DeleteBrowsingDataType.cache:
+        await _service.deleteCachedFiles();
+      case DeleteBrowsingDataType.permissions:
+        await _service.deleteSitePermissions();
+      case DeleteBrowsingDataType.downloads:
+        await _service.deleteDownloads();
     }
   }
 

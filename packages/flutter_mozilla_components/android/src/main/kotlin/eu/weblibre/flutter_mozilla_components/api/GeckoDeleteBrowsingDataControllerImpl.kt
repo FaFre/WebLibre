@@ -11,10 +11,13 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ClearDataType
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.action.EngineAction
 import mozilla.components.browser.state.action.RecentlyClosedAction
+import mozilla.components.browser.state.action.TabListAction
+import mozilla.components.browser.state.action.UndoAction
 import mozilla.components.browser.state.selector.allTabs
 import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.store.BrowserStore
@@ -65,9 +68,27 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
         }
     }
 
+    /**
+     * Removes every tab and writes the now-empty session to disk before returning.
+     *
+     * The store applies the removal synchronously, but the session file is only
+     * rewritten by [mozilla.components.browser.session.storage.AutoSave], which is
+     * debounced — and skips scheduling entirely while an earlier save is in flight.
+     * A process that ends first (Quit's `exit(0)`, or Android killing it) restores
+     * the removed tabs on the next launch. Callers rely on the removal being
+     * durable once this returns, so a session that could not be written throws
+     * rather than reporting success.
+     *
+     * The write goes through [eu.weblibre.flutter_mozilla_components.components.CurrentStateSessionWriter],
+     * which autosaves share, so an autosave holding a pre-removal snapshot cannot
+     * overwrite it afterwards.
+     */
     override suspend fun deleteTabs() {
         withContext(Dispatchers.Main) {
             components.useCases.tabsUseCases.removeAllTabs.invoke(false)
+        }
+        withContext(Dispatchers.IO) {
+            components.core.sessionWriter.saveCurrentStateOrThrow()
         }
     }
 
@@ -117,9 +138,44 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
         }
     }
 
+    /**
+     * Removes the tabs the session restore brought back, and only those, once the
+     * restore has completed; then writes the session like [deleteTabs].
+     *
+     * The startup deletion uses this rather than [deleteTabs]: it can run late (a
+     * slow restore, a retry after a failure), and by then the tab list may hold tabs
+     * opened in this session — a launch link, the home page. Those are not the
+     * previous session's data and must survive.
+     *
+     * See [removePreviousSessionTabs] for why the removal is not undoable.
+     */
+    override suspend fun deletePreviousSessionTabs() {
+        val core = components.core
+        core.store.stateFlow.first { it.restoreComplete }
+
+        withContext(Dispatchers.Main) {
+            core.store.removePreviousSessionTabs(core.previousSessionTabIds)
+        }
+        withContext(Dispatchers.IO) {
+            core.sessionWriter.saveCurrentStateOrThrow()
+        }
+    }
+
+    /**
+     * Removes every download from the store and from its database before returning.
+     *
+     * The use case only updates the store; [mozilla.components.feature.downloads.DownloadMiddleware]
+     * deletes the database rows in a coroutine nobody can await, so a process ending
+     * right after would bring the downloads back. Deleting the rows here as well makes
+     * the removal durable; both hit the same Room singleton, and deleting twice is
+     * harmless.
+     */
     override suspend fun deleteDownloads() {
         withContext(Dispatchers.Main) {
             components.useCases.downloadsUseCases.removeAllDownloads.invoke()
+        }
+        withContext(Dispatchers.IO) {
+            components.core.downloadStorage.removeAllDownloads()
         }
     }
 
@@ -189,4 +245,20 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
             )
         }
     }
+}
+
+/**
+ * Removes whichever of [previousSessionTabIds] are still open, and nothing else.
+ *
+ * Not undoable: [mozilla.components.feature.session.middleware.undo.UndoMiddleware]
+ * records every [TabListAction.RemoveTabsAction] for "undo close", so the entry it
+ * just made is cleared by its tag. Dispatch is synchronous, so the tag read back is
+ * that one.
+ */
+internal fun BrowserStore.removePreviousSessionTabs(previousSessionTabIds: Set<String>) {
+    val tabIds = state.tabs.map { it.id }.filter { it in previousSessionTabIds }
+    if (tabIds.isEmpty()) return
+
+    dispatch(TabListAction.RemoveTabsAction(tabIds))
+    dispatch(UndoAction.ClearRecoverableTabs(state.undoHistory.tag))
 }
