@@ -58,6 +58,8 @@ PersistedAppLinkRule? rememberedRuleFor(
 
 /// Modal prompt for an unsupported-scheme app link (§2.2). The navigation is
 /// genuinely stalled and there is no page to show behind it.
+///
+/// The content of a modal bottom sheet; `AppLinkPromptHost` presents it.
 class AppLinkPromptDialog extends HookConsumerWidget {
   final AppLinkPromptRequest request;
 
@@ -95,44 +97,65 @@ class AppLinkPromptDialog extends HookConsumerWidget {
       navigator.pop();
     }
 
-    return AlertDialog(
-      icon: const Icon(Icons.open_in_new),
-      title: Text(
-        appName != null
-            ? l10n.appLinks_dialogTitleNamed(appName)
-            : l10n.appLinks_dialogTitleGeneric,
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.appLinks_dialogBody),
-          const SizedBox(height: 8),
-          AppLinkPromptDetails(request: request),
-          if (request.canRemember)
-            CheckboxListTile(
-              contentPadding: EdgeInsets.zero,
-              controlAffinity: ListTileControlAffinity.leading,
-              value: remember.value,
-              onChanged: (value) => remember.value = value ?? false,
-              title: Text(
-                l10n.appLinks_dialogRememberFor(
-                  displayAppLinkScope(target.scopeKey),
+    final textTheme = Theme.of(context).textTheme;
+
+    // Shown as a modal bottom sheet (#651): it sits on the bottom edge, over the
+    // toolbar, next to where the banner form of this prompt appears.
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.open_in_new),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    appName != null
+                        ? l10n.appLinks_dialogTitleNamed(appName)
+                        : l10n.appLinks_dialogTitleGeneric,
+                    style: textTheme.titleLarge,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(l10n.appLinks_dialogBody),
+            const SizedBox(height: 8),
+            AppLinkPromptDetails(request: request),
+            if (request.canRemember)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: remember.value,
+                onChanged: (value) => remember.value = value ?? false,
+                title: Text(
+                  l10n.appLinks_dialogRememberFor(
+                    displayAppLinkScope(target.scopeKey),
+                  ),
                 ),
               ),
+            const SizedBox(height: 16),
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: () => resolve(AppLinkDecision.cancel),
+                  child: Text(l10n.common_cancel),
+                ),
+                FilledButton(
+                  onPressed: () => resolve(AppLinkDecision.open),
+                  child: Text(l10n.common_open),
+                ),
+              ],
             ),
-        ],
+          ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => resolve(AppLinkDecision.cancel),
-          child: Text(l10n.common_cancel),
-        ),
-        FilledButton(
-          onPressed: () => resolve(AppLinkDecision.open),
-          child: Text(l10n.common_open),
-        ),
-      ],
     );
   }
 }

@@ -14,6 +14,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -456,6 +457,14 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     // every download prompt when the page navigates away — the
                     // only one that reaches a custom third-party chooser.
                     dismissCustomFirstPartyDownloadDialog = downloadAppChooser::dismiss,
+                    // A full-width card on the bottom edge, the same shape AC gives the
+                    // extension permission prompt, instead of a centred dialog (#651).
+                    // Button colours and radius stay default: AC's radius override reads the
+                    // background colour unconditionally.
+                    promptsStyling = DownloadsFeature.PromptsStyling(
+                        gravity = Gravity.BOTTOM,
+                        shouldWidthMatchParent = true,
+                    ),
                 ),
                 owner = this,
                 view = view,

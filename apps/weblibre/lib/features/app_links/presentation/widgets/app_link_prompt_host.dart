@@ -30,7 +30,7 @@ import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 
 /// Presents Flutter-owned app-link prompts (§2.6): renders at most one banner for
-/// the active tab, and drives one modal at a time via [showDialog]. A request is
+/// the active tab, and drives one modal at a time via [showModalBottomSheet]. A request is
 /// only shown while its originating tab is active. Rotation/teardown is not a
 /// dismissal — the request stays pending and is re-presented on the next query.
 ///
@@ -134,9 +134,11 @@ class AppLinkPromptHost extends HookConsumerWidget {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!context.mounted) return;
         unawaited(
-          showDialog<void>(
+          showModalBottomSheet<void>(
             context: context,
             anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+            isScrollControlled: true,
+            showDragHandle: true,
             builder: (dialogContext) {
               shownModalRoute.value = ModalRoute.of<void>(dialogContext);
               return AppLinkPromptDialog(request: request.request);
