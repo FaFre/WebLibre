@@ -162,7 +162,7 @@ final class BrowsingHistoryProvider
   }
 }
 
-String _$browsingHistoryHash() => r'2a8b21d48c39e5a2f78dfa44ac1905f63c714a7f';
+String _$browsingHistoryHash() => r'6d663f4d9502c5a808fa8f0fd1cc9ff87dbd4381';
 
 @ProviderFor(browsingDownloads)
 final browsingDownloadsProvider = BrowsingDownloadsProvider._();

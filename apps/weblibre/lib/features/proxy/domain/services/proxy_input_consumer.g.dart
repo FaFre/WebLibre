@@ -42,7 +42,7 @@ final class ProxyInputConsumerProvider
 }
 
 String _$proxyInputConsumerHash() =>
-    r'652a9df1efd937039f62498d56e5d30f09066d91';
+    r'63145a2c43c16bef550e356d42e4db6392e54201';
 
 abstract class _$ProxyInputConsumer extends $Notifier<void> {
   void build();

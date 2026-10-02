@@ -93,4 +93,4 @@ final class AppLocalizationsProvider
   }
 }
 
-String _$appLocalizationsHash() => r'2db987216a5d4dc0a637f694eb73f1d6a22297a7';
+String _$appLocalizationsHash() => r'66ee4a1c412cbb54f3e37f9e16d7aeea46fe80fa';

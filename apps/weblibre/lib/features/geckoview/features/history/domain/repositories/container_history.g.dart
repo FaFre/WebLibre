@@ -49,7 +49,7 @@ final class ContainerHistoryRepositoryProvider
 }
 
 String _$containerHistoryRepositoryHash() =>
-    r'6c68d42dcc3b92747b7aa292507a604a2bf6628e';
+    r'e8085ea31cdac0e9362e9093eab35a129c866256';
 
 /// Mutations that combine the visit→container relation (`visit_container`) with
 /// Mozilla Places, the source of truth for the visits themselves.

@@ -261,7 +261,7 @@ final class SandboxSourceUrisProvider
   }
 }
 
-String _$sandboxSourceUrisHash() => r'2d04e6e0e79c5b79e640386fe29e101fdd64688d';
+String _$sandboxSourceUrisHash() => r'54f2cef01e85f4fb0230c7b6bf04f3335e42de32';
 
 /// The canonical source URL of a sandbox-captured tab, or `null` when the
 /// tab is not a sandbox capture (the regular `tabState.url` should be used in
@@ -515,7 +515,7 @@ final class SandboxCaptureControllerProvider
 }
 
 String _$sandboxCaptureControllerHash() =>
-    r'6ddcb0df7194f3e35ac0eee3c182204a990f9651';
+    r'820179f1dd8669ed59a073393d3decff90099d6c';
 
 /// Orchestrates sandbox capture browsing:
 ///

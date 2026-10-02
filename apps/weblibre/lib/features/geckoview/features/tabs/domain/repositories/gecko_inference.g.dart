@@ -42,7 +42,7 @@ final class GeckoInferenceRepositoryProvider
 }
 
 String _$geckoInferenceRepositoryHash() =>
-    r'cd6d47ccb5aa8d64aba81ac1d982b1df8cf64d14';
+    r'18cccac4dbfb806f00af07428c9c039de364aff0';
 
 abstract class _$GeckoInferenceRepository extends $Notifier<void> {
   void build();
@@ -267,7 +267,7 @@ final class TopicSuggestionProvider
   }
 }
 
-String _$topicSuggestionHash() => r'97480102ecfe9458d25cb4666cf4577333e26d66';
+String _$topicSuggestionHash() => r'528a9bd95de5832d64a471e527e2ed028de54bf3';
 
 final class TopicSuggestionFamily extends $Family
     with

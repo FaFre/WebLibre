@@ -42,7 +42,7 @@ final class BuiltinBridgesServiceProvider
 }
 
 String _$builtinBridgesServiceHash() =>
-    r'beacb3c9d8c5a7179c7c9cad8024d128b09241f5';
+    r'7dbb6f3662820399a708d81c78211593da4fff35';
 
 abstract class _$BuiltinBridgesService extends $Notifier<void> {
   void build();

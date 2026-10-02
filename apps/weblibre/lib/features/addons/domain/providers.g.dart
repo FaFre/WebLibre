@@ -50,7 +50,7 @@ final class AddonDetailsProvider
   }
 }
 
-String _$addonDetailsHash() => r'b8b7b0620d618488227fb6b8ba889279b933b707';
+String _$addonDetailsHash() => r'bbf2efff3f2f7737cf53b7856fb85aefda298751';
 
 final class AddonDetailsFamily extends $Family
     with
@@ -310,7 +310,7 @@ final class SearchAddonListingsProvider
 }
 
 String _$searchAddonListingsHash() =>
-    r'e20c27fb597093b92f8f4d402f196cc707a3e928';
+    r'8e7b977d645ad5d8009901d941fdedd8acef6593';
 
 final class SearchAddonListingsFamily extends $Family
     with
@@ -438,7 +438,7 @@ final class AddonDescriptionMarkdownProvider
 }
 
 String _$addonDescriptionMarkdownHash() =>
-    r'e60659ccef172237e44b9f77b79df4fe11997617';
+    r'7a6ca8d3bc432544a2e8bc0b81a60e16e2ce4044';
 
 final class AddonDescriptionMarkdownFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<String>, String> {

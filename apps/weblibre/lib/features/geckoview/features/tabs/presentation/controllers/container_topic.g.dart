@@ -42,7 +42,7 @@ final class ContainerTopicControllerProvider
 }
 
 String _$containerTopicControllerHash() =>
-    r'41ee4b2a259eba17af49b3c877a9b10ea51281c8';
+    r'6bfe1912e40861b0f24f0ef3c08d73309f2e644a';
 
 abstract class _$ContainerTopicController extends $Notifier<AsyncValue<void>> {
   AsyncValue<void> build();

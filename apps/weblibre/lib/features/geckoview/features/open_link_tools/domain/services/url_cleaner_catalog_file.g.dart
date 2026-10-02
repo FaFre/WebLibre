@@ -43,7 +43,7 @@ final class UrlCleanerCatalogFileServiceProvider
 }
 
 String _$urlCleanerCatalogFileServiceHash() =>
-    r'ea4d0d775e087704cc219dbf6d30ac34510b0b22';
+    r'a6ccb9f2b2225b088d109712e9fbb719b394d93b';
 
 abstract class _$UrlCleanerCatalogFileService extends $Notifier<void> {
   void build();

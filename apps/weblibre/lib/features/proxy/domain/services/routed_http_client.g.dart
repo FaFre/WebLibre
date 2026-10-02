@@ -168,7 +168,7 @@ final class SelectedTabRoutingPolicyProvider
 }
 
 String _$selectedTabRoutingPolicyHash() =>
-    r'adf37266f1c77d80dcb52edafb6e15cd401ace1d';
+    r'24a632aa87b2094985f0fe7e4d23c42d53c21646';
 
 /// The client for app-originated requests made on behalf of the selected tab.
 ///

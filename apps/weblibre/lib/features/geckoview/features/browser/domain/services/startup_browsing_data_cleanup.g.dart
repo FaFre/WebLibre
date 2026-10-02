@@ -11,15 +11,21 @@ part of 'startup_browsing_data_cleanup.dart';
 /// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
 ///
 /// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it.
+/// deletion, so a start must never skip it. Nothing it does may reach a tab
+/// opened in this session, however late it runs:
 ///
-/// - **After the session restore.** Restore runs natively on its own schedule;
-///   deleting tabs before it lands deletes nothing, and the restored tabs stay.
-/// - **Before any new tab.** Tab creation waits on [waitUntilDone], so a link the
-///   app was launched with, or the home page tab, is never caught by a deletion
-///   meant for the previous session.
-/// - **Retried after a failure.** Only a success counts as this process's run,
-///   so the next [start] — a remount of the browser — tries again.
+/// - **Tabs are scoped to the previous session.** Native removes only the tabs
+///   the session restore brought back, after that restore completed — never a
+///   launch link or home page tab, even when this runs late or is retried.
+/// - **Everything else runs only while new tabs are held back.** Cookie, cache
+///   and the other deletions are global: one that runs after browsing began
+///   would take this session's logins with it. So they are dispatched only
+///   while [waitUntilDone] still holds new tabs — during the first run, and
+///   never after a wait on it timed out. What did not get done is left for the
+///   next start, which deletes it anyway.
+/// - **Progress is kept per data type.** A retry (a remount of the browser after
+///   a failure) repeats only the previous-session tab deletion, if that is what
+///   failed, against the selection taken on the first run.
 
 @ProviderFor(StartupBrowsingDataCleanup)
 final startupBrowsingDataCleanupProvider =
@@ -28,29 +34,41 @@ final startupBrowsingDataCleanupProvider =
 /// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
 ///
 /// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it.
+/// deletion, so a start must never skip it. Nothing it does may reach a tab
+/// opened in this session, however late it runs:
 ///
-/// - **After the session restore.** Restore runs natively on its own schedule;
-///   deleting tabs before it lands deletes nothing, and the restored tabs stay.
-/// - **Before any new tab.** Tab creation waits on [waitUntilDone], so a link the
-///   app was launched with, or the home page tab, is never caught by a deletion
-///   meant for the previous session.
-/// - **Retried after a failure.** Only a success counts as this process's run,
-///   so the next [start] — a remount of the browser — tries again.
+/// - **Tabs are scoped to the previous session.** Native removes only the tabs
+///   the session restore brought back, after that restore completed — never a
+///   launch link or home page tab, even when this runs late or is retried.
+/// - **Everything else runs only while new tabs are held back.** Cookie, cache
+///   and the other deletions are global: one that runs after browsing began
+///   would take this session's logins with it. So they are dispatched only
+///   while [waitUntilDone] still holds new tabs — during the first run, and
+///   never after a wait on it timed out. What did not get done is left for the
+///   next start, which deletes it anyway.
+/// - **Progress is kept per data type.** A retry (a remount of the browser after
+///   a failure) repeats only the previous-session tab deletion, if that is what
+///   failed, against the selection taken on the first run.
 final class StartupBrowsingDataCleanupProvider
     extends $NotifierProvider<StartupBrowsingDataCleanup, void> {
   /// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
   ///
   /// This is also what completes a Quit that died half way through its own
-  /// deletion, so a start must never skip it.
+  /// deletion, so a start must never skip it. Nothing it does may reach a tab
+  /// opened in this session, however late it runs:
   ///
-  /// - **After the session restore.** Restore runs natively on its own schedule;
-  ///   deleting tabs before it lands deletes nothing, and the restored tabs stay.
-  /// - **Before any new tab.** Tab creation waits on [waitUntilDone], so a link the
-  ///   app was launched with, or the home page tab, is never caught by a deletion
-  ///   meant for the previous session.
-  /// - **Retried after a failure.** Only a success counts as this process's run,
-  ///   so the next [start] — a remount of the browser — tries again.
+  /// - **Tabs are scoped to the previous session.** Native removes only the tabs
+  ///   the session restore brought back, after that restore completed — never a
+  ///   launch link or home page tab, even when this runs late or is retried.
+  /// - **Everything else runs only while new tabs are held back.** Cookie, cache
+  ///   and the other deletions are global: one that runs after browsing began
+  ///   would take this session's logins with it. So they are dispatched only
+  ///   while [waitUntilDone] still holds new tabs — during the first run, and
+  ///   never after a wait on it timed out. What did not get done is left for the
+  ///   next start, which deletes it anyway.
+  /// - **Progress is kept per data type.** A retry (a remount of the browser after
+  ///   a failure) repeats only the previous-session tab deletion, if that is what
+  ///   failed, against the selection taken on the first run.
   StartupBrowsingDataCleanupProvider._()
     : super(
         from: null,
@@ -79,20 +97,26 @@ final class StartupBrowsingDataCleanupProvider
 }
 
 String _$startupBrowsingDataCleanupHash() =>
-    r'9a8e2634c7377266e5189cd690daec17ee31c8ee';
+    r'f084d64e5817c76c5eb8214871ff113d7e261459';
 
 /// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
 ///
 /// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it.
+/// deletion, so a start must never skip it. Nothing it does may reach a tab
+/// opened in this session, however late it runs:
 ///
-/// - **After the session restore.** Restore runs natively on its own schedule;
-///   deleting tabs before it lands deletes nothing, and the restored tabs stay.
-/// - **Before any new tab.** Tab creation waits on [waitUntilDone], so a link the
-///   app was launched with, or the home page tab, is never caught by a deletion
-///   meant for the previous session.
-/// - **Retried after a failure.** Only a success counts as this process's run,
-///   so the next [start] — a remount of the browser — tries again.
+/// - **Tabs are scoped to the previous session.** Native removes only the tabs
+///   the session restore brought back, after that restore completed — never a
+///   launch link or home page tab, even when this runs late or is retried.
+/// - **Everything else runs only while new tabs are held back.** Cookie, cache
+///   and the other deletions are global: one that runs after browsing began
+///   would take this session's logins with it. So they are dispatched only
+///   while [waitUntilDone] still holds new tabs — during the first run, and
+///   never after a wait on it timed out. What did not get done is left for the
+///   next start, which deletes it anyway.
+/// - **Progress is kept per data type.** A retry (a remount of the browser after
+///   a failure) repeats only the previous-session tab deletion, if that is what
+///   failed, against the selection taken on the first run.
 
 abstract class _$StartupBrowsingDataCleanup extends $Notifier<void> {
   void build();

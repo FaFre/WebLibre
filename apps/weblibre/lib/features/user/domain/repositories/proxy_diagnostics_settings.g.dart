@@ -41,7 +41,7 @@ final class ProxyDiagnosticsSettingsRepositoryProvider
 }
 
 String _$proxyDiagnosticsSettingsRepositoryHash() =>
-    r'3f3be2f10e75fefc0517b34a6d9a28bab823a434';
+    r'7c0dd1faab5622cbff89d7094fa868ce73dc2039';
 
 abstract class _$ProxyDiagnosticsSettingsRepository
     extends $StreamNotifier<ProxyDiagnosticsSettings> {
