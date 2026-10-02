@@ -84,6 +84,7 @@ class TabIcon extends HookConsumerWidget {
               height: iconSize,
               width: iconSize,
               fallback: Icon(MdiIcons.web, size: iconSize),
+              borderRadius: faviconBorderRadius(iconSize),
             ),
           ) ??
           Icon(MdiIcons.web, size: iconSize),

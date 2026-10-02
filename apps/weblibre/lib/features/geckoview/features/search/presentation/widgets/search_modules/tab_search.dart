@@ -199,6 +199,7 @@ class TabSearch extends HookConsumerWidget {
                               height: 24,
                               width: 24,
                               fallback: UrlIcon([result.url], iconSize: 24),
+                              borderRadius: faviconBorderRadius(24),
                             ),
                           ) ??
                           UrlIcon([result.url], iconSize: 24),

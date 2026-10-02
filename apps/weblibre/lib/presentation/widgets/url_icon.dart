@@ -59,11 +59,14 @@ class UrlIcon extends HookConsumerWidget {
       final asset = _bundledIconByOrigin[url.origin];
       if (asset != null) {
         return RepaintBoundary(
-          child: Image.asset(
-            asset,
-            height: iconSize,
-            width: iconSize,
-            fit: BoxFit.contain,
+          child: ClipRRect(
+            borderRadius: faviconBorderRadius(iconSize),
+            child: Image.asset(
+              asset,
+              height: iconSize,
+              width: iconSize,
+              fit: BoxFit.contain,
+            ),
           ),
         );
       }
@@ -102,6 +105,7 @@ class UrlIcon extends HookConsumerWidget {
                   width: iconSize,
                   fit: BoxFit.fill,
                   fallback: Icon(MdiIcons.web, size: iconSize),
+                  borderRadius: faviconBorderRadius(iconSize),
                 ),
               )
             : Icon(MdiIcons.web, size: iconSize),

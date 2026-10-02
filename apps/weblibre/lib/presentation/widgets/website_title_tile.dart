@@ -74,6 +74,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
                       height: 24,
                       width: 24,
                       fallback: const Icon(MdiIcons.web, size: 24),
+                      borderRadius: faviconBorderRadius(24),
                     ),
                   ) ??
                   const Icon(MdiIcons.web, size: 24),
@@ -100,6 +101,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
             image: initialTabState.favicon?.image,
             height: 24,
             width: 24,
+            borderRadius: faviconBorderRadius(24),
           ),
           contentPadding: EdgeInsets.zero,
           title: Text(initialTabState.titleOrAuthority),

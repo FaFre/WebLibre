@@ -60,6 +60,7 @@ class HistoryRowIcon extends HookWidget {
         height: size,
         width: size,
         fallback: fallback,
+        borderRadius: faviconBorderRadius(size),
       ),
     );
   }

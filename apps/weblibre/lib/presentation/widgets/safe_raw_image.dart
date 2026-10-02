@@ -20,6 +20,14 @@
 import 'package:flutter/widgets.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 
+/// Corner radius for a site icon drawn at [size].
+///
+/// Favicons are rounded wherever they appear (#651) so a full-bleed square icon
+/// reads like the rounded chrome around it; icons with their own transparent
+/// shape are unaffected.
+BorderRadius faviconBorderRadius(double size) =>
+    BorderRadius.circular(size / 5);
+
 /// A safe wrapper around [RawImage] that guards against disposed images.
 ///
 /// Checks [EquatableImage.isDisposed] before rendering. When the image
@@ -32,6 +40,9 @@ class SafeRawImage extends StatelessWidget {
   final BoxFit? fit;
   final Widget? fallback;
 
+  /// Rounds the image's corners. Applies to the image only, never [fallback].
+  final BorderRadius? borderRadius;
+
   const SafeRawImage({
     super.key,
     required this.image,
@@ -39,6 +50,7 @@ class SafeRawImage extends StatelessWidget {
     this.height,
     this.fit,
     this.fallback,
+    this.borderRadius,
   });
 
   @override
@@ -49,6 +61,15 @@ class SafeRawImage extends StatelessWidget {
       return fallback ?? SizedBox(width: width, height: height);
     }
 
-    return RawImage(image: uiImage, width: width, height: height, fit: fit);
+    final rawImage = RawImage(
+      image: uiImage,
+      width: width,
+      height: height,
+      fit: fit,
+    );
+
+    return borderRadius == null
+        ? rawImage
+        : ClipRRect(borderRadius: borderRadius!, child: rawImage);
   }
 }
