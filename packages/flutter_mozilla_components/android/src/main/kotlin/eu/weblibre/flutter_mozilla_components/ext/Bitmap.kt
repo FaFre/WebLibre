@@ -46,3 +46,10 @@ fun Bitmap.toWebPBytes(): ByteArray {
     }
     return stream.toByteArray()
 }
+
+fun Bitmap.toPngBytes(): ByteArray {
+    val stream = ByteArrayOutputStream()
+    // PNG ignores the quality argument.
+    compress(Bitmap.CompressFormat.PNG, 100, stream)
+    return stream.toByteArray()
+}

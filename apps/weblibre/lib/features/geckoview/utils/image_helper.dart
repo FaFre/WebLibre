@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -103,46 +102,6 @@ Future<EquatableImage?> tryDecodeImage(
   }
 
   return null;
-}
-
-/// Transcodes a native screenshot (delivered as WebP) to PNG off the main
-/// isolate.
-///
-/// Decoding a full-resolution screenshot and re-encoding it as PNG costs tens
-/// of milliseconds on the UI thread, and every caller does it right as a share
-/// sheet or file picker is animating in — so the cost lands as a visible hitch.
-/// dart:ui's codec APIs are usable from background isolates, so the whole
-/// transcode runs there; if that ever fails we fall back to doing it inline
-/// rather than losing the feature.
-Future<Uint8List?> encodeScreenshotAsPng(Uint8List screenshot) async {
-  try {
-    return await Isolate.run(() => _transcodeToPng(screenshot));
-  } catch (e, s) {
-    logger.w(
-      'Screenshot PNG transcode failed in background isolate, retrying inline',
-      error: e,
-      stackTrace: s,
-    );
-
-    return await _transcodeToPng(screenshot);
-  }
-}
-
-Future<Uint8List?> _transcodeToPng(Uint8List bytes) async {
-  final codec = await instantiateImageCodec(bytes);
-
-  try {
-    final frameInfo = await codec.getNextFrame();
-
-    try {
-      final png = await frameInfo.image.toByteData(format: ImageByteFormat.png);
-      return png?.buffer.asUint8List();
-    } finally {
-      frameInfo.image.dispose();
-    }
-  } finally {
-    codec.dispose();
-  }
 }
 
 bool _isLikelySvg(Uint8List bytes) {

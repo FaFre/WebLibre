@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -134,7 +133,11 @@ class WallpaperStore {
 
     final _PreparedWallpaper prepared;
     try {
-      prepared = await _prepareOffIsolate(bytes, mimeType);
+      // On this isolate: dart:ui's image decoder is not available on
+      // background isolates, which only ever failed here and then repeated
+      // the work inline. Reading the header is cheap; only an oversized or
+      // animated image is decoded and re-encoded.
+      prepared = await _prepare(bytes, mimeType);
     } catch (e, s) {
       logger.w('Wallpaper could not be decoded', error: e, stackTrace: s);
       throw const WallpaperImportException(
@@ -207,26 +210,6 @@ class _PreparedWallpaper {
   final String extension;
 
   const _PreparedWallpaper({required this.bytes, required this.extension});
-}
-
-/// Same fallback shape as `encodeScreenshotAsPng`: dart:ui's codecs work in a
-/// background isolate, and doing this inline would stall the frame the picker
-/// is animating out on.
-Future<_PreparedWallpaper> _prepareOffIsolate(
-  Uint8List bytes,
-  String mimeType,
-) async {
-  try {
-    return await Isolate.run(() => _prepare(bytes, mimeType));
-  } catch (e, s) {
-    logger.w(
-      'Wallpaper preparation failed in background isolate, retrying inline',
-      error: e,
-      stackTrace: s,
-    );
-
-    return await _prepare(bytes, mimeType);
-  }
 }
 
 /// Decides whether [bytes] can be stored as they are, and downscales them if

@@ -109,6 +109,9 @@ class GeckoSessionService {
     return _api.purgeHistory();
   }
 
+  /// Captures the selected tab, which also refreshes its thumbnail. With
+  /// [sendBack], returns the capture as PNG; otherwise, and when the engine
+  /// produced no capture, `null`.
   Future<Uint8List?> requestScreenshot(bool sendBack) {
     if (tabId != null) {
       throw Exception('Screenshot only allowed for selected (visible) tab.');

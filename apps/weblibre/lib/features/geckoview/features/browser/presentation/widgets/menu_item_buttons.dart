@@ -34,7 +34,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/dialog
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -246,15 +245,11 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
         if (screenshot != null) {
-          final png = await encodeScreenshotAsPng(screenshot);
+          final file = XFile.fromData(screenshot, mimeType: 'image/png');
 
-          if (png != null) {
-            final file = XFile.fromData(png, mimeType: 'image/png');
-
-            await SharePlus.instance.share(
-              ShareParams(files: [file], subject: tabState.titleOrAuthority),
-            );
-          }
+          await SharePlus.instance.share(
+            ShareParams(files: [file], subject: tabState.titleOrAuthority),
+          );
         }
 
         if (context.mounted) {
@@ -289,16 +284,12 @@ class ExportScreenshotMenuItemButton extends HookConsumerWidget {
         final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
         if (screenshot != null) {
-          final png = await encodeScreenshotAsPng(screenshot);
-
-          if (png != null) {
-            await FilePicker.saveFile(
-              fileName: '${tabState.titleOrAuthority}.png',
-              type: FileType.custom,
-              allowedExtensions: ['png'],
-              bytes: png,
-            );
-          }
+          await FilePicker.saveFile(
+            fileName: '${tabState.titleOrAuthority}.png',
+            type: FileType.custom,
+            allowedExtensions: ['png'],
+            bytes: screenshot,
+          );
         }
 
         if (context.mounted) {

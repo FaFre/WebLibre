@@ -8,7 +8,7 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import android.graphics.Bitmap
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
-import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
+import eu.weblibre.flutter_mozilla_components.ext.toPngBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.*
 import kotlinx.coroutines.*
 import mozilla.components.browser.state.action.ContentAction
@@ -280,10 +280,13 @@ class GeckoSessionApiImpl : GeckoSessionApi {
             return null
         }
 
-        // captureThumbnail calls back on the main thread, and encoding a
-        // full-resolution screenshot there stalls the UI for as long as it takes.
+        // PNG, the format every caller shares or saves it in: encoded here,
+        // off the main thread, Flutter has nothing left to transcode — which
+        // it could only do on its UI isolate, as dart:ui's image decoder is
+        // not available on background isolates. captureThumbnail calls back on
+        // the main thread, where a full-resolution encode would stall the UI.
         return try {
-            withContext(Dispatchers.Default) { bitmap.toWebPBytes() }
+            withContext(Dispatchers.Default) { bitmap.toPngBytes() }
                 .also { logger.debug("$TAG: Screenshot captured successfully") }
         } catch (e: CancellationException) {
             throw e

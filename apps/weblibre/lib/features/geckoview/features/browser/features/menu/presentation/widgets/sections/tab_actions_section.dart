@@ -52,7 +52,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/ta
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/geckoview/features/top_sites/domain/repositories/top_site_repository.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -407,15 +406,14 @@ class _ShareExpansion extends HookConsumerWidget {
                 final ts = ref.read(tabStateProvider(selectedTabId))!;
 
                 if (screenshot != null) {
-                  final png = await encodeScreenshotAsPng(screenshot);
+                  final file = XFile.fromData(
+                    screenshot,
+                    mimeType: 'image/png',
+                  );
 
-                  if (png != null) {
-                    final file = XFile.fromData(png, mimeType: 'image/png');
-
-                    await SharePlus.instance.share(
-                      ShareParams(files: [file], subject: ts.titleOrAuthority),
-                    );
-                  }
+                  await SharePlus.instance.share(
+                    ShareParams(files: [file], subject: ts.titleOrAuthority),
+                  );
                 }
 
                 if (context.mounted) Navigator.pop(context);
@@ -788,16 +786,12 @@ class _ExportExpansion extends ConsumerWidget {
               final ts = ref.read(tabStateProvider(selectedTabId))!;
 
               if (screenshot != null) {
-                final png = await encodeScreenshotAsPng(screenshot);
-
-                if (png != null) {
-                  await FilePicker.saveFile(
-                    fileName: '${ts.titleOrAuthority}.png',
-                    type: FileType.custom,
-                    allowedExtensions: ['png'],
-                    bytes: png,
-                  );
-                }
+                await FilePicker.saveFile(
+                  fileName: '${ts.titleOrAuthority}.png',
+                  type: FileType.custom,
+                  allowedExtensions: ['png'],
+                  bytes: screenshot,
+                );
               }
 
               if (context.mounted) Navigator.pop(context);

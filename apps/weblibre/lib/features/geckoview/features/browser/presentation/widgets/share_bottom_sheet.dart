@@ -39,7 +39,6 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/tracking_details_dialog.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/utils/image_helper.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -170,18 +169,14 @@ class ShareBottomSheet extends HookConsumerWidget {
                   final ts = ref.read(tabStateProvider(selectedTabId))!;
 
                   if (screenshot != null) {
-                    final png = await encodeScreenshotAsPng(screenshot);
+                    final file = XFile.fromData(
+                      screenshot,
+                      mimeType: 'image/png',
+                    );
 
-                    if (png != null) {
-                      final file = XFile.fromData(png, mimeType: 'image/png');
-
-                      await SharePlus.instance.share(
-                        ShareParams(
-                          files: [file],
-                          subject: ts.titleOrAuthority,
-                        ),
-                      );
-                    }
+                    await SharePlus.instance.share(
+                      ShareParams(files: [file], subject: ts.titleOrAuthority),
+                    );
                   }
 
                   if (context.mounted) Navigator.pop(context);
