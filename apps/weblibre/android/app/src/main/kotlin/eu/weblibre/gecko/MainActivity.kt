@@ -21,8 +21,12 @@ package eu.weblibre.gecko
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
@@ -71,8 +75,30 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         isRestoredLaunch = savedInstanceState?.getString(STATE_INTENT_PROCESS) == intentProcessId
         super.onCreate(null)
 
+        enableTransparentSystemBars()
+
         // Restored straight into a pinned task (e.g. the process was killed while in PiP).
         checkAndExitPiP()
+    }
+
+    /**
+     * Draws the Flutter UI behind both system bars on every Android version, not
+     * only where Android 15 enforces it. Flutter paints the inset regions itself
+     * (`BrowserSystemBars`) and drives the icon brightness, so the bars must be
+     * fully transparent: without this, Android 14 and older keep FlutterActivity's
+     * translucent status-bar scrim and an opaque black navigation bar, whose icons
+     * the light theme then renders dark-on-black (#651).
+     *
+     * Runs after `super.onCreate`, which is where Flutter installs that scrim.
+     */
+    private fun enableTransparentSystemBars() {
+        val transparent = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
+        enableEdgeToEdge(statusBarStyle = transparent, navigationBarStyle = transparent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // `enableEdgeToEdge` leaves contrast enforcement on for an `auto` style,
+            // which lays a translucent scrim over three-button navigation.
+            window.isNavigationBarContrastEnforced = false
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

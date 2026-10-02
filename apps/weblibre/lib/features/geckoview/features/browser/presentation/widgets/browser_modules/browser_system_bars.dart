@@ -30,11 +30,12 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 /// ([BrowserBottomAppBar]) tints itself, and drives the system bar icon
 /// brightness so the icons stay legible against the tint.
 ///
-/// The app runs edge-to-edge, so on modern Android the native
-/// `statusBarColor` / `navigationBarColor` window attributes are ignored — the
-/// system bars are transparent and content draws behind them. The inset
-/// regions are therefore filled in Flutter, and only the icon brightness is
-/// forwarded to the platform through [SystemUiOverlayStyle].
+/// The app runs edge-to-edge on every Android version (MainActivity enables
+/// it; Android 15+ would enforce it anyway), so the system bars are
+/// transparent and content draws behind them. The inset regions are therefore
+/// filled in Flutter, and the platform is only told to keep the bars
+/// transparent and which icon brightness to use, through
+/// [SystemUiOverlayStyle].
 ///
 /// Designed to be placed as a full-bleed ([Positioned.fill]) layer in the
 /// browser [Stack], above the browser content but below the toolbars. The tab
@@ -93,6 +94,14 @@ class BrowserSystemBars extends HookConsumerWidget {
     return IgnorePointer(
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
+          // The strips below are the bar backgrounds. MainActivity makes the
+          // native bars transparent at startup; restating it here keeps them
+          // that way whatever another route last asked for.
+          statusBarColor: Colors.transparent,
+          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemStatusBarContrastEnforced: false,
+          systemNavigationBarContrastEnforced: false,
           statusBarIconBrightness: iconBrightness,
           systemNavigationBarIconBrightness: iconBrightness,
           // iOS reports the bar's own brightness rather than the icons'.
