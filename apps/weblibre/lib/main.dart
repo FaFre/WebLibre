@@ -167,6 +167,18 @@ const _noAnimationPageTransitionsTheme = PageTransitionsTheme(
   },
 );
 
+/// Menus get the rounded corners dialogs and sheets already have (#651);
+/// Material 3 leaves them at a near-square 4dp.
+const _menuShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(12)),
+);
+
+const _popupMenuTheme = PopupMenuThemeData(shape: _menuShape);
+
+const _menuTheme = MenuThemeData(
+  style: MenuStyle(shape: WidgetStatePropertyAll(_menuShape)),
+);
+
 /// Starts a long-lived service provider **and keeps it reacting**.
 ///
 /// [WidgetRef.read] is not enough, and the difference is invisible until it
@@ -655,6 +667,8 @@ class _MainWidget extends HookConsumerWidget {
             bottomSheetTheme: BottomSheetThemeData(
               modalBarrierColor: showModalBarrier ? null : Colors.transparent,
             ),
+            popupMenuTheme: _popupMenuTheme,
+            menuTheme: _menuTheme,
             extensions: const <ThemeExtension<dynamic>>[AppColors.light],
           ),
           darkTheme: ThemeData(
@@ -675,6 +689,8 @@ class _MainWidget extends HookConsumerWidget {
             bottomSheetTheme: BottomSheetThemeData(
               modalBarrierColor: showModalBarrier ? null : Colors.transparent,
             ),
+            popupMenuTheme: _popupMenuTheme,
+            menuTheme: _menuTheme,
             extensions: <ThemeExtension<dynamic>>[
               if (pureBlack) AppColors.darkOled else AppColors.dark,
             ],
