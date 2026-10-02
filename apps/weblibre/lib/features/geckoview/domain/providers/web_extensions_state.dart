@@ -53,18 +53,26 @@ class WebExtensionsState extends _$WebExtensionsState {
             enabled: false,
           );
 
-      state = {...state}
-        ..[extensionId] = current.copyWith(
-          title: data.title,
-          enabled: data.enabled ?? current.enabled,
-          badgeText: data.badgeText,
-          badgeTextColor: data.badgeTextColor != null
-              ? Color(data.badgeTextColor!)
-              : null,
-          badgeBackgroundColor: data.badgeBackgroundColor != null
-              ? Color(data.badgeBackgroundColor!)
-              : null,
-        );
+      final next = current.copyWith(
+        title: data.title,
+        enabled: data.enabled ?? current.enabled,
+        badgeText: data.badgeText,
+        badgeTextColor: data.badgeTextColor != null
+            ? Color(data.badgeTextColor!)
+            : null,
+        badgeBackgroundColor: data.badgeBackgroundColor != null
+            ? Color(data.badgeBackgroundColor!)
+            : null,
+      );
+
+      // Native re-sends every action whenever the selected tab's extension
+      // state changes; a new map for an identical action would rebuild every
+      // toolbar and menu entry watching this provider.
+      if (state[extensionId] == next) {
+        return;
+      }
+
+      state = {...state}..[extensionId] = next;
     } else {
       if (state.containsKey(extensionId)) {
         state = {...state}..remove(extensionId);

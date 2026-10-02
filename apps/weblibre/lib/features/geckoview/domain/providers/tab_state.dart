@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/domain/entities/states/translation.d
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/repositories/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -56,10 +57,19 @@ part 'tab_state.g.dart';
 /// sources are left alone.
 const thumbnailDecodeWidth = 720;
 
+/// How long a closed tab's state outlives it; see [TabStates._onTabListChange].
+/// Native undo expires 5 seconds after a close.
+const _closedTabRetention = Duration(seconds: 15);
+
 @Riverpod(keepAlive: true)
 class TabStates extends _$TabStates {
   /// Callers parked in [awaitContentState], per tab.
   final _contentStateWaiters = <String, List<Completer<TabState?>>>{};
+
+  /// Closed tabs whose state is still held, each mapped to the token of the
+  /// sweep that will drop it.
+  final _closedTabs = <String, Object>{};
+  final _closedTabSweeps = <Timer>{};
 
   /// Replaces the entry for [tabId] — but only when [next] actually differs.
   ///
@@ -198,6 +208,56 @@ class TabStates extends _$TabStates {
         }
       }
     }
+  }
+
+  /// Schedules dropping the state of the tabs [next] no longer lists.
+  ///
+  /// The per-tab state here and in tab_detail_state.dart only grows from
+  /// engine events, so without this every closed tab kept its decoded
+  /// thumbnail and the rest for the whole session. It is dropped after
+  /// [_closedTabRetention] rather than at once because undo brings a tab back
+  /// under the same id, and native deletes its thumbnail on close: the copy
+  /// held here is the only one left.
+  void _onTabListChange(List<String> previous, List<String> next) {
+    final open = next.toSet();
+    // Closes that were undone.
+    _closedTabs.removeWhere((tabId, _) => open.contains(tabId));
+
+    final closed = previous.where((tabId) => !open.contains(tabId)).toSet();
+    if (closed.isEmpty) {
+      return;
+    }
+
+    // A tab closed, restored and closed again belongs to the later sweep.
+    final sweep = Object();
+    for (final tabId in closed) {
+      _closedTabs[tabId] = sweep;
+    }
+
+    late final Timer timer;
+    timer = Timer(_closedTabRetention, () {
+      _closedTabSweeps.remove(timer);
+      _dropClosedTabs({
+        for (final tabId in closed)
+          if (identical(_closedTabs[tabId], sweep)) tabId,
+      });
+    });
+    _closedTabSweeps.add(timer);
+  }
+
+  void _dropClosedTabs(Set<String> tabIds) {
+    if (tabIds.isEmpty || !ref.mounted) {
+      return;
+    }
+
+    _closedTabs.removeWhere((tabId, _) => tabIds.contains(tabId));
+
+    state = state.withoutTabs(tabIds);
+    ref.read(tabProgressStatesProvider.notifier).removeTabs(tabIds);
+    ref.read(tabThumbnailsProvider.notifier).removeTabs(tabIds);
+    ref.read(tabHistoryStatesProvider.notifier).removeTabs(tabIds);
+    ref.read(tabFindResultStatesProvider.notifier).removeTabs(tabIds);
+    ref.read(tabTranslationStatesProvider.notifier).removeTabs(tabIds);
   }
 
   Future<TabState> patchedState(String id) async {
@@ -470,7 +530,19 @@ class TabStates extends _$TabStates {
       },
     );
 
+    ref.listen(tabListProvider, (previous, next) {
+      if (previous != null) {
+        _onTabListChange(previous.value, next.value);
+      }
+    });
+
     ref.onDispose(() async {
+      for (final timer in _closedTabSweeps) {
+        timer.cancel();
+      }
+      _closedTabSweeps.clear();
+      _closedTabs.clear();
+
       for (final waiters in _contentStateWaiters.values.toList()) {
         for (final waiter in waiters) {
           waiter.complete(null);

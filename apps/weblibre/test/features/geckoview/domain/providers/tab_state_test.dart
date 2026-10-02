@@ -2,11 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart'
-    show ReaderableState;
+    show HistoryState, ReaderableState;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -189,5 +190,95 @@ void main() {
     container.dispose();
 
     expect(await pending, isNull);
+  });
+
+  group('closed tabs', () {
+    // Security and history events reach the per-tab maps without a database
+    // read, which keeps these tests about the sweep alone.
+    Future<void> reportState(
+      GeckoEventService events,
+      String tabId,
+      int sequence,
+    ) async {
+      await events.onSecurityInfoStateChange(
+        sequence,
+        tabId,
+        SecurityInfoState(secure: true, host: '$tabId.example', issuer: ''),
+      );
+      await events.onHistoryStateChange(
+        sequence,
+        tabId,
+        HistoryState(
+          items: [],
+          currentIndex: 0,
+          canGoBack: false,
+          canGoForward: false,
+        ),
+      );
+    }
+
+    Set<String> heldTabs(ProviderContainer container) => {
+      ...container.read(tabStatesProvider).keys,
+      ...container.read(tabHistoryStatesProvider).keys,
+    };
+
+    testWidgets('drop their state once undo has expired', (tester) async {
+      final (:events, repository: _, :container) = _setUpHarness();
+      container.read(tabStatesProvider);
+
+      await events.onTabListChange(1, ['a', 'b']);
+      await reportState(events, 'a', 2);
+      await reportState(events, 'b', 3);
+      await tester.pump();
+
+      await events.onTabListChange(4, ['b']);
+      await tester.pump(const Duration(seconds: 5));
+      expect(heldTabs(container), {'a', 'b'});
+
+      await tester.pump(const Duration(seconds: 10));
+      expect(container.read(tabStatesProvider).keys, ['b']);
+      expect(container.read(tabHistoryStatesProvider).keys, ['b']);
+    });
+
+    testWidgets('an undone close keeps the state', (tester) async {
+      final (:events, repository: _, :container) = _setUpHarness();
+      container.read(tabStatesProvider);
+
+      await events.onTabListChange(1, ['a']);
+      await reportState(events, 'a', 2);
+      await tester.pump();
+
+      await events.onTabListChange(3, []);
+      await tester.pump(const Duration(seconds: 3));
+      // Undo restores the tab under its old id.
+      await events.onTabListChange(4, ['a']);
+      await tester.pump(const Duration(seconds: 20));
+
+      expect(heldTabs(container), {'a'});
+    });
+
+    testWidgets('closing again after an undo restarts the wait', (
+      tester,
+    ) async {
+      final (:events, repository: _, :container) = _setUpHarness();
+      container.read(tabStatesProvider);
+
+      await events.onTabListChange(1, ['a']);
+      await reportState(events, 'a', 2);
+      await tester.pump();
+
+      await events.onTabListChange(3, []);
+      await tester.pump(const Duration(seconds: 10));
+      await events.onTabListChange(4, ['a']);
+      await tester.pump(const Duration(seconds: 1));
+      await events.onTabListChange(5, []);
+
+      // The first close's sweep comes due here; the tab is no longer its.
+      await tester.pump(const Duration(seconds: 5));
+      expect(heldTabs(container), {'a'});
+
+      await tester.pump(const Duration(seconds: 10));
+      expect(heldTabs(container), isEmpty);
+    });
   });
 }

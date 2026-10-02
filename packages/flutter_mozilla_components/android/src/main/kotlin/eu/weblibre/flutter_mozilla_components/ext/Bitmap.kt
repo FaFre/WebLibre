@@ -27,14 +27,22 @@ fun Bitmap.resize(maxWidth: Int, maxHeight: Int): Bitmap {
     return Bitmap.createScaledBitmap(this, width, height, true)
 }
 
+/**
+ * For [Bitmap.CompressFormat.WEBP_LOSSLESS] the quality argument is not a
+ * quality at all but the encoder's effort, and 100 is its slowest setting.
+ * Encoding a 1080x2400 page-like image with libwebp on a desktop, 75 took 1.7
+ * to 6 times less time than 100 (depending on the encoder method) for a file
+ * at most 9% larger — and lossless means the pixels are identical either way.
+ */
+private const val LOSSLESS_EFFORT = 75
+
 fun Bitmap.toWebPBytes(): ByteArray {
     val stream = ByteArrayOutputStream()
-    val compressFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        Bitmap.CompressFormat.WEBP_LOSSLESS
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        compress(Bitmap.CompressFormat.WEBP_LOSSLESS, LOSSLESS_EFFORT, stream)
     } else {
         @Suppress("DEPRECATION")
-        Bitmap.CompressFormat.WEBP
+        compress(Bitmap.CompressFormat.WEBP, 100, stream)
     }
-    compress(compressFormat, 100, stream)
     return stream.toByteArray()
 }

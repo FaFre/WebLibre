@@ -45,6 +45,7 @@ import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.TranslationsAction
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
+import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.LastMediaAccessState
 import mozilla.components.browser.state.state.ReaderState
@@ -60,6 +61,7 @@ import org.json.JSONObject
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 import mozilla.components.feature.addons.logger
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.webextension.Action
 import mozilla.components.concept.engine.translate.TranslationOperation
 
 class GeckoTabsApiImpl : GeckoTabsApi {
@@ -402,22 +404,34 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         onPageExtensionIcons: Boolean
     ) {
         try {
-            val extensions = components.core.store.state.extensions.values.filter { it.enabled }
+            val state = components.core.store.state
+            val selectedTab = state.selectedTab
+            val extensions = state.extensions.values.filter { it.enabled }
 
             extensions.forEach { extension ->
+                // Send what WebExtensionToolbarFeature sends: the actions as the
+                // selected tab shows them. The feature only re-sends when the
+                // tab's extension state changes, so anything else sent here
+                // would stay on screen until then.
+                if (extension.allowedInPrivateBrowsing == false && selectedTab?.content?.private == true) {
+                    return@forEach
+                }
+
+                val tabActions = selectedTab?.extensionState?.get(extension.id)
                 val browserAction = extension.browserAction
                 val pageAction = extension.pageAction
 
                 // Sync browser action
                 if (browserAction != null) {
                     if (onBrowserExtensionsChange) {
+                        val shownAction = browserAction.copyWithOverride(tabActions?.browserAction)
                         val data = WebExtensionData(
                             extensionId = extension.id,
-                            title = browserAction.title,
-                            enabled = browserAction.enabled,
-                            badgeText = browserAction.badgeText,
-                            badgeTextColor = browserAction.badgeTextColor?.toLong(),
-                            badgeBackgroundColor = browserAction.badgeBackgroundColor?.toLong(),
+                            title = shownAction.title,
+                            enabled = shownAction.enabled,
+                            badgeText = shownAction.badgeText,
+                            badgeTextColor = shownAction.badgeTextColor?.toLong(),
+                            badgeBackgroundColor = shownAction.badgeBackgroundColor?.toLong(),
                         )
                         components.addonEvents.onUpsertWebExtensionAction(
                             EventSequence.next(),
@@ -428,35 +442,22 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     }
 
                     if (onBrowserExtensionIcons) {
-                        coroutineScope.launch(Dispatchers.Main) {
-                            try {
-                                val icon = browserAction.loadIcon?.invoke(128)
-                                icon?.let {
-                                    val imageBytes = icon.toWebPBytes()
-                                    components.addonEvents.onUpdateWebExtensionIcon(
-                                        EventSequence.next(),
-                                        extension.id,
-                                        WebExtensionActionType.BROWSER,
-                                        imageBytes
-                                    ) { }
-                                }
-                            } catch (e: Exception) {
-                                logger.error("$TAG: Failed to load browser action icon for ${extension.id}", e)
-                            }
-                        }
+                        syncExtensionIcon(extension.id, browserAction, WebExtensionActionType.BROWSER)
                     }
                 }
 
-                // Sync page action
-                if (pageAction != null && pageAction.enabled == true) {
+                // Sync page action. Unlike browser actions, page actions are
+                // only shown while enabled.
+                val shownPageAction = pageAction?.copyWithOverride(tabActions?.pageAction)
+                if (pageAction != null && shownPageAction?.enabled == true) {
                     if (onPageExtensionsChange) {
                         val data = WebExtensionData(
                             extensionId = extension.id,
-                            title = pageAction.title,
-                            enabled = pageAction.enabled,
-                            badgeText = pageAction.badgeText,
-                            badgeTextColor = pageAction.badgeTextColor?.toLong(),
-                            badgeBackgroundColor = pageAction.badgeBackgroundColor?.toLong(),
+                            title = shownPageAction.title,
+                            enabled = shownPageAction.enabled,
+                            badgeText = shownPageAction.badgeText,
+                            badgeTextColor = shownPageAction.badgeTextColor?.toLong(),
+                            badgeBackgroundColor = shownPageAction.badgeBackgroundColor?.toLong(),
                         )
                         components.addonEvents.onUpsertWebExtensionAction(
                             EventSequence.next(),
@@ -467,27 +468,40 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     }
 
                     if (onPageExtensionIcons) {
-                        coroutineScope.launch(Dispatchers.Main) {
-                            try {
-                                val icon = pageAction.loadIcon?.invoke(128)
-                                icon?.let {
-                                    val imageBytes = icon.toWebPBytes()
-                                    components.addonEvents.onUpdateWebExtensionIcon(
-                                        EventSequence.next(),
-                                        extension.id,
-                                        WebExtensionActionType.PAGE,
-                                        imageBytes
-                                    ) { }
-                                }
-                            } catch (e: Exception) {
-                                logger.error("$TAG: Failed to load page action icon for ${extension.id}", e)
-                            }
-                        }
+                        syncExtensionIcon(extension.id, pageAction, WebExtensionActionType.PAGE)
                     }
                 }
             }
         } catch (e: Exception) {
             logger.error("$TAG: Failed to sync extension events", e)
+        }
+    }
+
+    /**
+     * Loads [action]'s icon and sends it. The global action's icon, like
+     * WebExtensionToolbarFeature: per-tab icons are not mirrored.
+     */
+    private fun syncExtensionIcon(
+        extensionId: String,
+        action: Action,
+        actionType: WebExtensionActionType,
+    ) {
+        // Taken before the load and encode, which can finish out of order —
+        // see handleIconChange.
+        val sequence = EventSequence.next()
+        coroutineScope.launch(Dispatchers.Main) {
+            try {
+                val icon = action.loadIcon?.invoke(128) ?: return@launch
+                val imageBytes = withContext(Dispatchers.Default) { icon.toWebPBytes() }
+                components.addonEvents.onUpdateWebExtensionIcon(
+                    sequence,
+                    extensionId,
+                    actionType,
+                    imageBytes
+                ) { }
+            } catch (e: Exception) {
+                logger.error("$TAG: Failed to load ${actionType.name.lowercase()} action icon for $extensionId", e)
+            }
         }
     }
 

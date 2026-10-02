@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.action.BrowserAction
 import mozilla.components.browser.state.action.ContentAction
 import mozilla.components.browser.state.selector.selectedTab
@@ -212,9 +213,16 @@ class Events(
         stateFlow.flowScoped(dispatcher = Dispatchers.Main) { flow ->
             flow.changedTabsBy(windowMillis = 15) { listOf(it.content.icon) }
                 .collect { tab ->
-                    val iconBytes = tab.content.icon?.toWebPBytes()
+                    // Taken before the encode so the event keeps its place in
+                    // native order. Encoding off the main thread matters on a
+                    // session restore, where every tab reports its icon at once;
+                    // suspending the collector keeps one tab's icons in order.
+                    val sequence = EventSequence.next()
+                    val iconBytes = tab.content.icon?.let { icon ->
+                        withContext(Dispatchers.Default) { icon.toWebPBytes() }
+                    }
                     flutterEvents.onIconChange(
-                        EventSequence.next(),
+                        sequence,
                         tab.id,
                         iconBytes
                     ) { _ -> }

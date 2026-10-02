@@ -14,6 +14,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionData
 import kotlinx.coroutines.*
 import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.SessionState
@@ -26,6 +27,24 @@ import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
+
+/**
+ * The states [WebExtensionToolbarFeature.renderWebExtensionActions] renders
+ * differently: only the parts of the selected tab it reads.
+ *
+ * Upstream observes the whole selected tab, which is cheap against a local
+ * toolbar. Here every render sends each action across the channel to Flutter,
+ * and the whole tab changes on every tick of a page load's progress.
+ */
+internal fun Flow<BrowserState>.webExtensionActionChanges(): Flow<BrowserState> =
+    ifAnyChanged {
+        arrayOf(
+            it.selectedTabId,
+            it.selectedTab?.extensionState,
+            it.selectedTab?.content?.private,
+            it.extensions,
+        )
+    }
 
 /**
  * Web extension toolbar implementation that updates the toolbar whenever the state of web
@@ -87,7 +106,7 @@ class WebExtensionToolbarFeature(
 
         iconJobDispatcher = iconHandler.asCoroutineDispatcher("WebExtensionIconDispatcher")
         scope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->
-            flow.ifAnyChanged { arrayOf(it.selectedTab, it.extensions) }
+            flow.webExtensionActionChanges()
                 .collect { state ->
                     renderWebExtensionActions(state, state.selectedTab)
                 }

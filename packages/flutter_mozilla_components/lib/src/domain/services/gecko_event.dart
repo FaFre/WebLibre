@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:flutter_mozilla_components/src/extensions/latest_per_key_subject.dart';
 import 'package:flutter_mozilla_components/src/extensions/subject.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 import 'package:rxdart/rxdart.dart';
@@ -34,10 +35,20 @@ class GeckoEventService extends GeckoStateEvents {
   final _selectedTabSubject = BehaviorSubject<String?>();
   final _restoreCompleteSubject = BehaviorSubject.seeded(false);
 
-  final _tabContentSubject = ReplaySubject<TabContentState>();
-  final _historySubject = ReplaySubject<HistoryEvent>();
-  final _securityInfoSubject = ReplaySubject<SecurityInfoEvent>();
-  final _readerableSubject = ReplaySubject<ReaderableEvent>();
+  /// Per-tab state, replayed to a late listener as each tab's latest event.
+  /// Pruned to the open tabs on every tab list change.
+  final _tabContentSubject = LatestPerKeySubject<String, TabContentState>(
+    (event) => event.id,
+  );
+  final _historySubject = LatestPerKeySubject<String, HistoryEvent>(
+    (event) => event.tabId,
+  );
+  final _securityInfoSubject = LatestPerKeySubject<String, SecurityInfoEvent>(
+    (event) => event.tabId,
+  );
+  final _readerableSubject = LatestPerKeySubject<String, ReaderableEvent>(
+    (event) => event.tabId,
+  );
 
   final _iconChangeSubject = PublishSubject<IconChangeEvent>();
   final _iconUpdateSubject = PublishSubject<IconUpdateEvent>();
@@ -69,7 +80,12 @@ class GeckoEventService extends GeckoStateEvents {
   final _downloadStoppedSubject = PublishSubject<DownloadStoppedEvent>();
   final _manifestUpdateSubject = PublishSubject<ManifestUpdateEvent>();
   final _translationEngineSubject = BehaviorSubject<TranslationEngineEvent>();
-  final _tabTranslationSubject = ReplaySubject<TabTranslationEvent>();
+  final _tabTranslationSubject =
+      LatestPerKeySubject<String, TabTranslationEvent>((event) => event.tabId);
+
+  /// The tabs of the last accepted tab list, to tell which tabs a new one
+  /// closed.
+  var _listedTabs = <String>{};
 
   // Event streams
   ValueStream<bool> get viewReadyStateEvents => _viewStateSubject.stream;
@@ -119,7 +135,41 @@ class GeckoEventService extends GeckoStateEvents {
   // Overridden methods
   @override
   Future<void> onTabListChange(int sequence, List<String?> tabIds) async {
-    _tabListSubject.addWhenMoreRecent(sequence, null, tabIds.nonNulls.toList());
+    final tabs = tabIds.nonNulls.toList();
+    if (_tabListSubject.addWhenMoreRecent(sequence, null, tabs)) {
+      _forgetClosedTabs(tabs.toSet());
+    }
+  }
+
+  /// Lets go of what is held for tabs that are no longer open, which would
+  /// otherwise accumulate for the rest of the session.
+  void _forgetClosedTabs(Set<String> openTabs) {
+    for (final subject in [
+      _tabContentSubject,
+      _historySubject,
+      _securityInfoSubject,
+      _readerableSubject,
+      _tabTranslationSubject,
+    ]) {
+      subject.retainKeys(openTabs);
+    }
+
+    final closedTabs = _listedTabs.difference(openTabs);
+    _listedTabs = openTabs;
+    if (closedTabs.isEmpty) {
+      return;
+    }
+
+    for (final subject in <Subject<Object?>>[
+      _iconChangeSubject,
+      _thumbnailSubject,
+      _findResultsSubject,
+      _longPressSubject,
+      _manifestUpdateSubject,
+      _proxyLoadErrorSubject,
+    ]) {
+      subject.forgetSequences(closedTabs);
+    }
   }
 
   @override

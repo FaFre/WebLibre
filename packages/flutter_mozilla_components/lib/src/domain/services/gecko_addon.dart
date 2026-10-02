@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_mozilla_components/src/extensions/latest_per_key_subject.dart';
 import 'package:flutter_mozilla_components/src/extensions/subject.dart';
 import 'package:flutter_mozilla_components/src/pigeons/gecko.g.dart';
 import 'package:rxdart/rxdart.dart';
@@ -20,11 +21,23 @@ final _apiInstance = GeckoAddonsApi();
 class GeckoAddonService extends GeckoAddonEvents {
   final GeckoAddonsApi _api;
 
-  final _browserExtensionSubject = ReplaySubject<ExtensionDataEvent>();
-  final _pageExtensionSubject = ReplaySubject<ExtensionDataEvent>();
+  // Replayed to a late listener as each extension's latest event. The toolbar
+  // feature re-sends an action whenever the selected tab's extension state
+  // changes, so holding every event would grow for the whole session.
+  final _browserExtensionSubject =
+      LatestPerKeySubject<String, ExtensionDataEvent>(
+        (event) => event.extensionId,
+      );
+  final _pageExtensionSubject = LatestPerKeySubject<String, ExtensionDataEvent>(
+    (event) => event.extensionId,
+  );
 
-  final _browserIconSubject = ReplaySubject<ExtensionIconEvent>();
-  final _pageIconSubject = ReplaySubject<ExtensionIconEvent>();
+  final _browserIconSubject = LatestPerKeySubject<String, ExtensionIconEvent>(
+    (event) => event.extensionId,
+  );
+  final _pageIconSubject = LatestPerKeySubject<String, ExtensionIconEvent>(
+    (event) => event.extensionId,
+  );
   final _popupSubject = PublishSubject<ExtensionPopupEvent>();
   final _openAddonSettingsSubject = PublishSubject<String>();
 

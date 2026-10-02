@@ -54,6 +54,11 @@ class TabProgressStates extends _$TabProgressStates {
 
     state = {...state}..[tabId] = progress;
   }
+
+  /// Drops the entries of [tabIds], tabs that have closed (see `TabStates`).
+  void removeTabs(Set<String> tabIds) {
+    state = state.withoutTabs(tabIds);
+  }
 }
 
 @Riverpod()
@@ -88,6 +93,11 @@ class TabThumbnails extends _$TabThumbnails {
 
     state = {...state}..[tabId] = thumbnail;
   }
+
+  /// Drops the entries of [tabIds], tabs that have closed (see `TabStates`).
+  void removeTabs(Set<String> tabIds) {
+    state = state.withoutTabs(tabIds);
+  }
 }
 
 @Riverpod()
@@ -111,6 +121,11 @@ class TabHistoryStates extends _$TabHistoryStates {
     }
 
     state = {...state}..[tabId] = history;
+  }
+
+  /// Drops the entries of [tabIds], tabs that have closed (see `TabStates`).
+  void removeTabs(Set<String> tabIds) {
+    state = state.withoutTabs(tabIds);
   }
 }
 
@@ -142,6 +157,11 @@ class TabFindResultStates extends _$TabFindResultStates {
 
   FindResultState resultFor(String tabId) =>
       state[tabId] ?? FindResultState.$default();
+
+  /// Drops the entries of [tabIds], tabs that have closed (see `TabStates`).
+  void removeTabs(Set<String> tabIds) {
+    state = state.withoutTabs(tabIds);
+  }
 }
 
 @Riverpod()
@@ -170,6 +190,11 @@ class TabTranslationStates extends _$TabTranslationStates {
 
     state = {...state}..[tabId] = translation;
   }
+
+  /// Drops the entries of [tabIds], tabs that have closed (see `TabStates`).
+  void removeTabs(Set<String> tabIds) {
+    state = state.withoutTabs(tabIds);
+  }
 }
 
 @Riverpod()
@@ -183,4 +208,16 @@ TranslationState tabTranslationState(Ref ref, String? tabId) {
       (s) => s[tabId] ?? TranslationState.$default(),
     ),
   );
+}
+
+extension TabKeyedState<T> on Map<String, T> {
+  /// This map without the entries of [tabIds]; the same instance when it has
+  /// none of them, so a notifier assigning the result notifies nobody.
+  Map<String, T> withoutTabs(Set<String> tabIds) {
+    if (!tabIds.any(containsKey)) {
+      return this;
+    }
+
+    return {...this}..removeWhere((tabId, _) => tabIds.contains(tabId));
+  }
 }

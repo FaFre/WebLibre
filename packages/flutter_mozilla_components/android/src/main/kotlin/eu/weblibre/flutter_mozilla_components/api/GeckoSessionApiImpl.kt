@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.api
 
+import android.graphics.Bitmap
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.pigeons.*
@@ -273,7 +274,30 @@ class GeckoSessionApiImpl : GeckoSessionApi {
         }
     }
 
-    override suspend fun requestScreenshot(sendBack: Boolean): ByteArray? =
+    override suspend fun requestScreenshot(sendBack: Boolean): ByteArray? {
+        val bitmap = captureSelectedTab() ?: return null
+        if (!sendBack) {
+            return null
+        }
+
+        // captureThumbnail calls back on the main thread, and encoding a
+        // full-resolution screenshot there stalls the UI for as long as it takes.
+        return try {
+            withContext(Dispatchers.Default) { bitmap.toWebPBytes() }
+                .also { logger.debug("$TAG: Screenshot captured successfully") }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to process screenshot", e)
+            throw e
+        }
+    }
+
+    /**
+     * Captures the selected tab and stores the bitmap as its thumbnail.
+     * Returns `null` when the engine view produced no bitmap.
+     */
+    private suspend fun captureSelectedTab(): Bitmap? =
         suspendCancellableCoroutine { continuation ->
             try {
                 val tab = components.core.store.state.selectedTab
@@ -287,13 +311,7 @@ class GeckoSessionApiImpl : GeckoSessionApi {
                     try {
                         if (bitmap != null) {
                             components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))
-                            if (sendBack) {
-                                val compressed = bitmap.toWebPBytes()
-                                logger.debug("$TAG: Screenshot captured successfully")
-                                continuation.resume(compressed)
-                            } else {
-                                continuation.resume(null)
-                            }
+                            continuation.resume(bitmap)
                         } else {
                             logger.warn("$TAG: Failed to capture screenshot - null bitmap")
                             continuation.resume(null)
