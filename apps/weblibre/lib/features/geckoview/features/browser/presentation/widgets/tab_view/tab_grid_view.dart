@@ -608,75 +608,82 @@ class ViewTabGridWidget extends HookConsumerWidget {
       return () => scrollController.removeListener(listener);
     }, [scrollController, draggableScrollableController]);
 
-    return Stack(
-      alignment: Alignment.bottomRight,
+    return Column(
       children: [
-        NestedScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          headerSliverBuilder: (context, innerBoxIsScrolled) => [
-            SliverToBoxAdapter(
-              child:
-                  draggableScrollableController.mapNotNull(
-                    (draggableScrollableController) =>
-                        DraggableScrollableHeader(
-                          controller: draggableScrollableController,
-                          child: TabViewHeader(
-                            onClose: onClose,
-                            tabsViewMode: TabsViewMode.grid,
-                          ),
+        Expanded(
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              NestedScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                  SliverToBoxAdapter(
+                    child:
+                        draggableScrollableController.mapNotNull(
+                          (draggableScrollableController) =>
+                              DraggableScrollableHeader(
+                                controller: draggableScrollableController,
+                                child: TabViewHeader(
+                                  onClose: onClose,
+                                  tabsViewMode: TabsViewMode.grid,
+                                ),
+                              ),
+                        ) ??
+                        TabViewHeader(
+                          onClose: onClose,
+                          tabsViewMode: TabsViewMode.grid,
                         ),
-                  ) ??
-                  TabViewHeader(
-                    onClose: onClose,
-                    tabsViewMode: TabsViewMode.grid,
                   ),
-            ),
-          ],
-          body: LayoutBuilder(
-            builder: (context, constraints) => _TabGridView(
-              availableWidth: constraints.maxWidth,
-              scrollController: scrollController,
-              tabsReorderable: tabsReorderable,
-              onClose: onClose,
-            ),
-          ),
-        ),
-        if (showNewTabFab)
-          AnimatedSlide(
-            duration: disableAnimations
-                ? Duration.zero
-                : const Duration(milliseconds: 200),
-            offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
-            curve: Curves.easeInOut,
-            child: AnimatedOpacity(
-              duration: disableAnimations
-                  ? Duration.zero
-                  : const Duration(milliseconds: 200),
-              opacity: isFabVisible.value ? 1.0 : 0.0,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: TabViewHeader.headerSize + 4,
-                  right: 4,
-                ),
-                child: FloatingActionButton.small(
-                  onPressed: () async {
-                    final settings = ref.read(
-                      generalSettingsWithDefaultsProvider,
-                    );
-
-                    await SearchRoute(
-                      tabType:
-                          ref.read(selectedTabTypeProvider) ??
-                          settings.effectiveDefaultCreateTabType,
-                    ).push(context);
-
-                    onClose();
-                  },
-                  child: const Icon(Icons.add),
+                ],
+                body: LayoutBuilder(
+                  builder: (context, constraints) => _TabGridView(
+                    availableWidth: constraints.maxWidth,
+                    scrollController: scrollController,
+                    tabsReorderable: tabsReorderable,
+                    onClose: onClose,
+                  ),
                 ),
               ),
-            ),
+              if (showNewTabFab)
+                AnimatedSlide(
+                  duration: disableAnimations
+                      ? Duration.zero
+                      : const Duration(milliseconds: 200),
+                  offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
+                  curve: Curves.easeInOut,
+                  child: AnimatedOpacity(
+                    duration: disableAnimations
+                        ? Duration.zero
+                        : const Duration(milliseconds: 200),
+                    opacity: isFabVisible.value ? 1.0 : 0.0,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: TabViewHeader.headerSize + 4,
+                        right: 4,
+                      ),
+                      child: FloatingActionButton.small(
+                        onPressed: () async {
+                          final settings = ref.read(
+                            generalSettingsWithDefaultsProvider,
+                          );
+
+                          await SearchRoute(
+                            tabType:
+                                ref.read(selectedTabTypeProvider) ??
+                                settings.effectiveDefaultCreateTabType,
+                          ).push(context);
+
+                          onClose();
+                        },
+                        child: const Icon(Icons.add),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
+        ),
+        const TabViewActionBar(tabsViewMode: TabsViewMode.grid),
       ],
     );
   }

@@ -13454,6 +13454,18 @@
   "@settings_switcherPlacementBelowContextualBarDescription": {
     "description": "Explanation under \"Below the contextual toolbar\"."
   },
+  "settings_tabViewActionsAtBottomTitle": "Tab View Actions at the Bottom",
+  "@settings_tabViewActionsAtBottomTitle": {
+    "description": "Switch: move the tab view's action row (search, filter, view mode, tab actions) from the top to the bottom of the tab view."
+  },
+  "settings_tabViewActionsAtBottomSubtitle": "Search, filters and tab actions at the bottom, with the new tab button above them",
+  "@settings_tabViewActionsAtBottomSubtitle": {
+    "description": "Explanation under that switch; also shown as a settings search result. The container filter stays at the top."
+  },
+  "settings_tabViewActionsAtBottomKeywords": "bottom, thumb, reach, one hand, toolbar, tab view",
+  "@settings_tabViewActionsAtBottomKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
   "smallWeb_sheetTitle": "Small Web",
   "@smallWeb_sheetTitle": {
     "description": "Title of the Small Web panel. The \"small web\" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout."

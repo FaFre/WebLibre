@@ -18438,6 +18438,24 @@ abstract class AppLocalizations {
   /// **'On the bottom edge of the screen'**
   String get settings_switcherPlacementBelowContextualBarDescription;
 
+  /// Switch: move the tab view's action row (search, filter, view mode, tab actions) from the top to the bottom of the tab view.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab View Actions at the Bottom'**
+  String get settings_tabViewActionsAtBottomTitle;
+
+  /// Explanation under that switch; also shown as a settings search result. The container filter stays at the top.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, filters and tab actions at the bottom, with the new tab button above them'**
+  String get settings_tabViewActionsAtBottomSubtitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'bottom, thumb, reach, one hand, toolbar, tab view'**
+  String get settings_tabViewActionsAtBottomKeywords;
+
   /// Title of the Small Web panel. The "small web" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout.
   ///
   /// In en, this message translates to:

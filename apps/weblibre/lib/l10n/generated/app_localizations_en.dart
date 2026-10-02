@@ -10843,6 +10843,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'On the bottom edge of the screen';
 
   @override
+  String get settings_tabViewActionsAtBottomTitle =>
+      'Tab View Actions at the Bottom';
+
+  @override
+  String get settings_tabViewActionsAtBottomSubtitle =>
+      'Search, filters and tab actions at the bottom, with the new tab button above them';
+
+  @override
+  String get settings_tabViewActionsAtBottomKeywords =>
+      'bottom, thumb, reach, one hand, toolbar, tab view';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

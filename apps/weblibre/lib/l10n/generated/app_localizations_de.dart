@@ -11064,6 +11064,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Am unteren Bildschirmrand';
 
   @override
+  String get settings_tabViewActionsAtBottomTitle =>
+      'Aktionen der Tab-Übersicht unten';
+
+  @override
+  String get settings_tabViewActionsAtBottomSubtitle =>
+      'Suche, Filter und Tab-Aktionen unten, mit der Schaltfläche für neue Tabs darüber';
+
+  @override
+  String get settings_tabViewActionsAtBottomKeywords =>
+      'unten, Daumen, Reichweite, einhändig, Symbolleiste, Tab-Übersicht';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

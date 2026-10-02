@@ -146,3 +146,20 @@ class TabsReorderableController extends _$TabsReorderableController {
     return false;
   }
 }
+
+/// Whether the tab tray's search field replaces its action row.
+///
+/// Shared rather than local to the header because the action row that opens
+/// the search can sit at the bottom of the tray (#651) while the field itself
+/// always opens at the top, clear of the keyboard.
+@Riverpod()
+class TabViewSearchModeController extends _$TabViewSearchModeController {
+  void show() => state = true;
+
+  void hide() => state = false;
+
+  @override
+  bool build() {
+    return false;
+  }
+}

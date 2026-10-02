@@ -1049,5 +1049,8 @@
   "settings_switcherPlacementBelowAddressBarLabel": "Под адресной строкой",
   "settings_switcherPlacementBelowAddressBarDescription": "Следует за адресной строкой вверх или вниз",
   "settings_switcherPlacementBelowContextualBarLabel": "Под контекстной панелью",
-  "settings_switcherPlacementBelowContextualBarDescription": "У нижнего края экрана"
+  "settings_switcherPlacementBelowContextualBarDescription": "У нижнего края экрана",
+  "settings_tabViewActionsAtBottomTitle": "Действия обзора вкладок внизу",
+  "settings_tabViewActionsAtBottomSubtitle": "Поиск, фильтры и действия с вкладками внизу, кнопка новой вкладки над ними",
+  "settings_tabViewActionsAtBottomKeywords": "внизу, большой палец, досягаемость, одной рукой, панель, обзор вкладок"
 }

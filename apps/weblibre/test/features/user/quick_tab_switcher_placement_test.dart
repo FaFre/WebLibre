@@ -74,6 +74,7 @@ void main() {
   test('a stored placement survives a JSON round trip', () {
     final settings = GeneralSettings.withDefaults().copyWith(
       quickTabSwitcherPlacement: QuickTabSwitcherPlacement.belowContextualBar,
+      tabTrayActionsAtBottom: true,
     );
     final restored = GeneralSettings.fromJson(settings.toJson());
 
@@ -81,5 +82,6 @@ void main() {
       restored.quickTabSwitcherPlacement,
       QuickTabSwitcherPlacement.belowContextualBar,
     );
+    expect(restored.tabTrayActionsAtBottom, isTrue);
   });
 }

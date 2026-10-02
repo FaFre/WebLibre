@@ -11133,6 +11133,18 @@ class AppLocalizationsRu extends AppLocalizations {
       'У нижнего края экрана';
 
   @override
+  String get settings_tabViewActionsAtBottomTitle =>
+      'Действия обзора вкладок внизу';
+
+  @override
+  String get settings_tabViewActionsAtBottomSubtitle =>
+      'Поиск, фильтры и действия с вкладками внизу, кнопка новой вкладки над ними';
+
+  @override
+  String get settings_tabViewActionsAtBottomKeywords =>
+      'внизу, большой палец, досягаемость, одной рукой, панель, обзор вкладок';
+
+  @override
   String get smallWeb_sheetTitle => 'Малый веб';
 
   @override

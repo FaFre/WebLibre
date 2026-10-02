@@ -183,44 +183,56 @@ class ViewTabTreesWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Stack(
-      alignment: Alignment.bottomRight,
+    return Column(
       children: [
-        Column(
-          children: [
-            TabViewHeader(onClose: onClose, tabsViewMode: TabsViewMode.tree),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) => _TabTreesGrid(
-                  availableWidth: constraints.maxWidth,
-                  scrollController: scrollController,
-                  onClose: onClose,
-                ),
+        Expanded(
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              Column(
+                children: [
+                  TabViewHeader(
+                    onClose: onClose,
+                    tabsViewMode: TabsViewMode.tree,
+                  ),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => _TabTreesGrid(
+                        availableWidth: constraints.maxWidth,
+                        scrollController: scrollController,
+                        onClose: onClose,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        if (showNewTabFab)
-          Padding(
-            padding: const EdgeInsets.only(
-              top: TabViewHeader.headerSize + 4,
-              right: 4,
-            ),
-            child: FloatingActionButton.small(
-              onPressed: () async {
-                final settings = ref.read(generalSettingsWithDefaultsProvider);
+              if (showNewTabFab)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: TabViewHeader.headerSize + 4,
+                    right: 4,
+                  ),
+                  child: FloatingActionButton.small(
+                    onPressed: () async {
+                      final settings = ref.read(
+                        generalSettingsWithDefaultsProvider,
+                      );
 
-                await SearchRoute(
-                  tabType:
-                      ref.read(selectedTabTypeProvider) ??
-                      settings.effectiveDefaultCreateTabType,
-                ).push(context);
+                      await SearchRoute(
+                        tabType:
+                            ref.read(selectedTabTypeProvider) ??
+                            settings.effectiveDefaultCreateTabType,
+                      ).push(context);
 
-                onClose();
-              },
-              child: const Icon(Icons.add),
-            ),
+                      onClose();
+                    },
+                    child: const Icon(Icons.add),
+                  ),
+                ),
+            ],
           ),
+        ),
+        const TabViewActionBar(tabsViewMode: TabsViewMode.tree),
       ],
     );
   }

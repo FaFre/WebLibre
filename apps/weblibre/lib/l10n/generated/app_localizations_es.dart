@@ -11154,6 +11154,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'En el borde inferior de la pantalla';
 
   @override
+  String get settings_tabViewActionsAtBottomTitle =>
+      'Acciones de la vista de pestañas abajo';
+
+  @override
+  String get settings_tabViewActionsAtBottomSubtitle =>
+      'Búsqueda, filtros y acciones de pestañas abajo, con el botón de nueva pestaña encima';
+
+  @override
+  String get settings_tabViewActionsAtBottomKeywords =>
+      'abajo, pulgar, alcance, una mano, barra de herramientas, vista de pestañas';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

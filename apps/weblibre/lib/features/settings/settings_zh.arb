@@ -1049,5 +1049,8 @@
   "settings_switcherPlacementBelowAddressBarLabel": "地址栏下方",
   "settings_switcherPlacementBelowAddressBarDescription": "随地址栏位于顶部或底部",
   "settings_switcherPlacementBelowContextualBarLabel": "上下文工具栏下方",
-  "settings_switcherPlacementBelowContextualBarDescription": "位于屏幕底边"
+  "settings_switcherPlacementBelowContextualBarDescription": "位于屏幕底边",
+  "settings_tabViewActionsAtBottomTitle": "标签页视图操作置于底部",
+  "settings_tabViewActionsAtBottomSubtitle": "搜索、筛选和标签页操作位于底部，新建标签页按钮在其上方",
+  "settings_tabViewActionsAtBottomKeywords": "底部, 拇指, 单手, 工具栏, 标签页视图"
 }

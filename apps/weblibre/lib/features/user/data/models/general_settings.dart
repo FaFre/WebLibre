@@ -476,6 +476,11 @@ class GeneralSettings with FastEquatable {
   /// See [QuickTabSwitcherPlacement].
   @JsonKey(unknownEnumValue: QuickTabSwitcherPlacement.auto)
   final QuickTabSwitcherPlacement quickTabSwitcherPlacement;
+
+  /// Puts the tab tray's action row (search, filter, view mode, sort, menu)
+  /// and the new-tab button at the bottom of the tray, within thumb reach,
+  /// leaving the container filter at the top (#651).
+  final bool tabTrayActionsAtBottom;
   final bool pullToRefreshEnabled;
   final bool useExternalDownloadManager;
 
@@ -673,6 +678,7 @@ class GeneralSettings with FastEquatable {
     required this.tabBarLayout,
     required this.tabBarStackingMode,
     required this.quickTabSwitcherPlacement,
+    required this.tabTrayActionsAtBottom,
     required this.pullToRefreshEnabled,
     required this.useExternalDownloadManager,
     required this.downloadDirectoryUri,
@@ -770,6 +776,7 @@ class GeneralSettings with FastEquatable {
     TabBarLayout? tabBarLayout,
     TabBarStackingMode? tabBarStackingMode,
     QuickTabSwitcherPlacement? quickTabSwitcherPlacement,
+    bool? tabTrayActionsAtBottom,
     bool? pullToRefreshEnabled,
     bool? useExternalDownloadManager,
     this.downloadDirectoryUri,
@@ -883,6 +890,7 @@ class GeneralSettings with FastEquatable {
        tabBarStackingMode = tabBarStackingMode ?? TabBarStackingMode.accordion,
        quickTabSwitcherPlacement =
            quickTabSwitcherPlacement ?? QuickTabSwitcherPlacement.auto,
+       tabTrayActionsAtBottom = tabTrayActionsAtBottom ?? false,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
        useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
@@ -1160,6 +1168,7 @@ class GeneralSettings with FastEquatable {
     tabBarLayout,
     tabBarStackingMode,
     quickTabSwitcherPlacement,
+    tabTrayActionsAtBottom,
     pullToRefreshEnabled,
     useExternalDownloadManager,
     downloadDirectoryUri,

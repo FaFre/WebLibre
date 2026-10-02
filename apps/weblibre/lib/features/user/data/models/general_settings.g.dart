@@ -117,6 +117,8 @@ abstract class _$GeneralSettingsCWProxy {
     QuickTabSwitcherPlacement quickTabSwitcherPlacement,
   );
 
+  GeneralSettings tabTrayActionsAtBottom(bool tabTrayActionsAtBottom);
+
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
 
   GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager);
@@ -286,6 +288,7 @@ abstract class _$GeneralSettingsCWProxy {
     TabBarLayout tabBarLayout,
     TabBarStackingMode tabBarStackingMode,
     QuickTabSwitcherPlacement quickTabSwitcherPlacement,
+    bool tabTrayActionsAtBottom,
     bool pullToRefreshEnabled,
     bool useExternalDownloadManager,
     String? downloadDirectoryUri,
@@ -542,6 +545,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings quickTabSwitcherPlacement(
     QuickTabSwitcherPlacement quickTabSwitcherPlacement,
   ) => call(quickTabSwitcherPlacement: quickTabSwitcherPlacement);
+
+  @override
+  GeneralSettings tabTrayActionsAtBottom(bool tabTrayActionsAtBottom) =>
+      call(tabTrayActionsAtBottom: tabTrayActionsAtBottom);
 
   @override
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
@@ -803,6 +810,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabBarLayout = const $CopyWithPlaceholder(),
     Object? tabBarStackingMode = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherPlacement = const $CopyWithPlaceholder(),
+    Object? tabTrayActionsAtBottom = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
     Object? downloadDirectoryUri = const $CopyWithPlaceholder(),
@@ -1121,6 +1129,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherPlacement
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherPlacement as QuickTabSwitcherPlacement,
+      tabTrayActionsAtBottom:
+          tabTrayActionsAtBottom == const $CopyWithPlaceholder() ||
+              tabTrayActionsAtBottom == null
+          ? _value.tabTrayActionsAtBottom
+          // ignore: cast_nullable_to_non_nullable
+          : tabTrayActionsAtBottom as bool,
       pullToRefreshEnabled:
           pullToRefreshEnabled == const $CopyWithPlaceholder() ||
               pullToRefreshEnabled == null
@@ -1522,6 +1536,7 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['quickTabSwitcherPlacement'],
     unknownValue: QuickTabSwitcherPlacement.auto,
   ),
+  tabTrayActionsAtBottom: json['tabTrayActionsAtBottom'] as bool?,
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
   useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
   downloadDirectoryUri: json['downloadDirectoryUri'] as String?,
@@ -1666,6 +1681,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$TabBarStackingModeEnumMap[instance.tabBarStackingMode]!,
   'quickTabSwitcherPlacement':
       _$QuickTabSwitcherPlacementEnumMap[instance.quickTabSwitcherPlacement]!,
+  'tabTrayActionsAtBottom': instance.tabTrayActionsAtBottom,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
   'useExternalDownloadManager': instance.useExternalDownloadManager,
   'downloadDirectoryUri': instance.downloadDirectoryUri,

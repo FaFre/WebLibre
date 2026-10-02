@@ -246,6 +246,82 @@ abstract class _$TabsReorderableController extends $Notifier<bool> {
   }
 }
 
+/// Whether the tab tray's search field replaces its action row.
+///
+/// Shared rather than local to the header because the action row that opens
+/// the search can sit at the bottom of the tray (#651) while the field itself
+/// always opens at the top, clear of the keyboard.
+
+@ProviderFor(TabViewSearchModeController)
+final tabViewSearchModeControllerProvider =
+    TabViewSearchModeControllerProvider._();
+
+/// Whether the tab tray's search field replaces its action row.
+///
+/// Shared rather than local to the header because the action row that opens
+/// the search can sit at the bottom of the tray (#651) while the field itself
+/// always opens at the top, clear of the keyboard.
+final class TabViewSearchModeControllerProvider
+    extends $NotifierProvider<TabViewSearchModeController, bool> {
+  /// Whether the tab tray's search field replaces its action row.
+  ///
+  /// Shared rather than local to the header because the action row that opens
+  /// the search can sit at the bottom of the tray (#651) while the field itself
+  /// always opens at the top, clear of the keyboard.
+  TabViewSearchModeControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabViewSearchModeControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabViewSearchModeControllerHash();
+
+  @$internal
+  @override
+  TabViewSearchModeController create() => TabViewSearchModeController();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$tabViewSearchModeControllerHash() =>
+    r'9aeb035d250d62728efac531291d1328fe7701f2';
+
+/// Whether the tab tray's search field replaces its action row.
+///
+/// Shared rather than local to the header because the action row that opens
+/// the search can sit at the bottom of the tray (#651) while the field itself
+/// always opens at the top, clear of the keyboard.
+
+abstract class _$TabViewSearchModeController extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 // **************************************************************************
 // JsonGenerator
 // **************************************************************************

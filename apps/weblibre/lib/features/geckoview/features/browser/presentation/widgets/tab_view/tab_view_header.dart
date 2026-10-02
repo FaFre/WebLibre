@@ -182,24 +182,20 @@ class TabViewHeader extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final searchMode = useState(false);
+    final searchMode = ref.watch(tabViewSearchModeControllerProvider);
     final searchTextFocus = useFocusNode();
     final searchTextController = useTextEditingController();
-
-    final viewModeMenuController = useMenuController();
-    final tabsActionMenuController = useMenuController();
-    final filterMenuController = useMenuController();
+    final actionsAtBottom = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.tabTrayActionsAtBottom,
+      ),
+    );
 
     final hasSearchText = useListenableSelector(
       searchTextController,
       () => searchTextController.text.isNotEmpty,
     );
 
-    final enableAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.enableLocalAiFeatures,
-      ),
-    );
     final showContainerUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.showContainerUi,
@@ -250,8 +246,11 @@ class TabViewHeader extends HookConsumerWidget {
     // tab list filtered with no visible search box (#421). Whenever we are not
     // searching, drop any lingering query so all tabs are shown again.
     useEffect(() {
-      if (!searchMode.value) {
+      if (!searchMode) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Leaving search drops the text too, so reopening starts empty
+          // instead of showing a query that no longer filters anything.
+          searchTextController.clear();
           if (ref.exists(
             tabSearchRepositoryProvider(TabSearchPartition.preview),
           )) {
@@ -269,7 +268,7 @@ class TabViewHeader extends HookConsumerWidget {
       }
 
       return null;
-    }, [searchMode.value]);
+    }, [searchMode]);
 
     useOnListenableChange(searchTextController, () async {
       if (ref.exists(tabSearchRepositoryProvider(TabSearchPartition.preview))) {
@@ -289,455 +288,11 @@ class TabViewHeader extends HookConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!searchMode.value)
-                Row(
-                  children: [
-                    if (tabsViewMode != TabsViewMode.tree)
-                      IconButton(
-                        icon: const Icon(MdiIcons.tabSearch),
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        tooltip: l10n.browser_tooltipSearchInsideTabs,
-                        onPressed: () {
-                          searchMode.value = true;
-                          searchTextFocus.requestFocus();
-                        },
-                      ),
-                    if (!isSyncedScope && tabsViewMode != TabsViewMode.tree)
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final filterOptions = ref.watch(
-                            tabViewFilterControllerProvider,
-                          );
-                          final hasActiveFilter = filterOptions.hasActiveFilter;
-
-                          return MenuAnchor(
-                            controller: filterMenuController,
-                            consumeOutsideTap: true,
-                            menuChildren: [
-                              // Tab type filter
-                              SubmenuButton(
-                                leadingIcon: const Icon(MdiIcons.tabUnselected),
-                                menuChildren: TabTypeFilter.values.map((type) {
-                                  final appColors = AppColors.of(context);
-                                  final (icon, color) = switch (type) {
-                                    TabTypeFilter.all => (
-                                      MdiIcons.tabUnselected,
-                                      null,
-                                    ),
-                                    TabTypeFilter.regularOnly => (
-                                      MdiIcons.tab,
-                                      null,
-                                    ),
-                                    TabTypeFilter.privateOnly => (
-                                      MdiIcons.dominoMask,
-                                      appColors.privateTabPurple,
-                                    ),
-                                    TabTypeFilter.isolatedOnly => (
-                                      MdiIcons.snowflake,
-                                      appColors.isolatedTabTeal,
-                                    ),
-                                  };
-
-                                  return MenuItemButton(
-                                    leadingIcon: Icon(
-                                      filterOptions.tabTypeFilter == type
-                                          ? Icons.radio_button_checked
-                                          : Icons.radio_button_unchecked,
-                                    ),
-                                    trailingIcon: Icon(icon, color: color),
-                                    child: Text(type.label(context)),
-                                    onPressed: () {
-                                      ref
-                                          .read(
-                                            tabViewFilterControllerProvider
-                                                .notifier,
-                                          )
-                                          .setTabTypeFilter(type);
-                                    },
-                                  );
-                                }).toList(),
-                                child: Text(l10n.browser_filterTabType),
-                              ),
-                              // Sort
-                              SubmenuButton(
-                                leadingIcon: const Icon(Icons.sort),
-                                menuChildren: [
-                                  ...TabSortType.values.map(
-                                    (sort) => MenuItemButton(
-                                      leadingIcon: Icon(
-                                        filterOptions.sortType == sort
-                                            ? Icons.radio_button_checked
-                                            : Icons.radio_button_unchecked,
-                                      ),
-                                      child: Text(sort.label(context)),
-                                      onPressed: () {
-                                        ref
-                                            .read(
-                                              tabViewFilterControllerProvider
-                                                  .notifier,
-                                            )
-                                            .setSortType(sort);
-                                      },
-                                    ),
-                                  ),
-                                  const Divider(),
-                                  MenuItemButton(
-                                    leadingIcon: Icon(
-                                      filterOptions.sortPinnedFirst ||
-                                              filterOptions
-                                                      .sortType
-                                                      .sortField ==
-                                                  null
-                                          ? Icons.check_box
-                                          : Icons.check_box_outline_blank,
-                                    ),
-                                    onPressed:
-                                        filterOptions.sortType.sortField == null
-                                        ? null
-                                        : () {
-                                            ref
-                                                .read(
-                                                  tabViewFilterControllerProvider
-                                                      .notifier,
-                                                )
-                                                .setSortPinnedFirst(
-                                                  !filterOptions
-                                                      .sortPinnedFirst,
-                                                );
-                                          },
-                                    child: Text(l10n.browser_sortPinnedFirst),
-                                  ),
-                                ],
-                                child: Text(l10n.browser_filterSort),
-                              ),
-                              MenuItemButton(
-                                leadingIcon: Icon(
-                                  filterOptions.showHierarchicalTabs
-                                      ? Icons.check_box
-                                      : Icons.check_box_outline_blank,
-                                ),
-                                onPressed: () {
-                                  ref
-                                      .read(
-                                        tabViewFilterControllerProvider
-                                            .notifier,
-                                      )
-                                      .setShowHierarchicalTabs(
-                                        !filterOptions.showHierarchicalTabs,
-                                      );
-                                },
-                                child: Text(l10n.browser_hierarchicalView),
-                              ),
-                              const Divider(),
-                              // Date range picker
-                              MenuItemButton(
-                                closeOnActivate: false,
-                                leadingIcon: const Icon(MdiIcons.calendarRange),
-                                trailingIcon: filterOptions.dateRange != null
-                                    ? IconButton(
-                                        onPressed: () {
-                                          ref
-                                              .read(
-                                                tabViewFilterControllerProvider
-                                                    .notifier,
-                                              )
-                                              .setDateRange(null);
-                                        },
-                                        icon: const Icon(Icons.clear),
-                                      )
-                                    : null,
-                                child: filterOptions.dateRange != null
-                                    ? Text(
-                                        '${DateFormat.yMd().format(filterOptions.dateRange!.start)} - ${DateFormat.yMd().format(filterOptions.dateRange!.end)}',
-                                      )
-                                    : Text(l10n.browser_filterDate),
-                                onPressed: () async {
-                                  final range = await showDateRangePicker(
-                                    context: context,
-                                    initialDateRange: filterOptions.dateRange,
-                                    firstDate: DateTime.now().subtract(
-                                      const Duration(days: 365),
-                                    ),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (range != null) {
-                                    ref
-                                        .read(
-                                          tabViewFilterControllerProvider
-                                              .notifier,
-                                        )
-                                        .setDateRange(
-                                          DateTimeRange(
-                                            start: range.start,
-                                            end: range.end.add(
-                                              const Duration(days: 1) -
-                                                  const Duration(
-                                                    milliseconds: 1,
-                                                  ),
-                                            ),
-                                          ),
-                                        );
-                                  }
-                                },
-                              ),
-                              // Quick intervals
-                              SubmenuButton(
-                                leadingIcon: const Icon(MdiIcons.clockOutline),
-                                menuChildren: TabQuickInterval.values
-                                    .map(
-                                      (interval) => MenuItemButton(
-                                        leadingIcon: Icon(
-                                          filterOptions.quickInterval ==
-                                                  interval
-                                              ? Icons.radio_button_checked
-                                              : Icons.radio_button_unchecked,
-                                        ),
-                                        child: Text(interval.label(context)),
-                                        onPressed: () {
-                                          ref
-                                              .read(
-                                                tabViewFilterControllerProvider
-                                                    .notifier,
-                                              )
-                                              .setQuickInterval(
-                                                filterOptions.quickInterval ==
-                                                        interval
-                                                    ? null
-                                                    : interval,
-                                              );
-                                        },
-                                      ),
-                                    )
-                                    .toList(),
-                                child: Text(l10n.browser_quickInterval),
-                              ),
-                              const Divider(),
-                              // Reset
-                              MenuItemButton(
-                                leadingIcon: const Icon(MdiIcons.restore),
-                                child: Text(l10n.browser_resetFilter),
-                                onPressed: () {
-                                  ref
-                                      .read(
-                                        tabViewFilterControllerProvider
-                                            .notifier,
-                                      )
-                                      .reset();
-                                },
-                              ),
-                            ],
-                            child: IconButton(
-                              tooltip: l10n.browser_tooltipFilterAndSort,
-                              onPressed: () {
-                                if (filterMenuController.isOpen) {
-                                  filterMenuController.close();
-                                } else {
-                                  filterMenuController.open();
-                                }
-                              },
-                              icon: Badge(
-                                isLabelVisible: hasActiveFilter,
-                                child: const Icon(MdiIcons.filter, size: 18),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    const Spacer(),
-                    MenuAnchor(
-                      controller: viewModeMenuController,
-                      menuChildren: TabsViewMode.values
-                          .map(
-                            (mode) => MenuItemButton(
-                              leadingIcon: Icon(mode.icon),
-                              child: Text(mode.label(context)),
-                              onPressed: () {
-                                if (mode == TabsViewMode.tree) {
-                                  searchTextController.clear();
-                                  searchMode.value = false;
-                                }
-
-                                ref
-                                    .read(
-                                      tabsViewModeControllerProvider.notifier,
-                                    )
-                                    .set(mode);
-                              },
-                            ),
-                          )
-                          .toList(),
-                      child: IconButton(
-                        tooltip: l10n.browser_tooltipChangeViewMode,
-                        onPressed: isSyncedScope
-                            ? null
-                            : () {
-                                if (viewModeMenuController.isOpen) {
-                                  viewModeMenuController.close();
-                                } else {
-                                  viewModeMenuController.open();
-                                }
-                              },
-                        icon: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(tabsViewMode.icon, size: 18),
-                            const Icon(Icons.arrow_drop_down, size: 18),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (enableAiFeatures &&
-                        switch (tabsViewMode) {
-                          TabsViewMode.list || TabsViewMode.grid => true,
-                          TabsViewMode.tree => false,
-                        })
-                      Consumer(
-                        builder: (context, ref, child) {
-                          final tabSuggestionsEnabled = ref.watch(
-                            persistedBoolProvider(
-                              PersistedBoolKey.tabSuggestions,
-                            ),
-                          );
-                          final downloadProgress = ref.watch(
-                            mlDownloadStateProvider,
-                          );
-
-                          return Badge(
-                            isLabelVisible: downloadProgress != null,
-                            offset: const Offset(-2, 2),
-                            label: downloadProgress != null
-                                ? Text(
-                                    '${downloadProgress.progress.toInt()}%',
-                                    style: const TextStyle(fontSize: 10),
-                                  )
-                                : null,
-                            child: IconButton.filledTonal(
-                              icon: const Icon(MdiIcons.imageAutoAdjust),
-                              isSelected: tabSuggestionsEnabled,
-                              iconSize: 18,
-                              padding: EdgeInsets.zero,
-                              tooltip: downloadProgress != null
-                                  ? l10n.browser_downloadingAiModelsProgress(
-                                      downloadProgress.progress.toInt(),
-                                    )
-                                  : tabSuggestionsEnabled
-                                  ? l10n.browser_disableAiTabSuggestions
-                                  : l10n.browser_enableAiTabSuggestionsTooltip,
-                              onPressed: () async {
-                                if (!tabSuggestionsEnabled) {
-                                  final result =
-                                      await showEnableAiTabSuggestionsDialog(
-                                        context,
-                                      );
-
-                                  if (result == true) {
-                                    ref
-                                        .read(
-                                          persistedBoolProvider(
-                                            PersistedBoolKey.tabSuggestions,
-                                          ).notifier,
-                                        )
-                                        .set(true);
-                                  }
-                                } else {
-                                  ref
-                                      .read(
-                                        persistedBoolProvider(
-                                          PersistedBoolKey.tabSuggestions,
-                                        ).notifier,
-                                      )
-                                      .set(false);
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    if (switch (tabsViewMode) {
-                      TabsViewMode.list || TabsViewMode.grid => true,
-                      TabsViewMode.tree => false,
-                    })
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.swap_vert),
-                        isSelected: tabsReorderable,
-                        iconSize: 18,
-                        padding: EdgeInsets.zero,
-                        tooltip: tabsReorderable
-                            ? l10n.browser_disableReorderingMode
-                            : canManualReorder
-                            ? l10n.browser_enableReorderingMode
-                            : l10n.browser_reorderingRequiresDefaultManualMode,
-                        onPressed: canManualReorder
-                            ? () {
-                                final wasEnabled = tabsReorderable;
-
-                                ref
-                                    .read(
-                                      tabsReorderableControllerProvider
-                                          .notifier,
-                                    )
-                                    .toggle();
-
-                                // Show info when enabling reordering
-                                if (!wasEnabled && context.mounted) {
-                                  ui_helper.showInfoMessage(
-                                    context,
-                                    l10n.browser_dragAndDropTabsToReorder,
-                                  );
-                                }
-                              }
-                            : null,
-                      ),
-                    Consumer(
-                      builder: (context, ref, child) {
-                        // The id is known synchronously; the row it points at
-                        // loads asynchronously. Scope the tab-bulk actions to
-                        // the id, or they would fall back to "unassigned"
-                        // during that window.
-                        final selectedContainerId = ref.watch(
-                          selectedContainerProvider,
-                        );
-                        final selectedContainer = ref.watch(
-                          selectedContainerDataProvider.select(
-                            (value) => value.value,
-                          ),
-                        );
-
-                        // Tab-bulk actions scoped to the container currently in
-                        // view. The container's own actions (edit, pin, assigned
-                        // sites, delete) hang off the chip's long-press menu,
-                        // which is the same [ContainerMenu] with more items
-                        // enabled.
-                        return ContainerMenu(
-                          controller: tabsActionMenuController,
-                          container: selectedContainer,
-                          scopeContainerId: selectedContainerId,
-                          // The synced scope lists tabs from other devices;
-                          // none of these act on them.
-                          enabled: !isSyncedScope,
-                          enableCloseFilteredTabs:
-                              tabsViewMode != TabsViewMode.tree,
-                          builder: (context, controller, _) => IconButton(
-                            tooltip: l10n.browser_tooltipTabActions,
-                            onPressed: () {
-                              if (controller.isOpen) {
-                                controller.close();
-                              } else {
-                                controller.open();
-                              }
-                            },
-                            icon: const Icon(MdiIcons.dotsVertical),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                )
-              else
+              if (searchMode)
                 TextField(
                   controller: searchTextController,
                   focusNode: searchTextFocus,
+                  autofocus: true,
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     prefixIcon: const Icon(MdiIcons.tabSearch, size: 18),
@@ -758,7 +313,12 @@ class TabViewHeader extends HookConsumerWidget {
                               searchTextController.clear();
                               searchTextFocus.requestFocus();
                             } else {
-                              searchMode.value = false;
+                              ref
+                                  .read(
+                                    tabViewSearchModeControllerProvider
+                                        .notifier,
+                                  )
+                                  .hide();
                             }
                           },
                           icon: const Icon(Icons.clear),
@@ -766,14 +326,488 @@ class TabViewHeader extends HookConsumerWidget {
                       ],
                     ),
                   ),
-                ),
-              const Divider(),
+                )
+              else if (!actionsAtBottom)
+                _TabViewActionRow(tabsViewMode: tabsViewMode),
+              if (searchMode || !actionsAtBottom) const Divider(),
               if (showContainerUi) _TabFilters(tabsViewMode: tabsViewMode),
               const SizedBox(height: 8),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The tab tray's action row at the bottom of the tray, within thumb reach,
+/// for [GeneralSettings.tabTrayActionsAtBottom] (#651). Renders nothing while
+/// that setting is off, when [TabViewHeader] carries the row instead.
+///
+/// The search it opens still appears in the header, at the top, where the
+/// keyboard cannot cover it.
+class TabViewActionBar extends ConsumerWidget {
+  /// Height including the divider above the row.
+  static const height = 57.0;
+
+  final TabsViewMode tabsViewMode;
+
+  const TabViewActionBar({super.key, required this.tabsViewMode});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final actionsAtBottom = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.tabTrayActionsAtBottom,
+      ),
+    );
+
+    if (!actionsAtBottom) {
+      return const SizedBox.shrink();
+    }
+
+    return Material(
+      child: SizedBox(
+        height: height,
+        child: Column(
+          children: [
+            const Divider(height: 1),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: _TabViewActionRow(tabsViewMode: tabsViewMode),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Search, filter, view mode, AI suggestions, reorder and the tab actions
+/// menu — in the header, or in [TabViewActionBar] at the bottom.
+class _TabViewActionRow extends HookConsumerWidget {
+  final TabsViewMode tabsViewMode;
+
+  const _TabViewActionRow({required this.tabsViewMode});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
+    final viewModeMenuController = useMenuController();
+    final tabsActionMenuController = useMenuController();
+    final filterMenuController = useMenuController();
+
+    final enableAiFeatures = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.enableLocalAiFeatures,
+      ),
+    );
+    final isSyncedScope = ref.watch(
+      effectiveTabsTrayScopeProvider.select(
+        (scope) => scope == TabsTrayScope.synced,
+      ),
+    );
+    final canManualTabReorder = ref.watch(canManualTabReorderProvider);
+    final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
+    final canManualReorder =
+        !isSyncedScope &&
+        tabsViewMode != TabsViewMode.tree &&
+        canManualTabReorder;
+
+    return Row(
+      children: [
+        if (tabsViewMode != TabsViewMode.tree)
+          IconButton(
+            icon: const Icon(MdiIcons.tabSearch),
+            iconSize: 18,
+            padding: EdgeInsets.zero,
+            tooltip: l10n.browser_tooltipSearchInsideTabs,
+            onPressed: () {
+              ref.read(tabViewSearchModeControllerProvider.notifier).show();
+            },
+          ),
+        if (!isSyncedScope && tabsViewMode != TabsViewMode.tree)
+          Consumer(
+            builder: (context, ref, child) {
+              final filterOptions = ref.watch(tabViewFilterControllerProvider);
+              final hasActiveFilter = filterOptions.hasActiveFilter;
+
+              return MenuAnchor(
+                controller: filterMenuController,
+                consumeOutsideTap: true,
+                menuChildren: [
+                  // Tab type filter
+                  SubmenuButton(
+                    leadingIcon: const Icon(MdiIcons.tabUnselected),
+                    menuChildren: TabTypeFilter.values.map((type) {
+                      final appColors = AppColors.of(context);
+                      final (icon, color) = switch (type) {
+                        TabTypeFilter.all => (MdiIcons.tabUnselected, null),
+                        TabTypeFilter.regularOnly => (MdiIcons.tab, null),
+                        TabTypeFilter.privateOnly => (
+                          MdiIcons.dominoMask,
+                          appColors.privateTabPurple,
+                        ),
+                        TabTypeFilter.isolatedOnly => (
+                          MdiIcons.snowflake,
+                          appColors.isolatedTabTeal,
+                        ),
+                      };
+
+                      return MenuItemButton(
+                        leadingIcon: Icon(
+                          filterOptions.tabTypeFilter == type
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                        ),
+                        trailingIcon: Icon(icon, color: color),
+                        child: Text(type.label(context)),
+                        onPressed: () {
+                          ref
+                              .read(tabViewFilterControllerProvider.notifier)
+                              .setTabTypeFilter(type);
+                        },
+                      );
+                    }).toList(),
+                    child: Text(l10n.browser_filterTabType),
+                  ),
+                  // Sort
+                  SubmenuButton(
+                    leadingIcon: const Icon(Icons.sort),
+                    menuChildren: [
+                      ...TabSortType.values.map(
+                        (sort) => MenuItemButton(
+                          leadingIcon: Icon(
+                            filterOptions.sortType == sort
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                          ),
+                          child: Text(sort.label(context)),
+                          onPressed: () {
+                            ref
+                                .read(tabViewFilterControllerProvider.notifier)
+                                .setSortType(sort);
+                          },
+                        ),
+                      ),
+                      const Divider(),
+                      MenuItemButton(
+                        leadingIcon: Icon(
+                          filterOptions.sortPinnedFirst ||
+                                  filterOptions.sortType.sortField == null
+                              ? Icons.check_box
+                              : Icons.check_box_outline_blank,
+                        ),
+                        onPressed: filterOptions.sortType.sortField == null
+                            ? null
+                            : () {
+                                ref
+                                    .read(
+                                      tabViewFilterControllerProvider.notifier,
+                                    )
+                                    .setSortPinnedFirst(
+                                      !filterOptions.sortPinnedFirst,
+                                    );
+                              },
+                        child: Text(l10n.browser_sortPinnedFirst),
+                      ),
+                    ],
+                    child: Text(l10n.browser_filterSort),
+                  ),
+                  MenuItemButton(
+                    leadingIcon: Icon(
+                      filterOptions.showHierarchicalTabs
+                          ? Icons.check_box
+                          : Icons.check_box_outline_blank,
+                    ),
+                    onPressed: () {
+                      ref
+                          .read(tabViewFilterControllerProvider.notifier)
+                          .setShowHierarchicalTabs(
+                            !filterOptions.showHierarchicalTabs,
+                          );
+                    },
+                    child: Text(l10n.browser_hierarchicalView),
+                  ),
+                  const Divider(),
+                  // Date range picker
+                  MenuItemButton(
+                    closeOnActivate: false,
+                    leadingIcon: const Icon(MdiIcons.calendarRange),
+                    trailingIcon: filterOptions.dateRange != null
+                        ? IconButton(
+                            onPressed: () {
+                              ref
+                                  .read(
+                                    tabViewFilterControllerProvider.notifier,
+                                  )
+                                  .setDateRange(null);
+                            },
+                            icon: const Icon(Icons.clear),
+                          )
+                        : null,
+                    child: filterOptions.dateRange != null
+                        ? Text(
+                            '${DateFormat.yMd().format(filterOptions.dateRange!.start)} - ${DateFormat.yMd().format(filterOptions.dateRange!.end)}',
+                          )
+                        : Text(l10n.browser_filterDate),
+                    onPressed: () async {
+                      final range = await showDateRangePicker(
+                        context: context,
+                        initialDateRange: filterOptions.dateRange,
+                        firstDate: DateTime.now().subtract(
+                          const Duration(days: 365),
+                        ),
+                        lastDate: DateTime.now(),
+                      );
+                      if (range != null) {
+                        ref
+                            .read(tabViewFilterControllerProvider.notifier)
+                            .setDateRange(
+                              DateTimeRange(
+                                start: range.start,
+                                end: range.end.add(
+                                  const Duration(days: 1) -
+                                      const Duration(milliseconds: 1),
+                                ),
+                              ),
+                            );
+                      }
+                    },
+                  ),
+                  // Quick intervals
+                  SubmenuButton(
+                    leadingIcon: const Icon(MdiIcons.clockOutline),
+                    menuChildren: TabQuickInterval.values
+                        .map(
+                          (interval) => MenuItemButton(
+                            leadingIcon: Icon(
+                              filterOptions.quickInterval == interval
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_unchecked,
+                            ),
+                            child: Text(interval.label(context)),
+                            onPressed: () {
+                              ref
+                                  .read(
+                                    tabViewFilterControllerProvider.notifier,
+                                  )
+                                  .setQuickInterval(
+                                    filterOptions.quickInterval == interval
+                                        ? null
+                                        : interval,
+                                  );
+                            },
+                          ),
+                        )
+                        .toList(),
+                    child: Text(l10n.browser_quickInterval),
+                  ),
+                  const Divider(),
+                  // Reset
+                  MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.restore),
+                    child: Text(l10n.browser_resetFilter),
+                    onPressed: () {
+                      ref
+                          .read(tabViewFilterControllerProvider.notifier)
+                          .reset();
+                    },
+                  ),
+                ],
+                child: IconButton(
+                  tooltip: l10n.browser_tooltipFilterAndSort,
+                  onPressed: () {
+                    if (filterMenuController.isOpen) {
+                      filterMenuController.close();
+                    } else {
+                      filterMenuController.open();
+                    }
+                  },
+                  icon: Badge(
+                    isLabelVisible: hasActiveFilter,
+                    child: const Icon(MdiIcons.filter, size: 18),
+                  ),
+                ),
+              );
+            },
+          ),
+        const Spacer(),
+        MenuAnchor(
+          controller: viewModeMenuController,
+          menuChildren: TabsViewMode.values
+              .map(
+                (mode) => MenuItemButton(
+                  leadingIcon: Icon(mode.icon),
+                  child: Text(mode.label(context)),
+                  onPressed: () {
+                    if (mode == TabsViewMode.tree) {
+                      ref
+                          .read(tabViewSearchModeControllerProvider.notifier)
+                          .hide();
+                    }
+
+                    ref.read(tabsViewModeControllerProvider.notifier).set(mode);
+                  },
+                ),
+              )
+              .toList(),
+          child: IconButton(
+            tooltip: l10n.browser_tooltipChangeViewMode,
+            onPressed: isSyncedScope
+                ? null
+                : () {
+                    if (viewModeMenuController.isOpen) {
+                      viewModeMenuController.close();
+                    } else {
+                      viewModeMenuController.open();
+                    }
+                  },
+            icon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(tabsViewMode.icon, size: 18),
+                const Icon(Icons.arrow_drop_down, size: 18),
+              ],
+            ),
+          ),
+        ),
+        if (enableAiFeatures &&
+            switch (tabsViewMode) {
+              TabsViewMode.list || TabsViewMode.grid => true,
+              TabsViewMode.tree => false,
+            })
+          Consumer(
+            builder: (context, ref, child) {
+              final tabSuggestionsEnabled = ref.watch(
+                persistedBoolProvider(PersistedBoolKey.tabSuggestions),
+              );
+              final downloadProgress = ref.watch(mlDownloadStateProvider);
+
+              return Badge(
+                isLabelVisible: downloadProgress != null,
+                offset: const Offset(-2, 2),
+                label: downloadProgress != null
+                    ? Text(
+                        '${downloadProgress.progress.toInt()}%',
+                        style: const TextStyle(fontSize: 10),
+                      )
+                    : null,
+                child: IconButton.filledTonal(
+                  icon: const Icon(MdiIcons.imageAutoAdjust),
+                  isSelected: tabSuggestionsEnabled,
+                  iconSize: 18,
+                  padding: EdgeInsets.zero,
+                  tooltip: downloadProgress != null
+                      ? l10n.browser_downloadingAiModelsProgress(
+                          downloadProgress.progress.toInt(),
+                        )
+                      : tabSuggestionsEnabled
+                      ? l10n.browser_disableAiTabSuggestions
+                      : l10n.browser_enableAiTabSuggestionsTooltip,
+                  onPressed: () async {
+                    if (!tabSuggestionsEnabled) {
+                      final result = await showEnableAiTabSuggestionsDialog(
+                        context,
+                      );
+
+                      if (result == true) {
+                        ref
+                            .read(
+                              persistedBoolProvider(
+                                PersistedBoolKey.tabSuggestions,
+                              ).notifier,
+                            )
+                            .set(true);
+                      }
+                    } else {
+                      ref
+                          .read(
+                            persistedBoolProvider(
+                              PersistedBoolKey.tabSuggestions,
+                            ).notifier,
+                          )
+                          .set(false);
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        if (switch (tabsViewMode) {
+          TabsViewMode.list || TabsViewMode.grid => true,
+          TabsViewMode.tree => false,
+        })
+          IconButton.filledTonal(
+            icon: const Icon(Icons.swap_vert),
+            isSelected: tabsReorderable,
+            iconSize: 18,
+            padding: EdgeInsets.zero,
+            tooltip: tabsReorderable
+                ? l10n.browser_disableReorderingMode
+                : canManualReorder
+                ? l10n.browser_enableReorderingMode
+                : l10n.browser_reorderingRequiresDefaultManualMode,
+            onPressed: canManualReorder
+                ? () {
+                    final wasEnabled = tabsReorderable;
+
+                    ref
+                        .read(tabsReorderableControllerProvider.notifier)
+                        .toggle();
+
+                    // Show info when enabling reordering
+                    if (!wasEnabled && context.mounted) {
+                      ui_helper.showInfoMessage(
+                        context,
+                        l10n.browser_dragAndDropTabsToReorder,
+                      );
+                    }
+                  }
+                : null,
+          ),
+        Consumer(
+          builder: (context, ref, child) {
+            // The id is known synchronously; the row it points at
+            // loads asynchronously. Scope the tab-bulk actions to
+            // the id, or they would fall back to "unassigned"
+            // during that window.
+            final selectedContainerId = ref.watch(selectedContainerProvider);
+            final selectedContainer = ref.watch(
+              selectedContainerDataProvider.select((value) => value.value),
+            );
+
+            // Tab-bulk actions scoped to the container currently in
+            // view. The container's own actions (edit, pin, assigned
+            // sites, delete) hang off the chip's long-press menu,
+            // which is the same [ContainerMenu] with more items
+            // enabled.
+            return ContainerMenu(
+              controller: tabsActionMenuController,
+              container: selectedContainer,
+              scopeContainerId: selectedContainerId,
+              // The synced scope lists tabs from other devices;
+              // none of these act on them.
+              enabled: !isSyncedScope,
+              enableCloseFilteredTabs: tabsViewMode != TabsViewMode.tree,
+              builder: (context, controller, _) => IconButton(
+                tooltip: l10n.browser_tooltipTabActions,
+                onPressed: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                icon: const Icon(MdiIcons.dotsVertical),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

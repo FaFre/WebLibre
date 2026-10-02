@@ -11016,6 +11016,18 @@ class AppLocalizationsId extends AppLocalizations {
       'Di tepi bawah layar';
 
   @override
+  String get settings_tabViewActionsAtBottomTitle =>
+      'Tindakan Tampilan Tab di Bawah';
+
+  @override
+  String get settings_tabViewActionsAtBottomSubtitle =>
+      'Pencarian, filter, dan tindakan tab di bawah, dengan tombol tab baru di atasnya';
+
+  @override
+  String get settings_tabViewActionsAtBottomKeywords =>
+      'bawah, jempol, jangkauan, satu tangan, bilah alat, tampilan tab';
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override

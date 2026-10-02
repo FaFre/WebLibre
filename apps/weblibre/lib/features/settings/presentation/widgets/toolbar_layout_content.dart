@@ -158,6 +158,14 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
           child: const _BottomSheetTabViewTile(),
         ),
         SettingsEntryDefinition(
+          title: l10n.settings_tabViewActionsAtBottomTitle,
+          subtitle: l10n.settings_tabViewActionsAtBottomSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_tabViewActionsAtBottomKeywords,
+          ),
+          child: const _TabViewActionsAtBottomTile(),
+        ),
+        SettingsEntryDefinition(
           title: l10n.settings_showFaviconsTitle,
           subtitle: l10n.settings_indexShowFaviconsSubtitle,
           keywords: settingsKeywords(l10n.settings_showFaviconsKeywords),
@@ -1041,6 +1049,35 @@ class _BottomSheetTabViewTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.tabViewBottomSheet(value),
+            );
+      },
+    );
+  }
+}
+
+class _TabViewActionsAtBottomTile extends HookConsumerWidget {
+  const _TabViewActionsAtBottomTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final actionsAtBottom = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.tabTrayActionsAtBottom,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_tabViewActionsAtBottomTitle),
+      subtitle: Text(l10n.settings_tabViewActionsAtBottomSubtitle),
+      secondary: const Icon(MdiIcons.dockBottom),
+      value: actionsAtBottom,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.tabTrayActionsAtBottom(value),
             );
       },
     );

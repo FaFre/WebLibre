@@ -10068,6 +10068,17 @@ class AppLocalizationsZh extends AppLocalizations {
       '位于屏幕底边';
 
   @override
+  String get settings_tabViewActionsAtBottomTitle => '标签页视图操作置于底部';
+
+  @override
+  String get settings_tabViewActionsAtBottomSubtitle =>
+      '搜索、筛选和标签页操作位于底部，新建标签页按钮在其上方';
+
+  @override
+  String get settings_tabViewActionsAtBottomKeywords =>
+      '底部, 拇指, 单手, 工具栏, 标签页视图';
+
+  @override
   String get smallWeb_sheetTitle => '小众网络';
 
   @override

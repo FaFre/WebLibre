@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
@@ -51,6 +52,11 @@ class TabViewScreen extends HookConsumerWidget {
         : tabsViewMode;
 
     final scrollController = useScrollController(keys: [tabsReorderable]);
+    final actionsAtBottom = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.tabTrayActionsAtBottom,
+      ),
+    );
 
     // Track FAB visibility based on scroll direction
     final isFabVisible = useScrollVisibility(
@@ -104,23 +110,30 @@ class TabViewScreen extends HookConsumerWidget {
                       ? Duration.zero
                       : const Duration(milliseconds: 200),
                   opacity: isFabVisible.value ? 1.0 : 0.0,
-                  child: FloatingActionButton(
-                    onPressed: () async {
-                      final settings = ref.read(
-                        generalSettingsWithDefaultsProvider,
-                      );
+                  // Above the tray's own action bar when that sits at the
+                  // bottom, which the Scaffold does not know about.
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: actionsAtBottom ? TabViewActionBar.height : 0,
+                    ),
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        final settings = ref.read(
+                          generalSettingsWithDefaultsProvider,
+                        );
 
-                      await SearchRoute(
-                        tabType:
-                            ref.read(selectedTabTypeProvider) ??
-                            settings.effectiveDefaultCreateTabType,
-                      ).push(context);
+                        await SearchRoute(
+                          tabType:
+                              ref.read(selectedTabTypeProvider) ??
+                              settings.effectiveDefaultCreateTabType,
+                        ).push(context);
 
-                      if (context.mounted) {
-                        const BrowserRoute().go(context);
-                      }
-                    },
-                    child: const Icon(Icons.add),
+                        if (context.mounted) {
+                          const BrowserRoute().go(context);
+                        }
+                      },
+                      child: const Icon(Icons.add),
+                    ),
                   ),
                 ),
               ),

@@ -1049,5 +1049,8 @@
   "settings_switcherPlacementBelowAddressBarLabel": "Unter der Adressleiste",
   "settings_switcherPlacementBelowAddressBarDescription": "Folgt der Adressleiste nach oben oder unten",
   "settings_switcherPlacementBelowContextualBarLabel": "Unter der kontextabhängigen Symbolleiste",
-  "settings_switcherPlacementBelowContextualBarDescription": "Am unteren Bildschirmrand"
+  "settings_switcherPlacementBelowContextualBarDescription": "Am unteren Bildschirmrand",
+  "settings_tabViewActionsAtBottomTitle": "Aktionen der Tab-Übersicht unten",
+  "settings_tabViewActionsAtBottomSubtitle": "Suche, Filter und Tab-Aktionen unten, mit der Schaltfläche für neue Tabs darüber",
+  "settings_tabViewActionsAtBottomKeywords": "unten, Daumen, Reichweite, einhändig, Symbolleiste, Tab-Übersicht"
 }
