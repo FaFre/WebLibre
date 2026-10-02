@@ -56,5 +56,9 @@
   "history_deleteTimeRangeToday": "Hoy",
   "history_deleteTimeRangeLastWeek": "Últimos 7 días",
   "history_deleteTimeRangeExplanation": "Se eliminan todas las visitas de este intervalo, en todos los contenedores. Las descargas finalizadas y fallidas de este intervalo también desaparecen de la lista de descargas; los archivos se quedan en el dispositivo. Las descargas en curso se conservan.",
-  "history_deleteTimeRangeInvalid": "El inicio debe ser anterior al final."
+  "history_deleteTimeRangeInvalid": "El inicio debe ser anterior al final.",
+  "history_tooltipEntryActions": "Más acciones",
+  "history_actionOpenInBackground": "Abrir en segundo plano",
+  "history_actionCopyLink": "Copiar enlace",
+  "history_actionShareLink": "Compartir enlace"
 }

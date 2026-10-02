@@ -56,5 +56,9 @@
   "history_deleteTimeRangeToday": "今天",
   "history_deleteTimeRangeLastWeek": "过去 7 天",
   "history_deleteTimeRangeExplanation": "此范围内的所有访问记录都将被删除，包括所有容器。此范围内已完成和失败的下载也会从下载列表中移除，但文件仍保留在设备上。正在进行的下载将保留。",
-  "history_deleteTimeRangeInvalid": "开始时间必须早于结束时间。"
+  "history_deleteTimeRangeInvalid": "开始时间必须早于结束时间。",
+  "history_tooltipEntryActions": "更多操作",
+  "history_actionOpenInBackground": "在后台打开",
+  "history_actionCopyLink": "复制链接",
+  "history_actionShareLink": "分享链接"
 }

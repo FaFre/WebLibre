@@ -56,5 +56,9 @@
   "history_deleteTimeRangeToday": "Hari ini",
   "history_deleteTimeRangeLastWeek": "7 hari terakhir",
   "history_deleteTimeRangeExplanation": "Setiap kunjungan dalam rentang ini dihapus, di semua kontainer. Unduhan yang selesai dan gagal dari rentang ini juga dihapus dari daftar unduhan; berkasnya tetap ada di perangkat. Unduhan yang masih berjalan tetap disimpan.",
-  "history_deleteTimeRangeInvalid": "Awal harus sebelum akhir."
+  "history_deleteTimeRangeInvalid": "Awal harus sebelum akhir.",
+  "history_tooltipEntryActions": "Tindakan lainnya",
+  "history_actionOpenInBackground": "Buka di Latar Belakang",
+  "history_actionCopyLink": "Salin tautan",
+  "history_actionShareLink": "Bagikan tautan"
 }

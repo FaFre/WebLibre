@@ -4416,6 +4416,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get history_deleteTimeRangeInvalid => 'Awal harus sebelum akhir.';
 
   @override
+  String get history_tooltipEntryActions => 'Tindakan lainnya';
+
+  @override
+  String get history_actionOpenInBackground => 'Buka di Latar Belakang';
+
+  @override
+  String get history_actionCopyLink => 'Salin tautan';
+
+  @override
+  String get history_actionShareLink => 'Bagikan tautan';
+
+  @override
   String get openLinkTools_openLinkTitle => 'Buka tautan';
 
   @override

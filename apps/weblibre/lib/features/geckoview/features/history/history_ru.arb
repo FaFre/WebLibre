@@ -56,5 +56,9 @@
   "history_deleteTimeRangeToday": "Сегодня",
   "history_deleteTimeRangeLastWeek": "Последние 7 дней",
   "history_deleteTimeRangeExplanation": "Все посещения за этот период удаляются во всех контейнерах. Завершённые и неудавшиеся загрузки за этот период также исчезнут из списка загрузок, но файлы останутся на устройстве. Загрузки, которые ещё выполняются, сохраняются.",
-  "history_deleteTimeRangeInvalid": "Начало должно быть раньше конца."
+  "history_deleteTimeRangeInvalid": "Начало должно быть раньше конца.",
+  "history_tooltipEntryActions": "Другие действия",
+  "history_actionOpenInBackground": "Открыть в фоне",
+  "history_actionCopyLink": "Копировать ссылку",
+  "history_actionShareLink": "Поделиться ссылкой"
 }

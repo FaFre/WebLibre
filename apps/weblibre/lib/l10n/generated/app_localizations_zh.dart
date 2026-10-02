@@ -4122,6 +4122,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get history_deleteTimeRangeInvalid => '开始时间必须早于结束时间。';
 
   @override
+  String get history_tooltipEntryActions => '更多操作';
+
+  @override
+  String get history_actionOpenInBackground => '在后台打开';
+
+  @override
+  String get history_actionCopyLink => '复制链接';
+
+  @override
+  String get history_actionShareLink => '分享链接';
+
+  @override
   String get openLinkTools_openLinkTitle => '打开链接';
 
   @override

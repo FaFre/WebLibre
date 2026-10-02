@@ -4476,6 +4476,18 @@ class AppLocalizationsRu extends AppLocalizations {
       'Начало должно быть раньше конца.';
 
   @override
+  String get history_tooltipEntryActions => 'Другие действия';
+
+  @override
+  String get history_actionOpenInBackground => 'Открыть в фоне';
+
+  @override
+  String get history_actionCopyLink => 'Копировать ссылку';
+
+  @override
+  String get history_actionShareLink => 'Поделиться ссылкой';
+
+  @override
   String get openLinkTools_openLinkTitle => 'Открыть ссылку';
 
   @override

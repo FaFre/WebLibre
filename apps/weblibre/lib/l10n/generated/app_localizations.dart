@@ -7612,6 +7612,30 @@ abstract class AppLocalizations {
   /// **'The start must be before the end.'**
   String get history_deleteTimeRangeInvalid;
 
+  /// Tooltip and accessibility label of the ⋮ button on each history or downloads row; it opens that entry's menu (open in background, copy link, share link, delete).
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get history_tooltipEntryActions;
+
+  /// Menu item on a history row: opens the page in a new tab without leaving the history screen; a snackbar then offers to switch to it.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in background'**
+  String get history_actionOpenInBackground;
+
+  /// Menu item on a history or downloads row: copies the page address (for a download, the address it was downloaded from) to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy link'**
+  String get history_actionCopyLink;
+
+  /// Menu item on a history or downloads row: opens the system share sheet with the page address (for a download, the address it was downloaded from).
+  ///
+  /// In en, this message translates to:
+  /// **'Share link'**
+  String get history_actionShareLink;
+
   /// Title of the sheet shown when a link is shared to or opened in WebLibre, offering ways to open it (new tab, custom tab, app) and to clean it.
   ///
   /// In en, this message translates to:

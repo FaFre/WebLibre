@@ -23,6 +23,7 @@ import 'package:collection/collection.dart';
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -31,9 +32,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
+import 'package:share_plus/share_plus.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_entry.dart';
@@ -112,11 +115,9 @@ class Section extends MultiSliver {
                        ),
                      ),
                      subtitle: UriBreadcrumb(uri: uri),
-                     trailing: IconButton(
-                       onPressed: () async {
-                         await onDelete(item);
-                       },
-                       icon: const Icon(MdiIcons.closeCircle),
+                     trailing: _HistoryEntryMenu(
+                       item: item,
+                       onDelete: onDelete,
                      ),
                      onTap: () {
                        onTap(item);
@@ -230,6 +231,87 @@ class Section extends MultiSliver {
            ),
          ],
        );
+}
+
+/// Per-row actions, behind a ⋮ like the bookmark list rather than an inline
+/// delete button on every row (#651). Long press still starts multi-select.
+class _HistoryEntryMenu extends HookConsumerWidget {
+  final HistoryEntry item;
+  final Future<void> Function(HistoryEntry) onDelete;
+
+  const _HistoryEntryMenu({required this.item, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final controller = useMenuController();
+    final isDownload = item.visitType == VisitType.download;
+
+    return MenuAnchor(
+      controller: controller,
+      builder: (context, controller, child) => IconButton(
+        tooltip: l10n.history_tooltipEntryActions,
+        onPressed: () {
+          if (controller.isOpen) {
+            controller.close();
+          } else {
+            controller.open();
+          }
+        },
+        icon: const Icon(MdiIcons.dotsVertical),
+      ),
+      menuChildren: [
+        if (!isDownload)
+          MenuItemButton(
+            leadingIcon: const Icon(MdiIcons.tab),
+            child: Text(l10n.history_actionOpenInBackground),
+            onPressed: () async {
+              final repo = ref.read(tabRepositoryProvider.notifier);
+              final router = GoRouter.of(context);
+              final tabId = await repo.addTab(
+                url: Uri.parse(item.url),
+                tabMode: TabMode.regular,
+                selectTab: false,
+              );
+
+              if (context.mounted) {
+                ui_helper.showTabSwitchMessage(
+                  context,
+                  onSwitch: () async {
+                    await repo.selectTab(tabId);
+                    // Selecting alone leaves this screen over the browser.
+                    // The router, not this row's context: the row may have
+                    // scrolled away while the snackbar was up.
+                    router.go(const BrowserRoute().location);
+                  },
+                );
+              }
+            },
+          ),
+        MenuItemButton(
+          leadingIcon: const Icon(MdiIcons.contentCopy),
+          child: Text(l10n.history_actionCopyLink),
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: item.url));
+          },
+        ),
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.share),
+          child: Text(l10n.history_actionShareLink),
+          onPressed: () async {
+            await SharePlus.instance.share(ShareParams(text: item.url));
+          },
+        ),
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.delete),
+          child: Text(l10n.common_delete),
+          onPressed: () async {
+            await onDelete(item);
+          },
+        ),
+      ],
+    );
+  }
 }
 
 enum HistoryScreenMode { history, downloads }

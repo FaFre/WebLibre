@@ -4473,6 +4473,18 @@ class AppLocalizationsEs extends AppLocalizations {
       'El inicio debe ser anterior al final.';
 
   @override
+  String get history_tooltipEntryActions => 'Más acciones';
+
+  @override
+  String get history_actionOpenInBackground => 'Abrir en segundo plano';
+
+  @override
+  String get history_actionCopyLink => 'Copiar enlace';
+
+  @override
+  String get history_actionShareLink => 'Compartir enlace';
+
+  @override
   String get openLinkTools_openLinkTitle => 'Abrir enlace';
 
   @override

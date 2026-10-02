@@ -5526,6 +5526,22 @@
   "@history_deleteTimeRangeInvalid": {
     "description": "Error under the chosen range in the delete-time-range dialog when the start is not earlier than the end. The Delete button is disabled."
   },
+  "history_tooltipEntryActions": "More actions",
+  "@history_tooltipEntryActions": {
+    "description": "Tooltip and accessibility label of the ⋮ button on each history or downloads row; it opens that entry's menu (open in background, copy link, share link, delete)."
+  },
+  "history_actionOpenInBackground": "Open in background",
+  "@history_actionOpenInBackground": {
+    "description": "Menu item on a history row: opens the page in a new tab without leaving the history screen; a snackbar then offers to switch to it."
+  },
+  "history_actionCopyLink": "Copy link",
+  "@history_actionCopyLink": {
+    "description": "Menu item on a history or downloads row: copies the page address (for a download, the address it was downloaded from) to the clipboard."
+  },
+  "history_actionShareLink": "Share link",
+  "@history_actionShareLink": {
+    "description": "Menu item on a history or downloads row: opens the system share sheet with the page address (for a download, the address it was downloaded from)."
+  },
   "openLinkTools_openLinkTitle": "Open link",
   "@openLinkTools_openLinkTitle": {
     "description": "Title of the sheet shown when a link is shared to or opened in WebLibre, offering ways to open it (new tab, custom tab, app) and to clean it."
