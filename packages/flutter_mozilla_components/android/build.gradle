@@ -2,7 +2,7 @@ group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.mozillaComponentsVersion = '155.0'
+    ext.mozillaComponentsVersion = '157.0'
 
     repositories {
         google()

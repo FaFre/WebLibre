@@ -64,7 +64,7 @@ class ReaderViewIntegration(
                 feature.hideControls()
             } else {
                 applyControlsBarBottomInset(onlyIfVisible = false)
-                feature.showControls()
+                feature.showControls(isListenEnabled = false)
             }
         }
     }

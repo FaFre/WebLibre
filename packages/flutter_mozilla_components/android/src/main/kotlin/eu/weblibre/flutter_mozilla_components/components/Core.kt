@@ -83,8 +83,11 @@ import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.support.base.worker.Frequency
 import org.mozilla.geckoview.GeckoRuntime
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.concurrent.TimeUnit
 
@@ -96,6 +99,14 @@ class Core(
     private val flutterEvents: GeckoStateEvents,
     private val extensionEvents: BrowserExtensionEvents
 ) {
+    /**
+     * The scope AC's session saving and upload cleanup run in. Never cancelled:
+     * these components live until the process exits, and a save in flight when
+     * `GlobalComponents.tearDown` runs must still reach disk. AC used
+     * `GlobalScope` for the same work before 157.
+     */
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     private val noOpCrashReporter = object : CrashReporting {
         override fun submitCaughtException(throwable: Throwable): Job = Job()
 
@@ -217,7 +228,7 @@ class Core(
     }
 
     val fileUploadsDirCleaner: FileUploadsDirCleaner by lazy {
-        FileUploadsDirCleaner { context.cacheDir }
+        FileUploadsDirCleaner(scope = applicationScope) { context.cacheDir }
     }
 
     val historyMetadataService by lazy {
@@ -337,7 +348,7 @@ class Core(
      * The storage component for persisting browser tab sessions.
      */
     val sessionStorage: SessionStorage by lazy {
-        SessionStorage(context, engine)
+        SessionStorage(context, engine, applicationScope = applicationScope)
     }
 
     /**

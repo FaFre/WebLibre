@@ -53,7 +53,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
 import mozilla.components.browser.session.storage.AutoSave
-import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.RestoreCompleteAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.CustomTabListAction
@@ -360,14 +359,10 @@ object GlobalComponents {
                 if (restoredState != null) {
                     newComponents.core.recordPreviousSessionTabs(restoredState)
                     newComponents.useCases.tabsUseCases.restore(
-                        state = RecoverableBrowserState(
-                            tabs = restoredState.tabs,
-                            // Intentionally do not resume the previously selected tab during the
-                            // first full setup. We restore the tab list, but let startup open in
-                            // its neutral/default state instead of jumping back into prior content.
-                            selectedTabId = null,
-                            tabPartitions = restoredState.tabPartitions
-                        ),
+                        // Intentionally do not resume the previously selected tab during the
+                        // first full setup. We restore the tab list, but let startup open in
+                        // its neutral/default state instead of jumping back into prior content.
+                        state = restoredState.copy(selectedTabId = null),
                         restoreLocation = TabListAction.RestoreAction.RestoreLocation.BEGINNING,
                     )
                 }
@@ -398,6 +393,7 @@ object GlobalComponents {
                 store = newComponents.core.store,
                 sessionStorage = newComponents.core.sessionWriter,
                 minimumIntervalMs = AutoSave.DEFAULT_INTERVAL_MILLISECONDS,
+                applicationScope = newComponents.core.applicationScope,
             )
                 .periodicallyInForeground(interval = 30, unit = TimeUnit.SECONDS)
                 .whenGoingToBackground()
