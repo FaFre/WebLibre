@@ -86,7 +86,23 @@ class _IsolatedProcessEnabledTile extends HookConsumerWidget {
 
     return SwitchListTile.adaptive(
       title: Text(l10n.settings_isolatedContentProcessTitle),
-      subtitle: Text(l10n.settings_isolatedContentProcessSubtitle),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.settings_isolatedContentProcessSubtitle),
+          if (isolatedProcessEnabled)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                '\u26a0\ufe0f May cause Cloudflare verification or video playback issues on some devices.',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
+      ),
       secondary: const Icon(MdiIcons.shieldCheck),
       value: isolatedProcessEnabled,
       onChanged: (value) async {
@@ -118,7 +134,23 @@ class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
 
     return SwitchListTile.adaptive(
       title: Text(l10n.settings_appZygoteProcessTitle),
-      subtitle: Text(l10n.settings_appZygoteProcessSubtitle),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.settings_appZygoteProcessSubtitle),
+          if (appZygoteProcessEnabled)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Text(
+                '\u26a0\ufe0f May cause Cloudflare verification or video playback issues on some devices.',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
+      ),
       secondary: const Icon(MdiIcons.rocketLaunch),
       value: appZygoteProcessEnabled,
       onChanged: (value) async {
