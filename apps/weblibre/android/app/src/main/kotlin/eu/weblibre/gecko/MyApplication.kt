@@ -28,6 +28,7 @@ import android.os.Process
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
+import eu.weblibre.flutter_mozilla_components.performance.LadybirdPowerManager
 import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
@@ -65,6 +66,11 @@ class MyApplication : Application() {
         MegazordSetup.setupEarlyMainProcess()
 
         if (!isDefaultProcess(this)) return
+
+        // Drives Gecko's timer/media/memory prefs from Android's own lifecycle
+        // and memory-pressure signals, so a hidden or pressured app stops
+        // burning CPU and radio instead of waiting for the LMK.
+        LadybirdPowerManager.install(this)
 
         // Before anything can commit, because it must not need a profile: private
         // tabs never survive the process, so a private-browsing notification still
