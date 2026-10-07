@@ -1611,6 +1611,26 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     });
   }
 
+  /// [syncTabs] against the tab ids [readTabIds] returns, read inside the same
+  /// transaction.
+  ///
+  /// For a snapshot of the native tab list: a tab is created natively inside
+  /// the transaction that inserts its row ([upsertTabTransactional]), so the
+  /// read here either sees that tab or happens before its creation starts. A
+  /// snapshot read outside could miss a tab whose row then lands just before
+  /// the deletion.
+  Future<SyncTabsResult> syncTabsToSnapshot(
+    Future<List<String>> Function() readTabIds, {
+    ChildTabPlacement childPlacement = ChildTabPlacement.afterParent,
+  }) {
+    return db.transaction(
+      () async => await syncTabs(
+        retainTabIds: await readTabIds(),
+        childPlacement: childPlacement,
+      ),
+    );
+  }
+
   /// Syncs DB tab rows with the engine's active tab list.
   /// Returns metadata about deleted rows for follow-up cleanup.
   Future<SyncTabsResult> syncTabs({

@@ -185,6 +185,10 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
+    override fun getTabIds(): List<String> {
+        return components.core.store.state.tabs.map { it.id }
+    }
+
     override fun syncEvents(
         onSelectedTabChange: Boolean,
         onTabListChange: Boolean,

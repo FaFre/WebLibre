@@ -9900,6 +9900,27 @@ class GeckoTabsApi {
 
   final String pigeonVar_messageChannelSuffix;
 
+  /// The ids of every tab in the store right now, in its order — what the
+  /// next `onTabListChange` will report, without its debounce.
+  Future<List<String>> getTabIds() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getTabIds$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
   Future<void> syncEvents({
     required bool onSelectedTabChange,
     required bool onTabListChange,

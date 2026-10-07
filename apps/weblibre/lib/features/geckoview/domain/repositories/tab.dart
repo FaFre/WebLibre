@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/controllers/
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/startup_browsing_data_cleanup.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -1525,24 +1526,53 @@ class TabRepository extends _$TabRepository {
 
     // Catch up on the tab list emissions skipped while the restore-complete
     // gate above was closed: reconcile the DB once against the current list.
-    ref.listen(browserRestoreCompleteProvider, (
+    //
+    // Fired immediately: this repository is built when the browser view
+    // mounts, after the engine was initialized, and restoring an empty session
+    // finishes almost at once — the flag is often already true here, and a
+    // transition this listener never sees would leave every cached row of a
+    // session that came back empty (a Quit that deleted all tabs) in place.
+    ref.listen(fireImmediately: true, browserRestoreCompleteProvider, (
       previous,
       restoreComplete,
     ) async {
       if (restoreComplete && !(previous ?? false)) {
         final currentTabs = ref.read(tabListProvider).value;
-        if (currentTabs.isNotEmpty) {
-          final syncTabsResult = await db.tabDao.syncTabs(
-            retainTabIds: currentTabs,
-            childPlacement: ref
-                .read(generalSettingsWithDefaultsProvider)
-                .childTabPlacement,
+        final childPlacement = ref
+            .read(generalSettingsWithDefaultsProvider)
+            .childTabPlacement;
+
+        final SyncTabsResult syncTabsResult;
+        try {
+          syncTabsResult = currentTabs.isNotEmpty
+              ? await db.tabDao.syncTabs(
+                  retainTabIds: currentTabs,
+                  childPlacement: childPlacement,
+                )
+              // The tab list event is debounced and can still be on its way
+              // with the restored tabs, so an empty list here is not trusted
+              // on its own: reconciling against it would delete their rows.
+              // The native store decides instead — empty there is real (a
+              // Quit that deleted every tab, say) and the cached rows are
+              // stale. Read inside the reconciling transaction, so a tab being
+              // created right now cannot be missed; see syncTabsToSnapshot.
+              : await db.tabDao.syncTabsToSnapshot(
+                  GeckoTabService().getTabIds,
+                  childPlacement: childPlacement,
+                );
+        } catch (e, st) {
+          logger.e(
+            'Could not reconcile the cached tabs after the restore',
+            error: e,
+            stackTrace: st,
           );
-          _pendingIsolationCleanup.addAll(
-            syncTabsResult.deletedIsolationContextIds,
-          );
-          await _drainPendingIsolationCleanup();
+          return;
         }
+
+        _pendingIsolationCleanup.addAll(
+          syncTabsResult.deletedIsolationContextIds,
+        );
+        await _drainPendingIsolationCleanup();
       }
     });
 

@@ -1707,6 +1707,10 @@ abstract class GeckoSessionApi {
 
 @HostApi()
 abstract class GeckoTabsApi {
+  /// The ids of every tab in the store right now, in its order — what the
+  /// next `onTabListChange` will report, without its debounce.
+  List<String> getTabIds();
+
   void syncEvents({
     required bool onSelectedTabChange,
     required bool onTabListChange,
