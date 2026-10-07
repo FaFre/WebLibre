@@ -20,7 +20,6 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -45,18 +44,13 @@ class ToolbarVisibilityController extends _$ToolbarVisibilityController {
       }
     });
 
-    // Show toolbar on navigation (history state change)
-    ref.listen(
-      tabHistoryStatesProvider.select((histories) => histories[tabId]),
-      (previous, next) {
-        if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) {
-          return;
-        }
-        if (next != null && previous != null && previous != next) {
-          show();
-        }
-      },
-    );
+    // Deliberately no trigger on the session history (tabHistoryStates).
+    // GeckoView only reports that list from a session-store flush, which runs
+    // on `browser.sessionstore.interval` (10 s), so it lands up to ten seconds
+    // after the navigation — by then the user is reading and has scrolled the
+    // bar away, and showing it again reads as the bar popping up mid-scroll
+    // (https://github.com/FaFre/WebLibre/issues/653). Loading start above
+    // already covers navigations, as it does in Fenix.
 
     // Force-show when GeckoView requests toolbar expansion
     // (e.g. touch on form input)
