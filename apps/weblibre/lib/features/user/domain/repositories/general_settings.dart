@@ -58,6 +58,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'showModalBarrier': DriftSqlType.bool,
   'enableReadability': DriftSqlType.bool,
   'enforceReadability': DriftSqlType.bool,
+  'autoDeleteBrowsingDataOnStart': DriftSqlType.bool,
   'confirmBeforeQuit': DriftSqlType.bool,
   'screenshotProtectionEnabled': DriftSqlType.bool,
   'allowPrivateTabScreenshots': DriftSqlType.bool,

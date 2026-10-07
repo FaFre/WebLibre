@@ -22,10 +22,12 @@ import 'dart:async';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/repositories/pending_quit_deletion.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/startup_browsing_data_cleanup.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/exit_app.dart';
 
 class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
   _FakeGeneralSettingsRepository(this.settings);
@@ -41,6 +43,41 @@ class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
   Future<GeneralSettings> fetchSettings() => Future.value(settings);
 }
 
+/// The record, in memory, behind the real serialization.
+class _FakePendingQuitDeletionRepository extends PendingQuitDeletionRepository {
+  _FakePendingQuitDeletionRepository(this.requests);
+
+  // A test fake: tests seed and read back the record.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
+  PendingDeletions requests;
+
+  /// While set, writes wait for it: a stalled database.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
+  Completer<void>? stallWrites;
+
+  Set<DeleteBrowsingDataType> get types => requests.keys.toSet();
+
+  @override
+  Future<PendingDeletions> readStored() => Future.value(requests);
+
+  @override
+  Future<void> writeStored(PendingDeletions requests) async {
+    await stallWrites?.future;
+    this.requests = requests;
+  }
+}
+
+/// Requests as an earlier Quit leaves them; a tab request names [quitTabIds].
+PendingDeletions _requests(Set<DeleteBrowsingDataType> types) => {
+  for (final type in types)
+    type: (
+      requestId: 'earlier-${type.name}',
+      tabIds: type == DeleteBrowsingDataType.tabs ? _quitTabIds : null,
+    ),
+};
+
+const _quitTabIds = {'quit-1', 'quit-2'};
+
 typedef _Deletion = ({
   DeleteBrowsingDataType type,
   bool previousSessionTabsOnly,
@@ -55,19 +92,27 @@ class _FakeBrowserDataService extends BrowserDataService {
   /// Types whose next deletion throws, once each.
   final failOnce = <DeleteBrowsingDataType>{};
 
-  /// Types whose deletion waits for this to complete.
+  /// Types whose next deletion waits for this to complete, once each.
   final holds = <DeleteBrowsingDataType, Completer<void>>{};
+
+  /// The tab ids each tab deletion was limited to; null for none.
+  final tabScopes = <Set<String>?>[];
+
+  @override
+  Future<Set<String>> sessionTabIds() async => {'open-1'};
 
   @override
   Future<void> deleteDataType(
     DeleteBrowsingDataType type, {
     bool previousSessionTabsOnly = false,
+    Set<String>? onlyTabIds,
   }) async {
     deletions.add((
       type: type,
       previousSessionTabsOnly: previousSessionTabsOnly,
     ));
-    await holds[type]?.future;
+    if (type == DeleteBrowsingDataType.tabs) tabScopes.add(onlyTabIds);
+    await holds.remove(type)?.future;
     if (failOnce.remove(type)) {
       throw Exception('simulated native failure');
     }
@@ -75,26 +120,35 @@ class _FakeBrowserDataService extends BrowserDataService {
 }
 
 typedef _Harness = ({
+  ProviderContainer container,
   StartupBrowsingDataCleanup cleanup,
   List<_Deletion> deletions,
   _FakeBrowserDataService browserData,
   _FakeGeneralSettingsRepository settings,
+  _FakePendingQuitDeletionRepository pendingQuit,
 });
 
 _Harness _harness({
   Set<DeleteBrowsingDataType>? autoDelete = const {DeleteBrowsingDataType.tabs},
+  bool onStart = true,
+  Set<DeleteBrowsingDataType> pendingQuit = const {},
   Duration waitTimeout = const Duration(seconds: 30),
 }) {
   final deletions = <_Deletion>[];
   final browserData = _FakeBrowserDataService(deletions);
   final settings = _FakeGeneralSettingsRepository(
-    GeneralSettings.withDefaults(autoDeleteBrowsingData: autoDelete),
+    GeneralSettings.withDefaults(
+      autoDeleteBrowsingData: autoDelete,
+      autoDeleteBrowsingDataOnStart: onStart,
+    ),
   );
+  final pending = _FakePendingQuitDeletionRepository(_requests(pendingQuit));
 
   final container = ProviderContainer(
     overrides: [
       generalSettingsRepositoryProvider.overrideWith(() => settings),
       browserDataServiceProvider.overrideWith(() => browserData),
+      pendingQuitDeletionRepositoryProvider.overrideWith(() => pending),
       startupBrowsingDataCleanupProvider.overrideWith(
         () => StartupBrowsingDataCleanup(waitTimeout: waitTimeout),
       ),
@@ -103,10 +157,12 @@ _Harness _harness({
   addTearDown(container.dispose);
 
   return (
+    container: container,
     cleanup: container.read(startupBrowsingDataCleanupProvider.notifier),
     deletions: deletions,
     browserData: browserData,
     settings: settings,
+    pendingQuit: pending,
   );
 }
 
@@ -311,6 +367,225 @@ void main() {
       final h = _harness();
 
       await h.cleanup.waitUntilDone();
+    });
+  });
+
+  group('StartupBrowsingDataCleanup when deleting on Quit only', () {
+    test('deletes nothing after a Quit that finished', () async {
+      final h = _harness(
+        autoDelete: {DeleteBrowsingDataType.tabs, DeleteBrowsingDataType.cache},
+        onStart: false,
+      );
+
+      await h.cleanup.start();
+
+      expect(h.deletions, isEmpty);
+    });
+
+    test('finishes what the last Quit left undeleted', () async {
+      final h = _harness(
+        autoDelete: {DeleteBrowsingDataType.tabs, DeleteBrowsingDataType.cache},
+        onStart: false,
+        pendingQuit: {DeleteBrowsingDataType.cache},
+      );
+
+      await h.cleanup.start();
+
+      expect(_types(h), [DeleteBrowsingDataType.cache]);
+      expect(h.pendingQuit.types, isEmpty);
+    });
+
+    test(
+      "deletes only the tabs the Quit named, of the restored ones",
+      () async {
+        final h = _harness(
+          onStart: false,
+          pendingQuit: {DeleteBrowsingDataType.tabs},
+        );
+
+        await h.cleanup.start();
+
+        expect(h.deletions, [
+          (type: DeleteBrowsingDataType.tabs, previousSessionTabsOnly: true),
+        ]);
+        expect(h.browserData.tabScopes, [_quitTabIds]);
+        expect(h.pendingQuit.types, isEmpty);
+      },
+    );
+
+    test('takes deleted types off the record, keeping what failed', () async {
+      final h = _harness(
+        autoDelete: null,
+        onStart: false,
+        pendingQuit: {
+          DeleteBrowsingDataType.tabs,
+          DeleteBrowsingDataType.cookies,
+        },
+      );
+      h.browserData.failOnce.add(DeleteBrowsingDataType.cookies);
+
+      await h.cleanup.start();
+
+      expect(h.pendingQuit.types, {DeleteBrowsingDataType.cookies});
+    });
+
+    test(
+      'a failed tab deletion stays requested, still naming its tabs',
+      () async {
+        // Safe to hand on: a later start deletes only the tabs it names, never
+        // ones opened in between.
+        final h = _harness(
+          autoDelete: null,
+          onStart: false,
+          pendingQuit: {DeleteBrowsingDataType.tabs},
+        );
+        h.browserData.failOnce.add(DeleteBrowsingDataType.tabs);
+
+        await h.cleanup.start();
+        expect(
+          h.pendingQuit.requests[DeleteBrowsingDataType.tabs]?.tabIds,
+          _quitTabIds,
+        );
+
+        // Retried in this process, with the same scope.
+        await h.cleanup.start();
+        expect(h.browserData.tabScopes, [_quitTabIds, _quitTabIds]);
+        expect(h.pendingQuit.types, isEmpty);
+      },
+    );
+
+    test('keeps the record for a type skipped once browsing began', () async {
+      final h = _harness(
+        autoDelete: null,
+        onStart: false,
+        pendingQuit: {
+          DeleteBrowsingDataType.history,
+          DeleteBrowsingDataType.cookies,
+        },
+        waitTimeout: const Duration(milliseconds: 20),
+      );
+      final hold = h.browserData.holds[DeleteBrowsingDataType.history] =
+          Completer();
+
+      final run = h.cleanup.start();
+      await h.cleanup.waitUntilDone();
+      hold.complete();
+      await run;
+
+      expect(_types(h), [DeleteBrowsingDataType.history]);
+      expect(h.pendingQuit.types, {DeleteBrowsingDataType.cookies});
+    });
+
+    test('a stalled record write does not hold new tabs back', () async {
+      final h = _harness(
+        autoDelete: null,
+        onStart: false,
+        pendingQuit: {
+          DeleteBrowsingDataType.cache,
+          DeleteBrowsingDataType.tabs,
+        },
+        waitTimeout: const Duration(milliseconds: 20),
+      );
+      // The cache deletion succeeds; recording that never returns.
+      h.pendingQuit.stallWrites = Completer();
+
+      unawaited(h.cleanup.start());
+
+      await h.cleanup.waitUntilDone().timeout(const Duration(seconds: 1));
+    });
+  });
+
+  group('StartupBrowsingDataCleanup during a Quit', () {
+    _Harness slowHistory() {
+      final h = _harness(
+        autoDelete: null,
+        onStart: false,
+        pendingQuit: {
+          DeleteBrowsingDataType.history,
+          DeleteBrowsingDataType.cookies,
+        },
+        waitTimeout: const Duration(milliseconds: 20),
+      );
+      h.browserData.holds[DeleteBrowsingDataType.history] = Completer();
+      return h;
+    }
+
+    test(
+      'keeps what the Quit recorded and completes its own deletion',
+      () async {
+        // The history deletion outlasts the wait; the user browses and quits,
+        // and the Quit's download deletion fails.
+        final h = slowHistory();
+        final hold = h.browserData.holds[DeleteBrowsingDataType.history]!;
+
+        final run = h.cleanup.start();
+        await h.cleanup.waitUntilDone();
+        h.browserData.failOnce.add(DeleteBrowsingDataType.downloads);
+        await deleteBrowsingDataOnQuit(h.container, {
+          DeleteBrowsingDataType.downloads,
+        });
+
+        hold.complete();
+        await run;
+
+        // History is done and comes off; cookies were skipped once browsing
+        // began; downloads is the Quit's.
+        expect(h.pendingQuit.types, {
+          DeleteBrowsingDataType.cookies,
+          DeleteBrowsingDataType.downloads,
+        });
+      },
+    );
+
+    test(
+      'an older deletion finishing does not complete a newer request',
+      () async {
+        final h = slowHistory();
+        final hold = h.browserData.holds[DeleteBrowsingDataType.history]!;
+
+        final run = h.cleanup.start();
+        await h.cleanup.waitUntilDone();
+        // The Quit asks for history again, and its own deletion fails.
+        h.browserData.failOnce.add(DeleteBrowsingDataType.history);
+        await deleteBrowsingDataOnQuit(h.container, {
+          DeleteBrowsingDataType.history,
+        });
+
+        hold.complete();
+        await run;
+
+        expect(h.pendingQuit.types, contains(DeleteBrowsingDataType.history));
+        expect(
+          h.pendingQuit.requests[DeleteBrowsingDataType.history]?.requestId,
+          isNot('earlier-history'),
+        );
+      },
+    );
+  });
+
+  group('StartupBrowsingDataCleanup when deleting on start too', () {
+    test('also finishes what was picked for the last Quit only', () async {
+      final h = _harness(
+        autoDelete: {DeleteBrowsingDataType.tabs},
+        pendingQuit: {DeleteBrowsingDataType.cookies},
+      );
+
+      await h.cleanup.start();
+
+      expect(_types(h), [
+        DeleteBrowsingDataType.cookies,
+        DeleteBrowsingDataType.tabs,
+      ]);
+      expect(h.pendingQuit.types, isEmpty);
+    });
+
+    test('takes every restored tab, which completes a tab request', () async {
+      final h = _harness(pendingQuit: {DeleteBrowsingDataType.tabs});
+
+      await h.cleanup.start();
+
+      expect(h.browserData.tabScopes, [null]);
+      expect(h.pendingQuit.types, isEmpty);
     });
   });
 }

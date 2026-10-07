@@ -11039,7 +11039,7 @@
   },
   "settings_autoDeleteBrowsingDataTitle": "Delete Browsing Data Automatically",
   "@settings_autoDeleteBrowsingDataTitle": {
-    "description": "Switch: delete the chosen browsing data automatically, both when the user quits the app and every time the app starts. Supersedes the former \"Incognito Mode\" switch."
+    "description": "Switch: delete the chosen browsing data automatically when the user quits the app and, unless \"Also Delete on Start\" is turned off, every time the app starts. Supersedes the former \"Incognito Mode\" switch."
   },
   "settings_autoDeleteBrowsingDataKeywords": "incognito, private mode, quit, exit, clear on exit, delete on quit, clear data",
   "@settings_autoDeleteBrowsingDataKeywords": {
@@ -11048,6 +11048,18 @@
   "settings_autoDeleteBrowsingDataSubtitle": "Delete selected browsing data when you quit or every time WebLibre starts",
   "@settings_autoDeleteBrowsingDataSubtitle": {
     "description": "Explanation under \"Delete Browsing Data Automatically\"."
+  },
+  "settings_autoDeleteBrowsingDataQuitOnlySubtitle": "Delete selected browsing data when you quit WebLibre",
+  "@settings_autoDeleteBrowsingDataQuitOnlySubtitle": {
+    "description": "Replaces the explanation under \"Delete Browsing Data Automatically\" while \"Also Delete on Start\" is off: the data is deleted only when the user taps Quit."
+  },
+  "settings_autoDeleteOnStartTitle": "Also Delete on Start",
+  "@settings_autoDeleteOnStartTitle": {
+    "description": "Switch under \"Delete Browsing Data Automatically\", shown while it is on. On (the default), the chosen data is also deleted every time WebLibre starts; off, only when the user taps Quit."
+  },
+  "settings_autoDeleteOnStartSubtitle": "Covers sessions that ended without Quit, such as WebLibre being swiped away or closed by Android in the background. When off, their data stays until you next quit.",
+  "@settings_autoDeleteOnStartSubtitle": {
+    "description": "Explanation under \"Also Delete on Start\". \"Quit\" is the Quit button / menu entry. Android may end an app it has kept in the background at any time."
   },
   "settings_confirmBeforeQuitTitle": "Confirm Before Quitting",
   "@settings_confirmBeforeQuitTitle": {
@@ -14786,6 +14798,14 @@
   "user_quitBrowserDontAskAgainHint": "You can turn this back on in settings.",
   "@user_quitBrowserDontAskAgainHint": {
     "description": "Small text under \"Don't ask again\" in the quit confirmation dialog."
+  },
+  "user_quitBrowserDontAskAgainSavesQuit": "The data ticked above will be deleted on every quit. You can change both in settings.",
+  "@user_quitBrowserDontAskAgainSavesQuit": {
+    "description": "Replaces the small text under \"Don't ask again\" in the quit confirmation dialog while it is ticked and the user also ticked browsing data to delete. Without the dialog there is no other place to pick data for one quit, so the ticked data is added to the \"Delete Browsing Data Automatically\" setting and deleted on every quit from now on."
+  },
+  "user_quitBrowserDontAskAgainSavesQuitAndStart": "The data ticked above will be deleted on every quit and every time WebLibre starts. You can change both in settings.",
+  "@user_quitBrowserDontAskAgainSavesQuitAndStart": {
+    "description": "Same as user_quitBrowserDontAskAgainSavesQuit, for when \"Delete Browsing Data Automatically\" also deletes on every start: the ticked data is added to it and deleted on every quit and every start from now on."
   },
   "user_quitBrowserDeleteDataTitle": "Delete browsing data",
   "@user_quitBrowserDeleteDataTitle": {

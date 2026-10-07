@@ -9,9 +9,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.action.UndoAction
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.createTab
+import mozilla.components.browser.state.state.recover.RecoverableTab
+import mozilla.components.browser.state.state.recover.TabState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.session.middleware.undo.UndoMiddleware
 
@@ -59,11 +62,55 @@ class RemovePreviousSessionTabsTest {
     }
 
     @Test
+    fun `only the listed restored tabs go when a list is given`() {
+        // An earlier Quit's deletion names its tabs; "kept" was restored too but
+        // is not one of them, and "new" was opened since.
+        val store = storeWith("quit-1", "kept", "new")
+
+        store.removePreviousSessionTabs(
+            setOf("quit-1", "kept"),
+            onlyTabIds = setOf("quit-1", "new"),
+        )
+
+        assertEquals(listOf("kept", "new"), store.state.tabs.map { it.id })
+    }
+
+    @Test
     fun `nothing restored means nothing removed and no undo entry touched`() {
         val store = storeWith("a", "b")
 
         store.removePreviousSessionTabs(emptySet())
 
         assertEquals(listOf("a", "b"), store.state.tabs.map { it.id })
+    }
+}
+
+class RestorableTabIdsTest {
+    private fun saved(vararg tabIds: String) = RecoverableBrowserState(
+        tabs = tabIds.map {
+            RecoverableTab(engineSessionState = null, state = TabState(id = it, url = "https://$it.example"))
+        },
+        selectedTabId = null,
+    )
+
+    @Test
+    fun `includes a tab closed since the session was last saved`() {
+        // Autosave is debounced: "closed" is gone from the store but still on disk,
+        // and a restore would bring it back.
+        val state = BrowserState(tabs = listOf(createTab(url = "https://open.example", id = "open")))
+
+        assertEquals(listOf("open", "closed"), state.restorableTabIds(saved("open", "closed")))
+    }
+
+    @Test
+    fun `leaves out private tabs, which are never saved`() {
+        val state = BrowserState(
+            tabs = listOf(
+                createTab(url = "https://open.example", id = "open"),
+                createTab(url = "https://private.example", id = "private", private = true),
+            ),
+        )
+
+        assertEquals(listOf("open"), state.restorableTabIds(saved = null))
     }
 }

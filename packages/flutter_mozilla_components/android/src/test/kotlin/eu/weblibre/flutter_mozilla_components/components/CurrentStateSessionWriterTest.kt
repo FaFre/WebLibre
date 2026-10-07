@@ -39,6 +39,35 @@ private class RecordingStorage(
 
 class CurrentStateSessionWriterTest {
     @Test
+    fun `a read while not writing waits for the write in progress`() {
+        // An autosave read the store with a tab that is closed just after, and is
+        // mid-write: a Quit reading the file now must see that write, not the
+        // file from before it.
+        val release = CountDownLatch(1)
+        val started = CountDownLatch(1)
+        val storage = RecordingStorage(holdFirstWrite = release, firstWriteStarted = started)
+        val writer = CurrentStateSessionWriter(storage, { withTabs }, isCleared = { true })
+
+        val autosave = thread { writer.save(withTabs) }
+        assertTrue(started.await(5, TimeUnit.SECONDS))
+
+        var writesSeen = -1
+        val quit = thread {
+            writer.whileNotWriting { writesSeen = synchronized(storage.written) { storage.written.size } }
+        }
+
+        quit.join(200)
+        assertTrue(quit.isAlive)
+
+        release.countDown()
+        autosave.join(5_000)
+        quit.join(5_000)
+
+        // The write had finished by the time the file was read.
+        assertEquals(1, writesSeen)
+    }
+
+    @Test
     fun `a stale autosave snapshot is replaced by the current state`() {
         val storage = RecordingStorage()
         val writer = CurrentStateSessionWriter(storage, { empty }, isCleared = { true })

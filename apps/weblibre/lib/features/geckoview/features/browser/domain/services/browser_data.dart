@@ -67,15 +67,17 @@ class BrowserDataService extends _$BrowserDataService {
   ///
   /// With [previousSessionTabsOnly], [DeleteBrowsingDataType.tabs] removes only
   /// the tabs the session restore brought back, never one opened since the
-  /// engine started. Other types ignore it.
+  /// engine started — and with [onlyTabIds] as well, only those of them listed
+  /// there. Other types ignore both.
   Future<void> deleteDataType(
     DeleteBrowsingDataType type, {
     bool previousSessionTabsOnly = false,
+    Set<String>? onlyTabIds,
   }) async {
     switch (type) {
       case DeleteBrowsingDataType.tabs:
         if (previousSessionTabsOnly) {
-          await _service.deletePreviousSessionTabs();
+          await _service.deletePreviousSessionTabs(onlyTabIds: onlyTabIds);
         } else {
           await _service.deleteTabs();
         }
@@ -99,6 +101,10 @@ class BrowserDataService extends _$BrowserDataService {
         await _service.deleteDownloads();
     }
   }
+
+  /// The ids of every tab the next session restore could bring back, including
+  /// ones closed since the session was last saved.
+  Future<Set<String>> sessionTabIds() => _service.getSessionTabIds();
 
   Future<void> clearDataForContext(String contextId) {
     return _service.clearDataForContext(contextId);

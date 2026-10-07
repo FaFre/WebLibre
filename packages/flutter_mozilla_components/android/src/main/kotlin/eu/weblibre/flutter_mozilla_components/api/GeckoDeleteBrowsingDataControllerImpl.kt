@@ -19,7 +19,10 @@ import mozilla.components.browser.state.action.RecentlyClosedAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.UndoAction
 import mozilla.components.browser.state.selector.allTabs
+import mozilla.components.browser.state.selector.normalTabs
+import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.SessionState
+import mozilla.components.browser.session.storage.RecoverableBrowserState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.Engine
 import mozilla.components.concept.engine.translate.ModelManagementOptions
@@ -92,6 +95,26 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
         }
     }
 
+    /**
+     * Every tab the next session restore could bring back: the open normal tabs,
+     * and the tabs still in the saved session. The file lags behind the store —
+     * autosave is debounced — so a tab closed just before a Quit can still be on
+     * disk, and a process that dies before the Quit's own write restores it.
+     *
+     * Both are read under the session writer's lock, so no write is half done: one
+     * that had already read the store but not yet written it would otherwise land
+     * after the file was read, bringing back a tab closed since. Any write after
+     * this reads the store later, and adds no tab that is open now.
+     */
+    override suspend fun getSessionTabIds(): List<String> {
+        val core = components.core
+        return withContext(Dispatchers.IO) {
+            core.sessionWriter.whileNotWriting {
+                core.store.state.restorableTabIds(core.sessionStorage.restore())
+            }
+        }
+    }
+
     override suspend fun deleteBrowsingHistory() {
         withContext(Dispatchers.Main) {
             components.core.historyStorage.deleteEverything()
@@ -147,14 +170,21 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
      * opened in this session — a launch link, the home page. Those are not the
      * previous session's data and must survive.
      *
+     * With [onlyTabIds], only the restored tabs listed there go: a deletion an
+     * earlier Quit could not finish names the tabs it meant, so it can never reach
+     * a tab opened in a later session, however many starts it takes.
+     *
      * See [removePreviousSessionTabs] for why the removal is not undoable.
      */
-    override suspend fun deletePreviousSessionTabs() {
+    override suspend fun deletePreviousSessionTabs(onlyTabIds: List<String>?) {
         val core = components.core
         core.store.stateFlow.first { it.restoreComplete }
 
         withContext(Dispatchers.Main) {
-            core.store.removePreviousSessionTabs(core.previousSessionTabIds)
+            core.store.removePreviousSessionTabs(
+                core.previousSessionTabIds,
+                onlyTabIds = onlyTabIds?.toSet(),
+            )
         }
         withContext(Dispatchers.IO) {
             core.sessionWriter.saveCurrentStateOrThrow()
@@ -248,17 +278,30 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
 }
 
 /**
- * Removes whichever of [previousSessionTabIds] are still open, and nothing else.
+ * Removes whichever of [previousSessionTabIds] are still open — limited to
+ * [onlyTabIds] when given — and nothing else.
  *
  * Not undoable: [mozilla.components.feature.session.middleware.undo.UndoMiddleware]
  * records every [TabListAction.RemoveTabsAction] for "undo close", so the entry it
  * just made is cleared by its tag. Dispatch is synchronous, so the tag read back is
  * that one.
  */
-internal fun BrowserStore.removePreviousSessionTabs(previousSessionTabIds: Set<String>) {
-    val tabIds = state.tabs.map { it.id }.filter { it in previousSessionTabIds }
+internal fun BrowserStore.removePreviousSessionTabs(
+    previousSessionTabIds: Set<String>,
+    onlyTabIds: Set<String>? = null,
+) {
+    val tabIds = state.tabs.map { it.id }.filter {
+        it in previousSessionTabIds && (onlyTabIds == null || it in onlyTabIds)
+    }
     if (tabIds.isEmpty()) return
 
     dispatch(TabListAction.RemoveTabsAction(tabIds))
     dispatch(UndoAction.ClearRecoverableTabs(state.undoHistory.tag))
 }
+
+/**
+ * The ids of the open normal tabs and of the tabs in [saved], the session on disk:
+ * everything a session restore could bring back.
+ */
+internal fun BrowserState.restorableTabIds(saved: RecoverableBrowserState?): List<String> =
+    (normalTabs.map { it.id } + saved?.tabs.orEmpty().map { it.state.id }).distinct()

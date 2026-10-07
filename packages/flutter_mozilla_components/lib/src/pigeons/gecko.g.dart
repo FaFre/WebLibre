@@ -12847,9 +12847,32 @@ class GeckoDeleteBrowsingDataController {
     );
   }
 
+  /// The ids of every tab the next session restore could bring back: the open
+  /// normal tabs, and those still in the saved session, which lags behind
+  /// (private tabs are never saved).
+  Future<List<String>> getSessionTabIds() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.getSessionTabIds$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
   /// Deletes only the tabs the session restore brought back, once it has
-  /// completed — never a tab opened since the engine started.
-  Future<void> deletePreviousSessionTabs() async {
+  /// completed — never a tab opened since the engine started. With
+  /// [onlyTabIds], only those of them listed there.
+  Future<void> deletePreviousSessionTabs(List<String>? onlyTabIds) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deletePreviousSessionTabs$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -12857,7 +12880,9 @@ class GeckoDeleteBrowsingDataController {
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[onlyTabIds],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

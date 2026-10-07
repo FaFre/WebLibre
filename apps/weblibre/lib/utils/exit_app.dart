@@ -19,11 +19,13 @@
  */
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/repositories/pending_quit_deletion.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -36,9 +38,9 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 /// armed relaunch runs: the trampoline has to be started from a process that is
 /// still alive, and `exit(0)` from Dart skips that.
 ///
-/// [deleteBrowsingData] is the automatic deletion an explicit Quit runs. Only
-/// Quit passes it — never a restart, nor a settings prompt asking to quit so a
-/// change can take effect.
+/// [deleteBrowsingData] is what an explicit Quit deletes: the automatic
+/// deletion plus anything picked for that Quit. Only Quit passes it — never a
+/// restart, nor a settings prompt asking to quit so a change can take effect.
 Future<void> exitApp(
   ProviderContainer container, {
   bool restart = false,
@@ -57,22 +59,9 @@ Future<void> exitApp(
     logger.e('Failed to close tabs', error: e, stackTrace: st);
   }
 
-  // 1b. The browsing data the user chose to delete automatically. If this
-  //     process dies half way, the next start deletes the same data anyway.
-  if (deleteBrowsingData != null && deleteBrowsingData.isNotEmpty) {
-    try {
-      await container
-          .read(browserDataServiceProvider.notifier)
-          .deleteData(deleteBrowsingData);
-      logger.i('Deleted browsing data on quit');
-    } catch (e, st) {
-      // Every selected type was still attempted; see deleteData.
-      logger.e(
-        'Failed to delete some browsing data on quit',
-        error: e,
-        stackTrace: st,
-      );
-    }
+  // 1b. The browsing data this Quit deletes.
+  if (deleteBrowsingData != null) {
+    await deleteBrowsingDataOnQuit(container, deleteBrowsingData);
   }
 
   // 1c. Explicit-Quit cleanup for containers with "Clear Data on Exit" enabled.
@@ -180,4 +169,76 @@ Future<void> exitApp(
   }
 
   exit(0);
+}
+
+/// Deletes [types] for an explicit Quit, recorded first: if a type fails or
+/// the process dies half way, the next start finishes the deletion, even when
+/// automatic deletion does not run on start. Never throws.
+///
+/// Each type is recorded as its own request, added next to whatever an earlier
+/// Quit left outstanding, and completed as soon as it is deleted, so a later
+/// start never repeats a deletion that succeeded. The tab request names every
+/// tab the next restore could bring back — those open now, and those the saved
+/// session still holds: a later start deletes those if they are still there,
+/// and never a tab opened since.
+@visibleForTesting
+Future<void> deleteBrowsingDataOnQuit(
+  ProviderContainer container,
+  Set<DeleteBrowsingDataType> types,
+) async {
+  if (types.isEmpty) return;
+
+  final record = container.read(pendingQuitDeletionRepositoryProvider.notifier);
+  final browserData = container.read(browserDataServiceProvider.notifier);
+
+  Set<String>? tabIds;
+  if (types.contains(DeleteBrowsingDataType.tabs)) {
+    try {
+      tabIds = await browserData.sessionTabIds();
+    } catch (e, st) {
+      // Without them the tab deletion goes unrecorded; it is still attempted.
+      logger.e('Failed to read the open tabs', error: e, stackTrace: st);
+    }
+  }
+
+  PendingDeletions requests = const {};
+  try {
+    requests = await record.request(types, tabIds: tabIds);
+  } catch (e, st) {
+    // Deleting matters more than the record of it.
+    logger.e('Failed to record the deletion on quit', error: e, stackTrace: st);
+  }
+
+  var failed = false;
+  for (final type in types) {
+    try {
+      await browserData.deleteDataType(type);
+    } catch (e, st) {
+      // The others are still attempted; this one stays recorded for the next
+      // start.
+      failed = true;
+      logger.e(
+        'Failed to delete ${type.name} on quit',
+        error: e,
+        stackTrace: st,
+      );
+      continue;
+    }
+
+    if (requests[type] case final request?) {
+      try {
+        await record.complete(type, request.requestId);
+      } catch (e, st) {
+        // The next start repeats this deletion, which does no harm: it is
+        // scoped like the request.
+        logger.e(
+          'Failed to complete the record of ${type.name} on quit',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+  }
+
+  if (!failed) logger.i('Deleted browsing data on quit');
 }

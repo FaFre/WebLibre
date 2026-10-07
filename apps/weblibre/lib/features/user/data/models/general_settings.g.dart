@@ -27,6 +27,10 @@ abstract class _$GeneralSettingsCWProxy {
     Set<DeleteBrowsingDataType>? autoDeleteBrowsingData,
   );
 
+  GeneralSettings autoDeleteBrowsingDataOnStart(
+    bool autoDeleteBrowsingDataOnStart,
+  );
+
   GeneralSettings confirmBeforeQuit(bool confirmBeforeQuit);
 
   GeneralSettings screenshotProtectionEnabled(bool screenshotProtectionEnabled);
@@ -250,6 +254,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool enableReadability,
     bool enforceReadability,
     Set<DeleteBrowsingDataType>? autoDeleteBrowsingData,
+    bool autoDeleteBrowsingDataOnStart,
     bool confirmBeforeQuit,
     bool screenshotProtectionEnabled,
     bool allowPrivateTabScreenshots,
@@ -380,6 +385,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings autoDeleteBrowsingData(
     Set<DeleteBrowsingDataType>? autoDeleteBrowsingData,
   ) => call(autoDeleteBrowsingData: autoDeleteBrowsingData);
+
+  @override
+  GeneralSettings autoDeleteBrowsingDataOnStart(
+    bool autoDeleteBrowsingDataOnStart,
+  ) => call(autoDeleteBrowsingDataOnStart: autoDeleteBrowsingDataOnStart);
 
   @override
   GeneralSettings confirmBeforeQuit(bool confirmBeforeQuit) =>
@@ -771,6 +781,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? enableReadability = const $CopyWithPlaceholder(),
     Object? enforceReadability = const $CopyWithPlaceholder(),
     Object? autoDeleteBrowsingData = const $CopyWithPlaceholder(),
+    Object? autoDeleteBrowsingDataOnStart = const $CopyWithPlaceholder(),
     Object? confirmBeforeQuit = const $CopyWithPlaceholder(),
     Object? screenshotProtectionEnabled = const $CopyWithPlaceholder(),
     Object? allowPrivateTabScreenshots = const $CopyWithPlaceholder(),
@@ -909,6 +920,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.autoDeleteBrowsingData
           // ignore: cast_nullable_to_non_nullable
           : autoDeleteBrowsingData as Set<DeleteBrowsingDataType>?,
+      autoDeleteBrowsingDataOnStart:
+          autoDeleteBrowsingDataOnStart == const $CopyWithPlaceholder() ||
+              autoDeleteBrowsingDataOnStart == null
+          ? _value.autoDeleteBrowsingDataOnStart
+          // ignore: cast_nullable_to_non_nullable
+          : autoDeleteBrowsingDataOnStart as bool,
       confirmBeforeQuit:
           confirmBeforeQuit == const $CopyWithPlaceholder() ||
               confirmBeforeQuit == null
@@ -1443,6 +1460,7 @@ GeneralSettings _$GeneralSettingsFromJson(
   autoDeleteBrowsingData: (json['deleteBrowsingDataOnQuit'] as List<dynamic>?)
       ?.map((e) => $enumDecode(_$DeleteBrowsingDataTypeEnumMap, e))
       .toSet(),
+  autoDeleteBrowsingDataOnStart: json['autoDeleteBrowsingDataOnStart'] as bool?,
   confirmBeforeQuit: json['confirmBeforeQuit'] as bool?,
   screenshotProtectionEnabled: json['screenshotProtectionEnabled'] as bool?,
   allowPrivateTabScreenshots: json['allowPrivateTabScreenshots'] as bool?,
@@ -1631,6 +1649,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'deleteBrowsingDataOnQuit': instance.autoDeleteBrowsingData
       ?.map((e) => _$DeleteBrowsingDataTypeEnumMap[e]!)
       .toList(),
+  'autoDeleteBrowsingDataOnStart': instance.autoDeleteBrowsingDataOnStart,
   'confirmBeforeQuit': instance.confirmBeforeQuit,
   'screenshotProtectionEnabled': instance.screenshotProtectionEnabled,
   'allowPrivateTabScreenshots': instance.allowPrivateTabScreenshots,

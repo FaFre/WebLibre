@@ -9004,6 +9004,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Ausgewählte Browserdaten beim Beenden oder bei jedem Start von WebLibre löschen';
 
   @override
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle =>
+      'Ausgewählte Browserdaten beim Beenden von WebLibre löschen';
+
+  @override
+  String get settings_autoDeleteOnStartTitle => 'Auch beim Start löschen';
+
+  @override
+  String get settings_autoDeleteOnStartSubtitle =>
+      'Erfasst Sitzungen, die ohne „Beenden“ endeten, etwa wenn WebLibre weggewischt oder von Android im Hintergrund geschlossen wurde. Ausgeschaltet bleiben deren Daten bis zum nächsten Beenden.';
+
+  @override
   String get settings_confirmBeforeQuitTitle => 'Vor dem Beenden nachfragen';
 
   @override
@@ -12109,6 +12120,14 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get user_quitBrowserDontAskAgainHint =>
       'Lässt sich in den Einstellungen wieder einschalten.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuit =>
+      'Die oben ausgewählten Daten werden dann bei jedem Beenden gelöscht. Beides lässt sich in den Einstellungen ändern.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart =>
+      'Die oben ausgewählten Daten werden dann bei jedem Beenden und bei jedem Start von WebLibre gelöscht. Beides lässt sich in den Einstellungen ändern.';
 
   @override
   String get user_quitBrowserDeleteDataTitle => 'Browserdaten löschen';

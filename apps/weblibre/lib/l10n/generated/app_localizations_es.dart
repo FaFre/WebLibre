@@ -9069,6 +9069,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'Eliminar los datos de navegación seleccionados al salir o cada vez que se inicia WebLibre';
 
   @override
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle =>
+      'Eliminar los datos de navegación seleccionados al salir de WebLibre';
+
+  @override
+  String get settings_autoDeleteOnStartTitle => 'Eliminar también al iniciar';
+
+  @override
+  String get settings_autoDeleteOnStartSubtitle =>
+      'Cubre las sesiones que terminaron sin «Salir», por ejemplo si deslizaste WebLibre para cerrarlo o Android lo cerró en segundo plano. Si está desactivado, sus datos se conservan hasta la próxima vez que salgas.';
+
+  @override
   String get settings_confirmBeforeQuitTitle => 'Confirmar antes de salir';
 
   @override
@@ -12203,6 +12214,14 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get user_quitBrowserDontAskAgainHint =>
       'Puedes volver a activarlo en Ajustes.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuit =>
+      'Los datos marcados arriba se eliminarán cada vez que salgas. Puedes cambiar ambas cosas en Ajustes.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart =>
+      'Los datos marcados arriba se eliminarán cada vez que salgas y cada vez que se inicie WebLibre. Puedes cambiar ambas cosas en Ajustes.';
 
   @override
   String get user_quitBrowserDeleteDataTitle => 'Eliminar datos de navegación';

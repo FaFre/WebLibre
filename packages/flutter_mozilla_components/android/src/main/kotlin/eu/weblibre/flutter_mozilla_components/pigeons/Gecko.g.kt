@@ -11631,10 +11631,17 @@ class GeckoTabContentEvents(private val binaryMessenger: BinaryMessenger, privat
 interface GeckoDeleteBrowsingDataController {
   suspend fun deleteTabs()
   /**
-   * Deletes only the tabs the session restore brought back, once it has
-   * completed — never a tab opened since the engine started.
+   * The ids of every tab the next session restore could bring back: the open
+   * normal tabs, and those still in the saved session, which lags behind
+   * (private tabs are never saved).
    */
-  suspend fun deletePreviousSessionTabs()
+  suspend fun getSessionTabIds(): List<String>
+  /**
+   * Deletes only the tabs the session restore brought back, once it has
+   * completed — never a tab opened since the engine started. With
+   * [onlyTabIds], only those of them listed there.
+   */
+  suspend fun deletePreviousSessionTabs(onlyTabIds: List<String>?)
   suspend fun deleteBrowsingHistory()
   suspend fun deleteCookiesAndSiteData()
   suspend fun deleteCachedFiles()
@@ -11672,12 +11679,31 @@ interface GeckoDeleteBrowsingDataController {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deletePreviousSessionTabs$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.getSessionTabIds$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
-                api.deletePreviousSessionTabs()
+                listOf(api.getSessionTabIds())
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoDeleteBrowsingDataController.deletePreviousSessionTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val onlyTabIdsArg = args[0] as List<String>?
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.deletePreviousSessionTabs(onlyTabIdsArg)
                 listOf(null)
               } catch (exception: Throwable) {
                 GeckoPigeonUtils.wrapError(exception)

@@ -15052,7 +15052,7 @@ abstract class AppLocalizations {
   /// **'Sites where tracking protection is disabled'**
   String get settings_trackingProtectionExceptionsTileSubtitle;
 
-  /// Switch: delete the chosen browsing data automatically, both when the user quits the app and every time the app starts. Supersedes the former "Incognito Mode" switch.
+  /// Switch: delete the chosen browsing data automatically when the user quits the app and, unless "Also Delete on Start" is turned off, every time the app starts. Supersedes the former "Incognito Mode" switch.
   ///
   /// In en, this message translates to:
   /// **'Delete Browsing Data Automatically'**
@@ -15069,6 +15069,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Delete selected browsing data when you quit or every time WebLibre starts'**
   String get settings_autoDeleteBrowsingDataSubtitle;
+
+  /// Replaces the explanation under "Delete Browsing Data Automatically" while "Also Delete on Start" is off: the data is deleted only when the user taps Quit.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete selected browsing data when you quit WebLibre'**
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle;
+
+  /// Switch under "Delete Browsing Data Automatically", shown while it is on. On (the default), the chosen data is also deleted every time WebLibre starts; off, only when the user taps Quit.
+  ///
+  /// In en, this message translates to:
+  /// **'Also Delete on Start'**
+  String get settings_autoDeleteOnStartTitle;
+
+  /// Explanation under "Also Delete on Start". "Quit" is the Quit button / menu entry. Android may end an app it has kept in the background at any time.
+  ///
+  /// In en, this message translates to:
+  /// **'Covers sessions that ended without Quit, such as WebLibre being swiped away or closed by Android in the background. When off, their data stays until you next quit.'**
+  String get settings_autoDeleteOnStartSubtitle;
 
   /// Switch: show a confirmation dialog when the user taps Quit. The dialog's "Don't ask again" checkbox turns this off.
   ///
@@ -20116,6 +20134,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can turn this back on in settings.'**
   String get user_quitBrowserDontAskAgainHint;
+
+  /// Replaces the small text under "Don't ask again" in the quit confirmation dialog while it is ticked and the user also ticked browsing data to delete. Without the dialog there is no other place to pick data for one quit, so the ticked data is added to the "Delete Browsing Data Automatically" setting and deleted on every quit from now on.
+  ///
+  /// In en, this message translates to:
+  /// **'The data ticked above will be deleted on every quit. You can change both in settings.'**
+  String get user_quitBrowserDontAskAgainSavesQuit;
+
+  /// Same as user_quitBrowserDontAskAgainSavesQuit, for when "Delete Browsing Data Automatically" also deletes on every start: the ticked data is added to it and deleted on every quit and every start from now on.
+  ///
+  /// In en, this message translates to:
+  /// **'The data ticked above will be deleted on every quit and every time WebLibre starts. You can change both in settings.'**
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart;
 
   /// Expandable row in the quit confirmation dialog. Expanded, it lists the browsing data types as checkboxes; the ticked ones are deleted on this quit.
   ///

@@ -331,14 +331,22 @@ class GeneralSettings with FastEquatable {
   final bool enforceReadability;
 
   /// The browsing data deleted automatically, or null when automatic deletion
-  /// is off. It is deleted on an explicit Quit and again on every start, which
-  /// also covers a session that ended any other way (swiped from Recents, a
-  /// crash, Android ending the process in the background).
+  /// is off. It is deleted on an explicit Quit and, while
+  /// [autoDeleteBrowsingDataOnStart] is on, again on every start.
   ///
   /// Persisted under its original name: the setting used to be called
   /// "Incognito Mode" and only ran on the next start.
   @JsonKey(name: 'deleteBrowsingDataOnQuit')
   final Set<DeleteBrowsingDataType>? autoDeleteBrowsingData;
+
+  /// Whether [autoDeleteBrowsingData] is also deleted on every start, which
+  /// covers a session that ended without a Quit (swiped from Recents, a crash,
+  /// Android ending the process in the background). Off, only an explicit Quit
+  /// deletes it, and such a session keeps its data until the next Quit.
+  ///
+  /// A Quit that did not finish its deletion is completed on the next start
+  /// either way.
+  final bool autoDeleteBrowsingDataOnStart;
 
   /// Whether an explicit Quit asks first. A long press on a Quit button never
   /// asks. Restart prompts in the settings screens always ask, since they are
@@ -640,6 +648,7 @@ class GeneralSettings with FastEquatable {
     required this.enableReadability,
     required this.enforceReadability,
     required this.autoDeleteBrowsingData,
+    required this.autoDeleteBrowsingDataOnStart,
     required this.confirmBeforeQuit,
     required this.screenshotProtectionEnabled,
     required this.allowPrivateTabScreenshots,
@@ -738,6 +747,7 @@ class GeneralSettings with FastEquatable {
     bool? enableReadability,
     bool? enforceReadability,
     this.autoDeleteBrowsingData,
+    bool? autoDeleteBrowsingDataOnStart,
     bool? confirmBeforeQuit,
     bool? screenshotProtectionEnabled,
     bool? allowPrivateTabScreenshots,
@@ -831,6 +841,7 @@ class GeneralSettings with FastEquatable {
        showModalBarrier = showModalBarrier ?? true,
        enableReadability = enableReadability ?? true,
        enforceReadability = enforceReadability ?? false,
+       autoDeleteBrowsingDataOnStart = autoDeleteBrowsingDataOnStart ?? true,
        confirmBeforeQuit = confirmBeforeQuit ?? true,
        screenshotProtectionEnabled = screenshotProtectionEnabled ?? false,
        allowPrivateTabScreenshots = allowPrivateTabScreenshots ?? false,
@@ -1130,6 +1141,7 @@ class GeneralSettings with FastEquatable {
     enableReadability,
     enforceReadability,
     autoDeleteBrowsingData,
+    autoDeleteBrowsingDataOnStart,
     confirmBeforeQuit,
     screenshotProtectionEnabled,
     allowPrivateTabScreenshots,

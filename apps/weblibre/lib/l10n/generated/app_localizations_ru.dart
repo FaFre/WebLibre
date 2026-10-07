@@ -9060,6 +9060,17 @@ class AppLocalizationsRu extends AppLocalizations {
       'Удалять выбранные данные просмотра при выходе или при каждом запуске WebLibre';
 
   @override
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle =>
+      'Удалять выбранные данные просмотра при выходе из WebLibre';
+
+  @override
+  String get settings_autoDeleteOnStartTitle => 'Удалять также при запуске';
+
+  @override
+  String get settings_autoDeleteOnStartSubtitle =>
+      'Охватывает сеансы, завершённые без «Выйти» — например, если WebLibre смахнули из списка недавних приложений или Android закрыл его в фоне. Если выключено, их данные сохраняются до следующего выхода.';
+
+  @override
   String get settings_confirmBeforeQuitTitle => 'Подтверждать выход';
 
   @override
@@ -12186,6 +12197,14 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get user_quitBrowserDontAskAgainHint =>
       'Это можно снова включить в настройках.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuit =>
+      'Отмеченные выше данные будут удаляться при каждом выходе. Оба параметра можно изменить в настройках.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart =>
+      'Отмеченные выше данные будут удаляться при каждом выходе и при каждом запуске WebLibre. Оба параметра можно изменить в настройках.';
 
   @override
   String get user_quitBrowserDeleteDataTitle => 'Удалить данные просмотра';

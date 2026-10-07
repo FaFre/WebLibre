@@ -532,6 +532,14 @@
   "@user_quitBrowserDontAskAgainHint": {
     "description": "Small text under \"Don't ask again\" in the quit confirmation dialog."
   },
+  "user_quitBrowserDontAskAgainSavesQuit": "The data ticked above will be deleted on every quit. You can change both in settings.",
+  "@user_quitBrowserDontAskAgainSavesQuit": {
+    "description": "Replaces the small text under \"Don't ask again\" in the quit confirmation dialog while it is ticked and the user also ticked browsing data to delete. Without the dialog there is no other place to pick data for one quit, so the ticked data is added to the \"Delete Browsing Data Automatically\" setting and deleted on every quit from now on."
+  },
+  "user_quitBrowserDontAskAgainSavesQuitAndStart": "The data ticked above will be deleted on every quit and every time WebLibre starts. You can change both in settings.",
+  "@user_quitBrowserDontAskAgainSavesQuitAndStart": {
+    "description": "Same as user_quitBrowserDontAskAgainSavesQuit, for when \"Delete Browsing Data Automatically\" also deletes on every start: the ticked data is added to it and deleted on every quit and every start from now on."
+  },
   "user_quitBrowserDeleteDataTitle": "Delete browsing data",
   "@user_quitBrowserDeleteDataTitle": {
     "description": "Expandable row in the quit confirmation dialog. Expanded, it lists the browsing data types as checkboxes; the ticked ones are deleted on this quit."

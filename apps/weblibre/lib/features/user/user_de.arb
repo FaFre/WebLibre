@@ -106,6 +106,8 @@
   "user_actionQuit": "Beenden",
   "user_quitBrowserDontAskAgain": "Nicht mehr fragen",
   "user_quitBrowserDontAskAgainHint": "Lässt sich in den Einstellungen wieder einschalten.",
+  "user_quitBrowserDontAskAgainSavesQuit": "Die oben ausgewählten Daten werden dann bei jedem Beenden gelöscht. Beides lässt sich in den Einstellungen ändern.",
+  "user_quitBrowserDontAskAgainSavesQuitAndStart": "Die oben ausgewählten Daten werden dann bei jedem Beenden und bei jedem Start von WebLibre gelöscht. Beides lässt sich in den Einstellungen ändern.",
   "user_quitBrowserDeleteDataTitle": "Browserdaten löschen",
   "user_quitBrowserDeleteDataSummary": "{count, plural, =0{Nichts ausgewählt} other{{count} ausgewählt}}",
   "user_quitBrowserDeletedAutomatically": "Wird automatisch gelöscht, festgelegt in den Einstellungen",

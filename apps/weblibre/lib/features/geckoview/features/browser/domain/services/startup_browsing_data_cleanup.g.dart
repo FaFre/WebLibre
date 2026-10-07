@@ -8,15 +8,19 @@ part of 'startup_browsing_data_cleanup.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
+/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts,
+/// unless [GeneralSettings.autoDeleteBrowsingDataOnStart] is off, and whatever
+/// the last Quit did not finish deleting ([PendingQuitDeletionRepository]).
 ///
-/// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it. Nothing it does may reach a tab
-/// opened in this session, however late it runs:
+/// Finishing an interrupted Quit happens in either mode, so a start must never
+/// skip this. Nothing it does may reach a tab opened in this session, however
+/// late it runs:
 ///
 /// - **Tabs are scoped to the previous session.** Native removes only the tabs
 ///   the session restore brought back, after that restore completed — never a
-///   launch link or home page tab, even when this runs late or is retried.
+///   launch link or home page tab, even when this runs late or is retried. A
+///   Quit's request narrows it further, to the tabs that Quit named: a request
+///   left over from an older session may be restored next to newer tabs.
 /// - **Everything else runs only while new tabs are held back.** Cookie, cache
 ///   and the other deletions are global: one that runs after browsing began
 ///   would take this session's logins with it. So they are dispatched only
@@ -31,15 +35,19 @@ part of 'startup_browsing_data_cleanup.dart';
 final startupBrowsingDataCleanupProvider =
     StartupBrowsingDataCleanupProvider._();
 
-/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
+/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts,
+/// unless [GeneralSettings.autoDeleteBrowsingDataOnStart] is off, and whatever
+/// the last Quit did not finish deleting ([PendingQuitDeletionRepository]).
 ///
-/// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it. Nothing it does may reach a tab
-/// opened in this session, however late it runs:
+/// Finishing an interrupted Quit happens in either mode, so a start must never
+/// skip this. Nothing it does may reach a tab opened in this session, however
+/// late it runs:
 ///
 /// - **Tabs are scoped to the previous session.** Native removes only the tabs
 ///   the session restore brought back, after that restore completed — never a
-///   launch link or home page tab, even when this runs late or is retried.
+///   launch link or home page tab, even when this runs late or is retried. A
+///   Quit's request narrows it further, to the tabs that Quit named: a request
+///   left over from an older session may be restored next to newer tabs.
 /// - **Everything else runs only while new tabs are held back.** Cookie, cache
 ///   and the other deletions are global: one that runs after browsing began
 ///   would take this session's logins with it. So they are dispatched only
@@ -51,15 +59,19 @@ final startupBrowsingDataCleanupProvider =
 ///   failed, against the selection taken on the first run.
 final class StartupBrowsingDataCleanupProvider
     extends $NotifierProvider<StartupBrowsingDataCleanup, void> {
-  /// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
+  /// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts,
+  /// unless [GeneralSettings.autoDeleteBrowsingDataOnStart] is off, and whatever
+  /// the last Quit did not finish deleting ([PendingQuitDeletionRepository]).
   ///
-  /// This is also what completes a Quit that died half way through its own
-  /// deletion, so a start must never skip it. Nothing it does may reach a tab
-  /// opened in this session, however late it runs:
+  /// Finishing an interrupted Quit happens in either mode, so a start must never
+  /// skip this. Nothing it does may reach a tab opened in this session, however
+  /// late it runs:
   ///
   /// - **Tabs are scoped to the previous session.** Native removes only the tabs
   ///   the session restore brought back, after that restore completed — never a
-  ///   launch link or home page tab, even when this runs late or is retried.
+  ///   launch link or home page tab, even when this runs late or is retried. A
+  ///   Quit's request narrows it further, to the tabs that Quit named: a request
+  ///   left over from an older session may be restored next to newer tabs.
   /// - **Everything else runs only while new tabs are held back.** Cookie, cache
   ///   and the other deletions are global: one that runs after browsing began
   ///   would take this session's logins with it. So they are dispatched only
@@ -97,17 +109,21 @@ final class StartupBrowsingDataCleanupProvider
 }
 
 String _$startupBrowsingDataCleanupHash() =>
-    r'f084d64e5817c76c5eb8214871ff113d7e261459';
+    r'536be7f421f65a832814531ab5560bd78afa7737';
 
-/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
+/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts,
+/// unless [GeneralSettings.autoDeleteBrowsingDataOnStart] is off, and whatever
+/// the last Quit did not finish deleting ([PendingQuitDeletionRepository]).
 ///
-/// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it. Nothing it does may reach a tab
-/// opened in this session, however late it runs:
+/// Finishing an interrupted Quit happens in either mode, so a start must never
+/// skip this. Nothing it does may reach a tab opened in this session, however
+/// late it runs:
 ///
 /// - **Tabs are scoped to the previous session.** Native removes only the tabs
 ///   the session restore brought back, after that restore completed — never a
-///   launch link or home page tab, even when this runs late or is retried.
+///   launch link or home page tab, even when this runs late or is retried. A
+///   Quit's request narrows it further, to the tabs that Quit named: a request
+///   left over from an older session may be restored next to newer tabs.
 /// - **Everything else runs only while new tabs are held back.** Cookie, cache
 ///   and the other deletions are global: one that runs after browsing began
 ///   would take this session's logins with it. So they are dispatched only

@@ -318,6 +318,77 @@ void main() {
     });
   });
 
+  testWidgets("data picked with \"Don't ask again\" is deleted on every Quit", (
+    tester,
+  ) async {
+    final exits = <_Exit>[];
+
+    final repository = await _pumpMenu(tester, exits: exits);
+
+    await tester.tap(find.text('Quit Browser'));
+    await tester.pumpAndSettle();
+    // Ticked first: the expanded list pushes it below the test screen.
+    await tester.tap(find.text("Don't ask again"));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete browsing data'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open tabs'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(
+        'The data ticked above will be deleted on every quit. You can change '
+        'both in settings.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.widgetWithText(TextButton, 'Quit'));
+    await tester.pumpAndSettle();
+    expect(exits.single.deleteBrowsingData, {DeleteBrowsingDataType.tabs});
+    expect(repository.settings.autoDeleteBrowsingData, {
+      DeleteBrowsingDataType.tabs,
+    });
+    // On Quit only: the dialog never asked about the start.
+    expect(repository.settings.autoDeleteBrowsingDataOnStart, isFalse);
+
+    // The next Quit skips the dialog and still deletes it.
+    await tester.tap(find.text('open menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Quit Browser'));
+    await tester.pumpAndSettle();
+    expect(exits.last.deleteBrowsingData, {DeleteBrowsingDataType.tabs});
+  });
+
+  testWidgets('the hint names the start when automatic deletion runs there', (
+    tester,
+  ) async {
+    await _pumpMenu(
+      tester,
+      exits: [],
+      settings: GeneralSettings.withDefaults(
+        autoDeleteBrowsingData: {DeleteBrowsingDataType.history},
+      ),
+    );
+
+    await tester.tap(find.text('Quit Browser'));
+    await tester.pumpAndSettle();
+    // Ticked first: the expanded list pushes it below the test screen.
+    await tester.tap(find.text("Don't ask again"));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete browsing data'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Open tabs'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'The data ticked above will be deleted on every quit and every time '
+        'WebLibre starts. You can change both in settings.',
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('one-time deletion works with automatic deletion off', (
     tester,
   ) async {

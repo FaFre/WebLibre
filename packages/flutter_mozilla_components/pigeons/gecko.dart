@@ -2426,10 +2426,17 @@ abstract class GeckoDeleteBrowsingDataController {
   @async
   void deleteTabs();
 
-  /// Deletes only the tabs the session restore brought back, once it has
-  /// completed — never a tab opened since the engine started.
+  /// The ids of every tab the next session restore could bring back: the open
+  /// normal tabs, and those still in the saved session, which lags behind
+  /// (private tabs are never saved).
   @async
-  void deletePreviousSessionTabs();
+  List<String> getSessionTabIds();
+
+  /// Deletes only the tabs the session restore brought back, once it has
+  /// completed — never a tab opened since the engine started. With
+  /// [onlyTabIds], only those of them listed there.
+  @async
+  void deletePreviousSessionTabs(List<String>? onlyTabIds);
   @async
   void deleteBrowsingHistory();
   @async

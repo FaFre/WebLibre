@@ -44,6 +44,18 @@ class CurrentStateSessionWriter(
     }
 
     /**
+     * Runs [block] while no write is in progress or can start: the file holds what
+     * the last write saved, and any later write reads the store after [block]
+     * returns.
+     *
+     * For reading the file next to the store as one consistent picture. The file
+     * lock inside `SessionStorage` alone does not give that: a write reads the
+     * store before it takes the file lock, so a read in between sees the old file
+     * while the write about to land still carries a state from before.
+     */
+    fun <T> whileNotWriting(block: () -> T): T = synchronized(lock) { block() }
+
+    /**
      * Like [saveCurrentState], for a deletion that must be on disk when it returns:
      * throws instead of reporting a failed write, so the caller does not count the
      * deletion as done while the old session file still holds the removed tabs.

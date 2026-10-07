@@ -8827,6 +8827,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Delete selected browsing data when you quit or every time WebLibre starts';
 
   @override
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle =>
+      'Delete selected browsing data when you quit WebLibre';
+
+  @override
+  String get settings_autoDeleteOnStartTitle => 'Also Delete on Start';
+
+  @override
+  String get settings_autoDeleteOnStartSubtitle =>
+      'Covers sessions that ended without Quit, such as WebLibre being swiped away or closed by Android in the background. When off, their data stays until you next quit.';
+
+  @override
   String get settings_confirmBeforeQuitTitle => 'Confirm Before Quitting';
 
   @override
@@ -11866,6 +11877,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get user_quitBrowserDontAskAgainHint =>
       'You can turn this back on in settings.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuit =>
+      'The data ticked above will be deleted on every quit. You can change both in settings.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart =>
+      'The data ticked above will be deleted on every quit and every time WebLibre starts. You can change both in settings.';
 
   @override
   String get user_quitBrowserDeleteDataTitle => 'Delete browsing data';

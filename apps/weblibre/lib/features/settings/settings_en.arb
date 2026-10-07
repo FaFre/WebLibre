@@ -2018,7 +2018,7 @@
   },
   "settings_autoDeleteBrowsingDataTitle": "Delete Browsing Data Automatically",
   "@settings_autoDeleteBrowsingDataTitle": {
-    "description": "Switch: delete the chosen browsing data automatically, both when the user quits the app and every time the app starts. Supersedes the former \"Incognito Mode\" switch."
+    "description": "Switch: delete the chosen browsing data automatically when the user quits the app and, unless \"Also Delete on Start\" is turned off, every time the app starts. Supersedes the former \"Incognito Mode\" switch."
   },
   "settings_autoDeleteBrowsingDataKeywords": "incognito, private mode, quit, exit, clear on exit, delete on quit, clear data",
   "@settings_autoDeleteBrowsingDataKeywords": {
@@ -2027,6 +2027,18 @@
   "settings_autoDeleteBrowsingDataSubtitle": "Delete selected browsing data when you quit or every time WebLibre starts",
   "@settings_autoDeleteBrowsingDataSubtitle": {
     "description": "Explanation under \"Delete Browsing Data Automatically\"."
+  },
+  "settings_autoDeleteBrowsingDataQuitOnlySubtitle": "Delete selected browsing data when you quit WebLibre",
+  "@settings_autoDeleteBrowsingDataQuitOnlySubtitle": {
+    "description": "Replaces the explanation under \"Delete Browsing Data Automatically\" while \"Also Delete on Start\" is off: the data is deleted only when the user taps Quit."
+  },
+  "settings_autoDeleteOnStartTitle": "Also Delete on Start",
+  "@settings_autoDeleteOnStartTitle": {
+    "description": "Switch under \"Delete Browsing Data Automatically\", shown while it is on. On (the default), the chosen data is also deleted every time WebLibre starts; off, only when the user taps Quit."
+  },
+  "settings_autoDeleteOnStartSubtitle": "Covers sessions that ended without Quit, such as WebLibre being swiped away or closed by Android in the background. When off, their data stays until you next quit.",
+  "@settings_autoDeleteOnStartSubtitle": {
+    "description": "Explanation under \"Also Delete on Start\". \"Quit\" is the Quit button / menu entry. Android may end an app it has kept in the background at any time."
   },
   "settings_confirmBeforeQuitTitle": "Confirm Before Quitting",
   "@settings_confirmBeforeQuitTitle": {

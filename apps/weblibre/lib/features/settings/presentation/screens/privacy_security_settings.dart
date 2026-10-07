@@ -340,13 +340,22 @@ class _AutoDeleteBrowsingDataSection extends HookConsumerWidget {
         (s) => s.autoDeleteBrowsingData,
       ),
     );
+    final deleteOnStart = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.autoDeleteBrowsingDataOnStart,
+      ),
+    );
     final l10n = AppLocalizations.of(context);
 
     return Column(
       children: [
         SwitchListTile.adaptive(
           title: Text(l10n.settings_autoDeleteBrowsingDataTitle),
-          subtitle: Text(l10n.settings_autoDeleteBrowsingDataSubtitle),
+          subtitle: Text(
+            deleteOnStart
+                ? l10n.settings_autoDeleteBrowsingDataSubtitle
+                : l10n.settings_autoDeleteBrowsingDataQuitOnlySubtitle,
+          ),
           secondary: const Icon(MdiIcons.deleteClockOutline),
           value: autoDeleteBrowsingData != null,
           onChanged: (value) async {
@@ -358,8 +367,23 @@ class _AutoDeleteBrowsingDataSection extends HookConsumerWidget {
                 );
           },
         ),
-        if (autoDeleteBrowsingData != null)
+        if (autoDeleteBrowsingData != null) ...[
           _DeleteBrowsingDataTypes(selectedTypes: autoDeleteBrowsingData),
+          SwitchListTile.adaptive(
+            title: Text(l10n.settings_autoDeleteOnStartTitle),
+            subtitle: Text(l10n.settings_autoDeleteOnStartSubtitle),
+            secondary: const Icon(MdiIcons.restart),
+            value: deleteOnStart,
+            onChanged: (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .autoDeleteBrowsingDataOnStart(value),
+                  );
+            },
+          ),
+        ],
       ],
     );
   }

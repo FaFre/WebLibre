@@ -19,6 +19,7 @@
  */
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/quit_browser.dart';
 
 void main() {
   group('automatic browsing data deletion', () {
@@ -55,6 +56,77 @@ void main() {
 
     test('Quit asks for confirmation by default', () {
       expect(GeneralSettings.withDefaults().confirmBeforeQuit, isTrue);
+    });
+
+    test('also deletes on start by default', () {
+      expect(
+        GeneralSettings.withDefaults().autoDeleteBrowsingDataOnStart,
+        isTrue,
+      );
+      // Saved before the setting existed.
+      expect(
+        GeneralSettings.fromJson({
+          'deleteBrowsingDataOnQuit': ['history'],
+        }).autoDeleteBrowsingDataOnStart,
+        isTrue,
+      );
+    });
+
+    test('round-trips deleting on Quit only', () {
+      final settings = GeneralSettings.withDefaults(
+        autoDeleteBrowsingData: {DeleteBrowsingDataType.tabs},
+        autoDeleteBrowsingDataOnStart: false,
+      );
+
+      final restored = GeneralSettings.fromJson(settings.toJson());
+
+      expect(restored.autoDeleteBrowsingDataOnStart, isFalse);
+    });
+  });
+
+  group('withQuitDeletionSaved', () {
+    test('turns automatic deletion on for Quit only', () {
+      final saved = withQuitDeletionSaved(GeneralSettings.withDefaults(), {
+        DeleteBrowsingDataType.tabs,
+        DeleteBrowsingDataType.history,
+      });
+
+      expect(saved.autoDeleteBrowsingData, {
+        DeleteBrowsingDataType.tabs,
+        DeleteBrowsingDataType.history,
+      });
+      expect(saved.autoDeleteBrowsingDataOnStart, isFalse);
+    });
+
+    test(
+      'adds to automatic deletion that is on, keeping its start setting',
+      () {
+        for (final onStart in [true, false]) {
+          final saved = withQuitDeletionSaved(
+            GeneralSettings.withDefaults(
+              autoDeleteBrowsingData: {DeleteBrowsingDataType.cache},
+              autoDeleteBrowsingDataOnStart: onStart,
+            ),
+            {DeleteBrowsingDataType.cache, DeleteBrowsingDataType.cookies},
+          );
+
+          expect(saved.autoDeleteBrowsingData, {
+            DeleteBrowsingDataType.cache,
+            DeleteBrowsingDataType.cookies,
+          });
+          expect(saved.autoDeleteBrowsingDataOnStart, onStart);
+        }
+      },
+    );
+
+    test('leaves automatic deletion off when nothing was picked', () {
+      final saved = withQuitDeletionSaved(
+        GeneralSettings.withDefaults(),
+        const {},
+      );
+
+      expect(saved.autoDeleteBrowsingData, isNull);
+      expect(saved.autoDeleteBrowsingDataOnStart, isTrue);
     });
   });
 }

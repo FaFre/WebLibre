@@ -8245,6 +8245,17 @@ class AppLocalizationsZh extends AppLocalizations {
       '在退出时或每次启动 WebLibre 时删除所选的浏览数据';
 
   @override
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle =>
+      '在退出 WebLibre 时删除所选的浏览数据';
+
+  @override
+  String get settings_autoDeleteOnStartTitle => '启动时也删除';
+
+  @override
+  String get settings_autoDeleteOnStartSubtitle =>
+      '适用于未通过“退出”结束的会话，例如 WebLibre 被划掉或被 Android 在后台关闭。关闭此项后，这类会话的数据会保留到下次退出。';
+
+  @override
   String get settings_confirmBeforeQuitTitle => '退出前确认';
 
   @override
@@ -11030,6 +11041,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get user_quitBrowserDontAskAgainHint => '你可以在设置中重新开启。';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuit =>
+      '上方勾选的数据将在每次退出时删除。你可以在设置中更改这两项。';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart =>
+      '上方勾选的数据将在每次退出时以及每次启动 WebLibre 时删除。你可以在设置中更改这两项。';
 
   @override
   String get user_quitBrowserDeleteDataTitle => '删除浏览数据';

@@ -62,34 +62,45 @@ Future<bool?> showQuitBrowserDialog(BuildContext context) {
 
 /// The answer to [showQuitConfirmationDialog]: whether to stop asking, and
 /// everything this Quit deletes — the automatic deletion plus whatever was
-/// picked for this Quit only.
+/// picked here.
 typedef QuitConfirmation = ({
   bool dontAskAgain,
   Set<DeleteBrowsingDataType> deletes,
 });
 
 /// Asks before an explicit Quit, with a "Don't ask again" option and a
-/// collapsed section for deleting browsing data on this Quit only.
+/// collapsed section for deleting browsing data on this Quit only — or on
+/// every Quit, when "Don't ask again" is ticked as well.
 ///
 /// [alwaysDeleted] is the automatic deletion from the settings: shown ticked
-/// and locked, since it happens either way.
+/// and locked, since it happens either way. [deletesOnStart] is whether it
+/// also runs on every start; data picked here joins it when "Don't ask again"
+/// is ticked too.
 ///
 /// Returns null unless the user confirms.
 Future<QuitConfirmation?> showQuitConfirmationDialog(
   BuildContext context, {
   required Set<DeleteBrowsingDataType> alwaysDeleted,
+  required bool deletesOnStart,
 }) {
   return showDialog<QuitConfirmation>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => _QuitConfirmationDialog(alwaysDeleted: alwaysDeleted),
+    builder: (context) => _QuitConfirmationDialog(
+      alwaysDeleted: alwaysDeleted,
+      deletesOnStart: deletesOnStart,
+    ),
   );
 }
 
 class _QuitConfirmationDialog extends HookWidget {
   final Set<DeleteBrowsingDataType> alwaysDeleted;
+  final bool deletesOnStart;
 
-  const _QuitConfirmationDialog({required this.alwaysDeleted});
+  const _QuitConfirmationDialog({
+    required this.alwaysDeleted,
+    required this.deletesOnStart,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +108,8 @@ class _QuitConfirmationDialog extends HookWidget {
     final dontAskAgain = useState(false);
     final oneTime = useState(<DeleteBrowsingDataType>{});
     final deletes = {...alwaysDeleted, ...oneTime.value};
+    // What was picked is then saved, not dropped: the hint says where it goes.
+    final savesPicked = dontAskAgain.value && oneTime.value.isNotEmpty;
 
     return AlertDialog(
       icon: const Icon(Icons.warning),
@@ -143,7 +156,12 @@ class _QuitConfirmationDialog extends HookWidget {
             contentPadding: EdgeInsets.zero,
             controlAffinity: ListTileControlAffinity.leading,
             title: Text(l10n.user_quitBrowserDontAskAgain),
-            subtitle: Text(l10n.user_quitBrowserDontAskAgainHint),
+            subtitle: Text(switch (savesPicked) {
+              false => l10n.user_quitBrowserDontAskAgainHint,
+              true when deletesOnStart =>
+                l10n.user_quitBrowserDontAskAgainSavesQuitAndStart,
+              true => l10n.user_quitBrowserDontAskAgainSavesQuit,
+            }),
             onChanged: (value) => dontAskAgain.value = value ?? false,
           ),
         ],

@@ -38,6 +38,10 @@ typedef ExitAppCallback =
 /// [GeneralSettings.autoDeleteBrowsingData] and anything picked in the
 /// confirmation for this Quit only.
 ///
+/// "Don't ask again" ends the only way to pick data for one Quit, so what was
+/// picked along with it is added to the automatic deletion instead of being
+/// dropped from every Quit after this one. See [withQuitDeletionSaved].
+///
 /// Takes the [container] rather than a `ref` because the menu sheet that
 /// starts a Quit is gone by the time the confirmation is answered. [context]
 /// only has to be mounted when this is called.
@@ -64,6 +68,7 @@ Future<void> quitBrowser(
     final result = await showQuitConfirmationDialog(
       navigatorContext,
       alwaysDeleted: deletes ?? const {},
+      deletesOnStart: _deletesOnStart(settings),
     );
     if (result == null) return;
 
@@ -77,7 +82,10 @@ Future<void> quitBrowser(
         await container
             .read(generalSettingsRepositoryProvider.notifier)
             .updateSettings(
-              (current) => current.copyWith.confirmBeforeQuit(false),
+              (current) => withQuitDeletionSaved(
+                current,
+                result.deletes,
+              ).copyWith.confirmBeforeQuit(false),
             );
       } catch (e, st) {
         logger.e(
@@ -90,4 +98,32 @@ Future<void> quitBrowser(
   }
 
   await onExit(container, deleteBrowsingData: deletes);
+}
+
+/// Whether the automatic deletion also runs on every start.
+bool _deletesOnStart(GeneralSettings settings) =>
+    settings.autoDeleteBrowsingData != null &&
+    settings.autoDeleteBrowsingDataOnStart;
+
+/// [settings] with [deletes], what a Quit confirmed with "Don't ask again"
+/// deleted, made part of the automatic deletion so every later Quit deletes it
+/// too.
+///
+/// Turning automatic deletion on from here keeps it to Quit: the dialog only
+/// ever asked about Quit, and deleting on start as well is a separate choice
+/// in the settings. Already on, it keeps its own start setting.
+@visibleForTesting
+GeneralSettings withQuitDeletionSaved(
+  GeneralSettings settings,
+  Set<DeleteBrowsingDataType> deletes,
+) {
+  final automatic = settings.autoDeleteBrowsingData;
+  if (automatic != null && automatic.containsAll(deletes)) return settings;
+  if (automatic == null && deletes.isEmpty) return settings;
+
+  return settings.copyWith(
+    autoDeleteBrowsingData: {...?automatic, ...deletes},
+    autoDeleteBrowsingDataOnStart:
+        automatic != null && settings.autoDeleteBrowsingDataOnStart,
+  );
 }

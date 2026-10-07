@@ -22,21 +22,26 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/repositories/pending_quit_deletion.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'startup_browsing_data_cleanup.g.dart';
 
-/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts.
+/// Deletes [GeneralSettings.autoDeleteBrowsingData] when the browser starts,
+/// unless [GeneralSettings.autoDeleteBrowsingDataOnStart] is off, and whatever
+/// the last Quit did not finish deleting ([PendingQuitDeletionRepository]).
 ///
-/// This is also what completes a Quit that died half way through its own
-/// deletion, so a start must never skip it. Nothing it does may reach a tab
-/// opened in this session, however late it runs:
+/// Finishing an interrupted Quit happens in either mode, so a start must never
+/// skip this. Nothing it does may reach a tab opened in this session, however
+/// late it runs:
 ///
 /// - **Tabs are scoped to the previous session.** Native removes only the tabs
 ///   the session restore brought back, after that restore completed — never a
-///   launch link or home page tab, even when this runs late or is retried.
+///   launch link or home page tab, even when this runs late or is retried. A
+///   Quit's request narrows it further, to the tabs that Quit named: a request
+///   left over from an older session may be restored next to newer tabs.
 /// - **Everything else runs only while new tabs are held back.** Cookie, cache
 ///   and the other deletions are global: one that runs after browsing began
 ///   would take this session's logins with it. So they are dispatched only
@@ -59,6 +64,16 @@ class StartupBrowsingDataCleanup extends _$StartupBrowsingDataCleanup {
 
   /// The data types this process deletes, read once on the first run.
   Set<DeleteBrowsingDataType>? _selection;
+
+  /// What earlier Quits left undeleted, read once on the first run. Only
+  /// these requests are completed here: one a Quit records meanwhile is newer
+  /// and stays.
+  PendingDeletions _pendingQuit = const {};
+
+  /// The tabs the tab deletion is limited to (among those the restore brought
+  /// back), or null for all of them. Set with [_selection].
+  Set<String>? _onlyTabIds;
+
   final _completed = <DeleteBrowsingDataType>{};
 
   Future<void>? _running;
@@ -126,20 +141,30 @@ class StartupBrowsingDataCleanup extends _$StartupBrowsingDataCleanup {
   }
 
   Future<void> _run() async {
-    try {
-      _selection ??=
-          (await ref
-                  .read(generalSettingsRepositoryProvider.notifier)
-                  .fetchSettings())
-              .autoDeleteBrowsingData ??
-          const {};
-    } catch (e, st) {
-      logger.e(
-        'Could not read what to delete on start',
-        error: e,
-        stackTrace: st,
-      );
-      return;
+    if (_selection == null) {
+      try {
+        final settings = await ref
+            .read(generalSettingsRepositoryProvider.notifier)
+            .fetchSettings();
+        _pendingQuit = await _readPendingQuit();
+
+        final automatic = settings.autoDeleteBrowsingDataOnStart
+            ? settings.autoDeleteBrowsingData ?? const {}
+            : const <DeleteBrowsingDataType>{};
+        // The automatic deletion takes every restored tab; a Quit's request
+        // only the tabs it named, which keeps it off tabs opened since.
+        _onlyTabIds = automatic.contains(DeleteBrowsingDataType.tabs)
+            ? null
+            : _pendingQuit[DeleteBrowsingDataType.tabs]?.tabIds;
+        _selection = {...automatic, ..._pendingQuit.keys};
+      } catch (e, st) {
+        logger.e(
+          'Could not read what to delete on start',
+          error: e,
+          stackTrace: st,
+        );
+        return;
+      }
     }
 
     final selection = _selection!;
@@ -169,7 +194,11 @@ class StartupBrowsingDataCleanup extends _$StartupBrowsingDataCleanup {
 
       // One failing type does not stop the others.
       try {
-        await browserData.deleteDataType(type, previousSessionTabsOnly: true);
+        await browserData.deleteDataType(
+          type,
+          previousSessionTabsOnly: true,
+          onlyTabIds: _onlyTabIds,
+        );
         _completed.add(type);
       } catch (e, st) {
         logger.e(
@@ -180,7 +209,47 @@ class StartupBrowsingDataCleanup extends _$StartupBrowsingDataCleanup {
           error: e,
           stackTrace: st,
         );
+        continue;
       }
+
+      await _completePendingQuit(type);
+    }
+  }
+
+  /// A record that cannot be read is left alone: this start goes on with the
+  /// automatic deletion only.
+  Future<PendingDeletions> _readPendingQuit() async {
+    try {
+      return await ref
+          .read(pendingQuitDeletionRepositoryProvider.notifier)
+          .read();
+    } catch (e, st) {
+      logger.e(
+        'Could not read what the last Quit left undeleted',
+        error: e,
+        stackTrace: st,
+      );
+      return const {};
+    }
+  }
+
+  /// Completes the request for [type] this start read, if there is one, so a
+  /// later start does not repeat it. What failed or was skipped stays
+  /// requested, for the next start.
+  Future<void> _completePendingQuit(DeleteBrowsingDataType type) async {
+    final request = _pendingQuit[type];
+    if (request == null || !ref.mounted) return;
+
+    try {
+      await ref
+          .read(pendingQuitDeletionRepositoryProvider.notifier)
+          .complete(type, request.requestId);
+    } catch (e, st) {
+      logger.e(
+        'Could not record that ${type.name} was deleted',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 }

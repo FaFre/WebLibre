@@ -8950,6 +8950,17 @@ class AppLocalizationsId extends AppLocalizations {
       'Hapus data penjelajahan yang dipilih saat keluar atau setiap kali WebLibre dimulai';
 
   @override
+  String get settings_autoDeleteBrowsingDataQuitOnlySubtitle =>
+      'Hapus data penjelajahan yang dipilih saat keluar dari WebLibre';
+
+  @override
+  String get settings_autoDeleteOnStartTitle => 'Hapus Juga Saat Dimulai';
+
+  @override
+  String get settings_autoDeleteOnStartSubtitle =>
+      'Mencakup sesi yang berakhir tanpa \"Keluar\", misalnya saat WebLibre diusap dari daftar terbaru atau ditutup Android di latar belakang. Jika nonaktif, datanya tetap ada hingga Anda keluar berikutnya.';
+
+  @override
   String get settings_confirmBeforeQuitTitle => 'Konfirmasi Sebelum Keluar';
 
   @override
@@ -12055,6 +12066,14 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get user_quitBrowserDontAskAgainHint =>
       'Anda dapat mengaktifkannya kembali di pengaturan.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuit =>
+      'Data yang dicentang di atas akan dihapus setiap kali keluar. Anda dapat mengubah keduanya di pengaturan.';
+
+  @override
+  String get user_quitBrowserDontAskAgainSavesQuitAndStart =>
+      'Data yang dicentang di atas akan dihapus setiap kali keluar dan setiap kali WebLibre dimulai. Anda dapat mengubah keduanya di pengaturan.';
 
   @override
   String get user_quitBrowserDeleteDataTitle => 'Hapus data penjelajahan';
