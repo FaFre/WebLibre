@@ -18,6 +18,12 @@ object PwaConstants {
     const val EXTRA_SHORTCUT_TYPE = "shortcut_type"
     const val EXTRA_SHORTCUT_CONTAINER_MODE = "shortcut_container_mode"
 
+    // Whether the installing tab was in desktop mode. A standalone PWA window has
+    // no toolbar to toggle it, and the per-site desktop rules live in Flutter
+    // settings a headless launch cannot read, so the install carries it. Absent
+    // on shortcuts installed before it existed.
+    const val EXTRA_PWA_DESKTOP_MODE = "pwa_desktop_mode"
+
     // Shortcut type values
     const val SHORTCUT_TYPE_BASIC = "basic"
     const val SHORTCUT_TYPE_PWA = "pwa"

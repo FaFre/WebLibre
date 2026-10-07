@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components
 
+import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.action.CustomTabListAction
@@ -16,7 +17,24 @@ import mozilla.components.browser.state.state.createCustomTab
 import mozilla.components.concept.engine.EngineSession
 
 object PwaSessionCreator {
-    suspend fun create(url: String, contextId: String?): String {
+    /**
+     * The desktop mode a PWA launch asks for, or null when its shortcut predates
+     * [PwaConstants.EXTRA_PWA_DESKTOP_MODE].
+     */
+    fun desktopModeOf(intent: Intent?): Boolean? {
+        if (intent?.hasExtra(PwaConstants.EXTRA_PWA_DESKTOP_MODE) != true) return null
+        return intent.getBooleanExtra(PwaConstants.EXTRA_PWA_DESKTOP_MODE, false)
+    }
+
+    /**
+     * Creates the PWA's session in [desktopMode], falling back to the
+     * browser-wide default when the shortcut does not say.
+     *
+     * It has to be set here: the engine session is created from the tab's own
+     * `desktopMode` (`CreateEngineSessionMiddleware`), and `createCustomTab`
+     * defaults that to false, so a PWA would otherwise always open mobile.
+     */
+    suspend fun create(url: String, contextId: String?, desktopMode: Boolean?): String {
         val components = GlobalComponents.components
             ?: throw IllegalStateException("Components not initialized")
 
@@ -36,6 +54,7 @@ object PwaSessionCreator {
                 webAppManifest = manifest,
                 source = SessionState.Source.Internal.CustomTab,
                 private = false,
+                desktopMode = desktopMode ?: components.core.store.state.desktopMode,
             )
 
             components.core.store.dispatch(

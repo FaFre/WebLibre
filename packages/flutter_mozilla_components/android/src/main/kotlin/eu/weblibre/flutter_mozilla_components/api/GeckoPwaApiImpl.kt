@@ -110,6 +110,7 @@ class GeckoPwaApiImpl(
                     profileUuid = profileUuid,
                     contextId = contextId,
                     tabFavicon = tab.content.icon,
+                    desktopMode = tab.content.desktopMode,
                 )
 
                 if (success) {
@@ -134,12 +135,16 @@ class GeckoPwaApiImpl(
 
     /**
      * Creates a PWA shortcut with profile and container metadata in intent extras.
+     *
+     * [desktopMode] is the installing tab's live state, which already reflects
+     * the per-site desktop rules and any manual toggle.
      */
     private suspend fun createPwaShortcut(
         manifest: WebAppManifest,
         profileUuid: String,
         contextId: String?,
         tabFavicon: Bitmap?,
+        desktopMode: Boolean,
     ): Boolean = withContext(Dispatchers.Main) {
         try {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -190,6 +195,7 @@ class GeckoPwaApiImpl(
                 putExtra(PwaConstants.EXTRA_PWA_TOKEN, launchToken)
                 putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, manifest.startUrl)
                 putExtra(PwaConstants.EXTRA_SHORTCUT_TYPE, ShortcutKind.PWA.shortcutType)
+                putExtra(PwaConstants.EXTRA_PWA_DESKTOP_MODE, desktopMode)
                 putExtra(
                     PwaConstants.EXTRA_SHORTCUT_CONTAINER_MODE,
                     resolveShortcutContainerMode(contextId),

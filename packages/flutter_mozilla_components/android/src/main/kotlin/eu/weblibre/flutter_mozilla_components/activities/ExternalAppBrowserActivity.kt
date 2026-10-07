@@ -99,6 +99,7 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
             pwaContextId: String? = null,
             pwaToken: String? = null,
             pwaInstallStartUrl: String? = null,
+            pwaDesktopMode: Boolean? = null,
         ): Intent {
             return Intent(context, ExternalAppBrowserActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -108,6 +109,7 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
                 pwaContextId?.let { putExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID, it) }
                 pwaToken?.let { putExtra(PwaConstants.EXTRA_PWA_TOKEN, it) }
                 putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, pwaInstallStartUrl ?: launchUrl)
+                pwaDesktopMode?.let { putExtra(PwaConstants.EXTRA_PWA_DESKTOP_MODE, it) }
             }
         }
 
@@ -119,6 +121,7 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
             pwaContextId: String? = null,
             pwaToken: String? = null,
             pwaInstallStartUrl: String? = null,
+            pwaDesktopMode: Boolean? = null,
             isPrivate: Boolean = false,
         ): Intent {
             return Intent(context, ExternalAppBrowserActivity::class.java).apply {
@@ -132,6 +135,7 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
                 pwaInstallStartUrl?.let {
                     putExtra(PwaConstants.EXTRA_PWA_INSTALL_START_URL, it)
                 }
+                pwaDesktopMode?.let { putExtra(PwaConstants.EXTRA_PWA_DESKTOP_MODE, it) }
             }
         }
     }
@@ -538,7 +542,11 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
         coroutineScope.launch {
             try {
-                val sessionId = PwaSessionCreator.create(launchUrl, contextId)
+                val sessionId = PwaSessionCreator.create(
+                    launchUrl,
+                    contextId,
+                    desktopMode = PwaSessionCreator.desktopModeOf(intent),
+                )
                 Log.d(
                     TAG,
                     "Recovered PWA session: old=$missingSessionId, new=$sessionId, url=$launchUrl",
