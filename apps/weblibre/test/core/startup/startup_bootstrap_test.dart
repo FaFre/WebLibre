@@ -145,7 +145,11 @@ class _FakeProfileApi implements GeckoProfileApi {
   }
 
   @override
-  Future<bool> armProfileRestart(String? targetProfileId, String reason) async {
+  Future<bool> armProfileRestart(
+    String? targetProfileId,
+    String reason,
+    bool showPicker,
+  ) async {
     armedRestarts.add(targetProfileId);
     return true;
   }
@@ -158,6 +162,9 @@ class _FakeProfileApi implements GeckoProfileApi {
 
   @override
   Future<bool> syncDirectory(String path) async => true;
+
+  @override
+  Future<void> copyDocumentToFile(String sourceUri, String destPath) async {}
 
   @override
   Future<List<StartupIntentRecord>> claimStartupIntents(

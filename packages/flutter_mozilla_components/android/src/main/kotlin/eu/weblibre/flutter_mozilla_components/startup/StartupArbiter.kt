@@ -330,6 +330,7 @@ object StartupArbiter {
                     candidateProfileId = current.candidateProfileId,
                     deadlineMillis = clock.nowMillis() + SELECTION_TIMEOUT_MS,
                     candidateIsRestartTarget = current.candidateIsRestartTarget,
+                    pickerRequested = current.pickerRequested,
                 )
                 StartupDirective(
                     kind = StartupDirectiveKind.SELECT,
@@ -339,6 +340,7 @@ object StartupArbiter {
                         owner,
                         promptMode,
                         current.candidateIsRestartTarget,
+                        current.pickerRequested,
                     ),
                 )
             }
@@ -355,6 +357,7 @@ object StartupArbiter {
                             owner,
                             promptMode,
                             current.candidateIsRestartTarget,
+                            current.pickerRequested,
                         ),
                     )
                 } else {
@@ -466,10 +469,7 @@ object StartupArbiter {
             // The provenance survives a handed-back lease. Releasing means this
             // owner stopped resolving, not that the user withdrew the switch that
             // named the candidate in the first place.
-            state = StartupState.Unresolved(
-                current.candidateProfileId,
-                current.candidateIsRestartTarget,
-            )
+            state = current.toUnresolved()
             true
         }
     }
@@ -505,10 +505,7 @@ object StartupArbiter {
                     logger.info("Selection lease abandoned by a destroyed engine")
                     // Same transition a voluntary release makes: the provenance of
                     // the candidate outlives the owner that was resolving it.
-                    state = StartupState.Unresolved(
-                        current.candidateProfileId,
-                        current.candidateIsRestartTarget,
-                    )
+                    state = current.toUnresolved()
                     true
                 }
             }
@@ -836,7 +833,14 @@ object StartupArbiter {
                 logger.warn("Restart target arrived in state $state; ignoring")
                 false
             }
-            target == null -> false
+            // No target, so the candidate stands. Applied anyway when the
+            // request asks for the picker: that is the whole of what it carries.
+            target == null -> {
+                if (request.showPicker) {
+                    state = current.copy(pickerRequested = true)
+                }
+                request.showPicker
+            }
             !isValidProfile(target) -> {
                 logger.warn("Restart target $target does not validate")
                 false
@@ -870,10 +874,7 @@ object StartupArbiter {
                 } else {
                     // First run with no candidate stays unresolved; native code
                     // cannot invent a profile.
-                    state = StartupState.Unresolved(
-                        candidate,
-                        current.candidateIsRestartTarget,
-                    )
+                    state = current.toUnresolved()
                 }
             }
 
@@ -1005,15 +1006,24 @@ object StartupArbiter {
      * would be asking them to confirm the answer they just gave. It suppresses one
      * launch only — the flag lives on the in-process state, so once this boot
      * commits, the next cold start prompts as configured.
+     *
+     * [pickerRequested] is the opposite override, also for one launch: the lock
+     * screen's "choose another profile" restarts with it, so the way out of a
+     * profile the user cannot unlock does not depend on the prompt setting.
      */
     private fun shouldShowPicker(
         owner: StartupOwner,
         promptMode: ProfilePromptMode,
         candidateIsRestartTarget: Boolean,
+        pickerRequested: Boolean,
     ): Boolean {
         if (owner.type != StartupOwnerType.UI) return false
-        if (promptMode != ProfilePromptMode.BROWSER_ONLY) return false
-        if (candidateIsRestartTarget) return false
+        // [pickerRequested] overrides the setting, but not the two cases where a
+        // picker cannot help: no UI to show it in, and nothing to choose between.
+        if (!pickerRequested) {
+            if (promptMode != ProfilePromptMode.BROWSER_ONLY) return false
+            if (candidateIsRestartTarget) return false
+        }
 
         val paths = this.paths ?: return false
         return ProfileDiscovery.scan(paths.profilesDir).profiles.size >= 2

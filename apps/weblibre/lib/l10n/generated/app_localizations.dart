@@ -19692,23 +19692,173 @@ abstract class AppLocalizations {
   /// **'Name'**
   String get user_nameFieldLabel;
 
-  /// Section heading in the profile editor for locking the profile behind fingerprint or device PIN.
+  /// Section heading in the profile editor for choosing how the profile is locked: not at all, with the device lock, or with a profile password.
   ///
   /// In en, this message translates to:
   /// **'Authentication'**
   String get user_authenticationSectionTitle;
 
-  /// Switch: require fingerprint or device PIN to open this profile.
+  /// Lock method option: the profile opens without asking for anything.
   ///
   /// In en, this message translates to:
-  /// **'Require authentication'**
-  String get user_requireAuthenticationTitle;
+  /// **'No lock'**
+  String get user_lockMethodNoneTitle;
 
-  /// Explanation under that switch.
+  /// Explanation under the "No lock" option.
   ///
   /// In en, this message translates to:
-  /// **'Ask before this profile can be opened'**
-  String get user_requireAuthenticationSubtitle;
+  /// **'Anyone using WebLibre on this device can open this profile'**
+  String get user_lockMethodNoneSubtitle;
+
+  /// Lock method option: Android's own prompt (fingerprint, face, or the device PIN, pattern or password) opens the profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Device lock'**
+  String get user_lockMethodDeviceTitle;
+
+  /// Explanation under the "Device lock" option. Warns that on a shared device everyone who can unlock the phone gets in.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint, face or the device PIN. Anyone who can unlock this device can open this profile.'**
+  String get user_lockMethodDeviceSubtitle;
+
+  /// Lock method option: a password set in WebLibre, only for this profile, opens it.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile password'**
+  String get user_lockMethodPasswordTitle;
+
+  /// Explanation under the "Profile password" option.
+  ///
+  /// In en, this message translates to:
+  /// **'A password only for this profile. Fingerprints and the device PIN can\'t open it.'**
+  String get user_lockMethodPasswordSubtitle;
+
+  /// Row in the profile editor that opens the dialog to set a new profile password.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get user_changeProfilePasswordTitle;
+
+  /// Warning shown in the profile editor while the profile password lock is selected.
+  ///
+  /// In en, this message translates to:
+  /// **'A forgotten password can\'t be recovered'**
+  String get user_profilePasswordUnrecoverableTitle;
+
+  /// Explanation under that warning. Says honestly that the password only guards the app, the files on the device are not encrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'Without it, this profile can\'t be opened, backed up or deleted. The password locks WebLibre; it does not encrypt the profile\'s data.'**
+  String get user_profilePasswordUnrecoverableSubtitle;
+
+  /// Title of the dialog for choosing a new profile password.
+  ///
+  /// In en, this message translates to:
+  /// **'Set profile password'**
+  String get user_setProfilePasswordTitle;
+
+  /// Text at the top of the set-password dialog, saying when the password will be needed.
+  ///
+  /// In en, this message translates to:
+  /// **'This password is asked for when the profile opens, and before it is backed up, replaced with a backup, changed or deleted.'**
+  String get user_setProfilePasswordExplanation;
+
+  /// Label of the first password field in the set-password dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get user_newProfilePasswordFieldLabel;
+
+  /// Label of the second password field in the set-password dialog, where the password is typed again.
+  ///
+  /// In en, this message translates to:
+  /// **'Repeat password'**
+  String get user_repeatProfilePasswordFieldLabel;
+
+  /// Error under the repeat field when the two passwords differ.
+  ///
+  /// In en, this message translates to:
+  /// **'The passwords don\'t match'**
+  String get user_profilePasswordsDoNotMatch;
+
+  /// Error under the profile password field when the password could not be checked at all (for example, the device storage failed). The profile stays locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check the password. Try again.'**
+  String get user_profilePasswordCheckFailed;
+
+  /// Error under the profile password field when the password was right but the user left the app while it was being checked, so it did not take effect and has to be entered again.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre was closed or switched away from during the check. Enter the password again.'**
+  String get user_profilePasswordInterrupted;
+
+  /// Error in the set-password dialog when the new profile password could not be prepared. Nothing was saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not set the password. Try again.'**
+  String get user_profilePasswordSaveFailed;
+
+  /// Label of the field where the profile password is entered to unlock the profile or confirm an action.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile password'**
+  String get user_profilePasswordFieldLabel;
+
+  /// Error under the profile password field after a wrong password.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password'**
+  String get user_wrongProfilePassword;
+
+  /// Error under the profile password field after a wrong password that starts a waiting time. retryHint is a full sentence like "Try again in 30 seconds."
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong password. {retryHint}'**
+  String user_wrongProfilePasswordWithRetry(String retryHint);
+
+  /// Error under the profile password field while further attempts are blocked. retryHint is a full sentence like "Try again in 2 minutes."
+  ///
+  /// In en, this message translates to:
+  /// **'Too many wrong attempts. {retryHint}'**
+  String user_tooManyPasswordAttempts(String retryHint);
+
+  /// Sentence saying how long to wait before the next password attempt, in seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds, plural, =1{Try again in 1 second.} other{Try again in {seconds} seconds.}}'**
+  String user_passwordRetryInSeconds(int seconds);
+
+  /// Sentence saying how long to wait before the next password attempt, in minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{Try again in 1 minute.} other{Try again in {minutes} minutes.}}'**
+  String user_passwordRetryInMinutes(int minutes);
+
+  /// Title of the password dialog, or reason in the system fingerprint/PIN prompt, when saving changes to a locked profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Change \"{profileName}\"'**
+  String user_authReasonEditProfile(String profileName);
+
+  /// Title of the password dialog, or reason in the system fingerprint/PIN prompt, before a locked profile is backed up.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up \"{profileName}\"'**
+  String user_authReasonBackupProfile(String profileName);
+
+  /// Title of the password dialog, or reason in the system fingerprint/PIN prompt, before a locked profile is deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{profileName}\"'**
+  String user_authReasonDeleteProfile(String profileName);
+
+  /// Title of the password dialog, or reason in the system fingerprint/PIN prompt, before a locked profile is replaced with a backup.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace \"{profileName}\"'**
+  String user_authReasonReplaceProfile(String profileName);
 
   /// Heading of the choice of when a locked profile locks again.
   ///
@@ -19889,6 +20039,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tabs, history and bookmarks are restored. Sign-in and sync data stay with the original profile.'**
   String get user_newProfileNoSignInSubtitle;
+
+  /// Error when a backup restored as a new profile uses the device lock (fingerprint/PIN) and the device prompt failed or this device has no screen lock, so no profile was created. nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'This backup is protected by the device lock, and this device could not unlock it. {nothingChanged}'**
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged);
 
   /// Line naming the profile the backup will replace. profileLabel is its name.
   ///

@@ -1244,6 +1244,7 @@ class StartupArbiterTest {
         processInstanceId: String = "other-process",
         state: RestartRequestState = RestartRequestState.PENDING,
         expiresAtMillis: Long = now + 60_000L,
+        showPicker: Boolean = false,
     ): RestartRequest {
         val request = RestartRequest(
             requestId = "req-1",
@@ -1253,9 +1254,117 @@ class StartupArbiterTest {
             createdAtMillis = now,
             expiresAtMillis = expiresAtMillis,
             targetProfileId = targetProfileId,
+            showPicker = showPicker,
         )
         RestartRequestStore(paths).write(request)
         return request
+    }
+
+    @Test
+    fun aRestartAskingForThePickerShowsItWithPromptingOff() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+
+        StartupArbiter.initialize(paths, writer) { now }
+
+        // The lock screen's way out: the user cannot unlock A and must be able
+        // to choose B even though they switched the picker off.
+        val directive = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+        assertEquals(PROFILE_A, directive.candidateProfileId)
+        assertTrue(directive.showPicker)
+
+        // A rotation mid-startup resumes the lease and still shows it.
+        assertTrue(StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).showPicker)
+    }
+
+    @Test
+    fun aReplacementEngineStillShowsTheRequestedPicker() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+
+        StartupArbiter.initialize(paths, writer) { now }
+        assertTrue(StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).showPicker)
+
+        // Android destroys the backgrounded Activity while the picker is open,
+        // and its engine with it. Without the request carried over, the new
+        // engine would skip the picker and open the profile the user could not
+        // unlock — the one they were trying to get away from.
+        assertTrue(StartupArbiter.abandonEngine(ui.engineId))
+
+        val replacement = StartupOwner(StartupOwnerType.UI, "engine-2")
+        val directive = StartupArbiter.beginStartup(replacement, ProfilePromptMode.OFF)
+        assertEquals(PROFILE_A, directive.candidateProfileId)
+        assertTrue(directive.showPicker)
+    }
+
+    @Test
+    fun aReleasedLeaseKeepsTheRequestedPicker() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+
+        StartupArbiter.initialize(paths, writer) { now }
+        val first = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+        assertTrue(StartupArbiter.releaseSelection(first.leaseId!!, "test"))
+
+        assertTrue(StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).showPicker)
+    }
+
+    @Test
+    fun theRequestedPickerIsForOneLaunchOnly() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+
+        StartupArbiter.initialize(paths, writer) { now }
+        val asked = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+        assertTrue(StartupArbiter.commitSelection(asked.leaseId!!, PROFILE_B))
+
+        StartupArbiter.resetForTest()
+        StartupArbiter.initialize(paths, writer) { now }
+
+        assertFalse(StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).showPicker)
+    }
+
+    @Test
+    fun aRequestedPickerStillNeedsSomethingToChoose() {
+        writeProfile(PROFILE_A)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+
+        StartupArbiter.initialize(paths, writer) { now }
+
+        assertFalse(StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).showPicker)
+    }
+
+    @Test
+    fun aHeadlessOwnerIsNeverShownARequestedPicker() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+
+        StartupArbiter.initialize(paths, writer) { now }
+
+        assertFalse(StartupArbiter.beginStartup(headless, ProfilePromptMode.OFF).showPicker)
+    }
+
+    @Test
+    fun aRestartWithoutTargetOrPickerChangesNothing() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null)
+
+        StartupArbiter.initialize(paths, writer) { now }
+
+        assertFalse(StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).showPicker)
     }
 
     @Test

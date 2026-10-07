@@ -28,9 +28,11 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/profile_authorization.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/maintenance_outcome_l10n.dart';
@@ -42,6 +44,10 @@ import 'package:weblibre/utils/ui_helper.dart';
 
 enum RestoreTarget { createOrOverride, createNew }
 
+/// Scope for the device prompt a device-locked clone must pass before it
+/// exists. It has no profile id yet, and nothing is cached under it.
+const _restoreAuthKey = 'profile_access::restore';
+
 class ProfileRestoreScreen extends HookConsumerWidget {
   final Uri backupFileUri;
 
@@ -51,8 +57,7 @@ class ProfileRestoreScreen extends HookConsumerWidget {
   /// profile this process is already serving. Offering a choice there produced
   /// the opposite of what was asked for — a *second* user built from the
   /// backup, with the freshly created one left behind empty and the lock the
-  /// user had just configured on it dropped, because a clone is a new profile
-  /// and carries neither.
+  /// user had just configured on it replaced by the archive's.
   final Profile? forcedOverwriteTarget;
 
   /// Whether the replaced user takes the archive's name.
@@ -172,9 +177,14 @@ class ProfileRestoreScreen extends HookConsumerWidget {
           // unpacks the archive in-process, so a wrong password surfaces here as
           // the raw `FormatException: Filter error, bad data` — which told the
           // user nothing, on the one restore path where retrying is free.
+          final error = restoreState.error!;
           showErrorMessage(
             context,
-            describeMaintenanceFailure(l10n, restoreState.error!),
+            error is CloneDeviceLockUnconfirmed
+                ? l10n.user_restoreDeviceLockUnconfirmed(
+                    l10n.profileCopy_nothingChanged,
+                  )
+                : describeMaintenanceFailure(l10n, error),
           );
         });
       } else if (restoreState.hasData && !successHandled.value) {
@@ -537,7 +547,23 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                           : null,
                                       replacesPlaceholder: _targetIsFixed,
                                     );
-                                if (confirmed != true) return;
+                                if (confirmed != true || !context.mounted) {
+                                  return;
+                                }
+
+                                // Replacing a locked profile would hand it the
+                                // archive's data — sessions, sign-ins — under
+                                // the lock its owner trusts. Only whoever can
+                                // open it may do that.
+                                final authorized = await authorizeProfileAction(
+                                  context,
+                                  ref,
+                                  target,
+                                  reason: l10n.user_authReasonReplaceProfile(
+                                    labelFor(target),
+                                  ),
+                                );
+                                if (!authorized) return;
 
                                 restoreFuture.value = _queueOverwrite(
                                   ref,
@@ -547,12 +573,30 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                 );
 
                               case RestoreTarget.createNew:
+                                // Captured now rather than read inside the
+                                // callback: it runs once the archive is open,
+                                // when this screen may no longer be mounted.
+                                final localAuth = ref.read(
+                                  localAuthenticationServiceProvider.notifier,
+                                );
+                                final reason =
+                                    l10n.user_authReasonConfirmUnlock;
+                                final alsoRemember =
+                                    await activeProfileDeviceUnlock();
+                                if (!context.mounted) return;
+
                                 restoreFuture.value = ref
                                     .read(userBackupServiceProvider.notifier)
                                     .restoreAndCreateNew(
                                       backupFileUri,
                                       profileName: nameTextController.text,
                                       password: passwordTextController.text,
+                                      confirmDeviceLock: () =>
+                                          localAuth.authenticate(
+                                            authKey: _restoreAuthKey,
+                                            localizedReason: reason,
+                                            alsoRemember: alsoRemember,
+                                          ),
                                     );
                             }
                           },

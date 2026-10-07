@@ -154,7 +154,10 @@ abstract class GeckoProfileApi {
   /// Returns false having changed nothing observable, so a caller that gets false
   /// can report the failure and keep running. On true the process is terminal and
   /// must call [completeProfileRestart] once teardown is done.
-  bool armProfileRestart(String? targetProfileId, String reason);
+  ///
+  /// [showPicker] makes the next launch show the profile picker once, whatever
+  /// the prompt setting says (it still needs a UI launch and two profiles).
+  bool armProfileRestart(String? targetProfileId, String reason, bool showPicker);
 
   /// Tears down and exits. Never returns.
   void completeProfileRestart();
@@ -193,6 +196,13 @@ abstract class GeckoProfileApi {
   /// treat that as "the window is still open", never as a failure of the
   /// operation.
   bool syncDirectory(String path);
+
+  /// Copies the SAF document [sourceUri] into the local file [destPath].
+  ///
+  /// Throws with the platform's own exception class and message, so a restore
+  /// that cannot read its archive says why instead of failing anonymously.
+  @async
+  void copyDocumentToFile(String sourceUri, String destPath);
 
   /// Claims the right for this Dart isolate to hold profile state open.
   ///

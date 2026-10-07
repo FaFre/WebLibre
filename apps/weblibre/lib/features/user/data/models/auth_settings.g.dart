@@ -7,7 +7,9 @@ part of 'auth_settings.dart';
 // **************************************************************************
 
 abstract class _$AuthSettingsCWProxy {
-  AuthSettings authenticationRequired(bool authenticationRequired);
+  AuthSettings lockMethod(ProfileLockMethod lockMethod);
+
+  AuthSettings passwordVerifier(String? passwordVerifier);
 
   AuthSettings autoLockMode(AutoLockMode autoLockMode);
 
@@ -21,7 +23,8 @@ abstract class _$AuthSettingsCWProxy {
   /// AuthSettings(...).copyWith(id: 12, name: "My name")
   /// ```
   AuthSettings call({
-    bool authenticationRequired,
+    ProfileLockMethod lockMethod,
+    String? passwordVerifier,
     AutoLockMode autoLockMode,
     Duration timeout,
   });
@@ -35,8 +38,12 @@ class _$AuthSettingsCWProxyImpl implements _$AuthSettingsCWProxy {
   final AuthSettings _value;
 
   @override
-  AuthSettings authenticationRequired(bool authenticationRequired) =>
-      call(authenticationRequired: authenticationRequired);
+  AuthSettings lockMethod(ProfileLockMethod lockMethod) =>
+      call(lockMethod: lockMethod);
+
+  @override
+  AuthSettings passwordVerifier(String? passwordVerifier) =>
+      call(passwordVerifier: passwordVerifier);
 
   @override
   AuthSettings autoLockMode(AutoLockMode autoLockMode) =>
@@ -54,17 +61,21 @@ class _$AuthSettingsCWProxyImpl implements _$AuthSettingsCWProxy {
   /// ```
   @override
   AuthSettings call({
-    Object? authenticationRequired = const $CopyWithPlaceholder(),
+    Object? lockMethod = const $CopyWithPlaceholder(),
+    Object? passwordVerifier = const $CopyWithPlaceholder(),
     Object? autoLockMode = const $CopyWithPlaceholder(),
     Object? timeout = const $CopyWithPlaceholder(),
   }) {
     return AuthSettings(
-      authenticationRequired:
-          authenticationRequired == const $CopyWithPlaceholder() ||
-              authenticationRequired == null
-          ? _value.authenticationRequired
+      lockMethod:
+          lockMethod == const $CopyWithPlaceholder() || lockMethod == null
+          ? _value.lockMethod
           // ignore: cast_nullable_to_non_nullable
-          : authenticationRequired as bool,
+          : lockMethod as ProfileLockMethod,
+      passwordVerifier: passwordVerifier == const $CopyWithPlaceholder()
+          ? _value.passwordVerifier
+          // ignore: cast_nullable_to_non_nullable
+          : passwordVerifier as String?,
       autoLockMode:
           autoLockMode == const $CopyWithPlaceholder() || autoLockMode == null
           ? _value.autoLockMode
@@ -90,17 +101,29 @@ extension $AuthSettingsCopyWith on AuthSettings {
 // **************************************************************************
 
 AuthSettings _$AuthSettingsFromJson(Map<String, dynamic> json) => AuthSettings(
-  authenticationRequired: json['authenticationRequired'] as bool,
+  lockMethod: $enumDecode(
+    _$ProfileLockMethodEnumMap,
+    _readLockMethod(json, 'lockMethod'),
+    unknownValue: ProfileLockMethod.device,
+  ),
+  passwordVerifier: json['passwordVerifier'] as String?,
   autoLockMode: $enumDecode(_$AutoLockModeEnumMap, json['autoLockMode']),
   timeout: Duration(microseconds: (json['timeout'] as num).toInt()),
 );
 
 Map<String, dynamic> _$AuthSettingsToJson(AuthSettings instance) =>
     <String, dynamic>{
-      'authenticationRequired': instance.authenticationRequired,
+      'lockMethod': _$ProfileLockMethodEnumMap[instance.lockMethod]!,
+      'passwordVerifier': instance.passwordVerifier,
       'autoLockMode': _$AutoLockModeEnumMap[instance.autoLockMode]!,
       'timeout': instance.timeout.inMicroseconds,
     };
+
+const _$ProfileLockMethodEnumMap = {
+  ProfileLockMethod.none: 'none',
+  ProfileLockMethod.device: 'device',
+  ProfileLockMethod.password: 'password',
+};
 
 const _$AutoLockModeEnumMap = {
   AutoLockMode.background: 'background',

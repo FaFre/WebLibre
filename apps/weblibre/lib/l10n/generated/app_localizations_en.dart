@@ -11602,11 +11602,122 @@ class AppLocalizationsEn extends AppLocalizations {
   String get user_authenticationSectionTitle => 'Authentication';
 
   @override
-  String get user_requireAuthenticationTitle => 'Require authentication';
+  String get user_lockMethodNoneTitle => 'No lock';
 
   @override
-  String get user_requireAuthenticationSubtitle =>
-      'Ask before this profile can be opened';
+  String get user_lockMethodNoneSubtitle =>
+      'Anyone using WebLibre on this device can open this profile';
+
+  @override
+  String get user_lockMethodDeviceTitle => 'Device lock';
+
+  @override
+  String get user_lockMethodDeviceSubtitle =>
+      'Fingerprint, face or the device PIN. Anyone who can unlock this device can open this profile.';
+
+  @override
+  String get user_lockMethodPasswordTitle => 'Profile password';
+
+  @override
+  String get user_lockMethodPasswordSubtitle =>
+      'A password only for this profile. Fingerprints and the device PIN can\'t open it.';
+
+  @override
+  String get user_changeProfilePasswordTitle => 'Change password';
+
+  @override
+  String get user_profilePasswordUnrecoverableTitle =>
+      'A forgotten password can\'t be recovered';
+
+  @override
+  String get user_profilePasswordUnrecoverableSubtitle =>
+      'Without it, this profile can\'t be opened, backed up or deleted. The password locks WebLibre; it does not encrypt the profile\'s data.';
+
+  @override
+  String get user_setProfilePasswordTitle => 'Set profile password';
+
+  @override
+  String get user_setProfilePasswordExplanation =>
+      'This password is asked for when the profile opens, and before it is backed up, replaced with a backup, changed or deleted.';
+
+  @override
+  String get user_newProfilePasswordFieldLabel => 'New password';
+
+  @override
+  String get user_repeatProfilePasswordFieldLabel => 'Repeat password';
+
+  @override
+  String get user_profilePasswordsDoNotMatch => 'The passwords don\'t match';
+
+  @override
+  String get user_profilePasswordCheckFailed =>
+      'Could not check the password. Try again.';
+
+  @override
+  String get user_profilePasswordInterrupted =>
+      'WebLibre was closed or switched away from during the check. Enter the password again.';
+
+  @override
+  String get user_profilePasswordSaveFailed =>
+      'Could not set the password. Try again.';
+
+  @override
+  String get user_profilePasswordFieldLabel => 'Profile password';
+
+  @override
+  String get user_wrongProfilePassword => 'Wrong password';
+
+  @override
+  String user_wrongProfilePasswordWithRetry(String retryHint) {
+    return 'Wrong password. $retryHint';
+  }
+
+  @override
+  String user_tooManyPasswordAttempts(String retryHint) {
+    return 'Too many wrong attempts. $retryHint';
+  }
+
+  @override
+  String user_passwordRetryInSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Try again in $seconds seconds.',
+      one: 'Try again in 1 second.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_passwordRetryInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Try again in $minutes minutes.',
+      one: 'Try again in 1 minute.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_authReasonEditProfile(String profileName) {
+    return 'Change \"$profileName\"';
+  }
+
+  @override
+  String user_authReasonBackupProfile(String profileName) {
+    return 'Back up \"$profileName\"';
+  }
+
+  @override
+  String user_authReasonDeleteProfile(String profileName) {
+    return 'Delete \"$profileName\"';
+  }
+
+  @override
+  String user_authReasonReplaceProfile(String profileName) {
+    return 'Replace \"$profileName\"';
+  }
 
   @override
   String get user_autoLockTitle => 'Auto-lock';
@@ -11708,6 +11819,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get user_newProfileNoSignInSubtitle =>
       'Tabs, history and bookmarks are restored. Sign-in and sync data stay with the original profile.';
+
+  @override
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged) {
+    return 'This backup is protected by the device lock, and this device could not unlock it. $nothingChanged';
+  }
 
   @override
   String user_restoringIntoTitle(String profileLabel) {

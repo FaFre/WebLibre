@@ -19,6 +19,7 @@
  */
 import 'dart:io';
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/logger.dart';
@@ -160,21 +161,21 @@ Future<void> _discardPartial(SafUtil util, String uri) async {
 /// decryptable copy of somebody's whole profile. Cleanup failures are logged
 /// rather than thrown: by then [use] has already produced the answer that
 /// matters.
+///
+/// The copy goes through the app's own native method rather than `saf_stream`,
+/// whose `copyToLocalFile` reported every failure as a bare `PluginError` and
+/// left restores failing with no reason anyone could act on.
 Future<T> withArchiveFromSaf<T>({
   required Uri sourceUri,
   required File local,
   required Future<T> Function(File archive) use,
-  SafStream? safStream,
 }) async {
   try {
     // Inside the bracket, not before it. A copy that throws part-way — a full
     // volume, a revoked grant — still leaves bytes behind, and those bytes are a
     // copy of somebody's whole profile that nothing else on this path is
     // guaranteed to reach.
-    await (safStream ?? SafStream()).copyToLocalFile(
-      sourceUri.toString(),
-      local.path,
-    );
+    await GeckoProfileService().copyDocumentToFile(sourceUri, local.path);
 
     return await use(local);
   } finally {

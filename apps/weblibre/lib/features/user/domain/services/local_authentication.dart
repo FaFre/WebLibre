@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
@@ -31,11 +32,65 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
   final _auth = LocalAuthentication();
   final _cache = <String, (DateTime, AuthSettings)>{};
 
-  void evictCacheOnBackground() {
+  /// System prompts this service has raised and that have not answered yet.
+  int _promptsInFlight = 0;
+  Completer<void>? _promptsSettled;
+
+  int _departures = 0;
+
+  /// How many times the app has left the foreground since this service
+  /// started — every lifecycle change that drops background-mode unlocks.
+  ///
+  /// That includes a plain `inactive` (notification shade, recents) unless
+  /// this service's own prompt caused it: the auto-lock policy treats it as
+  /// leaving, so a check running across it must not undo the eviction.
+  ///
+  /// A check that takes time — a profile password runs Argon2 — compares this
+  /// before and after. A change means the person may have walked away before
+  /// the answer arrived, and an unlock or authorization that lands while
+  /// nobody is looking must not take effect.
+  int get departureCount => _departures;
+
+  /// Tracked here rather than by a screen: the lock screen, the profile list
+  /// and dialogs need it too, and the browser view is mounted on none of them.
+  void _onLifecycleChanged(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        return;
+      case AppLifecycleState.inactive:
+        evictCacheOnBackground(leftForeground: false);
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        evictCacheOnBackground(leftForeground: true);
+    }
+  }
+
+  /// Drops background-mode unlocks because the app left the foreground.
+  ///
+  /// [leftForeground] is false for `inactive`, which is also what the app
+  /// becomes while this service's own system prompt covers it. Evicting then
+  /// would lock the open profile because the user was busy proving who they
+  /// are. A real departure (`hidden`, `paused`) always evicts.
+  ///
+  /// Every eviction also counts as a departure ([departureCount]), so the two
+  /// cannot disagree about what "left the app" means.
+  void evictCacheOnBackground({required bool leftForeground}) {
+    if (!leftForeground && _promptsInFlight > 0) return;
+
+    _departures++;
+
     _cache.removeWhere(
       (key, value) => value.$2.autoLockMode == AutoLockMode.background,
     );
   }
+
+  /// Completes once no system prompt is showing.
+  ///
+  /// The resume that follows a prompt and the prompt's own answer arrive in
+  /// no guaranteed order. Checking the cache before the answer is in would
+  /// lock a profile the user just unlocked.
+  Future<void> promptsSettled() => _promptsSettled?.future ?? Future.value();
 
   bool isCached(String authKey) {
     final auth = _cache[authKey];
@@ -51,31 +106,66 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
     return true;
   }
 
+  /// Records an unlock proved some other way, so auto-lock treats it like one
+  /// from the device prompt.
+  void remember(String authKey, AuthSettings settings) {
+    _cache[authKey] = (DateTime.now(), settings);
+  }
+
+  /// Drops a remembered unlock, so the next check asks again.
+  void forget(String authKey) {
+    _cache.remove(authKey);
+  }
+
+  /// Asks the device prompt, or answers from the cache when [useAuthCache].
+  ///
+  /// On success, [authKey] is remembered under [settings] when given, and so
+  /// is every entry of [alsoRemember]. Both are recorded before the prompt
+  /// counts as settled, so a resume check waiting in [promptsSettled] sees
+  /// them.
   Future<bool> authenticate({
     required String authKey,
     required String localizedReason,
     AuthSettings? settings,
     bool useAuthCache = false,
+    Map<String, AuthSettings> alsoRemember = const {},
   }) async {
-    try {
-      final useCache = useAuthCache && isCached(authKey);
-      final success =
-          useCache ||
-          await _auth.authenticate(localizedReason: localizedReason);
+    if (useAuthCache && isCached(authKey)) {
+      if (settings != null) remember(authKey, settings);
+      return true;
+    }
 
-      if (success && settings != null) {
-        _cache[authKey] = (DateTime.now(), settings);
+    if (_promptsInFlight++ == 0) {
+      _promptsSettled = Completer<void>();
+    }
+
+    try {
+      final success = await _auth.authenticate(
+        localizedReason: localizedReason,
+      );
+
+      if (success) {
+        if (settings != null) remember(authKey, settings);
+        alsoRemember.forEach(remember);
       }
 
       return success;
     } on LocalAuthException catch (e, s) {
       logger.e('Could not authenticate', error: e, stackTrace: s);
       return false;
+    } finally {
+      if (--_promptsInFlight == 0) {
+        _promptsSettled?.complete();
+        _promptsSettled = null;
+      }
     }
   }
 
   @override
   Future<bool> build() {
+    final lifecycle = AppLifecycleListener(onStateChange: _onLifecycleChanged);
+    ref.onDispose(lifecycle.dispose);
+
     return _auth.canCheckBiometrics;
   }
 }

@@ -11788,11 +11788,122 @@ class AppLocalizationsId extends AppLocalizations {
   String get user_authenticationSectionTitle => 'Autentikasi';
 
   @override
-  String get user_requireAuthenticationTitle => 'Wajibkan autentikasi';
+  String get user_lockMethodNoneTitle => 'Tanpa kunci';
 
   @override
-  String get user_requireAuthenticationSubtitle =>
-      'Minta konfirmasi sebelum profil ini dapat dibuka';
+  String get user_lockMethodNoneSubtitle =>
+      'Siapa pun yang menggunakan WebLibre di perangkat ini dapat membuka profil ini';
+
+  @override
+  String get user_lockMethodDeviceTitle => 'Kunci perangkat';
+
+  @override
+  String get user_lockMethodDeviceSubtitle =>
+      'Sidik jari, wajah, atau PIN perangkat. Siapa pun yang dapat membuka kunci perangkat ini dapat membuka profil ini.';
+
+  @override
+  String get user_lockMethodPasswordTitle => 'Kata sandi profil';
+
+  @override
+  String get user_lockMethodPasswordSubtitle =>
+      'Kata sandi khusus untuk profil ini. Sidik jari dan PIN perangkat tidak dapat membukanya.';
+
+  @override
+  String get user_changeProfilePasswordTitle => 'Ubah kata sandi';
+
+  @override
+  String get user_profilePasswordUnrecoverableTitle =>
+      'Kata sandi yang terlupa tidak dapat dipulihkan';
+
+  @override
+  String get user_profilePasswordUnrecoverableSubtitle =>
+      'Tanpa kata sandi, profil ini tidak dapat dibuka, dicadangkan, atau dihapus. Kata sandi ini mengunci WebLibre, tetapi tidak mengenkripsi data profil.';
+
+  @override
+  String get user_setProfilePasswordTitle => 'Atur kata sandi profil';
+
+  @override
+  String get user_setProfilePasswordExplanation =>
+      'Kata sandi ini diminta saat profil dibuka, serta sebelum profil dicadangkan, diganti dengan cadangan, diubah, atau dihapus.';
+
+  @override
+  String get user_newProfilePasswordFieldLabel => 'Kata sandi baru';
+
+  @override
+  String get user_repeatProfilePasswordFieldLabel => 'Ulangi kata sandi';
+
+  @override
+  String get user_profilePasswordsDoNotMatch => 'Kata sandi tidak cocok';
+
+  @override
+  String get user_profilePasswordCheckFailed =>
+      'Kata sandi tidak dapat diperiksa. Coba lagi.';
+
+  @override
+  String get user_profilePasswordInterrupted =>
+      'WebLibre ditinggalkan saat pemeriksaan. Masukkan kata sandi lagi.';
+
+  @override
+  String get user_profilePasswordSaveFailed =>
+      'Kata sandi tidak dapat diatur. Coba lagi.';
+
+  @override
+  String get user_profilePasswordFieldLabel => 'Kata sandi profil';
+
+  @override
+  String get user_wrongProfilePassword => 'Kata sandi salah';
+
+  @override
+  String user_wrongProfilePasswordWithRetry(String retryHint) {
+    return 'Kata sandi salah. $retryHint';
+  }
+
+  @override
+  String user_tooManyPasswordAttempts(String retryHint) {
+    return 'Terlalu banyak percobaan yang salah. $retryHint';
+  }
+
+  @override
+  String user_passwordRetryInSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Coba lagi dalam $seconds detik.',
+      one: 'Coba lagi dalam 1 detik.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_passwordRetryInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Coba lagi dalam $minutes menit.',
+      one: 'Coba lagi dalam 1 menit.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_authReasonEditProfile(String profileName) {
+    return 'Ubah \"$profileName\"';
+  }
+
+  @override
+  String user_authReasonBackupProfile(String profileName) {
+    return 'Cadangkan \"$profileName\"';
+  }
+
+  @override
+  String user_authReasonDeleteProfile(String profileName) {
+    return 'Hapus \"$profileName\"';
+  }
+
+  @override
+  String user_authReasonReplaceProfile(String profileName) {
+    return 'Ganti \"$profileName\"';
+  }
 
   @override
   String get user_autoLockTitle => 'Kunci otomatis';
@@ -11897,6 +12008,11 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get user_newProfileNoSignInSubtitle =>
       'Tab, riwayat, dan markah dipulihkan. Info masuk dan data sinkronisasi tetap berada di profil asli.';
+
+  @override
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged) {
+    return 'Cadangan ini dilindungi kunci perangkat, dan perangkat ini tidak dapat membukanya. $nothingChanged';
+  }
 
   @override
   String user_restoringIntoTitle(String profileLabel) {

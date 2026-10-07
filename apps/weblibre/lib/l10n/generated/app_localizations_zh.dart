@@ -10785,10 +10785,114 @@ class AppLocalizationsZh extends AppLocalizations {
   String get user_authenticationSectionTitle => '身份验证';
 
   @override
-  String get user_requireAuthenticationTitle => '需要身份验证';
+  String get user_lockMethodNoneTitle => '不锁定';
 
   @override
-  String get user_requireAuthenticationSubtitle => '打开此配置文件前先进行验证';
+  String get user_lockMethodNoneSubtitle => '在此设备上使用 WebLibre 的任何人都能打开此配置文件';
+
+  @override
+  String get user_lockMethodDeviceTitle => '设备锁';
+
+  @override
+  String get user_lockMethodDeviceSubtitle =>
+      '指纹、面容或设备 PIN 码。能解锁此设备的任何人都能打开此配置文件。';
+
+  @override
+  String get user_lockMethodPasswordTitle => '配置文件密码';
+
+  @override
+  String get user_lockMethodPasswordSubtitle => '仅用于此配置文件的密码。指纹和设备 PIN 码无法打开它。';
+
+  @override
+  String get user_changeProfilePasswordTitle => '更改密码';
+
+  @override
+  String get user_profilePasswordUnrecoverableTitle => '忘记的密码无法找回';
+
+  @override
+  String get user_profilePasswordUnrecoverableSubtitle =>
+      '没有密码，就无法打开、备份或删除此配置文件。此密码只锁定 WebLibre，不会加密配置文件的数据。';
+
+  @override
+  String get user_setProfilePasswordTitle => '设置配置文件密码';
+
+  @override
+  String get user_setProfilePasswordExplanation =>
+      '打开此配置文件时，以及在备份、用备份替换、更改或删除它之前，都需要输入此密码。';
+
+  @override
+  String get user_newProfilePasswordFieldLabel => '新密码';
+
+  @override
+  String get user_repeatProfilePasswordFieldLabel => '再次输入密码';
+
+  @override
+  String get user_profilePasswordsDoNotMatch => '两次输入的密码不一致';
+
+  @override
+  String get user_profilePasswordCheckFailed => '无法检查密码。请重试。';
+
+  @override
+  String get user_profilePasswordInterrupted => '检查期间离开了 WebLibre。请重新输入密码。';
+
+  @override
+  String get user_profilePasswordSaveFailed => '无法设置密码。请重试。';
+
+  @override
+  String get user_profilePasswordFieldLabel => '配置文件密码';
+
+  @override
+  String get user_wrongProfilePassword => '密码错误';
+
+  @override
+  String user_wrongProfilePasswordWithRetry(String retryHint) {
+    return '密码错误。$retryHint';
+  }
+
+  @override
+  String user_tooManyPasswordAttempts(String retryHint) {
+    return '错误次数过多。$retryHint';
+  }
+
+  @override
+  String user_passwordRetryInSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: '请在 $seconds 秒后重试。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_passwordRetryInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '请在 $minutes 分钟后重试。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_authReasonEditProfile(String profileName) {
+    return '更改“$profileName”';
+  }
+
+  @override
+  String user_authReasonBackupProfile(String profileName) {
+    return '备份“$profileName”';
+  }
+
+  @override
+  String user_authReasonDeleteProfile(String profileName) {
+    return '删除“$profileName”';
+  }
+
+  @override
+  String user_authReasonReplaceProfile(String profileName) {
+    return '替换“$profileName”';
+  }
 
   @override
   String get user_autoLockTitle => '自动锁定';
@@ -10882,6 +10986,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get user_newProfileNoSignInSubtitle =>
       '标签页、历史记录和书签会被恢复。登录和同步数据仍保留在原配置文件中。';
+
+  @override
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged) {
+    return '此备份受设备锁保护，而此设备无法解锁它。$nothingChanged';
+  }
 
   @override
   String user_restoringIntoTitle(String profileLabel) {

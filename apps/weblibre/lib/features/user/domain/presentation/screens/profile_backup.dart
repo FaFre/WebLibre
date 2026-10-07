@@ -27,6 +27,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/features/user/domain/entities/restart_cost.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/profile_maintenance_dialogs.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/profile_authorization.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -206,7 +207,19 @@ class ProfileBackupScreen extends HookConsumerWidget {
                       profileName: profile.name,
                       restartCost: restartCost,
                     );
-                    if (confirmed != true) return;
+                    if (confirmed != true || !context.mounted) return;
+
+                    // A backup is the profile's whole session — cookies and
+                    // logins — under a password whoever starts it picks. So
+                    // it takes whatever unlocks this profile, asked fresh, and
+                    // that holds when it is started from another profile too.
+                    final authorized = await authorizeProfileAction(
+                      context,
+                      ref,
+                      profile,
+                      reason: l10n.user_authReasonBackupProfile(profile.name),
+                    );
+                    if (!authorized) return;
 
                     // Queues the work and restarts. The archive is written
                     // by the next process, where nothing has the profile

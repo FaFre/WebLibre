@@ -54,6 +54,13 @@ data class RestartRequest(
     val targetProfileId: String? = null,
     val brokerEntryId: String? = null,
     val appliedAtMillis: Long? = null,
+    /**
+     * Asks the next process to show the profile picker once, whatever the
+     * prompt setting says. Set by the lock screen's way out: a user who cannot
+     * unlock the profile they landed on must be able to choose another one even
+     * when the picker is switched off.
+     */
+    val showPicker: Boolean = false,
 ) {
     val state: RestartRequestState? get() = RestartRequestState.tryFromId(stateId)
 
@@ -80,6 +87,7 @@ data class RestartRequest(
         put("createdAt", Iso8601.format(createdAtMillis))
         put("expiresAt", Iso8601.format(expiresAtMillis))
         put("appliedAt", appliedAtMillis?.let(Iso8601::format) ?: JSONObject.NULL)
+        put("showPicker", showPicker)
     }
 
     companion object {
@@ -104,6 +112,7 @@ data class RestartRequest(
                 createdAtMillis = createdAt,
                 expiresAtMillis = expiresAt,
                 appliedAtMillis = Iso8601.parse(json.stringOrNull("appliedAt")),
+                showPicker = json.optBoolean("showPicker", false),
             )
         }
     }

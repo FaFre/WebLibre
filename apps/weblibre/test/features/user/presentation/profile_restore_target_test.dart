@@ -33,7 +33,9 @@ void main() {
   final target = Profile(
     id: '0199a0b1-1111-7111-8111-111111111111',
     name: 'a',
-    authSettings: AuthSettings.withDefaults(authenticationRequired: true),
+    authSettings: AuthSettings.withDefaults(
+      lockMethod: ProfileLockMethod.device,
+    ),
   );
 
   Future<void> pump(WidgetTester tester, Widget screen) async {

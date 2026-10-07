@@ -605,7 +605,14 @@ class GeckoProfileApi {
   /// Returns false having changed nothing observable, so a caller that gets false
   /// can report the failure and keep running. On true the process is terminal and
   /// must call [completeProfileRestart] once teardown is done.
-  Future<bool> armProfileRestart(String? targetProfileId, String reason) async {
+  ///
+  /// [showPicker] makes the next launch show the profile picker once, whatever
+  /// the prompt setting says (it still needs a UI launch and two profiles).
+  Future<bool> armProfileRestart(
+    String? targetProfileId,
+    String reason,
+    bool showPicker,
+  ) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.armProfileRestart$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -614,7 +621,7 @@ class GeckoProfileApi {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[targetProfileId, reason],
+      <Object?>[targetProfileId, reason, showPicker],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -759,6 +766,30 @@ class GeckoProfileApi {
       isNullValid: false,
     );
     return pigeonVar_replyValue! as bool;
+  }
+
+  /// Copies the SAF document [sourceUri] into the local file [destPath].
+  ///
+  /// Throws with the platform's own exception class and message, so a restore
+  /// that cannot read its archive says why instead of failing anonymously.
+  Future<void> copyDocumentToFile(String sourceUri, String destPath) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.copyDocumentToFile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[sourceUri, destPath],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   /// Claims the right for this Dart isolate to hold profile state open.

@@ -11916,11 +11916,126 @@ class AppLocalizationsRu extends AppLocalizations {
   String get user_authenticationSectionTitle => 'Аутентификация';
 
   @override
-  String get user_requireAuthenticationTitle => 'Требовать аутентификацию';
+  String get user_lockMethodNoneTitle => 'Без блокировки';
 
   @override
-  String get user_requireAuthenticationSubtitle =>
-      'Запрашивать перед открытием этого профиля';
+  String get user_lockMethodNoneSubtitle =>
+      'Любой, кто пользуется WebLibre на этом устройстве, может открыть этот профиль';
+
+  @override
+  String get user_lockMethodDeviceTitle => 'Блокировка устройства';
+
+  @override
+  String get user_lockMethodDeviceSubtitle =>
+      'Отпечаток пальца, лицо или PIN-код устройства. Любой, кто может разблокировать это устройство, может открыть этот профиль.';
+
+  @override
+  String get user_lockMethodPasswordTitle => 'Пароль профиля';
+
+  @override
+  String get user_lockMethodPasswordSubtitle =>
+      'Пароль только для этого профиля. Отпечатки пальцев и PIN-код устройства его не откроют.';
+
+  @override
+  String get user_changeProfilePasswordTitle => 'Изменить пароль';
+
+  @override
+  String get user_profilePasswordUnrecoverableTitle =>
+      'Забытый пароль нельзя восстановить';
+
+  @override
+  String get user_profilePasswordUnrecoverableSubtitle =>
+      'Без пароля этот профиль нельзя открыть, сохранить в резервную копию или удалить. Пароль блокирует WebLibre, но не шифрует данные профиля.';
+
+  @override
+  String get user_setProfilePasswordTitle => 'Задать пароль профиля';
+
+  @override
+  String get user_setProfilePasswordExplanation =>
+      'Этот пароль запрашивается при открытии профиля, а также перед созданием его резервной копии, заменой из резервной копии, изменением или удалением.';
+
+  @override
+  String get user_newProfilePasswordFieldLabel => 'Новый пароль';
+
+  @override
+  String get user_repeatProfilePasswordFieldLabel => 'Повторите пароль';
+
+  @override
+  String get user_profilePasswordsDoNotMatch => 'Пароли не совпадают';
+
+  @override
+  String get user_profilePasswordCheckFailed =>
+      'Не удалось проверить пароль. Повторите попытку.';
+
+  @override
+  String get user_profilePasswordInterrupted =>
+      'Во время проверки вы вышли из WebLibre. Введите пароль ещё раз.';
+
+  @override
+  String get user_profilePasswordSaveFailed =>
+      'Не удалось задать пароль. Повторите попытку.';
+
+  @override
+  String get user_profilePasswordFieldLabel => 'Пароль профиля';
+
+  @override
+  String get user_wrongProfilePassword => 'Неверный пароль';
+
+  @override
+  String user_wrongProfilePasswordWithRetry(String retryHint) {
+    return 'Неверный пароль. $retryHint';
+  }
+
+  @override
+  String user_tooManyPasswordAttempts(String retryHint) {
+    return 'Слишком много неудачных попыток. $retryHint';
+  }
+
+  @override
+  String user_passwordRetryInSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Повторите попытку через $seconds секунды.',
+      many: 'Повторите попытку через $seconds секунд.',
+      few: 'Повторите попытку через $seconds секунды.',
+      one: 'Повторите попытку через $seconds секунду.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_passwordRetryInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Повторите попытку через $minutes минуты.',
+      many: 'Повторите попытку через $minutes минут.',
+      few: 'Повторите попытку через $minutes минуты.',
+      one: 'Повторите попытку через $minutes минуту.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_authReasonEditProfile(String profileName) {
+    return 'Изменить «$profileName»';
+  }
+
+  @override
+  String user_authReasonBackupProfile(String profileName) {
+    return 'Создать резервную копию «$profileName»';
+  }
+
+  @override
+  String user_authReasonDeleteProfile(String profileName) {
+    return 'Удалить «$profileName»';
+  }
+
+  @override
+  String user_authReasonReplaceProfile(String profileName) {
+    return 'Заменить «$profileName»';
+  }
 
   @override
   String get user_autoLockTitle => 'Автоблокировка';
@@ -12024,6 +12139,11 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get user_newProfileNoSignInSubtitle =>
       'Вкладки, история и закладки восстанавливаются. Данные входа и синхронизации остаются в исходном профиле.';
+
+  @override
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged) {
+    return 'Эта резервная копия защищена блокировкой устройства, и это устройство не смогло её разблокировать. $nothingChanged';
+  }
 
   @override
   String user_restoringIntoTitle(String profileLabel) {

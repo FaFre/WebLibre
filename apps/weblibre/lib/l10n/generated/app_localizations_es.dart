@@ -11935,11 +11935,122 @@ class AppLocalizationsEs extends AppLocalizations {
   String get user_authenticationSectionTitle => 'Autenticación';
 
   @override
-  String get user_requireAuthenticationTitle => 'Requerir autenticación';
+  String get user_lockMethodNoneTitle => 'Sin bloqueo';
 
   @override
-  String get user_requireAuthenticationSubtitle =>
-      'Preguntar antes de que se pueda abrir este perfil';
+  String get user_lockMethodNoneSubtitle =>
+      'Cualquiera que use WebLibre en este dispositivo puede abrir este perfil';
+
+  @override
+  String get user_lockMethodDeviceTitle => 'Bloqueo del dispositivo';
+
+  @override
+  String get user_lockMethodDeviceSubtitle =>
+      'Huella, rostro o PIN del dispositivo. Cualquiera que pueda desbloquear este dispositivo puede abrir este perfil.';
+
+  @override
+  String get user_lockMethodPasswordTitle => 'Contraseña del perfil';
+
+  @override
+  String get user_lockMethodPasswordSubtitle =>
+      'Una contraseña solo para este perfil. Las huellas y el PIN del dispositivo no lo abren.';
+
+  @override
+  String get user_changeProfilePasswordTitle => 'Cambiar contraseña';
+
+  @override
+  String get user_profilePasswordUnrecoverableTitle =>
+      'Una contraseña olvidada no se puede recuperar';
+
+  @override
+  String get user_profilePasswordUnrecoverableSubtitle =>
+      'Sin ella no podrás abrir este perfil, hacer copias de seguridad ni eliminarlo. La contraseña bloquea WebLibre; no cifra los datos del perfil.';
+
+  @override
+  String get user_setProfilePasswordTitle => 'Establecer contraseña del perfil';
+
+  @override
+  String get user_setProfilePasswordExplanation =>
+      'Se pedirá esta contraseña al abrir el perfil y antes de hacer una copia de seguridad, reemplazarlo por una copia, cambiarlo o eliminarlo.';
+
+  @override
+  String get user_newProfilePasswordFieldLabel => 'Nueva contraseña';
+
+  @override
+  String get user_repeatProfilePasswordFieldLabel => 'Repetir contraseña';
+
+  @override
+  String get user_profilePasswordsDoNotMatch => 'Las contraseñas no coinciden';
+
+  @override
+  String get user_profilePasswordCheckFailed =>
+      'No se pudo comprobar la contraseña. Vuelve a intentarlo.';
+
+  @override
+  String get user_profilePasswordInterrupted =>
+      'Saliste de WebLibre durante la comprobación. Vuelve a introducir la contraseña.';
+
+  @override
+  String get user_profilePasswordSaveFailed =>
+      'No se pudo establecer la contraseña. Vuelve a intentarlo.';
+
+  @override
+  String get user_profilePasswordFieldLabel => 'Contraseña del perfil';
+
+  @override
+  String get user_wrongProfilePassword => 'Contraseña incorrecta';
+
+  @override
+  String user_wrongProfilePasswordWithRetry(String retryHint) {
+    return 'Contraseña incorrecta. $retryHint';
+  }
+
+  @override
+  String user_tooManyPasswordAttempts(String retryHint) {
+    return 'Demasiados intentos fallidos. $retryHint';
+  }
+
+  @override
+  String user_passwordRetryInSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'Vuelve a intentarlo en $seconds segundos.',
+      one: 'Vuelve a intentarlo en 1 segundo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_passwordRetryInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'Vuelve a intentarlo en $minutes minutos.',
+      one: 'Vuelve a intentarlo en 1 minuto.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_authReasonEditProfile(String profileName) {
+    return 'Cambiar «$profileName»';
+  }
+
+  @override
+  String user_authReasonBackupProfile(String profileName) {
+    return 'Hacer copia de seguridad de «$profileName»';
+  }
+
+  @override
+  String user_authReasonDeleteProfile(String profileName) {
+    return 'Eliminar «$profileName»';
+  }
+
+  @override
+  String user_authReasonReplaceProfile(String profileName) {
+    return 'Reemplazar «$profileName»';
+  }
 
   @override
   String get user_autoLockTitle => 'Bloqueo automático';
@@ -12044,6 +12155,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get user_newProfileNoSignInSubtitle =>
       'Se restauran las pestañas, el historial y los marcadores. Los datos de inicio de sesión y sincronización se quedan en el perfil original.';
+
+  @override
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged) {
+    return 'Esta copia de seguridad está protegida con el bloqueo del dispositivo, y este dispositivo no pudo desbloquearla. $nothingChanged';
+  }
 
   @override
   String user_restoringIntoTitle(String profileLabel) {

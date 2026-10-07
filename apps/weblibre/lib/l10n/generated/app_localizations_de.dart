@@ -11841,11 +11841,123 @@ class AppLocalizationsDe extends AppLocalizations {
   String get user_authenticationSectionTitle => 'Authentifizierung';
 
   @override
-  String get user_requireAuthenticationTitle => 'Authentifizierung verlangen';
+  String get user_lockMethodNoneTitle => 'Keine Sperre';
 
   @override
-  String get user_requireAuthenticationSubtitle =>
-      'Vor dem Öffnen dieses Profils nachfragen';
+  String get user_lockMethodNoneSubtitle =>
+      'Jede Person, die WebLibre auf diesem Gerät nutzt, kann dieses Profil öffnen';
+
+  @override
+  String get user_lockMethodDeviceTitle => 'Gerätesperre';
+
+  @override
+  String get user_lockMethodDeviceSubtitle =>
+      'Fingerabdruck, Gesicht oder Geräte-PIN. Wer dieses Gerät entsperren kann, kann auch dieses Profil öffnen.';
+
+  @override
+  String get user_lockMethodPasswordTitle => 'Profilpasswort';
+
+  @override
+  String get user_lockMethodPasswordSubtitle =>
+      'Ein Passwort nur für dieses Profil. Fingerabdrücke und die Geräte-PIN öffnen es nicht.';
+
+  @override
+  String get user_changeProfilePasswordTitle => 'Passwort ändern';
+
+  @override
+  String get user_profilePasswordUnrecoverableTitle =>
+      'Ein vergessenes Passwort lässt sich nicht wiederherstellen';
+
+  @override
+  String get user_profilePasswordUnrecoverableSubtitle =>
+      'Ohne Passwort lässt sich dieses Profil weder öffnen noch sichern oder löschen. Das Passwort sperrt WebLibre; die Daten des Profils werden dadurch nicht verschlüsselt.';
+
+  @override
+  String get user_setProfilePasswordTitle => 'Profilpasswort festlegen';
+
+  @override
+  String get user_setProfilePasswordExplanation =>
+      'Dieses Passwort wird beim Öffnen des Profils abgefragt, außerdem bevor es gesichert, durch eine Sicherung ersetzt, geändert oder gelöscht wird.';
+
+  @override
+  String get user_newProfilePasswordFieldLabel => 'Neues Passwort';
+
+  @override
+  String get user_repeatProfilePasswordFieldLabel => 'Passwort wiederholen';
+
+  @override
+  String get user_profilePasswordsDoNotMatch =>
+      'Die Passwörter stimmen nicht überein';
+
+  @override
+  String get user_profilePasswordCheckFailed =>
+      'Das Passwort konnte nicht geprüft werden. Bitte erneut versuchen.';
+
+  @override
+  String get user_profilePasswordInterrupted =>
+      'WebLibre wurde während der Prüfung verlassen. Bitte das Passwort erneut eingeben.';
+
+  @override
+  String get user_profilePasswordSaveFailed =>
+      'Das Passwort konnte nicht festgelegt werden. Bitte erneut versuchen.';
+
+  @override
+  String get user_profilePasswordFieldLabel => 'Profilpasswort';
+
+  @override
+  String get user_wrongProfilePassword => 'Falsches Passwort';
+
+  @override
+  String user_wrongProfilePasswordWithRetry(String retryHint) {
+    return 'Falsches Passwort. $retryHint';
+  }
+
+  @override
+  String user_tooManyPasswordAttempts(String retryHint) {
+    return 'Zu viele Fehlversuche. $retryHint';
+  }
+
+  @override
+  String user_passwordRetryInSeconds(int seconds) {
+    String _temp0 = intl.Intl.pluralLogic(
+      seconds,
+      locale: localeName,
+      other: 'In $seconds Sekunden erneut versuchen.',
+      one: 'In 1 Sekunde erneut versuchen.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_passwordRetryInMinutes(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: 'In $minutes Minuten erneut versuchen.',
+      one: 'In 1 Minute erneut versuchen.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String user_authReasonEditProfile(String profileName) {
+    return '„$profileName“ ändern';
+  }
+
+  @override
+  String user_authReasonBackupProfile(String profileName) {
+    return '„$profileName“ sichern';
+  }
+
+  @override
+  String user_authReasonDeleteProfile(String profileName) {
+    return '„$profileName“ löschen';
+  }
+
+  @override
+  String user_authReasonReplaceProfile(String profileName) {
+    return '„$profileName“ ersetzen';
+  }
 
   @override
   String get user_autoLockTitle => 'Automatisch sperren';
@@ -11949,6 +12061,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get user_newProfileNoSignInSubtitle =>
       'Tabs, Verlauf und Lesezeichen werden wiederhergestellt. Anmelde- und Sync-Daten bleiben beim ursprünglichen Profil.';
+
+  @override
+  String user_restoreDeviceLockUnconfirmed(String nothingChanged) {
+    return 'Diese Sicherung ist durch die Gerätesperre geschützt, und dieses Gerät konnte sie nicht entsperren. $nothingChanged';
+  }
 
   @override
   String user_restoringIntoTitle(String profileLabel) {

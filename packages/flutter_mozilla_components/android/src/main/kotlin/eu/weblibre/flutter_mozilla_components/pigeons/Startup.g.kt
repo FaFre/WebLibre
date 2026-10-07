@@ -13,6 +13,12 @@ import io.flutter.plugin.common.StandardMethodCodec
 import io.flutter.plugin.common.StandardMessageCodec
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 private object StartupPigeonUtils {
 
   fun wrapResult(result: Any?): List<Any?> {
@@ -475,6 +481,7 @@ private open class StartupPigeonCodec : StandardMessageCodec() {
   }
 }
 
+
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoProfileApi {
   fun beginStartup(ownerType: ProfileStartupOwnerType, engineId: String, promptMode: ProfileStartupPromptMode): ProfileStartupDirective
@@ -506,8 +513,11 @@ interface GeckoProfileApi {
    * Returns false having changed nothing observable, so a caller that gets false
    * can report the failure and keep running. On true the process is terminal and
    * must call [completeProfileRestart] once teardown is done.
+   *
+   * [showPicker] makes the next launch show the profile picker once, whatever
+   * the prompt setting says (it still needs a UI launch and two profiles).
    */
-  fun armProfileRestart(targetProfileId: String?, reason: String): Boolean
+  fun armProfileRestart(targetProfileId: String?, reason: String, showPicker: Boolean): Boolean
   /** Tears down and exits. Never returns. */
   fun completeProfileRestart()
   /**
@@ -542,6 +552,13 @@ interface GeckoProfileApi {
    * operation.
    */
   fun syncDirectory(path: String): Boolean
+  /**
+   * Copies the SAF document [sourceUri] into the local file [destPath].
+   *
+   * Throws with the platform's own exception class and message, so a restore
+   * that cannot read its archive says why instead of failing anonymously.
+   */
+  suspend fun copyDocumentToFile(sourceUri: String, destPath: String)
   /**
    * Claims the right for this Dart isolate to hold profile state open.
    *
@@ -742,8 +759,9 @@ interface GeckoProfileApi {
             val args = message as List<Any?>
             val targetProfileIdArg = args[0] as String?
             val reasonArg = args[1] as String
+            val showPickerArg = args[2] as Boolean
             val wrapped: List<Any?> = try {
-              listOf(api.armProfileRestart(targetProfileIdArg, reasonArg))
+              listOf(api.armProfileRestart(targetProfileIdArg, reasonArg, showPickerArg))
             } catch (exception: Throwable) {
               StartupPigeonUtils.wrapError(exception)
             }
@@ -835,6 +853,27 @@ interface GeckoProfileApi {
               StartupPigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.copyDocumentToFile$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val sourceUriArg = args[0] as String
+            val destPathArg = args[1] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.copyDocumentToFile(sourceUriArg, destPathArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                StartupPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
           }
         } else {
           channel.setMessageHandler(null)

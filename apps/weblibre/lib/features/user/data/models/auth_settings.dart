@@ -25,28 +25,75 @@ part 'auth_settings.g.dart';
 
 enum AutoLockMode { background, timeout, startup }
 
+/// What stands between a person holding the device and this profile.
+enum ProfileLockMethod {
+  none,
+
+  /// Android's own prompt: an enrolled biometric or the device PIN, pattern or
+  /// password. It proves the person can unlock the *device*, so on a shared
+  /// phone it lets in everyone who can.
+  device,
+
+  /// A password that belongs to this profile alone. The device prompt never
+  /// stands in for it.
+  password,
+}
+
+/// Reads `lockMethod`, falling back to the boolean every older build wrote.
+///
+/// A profile locked before lock methods existed was always locked with the
+/// device prompt, so `authenticationRequired: true` maps to [ProfileLockMethod.device].
+Object? _readLockMethod(Map<dynamic, dynamic> json, String key) {
+  final value = json[key];
+  if (value != null) return value;
+
+  return json['authenticationRequired'] == true
+      ? ProfileLockMethod.device.name
+      : ProfileLockMethod.none.name;
+}
+
 @CopyWith()
 @JsonSerializable()
 class AuthSettings with FastEquatable {
-  final bool authenticationRequired;
+  @JsonKey(
+    readValue: _readLockMethod,
+    // An unknown value comes from a newer build. Failing closed keeps the
+    // profile locked behind something this build can still answer, instead of
+    // treating it as open.
+    unknownEnumValue: ProfileLockMethod.device,
+  )
+  final ProfileLockMethod lockMethod;
+
+  /// Proof of the profile password, never the password itself.
+  ///
+  /// See `createProfilePasswordVerifier`. Only meaningful while [lockMethod]
+  /// is [ProfileLockMethod.password].
+  final String? passwordVerifier;
+
   final AutoLockMode autoLockMode;
   final Duration timeout;
 
   AuthSettings({
-    required this.authenticationRequired,
+    required this.lockMethod,
+    this.passwordVerifier,
     required this.autoLockMode,
     required this.timeout,
   });
 
   AuthSettings.withDefaults({
-    bool? authenticationRequired,
+    ProfileLockMethod? lockMethod,
+    String? passwordVerifier,
     AutoLockMode? autoLockMode,
     Duration? timeout,
   }) : this(
-         authenticationRequired: authenticationRequired ?? false,
+         lockMethod: lockMethod ?? ProfileLockMethod.none,
+         passwordVerifier: passwordVerifier,
          autoLockMode: autoLockMode ?? AutoLockMode.background,
          timeout: timeout ?? const Duration(minutes: 5),
        );
+
+  /// Whether the profile asks for anything before it opens.
+  bool get authenticationRequired => lockMethod != ProfileLockMethod.none;
 
   AuthSettings withBackgroundLock() {
     return copyWith(autoLockMode: AutoLockMode.background);
@@ -63,11 +110,19 @@ class AuthSettings with FastEquatable {
   factory AuthSettings.fromJson(Map<String, dynamic> json) =>
       _$AuthSettingsFromJson(json);
 
-  Map<String, dynamic> toJson() => _$AuthSettingsToJson(this);
+  /// Also writes `authenticationRequired`, which older builds read.
+  ///
+  /// Downgrading must not open a password-locked profile: an older build that
+  /// sees `true` still locks it, with the only method it knows.
+  Map<String, dynamic> toJson() => {
+    ..._$AuthSettingsToJson(this),
+    'authenticationRequired': authenticationRequired,
+  };
 
   @override
   List<Object?> get hashParameters => [
-    authenticationRequired,
+    lockMethod,
+    passwordVerifier,
     autoLockMode,
     timeout,
   ];

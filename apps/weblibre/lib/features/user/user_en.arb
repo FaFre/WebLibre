@@ -158,15 +158,155 @@
   },
   "user_authenticationSectionTitle": "Authentication",
   "@user_authenticationSectionTitle": {
-    "description": "Section heading in the profile editor for locking the profile behind fingerprint or device PIN."
+    "description": "Section heading in the profile editor for choosing how the profile is locked: not at all, with the device lock, or with a profile password."
   },
-  "user_requireAuthenticationTitle": "Require authentication",
-  "@user_requireAuthenticationTitle": {
-    "description": "Switch: require fingerprint or device PIN to open this profile."
+  "user_lockMethodNoneTitle": "No lock",
+  "@user_lockMethodNoneTitle": {
+    "description": "Lock method option: the profile opens without asking for anything."
   },
-  "user_requireAuthenticationSubtitle": "Ask before this profile can be opened",
-  "@user_requireAuthenticationSubtitle": {
-    "description": "Explanation under that switch."
+  "user_lockMethodNoneSubtitle": "Anyone using WebLibre on this device can open this profile",
+  "@user_lockMethodNoneSubtitle": {
+    "description": "Explanation under the \"No lock\" option."
+  },
+  "user_lockMethodDeviceTitle": "Device lock",
+  "@user_lockMethodDeviceTitle": {
+    "description": "Lock method option: Android's own prompt (fingerprint, face, or the device PIN, pattern or password) opens the profile."
+  },
+  "user_lockMethodDeviceSubtitle": "Fingerprint, face or the device PIN. Anyone who can unlock this device can open this profile.",
+  "@user_lockMethodDeviceSubtitle": {
+    "description": "Explanation under the \"Device lock\" option. Warns that on a shared device everyone who can unlock the phone gets in."
+  },
+  "user_lockMethodPasswordTitle": "Profile password",
+  "@user_lockMethodPasswordTitle": {
+    "description": "Lock method option: a password set in WebLibre, only for this profile, opens it."
+  },
+  "user_lockMethodPasswordSubtitle": "A password only for this profile. Fingerprints and the device PIN can't open it.",
+  "@user_lockMethodPasswordSubtitle": {
+    "description": "Explanation under the \"Profile password\" option."
+  },
+  "user_changeProfilePasswordTitle": "Change password",
+  "@user_changeProfilePasswordTitle": {
+    "description": "Row in the profile editor that opens the dialog to set a new profile password."
+  },
+  "user_profilePasswordUnrecoverableTitle": "A forgotten password can't be recovered",
+  "@user_profilePasswordUnrecoverableTitle": {
+    "description": "Warning shown in the profile editor while the profile password lock is selected."
+  },
+  "user_profilePasswordUnrecoverableSubtitle": "Without it, this profile can't be opened, backed up or deleted. The password locks WebLibre; it does not encrypt the profile's data.",
+  "@user_profilePasswordUnrecoverableSubtitle": {
+    "description": "Explanation under that warning. Says honestly that the password only guards the app, the files on the device are not encrypted."
+  },
+  "user_setProfilePasswordTitle": "Set profile password",
+  "@user_setProfilePasswordTitle": {
+    "description": "Title of the dialog for choosing a new profile password."
+  },
+  "user_setProfilePasswordExplanation": "This password is asked for when the profile opens, and before it is backed up, replaced with a backup, changed or deleted.",
+  "@user_setProfilePasswordExplanation": {
+    "description": "Text at the top of the set-password dialog, saying when the password will be needed."
+  },
+  "user_newProfilePasswordFieldLabel": "New password",
+  "@user_newProfilePasswordFieldLabel": {
+    "description": "Label of the first password field in the set-password dialog."
+  },
+  "user_repeatProfilePasswordFieldLabel": "Repeat password",
+  "@user_repeatProfilePasswordFieldLabel": {
+    "description": "Label of the second password field in the set-password dialog, where the password is typed again."
+  },
+  "user_profilePasswordsDoNotMatch": "The passwords don't match",
+  "@user_profilePasswordsDoNotMatch": {
+    "description": "Error under the repeat field when the two passwords differ."
+  },
+  "user_profilePasswordCheckFailed": "Could not check the password. Try again.",
+  "@user_profilePasswordCheckFailed": {
+    "description": "Error under the profile password field when the password could not be checked at all (for example, the device storage failed). The profile stays locked."
+  },
+  "user_profilePasswordInterrupted": "WebLibre was closed or switched away from during the check. Enter the password again.",
+  "@user_profilePasswordInterrupted": {
+    "description": "Error under the profile password field when the password was right but the user left the app while it was being checked, so it did not take effect and has to be entered again."
+  },
+  "user_profilePasswordSaveFailed": "Could not set the password. Try again.",
+  "@user_profilePasswordSaveFailed": {
+    "description": "Error in the set-password dialog when the new profile password could not be prepared. Nothing was saved."
+  },
+  "user_profilePasswordFieldLabel": "Profile password",
+  "@user_profilePasswordFieldLabel": {
+    "description": "Label of the field where the profile password is entered to unlock the profile or confirm an action."
+  },
+  "user_wrongProfilePassword": "Wrong password",
+  "@user_wrongProfilePassword": {
+    "description": "Error under the profile password field after a wrong password."
+  },
+  "user_wrongProfilePasswordWithRetry": "Wrong password. {retryHint}",
+  "@user_wrongProfilePasswordWithRetry": {
+    "description": "Error under the profile password field after a wrong password that starts a waiting time. retryHint is a full sentence like \"Try again in 30 seconds.\"",
+    "placeholders": {
+      "retryHint": {
+        "type": "String"
+      }
+    }
+  },
+  "user_tooManyPasswordAttempts": "Too many wrong attempts. {retryHint}",
+  "@user_tooManyPasswordAttempts": {
+    "description": "Error under the profile password field while further attempts are blocked. retryHint is a full sentence like \"Try again in 2 minutes.\"",
+    "placeholders": {
+      "retryHint": {
+        "type": "String"
+      }
+    }
+  },
+  "user_passwordRetryInSeconds": "{seconds, plural, =1{Try again in 1 second.} other{Try again in {seconds} seconds.}}",
+  "@user_passwordRetryInSeconds": {
+    "description": "Sentence saying how long to wait before the next password attempt, in seconds.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "user_passwordRetryInMinutes": "{minutes, plural, =1{Try again in 1 minute.} other{Try again in {minutes} minutes.}}",
+  "@user_passwordRetryInMinutes": {
+    "description": "Sentence saying how long to wait before the next password attempt, in minutes.",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "user_authReasonEditProfile": "Change \"{profileName}\"",
+  "@user_authReasonEditProfile": {
+    "description": "Title of the password dialog, or reason in the system fingerprint/PIN prompt, when saving changes to a locked profile.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_authReasonBackupProfile": "Back up \"{profileName}\"",
+  "@user_authReasonBackupProfile": {
+    "description": "Title of the password dialog, or reason in the system fingerprint/PIN prompt, before a locked profile is backed up.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_authReasonDeleteProfile": "Delete \"{profileName}\"",
+  "@user_authReasonDeleteProfile": {
+    "description": "Title of the password dialog, or reason in the system fingerprint/PIN prompt, before a locked profile is deleted.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_authReasonReplaceProfile": "Replace \"{profileName}\"",
+  "@user_authReasonReplaceProfile": {
+    "description": "Title of the password dialog, or reason in the system fingerprint/PIN prompt, before a locked profile is replaced with a backup.",
+    "placeholders": {
+      "profileName": {
+        "type": "String"
+      }
+    }
   },
   "user_autoLockTitle": "Auto-lock",
   "@user_autoLockTitle": {
@@ -292,6 +432,15 @@
   "user_newProfileNoSignInSubtitle": "Tabs, history and bookmarks are restored. Sign-in and sync data stay with the original profile.",
   "@user_newProfileNoSignInSubtitle": {
     "description": "Explanation under that note."
+  },
+  "user_restoreDeviceLockUnconfirmed": "This backup is protected by the device lock, and this device could not unlock it. {nothingChanged}",
+  "@user_restoreDeviceLockUnconfirmed": {
+    "description": "Error when a backup restored as a new profile uses the device lock (fingerprint/PIN) and the device prompt failed or this device has no screen lock, so no profile was created. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
   },
   "user_restoringIntoTitle": "Restoring into \"{profileLabel}\"",
   "@user_restoringIntoTitle": {

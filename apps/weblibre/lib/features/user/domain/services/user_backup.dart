@@ -37,11 +37,24 @@ import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
 import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/user/data/models/auth_settings.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/features/user/domain/services/profile_password.dart';
 import 'package:weblibre/utils/filesystem.dart' as fs;
 
 part 'user_backup.g.dart';
+
+/// A device-locked backup was not restored as a new profile, because this
+/// device did not pass the device prompt it would need to open it.
+final class CloneDeviceLockUnconfirmed implements Exception {
+  const CloneDeviceLockUnconfirmed();
+
+  @override
+  String toString() =>
+      'CloneDeviceLockUnconfirmed: the device prompt for the restored '
+      "profile's lock did not succeed";
+}
 
 @Riverpod(keepAlive: true)
 class UserBackupService extends _$UserBackupService {
@@ -105,10 +118,19 @@ class UserBackupService extends _$UserBackupService {
     return task;
   }
 
+  /// Restores [backupFileUri] as a new profile.
+  ///
+  /// [confirmDeviceLock] runs when the archive's profile is device-locked, after
+  /// the archive is open and before anything becomes a profile. The archive may
+  /// come from another phone, and this one may have no fingerprint or screen
+  /// lock to answer the prompt with — the clone would then be a profile nobody
+  /// can open, edit or delete. A false answer throws
+  /// [CloneDeviceLockUnconfirmed] and leaves no profile behind.
   Future<Profile> restoreAndCreateNew(
     Uri backupFileUri, {
     required String profileName,
     required String password,
+    required Future<bool> Function() confirmDeviceLock,
   }) async {
     final tempDir = await getTemporaryDirectory();
     final tempFile = File(p.join(tempDir.path, 'restore_temp.weblibre'));
@@ -121,7 +143,6 @@ class UserBackupService extends _$UserBackupService {
       final newProfile = await withArchiveFromSaf(
         sourceUri: backupFileUri,
         local: tempFile,
-        safStream: _safStream,
         use: (archive) async {
           // The extractor refuses a target directory that already exists, so a
           // previous attempt that died before its cleanup would otherwise make
@@ -137,7 +158,29 @@ class UserBackupService extends _$UserBackupService {
             argon2Params: Argon2Params.memoryConstrained(),
           ).unpack(password);
 
-          final newProfile = Profile.create(name: profileName);
+          // The lock comes along. It was set by whoever owned the profile,
+          // and a backup that restored into an open copy would be the way
+          // around it. Only the record of wrong attempts stays behind: it
+          // belongs to the original, and a clone starts with a clean count.
+          final archived = await fs.readProfileMetadata(outputDirectory);
+          final attempts = File(
+            p.join(outputDirectory.path, profileLockAttemptsFileName),
+          );
+          if (await attempts.exists()) {
+            await attempts.delete();
+          }
+
+          // The same rule as creating a locked profile: it only exists once
+          // this device has shown it can unlock it.
+          if (archived?.authSettings.lockMethod == ProfileLockMethod.device &&
+              !await confirmDeviceLock()) {
+            throw const CloneDeviceLockUnconfirmed();
+          }
+
+          final newProfile = Profile.create(
+            name: profileName,
+            authSettings: archived?.authSettings,
+          );
           final newPath = filesystem.getProfileDir(newProfile.uuidValue);
 
           // Before the tree becomes a profile. The archive carries a

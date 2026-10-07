@@ -60,6 +60,8 @@ sealed interface StartupState {
     data class Unresolved(
         val candidateProfileId: String?,
         val candidateIsRestartTarget: Boolean = false,
+        /** See [RestartRequest.showPicker]. Lives for this process only. */
+        val pickerRequested: Boolean = false,
     ) : StartupState
 
     /**
@@ -76,7 +78,22 @@ sealed interface StartupState {
         val candidateProfileId: String?,
         val deadlineMillis: Long,
         val candidateIsRestartTarget: Boolean = false,
-    ) : StartupState
+        val pickerRequested: Boolean = false,
+    ) : StartupState {
+        /**
+         * The state a selection returns to when its owner stops resolving —
+         * released, abandoned by a destroyed engine, or expired with nothing to
+         * commit. Everything the launch carried in survives: losing the owner
+         * says nothing about the switch that named the candidate or the picker
+         * the user asked for. One helper so a new field cannot be dropped by one
+         * of the paths that used to rebuild [Unresolved] by hand.
+         */
+        fun toUnresolved(): Unresolved = Unresolved(
+            candidateProfileId = candidateProfileId,
+            candidateIsRestartTarget = candidateIsRestartTarget,
+            pickerRequested = pickerRequested,
+        )
+    }
 
     /** A commitment is in flight; briefly visible while `current_profile` is written. */
     data class Committing(val profileId: String) : StartupState

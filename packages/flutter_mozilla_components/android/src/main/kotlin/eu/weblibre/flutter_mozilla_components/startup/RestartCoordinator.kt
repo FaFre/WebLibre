@@ -91,6 +91,7 @@ object RestartCoordinator {
         targetProfileId: String?,
         reason: String,
         brokerEntryId: String? = null,
+        showPicker: Boolean = false,
         now: Long = System.currentTimeMillis(),
         /**
          * Starts the relaunch. Injected so the failure path is testable without
@@ -115,6 +116,7 @@ object RestartCoordinator {
             expiresAtMillis = now + RESTART_REQUEST_TTL_MS,
             targetProfileId = targetProfileId,
             brokerEntryId = brokerEntryId,
+            showPicker = showPicker,
         )
 
         val armed = runCatching {

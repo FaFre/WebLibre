@@ -69,7 +69,6 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
 import 'package:weblibre/features/web_feed/domain/services/article_content_processor.dart';
@@ -852,10 +851,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _periodicScreenshotUpdate?.cancel();
           _timerPaused = true;
         }
-
-        ref
-            .read(localAuthenticationServiceProvider.notifier)
-            .evictCacheOnBackground();
 
         if (state == AppLifecycleState.paused) {
           _suggestionCountTime = DateTime.now();

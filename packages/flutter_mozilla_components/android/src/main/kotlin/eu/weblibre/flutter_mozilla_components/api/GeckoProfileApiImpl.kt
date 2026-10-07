@@ -29,8 +29,16 @@ import eu.weblibre.flutter_mozilla_components.maintenance.PushOwnershipParticipa
 import eu.weblibre.flutter_mozilla_components.maintenance.ProfilePreferencesParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.PwaShortcutParticipant
 import eu.weblibre.flutter_mozilla_components.pigeons.ParticipantStep
+import android.net.Uri
+import android.os.ParcelFileDescriptor
+import android.system.Os
+import android.system.OsConstants
 import java.io.File
-import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.InputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirective
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirectiveKind
@@ -67,6 +75,9 @@ import eu.weblibre.flutter_mozilla_components.startup.StartupOwnerType
 class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfileApi {
 
     private val TAG = "GeckoProfileApi"
+
+    /** Large enough that an 80 MB archive is not thousands of tiny reads. */
+    private val COPY_BUFFER_BYTES = 1 shl 16
 
     /**
      * Profile-access owners this engine was granted, so they can be released
@@ -193,11 +204,16 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
      * the whole arming and returns false, so the caller reports it and keeps
      * running instead of exiting into a restart that will never arrive.
      */
-    override fun armProfileRestart(targetProfileId: String?, reason: String): Boolean =
+    override fun armProfileRestart(
+        targetProfileId: String?,
+        reason: String,
+        showPicker: Boolean,
+    ): Boolean =
         RestartCoordinator.arm(
             context = applicationContext,
             targetProfileId = targetProfileId?.lowercase(),
             reason = reason,
+            showPicker = showPicker,
         ) != null
 
     override fun completeProfileRestart() {
@@ -274,8 +290,10 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
      * A rename is recorded in the parent *directory*, not in either file, so a
      * journal phase that was written and flushed can still be lost if the machine
      * dies before that directory entry reaches the platter. Dart has no way to
-     * reach a directory's descriptor; Java does, and `FileDescriptor.sync()` on a
-     * directory opened for reading is the portable way to force it.
+     * reach a directory's descriptor; the platform does, through `Os.open`
+     * read-only and `Os.fsync`. (`FileInputStream` cannot be used: libcore's
+     * `IoBridge` refuses to open a directory with `EISDIR`, so the earlier
+     * version of this never synced anything.)
      *
      * False means the window is still open, never that the operation failed —
      * recovery is written to survive exactly this, and refusing to continue
@@ -286,13 +304,77 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
         val directory = File(path)
         if (!directory.isDirectory) return@runCatching false
 
-        FileInputStream(directory).use { stream ->
-            stream.fd.sync()
+        val fd = Os.open(path, OsConstants.O_RDONLY, 0)
+        try {
+            Os.fsync(fd)
+        } finally {
+            Os.close(fd)
         }
         true
     }.getOrElse { error ->
         Log.w(TAG, "Could not sync directory $path", error)
         false
+    }
+
+    /**
+     * Streams a SAF document into a local file, off the main thread.
+     *
+     * Replaces `saf_stream`'s `copyToLocalFile`, which reported every failure as
+     * `PluginError` with the exception's message — null for several of them —
+     * so a restore that could not read its archive failed without a reason.
+     * Here the exception propagates, and pigeon hands Dart its class and text.
+     */
+    override suspend fun copyDocumentToFile(sourceUri: String, destPath: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                openDocumentForRead(Uri.parse(sourceUri)).use { source ->
+                    FileOutputStream(destPath).use { sink ->
+                        source.copyTo(sink, COPY_BUFFER_BYTES)
+                        sink.fd.sync()
+                    }
+                }
+            } catch (error: Throwable) {
+                Log.e(TAG, "Could not copy $sourceUri to $destPath", error)
+                throw error
+            }
+        }
+    }
+
+    /**
+     * Opens a SAF document for reading, falling back to a read-write descriptor.
+     *
+     * For a file in shared storage, `FileSystemProvider.openDocument` routes a
+     * read-only open through MediaProvider (`openFileForRead`, so media can be
+     * redacted), and MediaProvider resolves the *caller's* package first. Some
+     * Android builds — seen on Waydroid, Android 13 — resolve it to null and
+     * fail inside `AppOpsManager.checkPackage` with a bare
+     * `NullPointerException`, so no backup in shared storage could be read. A
+     * read-write open takes the provider's direct path instead and never
+     * reaches MediaProvider. It needs the write grant the backup folder already
+     * has, and "rw" neither truncates nor writes anything.
+     *
+     * Only for failures that say nothing about the file: a missing document or
+     * a refused grant is the real answer and is reported as it is.
+     */
+    private fun openDocumentForRead(uri: Uri): InputStream {
+        val resolver = applicationContext.contentResolver
+        return try {
+            resolver.openInputStream(uri)
+                ?: throw FileNotFoundException("The provider returned no stream for $uri")
+        } catch (error: FileNotFoundException) {
+            throw error
+        } catch (error: SecurityException) {
+            throw error
+        } catch (error: Exception) {
+            Log.w(TAG, "Read-only open of $uri failed; retrying read-write", error)
+            try {
+                val descriptor = resolver.openFileDescriptor(uri, "rw") ?: throw error
+                ParcelFileDescriptor.AutoCloseInputStream(descriptor)
+            } catch (retry: Exception) {
+                error.addSuppressed(retry)
+                throw error
+            }
+        }
     }
 
     override fun claimStartupIntents(engineId: String): List<StartupIntentRecord> =
