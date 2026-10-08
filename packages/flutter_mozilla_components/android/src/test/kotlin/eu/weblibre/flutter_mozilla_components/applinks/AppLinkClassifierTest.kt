@@ -47,6 +47,7 @@ class AppLinkClassifierTest {
         globalMode: AppLinkMode = AppLinkMode.ASK,
         marketplaceFallbackEnabled: Boolean = false,
         rememberedTargetChanged: Boolean = false,
+        isAuthenticationCallback: Boolean = false,
     ) = ClassifierInput(
         resolved = resolved,
         isProtected = isProtected,
@@ -58,6 +59,14 @@ class AppLinkClassifierTest {
         globalMode = globalMode,
         marketplaceFallbackEnabled = marketplaceFallbackEnabled,
         rememberedTargetChanged = rememberedTargetChanged,
+        isAuthenticationCallback = isAuthenticationCallback,
+    )
+
+    /** [base] in each forced-prompt context, so every case below is checked against all three. */
+    private fun forcedContexts(base: ClassifierInput) = listOf(
+        base.copy(isProtected = true),
+        base.copy(isPrivate = true),
+        base.copy(isWallet = true),
     )
 
     @Test
@@ -255,6 +264,110 @@ class AppLinkClassifierTest {
             input(resolved(engineSupportsScheme = false), isWallet = true),
         )
         assertTrue(d is AppLinkDecision.Prompt && !d.canRemember)
+    }
+
+    // ---- forced-prompt contexts guard launches, they do not override a "no" (#656) ----
+
+    @Test
+    fun `never mode loads the page in a forced-prompt context without asking`() {
+        for (i in forcedContexts(input(resolved(engineSupportsScheme = true), globalMode = AppLinkMode.NEVER))) {
+            assertEquals(AppLinkDecision.AllowEngine, AppLinkClassifier.classify(i), "$i")
+        }
+    }
+
+    @Test
+    fun `never mode keeps an unsupported scheme in the browser in a forced-prompt context`() {
+        for (i in forcedContexts(input(resolved(engineSupportsScheme = false), globalMode = AppLinkMode.NEVER))) {
+            assertEquals(AppLinkDecision.DenyKeepPage, AppLinkClassifier.classify(i), "$i")
+        }
+        val withFallback = resolved(engineSupportsScheme = false, fallbackUrl = "https://fb.example")
+        for (i in forcedContexts(input(withFallback, globalMode = AppLinkMode.NEVER))) {
+            assertEquals(AppLinkDecision.LoadFallback("https://fb.example"), AppLinkClassifier.classify(i), "$i")
+        }
+    }
+
+    @Test
+    fun `a neverOpen rule is honoured in a forced-prompt context`() {
+        val rule = AppLinkRule(AppLinkRuleDecision.NEVER_OPEN, "host:example.com", null)
+        for (mode in AppLinkMode.entries) {
+            val base = input(resolved(engineSupportsScheme = true), matchingRule = rule, globalMode = mode)
+            for (i in forcedContexts(base)) {
+                assertEquals(AppLinkDecision.AllowEngine, AppLinkClassifier.classify(i), "$i")
+            }
+        }
+    }
+
+    @Test
+    fun `an alwaysOpen exception under never is asked about in a forced-prompt context`() {
+        // Outside these contexts the rule beats the mode and launches. Here the launch becomes a
+        // question, but the mode must not refuse the site exception outright.
+        val rule = AppLinkRule(AppLinkRuleDecision.ALWAYS_OPEN, "host:example.com", "com.example.app")
+        for (engineSupported in listOf(true, false)) {
+            val base = input(
+                resolved(engineSupportsScheme = engineSupported),
+                matchingRule = rule,
+                globalMode = AppLinkMode.NEVER,
+            )
+            val kind = if (engineSupported) AppLinkPromptKind.BANNER else AppLinkPromptKind.MODAL
+            for (i in forcedContexts(base)) {
+                assertEquals(
+                    AppLinkDecision.Prompt(kind, canRemember = false, isMarketplace = false),
+                    AppLinkClassifier.classify(i),
+                    "$i",
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `a suppression is honoured in a forced-prompt context`() {
+        for (i in forcedContexts(input(resolved(engineSupportsScheme = true), suppressionHit = true))) {
+            assertEquals(AppLinkDecision.AllowEngine, AppLinkClassifier.classify(i), "$i")
+        }
+    }
+
+    @Test
+    fun `ask mode still prompts in a forced-prompt context`() {
+        for (i in forcedContexts(input(resolved(engineSupportsScheme = true), globalMode = AppLinkMode.ASK))) {
+            assertEquals(
+                AppLinkDecision.Prompt(AppLinkPromptKind.BANNER, canRemember = false, isMarketplace = false),
+                AppLinkClassifier.classify(i),
+                "$i",
+            )
+        }
+    }
+
+    @Test
+    fun `a sign-in callback is asked about under never in a forced-prompt context`() {
+        // The auth carve-out exempts a return to the calling app from the mode; a forced-prompt
+        // context only downgrades its launch to a question. Refusing it silently would strand the
+        // sign-in.
+        val callback = input(
+            resolved(engineSupportsScheme = false),
+            globalMode = AppLinkMode.NEVER,
+            isAuthenticationCallback = true,
+        )
+        for (i in forcedContexts(callback)) {
+            assertEquals(
+                AppLinkDecision.Prompt(AppLinkPromptKind.MODAL, canRemember = false, isMarketplace = false),
+                AppLinkClassifier.classify(i),
+                "$i",
+            )
+        }
+    }
+
+    @Test
+    fun `a neverOpen rule still beats a sign-in callback in a forced-prompt context`() {
+        val rule = AppLinkRule(AppLinkRuleDecision.NEVER_OPEN, "host:example.com", null)
+        val callback = input(
+            resolved(engineSupportsScheme = false),
+            matchingRule = rule,
+            globalMode = AppLinkMode.NEVER,
+            isAuthenticationCallback = true,
+        )
+        for (i in forcedContexts(callback)) {
+            assertEquals(AppLinkDecision.DenyKeepPage, AppLinkClassifier.classify(i), "$i")
+        }
     }
 
     // (helpers above build ResolvedAppLink/ClassifierInput.)

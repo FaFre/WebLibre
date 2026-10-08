@@ -208,7 +208,7 @@ class WebLibreAppLinksInterceptor(
         // targets is a sign-in round trip rather than a general app link, so it returns to its
         // caller even under `never`. The forced-prompt contexts still win — a protected container,
         // a private tab or a wallet scheme must not leak out silently, so those fall through to the
-        // classifier, which prompts for them regardless of mode (§2.4 step 4). An explicit
+        // classifier, which asks instead of launching, under `never` too (§2.4 step 4). An explicit
         // `neverOpen` rule for this scope and a live suppression are the user having answered this
         // exact question already (classifier steps 5–6); the carve-out is about a mode the user set
         // for links in general, not a licence to override a specific "no".
@@ -244,6 +244,7 @@ class WebLibreAppLinksInterceptor(
             matchingRule = matchingRule,
             globalMode = effectiveMode,
             marketplaceFallbackEnabled = policy.marketplaceFallbackEnabled,
+            isAuthenticationCallback = authExceptionsAllowed && isAuthCallback,
         )
 
         val decision = AppLinkClassifier.classify(input)
@@ -252,7 +253,8 @@ class WebLibreAppLinksInterceptor(
                 "isolated=${override != null} hasApp=${resolved.hasExternalApp} " +
                 "engineScheme=${resolved.engineSupportsScheme} mode=${input.globalMode} " +
                 "protected=${input.isProtected} private=${input.isPrivate} wallet=${input.isWallet} " +
-                "suppressed=${input.suppressionHit} rule=${input.matchingRule?.decision} -> $decision",
+                "suppressed=${input.suppressionHit} rule=${input.matchingRule?.decision} " +
+                "auth=${input.isAuthenticationCallback} -> $decision",
         )
         return execute(
             decision, components, pendingStore, session, uri, lastUri, input, hasUserGesture,
