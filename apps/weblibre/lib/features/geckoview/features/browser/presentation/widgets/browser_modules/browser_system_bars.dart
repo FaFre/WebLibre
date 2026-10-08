@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
@@ -35,7 +36,9 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 /// transparent and content draws behind them. The inset regions are therefore
 /// filled in Flutter, and the platform is only told to keep the bars
 /// transparent and which icon brightness to use, through
-/// [SystemUiOverlayStyle].
+/// [SystemUiOverlayStyle]. The one exception is a navigation bar Flutter isn't
+/// laid out behind (detected natively by MainActivity): no strip can reach it,
+/// so the tint goes into the bar's own color through [SystemUiOverlayStyle].
 ///
 /// Designed to be placed as a full-bleed ([Positioned.fill]) layer in the
 /// browser [Stack], above the browser content but below the toolbars. The tab
@@ -91,6 +94,16 @@ class BrowserSystemBars extends HookConsumerWidget {
         ? Brightness.light
         : Brightness.dark;
 
+    // Where the navigation bar lies outside the Flutter UI, the strip below
+    // can't reach it and the transparent bar shows the native window
+    // background, which follows the system theme rather than the app's
+    // (#657). There the bar carries the tint itself, and the bottom strip is
+    // dropped: any inset Flutter still sees isn't the bar, and a strip would
+    // stack a second band of the same color on top of it.
+    final navigationBarOutsideFlutter = ref.watch(
+      navigationBarOutsideFlutterProvider,
+    );
+
     return IgnorePointer(
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
@@ -98,7 +111,9 @@ class BrowserSystemBars extends HookConsumerWidget {
           // native bars transparent at startup; restating it here keeps them
           // that way whatever another route last asked for.
           statusBarColor: Colors.transparent,
-          systemNavigationBarColor: Colors.transparent,
+          systemNavigationBarColor: navigationBarOutsideFlutter
+              ? tintColor
+              : Colors.transparent,
           systemNavigationBarDividerColor: Colors.transparent,
           systemStatusBarContrastEnforced: false,
           systemNavigationBarContrastEnforced: false,
@@ -122,7 +137,7 @@ class BrowserSystemBars extends HookConsumerWidget {
               bottom: 0,
               left: 0,
               right: 0,
-              height: bottomInset,
+              height: navigationBarOutsideFlutter ? 0 : bottomInset,
               child: ColoredBox(color: tintColor),
             ),
           ],

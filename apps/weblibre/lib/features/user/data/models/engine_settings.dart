@@ -111,8 +111,12 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
       super.trackingProtectionPolicy!;
   @override
   HttpsOnlyMode get httpsOnlyMode => super.httpsOnlyMode!;
+  /// Always null: the app theme (`GeneralSettings.themeMode`) is the only
+  /// source of the web content color scheme. A value here would ride along
+  /// with every full settings push and override the theme (issue #657).
   @override
-  ColorScheme get preferredColorScheme => super.preferredColorScheme!;
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  ColorScheme? get preferredColorScheme => null;
   @override
   bool get globalPrivacyControlEnabled => super.globalPrivacyControlEnabled!;
   @override
@@ -226,7 +230,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     required super.trackingProtectionPolicy,
     required super.httpsOnlyMode,
     required super.globalPrivacyControlEnabled,
-    required super.preferredColorScheme,
     required super.userAgent,
     required super.enterpriseRootsEnabled,
     required this.queryParameterStripping,
@@ -279,7 +282,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     TrackingProtectionPolicy? trackingProtectionPolicy,
     HttpsOnlyMode? httpsOnlyMode,
     bool? globalPrivacyControlEnabled,
-    ColorScheme? preferredColorScheme,
     QueryParameterStripping? queryParameterStripping,
     BounceTrackingProtectionMode? bounceTrackingProtectionMode,
     super.userAgent,
@@ -349,7 +351,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
              trackingProtectionPolicy ?? TrackingProtectionPolicy.strict,
          httpsOnlyMode: httpsOnlyMode ?? HttpsOnlyMode.enabled,
          globalPrivacyControlEnabled: globalPrivacyControlEnabled ?? true,
-         preferredColorScheme: preferredColorScheme ?? ColorScheme.system,
          enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
          fingerprintingProtectionOverrides:
              fingerprintingProtectionOverrides ??
@@ -422,7 +423,6 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     trackingProtectionPolicy,
     httpsOnlyMode,
     globalPrivacyControlEnabled,
-    preferredColorScheme,
     userAgent,
     enterpriseRootsEnabled,
     queryParameterStripping,

@@ -32,6 +32,7 @@ import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/app_initialization_l10n.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/multi_finger_tap_guard.dart';
+import 'package:weblibre/presentation/widgets/navigation_bar_style.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class MainApp extends HookConsumerWidget {
@@ -86,7 +87,9 @@ class MainApp extends HookConsumerWidget {
               return _AppMediaQueryOverrides(
                 uiScaleFactor: uiScaleFactor,
                 disableAnimations: disableAnimations,
-                child: child ?? const SizedBox.shrink(),
+                child: NavigationBarStyle(
+                  child: child ?? const SizedBox.shrink(),
+                ),
               );
             },
             home: Scaffold(
@@ -124,12 +127,14 @@ class MainApp extends HookConsumerWidget {
             return _AppMediaQueryOverrides(
               uiScaleFactor: uiScaleFactor,
               disableAnimations: disableAnimations,
-              child: MultiFingerTapGuard(
-                child: _SyncEventListener(
-                  child: _SandboxCaptureErrorListener(
-                    child: _DownloadStoppedListener(
-                      child: _StrictContainerBlockListener(
-                        child: child ?? const SizedBox.shrink(),
+              child: NavigationBarStyle(
+                child: MultiFingerTapGuard(
+                  child: _SyncEventListener(
+                    child: _SandboxCaptureErrorListener(
+                      child: _DownloadStoppedListener(
+                        child: _StrictContainerBlockListener(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
                       ),
                     ),
                   ),
@@ -156,7 +161,9 @@ class MainApp extends HookConsumerWidget {
             return _AppMediaQueryOverrides(
               uiScaleFactor: uiScaleFactor,
               disableAnimations: disableAnimations,
-              child: child ?? const SizedBox.shrink(),
+              child: NavigationBarStyle(
+                child: child ?? const SizedBox.shrink(),
+              ),
             );
           },
           home: Builder(

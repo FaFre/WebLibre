@@ -25,6 +25,9 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
@@ -54,8 +57,12 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
 
     private val TRIM_MEMORY_CHANNEL = "eu.weblibre.flutter_mozilla_components/trim_memory"
     private val ACTIVITY_CHANNEL = "eu.weblibre.gecko/activity"
+    private val NAVIGATION_BAR_CHANNEL = "eu.weblibre.gecko/navigation_bar"
     private val ENGINE_ID = FlutterEngineCoordinator.ENGINE_ID
     private var trimMemoryChannel: MethodChannel? = null
+    private var navigationBarChannel: MethodChannel? = null
+    private var lastNavigationBarOutsideFlutter: Boolean? = null
+    private val contentLocation = IntArray(2)
 
     override var isRestoredLaunch: Boolean = false
         private set
@@ -76,6 +83,7 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         super.onCreate(null)
 
         enableTransparentSystemBars()
+        watchNavigationBarOutsideFlutter()
 
         // Restored straight into a pinned task (e.g. the process was killed while in PiP).
         checkAndExitPiP()
@@ -98,6 +106,53 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
             // `enableEdgeToEdge` leaves contrast enforcement on for an `auto` style,
             // which lays a translucent scrim over three-button navigation.
             window.isNavigationBarContrastEnforced = false
+        }
+    }
+
+    /**
+     * Whether the navigation bar lies outside the Flutter UI. Some ROMs (ColorOS 7
+     * on Android 10) keep laying the content out above a three-button navigation
+     * bar despite edge-to-edge, so the transparent bar shows the window
+     * background, which follows the system theme instead of the app's (#657).
+     * Flutter then gives the bar a color of its own (`BrowserSystemBars`,
+     * `NavigationBarStyle`).
+     *
+     * This compares the content view (which hosts the FlutterView) with the
+     * decor view rather than reading Flutter's padding, which merges display
+     * cutout and waterfall insets in. A gap counts only on an edge where the
+     * navigation bar actually is, so cutout or caption padding on another edge
+     * doesn't. Returns null while the keyboard is up: a decor that pads for the
+     * IME opens a bottom gap that says nothing about the bar.
+     */
+    private fun isNavigationBarOutsideFlutter(): Boolean? {
+        val decor = window.decorView
+        val content = findViewById<View>(android.R.id.content) ?: return false
+        if (content.width == 0 || content.height == 0) return false
+        val insets = ViewCompat.getRootWindowInsets(decor) ?: return false
+        if (insets.isVisible(WindowInsetsCompat.Type.ime())) return null
+        val bar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+        content.getLocationInWindow(contentLocation)
+        val left = contentLocation[0]
+        val right = left + content.width
+        val bottom = contentLocation[1] + content.height
+        return (bar.left > 0 && left > 0) ||
+            (bar.right > 0 && right < decor.width) ||
+            (bar.bottom > 0 && bottom < decor.height)
+    }
+
+    /**
+     * A global layout listener rather than one on the content view: a 90° to 270°
+     * rotation moves the bar to the other side without changing the content's
+     * size or its bounds within its parent, and only the window position shows it.
+     */
+    private fun watchNavigationBarOutsideFlutter() {
+        window.decorView.viewTreeObserver.addOnGlobalLayoutListener {
+            val outside = isNavigationBarOutsideFlutter() ?: return@addOnGlobalLayoutListener
+            if (outside != lastNavigationBarOutsideFlutter) {
+                lastNavigationBarOutsideFlutter = outside
+                navigationBarChannel?.invokeMethod("outsideFlutterChanged", outside)
+            }
         }
     }
 
@@ -237,6 +292,32 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
                 else -> result.notImplemented()
             }
         }
+
+        navigationBarChannel = MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            NAVIGATION_BAR_CHANNEL,
+        ).apply {
+            setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isOutsideFlutter" -> result.success(
+                        isNavigationBarOutsideFlutter() ?: lastNavigationBarOutsideFlutter ?: false
+                    )
+                    else -> result.notImplemented()
+                }
+            }
+        }
+    }
+
+    /**
+     * The engine outlives this activity ([shouldDestroyEngineWithHost]), so the
+     * handler, which measures this activity's views, has to go with it. Until the
+     * next activity configures the engine, Dart's query fails and it keeps its
+     * last value; that activity's first layout pushes the current one.
+     */
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        navigationBarChannel?.setMethodCallHandler(null)
+        navigationBarChannel = null
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 
     override fun onPause() {

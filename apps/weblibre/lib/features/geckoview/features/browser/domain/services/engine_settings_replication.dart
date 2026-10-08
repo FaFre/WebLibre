@@ -311,8 +311,9 @@ class EngineSettingsReplicationService
             // Note: preferredColorScheme is intentionally NOT replicated from the
             // engine settings here. The app theme (generalSettings.themeMode) is the
             // sole source of truth for the color scheme; see the themeMode listener
-            // above. EngineSettings.preferredColorScheme is vestigial and always
-            // `system`, so replicating it would clobber the real theme (issue #436).
+            // above. EngineSettings.preferredColorScheme is always null, so the
+            // full push in setDefaultSettings below leaves the theme alone
+            // (issues #436, #657).
             if (previous.value?.contentBlocking != settings.contentBlocking) {
               await _service.contentBlocking(settings.contentBlocking);
             }

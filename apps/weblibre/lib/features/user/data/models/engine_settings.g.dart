@@ -78,8 +78,6 @@ abstract class _$EngineSettingsCWProxy {
 
   EngineSettings globalPrivacyControlEnabled(bool? globalPrivacyControlEnabled);
 
-  EngineSettings preferredColorScheme(ColorScheme? preferredColorScheme);
-
   EngineSettings userAgent(String? userAgent);
 
   EngineSettings enterpriseRootsEnabled(bool? enterpriseRootsEnabled);
@@ -196,7 +194,6 @@ abstract class _$EngineSettingsCWProxy {
     TrackingProtectionPolicy? trackingProtectionPolicy,
     HttpsOnlyMode? httpsOnlyMode,
     bool? globalPrivacyControlEnabled,
-    ColorScheme? preferredColorScheme,
     String? userAgent,
     bool? enterpriseRootsEnabled,
     QueryParameterStripping queryParameterStripping,
@@ -269,10 +266,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   EngineSettings globalPrivacyControlEnabled(
     bool? globalPrivacyControlEnabled,
   ) => call(globalPrivacyControlEnabled: globalPrivacyControlEnabled);
-
-  @override
-  EngineSettings preferredColorScheme(ColorScheme? preferredColorScheme) =>
-      call(preferredColorScheme: preferredColorScheme);
 
   @override
   EngineSettings userAgent(String? userAgent) => call(userAgent: userAgent);
@@ -476,7 +469,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
     Object? trackingProtectionPolicy = const $CopyWithPlaceholder(),
     Object? httpsOnlyMode = const $CopyWithPlaceholder(),
     Object? globalPrivacyControlEnabled = const $CopyWithPlaceholder(),
-    Object? preferredColorScheme = const $CopyWithPlaceholder(),
     Object? userAgent = const $CopyWithPlaceholder(),
     Object? enterpriseRootsEnabled = const $CopyWithPlaceholder(),
     Object? queryParameterStripping = const $CopyWithPlaceholder(),
@@ -542,10 +534,6 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
           ? _value.globalPrivacyControlEnabled
           // ignore: cast_nullable_to_non_nullable
           : globalPrivacyControlEnabled as bool?,
-      preferredColorScheme: preferredColorScheme == const $CopyWithPlaceholder()
-          ? _value.preferredColorScheme
-          // ignore: cast_nullable_to_non_nullable
-          : preferredColorScheme as ColorScheme?,
       userAgent: userAgent == const $CopyWithPlaceholder()
           ? _value.userAgent
           // ignore: cast_nullable_to_non_nullable
@@ -797,10 +785,6 @@ EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
         ),
         globalPrivacyControlEnabled:
             json['globalPrivacyControlEnabled'] as bool?,
-        preferredColorScheme: $enumDecodeNullable(
-          _$ColorSchemeEnumMap,
-          json['preferredColorScheme'],
-        ),
         queryParameterStripping: $enumDecodeNullable(
           _$QueryParameterStrippingEnumMap,
           json['queryParameterStripping'],
@@ -919,7 +903,6 @@ Map<String, dynamic> _$EngineSettingsToJson(
   'trackingProtectionPolicy':
       _$TrackingProtectionPolicyEnumMap[instance.trackingProtectionPolicy]!,
   'httpsOnlyMode': _$HttpsOnlyModeEnumMap[instance.httpsOnlyMode]!,
-  'preferredColorScheme': _$ColorSchemeEnumMap[instance.preferredColorScheme]!,
   'globalPrivacyControlEnabled': instance.globalPrivacyControlEnabled,
   'enterpriseRootsEnabled': instance.enterpriseRootsEnabled,
   'locales': instance.locales,
@@ -983,12 +966,6 @@ const _$HttpsOnlyModeEnumMap = {
   HttpsOnlyMode.disabled: 'disabled',
   HttpsOnlyMode.privateOnly: 'privateOnly',
   HttpsOnlyMode.enabled: 'enabled',
-};
-
-const _$ColorSchemeEnumMap = {
-  ColorScheme.system: 'system',
-  ColorScheme.light: 'light',
-  ColorScheme.dark: 'dark',
 };
 
 const _$QueryParameterStrippingEnumMap = {

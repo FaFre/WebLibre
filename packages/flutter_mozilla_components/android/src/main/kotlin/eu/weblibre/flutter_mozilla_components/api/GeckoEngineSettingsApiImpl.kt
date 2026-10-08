@@ -321,9 +321,9 @@ class GeckoEngineSettingsApiImpl(
         if(settings.preferredColorScheme != null) {
             components.core.engine.settings.preferredColorScheme = components.core.engineSettings.preferredColorScheme
             // Persist so cold-started Custom Tab / PWA sessions resolve the right
-            // scheme before Flutter runs. Only done here (the runtime path driven by
-            // the app theme), not in setDefaultSettings, so the vestigial engine
-            // settings payload can't clobber the real theme. See issue #436.
+            // scheme before Flutter runs. Only the app theme sends a scheme: the
+            // app's full engine settings push (also routed through here at startup)
+            // always leaves it null. See issues #436, #657.
             components.core.engineSettings.preferredColorScheme?.let { scheme ->
                 ColorSchemePreference.write(components.core.prefs, scheme)
             }
