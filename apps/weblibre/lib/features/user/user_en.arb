@@ -131,6 +131,22 @@
   "@user_authReasonUnlockProfile": {
     "description": "Reason shown in the system biometric or device-credential prompt when opening a locked profile."
   },
+  "user_deviceAuthPromptTitle": "Confirm it's you",
+  "@user_deviceAuthPromptTitle": {
+    "description": "Title of the system fingerprint/PIN prompt. The line under it says what the prompt is for, e.g. \"Unlock profile\"."
+  },
+  "user_deviceAuthNoScreenLock": "No screen lock is set up on this device. Set a PIN, pattern or password in Android settings to unlock this profile.",
+  "@user_deviceAuthNoScreenLock": {
+    "description": "Shown on the profile lock screen when the device unlock cannot be used because the phone has no screen lock (PIN, pattern or password) set up."
+  },
+  "user_deviceAuthLockedOut": "Too many attempts. Try again later.",
+  "@user_deviceAuthLockedOut": {
+    "description": "Shown on the profile lock screen when the system refuses the fingerprint/PIN prompt for a while after too many wrong attempts."
+  },
+  "user_deviceAuthUnavailable": "Could not confirm your identity. Try again.",
+  "@user_deviceAuthUnavailable": {
+    "description": "Shown on the profile lock screen when the system fingerprint/PIN prompt could not run, for example because of a device error."
+  },
   "user_authFailedExisting": "Could not confirm your identity. {nothingChanged}",
   "@user_authFailedExisting": {
     "description": "Error message when authentication failed while changing a profile's lock. nothingChanged is \"Nothing has been changed.\"",

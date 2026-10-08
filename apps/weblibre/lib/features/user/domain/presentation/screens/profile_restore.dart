@@ -591,12 +591,14 @@ class ProfileRestoreScreen extends HookConsumerWidget {
                                       backupFileUri,
                                       profileName: nameTextController.text,
                                       password: passwordTextController.text,
-                                      confirmDeviceLock: () =>
-                                          localAuth.authenticate(
+                                      confirmDeviceLock: () async =>
+                                          (await localAuth.authenticate(
                                             authKey: _restoreAuthKey,
+                                            localizedTitle:
+                                                l10n.user_deviceAuthPromptTitle,
                                             localizedReason: reason,
                                             alsoRemember: alsoRemember,
-                                          ),
+                                          )).passed,
                                     );
                             }
                           },

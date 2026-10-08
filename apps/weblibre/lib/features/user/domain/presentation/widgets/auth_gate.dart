@@ -30,7 +30,9 @@ import 'package:weblibre/features/user/domain/presentation/dialogs/profile_passw
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
+import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/features/user/domain/services/profile_password.dart';
+import 'package:weblibre/features/user/presentation/utils/local_authentication_l10n.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/utils/profile_copy_l10n.dart';
@@ -55,8 +57,12 @@ class LockScreen extends HookConsumerWidget {
     );
     final usesPassword = lockMethod == ProfileLockMethod.password;
     final password = useTextEditingController();
+    final passwordFocus = useFocusNode();
     final passwordText = useValueListenable(password).text;
     final passwordError = useState<String?>(null);
+
+    /// Why the last device prompt did not pass, when the system said why.
+    final deviceAuthFailure = useState<DeviceAuthFailure?>(null);
 
     /// Whether there is another profile to choose.
     ///
@@ -74,15 +80,20 @@ class LockScreen extends HookConsumerWidget {
       if (isAuthenticating.value) return;
 
       isAuthenticating.value = true;
+      deviceAuthFailure.value = null;
 
       try {
-        await ref
+        final result = await ref
             .read(profileAuthStateProvider.notifier)
             .authenticate(
-              localizedReason: AppLocalizations.of(
-                context,
-              ).user_authReasonUnlockProfile,
+              localizedTitle: l10n.user_deviceAuthPromptTitle,
+              localizedReason: l10n.user_authReasonUnlockProfile,
             );
+        // A closed prompt needs no explanation; one the system refused does,
+        // or tapping Unlock would seem to do nothing.
+        if (context.mounted && result is DeviceAuthFailed) {
+          deviceAuthFailure.value = result.failure;
+        }
       } finally {
         if (context.mounted) {
           isAuthenticating.value = false;
@@ -103,6 +114,7 @@ class LockScreen extends HookConsumerWidget {
         if (context.mounted && result is! ProfilePasswordAccepted) {
           password.clear();
           passwordError.value = describeProfilePasswordCheck(l10n, result);
+          refocusPasswordField(context, passwordFocus);
         }
       } catch (e, s) {
         // Stays locked: a check that could not record its outcome is not a
@@ -110,6 +122,7 @@ class LockScreen extends HookConsumerWidget {
         logger.e('Profile password unlock failed', error: e, stackTrace: s);
         if (context.mounted) {
           passwordError.value = l10n.user_profilePasswordCheckFailed;
+          refocusPasswordField(context, passwordFocus);
         }
       } finally {
         if (context.mounted) {
@@ -121,14 +134,29 @@ class LockScreen extends HookConsumerWidget {
     // Only the device prompt opens by itself. A password-locked profile is
     // refused by `authenticate` without prompting, so this is harmless there,
     // and the field below takes over.
+    //
+    // A Custom Tab or PWA window may have unlocked the profile already, in a
+    // mode whose unlock holds here too; then there is nothing to ask.
     useOnInitialization(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!didAutoAuthenticate.value) {
-          didAutoAuthenticate.value = true;
-          unawaited(authenticate());
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (didAutoAuthenticate.value) return;
+        didAutoAuthenticate.value = true;
+
+        final adopted = await ref
+            .read(profileAuthStateProvider.notifier)
+            .adoptSharedUnlock();
+        if (!adopted && context.mounted) {
+          await authenticate();
         }
       });
       return null;
+    });
+
+    // Back from a window that unlocked the profile meanwhile.
+    useOnAppLifecycleStateChange((previous, current) async {
+      if (current == AppLifecycleState.resumed) {
+        await ref.read(profileAuthStateProvider.notifier).adoptSharedUnlock();
+      }
     });
 
     /// Restarts so the startup picker can be answered again.
@@ -195,6 +223,7 @@ class LockScreen extends HookConsumerWidget {
                       constraints: const BoxConstraints(maxWidth: 360),
                       child: ObscurableTextField(
                         controller: password,
+                        focusNode: passwordFocus,
                         enabled: !isAuthenticating.value && !isSwitching.value,
                         autofocus: true,
                         keyboardType: TextInputType.visiblePassword,
@@ -249,6 +278,27 @@ class LockScreen extends HookConsumerWidget {
                         ? null
                         : authenticate,
                   ),
+                if (!usesPassword && deviceAuthFailure.value != null) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 360),
+                      // Read out when it appears, as the person is looking
+                      // at the button.
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(
+                          deviceAuthFailure.value!.describe(context),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 // Without this the only way out of a lock the user cannot pass is
                 // to close the app and reopen it — which they have to work out for
                 // themselves, from a screen that does not say so. The picker warns

@@ -8,6 +8,8 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
@@ -56,6 +58,8 @@ import mozilla.components.browser.session.storage.AutoSave
 import mozilla.components.browser.state.action.RestoreCompleteAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.CustomTabListAction
+import mozilla.components.browser.state.store.BrowserStore
+import java.util.concurrent.CopyOnWriteArrayList
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.ExperimentalAndroidComponentsApi
@@ -88,6 +92,50 @@ object GlobalComponents {
 
     internal val isExternalMode: Boolean
         get() = currentMode == ComponentsMode.EXTERNAL
+
+    /**
+     * The outgoing store, while its custom tabs wait to move to the current
+     * one; see [handOverCustomTabs]. A full set takes them over only once it
+     * has restored the browser's tabs, so for that long a Custom Tab or PWA
+     * window's session is missing from [components] without being gone.
+     */
+    @Volatile
+    private var customTabsInHandover: BrowserStore? = null
+
+    private val customTabsHandoverListeners = CopyOnWriteArrayList<() -> Unit>()
+
+    /** See [customTabsInHandover]. */
+    val isHandingOverCustomTabs: Boolean
+        get() = customTabsInHandover != null
+
+    /** Called on the main thread once custom tabs moved to [components]. */
+    fun addCustomTabsHandoverListener(listener: () -> Unit) {
+        customTabsHandoverListeners.add(listener)
+    }
+
+    fun removeCustomTabsHandoverListener(listener: () -> Unit) {
+        customTabsHandoverListeners.remove(listener)
+    }
+
+    /**
+     * Removes the custom tab of a window that closed, wherever it is now.
+     *
+     * Mid-handover it is still in the outgoing store. Removed there, its
+     * engine session is closed by that store, and the handover does not
+     * bring it back as a page nobody can see.
+     */
+    fun removeCustomTab(sessionId: String) {
+        val components = _components
+        if (components?.core?.store?.state?.findCustomTab(sessionId) != null) {
+            components.useCases.customTabsUseCases.remove(sessionId)
+            return
+        }
+
+        val outgoing = customTabsInHandover ?: return
+        if (outgoing.state.findCustomTab(sessionId) != null) {
+            outgoing.dispatch(CustomTabListAction.RemoveCustomTabAction(sessionId))
+        }
+    }
 
     /** Resolve a live Push only when it belongs to the supplied profile context. */
     fun pushForProfile(context: Context): Push? {
@@ -123,6 +171,7 @@ object GlobalComponents {
         _components?.existingCore?.flutterEventMiddleware?.close()
         _components = null
         currentMode = null
+        customTabsInHandover = null
         // Replicated per profile, so it must not outlive the profile it was
         // replicated for; the next one reads its own mirror until Dart speaks.
         pullToRefreshEnabledValue = null
@@ -527,6 +576,8 @@ object GlobalComponents {
         )
         _components = newComponents
         currentMode = mode
+        val outgoingStore = previousComponents?.core?.store?.takeIf { previousCustomTabs.isNotEmpty() }
+        customTabsInHandover = outgoingStore
 
         previousComponents?.let {
             // Not `accountManager.close()`: that reaches through a lazy and would
@@ -585,14 +636,18 @@ object GlobalComponents {
         }
 
         fun restorePreviousCustomTabs() {
-            if (previousCustomTabs.isEmpty()) return
-            for (tab in previousCustomTabs) {
-                val existing = newComponents.core.store.state.findCustomTab(tab.id)
-                if (existing == null) {
-                    newComponents.core.store.dispatch(
-                        CustomTabListAction.AddCustomTabAction(tab)
-                    )
-                }
+            outgoingStore ?: return
+            // Superseded by a later rebuild, which hands over on its own.
+            if (customTabsInHandover !== outgoingStore || _components !== newComponents) return
+
+            handOverCustomTabs(from = outgoingStore, to = newComponents.core.store)
+            customTabsInHandover = null
+
+            val notify = { customTabsHandoverListeners.forEach { it() } }
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                notify()
+            } else {
+                Handler(Looper.getMainLooper()).post(notify)
             }
         }
 

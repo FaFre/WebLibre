@@ -58,6 +58,9 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
     private val windowFeature = ViewBoundFeatureWrapper<LifecycleAwareFeature>()
 
     private var customTabToolbar: CustomTabToolbar? = null
+
+    /** The view this fragment created, as handed to `externalAppEngineView`. */
+    private var ownEngineView: EngineView? = null
     private var activePopup: PopupWindow? = null
     private var fixedToolbarVisible = false
 
@@ -74,6 +77,7 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
             selectionActionDelegate = components.selectionAction
         }.also { engineView ->
             components.externalAppEngineView = engineView
+            ownEngineView = engineView
         }
     }
 
@@ -460,14 +464,42 @@ class ExternalAppBrowserFragment : BaseBrowserFragment(), UserInteractionHandler
         return super.onBackPressed()
     }
 
+    /**
+     * The profile lock came up over this window. Its panel covers the page,
+     * but not the windows of their own the page's controls put up: the menu,
+     * which can share the page, and the selection toolbar, which can copy
+     * from it. Dialogs are hidden by the activity
+     * (`ExternalAppBrowserActivity.onLockChanged`).
+     */
+    internal fun onWindowLocked() {
+        activePopup?.dismiss()
+        activePopup = null
+        clearEngineSelection()
+    }
+
+    /**
+     * Takes the page out of this fragment's view, for a replacement fragment
+     * to show it: a page is shown in one view at a time, and the
+     * replacement's view can come up before this one goes.
+     */
+    internal fun releaseSession() {
+        sessionFeature.get()?.release()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         activePopup?.dismiss()
         activePopup = null
         customTabToolbar = null
         // Same reason as the base cleanup: this can run before components
-        // ever existed.
-        GlobalComponents.components?.externalAppEngineView = null
+        // ever existed. Only this fragment's own view: a replacement's can
+        // already be in place.
+        GlobalComponents.components?.let { components ->
+            if (components.externalAppEngineView === ownEngineView) {
+                components.externalAppEngineView = null
+            }
+        }
+        ownEngineView = null
     }
 
     companion object {

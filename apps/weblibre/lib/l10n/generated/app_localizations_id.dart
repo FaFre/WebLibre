@@ -11767,6 +11767,21 @@ class AppLocalizationsId extends AppLocalizations {
   String get user_authReasonUnlockProfile => 'Buka kunci profil';
 
   @override
+  String get user_deviceAuthPromptTitle => 'Konfirmasi identitas Anda';
+
+  @override
+  String get user_deviceAuthNoScreenLock =>
+      'Perangkat ini belum memiliki kunci layar. Atur PIN, pola, atau kata sandi di pengaturan Android untuk membuka kunci profil ini.';
+
+  @override
+  String get user_deviceAuthLockedOut =>
+      'Terlalu banyak percobaan. Coba lagi nanti.';
+
+  @override
+  String get user_deviceAuthUnavailable =>
+      'Tidak dapat mengonfirmasi identitas Anda. Coba lagi.';
+
+  @override
   String user_authFailedExisting(String nothingChanged) {
     return 'Tidak dapat mengonfirmasi identitas Anda. $nothingChanged';
   }

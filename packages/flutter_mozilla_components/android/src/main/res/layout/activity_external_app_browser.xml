@@ -21,4 +21,9 @@
         android:id="@+id/launch_status"
         layout="@layout/view_external_launch_status" />
 
+    <!-- Last, so it covers the status view as well as the page. -->
+    <include
+        android:id="@+id/lock_panel"
+        layout="@layout/view_external_lock" />
+
 </FrameLayout>

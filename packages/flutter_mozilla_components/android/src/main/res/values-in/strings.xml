@@ -3,4 +3,23 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
     <string name="weblibre_download_app_chooser_always_use">Selalu gunakan aplikasi ini</string>
+    <string name="weblibre_lock_title">Profil terkunci</string>
+    <string name="weblibre_lock_password_label">Kata sandi profil</string>
+    <string name="weblibre_lock_unlock">Buka kunci</string>
+    <string name="weblibre_lock_unlocking">Membuka kunci…</string>
+    <string name="weblibre_lock_close">Tutup</string>
+    <string name="weblibre_lock_prompt_title">Konfirmasi identitas Anda</string>
+    <string name="weblibre_lock_prompt_reason">Buka kunci profil</string>
+    <string name="weblibre_lock_wrong_password">Kata sandi salah</string>
+    <string name="weblibre_lock_wrong_password_retry">Kata sandi salah. %1$s</string>
+    <string name="weblibre_lock_too_many_attempts">Terlalu banyak percobaan yang salah. %1$s</string>
+    <string name="weblibre_lock_check_failed">Kata sandi tidak dapat diperiksa. Coba lagi.</string>
+    <string name="weblibre_lock_interrupted">WebLibre ditinggalkan saat pemeriksaan. Masukkan kata sandi lagi.</string>
+    <plurals name="weblibre_lock_retry_seconds">
+        <item quantity="other">Coba lagi dalam %d detik.</item>
+    </plurals>
+    <plurals name="weblibre_lock_retry_minutes">
+        <item quantity="other">Coba lagi dalam %d menit.</item>
+    </plurals>
+
 </resources>

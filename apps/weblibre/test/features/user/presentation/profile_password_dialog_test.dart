@@ -90,6 +90,68 @@ void main() {
     expect(result, isFalse);
   });
 
+  testWidgets('a wrong password leaves the cursor in the field', (
+    tester,
+  ) async {
+    // Checking disables the field, which takes its focus and the keyboard;
+    // the next attempt must not need a tap first.
+    final profileDir = Directory.systemTemp.createTempSync('weblibre-refocus');
+    addTearDown(() => profileDir.deleteSync(recursive: true));
+    // Fails to match without running Argon2, so the attempt is recorded as
+    // a plain wrong password.
+    final settings = AuthSettings.withDefaults(
+      lockMethod: ProfileLockMethod.password,
+      passwordVerifier: 'not-a-verifier',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showProfilePasswordDialog(
+              context,
+              profileDir: profileDir,
+              settings: settings,
+              title: 'Back up',
+              departureCount: () => 0,
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'wrong');
+    await tester.pump();
+
+    bool fieldHasFocus() => tester
+        .widget<EditableText>(find.byType(EditableText))
+        .focusNode
+        .hasFocus;
+
+    // What the field being disabled for the check does. Done by hand: no
+    // frame runs here while the check does, so it is never disabled.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+    expect(fieldHasFocus(), isFalse);
+
+    await tester.runAsync(() async {
+      await tester.tap(find.text('Confirm'));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    // The frame that enables the field again, then the focus asked for
+    // after it.
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Wrong password'), findsOneWidget);
+    expect(fieldHasFocus(), isTrue);
+  });
+
   Future<bool?> runRightPassword(
     WidgetTester tester, {
     required int Function() departureCount,

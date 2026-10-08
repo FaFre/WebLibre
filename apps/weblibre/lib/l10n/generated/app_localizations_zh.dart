@@ -10765,6 +10765,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get user_authReasonUnlockProfile => '解锁配置文件';
 
   @override
+  String get user_deviceAuthPromptTitle => '确认你的身份';
+
+  @override
+  String get user_deviceAuthNoScreenLock =>
+      '此设备未设置屏幕锁定。请在 Android 设置中设置 PIN 码、图案或密码，以解锁此配置文件。';
+
+  @override
+  String get user_deviceAuthLockedOut => '尝试次数过多。请稍后重试。';
+
+  @override
+  String get user_deviceAuthUnavailable => '无法确认你的身份。请重试。';
+
+  @override
   String user_authFailedExisting(String nothingChanged) {
     return '无法确认你的身份。$nothingChanged';
   }

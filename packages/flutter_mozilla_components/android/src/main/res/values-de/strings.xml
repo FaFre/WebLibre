@@ -3,4 +3,25 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
     <string name="weblibre_download_app_chooser_always_use">Immer diese App verwenden</string>
+    <string name="weblibre_lock_title">Profil ist gesperrt</string>
+    <string name="weblibre_lock_password_label">Profilpasswort</string>
+    <string name="weblibre_lock_unlock">Entsperren</string>
+    <string name="weblibre_lock_unlocking">Wird entsperrt …</string>
+    <string name="weblibre_lock_close">Schließen</string>
+    <string name="weblibre_lock_prompt_title">Identität bestätigen</string>
+    <string name="weblibre_lock_prompt_reason">Profil entsperren</string>
+    <string name="weblibre_lock_wrong_password">Falsches Passwort</string>
+    <string name="weblibre_lock_wrong_password_retry">Falsches Passwort. %1$s</string>
+    <string name="weblibre_lock_too_many_attempts">Zu viele Fehlversuche. %1$s</string>
+    <string name="weblibre_lock_check_failed">Das Passwort konnte nicht geprüft werden. Bitte erneut versuchen.</string>
+    <string name="weblibre_lock_interrupted">WebLibre wurde während der Prüfung verlassen. Bitte das Passwort erneut eingeben.</string>
+    <plurals name="weblibre_lock_retry_seconds">
+        <item quantity="one">In %d Sekunde erneut versuchen.</item>
+        <item quantity="other">In %d Sekunden erneut versuchen.</item>
+    </plurals>
+    <plurals name="weblibre_lock_retry_minutes">
+        <item quantity="one">In %d Minute erneut versuchen.</item>
+        <item quantity="other">In %d Minuten erneut versuchen.</item>
+    </plurals>
+
 </resources>

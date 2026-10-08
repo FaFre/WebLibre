@@ -11820,6 +11820,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get user_authReasonUnlockProfile => 'Profil entsperren';
 
   @override
+  String get user_deviceAuthPromptTitle => 'Identität bestätigen';
+
+  @override
+  String get user_deviceAuthNoScreenLock =>
+      'Auf diesem Gerät ist keine Displaysperre eingerichtet. Zum Entsperren dieses Profils in den Android-Einstellungen eine PIN, ein Muster oder ein Passwort festlegen.';
+
+  @override
+  String get user_deviceAuthLockedOut =>
+      'Zu viele Versuche. Bitte später erneut versuchen.';
+
+  @override
+  String get user_deviceAuthUnavailable =>
+      'Die Identität konnte nicht bestätigt werden. Bitte erneut versuchen.';
+
+  @override
   String user_authFailedExisting(String nothingChanged) {
     return 'Die Identität konnte nicht bestätigt werden. $nothingChanged';
   }

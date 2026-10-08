@@ -11581,6 +11581,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get user_authReasonUnlockProfile => 'Unlock profile';
 
   @override
+  String get user_deviceAuthPromptTitle => 'Confirm it\'s you';
+
+  @override
+  String get user_deviceAuthNoScreenLock =>
+      'No screen lock is set up on this device. Set a PIN, pattern or password in Android settings to unlock this profile.';
+
+  @override
+  String get user_deviceAuthLockedOut => 'Too many attempts. Try again later.';
+
+  @override
+  String get user_deviceAuthUnavailable =>
+      'Could not confirm your identity. Try again.';
+
+  @override
   String user_authFailedExisting(String nothingChanged) {
     return 'Could not confirm your identity. $nothingChanged';
   }

@@ -151,9 +151,18 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private var componentsWait: Runnable? = null
     val binding get() = _binding!!
 
-    protected val components by lazy {
+    private val componentsLazy = lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
+    protected val components by componentsLazy
+
+    /**
+     * The component set this fragment's features were built against, or null
+     * before it took one. It keeps that set for its whole life, so after the
+     * set is replaced it is watching a store nothing reports to any more.
+     */
+    internal val boundComponents: Components?
+        get() = if (componentsLazy.isInitialized()) componentsLazy.value else null
 
     private val backButtonHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
         fullScreenFeature,
@@ -853,6 +862,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
         // session the process should keep prioritised when it goes to background.
         AppLifecycleFeature.setVisibleSession(this, sessionId)
         keyboardVisibilityFeature?.checkKeyboardState()
+    }
+
+    /** Ends a text selection: its floating toolbar is a window above the page. */
+    protected fun clearEngineSelection() {
+        fragmentEngineView?.clearSelection()
     }
 
     @CallSuper

@@ -11895,6 +11895,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get user_authReasonUnlockProfile => 'Разблокировать профиль';
 
   @override
+  String get user_deviceAuthPromptTitle => 'Подтвердите свою личность';
+
+  @override
+  String get user_deviceAuthNoScreenLock =>
+      'На этом устройстве не настроена блокировка экрана. Чтобы разблокировать профиль, задайте PIN-код, графический ключ или пароль в настройках Android.';
+
+  @override
+  String get user_deviceAuthLockedOut =>
+      'Слишком много попыток. Повторите попытку позже.';
+
+  @override
+  String get user_deviceAuthUnavailable =>
+      'Не удалось подтвердить вашу личность. Повторите попытку.';
+
+  @override
   String user_authFailedExisting(String nothingChanged) {
     return 'Не удалось подтвердить вашу личность. $nothingChanged';
   }

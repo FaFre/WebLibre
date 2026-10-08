@@ -7,7 +7,6 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import android.app.Activity
-import android.content.Intent
 import android.view.View
 import androidx.fragment.app.FragmentActivity
 import eu.weblibre.flutter_mozilla_components.AddonPopupViewFactory
@@ -19,7 +18,6 @@ import eu.weblibre.flutter_mozilla_components.EngineViewVisibility
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
-import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
@@ -507,10 +505,13 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
             components.events.readerViewEvents
         )
 
-        val intent =
-            Intent(profileApplicationContext, NotificationActivity::class.java)
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        profileApplicationContext.startActivity(intent)
+        // No `NotificationActivity` here. It used to be started at this point to
+        // bind the notifications delegate, but it finishes in `onCreate` and
+        // unbinds with it, so nothing stayed bound. What it did do is pause
+        // whatever window was in front, and the browser counts that
+        // `inactive` as leaving, which ends a background-mode unlock and
+        // interrupts a password check (issue #658). It remains the activity a
+        // web notification opens, see `Core`.
 
         reportEngineReady()
     }

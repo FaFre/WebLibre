@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.weblibre.flutter_mozilla_components.R
+import eu.weblibre.flutter_mozilla_components.lock.coverWhileWindowLocked
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.session.SessionUseCases
@@ -238,6 +239,9 @@ class NativeAppLinkPromptFeature(
         dialog = built
         shownRequest = request
         built.show()
+        // Over a Custom Tab or PWA window whose profile lock is up, or comes
+        // up while this waits: hidden, not answered, until it lifts.
+        built.coverWhileWindowLocked()
         scheduleExpiryTick(request)
     }
 

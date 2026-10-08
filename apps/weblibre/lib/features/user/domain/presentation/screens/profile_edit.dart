@@ -142,6 +142,7 @@ class ProfileEditScreen extends HookConsumerWidget {
             authKey: existing != null
                 ? profileAccessAuthKey(existing.id)
                 : _newProfileAuthKey,
+            localizedTitle: l10n.user_deviceAuthPromptTitle,
             localizedReason: existing != null
                 ? l10n.user_authReasonRequireAuth
                 : l10n.user_authReasonConfirmUnlock,
@@ -149,7 +150,7 @@ class ProfileEditScreen extends HookConsumerWidget {
             alsoRemember: alsoRemember,
           );
 
-      if (!authResult) {
+      if (!authResult.passed) {
         if (context.mounted) reportFailure();
         return;
       }

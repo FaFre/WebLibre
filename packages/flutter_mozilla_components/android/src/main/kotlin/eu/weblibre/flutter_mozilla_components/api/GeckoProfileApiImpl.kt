@@ -39,7 +39,11 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import eu.weblibre.flutter_mozilla_components.lock.AutoLockMode
+import eu.weblibre.flutter_mozilla_components.lock.ProfileUnlockRegistry
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
+import eu.weblibre.flutter_mozilla_components.pigeons.SharedProfileUnlock
+import eu.weblibre.flutter_mozilla_components.pigeons.SharedUnlockMode
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirective
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirectiveKind
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
@@ -551,4 +555,46 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
     override fun getCommittedProfileId(): String? = StartupArbiter.committedProfileId()
 
     override fun getBoundProfileFolder(): String? = StartupArbiter.boundProfileFolder()
+
+    /**
+     * Only the committed profile's unlock is kept: no window of this process
+     * can show any other, and the browser also remembers unlocks of other
+     * profiles it authorized an action on.
+     */
+    override fun recordSharedProfileUnlock(
+        profileId: String,
+        mode: SharedUnlockMode,
+        timeoutMs: Long,
+        ageMs: Long,
+    ) {
+        if (profileId != StartupArbiter.committedProfileId()) return
+
+        ProfileUnlockRegistry.recordShared(
+            profileId,
+            when (mode) {
+                SharedUnlockMode.TIMEOUT -> AutoLockMode.TIMEOUT
+                SharedUnlockMode.STARTUP -> AutoLockMode.STARTUP
+            },
+            timeoutMs,
+            ageMs,
+        )
+    }
+
+    override fun clearSharedProfileUnlock(profileId: String) {
+        ProfileUnlockRegistry.forgetShared(profileId)
+    }
+
+    override fun getSharedProfileUnlock(profileId: String): SharedProfileUnlock? {
+        if (profileId != StartupArbiter.committedProfileId()) return null
+
+        val shared = ProfileUnlockRegistry.shared(profileId) ?: return null
+        return SharedProfileUnlock(
+            mode = when (shared.mode) {
+                AutoLockMode.STARTUP -> SharedUnlockMode.STARTUP
+                else -> SharedUnlockMode.TIMEOUT
+            },
+            timeoutMs = shared.timeoutMs,
+            ageMs = shared.ageMs,
+        )
+    }
 }

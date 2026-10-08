@@ -3,4 +3,25 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
     <string name="weblibre_download_app_chooser_always_use">Usar siempre esta aplicación</string>
+    <string name="weblibre_lock_title">El perfil está bloqueado</string>
+    <string name="weblibre_lock_password_label">Contraseña del perfil</string>
+    <string name="weblibre_lock_unlock">Desbloquear</string>
+    <string name="weblibre_lock_unlocking">Desbloqueando…</string>
+    <string name="weblibre_lock_close">Cerrar</string>
+    <string name="weblibre_lock_prompt_title">Confirma tu identidad</string>
+    <string name="weblibre_lock_prompt_reason">Desbloquear perfil</string>
+    <string name="weblibre_lock_wrong_password">Contraseña incorrecta</string>
+    <string name="weblibre_lock_wrong_password_retry">Contraseña incorrecta. %1$s</string>
+    <string name="weblibre_lock_too_many_attempts">Demasiados intentos fallidos. %1$s</string>
+    <string name="weblibre_lock_check_failed">No se pudo comprobar la contraseña. Vuelve a intentarlo.</string>
+    <string name="weblibre_lock_interrupted">Saliste de WebLibre durante la comprobación. Vuelve a introducir la contraseña.</string>
+    <plurals name="weblibre_lock_retry_seconds">
+        <item quantity="one">Vuelve a intentarlo en %d segundo.</item>
+        <item quantity="other">Vuelve a intentarlo en %d segundos.</item>
+    </plurals>
+    <plurals name="weblibre_lock_retry_minutes">
+        <item quantity="one">Vuelve a intentarlo en %d minuto.</item>
+        <item quantity="other">Vuelve a intentarlo en %d minutos.</item>
+    </plurals>
+
 </resources>

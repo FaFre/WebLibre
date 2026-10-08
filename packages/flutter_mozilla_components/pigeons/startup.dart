@@ -77,8 +77,52 @@ class ProfileStartupDirective {
     dartPackageName: 'flutter_mozilla_components',
   ),
 )
-/// Profile arbitration, registered at plugin attach time so it is callable
-/// before anything opens a database or initializes Gecko.
+/// The auto-lock modes whose unlock holds across windows.
+///
+/// Background mode is absent on purpose: switching between the browser and a
+/// Custom Tab or PWA window counts as leaving, so its unlock is never shared.
+enum SharedUnlockMode { timeout, startup }
+
+/// An unlock of the committed profile that the browser and its Custom Tab and
+/// PWA windows share.
+class SharedProfileUnlock {
+  final SharedUnlockMode mode;
+  final int timeoutMs;
+
+  /// How long ago the profile was unlocked. An age rather than a timestamp:
+  /// Dart and native do not share a clock worth trusting.
+  final int ageMs;
+
+  SharedProfileUnlock({
+    required this.mode,
+    required this.timeoutMs,
+    required this.ageMs,
+  });
+}
+
+enum ProfilePasswordOutcome {
+  accepted,
+  rejected,
+
+  /// Not checked: an earlier run of wrong attempts is still being waited out.
+  throttled,
+
+  /// The app half has not activated a profile yet. Asking again later is right.
+  unavailable,
+
+  /// The check could not run or record its result. Not a pass.
+  failed,
+}
+
+class ProfilePasswordReply {
+  final ProfilePasswordOutcome outcome;
+
+  /// How long the next attempt has to wait, for a rejected or throttled one.
+  final int? retryAfterMs;
+
+  ProfilePasswordReply({required this.outcome, this.retryAfterMs});
+}
+
 /// One launch the broker is holding because nothing could receive it.
 ///
 /// Only what survives a process restart unchanged: arbitrary `Parcelable` extras
@@ -115,6 +159,8 @@ class StartupIntentRecord {
   });
 }
 
+/// Profile arbitration, registered at plugin attach time so it is callable
+/// before anything opens a database or initializes Gecko.
 @HostApi()
 abstract class GeckoProfileApi {
   ProfileStartupDirective beginStartup(
@@ -236,4 +282,34 @@ abstract class GeckoProfileApi {
   String? getCommittedProfileId();
 
   String? getBoundProfileFolder();
+
+  /// Records that the browser unlocked [profileId] [ageMs] ago, so Custom Tab
+  /// and PWA windows open without asking again while [mode] says it holds.
+  ///
+  /// The age keeps an unlock the browser adopted from a window from starting
+  /// its timeout over on the way back.
+  void recordSharedProfileUnlock(
+    String profileId,
+    SharedUnlockMode mode,
+    int timeoutMs,
+    int ageMs,
+  );
+
+  /// Drops a shared unlock: the profile was locked again, or its lock
+  /// settings no longer allow sharing one.
+  void clearSharedProfileUnlock(String profileId);
+
+  /// The shared unlock of [profileId] that still holds, or null.
+  SharedProfileUnlock? getSharedProfileUnlock(String profileId);
+}
+
+/// Lets a Custom Tab or PWA window check a profile password.
+///
+/// The check runs in Dart because that is where the password's Argon2
+/// verifier and the wrong-attempt throttling live; a second implementation in
+/// Kotlin would be a second copy that can disagree.
+@FlutterApi()
+abstract class ProfileLockFlutterApi {
+  @async
+  ProfilePasswordReply checkProfilePassword(String profileId, String password);
 }

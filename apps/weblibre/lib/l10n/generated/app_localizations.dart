@@ -19662,6 +19662,30 @@ abstract class AppLocalizations {
   /// **'Unlock profile'**
   String get user_authReasonUnlockProfile;
 
+  /// Title of the system fingerprint/PIN prompt. The line under it says what the prompt is for, e.g. "Unlock profile".
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm it\'s you'**
+  String get user_deviceAuthPromptTitle;
+
+  /// Shown on the profile lock screen when the device unlock cannot be used because the phone has no screen lock (PIN, pattern or password) set up.
+  ///
+  /// In en, this message translates to:
+  /// **'No screen lock is set up on this device. Set a PIN, pattern or password in Android settings to unlock this profile.'**
+  String get user_deviceAuthNoScreenLock;
+
+  /// Shown on the profile lock screen when the system refuses the fingerprint/PIN prompt for a while after too many wrong attempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Try again later.'**
+  String get user_deviceAuthLockedOut;
+
+  /// Shown on the profile lock screen when the system fingerprint/PIN prompt could not run, for example because of a device error.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not confirm your identity. Try again.'**
+  String get user_deviceAuthUnavailable;
+
   /// Error message when authentication failed while changing a profile's lock. nothingChanged is "Nothing has been changed."
   ///
   /// In en, this message translates to:

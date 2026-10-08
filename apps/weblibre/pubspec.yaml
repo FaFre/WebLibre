@@ -57,6 +57,7 @@ dependencies:
     git:
       url: https://github.com/FaFre/lexo_rank.git
   local_auth: ^3.0.2
+  local_auth_android: ^2.2.0
   locale_resolver:
     path: ../../packages/locale_resolver
   logger: ^2.8.0

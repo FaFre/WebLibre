@@ -157,4 +157,26 @@ class GeckoProfileService {
   Future<String?> getCommittedProfileId() => _api.getCommittedProfileId();
 
   Future<String?> getBoundProfileFolder() => _api.getBoundProfileFolder();
+
+  /// Shares the browser's unlock of [profileId], made [age] ago, with Custom
+  /// Tab and PWA windows for as long as [mode] lets it hold.
+  Future<void> recordSharedProfileUnlock(
+    String profileId, {
+    required SharedUnlockMode mode,
+    required Duration timeout,
+    required Duration age,
+  }) => _api.recordSharedProfileUnlock(
+    profileId,
+    mode,
+    timeout.inMilliseconds,
+    age.inMilliseconds,
+  );
+
+  Future<void> clearSharedProfileUnlock(String profileId) =>
+      _api.clearSharedProfileUnlock(profileId);
+
+  /// An unlock of [profileId] a Custom Tab or PWA window made that still
+  /// holds, or null.
+  Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) =>
+      _api.getSharedProfileUnlock(profileId);
 }

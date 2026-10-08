@@ -72,4 +72,33 @@
        - next is used for later downloads without asking. -->
     <string name="weblibre_download_app_chooser_always_use">Always use this app</string>
 
+    <!-- Lock over a Custom Tab / PWA window whose profile is locked. Same
+       - wording as the browser's own lock screen (user_* in the app's ARB files). -->
+    <string name="weblibre_lock_title">Profile is locked</string>
+    <string name="weblibre_lock_password_label">Profile password</string>
+    <string name="weblibre_lock_unlock">Unlock</string>
+    <!-- Unlock button label while the password is being checked. -->
+    <string name="weblibre_lock_unlocking">Unlocking…</string>
+    <string name="weblibre_lock_close">Close</string>
+    <!-- Title of the system unlock prompt; the browser's says the same
+       - (user_deviceAuthPromptTitle). -->
+    <string name="weblibre_lock_prompt_title">Confirm it\'s you</string>
+    <!-- Under the title of the system unlock prompt: what it is for. -->
+    <string name="weblibre_lock_prompt_reason">Unlock profile</string>
+    <string name="weblibre_lock_wrong_password">Wrong password</string>
+    <!-- %1$s is one of weblibre_lock_retry_seconds / weblibre_lock_retry_minutes. -->
+    <string name="weblibre_lock_wrong_password_retry">Wrong password. %1$s</string>
+    <string name="weblibre_lock_too_many_attempts">Too many wrong attempts. %1$s</string>
+    <string name="weblibre_lock_check_failed">Could not check the password. Try again.</string>
+    <!-- The password was right, but the person left the window before the check finished. -->
+    <string name="weblibre_lock_interrupted">WebLibre was closed or switched away from during the check. Enter the password again.</string>
+    <plurals name="weblibre_lock_retry_seconds">
+        <item quantity="one">Try again in %d second.</item>
+        <item quantity="other">Try again in %d seconds.</item>
+    </plurals>
+    <plurals name="weblibre_lock_retry_minutes">
+        <item quantity="one">Try again in %d minute.</item>
+        <item quantity="other">Try again in %d minutes.</item>
+    </plurals>
+
 </resources>

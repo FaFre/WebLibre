@@ -39,6 +39,18 @@ String describePasswordRetryAfter(AppLocalizations l10n, Duration wait) {
   return l10n.user_passwordRetryInMinutes((seconds / 60).ceil());
 }
 
+/// Puts the cursor back into a password field after an attempt that did not
+/// unlock, so the next one can be typed straight away.
+///
+/// The field is disabled while the password is checked, which takes its focus
+/// and closes the keyboard. It is only enabled again by the rebuild that
+/// follows, so the focus is asked for after that frame.
+void refocusPasswordField(BuildContext context, FocusNode focusNode) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (context.mounted) focusNode.requestFocus();
+  });
+}
+
 /// The error under a password field for an attempt that did not unlock.
 String? describeProfilePasswordCheck(
   AppLocalizations l10n,
@@ -106,6 +118,7 @@ class _ProfilePasswordDialog extends HookWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final controller = useTextEditingController();
+    final focusNode = useFocusNode();
     final passwordText = useValueListenable(controller).text;
     final checking = useState(false);
     final error = useState<String?>(null);
@@ -137,6 +150,7 @@ class _ProfilePasswordDialog extends HookWidget {
 
         controller.clear();
         error.value = describeProfilePasswordCheck(l10n, result);
+        refocusPasswordField(context, focusNode);
       } catch (e, s) {
         // Most likely the attempt record could not be written. Denied, not
         // waved through: a check that cannot count its failures must not
@@ -144,6 +158,7 @@ class _ProfilePasswordDialog extends HookWidget {
         logger.e('Profile password check failed', error: e, stackTrace: s);
         if (context.mounted) {
           error.value = l10n.user_profilePasswordCheckFailed;
+          refocusPasswordField(context, focusNode);
         }
       } finally {
         if (context.mounted) {
@@ -160,6 +175,7 @@ class _ProfilePasswordDialog extends HookWidget {
         title: Text(title),
         content: ObscurableTextField(
           controller: controller,
+          focusNode: focusNode,
           enabled: !checking.value,
           autofocus: true,
           keyboardType: TextInputType.visiblePassword,

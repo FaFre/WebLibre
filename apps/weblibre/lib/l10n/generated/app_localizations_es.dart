@@ -11914,6 +11914,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get user_authReasonUnlockProfile => 'Desbloquear perfil';
 
   @override
+  String get user_deviceAuthPromptTitle => 'Confirma tu identidad';
+
+  @override
+  String get user_deviceAuthNoScreenLock =>
+      'Este dispositivo no tiene bloqueo de pantalla. Configura un PIN, un patrón o una contraseña en los ajustes de Android para desbloquear este perfil.';
+
+  @override
+  String get user_deviceAuthLockedOut =>
+      'Demasiados intentos. Vuelve a intentarlo más tarde.';
+
+  @override
+  String get user_deviceAuthUnavailable =>
+      'No se pudo confirmar tu identidad. Vuelve a intentarlo.';
+
+  @override
   String user_authFailedExisting(String nothingChanged) {
     return 'No se pudo confirmar tu identidad. $nothingChanged';
   }

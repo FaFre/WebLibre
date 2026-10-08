@@ -27,6 +27,7 @@ import mozilla.components.support.base.feature.LifecycleAwareFeature
 import mozilla.components.support.ktx.android.content.appVersionName
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 import eu.weblibre.flutter_mozilla_components.R
+import eu.weblibre.flutter_mozilla_components.lock.coverWhileWindowLocked
 import kotlinx.coroutines.Dispatchers
 import mozilla.components.feature.addons.R as MozComp
 
@@ -394,6 +395,9 @@ class WebExtensionPromptFeature(
                 .setPositiveButton(android.R.string.ok) { _, _ -> }.setCancelable(false).setMessage(
                     message,
                 ).show().withCenterAlignedButtons()
+                // The request is consumed already, so a lock that comes up
+                // over it hides it rather than dismissing it for good.
+                .coverWhileWindowLocked()
         }
     }
 

@@ -13,6 +13,7 @@ import android.os.Looper
 import androidx.fragment.app.FragmentActivity
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.lock.ProfileLockedWindow
 import java.lang.ref.WeakReference
 import mozilla.components.support.base.log.logger.Logger
 
@@ -106,6 +107,19 @@ object WebExtensionPromptHost : Application.ActivityLifecycleCallbacks {
         }
     }
 
+    /**
+     * The profile lock of [activity] came up or lifted.
+     *
+     * A locked window gets no prompts: a dialog is a window of its own, above
+     * the lock panel. The request waits in the store, and binding again once
+     * the lock lifts shows it.
+     */
+    fun onWindowLockChanged(activity: FragmentActivity) {
+        onMainThread {
+            if (resumedActivity?.get() === activity) bind(activity)
+        }
+    }
+
     override fun onActivityResumed(activity: Activity) {
         val fragmentActivity = activity as? FragmentActivity ?: return
 
@@ -147,6 +161,9 @@ object WebExtensionPromptHost : Application.ActivityLifecycleCallbacks {
         // bound one: this also runs for a rebuilt component set, and the running
         // feature would be holding the store that was replaced.
         unbind()
+
+        // See [onWindowLockChanged].
+        if ((activity as? ProfileLockedWindow)?.isProfileLocked == true) return
 
         val components = GlobalComponents.components ?: return
 

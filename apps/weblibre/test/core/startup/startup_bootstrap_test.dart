@@ -224,6 +224,21 @@ class _FakeProfileApi implements GeckoProfileApi {
 
   @override
   Future<String?> getBoundProfileFolder() async => null;
+
+  @override
+  Future<void> recordSharedProfileUnlock(
+    String profileId,
+    SharedUnlockMode mode,
+    int timeoutMs,
+    int ageMs,
+  ) async {}
+
+  @override
+  Future<void> clearSharedProfileUnlock(String profileId) async {}
+
+  @override
+  Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) async =>
+      null;
 }
 
 void main() {

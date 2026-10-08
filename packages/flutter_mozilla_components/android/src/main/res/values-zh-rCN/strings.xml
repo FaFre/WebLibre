@@ -3,4 +3,23 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
     <string name="weblibre_download_app_chooser_always_use">始终使用此应用</string>
+    <string name="weblibre_lock_title">配置文件已锁定</string>
+    <string name="weblibre_lock_password_label">配置文件密码</string>
+    <string name="weblibre_lock_unlock">解锁</string>
+    <string name="weblibre_lock_unlocking">正在解锁…</string>
+    <string name="weblibre_lock_close">关闭</string>
+    <string name="weblibre_lock_prompt_title">确认你的身份</string>
+    <string name="weblibre_lock_prompt_reason">解锁配置文件</string>
+    <string name="weblibre_lock_wrong_password">密码错误</string>
+    <string name="weblibre_lock_wrong_password_retry">密码错误。%1$s</string>
+    <string name="weblibre_lock_too_many_attempts">错误次数过多。%1$s</string>
+    <string name="weblibre_lock_check_failed">无法检查密码。请重试。</string>
+    <string name="weblibre_lock_interrupted">检查期间离开了 WebLibre。请重新输入密码。</string>
+    <plurals name="weblibre_lock_retry_seconds">
+        <item quantity="other">请在 %d 秒后重试。</item>
+    </plurals>
+    <plurals name="weblibre_lock_retry_minutes">
+        <item quantity="other">请在 %d 分钟后重试。</item>
+    </plurals>
+
 </resources>

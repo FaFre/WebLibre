@@ -6,6 +6,10 @@ import mozilla.components.concept.sync.OAuthAccount
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 
 class AuthCustomTabActivity : ExternalAppBrowserActivity() {
+    // Only `AuthIntentReceiverActivity` opens this, and only the account
+    // sign-in started from the browser opens that: neither is exported.
+    override val opensFromUnlockedBrowser: Boolean = true
+
     private val accountStateObserver = object : AccountObserver {
         override fun onAuthenticated(account: OAuthAccount, authType: AuthType) {
             finish()

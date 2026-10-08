@@ -6,6 +6,7 @@
 
 package eu.weblibre.flutter_mozilla_components.activities
 
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -14,8 +15,10 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.addCallback
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
 import com.google.android.material.button.MaterialButton
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
@@ -24,6 +27,11 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
+import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
+import eu.weblibre.flutter_mozilla_components.lock.ExternalWindowLock
+import eu.weblibre.flutter_mozilla_components.lock.LockedWindowCurtain
+import eu.weblibre.flutter_mozilla_components.lock.ProfileLockedWindow
+import eu.weblibre.flutter_mozilla_components.lock.ProfileUnlockRegistry
 import eu.weblibre.flutter_mozilla_components.startup.AppHalfBootstrap
 import eu.weblibre.flutter_mozilla_components.startup.BootstrapFailure
 import eu.weblibre.flutter_mozilla_components.startup.BootstrapStage
@@ -47,12 +55,20 @@ import mozilla.components.support.base.log.logger.Logger
  *
  * Uses an empty taskAffinity so Custom Tabs appear as a separate task from the main app.
  */
-open class ExternalAppBrowserActivity : AppCompatActivity() {
+open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow {
     companion object {
         private const val TAG = "ExternalAppBrowserActivity"
 
         const val EXTRA_CUSTOM_TAB_SESSION_ID = "custom_tab_session_id"
         const val EXTRA_WEB_APP_MANIFEST_URL = "web_app_manifest_url"
+
+        /** How [recoverPwaSession] creates a lost PWA session again. */
+        @VisibleForTesting
+        internal var createPwaSession: suspend (
+            url: String,
+            contextId: String?,
+            desktopMode: Boolean?,
+        ) -> String = PwaSessionCreator::create
 
         /**
          * Whether this window's session is a private one, in the shape the
@@ -144,6 +160,59 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var isRecoveringPwaSession = false
 
+    /**
+     * Whether this window is only ever opened by the browser, from a screen
+     * that is itself behind the profile lock.
+     *
+     * Such a window opens unlocked, as a continuation of what the person was
+     * doing, and locks like any other once they leave it. Only a fresh launch
+     * counts: reopening it from recents is a new visit.
+     */
+    protected open val opensFromUnlockedBrowser: Boolean = false
+
+    /** Null only before `setContentView`, which it needs. */
+    private var windowLock: ExternalWindowLock? = null
+
+    /** Null only before `onCreate`. */
+    private var curtain: LockedWindowCurtain? = null
+
+    /** Whether [start] ran: the profile was open when this window began. */
+    private var started = false
+
+    /**
+     * Custom tabs moving to new components while this window is open; see
+     * [onCustomTabsHandedOver]. Acts only while a fragment transaction is
+     * allowed, and keeps the rest for [onResume].
+     */
+    private val handover = HandoverWait(
+        timeoutMs = PwaConstants.COMPONENT_INIT_TIMEOUT_MS,
+        schedule = { delayMs, block ->
+            val job = coroutineScope.launch {
+                delay(delayMs)
+                block()
+            }
+            ({ job.cancel() })
+        },
+        mayAct = {
+            !supportFragmentManager.isStateSaved &&
+                lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+        },
+    )
+
+    private val customTabsHandoverListener: () -> Unit = { onCustomTabsHandedOver() }
+
+    /**
+     * What [showFragment] was asked to show while fragment transactions were
+     * not allowed, for [onResume]. The latest request wins.
+     */
+    private var deferredShow: (() -> Unit)? = null
+
+    /** Paused into picture-in-picture, which is not leaving yet. */
+    private var pausedIntoPictureInPicture = false
+
+    /** This window in [ProfileUnlockRegistry]'s pending departures. */
+    private val departureToken = Any()
+
     private val customTabSessionId: String?
         get() = intent?.getStringExtra(EXTRA_CUSTOM_TAB_SESSION_ID)
 
@@ -166,6 +235,12 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         FlutterEngineCoordinator.retainForExternalTask()
 
         onBackPressedDispatcher.addCallback(this) {
+            // Not the page's back history: that belongs to whoever unlocks it.
+            if (windowLock?.isShowing == true) {
+                finishAndRemoveTask()
+                return@addCallback
+            }
+
             val fragment = supportFragmentManager.findFragmentById(R.id.container)
             if (fragment is UserInteractionHandler && fragment.onBackPressed()) {
                 return@addCallback
@@ -176,6 +251,60 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_external_app_browser)
+
+        // Before the lock, which reports to it, and before `onStart`, which
+        // shows the dialogs `super.onCreate` restored.
+        curtain = LockedWindowCurtain(supportFragmentManager)
+
+        // Before anything of the profile is shown or started: a Custom Tab or
+        // PWA never passes through the browser's lock screen, so a locked
+        // profile is locked here as well (issue #658).
+        val lock = ExternalWindowLock(
+            activity = this,
+            scope = coroutineScope,
+            onClose = { finishAndRemoveTask() },
+            onLockChanged = ::onLockChanged,
+        )
+        windowLock = lock
+
+        val freshLaunch = savedInstanceState == null &&
+            ((intent?.flags ?: 0) and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0
+        if (opensFromUnlockedBrowser && freshLaunch) {
+            lock.grantForLaunch()
+        }
+
+        GlobalComponents.addCustomTabsHandoverListener(customTabsHandoverListener)
+
+        lock.guard(autoPrompt = false) { start() }
+    }
+
+    override val isProfileLocked: Boolean
+        get() = windowLock?.isShowing == true
+
+    override fun coverWhileLocked(dialog: Dialog) {
+        curtain?.cover(dialog)
+    }
+
+    /**
+     * Hides everything above the lock panel that the panel cannot cover:
+     * windows of their own, which a page or the window's own controls put up.
+     */
+    private fun onLockChanged(locked: Boolean) {
+        if (locked) {
+            curtain?.lock()
+            (supportFragmentManager.findFragmentById(R.id.container) as? ExternalAppBrowserFragment)
+                ?.onWindowLocked()
+        } else {
+            curtain?.unlock()
+        }
+
+        // Install prompts wait in the store while the window is locked.
+        WebExtensionPromptHost.onWindowLockChanged(this)
+    }
+
+    /** What the window does once its profile is open. */
+    private fun start() {
+        started = true
 
         if (intent?.getBooleanExtra(EXTRA_AWAITING_ROUTING, false) == true) {
             // Opened deliberately without a session: this window *is* where the
@@ -446,6 +575,50 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         waitForComponents(sessionId)
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        // A rotation is not leaving.
+        if (isChangingConfigurations) return
+
+        // Neither is picture-in-picture: the video is still on screen, and
+        // covering it would end what the person asked for. Leaving happens
+        // when that window goes away without coming back, see [onStop].
+        if (isInPictureInPictureMode) {
+            pausedIntoPictureInPicture = true
+            return
+        }
+
+        // Not leaving yet: a dialog may only be drawing over the window. See
+        // [ProfileUnlockRegistry.windowPaused].
+        ProfileUnlockRegistry.windowPaused(departureToken, ::coverAfterLeaving)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (isChangingConfigurations) return
+
+        if (pausedIntoPictureInPicture) {
+            pausedIntoPictureInPicture = false
+            ProfileUnlockRegistry.windowLeft(::coverAfterLeaving)
+            return
+        }
+
+        ProfileUnlockRegistry.windowStopped(departureToken)
+    }
+
+    /**
+     * Leaving ended a background-mode unlock, for this window and every other
+     * one. Covered as soon as that is settled, so the page is not what the
+     * next person to look at this window sees first.
+     */
+    private fun coverAfterLeaving() {
+        if (started && !isDestroyed) {
+            windowLock?.guard(autoPrompt = false)
+        }
+    }
+
     override fun onUserLeaveHint() {
         if (HomePressDispatcher.onUserLeaveHint(this)) {
             return
@@ -477,7 +650,21 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFragment(sessionId: String) {
+    /**
+     * [mayAwaitHandover] is false once a wait for the handover gave up: the
+     * session is then decided on as lost, rather than waited for again.
+     */
+    private fun showFragment(sessionId: String, mayAwaitHandover: Boolean = true) {
+        // Asked for by continuations (a recovered PWA session, the waits for
+        // components, routing or the handover) that can finish after the
+        // window went to the background. A commit after `onSaveInstanceState`
+        // throws, so the request waits for the window, with the session it
+        // names; so does every decision below, starting activities included.
+        if (supportFragmentManager.isStateSaved) {
+            deferredShow = { showFragment(sessionId, mayAwaitHandover) }
+            return
+        }
+
         hideLaunchStatus()
 
         val components = GlobalComponents.components ?: run {
@@ -488,6 +675,17 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
 
         // Verify session exists
         if (components.core.store.state.findCustomTab(sessionId) == null) {
+            if (mayAwaitHandover && GlobalComponents.isHandingOverCustomTabs) {
+                // The app half started (a password check starts it) and its
+                // components take this window's session over only once they
+                // have restored the browser's tabs. Missing for that long is
+                // not gone. A handover that never finishes must not leave a
+                // blank window, though: past the components timeout, this
+                // decides again without waiting.
+                handover.await { showFragment(sessionId, mayAwaitHandover = false) }
+                return
+            }
+
             Log.e(TAG, "Custom tab session $sessionId not found in store")
             logger.error("Custom tab session $sessionId not found in store, finishing.")
             if (!recoverPwaSession(sessionId, "session not found in store")) {
@@ -506,8 +704,66 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
             .commit()
     }
 
+    /**
+     * Custom tabs moved to new components: the app half started while this
+     * window was open and replaced the external set (issue #658: a password
+     * check starts it).
+     */
+    private fun onCustomTabsHandedOver() {
+        if (!started || isFinishing || isDestroyed) return
+        handover.arrived(::applyHandover)
+    }
+
+    private fun applyHandover(endedWait: Boolean) {
+        val sessionId = customTabSessionId ?: return
+
+        if (endedWait) {
+            showFragment(sessionId)
+            return
+        }
+
+        // A fragment built before the handover keeps the outgoing components:
+        // its features watch a store the page no longer reports to, so its
+        // URL, back state and prompts would go stale. One built since is fine.
+        val fragment =
+            supportFragmentManager.findFragmentById(R.id.container) as? ExternalAppBrowserFragment
+                ?: return
+        val bound = fragment.boundComponents ?: return
+        if (bound === GlobalComponents.components) return
+
+        fragment.releaseSession()
+        showFragment(sessionId)
+    }
+
     override fun onResume() {
         super.onResume()
+
+        // Back from picture-in-picture, or through it: either way, here again.
+        pausedIntoPictureInPicture = false
+
+        // Before the guard: settles whether this window left, and whether the
+        // one it took the front from did.
+        ProfileUnlockRegistry.windowResumed(departureToken)
+
+        // A window this very guard starts has just checked its session.
+        val wasStarted = started
+        windowLock?.guard(autoPrompt = true)
+        if (!wasStarted) return
+
+        // What could not be shown, or done for the handover, while the window
+        // was away. The handover second: it leaves a fragment that is already
+        // on the current components alone.
+        val shown = deferredShow?.let { show ->
+            deferredShow = null
+            show()
+            true
+        } ?: false
+        val handedOver = handover.runDeferred()
+        if (shown || handedOver) return
+
+        // Mid-handover the session is missing from the new components without
+        // being gone; [onCustomTabsHandedOver] picks it up.
+        if (GlobalComponents.isHandingOverCustomTabs) return
 
         // If the session was removed while we were in the background, finish
         val sessionId = customTabSessionId ?: return
@@ -541,33 +797,39 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         Log.w(TAG, "Creating PWA session for $launchUrl: $reason")
 
         coroutineScope.launch {
-            try {
-                val sessionId = PwaSessionCreator.create(
+            // Only the creation can fail the recovery. Showing the session
+            // is not part of it: a failure there must not remove a task
+            // whose session exists.
+            val sessionId = try {
+                createPwaSession(
                     launchUrl,
                     contextId,
-                    desktopMode = PwaSessionCreator.desktopModeOf(intent),
+                    PwaSessionCreator.desktopModeOf(intent),
                 )
-                Log.d(
-                    TAG,
-                    "Recovered PWA session: old=$missingSessionId, new=$sessionId, url=$launchUrl",
-                )
-
-                intent.putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, sessionId)
-                if (webAppManifestUrl == null) {
-                    intent.putExtra(EXTRA_WEB_APP_MANIFEST_URL, launchUrl)
-                }
-
-                if (!isFinishing && !isDestroyed) {
-                    showFragment(sessionId)
-                }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to recover PWA session", e)
                 logger.error("Failed to recover PWA session, removing stale task.", e)
                 if (!isFinishing && !isDestroyed) {
                     finishAndRemoveTask()
                 }
+                return@launch
             } finally {
                 isRecoveringPwaSession = false
+            }
+
+            Log.d(
+                TAG,
+                "Recovered PWA session: old=$missingSessionId, new=$sessionId, url=$launchUrl",
+            )
+
+            intent.putExtra(EXTRA_CUSTOM_TAB_SESSION_ID, sessionId)
+            if (webAppManifestUrl == null) {
+                intent.putExtra(EXTRA_WEB_APP_MANIFEST_URL, launchUrl)
+            }
+
+            if (!isFinishing && !isDestroyed) {
+                // Deferred to `onResume` if the window went away meanwhile.
+                showFragment(sessionId)
             }
         }
 
@@ -612,6 +874,12 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
+        // Normally settled by `onStop` already; this only drops a pause that
+        // never got that far.
+        ProfileUnlockRegistry.windowStopped(departureToken)
+        GlobalComponents.removeCustomTabsHandoverListener(customTabsHandoverListener)
+        handover.cancel()
+
         FlutterEngineCoordinator.releaseForExternalTask()
 
         // Cancel any pending coroutines
@@ -620,16 +888,8 @@ open class ExternalAppBrowserActivity : AppCompatActivity() {
         // Only clean up when the activity is actually finishing (user closed it),
         // not when the system temporarily destroys it (e.g. switching to main app).
         if (isFinishing) {
-            val sessionId = customTabSessionId
-            if (sessionId != null) {
-                val components = GlobalComponents.components
-                if (components != null) {
-                    val customTab = components.core.store.state.findCustomTab(sessionId)
-                    if (customTab != null) {
-                        components.useCases.customTabsUseCases.remove(sessionId)
-                    }
-                }
-            }
+            // Mid-handover too, where it is still in the outgoing store.
+            customTabSessionId?.let(GlobalComponents::removeCustomTab)
         }
     }
 

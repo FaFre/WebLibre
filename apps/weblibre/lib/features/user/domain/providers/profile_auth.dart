@@ -18,8 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/foundation.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/user/data/models/auth_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
@@ -27,7 +29,8 @@ import 'package:weblibre/features/user/domain/services/profile_password.dart';
 
 part 'profile_auth.g.dart';
 
-String profileAccessAuthKey(String profileId) => 'profile_access::$profileId';
+String profileAccessAuthKey(String profileId) =>
+    '$profileAccessAuthKeyPrefix$profileId';
 
 @Riverpod(keepAlive: true)
 class ProfileAuthState extends _$ProfileAuthState {
@@ -54,16 +57,19 @@ class ProfileAuthState extends _$ProfileAuthState {
   /// Refuses a password-locked profile without prompting: the device prompt
   /// proves only that someone can unlock the phone, which is exactly what a
   /// profile password is there to not accept.
-  Future<bool> authenticate({required String localizedReason}) async {
+  Future<DeviceAuthResult> authenticate({
+    required String localizedTitle,
+    required String localizedReason,
+  }) async {
     final profile = await ref.read(selectedProfileProvider.future);
-    if (!ref.mounted) return false;
+    if (!ref.mounted) return const DeviceAuthDeclined();
 
     switch (profile.authSettings.lockMethod) {
       case ProfileLockMethod.none:
         _unlock();
-        return true;
+        return const DeviceAuthPassed();
       case ProfileLockMethod.password:
-        return false;
+        return const DeviceAuthDeclined();
       case ProfileLockMethod.device:
         break;
     }
@@ -72,14 +78,15 @@ class ProfileAuthState extends _$ProfileAuthState {
         .read(localAuthenticationServiceProvider.notifier)
         .authenticate(
           authKey: profileAccessAuthKey(profile.id),
+          localizedTitle: localizedTitle,
           localizedReason: localizedReason,
           settings: profile.authSettings,
           useAuthCache: true,
         );
 
-    if (!ref.mounted) return false;
+    if (!ref.mounted) return const DeviceAuthDeclined();
 
-    state = result;
+    state = result.passed;
     return result;
   }
 
@@ -115,6 +122,54 @@ class ProfileAuthState extends _$ProfileAuthState {
     );
     _unlock();
     return result;
+  }
+
+  /// Opens the profile when a Custom Tab or PWA window unlocked it, and the
+  /// auto-lock settings let that unlock hold here too.
+  ///
+  /// Only timeout and until-restart unlocks are shared, and the window's is
+  /// checked against this profile's settings as they are now. Returns whether
+  /// the profile is open.
+  Future<bool> adoptSharedUnlock() async {
+    if (state) return true;
+
+    final profile = await ref.read(selectedProfileProvider.future);
+    if (!ref.mounted) return false;
+
+    final settings = profile.authSettings;
+    if (!settings.authenticationRequired) return false;
+
+    final SharedProfileUnlock? shared;
+    try {
+      shared = await GeckoProfileService().getSharedProfileUnlock(profile.id);
+    } catch (error, stackTrace) {
+      logger.w(
+        'Could not read a shared profile unlock',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
+    if (!ref.mounted || shared == null || state) return state;
+
+    final age = Duration(milliseconds: shared.ageMs);
+    final holds = switch (settings.autoLockMode) {
+      AutoLockMode.startup => shared.mode == SharedUnlockMode.startup,
+      AutoLockMode.timeout =>
+        shared.mode == SharedUnlockMode.timeout && age < settings.timeout,
+      AutoLockMode.background => false,
+    };
+    if (!holds) return false;
+
+    ref
+        .read(localAuthenticationServiceProvider.notifier)
+        .remember(
+          profileAccessAuthKey(profile.id),
+          settings,
+          unlockedAt: DateTime.now().subtract(age),
+        );
+    _unlock();
+    return true;
   }
 
   Future<void> revalidateAfterResume() async {

@@ -166,9 +166,14 @@ export 'src/pigeons/startup.g.dart'
     show
         GeckoProfileApi,
         ParticipantStep,
+        ProfileLockFlutterApi,
+        ProfilePasswordOutcome,
+        ProfilePasswordReply,
         ProfileStartupDirective,
         ProfileStartupDirectiveKind,
         ProfileStartupOwnerType,
         ProfileStartupPromptMode,
+        SharedProfileUnlock,
+        SharedUnlockMode,
         StartupIntentRecord;
 export 'src/pointer_input_surface.dart';

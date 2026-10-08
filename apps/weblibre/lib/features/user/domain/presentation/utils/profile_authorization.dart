@@ -26,6 +26,7 @@ import 'package:weblibre/features/user/data/models/auth_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/profile_password_dialogs.dart';
 import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/filesystem.dart' as fs;
 
 /// [profile] as its `metadata.json` describes it now.
@@ -120,13 +121,18 @@ Future<bool> authorizeProfileAction(
       // here. What is recorded is the open profile's unlock — see
       // [activeProfileDeviceUnlock].
       final alsoRemember = await activeProfileDeviceUnlock(current);
-      return await ref
+      if (!context.mounted) return false;
+      final result = await ref
           .read(localAuthenticationServiceProvider.notifier)
           .authenticate(
             authKey: profileAccessAuthKey(current.id),
+            localizedTitle: AppLocalizations.of(
+              context,
+            ).user_deviceAuthPromptTitle,
             localizedReason: reason,
             alsoRemember: alsoRemember,
           );
+      return result.passed;
     case ProfileLockMethod.password:
       final authService = ref.read(localAuthenticationServiceProvider.notifier);
       return await showProfilePasswordDialog(
