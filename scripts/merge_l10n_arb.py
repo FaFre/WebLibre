@@ -9,8 +9,9 @@ hand-edit it.
 
 Translations live beside their English source as `<stem>_<locale>.arb`
 (`tabs_de.arb` next to `tabs_en.arb`) and merge the same way into
-`lib/l10n/app_<locale>.arb`. They carry messages only — descriptions and
-placeholder types come from the English fragment. A translation may lag
+`lib/l10n/app_<locale>.arb`. Only their messages are merged — descriptions and
+placeholder types come from the English fragment, and the locale comes from
+the file name (`@@locale` may be omitted, as Weblate does). A translation may lag
 behind (gen-l10n falls back to English for missing keys), but it may not
 contain keys the English fragment no longer has, and every placeholder and
 `<tag>` of the English message must survive translation.
@@ -119,8 +120,15 @@ def load_translation(path: Path, locale: str, source: dict) -> dict:
     data = read_json(path)
     rel = path.relative_to(REPO_ROOT)
 
-    if data.get("@@locale") != locale:
-        sys.exit(f"error: {rel} must declare \"@@locale\": \"{locale}\"")
+    # The file name decides the locale. Weblate creates new translations from
+    # the English fragment, which has no `@@locale`, so it may be missing —
+    # but one that names another locale means the file is misnamed.
+    declared = data.get("@@locale", locale)
+    if declared != locale:
+        sys.exit(
+            f"error: {rel} declares \"@@locale\": {json.dumps(declared)}, "
+            f"but its file name says '{locale}'"
+        )
 
     messages = {}
     for key, value in data.items():
