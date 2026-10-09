@@ -1575,6 +1575,11 @@ abstract class GeckoEngineSettingsApi {
   void setAllowPrivateTabScreenshots(bool allow);
   void setPullToRefreshEnabled(bool enabled);
 
+  /// The language of the app's own UI as a BCP 47 tag, or null while it
+  /// follows the system. Custom Tab and PWA windows show their own UI in it.
+  /// It does not change the languages websites are asked for.
+  void setAppLocale(String? languageTag);
+
   /// Sets whether to use external download managers for downloads.
   /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
   void setUseExternalDownloadManager(bool enabled);

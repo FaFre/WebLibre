@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import eu.weblibre.flutter_mozilla_components.AppLocalePreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.R
 import mozilla.components.browser.state.action.WebExtensionAction
@@ -29,6 +30,11 @@ class WebExtensionActionPopupActivity : AppCompatActivity() {
     }
 
     private lateinit var webExtensionId: String
+
+    // The app's language for this window's own UI; see AppLocalePreference.
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocalePreference.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

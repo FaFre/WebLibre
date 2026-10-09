@@ -9,10 +9,12 @@ package eu.weblibre.flutter_mozilla_components.activities
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.DialogInterface
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import eu.weblibre.flutter_mozilla_components.AppLocalePreference
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
@@ -90,6 +92,11 @@ class IntentReceiverActivity : Activity() {
     }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    // The app's language for this window's own UI; see AppLocalePreference.
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocalePreference.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

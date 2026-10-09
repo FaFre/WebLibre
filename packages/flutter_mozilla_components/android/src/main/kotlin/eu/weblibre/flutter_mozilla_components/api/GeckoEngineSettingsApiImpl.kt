@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.api
 
 import android.content.Context
+import eu.weblibre.flutter_mozilla_components.AppLocalePreference
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.DownloadManagerPreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
@@ -407,6 +408,11 @@ class GeckoEngineSettingsApiImpl(
         // profile's native-readable store, for the window a cold start puts on
         // screen before this call arrives (see BrowserSettingsPreferences).
         GlobalComponents.setPullToRefreshEnabled(enabled)
+    }
+
+    override fun setAppLocale(languageTag: String?) {
+        val context = applicationContext ?: return
+        AppLocalePreference.write(context, languageTag)
     }
 
     override fun setScreenshotProtectionEnabled(enabled: Boolean) {

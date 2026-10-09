@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import com.google.android.material.button.MaterialButton
+import eu.weblibre.flutter_mozilla_components.AppLocalePreference
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.ExternalAppBrowserFragment
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
@@ -218,6 +219,11 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
 
     private val webAppManifestUrl: String?
         get() = intent?.getStringExtra(EXTRA_WEB_APP_MANIFEST_URL)
+
+    // The app's language for this window's own UI; see AppLocalePreference.
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppLocalePreference.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Match the window chrome (status/nav bar + pre-paint background) to the

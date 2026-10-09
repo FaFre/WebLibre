@@ -179,6 +179,24 @@ class EngineSettingsReplicationService
       },
     );
 
+    // The UI language, for Custom Tab and PWA windows: native resources
+    // follow the system language unless told otherwise. The resolved one, so
+    // a window shows what the browser shows; null follows the system.
+    ref.listen(
+      fireImmediately: true,
+      effectiveAppLocaleProvider,
+      (previous, next) async {
+        await _service.setAppLocale(next?.toLanguageTag());
+      },
+      onError: (error, stackTrace) {
+        logger.e(
+          'Error listening to effectiveAppLocale',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
     ref.listen(
       fireImmediately: true,
       generalSettingsWithDefaultsProvider.select(

@@ -180,6 +180,12 @@ class GeckoEngineSettingsService {
     return _api.setPullToRefreshEnabled(enabled);
   }
 
+  /// Shows the UI of Custom Tab and PWA windows in [languageTag], or in the
+  /// system language when null. Not the languages websites are asked for.
+  Future<void> setAppLocale(String? languageTag) {
+    return _api.setAppLocale(languageTag);
+  }
+
   /// Sets whether to use external download managers for downloads.
   /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
   Future<void> setUseExternalDownloadManager(bool enabled) {

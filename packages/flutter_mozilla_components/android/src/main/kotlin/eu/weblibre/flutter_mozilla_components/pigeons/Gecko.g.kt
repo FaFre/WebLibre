@@ -8766,6 +8766,12 @@ interface GeckoEngineSettingsApi {
   fun setAllowPrivateTabScreenshots(allow: Boolean)
   fun setPullToRefreshEnabled(enabled: Boolean)
   /**
+   * The language of the app's own UI as a BCP 47 tag, or null while it
+   * follows the system. Custom Tab and PWA windows show their own UI in it.
+   * It does not change the languages websites are asked for.
+   */
+  fun setAppLocale(languageTag: String?)
+  /**
    * Sets whether to use external download managers for downloads.
    * When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
    */
@@ -8900,6 +8906,24 @@ interface GeckoEngineSettingsApi {
             val enabledArg = args[0] as Boolean
             val wrapped: List<Any?> = try {
               api.setPullToRefreshEnabled(enabledArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setAppLocale$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val languageTagArg = args[0] as String?
+            val wrapped: List<Any?> = try {
+              api.setAppLocale(languageTagArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

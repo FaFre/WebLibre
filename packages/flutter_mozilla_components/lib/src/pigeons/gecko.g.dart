@@ -9301,6 +9301,29 @@ class GeckoEngineSettingsApi {
     );
   }
 
+  /// The language of the app's own UI as a BCP 47 tag, or null while it
+  /// follows the system. Custom Tab and PWA windows show their own UI in it.
+  /// It does not change the languages websites are asked for.
+  Future<void> setAppLocale(String? languageTag) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setAppLocale$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[languageTag],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   /// Sets whether to use external download managers for downloads.
   /// When enabled, downloads are forwarded to third-party apps like ADM, 1DM, AB DM.
   Future<void> setUseExternalDownloadManager(bool enabled) async {
