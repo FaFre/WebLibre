@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is off -->
-    <style name="LaunchTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
-        <!-- Show a splash screen on the activity. Automatically removed when
-             the Flutter engine draws its first frame -->
-        <item name="android:windowBackground">@drawable/launch_background</item>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Window attributes shared by LaunchTheme and NormalTheme. The system bars are
+         transparent over the theme background, as MainActivity sets them once it
+         starts (enableTransparentSystemBars). The launch theme also styles the window
+         Android shows before that, the splash screen on Android 12+, whose
+         navigation bar would otherwise be the platform's black (#651). Icon
+         brightness follows the system theme: the app's own theme isn't known yet. -->
+    <style name="WindowTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/light_system_bars</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <!-- Required by Mozilla Components (e.g. the add-on permission dialog's
              message bars, mozac_feature_addons_message_bars.xml) wherever it's
              inflated over this theme; unset it throws UnsupportedOperationException. -->
         <item name="mozac_primary_text_color">?attr/colorOnSurface</item>
     </style>
+
+    <!-- Theme applied to the Android Window while the process is starting. -->
+    <style name="LaunchTheme" parent="WindowTheme" />
+
     <!-- Theme applied to the Android Window as soon as the process has started.
          This theme determines the color of the Android Window while your
          Flutter UI initializes, as well as behind your Flutter UI while its
          running.
 
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
-    <style name="NormalTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
-        <item name="android:windowBackground">?android:colorBackground</item>
-        <!-- See LaunchTheme above. -->
-        <item name="mozac_primary_text_color">?attr/colorOnSurface</item>
-    </style>
+    <style name="NormalTheme" parent="WindowTheme" />
 
     <style name="Widget.WebLibreWidget.AppWidget.Container" parent="android:Widget">
         <item name="android:id">@android:id/background</item>
@@ -39,7 +47,7 @@
     <style name="ExternalAppBrowserTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <!-- See LaunchTheme above. -->
+        <!-- See WindowTheme above. -->
         <item name="mozac_primary_text_color">?attr/colorOnSurface</item>
     </style>
 </resources>
