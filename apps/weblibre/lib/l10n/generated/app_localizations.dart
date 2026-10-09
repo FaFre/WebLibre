@@ -13628,6 +13628,26 @@ abstract class AppLocalizations {
   /// **'Allow unsigned extensions'**
   String get settings_allowUnsignedExtensionsTitle;
 
+  String get settings_protectionCoherenceSectionTitle;
+
+  String get settings_monitorExtensionConflictsTitle;
+
+  String get settings_monitorExtensionConflictsSubtitle;
+
+  String get settings_followExtensionChangesTitle;
+
+  String get settings_followExtensionChangesSubtitle;
+
+  String get settings_extensionProtectionClaimsTitle;
+
+  String get settings_extensionProtectionClaimsLoading;
+
+  String get settings_extensionProtectionClaimsNone;
+
+  String get settings_extensionProtectionClaimsControls;
+
+  String get settings_extensionProtectionClaimsIncomplete;
+
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:

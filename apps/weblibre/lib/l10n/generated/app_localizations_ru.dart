@@ -8189,6 +8189,46 @@ class AppLocalizationsRu extends AppLocalizations {
       'Разрешить неподписанные расширения';
 
   @override
+  String get settings_protectionCoherenceSectionTitle =>
+      'Protection coherence';
+
+  @override
+  String get settings_monitorExtensionConflictsTitle =>
+      'Monitor extension conflicts';
+
+  @override
+  String get settings_monitorExtensionConflictsSubtitle =>
+      'Warn when an extension and the settings both control a fingerprint surface, or when an extension changes only part of one.';
+
+  @override
+  String get settings_followExtensionChangesTitle =>
+      'Follow extension changes';
+
+  @override
+  String get settings_followExtensionChangesSubtitle =>
+      'Update the related protection settings when an extension changes one, so the fingerprint stays coherent instead of half-moved.';
+
+  @override
+  String get settings_extensionProtectionClaimsTitle =>
+      'Extension protection claims';
+
+  @override
+  String get settings_extensionProtectionClaimsLoading =>
+      'Reading extension declarations…';
+
+  @override
+  String get settings_extensionProtectionClaimsNone =>
+      'No built-in extension declares a fingerprint surface.';
+
+  @override
+  String get settings_extensionProtectionClaimsControls =>
+      'Controls';
+
+  @override
+  String get settings_extensionProtectionClaimsIncomplete =>
+      'Incomplete';
+
+  @override
   String get settings_allowUnsignedExtensionsKeywords => 'дополнения, addons';
 
   @override
