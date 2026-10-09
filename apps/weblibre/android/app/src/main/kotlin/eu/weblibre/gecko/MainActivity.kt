@@ -26,6 +26,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.activity.SystemBarStyle
@@ -61,7 +62,7 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
     private val ENGINE_ID = FlutterEngineCoordinator.ENGINE_ID
     private var trimMemoryChannel: MethodChannel? = null
     private var navigationBarChannel: MethodChannel? = null
-    private var lastNavigationBarOutsideFlutter: Boolean? = null
+    private var lastNavigationBarLayout: NavigationBarLayout? = null
     private val contentLocation = IntArray(2)
 
     override var isRestoredLaunch: Boolean = false
@@ -83,7 +84,7 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         super.onCreate(null)
 
         enableTransparentSystemBars()
-        watchNavigationBarOutsideFlutter()
+        watchNavigationBarLayout()
 
         // Restored straight into a pinned task (e.g. the process was killed while in PiP).
         checkAndExitPiP()
@@ -104,9 +105,52 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         enableEdgeToEdge(statusBarStyle = transparent, navigationBarStyle = transparent)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // `enableEdgeToEdge` leaves contrast enforcement on for an `auto` style,
-            // which lays a translucent scrim over three-button navigation.
+            // which lays a translucent scrim over three-button navigation. Flutter
+            // keeps content clear of the buttons itself (`NavigationBarProtection`).
             window.isNavigationBarContrastEnforced = false
         }
+    }
+
+    /**
+     * How the navigation bar sits relative to the Flutter UI, as Dart's
+     * `navigationBarLayoutControllerProvider` receives it.
+     *
+     * @property outsideFlutter see [isNavigationBarOutsideFlutter].
+     * @property buttonsAtBottom the bar along the bottom edge holds navigation
+     * buttons rather than a gesture handle. Ordinary screens then end above it
+     * (`NavigationBarProtection`): the bar is transparent, and text scrolled under
+     * it would run into the buttons (#651).
+     */
+    private data class NavigationBarLayout(
+        val outsideFlutter: Boolean,
+        val buttonsAtBottom: Boolean,
+    ) {
+        fun toMap(): Map<String, Boolean> = mapOf(
+            "outsideFlutter" to outsideFlutter,
+            "buttonsAtBottom" to buttonsAtBottom,
+        )
+    }
+
+    /**
+     * Returns null while the keyboard is up: a decor that pads for the IME opens
+     * a bottom gap that says nothing about the bar. The last layout stands until
+     * the keyboard closes.
+     */
+    private fun measureNavigationBarLayout(): NavigationBarLayout? {
+        val decor = window.decorView
+        val insets = ViewCompat.getRootWindowInsets(decor)
+            ?: return NavigationBarLayout(outsideFlutter = false, buttonsAtBottom = false)
+        if (insets.isVisible(WindowInsetsCompat.Type.ime())) return null
+        val bar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+        // A gesture handle takes no taps, so only buttons leave tappable-element
+        // insets at the bottom. Before Android 10 these equal the system bar
+        // insets, and every navigation bar there has buttons.
+        val tappable = insets.getInsets(WindowInsetsCompat.Type.tappableElement())
+
+        return NavigationBarLayout(
+            outsideFlutter = isNavigationBarOutsideFlutter(decor, bar),
+            buttonsAtBottom = bar.bottom > 0 && tappable.bottom > 0,
+        )
     }
 
     /**
@@ -121,16 +165,11 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
      * decor view rather than reading Flutter's padding, which merges display
      * cutout and waterfall insets in. A gap counts only on an edge where the
      * navigation bar actually is, so cutout or caption padding on another edge
-     * doesn't. Returns null while the keyboard is up: a decor that pads for the
-     * IME opens a bottom gap that says nothing about the bar.
+     * doesn't.
      */
-    private fun isNavigationBarOutsideFlutter(): Boolean? {
-        val decor = window.decorView
+    private fun isNavigationBarOutsideFlutter(decor: View, bar: Insets): Boolean {
         val content = findViewById<View>(android.R.id.content) ?: return false
         if (content.width == 0 || content.height == 0) return false
-        val insets = ViewCompat.getRootWindowInsets(decor) ?: return false
-        if (insets.isVisible(WindowInsetsCompat.Type.ime())) return null
-        val bar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
         content.getLocationInWindow(contentLocation)
         val left = contentLocation[0]
@@ -146,12 +185,12 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
      * rotation moves the bar to the other side without changing the content's
      * size or its bounds within its parent, and only the window position shows it.
      */
-    private fun watchNavigationBarOutsideFlutter() {
+    private fun watchNavigationBarLayout() {
         window.decorView.viewTreeObserver.addOnGlobalLayoutListener {
-            val outside = isNavigationBarOutsideFlutter() ?: return@addOnGlobalLayoutListener
-            if (outside != lastNavigationBarOutsideFlutter) {
-                lastNavigationBarOutsideFlutter = outside
-                navigationBarChannel?.invokeMethod("outsideFlutterChanged", outside)
+            val layout = measureNavigationBarLayout() ?: return@addOnGlobalLayoutListener
+            if (layout != lastNavigationBarLayout) {
+                lastNavigationBarLayout = layout
+                navigationBarChannel?.invokeMethod("layoutChanged", layout.toMap())
             }
         }
     }
@@ -299,8 +338,12 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         ).apply {
             setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "isOutsideFlutter" -> result.success(
-                        isNavigationBarOutsideFlutter() ?: lastNavigationBarOutsideFlutter ?: false
+                    "getLayout" -> result.success(
+                        (
+                            measureNavigationBarLayout()
+                                ?: lastNavigationBarLayout
+                                ?: NavigationBarLayout(outsideFlutter = false, buttonsAtBottom = false)
+                        ).toMap()
                     )
                     else -> result.notImplemented()
                 }

@@ -27,10 +27,23 @@ const _channel = MethodChannel('eu.weblibre.gecko/navigation_bar');
 TestDefaultBinaryMessenger get _messenger =>
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
+Map<String, bool> _wire({
+  bool outsideFlutter = false,
+  bool buttonsAtBottom = false,
+}) => {'outsideFlutter': outsideFlutter, 'buttonsAtBottom': buttonsAtBottom};
+
 /// Sends a native-side push as MainActivity would.
-Future<void> _push(bool outside) => _messenger.handlePlatformMessage(
+Future<void> _push({
+  bool outsideFlutter = false,
+  bool buttonsAtBottom = false,
+}) => _messenger.handlePlatformMessage(
   _channel.name,
-  _channel.codec.encodeMethodCall(MethodCall('outsideFlutterChanged', outside)),
+  _channel.codec.encodeMethodCall(
+    MethodCall(
+      'layoutChanged',
+      _wire(outsideFlutter: outsideFlutter, buttonsAtBottom: buttonsAtBottom),
+    ),
+  ),
   (_) {},
 );
 
@@ -39,61 +52,64 @@ void main() {
 
   tearDown(() => _messenger.setMockMethodCallHandler(_channel, null));
 
-  test('stays false without the native channel', () async {
+  test('reports neither condition without the native channel', () async {
     final container = ProviderContainer.test();
     final sub = container.listen(
-      navigationBarOutsideFlutterProvider,
+      navigationBarLayoutControllerProvider,
       (_, _) {},
     );
 
     await pumpEventQueue();
 
-    expect(sub.read(), isFalse);
+    expect(sub.read(), (outsideFlutter: false, buttonsAtBottom: false));
   });
 
   test('reads the current value on start', () async {
     _messenger.setMockMethodCallHandler(_channel, (call) async {
-      expect(call.method, 'isOutsideFlutter');
-      return true;
+      expect(call.method, 'getLayout');
+      return _wire(outsideFlutter: true, buttonsAtBottom: true);
     });
     final container = ProviderContainer.test();
     final sub = container.listen(
-      navigationBarOutsideFlutterProvider,
+      navigationBarLayoutControllerProvider,
       (_, _) {},
     );
 
     await pumpEventQueue();
 
-    expect(sub.read(), isTrue);
+    expect(sub.read(), (outsideFlutter: true, buttonsAtBottom: true));
   });
 
   test('follows native pushes', () async {
-    _messenger.setMockMethodCallHandler(_channel, (_) async => false);
+    _messenger.setMockMethodCallHandler(_channel, (_) async => _wire());
     final container = ProviderContainer.test();
     final sub = container.listen(
-      navigationBarOutsideFlutterProvider,
+      navigationBarLayoutControllerProvider,
       (_, _) {},
     );
     await pumpEventQueue();
 
-    await _push(true);
-    expect(sub.read(), isTrue);
+    await _push(outsideFlutter: true);
+    expect(sub.read(), (outsideFlutter: true, buttonsAtBottom: false));
 
-    await _push(false);
-    expect(sub.read(), isFalse);
+    await _push(buttonsAtBottom: true);
+    expect(sub.read(), (outsideFlutter: false, buttonsAtBottom: true));
   });
 
   test('an older container disposing keeps the newer one updated', () async {
-    _messenger.setMockMethodCallHandler(_channel, (_) async => false);
+    _messenger.setMockMethodCallHandler(_channel, (_) async => _wire());
     final old = ProviderContainer.test();
-    old.listen(navigationBarOutsideFlutterProvider, (_, _) {});
+    old.listen(navigationBarLayoutControllerProvider, (_, _) {});
     final current = ProviderContainer.test();
-    final sub = current.listen(navigationBarOutsideFlutterProvider, (_, _) {});
+    final sub = current.listen(
+      navigationBarLayoutControllerProvider,
+      (_, _) {},
+    );
     await pumpEventQueue();
 
     old.dispose();
-    await _push(true);
+    await _push(buttonsAtBottom: true);
 
-    expect(sub.read(), isTrue);
+    expect(sub.read(), (outsideFlutter: false, buttonsAtBottom: true));
   });
 }

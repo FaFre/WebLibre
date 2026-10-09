@@ -41,7 +41,9 @@ class NavigationBarStyle extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final background = Theme.of(context).scaffoldBackgroundColor;
     final navigationBarOutsideFlutter = ref.watch(
-      navigationBarOutsideFlutterProvider,
+      navigationBarLayoutControllerProvider.select(
+        (layout) => layout.outsideFlutter,
+      ),
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

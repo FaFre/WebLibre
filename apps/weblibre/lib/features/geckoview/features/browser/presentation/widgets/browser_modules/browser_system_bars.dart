@@ -101,7 +101,9 @@ class BrowserSystemBars extends HookConsumerWidget {
     // dropped: any inset Flutter still sees isn't the bar, and a strip would
     // stack a second band of the same color on top of it.
     final navigationBarOutsideFlutter = ref.watch(
-      navigationBarOutsideFlutterProvider,
+      navigationBarLayoutControllerProvider.select(
+        (layout) => layout.outsideFlutter,
+      ),
     );
 
     return IgnorePointer(

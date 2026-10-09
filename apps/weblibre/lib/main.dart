@@ -89,6 +89,7 @@ import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
 import 'package:weblibre/presentation/startup_phase_host.dart';
+import 'package:weblibre/presentation/widgets/navigation_bar_protection.dart';
 
 ColorScheme _fixSurfaceContainerColors(
   ColorScheme scheme,
@@ -159,15 +160,16 @@ class _NoAnimationPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-const _noAnimationPageTransitionsTheme = PageTransitionsTheme(
-  builders: {
-    TargetPlatform.android: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.iOS: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.linux: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.macOS: _NoAnimationPageTransitionsBuilder(),
-    TargetPlatform.windows: _NoAnimationPageTransitionsBuilder(),
-  },
-);
+const _noAnimationPageTransitionsTheme =
+    NavigationBarProtectedPageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: _NoAnimationPageTransitionsBuilder(),
+        TargetPlatform.iOS: _NoAnimationPageTransitionsBuilder(),
+        TargetPlatform.linux: _NoAnimationPageTransitionsBuilder(),
+        TargetPlatform.macOS: _NoAnimationPageTransitionsBuilder(),
+        TargetPlatform.windows: _NoAnimationPageTransitionsBuilder(),
+      },
+    );
 
 /// Menus get the rounded corners dialogs and sheets already have (#651);
 /// Material 3 leaves them at a near-square 4dp.
@@ -656,7 +658,7 @@ class _MainWidget extends HookConsumerWidget {
             colorScheme: lightColorScheme,
             pageTransitionsTheme: disableAnimations
                 ? _noAnimationPageTransitionsTheme
-                : null,
+                : const NavigationBarProtectedPageTransitionsTheme(),
             dialogTheme: DialogThemeData(
               barrierColor: showModalBarrier ? null : Colors.transparent,
               // Material specifies a maximum dialog width but Flutter does not
@@ -678,7 +680,7 @@ class _MainWidget extends HookConsumerWidget {
             colorScheme: darkColorScheme,
             pageTransitionsTheme: disableAnimations
                 ? _noAnimationPageTransitionsTheme
-                : null,
+                : const NavigationBarProtectedPageTransitionsTheme(),
             dialogTheme: DialogThemeData(
               barrierColor: showModalBarrier ? null : Colors.transparent,
               // Material specifies a maximum dialog width but Flutter does not

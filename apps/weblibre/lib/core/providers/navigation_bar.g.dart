@@ -8,83 +8,81 @@ part of 'navigation_bar.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Whether the navigation bar sits outside the Flutter UI, so Flutter cannot
-/// paint behind it and the bar shows the native window background instead
-/// (#657). MainActivity measures this from view geometry and pushes every
-/// change; without the channel (tests, other hosts) it stays false.
+/// The current [NavigationBarLayout]. MainActivity pushes every change;
+/// without the channel (tests, other hosts) neither condition holds.
 ///
 /// Kept alive so a screen that mounts again (the browser leaving fullscreen)
-/// starts from the known value, not from false until the native reply lands.
+/// starts from the known value, not from the default until the native reply
+/// lands.
 
-@ProviderFor(NavigationBarOutsideFlutter)
-final navigationBarOutsideFlutterProvider =
-    NavigationBarOutsideFlutterProvider._();
+@ProviderFor(NavigationBarLayoutController)
+final navigationBarLayoutControllerProvider =
+    NavigationBarLayoutControllerProvider._();
 
-/// Whether the navigation bar sits outside the Flutter UI, so Flutter cannot
-/// paint behind it and the bar shows the native window background instead
-/// (#657). MainActivity measures this from view geometry and pushes every
-/// change; without the channel (tests, other hosts) it stays false.
+/// The current [NavigationBarLayout]. MainActivity pushes every change;
+/// without the channel (tests, other hosts) neither condition holds.
 ///
 /// Kept alive so a screen that mounts again (the browser leaving fullscreen)
-/// starts from the known value, not from false until the native reply lands.
-final class NavigationBarOutsideFlutterProvider
-    extends $NotifierProvider<NavigationBarOutsideFlutter, bool> {
-  /// Whether the navigation bar sits outside the Flutter UI, so Flutter cannot
-  /// paint behind it and the bar shows the native window background instead
-  /// (#657). MainActivity measures this from view geometry and pushes every
-  /// change; without the channel (tests, other hosts) it stays false.
+/// starts from the known value, not from the default until the native reply
+/// lands.
+final class NavigationBarLayoutControllerProvider
+    extends
+        $NotifierProvider<NavigationBarLayoutController, NavigationBarLayout> {
+  /// The current [NavigationBarLayout]. MainActivity pushes every change;
+  /// without the channel (tests, other hosts) neither condition holds.
   ///
   /// Kept alive so a screen that mounts again (the browser leaving fullscreen)
-  /// starts from the known value, not from false until the native reply lands.
-  NavigationBarOutsideFlutterProvider._()
+  /// starts from the known value, not from the default until the native reply
+  /// lands.
+  NavigationBarLayoutControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'navigationBarOutsideFlutterProvider',
+        name: r'navigationBarLayoutControllerProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$navigationBarOutsideFlutterHash();
+  String debugGetCreateSourceHash() => _$navigationBarLayoutControllerHash();
 
   @$internal
   @override
-  NavigationBarOutsideFlutter create() => NavigationBarOutsideFlutter();
+  NavigationBarLayoutController create() => NavigationBarLayoutController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(bool value) {
+  Override overrideWithValue(NavigationBarLayout value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<bool>(value),
+      providerOverride: $SyncValueProvider<NavigationBarLayout>(value),
     );
   }
 }
 
-String _$navigationBarOutsideFlutterHash() =>
-    r'7ab72dffd1898303061c41f7f669462b901dd002';
+String _$navigationBarLayoutControllerHash() =>
+    r'38bdc35c60ac828e0bcbf53674d17239b0ff29a5';
 
-/// Whether the navigation bar sits outside the Flutter UI, so Flutter cannot
-/// paint behind it and the bar shows the native window background instead
-/// (#657). MainActivity measures this from view geometry and pushes every
-/// change; without the channel (tests, other hosts) it stays false.
+/// The current [NavigationBarLayout]. MainActivity pushes every change;
+/// without the channel (tests, other hosts) neither condition holds.
 ///
 /// Kept alive so a screen that mounts again (the browser leaving fullscreen)
-/// starts from the known value, not from false until the native reply lands.
+/// starts from the known value, not from the default until the native reply
+/// lands.
 
-abstract class _$NavigationBarOutsideFlutter extends $Notifier<bool> {
-  bool build();
+abstract class _$NavigationBarLayoutController
+    extends $Notifier<NavigationBarLayout> {
+  NavigationBarLayout build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<bool, bool>;
+    final ref = this.ref as $Ref<NavigationBarLayout, NavigationBarLayout>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<bool, bool>,
-              bool,
+              AnyNotifier<NavigationBarLayout, NavigationBarLayout>,
+              NavigationBarLayout,
               Object?,
               Object?
             >;

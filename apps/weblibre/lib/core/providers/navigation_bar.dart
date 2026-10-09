@@ -26,32 +26,52 @@ part 'navigation_bar.g.dart';
 
 const _channel = MethodChannel('eu.weblibre.gecko/navigation_bar');
 
-/// Whether the navigation bar sits outside the Flutter UI, so Flutter cannot
-/// paint behind it and the bar shows the native window background instead
-/// (#657). MainActivity measures this from view geometry and pushes every
-/// change; without the channel (tests, other hosts) it stays false.
+/// How the system navigation bar sits relative to the Flutter UI, measured by
+/// MainActivity from view geometry.
+///
+/// - `outsideFlutter`: Flutter isn't laid out behind the bar, so it cannot
+///   paint there and the bar shows the native window background instead
+///   (#657).
+/// - `buttonsAtBottom`: the bar along the bottom edge holds navigation buttons
+///   rather than a gesture handle, so ordinary screens end above it
+///   (`NavigationBarProtection`, #651).
+typedef NavigationBarLayout = ({bool outsideFlutter, bool buttonsAtBottom});
+
+const _unknownLayout = (outsideFlutter: false, buttonsAtBottom: false);
+
+NavigationBarLayout _layoutFromMap(Object? arguments) {
+  final map = arguments! as Map<Object?, Object?>;
+  return (
+    outsideFlutter: map['outsideFlutter']! as bool,
+    buttonsAtBottom: map['buttonsAtBottom']! as bool,
+  );
+}
+
+/// The current [NavigationBarLayout]. MainActivity pushes every change;
+/// without the channel (tests, other hosts) neither condition holds.
 ///
 /// Kept alive so a screen that mounts again (the browser leaving fullscreen)
-/// starts from the known value, not from false until the native reply lands.
+/// starts from the known value, not from the default until the native reply
+/// lands.
 @Riverpod(keepAlive: true)
-class NavigationBarOutsideFlutter extends _$NavigationBarOutsideFlutter {
+class NavigationBarLayoutController extends _$NavigationBarLayoutController {
   /// The channel takes one handler per process, but every [ProviderContainer]
   /// builds its own notifier, and an old container can outlive a new one's
   /// build. The handler therefore serves all live notifiers and is removed
   /// only with the last of them.
-  static final _instances = <NavigationBarOutsideFlutter>{};
+  static final _instances = <NavigationBarLayoutController>{};
 
   static Future<void> _handleCall(MethodCall call) async {
-    if (call.method == 'outsideFlutterChanged') {
-      final outside = call.arguments as bool;
+    if (call.method == 'layoutChanged') {
+      final layout = _layoutFromMap(call.arguments);
       for (final instance in _instances.toList()) {
-        instance.state = outside;
+        instance.state = layout;
       }
     }
   }
 
   @override
-  bool build() {
+  NavigationBarLayout build() {
     _instances.add(this);
     _channel.setMethodCallHandler(_handleCall);
     ref.onDispose(() {
@@ -64,13 +84,13 @@ class NavigationBarOutsideFlutter extends _$NavigationBarOutsideFlutter {
     // push can't be overwritten by this older reading.
     unawaited(
       _channel
-          .invokeMethod<bool>('isOutsideFlutter')
-          .then((outside) {
-            if (ref.mounted && outside != null) state = outside;
+          .invokeMethod<Object?>('getLayout')
+          .then((layout) {
+            if (ref.mounted && layout != null) state = _layoutFromMap(layout);
           })
           .catchError((Object _) {}, test: (e) => e is MissingPluginException),
     );
 
-    return false;
+    return _unknownLayout;
   }
 }
