@@ -1,0 +1,18 @@
+{
+    "httpErrorHandler_socketError": "Ühenduse loomine serveriga ei õnnestunud",
+    "@httpErrorHandler_socketError": {
+        "description": "Error message when a network request failed because the server could not be reached (no connection, DNS or socket failure)."
+    },
+    "httpErrorHandler_httpError": "Veebipäringu vastuseks oli viga",
+    "@httpErrorHandler_httpError": {
+        "description": "Error message when a server answered a network request with an HTTP error status."
+    },
+    "httpErrorHandler_formatError": "Vigases vormingus vastus",
+    "@httpErrorHandler_formatError": {
+        "description": "Error message when a server answered but its response could not be parsed."
+    },
+    "httpErrorHandler_clientError": "Ühenduse loomine serveriga ei õnnestunud kliendi vea tõttu",
+    "@httpErrorHandler_clientError": {
+        "description": "Error message when a network request failed inside the HTTP client before any response arrived."
+    }
+}

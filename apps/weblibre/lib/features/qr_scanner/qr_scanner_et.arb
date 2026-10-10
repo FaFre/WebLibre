@@ -1,0 +1,10 @@
+{
+    "qrScanner_noCameraPermission": "Kaamera kasutamise õigused on puudu.",
+    "@qrScanner_noCameraPermission": {
+        "description": "Error message shown when the QR code scanner cannot open because camera access was denied."
+    },
+    "qrScanner_scanCodeTitle": "Skaneeri koodi",
+    "@qrScanner_scanCodeTitle": {
+        "description": "Title of the full-screen QR code scanner."
+    }
+}
