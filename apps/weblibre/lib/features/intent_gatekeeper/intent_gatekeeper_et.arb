@@ -1,0 +1,34 @@
+{
+    "intentGatekeeper_dialogTitle": "Kas avad lingi WebLibre brauseris?",
+    "@intentGatekeeper_dialogTitle": {
+        "description": "Title of the dialog shown when another app asks WebLibre to open a link, letting the user allow or block that app."
+    },
+    "intentGatekeeper_appIsTryingToOpenLink": "{appName} rakendus proovib avada linki {browserName} brauseris.",
+    "@intentGatekeeper_appIsTryingToOpenLink": {
+        "description": "Body of the dialog shown when another app asks WebLibre to open a link. appName is the requesting app; browserName is the app name, WebLibre. Both placeholders are rendered in bold.",
+        "placeholders": {
+            "appName": {
+                "type": "String"
+            },
+            "browserName": {
+                "type": "String"
+            }
+        }
+    },
+    "intentGatekeeper_alwaysAllow": "Luba alati",
+    "@intentGatekeeper_alwaysAllow": {
+        "description": "Button in the link-request dialog: open the link and remember to always allow links from this app."
+    },
+    "intentGatekeeper_allowOnce": "Luba üks kord",
+    "@intentGatekeeper_allowOnce": {
+        "description": "Button in the link-request dialog: open this one link without remembering the choice."
+    },
+    "intentGatekeeper_blockOnce": "Blokeeri üks kord",
+    "@intentGatekeeper_blockOnce": {
+        "description": "Button in the link-request dialog: refuse this one link without remembering the choice."
+    },
+    "intentGatekeeper_alwaysBlock": "Blokeeri alati",
+    "@intentGatekeeper_alwaysBlock": {
+        "description": "Button in the link-request dialog: refuse the link and remember to always block links from this app."
+    }
+}

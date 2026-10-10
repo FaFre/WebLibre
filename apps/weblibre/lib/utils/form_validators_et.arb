@@ -1,0 +1,22 @@
+{
+    "formValidators_urlRequired": "Võrguaadress on vajalik",
+    "@formValidators_urlRequired": {
+        "description": "Validation error under a URL input field that was left empty but is required."
+    },
+    "formValidators_invalidUrl": "Vigane võrguaadress",
+    "@formValidators_invalidUrl": {
+        "description": "Validation error under a URL input field when the entered text is not a valid web address."
+    },
+    "formValidators_valueRequired": "Väärtus on vajalik",
+    "@formValidators_valueRequired": {
+        "description": "Generic validation error under a required input field that was left empty."
+    },
+    "formValidators_nameRequired": "Nimi on vajalik",
+    "@formValidators_nameRequired": {
+        "description": "Validation error under the profile name field when it was left empty."
+    },
+    "formValidators_nameInvalidCharacters": "Nimes leidub vigaseid tähemärke",
+    "@formValidators_nameInvalidCharacters": {
+        "description": "Validation error under the profile name field when the name contains characters that are not allowed (such as brackets, quotes, slashes or punctuation)."
+    }
+}
