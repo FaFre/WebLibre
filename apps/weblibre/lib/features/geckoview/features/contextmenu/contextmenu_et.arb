@@ -1,0 +1,95 @@
+{
+  "contextmenu_openInNewTab": "Ava uuel vahekaardil",
+  "@contextmenu_openInNewTab": {
+    "description": "Item in the menu shown when long-pressing a link on a web page; opens the link in a new tab of the current kind."
+  },
+  "contextmenu_tooltipOpenInDifferentTabType": "Ava teist tüüpi vahekaardil",
+  "@contextmenu_tooltipOpenInDifferentTabType": {
+    "description": "Tooltip of the arrow next to \"Open in new tab\" in the link long-press menu; it lists other tab kinds (regular, private, isolated) to open the link in."
+  },
+  "contextmenu_newRegularTab": "Uus tavaline vahekaart",
+  "@contextmenu_newRegularTab": {
+    "description": "Choice in the link long-press menu's tab-kind list: open the link in a normal (non-private) tab."
+  },
+  "contextmenu_newPrivateTab": "Uus privaatne vahekaart",
+  "@contextmenu_newPrivateTab": {
+    "description": "Choice in the link long-press menu's tab-kind list: open the link in a private tab, which keeps no history."
+  },
+  "contextmenu_newIsolatedTab": "Uus eraldatud vahekaart",
+  "@contextmenu_newIsolatedTab": {
+    "description": "Choice in the link long-press menu's tab-kind list: open the link in an isolated tab, which has its own temporary cookies and site data."
+  },
+  "contextmenu_openImageInNewTab": "Ava pilt uuel vahekaardil",
+  "@contextmenu_openImageInNewTab": {
+    "description": "Item in the menu shown when long-pressing an image on a web page; opens the image by itself in a new tab."
+  },
+  "contextmenu_openInContainer": "Ava konteineris",
+  "@contextmenu_openInContainer": {
+    "description": "Item in the link long-press menu; lets the user pick a container (a separate browsing identity with its own cookies) to open the link in."
+  },
+  "contextmenu_selectContainerTitle": "Vali konteiner",
+  "@contextmenu_selectContainerTitle": {
+    "description": "Heading of the list of containers shown after choosing \"Open in container\" in the link long-press menu."
+  },
+  "contextmenu_loadContainersFailedTitle": "Konteinerite laadimine ei õnnestunud",
+  "@contextmenu_loadContainersFailedTitle": {
+    "description": "Error heading when the list of containers could not be loaded for \"Open in container\"."
+  },
+  "contextmenu_newContainer": "Uus konteiner",
+  "@contextmenu_newContainer": {
+    "description": "Last entry in the \"Open in container\" list; creates a new container and opens the link in it."
+  },
+  "contextmenu_openInApp": "Ava rakenduses",
+  "@contextmenu_openInApp": {
+    "description": "Item in the link long-press menu; opens the link in the installed app that handles it, when the app's name is unknown."
+  },
+  "contextmenu_openInAppNamed": "Ava {appName} rakendusega",
+  "@contextmenu_openInAppNamed": {
+    "description": "Item in the link long-press menu; opens the link in the installed app that handles it. appName is that app's name.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "contextmenu_copyLink": "Kopeeri link",
+  "@contextmenu_copyLink": {
+    "description": "Item in the long-press menu of a link; copies the link address to the clipboard."
+  },
+  "contextmenu_copyLinkText": "Kopeeri lingi tekst",
+  "@contextmenu_copyLinkText": {
+    "description": "Item in the long-press menu of a link; copies the visible text of the link, not its address."
+  },
+  "contextmenu_copyImage": "Kopeeri pilt",
+  "@contextmenu_copyImage": {
+    "description": "Item in the long-press menu of an image; copies the image itself to the clipboard."
+  },
+  "contextmenu_copyImageLocation": "Kopeeri pildi asukoht",
+  "@contextmenu_copyImageLocation": {
+    "description": "Item in the long-press menu of an image; copies the image's web address to the clipboard."
+  },
+  "contextmenu_saveFile": "Salvesta fail",
+  "@contextmenu_saveFile": {
+    "description": "Item in the long-press menu of a link; downloads the linked file."
+  },
+  "contextmenu_saveImage": "Salvesta pilt",
+  "@contextmenu_saveImage": {
+    "description": "Item in the long-press menu of an image; downloads the image to the device."
+  },
+  "contextmenu_shareImage": "Jaga pilti",
+  "@contextmenu_shareImage": {
+    "description": "Item in the long-press menu of an image; opens the system share sheet for the image."
+  },
+  "contextmenu_shareEmailAddress": "Jaga e-posti aadressi",
+  "@contextmenu_shareEmailAddress": {
+    "description": "Item in the long-press menu of an email link (mailto:); copies or shares the email address. Same text for both actions."
+  },
+  "contextmenu_urlCleanedMessage": "Võrguaadress on puhastatud",
+  "@contextmenu_urlCleanedMessage": {
+    "description": "Short confirmation shown after tracking parameters were removed from the long-pressed link."
+  },
+  "contextmenu_urlPreviewAppliedMessage": "Võrguaadressi eelvaade on rakendatud",
+  "@contextmenu_urlPreviewAppliedMessage": {
+    "description": "Short confirmation shown after the user picked which tracking parameters to remove from the long-pressed link and the cleaned address was applied."
+  }
+}
