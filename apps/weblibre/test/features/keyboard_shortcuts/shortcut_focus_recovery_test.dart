@@ -56,12 +56,14 @@ void main() {
   Future<List<BrowserAction>> pumpBrowser(
     WidgetTester tester, {
     GlobalKey<NavigatorState>? navigatorKey,
+    bool enabled = true,
   }) async {
     final fired = <BrowserAction>[];
     await tester.pumpWidget(
       MaterialApp(
         navigatorKey: navigatorKey,
         home: BrowserKeyboardShortcuts(
+          enabled: enabled,
           bindings: defaultKeyboardShortcuts,
           onAction: fired.add,
           child: Column(
@@ -140,6 +142,16 @@ void main() {
     await tester.pumpAndSettle();
 
     await pressCtrlT(tester);
+    expect(fired, isEmpty);
+  });
+
+  testWidgets('not while a sheet in the route covers the browser', (
+    tester,
+  ) async {
+    // The tab tray: modal, but no route of its own.
+    final fired = await pumpBrowser(tester, enabled: false);
+
+    expect(await pressCtrlT(tester), isFalse);
     expect(fired, isEmpty);
   });
 }

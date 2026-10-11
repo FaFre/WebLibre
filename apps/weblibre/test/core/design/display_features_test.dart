@@ -154,4 +154,71 @@ void main() {
       }
     });
   });
+
+  group('modalSubScreen', () {
+    test('is the whole window when no display feature divides it', () {
+      final mediaQuery = withFeatures(const []);
+
+      expect(
+        modalSubScreen(
+          mediaQuery,
+          anchorPoint: preferredAnchorPoint(mediaQuery),
+          textDirection: TextDirection.ltr,
+        ),
+        Offset.zero & _unfolded,
+      );
+    });
+
+    // The route lays a modal out with DisplayFeatureSubScreen: the sub-screen
+    // has to be the one it picks, for every anchor a route can be given.
+    final layouts = {
+      'fold': [horizontalFold()],
+      'off-centre fold': [horizontalFold(centre: 600)],
+      'hinge': [verticalHinge()],
+    };
+    final anchors = <String, Offset? Function(MediaQueryData)>{
+      'preferred': preferredAnchorPoint,
+      'none': (_) => null,
+      'outside the window': (_) => const Offset(2000, 2000),
+      'on the feature': (mediaQuery) => mediaQuery.size.center(Offset.zero),
+    };
+    for (final MapEntry(key: layoutName, value: features) in layouts.entries) {
+      for (final MapEntry(key: anchorName, value: anchorFor)
+          in anchors.entries) {
+        for (final textDirection in TextDirection.values) {
+          testWidgets('is where the route lays a modal out: $layoutName, '
+              'anchor $anchorName, ${textDirection.name}', (tester) async {
+            final mediaQuery = withFeatures(features);
+            final anchorPoint = anchorFor(mediaQuery);
+            final modal = GlobalKey();
+            tester.view.physicalSize = _unfolded;
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.reset);
+
+            await tester.pumpWidget(
+              MediaQuery(
+                data: mediaQuery,
+                child: Directionality(
+                  textDirection: textDirection,
+                  child: DisplayFeatureSubScreen(
+                    anchorPoint: anchorPoint,
+                    child: SizedBox.expand(key: modal),
+                  ),
+                ),
+              ),
+            );
+
+            expect(
+              modalSubScreen(
+                mediaQuery,
+                anchorPoint: anchorPoint,
+                textDirection: textDirection,
+              ),
+              tester.getRect(find.byKey(modal)),
+            );
+          });
+        }
+      }
+    }
+  });
 }

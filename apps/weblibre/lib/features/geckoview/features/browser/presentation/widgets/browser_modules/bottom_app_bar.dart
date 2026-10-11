@@ -88,10 +88,9 @@ class BrowserTopAppBar extends StatelessWidget {
   final bool enableGestures;
   final bool suppressMainToolbar;
 
-  /// The sheet over the page, if any. The top bar is drawn above the sheet
-  /// layer, so it drops the rows the tab tray replaces (the switcher, and the
-  /// address bar when a contextual toolbar takes over) exactly like the
-  /// bottom bar does, instead of covering the expanded tray.
+  /// The sheet over the page, if any, for the buttons that show its state and
+  /// toggle it. The sheet covers the bars, so their layout never depends on
+  /// it.
   final Sheet? displayedSheet;
 
   late final BrowserTabBar _tabBar;
@@ -144,6 +143,8 @@ class BrowserBottomAppBar extends StatelessWidget {
   final int quickTabSwitcherRowCount;
   final QuickTabSwitcherPlacement quickTabSwitcherPlacement;
   final bool isSmallWebMode;
+
+  /// See [BrowserTopAppBar.displayedSheet].
   final Sheet? displayedSheet;
   final bool enableGestures;
   final bool suppressMainToolbar;
@@ -154,7 +155,7 @@ class BrowserBottomAppBar extends StatelessWidget {
   BrowserBottomAppBar({
     super.key,
     required this.showMainToolbar,
-    required this.displayedSheet,
+    this.displayedSheet,
     required this.showContextualToolbar,
     required this.quickTabSwitcherRowCount,
     required this.isSmallWebMode,
@@ -183,7 +184,7 @@ class BrowserBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return Material(
       shadowColor: Colors.transparent,
@@ -507,13 +508,9 @@ class BrowserTabBar extends HookConsumerWidget {
 
   double getToolbarWidth() => railWidth;
 
-  bool get displayAppBar =>
-      showMainToolbar &&
-      !suppressMainToolbar &&
-      (!showContextualToolbar || displayedSheet is! ViewTabsSheet);
+  bool get displayAppBar => showMainToolbar && !suppressMainToolbar;
 
-  bool get displayQuickTabSwitcher =>
-      quickTabSwitcherRowCount > 0 && displayedSheet is! ViewTabsSheet;
+  bool get displayQuickTabSwitcher => quickTabSwitcherRowCount > 0;
 
   double getToolbarHeight() {
     var height = 0.0;
@@ -629,12 +626,8 @@ class BrowserTabBar extends HookConsumerWidget {
       await runSwipe(gesture);
     }
 
-    final showTabTitle = displayedSheet is! ViewTabsSheet;
-
     final effectiveContainerColor =
-        (settings.showContainerUi &&
-            containerColor != null &&
-            displayedSheet is! ViewTabsSheet)
+        (settings.showContainerUi && containerColor != null)
         ? containerColor
         : null;
     final effectiveUseCustomColor =
@@ -687,27 +680,24 @@ class BrowserTabBar extends HookConsumerWidget {
       displayAppBar: displayAppBar,
       displayQuickTabSwitcher: displayQuickTabSwitcher,
       backgroundColor: effectiveContainerPalette?.surfaceColor,
-      title: showTabTitle
-          // A wide rail takes the ordinary horizontal title. RailAppBarTitle
-          // exists to survive a 56dp column by rotating 90 degrees; at panel
-          // width there is nothing to survive and a sideways URL would just be
-          // hard to read.
-          ? (isVertical && !wideRail)
-                ? RailAppBarTitle(
-                    quarterTurns: railQuarterTurns,
-                    containerColor: effectiveContainerColor,
-                    useCustomColor: effectiveUseCustomColor,
-                  )
-                : settings.tabBarLayout == TabBarLayout.compact
-                ? CompactAppBarTitle(
-                    containerColor: effectiveContainerColor,
-                    useCustomColor: effectiveUseCustomColor,
-                  )
-                : AppBarTitle(
-                    containerColor: effectiveContainerColor,
-                    useCustomColor: effectiveUseCustomColor,
-                  )
-          : null,
+      // A wide rail takes the ordinary horizontal title. RailAppBarTitle exists
+      // to survive a 56dp column by rotating 90 degrees; at panel width there
+      // is nothing to survive and a sideways URL would just be hard to read.
+      title: (isVertical && !wideRail)
+          ? RailAppBarTitle(
+              quarterTurns: railQuarterTurns,
+              containerColor: effectiveContainerColor,
+              useCustomColor: effectiveUseCustomColor,
+            )
+          : settings.tabBarLayout == TabBarLayout.compact
+          ? CompactAppBarTitle(
+              containerColor: effectiveContainerColor,
+              useCustomColor: effectiveUseCustomColor,
+            )
+          : AppBarTitle(
+              containerColor: effectiveContainerColor,
+              useCustomColor: effectiveUseCustomColor,
+            ),
       // A panel wraps these together with the contextual buttons instead; see
       // the contextual toolbar below.
       actions: wideRail ? const [] : mainActions,

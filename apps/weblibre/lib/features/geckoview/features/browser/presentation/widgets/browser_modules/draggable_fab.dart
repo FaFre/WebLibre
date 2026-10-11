@@ -49,10 +49,9 @@ class DraggableFab extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenSize = mediaQuery.size;
-    final padding = mediaQuery.padding;
-    final disableAnimations = mediaQuery.disableAnimations;
+    final screenSize = MediaQuery.sizeOf(context);
+    final padding = MediaQuery.paddingOf(context);
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
 
     final isDragging = useState(false);
     // Stored as distances from the bottom-right corner (dx = from right edge,

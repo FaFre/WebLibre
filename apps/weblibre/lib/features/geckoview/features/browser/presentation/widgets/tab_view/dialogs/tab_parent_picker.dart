@@ -20,12 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
+import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
 /// Matches the fixed itemExtent used by the main tab list
 /// (`tab_list_view.dart`'s `_itemHeight`).
@@ -63,11 +64,8 @@ Future<void> showTabParentPicker({
   // Riverpod notifier itself is keepAlive and safe to use post-await.
   final repo = ref.read(tabDataRepositoryProvider.notifier);
 
-  final selection = await showModalBottomSheet<_ParentPickerSelection>(
+  final selection = await showBrowserSheet<_ParentPickerSelection>(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    isScrollControlled: true,
-    showDragHandle: true,
     builder: (context) => _TabParentPickerSheet(tabId: tabId),
   );
 
@@ -96,109 +94,135 @@ class _TabParentPickerSheet extends HookConsumerWidget {
       expand: false,
       initialChildSize: 0.6,
       minChildSize: 0.3,
-      maxChildSize: 0.95,
       builder: (context, scrollController) {
-        return movingTabAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) =>
-              Center(child: Text(l10n.browser_errorGeneric(e.toString()))),
-          data: (movingTab) {
-            if (movingTab == null) {
-              return Center(child: Text(l10n.browser_tabNoLongerExists));
-            }
-            return descendantsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) =>
-                  Center(child: Text(l10n.browser_errorGeneric(e.toString()))),
-              data: (descendants) {
-                final excluded = descendants.keys.toSet()..add(tabId);
-                final containerId = movingTab.containerId;
-                final candidatesAsync = ref.watch(
-                  watchContainerTabsDataProvider(containerId),
-                );
-                return candidatesAsync.when(
+        return BrowserSheetSurface(
+          child: Column(
+            children: [
+              const SheetDragHandle(),
+              Expanded(
+                child: movingTabAsync.when(
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => Center(
                     child: Text(l10n.browser_errorGeneric(e.toString())),
                   ),
-                  data: (tabs) {
-                    final candidates = tabs
-                        .where((t) => !excluded.contains(t.id))
-                        .toList();
-                    return CustomScrollView(
-                      controller: scrollController,
-                      slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                          sliver: SliverToBoxAdapter(
+                  data: (movingTab) {
+                    if (movingTab == null) {
+                      return Center(
+                        child: Text(l10n.browser_tabNoLongerExists),
+                      );
+                    }
+                    return descendantsAsync.when(
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Center(
+                        child: Text(l10n.browser_errorGeneric(e.toString())),
+                      ),
+                      data: (descendants) {
+                        final excluded = descendants.keys.toSet()..add(tabId);
+                        final containerId = movingTab.containerId;
+                        final candidatesAsync = ref.watch(
+                          watchContainerTabsDataProvider(containerId),
+                        );
+                        return candidatesAsync.when(
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (e, _) => Center(
                             child: Text(
-                              l10n.browser_chooseAParentTab,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              l10n.browser_errorGeneric(e.toString()),
                             ),
                           ),
-                        ),
-                        SliverToBoxAdapter(
-                          child: ListTile(
-                            leading: const Icon(MdiIcons.fileTreeOutline),
-                            title: Text(l10n.browser_makeStandalone),
-                            subtitle: Text(
-                              l10n.browser_detachFromCurrentParent,
-                            ),
-                            enabled: movingTab.parentId != null,
-                            onTap: () => Navigator.of(
-                              context,
-                            ).pop(const _ParentPickerDetach()),
-                          ),
-                        ),
-                        const SliverToBoxAdapter(child: Divider(height: 1)),
-                        if (candidates.isEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
-                              child: Text(
-                                l10n.browser_noCandidateTabsInContainer,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        else
-                          // Match the tab list view's fixed itemExtent.
-                          // `ListTabPreview` has no intrinsic height — its
-                          // thumbnail variant uses `BoxFit.fitHeight`, which
-                          // needs a bounded parent or it sizes to the
-                          // image's native dimensions and overflows.
-                          SliverFixedExtentList.builder(
-                            itemExtent: _itemExtent,
-                            itemCount: candidates.length,
-                            itemBuilder: (context, index) {
-                              final candidate = candidates[index];
-                              // `isActive` highlights the current parent
-                              // with the same accent the tab list uses for
-                              // the selected tab — semantically "this is
-                              // the one you're currently nested under".
-                              return ListTabPreview(
-                                tabId: candidate.id,
-                                isActive: candidate.id == movingTab.parentId,
-                                onTap: () => Navigator.of(
-                                  context,
-                                ).pop(_ParentPickerSelected(candidate.id)),
-                              );
-                            },
-                          ),
-                        const SliverPadding(
-                          padding: EdgeInsets.only(bottom: 16),
-                        ),
-                      ],
+                          data: (tabs) {
+                            final candidates = tabs
+                                .where((t) => !excluded.contains(t.id))
+                                .toList();
+                            return CustomScrollView(
+                              controller: scrollController,
+                              slivers: [
+                                SliverPadding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    8,
+                                    16,
+                                    8,
+                                  ),
+                                  sliver: SliverToBoxAdapter(
+                                    child: Text(
+                                      l10n.browser_chooseAParentTab,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SliverToBoxAdapter(
+                                  child: ListTile(
+                                    leading: const Icon(
+                                      MdiIcons.fileTreeOutline,
+                                    ),
+                                    title: Text(l10n.browser_makeStandalone),
+                                    subtitle: Text(
+                                      l10n.browser_detachFromCurrentParent,
+                                    ),
+                                    enabled: movingTab.parentId != null,
+                                    onTap: () => Navigator.of(
+                                      context,
+                                    ).pop(const _ParentPickerDetach()),
+                                  ),
+                                ),
+                                const SliverToBoxAdapter(
+                                  child: Divider(height: 1),
+                                ),
+                                if (candidates.isEmpty)
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24),
+                                      child: Text(
+                                        l10n.browser_noCandidateTabsInContainer,
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  // Match the tab list view's fixed itemExtent.
+                                  // `ListTabPreview` has no intrinsic height — its
+                                  // thumbnail variant uses `BoxFit.fitHeight`, which
+                                  // needs a bounded parent or it sizes to the
+                                  // image's native dimensions and overflows.
+                                  SliverFixedExtentList.builder(
+                                    itemExtent: _itemExtent,
+                                    itemCount: candidates.length,
+                                    itemBuilder: (context, index) {
+                                      final candidate = candidates[index];
+                                      // `isActive` highlights the current parent
+                                      // with the same accent the tab list uses for
+                                      // the selected tab — semantically "this is
+                                      // the one you're currently nested under".
+                                      return ListTabPreview(
+                                        tabId: candidate.id,
+                                        isActive:
+                                            candidate.id == movingTab.parentId,
+                                        onTap: () => Navigator.of(context).pop(
+                                          _ParentPickerSelected(candidate.id),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                const SliverPadding(
+                                  padding: EdgeInsets.only(bottom: 16),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
                     );
                   },
-                );
-              },
-            );
-          },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

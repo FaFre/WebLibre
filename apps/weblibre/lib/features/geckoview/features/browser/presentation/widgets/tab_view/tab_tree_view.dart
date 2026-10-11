@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -37,7 +38,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_enti
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class _TabTreePreview extends HookConsumerWidget {
@@ -171,12 +171,14 @@ class _TabTreePreview extends HookConsumerWidget {
 
 class ViewTabTreesWidget extends HookConsumerWidget {
   final ScrollController scrollController;
+  final DraggableScrollableController? draggableScrollableController;
   final VoidCallback onClose;
   final bool showNewTabFab;
 
   const ViewTabTreesWidget({
     required this.onClose,
     required this.scrollController,
+    this.draggableScrollableController,
     required this.showNewTabFab,
     super.key,
   });
@@ -207,27 +209,10 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                 ],
               ),
               if (showNewTabFab)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    top: TabViewHeader.headerSize + 4,
-                    right: 4,
-                  ),
-                  child: FloatingActionButton.small(
-                    onPressed: () async {
-                      final settings = ref.read(
-                        generalSettingsWithDefaultsProvider,
-                      );
-
-                      await SearchRoute(
-                        tabType:
-                            ref.read(selectedTabTypeProvider) ??
-                            settings.effectiveDefaultCreateTabType,
-                      ).push(context);
-
-                      onClose();
-                    },
-                    child: const Icon(Icons.add),
-                  ),
+                TabTrayNewTabFab(
+                  scrollController: scrollController,
+                  sheetController: draggableScrollableController,
+                  onClose: onClose,
                 ),
             ],
           ),

@@ -19,6 +19,7 @@
  */
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:weblibre/extensions/draggable_scrollable_controller.dart';
 
 class DraggableScrollableHeader extends StatefulWidget {
   final DraggableScrollableController controller;
@@ -53,18 +54,12 @@ class _DraggableScrollableHeaderState extends State<DraggableScrollableHeader> {
   Future<void> _animateToPosition(
     double targetSize, {
     Duration? customDuration,
-  }) async {
-    if (MediaQuery.disableAnimationsOf(context)) {
-      widget.controller.jumpTo(targetSize);
-      return;
-    }
-
-    await widget.controller.animateTo(
-      targetSize,
-      duration: customDuration ?? widget.animationDuration,
-      curve: widget.animationCurve,
-    );
-  }
+  }) => widget.controller.moveTo(
+    targetSize,
+    disableAnimations: MediaQuery.disableAnimationsOf(context),
+    duration: customDuration ?? widget.animationDuration,
+    curve: widget.animationCurve,
+  );
 
   @override
   Widget build(BuildContext context) {

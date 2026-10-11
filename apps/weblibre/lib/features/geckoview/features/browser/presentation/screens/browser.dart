@@ -31,7 +31,7 @@ import 'package:weblibre/core/providers/pointer_device.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
-import 'package:weblibre/extensions/media_query.dart';
+import 'package:weblibre/extensions/draggable_scrollable_controller.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_host.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
@@ -54,6 +54,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/provid
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_system_bars.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/draggable_fab.dart';
@@ -84,6 +85,7 @@ import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -400,14 +402,17 @@ class _BrowserScaffoldTheme extends ConsumerWidget {
     final toolbarState = isSmallWebActive
         ? ToolbarVisibility.visible
         : ref.watch(toolbarVisibilityControllerProvider(selectedTabId));
-    final bottomToolbarVisible = isSmallWebActive
-        ? !tabInFullScreen
-        : sheetDisplayed ||
-              (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+    // A sheet covers the bottom bar and the find bar, so a snackbar over the
+    // sheet keeps clear of the window's bottom edge only.
+    final bottomToolbarVisible =
+        !sheetDisplayed &&
+        !tabInFullScreen &&
+        (isSmallWebActive || toolbarState == ToolbarVisibility.visible);
+    final findInPageShown = !sheetDisplayed && findInPageVisible;
     final bottomInset =
         (bottomToolbarVisible ? bottomAppBarContentSize.height : 0.0) +
         8 +
-        (findInPageVisible ? findInPageHeight : 0.0);
+        (findInPageShown ? findInPageHeight : 0.0);
 
     final theme = Theme.of(context);
 
@@ -416,12 +421,10 @@ class _BrowserScaffoldTheme extends ConsumerWidget {
     // override exists to defeat it so a sheet spans a phone edge to edge.
     // Above compact width that is no longer what anyone wants, so the override
     // stops at the same cap Material would have applied.
+    final padding = MediaQuery.paddingOf(context);
     final safeAreaWidth =
-        MediaQuery.of(context).size.width -
-        math.max(
-          MediaQuery.of(context).padding.left * 2,
-          MediaQuery.of(context).padding.right * 2,
-        );
+        MediaQuery.sizeOf(context).width -
+        math.max(padding.left * 2, padding.right * 2);
     final sheetMaxWidth = math.min(
       safeAreaWidth,
       ref.watch(windowSizeClassControllerProvider).sheetMaxWidth,
@@ -450,17 +453,19 @@ class _BrowserScaffoldTheme extends ConsumerWidget {
 /// [child] in/out via [_AnimatedToolbar]. Shared by the bottom, top and side
 /// rail toolbar layers so the (identical) visibility logic isn't duplicated
 /// across ad-hoc `Consumer` closures.
+///
+/// An open sheet changes nothing here: it covers the toolbars like any modal
+/// bottom sheet, so a hidden toolbar stays hidden under it rather than sliding
+/// in beneath the scrim.
 class _ToolbarVisibilityAnimator extends ConsumerWidget {
   final TabBarPosition position;
   final String? selectedTabId;
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final Widget child;
 
   const _ToolbarVisibilityAnimator({
     required this.position,
     required this.selectedTabId,
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.child,
   });
@@ -471,8 +476,7 @@ class _ToolbarVisibilityAnimator extends ConsumerWidget {
       toolbarVisibilityControllerProvider(selectedTabId),
     );
     final visible =
-        sheetDisplayed ||
-        (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+        !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
 
     return _AnimatedToolbar(position: position, visible: visible, child: child);
   }
@@ -484,7 +488,6 @@ class _BrowserContentPositioned extends ConsumerWidget {
   final OverlayPortalController overlayController;
   final StreamController<Offset> pointerMoveEventsController;
   final String? selectedTabId;
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
   final bool autoHideTabBar;
@@ -506,7 +509,6 @@ class _BrowserContentPositioned extends ConsumerWidget {
     required this.overlayController,
     required this.pointerMoveEventsController,
     required this.selectedTabId,
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.autoHideTabBar,
@@ -523,12 +525,12 @@ class _BrowserContentPositioned extends ConsumerWidget {
     final toolbarState = ref.watch(
       toolbarVisibilityControllerProvider(selectedTabId),
     );
-    // Deliberately does NOT include `sheetDisplayed` (unlike the layers that
-    // render chrome above the page). A sheet is painted over the browser, so
-    // letting it force the toolbar "visible" here would move the Positioned
-    // that wraps the platform view — a native re-layout, and under hybrid
-    // composition a surface recreation, in the same frame as the sheet's
-    // slide-in. The geometry the page sees stays frozen while a sheet is up.
+    // An open sheet deliberately changes nothing here. It is painted over the
+    // browser, so letting it change the toolbar state here would move the
+    // Positioned that wraps the platform view — a native re-layout, and under
+    // hybrid composition a surface recreation, in the same frame as the
+    // sheet's slide-in. The geometry the page sees stays frozen while a sheet
+    // is up.
     final toolbarVisible =
         !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
 
@@ -564,22 +566,19 @@ class _BrowserContentPositioned extends ConsumerWidget {
         ? sideRailTotalWidth
         : 0.0;
 
-    // Only fall back to the system bottom inset when the bottom
-    // toolbar was explicitly dismissed. The normal auto-hide
-    // hidden state is still handled by GeckoView's dynamic
-    // toolbar/clipping logic. On the rail there is never a bottom
-    // bar, so the browser always needs the bottom safe inset.
+    // The page stops above the navigation bar unless something else holds the
+    // bottom edge: a bar that doesn't auto-hide, the keyboard, fullscreen, or
+    // small web's bar. That includes an auto-hiding bar, shown or hidden: the
+    // bar slides over the page, and Gecko's dynamic toolbar covers only its
+    // content (see `autoHideOverlapHeight` in [BrowserScreen]). Running the
+    // page down to the window's edge instead left its end under the
+    // navigation bar strip once the bar hid, out of reach.
     //
-    // `sheetDisplayed` is likewise excluded here: toggling the safe-area
-    // padding on sheet open/close would resize the platform view for content
-    // the sheet covers anyway.
+    // An open sheet is likewise left out here: toggling the safe-area padding
+    // on sheet open/close would resize the platform view for content the sheet
+    // covers anyway.
     final applyBottomSafeArea =
-        bottomOffset == 0 &&
-        (isRail
-            ? (!tabInFullScreen && !isSmallWebActive)
-            : (!tabInFullScreen &&
-                  !isSmallWebActive &&
-                  toolbarState == ToolbarVisibility.dismissed));
+        bottomOffset == 0 && !tabInFullScreen && !isSmallWebActive;
 
     return Positioned(
       left: leftOffset,
@@ -592,7 +591,6 @@ class _BrowserContentPositioned extends ConsumerWidget {
         pointerMoveEventSink: autoHideTabBar
             ? pointerMoveEventsController.sink
             : null,
-        sheetDisplayed: sheetDisplayed,
         hasTopBarOffset: topOffset > 0,
         hasLeftBarOffset: leftOffset > 0,
         hasRightBarOffset: rightOffset > 0,
@@ -604,7 +602,6 @@ class _BrowserContentPositioned extends ConsumerWidget {
 
 /// Layer 2: bottom toolbar (or the small-web discovery overlay in its place).
 class _BottomToolbarLayer extends StatelessWidget {
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final bool isSmallWebActive;
   final TabBarPosition tabBarPosition;
@@ -614,7 +611,6 @@ class _BottomToolbarLayer extends StatelessWidget {
   final StreamController<Offset> pointerMoveEventsController;
 
   const _BottomToolbarLayer({
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.isSmallWebActive,
     required this.tabBarPosition,
@@ -643,7 +639,6 @@ class _BottomToolbarLayer extends StatelessWidget {
     return _ToolbarVisibilityAnimator(
       position: TabBarPosition.bottom,
       selectedTabId: selectedTabId,
-      sheetDisplayed: sheetDisplayed,
       tabInFullScreen: tabInFullScreen,
       child: _TabBar(
         tabBarPosition: TabBarPosition.bottom,
@@ -661,7 +656,6 @@ class _BottomToolbarLayer extends StatelessWidget {
 
 /// Layer 3: top toolbar (only rendered when the tab bar position is top).
 class _TopToolbarLayer extends StatelessWidget {
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final bool isSmallWebActive;
   final bool showContextualToolbar;
@@ -670,7 +664,6 @@ class _TopToolbarLayer extends StatelessWidget {
   final StreamController<Offset> pointerMoveEventsController;
 
   const _TopToolbarLayer({
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.isSmallWebActive,
     required this.showContextualToolbar,
@@ -684,7 +677,6 @@ class _TopToolbarLayer extends StatelessWidget {
     return _ToolbarVisibilityAnimator(
       position: TabBarPosition.top,
       selectedTabId: selectedTabId,
-      sheetDisplayed: sheetDisplayed,
       tabInFullScreen: tabInFullScreen,
       child: _TabBar(
         tabBarPosition: TabBarPosition.top,
@@ -703,7 +695,6 @@ class _TopToolbarLayer extends StatelessWidget {
 
 /// Layer 3b: vertical side rail (left/right).
 class _SideRailToolbarLayer extends StatelessWidget {
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
 
@@ -726,7 +717,6 @@ class _SideRailToolbarLayer extends StatelessWidget {
   final bool overlay;
 
   const _SideRailToolbarLayer({
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.railWidth,
@@ -762,7 +752,6 @@ class _SideRailToolbarLayer extends StatelessWidget {
     return _ToolbarVisibilityAnimator(
       position: tabBarPosition,
       selectedTabId: selectedTabId,
-      sheetDisplayed: sheetDisplayed,
       tabInFullScreen: tabInFullScreen,
       child: rail,
     );
@@ -871,7 +860,6 @@ class _SideRailRevealRegion extends HookConsumerWidget {
 /// Layer 4: draggable FAB, positioned clear of the toolbar/rail.
 class _FabPositioner extends ConsumerWidget {
   final String? selectedTabId;
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
   final double bottomAppBarTotalHeight;
@@ -881,7 +869,6 @@ class _FabPositioner extends ConsumerWidget {
 
   const _FabPositioner({
     required this.selectedTabId,
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.bottomAppBarTotalHeight,
@@ -896,8 +883,7 @@ class _FabPositioner extends ConsumerWidget {
       toolbarVisibilityControllerProvider(selectedTabId),
     );
     final visible =
-        sheetDisplayed ||
-        (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+        !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
 
     return DraggableFab(
       bottomToolbarVisible: visible,
@@ -914,13 +900,40 @@ class _FabPositioner extends ConsumerWidget {
   }
 }
 
+/// How far an overlay spanning the window's width (the progress line, the find
+/// bar, the app-link banner) keeps from each side: clear of the rail where it
+/// is docked and showing, and always of the side insets, like the tab bars
+/// themselves. In landscape those hold the navigation bar's buttons or a
+/// display cutout.
+({double left, double right}) _overlaySideInsets(
+  BuildContext context, {
+  required TabBarPosition tabBarPosition,
+  required bool toolbarVisible,
+  required double sideRailTotalWidth,
+}) {
+  final padding = MediaQuery.paddingOf(context);
+  return (
+    left: math.max(
+      padding.left,
+      tabBarPosition == TabBarPosition.left && toolbarVisible
+          ? sideRailTotalWidth
+          : 0.0,
+    ),
+    right: math.max(
+      padding.right,
+      tabBarPosition == TabBarPosition.right && toolbarVisible
+          ? sideRailTotalWidth
+          : 0.0,
+    ),
+  );
+}
+
 /// Layer 5: page load progress indicator, animated with toolbar visibility.
 /// Split into a positioner (reacts to toolbar visibility) and a content
 /// widget (reacts to load progress) so the two independent watches don't
 /// force each other to rebuild.
 class _ProgressIndicatorPositioner extends ConsumerWidget {
   final String? selectedTabId;
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
   final bool isRail;
@@ -932,7 +945,6 @@ class _ProgressIndicatorPositioner extends ConsumerWidget {
 
   const _ProgressIndicatorPositioner({
     required this.selectedTabId,
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.isRail,
@@ -950,8 +962,13 @@ class _ProgressIndicatorPositioner extends ConsumerWidget {
       toolbarVisibilityControllerProvider(selectedTabId),
     );
     final visible =
-        sheetDisplayed ||
-        (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+        !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
+    final sideInsets = _overlaySideInsets(
+      context,
+      tabBarPosition: tabBarPosition,
+      toolbarVisible: visible,
+      sideRailTotalWidth: sideRailTotalWidth,
+    );
 
     return AnimatedPositioned(
       duration: disableAnimations
@@ -960,12 +977,8 @@ class _ProgressIndicatorPositioner extends ConsumerWidget {
       curve: Curves.easeInOutQuart,
       // Rail insets track the rail's visibility so overlays
       // reclaim the space when it is swiped away.
-      left: (tabBarPosition == TabBarPosition.left && visible)
-          ? sideRailTotalWidth
-          : 0.0,
-      right: (tabBarPosition == TabBarPosition.right && visible)
-          ? sideRailTotalWidth
-          : 0.0,
+      left: sideInsets.left,
+      right: sideInsets.right,
       // On the rail there is no top/bottom bar; pin the progress
       // line to the top of the content area.
       top: isRail
@@ -1009,7 +1022,6 @@ class _ProgressIndicatorBar extends ConsumerWidget {
 /// Same positioner/content split rationale as the progress indicator above.
 class _FindInPagePositioner extends ConsumerWidget {
   final String? selectedTabId;
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
   final bool isRail;
@@ -1020,7 +1032,6 @@ class _FindInPagePositioner extends ConsumerWidget {
 
   const _FindInPagePositioner({
     required this.selectedTabId,
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.isRail,
@@ -1037,25 +1048,31 @@ class _FindInPagePositioner extends ConsumerWidget {
       toolbarVisibilityControllerProvider(selectedTabId),
     );
     final visible =
-        sheetDisplayed ||
-        (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+        !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
+    final sideInsets = _overlaySideInsets(
+      context,
+      tabBarPosition: tabBarPosition,
+      toolbarVisible: visible,
+      sideRailTotalWidth: sideRailTotalWidth,
+    );
+    final keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return AnimatedPositioned(
-      duration: disableAnimations
+      // Animated as the toolbar slides in and out. Not while the keyboard is
+      // up: it reports a new inset on every frame of its own slide, and each
+      // would restart the animation from wherever the bar is, so the bar would
+      // trail behind the keyboard and only catch up once it stopped.
+      duration: disableAnimations || keyboardInset > 0
           ? Duration.zero
           : _AnimatedToolbar._kAnimationDuration,
       curve: Curves.easeInOutQuart,
-      left: (tabBarPosition == TabBarPosition.left && visible)
-          ? sideRailTotalWidth
-          : 0.0,
-      right: (tabBarPosition == TabBarPosition.right && visible)
-          ? sideRailTotalWidth
-          : 0.0,
+      left: sideInsets.left,
+      right: sideInsets.right,
       bottom: math.max(
         isRail
             ? bottomSafeArea
             : (visible ? bottomAppBarTotalHeight : bottomSafeArea),
-        MediaQuery.viewInsetsOf(context).bottom,
+        keyboardInset,
       ),
       child: child,
     );
@@ -1081,7 +1098,6 @@ class _FindInPageContent extends ConsumerWidget {
 /// the browser-tab surface only.
 class _AppLinkPromptLayer extends ConsumerWidget {
   final String? selectedTabId;
-  final bool sheetDisplayed;
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
   final bool isRail;
@@ -1091,7 +1107,6 @@ class _AppLinkPromptLayer extends ConsumerWidget {
 
   const _AppLinkPromptLayer({
     required this.selectedTabId,
-    required this.sheetDisplayed,
     required this.tabInFullScreen,
     required this.tabBarPosition,
     required this.isRail,
@@ -1106,16 +1121,17 @@ class _AppLinkPromptLayer extends ConsumerWidget {
       toolbarVisibilityControllerProvider(selectedTabId),
     );
     final visible =
-        sheetDisplayed ||
-        (!tabInFullScreen && toolbarState == ToolbarVisibility.visible);
+        !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
+    final sideInsets = _overlaySideInsets(
+      context,
+      tabBarPosition: tabBarPosition,
+      toolbarVisible: visible,
+      sideRailTotalWidth: sideRailTotalWidth,
+    );
 
     return Positioned(
-      left: (tabBarPosition == TabBarPosition.left && visible)
-          ? sideRailTotalWidth
-          : 0.0,
-      right: (tabBarPosition == TabBarPosition.right && visible)
-          ? sideRailTotalWidth
-          : 0.0,
+      left: sideInsets.left,
+      right: sideInsets.right,
       bottom: math.max(
         isRail
             ? bottomSafeArea
@@ -1450,9 +1466,7 @@ class BrowserScreen extends HookConsumerWidget {
     // hide/show cycle during scrolling.
     final selectedTabId = ref.watch(selectedTabProvider);
 
-    // Calculate relative safe area for sheet max size
-    final relativeSafeArea = MediaQuery.of(context).relativeSafeArea();
-    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final bottomSafeArea = MediaQuery.paddingOf(context).bottom;
 
     // Must match what _TabBar resolves, or the browser is inset for a toolbar
     // row that is not drawn.
@@ -1462,79 +1476,47 @@ class BrowserScreen extends HookConsumerWidget {
       placement: ref.watch(effectiveHomeSearchBarPlacementProvider),
     );
 
-    // Calculate bottom toolbar size for FAB and sheet positioning
+    // Calculate bottom toolbar size for the page inset and the FAB. A sheet
+    // covers the bars and never changes their size, so the page's viewport
+    // stays put while one opens: resizing the Gecko viewport would cost a page
+    // reflow plus, under hybrid composition, a native surface recreation, all
+    // in the same frame as the sheet's slide-in.
     final Size bottomAppBarContentSize;
-    // The same size computed as if no sheet were displayed. `ViewTabsSheet`
-    // hides the main toolbar and the quick tab switcher, which shrinks the bar
-    // by 48-152px — and that value feeds the browser's viewport geometry
-    // (dynamic toolbar inset, vertical clipping and the Positioned that wraps
-    // the platform view). Resizing the Gecko viewport when a sheet opens costs
-    // a page reflow plus, under hybrid composition, a native surface
-    // recreation — all in the same frame as the sheet's slide-in animation.
-    // The sheet is drawn *on top* of the page, so the page's viewport has no
-    // reason to change: the inset math below uses this frozen value while the
-    // widgets that actually render the bar keep the real one.
-    final Size viewportBottomAppBarContentSize;
     if (isSmallWebActive) {
       bottomAppBarContentSize = const Size.fromHeight(
         SmallWebBrowserOverlay.barHeight,
       );
-      viewportBottomAppBarContentSize = bottomAppBarContentSize;
     } else if (isRail) {
       // The rail occupies a side, not the bottom; no bottom bar is rendered.
       bottomAppBarContentSize = Size.zero;
-      viewportBottomAppBarContentSize = bottomAppBarContentSize;
     } else {
-      // Pass actual displayedSheet to get correct height when ViewTabsSheet hides main toolbar
       bottomAppBarContentSize = BrowserBottomAppBar(
         showMainToolbar: tabBarPosition == TabBarPosition.bottom,
         showContextualToolbar: showContextualToolbar,
         quickTabSwitcherRowCount: quickTabSwitcherRowCount,
         quickTabSwitcherPlacement: quickTabSwitcherPlacement,
         isSmallWebMode: false,
-        displayedSheet: displayedSheet,
         suppressMainToolbar: suppressMainToolbarForHome,
       ).preferredSize;
-      viewportBottomAppBarContentSize = displayedSheet == null
-          ? bottomAppBarContentSize
-          : BrowserBottomAppBar(
-              showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-              showContextualToolbar: showContextualToolbar,
-              quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-              quickTabSwitcherPlacement: quickTabSwitcherPlacement,
-              isSmallWebMode: false,
-              displayedSheet: null,
-              suppressMainToolbar: suppressMainToolbarForHome,
-            ).preferredSize;
     }
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
-    final viewportBottomAppBarTotalHeight =
-        viewportBottomAppBarContentSize.height + bottomSafeArea;
 
     // Side rail width reservation (vertical positions only): the content width
     // plus the system safe-area inset on the rail's outer edge. Nothing is
     // reserved for a rail that overlays the page.
     final horizontalSafeArea = switch (tabBarPosition) {
-      TabBarPosition.left => MediaQuery.of(context).padding.left,
-      TabBarPosition.right => MediaQuery.of(context).padding.right,
+      TabBarPosition.left => MediaQuery.paddingOf(context).left,
+      TabBarPosition.right => MediaQuery.paddingOf(context).right,
       _ => 0.0,
     };
     final sideRailTotalWidth = isRail && !railOverlay
         ? railWidth + horizontalSafeArea
         : 0.0;
-    // Horizontal insets used to keep overlays (progress, find-in-page) clear of
-    // the rail on its docked edge.
-    final railLeftInset = tabBarPosition == TabBarPosition.left
-        ? sideRailTotalWidth
-        : 0.0;
-    final railRightInset = tabBarPosition == TabBarPosition.right
-        ? sideRailTotalWidth
-        : 0.0;
 
     // Calculate top toolbar size for browser offset and progress indicator
-    final topSafeArea = MediaQuery.of(context).padding.top;
+    final topSafeArea = MediaQuery.paddingOf(context).top;
     final topAppBarContentSize = BrowserTopAppBar(
       showMainToolbar: tabBarPosition == TabBarPosition.top,
       showContextualToolbar: showContextualToolbar,
@@ -1546,41 +1528,8 @@ class BrowserScreen extends HookConsumerWidget {
     ).preferredSize;
     final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
 
-    // [topAppBarTotalHeight] is computed as if no sheet were displayed, for the
-    // same reason as `viewportBottomAppBarContentSize`: it feeds the page
-    // geometry, which must not change under a sheet. What the top bar actually
-    // draws while one is up is smaller — and since it paints above the sheet
-    // layer, an expanded tab tray has to stop below it.
-    final double viewTabsSheetMaxExtent;
-    if (tabBarPosition == TabBarPosition.top && displayedSheet != null) {
-      final sheetTopAppBarTotalHeight =
-          BrowserTopAppBar(
-            showMainToolbar: true,
-            showContextualToolbar: showContextualToolbar,
-            quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-            quickTabSwitcherPlacement: quickTabSwitcherPlacement,
-            displayedSheet: displayedSheet,
-            isSmallWebMode: isSmallWebActive,
-            enableGestures: !isSmallWebActive,
-            suppressMainToolbar: suppressMainToolbarForHome,
-          ).preferredSize.height +
-          topSafeArea;
-      // The sheet lives in the band above the bottom bar, and its extents are
-      // fractions of that band.
-      final sheetAreaHeight =
-          MediaQuery.sizeOf(context).height - bottomAppBarTotalHeight;
-      viewTabsSheetMaxExtent = sheetAreaHeight > 0
-          ? (1.0 - sheetTopAppBarTotalHeight / sheetAreaHeight).clamp(
-              _ViewTabsSheet.initialHeight,
-              1.0,
-            )
-          : relativeSafeArea;
-    } else {
-      viewTabsSheetMaxExtent = relativeSafeArea;
-    }
-
     // Get pixel ratio for converting logical pixels to physical pixels
-    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
     final bottomSystemInsetPx =
         (MediaQuery.viewPaddingOf(context).bottom * pixelRatio).round();
 
@@ -1606,11 +1555,19 @@ class BrowserScreen extends HookConsumerWidget {
       [selectedTabId],
     );
 
+    // How much of the page an auto-hiding bottom bar covers while it shows.
+    // The page ends above the navigation bar (`_BrowserContentPositioned`), so
+    // that is the bar's content, not the padding it keeps over the navigation
+    // bar. Small web's bar never hides, and the page runs under it padding
+    // included.
+    final autoHideOverlapHeight = isSmallWebActive
+        ? bottomAppBarTotalHeight
+        : bottomAppBarContentSize.height;
+
     final autoHideToolbarHeight = switch (tabBarPosition) {
       // Gecko's dynamic toolbar value is consumed as a bottom inset by Dart and
       // native UI. The top toolbar itself is positioned with Flutter's topOffset.
-      TabBarPosition.top ||
-      TabBarPosition.bottom => viewportBottomAppBarTotalHeight,
+      TabBarPosition.top || TabBarPosition.bottom => autoHideOverlapHeight,
       TabBarPosition.left || TabBarPosition.right => 0.0,
     };
 
@@ -1713,8 +1670,8 @@ class BrowserScreen extends HookConsumerWidget {
       // handled by Flutter's topOffset instead of Gecko's bottom inset channel.
       // When visible/dismissed or overridden by keyboard/loading: no clipping.
       final hiddenToolbarClippingPx = switch (tabBarPosition) {
-        TabBarPosition.top || TabBarPosition.bottom =>
-          -(viewportBottomAppBarTotalHeight * pixelRatio).round(),
+        TabBarPosition.top ||
+        TabBarPosition.bottom => -(autoHideOverlapHeight * pixelRatio).round(),
         TabBarPosition.left || TabBarPosition.right => 0,
       };
       final targetClippingPx =
@@ -1768,7 +1725,7 @@ class BrowserScreen extends HookConsumerWidget {
         keyboardVisible,
         tabIsLoading,
         tabInFullScreen,
-        viewportBottomAppBarTotalHeight,
+        autoHideOverlapHeight,
         pixelRatio,
         selectedTabId,
         tabBarPosition,
@@ -1799,7 +1756,6 @@ class BrowserScreen extends HookConsumerWidget {
                 overlayController: overlayController,
                 pointerMoveEventsController: pointerMoveEventsController,
                 selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
                 tabInFullScreen: tabInFullScreen,
                 tabBarPosition: tabBarPosition,
                 autoHideTabBar: autoHideTabBar,
@@ -1835,32 +1791,18 @@ class BrowserScreen extends HookConsumerWidget {
                   ),
                 ),
 
-              // Layer 1: Sheet (when displayed) - positioned above toolbar,
-              // inset past the rail on its docked edge.
-              if (sheetDisplayed)
-                Positioned(
-                  left: railLeftInset,
-                  right: railRightInset,
-                  top: 0,
-                  bottom: bottomAppBarTotalHeight,
-                  child: _SheetContainer(
-                    displayedSheet: displayedSheet,
-                    relativeSafeArea: relativeSafeArea,
-                    viewTabsMaxExtent: viewTabsSheetMaxExtent,
-                    bottomAppBarHeight: bottomAppBarTotalHeight,
-                  ),
-                ),
-
               // Layer 2: Bottom Toolbar (overlay, slides in/out)
               // In small web mode, show the discovery overlay instead.
               // Skipped entirely for the side rail (Layer 3b below).
               if (!isRail)
                 Positioned(
-                  left: 0,
-                  right: 0,
+                  // Clear of the side insets, as the top bar is through its
+                  // SafeArea: in landscape a navigation bar of buttons moves
+                  // to the side, and the bar's ends would sit under it.
+                  left: MediaQuery.paddingOf(context).left,
+                  right: MediaQuery.paddingOf(context).right,
                   bottom: 0,
                   child: _BottomToolbarLayer(
-                    sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
                     isSmallWebActive: isSmallWebActive,
                     tabBarPosition: tabBarPosition,
@@ -1878,7 +1820,6 @@ class BrowserScreen extends HookConsumerWidget {
                   right: 0,
                   top: 0,
                   child: _TopToolbarLayer(
-                    sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
                     isSmallWebActive: isSmallWebActive,
                     showContextualToolbar: showContextualToolbar,
@@ -1897,7 +1838,6 @@ class BrowserScreen extends HookConsumerWidget {
                   left: tabBarPosition == TabBarPosition.left ? 0 : null,
                   right: tabBarPosition == TabBarPosition.right ? 0 : null,
                   child: _SideRailToolbarLayer(
-                    sheetDisplayed: sheetDisplayed,
                     tabInFullScreen: tabInFullScreen,
                     tabBarPosition: tabBarPosition,
                     railWidth: railWidth,
@@ -1913,7 +1853,6 @@ class BrowserScreen extends HookConsumerWidget {
               // Layer 4: FAB (draggable via long press)
               _FabPositioner(
                 selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
                 tabInFullScreen: tabInFullScreen,
                 tabBarPosition: tabBarPosition,
                 bottomAppBarTotalHeight: bottomAppBarTotalHeight,
@@ -1925,7 +1864,6 @@ class BrowserScreen extends HookConsumerWidget {
               // Layer 5: Page load progress indicator (animates with toolbar visibility)
               _ProgressIndicatorPositioner(
                 selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
                 tabInFullScreen: tabInFullScreen,
                 tabBarPosition: tabBarPosition,
                 isRail: isRail,
@@ -1939,7 +1877,6 @@ class BrowserScreen extends HookConsumerWidget {
               // Layer 6: Find in Page widget (above toolbar or keyboard, whichever is higher)
               _FindInPagePositioner(
                 selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
                 tabInFullScreen: tabInFullScreen,
                 tabBarPosition: tabBarPosition,
                 isRail: isRail,
@@ -1955,7 +1892,6 @@ class BrowserScreen extends HookConsumerWidget {
               // the browser-tab surface only.
               _AppLinkPromptLayer(
                 selectedTabId: selectedTabId,
-                sheetDisplayed: sheetDisplayed,
                 tabInFullScreen: tabInFullScreen,
                 tabBarPosition: tabBarPosition,
                 isRail: isRail,
@@ -1963,168 +1899,46 @@ class BrowserScreen extends HookConsumerWidget {
                 bottomSafeArea: bottomSafeArea,
                 bottomAppBarTotalHeight: bottomAppBarTotalHeight,
               ),
+
+              // Layer 8: Sheet (when displayed). A modal bottom sheet, so it
+              // spans the window above all of the browser's chrome: its scrim
+              // dims the toolbars too, and the sheet itself reaches behind
+              // the system bars.
+              if (sheetDisplayed)
+                Positioned.fill(
+                  child: _SheetContainer(displayedSheet: displayedSheet),
+                ),
             ],
           ),
         ),
       ),
     );
 
-    return BrowserKeyboardShortcutScope(child: screen);
+    // The sheet is modal: nothing it covers takes a shortcut.
+    return BrowserKeyboardShortcutScope(
+      enabled: !sheetDisplayed,
+      child: screen,
+    );
   }
 }
 
-/// Container widget for bottom sheets - renders in Stack for proper layering.
-class _SheetContainer extends HookConsumerWidget {
+/// Shows [displayedSheet] in a [BrowserSheetHost].
+class _SheetContainer extends ConsumerWidget {
   final Sheet displayedSheet;
-  final double relativeSafeArea;
 
-  /// The tab tray's maximum extent: [relativeSafeArea], or less when the top
-  /// bar stays drawn over the sheet.
-  final double viewTabsMaxExtent;
-  final double bottomAppBarHeight;
-
-  const _SheetContainer({
-    required this.displayedSheet,
-    required this.relativeSafeArea,
-    required this.viewTabsMaxExtent,
-    required this.bottomAppBarHeight,
-  });
-
-  /// How far the scrim is allowed to extend *under* the sheet. The sheets round
-  /// their top corners (radius 28), and the page shows through those cutouts —
-  /// so the scrim has to reach a little past the sheet's top edge or the
-  /// corners would reveal unscrimmed content.
-  static const _sheetCornerOverlap = 32.0;
+  const _SheetContainer({required this.displayedSheet});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final modalBarrierColor =
-        Theme.of(context).bottomSheetTheme.modalBarrierColor ??
-        colorScheme.scrim.withValues(alpha: 0.5);
-
-    final (sheet, initialExtent) = switch (displayedSheet) {
-      ViewTabsSheet() => (
-        _ViewTabsSheet(maxChildSize: viewTabsMaxExtent),
-        _ViewTabsSheet.initialHeight,
-      ),
-      final SiteSettingsSheet parameter => (
-        _SiteSettingsSheet(
+    return BrowserSheetHost(
+      sheet: switch (displayedSheet) {
+        ViewTabsSheet() => const _ViewTabsSheet(),
+        final SiteSettingsSheet parameter => _SiteSettingsSheet(
           initialTabState: parameter.tabState,
-          maxChildSize: relativeSafeArea,
-          bottomAppBarHeight: bottomAppBarHeight,
         ),
-        _SiteSettingsSheet.initialHeight,
-      ),
-    };
-
-    // Drives the scrim's height. Seeded with the sheet's initial extent so the
-    // very first frame is already clipped correctly, then tracked from the
-    // sheet's own drag notifications.
-    final sheetExtent = useValueNotifier(initialExtent);
-
-    bool onSheetNotification(DraggableScrollableNotification notification) {
-      sheetExtent.value = notification.extent;
-
-      if (notification.extent <= 0.1) {
-        logger.i('Dismissing sheet, reached min extend');
+      },
+      onDismiss: () {
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
-        return true;
-      }
-      return false;
-    }
-
-    // This sheet is hosted in the browser's own Stack, not by a
-    // ModalBottomSheetRoute, so it never sees bottomSheetTheme.constraints and
-    // has to cap itself.
-    final sheetMaxWidth = ref
-        .watch(windowSizeClassControllerProvider)
-        .sheetMaxWidth;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final available = constraints.maxHeight;
-        final sheetWidth = math.min(constraints.maxWidth, sheetMaxWidth);
-        // Empty on a phone, where the sheet still spans the window.
-        final gutter = (constraints.maxWidth - sheetWidth) / 2;
-
-        return Stack(
-          children: [
-            // Scrim. Hit-testing stays full-area (opaque) so tapping anywhere
-            // the sheet doesn't occupy still dismisses — including beside a
-            // width-constrained sheet — but the *paint* is clipped to the band
-            // above the sheet. Under hybrid composition every pixel painted
-            // over the platform view goes through an overlay surface, and once
-            // the tab sheet settles near full extent almost all of a
-            // full-screen scrim is hidden behind it anyway.
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                },
-                child: ValueListenableBuilder<double>(
-                  valueListenable: sheetExtent,
-                  builder: (context, extent, _) {
-                    final scrimHeight =
-                        (available * (1.0 - extent) + _sheetCornerOverlap)
-                            .clamp(0.0, available);
-
-                    return Stack(
-                      children: [
-                        Align(
-                          alignment: Alignment.topCenter,
-                          child: SizedBox(
-                            height: scrimHeight,
-                            width: double.infinity,
-                            child: ColoredBox(color: modalBarrierColor),
-                          ),
-                        ),
-                        // Beside a width-capped sheet the page would otherwise
-                        // stay unscrimmed all the way down, reading as live
-                        // content next to a modal surface. Painted full height
-                        // because the sheet never reaches into the gutters.
-                        if (gutter > 0) ...[
-                          Positioned(
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: gutter,
-                            child: ColoredBox(color: modalBarrierColor),
-                          ),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: gutter,
-                            child: ColoredBox(color: modalBarrierColor),
-                          ),
-                        ],
-                      ],
-                    );
-                  },
-                ),
-              ),
-            ),
-
-            // The sheet itself sits above the scrim, so taps on it hit its own
-            // widgets and taps above it fall through to the scrim's detector.
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: sheetWidth),
-                  child: NotificationListener<DraggableScrollableNotification>(
-                    onNotification: onSheetNotification,
-                    child: sheet,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
       },
     );
   }
@@ -2136,7 +1950,6 @@ class _Browser extends HookConsumerWidget {
   final OverlayPortalController overlayController;
   final StreamSink<Offset>? pointerMoveEventSink;
   final bool tabInFullScreen;
-  final bool sheetDisplayed;
   final bool hasTopBarOffset;
   final bool hasLeftBarOffset;
   final bool hasRightBarOffset;
@@ -2146,7 +1959,6 @@ class _Browser extends HookConsumerWidget {
     required this.overlayController,
     required this.tabInFullScreen,
     required this.pointerMoveEventSink,
-    required this.sheetDisplayed,
     required this.hasTopBarOffset,
     required this.hasLeftBarOffset,
     required this.hasRightBarOffset,
@@ -2216,139 +2028,218 @@ class _Browser extends HookConsumerWidget {
             // instead of force-unwrapping a null builder.
             return overlayBuilder?.call(context) ?? const SizedBox.shrink();
           },
-          child: Listener(
-            onPointerDown: sheetDisplayed
-                ? (_) {
-                    ref
-                        .read(bottomSheetControllerProvider.notifier)
-                        .requestDismiss();
-                  }
-                : null,
-            child: BackButtonListener(
-              onBackButtonPressed: () async {
-                final tabState = ref.read(selectedTabStateProvider);
-                final onBackBehavior = ref
-                    .read(tabRepositoryProvider.notifier)
-                    .backBehaviorFor(tabState?.id);
+          child: BackButtonListener(
+            onBackButtonPressed: () async {
+              final tabState = ref.read(selectedTabStateProvider);
+              final onBackBehavior = ref
+                  .read(tabRepositoryProvider.notifier)
+                  .backBehaviorFor(tabState?.id);
 
-                //Don't do anything if a child route is active
-                if (GoRouterState.of(context).topRoute?.name !=
-                    BrowserRoute.name) {
-                  return false;
-                }
+              //Don't do anything if a child route is active
+              if (GoRouterState.of(context).topRoute?.name !=
+                  BrowserRoute.name) {
+                return false;
+              }
 
-                // Dismiss modal routes (e.g. showModalBottomSheet).
-                // maybePop rather than pop: this listener runs ahead of the
-                // navigator, so popping outright would skip the PopScope of
-                // whatever is on top — a modal that handles back itself (the
-                // menu sheet's arrangement UI, a dialog that blocks back while
-                // it works) would be closed instead of being asked. Either way
-                // the gesture belongs to that modal, so it counts as handled.
-                final rootNavigator = Navigator.of(
-                  context,
-                  rootNavigator: true,
-                );
-                if (rootNavigator.canPop()) {
-                  await rootNavigator.maybePop();
-                  return true;
-                }
+              // Dismiss modal routes (e.g. showModalBottomSheet).
+              // maybePop rather than pop: this listener runs ahead of the
+              // navigator, so popping outright would skip the PopScope of
+              // whatever is on top — a modal that handles back itself (the
+              // menu sheet's arrangement UI, a dialog that blocks back while
+              // it works) would be closed instead of being asked. Either way
+              // the gesture belongs to that modal, so it counts as handled.
+              final rootNavigator = Navigator.of(context, rootNavigator: true);
+              if (rootNavigator.canPop()) {
+                await rootNavigator.maybePop();
+                return true;
+              }
 
-                if (ref.read(bottomSheetControllerProvider) != null) {
-                  ref
-                      .read(bottomSheetControllerProvider.notifier)
-                      .requestDismiss();
-                  return true;
-                }
-
-                if (overlayBuilder != null) {
-                  ref.read(overlayControllerProvider.notifier).dismiss();
-                  return true;
-                }
-
-                // Arranging the home page's sections is a mode on top of the
-                // home page, not a route, so back has to leave it here — the
-                // browser's own back would otherwise navigate the tab (or
-                // close it) out from under a user who was only reordering.
-                // The search screen's surfaces answer back themselves; this
-                // listener never runs while that screen is on top.
-                if (ref.read(searchReorderModeProvider(ModuleSurface.home))) {
-                  ref
-                      .read(
-                        searchReorderModeProvider(ModuleSurface.home).notifier,
-                      )
-                      .deactivate();
-                  return true;
-                }
-
-                if (tabState?.isFullScreen == true) {
-                  await ref.read(selectedTabSessionProvider).exitFullscreen();
-                  return true;
-                }
-
-                //Make sure app bar is visible
-                final tabId = ref.read(selectedTabProvider);
+              if (ref.read(bottomSheetControllerProvider) != null) {
                 ref
-                    .read(toolbarVisibilityControllerProvider(tabId).notifier)
-                    .show();
+                    .read(bottomSheetControllerProvider.notifier)
+                    .requestDismiss();
+                return true;
+              }
 
-                if (tabState?.isLoading == true) {
+              if (overlayBuilder != null) {
+                ref.read(overlayControllerProvider.notifier).dismiss();
+                return true;
+              }
+
+              // Arranging the home page's sections is a mode on top of the
+              // home page, not a route, so back has to leave it here — the
+              // browser's own back would otherwise navigate the tab (or
+              // close it) out from under a user who was only reordering.
+              // The search screen's surfaces answer back themselves; this
+              // listener never runs while that screen is on top.
+              if (ref.read(searchReorderModeProvider(ModuleSurface.home))) {
+                ref
+                    .read(
+                      searchReorderModeProvider(ModuleSurface.home).notifier,
+                    )
+                    .deactivate();
+                return true;
+              }
+
+              if (tabState?.isFullScreen == true) {
+                await ref.read(selectedTabSessionProvider).exitFullscreen();
+                return true;
+              }
+
+              //Make sure app bar is visible
+              final tabId = ref.read(selectedTabProvider);
+              ref
+                  .read(toolbarVisibilityControllerProvider(tabId).notifier)
+                  .show();
+
+              if (tabState?.isLoading == true) {
+                lastBackButtonPress.value = null;
+
+                final controller = ref.read(selectedTabSessionProvider);
+
+                await controller.stopLoading();
+                return true;
+              } else if (tabState?.readerableState.active == true) {
+                lastBackButtonPress.value = null;
+
+                await ref
+                    .read(readerableScreenControllerProvider.notifier)
+                    .toggleReaderView(false);
+
+                return true;
+              } else if (ref
+                  .read(tabHistoryStateProvider(tabState?.id))
+                  .canGoBack) {
+                lastBackButtonPress.value = null;
+
+                final controller = ref.read(selectedTabSessionProvider);
+
+                await controller.goBack();
+                return true;
+              }
+
+              if (onBackBehavior case ReturnToBrowserHomeTabBackBehavior()) {
+                // Answered here rather than through the keep-or-close
+                // question below: home is a layer over the selected tab, so
+                // going back to it costs the user nothing and asking would be
+                // about a tab they are not leaving.
+                //
+                // Only while the tab is what's on screen. Once home is
+                // showing, back belongs to the double-back handling further
+                // down — that is what leaves the app, and re-requesting home
+                // from here would swallow every press instead.
+                if (!ref.read(shouldShowBrowserHomeProvider)) {
                   lastBackButtonPress.value = null;
 
-                  final controller = ref.read(selectedTabSessionProvider);
-
-                  await controller.stopLoading();
+                  ref.read(forceBrowserHomeProvider.notifier).request();
                   return true;
-                } else if (tabState?.readerableState.active == true) {
-                  lastBackButtonPress.value = null;
+                }
+              } else if (onBackBehavior != null) {
+                if (!context.mounted) return false;
+
+                final keep = await showKeepTabDialog(context);
+                if (keep == null) {
+                  return true;
+                }
+
+                if (keep) {
+                  if (tabState == null) {
+                    return true;
+                  }
+                  ref
+                      .read(tabRepositoryProvider.notifier)
+                      .clearBackBehavior(tabState.id);
+                } else if (tabState != null) {
+                  if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
+                    return true;
+                  }
 
                   await ref
-                      .read(readerableScreenControllerProvider.notifier)
-                      .toggleReaderView(false);
-
-                  return true;
-                } else if (ref
-                    .read(tabHistoryStateProvider(tabState?.id))
-                    .canGoBack) {
-                  lastBackButtonPress.value = null;
-
-                  final controller = ref.read(selectedTabSessionProvider);
-
-                  await controller.goBack();
-                  return true;
+                      .read(tabRepositoryProvider.notifier)
+                      .closeTab(tabState.id);
                 }
 
-                if (onBackBehavior case ReturnToBrowserHomeTabBackBehavior()) {
-                  // Answered here rather than through the keep-or-close
-                  // question below: home is a layer over the selected tab, so
-                  // going back to it costs the user nothing and asking would be
-                  // about a tab they are not leaving.
-                  //
-                  // Only while the tab is what's on screen. Once home is
-                  // showing, back belongs to the double-back handling further
-                  // down — that is what leaves the app, and re-requesting home
-                  // from here would swallow every press instead.
-                  if (!ref.read(shouldShowBrowserHomeProvider)) {
-                    lastBackButtonPress.value = null;
+                if (!context.mounted) return true;
 
-                    ref.read(forceBrowserHomeProvider.notifier).request();
-                    return true;
-                  }
-                } else if (onBackBehavior != null) {
-                  if (!context.mounted) return false;
-
-                  final keep = await showKeepTabDialog(context);
-                  if (keep == null) {
-                    return true;
-                  }
-
-                  if (keep) {
-                    if (tabState == null) {
-                      return true;
-                    }
+                switch (onBackBehavior) {
+                  case BackgroundAppTabBackBehavior():
+                    await moveToBackground();
+                  case ReturnToSearchTabBackBehavior(:final tabType):
                     ref
-                        .read(tabRepositoryProvider.notifier)
-                        .clearBackBehavior(tabState.id);
-                  } else if (tabState != null) {
+                        .read(searchAutofocusSuppressionProvider.notifier)
+                        .suppressNext();
+                    await SearchRoute(tabType: tabType).push(context);
+                  case ReturnToBrowserHomeTabBackBehavior():
+                    // Never prompts, so it never reaches this block.
+                    break;
+                }
+
+                return true;
+              }
+
+              //Go router has routes to go back to
+              if (context.canPop()) {
+                return true;
+              }
+
+              // Handle double back to close (if enabled)
+              if (doubleBackCloseTab) {
+                // A tab is only closed when that lands somewhere the user
+                // came from: another tab of the container on screen, or the
+                // tab's opener, which may live in another container (#530).
+                // Closing a container's last tab otherwise selects a tab of
+                // some other container, so repeated presses emptied every
+                // container in turn (#616); leaving the app is the end of
+                // the line instead. On home no tab is on screen, so there is
+                // nothing to close either.
+                var canCloseTab = false;
+                if (tabState != null &&
+                    !ref.read(shouldShowBrowserHomeProvider)) {
+                  final containerId = await ref
+                      .read(tabDataRepositoryProvider.notifier)
+                      .getTabContainerId(tabState.id);
+                  if (!context.mounted) return true;
+
+                  final containerTabIds = await ref
+                      .read(containerRepositoryProvider.notifier)
+                      .getContainerTabIds(containerId);
+                  if (!context.mounted) return true;
+
+                  // Rows of closed tabs are only deleted once the engine's
+                  // tab list sync catches up, so the stored ids alone can
+                  // still count a tab that is already gone.
+                  final liveTabIds = ref.read(tabListProvider).value.toSet();
+                  final containerTabCount = containerTabIds
+                      .where(liveTabIds.contains)
+                      .length;
+
+                  canCloseTab =
+                      containerTabCount > 1 ||
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .hasOpenAncestor(tabState.id);
+                  if (!context.mounted) return true;
+
+                  // The lookups above yield, so another back press, a tab
+                  // switch or a route may have come in between. The answer
+                  // describes the tab that was on screen when they started;
+                  // act on it only if that is still what the user sees, and
+                  // otherwise let this press go.
+                  if (ref.read(selectedTabProvider) != tabState.id ||
+                      ref.read(shouldShowBrowserHomeProvider) ||
+                      GoRouterState.of(context).topRoute?.name !=
+                          BrowserRoute.name ||
+                      Navigator.of(context, rootNavigator: true).canPop()) {
+                    return true;
+                  }
+                }
+
+                if (lastBackButtonPress.value != null &&
+                    DateTime.now().difference(lastBackButtonPress.value!) <
+                        _backButtonPressTimeout) {
+                  lastBackButtonPress.value = null;
+
+                  if (tabState != null && canCloseTab) {
                     if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
                       return true;
                     }
@@ -2356,131 +2247,40 @@ class _Browser extends HookConsumerWidget {
                     await ref
                         .read(tabRepositoryProvider.notifier)
                         .closeTab(tabState.id);
-                  }
 
-                  if (!context.mounted) return true;
-
-                  switch (onBackBehavior) {
-                    case BackgroundAppTabBackBehavior():
-                      await moveToBackground();
-                    case ReturnToSearchTabBackBehavior(:final tabType):
-                      ref
-                          .read(searchAutofocusSuppressionProvider.notifier)
-                          .suppressNext();
-                      await SearchRoute(tabType: tabType).push(context);
-                    case ReturnToBrowserHomeTabBackBehavior():
-                      // Never prompts, so it never reaches this block.
-                      break;
-                  }
-
-                  return true;
-                }
-
-                //Go router has routes to go back to
-                if (context.canPop()) {
-                  return true;
-                }
-
-                // Handle double back to close (if enabled)
-                if (doubleBackCloseTab) {
-                  // A tab is only closed when that lands somewhere the user
-                  // came from: another tab of the container on screen, or the
-                  // tab's opener, which may live in another container (#530).
-                  // Closing a container's last tab otherwise selects a tab of
-                  // some other container, so repeated presses emptied every
-                  // container in turn (#616); leaving the app is the end of
-                  // the line instead. On home no tab is on screen, so there is
-                  // nothing to close either.
-                  var canCloseTab = false;
-                  if (tabState != null &&
-                      !ref.read(shouldShowBrowserHomeProvider)) {
-                    final containerId = await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .getTabContainerId(tabState.id);
-                    if (!context.mounted) return true;
-
-                    final containerTabIds = await ref
-                        .read(containerRepositoryProvider.notifier)
-                        .getContainerTabIds(containerId);
-                    if (!context.mounted) return true;
-
-                    // Rows of closed tabs are only deleted once the engine's
-                    // tab list sync catches up, so the stored ids alone can
-                    // still count a tab that is already gone.
-                    final liveTabIds = ref.read(tabListProvider).value.toSet();
-                    final containerTabCount = containerTabIds
-                        .where(liveTabIds.contains)
-                        .length;
-
-                    canCloseTab =
-                        containerTabCount > 1 ||
-                        await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .hasOpenAncestor(tabState.id);
-                    if (!context.mounted) return true;
-
-                    // The lookups above yield, so another back press, a tab
-                    // switch or a route may have come in between. The answer
-                    // describes the tab that was on screen when they started;
-                    // act on it only if that is still what the user sees, and
-                    // otherwise let this press go.
-                    if (ref.read(selectedTabProvider) != tabState.id ||
-                        ref.read(shouldShowBrowserHomeProvider) ||
-                        GoRouterState.of(context).topRoute?.name !=
-                            BrowserRoute.name ||
-                        Navigator.of(context, rootNavigator: true).canPop()) {
-                      return true;
+                    if (context.mounted) {
+                      ui_helper.showTabUndoClose(
+                        context,
+                        ref.read(tabRepositoryProvider.notifier).undoClose,
+                      );
                     }
-                  }
-
-                  if (lastBackButtonPress.value != null &&
-                      DateTime.now().difference(lastBackButtonPress.value!) <
-                          _backButtonPressTimeout) {
-                    lastBackButtonPress.value = null;
-
-                    if (tabState != null && canCloseTab) {
-                      if (!await confirmIsolatedTabCloseIfNeeded(tabState.id)) {
-                        return true;
-                      }
-
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .closeTab(tabState.id);
-
-                      if (context.mounted) {
-                        ui_helper.showTabUndoClose(
-                          context,
-                          ref.read(tabRepositoryProvider.notifier).undoClose,
-                        );
-                      }
-
-                      return true;
-                    } else {
-                      await moveToBackground();
-                      return true;
-                    }
-                  } else {
-                    lastBackButtonPress.value = DateTime.now();
-                    ui_helper.showTabBackButtonMessage(
-                      context,
-                      canCloseTab,
-                      _backButtonPressTimeout,
-                    );
 
                     return true;
+                  } else {
+                    await moveToBackground();
+                    return true;
                   }
-                }
+                } else {
+                  lastBackButtonPress.value = DateTime.now();
+                  ui_helper.showTabBackButtonMessage(
+                    context,
+                    canCloseTab,
+                    _backButtonPressTimeout,
+                  );
 
-                return true;
-              },
-              child: _BrowserView(
-                isFullscreen: tabInFullScreen,
-                pointerMoveEventSink: pointerMoveEventSink,
-                hasTopBarOffset: hasTopBarOffset,
-                hasLeftBarOffset: hasLeftBarOffset,
-                hasRightBarOffset: hasRightBarOffset,
-                applyBottomSafeArea: applyBottomSafeArea,
-              ),
+                  return true;
+                }
+              }
+
+              return true;
+            },
+            child: _BrowserView(
+              isFullscreen: tabInFullScreen,
+              pointerMoveEventSink: pointerMoveEventSink,
+              hasTopBarOffset: hasTopBarOffset,
+              hasLeftBarOffset: hasLeftBarOffset,
+              hasRightBarOffset: hasRightBarOffset,
+              applyBottomSafeArea: applyBottomSafeArea,
             ),
           ),
         );
@@ -2514,10 +2314,12 @@ class _BrowserView extends StatelessWidget {
       // Disable a side's SafeArea when the rail on that edge already consumed
       // the inset via the content offset.
       right: !isFullscreen && !hasRightBarOffset,
-      // Apply bottom SafeArea only when no toolbar/overlay is rendered at the
-      // bottom (and not in fullscreen). Otherwise the toolbar handles its own
-      // safe-area inset and the platform view extends behind it.
+      // See `applyBottomSafeArea` in [_BrowserContentPositioned].
       bottom: applyBottomSafeArea,
+      // The navigation bar's height, also while the keyboard covers it: a
+      // keyboard opened for a field in a sheet leaves the page where it is,
+      // and the inset dropping to 0 under it would grow the page view.
+      maintainBottomViewPadding: true,
       left: !isFullscreen && !hasLeftBarOffset,
       child: Stack(
         children: [BrowserView(pointerMoveEventSink: pointerMoveEventSink)],
@@ -2527,17 +2329,11 @@ class _BrowserView extends StatelessWidget {
 }
 
 class _SiteSettingsSheet extends HookConsumerWidget {
-  final double maxChildSize;
   final TabState initialTabState;
-  final double bottomAppBarHeight;
 
   static const initialHeight = 0.8;
 
-  const _SiteSettingsSheet({
-    required this.initialTabState,
-    required this.bottomAppBarHeight,
-    this.maxChildSize = 1.0,
-  });
+  const _SiteSettingsSheet({required this.initialTabState});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2546,15 +2342,12 @@ class _SiteSettingsSheet extends HookConsumerWidget {
 
     void handleClearSiteDataExpansion(bool isExpanded) {
       if (isExpanded) {
-        if (disableAnimations) {
-          draggableScrollableController.jumpTo(1.0);
-        } else {
-          draggableScrollableController.animateTo(
+        unawaited(
+          draggableScrollableController.moveTo(
             1.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.decelerate,
-          );
-        }
+            disableAnimations: disableAnimations,
+          ),
+        );
       }
     }
 
@@ -2563,14 +2356,11 @@ class _SiteSettingsSheet extends HookConsumerWidget {
       expand: false,
       initialChildSize: initialHeight,
       minChildSize: 0.1,
-      maxChildSize: maxChildSize,
       builder: (context, scrollController) {
-        return Material(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-          clipBehavior: Clip.antiAlias,
+        return BrowserSheetSurface(
+          // The browser's own sheets keep their color from before they were
+          // modal.
+          color: Theme.of(context).canvasColor,
           child: ViewTabSheetWidget(
             initialTabState: initialTabState,
             sheetScrollController: scrollController,
@@ -2589,7 +2379,6 @@ class _SiteSettingsSheet extends HookConsumerWidget {
               }
             },
             initialHeight: initialHeight,
-            bottomAppBarHeight: bottomAppBarHeight,
             onClearSiteDataExpandedChanged: handleClearSiteDataExpansion,
           ),
         );
@@ -2599,13 +2388,10 @@ class _SiteSettingsSheet extends HookConsumerWidget {
 }
 
 class _ViewTabsSheet extends HookConsumerWidget {
-  final double maxChildSize;
-
-  /// Matches [DraggableScrollableSheet]'s default, made explicit so the
-  /// scrim in [_SheetContainer] can seed its clip from it.
+  /// Matches [DraggableScrollableSheet]'s default.
   static const initialHeight = 0.5;
 
-  const _ViewTabsSheet({this.maxChildSize = 1.0});
+  const _ViewTabsSheet();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -2625,6 +2411,23 @@ class _ViewTabsSheet extends HookConsumerWidget {
     final draggableScrollableController = useDraggableScrollableController(
       keys: [tabsReorderable],
     );
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+
+    // The search field opens in the header, at the top of the tray, and takes
+    // the keyboard with it. The tray's content stays above the keyboard, and
+    // at its initial height that leaves next to no room for the header and
+    // the results. Searching expands the tray, which puts the field at the
+    // top of the window and the results between it and the keyboard.
+    ref.listen(tabViewSearchModeControllerProvider, (previous, searching) {
+      if (!searching || !draggableScrollableController.isAttached) return;
+
+      unawaited(
+        draggableScrollableController.moveTo(
+          1.0,
+          disableAnimations: disableAnimations,
+        ),
+      );
+    });
 
     return PointerScrollableSheet(
       key: ValueKey(tabsReorderable),
@@ -2632,14 +2435,10 @@ class _ViewTabsSheet extends HookConsumerWidget {
       expand: false,
       initialChildSize: initialHeight,
       minChildSize: 0.1,
-      maxChildSize: maxChildSize,
       builder: (context, scrollController) {
-        return Material(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(28),
-            topRight: Radius.circular(28),
-          ),
-          clipBehavior: Clip.antiAlias,
+        return BrowserSheetSurface(
+          // As in [_SiteSettingsSheet].
+          color: Theme.of(context).canvasColor,
           child: TabTrayGestures(
             child: switch (effectiveTabsViewMode) {
               TabsViewMode.list => ViewTabListWidget(
@@ -2666,6 +2465,7 @@ class _ViewTabsSheet extends HookConsumerWidget {
               ),
               TabsViewMode.tree => ViewTabTreesWidget(
                 scrollController: scrollController,
+                draggableScrollableController: draggableScrollableController,
                 showNewTabFab: true,
                 onClose: () {
                   ref

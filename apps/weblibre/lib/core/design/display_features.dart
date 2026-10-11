@@ -67,6 +67,57 @@ Offset? preferredAnchorPoint(MediaQueryData mediaQuery) {
   return best.center;
 }
 
+/// The sub-screen a modal route anchored at [anchorPoint] is laid out in, the
+/// one [DisplayFeatureSubScreen] picks: the closest to the anchor, or the whole
+/// window when no display feature divides it.
+///
+/// The route leaves the window's size in the modal's MediaQuery, so this is
+/// where a modal finds its own edges in the window.
+Rect modalSubScreen(
+  MediaQueryData mediaQuery, {
+  required Offset? anchorPoint,
+  required TextDirection textDirection,
+}) {
+  final size = mediaQuery.size;
+  final screen = Offset.zero & size;
+  final subScreens = DisplayFeatureSubScreen.subScreensInBounds(
+    screen,
+    DisplayFeatureSubScreen.avoidBounds(mediaQuery),
+  );
+
+  // Without one, the route anchors at the top corner the text starts from.
+  final wanted =
+      anchorPoint ??
+      switch (textDirection) {
+        TextDirection.rtl => Offset(size.width, 0),
+        TextDirection.ltr => Offset.zero,
+      };
+  final anchor = Offset(
+    wanted.dx.clamp(0.0, size.width),
+    wanted.dy.clamp(0.0, size.height),
+  );
+
+  double distanceTo(Rect subScreen) {
+    final nearest = Offset(
+      anchor.dx.clamp(subScreen.left, subScreen.right),
+      anchor.dy.clamp(subScreen.top, subScreen.bottom),
+    );
+    return (anchor - nearest).distance;
+  }
+
+  // The first of the closest, as the route takes it.
+  var closest = screen;
+  var closestDistance = double.infinity;
+  for (final subScreen in subScreens) {
+    final distance = distanceTo(subScreen);
+    if (distance < closestDistance) {
+      closest = subScreen;
+      closestDistance = distance;
+    }
+  }
+  return closest;
+}
+
 /// Whether [candidate] is a better home for a modal than [incumbent].
 ///
 /// Bigger wins, because a modal squeezed into the smaller half loses content.

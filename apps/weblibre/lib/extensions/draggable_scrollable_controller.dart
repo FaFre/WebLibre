@@ -17,10 +17,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
-extension RelativeSafeArea on MediaQueryData {
-  double relativeSafeArea() {
-    return 1.0 - (padding.top / size.height);
+extension DraggableScrollableControllerX on DraggableScrollableController {
+  /// Moves the sheet to [size], a fraction of its maximum height: animated, or
+  /// at once while animations are off.
+  Future<void> moveTo(
+    double size, {
+    required bool disableAnimations,
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.decelerate,
+  }) async {
+    if (disableAnimations) {
+      jumpTo(size);
+      return;
+    }
+
+    await animateTo(size, duration: duration, curve: curve);
   }
 }

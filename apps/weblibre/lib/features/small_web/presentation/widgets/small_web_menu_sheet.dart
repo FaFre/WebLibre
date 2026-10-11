@@ -21,7 +21,6 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_category.dart';
 import 'package:weblibre/features/small_web/data/models/kagi_small_web_mode.dart';
 import 'package:weblibre/features/small_web/data/models/small_web_source_kind.dart';
@@ -36,6 +35,7 @@ import 'package:weblibre/features/small_web/presentation/widgets/small_web_histo
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_mode_chips.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/wander_console_sheet.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -62,13 +62,8 @@ Future<void> openSmallWebMenuFlow(BuildContext context) async {
 }
 
 Future<SmallWebSheetRequest?> showSmallWebMenuSheet(BuildContext context) {
-  return showModalBottomSheet<SmallWebSheetRequest>(
+  return showBrowserSheet<SmallWebSheetRequest>(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
     builder: (context) => const _SmallWebMenuSheet(),
   );
 }
@@ -85,67 +80,71 @@ class _SmallWebMenuSheet extends ConsumerWidget {
     return PointerScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.3,
-      maxChildSize: 0.85,
       expand: false,
       builder: (context, scrollController) {
-        return Column(
-          children: [
-            const SheetDragHandle(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Icon(Icons.explore, color: colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.smallWeb_sheetTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  sessionAsync.when(
-                    data: (session) => _SourceKindChip(
-                      sourceKind: session.sourceKind,
-                      onChanged: (kind) {
-                        final notifier = ref.read(
-                          smallWebSessionControllerProvider.notifier,
-                        );
-                        notifier.setSourceKind(kind);
-                        // await notifier.discover();
-                      },
-                    ),
-                    loading: () => _SourceKindChip(
-                      sourceKind: SmallWebSourceKind.kagi,
-                      onChanged: (_) {},
-                    ),
-                    error: (_, _) => IconButton(
-                      onPressed: ref
-                          .read(smallWebSessionControllerProvider.notifier)
-                          .discover,
-                      icon: const Icon(Icons.refresh),
-                      tooltip: l10n.common_retry,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: sessionAsync.when(
-                data: (session) => _SmallWebMenuContent(
-                  scrollController: scrollController,
-                  session: session,
+        return BrowserSheetSurface(
+          child: Column(
+            children: [
+              const SheetDragHandle(),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
-                loading: () =>
-                    _SmallWebMenuLoading(scrollController: scrollController),
-                error: (error, _) => _SmallWebMenuError(
-                  scrollController: scrollController,
-                  error: error,
-                  onRetry: ref
-                      .read(smallWebSessionControllerProvider.notifier)
-                      .discover,
+                child: Row(
+                  children: [
+                    Icon(Icons.explore, color: colorScheme.primary),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.smallWeb_sheetTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const Spacer(),
+                    sessionAsync.when(
+                      data: (session) => _SourceKindChip(
+                        sourceKind: session.sourceKind,
+                        onChanged: (kind) {
+                          final notifier = ref.read(
+                            smallWebSessionControllerProvider.notifier,
+                          );
+                          notifier.setSourceKind(kind);
+                          // await notifier.discover();
+                        },
+                      ),
+                      loading: () => _SourceKindChip(
+                        sourceKind: SmallWebSourceKind.kagi,
+                        onChanged: (_) {},
+                      ),
+                      error: (_, _) => IconButton(
+                        onPressed: ref
+                            .read(smallWebSessionControllerProvider.notifier)
+                            .discover,
+                        icon: const Icon(Icons.refresh),
+                        tooltip: l10n.common_retry,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: sessionAsync.when(
+                  data: (session) => _SmallWebMenuContent(
+                    scrollController: scrollController,
+                    session: session,
+                  ),
+                  loading: () =>
+                      _SmallWebMenuLoading(scrollController: scrollController),
+                  error: (error, _) => _SmallWebMenuError(
+                    scrollController: scrollController,
+                    error: error,
+                    onRetry: ref
+                        .read(smallWebSessionControllerProvider.notifier)
+                        .discover,
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

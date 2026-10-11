@@ -24,7 +24,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 import 'package:weblibre/presentation/widgets/web_content_keyboard.dart';
@@ -36,13 +36,8 @@ Future<void> showAddonPopupBottomSheet(
   required String extensionId,
   required String extensionName,
 }) {
-  return showModalBottomSheet<void>(
+  return showBrowserSheet<void>(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
     builder: (context) => _AddonPopupSheet(
       extensionId: extensionId,
       extensionName: extensionName,
@@ -64,15 +59,21 @@ class _AddonPopupSheet extends StatelessWidget {
     return PointerScrollableSheet(
       initialChildSize: 0.65,
       minChildSize: 0.3,
-      maxChildSize: 0.95,
       expand: false,
       builder: (context, scrollController) {
-        return Column(
-          children: [
-            const SheetDragHandle(),
-            const Divider(height: 1),
-            Expanded(child: _AddonPopupPlatformView(extensionId: extensionId)),
-          ],
+        return BrowserSheetSurface(
+          // The extension's page is a native view. It starts below the handle
+          // and divider, past the corners' curve, so it needs no clip anyway.
+          clipBehavior: Clip.none,
+          child: Column(
+            children: [
+              const SheetDragHandle(),
+              const Divider(height: 1),
+              Expanded(
+                child: _AddonPopupPlatformView(extensionId: extensionId),
+              ),
+            ],
+          ),
         );
       },
     );

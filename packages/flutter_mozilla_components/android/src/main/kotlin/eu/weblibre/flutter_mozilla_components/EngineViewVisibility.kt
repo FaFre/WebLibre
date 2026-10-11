@@ -32,6 +32,8 @@ import java.lang.ref.WeakReference
  * visibility has to be set on the surface view itself, which is what this walks
  * down to do.
  *
+ * The same channel gives the page native focus back ([focusEngineView]).
+ *
  * [View.INVISIBLE] rather than [View.GONE] because the browser fragment is
  * attached to the container and its view has to keep being measured and laid
  * out: an attach against a zero-sized container is one of the failures
@@ -68,6 +70,11 @@ class EngineViewVisibility(
                 }
 
                 setVisible(visible)
+                result.success(null)
+            }
+
+            "focusEngineView" -> {
+                focusEngineView()
                 result.success(null)
             }
 
@@ -110,6 +117,21 @@ class EngineViewVisibility(
 
         hideTree(container)
         startWatching(container)
+    }
+
+    /**
+     * Gives the page native focus back, once Flutter focus has returned to it.
+     *
+     * Flutter clears a platform view's native focus when its own focus moves
+     * elsewhere, into a sheet or a dialog, but focus coming back doesn't
+     * restore it: the page would stay without its caret, its keyboard and the
+     * keys typed until a tap.
+     */
+    private fun focusEngineView() {
+        val view = GlobalComponents.components?.activeEngineView?.asView() ?: return
+        if (!view.hasFocus()) {
+            view.requestFocus()
+        }
     }
 
     /** Hides [container] and every surface under it, remembering each one. */

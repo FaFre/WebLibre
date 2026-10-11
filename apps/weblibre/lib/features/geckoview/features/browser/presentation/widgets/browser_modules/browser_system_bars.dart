@@ -25,6 +25,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 
 /// Tints the status-bar (top) and navigation-bar (bottom) inset regions with
 /// the active container's surface color, mirroring how the tab bar
@@ -88,18 +89,10 @@ class BrowserSystemBars extends HookConsumerWidget {
     // visually attached to the toolbar even when no container is active.
     final tintColor = palette?.surfaceColor ?? colorScheme.surfaceContainer;
 
-    // Icons must contrast with whatever fills the inset region.
-    final iconBrightness =
-        ThemeData.estimateBrightnessForColor(tintColor) == Brightness.dark
-        ? Brightness.light
-        : Brightness.dark;
-
     // Where the navigation bar lies outside the Flutter UI, the strip below
-    // can't reach it and the transparent bar shows the native window
-    // background, which follows the system theme rather than the app's
-    // (#657). There the bar carries the tint itself, and the bottom strip is
-    // dropped: any inset Flutter still sees isn't the bar, and a strip would
-    // stack a second band of the same color on top of it.
+    // can't reach it (see [browserSystemBarsStyle]). The bottom strip is
+    // dropped there: any inset Flutter still sees isn't the bar, and a strip
+    // would stack a second band of the same color on top of it.
     final navigationBarOutsideFlutter = ref.watch(
       navigationBarLayoutControllerProvider.select(
         (layout) => layout.outsideFlutter,
@@ -108,23 +101,9 @@ class BrowserSystemBars extends HookConsumerWidget {
 
     return IgnorePointer(
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          // The strips below are the bar backgrounds. MainActivity makes the
-          // native bars transparent at startup; restating it here keeps them
-          // that way whatever another route last asked for.
-          statusBarColor: Colors.transparent,
-          systemNavigationBarColor: navigationBarOutsideFlutter
-              ? tintColor
-              : Colors.transparent,
-          systemNavigationBarDividerColor: Colors.transparent,
-          systemStatusBarContrastEnforced: false,
-          systemNavigationBarContrastEnforced: false,
-          statusBarIconBrightness: iconBrightness,
-          systemNavigationBarIconBrightness: iconBrightness,
-          // iOS reports the bar's own brightness rather than the icons'.
-          statusBarBrightness: iconBrightness == Brightness.light
-              ? Brightness.dark
-              : Brightness.light,
+        value: browserSystemBarsStyle(
+          tintColor,
+          navigationBarOutsideFlutter: navigationBarOutsideFlutter,
         ),
         child: Stack(
           children: [

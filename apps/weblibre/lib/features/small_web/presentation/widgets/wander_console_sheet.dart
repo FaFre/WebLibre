@@ -28,6 +28,7 @@ import 'package:weblibre/features/small_web/domain/services/wander_source_servic
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_session_controller.dart';
 import 'package:weblibre/features/small_web/presentation/widgets/small_web_menu_sheet.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -37,13 +38,8 @@ import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 Future<SmallWebSheetRequest?> showWanderConsoleSheet(BuildContext context) {
-  return showModalBottomSheet<SmallWebSheetRequest>(
+  return showBrowserSheet<SmallWebSheetRequest>(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
     builder: (context) => const _WanderConsoleSheet(),
   );
 }
@@ -66,85 +62,89 @@ class _WanderConsoleSheet extends HookConsumerWidget {
     return PointerScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.3,
-      maxChildSize: 0.85,
       expand: false,
       builder: (context, scrollController) {
-        return Column(
-          children: [
-            const SheetDragHandle(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(
-                      context,
-                    ).pop(SmallWebSheetRequest.showMenu),
-                    icon: const Icon(Icons.arrow_back),
-                    style: const ButtonStyle(
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        return BrowserSheetSurface(
+          child: Column(
+            children: [
+              const SheetDragHandle(),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(
+                        context,
+                      ).pop(SmallWebSheetRequest.showMenu),
+                      icon: const Icon(Icons.arrow_back),
+                      style: const ButtonStyle(
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    l10n.smallWeb_selectConsoleTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  FilledButton.tonalIcon(
-                    onPressed: sessionAsync.isLoading || sessionAsync.hasError
-                        ? null
-                        : () async {
-                            final notifier = ref.read(
-                              smallWebSessionControllerProvider.notifier,
-                            );
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.smallWeb_selectConsoleTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const Spacer(),
+                    FilledButton.tonalIcon(
+                      onPressed: sessionAsync.isLoading || sessionAsync.hasError
+                          ? null
+                          : () async {
+                              final notifier = ref.read(
+                                smallWebSessionControllerProvider.notifier,
+                              );
 
-                            if (context.mounted) {
-                              Navigator.of(context).pop();
-                            }
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                              }
 
-                            await notifier.discover(forceNewConsole: true);
-                          },
-                    icon: const Icon(Icons.shuffle, size: 18),
-                    label: Text(l10n.smallWeb_randomButtonLabel),
-                  ),
-                ],
+                              await notifier.discover(forceNewConsole: true);
+                            },
+                      icon: const Icon(Icons.shuffle, size: 18),
+                      label: Text(l10n.smallWeb_randomButtonLabel),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: sessionAsync.when(
-                data: (session) {
-                  final currentConsoleUrl = session.currentConsoleUrl;
-                  final effectiveShowAllConsoles =
-                      showAllConsoles.value ?? currentConsoleUrl == null;
+              Expanded(
+                child: sessionAsync.when(
+                  data: (session) {
+                    final currentConsoleUrl = session.currentConsoleUrl;
+                    final effectiveShowAllConsoles =
+                        showAllConsoles.value ?? currentConsoleUrl == null;
 
-                  return _WanderConsoleSheetContent(
-                    session: session,
-                    searchController: searchController,
-                    searchQuery: searchQuery,
+                    return _WanderConsoleSheetContent(
+                      session: session,
+                      searchController: searchController,
+                      searchQuery: searchQuery,
+                      scrollController: scrollController,
+                      showAllConsoles: effectiveShowAllConsoles,
+                      onToggleAllConsoles: (value) {
+                        showAllConsoles.value = value;
+                      },
+                      onAddConsole: () => _showAddConsoleDialog(context, ref),
+                    );
+                  },
+                  loading: () => _WanderConsoleSheetLoading(
                     scrollController: scrollController,
-                    showAllConsoles: effectiveShowAllConsoles,
-                    onToggleAllConsoles: (value) {
-                      showAllConsoles.value = value;
-                    },
-                    onAddConsole: () => _showAddConsoleDialog(context, ref),
-                  );
-                },
-                loading: () => _WanderConsoleSheetLoading(
-                  scrollController: scrollController,
-                ),
-                error: (error, _) => _WanderConsoleSheetError(
-                  scrollController: scrollController,
-                  error: error,
-                  onRetry: ref
-                      .read(smallWebSessionControllerProvider.notifier)
-                      .discover,
+                  ),
+                  error: (error, _) => _WanderConsoleSheetError(
+                    scrollController: scrollController,
+                    error: error,
+                    onRetry: ref
+                        .read(smallWebSessionControllerProvider.notifier)
+                        .discover,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

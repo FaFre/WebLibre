@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:fast_equatable/fast_equatable.dart';
@@ -29,10 +28,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
-import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
@@ -42,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
@@ -521,9 +519,6 @@ class ViewTabGridWidget extends HookConsumerWidget {
   final bool tabsReorderable;
   final VoidCallback onClose;
 
-  static const _hideThreshold = 0.02; // 2% of sheet size change
-  static const _showThreshold = 0.02;
-
   const ViewTabGridWidget({
     required this.onClose,
     required this.scrollController,
@@ -535,79 +530,6 @@ class ViewTabGridWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final disableAnimations = MediaQuery.disableAnimationsOf(context);
-    final isFabVisible = useState(true);
-    final lastSheetSize = useRef(0.0);
-    final isInitialized = useRef(false);
-
-    // Delay initialization to ignore initial animations
-    useEffect(() {
-      final timer = Timer(
-        disableAnimations ? Duration.zero : const Duration(milliseconds: 500),
-        () {
-          isInitialized.value = true;
-          // Initialize lastSheetSize with current size
-          if (draggableScrollableController?.isAttached == true) {
-            lastSheetSize.value = draggableScrollableController!.size;
-          }
-        },
-      );
-      return timer.cancel;
-    }, [disableAnimations]);
-
-    // Listen to DraggableScrollableController for sheet size changes
-    useEffect(() {
-      final controller = draggableScrollableController;
-      if (controller == null) return null;
-
-      void listener() {
-        if (!isInitialized.value) return;
-        if (!controller.isAttached) return;
-
-        final currentSize = controller.size;
-        final difference = currentSize - lastSheetSize.value;
-
-        // Hide when sheet expands (dragging up / scrolling down)
-        if (difference > _hideThreshold && isFabVisible.value) {
-          isFabVisible.value = false;
-        }
-        // Show when sheet collapses (dragging down / scrolling up)
-        else if (difference < -_showThreshold && !isFabVisible.value) {
-          isFabVisible.value = true;
-        }
-
-        lastSheetSize.value = currentSize;
-      }
-
-      controller.addListener(listener);
-      return () => controller.removeListener(listener);
-    }, [draggableScrollableController]);
-
-    // Fallback: Also listen to scroll controller for fullscreen mode (no draggable sheet)
-    useEffect(() {
-      if (draggableScrollableController != null) return null;
-
-      var lastOffset = 0.0;
-      void listener() {
-        if (!isInitialized.value) return;
-
-        final currentOffset = scrollController.offset;
-        final difference = currentOffset - lastOffset;
-
-        if (difference > 10.0 && isFabVisible.value) {
-          isFabVisible.value = false;
-        } else if ((difference < -10.0 || currentOffset <= 0) &&
-            !isFabVisible.value) {
-          isFabVisible.value = true;
-        }
-
-        lastOffset = currentOffset;
-      }
-
-      scrollController.addListener(listener);
-      return () => scrollController.removeListener(listener);
-    }, [scrollController, draggableScrollableController]);
-
     return Column(
       children: [
         Expanded(
@@ -645,40 +567,10 @@ class ViewTabGridWidget extends HookConsumerWidget {
                 ),
               ),
               if (showNewTabFab)
-                AnimatedSlide(
-                  duration: disableAnimations
-                      ? Duration.zero
-                      : const Duration(milliseconds: 200),
-                  offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
-                  curve: Curves.easeInOut,
-                  child: AnimatedOpacity(
-                    duration: disableAnimations
-                        ? Duration.zero
-                        : const Duration(milliseconds: 200),
-                    opacity: isFabVisible.value ? 1.0 : 0.0,
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: TabViewHeader.headerSize + 4,
-                        right: 4,
-                      ),
-                      child: FloatingActionButton.small(
-                        onPressed: () async {
-                          final settings = ref.read(
-                            generalSettingsWithDefaultsProvider,
-                          );
-
-                          await SearchRoute(
-                            tabType:
-                                ref.read(selectedTabTypeProvider) ??
-                                settings.effectiveDefaultCreateTabType,
-                          ).push(context);
-
-                          onClose();
-                        },
-                        child: const Icon(Icons.add),
-                      ),
-                    ),
-                  ),
+                TabTrayNewTabFab(
+                  scrollController: scrollController,
+                  sheetController: draggableScrollableController,
+                  onClose: onClose,
                 ),
             ],
           ),

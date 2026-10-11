@@ -32,15 +32,22 @@ import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboar
 /// [BrowserKeyboardShortcuts] with the user's shortcuts, carried out by the
 /// [BrowserActionDispatcher].
 class BrowserKeyboardShortcutScope extends HookConsumerWidget {
+  /// See [BrowserKeyboardShortcuts.enabled].
+  final bool enabled;
   final Widget child;
 
-  const BrowserKeyboardShortcutScope({required this.child, super.key});
+  const BrowserKeyboardShortcutScope({
+    required this.child,
+    this.enabled = true,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bindings = ref.watch(effectiveKeyboardShortcutsProvider);
 
     return BrowserKeyboardShortcuts(
+      enabled: enabled,
       bindings: bindings,
       onAction: (action) => unawaited(
         ref.read(browserActionDispatcherProvider.notifier).run(action),
@@ -72,15 +79,21 @@ typedef _Shortcut = ({
 ///
 /// Scoped to its route by [ModalRoute.isCurrent]: with settings, a dialog or a
 /// modal sheet on top, Ctrl+W does nothing rather than closing a tab behind it.
+/// [enabled] does the same for a modal layer inside the route.
 class BrowserKeyboardShortcuts extends HookWidget {
   final Map<BrowserAction, List<KeyChord>> bindings;
   final ValueChanged<BrowserAction> onAction;
+
+  /// False while something modal covers [child] without a route of its own,
+  /// such as the browser's tab tray.
+  final bool enabled;
   final Widget child;
 
   const BrowserKeyboardShortcuts({
     required this.bindings,
     required this.onAction,
     required this.child,
+    this.enabled = true,
     super.key,
   });
 
@@ -106,10 +119,11 @@ class BrowserKeyboardShortcuts extends HookWidget {
     final latestRoute = useRef(ModalRoute.of(context))
       ..value = ModalRoute.of(context);
     final latestOnAction = useRef(onAction)..value = onAction;
+    final latestEnabled = useRef(enabled)..value = enabled;
 
     useEffect(() {
       KeyEventResult handleKeyEvent(KeyEvent event) {
-        if (latestRoute.value?.isCurrent == false) {
+        if (!latestEnabled.value || latestRoute.value?.isCurrent == false) {
           return KeyEventResult.ignored;
         }
 

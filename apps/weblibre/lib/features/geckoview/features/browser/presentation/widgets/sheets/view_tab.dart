@@ -53,7 +53,6 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   final DraggableScrollableController draggableScrollableController;
   final VoidCallback onClose;
   final double initialHeight;
-  final double bottomAppBarHeight;
   final ValueChanged<bool>? onClearSiteDataExpandedChanged;
 
   const ViewTabSheetWidget({
@@ -63,43 +62,12 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     required this.draggableScrollableController,
     required this.onClose,
     required this.initialHeight,
-    required this.bottomAppBarHeight,
     this.onClearSiteDataExpandedChanged,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final headerKey = useMemoized(() => GlobalKey());
-
-    final bottomInsets = useRef(0.0);
-    useEffect(
-      () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!context.mounted) return;
-          if (!draggableScrollableController.isAttached) return;
-
-          final diff =
-              ((MediaQuery.of(context).viewInsets.bottom / 2) /
-                  MediaQuery.of(context).size.height) -
-              bottomInsets.value;
-
-          final jumpValue = (draggableScrollableController.size + diff).clamp(
-            0.0,
-            1.0,
-          );
-
-          draggableScrollableController.jumpTo(jumpValue);
-
-          bottomInsets.value += diff;
-        });
-
-        return null;
-      },
-      [
-        MediaQuery.of(context).viewInsets.bottom,
-        MediaQuery.of(context).size.height,
-      ],
-    );
 
     return NestedScrollView(
       physics: const NeverScrollableScrollPhysics(),

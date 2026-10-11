@@ -19,7 +19,6 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
@@ -34,18 +33,14 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_toggles_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
 /// Shows the combined browser menu as a modal bottom sheet.
 Future<void> showBrowserMenuSheet(BuildContext context) {
-  return showModalBottomSheet(
+  return showBrowserSheet(
     context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-    ),
     builder: (context) => const _BrowserMenuSheet(),
   );
 }
@@ -110,52 +105,52 @@ class _BrowserMenuSheet extends ConsumerWidget {
       child: PointerScrollableSheet(
         initialChildSize: 0.85,
         minChildSize: 0.4,
-        maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) {
-          return Column(
-            children: [
-              const SheetDragHandle(),
+          return BrowserSheetSurface(
+            child: Column(
+              children: [
+                const SheetDragHandle(),
 
-              // Pinned above the scrolling list: "Done" and the back arrow
-              // are the only ways out of the arrangement UI, and a long
-              // section's rows would otherwise carry them off screen.
-              if (isReordering) ...[
-                const MenuReorderHeader(),
-                const Divider(height: 1),
-              ],
+                // Pinned above the scrolling list: "Done" and the back arrow
+                // are the only ways out of the arrangement UI, and a long
+                // section's rows would otherwise carry them off screen.
+                if (isReordering) ...[
+                  const MenuReorderHeader(),
+                  const Divider(height: 1),
+                ],
 
-              Expanded(
-                child: CustomScrollView(
-                  controller: scrollController,
-                  slivers: isReordering
-                      ? const [MenuReorderView()]
-                      : [
-                          SliverPadding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                Expanded(
+                  child: CustomScrollView(
+                    controller: scrollController,
+                    slivers: isReordering
+                        ? const [MenuReorderView()]
+                        : [
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              sliver: _MenuSections(
+                                selectedTabId: selectedTabId,
+                              ),
                             ),
-                            sliver: _MenuSections(selectedTabId: selectedTabId),
-                          ),
-                        ],
-                ),
-              ),
-
-              // Persistent navigation row at the bottom. Chrome rather than a
-              // section, so it stays out of the way while the menu is being
-              // arranged.
-              if (selectedTabId != null && !isReordering) ...[
-                const Divider(height: 1),
-                Padding(
-                  padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).padding.bottom,
-                    top: 8,
+                          ],
                   ),
-                  child: MenuNavigationRow(selectedTabId: selectedTabId),
                 ),
+
+                // Persistent navigation row at the bottom. Chrome rather than a
+                // section, so it stays out of the way while the menu is being
+                // arranged.
+                if (selectedTabId != null && !isReordering) ...[
+                  const Divider(height: 1),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: MenuNavigationRow(selectedTabId: selectedTabId),
+                  ),
+                ],
               ],
-            ],
+            ),
           );
         },
       ),

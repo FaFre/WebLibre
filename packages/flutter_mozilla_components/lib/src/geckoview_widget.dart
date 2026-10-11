@@ -62,7 +62,7 @@ class _GeckoViewState extends State<GeckoView> {
     'eu.weblibre.flutter_mozilla_components/trim_memory',
   );
 
-  static const _visibility = MethodChannel(
+  static const _engineView = MethodChannel(
     'eu.weblibre.flutter_mozilla_components/engine_view',
   );
 
@@ -197,13 +197,34 @@ class _GeckoViewState extends State<GeckoView> {
   /// being painted, and nothing else would then hide it.
   Future<void> _applyContainerVisibility() async {
     try {
-      await _visibility.invokeMethod<void>(
+      await _engineView.invokeMethod<void>(
         'setEngineViewVisible',
         widget.isPainted,
       );
     } catch (error, stackTrace) {
       developer.log(
         'Failed to set engine view visibility',
+        name: 'GeckoView',
+        level: 900,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Gives the page native focus back, once Flutter focus has returned to it.
+  ///
+  /// Flutter clears the page's native focus when its own focus moves off the
+  /// view, into a sheet or a dialog, but doesn't give it back when focus
+  /// returns: the page would stay without its caret, its keyboard and the keys
+  /// typed until a tap.
+  Future<void> _restoreEngineViewFocus(bool focused) async {
+    if (!focused) return;
+    try {
+      await _engineView.invokeMethod<void>('focusEngineView');
+    } catch (error, stackTrace) {
+      developer.log(
+        'Failed to focus engine view',
         name: 'GeckoView',
         level: 900,
         error: error,
@@ -223,33 +244,38 @@ class _GeckoViewState extends State<GeckoView> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformViewLink(
-      viewType: 'eu.weblibre/gecko',
-      surfaceFactory: (context, controller) =>
-          PointerInputSurface(controller: controller),
-      onCreatePlatformView: (PlatformViewCreationParams params) {
-        return PlatformViewsService.initExpensiveAndroidView(
-            id: params.id,
-            viewType: 'eu.weblibre/gecko',
-            layoutDirection: TextDirection.ltr,
-            creationParams: {},
-            creationParamsCodec: const StandardMessageCodec(),
-          )
-          ..addOnPlatformViewCreatedListener((value) {
-            params.onPlatformViewCreated(value);
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onFocusChange: (focused) => unawaited(_restoreEngineViewFocus(focused)),
+      child: PlatformViewLink(
+        viewType: 'eu.weblibre/gecko',
+        surfaceFactory: (context, controller) =>
+            PointerInputSurface(controller: controller),
+        onCreatePlatformView: (PlatformViewCreationParams params) {
+          return PlatformViewsService.initExpensiveAndroidView(
+              id: params.id,
+              viewType: 'eu.weblibre/gecko',
+              layoutDirection: TextDirection.ltr,
+              creationParams: {},
+              creationParamsCodec: const StandardMessageCodec(),
+            )
+            ..addOnPlatformViewCreatedListener((value) {
+              params.onPlatformViewCreated(value);
 
-            SchedulerBinding.instance.addPostFrameCallback((_) async {
-              // A first attempt for the common case where the view is painted
-              // from the frame it is created in, so the container is already
-              // attached by now. When it is not, this attempt is cheap and the
-              // ready subscription takes over as soon as it becomes attached.
-              await _enqueueShowNativeFragment();
-              await widget.postInitializationStep?.call();
-            });
-          })
-          // ignore: discarded_futures that hos it is done in docs
-          ..create();
-      },
+              SchedulerBinding.instance.addPostFrameCallback((_) async {
+                // A first attempt for the common case where the view is painted
+                // from the frame it is created in, so the container is already
+                // attached by now. When it is not, this attempt is cheap and the
+                // ready subscription takes over as soon as it becomes attached.
+                await _enqueueShowNativeFragment();
+                await widget.postInitializationStep?.call();
+              });
+            })
+            // ignore: discarded_futures that hos it is done in docs
+            ..create();
+        },
+      ),
     );
   }
 }
