@@ -3287,6 +3287,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contextualToolbar_buttonLabelPageDown => '向下翻页';
 
   @override
+  String get contextualToolbar_buttonLabelScrollTop => '滚动到顶部';
+
+  @override
+  String get contextualToolbar_buttonLabelScrollBottom => '滚动到底部';
+
+  @override
   String get contextualToolbar_buttonLabelFont => '文字大小';
 
   @override

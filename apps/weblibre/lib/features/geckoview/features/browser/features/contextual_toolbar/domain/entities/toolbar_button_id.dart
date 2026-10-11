@@ -44,6 +44,8 @@ enum ToolbarButtonId {
   moveToBackground,
   pageUp,
   pageDown,
+  scrollTop,
+  scrollBottom,
   font,
   extensionShortcut,
   toggleGestures,

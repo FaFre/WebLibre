@@ -3513,6 +3513,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contextualToolbar_buttonLabelPageDown => 'Page Down';
 
   @override
+  String get contextualToolbar_buttonLabelScrollTop => 'Scroll to Top';
+
+  @override
+  String get contextualToolbar_buttonLabelScrollBottom => 'Scroll to Bottom';
+
+  @override
   String get contextualToolbar_buttonLabelFont => 'Text Size';
 
   @override

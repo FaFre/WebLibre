@@ -46,6 +46,8 @@
   "contextualToolbar_buttonLabelHideTabBar": "隐藏标签栏",
   "contextualToolbar_buttonLabelPageUp": "向上翻页",
   "contextualToolbar_buttonLabelPageDown": "向下翻页",
+  "contextualToolbar_buttonLabelScrollTop": "滚动到顶部",
+  "contextualToolbar_buttonLabelScrollBottom": "滚动到底部",
   "contextualToolbar_buttonLabelFont": "文字大小",
   "contextualToolbar_buttonLabelExtensionShortcut": "扩展",
   "contextualToolbar_buttonLabelClearBrowsingData": "清除数据",

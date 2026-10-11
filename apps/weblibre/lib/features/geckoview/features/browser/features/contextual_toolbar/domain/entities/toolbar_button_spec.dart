@@ -172,6 +172,18 @@ const pageDownToolbarButtonSpec = ToolbarButtonSpec(
   canBeFallbackTarget: false,
 );
 
+const scrollTopToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.scrollTop,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
+const scrollBottomToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.scrollBottom,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
 const fontToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.font,
   defaultVisible: false,
@@ -232,6 +244,8 @@ const toolbarButtonSpecs = [
   moveToBackgroundToolbarButtonSpec,
   pageUpToolbarButtonSpec,
   pageDownToolbarButtonSpec,
+  scrollTopToolbarButtonSpec,
+  scrollBottomToolbarButtonSpec,
   fontToolbarButtonSpec,
   extensionShortcutToolbarButtonSpec,
   toggleGesturesToolbarButtonSpec,

@@ -3596,6 +3596,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get contextualToolbar_buttonLabelPageDown => 'Страница вниз';
 
   @override
+  String get contextualToolbar_buttonLabelScrollTop => 'Прокрутить в начало';
+
+  @override
+  String get contextualToolbar_buttonLabelScrollBottom => 'Прокрутить в конец';
+
+  @override
   String get contextualToolbar_buttonLabelFont => 'Размер текста';
 
   @override

@@ -62,6 +62,9 @@ extension ToolbarButtonIdL10n on ToolbarButtonId {
         l10n.contextualToolbar_buttonLabelMoveToBackground,
       ToolbarButtonId.pageUp => l10n.contextualToolbar_buttonLabelPageUp,
       ToolbarButtonId.pageDown => l10n.contextualToolbar_buttonLabelPageDown,
+      ToolbarButtonId.scrollTop => l10n.contextualToolbar_buttonLabelScrollTop,
+      ToolbarButtonId.scrollBottom =>
+        l10n.contextualToolbar_buttonLabelScrollBottom,
       ToolbarButtonId.font => l10n.contextualToolbar_buttonLabelFont,
       ToolbarButtonId.extensionShortcut =>
         l10n.contextualToolbar_buttonLabelExtensionShortcut,

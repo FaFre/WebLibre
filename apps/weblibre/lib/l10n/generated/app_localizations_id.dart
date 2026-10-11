@@ -3551,6 +3551,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get contextualToolbar_buttonLabelPageDown => 'Halaman ke Bawah';
 
   @override
+  String get contextualToolbar_buttonLabelScrollTop => 'Gulir ke Atas';
+
+  @override
+  String get contextualToolbar_buttonLabelScrollBottom => 'Gulir ke Bawah';
+
+  @override
   String get contextualToolbar_buttonLabelFont => 'Ukuran Teks';
 
   @override

@@ -46,6 +46,8 @@
   "contextualToolbar_buttonLabelHideTabBar": "Tableiste ausblenden",
   "contextualToolbar_buttonLabelPageUp": "Bild auf",
   "contextualToolbar_buttonLabelPageDown": "Bild ab",
+  "contextualToolbar_buttonLabelScrollTop": "Zum Anfang scrollen",
+  "contextualToolbar_buttonLabelScrollBottom": "Zum Ende scrollen",
   "contextualToolbar_buttonLabelFont": "Textgröße",
   "contextualToolbar_buttonLabelExtensionShortcut": "Erweiterungen",
   "contextualToolbar_buttonLabelClearBrowsingData": "Daten löschen",

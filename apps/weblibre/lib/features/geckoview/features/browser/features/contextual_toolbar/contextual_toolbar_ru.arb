@@ -46,6 +46,8 @@
   "contextualToolbar_buttonLabelHideTabBar": "Скрыть панель вкладок",
   "contextualToolbar_buttonLabelPageUp": "Страница вверх",
   "contextualToolbar_buttonLabelPageDown": "Страница вниз",
+  "contextualToolbar_buttonLabelScrollTop": "Прокрутить в начало",
+  "contextualToolbar_buttonLabelScrollBottom": "Прокрутить в конец",
   "contextualToolbar_buttonLabelFont": "Размер текста",
   "contextualToolbar_buttonLabelExtensionShortcut": "Расширения",
   "contextualToolbar_buttonLabelClearBrowsingData": "Очистить данные",

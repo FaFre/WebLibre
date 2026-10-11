@@ -3601,6 +3601,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get contextualToolbar_buttonLabelPageDown => 'Avanzar página';
 
   @override
+  String get contextualToolbar_buttonLabelScrollTop => 'Ir al principio';
+
+  @override
+  String get contextualToolbar_buttonLabelScrollBottom => 'Ir al final';
+
+  @override
   String get contextualToolbar_buttonLabelFont => 'Tamaño del texto';
 
   @override

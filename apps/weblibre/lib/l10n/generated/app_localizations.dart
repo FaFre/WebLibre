@@ -6076,6 +6076,18 @@ abstract class AppLocalizations {
   /// **'Page Down'**
   String get contextualToolbar_buttonLabelPageDown;
 
+  /// Name of the toolbar button that jumps to the top of the page, shown in toolbar customization and as the button's tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to Top'**
+  String get contextualToolbar_buttonLabelScrollTop;
+
+  /// Name of the toolbar button that jumps to the bottom of the page, shown in toolbar customization and as the button's tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll to Bottom'**
+  String get contextualToolbar_buttonLabelScrollBottom;
+
   /// Name of the toolbar button for adjusting the page's text size, shown in toolbar customization.
   ///
   /// In en, this message translates to:

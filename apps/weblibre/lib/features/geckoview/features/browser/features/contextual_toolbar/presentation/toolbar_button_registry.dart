@@ -41,6 +41,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_id_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
@@ -566,6 +567,52 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
                 }
               },
         icon: const Icon(MdiIcons.chevronDoubleDown),
+      );
+    },
+  ),
+  // Also on a long press of Page Up and Page Down, but on its own button for
+  // those who want it one tap away (#651).
+  ToolbarButtonDefinition(
+    spec: scrollTopToolbarButtonSpec,
+    // As [BrowserAction.scrollTop].
+    icon: Icons.vertical_align_top,
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    builder: (scope, context, ref) {
+      return IconButton(
+        tooltip: ToolbarButtonId.scrollTop.label(context),
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                final tabId = scope.selectedTabId;
+                if (tabId != null) {
+                  await ref
+                      .read(tabSessionProvider(tabId: tabId).notifier)
+                      .scrollToTop();
+                }
+              },
+        icon: const Icon(Icons.vertical_align_top),
+      );
+    },
+  ),
+  ToolbarButtonDefinition(
+    spec: scrollBottomToolbarButtonSpec,
+    // As [BrowserAction.scrollBottom].
+    icon: Icons.vertical_align_bottom,
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    builder: (scope, context, ref) {
+      return IconButton(
+        tooltip: ToolbarButtonId.scrollBottom.label(context),
+        onPressed: scope.isPreview
+            ? () {}
+            : () async {
+                final tabId = scope.selectedTabId;
+                if (tabId != null) {
+                  await ref
+                      .read(tabSessionProvider(tabId: tabId).notifier)
+                      .scrollToBottom();
+                }
+              },
+        icon: const Icon(Icons.vertical_align_bottom),
       );
     },
   ),

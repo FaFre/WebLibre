@@ -3581,6 +3581,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get contextualToolbar_buttonLabelPageDown => 'Bild ab';
 
   @override
+  String get contextualToolbar_buttonLabelScrollTop => 'Zum Anfang scrollen';
+
+  @override
+  String get contextualToolbar_buttonLabelScrollBottom => 'Zum Ende scrollen';
+
+  @override
   String get contextualToolbar_buttonLabelFont => 'Textgröße';
 
   @override

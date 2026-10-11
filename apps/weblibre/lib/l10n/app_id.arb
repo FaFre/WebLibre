@@ -995,6 +995,8 @@
   "contextualToolbar_buttonLabelHideTabBar": "Sembunyikan Bilah Tab",
   "contextualToolbar_buttonLabelPageUp": "Halaman ke Atas",
   "contextualToolbar_buttonLabelPageDown": "Halaman ke Bawah",
+  "contextualToolbar_buttonLabelScrollTop": "Gulir ke Atas",
+  "contextualToolbar_buttonLabelScrollBottom": "Gulir ke Bawah",
   "contextualToolbar_buttonLabelFont": "Ukuran Teks",
   "contextualToolbar_buttonLabelExtensionShortcut": "Ekstensi",
   "contextualToolbar_buttonLabelClearBrowsingData": "Hapus Data",

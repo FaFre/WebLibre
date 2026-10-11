@@ -46,6 +46,8 @@
   "contextualToolbar_buttonLabelHideTabBar": "Ocultar barra de pestañas",
   "contextualToolbar_buttonLabelPageUp": "Retroceder página",
   "contextualToolbar_buttonLabelPageDown": "Avanzar página",
+  "contextualToolbar_buttonLabelScrollTop": "Ir al principio",
+  "contextualToolbar_buttonLabelScrollBottom": "Ir al final",
   "contextualToolbar_buttonLabelFont": "Tamaño del texto",
   "contextualToolbar_buttonLabelExtensionShortcut": "Extensiones",
   "contextualToolbar_buttonLabelClearBrowsingData": "Borrar datos",

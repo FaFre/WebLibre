@@ -4396,6 +4396,14 @@
   "@contextualToolbar_buttonLabelPageDown": {
     "description": "Name of the toolbar button that scrolls the page down by one screen, shown in toolbar customization."
   },
+  "contextualToolbar_buttonLabelScrollTop": "Scroll to Top",
+  "@contextualToolbar_buttonLabelScrollTop": {
+    "description": "Name of the toolbar button that jumps to the top of the page, shown in toolbar customization and as the button's tooltip."
+  },
+  "contextualToolbar_buttonLabelScrollBottom": "Scroll to Bottom",
+  "@contextualToolbar_buttonLabelScrollBottom": {
+    "description": "Name of the toolbar button that jumps to the bottom of the page, shown in toolbar customization and as the button's tooltip."
+  },
   "contextualToolbar_buttonLabelFont": "Text Size",
   "@contextualToolbar_buttonLabelFont": {
     "description": "Name of the toolbar button for adjusting the page's text size, shown in toolbar customization."
