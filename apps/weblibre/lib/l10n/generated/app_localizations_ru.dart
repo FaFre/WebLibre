@@ -2229,6 +2229,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get bookmarks_tooltipExpand => 'Развернуть';
 
   @override
+  String get bookmarks_tooltipEntryActions => 'Другие действия';
+
+  @override
   String get bookmarks_menuAddBookmarkHere => 'Добавить закладку сюда';
 
   @override

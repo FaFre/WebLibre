@@ -611,6 +611,7 @@
   "bookmarks_tooltipSearchBookmarks": "Lesezeichen durchsuchen",
   "bookmarks_tooltipCollapse": "Einklappen",
   "bookmarks_tooltipExpand": "Ausklappen",
+  "bookmarks_tooltipEntryActions": "Weitere Aktionen",
   "bookmarks_menuAddBookmarkHere": "Lesezeichen hier hinzufügen",
   "bookmarks_menuAddSubfolderHere": "Unterordner hier hinzufügen",
   "bookmarks_menuCollapseAll": "Alle einklappen",

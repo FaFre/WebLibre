@@ -2009,6 +2009,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bookmarks_tooltipExpand => '展开';
 
   @override
+  String get bookmarks_tooltipEntryActions => '更多操作';
+
+  @override
   String get bookmarks_menuAddBookmarkHere => '在此处添加书签';
 
   @override

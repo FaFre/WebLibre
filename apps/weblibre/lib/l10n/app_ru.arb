@@ -611,6 +611,7 @@
   "bookmarks_tooltipSearchBookmarks": "Поиск закладок",
   "bookmarks_tooltipCollapse": "Свернуть",
   "bookmarks_tooltipExpand": "Развернуть",
+  "bookmarks_tooltipEntryActions": "Другие действия",
   "bookmarks_menuAddBookmarkHere": "Добавить закладку сюда",
   "bookmarks_menuAddSubfolderHere": "Добавить подпапку сюда",
   "bookmarks_menuCollapseAll": "Свернуть все",

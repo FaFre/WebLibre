@@ -611,6 +611,7 @@
   "bookmarks_tooltipSearchBookmarks": "Buscar marcadores",
   "bookmarks_tooltipCollapse": "Contraer",
   "bookmarks_tooltipExpand": "Expandir",
+  "bookmarks_tooltipEntryActions": "Más acciones",
   "bookmarks_menuAddBookmarkHere": "Añadir marcador aquí",
   "bookmarks_menuAddSubfolderHere": "Añadir subcarpeta aquí",
   "bookmarks_menuCollapseAll": "Contraer todo",

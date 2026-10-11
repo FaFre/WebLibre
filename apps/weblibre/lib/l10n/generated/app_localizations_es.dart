@@ -2237,6 +2237,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get bookmarks_tooltipExpand => 'Expandir';
 
   @override
+  String get bookmarks_tooltipEntryActions => 'Más acciones';
+
+  @override
   String get bookmarks_menuAddBookmarkHere => 'Añadir marcador aquí';
 
   @override

@@ -2173,6 +2173,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookmarks_tooltipExpand => 'Expand';
 
   @override
+  String get bookmarks_tooltipEntryActions => 'More actions';
+
+  @override
   String get bookmarks_menuAddBookmarkHere => 'Add Bookmark Here';
 
   @override

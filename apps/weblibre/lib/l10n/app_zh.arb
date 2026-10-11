@@ -611,6 +611,7 @@
   "bookmarks_tooltipSearchBookmarks": "搜索书签",
   "bookmarks_tooltipCollapse": "折叠",
   "bookmarks_tooltipExpand": "展开",
+  "bookmarks_tooltipEntryActions": "更多操作",
   "bookmarks_menuAddBookmarkHere": "在此处添加书签",
   "bookmarks_menuAddSubfolderHere": "在此处添加子文件夹",
   "bookmarks_menuCollapseAll": "全部折叠",

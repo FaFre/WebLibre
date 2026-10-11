@@ -2208,6 +2208,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get bookmarks_tooltipExpand => 'Luaskan';
 
   @override
+  String get bookmarks_tooltipEntryActions => 'Tindakan lainnya';
+
+  @override
   String get bookmarks_menuAddBookmarkHere => 'Tambah Markah di Sini';
 
   @override

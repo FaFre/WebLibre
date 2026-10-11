@@ -2220,6 +2220,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bookmarks_tooltipExpand => 'Ausklappen';
 
   @override
+  String get bookmarks_tooltipEntryActions => 'Weitere Aktionen';
+
+  @override
   String get bookmarks_menuAddBookmarkHere => 'Lesezeichen hier hinzufügen';
 
   @override

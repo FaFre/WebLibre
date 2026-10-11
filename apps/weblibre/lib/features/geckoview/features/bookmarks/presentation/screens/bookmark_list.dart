@@ -568,7 +568,8 @@ class BookmarkListScreen extends HookConsumerWidget {
     if (uiState.selectionMode) {
       return ListTile(
         key: ValueKey(bookmark.guid),
-        contentPadding: EdgeInsets.zero,
+        // The checkbox where the ⋮ button is otherwise.
+        contentPadding: const EdgeInsetsDirectional.only(end: 4),
         leading: UrlIcon([bookmark.url], iconSize: 34.0),
         trailing: Checkbox(
           value: isSelected,
@@ -586,7 +587,9 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     return ListTile(
       key: ValueKey(bookmark.guid),
-      contentPadding: EdgeInsets.zero,
+      // Its ⋮ icon 16 from the edge, as an M3 list item's trailing icon and
+      // as in folder rows (4 + the button's own 12).
+      contentPadding: const EdgeInsetsDirectional.only(end: 4),
       leading: UrlIcon([bookmark.url], iconSize: 34.0),
       trailing: _buildEntryMenu(context, ref, bookmark),
       title: Text(bookmark.title, maxLines: 3, overflow: TextOverflow.ellipsis),
@@ -610,18 +613,16 @@ class BookmarkListScreen extends HookConsumerWidget {
 
         return MenuAnchor(
           controller: controller,
-          builder: (context, controller, child) => InkWell(
-            onTap: () {
+          builder: (context, controller, child) => IconButton(
+            tooltip: l10n.bookmarks_tooltipEntryActions,
+            onPressed: () {
               if (controller.isOpen) {
                 controller.close();
               } else {
                 controller.open();
               }
             },
-            child: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
-              child: Icon(MdiIcons.dotsVertical),
-            ),
+            icon: const Icon(MdiIcons.dotsVertical),
           ),
           menuChildren: [
             MenuItemButton(
@@ -773,21 +774,16 @@ class BookmarkListScreen extends HookConsumerWidget {
             title: Text(folder.displayTitle(context)),
             trailing: MenuAnchor(
               controller: controller,
-              builder: (context, controller, child) => InkWell(
-                onTap: () {
+              builder: (context, controller, child) => IconButton(
+                tooltip: l10n.bookmarks_tooltipEntryActions,
+                onPressed: () {
                   if (controller.isOpen) {
                     controller.close();
                   } else {
                     controller.open();
                   }
                 },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 15.0,
-                  ),
-                  child: Icon(MdiIcons.dotsVertical),
-                ),
+                icon: const Icon(MdiIcons.dotsVertical),
               ),
               menuChildren: [
                 if (!isRoot) ...[

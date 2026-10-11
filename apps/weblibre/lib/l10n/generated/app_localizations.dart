@@ -3772,6 +3772,12 @@ abstract class AppLocalizations {
   /// **'Expand'**
   String get bookmarks_tooltipExpand;
 
+  /// Tooltip and accessibility label of the ⋮ button on each bookmark or folder row; it opens that row's menu (open, edit, move, delete and the like).
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get bookmarks_tooltipEntryActions;
+
   /// Item in the bookmarks screen menu that creates a new bookmark in the folder currently shown.
   ///
   /// In en, this message translates to:

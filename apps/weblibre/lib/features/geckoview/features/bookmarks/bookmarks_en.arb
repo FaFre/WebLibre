@@ -78,6 +78,10 @@
   "@bookmarks_tooltipExpand": {
     "description": "Tooltip of the folder icon of a collapsed bookmark folder: shows its contents inline."
   },
+  "bookmarks_tooltipEntryActions": "More actions",
+  "@bookmarks_tooltipEntryActions": {
+    "description": "Tooltip and accessibility label of the ⋮ button on each bookmark or folder row; it opens that row's menu (open, edit, move, delete and the like)."
+  },
   "bookmarks_menuAddBookmarkHere": "Add Bookmark Here",
   "@bookmarks_menuAddBookmarkHere": {
     "description": "Item in the bookmarks screen menu that creates a new bookmark in the folder currently shown."

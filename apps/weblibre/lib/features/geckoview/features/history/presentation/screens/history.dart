@@ -97,6 +97,14 @@ class Section extends MultiSliver {
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
                    ListTile(
+                     // M3 list items keep 16 on both sides. ListTile ends 24
+                     // from the edge, and the ⋮ button centers its icon in a
+                     // 48 target, so the icon sat 36 from the edge against
+                     // the favicon's 16 (#651). 4 + 12 brings it to 16.
+                     contentPadding: const EdgeInsetsDirectional.only(
+                       start: 16,
+                       end: 4,
+                     ),
                      leading: selectedItems.contains(item)
                          ? const CircleAvatar(
                              radius: 12,
