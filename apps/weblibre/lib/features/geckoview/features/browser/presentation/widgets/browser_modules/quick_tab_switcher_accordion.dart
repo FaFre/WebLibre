@@ -885,9 +885,10 @@ class _AccordionHeaderChip extends StatelessWidget {
 enum _TrayPosition { none, solo, start, middle, end }
 
 /// One slice of the shared tray behind an expanded group's chips. Adjacent
-/// slices abut with matching height and seam padding so their fill merges into
-/// a single continuous rounded, container-colored surface spanning the header
-/// and its tabs.
+/// slices abut with matching height and seam padding, and each runs its fill
+/// slightly under the next ([_seamOverlap]), so they merge into a single
+/// continuous rounded, container-colored surface spanning the header and its
+/// tabs.
 class _TraySlice extends StatelessWidget {
   final _TrayPosition position;
   final Color fill;
@@ -909,9 +910,31 @@ class _TraySlice extends StatelessWidget {
   /// last chip's edges exactly.
   static const Radius _radius = Radius.circular(8.0);
 
+  /// How far a slice's fill runs on under the next slice of the same tray.
+  ///
+  /// Chip sizes and scroll offsets are fractional, so two slices usually meet
+  /// inside a pixel. Each slice's anti-aliased edge covers that pixel only in
+  /// part, and the background shows through between them as a thin line
+  /// (#651). The next slice paints after this one, so a fill that runs at
+  /// least one physical pixel under it covers the pixel fully.
+  static const double _seamOverlap = 1.0;
+
+  /// The sides on which this slice's fill runs past its bounds: the one it
+  /// shares with the next slice, if the tray continues there.
+  EdgeInsets _fillOverlap({required bool isVertical}) => switch (position) {
+    _TrayPosition.start || _TrayPosition.middle =>
+      isVertical
+          ? const EdgeInsets.only(bottom: _seamOverlap)
+          : const EdgeInsets.only(right: _seamOverlap),
+    _TrayPosition.solo ||
+    _TrayPosition.end ||
+    _TrayPosition.none => EdgeInsets.zero,
+  };
+
   @override
   Widget build(BuildContext context) {
     final isVertical = axis == Axis.vertical;
+    final fillOverlap = _fillOverlap(isVertical: isVertical);
 
     if (isVertical && fullWidth) {
       // The panel's inset, shared with the toolbar-and-address block above the
@@ -934,18 +957,21 @@ class _TraySlice extends StatelessWidget {
           inset,
           isTrailingEdge ? 4.0 : 0.0,
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: fill,
+        child: CustomPaint(
+          painter: _TrayFillPainter(
+            fill: fill,
             borderRadius: switch (position) {
               _TrayPosition.solo => const BorderRadius.all(_radius),
               _TrayPosition.start => const BorderRadius.vertical(top: _radius),
               _TrayPosition.end => const BorderRadius.vertical(bottom: _radius),
               _TrayPosition.middle || _TrayPosition.none => BorderRadius.zero,
             },
+            overlap: fillOverlap,
           ),
-          padding: EdgeInsets.only(bottom: isTrailingEdge ? 4.0 : 0.0),
-          child: child,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isTrailingEdge ? 4.0 : 0.0),
+            child: child,
+          ),
         ),
       );
     }
@@ -994,16 +1020,50 @@ class _TraySlice extends StatelessWidget {
       child: SizedBox(
         height: isVertical ? null : 44.0,
         width: isVertical ? 44.0 : null,
-        child: Container(
-          decoration: BoxDecoration(color: fill, borderRadius: borderRadius),
-          // A small inset so the first/last chip get the same breathing room
-          // from the tray edge as the inter-chip seam gaps.
-          padding: isVertical
-              ? const EdgeInsets.symmetric(vertical: 4.0)
-              : const EdgeInsets.symmetric(horizontal: 4.0),
-          child: Center(child: child),
+        child: CustomPaint(
+          painter: _TrayFillPainter(
+            fill: fill,
+            borderRadius: borderRadius,
+            overlap: fillOverlap,
+          ),
+          child: Padding(
+            // A small inset so the first/last chip get the same breathing room
+            // from the tray edge as the inter-chip seam gaps.
+            padding: isVertical
+                ? const EdgeInsets.symmetric(vertical: 4.0)
+                : const EdgeInsets.symmetric(horizontal: 4.0),
+            child: Center(child: child),
+          ),
         ),
       ),
     );
   }
+}
+
+/// Paints a [_TraySlice]'s piece of the tray, running [overlap] past the
+/// slice's bounds; see [_TraySlice._seamOverlap].
+class _TrayFillPainter extends CustomPainter {
+  final Color fill;
+  final BorderRadius borderRadius;
+  final EdgeInsets overlap;
+
+  const _TrayFillPainter({
+    required this.fill,
+    required this.borderRadius,
+    required this.overlap,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRRect(
+      borderRadius.toRRect(overlap.inflateRect(Offset.zero & size)),
+      Paint()..color = fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_TrayFillPainter oldDelegate) =>
+      fill != oldDelegate.fill ||
+      borderRadius != oldDelegate.borderRadius ||
+      overlap != oldDelegate.overlap;
 }
