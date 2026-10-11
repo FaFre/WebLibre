@@ -66,6 +66,9 @@ Future<T?> showBrowserSheet<T>({
 /// stays above the keyboard, too. A sheet that
 /// reaches into a side inset (a navigation bar on a landscape phone) keeps its
 /// content clear of it as well.
+///
+/// A sheet with bars of its own at its top and bottom edges can let them run
+/// behind the system bars instead ([extendBehindSystemBars]).
 class BrowserSheetSurface extends ConsumerWidget {
   final Widget child;
 
@@ -77,10 +80,21 @@ class BrowserSheetSurface extends ConsumerWidget {
   /// reliably apply a rounded clip to one rendered into its own surface.
   final Clip clipBehavior;
 
+  /// Whether [child] reaches behind the status bar and the navigation bar (or
+  /// the keyboard) itself, so a bar at its top or bottom edge runs behind
+  /// them in its own color, as a [Scaffold]'s app bars do. [child] then spans
+  /// the surface's whole height, and finds what it has to keep its content
+  /// clear of where a [Scaffold]'s body would: the system bars in
+  /// [MediaQuery.paddingOf], top and bottom, and the keyboard in
+  /// [MediaQuery.viewInsetsOf]. Otherwise the surface keeps [child] clear of
+  /// them, in [color].
+  final bool extendBehindSystemBars;
+
   const BrowserSheetSurface({
     required this.child,
     this.color,
     this.clipBehavior = Clip.antiAlias,
+    this.extendBehindSystemBars = false,
     super.key,
   });
 
@@ -92,8 +106,9 @@ class BrowserSheetSurface extends ConsumerWidget {
         this.color ?? Theme.of(context).colorScheme.surfaceContainerLow;
     // Above the navigation bar, or the keyboard while it covers the bar.
     // Neither the browser nor a sheet's route makes room for the keyboard.
+    final navigationBarInset = MediaQuery.paddingOf(context).bottom;
     final bottomInset = math.max(
-      MediaQuery.paddingOf(context).bottom,
+      navigationBarInset,
       MediaQuery.viewInsetsOf(context).bottom,
     );
     final navigationBarOutsideFlutter = ref.watch(
@@ -109,17 +124,13 @@ class BrowserSheetSurface extends ConsumerWidget {
     };
     final textDirection = Directionality.of(context);
 
-    // Built once, outside the LayoutBuilder below: that one rebuilds on every
-    // frame of a drag, and only the insets and corners change.
-    final content = MediaQuery.removePadding(
-      context: context,
-      // The insets are applied below, so nothing inside adds them a second
-      // time.
+    // The insets are applied below, or handed to the child there, so nothing
+    // inside adds them a second time.
+    final mediaQuery = MediaQuery.of(context).removePadding(
       removeTop: true,
       removeBottom: true,
       removeLeft: true,
       removeRight: true,
-      child: child,
     );
 
     // The window's own geometry, which the sheet's MediaQuery doesn't carry: a
@@ -186,14 +197,30 @@ class BrowserSheetSurface extends ConsumerWidget {
               child: Padding(
                 padding: EdgeInsets.only(
                   left: math.max(0, windowInsets.left - sheet.left),
-                  top: statusBarOverlap,
+                  top: extendBehindSystemBars ? 0 : statusBarOverlap,
                   right: math.max(
                     0,
                     windowInsets.right - (windowSize.width - sheet.right),
                   ),
-                  bottom: bottomInset,
+                  bottom: extendBehindSystemBars ? 0 : bottomInset,
                 ),
-                child: content,
+                // Rebuilt on every frame of a drag, but it only rebuilds what
+                // reads the insets, and only when they change.
+                child: MediaQuery(
+                  // The keyboard stays in the view insets only, as the
+                  // platform reports it: the bottom padding is already less
+                  // what the keyboard covers. Counted in both, whatever adds
+                  // the two would keep clear of it twice.
+                  data: extendBehindSystemBars
+                      ? mediaQuery.copyWith(
+                          padding: EdgeInsets.only(
+                            top: statusBarOverlap,
+                            bottom: navigationBarInset,
+                          ),
+                        )
+                      : mediaQuery,
+                  child: child,
+                ),
               ),
             ),
           );

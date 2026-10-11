@@ -18,8 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
@@ -31,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
+import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 
 class TabViewScreen extends HookConsumerWidget {
   const TabViewScreen({super.key});
@@ -64,79 +67,98 @@ class TabViewScreen extends HookConsumerWidget {
       disableAnimations: disableAnimations,
     );
 
-    return Dialog.fullscreen(
-      child: Scaffold(
-        body: SafeArea(
-          child: TabTrayGestures(
-            child: switch (effectiveTabsViewMode) {
-              TabsViewMode.list => ViewTabListWidget(
-                key: ValueKey(tabsReorderable),
-                scrollController: scrollController,
-                tabsReorderable: tabsReorderable,
-                showNewTabFab: false,
-                onClose: () {
-                  const BrowserRoute().go(context);
-                },
-              ),
-              TabsViewMode.grid => ViewTabGridWidget(
-                key: ValueKey(tabsReorderable),
-                scrollController: scrollController,
-                tabsReorderable: tabsReorderable,
-                showNewTabFab: false,
-                onClose: () {
-                  const BrowserRoute().go(context);
-                },
-              ),
-              TabsViewMode.tree => ViewTabTreesWidget(
-                scrollController: scrollController,
-                showNewTabFab: false,
-                onClose: () {
-                  const BrowserRoute().go(context);
-                },
-              ),
-            },
+    final navigationBarOutsideFlutter = ref.watch(
+      navigationBarLayoutControllerProvider.select(
+        (layout) => layout.outsideFlutter,
+      ),
+    );
+
+    // The screen covers the system bars, and the browser under it would
+    // otherwise style them for its own colors. The action bar styles the
+    // navigation bar over this, where it is behind it.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: browserSystemBarsStyle(
+        Theme.of(context).scaffoldBackgroundColor,
+        navigationBarOutsideFlutter: navigationBarOutsideFlutter,
+      ),
+      child: Dialog.fullscreen(
+        child: Scaffold(
+          body: SafeArea(
+            // The header and the action bar run behind the system bars, as in
+            // the tray's sheet.
+            top: false,
+            bottom: false,
+            child: TabTrayGestures(
+              child: switch (effectiveTabsViewMode) {
+                TabsViewMode.list => ViewTabListWidget(
+                  key: ValueKey(tabsReorderable),
+                  scrollController: scrollController,
+                  tabsReorderable: tabsReorderable,
+                  showNewTabFab: false,
+                  onClose: () {
+                    const BrowserRoute().go(context);
+                  },
+                ),
+                TabsViewMode.grid => ViewTabGridWidget(
+                  key: ValueKey(tabsReorderable),
+                  scrollController: scrollController,
+                  tabsReorderable: tabsReorderable,
+                  showNewTabFab: false,
+                  onClose: () {
+                    const BrowserRoute().go(context);
+                  },
+                ),
+                TabsViewMode.tree => ViewTabTreesWidget(
+                  scrollController: scrollController,
+                  showNewTabFab: false,
+                  onClose: () {
+                    const BrowserRoute().go(context);
+                  },
+                ),
+              },
+            ),
           ),
-        ),
-        floatingActionButton: isSyncedScope
-            ? null
-            : AnimatedSlide(
-                duration: disableAnimations
-                    ? Duration.zero
-                    : const Duration(milliseconds: 200),
-                offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
-                curve: Curves.easeInOut,
-                child: AnimatedOpacity(
+          floatingActionButton: isSyncedScope
+              ? null
+              : AnimatedSlide(
                   duration: disableAnimations
                       ? Duration.zero
                       : const Duration(milliseconds: 200),
-                  opacity: isFabVisible.value ? 1.0 : 0.0,
-                  // Above the tray's own action bar when that sits at the
-                  // bottom, which the Scaffold does not know about.
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: actionsAtBottom ? TabViewActionBar.height : 0,
-                    ),
-                    child: FloatingActionButton(
-                      onPressed: () async {
-                        final settings = ref.read(
-                          generalSettingsWithDefaultsProvider,
-                        );
+                  offset: isFabVisible.value ? Offset.zero : const Offset(0, 2),
+                  curve: Curves.easeInOut,
+                  child: AnimatedOpacity(
+                    duration: disableAnimations
+                        ? Duration.zero
+                        : const Duration(milliseconds: 200),
+                    opacity: isFabVisible.value ? 1.0 : 0.0,
+                    // Above the tray's own action bar when that sits at the
+                    // bottom, which the Scaffold does not know about.
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: actionsAtBottom ? TabViewActionBar.height : 0,
+                      ),
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          final settings = ref.read(
+                            generalSettingsWithDefaultsProvider,
+                          );
 
-                        await SearchRoute(
-                          tabType:
-                              ref.read(selectedTabTypeProvider) ??
-                              settings.effectiveDefaultCreateTabType,
-                        ).push(context);
+                          await SearchRoute(
+                            tabType:
+                                ref.read(selectedTabTypeProvider) ??
+                                settings.effectiveDefaultCreateTabType,
+                          ).push(context);
 
-                        if (context.mounted) {
-                          const BrowserRoute().go(context);
-                        }
-                      },
-                      child: const Icon(Icons.add),
+                          if (context.mounted) {
+                            const BrowserRoute().go(context);
+                          }
+                        },
+                        child: const Icon(Icons.add),
+                      ),
                     ),
                   ),
                 ),
-              ),
+        ),
       ),
     );
   }

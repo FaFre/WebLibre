@@ -287,7 +287,12 @@ class TabViewRoute extends GoRouteData with $TabViewRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return DialogPage(builder: (_) => const TabViewScreen());
+    return DialogPage(
+      // Edge to edge: the tray's header and action bar run behind the system
+      // bars themselves (#651).
+      useSafeArea: false,
+      builder: (_) => const TabViewScreen(),
+    );
   }
 }
 

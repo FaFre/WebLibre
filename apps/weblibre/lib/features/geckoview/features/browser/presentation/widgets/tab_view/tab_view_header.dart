@@ -18,13 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
@@ -41,6 +44,7 @@ import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -167,16 +171,27 @@ class _SyncedDeviceSelector extends ConsumerWidget {
   }
 }
 
+/// The tab tray's header: the container filters, and the search field or the
+/// action row ([GeneralSettings.tabTrayActionsAtBottom]).
+///
+/// Set apart from the tabs the way an M3 top app bar is, by color rather than
+/// a divider (#651): it takes the surface container color while the tabs
+/// scroll under it ([scrollController]). It reaches behind the status bar,
+/// where its parent leaves that to it, and keeps its content below the bar.
 class TabViewHeader extends HookConsumerWidget {
   static const headerSize = 124.0;
 
   final TabsViewMode tabsViewMode;
   final VoidCallback onClose;
 
+  /// The tab list's.
+  final ScrollController scrollController;
+
   const TabViewHeader({
     super.key,
     required this.onClose,
     required this.tabsViewMode,
+    required this.scrollController,
   });
 
   @override
@@ -194,6 +209,16 @@ class TabViewHeader extends HookConsumerWidget {
     final hasSearchText = useListenableSelector(
       searchTextController,
       () => searchTextController.text.isNotEmpty,
+    );
+
+    final scrolledUnder = useListenableSelector(
+      scrollController,
+      () => scrollController.positions.any(
+        (position) =>
+            position.hasContentDimensions &&
+            position.hasPixels &&
+            position.extentBefore > 0,
+      ),
     );
 
     final showContainerUi = ref.watch(
@@ -281,10 +306,18 @@ class TabViewHeader extends HookConsumerWidget {
     });
 
     return Material(
+      color: scrolledUnder
+          ? Theme.of(context).colorScheme.surfaceContainer
+          : null,
+      animateColor: true,
       //Fix layout issue https://github.com/flutter/flutter/issues/78748#issuecomment-1194680555
       child: Align(
         child: Padding(
-          padding: const EdgeInsets.only(right: 8.0, left: 8.0, top: 8.0),
+          padding: EdgeInsets.only(
+            right: 8.0,
+            left: 8.0,
+            top: MediaQuery.paddingOf(context).top + 8.0,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -329,7 +362,8 @@ class TabViewHeader extends HookConsumerWidget {
                 )
               else if (!actionsAtBottom)
                 _TabViewActionRow(tabsViewMode: tabsViewMode),
-              if (searchMode || !actionsAtBottom) const Divider(),
+              // Under the search field only, as in an M3 search view.
+              if (searchMode) const Divider(),
               if (showContainerUi) _TabFilters(tabsViewMode: tabsViewMode),
               const SizedBox(height: 8),
             ],
@@ -341,14 +375,19 @@ class TabViewHeader extends HookConsumerWidget {
 }
 
 /// The tab tray's action row at the bottom of the tray, within thumb reach,
-/// for [GeneralSettings.tabTrayActionsAtBottom] (#651). Renders nothing while
-/// that setting is off, when [TabViewHeader] carries the row instead.
+/// for [GeneralSettings.tabTrayActionsAtBottom] (#651). While that setting is
+/// off, [TabViewHeader] carries the row instead, and this only keeps the
+/// tray's content clear of the navigation bar.
+///
+/// An M3 bottom app bar, in the surface container color and without a divider
+/// above it. It reaches behind the navigation bar (or the keyboard), where its
+/// parent leaves that to it, and keeps the row above the bar.
 ///
 /// The search it opens still appears in the header, at the top, where the
 /// keyboard cannot cover it.
 class TabViewActionBar extends ConsumerWidget {
-  /// Height including the divider above the row.
-  static const height = 57.0;
+  /// Height of the row, above the navigation bar.
+  static const height = 56.0;
 
   final TabsViewMode tabsViewMode;
 
@@ -362,23 +401,38 @@ class TabViewActionBar extends ConsumerWidget {
       ),
     );
 
+    // The navigation bar, or the keyboard while it covers the bar.
+    final bottomInset = math.max(
+      MediaQuery.paddingOf(context).bottom,
+      MediaQuery.viewInsetsOf(context).bottom,
+    );
+
     if (!actionsAtBottom) {
-      return const SizedBox.shrink();
+      return SizedBox(height: bottomInset);
     }
 
-    return Material(
-      child: SizedBox(
-        height: height,
-        child: Column(
-          children: [
-            const Divider(height: 1),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _TabViewActionRow(tabsViewMode: tabsViewMode),
-              ),
-            ),
-          ],
+    final color = Theme.of(context).colorScheme.surfaceContainer;
+    final navigationBarOutsideFlutter = ref.watch(
+      navigationBarLayoutControllerProvider.select(
+        (layout) => layout.outsideFlutter,
+      ),
+    );
+
+    // The bar is what the navigation bar shows, so it sets the bar's style,
+    // and colors a bar this can't reach.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: browserSystemBarsStyle(
+        color,
+        navigationBarOutsideFlutter: navigationBarOutsideFlutter,
+      ),
+      child: Material(
+        color: color,
+        child: Padding(
+          padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: bottomInset),
+          child: SizedBox(
+            height: height,
+            child: _TabViewActionRow(tabsViewMode: tabsViewMode),
+          ),
         ),
       ),
     );

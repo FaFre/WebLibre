@@ -43,7 +43,7 @@ final _contentKey = GlobalKey();
 /// height) over a button, in a window with a status bar and a navigation bar.
 /// Without [showSheet], only the button. A different [extent] builds a new
 /// sheet in the same host. [sheetMaxWidth] caps the sheet's width the way the
-/// browser's theme does.
+/// browser's theme does. [extendBehindSystemBars] is the surface's.
 Future<void> _pumpSheet(
   WidgetTester tester, {
   required double extent,
@@ -53,6 +53,7 @@ Future<void> _pumpSheet(
   DraggableScrollableController? controller,
   double sideInset = 0,
   double? sheetMaxWidth,
+  bool extendBehindSystemBars = false,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(400, _windowHeight);
@@ -110,6 +111,7 @@ Future<void> _pumpSheet(
                     initialChildSize: extent,
                     minChildSize: 0.1,
                     builder: (context, scrollController) => BrowserSheetSurface(
+                      extendBehindSystemBars: extendBehindSystemBars,
                       // The sheet's controller moves it only once a scrollable
                       // uses this.
                       child: CustomScrollView(
@@ -191,6 +193,15 @@ int _scrimLayersAt(WidgetTester tester, Offset point) => find
 FocusNode _focusOf(WidgetTester tester, String label) =>
     Focus.of(tester.element(find.text(label)));
 
+const _keyboard = 300.0;
+
+/// Shows a keyboard over the navigation bar, with the insets the platform
+/// reports for it: the bottom padding drops what the keyboard covers.
+void _showKeyboard(WidgetTester tester) {
+  tester.view.viewInsets = const FakeViewPadding(bottom: _keyboard);
+  tester.view.padding = const FakeViewPadding(top: _statusBar);
+}
+
 SystemUiOverlayStyle _style(WidgetTester tester) => tester
     .widget<AnnotatedRegion<SystemUiOverlayStyle>>(
       find.descendant(
@@ -223,6 +234,37 @@ void main() {
     await tester.pump();
 
     expect(_contentRect(tester).bottom, _windowHeight - 300);
+  });
+
+  testWidgets('hands the system bars behind it to content that extends there', (
+    tester,
+  ) async {
+    await _pumpSheet(tester, extent: 1.0, extendBehindSystemBars: true);
+
+    final content = _contentRect(tester);
+    expect(content.top, 0);
+    expect(content.bottom, _windowHeight);
+    expect(
+      MediaQuery.paddingOf(tester.element(find.byKey(_contentKey))),
+      const EdgeInsets.only(top: _statusBar, bottom: _navigationBar),
+    );
+  });
+
+  testWidgets('hands such content the keyboard as the platform does', (
+    tester,
+  ) async {
+    await _pumpSheet(tester, extent: 0.5, extendBehindSystemBars: true);
+    _showKeyboard(tester);
+    await tester.pump();
+
+    final content = _contentRect(tester);
+    expect(content.top, _windowHeight / 2);
+    expect(content.bottom, _windowHeight);
+    final contentElement = tester.element(find.byKey(_contentKey));
+    // Clear of the status bar already, and the keyboard covers the
+    // navigation bar: the keyboard is in the view insets only.
+    expect(MediaQuery.paddingOf(contentElement), EdgeInsets.zero);
+    expect(MediaQuery.viewInsetsOf(contentElement).bottom, _keyboard);
   });
 
   testWidgets('expanded, it covers the status bar and drops its corners', (

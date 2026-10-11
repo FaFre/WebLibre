@@ -2439,6 +2439,9 @@ class _ViewTabsSheet extends HookConsumerWidget {
         return BrowserSheetSurface(
           // As in [_SiteSettingsSheet].
           color: Theme.of(context).canvasColor,
+          // The header and the action bar run behind the system bars, so the
+          // bars take their colors (#651).
+          extendBehindSystemBars: true,
           child: TabTrayGestures(
             child: switch (effectiveTabsViewMode) {
               TabsViewMode.list => ViewTabListWidget(

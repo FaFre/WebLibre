@@ -542,19 +542,28 @@ class ViewTabListWidget extends HookConsumerWidget {
                                 child: TabViewHeader(
                                   onClose: onClose,
                                   tabsViewMode: TabsViewMode.list,
+                                  scrollController: scrollController,
                                 ),
                               ),
                         ) ??
                         TabViewHeader(
                           onClose: onClose,
                           tabsViewMode: TabsViewMode.list,
+                          scrollController: scrollController,
                         ),
                   ),
                 ],
-                body: _TabListView(
-                  scrollController: scrollController,
-                  tabsReorderable: tabsReorderable,
-                  onClose: onClose,
+                // The header and the action bar keep clear of the system
+                // bars, the list runs between them.
+                body: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  removeBottom: true,
+                  child: _TabListView(
+                    scrollController: scrollController,
+                    tabsReorderable: tabsReorderable,
+                    onClose: onClose,
+                  ),
                 ),
               ),
               if (showNewTabFab && !isSyncedScope)

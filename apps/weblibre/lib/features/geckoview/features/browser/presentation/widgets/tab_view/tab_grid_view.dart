@@ -548,21 +548,30 @@ class ViewTabGridWidget extends HookConsumerWidget {
                                 child: TabViewHeader(
                                   onClose: onClose,
                                   tabsViewMode: TabsViewMode.grid,
+                                  scrollController: scrollController,
                                 ),
                               ),
                         ) ??
                         TabViewHeader(
                           onClose: onClose,
                           tabsViewMode: TabsViewMode.grid,
+                          scrollController: scrollController,
                         ),
                   ),
                 ],
-                body: LayoutBuilder(
-                  builder: (context, constraints) => _TabGridView(
-                    availableWidth: constraints.maxWidth,
-                    scrollController: scrollController,
-                    tabsReorderable: tabsReorderable,
-                    onClose: onClose,
+                // The header and the action bar keep clear of the system
+                // bars, the grid runs between them.
+                body: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  removeBottom: true,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => _TabGridView(
+                      availableWidth: constraints.maxWidth,
+                      scrollController: scrollController,
+                      tabsReorderable: tabsReorderable,
+                      onClose: onClose,
+                    ),
                   ),
                 ),
               ),

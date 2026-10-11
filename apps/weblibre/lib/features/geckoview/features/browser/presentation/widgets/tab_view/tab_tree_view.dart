@@ -196,13 +196,21 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                   TabViewHeader(
                     onClose: onClose,
                     tabsViewMode: TabsViewMode.tree,
+                    scrollController: scrollController,
                   ),
                   Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) => _TabTreesGrid(
-                        availableWidth: constraints.maxWidth,
-                        scrollController: scrollController,
-                        onClose: onClose,
+                    // The header and the action bar keep clear of the system
+                    // bars, the grid runs between them.
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      removeBottom: true,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) => _TabTreesGrid(
+                          availableWidth: constraints.maxWidth,
+                          scrollController: scrollController,
+                          onClose: onClose,
+                        ),
                       ),
                     ),
                   ),
