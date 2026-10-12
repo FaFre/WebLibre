@@ -52,12 +52,21 @@ const _navigationBar = 48.0;
 /// Pumps the tray's frame the way its sheet hands it the system bars: the
 /// header over a list of tabs, the action bar below, in a window with a
 /// status bar and a navigation bar.
+///
+/// While [tabsShown] is false, the list makes way for a scroll view without
+/// tabs, as the synced tabs' spinner does.
 Future<void> _pumpTray(
   WidgetTester tester, {
   required ScrollController scrollController,
   required bool actionsAtBottom,
   bool navigationBarOutsideFlutter = false,
+  ValueNotifier<bool>? tabsShown,
 }) async {
+  final scrolledUnder = ValueNotifier(false);
+  addTearDown(scrolledUnder.dispose);
+  final shown = tabsShown ?? ValueNotifier(true);
+  if (tabsShown == null) addTearDown(shown.dispose);
+
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(400, _windowHeight);
   const insets = FakeViewPadding(top: _statusBar, bottom: _navigationBar);
@@ -110,19 +119,39 @@ Future<void> _pumpTray(
               TabViewHeader(
                 onClose: () {},
                 tabsViewMode: TabsViewMode.list,
-                scrollController: scrollController,
+                scrolledUnder: scrolledUnder,
               ),
               Expanded(
-                child: Builder(
-                  builder: (context) => MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    removeBottom: true,
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: 50,
-                      itemBuilder: (context, index) =>
-                          SizedBox(height: 64, child: Text('tab $index')),
+                child: TabViewScrolledUnderListener(
+                  scrolledUnder: scrolledUnder,
+                  child: Builder(
+                    builder: (context) => MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      removeBottom: true,
+                      child: ValueListenableBuilder(
+                        valueListenable: shown,
+                        builder: (context, tabsShown, _) => tabsShown
+                            ? ListView.builder(
+                                controller: scrollController,
+                                itemCount: 50,
+                                itemBuilder: (context, index) => SizedBox(
+                                  height: 64,
+                                  child: Text('tab $index'),
+                                ),
+                              )
+                            : CustomScrollView(
+                                controller: scrollController,
+                                slivers: const [
+                                  SliverFillRemaining(
+                                    hasScrollBody: false,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
                     ),
                   ),
                 ),
@@ -288,6 +317,30 @@ void main() {
 
     scrollController.jumpTo(0);
     await tester.pumpAndSettle();
+    expect(_headerColor(tester), isNull);
+  });
+
+  testWidgets('the header drops the container color when the tabs make way '
+      'for another scroll view', (tester) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    final tabsShown = ValueNotifier(true);
+    addTearDown(tabsShown.dispose);
+    await _pumpTray(
+      tester,
+      scrollController: scrollController,
+      actionsAtBottom: true,
+      tabsShown: tabsShown,
+    );
+
+    scrollController.jumpTo(100);
+    await tester.pumpAndSettle();
+    expect(_headerColor(tester), _colorScheme(tester).surfaceContainer);
+
+    // A scroll controller says nothing when its scroll view is replaced.
+    tabsShown.value = false;
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(_headerColor(tester), isNull);
   });
 }

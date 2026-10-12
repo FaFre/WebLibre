@@ -19,6 +19,38 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/navigation_bar.dart';
+
+/// Styles the system bars over [child] with [browserSystemBarsStyle], for a
+/// surface of [color] drawn behind them.
+class BrowserSystemBarsRegion extends ConsumerWidget {
+  final Color color;
+  final Widget child;
+
+  const BrowserSystemBarsRegion({
+    required this.color,
+    required this.child,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final navigationBarOutsideFlutter = ref.watch(
+      navigationBarLayoutControllerProvider.select(
+        (layout) => layout.outsideFlutter,
+      ),
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: browserSystemBarsStyle(
+        color,
+        navigationBarOutsideFlutter: navigationBarOutsideFlutter,
+      ),
+      child: child,
+    );
+  }
+}
 
 /// The system bar style for a browser surface of [background] that is drawn
 /// behind the status and navigation bars: `BrowserSystemBars`, or a sheet

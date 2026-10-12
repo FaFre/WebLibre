@@ -244,10 +244,11 @@ void main() {
     final content = _contentRect(tester);
     expect(content.top, 0);
     expect(content.bottom, _windowHeight);
-    expect(
-      MediaQuery.paddingOf(tester.element(find.byKey(_contentKey))),
-      const EdgeInsets.only(top: _statusBar, bottom: _navigationBar),
-    );
+    final contentElement = tester.element(find.byKey(_contentKey));
+    const bars = EdgeInsets.only(top: _statusBar, bottom: _navigationBar);
+    expect(MediaQuery.paddingOf(contentElement), bars);
+    // As a Scaffold's body sees them, for a FAB's margin, say.
+    expect(MediaQuery.viewPaddingOf(contentElement), bars);
   });
 
   testWidgets('hands such content the keyboard as the platform does', (
@@ -265,6 +266,11 @@ void main() {
     // navigation bar: the keyboard is in the view insets only.
     expect(MediaQuery.paddingOf(contentElement), EdgeInsets.zero);
     expect(MediaQuery.viewInsetsOf(contentElement).bottom, _keyboard);
+    // The navigation bar stays in the view padding.
+    expect(
+      MediaQuery.viewPaddingOf(contentElement),
+      const EdgeInsets.only(bottom: _navigationBar),
+    );
   });
 
   testWidgets('expanded, it covers the status bar and drops its corners', (

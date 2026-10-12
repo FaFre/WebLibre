@@ -530,6 +530,8 @@ class ViewTabGridWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final scrolledUnder = useValueNotifier(false);
+
     return Column(
       children: [
         Expanded(
@@ -548,29 +550,32 @@ class ViewTabGridWidget extends HookConsumerWidget {
                                 child: TabViewHeader(
                                   onClose: onClose,
                                   tabsViewMode: TabsViewMode.grid,
-                                  scrollController: scrollController,
+                                  scrolledUnder: scrolledUnder,
                                 ),
                               ),
                         ) ??
                         TabViewHeader(
                           onClose: onClose,
                           tabsViewMode: TabsViewMode.grid,
-                          scrollController: scrollController,
+                          scrolledUnder: scrolledUnder,
                         ),
                   ),
                 ],
                 // The header and the action bar keep clear of the system
                 // bars, the grid runs between them.
-                body: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  removeBottom: true,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) => _TabGridView(
-                      availableWidth: constraints.maxWidth,
-                      scrollController: scrollController,
-                      tabsReorderable: tabsReorderable,
-                      onClose: onClose,
+                body: TabViewScrolledUnderListener(
+                  scrolledUnder: scrolledUnder,
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    removeBottom: true,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) => _TabGridView(
+                        availableWidth: constraints.maxWidth,
+                        scrollController: scrollController,
+                        tabsReorderable: tabsReorderable,
+                        onClose: onClose,
+                      ),
                     ),
                   ),
                 ),

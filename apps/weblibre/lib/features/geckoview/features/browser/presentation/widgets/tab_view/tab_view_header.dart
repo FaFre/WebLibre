@@ -20,14 +20,13 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
-import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
@@ -176,22 +175,25 @@ class _SyncedDeviceSelector extends ConsumerWidget {
 ///
 /// Set apart from the tabs the way an M3 top app bar is, by color rather than
 /// a divider (#651): it takes the surface container color while the tabs
-/// scroll under it ([scrollController]). It reaches behind the status bar,
-/// where its parent leaves that to it, and keeps its content below the bar.
+/// scroll under it ([scrolledUnder]). It reaches behind the status bar, where
+/// its parent leaves that to it, and keeps its content below the bar.
 class TabViewHeader extends HookConsumerWidget {
+  /// The header's height below the status bar, which it adds to that once it
+  /// runs behind the bar.
   static const headerSize = 124.0;
 
   final TabsViewMode tabsViewMode;
   final VoidCallback onClose;
 
-  /// The tab list's.
-  final ScrollController scrollController;
+  /// Whether the tabs are scrolled under the header, from the
+  /// [TabViewScrolledUnderListener] around them.
+  final ValueListenable<bool> scrolledUnder;
 
   const TabViewHeader({
     super.key,
     required this.onClose,
     required this.tabsViewMode,
-    required this.scrollController,
+    required this.scrolledUnder,
   });
 
   @override
@@ -211,15 +213,7 @@ class TabViewHeader extends HookConsumerWidget {
       () => searchTextController.text.isNotEmpty,
     );
 
-    final scrolledUnder = useListenableSelector(
-      scrollController,
-      () => scrollController.positions.any(
-        (position) =>
-            position.hasContentDimensions &&
-            position.hasPixels &&
-            position.extentBefore > 0,
-      ),
-    );
+    final scrolledUnder = useValueListenable(this.scrolledUnder);
 
     final showContainerUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -374,6 +368,48 @@ class TabViewHeader extends HookConsumerWidget {
   }
 }
 
+/// Tells [TabViewHeader] whether the tabs are scrolled under it, from the
+/// notifications of the scroll view in [child], as an [AppBar] learns it.
+///
+/// Not from the tab list's [ScrollController]: it stays silent when the tray
+/// swaps its scroll view for another (a change of view mode, scope or column
+/// count), while the new one reports its metrics once laid out. So [child]
+/// shows a scroll view in every state, even with nothing to list, or the
+/// header would keep the last one's color.
+class TabViewScrolledUnderListener extends StatelessWidget {
+  /// What [TabViewHeader.scrolledUnder] reads.
+  final ValueNotifier<bool> scrolledUnder;
+  final Widget child;
+
+  const TabViewScrolledUnderListener({
+    super.key,
+    required this.scrolledUnder,
+    required this.child,
+  });
+
+  bool _update(int depth, ScrollMetrics metrics) {
+    // The tab list itself, not a scroll view inside it.
+    if (depth == 0 && metrics.axis == Axis.vertical) {
+      scrolledUnder.value = metrics.extentBefore > 0;
+    }
+
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: (notification) =>
+          _update(notification.depth, notification.metrics),
+      child: NotificationListener<ScrollUpdateNotification>(
+        onNotification: (notification) =>
+            _update(notification.depth, notification.metrics),
+        child: child,
+      ),
+    );
+  }
+}
+
 /// The tab tray's action row at the bottom of the tray, within thumb reach,
 /// for [GeneralSettings.tabTrayActionsAtBottom] (#651). While that setting is
 /// off, [TabViewHeader] carries the row instead, and this only keeps the
@@ -412,19 +448,11 @@ class TabViewActionBar extends ConsumerWidget {
     }
 
     final color = Theme.of(context).colorScheme.surfaceContainer;
-    final navigationBarOutsideFlutter = ref.watch(
-      navigationBarLayoutControllerProvider.select(
-        (layout) => layout.outsideFlutter,
-      ),
-    );
 
     // The bar is what the navigation bar shows, so it sets the bar's style,
     // and colors a bar this can't reach.
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: browserSystemBarsStyle(
-        color,
-        navigationBarOutsideFlutter: navigationBarOutsideFlutter,
-      ),
+    return BrowserSystemBarsRegion(
+      color: color,
       child: Material(
         color: color,
         child: Padding(

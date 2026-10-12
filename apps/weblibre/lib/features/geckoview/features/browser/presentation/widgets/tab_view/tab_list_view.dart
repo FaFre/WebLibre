@@ -196,11 +196,20 @@ class _TabListView extends HookConsumerWidget {
 
     final l10n = AppLocalizations.of(context);
 
+    // In a scroll view of its own, which tells the header that no tabs are
+    // scrolled under it anymore ([TabViewScrolledUnderListener]).
+    Widget placeholder(Widget child) => CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        SliverFillRemaining(hasScrollBody: false, child: Center(child: child)),
+      ],
+    );
+
     return syncedTabs.when(
       skipLoadingOnReload: true,
       data: (tabs) {
         if (tabs.isEmpty) {
-          return Center(child: Text(l10n.browser_noSyncedTabsAvailable));
+          return placeholder(Text(l10n.browser_noSyncedTabsAvailable));
         }
 
         return Padding(
@@ -230,9 +239,9 @@ class _TabListView extends HookConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text(l10n.browser_failedToLoadSyncedTabs(error.toString())),
+      loading: () => placeholder(const CircularProgressIndicator()),
+      error: (error, _) => placeholder(
+        Text(l10n.browser_failedToLoadSyncedTabs(error.toString())),
       ),
     );
   }
@@ -523,6 +532,7 @@ class ViewTabListWidget extends HookConsumerWidget {
         (scope) => scope == TabsTrayScope.synced,
       ),
     );
+    final scrolledUnder = useValueNotifier(false);
 
     return Column(
       children: [
@@ -542,27 +552,30 @@ class ViewTabListWidget extends HookConsumerWidget {
                                 child: TabViewHeader(
                                   onClose: onClose,
                                   tabsViewMode: TabsViewMode.list,
-                                  scrollController: scrollController,
+                                  scrolledUnder: scrolledUnder,
                                 ),
                               ),
                         ) ??
                         TabViewHeader(
                           onClose: onClose,
                           tabsViewMode: TabsViewMode.list,
-                          scrollController: scrollController,
+                          scrolledUnder: scrolledUnder,
                         ),
                   ),
                 ],
                 // The header and the action bar keep clear of the system
                 // bars, the list runs between them.
-                body: MediaQuery.removePadding(
-                  context: context,
-                  removeTop: true,
-                  removeBottom: true,
-                  child: _TabListView(
-                    scrollController: scrollController,
-                    tabsReorderable: tabsReorderable,
-                    onClose: onClose,
+                body: TabViewScrolledUnderListener(
+                  scrolledUnder: scrolledUnder,
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    removeBottom: true,
+                    child: _TabListView(
+                      scrollController: scrollController,
+                      tabsReorderable: tabsReorderable,
+                      onClose: onClose,
+                    ),
                   ),
                 ),
               ),

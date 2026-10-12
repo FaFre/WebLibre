@@ -65,8 +65,13 @@ class TabTrayNewTabFab extends HookConsumerWidget {
         duration: duration,
         opacity: isVisible.value ? 1.0 : 0.0,
         child: Padding(
-          padding: const EdgeInsets.only(
-            top: TabViewHeader.headerSize + 4,
+          padding: EdgeInsets.only(
+            // Clear of the header, which runs behind the status bar once the
+            // sheet slides under it, and grows by its height.
+            top:
+                TabViewHeader.headerSize +
+                MediaQuery.paddingOf(context).top +
+                4,
             right: 4,
           ),
           child: FloatingActionButton.small(

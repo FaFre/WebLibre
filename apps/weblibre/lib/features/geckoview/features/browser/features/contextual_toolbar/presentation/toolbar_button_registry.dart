@@ -516,26 +516,12 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .pageUp();
-                }
-              },
-        onLongPress: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .scrollToTop();
-                }
-              },
+        onPressed: _withTabSession(scope, ref, (session) => session.pageUp()),
+        onLongPress: _withTabSession(
+          scope,
+          ref,
+          (session) => session.scrollToTop(),
+        ),
         icon: const Icon(MdiIcons.chevronDoubleUp),
       );
     },
@@ -546,26 +532,12 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
     builder: (scope, context, ref) {
       return IconButton(
-        onPressed: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .pageDown();
-                }
-              },
-        onLongPress: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .scrollToBottom();
-                }
-              },
+        onPressed: _withTabSession(scope, ref, (session) => session.pageDown()),
+        onLongPress: _withTabSession(
+          scope,
+          ref,
+          (session) => session.scrollToBottom(),
+        ),
         icon: const Icon(MdiIcons.chevronDoubleDown),
       );
     },
@@ -580,16 +552,11 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     builder: (scope, context, ref) {
       return IconButton(
         tooltip: ToolbarButtonId.scrollTop.label(context),
-        onPressed: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .scrollToTop();
-                }
-              },
+        onPressed: _withTabSession(
+          scope,
+          ref,
+          (session) => session.scrollToTop(),
+        ),
         icon: const Icon(Icons.vertical_align_top),
       );
     },
@@ -602,16 +569,11 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     builder: (scope, context, ref) {
       return IconButton(
         tooltip: ToolbarButtonId.scrollBottom.label(context),
-        onPressed: scope.isPreview
-            ? () {}
-            : () async {
-                final tabId = scope.selectedTabId;
-                if (tabId != null) {
-                  await ref
-                      .read(tabSessionProvider(tabId: tabId).notifier)
-                      .scrollToBottom();
-                }
-              },
+        onPressed: _withTabSession(
+          scope,
+          ref,
+          (session) => session.scrollToBottom(),
+        ),
         icon: const Icon(Icons.vertical_align_bottom),
       );
     },
@@ -684,6 +646,22 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
 final Map<String, ToolbarButtonDefinition> toolbarButtonRegistryById = {
   for (final def in toolbarButtonRegistry) def.spec.id.name: def,
 };
+
+/// Runs [action] on the selected tab's session, and nothing in a preview.
+VoidCallback _withTabSession(
+  ContextualToolbarScope scope,
+  WidgetRef ref,
+  Future<void> Function(TabSession session) action,
+) {
+  if (scope.isPreview) return () {};
+
+  return () async {
+    final tabId = scope.selectedTabId;
+    if (tabId != null) {
+      await action(ref.read(tabSessionProvider(tabId: tabId).notifier));
+    }
+  };
+}
 
 Future<void> _closeTab(
   BuildContext context,

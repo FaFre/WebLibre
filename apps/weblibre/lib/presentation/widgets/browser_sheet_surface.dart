@@ -20,10 +20,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
-import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -69,7 +66,7 @@ Future<T?> showBrowserSheet<T>({
 ///
 /// A sheet with bars of its own at its top and bottom edges can let them run
 /// behind the system bars instead ([extendBehindSystemBars]).
-class BrowserSheetSurface extends ConsumerWidget {
+class BrowserSheetSurface extends StatelessWidget {
   final Widget child;
 
   /// The surface's color, Material's for a modal bottom sheet by default.
@@ -101,7 +98,7 @@ class BrowserSheetSurface extends ConsumerWidget {
   static const cornerRadius = 28.0;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final color =
         this.color ?? Theme.of(context).colorScheme.surfaceContainerLow;
     // Above the navigation bar, or the keyboard while it covers the bar.
@@ -111,11 +108,8 @@ class BrowserSheetSurface extends ConsumerWidget {
       navigationBarInset,
       MediaQuery.viewInsetsOf(context).bottom,
     );
-    final navigationBarOutsideFlutter = ref.watch(
-      navigationBarLayoutControllerProvider.select(
-        (layout) => layout.outsideFlutter,
-      ),
-    );
+    // The navigation bar, whatever covers it.
+    final navigationBarViewPadding = MediaQuery.viewPaddingOf(context).bottom;
     // On a foldable, a modal bottom sheet route lays its sheet out on one side
     // of the fold, and leaves the window's size in the sheet's MediaQuery.
     final sheetRoute = switch (ModalRoute.of(context)) {
@@ -176,11 +170,8 @@ class BrowserSheetSurface extends ConsumerWidget {
                 1.0,
               );
 
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: browserSystemBarsStyle(
-              color,
-              navigationBarOutsideFlutter: navigationBarOutsideFlutter,
-            ),
+          return BrowserSystemBarsRegion(
+            color: color,
             child: Material(
               color: color,
               // The corners follow the sheet's edge frame by frame. Material
@@ -210,12 +201,18 @@ class BrowserSheetSurface extends ConsumerWidget {
                   // The keyboard stays in the view insets only, as the
                   // platform reports it: the bottom padding is already less
                   // what the keyboard covers. Counted in both, whatever adds
-                  // the two would keep clear of it twice.
+                  // the two would keep clear of it twice. The view padding
+                  // keeps the bars whatever covers them, as it does for a
+                  // Scaffold's body.
                   data: extendBehindSystemBars
                       ? mediaQuery.copyWith(
                           padding: EdgeInsets.only(
                             top: statusBarOverlap,
                             bottom: navigationBarInset,
+                          ),
+                          viewPadding: EdgeInsets.only(
+                            top: statusBarOverlap,
+                            bottom: navigationBarViewPadding,
                           ),
                         )
                       : mediaQuery,

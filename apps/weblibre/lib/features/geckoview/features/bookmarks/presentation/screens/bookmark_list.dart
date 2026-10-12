@@ -732,7 +732,7 @@ class BookmarkListScreen extends HookConsumerWidget {
     if (uiState.selectionMode) {
       return Padding(
         key: ValueKey(folder.guid),
-        padding: const EdgeInsets.only(right: 4.0),
+        padding: const EdgeInsetsDirectional.only(end: 4.0),
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           leading: Icon(isExpanded ? MdiIcons.folderOpen : MdiIcons.folder),
@@ -753,7 +753,7 @@ class BookmarkListScreen extends HookConsumerWidget {
 
     return Padding(
       key: ValueKey(folder.guid),
-      padding: const EdgeInsets.only(right: 4.0),
+      padding: const EdgeInsetsDirectional.only(end: 4.0),
       child: HookBuilder(
         builder: (context) {
           final controller = useMenuController();

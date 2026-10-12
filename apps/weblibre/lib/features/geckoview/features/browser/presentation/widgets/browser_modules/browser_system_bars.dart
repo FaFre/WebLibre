@@ -100,11 +100,8 @@ class BrowserSystemBars extends HookConsumerWidget {
     );
 
     return IgnorePointer(
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: browserSystemBarsStyle(
-          tintColor,
-          navigationBarOutsideFlutter: navigationBarOutsideFlutter,
-        ),
+      child: BrowserSystemBarsRegion(
+        color: tintColor,
         child: Stack(
           children: [
             Positioned(

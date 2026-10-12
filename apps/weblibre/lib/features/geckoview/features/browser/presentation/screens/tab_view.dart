@@ -18,10 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
@@ -67,20 +65,11 @@ class TabViewScreen extends HookConsumerWidget {
       disableAnimations: disableAnimations,
     );
 
-    final navigationBarOutsideFlutter = ref.watch(
-      navigationBarLayoutControllerProvider.select(
-        (layout) => layout.outsideFlutter,
-      ),
-    );
-
     // The screen covers the system bars, and the browser under it would
     // otherwise style them for its own colors. The action bar styles the
     // navigation bar over this, where it is behind it.
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: browserSystemBarsStyle(
-        Theme.of(context).scaffoldBackgroundColor,
-        navigationBarOutsideFlutter: navigationBarOutsideFlutter,
-      ),
+    return BrowserSystemBarsRegion(
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Dialog.fullscreen(
         child: Scaffold(
           body: SafeArea(
