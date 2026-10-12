@@ -36,6 +36,7 @@ import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeatu
 import eu.weblibre.flutter_mozilla_components.feature.DownloadAppChooser
 import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
+import eu.weblibre.flutter_mozilla_components.feature.PromptSheet
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
@@ -202,6 +203,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The download prompts and the app chooser below show in this manager.
+        PromptSheet.install(childFragmentManager)
 
         requestDownloadPermissionsLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
@@ -466,8 +470,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     // every download prompt when the page navigates away — the
                     // only one that reaches a custom third-party chooser.
                     dismissCustomFirstPartyDownloadDialog = downloadAppChooser::dismiss,
-                    // A full-width card on the bottom edge, the same shape AC gives the
-                    // extension permission prompt, instead of a centred dialog (#651).
+                    // On the bottom edge at full width, as AC lays out the extension
+                    // permission prompt; [PromptSheet] makes both M3 bottom sheets (#651).
                     // Button colours and radius stay default: AC's radius override reads the
                     // background colour unconditionally.
                     promptsStyling = DownloadsFeature.PromptsStyling(

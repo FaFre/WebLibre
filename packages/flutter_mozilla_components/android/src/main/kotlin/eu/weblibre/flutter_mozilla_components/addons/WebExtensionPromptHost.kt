@@ -13,6 +13,7 @@ import android.os.Looper
 import androidx.fragment.app.FragmentActivity
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.feature.PromptSheet
 import eu.weblibre.flutter_mozilla_components.lock.ProfileLockedWindow
 import java.lang.ref.WeakReference
 import mozilla.components.support.base.log.logger.Logger
@@ -151,7 +152,13 @@ object WebExtensionPromptHost : Application.ActivityLifecycleCallbacks {
         onActivityPaused(activity)
     }
 
-    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
+        // The extension prompts show as M3 bottom sheets. Set up with the
+        // window rather than when it binds: a prompt restored with the window
+        // starts with it, before it resumes.
+        (activity as? FragmentActivity)?.let { PromptSheet.install(it.supportFragmentManager) }
+    }
+
     override fun onActivityStarted(activity: Activity) = Unit
     override fun onActivityStopped(activity: Activity) = Unit
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
