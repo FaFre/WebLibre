@@ -21,11 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
@@ -128,14 +128,8 @@ class TabViewScreen extends HookConsumerWidget {
                       ),
                       child: FloatingActionButton(
                         onPressed: () async {
-                          final settings = ref.read(
-                            generalSettingsWithDefaultsProvider,
-                          );
-
                           await SearchRoute(
-                            tabType:
-                                ref.read(selectedTabTypeProvider) ??
-                                settings.effectiveDefaultCreateTabType,
+                            tabType: trayNewTabType(ref),
                           ).push(context);
 
                           if (context.mounted) {

@@ -509,9 +509,11 @@ Future<void> _clearContainerData(
   final shouldReopenTabs = result!.reopenTabs;
 
   try {
+    // Off the recently closed list, which would keep their back history
+    // past the clearing.
     final closedTabIds = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .closeContainerTabs(container.id);
+        .closeContainerTabs(container.id, keepOffRecentlyClosed: true);
 
     await ref
         .read(browserDataServiceProvider.notifier)

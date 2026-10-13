@@ -545,9 +545,9 @@
   "settings_trackingProtectionStrictSubtitle": "Blockiert mehr Tracker-Kategorien einschließlich Tracking-Inhalten, kann aber manche Websites beeinträchtigen.",
   "settings_trackingProtectionCustomLabel": "Benutzerdefiniert",
   "settings_trackingProtectionCustomSubtitle": "Festlegen, welche Tracker und Skripte blockiert werden.",
-  "settings_contentBlockingDatabaseTitle": "Datenbank für Inhaltsblockierung",
-  "settings_contentBlockingDatabaseKeywords": "Werbung, Tracker, Inhaltsblockierung",
-  "settings_contentBlockingDatabaseSubtitle": "GeckoView-Blocklisten für ETP-Kategorien wie Werbung, Analyse und Social-Media-Tracker verwenden. Erfordert einen Neustart der App.",
+  "settings_trackerStatisticsTitle": "Tracker-Statistik",
+  "settings_trackerStatisticsKeywords": "Tracker, Statistik, blockierte Tracker, Inhaltsblockierung, Datenbank",
+  "settings_trackerStatisticsSubtitle": "Blockierte Tracker täglich nach Kategorie zählen. Gespeichert werden nur Anzahl und Datum, keine besuchten Websites. Das Löschen des Browserverlaufs löscht auch diese Statistik. Erfordert einen Neustart der App.",
   "settings_bounceTrackingProtectionTitle": "Schutz vor Bounce-Tracking",
   "settings_bounceTrackingProtectionKeywords": "Weiterleitungs-Tracker, Redirect-Tracker",
   "settings_bounceTrackingProtectionSubtitle": "Blockiert Weiterleitungs-Tracker, die über zwischengeschaltete URL-Weiterleitungen zwischen Websites Daten sammeln",
@@ -851,7 +851,7 @@
   "settings_privacySectionTrackingProtectionTitle": "Tracking-Schutz",
   "settings_privacySectionTrackingProtectionKeywords": "Datenschutz, Privatsphäre",
   "settings_indexEnhancedTrackingProtectionSubtitle": "Festlegen, wie konsequent Tracker blockiert werden",
-  "settings_indexContentBlockingDatabaseSubtitle": "GeckoView-Blocklisten für ETP-Kategorien verwenden",
+  "settings_indexTrackerStatisticsSubtitle": "Blockierte Tracker täglich zählen",
   "settings_indexBounceTrackingProtectionSubtitle": "Von Weiterleitungs-Trackern hinterlassene Tracking-Daten entfernen",
   "settings_indexQueryParameterStrippingSubtitle": "Tracking-Parameter aus URLs entfernen",
   "settings_privacySectionFingerprintingTitle": "Fingerprinting",
@@ -1055,5 +1055,10 @@
   "settings_switcherPlacementBelowContextualBarDescription": "Am unteren Bildschirmrand",
   "settings_tabViewActionsAtBottomTitle": "Aktionen der Tab-Übersicht unten",
   "settings_tabViewActionsAtBottomSubtitle": "Suche, Filter und Tab-Aktionen unten, mit der Schaltfläche für neue Tabs darüber",
-  "settings_tabViewActionsAtBottomKeywords": "unten, Daumen, Reichweite, einhändig, Symbolleiste, Tab-Übersicht"
+  "settings_tabViewActionsAtBottomKeywords": "unten, Daumen, Reichweite, einhändig, Symbolleiste, Tab-Übersicht",
+  "settings_trackerStatisticsTotal": "{count, plural, =1{Seit {date} 1 Tracker blockiert} other{Seit {date} {count} Tracker blockiert}}",
+  "settings_trackerStatisticsNothingRecorded": "Noch keine blockierten Tracker aufgezeichnet.",
+  "settings_trackerStatisticsLastSevenDays": "Letzte 7 Tage",
+  "settings_trackerStatisticsNoneLastSevenDays": "In den letzten 7 Tagen keine Tracker blockiert.",
+  "settings_trackerStatisticsLoadFailed": "Tracker-Statistik konnte nicht geladen werden."
 }

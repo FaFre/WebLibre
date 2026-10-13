@@ -35,6 +35,9 @@ const int historyVisitContainerMatchWindowMs = 5000;
 /// a normal visit (the nearest relation within
 /// [historyVisitContainerMatchWindowMs]); empty when the visit was uncontained
 /// or predates history-relation recording.
+/// Which visit or download a [HistoryEntry] is; see [HistoryEntry.id].
+typedef HistoryEntryId = ({String? contentId, String url, int visitTime});
+
 class HistoryEntry with FastEquatable {
   // Destructured into `hashParameters` field by field instead of listed here:
   // `VisitInfo` is a Pigeon class with identity equality, so listing it would
@@ -71,12 +74,34 @@ class HistoryEntry with FastEquatable {
     yield* olderVisits;
   }
 
+  /// Which visit or download this is. Unlike `==`, which also compares a
+  /// running download's progress, it stays the same as the download goes on:
+  /// the download's id, or the visit's address and time.
+  HistoryEntryId get id =>
+      (contentId: contentId, url: url, visitTime: visitTime);
+
   String get url => visit.url;
   String? get title => visit.title;
   int get visitTime => visit.visitTime;
   VisitType get visitType => visit.visitType;
   String? get previewImageUrl => visit.previewImageUrl;
   String? get contentId => visit.contentId;
+
+  /// For an entry of the engine's download list: how far it got. Null for a
+  /// page visit.
+  DownloadStatus? get downloadStatus => visit.downloadStatus;
+  int? get downloadedBytes => visit.downloadedBytes;
+  int? get downloadSize => visit.downloadSize;
+
+  /// Whether this is a download that has not finished: running, paused or
+  /// failed. Its file is incomplete or missing.
+  bool get isUnfinishedDownload => switch (downloadStatus) {
+    null || DownloadStatus.completed || DownloadStatus.cancelled => false,
+    DownloadStatus.initiated ||
+    DownloadStatus.downloading ||
+    DownloadStatus.paused ||
+    DownloadStatus.failed => true,
+  };
 
   /// Whether [lowerCaseQuery] occurs in the title or URL of this visit or of
   /// any visit it stands for. A Distinct URLs row has to match through those
@@ -101,6 +126,10 @@ class HistoryEntry with FastEquatable {
     visit.visitType,
     visit.previewImageUrl,
     visit.contentId,
+    // Downloads in progress change only in these.
+    visit.downloadStatus,
+    visit.downloadedBytes,
+    visit.downloadSize,
     containerIds,
     containerRelationId,
     olderVisits,

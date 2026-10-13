@@ -67,6 +67,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoRecentlyClosedTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.LogLevel
@@ -440,6 +441,10 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         )
         GeckoSessionApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoSessionApiImpl())
         GeckoTabsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoTabsApiImpl())
+        GeckoRecentlyClosedTabsApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoRecentlyClosedTabsApiImpl()
+        )
         GeckoIconsApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoIconsApiImpl())
         GeckoCookieApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoCookieApiImpl())
         GeckoMlApi.setUp(_flutterPluginBinding.binaryMessenger, GeckoMlApiImpl(_flutterPluginBinding.binaryMessenger, _flutterEvents))

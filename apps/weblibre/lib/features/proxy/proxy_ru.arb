@@ -252,5 +252,13 @@
   "proxy_saveErrorSecretsNotJson": "Секреты должны быть объектом JSON.",
   "proxy_saveErrorUnexpected": "Не удалось сохранить профиль прокси: {error}",
   "proxy_loadErrorNotFound": "Профиль прокси не найден.",
-  "proxy_loadErrorFailed": "Не удалось загрузить профиль прокси: {error}"
+  "proxy_loadErrorFailed": "Не удалось загрузить профиль прокси: {error}",
+  "proxy_tabNotRoutedByContainer": "Не маршрутизируется контейнером «{container}»",
+  "proxy_tabNotRoutedByTabContainer": "Не маршрутизируется контейнером этой вкладки",
+  "proxy_tabRoutingChecking": "Проверка маршрутизации…",
+  "proxy_tabRoutingStarting": "Запуск маршрутизации…",
+  "proxy_tabRoutingBlockedNotRunning": "Заблокировано — {proxyTitle} не запущен",
+  "proxy_tabRoutingVia": "Эта вкладка: {proxyTitle}",
+  "proxy_tabRoutingDirect": "Эта вкладка: прямое подключение",
+  "proxy_tabRoutingTitle": "Прокси"
 }

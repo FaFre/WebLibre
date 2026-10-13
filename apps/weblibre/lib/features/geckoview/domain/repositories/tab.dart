@@ -155,6 +155,7 @@ final class ReturnToBrowserHomeTabBackBehavior extends TabBackBehavior {
 @Riverpod(keepAlive: true)
 class TabRepository extends _$TabRepository {
   final _tabsService = GeckoTabService();
+  final _recentlyClosedService = GeckoRecentlyClosedTabsService();
   final _sessionStartedAt = DateTime.now();
   bool _didPruneTombstones = false;
   bool _reclosing = false;
@@ -973,10 +974,15 @@ class TabRepository extends _$TabRepository {
   Future<void> _closeTabsInternal(
     List<String> tabIds, {
     required bool recordTombstones,
+    bool keepOffRecentlyClosed = false,
   }) {
     return _closeLock.synchronized(() async {
       if (tabIds.isEmpty) {
         return;
+      }
+
+      if (keepOffRecentlyClosed) {
+        await _recentlyClosedService.keepOff(tabIds);
       }
 
       if (recordTombstones) {
@@ -1011,12 +1017,27 @@ class TabRepository extends _$TabRepository {
     });
   }
 
-  Future<void> closeTab(String tabId) {
-    return _closeTabsInternal([tabId], recordTombstones: true);
+  /// With [keepOffRecentlyClosed], for a close the user did not ask for (the
+  /// tab is recreated elsewhere, its container is deleted), the tab never goes
+  /// on the recently closed list.
+  Future<void> closeTab(String tabId, {bool keepOffRecentlyClosed = false}) {
+    return _closeTabsInternal(
+      [tabId],
+      recordTombstones: true,
+      keepOffRecentlyClosed: keepOffRecentlyClosed,
+    );
   }
 
-  Future<void> closeTabs(List<String> tabIds) {
-    return _closeTabsInternal(tabIds, recordTombstones: true);
+  /// [keepOffRecentlyClosed] as for [closeTab].
+  Future<void> closeTabs(
+    List<String> tabIds, {
+    bool keepOffRecentlyClosed = false,
+  }) {
+    return _closeTabsInternal(
+      tabIds,
+      recordTombstones: true,
+      keepOffRecentlyClosed: keepOffRecentlyClosed,
+    );
   }
 
   Future<void> _clearTombstonesForCurrentTabs(List<String> tabIds) {
@@ -1126,6 +1147,87 @@ class TabRepository extends _$TabRepository {
     } finally {
       if (!restoresTabs) _suppressNextReclose = false;
     }
+  }
+
+  /// Reopens [tab] from the recently closed list with its back history, in the
+  /// container it was closed in. Returns its id, or null when the engine no
+  /// longer has it.
+  ///
+  /// When that container has been deleted since, the page opens afresh
+  /// outside it: the container's cookies and routing went with it.
+  Future<String?> restoreClosedTab(
+    RecentlyClosedTab tab, {
+    required bool selectTab,
+  }) async {
+    // As for addTab: the startup cleanup would delete the tab's site data.
+    await ref.read(startupBrowsingDataCleanupProvider.notifier).waitUntilDone();
+
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+    final containerId = (await tabDao.closedTabContainers([
+      tab.id,
+    ]))[tab.id]?.containerId;
+    final container = await containerId.mapNotNull(
+      (id) =>
+          ref.read(containerRepositoryProvider.notifier).getContainerData(id),
+    );
+
+    if (containerId != null && container == null) {
+      await _recentlyClosedService.remove(tab.id);
+      await tabDao.deleteClosedTabContainers([tab.id]);
+
+      return await addTab(
+        url: Uri.tryParse(tab.url),
+        tabMode: TabMode.regular,
+        selectTab: selectTab,
+        containerSelection: const TabContainerSelection.unassigned(),
+      );
+    }
+
+    // Its close left a tombstone, which would have the tab list listener close
+    // it again as a stale restore.
+    await tabDao.deleteClosedTabTombstones([tab.id]);
+
+    final String restoredId;
+    try {
+      restoredId = await tabDao.upsertTabTransactional(
+        () async =>
+            await _recentlyClosedService.restore(
+              tab.id,
+              contextId: container?.metadata.contextualIdentity,
+              selectTab: selectTab,
+              excludeFromHistory:
+                  container?.metadata.excludeFromHistory ?? false,
+            ) ??
+            (throw const _NoLongerClosed()),
+        parentId: const Value(null),
+        containerId: Value(container?.id),
+        url: Value(Uri.tryParse(tab.url)),
+        title: Value(tab.title),
+        tabMode: const Value(TabMode.regular),
+        childPlacement: ref
+            .read(generalSettingsWithDefaultsProvider)
+            .childTabPlacement,
+      );
+    } on _NoLongerClosed {
+      return null;
+    }
+
+    await tabDao.deleteClosedTabContainers([restoredId]);
+
+    if (selectTab && ref.mounted) {
+      _clearForceBrowserHome();
+
+      final selectedContainerNotifier = ref.read(
+        selectedContainerProvider.notifier,
+      );
+      if (container != null) {
+        await selectedContainerNotifier.setContainerId(container.id);
+      } else {
+        selectedContainerNotifier.clearContainer();
+      }
+    }
+
+    return restoredId;
   }
 
   Future<bool> _recloseRestoredClosedTabs(List<String> tabIds) async {
@@ -1314,7 +1416,8 @@ class TabRepository extends _$TabRepository {
         // is finished even if a newer navigation has claimed this tab since —
         // abandoning it here would leave the new tab created but unselected.
         if (historyIsEmpty && ref.mounted) {
-          await closeTab(currentTabState.id);
+          // The replacement stands in for it, so it was never closed.
+          await closeTab(currentTabState.id, keepOffRecentlyClosed: true);
           if (ref.mounted) {
             await selectTab(newTabId);
           }
@@ -1615,4 +1718,9 @@ class TabRepository extends _$TabRepository {
       await containerSiteAssignementSub.cancel();
     });
   }
+}
+
+/// The tab to reopen was taken off the recently closed list meanwhile.
+class _NoLongerClosed implements Exception {
+  const _NoLongerClosed();
 }

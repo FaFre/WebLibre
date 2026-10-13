@@ -62,7 +62,7 @@ void main() {
                     items: [entry],
                     // Selected, so the row leads with a check mark rather
                     // than the favicon, which wants the icon service.
-                    selectedItems: {entry},
+                    selectedIds: {entry.id},
                     containersById: const {},
                     onTap: (_) {},
                     onLongPress: (_) {},

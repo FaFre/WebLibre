@@ -2340,7 +2340,7 @@ class _SiteSettingsSheet extends HookConsumerWidget {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final draggableScrollableController = useDraggableScrollableController();
 
-    void handleClearSiteDataExpansion(bool isExpanded) {
+    void handleSectionExpansion(bool isExpanded) {
       if (isExpanded) {
         unawaited(
           draggableScrollableController.moveTo(
@@ -2379,7 +2379,7 @@ class _SiteSettingsSheet extends HookConsumerWidget {
               }
             },
             initialHeight: initialHeight,
-            onClearSiteDataExpandedChanged: handleClearSiteDataExpansion,
+            onSectionExpandedChanged: handleSectionExpansion,
           ),
         );
       },

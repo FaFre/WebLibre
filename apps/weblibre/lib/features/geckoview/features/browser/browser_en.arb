@@ -39,9 +39,9 @@
   "@browser_clearSiteDataTitle": {
     "description": "Title of the dialog, and row in the site info sheet, for deleting data stored by the current website."
   },
-  "browser_clearSiteDataContent": "This will clear the following data for {host}:\n{formattedTypes}\n\nYou may need to log in again.",
+  "browser_clearSiteDataContent": "This will clear the following data for {host}, including its subdomains, in every container and in private and isolated tabs:\n{formattedTypes}\n\nYou may need to log in again.",
   "@browser_clearSiteDataContent": {
-    "description": "Body of the clear site data dialog. host is the website domain; formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. \"• Cookies\"). Keep the line breaks (\\n) around it.",
+    "description": "Body of the clear site data dialog. host is the site's registrable domain (e.g. example.com); the data is cleared for its subdomains too, in every container and in private and isolated tabs. formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. \"• Cookies\"). Keep the line breaks (\\n) around it.",
     "placeholders": {
       "formattedTypes": { "type": "String" },
       "host": { "type": "String" }
@@ -953,10 +953,6 @@
   "@browser_tooltipSearchInsideTabs": {
     "description": "Tooltip of the button that searches the text of open tabs."
   },
-  "browser_filterTabType": "Tab Type",
-  "@browser_filterTabType": {
-    "description": "Submenu of the tab overview filter menu: show only a kind of tab."
-  },
   "browser_sortPinnedFirst": "Sort Pinned First",
   "@browser_sortPinnedFirst": {
     "description": "Checkbox item in the sort submenu: list pinned tabs first."
@@ -1191,5 +1187,79 @@
   "browser_tabReorderBlockedMessage": "Clear the tab view filter or search to reorder tabs",
   "@browser_tabReorderBlockedMessage": {
     "description": "Message when trying to drag a tab while the tab overview is filtered or searched."
+  },
+  "browser_trackersBlockedCount": "{count, plural, =1{1 tracker blocked} other{{count} trackers blocked}}",
+  "@browser_trackersBlockedCount": {
+    "description": "Row in the site information sheet, under the tracking protection switch: how many trackers were blocked on the current page so far. Tapping it lists them by category.",
+    "placeholders": { "count": {"type": "int"} }
+  },
+  "browser_noTrackersBlocked": "No trackers blocked on this page so far",
+  "@browser_noTrackersBlocked": {
+    "description": "Same row when tracking protection is on but nothing was blocked yet; the page may still be loading."
+  },
+  "browser_trackerCount": "{count, plural, =1{1 tracker} other{{count} trackers}}",
+  "@browser_trackerCount": {
+    "description": "Subtitle of a tracker category in the site information sheet: how many trackers of that category were blocked on the page.",
+    "placeholders": { "count": {"type": "int"} }
+  },
+  "browser_trackerCategoryCrossSiteCookies": "Cross-site tracking cookies",
+  "@browser_trackerCategoryCrossSiteCookies": {
+    "description": "Tracker category: cookies that follow you across websites. Used in the site information sheet and in the tracker statistics in privacy settings."
+  },
+  "browser_trackerCategorySocialMedia": "Social media trackers",
+  "@browser_trackerCategorySocialMedia": {
+    "description": "Tracker category: social network scripts that follow you across websites."
+  },
+  "browser_trackerCategoryFingerprinters": "Fingerprinters",
+  "@browser_trackerCategoryFingerprinters": {
+    "description": "Tracker category: scripts that identify your browser and device from their characteristics."
+  },
+  "browser_trackerCategoryCryptominers": "Cryptominers",
+  "@browser_trackerCategoryCryptominers": {
+    "description": "Tracker category: scripts that use your device to mine cryptocurrency."
+  },
+  "browser_trackerCategoryTrackingContent": "Tracking content",
+  "@browser_trackerCategoryTrackingContent": {
+    "description": "Tracker category: ads, analytics and other content that tracks you."
+  },
+  "browser_trackerCategoryRedirectTrackers": "Redirect trackers",
+  "@browser_trackerCategoryRedirectTrackers": {
+    "description": "Tracker category: sites that track you by redirecting through themselves (bounce tracking). Only appears in the tracker statistics."
+  },
+  "browser_siteBehaviorSectionTitle": "Behavior",
+  "@browser_siteBehaviorSectionTitle": {
+    "description": "Group title in the site information sheet over the per-site settings for desktop mode, opening links in apps and gestures."
+  },
+  "browser_siteSettingsButton": "Site settings",
+  "@browser_siteSettingsButton": {
+    "description": "Screen reader label of the site icon button left of the address bar, which opens the site information sheet."
+  },
+  "browser_privateTabIndicator": "Private tab",
+  "@browser_privateTabIndicator": {
+    "description": "Screen reader label of the icon in the address bar that marks a private tab."
+  },
+  "browser_isolatedTabIndicator": "Isolated tab",
+  "@browser_isolatedTabIndicator": {
+    "description": "Screen reader label of the icon in the address bar that marks an isolated tab."
+  },
+  "browser_proxiedTabIndicator": "Routed through a proxy",
+  "@browser_proxiedTabIndicator": {
+    "description": "Screen reader label of the icon in the address bar shown while the tab's traffic goes through a proxy or Tor."
+  },
+  "browser_moveTabUp": "Move tab up",
+  "@browser_moveTabUp": {
+    "description": "Screen reader action on a tab in the tab tray: moves it up one row (in a grid, one row up), instead of dragging it."
+  },
+  "browser_moveTabDown": "Move tab down",
+  "@browser_moveTabDown": {
+    "description": "Screen reader action on a tab in the tab tray: moves it down one row, instead of dragging it."
+  },
+  "browser_moveTabLeft": "Move tab left",
+  "@browser_moveTabLeft": {
+    "description": "Screen reader action on a tab in the tab tray's grid: moves it one place to the left, instead of dragging it."
+  },
+  "browser_moveTabRight": "Move tab right",
+  "@browser_moveTabRight": {
+    "description": "Screen reader action on a tab in the tab tray's grid: moves it one place to the right, instead of dragging it."
   }
 }

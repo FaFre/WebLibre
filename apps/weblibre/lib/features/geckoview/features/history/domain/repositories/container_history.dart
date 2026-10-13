@@ -61,6 +61,45 @@ class ContainerHistoryRepository extends _$ContainerHistoryRepository {
         .deleteById(relationId);
   }
 
+  /// Delete every visit of the page [url] in all containers, with their
+  /// container tags and the page's local index row: what deleting a history
+  /// suggestion from the address bar removes, as in Fenix.
+  ///
+  /// The tags and the index row are keyed by the canonical URL, which joins
+  /// spellings Places keeps apart (a `#fragment`, userinfo, a bare host's
+  /// slash). So the visits of every spelling of the page go too, or the page
+  /// would come back as a suggestion. Those a tag names always go, so no tag
+  /// is dropped while its visit stays; the rest are found by their host.
+  Future<void> deleteUrl(String url) async {
+    final history = ref.read(historyRepositoryProvider.notifier);
+    final db = ref.read(tabDatabaseProvider);
+    final canonical = canonicalizeUrl(url)?.canonical;
+    final relations = canonical == null
+        ? const <VisitContainerData>[]
+        : await db.visitContainerDao.relationsForCanonicalUrls({canonical});
+
+    final spellings = {url, ...relations.map((relation) => relation.rawUrl)};
+    final host = _hostAsWritten(url);
+    if (canonical != null && host != null) {
+      spellings.addAll(
+        (await history.getVisitedUrlsContaining(
+          host,
+        )).where((other) => canonicalizeUrl(other)?.canonical == canonical),
+      );
+    }
+    for (final spelling in spellings) {
+      await history.deleteVisitsFor(spelling);
+    }
+
+    if (canonical == null) return;
+
+    await db.visitContainerDao.deleteByIds(
+      relations.map((relation) => relation.id),
+    );
+    // Content matches come from here, so it would still offer the page.
+    await db.historyDao.deleteByCanonicalUrls([canonical]);
+  }
+
   /// Delete everything the history screen lists between [start] and [end]
   /// (inclusive), in all containers: the Places visits, their container tags
   /// and the download list entries created in the range. Downloaded files are
@@ -396,4 +435,12 @@ Future<List<HistoryEntry>> annotateVisitsWithContainers(
   }
 
   return entries;
+}
+
+/// The host of [url] as an address spells it, an IPv6 one in brackets; null
+/// when it has none.
+String? _hostAsWritten(String url) {
+  final host = Uri.tryParse(url)?.host ?? '';
+  if (host.isEmpty) return null;
+  return host.contains(':') ? '[$host]' : host;
 }

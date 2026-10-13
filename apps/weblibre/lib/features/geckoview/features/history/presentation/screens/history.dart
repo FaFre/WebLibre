@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
@@ -33,7 +34,6 @@ import 'package:nullability/nullability.dart';
 import 'package:path/path.dart' as p;
 import 'package:share_plus/share_plus.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -42,32 +42,34 @@ import 'package:weblibre/features/geckoview/features/history/domain/entities/his
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/recently_closed_tabs.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_time_range.dart';
+import 'package:weblibre/features/geckoview/features/history/presentation/utils/history_day_l10n.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class Section extends MultiSliver {
-  static final _datePattern = DateFormat.MMMd().addPattern('Hm');
-
   Section({
     super.key,
     required BuildContext context,
     required String title,
     required List<HistoryEntry> items,
-    required Set<HistoryEntry> selectedItems,
+    required Set<HistoryEntryId> selectedIds,
     required Map<String, ContainerData> containersById,
     required void Function(HistoryEntry) onTap,
     required void Function(HistoryEntry) onLongPress,
     required Future<void> Function(HistoryEntry) onDelete,
+    Future<void> Function(HistoryEntry, DownloadControl)? onDownloadControl,
   }) : super(
          pushPinnedChildren: true,
          children: [
@@ -92,7 +94,10 @@ class Section extends MultiSliver {
                final uri = Uri.parse(item.url);
 
                return Column(
-                 key: ValueKey(item.hashCode),
+                 // Which entry the row is, not its state: the hash takes in a
+                 // running download's progress, so keyed by it the row (and
+                 // an open ⋮ menu) was rebuilt on every update.
+                 key: ValueKey(item.id),
                  mainAxisSize: MainAxisSize.min,
                  crossAxisAlignment: CrossAxisAlignment.start,
                  children: [
@@ -105,7 +110,7 @@ class Section extends MultiSliver {
                        start: 16,
                        end: 4,
                      ),
-                     leading: selectedItems.contains(item)
+                     leading: selectedIds.contains(item.id)
                          ? const CircleAvatar(
                              radius: 12,
                              child: Icon(Icons.check, size: 12),
@@ -125,6 +130,7 @@ class Section extends MultiSliver {
                      trailing: _HistoryEntryMenu(
                        item: item,
                        onDelete: onDelete,
+                       onDownloadControl: onDownloadControl,
                      ),
                      onTap: () {
                        onTap(item);
@@ -196,12 +202,17 @@ class Section extends MultiSliver {
                              ),
                            },
                          ),
+                         // The day is the section heading's.
                          Chip(
                            label: Text(
-                             _datePattern.format(
-                               DateTime.fromMillisecondsSinceEpoch(
-                                 item.visitTime,
+                             MaterialLocalizations.of(context).formatTimeOfDay(
+                               TimeOfDay.fromDateTime(
+                                 DateTime.fromMillisecondsSinceEpoch(
+                                   item.visitTime,
+                                 ),
                                ),
+                               alwaysUse24HourFormat:
+                                   MediaQuery.alwaysUse24HourFormatOf(context),
                              ),
                            ),
                          ),
@@ -232,6 +243,15 @@ class Section extends MultiSliver {
                        ],
                      ),
                    ),
+                   if (item.isUnfinishedDownload)
+                     Padding(
+                       padding: const EdgeInsets.only(
+                         left: 54,
+                         right: 16,
+                         top: 8,
+                       ),
+                       child: _DownloadProgress(item: item),
+                     ),
                  ],
                );
              },
@@ -240,13 +260,79 @@ class Section extends MultiSliver {
        );
 }
 
+/// How far an unfinished download got, under its row.
+class _DownloadProgress extends StatelessWidget {
+  final HistoryEntry item;
+
+  const _DownloadProgress({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final status = item.downloadStatus;
+    final downloaded = item.downloadedBytes ?? 0;
+    final size = item.downloadSize;
+    final hasSize = size != null && size > 0;
+
+    final label = switch (status) {
+      DownloadStatus.initiated => l10n.history_downloadStatusStarting,
+      DownloadStatus.downloading => l10n.history_downloadStatusDownloading,
+      DownloadStatus.paused => l10n.history_downloadStatusPaused,
+      DownloadStatus.failed => l10n.history_downloadStatusFailed,
+      DownloadStatus.completed || DownloadStatus.cancelled || null => null,
+    };
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: status == DownloadStatus.failed
+          ? theme.colorScheme.error
+          : theme.colorScheme.onSurfaceVariant,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (status != DownloadStatus.failed)
+          LinearProgressIndicator(
+            // Indeterminate only while it runs with no size to measure by.
+            value: hasSize
+                ? (downloaded / size).clamp(0.0, 1.0)
+                : (status == DownloadStatus.paused ? 0 : null),
+          ),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 12,
+          children: [
+            if (label != null) Text(label, style: style),
+            if (status != DownloadStatus.failed)
+              Text(
+                hasSize
+                    ? l10n.history_downloadProgress(
+                        formatByteSize(l10n, downloaded),
+                        formatByteSize(l10n, size),
+                      )
+                    : formatByteSize(l10n, downloaded),
+                style: style,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 /// Per-row actions, behind a ⋮ like the bookmark list rather than an inline
 /// delete button on every row (#651). Long press still starts multi-select.
 class _HistoryEntryMenu extends HookConsumerWidget {
   final HistoryEntry item;
   final Future<void> Function(HistoryEntry) onDelete;
+  final Future<void> Function(HistoryEntry, DownloadControl)? onDownloadControl;
 
-  const _HistoryEntryMenu({required this.item, required this.onDelete});
+  const _HistoryEntryMenu({
+    required this.item,
+    required this.onDelete,
+    this.onDownloadControl,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -268,6 +354,44 @@ class _HistoryEntryMenu extends HookConsumerWidget {
         icon: const Icon(MdiIcons.dotsVertical),
       ),
       menuChildren: [
+        if (onDownloadControl case final control?)
+          for (final (action, icon, label) in switch (item.downloadStatus) {
+            DownloadStatus.initiated || DownloadStatus.downloading => [
+              (
+                DownloadControl.pause,
+                Icons.pause,
+                l10n.history_downloadActionPause,
+              ),
+              (
+                DownloadControl.cancel,
+                Icons.close,
+                l10n.history_downloadActionCancel,
+              ),
+            ],
+            DownloadStatus.paused => [
+              (
+                DownloadControl.resume,
+                Icons.play_arrow,
+                l10n.history_downloadActionResume,
+              ),
+              (
+                DownloadControl.cancel,
+                Icons.close,
+                l10n.history_downloadActionCancel,
+              ),
+            ],
+            DownloadStatus.failed => [
+              (DownloadControl.retry, Icons.refresh, l10n.common_retry),
+            ],
+            DownloadStatus.completed ||
+            DownloadStatus.cancelled ||
+            null => const <(DownloadControl, IconData, String)>[],
+          })
+            MenuItemButton(
+              leadingIcon: Icon(icon),
+              onPressed: () => control(item, action),
+              child: Text(label),
+            ),
         if (!isDownload)
           MenuItemButton(
             leadingIcon: const Icon(MdiIcons.tab),
@@ -357,7 +481,23 @@ class HistoryScreen extends HookConsumerWidget {
       (id) => containersById[id],
     );
 
-    final selectedItems = useState(<HistoryEntry>{});
+    // By id: a running download's entry is replaced on every update.
+    final selectedIds = useState(<HistoryEntryId>{});
+    // The entries as listed now. Also leaves out rows gone since.
+    final selectedRows = selectedIds.value.isEmpty
+        ? const <HistoryEntry>[]
+        : [
+            for (final entry in historyEntries.value ?? const <HistoryEntry>[])
+              if (selectedIds.value.contains(entry.id)) entry,
+          ];
+    // The mode never changes for a screen, so neither does this watch.
+    final recentlyClosedCount = isDownloadsMode
+        ? 0
+        : ref.watch(
+            recentlyClosedTabsRepositoryProvider.select(
+              (value) => value.value?.length ?? 0,
+            ),
+          );
     final defaultDownloadsFilter = HistoryFilterOptions(
       dateRange: null,
       visitTypes: const {VisitType.download},
@@ -384,6 +524,38 @@ class HistoryScreen extends HookConsumerWidget {
       }
     }
 
+    // Running downloads change only on the engine's side; follow them.
+    final hasRunningDownload =
+        isDownloadsMode &&
+        (historyEntries.value?.any(
+              (entry) => switch (entry.downloadStatus) {
+                DownloadStatus.initiated || DownloadStatus.downloading => true,
+                _ => false,
+              },
+            ) ??
+            false);
+    useEffect(() {
+      if (!hasRunningDownload) return null;
+      final timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => ref.invalidate(browsingDownloadsProvider),
+      );
+      return timer.cancel;
+    }, [hasRunningDownload]);
+
+    Future<void> controlDownload(
+      HistoryEntry item,
+      DownloadControl control,
+    ) async {
+      final downloadId = item.contentId;
+      if (downloadId == null) return;
+
+      await GeckoDownloadsService().controlDownload(downloadId, control);
+      // The service updates the list a moment after it gets the request.
+      await Future<void>.delayed(const Duration(milliseconds: 500));
+      if (context.mounted) await refreshHistoryEntries();
+    }
+
     // Delete [rows] with every visit each stands for (a Distinct URLs row
     // covers all visits of its URL, or it would resurface as the next older
     // one), asking about each downloaded file still on the device.
@@ -396,6 +568,15 @@ class HistoryScreen extends HookConsumerWidget {
 
       DeleteDecision? decision;
       for (final visit in visits) {
+        // Stopped first, or the service would go on writing the file.
+        if (visit.isUnfinishedDownload &&
+            visit.downloadStatus != DownloadStatus.failed &&
+            visit.contentId != null) {
+          await GeckoDownloadsService().controlDownload(
+            visit.contentId!,
+            DownloadControl.cancel,
+          );
+        }
         await repository.deleteVisit(visit);
 
         // A download's title is its file path.
@@ -469,15 +650,15 @@ class HistoryScreen extends HookConsumerWidget {
                       : l10n.history_filterHintHistory,
                 ),
               )
-            : selectedItems.value.isEmpty
+            : selectedRows.isEmpty
             ? Text(
                 isDownloadsMode
                     ? l10n.history_titleDownloads
                     : l10n.history_titleHistory,
               )
-            : Text(l10n.history_selectionCount(selectedItems.value.length)),
+            : Text(l10n.history_selectionCount(selectedRows.length)),
         actions: [
-          if (selectedItems.value.isEmpty)
+          if (selectedRows.isEmpty)
             IconButton(
               tooltip: textFilterEnabled.value
                   ? l10n.history_tooltipClearSearch
@@ -495,11 +676,11 @@ class HistoryScreen extends HookConsumerWidget {
               },
               icon: Icon(textFilterEnabled.value ? Icons.clear : Icons.search),
             ),
-          if (selectedItems.value.isNotEmpty)
+          if (selectedRows.isNotEmpty)
             IconButton(
               onPressed: () async {
-                final rows = selectedItems.value;
-                selectedItems.value = {};
+                final rows = selectedRows;
+                selectedIds.value = {};
                 await deleteRows(rows);
               },
               icon: const Icon(Icons.delete),
@@ -576,7 +757,7 @@ class HistoryScreen extends HookConsumerWidget {
                 icon: const Icon(Icons.delete),
               ),
             ),
-          if (selectedItems.value.isEmpty)
+          if (selectedRows.isEmpty)
             MenuAnchor(
               controller: menuController,
               consumeOutsideTap: true,
@@ -781,15 +962,12 @@ class HistoryScreen extends HookConsumerWidget {
                       ) ??
                       '';
 
-                  // Grouped once per load rather than on every keystroke:
-                  // formatting a relative time for each entry dominated
-                  // filtering a long history. Keyed on the list itself, as
-                  // comparing it by value walked every entry on each rebuild.
+                  // Grouped once per load rather than on every keystroke.
+                  // Keyed on the list itself, as comparing it by value walked
+                  // every entry on each rebuild.
                   final allGroups = useMemoized(
                     () => data.groupListsBy(
-                      (entry) => timeago.format(
-                        DateTime.fromMillisecondsSinceEpoch(entry.visitTime),
-                      ),
+                      (entry) => historyDayOf(entry.visitTime),
                     ),
                     [data],
                   );
@@ -810,13 +988,15 @@ class HistoryScreen extends HookConsumerWidget {
                   }, [allGroups, query]);
 
                   void toggleSelected(HistoryEntry item) {
-                    if (selectedItems.value.contains(item)) {
-                      selectedItems.value = {...selectedItems.value}
-                        ..remove(item);
+                    if (selectedIds.value.contains(item.id)) {
+                      selectedIds.value = {...selectedIds.value}
+                        ..remove(item.id);
                     } else {
-                      selectedItems.value = {...selectedItems.value, item};
+                      selectedIds.value = {...selectedIds.value, item.id};
                     }
                   }
+
+                  final now = DateTime.now();
 
                   return FadingScroll(
                     startFadingSize: 0.0,
@@ -824,19 +1004,43 @@ class HistoryScreen extends HookConsumerWidget {
                       return CustomScrollView(
                         controller: controller,
                         slivers: [
+                          // Where Fenix has it, above the visits.
+                          if (recentlyClosedCount > 0 &&
+                              query.isEmpty &&
+                              selectedRows.isEmpty)
+                            SliverToBoxAdapter(
+                              child: ListTile(
+                                leading: const Icon(Icons.restore_page),
+                                title: Text(l10n.history_recentlyClosedTitle),
+                                subtitle: Text(
+                                  l10n.history_recentlyClosedCount(
+                                    recentlyClosedCount,
+                                  ),
+                                ),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () => const HistoryRecentlyClosedRoute()
+                                    .push<void>(context),
+                              ),
+                            ),
                           for (final MapEntry(:key, :value) in groups.entries)
                             Section(
                               context: context,
-                              title: key,
+                              title: historyDayLabel(l10n, key, now: now),
                               items: value,
-                              selectedItems: selectedItems.value,
+                              selectedIds: selectedIds.value,
                               containersById: containersById,
                               onLongPress: toggleSelected,
                               onDelete: (item) => deleteRows([item]),
+                              onDownloadControl: isDownloadsMode
+                                  ? controlDownload
+                                  : null,
                               onTap: (item) async {
-                                if (selectedItems.value.isNotEmpty) {
+                                if (selectedRows.isNotEmpty) {
                                   toggleSelected(item);
                                 } else if (isDownloadsMode) {
+                                  // Its menu has what can be done with it.
+                                  if (item.isUnfinishedDownload) return;
+
                                   final filePath = item.title;
                                   final file = filePath.mapNotNull(File.new);
 

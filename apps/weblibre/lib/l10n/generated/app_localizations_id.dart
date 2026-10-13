@@ -2474,7 +2474,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String browser_clearSiteDataContent(String formattedTypes, String host) {
-    return 'Ini akan menghapus data berikut untuk $host:\n$formattedTypes\n\nAnda mungkin perlu masuk kembali.';
+    return 'Ini akan menghapus data berikut untuk $host, termasuk subdomainnya, di semua kontainer serta di tab pribadi dan tab terisolasi:\n$formattedTypes\n\nAnda mungkin perlu masuk kembali.';
   }
 
   @override
@@ -3229,9 +3229,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get browser_tooltipSearchInsideTabs => 'Cari di dalam tab';
 
   @override
-  String get browser_filterTabType => 'Jenis Tab';
-
-  @override
   String get browser_sortPinnedFirst => 'Urutkan yang Disematkan Dahulu';
 
   @override
@@ -3408,6 +3405,78 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get browser_tabReorderBlockedMessage =>
       'Hapus filter atau pencarian tampilan tab untuk menata ulang tab';
+
+  @override
+  String browser_trackersBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pelacak diblokir',
+      one: '1 pelacak diblokir',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_noTrackersBlocked =>
+      'Belum ada pelacak yang diblokir di halaman ini';
+
+  @override
+  String browser_trackerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pelacak',
+      one: '1 pelacak',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_trackerCategoryCrossSiteCookies =>
+      'Kuki pelacak lintas situs';
+
+  @override
+  String get browser_trackerCategorySocialMedia => 'Pelacak media sosial';
+
+  @override
+  String get browser_trackerCategoryFingerprinters => 'Pembuat sidik jari';
+
+  @override
+  String get browser_trackerCategoryCryptominers => 'Penambang kripto';
+
+  @override
+  String get browser_trackerCategoryTrackingContent => 'Konten pelacak';
+
+  @override
+  String get browser_trackerCategoryRedirectTrackers => 'Pelacak pengalihan';
+
+  @override
+  String get browser_siteBehaviorSectionTitle => 'Perilaku';
+
+  @override
+  String get browser_siteSettingsButton => 'Pengaturan situs';
+
+  @override
+  String get browser_privateTabIndicator => 'Tab pribadi';
+
+  @override
+  String get browser_isolatedTabIndicator => 'Tab terisolasi';
+
+  @override
+  String get browser_proxiedTabIndicator => 'Dirutekan melalui proxy';
+
+  @override
+  String get browser_moveTabUp => 'Pindahkan tab ke atas';
+
+  @override
+  String get browser_moveTabDown => 'Pindahkan tab ke bawah';
+
+  @override
+  String get browser_moveTabLeft => 'Pindahkan tab ke kiri';
+
+  @override
+  String get browser_moveTabRight => 'Pindahkan tab ke kanan';
 
   @override
   String get contextualToolbar_tooltipHome => 'Beranda';
@@ -4079,34 +4148,6 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String menu_connectionNotRoutedByContainer(String container) {
-    return 'Tidak dirutekan oleh kontainer \"$container\"';
-  }
-
-  @override
-  String get menu_connectionNotRoutedByTabContainer =>
-      'Tidak dirutekan oleh kontainer tab ini';
-
-  @override
-  String get menu_connectionCheckingRouting => 'Memeriksa perutean…';
-
-  @override
-  String get menu_connectionStartingRouting => 'Memulai perutean…';
-
-  @override
-  String menu_connectionBlockedNotRunning(String proxyTitle) {
-    return 'Diblokir — $proxyTitle tidak berjalan';
-  }
-
-  @override
-  String menu_connectionThisTabVia(String proxyTitle) {
-    return 'Tab ini: $proxyTitle';
-  }
-
-  @override
-  String get menu_connectionThisTabDirect => 'Tab ini: koneksi langsung';
-
-  @override
   String menu_connectionStartProxy(String proxyTitle) {
     return 'Mulai $proxyTitle';
   }
@@ -4435,6 +4476,74 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get history_actionShareLink => 'Bagikan tautan';
+
+  @override
+  String get history_dayToday => 'Hari ini';
+
+  @override
+  String get history_dayYesterday => 'Kemarin';
+
+  @override
+  String get history_recentlyClosedTitle => 'Tab yang baru ditutup';
+
+  @override
+  String history_recentlyClosedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_recentlyClosedEmpty => 'Tidak ada tab yang baru ditutup';
+
+  @override
+  String get history_recentlyClosedExplanation =>
+      '10 tab terakhir yang Anda tutup, untuk dibuka kembali beserta riwayat kembalinya. Tab pribadi dan terisolasi serta tab dari kontainer yang dikecualikan dari riwayat tidak disimpan. Menghapus riwayat juga mengosongkan daftar ini.';
+
+  @override
+  String get history_recentlyClosedClearAll =>
+      'Kosongkan tab yang baru ditutup';
+
+  @override
+  String get history_recentlyClosedClearConfirm =>
+      'Kosongkan tab yang baru ditutup?';
+
+  @override
+  String get history_recentlyClosedContainerDeleted =>
+      'Kontainer dihapus, dibuka tanpa kontainer';
+
+  @override
+  String get history_recentlyClosedLoadFailed =>
+      'Tidak dapat memuat tab yang baru ditutup';
+
+  @override
+  String get history_downloadStatusStarting => 'Memulai';
+
+  @override
+  String get history_downloadStatusDownloading => 'Mengunduh';
+
+  @override
+  String get history_downloadStatusPaused => 'Dijeda';
+
+  @override
+  String get history_downloadStatusFailed => 'Gagal';
+
+  @override
+  String history_downloadProgress(String downloaded, String total) {
+    return '$downloaded dari $total';
+  }
+
+  @override
+  String get history_downloadActionPause => 'Jeda';
+
+  @override
+  String get history_downloadActionResume => 'Lanjutkan';
+
+  @override
+  String get history_downloadActionCancel => 'Batalkan unduhan';
 
   @override
   String get openLinkTools_openLinkTitle => 'Buka tautan';
@@ -5149,6 +5258,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get search_actionUntitledFeed => 'Umpan tanpa judul';
+
+  @override
+  String get search_actionDeleteFromHistory => 'Hapus dari riwayat';
+
+  @override
+  String search_deletedFromHistory(String site) {
+    return '$site dihapus dari riwayat';
+  }
 
   @override
   String get tabs_actionSelect => 'Pilih';
@@ -7099,6 +7216,37 @@ class AppLocalizationsId extends AppLocalizations {
   String proxy_loadErrorFailed(String error) {
     return 'Gagal memuat profil proksi: $error';
   }
+
+  @override
+  String proxy_tabNotRoutedByContainer(String container) {
+    return 'Tidak dirutekan oleh kontainer \"$container\"';
+  }
+
+  @override
+  String get proxy_tabNotRoutedByTabContainer =>
+      'Tidak dirutekan oleh kontainer tab ini';
+
+  @override
+  String get proxy_tabRoutingChecking => 'Memeriksa perutean…';
+
+  @override
+  String get proxy_tabRoutingStarting => 'Memulai perutean…';
+
+  @override
+  String proxy_tabRoutingBlockedNotRunning(String proxyTitle) {
+    return 'Diblokir — $proxyTitle tidak berjalan';
+  }
+
+  @override
+  String proxy_tabRoutingVia(String proxyTitle) {
+    return 'Tab ini: $proxyTitle';
+  }
+
+  @override
+  String get proxy_tabRoutingDirect => 'Tab ini: koneksi langsung';
+
+  @override
+  String get proxy_tabRoutingTitle => 'Proxy';
 
   @override
   String get qrScanner_noCameraPermission => 'Izin kamera belum diberikan.';
@@ -9159,16 +9307,15 @@ class AppLocalizationsId extends AppLocalizations {
       'Pilih pelacak dan skrip yang akan diblokir.';
 
   @override
-  String get settings_contentBlockingDatabaseTitle =>
-      'Basis Data Pemblokiran Konten';
+  String get settings_trackerStatisticsTitle => 'Statistik Pelacak';
 
   @override
-  String get settings_contentBlockingDatabaseKeywords =>
-      'iklan, pelacak, pemblokiran konten, ads, trackers, content blocking';
+  String get settings_trackerStatisticsKeywords =>
+      'pelacak, statistik, pelacak diblokir, pemblokiran konten, basis data, trackers, statistics';
 
   @override
-  String get settings_contentBlockingDatabaseSubtitle =>
-      'Gunakan daftar pemblokir GeckoView untuk kategori ETP seperti iklan, analitik, dan pelacak media sosial. Memerlukan mulai ulang aplikasi.';
+  String get settings_trackerStatisticsSubtitle =>
+      'Catat jumlah harian pelacak yang diblokir per kategori. Hanya jumlah dan tanggal yang disimpan, bukan situs yang Anda kunjungi. Menghapus riwayat penjelajahan juga menghapus statistik ini. Memerlukan mulai ulang aplikasi.';
 
   @override
   String get settings_bounceTrackingProtectionTitle =>
@@ -10300,8 +10447,8 @@ class AppLocalizationsId extends AppLocalizations {
       'Pilih seberapa ketat pelacak diblokir';
 
   @override
-  String get settings_indexContentBlockingDatabaseSubtitle =>
-      'Gunakan daftar pemblokir GeckoView untuk kategori ETP';
+  String get settings_indexTrackerStatisticsSubtitle =>
+      'Catat jumlah harian pelacak yang diblokir';
 
   @override
   String get settings_indexBounceTrackingProtectionSubtitle =>
@@ -11046,6 +11193,36 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settings_tabViewActionsAtBottomKeywords =>
       'bawah, jempol, jangkauan, satu tangan, bilah alat, tampilan tab';
+
+  @override
+  String settings_trackerStatisticsTotal(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString pelacak diblokir sejak $date',
+      one: '1 pelacak diblokir sejak $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_trackerStatisticsNothingRecorded =>
+      'Belum ada pelacak diblokir yang tercatat.';
+
+  @override
+  String get settings_trackerStatisticsLastSevenDays => '7 hari terakhir';
+
+  @override
+  String get settings_trackerStatisticsNoneLastSevenDays =>
+      'Tidak ada pelacak yang diblokir dalam 7 hari terakhir.';
+
+  @override
+  String get settings_trackerStatisticsLoadFailed =>
+      'Statistik pelacak tidak dapat dimuat.';
 
   @override
   String get smallWeb_sheetTitle => 'Small Web';

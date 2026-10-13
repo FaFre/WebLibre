@@ -42,7 +42,7 @@ final class BrowserDataServiceProvider
 }
 
 String _$browserDataServiceHash() =>
-    r'62476801fc4c02700da23a45f31f63cd03e9d868';
+    r'6a3a4591323fb9f52f0c56b5e74882629354f1db';
 
 abstract class _$BrowserDataService extends $Notifier<void> {
   void build();

@@ -273,5 +273,82 @@
   "history_actionShareLink": "Share link",
   "@history_actionShareLink": {
     "description": "Menu item on a history or downloads row: opens the system share sheet with the page address (for a download, the address it was downloaded from)."
+  },
+  "history_dayToday": "Today",
+  "@history_dayToday": {
+    "description": "Heading over the history (and downloads) entries visited today, above a list grouped by calendar day."
+  },
+  "history_dayYesterday": "Yesterday",
+  "@history_dayYesterday": {
+    "description": "Heading over the history (and downloads) entries visited yesterday. Older days show their date instead."
+  },
+  "history_recentlyClosedTitle": "Recently closed tabs",
+  "@history_recentlyClosedTitle": {
+    "description": "Title of the screen listing recently closed tabs, and of the row at the top of the history screen that opens it."
+  },
+  "history_recentlyClosedCount": "{count, plural, =1{1 tab} other{{count} tabs}}",
+  "@history_recentlyClosedCount": {
+    "description": "Subtitle of the 'Recently closed tabs' row at the top of the history screen: how many closed tabs it holds (at most 10).",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "history_recentlyClosedEmpty": "No recently closed tabs",
+  "@history_recentlyClosedEmpty": {
+    "description": "Shown on the recently closed tabs screen when the list is empty."
+  },
+  "history_recentlyClosedExplanation": "The last 10 tabs you closed, to reopen with their back history. Private and isolated tabs and tabs of containers excluded from history are not kept. Deleting your history clears this list.",
+  "@history_recentlyClosedExplanation": {
+    "description": "Explanation under the list (or the empty state) on the recently closed tabs screen."
+  },
+  "history_recentlyClosedClearAll": "Clear recently closed tabs",
+  "@history_recentlyClosedClearAll": {
+    "description": "Tooltip of the delete button on the recently closed tabs screen, which empties the list."
+  },
+  "history_recentlyClosedClearConfirm": "Clear the recently closed tabs?",
+  "@history_recentlyClosedClearConfirm": {
+    "description": "Title of the confirmation dialog before emptying the recently closed tabs list. The tabs can no longer be reopened afterwards."
+  },
+  "history_recentlyClosedContainerDeleted": "Container deleted, reopens without it",
+  "@history_recentlyClosedContainerDeleted": {
+    "description": "Under a recently closed tab whose container has been deleted since: reopening it opens the page outside any container, without its back history."
+  },
+  "history_recentlyClosedLoadFailed": "Could not load the recently closed tabs",
+  "@history_recentlyClosedLoadFailed": {
+    "description": "Error title on the recently closed tabs screen when the list could not be read."
+  },
+  "history_downloadStatusStarting": "Starting",
+  "@history_downloadStatusStarting": {
+    "description": "Status chip on a download in the downloads list that has been accepted but has not started receiving data yet."
+  },
+  "history_downloadStatusDownloading": "Downloading",
+  "@history_downloadStatusDownloading": {
+    "description": "Status chip on a download in the downloads list that is receiving data, shown with a progress bar."
+  },
+  "history_downloadStatusPaused": "Paused",
+  "@history_downloadStatusPaused": {
+    "description": "Status chip on a paused download in the downloads list."
+  },
+  "history_downloadStatusFailed": "Failed",
+  "@history_downloadStatusFailed": {
+    "description": "Status chip on a download in the downloads list that stopped with an error. It can be retried from the row's menu."
+  },
+  "history_downloadProgress": "{downloaded} of {total}",
+  "@history_downloadProgress": {
+    "description": "How much of an unfinished download has arrived, e.g. '12.4 MB of 40.0 MB'. Both values are formatted sizes.",
+    "placeholders": {
+      "downloaded": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+  "history_downloadActionPause": "Pause",
+  "@history_downloadActionPause": {
+    "description": "Menu item on a running download in the downloads list: pauses it."
+  },
+  "history_downloadActionResume": "Resume",
+  "@history_downloadActionResume": {
+    "description": "Menu item on a paused download in the downloads list: continues it."
+  },
+  "history_downloadActionCancel": "Cancel download",
+  "@history_downloadActionCancel": {
+    "description": "Menu item on a running or paused download in the downloads list: stops it for good."
   }
 }

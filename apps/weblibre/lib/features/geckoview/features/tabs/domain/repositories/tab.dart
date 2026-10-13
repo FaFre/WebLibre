@@ -103,7 +103,10 @@ class TabDataRepository extends _$TabDataRepository {
             : tabId;
 
         if (closeOldTab) {
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+          // The replacement stands in for it, so it was never closed.
+          await ref
+              .read(tabRepositoryProvider.notifier)
+              .closeTab(tabId, keepOffRecentlyClosed: true);
         }
 
         await ref
@@ -151,7 +154,9 @@ class TabDataRepository extends _$TabDataRepository {
         // its place in the hierarchy — read before the row disappears.
         final parentId = (await getTabDataById(tabId))?.parentId;
 
-        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
+        await ref
+            .read(tabRepositoryProvider.notifier)
+            .closeTab(tabId, keepOffRecentlyClosed: true);
 
         await ref
             .read(tabRepositoryProvider.notifier)
@@ -269,11 +274,13 @@ class TabDataRepository extends _$TabDataRepository {
     return tabIds.length;
   }
 
+  /// [keepOffRecentlyClosed] as for [TabRepository.closeTab].
   Future<List<String>> closeContainerTabs(
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
     bool includeIsolated = true,
+    bool keepOffRecentlyClosed = false,
   }) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
@@ -287,7 +294,9 @@ class TabDataRepository extends _$TabDataRepository {
         .get();
 
     if (tabIds.isNotEmpty) {
-      await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
+      await ref
+          .read(tabRepositoryProvider.notifier)
+          .closeTabs(tabIds, keepOffRecentlyClosed: keepOffRecentlyClosed);
     }
 
     return tabIds;

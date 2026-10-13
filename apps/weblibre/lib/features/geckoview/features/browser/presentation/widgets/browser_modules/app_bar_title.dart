@@ -152,6 +152,7 @@ class CompactAppBarTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
@@ -167,6 +168,7 @@ class CompactAppBarTitleView extends StatelessWidget {
       children: [
         ToolbarButton(
           onTap: onSiteSettingsTap,
+          semanticLabel: l10n.browser_siteSettingsButton,
           child: Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: Stack(
@@ -216,6 +218,7 @@ class CompactAppBarTitleView extends StatelessWidget {
                   if (tabState.tabMode is PrivateTabMode) ...[
                     Icon(
                       MdiIcons.dominoMask,
+                      semanticLabel: l10n.browser_privateTabIndicator,
                       color: appColors.privateTabPurple,
                       size: 16,
                     ),
@@ -223,18 +226,24 @@ class CompactAppBarTitleView extends StatelessWidget {
                   ] else if (tabState.tabMode is IsolatedTabMode) ...[
                     Icon(
                       MdiIcons.snowflake,
+                      semanticLabel: l10n.browser_isolatedTabIndicator,
                       color: appColors.isolatedTabTeal,
                       size: 16,
                     ),
                     const SizedBox(width: 4),
                   ],
                   if (isTabTunneled) ...[
-                    const Icon(MdiIcons.tunnelOutline, size: 16),
+                    Icon(
+                      MdiIcons.tunnelOutline,
+                      size: 16,
+                      semanticLabel: l10n.browser_proxiedTabIndicator,
+                    ),
                     const SizedBox(width: 4),
                   ],
                   if (sandboxSourceUri != null) ...[
                     Icon(
                       MdiIcons.archiveLockOutline,
+                      semanticLabel: l10n.browser_certSandboxedCaptureTitle,
                       color: theme.colorScheme.tertiary,
                       size: 16,
                     ),
@@ -382,6 +391,7 @@ class AppBarTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
@@ -397,6 +407,7 @@ class AppBarTitleView extends StatelessWidget {
       children: [
         ToolbarButton(
           onTap: onSiteSettingsTap,
+          semanticLabel: l10n.browser_siteSettingsButton,
           child: Padding(
             padding: const EdgeInsets.only(right: 4.0),
             child: Stack(
@@ -474,6 +485,7 @@ class AppBarTitleView extends StatelessWidget {
                       if (tabState.tabMode is PrivateTabMode) ...[
                         Icon(
                           MdiIcons.dominoMask,
+                          semanticLabel: l10n.browser_privateTabIndicator,
                           color: appColors.privateTabPurple,
                           size: 14,
                         ),
@@ -481,18 +493,24 @@ class AppBarTitleView extends StatelessWidget {
                       ] else if (tabState.tabMode is IsolatedTabMode) ...[
                         Icon(
                           MdiIcons.snowflake,
+                          semanticLabel: l10n.browser_isolatedTabIndicator,
                           color: appColors.isolatedTabTeal,
                           size: 14,
                         ),
                         const SizedBox(width: 4),
                       ],
                       if (isTabTunneled) ...[
-                        const Icon(MdiIcons.tunnelOutline, size: 14),
+                        Icon(
+                          MdiIcons.tunnelOutline,
+                          size: 14,
+                          semanticLabel: l10n.browser_proxiedTabIndicator,
+                        ),
                         const SizedBox(width: 4),
                       ],
                       if (sandboxSourceUri != null) ...[
                         Icon(
                           MdiIcons.archiveLockOutline,
+                          semanticLabel: l10n.browser_certSandboxedCaptureTitle,
                           color: theme.colorScheme.tertiary,
                           size: 14,
                         ),
@@ -642,6 +660,7 @@ class RailAppBarTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final appColors = AppColors.of(context);
     final containerColor = this.containerColor;
@@ -676,6 +695,7 @@ class RailAppBarTitleView extends StatelessWidget {
         children: [
           ToolbarButton(
             onTap: onSiteSettingsTap,
+            semanticLabel: l10n.browser_siteSettingsButton,
             // Clear of the pill's rounded end at the top, close to the
             // address below so the two read as one.
             padding: const EdgeInsets.fromLTRB(8.0, 12.0, 8.0, 4.0),
@@ -718,6 +738,7 @@ class RailAppBarTitleView extends StatelessWidget {
                       if (tabState.tabMode is PrivateTabMode) ...[
                         Icon(
                           MdiIcons.dominoMask,
+                          semanticLabel: l10n.browser_privateTabIndicator,
                           color: appColors.privateTabPurple,
                           size: 16,
                         ),
@@ -725,18 +746,24 @@ class RailAppBarTitleView extends StatelessWidget {
                       ] else if (tabState.tabMode is IsolatedTabMode) ...[
                         Icon(
                           MdiIcons.snowflake,
+                          semanticLabel: l10n.browser_isolatedTabIndicator,
                           color: appColors.isolatedTabTeal,
                           size: 16,
                         ),
                         const SizedBox(width: 4),
                       ],
                       if (isTabTunneled) ...[
-                        const Icon(MdiIcons.tunnelOutline, size: 16),
+                        Icon(
+                          MdiIcons.tunnelOutline,
+                          size: 16,
+                          semanticLabel: l10n.browser_proxiedTabIndicator,
+                        ),
                         const SizedBox(width: 4),
                       ],
                       if (sandboxSourceUri != null) ...[
                         Icon(
                           MdiIcons.archiveLockOutline,
+                          semanticLabel: l10n.browser_certSandboxedCaptureTitle,
                           color: theme.colorScheme.tertiary,
                           size: 16,
                         ),
@@ -832,25 +859,41 @@ class _SecurityStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    // Labeled with the site sheet's wording for the same states. The reader
+    // view and loading glyphs say nothing about the connection, so they stay
+    // silent rather than read out as a lock.
     if (tabState.url.isHttp) {
       return Icon(
         MdiIcons.lockOff,
         color: Theme.of(context).colorScheme.error,
         size: size,
+        semanticLabel: l10n.browser_certConnectionNotSecure,
       );
     } else if (tabState.readerableState.active) {
-      return Icon(MdiIcons.lockMinus, color: containerColor, size: size);
+      return ExcludeSemantics(
+        child: Icon(MdiIcons.lockMinus, color: containerColor, size: size),
+      );
     } else if (!tabState.securityInfoState.secure) {
       return Icon(
         MdiIcons.lockAlert,
         color: Theme.of(context).colorScheme.errorContainer,
         size: size,
+        semanticLabel: l10n.browser_certConnectionNotSecure,
       );
     } else if (!tabState.isLoading) {
-      return Icon(MdiIcons.lock, color: containerColor, size: size);
+      return Icon(
+        MdiIcons.lock,
+        color: containerColor,
+        size: size,
+        semanticLabel: l10n.browser_certConnectionSecure,
+      );
     }
 
-    return Icon(MdiIcons.timerSand, color: containerColor, size: size);
+    return ExcludeSemantics(
+      child: Icon(MdiIcons.timerSand, color: containerColor, size: size),
+    );
   }
 }
 

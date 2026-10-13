@@ -23,7 +23,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/hidden_history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestion_menu.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -50,7 +52,10 @@ class LocalHistorySuggestions extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final searchAsync = ref.watch(historySearchRepositoryProvider);
-    final results = searchAsync.value?.results ?? const [];
+    final hidden = ref.watch(hiddenHistorySuggestionsProvider);
+    final results = (searchAsync.value?.results ?? const [])
+        .where((result) => !hidden.contains(result.urlCanonical))
+        .toList();
 
     useOnListenableChangeSelector(
       searchTextListenable,
@@ -75,13 +80,13 @@ class LocalHistorySuggestions extends HookConsumerWidget {
               child: searchAsync.when(
                 skipLoadingOnReload: true,
                 data: (data) {
-                  if (data == null || data.results.isEmpty) {
+                  if (results.isEmpty) {
                     return const SliverToBoxAdapter(child: SizedBox.shrink());
                   }
                   return SliverList.builder(
                     itemCount: visibleCount,
                     itemBuilder: (context, index) {
-                      final result = data.results[index];
+                      final result = results[index];
                       final uri = Uri.tryParse(result.urlCanonical);
 
                       final content =
@@ -99,64 +104,68 @@ class LocalHistorySuggestions extends HookConsumerWidget {
 
                       final theme = Theme.of(context);
 
-                      return ListTile(
-                        leading: RepaintBoundary(
-                          child: uri != null
-                              ? UrlIcon([uri], iconSize: 24)
-                              : const Icon(MdiIcons.history, size: 24),
-                        ),
-                        title: result.title.mapNotNull(
-                          (title) => Text.rich(
-                            buildHighlightedText(
-                              title,
-                              theme.textTheme.bodyLarge?.copyWith(
-                                color: theme.colorScheme.onSurface,
-                              ),
-                              theme.textTheme.bodyLarge?.copyWith(
-                                color: theme.colorScheme.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              historyHighlightPrefix,
-                              historyHighlightSuffix,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                      return HistorySuggestionMenu(
+                        url: result.urlCanonical,
+                        builder: (onLongPress) => ListTile(
+                          onLongPress: onLongPress,
+                          leading: RepaintBoundary(
+                            child: uri != null
+                                ? UrlIcon([uri], iconSize: 24)
+                                : const Icon(MdiIcons.history, size: 24),
                           ),
-                        ),
-                        subtitle: bodyHasMatch
-                            ? Text.rich(
-                                buildHighlightedText(
-                                  content!,
-                                  theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                  theme.textTheme.bodyMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  historyHighlightPrefix,
-                                  historyHighlightSuffix,
-                                  normalizeWhitespaces: true,
+                          title: result.title.mapNotNull(
+                            (title) => Text.rich(
+                              buildHighlightedText(
+                                title,
+                                theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                 ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            : (uri != null && !titleHasMatch
-                                  ? UriBreadcrumb(
-                                      uri: uri,
-                                      showHttpScheme: false,
-                                    )
-                                  : null),
-                        onTap: () {
-                          if (uri != null) {
-                            onUriSelected(
-                              uri,
-                              findInPageQuery: bodyHasMatch
-                                  ? searchTextListenable.value.text
-                                  : null,
-                            );
-                          }
-                        },
+                                theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.onSurface,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                historyHighlightPrefix,
+                                historyHighlightSuffix,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          subtitle: bodyHasMatch
+                              ? Text.rich(
+                                  buildHighlightedText(
+                                    content!,
+                                    theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    historyHighlightPrefix,
+                                    historyHighlightSuffix,
+                                    normalizeWhitespaces: true,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              : (uri != null && !titleHasMatch
+                                    ? UriBreadcrumb(
+                                        uri: uri,
+                                        showHttpScheme: false,
+                                      )
+                                    : null),
+                          onTap: () {
+                            if (uri != null) {
+                              onUriSelected(
+                                uri,
+                                findInPageQuery: bodyHasMatch
+                                    ? searchTextListenable.value.text
+                                    : null,
+                              );
+                            }
+                          },
+                        ),
                       );
                     },
                   );

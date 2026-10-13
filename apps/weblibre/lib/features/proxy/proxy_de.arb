@@ -252,5 +252,13 @@
   "proxy_saveErrorSecretsNotJson": "Die Geheimnisse müssen ein JSON-Objekt sein.",
   "proxy_saveErrorUnexpected": "Proxy-Profil konnte nicht gespeichert werden: {error}",
   "proxy_loadErrorNotFound": "Proxy-Profil nicht gefunden.",
-  "proxy_loadErrorFailed": "Proxy-Profil konnte nicht geladen werden: {error}"
+  "proxy_loadErrorFailed": "Proxy-Profil konnte nicht geladen werden: {error}",
+  "proxy_tabNotRoutedByContainer": "Nicht über Container „{container}“ geleitet",
+  "proxy_tabNotRoutedByTabContainer": "Nicht über den Container dieses Tabs geleitet",
+  "proxy_tabRoutingChecking": "Routing wird geprüft …",
+  "proxy_tabRoutingStarting": "Routing wird gestartet …",
+  "proxy_tabRoutingBlockedNotRunning": "Blockiert – {proxyTitle} läuft nicht",
+  "proxy_tabRoutingVia": "Dieser Tab: {proxyTitle}",
+  "proxy_tabRoutingDirect": "Dieser Tab: direkte Verbindung",
+  "proxy_tabRoutingTitle": "Proxy"
 }

@@ -1,5 +1,6 @@
 package eu.weblibre.flutter_mozilla_components.api
 
+import eu.weblibre.flutter_mozilla_components.ext.toPigeonDownloadStatus
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.DocumentType
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoHistoryApi
@@ -49,7 +50,10 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
             title = filePath,
             previewImageUrl = contentType,
             isRemote = false,
-            contentId = id
+            contentId = id,
+            downloadStatus = status.toPigeonDownloadStatus(),
+            downloadedBytes = currentBytesCopied,
+            downloadSize = contentLength,
         )
 
     override suspend fun getDetailedVisits(
@@ -309,6 +313,10 @@ class GeckoHistoryApiImpl() : GeckoHistoryApi {
         val visited = components.core.historyStorage.getVisited(urls)
         return visited
     }
+
+    /** Filtered here, so the whole history never crosses the channel. */
+    override suspend fun getVisitedUrlsContaining(text: String): List<String> =
+        components.core.historyStorage.getVisited().filter { it.contains(text) }
 
     override suspend fun getSuggestions(
         query: String,

@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
@@ -109,6 +111,9 @@ Future<void> _pumpTray(
         ),
         selectedContainerProvider.overrideWith(_TestSelectedContainer.new),
         selectedContainerDataProvider.overrideWith((ref) => Stream.value(null)),
+        // The tab-type filter bar reads which kinds of tab are open, which
+        // would wait for the engine.
+        tabSortKeysProvider.overrideWith((ref) => EquatableValue(const {})),
       ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

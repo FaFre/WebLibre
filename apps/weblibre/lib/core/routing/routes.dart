@@ -52,6 +52,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/screen
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/context_menu_dialog.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/screens/history.dart';
+import 'package:weblibre/features/geckoview/features/history/presentation/screens/recently_closed_tabs.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/open_shared_content.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/unshortener_settings.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';

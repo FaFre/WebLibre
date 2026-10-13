@@ -1236,5 +1236,40 @@
         "type": "String"
       }
     }
+  },
+  "proxy_tabNotRoutedByContainer": "Not routed by container \"{container}\"",
+  "@proxy_tabNotRoutedByContainer": {
+    "description": "Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name. Shown in the browser menu's connection group and in the site information sheet.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "proxy_tabNotRoutedByTabContainer": "Not routed by this tab's container",
+  "@proxy_tabNotRoutedByTabContainer": {
+    "description": "Same summary line when the container has no name. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingChecking": "Checking routing…",
+  "@proxy_tabRoutingChecking": {
+    "description": "Summary line while the tab's routing is being determined. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingStarting": "Starting routing…",
+  "@proxy_tabRoutingStarting": {
+    "description": "Summary line while the tab's proxy is starting. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingBlockedNotRunning": "Blocked — {proxyTitle} is not running",
+  "@proxy_tabRoutingBlockedNotRunning": {
+    "description": "Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name. Shown in the browser menu's connection group and in the site information sheet.",
+    "placeholders": { "proxyTitle": { "type": "String" } }
+  },
+  "proxy_tabRoutingVia": "This tab: {proxyTitle}",
+  "@proxy_tabRoutingVia": {
+    "description": "Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name. Shown in the browser menu's connection group and in the site information sheet.",
+    "placeholders": { "proxyTitle": { "type": "String" } }
+  },
+  "proxy_tabRoutingDirect": "This tab: direct connection",
+  "@proxy_tabRoutingDirect": {
+    "description": "Summary line: this tab connects directly without a proxy. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingTitle": "Proxy",
+  "@proxy_tabRoutingTitle": {
+    "description": "Title of the row in the site information sheet that says how the current tab's traffic is routed (directly, via a proxy or Tor); the routing summary is shown under it."
   }
 }

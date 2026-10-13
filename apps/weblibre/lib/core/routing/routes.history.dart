@@ -27,6 +27,10 @@ part of 'routes.dart';
       name: 'HistoryDownloadsRoute',
       path: 'downloads',
     ),
+    TypedGoRoute<HistoryRecentlyClosedRoute>(
+      name: 'HistoryRecentlyClosedRoute',
+      path: 'recently-closed',
+    ),
   ],
 )
 class HistoryRoute extends GoRouteData with $HistoryRoute {
@@ -44,5 +48,15 @@ class HistoryDownloadsRoute extends GoRouteData with $HistoryDownloadsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const HistoryScreen(mode: HistoryScreenMode.downloads);
+  }
+}
+
+class HistoryRecentlyClosedRoute extends GoRouteData
+    with $HistoryRecentlyClosedRoute {
+  const HistoryRecentlyClosedRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RecentlyClosedTabsScreen();
   }
 }

@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/com
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestion_menu.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -114,60 +115,64 @@ class CombinedHistorySuggestions extends HookConsumerWidget {
                 final snippetHasMatch =
                     item.snippet?.contains(historyHighlightPrefix) ?? false;
 
-                return ListTile(
+                return HistorySuggestionMenu(
                   key: ValueKey(item.uri.toString()),
-                  leading: HistoryRowIcon(
-                    iconBytes: item.engineIcon,
-                    fallback: UrlIcon([item.uri], iconSize: 24),
-                  ),
-                  title: titleHasMatch
-                      ? Text.rich(
-                          buildHighlightedText(
-                            item.highlightedTitle!,
-                            titleBase,
-                            titleHighlight,
-                            historyHighlightPrefix,
-                            historyHighlightSuffix,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : item.title.mapNotNull(
-                          (title) => Text(
-                            title,
+                  url: item.historyUrl,
+                  builder: (onLongPress) => ListTile(
+                    onLongPress: onLongPress,
+                    leading: HistoryRowIcon(
+                      iconBytes: item.engineIcon,
+                      fallback: UrlIcon([item.uri], iconSize: 24),
+                    ),
+                    title: titleHasMatch
+                        ? Text.rich(
+                            buildHighlightedText(
+                              item.highlightedTitle!,
+                              titleBase,
+                              titleHighlight,
+                              historyHighlightPrefix,
+                              historyHighlightSuffix,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
+                          )
+                        : item.title.mapNotNull(
+                            (title) => Text(
+                              title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                  subtitle: snippetHasMatch
-                      ? Text.rich(
-                          buildHighlightedText(
-                            item.snippet!,
-                            snippetBase,
-                            snippetHighlight,
-                            historyHighlightPrefix,
-                            historyHighlightSuffix,
-                            normalizeWhitespaces: true,
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        )
-                      : UriBreadcrumb(uri: item.uri, showHttpScheme: false),
-                  trailing: item.source == CombinedHistorySource.local
-                      ? Tooltip(
-                          message: l10n.search_contentMatchTooltip,
-                          child: Icon(
-                            MdiIcons.textBoxSearchOutline,
-                            size: 16,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      : null,
-                  onTap: () => onUriSelected(
-                    item.uri,
-                    findInPageQuery: snippetHasMatch
-                        ? searchTextListenable.value.text
+                    subtitle: snippetHasMatch
+                        ? Text.rich(
+                            buildHighlightedText(
+                              item.snippet!,
+                              snippetBase,
+                              snippetHighlight,
+                              historyHighlightPrefix,
+                              historyHighlightSuffix,
+                              normalizeWhitespaces: true,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        : UriBreadcrumb(uri: item.uri, showHttpScheme: false),
+                    trailing: item.source == CombinedHistorySource.local
+                        ? Tooltip(
+                            message: l10n.search_contentMatchTooltip,
+                            child: Icon(
+                              MdiIcons.textBoxSearchOutline,
+                              size: 16,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          )
                         : null,
+                    onTap: () => onUriSelected(
+                      item.uri,
+                      findInPageQuery: snippetHasMatch
+                          ? searchTextListenable.value.text
+                          : null,
+                    ),
                   ),
                 );
               },

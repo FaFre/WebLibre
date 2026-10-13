@@ -545,9 +545,9 @@
   "settings_trackingProtectionStrictSubtitle": "Блокирует больше категорий трекеров, включая отслеживающий контент, но может нарушить работу некоторых сайтов.",
   "settings_trackingProtectionCustomLabel": "Своя",
   "settings_trackingProtectionCustomSubtitle": "Выберите, какие трекеры и скрипты блокировать.",
-  "settings_contentBlockingDatabaseTitle": "База блокировки контента",
-  "settings_contentBlockingDatabaseKeywords": "реклама, трекеры, блокировка контента",
-  "settings_contentBlockingDatabaseSubtitle": "Использовать списки блокировки GeckoView для категорий ETP, таких как реклама, аналитика и социальные трекеры. Требуется перезапуск приложения.",
+  "settings_trackerStatisticsTitle": "Статистика трекеров",
+  "settings_trackerStatisticsKeywords": "трекеры, статистика, заблокированные трекеры, блокировка контента, база данных",
+  "settings_trackerStatisticsSubtitle": "Ежедневно подсчитывать заблокированные трекеры по категориям. Хранятся только количество и даты, а не посещённые сайты. Удаление истории просмотра удаляет и эту статистику. Требуется перезапуск приложения.",
   "settings_bounceTrackingProtectionTitle": "Защита от отскакивающего отслеживания",
   "settings_bounceTrackingProtectionKeywords": "трекеры перенаправлений, bounce tracking",
   "settings_bounceTrackingProtectionSubtitle": "Блокирует трекеры, собирающие данные через промежуточные перенаправления между сайтами",
@@ -851,7 +851,7 @@
   "settings_privacySectionTrackingProtectionTitle": "Защита от отслеживания",
   "settings_privacySectionTrackingProtectionKeywords": "приватность, трекеры",
   "settings_indexEnhancedTrackingProtectionSubtitle": "Выбор строгости блокировки трекеров",
-  "settings_indexContentBlockingDatabaseSubtitle": "Использовать списки блокировки GeckoView для категорий ETP",
+  "settings_indexTrackerStatisticsSubtitle": "Ежедневно подсчитывать заблокированные трекеры",
   "settings_indexBounceTrackingProtectionSubtitle": "Удалять следы отслеживания, оставленные трекерами перенаправлений",
   "settings_indexQueryParameterStrippingSubtitle": "Удалять параметры отслеживания из URL-адресов",
   "settings_privacySectionFingerprintingTitle": "Цифровые отпечатки",
@@ -1055,5 +1055,10 @@
   "settings_switcherPlacementBelowContextualBarDescription": "У нижнего края экрана",
   "settings_tabViewActionsAtBottomTitle": "Действия обзора вкладок внизу",
   "settings_tabViewActionsAtBottomSubtitle": "Поиск, фильтры и действия с вкладками внизу, кнопка новой вкладки над ними",
-  "settings_tabViewActionsAtBottomKeywords": "внизу, большой палец, досягаемость, одной рукой, панель, обзор вкладок"
+  "settings_tabViewActionsAtBottomKeywords": "внизу, большой палец, досягаемость, одной рукой, панель, обзор вкладок",
+  "settings_trackerStatisticsTotal": "{count, plural, one{С {date} заблокирован {count} трекер} few{С {date} заблокировано {count} трекера} many{С {date} заблокировано {count} трекеров} other{С {date} заблокировано {count} трекера}}",
+  "settings_trackerStatisticsNothingRecorded": "Заблокированные трекеры пока не записаны.",
+  "settings_trackerStatisticsLastSevenDays": "Последние 7 дней",
+  "settings_trackerStatisticsNoneLastSevenDays": "За последние 7 дней трекеры не блокировались.",
+  "settings_trackerStatisticsLoadFailed": "Не удалось загрузить статистику трекеров."
 }

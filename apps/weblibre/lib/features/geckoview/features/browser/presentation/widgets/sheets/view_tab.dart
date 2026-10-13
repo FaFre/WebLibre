@@ -30,9 +30,11 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/desktop_mode_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/gesture_exclusion_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/permissions_section.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/routing_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/website_title_tile.dart';
 
 class ClampingScrollPhysicsWithoutImplicit extends ClampingScrollPhysics {
@@ -53,7 +55,10 @@ class ViewTabSheetWidget extends HookConsumerWidget {
   final DraggableScrollableController draggableScrollableController;
   final VoidCallback onClose;
   final double initialHeight;
-  final ValueChanged<bool>? onClearSiteDataExpandedChanged;
+
+  /// Called when a section opens or closes a list, so the sheet can make room
+  /// for it.
+  final ValueChanged<bool>? onSectionExpandedChanged;
 
   const ViewTabSheetWidget({
     super.key,
@@ -62,7 +67,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
     required this.draggableScrollableController,
     required this.onClose,
     required this.initialHeight,
-    this.onClearSiteDataExpandedChanged,
+    this.onSectionExpandedChanged,
   });
 
   @override
@@ -116,37 +121,70 @@ class ViewTabSheetWidget extends HookConsumerWidget {
         controller: sheetScrollController,
         physics: const ClampingScrollPhysicsWithoutImplicit(),
         children: [
-          // Tracking Protection Section
-          TrackingProtectionSection(tabId: initialTabState.id),
-          const Divider(),
-          // Gesture Exclusion Section
-          GestureExclusionSection(url: initialTabState.url),
-          const Divider(),
-          // Desktop Mode Section
-          DesktopModeSection(
+          // Ordered by the questions people open this sheet with: is the site
+          // tracking me, where does my traffic go, what may it access. How the
+          // browser behaves on it, and wiping it, come after.
+          TrackingProtectionSection(
             tabId: initialTabState.id,
-            url: initialTabState.url,
+            onExpandedChanged: onSectionExpandedChanged,
           ),
           const Divider(),
-          // App Link Section
-          AppLinkSection(
-            url: initialTabState.url,
-            contextId: initialTabState.contextId,
-          ),
-          const Divider(),
-          // Permissions Section
+          RoutingSection(tabId: initialTabState.id, onClose: onClose),
           PermissionsSection(
             origin: initialTabState.url.origin,
             isPrivate: initialTabState.tabMode is PrivateTabMode,
           ),
           const Divider(),
-          // Clear Site Data Section
-          ClearSiteDataSection(
-            url: initialTabState.url,
-            onExpandedChanged: onClearSiteDataExpandedChanged,
+          _SectionHeader(
+            AppLocalizations.of(context).browser_siteBehaviorSectionTitle,
           ),
+          DesktopModeSection(
+            tabId: initialTabState.id,
+            url: initialTabState.url,
+          ),
+          AppLinkSection(
+            url: initialTabState.url,
+            contextId: initialTabState.contextId,
+          ),
+          GestureExclusionSection(url: initialTabState.url),
+          // Clear Site Data Section. The clear covers the site in every
+          // partition, so from a private or isolated tab it would mostly hit
+          // data outside that tab; closing the tab already drops its own data.
+          // Fenix hides it in private tabs for the same reason.
+          if (initialTabState.tabMode is RegularTabMode) ...[
+            const Divider(),
+            ClearSiteDataSection(
+              url: initialTabState.url,
+              onExpandedChanged: onSectionExpandedChanged,
+            ),
+          ],
           const SizedBox(height: 16.0),
         ],
+      ),
+    );
+  }
+}
+
+/// A group title in the sheet, styled like the permissions section's.
+class _SectionHeader extends StatelessWidget {
+  final String title;
+
+  const _SectionHeader(this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 0.0),
+      child: Semantics(
+        header: true,
+        child: Text(
+          title,
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
       ),
     );
   }

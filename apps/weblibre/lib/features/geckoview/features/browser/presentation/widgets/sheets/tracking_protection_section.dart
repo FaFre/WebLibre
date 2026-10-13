@@ -18,20 +18,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/blocked_trackers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/blocked_trackers_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/sheets/tracking_protection_provider.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-/// Section widget displaying Enhanced Tracking Protection toggle
+/// Section widget displaying the Enhanced Tracking Protection toggle and the
+/// trackers it has blocked on this page.
 class TrackingProtectionSection extends HookConsumerWidget {
   final String tabId;
 
-  const TrackingProtectionSection({required this.tabId, super.key});
+  /// Called when the blocked-trackers list opens or closes, so the sheet can
+  /// make room for it.
+  final ValueChanged<bool>? onExpandedChanged;
+
+  const TrackingProtectionSection({
+    required this.tabId,
+    this.onExpandedChanged,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,9 +52,21 @@ class TrackingProtectionSection extends HookConsumerWidget {
     );
 
     return hasExceptionAsync.when(
-      data: (hasException) => _TrackingProtectionTile(
-        tabId: tabId,
-        isEnabled: !hasException, // ETP enabled when NOT in exceptions
+      data: (hasException) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _TrackingProtectionTile(
+            tabId: tabId,
+            isEnabled: !hasException, // ETP enabled when NOT in exceptions
+          ),
+          // With protection off for the site nothing is blocked, which the
+          // switch's subtitle already says.
+          if (!hasException)
+            _BlockedTrackers(
+              tabId: tabId,
+              onExpandedChanged: onExpandedChanged,
+            ),
+        ],
       ),
       loading: () => Skeletonizer(
         child: SwitchListTile.adaptive(
@@ -126,5 +150,74 @@ class _TrackingProtectionTile extends ConsumerWidget {
         );
       }
     }
+  }
+}
+
+/// "N trackers blocked", opening into the categories and, under each, the
+/// tracker hosts.
+class _BlockedTrackers extends ConsumerWidget {
+  final String tabId;
+  final ValueChanged<bool>? onExpandedChanged;
+
+  const _BlockedTrackers({required this.tabId, this.onExpandedChanged});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final trackersAsync = ref.watch(pageTrackersProvider(tabId));
+    // The log is read again when a load starts or ends; keep showing the last
+    // count meanwhile instead of flashing a placeholder.
+    final trackers = trackersAsync.value;
+
+    if (trackers == null) {
+      // A suspended tab has no engine session, so there is no log to read.
+      if (trackersAsync.hasError) return const SizedBox.shrink();
+
+      return Skeletonizer(
+        child: ListTile(
+          leading: const Icon(Icons.block),
+          title: Text(BoneMock.title),
+        ),
+      );
+    }
+
+    final count = trackers.blockedCount;
+    if (count == 0) {
+      return ListTile(
+        leading: const Icon(MdiIcons.shieldOutline),
+        title: Text(l10n.browser_noTrackersBlocked),
+      );
+    }
+
+    return ExpansionTile(
+      leading: const Icon(Icons.block),
+      title: Text(l10n.browser_trackersBlockedCount(count)),
+      shape: const Border(),
+      collapsedShape: const Border(),
+      onExpansionChanged: onExpandedChanged,
+      children: [
+        for (final MapEntry(key: category, value: hosts)
+            in trackers.blocked.entries)
+          ExpansionTile(
+            leading: Icon(category.icon),
+            title: Text(category.label(context)),
+            subtitle: Text(l10n.browser_trackerCount(hosts.length)),
+            shape: const Border(),
+            collapsedShape: const Border(),
+            children: [
+              for (final host in hosts)
+                ListTile(
+                  dense: true,
+                  // Lines the hosts up with their category's title.
+                  contentPadding: const EdgeInsetsDirectional.only(
+                    start: 72,
+                    end: 16,
+                  ),
+                  title: Text(host),
+                ),
+            ],
+          ),
+      ],
+    );
   }
 }

@@ -25,6 +25,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/hidden_history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/services/address_completion.dart';
 import 'package:weblibre/features/popular_sites/domain/repositories/popular_sites.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -129,6 +130,8 @@ class EngineSuggestions extends _$EngineSuggestions {
 
 @Riverpod()
 AsyncValue<List<GeckoSuggestion>> engineHistorySuggestions(Ref ref) {
+  final hidden = ref.watch(hiddenHistorySuggestionsProvider);
+
   return ref.watch(
     engineSuggestionsProvider.select(
       (suggestions) => suggestions.whenData(
@@ -140,7 +143,10 @@ AsyncValue<List<GeckoSuggestion>> engineHistorySuggestions(Ref ref) {
                   (suggestion.description.mapNotNull(
                         (url) => Uri.tryParse(url),
                       ) !=
-                      null),
+                      null) &&
+                  !hidden.contains(
+                    historySuggestionKey(suggestion.description!),
+                  ),
             )
             .take(25)
             .toList(),

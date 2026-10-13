@@ -52,6 +52,20 @@ class ClearSiteDataSection extends HookConsumerWidget {
       ClearDataType.allSiteData,
       ClearDataType.authSessions,
     });
+    // The clear runs on the registrable domain (eTLD+1), which takes every
+    // subdomain with it, so the confirmation names that domain rather than
+    // the tab's host. Resolved up front so a tap opens the dialog at once.
+    final baseDomainSnapshot = useFuture(
+      useMemoized(
+        () => GeckoPublicSuffixListApi().getPublicSuffixPlusOne(url.host),
+        [url.host],
+      ),
+    );
+    // The native lookup already falls back to the host; this covers a failed
+    // channel call.
+    final baseDomain = baseDomainSnapshot.hasError
+        ? url.host
+        : baseDomainSnapshot.data;
 
     void toggleType(ClearDataType type) {
       final newTypes = Set<ClearDataType>.from(selectedTypes.value);
@@ -153,12 +167,16 @@ class ClearSiteDataSection extends HookConsumerWidget {
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: isClearing.value || selectedTypes.value.isEmpty
+                onPressed:
+                    isClearing.value ||
+                        selectedTypes.value.isEmpty ||
+                        baseDomain == null
                     ? null
                     : () => _showConfirmationAndClear(
                         context,
                         ref,
                         isClearing,
+                        baseDomain,
                         selectedTypes.value,
                         closeTabAfterClear.value,
                       ),
@@ -186,6 +204,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ValueNotifier<bool> isClearing,
+    String baseDomain,
     Set<ClearDataType> selectedTypes,
     bool closeTabAfterClear,
   ) async {
@@ -199,14 +218,14 @@ class ClearSiteDataSection extends HookConsumerWidget {
 
     final confirmed = await showClearSiteDataDialog(
       context,
-      host: url.host,
+      host: baseDomain,
       formattedTypes: _formatTypes(AppLocalizations.of(context), selectedTypes),
     );
 
     if (confirmed == true && context.mounted) {
       isClearing.value = true;
       try {
-        await _clearData(ref, selectedTypes, closeTabAfterClear);
+        await _clearData(ref, baseDomain, selectedTypes, closeTabAfterClear);
         if (context.mounted) {
           showInfoMessage(
             context,
@@ -248,15 +267,10 @@ class ClearSiteDataSection extends HookConsumerWidget {
 
   Future<void> _clearData(
     WidgetRef ref,
+    String baseDomain,
     Set<ClearDataType> selectedTypes,
     bool closeTabAfterClear,
   ) async {
-    final host = url.host;
-
-    // Get base domain using PSL API (falls back to host on error)
-    final pslApi = GeckoPublicSuffixListApi();
-    final baseDomain = await pslApi.getPublicSuffixPlusOne(host);
-
     // Clear data via API
     final clearApi = GeckoDeleteBrowsingDataController();
     await clearApi.clearDataForHost(baseDomain, selectedTypes.toList());

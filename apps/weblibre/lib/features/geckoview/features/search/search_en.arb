@@ -346,5 +346,14 @@
   "search_actionUntitledFeed": "Untitled feed",
   "@search_actionUntitledFeed": {
     "description": "Row title in the search screen's Actions section for a subscribed feed that has no title."
+  },
+  "search_actionDeleteFromHistory": "Delete from history",
+  "@search_actionDeleteFromHistory": {
+    "description": "Menu item (long press on a history suggestion under the address bar) and screen-reader action: deletes every visit of that page from browsing history."
+  },
+  "search_deletedFromHistory": "Deleted {site} from history",
+  "@search_deletedFromHistory": {
+    "description": "Snackbar with an Undo button after deleting a history suggestion under the address bar. The visits are deleted when the snackbar goes away without Undo. site is the page's host, e.g. example.com.",
+    "placeholders": { "site": { "type": "String" } }
   }
 }

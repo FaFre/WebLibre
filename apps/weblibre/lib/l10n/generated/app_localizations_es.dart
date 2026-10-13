@@ -2507,7 +2507,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String browser_clearSiteDataContent(String formattedTypes, String host) {
-    return 'Se borrarán los siguientes datos de $host:\n$formattedTypes\n\nEs posible que tengas que volver a iniciar sesión.';
+    return 'Se borrarán los siguientes datos de $host, incluidos sus subdominios, en todos los contenedores y en las pestañas privadas y aisladas:\n$formattedTypes\n\nEs posible que tengas que volver a iniciar sesión.';
   }
 
   @override
@@ -3274,9 +3274,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browser_tooltipSearchInsideTabs => 'Buscar dentro de las pestañas';
 
   @override
-  String get browser_filterTabType => 'Tipo de pestaña';
-
-  @override
   String get browser_sortPinnedFirst => 'Fijadas primero';
 
   @override
@@ -3459,6 +3456,81 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get browser_tabReorderBlockedMessage =>
       'Borra el filtro o la búsqueda de la vista de pestañas para reordenarlas';
+
+  @override
+  String browser_trackersBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rastreadores bloqueados',
+      one: '1 rastreador bloqueado',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_noTrackersBlocked =>
+      'Aún no se ha bloqueado ningún rastreador en esta página';
+
+  @override
+  String browser_trackerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rastreadores',
+      one: '1 rastreador',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_trackerCategoryCrossSiteCookies =>
+      'Cookies de rastreo entre sitios';
+
+  @override
+  String get browser_trackerCategorySocialMedia =>
+      'Rastreadores de redes sociales';
+
+  @override
+  String get browser_trackerCategoryFingerprinters =>
+      'Detectores de huellas digitales';
+
+  @override
+  String get browser_trackerCategoryCryptominers => 'Criptomineros';
+
+  @override
+  String get browser_trackerCategoryTrackingContent => 'Contenido de rastreo';
+
+  @override
+  String get browser_trackerCategoryRedirectTrackers =>
+      'Rastreadores por redirección';
+
+  @override
+  String get browser_siteBehaviorSectionTitle => 'Comportamiento';
+
+  @override
+  String get browser_siteSettingsButton => 'Ajustes del sitio';
+
+  @override
+  String get browser_privateTabIndicator => 'Pestaña privada';
+
+  @override
+  String get browser_isolatedTabIndicator => 'Pestaña aislada';
+
+  @override
+  String get browser_proxiedTabIndicator => 'Se enruta a través de un proxy';
+
+  @override
+  String get browser_moveTabUp => 'Mover pestaña arriba';
+
+  @override
+  String get browser_moveTabDown => 'Mover pestaña abajo';
+
+  @override
+  String get browser_moveTabLeft => 'Mover pestaña a la izquierda';
+
+  @override
+  String get browser_moveTabRight => 'Mover pestaña a la derecha';
 
   @override
   String get contextualToolbar_tooltipHome => 'Inicio';
@@ -4130,34 +4202,6 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String menu_connectionNotRoutedByContainer(String container) {
-    return 'No se enruta por el contenedor «$container»';
-  }
-
-  @override
-  String get menu_connectionNotRoutedByTabContainer =>
-      'No se enruta por el contenedor de esta pestaña';
-
-  @override
-  String get menu_connectionCheckingRouting => 'Comprobando el enrutamiento…';
-
-  @override
-  String get menu_connectionStartingRouting => 'Iniciando el enrutamiento…';
-
-  @override
-  String menu_connectionBlockedNotRunning(String proxyTitle) {
-    return 'Bloqueada: $proxyTitle no se está ejecutando';
-  }
-
-  @override
-  String menu_connectionThisTabVia(String proxyTitle) {
-    return 'Esta pestaña: $proxyTitle';
-  }
-
-  @override
-  String get menu_connectionThisTabDirect => 'Esta pestaña: conexión directa';
-
-  @override
   String menu_connectionStartProxy(String proxyTitle) {
     return 'Iniciar $proxyTitle';
   }
@@ -4492,6 +4536,76 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get history_actionShareLink => 'Compartir enlace';
+
+  @override
+  String get history_dayToday => 'Hoy';
+
+  @override
+  String get history_dayYesterday => 'Ayer';
+
+  @override
+  String get history_recentlyClosedTitle => 'Pestañas cerradas recientemente';
+
+  @override
+  String history_recentlyClosedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pestañas',
+      one: '1 pestaña',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_recentlyClosedEmpty =>
+      'No hay pestañas cerradas recientemente';
+
+  @override
+  String get history_recentlyClosedExplanation =>
+      'Las últimas 10 pestañas que cerraste, para volver a abrirlas con su historial de navegación hacia atrás. No se guardan las pestañas privadas ni las aisladas, ni las de contenedores excluidos del historial. Al eliminar el historial se vacía esta lista.';
+
+  @override
+  String get history_recentlyClosedClearAll =>
+      'Vaciar pestañas cerradas recientemente';
+
+  @override
+  String get history_recentlyClosedClearConfirm =>
+      '¿Vaciar las pestañas cerradas recientemente?';
+
+  @override
+  String get history_recentlyClosedContainerDeleted =>
+      'Contenedor eliminado; se abre sin él';
+
+  @override
+  String get history_recentlyClosedLoadFailed =>
+      'No se pudieron cargar las pestañas cerradas recientemente';
+
+  @override
+  String get history_downloadStatusStarting => 'Iniciando';
+
+  @override
+  String get history_downloadStatusDownloading => 'Descargando';
+
+  @override
+  String get history_downloadStatusPaused => 'En pausa';
+
+  @override
+  String get history_downloadStatusFailed => 'Error';
+
+  @override
+  String history_downloadProgress(String downloaded, String total) {
+    return '$downloaded de $total';
+  }
+
+  @override
+  String get history_downloadActionPause => 'Pausar';
+
+  @override
+  String get history_downloadActionResume => 'Reanudar';
+
+  @override
+  String get history_downloadActionCancel => 'Cancelar descarga';
 
   @override
   String get openLinkTools_openLinkTitle => 'Abrir enlace';
@@ -5211,6 +5325,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get search_actionUntitledFeed => 'Fuente sin título';
+
+  @override
+  String get search_actionDeleteFromHistory => 'Eliminar del historial';
+
+  @override
+  String search_deletedFromHistory(String site) {
+    return 'Se eliminó $site del historial';
+  }
 
   @override
   String get tabs_actionSelect => 'Seleccionar';
@@ -7187,6 +7309,37 @@ class AppLocalizationsEs extends AppLocalizations {
   String proxy_loadErrorFailed(String error) {
     return 'No se pudo cargar el perfil de proxy: $error';
   }
+
+  @override
+  String proxy_tabNotRoutedByContainer(String container) {
+    return 'No se enruta por el contenedor «$container»';
+  }
+
+  @override
+  String get proxy_tabNotRoutedByTabContainer =>
+      'No se enruta por el contenedor de esta pestaña';
+
+  @override
+  String get proxy_tabRoutingChecking => 'Comprobando el enrutamiento…';
+
+  @override
+  String get proxy_tabRoutingStarting => 'Iniciando el enrutamiento…';
+
+  @override
+  String proxy_tabRoutingBlockedNotRunning(String proxyTitle) {
+    return 'Bloqueada: $proxyTitle no se está ejecutando';
+  }
+
+  @override
+  String proxy_tabRoutingVia(String proxyTitle) {
+    return 'Esta pestaña: $proxyTitle';
+  }
+
+  @override
+  String get proxy_tabRoutingDirect => 'Esta pestaña: conexión directa';
+
+  @override
+  String get proxy_tabRoutingTitle => 'Proxy';
 
   @override
   String get qrScanner_noCameraPermission =>
@@ -9278,16 +9431,15 @@ class AppLocalizationsEs extends AppLocalizations {
       'Elige qué rastreadores y scripts bloquear.';
 
   @override
-  String get settings_contentBlockingDatabaseTitle =>
-      'Base de datos de bloqueo de contenido';
+  String get settings_trackerStatisticsTitle => 'Estadísticas de rastreadores';
 
   @override
-  String get settings_contentBlockingDatabaseKeywords =>
-      'anuncios, rastreadores, bloqueo de contenido';
+  String get settings_trackerStatisticsKeywords =>
+      'rastreadores, estadísticas, rastreadores bloqueados, bloqueo de contenido, base de datos';
 
   @override
-  String get settings_contentBlockingDatabaseSubtitle =>
-      'Usar las listas de bloqueo de GeckoView para las categorías de la protección mejorada, como anuncios, analíticas y rastreadores sociales. Requiere reiniciar la aplicación.';
+  String get settings_trackerStatisticsSubtitle =>
+      'Llevar un recuento diario de los rastreadores bloqueados por categoría. Solo se guardan recuentos y fechas, no los sitios que visitas. Al eliminar el historial de navegación también se eliminan. Requiere reiniciar la aplicación.';
 
   @override
   String get settings_bounceTrackingProtectionTitle =>
@@ -10431,8 +10583,8 @@ class AppLocalizationsEs extends AppLocalizations {
       'Elegir con qué intensidad se bloquean los rastreadores';
 
   @override
-  String get settings_indexContentBlockingDatabaseSubtitle =>
-      'Usar las listas de bloqueo de GeckoView para las categorías de la protección mejorada';
+  String get settings_indexTrackerStatisticsSubtitle =>
+      'Llevar un recuento diario de los rastreadores bloqueados';
 
   @override
   String get settings_indexBounceTrackingProtectionSubtitle =>
@@ -11184,6 +11336,36 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_tabViewActionsAtBottomKeywords =>
       'abajo, pulgar, alcance, una mano, barra de herramientas, vista de pestañas';
+
+  @override
+  String settings_trackerStatisticsTotal(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString rastreadores bloqueados desde el $date',
+      one: '1 rastreador bloqueado desde el $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_trackerStatisticsNothingRecorded =>
+      'Aún no se ha registrado ningún rastreador bloqueado.';
+
+  @override
+  String get settings_trackerStatisticsLastSevenDays => 'Últimos 7 días';
+
+  @override
+  String get settings_trackerStatisticsNoneLastSevenDays =>
+      'No se ha bloqueado ningún rastreador en los últimos 7 días.';
+
+  @override
+  String get settings_trackerStatisticsLoadFailed =>
+      'No se pudieron cargar las estadísticas de rastreadores.';
 
   @override
   String get smallWeb_sheetTitle => 'Small Web';

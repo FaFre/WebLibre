@@ -61,6 +61,17 @@ class TrackingProtectionRepository extends _$TrackingProtectionRepository {
     await _invalidateWithDelay();
   }
 
+  /// The trackers the page in [tabId] has tried to load so far. Throws when
+  /// the tab has no engine session.
+  Future<List<TrackerLogEntry>> fetchTrackerLog(String tabId) {
+    return _api.fetchTrackerLog(tabId);
+  }
+
+  /// Everything in the tracker-statistics database.
+  Future<TrackingStatistics> fetchTrackingStatistics() {
+    return _api.fetchTrackingStatistics();
+  }
+
   /// Helper method to invalidate repository state after mutations with delay
   Future<void> _invalidateWithDelay() async {
     await Future.delayed(const Duration(milliseconds: 100)).whenComplete(() {

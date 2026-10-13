@@ -99,6 +99,10 @@ class HistoryRepository extends _$HistoryRepository {
     return _service.getVisited(urls);
   }
 
+  Future<List<String>> getVisitedUrlsContaining(String text) {
+    return _service.getVisitedUrlsContaining(text);
+  }
+
   Future<List<HistorySuggestion>> getSuggestions(
     String query, {
     int limit = 10,

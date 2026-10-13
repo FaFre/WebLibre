@@ -21,6 +21,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class TabViewReorderResult {
@@ -39,6 +40,44 @@ class TabViewReorderResult {
     required this.nextTabId,
     this.parentChange = const TabParentChange.unchanged(),
   });
+}
+
+/// Moves the tab view row at [oldIndex] to [newIndex], counted after it is
+/// taken out, as the list and grid views' drops and move actions do. Rows past
+/// [visibleItems], the tab suggestions, never move.
+Future<void> moveTabViewRow(
+  TabDataRepository repository, {
+  required List<TabViewItem> visibleItems,
+  required List<TabsWithRootAndDepthResult> treeRows,
+  required Set<String> collapsedGroups,
+  required Set<String> pinnedTabIds,
+  required int oldIndex,
+  required int newIndex,
+  required TabDirection tabListDirection,
+  required bool hierarchical,
+  required bool sortPinnedFirst,
+}) async {
+  if (oldIndex >= visibleItems.length) return;
+
+  final result = buildTabViewReorderResult(
+    visibleItems: visibleItems,
+    treeRows: treeRows,
+    collapsedGroups: collapsedGroups,
+    pinnedTabIds: pinnedTabIds,
+    oldIndex: oldIndex,
+    newIndex: newIndex,
+    tabListDirection: tabListDirection,
+    hierarchical: hierarchical,
+    sortPinnedFirst: sortPinnedFirst,
+  );
+  if (result == null) return;
+
+  await repository.reorderTabs(
+    movingTabIds: result.movingTabIds,
+    previousTabId: result.previousTabId,
+    nextTabId: result.nextTabId,
+    parentChange: result.parentChange,
+  );
 }
 
 TabViewReorderResult? buildTabViewReorderResult({

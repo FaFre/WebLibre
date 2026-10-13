@@ -10,12 +10,12 @@ import androidx.core.net.toUri
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ClearDataType
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
+import eu.weblibre.flutter_mozilla_components.middleware.clearRecentlyClosedTabs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.action.EngineAction
-import mozilla.components.browser.state.action.RecentlyClosedAction
 import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.UndoAction
 import mozilla.components.browser.state.selector.allTabs
@@ -72,6 +72,20 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
     }
 
     /**
+     * [Engine.clearTrackingProtectionData] as a suspend call that fails with the
+     * engine's own error. Gecko clears its stats database whether or not
+     * recording is enabled.
+     */
+    private suspend fun clearTrackingProtectionData() {
+        suspendCancellableCoroutine<Unit> { continuation ->
+            components.core.engine.clearTrackingProtectionData(
+                onSuccess = { continuation.resume(Unit) },
+                onError = { continuation.resumeWithException(it) },
+            )
+        }
+    }
+
+    /**
      * Removes every tab and writes the now-empty session to disk before returning.
      *
      * The store applies the removal synchronously, but the session file is only
@@ -115,12 +129,26 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
         }
     }
 
+    /**
+     * Deletes browsing history and the records derived from it, including
+     * Gecko's tracker statistics (`useContentBlockingDatabase`): per-day blocked
+     * counts are a dated record of when the user browsed, so they go with the
+     * history, as in Fenix.
+     */
     override suspend fun deleteBrowsingHistory() {
+        val core = components.core
         withContext(Dispatchers.Main) {
-            components.core.historyStorage.deleteEverything()
-            components.core.store.dispatch(EngineAction.PurgeHistoryAction)
-            components.core.icons.clear()
-            components.core.store.dispatch(RecentlyClosedAction.RemoveAllClosedTabAction)
+            core.historyStorage.deleteEverything()
+            core.store.dispatch(EngineAction.PurgeHistoryAction)
+            core.icons.clear()
+            // The closed tabs are history, with their back history.
+            core.store.clearRecentlyClosedTabs(
+                core.recentlyClosedFilterMiddleware,
+                core.orderedRecentlyClosedStorage,
+            )
+            // Last, as the one step that fails on an engine error: it must not
+            // keep the rest of the history.
+            clearTrackingProtectionData()
         }
     }
 
@@ -184,6 +212,7 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
             core.store.removePreviousSessionTabs(
                 core.previousSessionTabIds,
                 onlyTabIds = onlyTabIds?.toSet(),
+                beforeRemoval = core.recentlyClosedFilterMiddleware::discard,
             )
         }
         withContext(Dispatchers.IO) {
@@ -285,16 +314,21 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
  * records every [TabListAction.RemoveTabsAction] for "undo close", so the entry it
  * just made is cleared by its tag. Dispatch is synchronous, so the tag read back is
  * that one.
+ *
+ * Clearing that entry is what files tabs under recently closed, so
+ * [beforeRemoval] gets the ids first, to keep them off that list too.
  */
 internal fun BrowserStore.removePreviousSessionTabs(
     previousSessionTabIds: Set<String>,
     onlyTabIds: Set<String>? = null,
+    beforeRemoval: (List<String>) -> Unit = {},
 ) {
     val tabIds = state.tabs.map { it.id }.filter {
         it in previousSessionTabIds && (onlyTabIds == null || it in onlyTabIds)
     }
     if (tabIds.isEmpty()) return
 
+    beforeRemoval(tabIds)
     dispatch(TabListAction.RemoveTabsAction(tabIds))
     dispatch(UndoAction.ClearRecoverableTabs(state.undoHistory.tag))
 }

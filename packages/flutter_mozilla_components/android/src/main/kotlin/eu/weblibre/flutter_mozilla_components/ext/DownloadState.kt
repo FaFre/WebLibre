@@ -33,7 +33,7 @@ fun MozillaDownloadState.toPigeonDownloadState(
         notificationId = notificationId?.toLong(),
     )
 
-private fun MozillaDownloadState.Status.toPigeonDownloadStatus(): PigeonDownloadStatus =
+internal fun MozillaDownloadState.Status.toPigeonDownloadStatus(): PigeonDownloadStatus =
     when (this) {
         MozillaDownloadState.Status.INITIATED -> PigeonDownloadStatus.INITIATED
         MozillaDownloadState.Status.DOWNLOADING -> PigeonDownloadStatus.DOWNLOADING

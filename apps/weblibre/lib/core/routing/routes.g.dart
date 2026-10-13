@@ -1394,6 +1394,12 @@ RouteBase get $historyRoute => GoRouteData.$route(
       hasOverriddenOnExit: false,
       factory: $HistoryDownloadsRoute._fromState,
     ),
+    GoRouteData.$route(
+      path: 'recently-closed',
+      name: 'HistoryRecentlyClosedRoute',
+      hasOverriddenOnExit: false,
+      factory: $HistoryRecentlyClosedRoute._fromState,
+    ),
   ],
 );
 
@@ -1423,6 +1429,27 @@ mixin $HistoryDownloadsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/history/downloads');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $HistoryRecentlyClosedRoute on GoRouteData {
+  static HistoryRecentlyClosedRoute _fromState(GoRouterState state) =>
+      const HistoryRecentlyClosedRoute();
+
+  @override
+  String get location => GoRouteData.$location('/history/recently-closed');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -44,6 +44,7 @@ import 'package:weblibre/features/proxy/domain/services/connection_usage.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
 import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
+import 'package:weblibre/features/proxy/presentation/utils/tab_routing_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_picker_sheet.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
@@ -433,26 +434,7 @@ class ConnectionSection extends ConsumerWidget {
         ),
     ];
 
-    // A container that names a proxy while its own tab connects directly is a
-    // misconfiguration nothing else in the browser reports.
-    final isContextMismatch = routing.isContextMismatch;
-
-    final (IconData headerIcon, Color? headerColor) = switch (routing.status) {
-      _ when isContextMismatch => (
-        MdiIcons.shieldAlertOutline,
-        colorScheme.error,
-      ),
-      TabRoutingStatus.active => (
-        MdiIcons.shieldCheck,
-        appColors.torActiveGreen,
-      ),
-      TabRoutingStatus.blocked => (MdiIcons.shieldOff, colorScheme.error),
-      TabRoutingStatus.pending => (MdiIcons.shieldSync, null),
-      TabRoutingStatus.unknown => (MdiIcons.shieldOutline, null),
-      // Shares the site sheet's icon for the same state, and keeps the header
-      // clear of glyphs that read as arrows next to the text.
-      TabRoutingStatus.direct => (Icons.public, null),
-    };
+    final (headerIcon, headerColor) = routing.statusIcon(context);
 
     return buildMenuCard(
       context,
@@ -463,10 +445,8 @@ class ConnectionSection extends ConsumerWidget {
             leading: Icon(headerIcon, color: headerColor),
             title: Text(l10n.menu_connectionTitle),
             subtitle: Text(
-              _routingSummary(context, routing),
-              style:
-                  routing.status == TabRoutingStatus.blocked ||
-                      isContextMismatch
+              routing.describe(context),
+              style: routing.isRoutingProblem
                   ? TextStyle(color: colorScheme.error)
                   : null,
             ),
@@ -522,30 +502,6 @@ class ConnectionSection extends ConsumerWidget {
       ],
     );
   }
-}
-
-/// One-line answer to "where is this tab's traffic going".
-String _routingSummary(BuildContext context, TabRouting routing) {
-  final l10n = AppLocalizations.of(context);
-
-  if (routing.isContextMismatch) {
-    return switch (routing.containerName) {
-      final container? => l10n.menu_connectionNotRoutedByContainer(container),
-      null => l10n.menu_connectionNotRoutedByTabContainer,
-    };
-  }
-
-  return switch (routing.status) {
-    TabRoutingStatus.unknown => l10n.menu_connectionCheckingRouting,
-    TabRoutingStatus.pending => l10n.menu_connectionStartingRouting,
-    TabRoutingStatus.blocked => l10n.menu_connectionBlockedNotRunning(
-      routing.proxyTitle!,
-    ),
-    TabRoutingStatus.active => l10n.menu_connectionThisTabVia(
-      routing.proxyTitle!,
-    ),
-    TabRoutingStatus.direct => l10n.menu_connectionThisTabDirect,
-  };
 }
 
 /// A routing *decision* — which connection carries a class of tabs — as opposed

@@ -30,6 +30,7 @@ export 'src/domain/services/gecko_pref.dart';
 export 'src/domain/services/gecko_profile.dart';
 export 'src/domain/services/gecko_push.dart';
 export 'src/domain/services/gecko_readerable.dart';
+export 'src/domain/services/gecko_recently_closed_tabs.dart';
 export 'src/domain/services/gecko_selection_action.dart';
 export 'src/domain/services/gecko_session.dart';
 export 'src/domain/services/gecko_suggestions.dart';
@@ -71,12 +72,12 @@ export 'src/pigeons/gecko.g.dart'
         ColorScheme,
         ContainerSiteAssignment,
         ContentBlocking,
-        CookieBannerHandlingMode,
         CookieSameSiteStatus,
         CustomCookiePolicy,
         DocumentType,
         DohSettings,
         DohSettingsMode,
+        DownloadControl,
         DownloadState,
         DownloadStatus,
         EmailHitResult,
@@ -129,6 +130,7 @@ export 'src/pigeons/gecko.g.dart'
         PwaIcon,
         PwaManifest,
         QueryParameterStripping,
+        RecentlyClosedTab,
         Resource,
         ResourceSize,
         SandboxCaptureApi,
@@ -148,9 +150,14 @@ export 'src/pigeons/gecko.g.dart'
         TabContentState,
         TabTranslationStateData,
         TopFrecentSiteInfo,
+        TrackerLogCategory,
+        TrackerLogEntry,
         TrackingProtectionException,
         TrackingProtectionPolicy,
         TrackingScope,
+        TrackingStatistics,
+        TrackingStatisticsRecord,
+        TrackingStatisticsType,
         TranslationDetectedLanguages,
         TranslationEngineStateData,
         TranslationLanguage,

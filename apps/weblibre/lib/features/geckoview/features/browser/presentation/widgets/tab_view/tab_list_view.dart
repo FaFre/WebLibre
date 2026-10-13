@@ -39,7 +39,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_drop_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_group_expand_toggle.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_reorder_semantics.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_scroll_to_active.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -337,43 +339,46 @@ class _TabListView extends HookConsumerWidget {
 
     final activeTab = ref.watch(selectedTabProvider);
 
-    useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients && activeTab != null) {
-          final index = primaryRows.indexWhere((row) => row.tabId == activeTab);
+    final activeIndex = activeTab == null
+        ? -1
+        : primaryRows.indexWhere((row) => row.tabId == activeTab);
 
-          if (index > -1) {
-            final viewportDimension =
-                scrollController.position.viewportDimension;
-            final tabStart = index * _itemHeight;
+    useScrollToActiveTab(
+      scrollController: scrollController,
+      activeTabId: activeTab,
+      activeItemStart: activeIndex < 0 ? null : activeIndex * _itemHeight,
+      itemExtent: _itemHeight,
+      disableAnimations: disableAnimations,
+    );
 
-            final targetOffset =
-                (tabStart - viewportDimension / 2 + _itemHeight / 2).clamp(
-                  0.0,
-                  scrollController.position.maxScrollExtent,
-                );
+    Future<void> moveRow(int oldIndex, int newIndex) => moveTabViewRow(
+      ref.read(tabDataRepositoryProvider.notifier),
+      visibleItems: primaryRows,
+      treeRows: treeRows,
+      collapsedGroups: collapsedGroups,
+      pinnedTabIds: pinnedTabIds,
+      oldIndex: oldIndex,
+      newIndex: newIndex,
+      tabListDirection: tabListDirection,
+      hierarchical: showHierarchicalTabs && !hasActiveSearch,
+      sortPinnedFirst: filterOptions.sortPinnedFirst,
+    );
 
-            if (disableAnimations) {
-              scrollController.jumpTo(targetOffset);
-            } else {
-              scrollController.animateTo(
-                targetOffset,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-              );
-            }
-          }
-        }
-      });
-
-      return null;
-    }, [activeTab, primaryRows.length]);
+    // Offered whenever the order is the user's own, reorder mode or not: the
+    // mode only arms dragging, which a screen reader cannot do anyway.
+    Widget withMoveActions(int index, Widget child) => TabReorderSemantics(
+      index: index,
+      count: primaryRows.length,
+      columns: 1,
+      onMove: canManualReorder ? (newIndex) => moveRow(index, newIndex) : null,
+      child: child,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: !reorderEnabled
           ? ListView.builder(
-              padding: const EdgeInsets.only(bottom: 56),
+              padding: const EdgeInsets.only(bottom: tabTrayListBottomPadding),
               controller: scrollController,
               itemCount: displayItemCount,
               itemExtent: _itemHeight,
@@ -393,16 +398,19 @@ class _TabListView extends HookConsumerWidget {
                     ),
                   );
 
-                  return TabDropTarget(
-                    targetTabId: row.tabId,
-                    child: TabContextMenuDraggable(
-                      tabId: row.tabId,
-                      data: tab.data! as TabDragData,
-                      feedbackSize: Size(
-                        MediaQuery.of(context).size.width,
-                        _itemHeight,
+                  return withMoveActions(
+                    index,
+                    TabDropTarget(
+                      targetTabId: row.tabId,
+                      child: TabContextMenuDraggable(
+                        tabId: row.tabId,
+                        data: tab.data! as TabDragData,
+                        feedbackSize: Size(
+                          MediaQuery.of(context).size.width,
+                          _itemHeight,
+                        ),
+                        child: tab.child,
                       ),
-                      child: tab.child,
                     ),
                   );
                 }
@@ -427,7 +435,7 @@ class _TabListView extends HookConsumerWidget {
             )
           : ReorderableListView.builder(
               scrollController: scrollController,
-              padding: const EdgeInsets.only(bottom: 56),
+              padding: const EdgeInsets.only(bottom: tabTrayListBottomPadding),
               itemCount: displayItemCount,
               itemExtent: _itemHeight,
               // Drag handles are supplied per item so the drag arms later than
@@ -437,54 +445,29 @@ class _TabListView extends HookConsumerWidget {
               onReorderStart: (index) {
                 ref.read(willAcceptDropProvider.notifier).clear();
               },
-              onReorderItem: (oldIndex, newIndex) async {
-                //Suggestions are at the end and not reorderable, so skip
-                if (oldIndex >= primaryRows.length) {
-                  return;
-                }
-
-                final result = buildTabViewReorderResult(
-                  visibleItems: primaryRows,
-                  treeRows: treeRows,
-                  collapsedGroups: collapsedGroups,
-                  pinnedTabIds: pinnedTabIds,
-                  oldIndex: oldIndex,
-                  newIndex: newIndex,
-                  tabListDirection: tabListDirection,
-                  hierarchical: showHierarchicalTabs && !hasActiveSearch,
-                  sortPinnedFirst: filterOptions.sortPinnedFirst,
-                );
-
-                if (result == null) return;
-
-                await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .reorderTabs(
-                      movingTabIds: result.movingTabIds,
-                      previousTabId: result.previousTabId,
-                      nextTabId: result.nextTabId,
-                      parentChange: result.parentChange,
-                    );
-              },
+              onReorderItem: moveRow,
               itemBuilder: (context, index) {
                 if (index < primaryRows.length) {
                   final row = primaryRows[index];
                   return CustomDraggable(
                     key: Key(row.tabId),
                     data: TabDragData(row.tabId),
-                    child: ReorderableHoldDragListener(
-                      index: index,
-                      child: TabContextMenuDraggable(
-                        tabId: row.tabId,
-                        feedbackSize: Size.zero,
-                        externalDrag: true,
-                        child: _TabDraggable(
+                    child: withMoveActions(
+                      index,
+                      ReorderableHoldDragListener(
+                        index: index,
+                        child: TabContextMenuDraggable(
                           tabId: row.tabId,
-                          onClose: onClose,
-                          sourceSearchQuery: row.sourceSearchQuery,
-                          height: _itemHeight,
-                          groupToggle: _listGroupToggleFor(row),
-                          depth: _depthFor(row),
+                          feedbackSize: Size.zero,
+                          externalDrag: true,
+                          child: _TabDraggable(
+                            tabId: row.tabId,
+                            onClose: onClose,
+                            sourceSearchQuery: row.sourceSearchQuery,
+                            height: _itemHeight,
+                            groupToggle: _listGroupToggleFor(row),
+                            depth: _depthFor(row),
+                          ),
                         ),
                       ),
                     ),
@@ -584,6 +567,7 @@ class ViewTabListWidget extends HookConsumerWidget {
                   scrollController: scrollController,
                   sheetController: draggableScrollableController,
                   onClose: onClose,
+                  tabsViewMode: TabsViewMode.list,
                 ),
             ],
           ),

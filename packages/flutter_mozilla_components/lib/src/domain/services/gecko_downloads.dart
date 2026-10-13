@@ -13,6 +13,12 @@ class GeckoDownloadsService {
 
   GeckoDownloadsService({GeckoDownloadsApi? api}) : _api = api ?? _apiInstance;
 
+  /// Pauses, resumes, cancels or retries [downloadId], as its notification's
+  /// buttons do.
+  Future<void> controlDownload(String downloadId, DownloadControl control) {
+    return _api.controlDownload(downloadId, control);
+  }
+
   Future<void> copyInternetResource(
     String tabId, {
     required Uri url,

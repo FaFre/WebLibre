@@ -78,5 +78,7 @@
   "search_actionSettingLocation": "Einstellungen › {category} › {section}",
   "search_actionSettingCategory": "Einstellungen › {category}",
   "search_actionUnnamedContainer": "Unbenannter Container",
-  "search_actionUntitledFeed": "Feed ohne Titel"
+  "search_actionUntitledFeed": "Feed ohne Titel",
+  "search_actionDeleteFromHistory": "Aus dem Verlauf löschen",
+  "search_deletedFromHistory": "{site} aus dem Verlauf gelöscht"
 }

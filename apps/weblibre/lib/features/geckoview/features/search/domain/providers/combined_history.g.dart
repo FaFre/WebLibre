@@ -78,4 +78,4 @@ final class CombinedHistorySuggestionsProvider
 }
 
 String _$combinedHistorySuggestionsHash() =>
-    r'a2cc2bc57529cb60e9ac75e83e3a7babb7f950ea';
+    r'5a54a99475b60ab769936bcd420832476814518e';

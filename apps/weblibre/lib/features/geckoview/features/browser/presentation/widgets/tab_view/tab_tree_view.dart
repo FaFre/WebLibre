@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_scroll_to_active.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -226,6 +227,7 @@ class ViewTabTreesWidget extends HookConsumerWidget {
                   scrollController: scrollController,
                   sheetController: draggableScrollableController,
                   onClose: onClose,
+                  tabsViewMode: TabsViewMode.tree,
                 ),
             ],
           ),
@@ -302,49 +304,24 @@ class _TabTreesGrid extends HookConsumerWidget {
       [screenWidth, crossAxisCount],
     );
 
-    useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!scrollController.hasClients || activeTab == null) {
-          return;
-        }
-
-        final index = filteredTabEntities.value.indexWhere(
-          (entity) => entity.tabId == activeTab,
-        );
-
-        if (index < 0) return;
-
-        // Was hardcoded to 2, which only matched the column count on a narrow
-        // phone; anywhere else this scrolled to the wrong row. Its sibling in
-        // tab_grid_view.dart always divided by the real count.
-        final row = index ~/ crossAxisCount;
-        final tabStart = row * itemSize.height;
-        final viewportDimension = scrollController.position.viewportDimension;
-
-        final targetOffset =
-            (tabStart - viewportDimension / 2 + itemSize.height / 2).clamp(
-              0.0,
-              scrollController.position.maxScrollExtent,
-            );
-
-        if (targetOffset == scrollController.offset) return;
-
-        if (disableAnimations) {
-          scrollController.jumpTo(targetOffset);
-        } else {
-          scrollController.animateTo(
-            targetOffset,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
+    final activeIndex = activeTab == null
+        ? -1
+        : filteredTabEntities.value.indexWhere(
+            (entity) => entity.tabId == activeTab,
           );
-        }
-      });
 
-      return null;
-      // crossAxisCount and itemSize both change with the available width, and
-      // the target offset is computed from them -- without them here a resize
-      // would leave the active tab centred on the row it used to be in.
-    }, [filteredTabEntities, activeTab, crossAxisCount, itemSize]);
+    useScrollToActiveTab(
+      scrollController: scrollController,
+      activeTabId: activeTab,
+      activeItemStart: activeIndex < 0
+          ? null
+          : (activeIndex ~/ crossAxisCount) * itemSize.height,
+      itemExtent: itemSize.height,
+      disableAnimations: disableAnimations,
+      // The offset is computed from the column count and the tile size, so a
+      // resize has to bring the active tab back into view.
+      layoutKey: (crossAxisCount, itemSize),
+    );
 
     final tabs = useMemoized(() {
       return filteredTabEntities.value.whereType<TabTreeEntity>().map((entity) {
@@ -361,7 +338,7 @@ class _TabTreesGrid extends HookConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: GridView.builder(
         controller: scrollController,
-        padding: const EdgeInsets.only(bottom: 56),
+        padding: const EdgeInsets.only(bottom: tabTrayListBottomPadding),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           //Sync values for itemHeight calculation _calculateItemHeight
           childAspectRatio: 0.75,

@@ -2265,7 +2265,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String browser_clearSiteDataContent(String formattedTypes, String host) {
-    return '这将清除 $host 的以下数据：\n$formattedTypes\n\n你可能需要重新登录。';
+    return '这将清除 $host（包括其子域名）在所有容器以及隐私和隔离标签页中的以下数据：\n$formattedTypes\n\n你可能需要重新登录。';
   }
 
   @override
@@ -2974,9 +2974,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_tooltipSearchInsideTabs => '在标签页内容中搜索';
 
   @override
-  String get browser_filterTabType => '标签页类型';
-
-  @override
   String get browser_sortPinnedFirst => '固定的标签页优先';
 
   @override
@@ -3149,6 +3146,74 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browser_tabReorderBlockedMessage => '请清除标签页视图的筛选或搜索后再调整顺序';
+
+  @override
+  String browser_trackersBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已拦截 $count 个跟踪器',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_noTrackersBlocked => '此页面上暂未拦截任何跟踪器';
+
+  @override
+  String browser_trackerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个跟踪器',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_trackerCategoryCrossSiteCookies => '跨网站跟踪 Cookie';
+
+  @override
+  String get browser_trackerCategorySocialMedia => '社交媒体跟踪器';
+
+  @override
+  String get browser_trackerCategoryFingerprinters => '数字指纹跟踪程序';
+
+  @override
+  String get browser_trackerCategoryCryptominers => '加密货币挖矿程序';
+
+  @override
+  String get browser_trackerCategoryTrackingContent => '跟踪内容';
+
+  @override
+  String get browser_trackerCategoryRedirectTrackers => '重定向跟踪器';
+
+  @override
+  String get browser_siteBehaviorSectionTitle => '行为';
+
+  @override
+  String get browser_siteSettingsButton => '网站设置';
+
+  @override
+  String get browser_privateTabIndicator => '隐私标签页';
+
+  @override
+  String get browser_isolatedTabIndicator => '隔离标签页';
+
+  @override
+  String get browser_proxiedTabIndicator => '经由代理路由';
+
+  @override
+  String get browser_moveTabUp => '上移标签页';
+
+  @override
+  String get browser_moveTabDown => '下移标签页';
+
+  @override
+  String get browser_moveTabLeft => '左移标签页';
+
+  @override
+  String get browser_moveTabRight => '右移标签页';
 
   @override
   String get contextualToolbar_tooltipHome => '主页';
@@ -3797,33 +3862,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String menu_connectionNotRoutedByContainer(String container) {
-    return '不经由容器“$container”路由';
-  }
-
-  @override
-  String get menu_connectionNotRoutedByTabContainer => '不经由此标签页的容器路由';
-
-  @override
-  String get menu_connectionCheckingRouting => '正在检查路由…';
-
-  @override
-  String get menu_connectionStartingRouting => '正在启动路由…';
-
-  @override
-  String menu_connectionBlockedNotRunning(String proxyTitle) {
-    return '已阻止 — $proxyTitle 未运行';
-  }
-
-  @override
-  String menu_connectionThisTabVia(String proxyTitle) {
-    return '此标签页：$proxyTitle';
-  }
-
-  @override
-  String get menu_connectionThisTabDirect => '此标签页：直接连接';
-
-  @override
   String menu_connectionStartProxy(String proxyTitle) {
     return '启动 $proxyTitle';
   }
@@ -4141,6 +4179,70 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get history_actionShareLink => '分享链接';
+
+  @override
+  String get history_dayToday => '今天';
+
+  @override
+  String get history_dayYesterday => '昨天';
+
+  @override
+  String get history_recentlyClosedTitle => '最近关闭的标签页';
+
+  @override
+  String history_recentlyClosedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个标签页',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_recentlyClosedEmpty => '没有最近关闭的标签页';
+
+  @override
+  String get history_recentlyClosedExplanation =>
+      '你最近关闭的 10 个标签页，可连同其后退历史重新打开。隐私标签页、隔离标签页以及已从历史记录中排除的容器中的标签页不会保留。删除历史记录时会清空此列表。';
+
+  @override
+  String get history_recentlyClosedClearAll => '清空最近关闭的标签页';
+
+  @override
+  String get history_recentlyClosedClearConfirm => '要清空最近关闭的标签页吗？';
+
+  @override
+  String get history_recentlyClosedContainerDeleted => '容器已删除，将在容器外打开';
+
+  @override
+  String get history_recentlyClosedLoadFailed => '无法加载最近关闭的标签页';
+
+  @override
+  String get history_downloadStatusStarting => '正在开始';
+
+  @override
+  String get history_downloadStatusDownloading => '正在下载';
+
+  @override
+  String get history_downloadStatusPaused => '已暂停';
+
+  @override
+  String get history_downloadStatusFailed => '失败';
+
+  @override
+  String history_downloadProgress(String downloaded, String total) {
+    return '$downloaded / $total';
+  }
+
+  @override
+  String get history_downloadActionPause => '暂停';
+
+  @override
+  String get history_downloadActionResume => '继续';
+
+  @override
+  String get history_downloadActionCancel => '取消下载';
 
   @override
   String get openLinkTools_openLinkTitle => '打开链接';
@@ -4807,6 +4909,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get search_actionUntitledFeed => '无标题订阅源';
+
+  @override
+  String get search_actionDeleteFromHistory => '从历史记录中删除';
+
+  @override
+  String search_deletedFromHistory(String site) {
+    return '已从历史记录中删除 $site';
+  }
 
   @override
   String get tabs_actionSelect => '选择';
@@ -6618,6 +6728,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String proxy_loadErrorFailed(String error) {
     return '无法加载代理配置：$error';
   }
+
+  @override
+  String proxy_tabNotRoutedByContainer(String container) {
+    return '不经由容器“$container”路由';
+  }
+
+  @override
+  String get proxy_tabNotRoutedByTabContainer => '不经由此标签页的容器路由';
+
+  @override
+  String get proxy_tabRoutingChecking => '正在检查路由…';
+
+  @override
+  String get proxy_tabRoutingStarting => '正在启动路由…';
+
+  @override
+  String proxy_tabRoutingBlockedNotRunning(String proxyTitle) {
+    return '已阻止 — $proxyTitle 未运行';
+  }
+
+  @override
+  String proxy_tabRoutingVia(String proxyTitle) {
+    return '此标签页：$proxyTitle';
+  }
+
+  @override
+  String get proxy_tabRoutingDirect => '此标签页：直接连接';
+
+  @override
+  String get proxy_tabRoutingTitle => '代理';
 
   @override
   String get qrScanner_noCameraPermission => '未授予相机权限。';
@@ -8434,14 +8574,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_trackingProtectionCustomSubtitle => '选择要拦截的跟踪器和脚本。';
 
   @override
-  String get settings_contentBlockingDatabaseTitle => '内容拦截数据库';
+  String get settings_trackerStatisticsTitle => '跟踪器统计';
 
   @override
-  String get settings_contentBlockingDatabaseKeywords => '广告,跟踪器,内容拦截';
+  String get settings_trackerStatisticsKeywords => '跟踪器,统计,已拦截的跟踪器,内容拦截,数据库';
 
   @override
-  String get settings_contentBlockingDatabaseSubtitle =>
-      '为广告、分析和社交跟踪器等 ETP 类别使用 GeckoView 拦截列表。需要重启应用。';
+  String get settings_trackerStatisticsSubtitle =>
+      '按类别每天统计被拦截的跟踪器数量。仅存储数量和日期，不存储你访问的网站。删除浏览历史记录时也会一并删除。需要重启应用。';
 
   @override
   String get settings_bounceTrackingProtectionTitle => '反弹跟踪保护';
@@ -9442,8 +9582,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexEnhancedTrackingProtectionSubtitle => '选择拦截跟踪器的力度';
 
   @override
-  String get settings_indexContentBlockingDatabaseSubtitle =>
-      '为 ETP 类别使用 GeckoView 拦截列表';
+  String get settings_indexTrackerStatisticsSubtitle => '每天统计被拦截的跟踪器';
 
   @override
   String get settings_indexBounceTrackingProtectionSubtitle =>
@@ -10097,6 +10236,32 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get settings_tabViewActionsAtBottomKeywords =>
       '底部, 拇指, 单手, 工具栏, 标签页视图';
+
+  @override
+  String settings_trackerStatisticsTotal(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '自 $date 起已拦截 $countString 个跟踪器',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_trackerStatisticsNothingRecorded => '尚未记录任何被拦截的跟踪器。';
+
+  @override
+  String get settings_trackerStatisticsLastSevenDays => '最近 7 天';
+
+  @override
+  String get settings_trackerStatisticsNoneLastSevenDays => '最近 7 天未拦截任何跟踪器。';
+
+  @override
+  String get settings_trackerStatisticsLoadFailed => '无法加载跟踪器统计。';
 
   @override
   String get smallWeb_sheetTitle => '小众网络';

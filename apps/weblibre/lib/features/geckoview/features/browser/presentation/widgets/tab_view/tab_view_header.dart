@@ -20,6 +20,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -29,12 +30,14 @@ import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_enums_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
@@ -166,6 +169,121 @@ class _SyncedDeviceSelector extends ConsumerWidget {
       },
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+}
+
+/// Height of [_TabTypeFilterBar], which the header grows by while it shows.
+const tabTypeFilterBarHeight = 48.0;
+
+/// Whether the tray's header shows [_TabTypeFilterBar].
+///
+/// Only once there is a choice to make: while tabs of more than one kind are
+/// open, or while the filter is set — the filter persists, and must never hide
+/// tabs out of sight. Not in the tree view, which ignores the filter, nor for
+/// synced tabs, which have no kind.
+bool watchTabTypeFilterBarVisible(WidgetRef ref, TabsViewMode tabsViewMode) {
+  if (tabsViewMode == TabsViewMode.tree) return false;
+
+  final isSyncedScope = ref.watch(
+    effectiveTabsTrayScopeProvider.select(
+      (scope) => scope == TabsTrayScope.synced,
+    ),
+  );
+  if (isSyncedScope) return false;
+
+  final selected = ref.watch(
+    tabViewFilterControllerProvider.select((options) => options.tabTypeFilter),
+  );
+  if (selected != TabTypeFilter.all) return true;
+
+  return _watchOpenTabTypes(ref).length > 1;
+}
+
+/// The kinds of tab open right now, as the filters that would list them.
+Set<TabTypeFilter> _watchOpenTabTypes(WidgetRef ref) {
+  return ref
+      .watch(
+        tabSortKeysProvider.select(
+          (keys) => EquatableValue({
+            for (final key in keys.value.values) _filterFor(key.tabMode),
+          }),
+        ),
+      )
+      .value;
+}
+
+TabTypeFilter _filterFor(TabMode tabMode) => switch (tabMode) {
+  RegularTabMode() => TabTypeFilter.regularOnly,
+  PrivateTabMode() => TabTypeFilter.privateOnly,
+  IsolatedTabMode() => TabTypeFilter.isolatedOnly,
+};
+
+/// One tap to list all tabs or only regular, private or isolated ones, which
+/// the filter menu used to keep two levels deep.
+class _TabTypeFilterBar extends ConsumerWidget {
+  const _TabTypeFilterBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appColors = AppColors.of(context);
+    final selected = ref.watch(
+      tabViewFilterControllerProvider.select(
+        (options) => options.tabTypeFilter,
+      ),
+    );
+    final openTypes = _watchOpenTabTypes(ref);
+    final showIsolatedTabUi = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.showIsolatedTabUi,
+      ),
+    );
+
+    final types = [
+      TabTypeFilter.all,
+      TabTypeFilter.regularOnly,
+      TabTypeFilter.privateOnly,
+      // Hidden with the rest of the isolated tab UI, unless there is something
+      // to show or it is the filter in force.
+      if (showIsolatedTabUi ||
+          openTypes.contains(TabTypeFilter.isolatedOnly) ||
+          selected == TabTypeFilter.isolatedOnly)
+        TabTypeFilter.isolatedOnly,
+    ];
+
+    return SizedBox(
+      height: tabTypeFilterBarHeight,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          for (final type in types)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: 6.0),
+              child: Center(
+                child: ChoiceChip(
+                  avatar: switch (type) {
+                    TabTypeFilter.all => null,
+                    TabTypeFilter.regularOnly => const Icon(MdiIcons.tab),
+                    TabTypeFilter.privateOnly => Icon(
+                      MdiIcons.dominoMask,
+                      color: appColors.privateTabPurple,
+                    ),
+                    TabTypeFilter.isolatedOnly => Icon(
+                      MdiIcons.snowflake,
+                      color: appColors.isolatedTabTeal,
+                    ),
+                  },
+                  showCheckmark: false,
+                  label: Text(type.label(context)),
+                  selected: selected == type,
+                  onSelected: (_) => ref
+                      .read(tabViewFilterControllerProvider.notifier)
+                      .setTabTypeFilter(type),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -358,6 +476,8 @@ class TabViewHeader extends HookConsumerWidget {
                 _TabViewActionRow(tabsViewMode: tabsViewMode),
               // Under the search field only, as in an M3 search view.
               if (searchMode) const Divider(),
+              if (watchTabTypeFilterBarVisible(ref, tabsViewMode))
+                const _TabTypeFilterBar(),
               if (showContainerUi) _TabFilters(tabsViewMode: tabsViewMode),
               const SizedBox(height: 8),
             ],
@@ -515,47 +635,15 @@ class _TabViewActionRow extends HookConsumerWidget {
           Consumer(
             builder: (context, ref, child) {
               final filterOptions = ref.watch(tabViewFilterControllerProvider);
-              final hasActiveFilter = filterOptions.hasActiveFilter;
+              // The tab-type filter shows itself in [_TabTypeFilterBar].
+              final hasActiveFilter = filterOptions.copyWith
+                  .tabTypeFilter(TabTypeFilter.all)
+                  .hasActiveFilter;
 
               return MenuAnchor(
                 controller: filterMenuController,
                 consumeOutsideTap: true,
                 menuChildren: [
-                  // Tab type filter
-                  SubmenuButton(
-                    leadingIcon: const Icon(MdiIcons.tabUnselected),
-                    menuChildren: TabTypeFilter.values.map((type) {
-                      final appColors = AppColors.of(context);
-                      final (icon, color) = switch (type) {
-                        TabTypeFilter.all => (MdiIcons.tabUnselected, null),
-                        TabTypeFilter.regularOnly => (MdiIcons.tab, null),
-                        TabTypeFilter.privateOnly => (
-                          MdiIcons.dominoMask,
-                          appColors.privateTabPurple,
-                        ),
-                        TabTypeFilter.isolatedOnly => (
-                          MdiIcons.snowflake,
-                          appColors.isolatedTabTeal,
-                        ),
-                      };
-
-                      return MenuItemButton(
-                        leadingIcon: Icon(
-                          filterOptions.tabTypeFilter == type
-                              ? Icons.radio_button_checked
-                              : Icons.radio_button_unchecked,
-                        ),
-                        trailingIcon: Icon(icon, color: color),
-                        child: Text(type.label(context)),
-                        onPressed: () {
-                          ref
-                              .read(tabViewFilterControllerProvider.notifier)
-                              .setTabTypeFilter(type);
-                        },
-                      );
-                    }).toList(),
-                    child: Text(l10n.browser_filterTabType),
-                  ),
                   // Sort
                   SubmenuButton(
                     leadingIcon: const Icon(Icons.sort),

@@ -23,6 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/hidden_history_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/history_query_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/history_search.dart';
 import 'package:weblibre/utils/url_canonical.dart';
@@ -37,6 +38,9 @@ part 'combined_history.g.dart';
 /// content-search hits flesh out the long tail.
 class CombinedHistoryItem {
   final Uri uri;
+
+  /// [uri] as history stores it, which deleting the page must match exactly.
+  final String historyUrl;
   final String? title;
   final Uint8List? engineIcon;
 
@@ -51,6 +55,7 @@ class CombinedHistoryItem {
 
   const CombinedHistoryItem({
     required this.uri,
+    required this.historyUrl,
     required this.title,
     required this.engineIcon,
     required this.highlightedTitle,
@@ -72,6 +77,8 @@ enum CombinedHistorySource { engine, local }
 List<CombinedHistoryItem> combinedHistorySuggestions(Ref ref) {
   final engineAsync = ref.watch(engineSuggestionsProvider);
   final localAsync = ref.watch(historySearchRepositoryProvider);
+  // Deleted rows count as emitted, so neither source brings them back.
+  final emitted = {...ref.watch(hiddenHistorySuggestionsProvider)};
 
   final engineSuggestions = engineAsync.value ?? const <GeckoSuggestion>[];
   final localResults =
@@ -84,7 +91,6 @@ List<CombinedHistoryItem> combinedHistorySuggestions(Ref ref) {
     localByCanonical[hit.urlCanonical] = hit;
   }
 
-  final emitted = <String>{};
   final out = <CombinedHistoryItem>[];
 
   // 1. Engine suggestions in their existing order, enriched where possible.
@@ -105,6 +111,7 @@ List<CombinedHistoryItem> combinedHistorySuggestions(Ref ref) {
     out.add(
       CombinedHistoryItem(
         uri: uri,
+        historyUrl: suggestion.description!,
         title: suggestion.title,
         engineIcon: suggestion.icon,
         highlightedTitle: local?.title,
@@ -125,6 +132,7 @@ List<CombinedHistoryItem> combinedHistorySuggestions(Ref ref) {
     out.add(
       CombinedHistoryItem(
         uri: uri,
+        historyUrl: hit.urlCanonical,
         title: hit.title,
         engineIcon: null,
         highlightedTitle: hit.title,

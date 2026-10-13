@@ -252,5 +252,13 @@
   "proxy_saveErrorSecretsNotJson": "Los secretos deben ser un objeto JSON.",
   "proxy_saveErrorUnexpected": "No se pudo guardar el perfil de proxy: {error}",
   "proxy_loadErrorNotFound": "No se encontró el perfil de proxy.",
-  "proxy_loadErrorFailed": "No se pudo cargar el perfil de proxy: {error}"
+  "proxy_loadErrorFailed": "No se pudo cargar el perfil de proxy: {error}",
+  "proxy_tabNotRoutedByContainer": "No se enruta por el contenedor «{container}»",
+  "proxy_tabNotRoutedByTabContainer": "No se enruta por el contenedor de esta pestaña",
+  "proxy_tabRoutingChecking": "Comprobando el enrutamiento…",
+  "proxy_tabRoutingStarting": "Iniciando el enrutamiento…",
+  "proxy_tabRoutingBlockedNotRunning": "Bloqueada: {proxyTitle} no se está ejecutando",
+  "proxy_tabRoutingVia": "Esta pestaña: {proxyTitle}",
+  "proxy_tabRoutingDirect": "Esta pestaña: conexión directa",
+  "proxy_tabRoutingTitle": "Proxy"
 }

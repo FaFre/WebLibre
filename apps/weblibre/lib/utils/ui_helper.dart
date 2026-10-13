@@ -103,6 +103,32 @@ void showInfoMessage(
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
 
+/// Shows [message] with an Undo button. Completes with whether Undo was
+/// tapped before the snackbar went away, for whatever reason it went.
+Future<bool> showUndoMessage(
+  BuildContext context,
+  String message, {
+  Duration duration = const Duration(seconds: 4),
+}) async {
+  final l10n = AppLocalizations.of(context);
+
+  final controller = ScaffoldMessenger.of(context).showSnackBar(
+    _createFloatingSnackBar(
+      content: Text(
+        _truncateForSnackBar(message),
+        maxLines: _kSnackBarMaxLines,
+        overflow: TextOverflow.ellipsis,
+      ),
+      // Tapping it closes the snackbar, which reports the action.
+      action: SnackBarAction(label: l10n.common_undo, onPressed: () {}),
+      duration: duration,
+      persist: false,
+    ),
+  );
+
+  return await controller.closed == SnackBarClosedReason.action;
+}
+
 void showFindInPageSuggestion(
   BuildContext context, {
   required String query,

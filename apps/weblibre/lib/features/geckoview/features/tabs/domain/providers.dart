@@ -39,6 +39,22 @@ Stream<List<ContainerDataWithCount>> watchContainersWithCount(Ref ref) {
   return db.definitionsDrift.containersWithCount().watch();
 }
 
+/// The containers without their tab counts. Unlike [watchContainersWithCount],
+/// it does not emit again on every write to a tab, so it suits work too costly
+/// to repeat that often.
+@Riverpod()
+Stream<List<ContainerData>> watchContainers(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.allContainers().watch();
+}
+
+/// Which container each closed tab ran in, for the recently closed list.
+@Riverpod()
+Stream<List<ClosedTabContainerData>> watchClosedTabContainers(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.tabDao.watchClosedTabContainers();
+}
+
 /// The destinations a container-cycling gesture steps through, in the order
 /// the container chips render them: the unassigned pseudo-container (`null`)
 /// first, then the containers themselves.

@@ -77,5 +77,7 @@
   "search_actionSettingLocation": "Настройки › {category} › {section}",
   "search_actionSettingCategory": "Настройки › {category}",
   "search_actionUnnamedContainer": "Контейнер без названия",
-  "search_actionUntitledFeed": "Лента без названия"
+  "search_actionUntitledFeed": "Лента без названия",
+  "search_actionDeleteFromHistory": "Удалить из истории",
+  "search_deletedFromHistory": "Удалено из истории: {site}"
 }

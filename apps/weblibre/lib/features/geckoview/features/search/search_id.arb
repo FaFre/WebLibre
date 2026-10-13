@@ -77,5 +77,7 @@
   "search_actionSettingLocation": "Pengaturan › {category} › {section}",
   "search_actionSettingCategory": "Pengaturan › {category}",
   "search_actionUnnamedContainer": "Kontainer tanpa nama",
-  "search_actionUntitledFeed": "Umpan tanpa judul"
+  "search_actionUntitledFeed": "Umpan tanpa judul",
+  "search_actionDeleteFromHistory": "Hapus dari riwayat",
+  "search_deletedFromHistory": "{site} dihapus dari riwayat"
 }

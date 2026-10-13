@@ -30,6 +30,8 @@ import eu.weblibre.flutter_mozilla_components.middleware.AppLinkNavigationMiddle
 import eu.weblibre.flutter_mozilla_components.middleware.CrashRecoveryMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.OrderedRecentlyClosedStorage
+import eu.weblibre.flutter_mozilla_components.middleware.RecentlyClosedFilterMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
@@ -73,6 +75,8 @@ import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
 import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
 import mozilla.components.feature.readerview.ReaderViewMiddleware
+import mozilla.components.feature.recentlyclosed.RecentlyClosedMiddleware
+import mozilla.components.feature.recentlyclosed.RecentlyClosedTabsStorage
 import mozilla.components.concept.engine.history.HistoryTrackingDelegate
 import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
@@ -92,6 +96,9 @@ import mozilla.components.support.utils.DefaultDownloadFileUtils
 import java.util.concurrent.TimeUnit
 
 private const val AMO_COLLECTION_MAX_CACHE_AGE = 24 * 60L
+
+/** As in Fenix. */
+private const val RECENTLY_CLOSED_MAX = 10
 
 class Core(
     private val context: Context,
@@ -245,6 +252,20 @@ class Core(
     // encodes; see [FlutterEventMiddleware.close].
     val flutterEventMiddleware = FlutterEventMiddleware(flutterEvents)
 
+    /** Closed tabs with their engine state, so a reopened tab keeps its back history. */
+    val recentlyClosedTabsStorage = lazy {
+        RecentlyClosedTabsStorage(context, engine, noOpCrashReporter)
+    }
+
+    /**
+     * [recentlyClosedTabsStorage] as the middleware writes it, in order, so
+     * clearing the list can wait for the saves before it.
+     */
+    val orderedRecentlyClosedStorage = OrderedRecentlyClosedStorage(recentlyClosedTabsStorage)
+
+    /** Held so tabs WebLibre removes itself can be kept off the list. */
+    val recentlyClosedFilterMiddleware = RecentlyClosedFilterMiddleware()
+
     @OptIn(FlowPreview::class)
     val store by lazy {
         BrowserStore(
@@ -280,6 +301,13 @@ class Core(
                 ),
                 ThumbnailsMiddleware(thumbnailStorage),
                 ReaderViewMiddleware(),
+                // Before the recently closed middleware, whose additions it filters.
+                recentlyClosedFilterMiddleware,
+                RecentlyClosedMiddleware(
+                    lazyOf(orderedRecentlyClosedStorage),
+                    RECENTLY_CLOSED_MAX,
+                    orderedRecentlyClosedStorage.scope,
+                ),
                 UndoMiddleware(),
                 LastAccessMiddleware(),
                 SessionPrioritizationMiddleware(),

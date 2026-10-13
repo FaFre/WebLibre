@@ -135,6 +135,7 @@ dependencies {
     implementation "org.mozilla.components:feature-prompts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-session:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-readerview:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:feature-recentlyclosed:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-syncedtabs:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-privatemode:$mozillaComponentsVersion"
     implementation "org.mozilla.components:feature-sitepermissions:$mozillaComponentsVersion"

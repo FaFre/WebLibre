@@ -2440,7 +2440,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String browser_clearSiteDataContent(String formattedTypes, String host) {
-    return 'This will clear the following data for $host:\n$formattedTypes\n\nYou may need to log in again.';
+    return 'This will clear the following data for $host, including its subdomains, in every container and in private and isolated tabs:\n$formattedTypes\n\nYou may need to log in again.';
   }
 
   @override
@@ -3193,9 +3193,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browser_tooltipSearchInsideTabs => 'Search inside tabs';
 
   @override
-  String get browser_filterTabType => 'Tab Type';
-
-  @override
   String get browser_sortPinnedFirst => 'Sort Pinned First';
 
   @override
@@ -3372,6 +3369,78 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get browser_tabReorderBlockedMessage =>
       'Clear the tab view filter or search to reorder tabs';
+
+  @override
+  String browser_trackersBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trackers blocked',
+      one: '1 tracker blocked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_noTrackersBlocked =>
+      'No trackers blocked on this page so far';
+
+  @override
+  String browser_trackerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count trackers',
+      one: '1 tracker',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_trackerCategoryCrossSiteCookies =>
+      'Cross-site tracking cookies';
+
+  @override
+  String get browser_trackerCategorySocialMedia => 'Social media trackers';
+
+  @override
+  String get browser_trackerCategoryFingerprinters => 'Fingerprinters';
+
+  @override
+  String get browser_trackerCategoryCryptominers => 'Cryptominers';
+
+  @override
+  String get browser_trackerCategoryTrackingContent => 'Tracking content';
+
+  @override
+  String get browser_trackerCategoryRedirectTrackers => 'Redirect trackers';
+
+  @override
+  String get browser_siteBehaviorSectionTitle => 'Behavior';
+
+  @override
+  String get browser_siteSettingsButton => 'Site settings';
+
+  @override
+  String get browser_privateTabIndicator => 'Private tab';
+
+  @override
+  String get browser_isolatedTabIndicator => 'Isolated tab';
+
+  @override
+  String get browser_proxiedTabIndicator => 'Routed through a proxy';
+
+  @override
+  String get browser_moveTabUp => 'Move tab up';
+
+  @override
+  String get browser_moveTabDown => 'Move tab down';
+
+  @override
+  String get browser_moveTabLeft => 'Move tab left';
+
+  @override
+  String get browser_moveTabRight => 'Move tab right';
 
   @override
   String get contextualToolbar_tooltipHome => 'Home';
@@ -4040,34 +4109,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String menu_connectionNotRoutedByContainer(String container) {
-    return 'Not routed by container \"$container\"';
-  }
-
-  @override
-  String get menu_connectionNotRoutedByTabContainer =>
-      'Not routed by this tab\'s container';
-
-  @override
-  String get menu_connectionCheckingRouting => 'Checking routing…';
-
-  @override
-  String get menu_connectionStartingRouting => 'Starting routing…';
-
-  @override
-  String menu_connectionBlockedNotRunning(String proxyTitle) {
-    return 'Blocked — $proxyTitle is not running';
-  }
-
-  @override
-  String menu_connectionThisTabVia(String proxyTitle) {
-    return 'This tab: $proxyTitle';
-  }
-
-  @override
-  String get menu_connectionThisTabDirect => 'This tab: direct connection';
-
-  @override
   String menu_connectionStartProxy(String proxyTitle) {
     return 'Start $proxyTitle';
   }
@@ -4395,6 +4436,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get history_actionShareLink => 'Share link';
+
+  @override
+  String get history_dayToday => 'Today';
+
+  @override
+  String get history_dayYesterday => 'Yesterday';
+
+  @override
+  String get history_recentlyClosedTitle => 'Recently closed tabs';
+
+  @override
+  String history_recentlyClosedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tabs',
+      one: '1 tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_recentlyClosedEmpty => 'No recently closed tabs';
+
+  @override
+  String get history_recentlyClosedExplanation =>
+      'The last 10 tabs you closed, to reopen with their back history. Private and isolated tabs and tabs of containers excluded from history are not kept. Deleting your history clears this list.';
+
+  @override
+  String get history_recentlyClosedClearAll => 'Clear recently closed tabs';
+
+  @override
+  String get history_recentlyClosedClearConfirm =>
+      'Clear the recently closed tabs?';
+
+  @override
+  String get history_recentlyClosedContainerDeleted =>
+      'Container deleted, reopens without it';
+
+  @override
+  String get history_recentlyClosedLoadFailed =>
+      'Could not load the recently closed tabs';
+
+  @override
+  String get history_downloadStatusStarting => 'Starting';
+
+  @override
+  String get history_downloadStatusDownloading => 'Downloading';
+
+  @override
+  String get history_downloadStatusPaused => 'Paused';
+
+  @override
+  String get history_downloadStatusFailed => 'Failed';
+
+  @override
+  String history_downloadProgress(String downloaded, String total) {
+    return '$downloaded of $total';
+  }
+
+  @override
+  String get history_downloadActionPause => 'Pause';
+
+  @override
+  String get history_downloadActionResume => 'Resume';
+
+  @override
+  String get history_downloadActionCancel => 'Cancel download';
 
   @override
   String get openLinkTools_openLinkTitle => 'Open link';
@@ -5092,6 +5201,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get search_actionUntitledFeed => 'Untitled feed';
+
+  @override
+  String get search_actionDeleteFromHistory => 'Delete from history';
+
+  @override
+  String search_deletedFromHistory(String site) {
+    return 'Deleted $site from history';
+  }
 
   @override
   String get tabs_actionSelect => 'Select';
@@ -7022,6 +7139,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String proxy_loadErrorFailed(String error) {
     return 'Failed to load proxy profile: $error';
   }
+
+  @override
+  String proxy_tabNotRoutedByContainer(String container) {
+    return 'Not routed by container \"$container\"';
+  }
+
+  @override
+  String get proxy_tabNotRoutedByTabContainer =>
+      'Not routed by this tab\'s container';
+
+  @override
+  String get proxy_tabRoutingChecking => 'Checking routing…';
+
+  @override
+  String get proxy_tabRoutingStarting => 'Starting routing…';
+
+  @override
+  String proxy_tabRoutingBlockedNotRunning(String proxyTitle) {
+    return 'Blocked — $proxyTitle is not running';
+  }
+
+  @override
+  String proxy_tabRoutingVia(String proxyTitle) {
+    return 'This tab: $proxyTitle';
+  }
+
+  @override
+  String get proxy_tabRoutingDirect => 'This tab: direct connection';
+
+  @override
+  String get proxy_tabRoutingTitle => 'Proxy';
 
   @override
   String get qrScanner_noCameraPermission =>
@@ -9029,16 +9177,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose which trackers and scripts to block.';
 
   @override
-  String get settings_contentBlockingDatabaseTitle =>
-      'Content Blocking Database';
+  String get settings_trackerStatisticsTitle => 'Tracker Statistics';
 
   @override
-  String get settings_contentBlockingDatabaseKeywords =>
-      'ads, trackers, content blocking';
+  String get settings_trackerStatisticsKeywords =>
+      'trackers, statistics, blocked trackers, content blocking, database';
 
   @override
-  String get settings_contentBlockingDatabaseSubtitle =>
-      'Use GeckoView blocker lists for ETP categories such as ads, analytics, and social trackers. Requires an app restart.';
+  String get settings_trackerStatisticsSubtitle =>
+      'Keep a daily count of blocked trackers by category. Only counts and dates are stored, not the sites you visit. Deleting browsing history deletes them too. Requires an app restart.';
 
   @override
   String get settings_bounceTrackingProtectionTitle =>
@@ -10141,8 +10288,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose how aggressively trackers are blocked';
 
   @override
-  String get settings_indexContentBlockingDatabaseSubtitle =>
-      'Use GeckoView blocker lists for ETP categories';
+  String get settings_indexTrackerStatisticsSubtitle =>
+      'Keep a daily count of blocked trackers';
 
   @override
   String get settings_indexBounceTrackingProtectionSubtitle =>
@@ -10873,6 +11020,36 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_tabViewActionsAtBottomKeywords =>
       'bottom, thumb, reach, one hand, toolbar, tab view';
+
+  @override
+  String settings_trackerStatisticsTotal(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString trackers blocked since $date',
+      one: '1 tracker blocked since $date',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_trackerStatisticsNothingRecorded =>
+      'No blocked trackers recorded yet.';
+
+  @override
+  String get settings_trackerStatisticsLastSevenDays => 'Last 7 days';
+
+  @override
+  String get settings_trackerStatisticsNoneLastSevenDays =>
+      'No trackers blocked in the last 7 days.';
+
+  @override
+  String get settings_trackerStatisticsLoadFailed =>
+      'Couldn\'t load tracker statistics.';
 
   @override
   String get smallWeb_sheetTitle => 'Small Web';

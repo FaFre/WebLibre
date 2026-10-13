@@ -597,37 +597,6 @@
     "description": "Error message when starting a proxy failed. error is technical error text, usually English.",
     "placeholders": { "error": { "type": "String" } }
   },
-  "menu_connectionNotRoutedByContainer": "Not routed by container \"{container}\"",
-  "@menu_connectionNotRoutedByContainer": {
-    "description": "Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name.",
-    "placeholders": { "container": { "type": "String" } }
-  },
-  "menu_connectionNotRoutedByTabContainer": "Not routed by this tab's container",
-  "@menu_connectionNotRoutedByTabContainer": {
-    "description": "Same summary line when the container has no name."
-  },
-  "menu_connectionCheckingRouting": "Checking routing…",
-  "@menu_connectionCheckingRouting": {
-    "description": "Summary line while the tab's routing is being determined."
-  },
-  "menu_connectionStartingRouting": "Starting routing…",
-  "@menu_connectionStartingRouting": {
-    "description": "Summary line while the tab's proxy is starting."
-  },
-  "menu_connectionBlockedNotRunning": "Blocked — {proxyTitle} is not running",
-  "@menu_connectionBlockedNotRunning": {
-    "description": "Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name.",
-    "placeholders": { "proxyTitle": { "type": "String" } }
-  },
-  "menu_connectionThisTabVia": "This tab: {proxyTitle}",
-  "@menu_connectionThisTabVia": {
-    "description": "Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name.",
-    "placeholders": { "proxyTitle": { "type": "String" } }
-  },
-  "menu_connectionThisTabDirect": "This tab: direct connection",
-  "@menu_connectionThisTabDirect": {
-    "description": "Summary line: this tab connects directly without a proxy."
-  },
   "menu_connectionStartProxy": "Start {proxyTitle}",
   "@menu_connectionStartProxy": {
     "description": "Button that starts the stopped proxy. proxyTitle is the proxy's name.",

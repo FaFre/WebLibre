@@ -772,124 +772,99 @@ CustomDohProvider _$CustomDohProviderFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CustomDohProviderToJson(CustomDohProvider instance) =>
     <String, dynamic>{'url': instance.url, 'name': ?instance.name};
 
-EngineSettings _$EngineSettingsFromJson(Map<String, dynamic> json) =>
-    EngineSettings.withDefaults(
-        javascriptEnabled: json['javascriptEnabled'] as bool?,
-        trackingProtectionPolicy: $enumDecodeNullable(
-          _$TrackingProtectionPolicyEnumMap,
-          json['trackingProtectionPolicy'],
-        ),
-        httpsOnlyMode: $enumDecodeNullable(
-          _$HttpsOnlyModeEnumMap,
-          json['httpsOnlyMode'],
-        ),
-        globalPrivacyControlEnabled:
-            json['globalPrivacyControlEnabled'] as bool?,
-        queryParameterStripping: $enumDecodeNullable(
-          _$QueryParameterStrippingEnumMap,
-          json['queryParameterStripping'],
-        ),
-        bounceTrackingProtectionMode: $enumDecodeNullable(
-          _$BounceTrackingProtectionModeEnumMap,
-          json['bounceTrackingProtectionMode'],
-        ),
-        userAgent: json['userAgent'] as String?,
-        enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
-        addonCollection: EngineSettings._addonCollectionFromJson(
-          json['addonCollection'] as String?,
-        ),
-        ublockFilterListSettings:
-            EngineSettings._ublockFilterListSettingsFromJson(
-              json['ublockFilterListSettings'] as String?,
-            ),
-        dohSettingsMode: $enumDecodeNullable(
-          _$DohSettingsModeEnumMap,
-          json['dohSettingsMode'],
-        ),
-        dohProviderUrl: json['dohProviderUrl'] as String?,
-        dohDefaultProviderUrl: json['dohDefaultProviderUrl'] as String?,
-        dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList(),
-        customDohProviders: (json['customDohProviders'] as List<dynamic>?)
-            ?.map((e) => CustomDohProvider.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        fingerprintingProtectionOverrides:
-            json['fingerprintingProtectionOverrides'] as String?,
-        enablePdfJs: json['enablePdfJs'] as bool?,
-        safeBrowsingMalwareEnabled: json['safeBrowsingMalwareEnabled'] as bool?,
-        safeBrowsingPhishingEnabled:
-            json['safeBrowsingPhishingEnabled'] as bool?,
-        locales: (json['locales'] as List<dynamic>?)
-            ?.map((e) => e as String)
-            .toList(),
-        useContentBlockingDatabase: json['useContentBlockingDatabase'] as bool?,
-        blockCookies: json['blockCookies'] as bool?,
-        customCookiePolicy: $enumDecodeNullable(
-          _$CustomCookiePolicyEnumMap,
-          json['customCookiePolicy'],
-        ),
-        blockTrackingContent: json['blockTrackingContent'] as bool?,
-        trackingContentScope: $enumDecodeNullable(
-          _$TrackingScopeEnumMap,
-          json['trackingContentScope'],
-        ),
-        blockCryptominers: json['blockCryptominers'] as bool?,
-        blockFingerprinters: json['blockFingerprinters'] as bool?,
-        blockRedirectTrackers: json['blockRedirectTrackers'] as bool?,
-        blockSuspectedFingerprinters:
-            json['blockSuspectedFingerprinters'] as bool?,
-        suspectedFingerprintersScope: $enumDecodeNullable(
-          _$TrackingScopeEnumMap,
-          json['suspectedFingerprintersScope'],
-        ),
-        allowListBaseline: json['allowListBaseline'] as bool?,
-        allowListConvenience: json['allowListConvenience'] as bool?,
-        blockAdsAnalyticsSocialTrackers:
-            json['blockAdsAnalyticsSocialTrackers'] as bool?,
-        webFontsEnabled: json['webFontsEnabled'] as bool?,
-        automaticFontSizeAdjustment:
-            json['automaticFontSizeAdjustment'] as bool?,
-        fontSizeFactor: (json['fontSizeFactor'] as num?)?.toDouble(),
-        fontInflationEnabled: json['fontInflationEnabled'] as bool?,
-        displayDensityOverride: (json['displayDensityOverride'] as num?)
-            ?.toDouble(),
-        screenWidthOverride: (json['screenWidthOverride'] as num?)?.toInt(),
-        screenHeightOverride: (json['screenHeightOverride'] as num?)?.toInt(),
-        inputAutoZoomEnabled: json['inputAutoZoomEnabled'] as bool?,
-        forceUserScalableContent: json['forceUserScalableContent'] as bool?,
-        fissionEnabled: json['fissionEnabled'] as bool?,
-        isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
-        appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
-        extensionsWebAPIEnabled: json['extensionsWebAPIEnabled'] as bool?,
-        lnaBlocking: json['lnaBlocking'] as bool?,
-        lnaBlockTrackers: json['lnaBlockTrackers'] as bool?,
-        lnaEnabled: json['lnaEnabled'] as bool?,
-      )
-      ..cookieBannerHandlingMode = $enumDecodeNullable(
-        _$CookieBannerHandlingModeEnumMap,
-        json['cookieBannerHandlingMode'],
-      )
-      ..cookieBannerHandlingModePrivateBrowsing = $enumDecodeNullable(
-        _$CookieBannerHandlingModeEnumMap,
-        json['cookieBannerHandlingModePrivateBrowsing'],
-      )
-      ..cookieBannerHandlingGlobalRules =
-          json['cookieBannerHandlingGlobalRules'] as bool?
-      ..cookieBannerHandlingGlobalRulesSubFrames =
-          json['cookieBannerHandlingGlobalRulesSubFrames'] as bool?;
+EngineSettings _$EngineSettingsFromJson(
+  Map<String, dynamic> json,
+) => EngineSettings.withDefaults(
+  javascriptEnabled: json['javascriptEnabled'] as bool?,
+  trackingProtectionPolicy: $enumDecodeNullable(
+    _$TrackingProtectionPolicyEnumMap,
+    json['trackingProtectionPolicy'],
+  ),
+  httpsOnlyMode: $enumDecodeNullable(
+    _$HttpsOnlyModeEnumMap,
+    json['httpsOnlyMode'],
+  ),
+  globalPrivacyControlEnabled: json['globalPrivacyControlEnabled'] as bool?,
+  queryParameterStripping: $enumDecodeNullable(
+    _$QueryParameterStrippingEnumMap,
+    json['queryParameterStripping'],
+  ),
+  bounceTrackingProtectionMode: $enumDecodeNullable(
+    _$BounceTrackingProtectionModeEnumMap,
+    json['bounceTrackingProtectionMode'],
+  ),
+  userAgent: json['userAgent'] as String?,
+  enterpriseRootsEnabled: json['enterpriseRootsEnabled'] as bool?,
+  addonCollection: EngineSettings._addonCollectionFromJson(
+    json['addonCollection'] as String?,
+  ),
+  ublockFilterListSettings: EngineSettings._ublockFilterListSettingsFromJson(
+    json['ublockFilterListSettings'] as String?,
+  ),
+  dohSettingsMode: $enumDecodeNullable(
+    _$DohSettingsModeEnumMap,
+    json['dohSettingsMode'],
+  ),
+  dohProviderUrl: json['dohProviderUrl'] as String?,
+  dohDefaultProviderUrl: json['dohDefaultProviderUrl'] as String?,
+  dohExceptionsList: (json['dohExceptionsList'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  customDohProviders: (json['customDohProviders'] as List<dynamic>?)
+      ?.map((e) => CustomDohProvider.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  fingerprintingProtectionOverrides:
+      json['fingerprintingProtectionOverrides'] as String?,
+  enablePdfJs: json['enablePdfJs'] as bool?,
+  safeBrowsingMalwareEnabled: json['safeBrowsingMalwareEnabled'] as bool?,
+  safeBrowsingPhishingEnabled: json['safeBrowsingPhishingEnabled'] as bool?,
+  locales: (json['locales'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
+  useContentBlockingDatabase: json['useContentBlockingDatabase'] as bool?,
+  blockCookies: json['blockCookies'] as bool?,
+  customCookiePolicy: $enumDecodeNullable(
+    _$CustomCookiePolicyEnumMap,
+    json['customCookiePolicy'],
+  ),
+  blockTrackingContent: json['blockTrackingContent'] as bool?,
+  trackingContentScope: $enumDecodeNullable(
+    _$TrackingScopeEnumMap,
+    json['trackingContentScope'],
+  ),
+  blockCryptominers: json['blockCryptominers'] as bool?,
+  blockFingerprinters: json['blockFingerprinters'] as bool?,
+  blockRedirectTrackers: json['blockRedirectTrackers'] as bool?,
+  blockSuspectedFingerprinters: json['blockSuspectedFingerprinters'] as bool?,
+  suspectedFingerprintersScope: $enumDecodeNullable(
+    _$TrackingScopeEnumMap,
+    json['suspectedFingerprintersScope'],
+  ),
+  allowListBaseline: json['allowListBaseline'] as bool?,
+  allowListConvenience: json['allowListConvenience'] as bool?,
+  blockAdsAnalyticsSocialTrackers:
+      json['blockAdsAnalyticsSocialTrackers'] as bool?,
+  webFontsEnabled: json['webFontsEnabled'] as bool?,
+  automaticFontSizeAdjustment: json['automaticFontSizeAdjustment'] as bool?,
+  fontSizeFactor: (json['fontSizeFactor'] as num?)?.toDouble(),
+  fontInflationEnabled: json['fontInflationEnabled'] as bool?,
+  displayDensityOverride: (json['displayDensityOverride'] as num?)?.toDouble(),
+  screenWidthOverride: (json['screenWidthOverride'] as num?)?.toInt(),
+  screenHeightOverride: (json['screenHeightOverride'] as num?)?.toInt(),
+  inputAutoZoomEnabled: json['inputAutoZoomEnabled'] as bool?,
+  forceUserScalableContent: json['forceUserScalableContent'] as bool?,
+  fissionEnabled: json['fissionEnabled'] as bool?,
+  isolatedProcessEnabled: json['isolatedProcessEnabled'] as bool?,
+  appZygoteProcessEnabled: json['appZygoteProcessEnabled'] as bool?,
+  extensionsWebAPIEnabled: json['extensionsWebAPIEnabled'] as bool?,
+  lnaBlocking: json['lnaBlocking'] as bool?,
+  lnaBlockTrackers: json['lnaBlockTrackers'] as bool?,
+  lnaEnabled: json['lnaEnabled'] as bool?,
+);
 
 Map<String, dynamic> _$EngineSettingsToJson(
   EngineSettings instance,
 ) => <String, dynamic>{
-  'cookieBannerHandlingMode':
-      _$CookieBannerHandlingModeEnumMap[instance.cookieBannerHandlingMode],
-  'cookieBannerHandlingModePrivateBrowsing':
-      _$CookieBannerHandlingModeEnumMap[instance
-          .cookieBannerHandlingModePrivateBrowsing],
-  'cookieBannerHandlingGlobalRules': instance.cookieBannerHandlingGlobalRules,
-  'cookieBannerHandlingGlobalRulesSubFrames':
-      instance.cookieBannerHandlingGlobalRulesSubFrames,
   'userAgent': instance.userAgent,
   'fingerprintingProtectionOverrides':
       instance.fingerprintingProtectionOverrides,
@@ -999,10 +974,4 @@ const _$CustomCookiePolicyEnumMap = {
 const _$TrackingScopeEnumMap = {
   TrackingScope.all: 'all',
   TrackingScope.privateOnly: 'privateOnly',
-};
-
-const _$CookieBannerHandlingModeEnumMap = {
-  CookieBannerHandlingMode.disabled: 'disabled',
-  CookieBannerHandlingMode.rejectAll: 'rejectAll',
-  CookieBannerHandlingMode.rejectOrAcceptAll: 'rejectOrAcceptAll',
 };

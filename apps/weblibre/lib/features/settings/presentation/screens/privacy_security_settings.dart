@@ -21,9 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart' show DateFormat, NumberFormat;
 import 'package:nullability/nullability.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/blocked_trackers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/blocked_trackers_l10n.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -59,11 +63,9 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
           child: const _EnhancedTrackingProtectionSection(),
         ),
         SettingsEntryDefinition(
-          title: l10n.settings_contentBlockingDatabaseTitle,
-          subtitle: l10n.settings_indexContentBlockingDatabaseSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_contentBlockingDatabaseKeywords,
-          ),
+          title: l10n.settings_trackerStatisticsTitle,
+          subtitle: l10n.settings_indexTrackerStatisticsSubtitle,
+          keywords: settingsKeywords(l10n.settings_trackerStatisticsKeywords),
           child: const _ContentBlockingDatabaseTile(),
         ),
         SettingsEntryDefinition(
@@ -921,21 +923,138 @@ class _ContentBlockingDatabaseTile extends HookConsumerWidget {
     );
     final l10n = AppLocalizations.of(context);
 
-    return SwitchListTile.adaptive(
-      title: Text(l10n.settings_contentBlockingDatabaseTitle),
-      subtitle: Text(l10n.settings_contentBlockingDatabaseSubtitle),
-      secondary: const Icon(Icons.storage),
-      value: useContentBlockingDatabase,
-      onChanged: (value) async {
-        await ref
-            .read(saveEngineSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.useContentBlockingDatabase(value),
-            );
-        if (context.mounted) {
-          await _showRestartDialog(context, ref);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SwitchListTile.adaptive(
+          title: Text(l10n.settings_trackerStatisticsTitle),
+          subtitle: Text(l10n.settings_trackerStatisticsSubtitle),
+          secondary: const Icon(Icons.bar_chart),
+          value: useContentBlockingDatabase,
+          onChanged: (value) async {
+            await ref
+                .read(saveEngineSettingsControllerProvider.notifier)
+                .save(
+                  (currentSettings) => currentSettings.copyWith
+                      .useContentBlockingDatabase(value),
+                );
+            if (context.mounted) {
+              await _showRestartDialog(context, ref);
+            }
+          },
+        ),
+        // What was recorded is only shown while recording is on: turning it
+        // off reads as "I don't want this", and the counts stay until the
+        // next history deletion either way.
+        if (useContentBlockingDatabase) const _TrackerStatisticsSummary(),
+      ],
+    );
+  }
+}
+
+/// Trackers blocked since recording started, and in the last seven days by
+/// category.
+class _TrackerStatisticsSummary extends ConsumerWidget {
+  /// Lines the summary up with the switch's title.
+  static const _padding = EdgeInsetsDirectional.fromSTEB(56, 0, 24, 16);
+
+  const _TrackerStatisticsSummary();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final summaryAsync = ref.watch(trackerStatisticsProvider);
+
+    return summaryAsync.when(
+      skipLoadingOnReload: true,
+      loading: () => Skeletonizer(
+        child: Padding(
+          padding: _padding,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(BoneMock.subtitle),
+          ),
+        ),
+      ),
+      error: (error, stackTrace) => Padding(
+        padding: _padding,
+        child: Text(
+          l10n.settings_trackerStatisticsLoadFailed,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+        ),
+      ),
+      data: (summary) {
+        final since = summary.since;
+        if (since == null) {
+          return Padding(
+            padding: _padding,
+            child: Text(
+              l10n.settings_trackerStatisticsNothingRecorded,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
         }
+
+        final numberFormat = NumberFormat.decimalPattern();
+        final recentCategories = [
+          for (final MapEntry(key: category, value: count)
+              in summary.lastSevenDays.entries)
+            if (count > 0) (category, count),
+        ];
+
+        return Padding(
+          padding: _padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.settings_trackerStatisticsTotal(
+                  summary.total,
+                  // A UTC day: formatting its own fields keeps it the day
+                  // Gecko recorded rather than shifting it to local time.
+                  DateFormat.yMMMd().format(since),
+                ),
+                style: theme.textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.settings_trackerStatisticsLastSevenDays,
+                style: theme.textTheme.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              if (recentCategories.isEmpty)
+                Text(
+                  l10n.settings_trackerStatisticsNoneLastSevenDays,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                )
+              else
+                for (final (category, count) in recentCategories)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      children: [
+                        Icon(
+                          category.icon,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(category.label(context))),
+                        const SizedBox(width: 12),
+                        Text(numberFormat.format(count)),
+                      ],
+                    ),
+                  ),
+            ],
+          ),
+        );
       },
     );
   }

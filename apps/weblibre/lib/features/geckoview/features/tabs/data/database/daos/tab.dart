@@ -54,6 +54,10 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
   static const closedTabTombstoneTtl = Duration(hours: 24);
 
+  /// How many closed tabs' containers [_recordClosedTabContainers] keeps. The
+  /// engine's list holds ten; the margin covers closes it never keeps.
+  static const closedTabContainerLimit = 1000;
+
   /// Soft cap for stored extracted/full content bytes (UTF-16 code units).
   /// The trigram FTS index expansion is roughly 5–10x the source size, so an
   /// uncapped multi-MB page DOM blows up the shadow tables disproportionately.
@@ -732,6 +736,89 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         );
       }
     });
+  }
+
+  /// Remembers the container of each regular tab in [closed], rows just
+  /// deleted, for reopening it from the recently closed list. Private and
+  /// isolated tabs never go on that list.
+  ///
+  /// Every deleted row is recorded, also of tabs the list will not keep (an
+  /// undone close, tabs removed without undo): which ones it keeps is decided
+  /// natively, later. [retainClosedTabContainers] drops the rest, and only the
+  /// newest [closedTabContainerLimit] rows are kept in any case.
+  Future<void> _recordClosedTabContainers(List<TabData> closed) async {
+    final regular = [
+      for (final tab in closed)
+        if (tab.tabMode == TabModeDbValue.regular) tab,
+    ];
+    if (regular.isEmpty) return;
+
+    final closedAt = DateTime.now();
+    await batch((batch) {
+      batch.insertAll(db.closedTabContainer, [
+        for (final tab in regular)
+          ClosedTabContainerCompanion.insert(
+            tabId: tab.id,
+            containerId: Value(tab.containerId),
+            closedAt: closedAt,
+          ),
+      ], mode: InsertMode.insertOrReplace);
+    });
+
+    await db.customStatement(
+      'DELETE FROM closed_tab_container WHERE tab_id NOT IN '
+      '(SELECT tab_id FROM closed_tab_container '
+      'ORDER BY closed_at DESC LIMIT ?)',
+      [closedTabContainerLimit],
+    );
+  }
+
+  /// The recorded rows for [tabIds], by tab id. A tab without one was closed
+  /// before it was recorded and has no known container.
+  Future<Map<String, ClosedTabContainerData>> closedTabContainers(
+    Iterable<String> tabIds,
+  ) async {
+    final ids = tabIds.toSet();
+    if (ids.isEmpty) return const {};
+
+    final rows = await (db.select(
+      db.closedTabContainer,
+    )..where((t) => t.tabId.isIn(ids))).get();
+    return {for (final row in rows) row.tabId: row};
+  }
+
+  /// Every recorded row, again whenever one is added, replaced or dropped.
+  Stream<List<ClosedTabContainerData>> watchClosedTabContainers() {
+    return (db.select(db.closedTabContainer)
+          ..orderBy([(t) => OrderingTerm.asc(t.tabId)]))
+        .watch()
+        .distinct(const ListEquality<ClosedTabContainerData>().equals);
+  }
+
+  /// Drops every recorded container but those of [tabIds], the tabs on the
+  /// recently closed list, and those recorded since [recordedSince].
+  ///
+  /// The engine adds a tab to the list only once its close can no longer be
+  /// undone, seconds after its row went. A record newer than that is of a tab
+  /// that may yet arrive, and [recordedSince] keeps it.
+  Future<void> retainClosedTabContainers(
+    Iterable<String> tabIds, {
+    DateTime? recordedSince,
+  }) {
+    final ids = tabIds.toSet();
+    return (db.delete(db.closedTabContainer)..where((t) {
+          final notListed = t.tabId.isNotIn(ids);
+          return recordedSince == null
+              ? notListed
+              : notListed & t.closedAt.isSmallerThanValue(recordedSince);
+        }))
+        .go();
+  }
+
+  Future<void> deleteClosedTabContainers(Iterable<String> tabIds) {
+    return (db.delete(
+      db.closedTabContainer,
+    )..where((t) => t.tabId.isIn(tabIds.toSet()))).go();
   }
 
   Future<void> deleteClosedTabTombstones(Iterable<String> tabIds) {
@@ -1646,6 +1733,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         for (final tab in deleted)
           if (tab.isolationContextId != null) tab.isolationContextId!,
       };
+
+      await _recordClosedTabContainers(deleted);
 
       if (deleted.isNotEmpty) {
         _clearHistoryTimer?.cancel();

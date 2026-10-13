@@ -26,6 +26,9 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
   late final i1.ClosedTabTombstone closedTabTombstone = i1.ClosedTabTombstone(
     this,
   );
+  late final i1.ClosedTabContainer closedTabContainer = i1.ClosedTabContainer(
+    this,
+  );
   late final i1.CaptureTab captureTab = i1.CaptureTab(this);
   late final i1.TabFts tabFts = i1.TabFts(this);
   late final i1.LocalIndexSetting localIndexSetting = i1.LocalIndexSetting(
@@ -56,6 +59,7 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     container,
     tab,
     closedTabTombstone,
+    closedTabContainer,
     i1.idxTabParentContainer,
     i1.idxTabTimestamp,
     i1.idxTabContainerOrder,
@@ -209,6 +213,8 @@ class $TabDatabaseManager {
   i1.$TabTableManager get tab => i1.$TabTableManager(_db, _db.tab);
   i1.$ClosedTabTombstoneTableManager get closedTabTombstone =>
       i1.$ClosedTabTombstoneTableManager(_db, _db.closedTabTombstone);
+  i1.$ClosedTabContainerTableManager get closedTabContainer =>
+      i1.$ClosedTabContainerTableManager(_db, _db.closedTabContainer);
   i1.$CaptureTabTableManager get captureTab =>
       i1.$CaptureTabTableManager(_db, _db.captureTab);
   i1.$TabFtsTableManager get tabFts => i1.$TabFtsTableManager(_db, _db.tabFts);

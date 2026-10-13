@@ -2507,7 +2507,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String browser_clearSiteDataContent(String formattedTypes, String host) {
-    return 'Для $host будут удалены следующие данные:\n$formattedTypes\n\nВозможно, придётся войти снова.';
+    return 'Для $host, включая поддомены, будут удалены следующие данные во всех контейнерах, а также в приватных и изолированных вкладках:\n$formattedTypes\n\nВозможно, придётся войти снова.';
   }
 
   @override
@@ -3272,9 +3272,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browser_tooltipSearchInsideTabs => 'Поиск внутри вкладок';
 
   @override
-  String get browser_filterTabType => 'Тип вкладок';
-
-  @override
   String get browser_sortPinnedFirst => 'Сначала закреплённые';
 
   @override
@@ -3452,6 +3449,84 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get browser_tabReorderBlockedMessage =>
       'Сбросьте фильтр или поиск в обзоре вкладок, чтобы изменить порядок';
+
+  @override
+  String browser_trackersBlockedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count трекера заблокировано',
+      many: '$count трекеров заблокировано',
+      few: '$count трекера заблокировано',
+      one: '$count трекер заблокирован',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_noTrackersBlocked =>
+      'На этой странице пока не заблокировано ни одного трекера';
+
+  @override
+  String browser_trackerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count трекера',
+      many: '$count трекеров',
+      few: '$count трекера',
+      one: '$count трекер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_trackerCategoryCrossSiteCookies =>
+      'Межсайтовые отслеживающие куки';
+
+  @override
+  String get browser_trackerCategorySocialMedia => 'Трекеры социальных сетей';
+
+  @override
+  String get browser_trackerCategoryFingerprinters =>
+      'Сборщики цифровых отпечатков';
+
+  @override
+  String get browser_trackerCategoryCryptominers => 'Криптомайнеры';
+
+  @override
+  String get browser_trackerCategoryTrackingContent => 'Отслеживающий контент';
+
+  @override
+  String get browser_trackerCategoryRedirectTrackers =>
+      'Трекеры перенаправлений';
+
+  @override
+  String get browser_siteBehaviorSectionTitle => 'Поведение';
+
+  @override
+  String get browser_siteSettingsButton => 'Настройки сайта';
+
+  @override
+  String get browser_privateTabIndicator => 'Приватная вкладка';
+
+  @override
+  String get browser_isolatedTabIndicator => 'Изолированная вкладка';
+
+  @override
+  String get browser_proxiedTabIndicator => 'Маршрутизируется через прокси';
+
+  @override
+  String get browser_moveTabUp => 'Переместить вкладку вверх';
+
+  @override
+  String get browser_moveTabDown => 'Переместить вкладку вниз';
+
+  @override
+  String get browser_moveTabLeft => 'Переместить вкладку влево';
+
+  @override
+  String get browser_moveTabRight => 'Переместить вкладку вправо';
 
   @override
   String get contextualToolbar_tooltipHome => 'Домой';
@@ -4124,34 +4199,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String menu_connectionNotRoutedByContainer(String container) {
-    return 'Не маршрутизируется контейнером «$container»';
-  }
-
-  @override
-  String get menu_connectionNotRoutedByTabContainer =>
-      'Не маршрутизируется контейнером этой вкладки';
-
-  @override
-  String get menu_connectionCheckingRouting => 'Проверка маршрутизации…';
-
-  @override
-  String get menu_connectionStartingRouting => 'Запуск маршрутизации…';
-
-  @override
-  String menu_connectionBlockedNotRunning(String proxyTitle) {
-    return 'Заблокировано — $proxyTitle не запущен';
-  }
-
-  @override
-  String menu_connectionThisTabVia(String proxyTitle) {
-    return 'Эта вкладка: $proxyTitle';
-  }
-
-  @override
-  String get menu_connectionThisTabDirect => 'Эта вкладка: прямое подключение';
-
-  @override
   String menu_connectionStartProxy(String proxyTitle) {
     return 'Запустить $proxyTitle';
   }
@@ -4495,6 +4542,77 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get history_actionShareLink => 'Поделиться ссылкой';
+
+  @override
+  String get history_dayToday => 'Сегодня';
+
+  @override
+  String get history_dayYesterday => 'Вчера';
+
+  @override
+  String get history_recentlyClosedTitle => 'Недавно закрытые вкладки';
+
+  @override
+  String history_recentlyClosedCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count вкладки',
+      many: '$count вкладок',
+      few: '$count вкладки',
+      one: '$count вкладка',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get history_recentlyClosedEmpty => 'Нет недавно закрытых вкладок';
+
+  @override
+  String get history_recentlyClosedExplanation =>
+      'Последние 10 закрытых вкладок, которые можно открыть снова вместе с историей «Назад». Приватные и изолированные вкладки, а также вкладки контейнеров, исключённых из истории, не сохраняются. При удалении истории этот список очищается.';
+
+  @override
+  String get history_recentlyClosedClearAll =>
+      'Очистить недавно закрытые вкладки';
+
+  @override
+  String get history_recentlyClosedClearConfirm =>
+      'Очистить недавно закрытые вкладки?';
+
+  @override
+  String get history_recentlyClosedContainerDeleted =>
+      'Контейнер удалён, откроется без него';
+
+  @override
+  String get history_recentlyClosedLoadFailed =>
+      'Не удалось загрузить недавно закрытые вкладки';
+
+  @override
+  String get history_downloadStatusStarting => 'Запуск';
+
+  @override
+  String get history_downloadStatusDownloading => 'Загрузка';
+
+  @override
+  String get history_downloadStatusPaused => 'Приостановлено';
+
+  @override
+  String get history_downloadStatusFailed => 'Ошибка';
+
+  @override
+  String history_downloadProgress(String downloaded, String total) {
+    return '$downloaded из $total';
+  }
+
+  @override
+  String get history_downloadActionPause => 'Приостановить';
+
+  @override
+  String get history_downloadActionResume => 'Продолжить';
+
+  @override
+  String get history_downloadActionCancel => 'Отменить загрузку';
 
   @override
   String get openLinkTools_openLinkTitle => 'Открыть ссылку';
@@ -5220,6 +5338,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get search_actionUntitledFeed => 'Лента без названия';
+
+  @override
+  String get search_actionDeleteFromHistory => 'Удалить из истории';
+
+  @override
+  String search_deletedFromHistory(String site) {
+    return 'Удалено из истории: $site';
+  }
 
   @override
   String get tabs_actionSelect => 'Выбрать';
@@ -7204,6 +7330,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String proxy_loadErrorFailed(String error) {
     return 'Не удалось загрузить профиль прокси: $error';
   }
+
+  @override
+  String proxy_tabNotRoutedByContainer(String container) {
+    return 'Не маршрутизируется контейнером «$container»';
+  }
+
+  @override
+  String get proxy_tabNotRoutedByTabContainer =>
+      'Не маршрутизируется контейнером этой вкладки';
+
+  @override
+  String get proxy_tabRoutingChecking => 'Проверка маршрутизации…';
+
+  @override
+  String get proxy_tabRoutingStarting => 'Запуск маршрутизации…';
+
+  @override
+  String proxy_tabRoutingBlockedNotRunning(String proxyTitle) {
+    return 'Заблокировано — $proxyTitle не запущен';
+  }
+
+  @override
+  String proxy_tabRoutingVia(String proxyTitle) {
+    return 'Эта вкладка: $proxyTitle';
+  }
+
+  @override
+  String get proxy_tabRoutingDirect => 'Эта вкладка: прямое подключение';
+
+  @override
+  String get proxy_tabRoutingTitle => 'Прокси';
 
   @override
   String get qrScanner_noCameraPermission =>
@@ -9268,16 +9425,15 @@ class AppLocalizationsRu extends AppLocalizations {
       'Выберите, какие трекеры и скрипты блокировать.';
 
   @override
-  String get settings_contentBlockingDatabaseTitle =>
-      'База блокировки контента';
+  String get settings_trackerStatisticsTitle => 'Статистика трекеров';
 
   @override
-  String get settings_contentBlockingDatabaseKeywords =>
-      'реклама, трекеры, блокировка контента';
+  String get settings_trackerStatisticsKeywords =>
+      'трекеры, статистика, заблокированные трекеры, блокировка контента, база данных';
 
   @override
-  String get settings_contentBlockingDatabaseSubtitle =>
-      'Использовать списки блокировки GeckoView для категорий ETP, таких как реклама, аналитика и социальные трекеры. Требуется перезапуск приложения.';
+  String get settings_trackerStatisticsSubtitle =>
+      'Ежедневно подсчитывать заблокированные трекеры по категориям. Хранятся только количество и даты, а не посещённые сайты. Удаление истории просмотра удаляет и эту статистику. Требуется перезапуск приложения.';
 
   @override
   String get settings_bounceTrackingProtectionTitle =>
@@ -10414,8 +10570,8 @@ class AppLocalizationsRu extends AppLocalizations {
       'Выбор строгости блокировки трекеров';
 
   @override
-  String get settings_indexContentBlockingDatabaseSubtitle =>
-      'Использовать списки блокировки GeckoView для категорий ETP';
+  String get settings_indexTrackerStatisticsSubtitle =>
+      'Ежедневно подсчитывать заблокированные трекеры';
 
   @override
   String get settings_indexBounceTrackingProtectionSubtitle =>
@@ -11163,6 +11319,38 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settings_tabViewActionsAtBottomKeywords =>
       'внизу, большой палец, досягаемость, одной рукой, панель, обзор вкладок';
+
+  @override
+  String settings_trackerStatisticsTotal(int count, String date) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'С $date заблокировано $countString трекера',
+      many: 'С $date заблокировано $countString трекеров',
+      few: 'С $date заблокировано $countString трекера',
+      one: 'С $date заблокирован $countString трекер',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_trackerStatisticsNothingRecorded =>
+      'Заблокированные трекеры пока не записаны.';
+
+  @override
+  String get settings_trackerStatisticsLastSevenDays => 'Последние 7 дней';
+
+  @override
+  String get settings_trackerStatisticsNoneLastSevenDays =>
+      'За последние 7 дней трекеры не блокировались.';
+
+  @override
+  String get settings_trackerStatisticsLoadFailed =>
+      'Не удалось загрузить статистику трекеров.';
 
   @override
   String get smallWeb_sheetTitle => 'Малый веб';

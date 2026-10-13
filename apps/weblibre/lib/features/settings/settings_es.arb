@@ -545,9 +545,9 @@
   "settings_trackingProtectionStrictSubtitle": "Bloquea más categorías de rastreadores, incluido el contenido de rastreo, pero puede hacer que fallen algunos sitios.",
   "settings_trackingProtectionCustomLabel": "Personalizada",
   "settings_trackingProtectionCustomSubtitle": "Elige qué rastreadores y scripts bloquear.",
-  "settings_contentBlockingDatabaseTitle": "Base de datos de bloqueo de contenido",
-  "settings_contentBlockingDatabaseKeywords": "anuncios, rastreadores, bloqueo de contenido",
-  "settings_contentBlockingDatabaseSubtitle": "Usar las listas de bloqueo de GeckoView para las categorías de la protección mejorada, como anuncios, analíticas y rastreadores sociales. Requiere reiniciar la aplicación.",
+  "settings_trackerStatisticsTitle": "Estadísticas de rastreadores",
+  "settings_trackerStatisticsKeywords": "rastreadores, estadísticas, rastreadores bloqueados, bloqueo de contenido, base de datos",
+  "settings_trackerStatisticsSubtitle": "Llevar un recuento diario de los rastreadores bloqueados por categoría. Solo se guardan recuentos y fechas, no los sitios que visitas. Al eliminar el historial de navegación también se eliminan. Requiere reiniciar la aplicación.",
   "settings_bounceTrackingProtectionTitle": "Protección contra el rastreo por rebote",
   "settings_bounceTrackingProtectionKeywords": "rastreadores por redirección, rebote",
   "settings_bounceTrackingProtectionSubtitle": "Bloquea los rastreadores por redirección que recopilan datos mediante redirecciones de URL intermedias entre sitios web",
@@ -851,7 +851,7 @@
   "settings_privacySectionTrackingProtectionTitle": "Protección contra el rastreo",
   "settings_privacySectionTrackingProtectionKeywords": "privacidad, rastreo",
   "settings_indexEnhancedTrackingProtectionSubtitle": "Elegir con qué intensidad se bloquean los rastreadores",
-  "settings_indexContentBlockingDatabaseSubtitle": "Usar las listas de bloqueo de GeckoView para las categorías de la protección mejorada",
+  "settings_indexTrackerStatisticsSubtitle": "Llevar un recuento diario de los rastreadores bloqueados",
   "settings_indexBounceTrackingProtectionSubtitle": "Quitar el estado de rastreo que dejan los rastreadores por redirección",
   "settings_indexQueryParameterStrippingSubtitle": "Quitar los parámetros de rastreo de las URL",
   "settings_privacySectionFingerprintingTitle": "Huellas digitales",
@@ -1055,5 +1055,10 @@
   "settings_switcherPlacementBelowContextualBarDescription": "En el borde inferior de la pantalla",
   "settings_tabViewActionsAtBottomTitle": "Acciones de la vista de pestañas abajo",
   "settings_tabViewActionsAtBottomSubtitle": "Búsqueda, filtros y acciones de pestañas abajo, con el botón de nueva pestaña encima",
-  "settings_tabViewActionsAtBottomKeywords": "abajo, pulgar, alcance, una mano, barra de herramientas, vista de pestañas"
+  "settings_tabViewActionsAtBottomKeywords": "abajo, pulgar, alcance, una mano, barra de herramientas, vista de pestañas",
+  "settings_trackerStatisticsTotal": "{count, plural, =1{1 rastreador bloqueado desde el {date}} other{{count} rastreadores bloqueados desde el {date}}}",
+  "settings_trackerStatisticsNothingRecorded": "Aún no se ha registrado ningún rastreador bloqueado.",
+  "settings_trackerStatisticsLastSevenDays": "Últimos 7 días",
+  "settings_trackerStatisticsNoneLastSevenDays": "No se ha bloqueado ningún rastreador en los últimos 7 días.",
+  "settings_trackerStatisticsLoadFailed": "No se pudieron cargar las estadísticas de rastreadores."
 }

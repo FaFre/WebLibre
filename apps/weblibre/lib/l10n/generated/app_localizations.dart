@@ -4186,10 +4186,10 @@ abstract class AppLocalizations {
   /// **'Clear Site Data'**
   String get browser_clearSiteDataTitle;
 
-  /// Body of the clear site data dialog. host is the website domain; formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. "• Cookies"). Keep the line breaks (\n) around it.
+  /// Body of the clear site data dialog. host is the site's registrable domain (e.g. example.com); the data is cleared for its subdomains too, in every container and in private and isolated tabs. formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. "• Cookies"). Keep the line breaks (\n) around it.
   ///
   /// In en, this message translates to:
-  /// **'This will clear the following data for {host}:\n{formattedTypes}\n\nYou may need to log in again.'**
+  /// **'This will clear the following data for {host}, including its subdomains, in every container and in private and isolated tabs:\n{formattedTypes}\n\nYou may need to log in again.'**
   String browser_clearSiteDataContent(String formattedTypes, String host);
 
   /// Option in the page content dialog (e.g. for copying or exporting as Markdown): use only the main article text.
@@ -5464,12 +5464,6 @@ abstract class AppLocalizations {
   /// **'Search inside tabs'**
   String get browser_tooltipSearchInsideTabs;
 
-  /// Submenu of the tab overview filter menu: show only a kind of tab.
-  ///
-  /// In en, this message translates to:
-  /// **'Tab Type'**
-  String get browser_filterTabType;
-
   /// Checkbox item in the sort submenu: list pinned tabs first.
   ///
   /// In en, this message translates to:
@@ -5805,6 +5799,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Clear the tab view filter or search to reorder tabs'**
   String get browser_tabReorderBlockedMessage;
+
+  /// Row in the site information sheet, under the tracking protection switch: how many trackers were blocked on the current page so far. Tapping it lists them by category.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tracker blocked} other{{count} trackers blocked}}'**
+  String browser_trackersBlockedCount(int count);
+
+  /// Same row when tracking protection is on but nothing was blocked yet; the page may still be loading.
+  ///
+  /// In en, this message translates to:
+  /// **'No trackers blocked on this page so far'**
+  String get browser_noTrackersBlocked;
+
+  /// Subtitle of a tracker category in the site information sheet: how many trackers of that category were blocked on the page.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tracker} other{{count} trackers}}'**
+  String browser_trackerCount(int count);
+
+  /// Tracker category: cookies that follow you across websites. Used in the site information sheet and in the tracker statistics in privacy settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-site tracking cookies'**
+  String get browser_trackerCategoryCrossSiteCookies;
+
+  /// Tracker category: social network scripts that follow you across websites.
+  ///
+  /// In en, this message translates to:
+  /// **'Social media trackers'**
+  String get browser_trackerCategorySocialMedia;
+
+  /// Tracker category: scripts that identify your browser and device from their characteristics.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprinters'**
+  String get browser_trackerCategoryFingerprinters;
+
+  /// Tracker category: scripts that use your device to mine cryptocurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Cryptominers'**
+  String get browser_trackerCategoryCryptominers;
+
+  /// Tracker category: ads, analytics and other content that tracks you.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking content'**
+  String get browser_trackerCategoryTrackingContent;
+
+  /// Tracker category: sites that track you by redirecting through themselves (bounce tracking). Only appears in the tracker statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Redirect trackers'**
+  String get browser_trackerCategoryRedirectTrackers;
+
+  /// Group title in the site information sheet over the per-site settings for desktop mode, opening links in apps and gestures.
+  ///
+  /// In en, this message translates to:
+  /// **'Behavior'**
+  String get browser_siteBehaviorSectionTitle;
+
+  /// Screen reader label of the site icon button left of the address bar, which opens the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Site settings'**
+  String get browser_siteSettingsButton;
+
+  /// Screen reader label of the icon in the address bar that marks a private tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Private tab'**
+  String get browser_privateTabIndicator;
+
+  /// Screen reader label of the icon in the address bar that marks an isolated tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Isolated tab'**
+  String get browser_isolatedTabIndicator;
+
+  /// Screen reader label of the icon in the address bar shown while the tab's traffic goes through a proxy or Tor.
+  ///
+  /// In en, this message translates to:
+  /// **'Routed through a proxy'**
+  String get browser_proxiedTabIndicator;
+
+  /// Screen reader action on a tab in the tab tray: moves it up one row (in a grid, one row up), instead of dragging it.
+  ///
+  /// In en, this message translates to:
+  /// **'Move tab up'**
+  String get browser_moveTabUp;
+
+  /// Screen reader action on a tab in the tab tray: moves it down one row, instead of dragging it.
+  ///
+  /// In en, this message translates to:
+  /// **'Move tab down'**
+  String get browser_moveTabDown;
+
+  /// Screen reader action on a tab in the tab tray's grid: moves it one place to the left, instead of dragging it.
+  ///
+  /// In en, this message translates to:
+  /// **'Move tab left'**
+  String get browser_moveTabLeft;
+
+  /// Screen reader action on a tab in the tab tray's grid: moves it one place to the right, instead of dragging it.
+  ///
+  /// In en, this message translates to:
+  /// **'Move tab right'**
+  String get browser_moveTabRight;
 
   /// Tooltip of the toolbar button that opens the home page.
   ///
@@ -7060,48 +7162,6 @@ abstract class AppLocalizations {
   /// **'Proxy error: {error}'**
   String menu_connectionProxyError(String error);
 
-  /// Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name.
-  ///
-  /// In en, this message translates to:
-  /// **'Not routed by container \"{container}\"'**
-  String menu_connectionNotRoutedByContainer(String container);
-
-  /// Same summary line when the container has no name.
-  ///
-  /// In en, this message translates to:
-  /// **'Not routed by this tab\'s container'**
-  String get menu_connectionNotRoutedByTabContainer;
-
-  /// Summary line while the tab's routing is being determined.
-  ///
-  /// In en, this message translates to:
-  /// **'Checking routing…'**
-  String get menu_connectionCheckingRouting;
-
-  /// Summary line while the tab's proxy is starting.
-  ///
-  /// In en, this message translates to:
-  /// **'Starting routing…'**
-  String get menu_connectionStartingRouting;
-
-  /// Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name.
-  ///
-  /// In en, this message translates to:
-  /// **'Blocked — {proxyTitle} is not running'**
-  String menu_connectionBlockedNotRunning(String proxyTitle);
-
-  /// Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name.
-  ///
-  /// In en, this message translates to:
-  /// **'This tab: {proxyTitle}'**
-  String menu_connectionThisTabVia(String proxyTitle);
-
-  /// Summary line: this tab connects directly without a proxy.
-  ///
-  /// In en, this message translates to:
-  /// **'This tab: direct connection'**
-  String get menu_connectionThisTabDirect;
-
   /// Button that starts the stopped proxy. proxyTitle is the proxy's name.
   ///
   /// In en, this message translates to:
@@ -7653,6 +7713,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Share link'**
   String get history_actionShareLink;
+
+  /// Heading over the history (and downloads) entries visited today, above a list grouped by calendar day.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get history_dayToday;
+
+  /// Heading over the history (and downloads) entries visited yesterday. Older days show their date instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get history_dayYesterday;
+
+  /// Title of the screen listing recently closed tabs, and of the row at the top of the history screen that opens it.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently closed tabs'**
+  String get history_recentlyClosedTitle;
+
+  /// Subtitle of the 'Recently closed tabs' row at the top of the history screen: how many closed tabs it holds (at most 10).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tab} other{{count} tabs}}'**
+  String history_recentlyClosedCount(int count);
+
+  /// Shown on the recently closed tabs screen when the list is empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently closed tabs'**
+  String get history_recentlyClosedEmpty;
+
+  /// Explanation under the list (or the empty state) on the recently closed tabs screen.
+  ///
+  /// In en, this message translates to:
+  /// **'The last 10 tabs you closed, to reopen with their back history. Private and isolated tabs and tabs of containers excluded from history are not kept. Deleting your history clears this list.'**
+  String get history_recentlyClosedExplanation;
+
+  /// Tooltip of the delete button on the recently closed tabs screen, which empties the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear recently closed tabs'**
+  String get history_recentlyClosedClearAll;
+
+  /// Title of the confirmation dialog before emptying the recently closed tabs list. The tabs can no longer be reopened afterwards.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the recently closed tabs?'**
+  String get history_recentlyClosedClearConfirm;
+
+  /// Under a recently closed tab whose container has been deleted since: reopening it opens the page outside any container, without its back history.
+  ///
+  /// In en, this message translates to:
+  /// **'Container deleted, reopens without it'**
+  String get history_recentlyClosedContainerDeleted;
+
+  /// Error title on the recently closed tabs screen when the list could not be read.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the recently closed tabs'**
+  String get history_recentlyClosedLoadFailed;
+
+  /// Status chip on a download in the downloads list that has been accepted but has not started receiving data yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting'**
+  String get history_downloadStatusStarting;
+
+  /// Status chip on a download in the downloads list that is receiving data, shown with a progress bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading'**
+  String get history_downloadStatusDownloading;
+
+  /// Status chip on a paused download in the downloads list.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get history_downloadStatusPaused;
+
+  /// Status chip on a download in the downloads list that stopped with an error. It can be retried from the row's menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get history_downloadStatusFailed;
+
+  /// How much of an unfinished download has arrived, e.g. '12.4 MB of 40.0 MB'. Both values are formatted sizes.
+  ///
+  /// In en, this message translates to:
+  /// **'{downloaded} of {total}'**
+  String history_downloadProgress(String downloaded, String total);
+
+  /// Menu item on a running download in the downloads list: pauses it.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get history_downloadActionPause;
+
+  /// Menu item on a paused download in the downloads list: continues it.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get history_downloadActionResume;
+
+  /// Menu item on a running or paused download in the downloads list: stops it for good.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel download'**
+  String get history_downloadActionCancel;
 
   /// Title of the sheet shown when a link is shared to or opened in WebLibre, offering ways to open it (new tab, custom tab, app) and to clean it.
   ///
@@ -8817,6 +8985,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled feed'**
   String get search_actionUntitledFeed;
+
+  /// Menu item (long press on a history suggestion under the address bar) and screen-reader action: deletes every visit of that page from browsing history.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete from history'**
+  String get search_actionDeleteFromHistory;
+
+  /// Snackbar with an Undo button after deleting a history suggestion under the address bar. The visits are deleted when the snackbar goes away without Undo. site is the page's host, e.g. example.com.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted {site} from history'**
+  String search_deletedFromHistory(String site);
 
   /// Button that picks an item: a container in the container list, or the chosen color in the color picker.
   ///
@@ -12027,6 +12207,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load proxy profile: {error}'**
   String proxy_loadErrorFailed(String error);
+
+  /// Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not routed by container \"{container}\"'**
+  String proxy_tabNotRoutedByContainer(String container);
+
+  /// Same summary line when the container has no name. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not routed by this tab\'s container'**
+  String get proxy_tabNotRoutedByTabContainer;
+
+  /// Summary line while the tab's routing is being determined. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking routing…'**
+  String get proxy_tabRoutingChecking;
+
+  /// Summary line while the tab's proxy is starting. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting routing…'**
+  String get proxy_tabRoutingStarting;
+
+  /// Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked — {proxyTitle} is not running'**
+  String proxy_tabRoutingBlockedNotRunning(String proxyTitle);
+
+  /// Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab: {proxyTitle}'**
+  String proxy_tabRoutingVia(String proxyTitle);
+
+  /// Summary line: this tab connects directly without a proxy. Shown in the browser menu's connection group and in the site information sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab: direct connection'**
+  String get proxy_tabRoutingDirect;
+
+  /// Title of the row in the site information sheet that says how the current tab's traffic is routed (directly, via a proxy or Tor); the routing summary is shown under it.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy'**
+  String get proxy_tabRoutingTitle;
 
   /// Error message shown when the QR code scanner cannot open because camera access was denied.
   ///
@@ -15418,23 +15646,23 @@ abstract class AppLocalizations {
   /// **'Choose which trackers and scripts to block.'**
   String get settings_trackingProtectionCustomSubtitle;
 
-  /// Switch: use the browser engine's built-in block lists for tracker categories.
+  /// Switch: record how many trackers the browser blocks each day, by category, for statistics. It does not change what gets blocked.
   ///
   /// In en, this message translates to:
-  /// **'Content Blocking Database'**
-  String get settings_contentBlockingDatabaseTitle;
+  /// **'Tracker Statistics'**
+  String get settings_trackerStatisticsTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'ads, trackers, content blocking'**
-  String get settings_contentBlockingDatabaseKeywords;
+  /// **'trackers, statistics, blocked trackers, content blocking, database'**
+  String get settings_trackerStatisticsKeywords;
 
-  /// Explanation under that switch. GeckoView is the engine's name; ETP means Enhanced Tracking Protection.
+  /// Explanation under that switch. Only per-day counts per tracker category are stored, never website addresses; deleting browsing history also deletes these counts.
   ///
   /// In en, this message translates to:
-  /// **'Use GeckoView blocker lists for ETP categories such as ads, analytics, and social trackers. Requires an app restart.'**
-  String get settings_contentBlockingDatabaseSubtitle;
+  /// **'Keep a daily count of blocked trackers by category. Only counts and dates are stored, not the sites you visit. Deleting browsing history deletes them too. Requires an app restart.'**
+  String get settings_trackerStatisticsSubtitle;
 
   /// Switch: block trackers that bounce you through their own sites while navigating. Mozilla feature name.
   ///
@@ -17262,11 +17490,11 @@ abstract class AppLocalizations {
   /// **'Choose how aggressively trackers are blocked'**
   String get settings_indexEnhancedTrackingProtectionSubtitle;
 
-  /// Summary of the content blocking database setting, shown as a settings search result.
+  /// Summary of the tracker statistics setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Use GeckoView blocker lists for ETP categories'**
-  String get settings_indexContentBlockingDatabaseSubtitle;
+  /// **'Keep a daily count of blocked trackers'**
+  String get settings_indexTrackerStatisticsSubtitle;
 
   /// Summary of the bounce tracking protection setting, shown as a settings search result.
   ///
@@ -18491,6 +18719,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'bottom, thumb, reach, one hand, toolbar, tab view'**
   String get settings_tabViewActionsAtBottomKeywords;
+
+  /// Total under the tracker statistics switch. date is the day recording started, formatted like "Oct 12, 2026".
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tracker blocked since {date}} other{{count} trackers blocked since {date}}}'**
+  String settings_trackerStatisticsTotal(int count, String date);
+
+  /// Shown under the tracker statistics switch while nothing has been recorded (recording starts after an app restart).
+  ///
+  /// In en, this message translates to:
+  /// **'No blocked trackers recorded yet.'**
+  String get settings_trackerStatisticsNothingRecorded;
+
+  /// Heading over the per-category counts of trackers blocked in the last seven days.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 7 days'**
+  String get settings_trackerStatisticsLastSevenDays;
+
+  /// Shown under that heading when nothing was blocked in that time.
+  ///
+  /// In en, this message translates to:
+  /// **'No trackers blocked in the last 7 days.'**
+  String get settings_trackerStatisticsNoneLastSevenDays;
+
+  /// Shown under the tracker statistics switch when the engine could not read them.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load tracker statistics.'**
+  String get settings_trackerStatisticsLoadFailed;
 
   /// Title of the Small Web panel. The "small web" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout.
   ///

@@ -1,6 +1,12 @@
+import 'package:drift/native.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
+import 'package:weblibre/data/database/functions/url_functions.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 
 class _FakeGeckoDeleteBrowserDataService extends GeckoDeleteBrowserDataService {
@@ -103,13 +109,42 @@ void main() {
   });
 
   group('BrowserDataService.deleteData', () {
-    test('a failing type does not skip the ones after it', () async {
-      final gecko = _FakeGeckoDeleteBrowserDataService();
-      final service = BrowserDataService(service: gecko);
+    late TabDatabase db;
+    late ProviderContainer container;
+    late _FakeGeckoDeleteBrowserDataService gecko;
 
+    setUp(() {
+      db = TabDatabase(
+        NativeDatabase.memory(
+          setup: (database) {
+            registerLexorankFunctions(database);
+            registerUrlFunctions(database);
+          },
+        ),
+      );
+      gecko = _FakeGeckoDeleteBrowserDataService();
+      container = ProviderContainer(
+        overrides: [
+          tabDatabaseProvider.overrideWith((ref) => db),
+          browserDataServiceProvider.overrideWith(
+            () => BrowserDataService(service: gecko),
+          ),
+        ],
+      );
+    });
+
+    tearDown(() async {
+      container.dispose();
+      await db.close();
+    });
+
+    BrowserDataService service() =>
+        container.read(browserDataServiceProvider.notifier);
+
+    test('a failing type does not skip the ones after it', () async {
       // On Quit, history failing used to keep the cookies and the cache.
       await expectLater(
-        service.deleteData({
+        service().deleteData({
           DeleteBrowsingDataType.history,
           DeleteBrowsingDataType.cookies,
           DeleteBrowsingDataType.cache,
@@ -118,6 +153,37 @@ void main() {
       );
 
       expect(gecko.deleted, ['history', 'cookies', 'cache']);
+    });
+
+    test('the local history records go even when the engine fails', () async {
+      await db.customStatement(
+        'INSERT INTO container (id, color, order_key, is_pinned, metadata) '
+        "VALUES ('work', 0, 'work', 0, '{}')",
+      );
+      await db.visitContainerDao.insertRelation(
+        rawUrl: 'https://a.example/',
+        urlCanonical: 'https://a.example/',
+        visitTime: 1,
+        containerId: 'work',
+      );
+      await db.customStatement(
+        'INSERT INTO history (url_canonical, url_host, observed_at) '
+        "VALUES ('https://a.example/', 'a.example', 0)",
+      );
+      await db.customStatement(
+        'INSERT INTO closed_tab_container (tab_id, container_id, closed_at) '
+        "VALUES ('closed', 'work', 0)",
+      );
+
+      await expectLater(
+        service().deleteDataType(DeleteBrowsingDataType.history),
+        throwsException,
+      );
+
+      // The indexed page contents are history too.
+      expect(await db.historyDao.countRows(), 0);
+      expect(await db.visitContainerDao.relationsForContainer('work'), isEmpty);
+      expect(await db.tabDao.closedTabContainers(['closed']), isEmpty);
     });
   });
 }

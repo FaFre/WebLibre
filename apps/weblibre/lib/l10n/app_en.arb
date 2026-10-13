@@ -3008,9 +3008,9 @@
   "@browser_clearSiteDataTitle": {
     "description": "Title of the dialog, and row in the site info sheet, for deleting data stored by the current website."
   },
-  "browser_clearSiteDataContent": "This will clear the following data for {host}:\n{formattedTypes}\n\nYou may need to log in again.",
+  "browser_clearSiteDataContent": "This will clear the following data for {host}, including its subdomains, in every container and in private and isolated tabs:\n{formattedTypes}\n\nYou may need to log in again.",
   "@browser_clearSiteDataContent": {
-    "description": "Body of the clear site data dialog. host is the website domain; formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. \"• Cookies\"). Keep the line breaks (\\n) around it.",
+    "description": "Body of the clear site data dialog. host is the site's registrable domain (e.g. example.com); the data is cleared for its subdomains too, in every container and in private and isolated tabs. formattedTypes is the chosen data types, one bulleted line each, using the checkbox labels (e.g. \"• Cookies\"). Keep the line breaks (\\n) around it.",
     "placeholders": {
       "formattedTypes": {
         "type": "String"
@@ -3973,10 +3973,6 @@
   "@browser_tooltipSearchInsideTabs": {
     "description": "Tooltip of the button that searches the text of open tabs."
   },
-  "browser_filterTabType": "Tab Type",
-  "@browser_filterTabType": {
-    "description": "Submenu of the tab overview filter menu: show only a kind of tab."
-  },
   "browser_sortPinnedFirst": "Sort Pinned First",
   "@browser_sortPinnedFirst": {
     "description": "Checkbox item in the sort submenu: list pinned tabs first."
@@ -4215,6 +4211,88 @@
   "browser_tabReorderBlockedMessage": "Clear the tab view filter or search to reorder tabs",
   "@browser_tabReorderBlockedMessage": {
     "description": "Message when trying to drag a tab while the tab overview is filtered or searched."
+  },
+  "browser_trackersBlockedCount": "{count, plural, =1{1 tracker blocked} other{{count} trackers blocked}}",
+  "@browser_trackersBlockedCount": {
+    "description": "Row in the site information sheet, under the tracking protection switch: how many trackers were blocked on the current page so far. Tapping it lists them by category.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browser_noTrackersBlocked": "No trackers blocked on this page so far",
+  "@browser_noTrackersBlocked": {
+    "description": "Same row when tracking protection is on but nothing was blocked yet; the page may still be loading."
+  },
+  "browser_trackerCount": "{count, plural, =1{1 tracker} other{{count} trackers}}",
+  "@browser_trackerCount": {
+    "description": "Subtitle of a tracker category in the site information sheet: how many trackers of that category were blocked on the page.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "browser_trackerCategoryCrossSiteCookies": "Cross-site tracking cookies",
+  "@browser_trackerCategoryCrossSiteCookies": {
+    "description": "Tracker category: cookies that follow you across websites. Used in the site information sheet and in the tracker statistics in privacy settings."
+  },
+  "browser_trackerCategorySocialMedia": "Social media trackers",
+  "@browser_trackerCategorySocialMedia": {
+    "description": "Tracker category: social network scripts that follow you across websites."
+  },
+  "browser_trackerCategoryFingerprinters": "Fingerprinters",
+  "@browser_trackerCategoryFingerprinters": {
+    "description": "Tracker category: scripts that identify your browser and device from their characteristics."
+  },
+  "browser_trackerCategoryCryptominers": "Cryptominers",
+  "@browser_trackerCategoryCryptominers": {
+    "description": "Tracker category: scripts that use your device to mine cryptocurrency."
+  },
+  "browser_trackerCategoryTrackingContent": "Tracking content",
+  "@browser_trackerCategoryTrackingContent": {
+    "description": "Tracker category: ads, analytics and other content that tracks you."
+  },
+  "browser_trackerCategoryRedirectTrackers": "Redirect trackers",
+  "@browser_trackerCategoryRedirectTrackers": {
+    "description": "Tracker category: sites that track you by redirecting through themselves (bounce tracking). Only appears in the tracker statistics."
+  },
+  "browser_siteBehaviorSectionTitle": "Behavior",
+  "@browser_siteBehaviorSectionTitle": {
+    "description": "Group title in the site information sheet over the per-site settings for desktop mode, opening links in apps and gestures."
+  },
+  "browser_siteSettingsButton": "Site settings",
+  "@browser_siteSettingsButton": {
+    "description": "Screen reader label of the site icon button left of the address bar, which opens the site information sheet."
+  },
+  "browser_privateTabIndicator": "Private tab",
+  "@browser_privateTabIndicator": {
+    "description": "Screen reader label of the icon in the address bar that marks a private tab."
+  },
+  "browser_isolatedTabIndicator": "Isolated tab",
+  "@browser_isolatedTabIndicator": {
+    "description": "Screen reader label of the icon in the address bar that marks an isolated tab."
+  },
+  "browser_proxiedTabIndicator": "Routed through a proxy",
+  "@browser_proxiedTabIndicator": {
+    "description": "Screen reader label of the icon in the address bar shown while the tab's traffic goes through a proxy or Tor."
+  },
+  "browser_moveTabUp": "Move tab up",
+  "@browser_moveTabUp": {
+    "description": "Screen reader action on a tab in the tab tray: moves it up one row (in a grid, one row up), instead of dragging it."
+  },
+  "browser_moveTabDown": "Move tab down",
+  "@browser_moveTabDown": {
+    "description": "Screen reader action on a tab in the tab tray: moves it down one row, instead of dragging it."
+  },
+  "browser_moveTabLeft": "Move tab left",
+  "@browser_moveTabLeft": {
+    "description": "Screen reader action on a tab in the tab tray's grid: moves it one place to the left, instead of dragging it."
+  },
+  "browser_moveTabRight": "Move tab right",
+  "@browser_moveTabRight": {
+    "description": "Screen reader action on a tab in the tab tray's grid: moves it one place to the right, instead of dragging it."
   },
   "contextualToolbar_tooltipHome": "Home",
   "@contextualToolbar_tooltipHome": {
@@ -5085,49 +5163,6 @@
       }
     }
   },
-  "menu_connectionNotRoutedByContainer": "Not routed by container \"{container}\"",
-  "@menu_connectionNotRoutedByContainer": {
-    "description": "Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name.",
-    "placeholders": {
-      "container": {
-        "type": "String"
-      }
-    }
-  },
-  "menu_connectionNotRoutedByTabContainer": "Not routed by this tab's container",
-  "@menu_connectionNotRoutedByTabContainer": {
-    "description": "Same summary line when the container has no name."
-  },
-  "menu_connectionCheckingRouting": "Checking routing…",
-  "@menu_connectionCheckingRouting": {
-    "description": "Summary line while the tab's routing is being determined."
-  },
-  "menu_connectionStartingRouting": "Starting routing…",
-  "@menu_connectionStartingRouting": {
-    "description": "Summary line while the tab's proxy is starting."
-  },
-  "menu_connectionBlockedNotRunning": "Blocked — {proxyTitle} is not running",
-  "@menu_connectionBlockedNotRunning": {
-    "description": "Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name.",
-    "placeholders": {
-      "proxyTitle": {
-        "type": "String"
-      }
-    }
-  },
-  "menu_connectionThisTabVia": "This tab: {proxyTitle}",
-  "@menu_connectionThisTabVia": {
-    "description": "Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name.",
-    "placeholders": {
-      "proxyTitle": {
-        "type": "String"
-      }
-    }
-  },
-  "menu_connectionThisTabDirect": "This tab: direct connection",
-  "@menu_connectionThisTabDirect": {
-    "description": "Summary line: this tab connects directly without a proxy."
-  },
   "menu_connectionStartProxy": "Start {proxyTitle}",
   "@menu_connectionStartProxy": {
     "description": "Button that starts the stopped proxy. proxyTitle is the proxy's name.",
@@ -5553,6 +5588,91 @@
   "history_actionShareLink": "Share link",
   "@history_actionShareLink": {
     "description": "Menu item on a history or downloads row: opens the system share sheet with the page address (for a download, the address it was downloaded from)."
+  },
+  "history_dayToday": "Today",
+  "@history_dayToday": {
+    "description": "Heading over the history (and downloads) entries visited today, above a list grouped by calendar day."
+  },
+  "history_dayYesterday": "Yesterday",
+  "@history_dayYesterday": {
+    "description": "Heading over the history (and downloads) entries visited yesterday. Older days show their date instead."
+  },
+  "history_recentlyClosedTitle": "Recently closed tabs",
+  "@history_recentlyClosedTitle": {
+    "description": "Title of the screen listing recently closed tabs, and of the row at the top of the history screen that opens it."
+  },
+  "history_recentlyClosedCount": "{count, plural, =1{1 tab} other{{count} tabs}}",
+  "@history_recentlyClosedCount": {
+    "description": "Subtitle of the 'Recently closed tabs' row at the top of the history screen: how many closed tabs it holds (at most 10).",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "history_recentlyClosedEmpty": "No recently closed tabs",
+  "@history_recentlyClosedEmpty": {
+    "description": "Shown on the recently closed tabs screen when the list is empty."
+  },
+  "history_recentlyClosedExplanation": "The last 10 tabs you closed, to reopen with their back history. Private and isolated tabs and tabs of containers excluded from history are not kept. Deleting your history clears this list.",
+  "@history_recentlyClosedExplanation": {
+    "description": "Explanation under the list (or the empty state) on the recently closed tabs screen."
+  },
+  "history_recentlyClosedClearAll": "Clear recently closed tabs",
+  "@history_recentlyClosedClearAll": {
+    "description": "Tooltip of the delete button on the recently closed tabs screen, which empties the list."
+  },
+  "history_recentlyClosedClearConfirm": "Clear the recently closed tabs?",
+  "@history_recentlyClosedClearConfirm": {
+    "description": "Title of the confirmation dialog before emptying the recently closed tabs list. The tabs can no longer be reopened afterwards."
+  },
+  "history_recentlyClosedContainerDeleted": "Container deleted, reopens without it",
+  "@history_recentlyClosedContainerDeleted": {
+    "description": "Under a recently closed tab whose container has been deleted since: reopening it opens the page outside any container, without its back history."
+  },
+  "history_recentlyClosedLoadFailed": "Could not load the recently closed tabs",
+  "@history_recentlyClosedLoadFailed": {
+    "description": "Error title on the recently closed tabs screen when the list could not be read."
+  },
+  "history_downloadStatusStarting": "Starting",
+  "@history_downloadStatusStarting": {
+    "description": "Status chip on a download in the downloads list that has been accepted but has not started receiving data yet."
+  },
+  "history_downloadStatusDownloading": "Downloading",
+  "@history_downloadStatusDownloading": {
+    "description": "Status chip on a download in the downloads list that is receiving data, shown with a progress bar."
+  },
+  "history_downloadStatusPaused": "Paused",
+  "@history_downloadStatusPaused": {
+    "description": "Status chip on a paused download in the downloads list."
+  },
+  "history_downloadStatusFailed": "Failed",
+  "@history_downloadStatusFailed": {
+    "description": "Status chip on a download in the downloads list that stopped with an error. It can be retried from the row's menu."
+  },
+  "history_downloadProgress": "{downloaded} of {total}",
+  "@history_downloadProgress": {
+    "description": "How much of an unfinished download has arrived, e.g. '12.4 MB of 40.0 MB'. Both values are formatted sizes.",
+    "placeholders": {
+      "downloaded": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "history_downloadActionPause": "Pause",
+  "@history_downloadActionPause": {
+    "description": "Menu item on a running download in the downloads list: pauses it."
+  },
+  "history_downloadActionResume": "Resume",
+  "@history_downloadActionResume": {
+    "description": "Menu item on a paused download in the downloads list: continues it."
+  },
+  "history_downloadActionCancel": "Cancel download",
+  "@history_downloadActionCancel": {
+    "description": "Menu item on a running or paused download in the downloads list: stops it for good."
   },
   "openLinkTools_openLinkTitle": "Open link",
   "@openLinkTools_openLinkTitle": {
@@ -6479,6 +6599,19 @@
   "search_actionUntitledFeed": "Untitled feed",
   "@search_actionUntitledFeed": {
     "description": "Row title in the search screen's Actions section for a subscribed feed that has no title."
+  },
+  "search_actionDeleteFromHistory": "Delete from history",
+  "@search_actionDeleteFromHistory": {
+    "description": "Menu item (long press on a history suggestion under the address bar) and screen-reader action: deletes every visit of that page from browsing history."
+  },
+  "search_deletedFromHistory": "Deleted {site} from history",
+  "@search_deletedFromHistory": {
+    "description": "Snackbar with an Undo button after deleting a history suggestion under the address bar. The visits are deleted when the snackbar goes away without Undo. site is the page's host, e.g. example.com.",
+    "placeholders": {
+      "site": {
+        "type": "String"
+      }
+    }
   },
   "tabs_actionSelect": "Select",
   "@tabs_actionSelect": {
@@ -8915,6 +9048,53 @@
       }
     }
   },
+  "proxy_tabNotRoutedByContainer": "Not routed by container \"{container}\"",
+  "@proxy_tabNotRoutedByContainer": {
+    "description": "Summary line when this tab's storage differs from its container's, so the container's route does not apply. container is the container's name. Shown in the browser menu's connection group and in the site information sheet.",
+    "placeholders": {
+      "container": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_tabNotRoutedByTabContainer": "Not routed by this tab's container",
+  "@proxy_tabNotRoutedByTabContainer": {
+    "description": "Same summary line when the container has no name. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingChecking": "Checking routing…",
+  "@proxy_tabRoutingChecking": {
+    "description": "Summary line while the tab's routing is being determined. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingStarting": "Starting routing…",
+  "@proxy_tabRoutingStarting": {
+    "description": "Summary line while the tab's proxy is starting. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingBlockedNotRunning": "Blocked — {proxyTitle} is not running",
+  "@proxy_tabRoutingBlockedNotRunning": {
+    "description": "Summary line when the tab's traffic is blocked because its proxy is off. proxyTitle is the proxy's name. Shown in the browser menu's connection group and in the site information sheet.",
+    "placeholders": {
+      "proxyTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_tabRoutingVia": "This tab: {proxyTitle}",
+  "@proxy_tabRoutingVia": {
+    "description": "Summary line: this tab's traffic goes through a proxy. proxyTitle is the proxy's name. Shown in the browser menu's connection group and in the site information sheet.",
+    "placeholders": {
+      "proxyTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "proxy_tabRoutingDirect": "This tab: direct connection",
+  "@proxy_tabRoutingDirect": {
+    "description": "Summary line: this tab connects directly without a proxy. Shown in the browser menu's connection group and in the site information sheet."
+  },
+  "proxy_tabRoutingTitle": "Proxy",
+  "@proxy_tabRoutingTitle": {
+    "description": "Title of the row in the site information sheet that says how the current tab's traffic is routed (directly, via a proxy or Tor); the routing summary is shown under it."
+  },
   "qrScanner_noCameraPermission": "Camera permission has not been granted.",
   "@qrScanner_noCameraPermission": {
     "description": "Error message shown when the QR code scanner cannot open because camera access was denied."
@@ -11291,17 +11471,17 @@
   "@settings_trackingProtectionCustomSubtitle": {
     "description": "Explanation under \"Custom\"."
   },
-  "settings_contentBlockingDatabaseTitle": "Content Blocking Database",
-  "@settings_contentBlockingDatabaseTitle": {
-    "description": "Switch: use the browser engine's built-in block lists for tracker categories."
+  "settings_trackerStatisticsTitle": "Tracker Statistics",
+  "@settings_trackerStatisticsTitle": {
+    "description": "Switch: record how many trackers the browser blocks each day, by category, for statistics. It does not change what gets blocked."
   },
-  "settings_contentBlockingDatabaseKeywords": "ads, trackers, content blocking",
-  "@settings_contentBlockingDatabaseKeywords": {
+  "settings_trackerStatisticsKeywords": "trackers, statistics, blocked trackers, content blocking, database",
+  "@settings_trackerStatisticsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_contentBlockingDatabaseSubtitle": "Use GeckoView blocker lists for ETP categories such as ads, analytics, and social trackers. Requires an app restart.",
-  "@settings_contentBlockingDatabaseSubtitle": {
-    "description": "Explanation under that switch. GeckoView is the engine's name; ETP means Enhanced Tracking Protection."
+  "settings_trackerStatisticsSubtitle": "Keep a daily count of blocked trackers by category. Only counts and dates are stored, not the sites you visit. Deleting browsing history deletes them too. Requires an app restart.",
+  "@settings_trackerStatisticsSubtitle": {
+    "description": "Explanation under that switch. Only per-day counts per tracker category are stored, never website addresses; deleting browsing history also deletes these counts."
   },
   "settings_bounceTrackingProtectionTitle": "Bounce Tracking Protection",
   "@settings_bounceTrackingProtectionTitle": {
@@ -12644,9 +12824,9 @@
   "@settings_indexEnhancedTrackingProtectionSubtitle": {
     "description": "Summary of the tracking protection level setting, shown as a settings search result."
   },
-  "settings_indexContentBlockingDatabaseSubtitle": "Use GeckoView blocker lists for ETP categories",
-  "@settings_indexContentBlockingDatabaseSubtitle": {
-    "description": "Summary of the content blocking database setting, shown as a settings search result."
+  "settings_indexTrackerStatisticsSubtitle": "Keep a daily count of blocked trackers",
+  "@settings_indexTrackerStatisticsSubtitle": {
+    "description": "Summary of the tracker statistics setting, shown as a settings search result."
   },
   "settings_indexBounceTrackingProtectionSubtitle": "Remove tracking state left by redirect-based trackers",
   "@settings_indexBounceTrackingProtectionSubtitle": {
@@ -13489,6 +13669,35 @@
   "settings_tabViewActionsAtBottomKeywords": "bottom, thumb, reach, one hand, toolbar, tab view",
   "@settings_tabViewActionsAtBottomKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_trackerStatisticsTotal": "{count, plural, =1{1 tracker blocked since {date}} other{{count} trackers blocked since {date}}}",
+  "@settings_trackerStatisticsTotal": {
+    "description": "Total under the tracker statistics switch. date is the day recording started, formatted like \"Oct 12, 2026\".",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_trackerStatisticsNothingRecorded": "No blocked trackers recorded yet.",
+  "@settings_trackerStatisticsNothingRecorded": {
+    "description": "Shown under the tracker statistics switch while nothing has been recorded (recording starts after an app restart)."
+  },
+  "settings_trackerStatisticsLastSevenDays": "Last 7 days",
+  "@settings_trackerStatisticsLastSevenDays": {
+    "description": "Heading over the per-category counts of trackers blocked in the last seven days."
+  },
+  "settings_trackerStatisticsNoneLastSevenDays": "No trackers blocked in the last 7 days.",
+  "@settings_trackerStatisticsNoneLastSevenDays": {
+    "description": "Shown under that heading when nothing was blocked in that time."
+  },
+  "settings_trackerStatisticsLoadFailed": "Couldn't load tracker statistics.",
+  "@settings_trackerStatisticsLoadFailed": {
+    "description": "Shown under the tracker statistics switch when the engine could not read them."
   },
   "smallWeb_sheetTitle": "Small Web",
   "@smallWeb_sheetTitle": {

@@ -253,8 +253,6 @@ enum BounceTrackingProtectionMode {
 
 enum ColorScheme { system, light, dark }
 
-enum CookieBannerHandlingMode { disabled, rejectAll, rejectOrAcceptAll }
-
 /// App links behavior mode - controls how external app links are handled
 enum AppLinksMode {
   /// Always open links in their native apps without prompting
@@ -349,6 +347,9 @@ enum ClearDataType {
   onlyCaches,
 }
 
+/// What the downloads list can ask of a download, as its notification can.
+enum DownloadControl { pause, resume, cancel, retry }
+
 enum GeckoFetchMethod { get, head, post, put, delete, connect, options, trace }
 
 enum GeckoFetchRedircet { follow, manual }
@@ -382,6 +383,38 @@ enum AutoplayStatus {
 
   /// Allow autoplay on WiFi only
   allowOnWifi,
+}
+
+/// A tracking category as the engine reports it in a page's tracker log
+/// (AC `TrackingCategory`). Grouping into what the UI shows happens in Dart.
+enum TrackerLogCategory {
+  ad,
+  analytics,
+  social,
+  content,
+  cryptomining,
+  fingerprinting,
+  mozillaSocial,
+  email,
+  scriptsAndSubResources,
+
+  /// A category with no meaning of its own in a log (test lists, the
+  /// composite policies).
+  other,
+}
+
+/// The kind of blocked item a tracker-statistics record counts
+/// (`nsITrackingDBService` types).
+enum TrackingStatisticsType {
+  /// Cookies blocked by the cookie policy that are not known trackers.
+  otherCookies,
+  trackers,
+  trackingCookies,
+  cryptominers,
+  fingerprinters,
+  social,
+  suspiciousFingerprinters,
+  bounceTrackers,
 }
 
 enum NativeAppLinkRuleDecision { alwaysOpen, neverOpen }
@@ -1876,6 +1909,9 @@ class VisitInfo {
     this.previewImageUrl,
     required this.isRemote,
     this.contentId,
+    this.downloadStatus,
+    this.downloadedBytes,
+    this.downloadSize,
   });
 
   String url;
@@ -1892,6 +1928,15 @@ class VisitInfo {
 
   String? contentId;
 
+  /// For an entry of the engine's download list: how far it got. Null for a
+  /// page visit.
+  DownloadStatus? downloadStatus;
+
+  int? downloadedBytes;
+
+  /// The size the server announced, if it did.
+  int? downloadSize;
+
   List<Object?> _toList() {
     return <Object?>[
       url,
@@ -1901,6 +1946,9 @@ class VisitInfo {
       previewImageUrl,
       isRemote,
       contentId,
+      downloadStatus,
+      downloadedBytes,
+      downloadSize,
     ];
   }
 
@@ -1918,6 +1966,9 @@ class VisitInfo {
       previewImageUrl: result[4] as String?,
       isRemote: result[5]! as bool,
       contentId: result[6] as String?,
+      downloadStatus: result[7] as DownloadStatus?,
+      downloadedBytes: result[8] as int?,
+      downloadSize: result[9] as int?,
     );
   }
 
@@ -1936,7 +1987,10 @@ class VisitInfo {
         _deepEquals(visitType, other.visitType) &&
         _deepEquals(previewImageUrl, other.previewImageUrl) &&
         _deepEquals(isRemote, other.isRemote) &&
-        _deepEquals(contentId, other.contentId);
+        _deepEquals(contentId, other.contentId) &&
+        _deepEquals(downloadStatus, other.downloadStatus) &&
+        _deepEquals(downloadedBytes, other.downloadedBytes) &&
+        _deepEquals(downloadSize, other.downloadSize);
   }
 
   @override
@@ -1945,7 +1999,7 @@ class VisitInfo {
 
   @override
   String toString() {
-    return 'VisitInfo(url: $url, title: $title, visitTime: $visitTime, visitType: $visitType, previewImageUrl: $previewImageUrl, isRemote: $isRemote, contentId: $contentId)';
+    return 'VisitInfo(url: $url, title: $title, visitTime: $visitTime, visitType: $visitType, previewImageUrl: $previewImageUrl, isRemote: $isRemote, contentId: $contentId, downloadStatus: $downloadStatus, downloadedBytes: $downloadedBytes, downloadSize: $downloadSize)';
   }
 }
 
@@ -3739,10 +3793,6 @@ class GeckoEngineSettings {
     this.httpsOnlyMode,
     this.globalPrivacyControlEnabled,
     this.preferredColorScheme,
-    this.cookieBannerHandlingMode,
-    this.cookieBannerHandlingModePrivateBrowsing,
-    this.cookieBannerHandlingGlobalRules,
-    this.cookieBannerHandlingGlobalRulesSubFrames,
     this.userAgent,
     this.contentBlocking,
     this.enterpriseRootsEnabled,
@@ -3790,14 +3840,6 @@ class GeckoEngineSettings {
 
   ColorScheme? preferredColorScheme;
 
-  CookieBannerHandlingMode? cookieBannerHandlingMode;
-
-  CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing;
-
-  bool? cookieBannerHandlingGlobalRules;
-
-  bool? cookieBannerHandlingGlobalRulesSubFrames;
-
   String? userAgent;
 
   ContentBlocking? contentBlocking;
@@ -3810,8 +3852,10 @@ class GeckoEngineSettings {
 
   List<String>? locales;
 
-  /// Use GeckoView's content-blocking database for tracking protection.
-  /// This is applied when the engine is created and requires app restart.
+  /// Record blocked trackers in Gecko's content-blocking database: per-day
+  /// counts by tracker category, for protection statistics. It does not
+  /// change what is blocked. Applied when the engine is created, so it needs
+  /// an app restart.
   bool? useContentBlockingDatabase;
 
   /// Master toggle for cookie blocking in Custom mode
@@ -3892,10 +3936,6 @@ class GeckoEngineSettings {
       httpsOnlyMode,
       globalPrivacyControlEnabled,
       preferredColorScheme,
-      cookieBannerHandlingMode,
-      cookieBannerHandlingModePrivateBrowsing,
-      cookieBannerHandlingGlobalRules,
-      cookieBannerHandlingGlobalRulesSubFrames,
       userAgent,
       contentBlocking,
       enterpriseRootsEnabled,
@@ -3946,46 +3986,41 @@ class GeckoEngineSettings {
       httpsOnlyMode: result[2] as HttpsOnlyMode?,
       globalPrivacyControlEnabled: result[3] as bool?,
       preferredColorScheme: result[4] as ColorScheme?,
-      cookieBannerHandlingMode: result[5] as CookieBannerHandlingMode?,
-      cookieBannerHandlingModePrivateBrowsing:
-          result[6] as CookieBannerHandlingMode?,
-      cookieBannerHandlingGlobalRules: result[7] as bool?,
-      cookieBannerHandlingGlobalRulesSubFrames: result[8] as bool?,
-      userAgent: result[9] as String?,
-      contentBlocking: result[10] as ContentBlocking?,
-      enterpriseRootsEnabled: result[11] as bool?,
-      dohSettings: result[12] as DohSettings?,
-      fingerprintingProtectionOverrides: result[13] as String?,
-      locales: (result[14] as List<Object?>?)?.cast<String>(),
-      useContentBlockingDatabase: result[15] as bool?,
-      blockCookies: result[16] as bool?,
-      customCookiePolicy: result[17] as CustomCookiePolicy?,
-      blockTrackingContent: result[18] as bool?,
-      trackingContentScope: result[19] as TrackingScope?,
-      blockCryptominers: result[20] as bool?,
-      blockFingerprinters: result[21] as bool?,
-      blockRedirectTrackers: result[22] as bool?,
-      blockSuspectedFingerprinters: result[23] as bool?,
-      suspectedFingerprintersScope: result[24] as TrackingScope?,
-      allowListBaseline: result[25] as bool?,
-      allowListConvenience: result[26] as bool?,
-      blockAdsAnalyticsSocialTrackers: result[27] as bool?,
-      webFontsEnabled: result[28] as bool?,
-      automaticFontSizeAdjustment: result[29] as bool?,
-      fontSizeFactor: result[30] as double?,
-      fontInflationEnabled: result[31] as bool?,
-      displayDensityOverride: result[32] as double?,
-      screenWidthOverride: result[33] as int?,
-      screenHeightOverride: result[34] as int?,
-      inputAutoZoomEnabled: result[35] as bool?,
-      forceUserScalableContent: result[36] as bool?,
-      fissionEnabled: result[37] as bool?,
-      isolatedProcessEnabled: result[38] as bool?,
-      appZygoteProcessEnabled: result[39] as bool?,
-      extensionsWebAPIEnabled: result[40] as bool?,
-      lnaBlocking: result[41] as bool?,
-      lnaBlockTrackers: result[42] as bool?,
-      lnaEnabled: result[43] as bool?,
+      userAgent: result[5] as String?,
+      contentBlocking: result[6] as ContentBlocking?,
+      enterpriseRootsEnabled: result[7] as bool?,
+      dohSettings: result[8] as DohSettings?,
+      fingerprintingProtectionOverrides: result[9] as String?,
+      locales: (result[10] as List<Object?>?)?.cast<String>(),
+      useContentBlockingDatabase: result[11] as bool?,
+      blockCookies: result[12] as bool?,
+      customCookiePolicy: result[13] as CustomCookiePolicy?,
+      blockTrackingContent: result[14] as bool?,
+      trackingContentScope: result[15] as TrackingScope?,
+      blockCryptominers: result[16] as bool?,
+      blockFingerprinters: result[17] as bool?,
+      blockRedirectTrackers: result[18] as bool?,
+      blockSuspectedFingerprinters: result[19] as bool?,
+      suspectedFingerprintersScope: result[20] as TrackingScope?,
+      allowListBaseline: result[21] as bool?,
+      allowListConvenience: result[22] as bool?,
+      blockAdsAnalyticsSocialTrackers: result[23] as bool?,
+      webFontsEnabled: result[24] as bool?,
+      automaticFontSizeAdjustment: result[25] as bool?,
+      fontSizeFactor: result[26] as double?,
+      fontInflationEnabled: result[27] as bool?,
+      displayDensityOverride: result[28] as double?,
+      screenWidthOverride: result[29] as int?,
+      screenHeightOverride: result[30] as int?,
+      inputAutoZoomEnabled: result[31] as bool?,
+      forceUserScalableContent: result[32] as bool?,
+      fissionEnabled: result[33] as bool?,
+      isolatedProcessEnabled: result[34] as bool?,
+      appZygoteProcessEnabled: result[35] as bool?,
+      extensionsWebAPIEnabled: result[36] as bool?,
+      lnaBlocking: result[37] as bool?,
+      lnaBlockTrackers: result[38] as bool?,
+      lnaEnabled: result[39] as bool?,
     );
   }
 
@@ -4006,19 +4041,6 @@ class GeckoEngineSettings {
           other.globalPrivacyControlEnabled,
         ) &&
         _deepEquals(preferredColorScheme, other.preferredColorScheme) &&
-        _deepEquals(cookieBannerHandlingMode, other.cookieBannerHandlingMode) &&
-        _deepEquals(
-          cookieBannerHandlingModePrivateBrowsing,
-          other.cookieBannerHandlingModePrivateBrowsing,
-        ) &&
-        _deepEquals(
-          cookieBannerHandlingGlobalRules,
-          other.cookieBannerHandlingGlobalRules,
-        ) &&
-        _deepEquals(
-          cookieBannerHandlingGlobalRulesSubFrames,
-          other.cookieBannerHandlingGlobalRulesSubFrames,
-        ) &&
         _deepEquals(userAgent, other.userAgent) &&
         _deepEquals(contentBlocking, other.contentBlocking) &&
         _deepEquals(enterpriseRootsEnabled, other.enterpriseRootsEnabled) &&
@@ -4080,7 +4102,7 @@ class GeckoEngineSettings {
 
   @override
   String toString() {
-    return 'GeckoEngineSettings(javascriptEnabled: $javascriptEnabled, trackingProtectionPolicy: $trackingProtectionPolicy, httpsOnlyMode: $httpsOnlyMode, globalPrivacyControlEnabled: $globalPrivacyControlEnabled, preferredColorScheme: $preferredColorScheme, cookieBannerHandlingMode: $cookieBannerHandlingMode, cookieBannerHandlingModePrivateBrowsing: $cookieBannerHandlingModePrivateBrowsing, cookieBannerHandlingGlobalRules: $cookieBannerHandlingGlobalRules, cookieBannerHandlingGlobalRulesSubFrames: $cookieBannerHandlingGlobalRulesSubFrames, userAgent: $userAgent, contentBlocking: $contentBlocking, enterpriseRootsEnabled: $enterpriseRootsEnabled, dohSettings: $dohSettings, fingerprintingProtectionOverrides: $fingerprintingProtectionOverrides, locales: $locales, useContentBlockingDatabase: $useContentBlockingDatabase, blockCookies: $blockCookies, customCookiePolicy: $customCookiePolicy, blockTrackingContent: $blockTrackingContent, trackingContentScope: $trackingContentScope, blockCryptominers: $blockCryptominers, blockFingerprinters: $blockFingerprinters, blockRedirectTrackers: $blockRedirectTrackers, blockSuspectedFingerprinters: $blockSuspectedFingerprinters, suspectedFingerprintersScope: $suspectedFingerprintersScope, allowListBaseline: $allowListBaseline, allowListConvenience: $allowListConvenience, blockAdsAnalyticsSocialTrackers: $blockAdsAnalyticsSocialTrackers, webFontsEnabled: $webFontsEnabled, automaticFontSizeAdjustment: $automaticFontSizeAdjustment, fontSizeFactor: $fontSizeFactor, fontInflationEnabled: $fontInflationEnabled, displayDensityOverride: $displayDensityOverride, screenWidthOverride: $screenWidthOverride, screenHeightOverride: $screenHeightOverride, inputAutoZoomEnabled: $inputAutoZoomEnabled, forceUserScalableContent: $forceUserScalableContent, fissionEnabled: $fissionEnabled, isolatedProcessEnabled: $isolatedProcessEnabled, appZygoteProcessEnabled: $appZygoteProcessEnabled, extensionsWebAPIEnabled: $extensionsWebAPIEnabled, lnaBlocking: $lnaBlocking, lnaBlockTrackers: $lnaBlockTrackers, lnaEnabled: $lnaEnabled)';
+    return 'GeckoEngineSettings(javascriptEnabled: $javascriptEnabled, trackingProtectionPolicy: $trackingProtectionPolicy, httpsOnlyMode: $httpsOnlyMode, globalPrivacyControlEnabled: $globalPrivacyControlEnabled, preferredColorScheme: $preferredColorScheme, userAgent: $userAgent, contentBlocking: $contentBlocking, enterpriseRootsEnabled: $enterpriseRootsEnabled, dohSettings: $dohSettings, fingerprintingProtectionOverrides: $fingerprintingProtectionOverrides, locales: $locales, useContentBlockingDatabase: $useContentBlockingDatabase, blockCookies: $blockCookies, customCookiePolicy: $customCookiePolicy, blockTrackingContent: $blockTrackingContent, trackingContentScope: $trackingContentScope, blockCryptominers: $blockCryptominers, blockFingerprinters: $blockFingerprinters, blockRedirectTrackers: $blockRedirectTrackers, blockSuspectedFingerprinters: $blockSuspectedFingerprinters, suspectedFingerprintersScope: $suspectedFingerprintersScope, allowListBaseline: $allowListBaseline, allowListConvenience: $allowListConvenience, blockAdsAnalyticsSocialTrackers: $blockAdsAnalyticsSocialTrackers, webFontsEnabled: $webFontsEnabled, automaticFontSizeAdjustment: $automaticFontSizeAdjustment, fontSizeFactor: $fontSizeFactor, fontInflationEnabled: $fontInflationEnabled, displayDensityOverride: $displayDensityOverride, screenWidthOverride: $screenWidthOverride, screenHeightOverride: $screenHeightOverride, inputAutoZoomEnabled: $inputAutoZoomEnabled, forceUserScalableContent: $forceUserScalableContent, fissionEnabled: $fissionEnabled, isolatedProcessEnabled: $isolatedProcessEnabled, appZygoteProcessEnabled: $appZygoteProcessEnabled, extensionsWebAPIEnabled: $extensionsWebAPIEnabled, lnaBlocking: $lnaBlocking, lnaBlockTrackers: $lnaBlockTrackers, lnaEnabled: $lnaEnabled)';
   }
 }
 
@@ -5181,6 +5203,69 @@ class PreferredDownloadManager {
   @override
   String toString() {
     return 'PreferredDownloadManager(packageName: $packageName, label: $label, isThisApp: $isThisApp)';
+  }
+}
+
+/// A closed tab on the recently closed list. Private and isolated tabs and
+/// tabs of containers excluded from history are never on it.
+class RecentlyClosedTab {
+  RecentlyClosedTab({
+    required this.id,
+    required this.url,
+    required this.title,
+    required this.lastAccess,
+  });
+
+  String id;
+
+  String url;
+
+  String title;
+
+  /// When the tab was last selected, in milliseconds since the epoch. The
+  /// engine orders the list by it, and drops the oldest past ten.
+  int lastAccess;
+
+  List<Object?> _toList() {
+    return <Object?>[id, url, title, lastAccess];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static RecentlyClosedTab decode(Object result) {
+    result as List<Object?>;
+    return RecentlyClosedTab(
+      id: result[0]! as String,
+      url: result[1]! as String,
+      title: result[2]! as String,
+      lastAccess: result[3]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! RecentlyClosedTab || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) &&
+        _deepEquals(url, other.url) &&
+        _deepEquals(title, other.title) &&
+        _deepEquals(lastAccess, other.lastAccess);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'RecentlyClosedTab(id: $id, url: $url, title: $title, lastAccess: $lastAccess)';
   }
 }
 
@@ -6483,6 +6568,194 @@ class TrackingProtectionException {
   @override
   String toString() {
     return 'TrackingProtectionException(url: $url)';
+  }
+}
+
+/// One third-party origin the current page tried to load that matched a
+/// tracking list (AC `TrackerLog`).
+class TrackerLogEntry {
+  TrackerLogEntry({
+    required this.url,
+    required this.blockedCategories,
+    required this.loadedCategories,
+    required this.cookiesBlocked,
+    required this.unblockedBySmartBlock,
+  });
+
+  /// The tracker's origin, e.g. `https://tracker.example`.
+  String url;
+
+  /// Categories this origin was blocked for.
+  List<TrackerLogCategory> blockedCategories;
+
+  /// Categories this origin was allowed to load for.
+  List<TrackerLogCategory> loadedCategories;
+
+  /// Whether its cross-site tracking cookies were blocked.
+  bool cookiesBlocked;
+
+  /// Whether SmartBlock let part of the blocked content load to keep the page
+  /// working.
+  bool unblockedBySmartBlock;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      url,
+      blockedCategories,
+      loadedCategories,
+      cookiesBlocked,
+      unblockedBySmartBlock,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static TrackerLogEntry decode(Object result) {
+    result as List<Object?>;
+    return TrackerLogEntry(
+      url: result[0]! as String,
+      blockedCategories: (result[1]! as List<Object?>)
+          .cast<TrackerLogCategory>(),
+      loadedCategories: (result[2]! as List<Object?>)
+          .cast<TrackerLogCategory>(),
+      cookiesBlocked: result[3]! as bool,
+      unblockedBySmartBlock: result[4]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TrackerLogEntry || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(url, other.url) &&
+        _deepEquals(blockedCategories, other.blockedCategories) &&
+        _deepEquals(loadedCategories, other.loadedCategories) &&
+        _deepEquals(cookiesBlocked, other.cookiesBlocked) &&
+        _deepEquals(unblockedBySmartBlock, other.unblockedBySmartBlock);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TrackerLogEntry(url: $url, blockedCategories: $blockedCategories, loadedCategories: $loadedCategories, cookiesBlocked: $cookiesBlocked, unblockedBySmartBlock: $unblockedBySmartBlock)';
+  }
+}
+
+/// How many items of [type] were blocked on [date].
+class TrackingStatisticsRecord {
+  TrackingStatisticsRecord({
+    required this.type,
+    required this.count,
+    this.date,
+  });
+
+  TrackingStatisticsType type;
+
+  int count;
+
+  /// The day, as `YYYY-MM-DD`, or null when the engine does not know it.
+  String? date;
+
+  List<Object?> _toList() {
+    return <Object?>[type, count, date];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static TrackingStatisticsRecord decode(Object result) {
+    result as List<Object?>;
+    return TrackingStatisticsRecord(
+      type: result[0]! as TrackingStatisticsType,
+      count: result[1]! as int,
+      date: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TrackingStatisticsRecord ||
+        other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(type, other.type) &&
+        _deepEquals(count, other.count) &&
+        _deepEquals(date, other.date);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TrackingStatisticsRecord(type: $type, count: $count, date: $date)';
+  }
+}
+
+/// Everything in the engine's tracker-statistics database
+/// (`useContentBlockingDatabase`).
+class TrackingStatistics {
+  TrackingStatistics({this.earliestRecordMillis, required this.records});
+
+  /// When the oldest record was written, in milliseconds since the epoch, or
+  /// null when there are none.
+  int? earliestRecordMillis;
+
+  /// Every daily record from [earliestRecordMillis] until now.
+  List<TrackingStatisticsRecord> records;
+
+  List<Object?> _toList() {
+    return <Object?>[earliestRecordMillis, records];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static TrackingStatistics decode(Object result) {
+    result as List<Object?>;
+    return TrackingStatistics(
+      earliestRecordMillis: result[0] as int?,
+      records: (result[1]! as List<Object?>).cast<TrackingStatisticsRecord>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TrackingStatistics || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(earliestRecordMillis, other.earliestRecordMillis) &&
+        _deepEquals(records, other.records);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TrackingStatistics(earliestRecordMillis: $earliestRecordMillis, records: $records)';
   }
 }
 
@@ -7840,38 +8113,50 @@ class _PigeonCodecOverflow {
 
     switch (type) {
       case 0:
-        return ProtectedTargetPattern.decode(wrapped!);
+        return SitePermissions.decode(wrapped!);
       case 1:
-        return NativeAppLinkRule.decode(wrapped!);
+        return TrackingProtectionException.decode(wrapped!);
       case 2:
-        return NativeContextAppLinkPolicy.decode(wrapped!);
+        return TrackerLogEntry.decode(wrapped!);
       case 3:
-        return AppLinkPolicySnapshot.decode(wrapped!);
+        return TrackingStatisticsRecord.decode(wrapped!);
       case 4:
-        return AppLinkPromptRequest.decode(wrapped!);
+        return TrackingStatistics.decode(wrapped!);
       case 5:
-        return AppLinkResolutionResult.decode(wrapped!);
+        return AppLinkTarget.decode(wrapped!);
       case 6:
-        return PwaIcon.decode(wrapped!);
+        return ProtectedTargetPattern.decode(wrapped!);
       case 7:
-        return ShareTargetFiles.decode(wrapped!);
+        return NativeAppLinkRule.decode(wrapped!);
       case 8:
-        return ShareTargetParams.decode(wrapped!);
+        return NativeContextAppLinkPolicy.decode(wrapped!);
       case 9:
-        return ShareTarget.decode(wrapped!);
+        return AppLinkPolicySnapshot.decode(wrapped!);
       case 10:
-        return ExternalApplicationResource.decode(wrapped!);
+        return AppLinkPromptRequest.decode(wrapped!);
       case 11:
-        return PwaManifest.decode(wrapped!);
+        return AppLinkResolutionResult.decode(wrapped!);
       case 12:
-        return SandboxCaptureEntry.decode(wrapped!);
+        return PwaIcon.decode(wrapped!);
       case 13:
-        return GestureConfig.decode(wrapped!);
+        return ShareTargetFiles.decode(wrapped!);
       case 14:
-        return PushDistributor.decode(wrapped!);
+        return ShareTargetParams.decode(wrapped!);
       case 15:
-        return PushStatus.decode(wrapped!);
+        return ShareTarget.decode(wrapped!);
       case 16:
+        return ExternalApplicationResource.decode(wrapped!);
+      case 17:
+        return PwaManifest.decode(wrapped!);
+      case 18:
+        return SandboxCaptureEntry.decode(wrapped!);
+      case 19:
+        return GestureConfig.decode(wrapped!);
+      case 20:
+        return PushDistributor.decode(wrapped!);
+      case 21:
+        return PushStatus.decode(wrapped!);
+      case 22:
         return PushSubscription.decode(wrapped!);
     }
     return null;
@@ -7948,37 +8233,37 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is ColorScheme) {
       buffer.putUint8(149);
       writeValue(buffer, value.index);
-    } else if (value is CookieBannerHandlingMode) {
+    } else if (value is AppLinksMode) {
       buffer.putUint8(150);
       writeValue(buffer, value.index);
-    } else if (value is AppLinksMode) {
+    } else if (value is CustomCookiePolicy) {
       buffer.putUint8(151);
       writeValue(buffer, value.index);
-    } else if (value is CustomCookiePolicy) {
+    } else if (value is TrackingScope) {
       buffer.putUint8(152);
       writeValue(buffer, value.index);
-    } else if (value is TrackingScope) {
+    } else if (value is DohSettingsMode) {
       buffer.putUint8(153);
       writeValue(buffer, value.index);
-    } else if (value is DohSettingsMode) {
+    } else if (value is DownloadStatus) {
       buffer.putUint8(154);
       writeValue(buffer, value.index);
-    } else if (value is DownloadStatus) {
+    } else if (value is LogLevel) {
       buffer.putUint8(155);
       writeValue(buffer, value.index);
-    } else if (value is LogLevel) {
+    } else if (value is SyncEngineValue) {
       buffer.putUint8(156);
       writeValue(buffer, value.index);
-    } else if (value is SyncEngineValue) {
+    } else if (value is MlProgressType) {
       buffer.putUint8(157);
       writeValue(buffer, value.index);
-    } else if (value is MlProgressType) {
+    } else if (value is MlProgressStatus) {
       buffer.putUint8(158);
       writeValue(buffer, value.index);
-    } else if (value is MlProgressStatus) {
+    } else if (value is ClearDataType) {
       buffer.putUint8(159);
       writeValue(buffer, value.index);
-    } else if (value is ClearDataType) {
+    } else if (value is DownloadControl) {
       buffer.putUint8(160);
       writeValue(buffer, value.index);
     } else if (value is GeckoFetchMethod) {
@@ -7999,385 +8284,427 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is AutoplayStatus) {
       buffer.putUint8(166);
       writeValue(buffer, value.index);
-    } else if (value is NativeAppLinkRuleDecision) {
+    } else if (value is TrackerLogCategory) {
       buffer.putUint8(167);
       writeValue(buffer, value.index);
-    } else if (value is AppLinkPromptOwner) {
+    } else if (value is TrackingStatisticsType) {
       buffer.putUint8(168);
       writeValue(buffer, value.index);
-    } else if (value is AppLinkDecision) {
+    } else if (value is NativeAppLinkRuleDecision) {
       buffer.putUint8(169);
       writeValue(buffer, value.index);
-    } else if (value is PushDistributorStatus) {
+    } else if (value is AppLinkPromptOwner) {
       buffer.putUint8(170);
       writeValue(buffer, value.index);
-    } else if (value is TranslationOptions) {
+    } else if (value is AppLinkDecision) {
       buffer.putUint8(171);
-      writeValue(buffer, value.encode());
-    } else if (value is TranslationLanguage) {
+      writeValue(buffer, value.index);
+    } else if (value is PushDistributorStatus) {
       buffer.putUint8(172);
-      writeValue(buffer, value.encode());
-    } else if (value is TranslationDetectedLanguages) {
+      writeValue(buffer, value.index);
+    } else if (value is TranslationOptions) {
       buffer.putUint8(173);
       writeValue(buffer, value.encode());
-    } else if (value is TranslationPair) {
+    } else if (value is TranslationLanguage) {
       buffer.putUint8(174);
       writeValue(buffer, value.encode());
-    } else if (value is TranslationEngineStateData) {
+    } else if (value is TranslationDetectedLanguages) {
       buffer.putUint8(175);
       writeValue(buffer, value.encode());
-    } else if (value is TabTranslationStateData) {
+    } else if (value is TranslationPair) {
       buffer.putUint8(176);
       writeValue(buffer, value.encode());
-    } else if (value is ReaderState) {
+    } else if (value is TranslationEngineStateData) {
       buffer.putUint8(177);
       writeValue(buffer, value.encode());
-    } else if (value is AddTabParams) {
+    } else if (value is TabTranslationStateData) {
       buffer.putUint8(178);
       writeValue(buffer, value.encode());
-    } else if (value is LastMediaAccessState) {
+    } else if (value is ReaderState) {
       buffer.putUint8(179);
       writeValue(buffer, value.encode());
-    } else if (value is HistoryMetadataKey) {
+    } else if (value is AddTabParams) {
       buffer.putUint8(180);
       writeValue(buffer, value.encode());
-    } else if (value is PackageCategoryValue) {
+    } else if (value is LastMediaAccessState) {
       buffer.putUint8(181);
       writeValue(buffer, value.encode());
-    } else if (value is ExternalPackage) {
+    } else if (value is HistoryMetadataKey) {
       buffer.putUint8(182);
       writeValue(buffer, value.encode());
-    } else if (value is LoadUrlFlagsValue) {
+    } else if (value is PackageCategoryValue) {
       buffer.putUint8(183);
       writeValue(buffer, value.encode());
-    } else if (value is SourceValue) {
+    } else if (value is ExternalPackage) {
       buffer.putUint8(184);
       writeValue(buffer, value.encode());
-    } else if (value is TabState) {
+    } else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    } else if (value is RecoverableTab) {
+    } else if (value is SourceValue) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    } else if (value is IconRequest) {
+    } else if (value is TabState) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    } else if (value is ResourceSize) {
+    } else if (value is RecoverableTab) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    } else if (value is Resource) {
+    } else if (value is IconRequest) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    } else if (value is IconResult) {
+    } else if (value is ResourceSize) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    } else if (value is CookiePartitionKey) {
+    } else if (value is Resource) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    } else if (value is Cookie) {
+    } else if (value is IconResult) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    } else if (value is VisitInfo) {
+    } else if (value is CookiePartitionKey) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    } else if (value is HistoryHighlightWeights) {
+    } else if (value is Cookie) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    } else if (value is HistoryHighlight) {
+    } else if (value is VisitInfo) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    } else if (value is TopFrecentSiteInfo) {
+    } else if (value is HistoryHighlightWeights) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    } else if (value is HistoryMetadata) {
+    } else if (value is HistoryHighlight) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    } else if (value is HistorySuggestion) {
+    } else if (value is TopFrecentSiteInfo) {
       buffer.putUint8(198);
       writeValue(buffer, value.encode());
-    } else if (value is PageObservation) {
+    } else if (value is HistoryMetadata) {
       buffer.putUint8(199);
       writeValue(buffer, value.encode());
-    } else if (value is HistoryItem) {
+    } else if (value is HistorySuggestion) {
       buffer.putUint8(200);
       writeValue(buffer, value.encode());
-    } else if (value is HistoryState) {
+    } else if (value is PageObservation) {
       buffer.putUint8(201);
       writeValue(buffer, value.encode());
-    } else if (value is ReaderableState) {
+    } else if (value is HistoryItem) {
       buffer.putUint8(202);
       writeValue(buffer, value.encode());
-    } else if (value is SecurityInfoState) {
+    } else if (value is HistoryState) {
       buffer.putUint8(203);
       writeValue(buffer, value.encode());
-    } else if (value is TabContentState) {
+    } else if (value is ReaderableState) {
       buffer.putUint8(204);
       writeValue(buffer, value.encode());
-    } else if (value is FindResultState) {
+    } else if (value is SecurityInfoState) {
       buffer.putUint8(205);
       writeValue(buffer, value.encode());
-    } else if (value is CustomSelectionAction) {
+    } else if (value is TabContentState) {
       buffer.putUint8(206);
       writeValue(buffer, value.encode());
-    } else if (value is WebExtensionData) {
+    } else if (value is FindResultState) {
       buffer.putUint8(207);
       writeValue(buffer, value.encode());
-    } else if (value is AddonInfo) {
+    } else if (value is CustomSelectionAction) {
       buffer.putUint8(208);
       writeValue(buffer, value.encode());
-    } else if (value is AddonListingPreview) {
+    } else if (value is WebExtensionData) {
       buffer.putUint8(209);
       writeValue(buffer, value.encode());
-    } else if (value is AddonListing) {
+    } else if (value is AddonInfo) {
       buffer.putUint8(210);
       writeValue(buffer, value.encode());
-    } else if (value is AddonStoreInfo) {
+    } else if (value is AddonListingPreview) {
       buffer.putUint8(211);
       writeValue(buffer, value.encode());
-    } else if (value is AddonUpdateAttemptInfo) {
+    } else if (value is AddonListing) {
       buffer.putUint8(212);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoSuggestion) {
+    } else if (value is AddonStoreInfo) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
-    } else if (value is TabContent) {
+    } else if (value is AddonUpdateAttemptInfo) {
       buffer.putUint8(214);
       writeValue(buffer, value.encode());
-    } else if (value is ContentBlocking) {
+    } else if (value is GeckoSuggestion) {
       buffer.putUint8(215);
       writeValue(buffer, value.encode());
-    } else if (value is DohSettings) {
+    } else if (value is TabContent) {
       buffer.putUint8(216);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoEngineSettings) {
+    } else if (value is ContentBlocking) {
       buffer.putUint8(217);
       writeValue(buffer, value.encode());
-    } else if (value is AutocompleteResult) {
+    } else if (value is DohSettings) {
       buffer.putUint8(218);
       writeValue(buffer, value.encode());
-    } else if (value is UnknownHitResult) {
+    } else if (value is GeckoEngineSettings) {
       buffer.putUint8(219);
       writeValue(buffer, value.encode());
-    } else if (value is ImageHitResult) {
+    } else if (value is AutocompleteResult) {
       buffer.putUint8(220);
       writeValue(buffer, value.encode());
-    } else if (value is VideoHitResult) {
+    } else if (value is UnknownHitResult) {
       buffer.putUint8(221);
       writeValue(buffer, value.encode());
-    } else if (value is AudioHitResult) {
+    } else if (value is ImageHitResult) {
       buffer.putUint8(222);
       writeValue(buffer, value.encode());
-    } else if (value is ImageSrcHitResult) {
+    } else if (value is VideoHitResult) {
       buffer.putUint8(223);
       writeValue(buffer, value.encode());
-    } else if (value is PhoneHitResult) {
+    } else if (value is AudioHitResult) {
       buffer.putUint8(224);
       writeValue(buffer, value.encode());
-    } else if (value is EmailHitResult) {
+    } else if (value is ImageSrcHitResult) {
       buffer.putUint8(225);
       writeValue(buffer, value.encode());
-    } else if (value is GeoHitResult) {
+    } else if (value is PhoneHitResult) {
       buffer.putUint8(226);
       writeValue(buffer, value.encode());
-    } else if (value is DownloadState) {
+    } else if (value is EmailHitResult) {
       buffer.putUint8(227);
       writeValue(buffer, value.encode());
-    } else if (value is ShareInternetResourceState) {
+    } else if (value is GeoHitResult) {
       buffer.putUint8(228);
       writeValue(buffer, value.encode());
-    } else if (value is AddonCollection) {
+    } else if (value is DownloadState) {
       buffer.putUint8(229);
       writeValue(buffer, value.encode());
-    } else if (value is SyncEngineStatus) {
+    } else if (value is ShareInternetResourceState) {
       buffer.putUint8(230);
       writeValue(buffer, value.encode());
-    } else if (value is SyncAccountInfo) {
+    } else if (value is AddonCollection) {
       buffer.putUint8(231);
       writeValue(buffer, value.encode());
-    } else if (value is SyncDevice) {
+    } else if (value is SyncEngineStatus) {
       buffer.putUint8(232);
       writeValue(buffer, value.encode());
-    } else if (value is SyncIncomingTab) {
+    } else if (value is SyncAccountInfo) {
       buffer.putUint8(233);
       writeValue(buffer, value.encode());
-    } else if (value is SyncRemoteTab) {
+    } else if (value is SyncDevice) {
       buffer.putUint8(234);
       writeValue(buffer, value.encode());
-    } else if (value is SyncDeviceTabs) {
+    } else if (value is SyncIncomingTab) {
       buffer.putUint8(235);
       writeValue(buffer, value.encode());
-    } else if (value is PreferredDownloadManager) {
+    } else if (value is SyncRemoteTab) {
       buffer.putUint8(236);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoPref) {
+    } else if (value is SyncDeviceTabs) {
       buffer.putUint8(237);
       writeValue(buffer, value.encode());
-    } else if (value is MlProgressData) {
+    } else if (value is PreferredDownloadManager) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxySettings) {
+    } else if (value is RecentlyClosedTab) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxyRoutingSnapshot) {
+    } else if (value is GeckoPref) {
       buffer.putUint8(240);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoRoutingDemand) {
+    } else if (value is MlProgressData) {
       buffer.putUint8(241);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxyRoutingStatus) {
+    } else if (value is GeckoProxySettings) {
       buffer.putUint8(242);
       writeValue(buffer, value.encode());
-    } else if (value is ContainerSiteAssignment) {
+    } else if (value is GeckoProxyRoutingSnapshot) {
       buffer.putUint8(243);
       writeValue(buffer, value.encode());
-    } else if (value is ProxyLoadError) {
+    } else if (value is GeckoRoutingDemand) {
       buffer.putUint8(244);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoHeader) {
+    } else if (value is GeckoProxyRoutingStatus) {
       buffer.putUint8(245);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoFetchRequest) {
+    } else if (value is ContainerSiteAssignment) {
       buffer.putUint8(246);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoFetchResponse) {
+    } else if (value is ProxyLoadError) {
       buffer.putUint8(247);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkNode) {
+    } else if (value is GeckoHeader) {
       buffer.putUint8(248);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkImportNode) {
+    } else if (value is GeckoFetchRequest) {
       buffer.putUint8(249);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkInsertTreeResult) {
+    } else if (value is GeckoFetchResponse) {
       buffer.putUint8(250);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkInfo) {
+    } else if (value is BookmarkNode) {
       buffer.putUint8(251);
       writeValue(buffer, value.encode());
-    } else if (value is SitePermissions) {
+    } else if (value is BookmarkImportNode) {
       buffer.putUint8(252);
       writeValue(buffer, value.encode());
-    } else if (value is TrackingProtectionException) {
+    } else if (value is BookmarkInsertTreeResult) {
       buffer.putUint8(253);
       writeValue(buffer, value.encode());
-    } else if (value is AppLinkTarget) {
+    } else if (value is BookmarkInfo) {
       buffer.putUint8(254);
       writeValue(buffer, value.encode());
-    } else if (value is ProtectedTargetPattern) {
+    } else if (value is SitePermissions) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 0,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is NativeAppLinkRule) {
+    } else if (value is TrackingProtectionException) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 1,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is NativeContextAppLinkPolicy) {
+    } else if (value is TrackerLogEntry) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 2,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkPolicySnapshot) {
+    } else if (value is TrackingStatisticsRecord) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 3,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkPromptRequest) {
+    } else if (value is TrackingStatistics) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 4,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkResolutionResult) {
+    } else if (value is AppLinkTarget) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 5,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PwaIcon) {
+    } else if (value is ProtectedTargetPattern) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 6,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTargetFiles) {
+    } else if (value is NativeAppLinkRule) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 7,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTargetParams) {
+    } else if (value is NativeContextAppLinkPolicy) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 8,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTarget) {
+    } else if (value is AppLinkPolicySnapshot) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 9,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ExternalApplicationResource) {
+    } else if (value is AppLinkPromptRequest) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 10,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PwaManifest) {
+    } else if (value is AppLinkResolutionResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 11,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is SandboxCaptureEntry) {
+    } else if (value is PwaIcon) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 12,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is GestureConfig) {
+    } else if (value is ShareTargetFiles) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 13,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushDistributor) {
+    } else if (value is ShareTargetParams) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 14,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushStatus) {
+    } else if (value is ShareTarget) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 15,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushSubscription) {
+    } else if (value is ExternalApplicationResource) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 16,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is PwaManifest) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 17,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is SandboxCaptureEntry) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 18,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is GestureConfig) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 19,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is PushDistributor) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 20,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is PushStatus) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 21,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is PushSubscription) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 22,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
@@ -8457,37 +8784,37 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : ColorScheme.values[value];
       case 150:
         final value = readValue(buffer) as int?;
-        return value == null ? null : CookieBannerHandlingMode.values[value];
+        return value == null ? null : AppLinksMode.values[value];
       case 151:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinksMode.values[value];
+        return value == null ? null : CustomCookiePolicy.values[value];
       case 152:
         final value = readValue(buffer) as int?;
-        return value == null ? null : CustomCookiePolicy.values[value];
+        return value == null ? null : TrackingScope.values[value];
       case 153:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackingScope.values[value];
+        return value == null ? null : DohSettingsMode.values[value];
       case 154:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DohSettingsMode.values[value];
+        return value == null ? null : DownloadStatus.values[value];
       case 155:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DownloadStatus.values[value];
+        return value == null ? null : LogLevel.values[value];
       case 156:
         final value = readValue(buffer) as int?;
-        return value == null ? null : LogLevel.values[value];
+        return value == null ? null : SyncEngineValue.values[value];
       case 157:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SyncEngineValue.values[value];
+        return value == null ? null : MlProgressType.values[value];
       case 158:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressType.values[value];
+        return value == null ? null : MlProgressStatus.values[value];
       case 159:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressStatus.values[value];
+        return value == null ? null : ClearDataType.values[value];
       case 160:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ClearDataType.values[value];
+        return value == null ? null : DownloadControl.values[value];
       case 161:
         final value = readValue(buffer) as int?;
         return value == null ? null : GeckoFetchMethod.values[value];
@@ -8508,184 +8835,186 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : AutoplayStatus.values[value];
       case 167:
         final value = readValue(buffer) as int?;
-        return value == null ? null : NativeAppLinkRuleDecision.values[value];
+        return value == null ? null : TrackerLogCategory.values[value];
       case 168:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinkPromptOwner.values[value];
+        return value == null ? null : TrackingStatisticsType.values[value];
       case 169:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinkDecision.values[value];
+        return value == null ? null : NativeAppLinkRuleDecision.values[value];
       case 170:
         final value = readValue(buffer) as int?;
-        return value == null ? null : PushDistributorStatus.values[value];
+        return value == null ? null : AppLinkPromptOwner.values[value];
       case 171:
-        return TranslationOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : AppLinkDecision.values[value];
       case 172:
-        return TranslationLanguage.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : PushDistributorStatus.values[value];
       case 173:
-        return TranslationDetectedLanguages.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 174:
-        return TranslationPair.decode(readValue(buffer)!);
+        return TranslationLanguage.decode(readValue(buffer)!);
       case 175:
-        return TranslationEngineStateData.decode(readValue(buffer)!);
+        return TranslationDetectedLanguages.decode(readValue(buffer)!);
       case 176:
-        return TabTranslationStateData.decode(readValue(buffer)!);
+        return TranslationPair.decode(readValue(buffer)!);
       case 177:
-        return ReaderState.decode(readValue(buffer)!);
+        return TranslationEngineStateData.decode(readValue(buffer)!);
       case 178:
-        return AddTabParams.decode(readValue(buffer)!);
+        return TabTranslationStateData.decode(readValue(buffer)!);
       case 179:
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 180:
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        return AddTabParams.decode(readValue(buffer)!);
       case 181:
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 182:
-        return ExternalPackage.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 183:
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 184:
-        return SourceValue.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 185:
-        return TabState.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 186:
-        return RecoverableTab.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 187:
-        return IconRequest.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 188:
-        return ResourceSize.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 189:
-        return Resource.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 190:
-        return IconResult.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 191:
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 192:
-        return Cookie.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 193:
-        return VisitInfo.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 194:
-        return HistoryHighlightWeights.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 195:
-        return HistoryHighlight.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 196:
-        return TopFrecentSiteInfo.decode(readValue(buffer)!);
+        return HistoryHighlightWeights.decode(readValue(buffer)!);
       case 197:
-        return HistoryMetadata.decode(readValue(buffer)!);
+        return HistoryHighlight.decode(readValue(buffer)!);
       case 198:
-        return HistorySuggestion.decode(readValue(buffer)!);
+        return TopFrecentSiteInfo.decode(readValue(buffer)!);
       case 199:
-        return PageObservation.decode(readValue(buffer)!);
+        return HistoryMetadata.decode(readValue(buffer)!);
       case 200:
-        return HistoryItem.decode(readValue(buffer)!);
+        return HistorySuggestion.decode(readValue(buffer)!);
       case 201:
-        return HistoryState.decode(readValue(buffer)!);
+        return PageObservation.decode(readValue(buffer)!);
       case 202:
-        return ReaderableState.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 203:
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 204:
-        return TabContentState.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 205:
-        return FindResultState.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 206:
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 207:
-        return WebExtensionData.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 208:
-        return AddonInfo.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 209:
-        return AddonListingPreview.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 210:
-        return AddonListing.decode(readValue(buffer)!);
+        return AddonInfo.decode(readValue(buffer)!);
       case 211:
-        return AddonStoreInfo.decode(readValue(buffer)!);
+        return AddonListingPreview.decode(readValue(buffer)!);
       case 212:
-        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
+        return AddonListing.decode(readValue(buffer)!);
       case 213:
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return AddonStoreInfo.decode(readValue(buffer)!);
       case 214:
-        return TabContent.decode(readValue(buffer)!);
+        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
       case 215:
-        return ContentBlocking.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 216:
-        return DohSettings.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 217:
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 218:
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 219:
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 220:
-        return ImageHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 221:
-        return VideoHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 222:
-        return AudioHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 223:
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 224:
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 225:
-        return EmailHitResult.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 226:
-        return GeoHitResult.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 227:
-        return DownloadState.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 228:
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 229:
-        return AddonCollection.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 230:
-        return SyncEngineStatus.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 231:
-        return SyncAccountInfo.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 232:
-        return SyncDevice.decode(readValue(buffer)!);
+        return SyncEngineStatus.decode(readValue(buffer)!);
       case 233:
-        return SyncIncomingTab.decode(readValue(buffer)!);
+        return SyncAccountInfo.decode(readValue(buffer)!);
       case 234:
-        return SyncRemoteTab.decode(readValue(buffer)!);
+        return SyncDevice.decode(readValue(buffer)!);
       case 235:
-        return SyncDeviceTabs.decode(readValue(buffer)!);
+        return SyncIncomingTab.decode(readValue(buffer)!);
       case 236:
-        return PreferredDownloadManager.decode(readValue(buffer)!);
+        return SyncRemoteTab.decode(readValue(buffer)!);
       case 237:
-        return GeckoPref.decode(readValue(buffer)!);
+        return SyncDeviceTabs.decode(readValue(buffer)!);
       case 238:
-        return MlProgressData.decode(readValue(buffer)!);
+        return PreferredDownloadManager.decode(readValue(buffer)!);
       case 239:
-        return GeckoProxySettings.decode(readValue(buffer)!);
+        return RecentlyClosedTab.decode(readValue(buffer)!);
       case 240:
-        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 241:
-        return GeckoRoutingDemand.decode(readValue(buffer)!);
+        return MlProgressData.decode(readValue(buffer)!);
       case 242:
-        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
+        return GeckoProxySettings.decode(readValue(buffer)!);
       case 243:
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
       case 244:
-        return ProxyLoadError.decode(readValue(buffer)!);
+        return GeckoRoutingDemand.decode(readValue(buffer)!);
       case 245:
-        return GeckoHeader.decode(readValue(buffer)!);
+        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
       case 246:
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 247:
-        return GeckoFetchResponse.decode(readValue(buffer)!);
+        return ProxyLoadError.decode(readValue(buffer)!);
       case 248:
-        return BookmarkNode.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 249:
-        return BookmarkImportNode.decode(readValue(buffer)!);
+        return GeckoFetchRequest.decode(readValue(buffer)!);
       case 250:
-        return BookmarkInsertTreeResult.decode(readValue(buffer)!);
+        return GeckoFetchResponse.decode(readValue(buffer)!);
       case 251:
-        return BookmarkInfo.decode(readValue(buffer)!);
+        return BookmarkNode.decode(readValue(buffer)!);
       case 252:
-        return SitePermissions.decode(readValue(buffer)!);
+        return BookmarkImportNode.decode(readValue(buffer)!);
       case 253:
-        return TrackingProtectionException.decode(readValue(buffer)!);
+        return BookmarkInsertTreeResult.decode(readValue(buffer)!);
       case 254:
-        return AppLinkTarget.decode(readValue(buffer)!);
+        return BookmarkInfo.decode(readValue(buffer)!);
       case 255:
         final _PigeonCodecOverflow wrapper = _PigeonCodecOverflow.decode(
           readValue(buffer)!,
@@ -9895,6 +10224,136 @@ class GeckoSessionApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[keyCode],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+}
+
+class GeckoRecentlyClosedTabsApi {
+  /// Constructor for [GeckoRecentlyClosedTabsApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoRecentlyClosedTabsApi({
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+  /// The recently closed tabs, most recently selected first.
+  Future<List<RecentlyClosedTab>> getRecentlyClosedTabs() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoRecentlyClosedTabsApi.getRecentlyClosedTabs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<RecentlyClosedTab>();
+  }
+
+  /// Reopens the closed tab [id] with its back history, under the same id, and
+  /// takes it off the list. Returns the id, or null when it is no longer on
+  /// the list.
+  ///
+  /// The list does not keep a tab's [contextId], so the caller passes it.
+  /// [excludeFromHistory] as for `GeckoTabsApi.addTab`.
+  Future<String?> restoreRecentlyClosedTab({
+    required String id,
+    required String? contextId,
+    required bool selectTab,
+    required bool excludeFromHistory,
+  }) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoRecentlyClosedTabsApi.restoreRecentlyClosedTab$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id, contextId, selectTab, excludeFromHistory],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as String?;
+  }
+
+  Future<void> removeRecentlyClosedTab(String id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoRecentlyClosedTabsApi.removeRecentlyClosedTab$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  Future<void> removeAllRecentlyClosedTabs() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoRecentlyClosedTabsApi.removeAllRecentlyClosedTabs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// Keeps the tabs [ids] off the list when they are removed next, for tabs
+  /// WebLibre closes itself rather than the user. Call it before the removal.
+  Future<void> keepOffRecentlyClosed(List<String> ids) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoRecentlyClosedTabsApi.keepOffRecentlyClosed$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ids],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -13395,6 +13854,29 @@ class GeckoHistoryApi {
     return (pigeonVar_replyValue! as List<Object?>).cast<bool>();
   }
 
+  /// Every address with a visit in the history that contains [text], such
+  /// as a host: how a page's other spellings (a `#fragment`) are found.
+  Future<List<String>> getVisitedUrlsContaining(String text) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoHistoryApi.getVisitedUrlsContaining$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[text],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
   /// Frecency-ranked autocomplete results. Mirrors Places' awesomebar input.
   Future<List<HistorySuggestion>> getSuggestions(
     String query,
@@ -13634,6 +14116,32 @@ class GeckoDownloadsApi {
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
       <Object?>[tabId, state],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
+  /// Sends [control] to the download service for [downloadId]. The service
+  /// acts only on downloads it is running or has failed this session, as it
+  /// does for its notification's buttons.
+  Future<void> controlDownload(
+    String downloadId,
+    DownloadControl control,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoDownloadsApi.controlDownload$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[downloadId, control],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
@@ -14701,6 +15209,50 @@ class GeckoTrackingProtectionApi {
       pigeonVar_channelName,
       isNullValid: true,
     );
+  }
+
+  /// The trackers the page in [tabId] has tried to load so far, blocked or
+  /// not. Fails when the tab has no engine session (it is suspended).
+  Future<List<TrackerLogEntry>> fetchTrackerLog(String tabId) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.fetchTrackerLog$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[tabId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as List<Object?>).cast<TrackerLogEntry>();
+  }
+
+  /// Every record in the tracker-statistics database. Empty while
+  /// `useContentBlockingDatabase` is off and nothing was recorded before.
+  Future<TrackingStatistics> fetchTrackingStatistics() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTrackingProtectionApi.fetchTrackingStatistics$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return pigeonVar_replyValue! as TrackingStatistics;
   }
 }
 

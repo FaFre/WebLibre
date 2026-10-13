@@ -1410,6 +1410,191 @@ typedef $ClosedTabTombstoneProcessedTableManager =
       i3.ClosedTabTombstoneData,
       i0.PrefetchHooks Function()
     >;
+typedef $ClosedTabContainerCreateCompanionBuilder =
+    i3.ClosedTabContainerCompanion Function({
+      required String tabId,
+      i0.Value<String?> containerId,
+      required DateTime closedAt,
+      i0.Value<int> rowid,
+    });
+typedef $ClosedTabContainerUpdateCompanionBuilder =
+    i3.ClosedTabContainerCompanion Function({
+      i0.Value<String> tabId,
+      i0.Value<String?> containerId,
+      i0.Value<DateTime> closedAt,
+      i0.Value<int> rowid,
+    });
+
+class $ClosedTabContainerFilterComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.ClosedTabContainer> {
+  $ClosedTabContainerFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnFilters<String> get tabId => $composableBuilder(
+    column: $table.tabId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<String> get containerId => $composableBuilder(
+    column: $table.containerId,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+}
+
+class $ClosedTabContainerOrderingComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.ClosedTabContainer> {
+  $ClosedTabContainerOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.ColumnOrderings<String> get tabId => $composableBuilder(
+    column: $table.tabId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<String> get containerId => $composableBuilder(
+    column: $table.containerId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+}
+
+class $ClosedTabContainerAnnotationComposer
+    extends i0.Composer<i0.GeneratedDatabase, i3.ClosedTabContainer> {
+  $ClosedTabContainerAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  i0.GeneratedColumn<String> get tabId =>
+      $composableBuilder(column: $table.tabId, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get containerId => $composableBuilder(
+    column: $table.containerId,
+    builder: (column) => column,
+  );
+
+  i0.GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+}
+
+class $ClosedTabContainerTableManager
+    extends
+        i0.RootTableManager<
+          i0.GeneratedDatabase,
+          i3.ClosedTabContainer,
+          i3.ClosedTabContainerData,
+          i3.$ClosedTabContainerFilterComposer,
+          i3.$ClosedTabContainerOrderingComposer,
+          i3.$ClosedTabContainerAnnotationComposer,
+          $ClosedTabContainerCreateCompanionBuilder,
+          $ClosedTabContainerUpdateCompanionBuilder,
+          (
+            i3.ClosedTabContainerData,
+            i0.BaseReferences<
+              i0.GeneratedDatabase,
+              i3.ClosedTabContainer,
+              i3.ClosedTabContainerData
+            >,
+          ),
+          i3.ClosedTabContainerData,
+          i0.PrefetchHooks Function()
+        > {
+  $ClosedTabContainerTableManager(
+    i0.GeneratedDatabase db,
+    i3.ClosedTabContainer table,
+  ) : super(
+        i0.TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              i3.$ClosedTabContainerFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              i3.$ClosedTabContainerOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              i3.$ClosedTabContainerAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                i0.Value<String> tabId = const i0.Value.absent(),
+                i0.Value<String?> containerId = const i0.Value.absent(),
+                i0.Value<DateTime> closedAt = const i0.Value.absent(),
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.ClosedTabContainerCompanion(
+                tabId: tabId,
+                containerId: containerId,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String tabId,
+                i0.Value<String?> containerId = const i0.Value.absent(),
+                required DateTime closedAt,
+                i0.Value<int> rowid = const i0.Value.absent(),
+              }) => i3.ClosedTabContainerCompanion.insert(
+                tabId: tabId,
+                containerId: containerId,
+                closedAt: closedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<i3.ClosedTabContainer, i3.ClosedTabContainerData>(
+                    table,
+                  ),
+                  i0.BaseReferences<
+                    i0.GeneratedDatabase,
+                    i3.ClosedTabContainer,
+                    i3.ClosedTabContainerData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $ClosedTabContainerProcessedTableManager =
+    i0.ProcessedTableManager<
+      i0.GeneratedDatabase,
+      i3.ClosedTabContainer,
+      i3.ClosedTabContainerData,
+      i3.$ClosedTabContainerFilterComposer,
+      i3.$ClosedTabContainerOrderingComposer,
+      i3.$ClosedTabContainerAnnotationComposer,
+      $ClosedTabContainerCreateCompanionBuilder,
+      $ClosedTabContainerUpdateCompanionBuilder,
+      (
+        i3.ClosedTabContainerData,
+        i0.BaseReferences<
+          i0.GeneratedDatabase,
+          i3.ClosedTabContainer,
+          i3.ClosedTabContainerData
+        >,
+      ),
+      i3.ClosedTabContainerData,
+      i0.PrefetchHooks Function()
+    >;
 typedef $CaptureTabCreateCompanionBuilder =
     i3.CaptureTabCompanion Function({
       required String tabId,
@@ -4241,6 +4426,239 @@ class ClosedTabTombstoneCompanion
   String toString() {
     return (StringBuffer('ClosedTabTombstoneCompanion(')
           ..write('tabId: $tabId, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ClosedTabContainer extends i0.Table
+    with i0.TableInfo<ClosedTabContainer, i3.ClosedTabContainerData> {
+  @override
+  final i0.GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  ClosedTabContainer(this.attachedDatabase, [this._alias]);
+  late final i0.GeneratedColumn<String> tabId = i0.GeneratedColumn<String>(
+    'tab_id',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.string,
+    requiredDuringInsert: true,
+    $customConstraints: 'PRIMARY KEY NOT NULL',
+  );
+  late final i0.GeneratedColumn<String> containerId =
+      i0.GeneratedColumn<String>(
+        'container_id',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
+  late final i0.GeneratedColumn<DateTime> closedAt =
+      i0.GeneratedColumn<DateTime>(
+        'closed_at',
+        aliasedName,
+        false,
+        type: i0.DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+        $customConstraints: 'NOT NULL',
+      );
+  @override
+  List<i0.GeneratedColumn> get $columns => [tabId, containerId, closedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'closed_tab_container';
+  @override
+  Set<i0.GeneratedColumn> get $primaryKey => {tabId};
+  @override
+  i3.ClosedTabContainerData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return i3.ClosedTabContainerData(
+      tabId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}tab_id'],
+      )!,
+      containerId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}container_id'],
+      ),
+      closedAt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      )!,
+    );
+  }
+
+  @override
+  ClosedTabContainer createAlias(String alias) {
+    return ClosedTabContainer(attachedDatabase, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class ClosedTabContainerData extends i0.DataClass
+    implements i0.Insertable<i3.ClosedTabContainerData> {
+  final String tabId;
+  final String? containerId;
+  final DateTime closedAt;
+  const ClosedTabContainerData({
+    required this.tabId,
+    this.containerId,
+    required this.closedAt,
+  });
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    map['tab_id'] = i0.Variable<String>(tabId);
+    if (!nullToAbsent || containerId != null) {
+      map['container_id'] = i0.Variable<String>(containerId);
+    }
+    map['closed_at'] = i0.Variable<DateTime>(closedAt);
+    return map;
+  }
+
+  factory ClosedTabContainerData.fromJson(
+    Map<String, dynamic> json, {
+    i0.ValueSerializer? serializer,
+  }) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return ClosedTabContainerData(
+      tabId: serializer.fromJson<String>(json['tab_id']),
+      containerId: serializer.fromJson<String?>(json['container_id']),
+      closedAt: serializer.fromJson<DateTime>(json['closed_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({i0.ValueSerializer? serializer}) {
+    serializer ??= i0.driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'tab_id': serializer.toJson<String>(tabId),
+      'container_id': serializer.toJson<String?>(containerId),
+      'closed_at': serializer.toJson<DateTime>(closedAt),
+    };
+  }
+
+  i3.ClosedTabContainerData copyWith({
+    String? tabId,
+    i0.Value<String?> containerId = const i0.Value.absent(),
+    DateTime? closedAt,
+  }) => i3.ClosedTabContainerData(
+    tabId: tabId ?? this.tabId,
+    containerId: containerId.present ? containerId.value : this.containerId,
+    closedAt: closedAt ?? this.closedAt,
+  );
+  ClosedTabContainerData copyWithCompanion(
+    i3.ClosedTabContainerCompanion data,
+  ) {
+    return ClosedTabContainerData(
+      tabId: data.tabId.present ? data.tabId.value : this.tabId,
+      containerId: data.containerId.present
+          ? data.containerId.value
+          : this.containerId,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClosedTabContainerData(')
+          ..write('tabId: $tabId, ')
+          ..write('containerId: $containerId, ')
+          ..write('closedAt: $closedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(tabId, containerId, closedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is i3.ClosedTabContainerData &&
+          other.tabId == this.tabId &&
+          other.containerId == this.containerId &&
+          other.closedAt == this.closedAt);
+}
+
+class ClosedTabContainerCompanion
+    extends i0.UpdateCompanion<i3.ClosedTabContainerData> {
+  final i0.Value<String> tabId;
+  final i0.Value<String?> containerId;
+  final i0.Value<DateTime> closedAt;
+  final i0.Value<int> rowid;
+  const ClosedTabContainerCompanion({
+    this.tabId = const i0.Value.absent(),
+    this.containerId = const i0.Value.absent(),
+    this.closedAt = const i0.Value.absent(),
+    this.rowid = const i0.Value.absent(),
+  });
+  ClosedTabContainerCompanion.insert({
+    required String tabId,
+    this.containerId = const i0.Value.absent(),
+    required DateTime closedAt,
+    this.rowid = const i0.Value.absent(),
+  }) : tabId = i0.Value(tabId),
+       closedAt = i0.Value(closedAt);
+  static i0.Insertable<i3.ClosedTabContainerData> custom({
+    i0.Expression<String>? tabId,
+    i0.Expression<String>? containerId,
+    i0.Expression<DateTime>? closedAt,
+    i0.Expression<int>? rowid,
+  }) {
+    return i0.RawValuesInsertable({
+      if (tabId != null) 'tab_id': tabId,
+      if (containerId != null) 'container_id': containerId,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  i3.ClosedTabContainerCompanion copyWith({
+    i0.Value<String>? tabId,
+    i0.Value<String?>? containerId,
+    i0.Value<DateTime>? closedAt,
+    i0.Value<int>? rowid,
+  }) {
+    return i3.ClosedTabContainerCompanion(
+      tabId: tabId ?? this.tabId,
+      containerId: containerId ?? this.containerId,
+      closedAt: closedAt ?? this.closedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, i0.Expression> toColumns(bool nullToAbsent) {
+    final map = <String, i0.Expression>{};
+    if (tabId.present) {
+      map['tab_id'] = i0.Variable<String>(tabId.value);
+    }
+    if (containerId.present) {
+      map['container_id'] = i0.Variable<String>(containerId.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = i0.Variable<DateTime>(closedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = i0.Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClosedTabContainerCompanion(')
+          ..write('tabId: $tabId, ')
+          ..write('containerId: $containerId, ')
           ..write('closedAt: $closedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))

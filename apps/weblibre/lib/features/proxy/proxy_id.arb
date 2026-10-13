@@ -252,5 +252,13 @@
   "proxy_saveErrorSecretsNotJson": "Rahasia harus berupa objek JSON.",
   "proxy_saveErrorUnexpected": "Gagal menyimpan profil proksi: {error}",
   "proxy_loadErrorNotFound": "Profil proksi tidak ditemukan.",
-  "proxy_loadErrorFailed": "Gagal memuat profil proksi: {error}"
+  "proxy_loadErrorFailed": "Gagal memuat profil proksi: {error}",
+  "proxy_tabNotRoutedByContainer": "Tidak dirutekan oleh kontainer \"{container}\"",
+  "proxy_tabNotRoutedByTabContainer": "Tidak dirutekan oleh kontainer tab ini",
+  "proxy_tabRoutingChecking": "Memeriksa perutean…",
+  "proxy_tabRoutingStarting": "Memulai perutean…",
+  "proxy_tabRoutingBlockedNotRunning": "Diblokir — {proxyTitle} tidak berjalan",
+  "proxy_tabRoutingVia": "Tab ini: {proxyTitle}",
+  "proxy_tabRoutingDirect": "Tab ini: koneksi langsung",
+  "proxy_tabRoutingTitle": "Proxy"
 }

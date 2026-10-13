@@ -51,6 +51,105 @@ final class WatchContainersWithCountProvider
 String _$watchContainersWithCountHash() =>
     r'50d8e9b39cb589b0b5f50d79cbe20b8d10d7a504';
 
+/// The containers without their tab counts. Unlike [watchContainersWithCount],
+/// it does not emit again on every write to a tab, so it suits work too costly
+/// to repeat that often.
+
+@ProviderFor(watchContainers)
+final watchContainersProvider = WatchContainersProvider._();
+
+/// The containers without their tab counts. Unlike [watchContainersWithCount],
+/// it does not emit again on every write to a tab, so it suits work too costly
+/// to repeat that often.
+
+final class WatchContainersProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ContainerData>>,
+          List<ContainerData>,
+          Stream<List<ContainerData>>
+        >
+    with
+        $FutureModifier<List<ContainerData>>,
+        $StreamProvider<List<ContainerData>> {
+  /// The containers without their tab counts. Unlike [watchContainersWithCount],
+  /// it does not emit again on every write to a tab, so it suits work too costly
+  /// to repeat that often.
+  WatchContainersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchContainersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchContainersHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<ContainerData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<ContainerData>> create(Ref ref) {
+    return watchContainers(ref);
+  }
+}
+
+String _$watchContainersHash() => r'd72af19d1e3bf7211e80100cde73a5461e2a8c64';
+
+/// Which container each closed tab ran in, for the recently closed list.
+
+@ProviderFor(watchClosedTabContainers)
+final watchClosedTabContainersProvider = WatchClosedTabContainersProvider._();
+
+/// Which container each closed tab ran in, for the recently closed list.
+
+final class WatchClosedTabContainersProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ClosedTabContainerData>>,
+          List<ClosedTabContainerData>,
+          Stream<List<ClosedTabContainerData>>
+        >
+    with
+        $FutureModifier<List<ClosedTabContainerData>>,
+        $StreamProvider<List<ClosedTabContainerData>> {
+  /// Which container each closed tab ran in, for the recently closed list.
+  WatchClosedTabContainersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchClosedTabContainersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchClosedTabContainersHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<ClosedTabContainerData>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<ClosedTabContainerData>> create(Ref ref) {
+    return watchClosedTabContainers(ref);
+  }
+}
+
+String _$watchClosedTabContainersHash() =>
+    r'93b2698fe05151e90e1e771438fa57603066d0b6';
+
 /// The destinations a container-cycling gesture steps through, in the order
 /// the container chips render them: the unassigned pseudo-container (`null`)
 /// first, then the containers themselves.

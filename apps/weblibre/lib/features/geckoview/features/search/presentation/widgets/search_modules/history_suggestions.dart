@@ -26,6 +26,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_row_icon.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/history_suggestion_menu.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_listenable_change_selector.dart';
@@ -84,38 +85,43 @@ class HistorySuggestions extends HookConsumerWidget {
                         Uri.tryParse,
                       );
 
-                      return ListTile(
+                      // The provider keeps only rows with an address.
+                      return HistorySuggestionMenu(
                         key: ValueKey(suggestion.id),
-                        leading: HistoryRowIcon(
-                          iconBytes: suggestion.icon,
-                          fallback: const Icon(MdiIcons.web, size: 24),
-                        ),
-                        title: suggestion.title.mapNotNull(
-                          (title) => Text(
-                            title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                        url: suggestion.description!,
+                        builder: (onLongPress) => ListTile(
+                          onLongPress: onLongPress,
+                          leading: HistoryRowIcon(
+                            iconBytes: suggestion.icon,
+                            fallback: const Icon(MdiIcons.web, size: 24),
                           ),
-                        ),
-                        subtitle:
-                            uri.mapNotNull(
-                              (uri) => UriBreadcrumb(
-                                uri: uri,
-                                showHttpScheme: false,
-                              ),
-                            ) ??
-                            suggestion.description.mapNotNull(
-                              (description) => Text(
-                                description,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                          title: suggestion.title.mapNotNull(
+                            (title) => Text(
+                              title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                        onTap: () {
-                          if (uri != null) {
-                            onUriSelected(uri);
-                          }
-                        },
+                          ),
+                          subtitle:
+                              uri.mapNotNull(
+                                (uri) => UriBreadcrumb(
+                                  uri: uri,
+                                  showHttpScheme: false,
+                                ),
+                              ) ??
+                              suggestion.description.mapNotNull(
+                                (description) => Text(
+                                  description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          onTap: () {
+                            if (uri != null) {
+                              onUriSelected(uri);
+                            }
+                          },
+                        ),
                       );
                     },
                   );

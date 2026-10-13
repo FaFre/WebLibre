@@ -22,6 +22,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/site_settings_badge_provider.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 const _faviconKey = ValueKey('favicon');
 
@@ -32,6 +33,8 @@ Future<void> pumpTitle(
 }) {
   return tester.pumpWidget(
     MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Scaffold(
         body: Center(
           child: SizedBox(
@@ -108,4 +111,27 @@ void main() {
     expect(title, 1);
     expect(siteSettings, 0);
   });
+
+  testWidgets(
+    'screen readers announce the favicon as the site settings button',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      final l10n = lookupAppLocalizations(const Locale('en'));
+      var siteSettings = 0;
+      await pumpTitle(tester, onSiteSettingsTap: () => siteSettings++);
+
+      final button = find.bySemanticsLabel(l10n.browser_siteSettingsButton);
+      expect(
+        tester.getSemantics(button),
+        isSemantics(isButton: true, hasTapAction: true),
+      );
+
+      tester.semantics.tap(
+        find.semantics.byLabel(l10n.browser_siteSettingsButton),
+      );
+      expect(siteSettings, 1);
+
+      semantics.dispose();
+    },
+  );
 }

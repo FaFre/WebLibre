@@ -30,6 +30,11 @@ class ToolbarButton extends StatelessWidget {
   /// address field as the pinned extension icons do.
   final EdgeInsetsGeometry padding;
 
+  /// What the button does, for screen readers. Without it the button is
+  /// announced only by whatever its [child] says, which for a favicon is
+  /// nothing.
+  final String? semanticLabel;
+
   const ToolbarButton({
     super.key,
     required this.child,
@@ -37,6 +42,7 @@ class ToolbarButton extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.padding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15.0),
+    this.semanticLabel,
   });
 
   @override
@@ -44,7 +50,7 @@ class ToolbarButton extends StatelessWidget {
     final theme = Theme.of(context);
     final iconColor = theme.colorScheme.onSurfaceVariant;
 
-    return InkWell(
+    final button = InkWell(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
@@ -55,6 +61,19 @@ class ToolbarButton extends StatelessWidget {
           child: child,
         ),
       ),
+    );
+
+    final semanticLabel = this.semanticLabel;
+    if (semanticLabel == null) return button;
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      // The label replaces the child's own semantics (an unlabeled image).
+      excludeSemantics: true,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: button,
     );
   }
 }

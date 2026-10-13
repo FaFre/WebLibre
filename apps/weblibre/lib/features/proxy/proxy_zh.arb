@@ -252,5 +252,13 @@
   "proxy_saveErrorSecretsNotJson": "机密信息必须是 JSON 对象。",
   "proxy_saveErrorUnexpected": "无法保存代理配置：{error}",
   "proxy_loadErrorNotFound": "找不到代理配置。",
-  "proxy_loadErrorFailed": "无法加载代理配置：{error}"
+  "proxy_loadErrorFailed": "无法加载代理配置：{error}",
+  "proxy_tabNotRoutedByContainer": "不经由容器“{container}”路由",
+  "proxy_tabNotRoutedByTabContainer": "不经由此标签页的容器路由",
+  "proxy_tabRoutingChecking": "正在检查路由…",
+  "proxy_tabRoutingStarting": "正在启动路由…",
+  "proxy_tabRoutingBlockedNotRunning": "已阻止 — {proxyTitle} 未运行",
+  "proxy_tabRoutingVia": "此标签页：{proxyTitle}",
+  "proxy_tabRoutingDirect": "此标签页：直接连接",
+  "proxy_tabRoutingTitle": "代理"
 }

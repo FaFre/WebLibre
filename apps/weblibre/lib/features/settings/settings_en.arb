@@ -2258,17 +2258,17 @@
   "@settings_trackingProtectionCustomSubtitle": {
     "description": "Explanation under \"Custom\"."
   },
-  "settings_contentBlockingDatabaseTitle": "Content Blocking Database",
-  "@settings_contentBlockingDatabaseTitle": {
-    "description": "Switch: use the browser engine's built-in block lists for tracker categories."
+  "settings_trackerStatisticsTitle": "Tracker Statistics",
+  "@settings_trackerStatisticsTitle": {
+    "description": "Switch: record how many trackers the browser blocks each day, by category, for statistics. It does not change what gets blocked."
   },
-  "settings_contentBlockingDatabaseKeywords": "ads, trackers, content blocking",
-  "@settings_contentBlockingDatabaseKeywords": {
+  "settings_trackerStatisticsKeywords": "trackers, statistics, blocked trackers, content blocking, database",
+  "@settings_trackerStatisticsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_contentBlockingDatabaseSubtitle": "Use GeckoView blocker lists for ETP categories such as ads, analytics, and social trackers. Requires an app restart.",
-  "@settings_contentBlockingDatabaseSubtitle": {
-    "description": "Explanation under that switch. GeckoView is the engine's name; ETP means Enhanced Tracking Protection."
+  "settings_trackerStatisticsSubtitle": "Keep a daily count of blocked trackers by category. Only counts and dates are stored, not the sites you visit. Deleting browsing history deletes them too. Requires an app restart.",
+  "@settings_trackerStatisticsSubtitle": {
+    "description": "Explanation under that switch. Only per-day counts per tracker category are stored, never website addresses; deleting browsing history also deletes these counts."
   },
   "settings_bounceTrackingProtectionTitle": "Bounce Tracking Protection",
   "@settings_bounceTrackingProtectionTitle": {
@@ -3611,9 +3611,9 @@
   "@settings_indexEnhancedTrackingProtectionSubtitle": {
     "description": "Summary of the tracking protection level setting, shown as a settings search result."
   },
-  "settings_indexContentBlockingDatabaseSubtitle": "Use GeckoView blocker lists for ETP categories",
-  "@settings_indexContentBlockingDatabaseSubtitle": {
-    "description": "Summary of the content blocking database setting, shown as a settings search result."
+  "settings_indexTrackerStatisticsSubtitle": "Keep a daily count of blocked trackers",
+  "@settings_indexTrackerStatisticsSubtitle": {
+    "description": "Summary of the tracker statistics setting, shown as a settings search result."
   },
   "settings_indexBounceTrackingProtectionSubtitle": "Remove tracking state left by redirect-based trackers",
   "@settings_indexBounceTrackingProtectionSubtitle": {
@@ -4456,5 +4456,26 @@
   "settings_tabViewActionsAtBottomKeywords": "bottom, thumb, reach, one hand, toolbar, tab view",
   "@settings_tabViewActionsAtBottomKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_trackerStatisticsTotal": "{count, plural, =1{1 tracker blocked since {date}} other{{count} trackers blocked since {date}}}",
+  "@settings_trackerStatisticsTotal": {
+    "description": "Total under the tracker statistics switch. date is the day recording started, formatted like \"Oct 12, 2026\".",
+    "placeholders": { "count": {"type": "int", "format": "decimalPattern"}, "date": {"type": "String"} }
+  },
+  "settings_trackerStatisticsNothingRecorded": "No blocked trackers recorded yet.",
+  "@settings_trackerStatisticsNothingRecorded": {
+    "description": "Shown under the tracker statistics switch while nothing has been recorded (recording starts after an app restart)."
+  },
+  "settings_trackerStatisticsLastSevenDays": "Last 7 days",
+  "@settings_trackerStatisticsLastSevenDays": {
+    "description": "Heading over the per-category counts of trackers blocked in the last seven days."
+  },
+  "settings_trackerStatisticsNoneLastSevenDays": "No trackers blocked in the last 7 days.",
+  "@settings_trackerStatisticsNoneLastSevenDays": {
+    "description": "Shown under that heading when nothing was blocked in that time."
+  },
+  "settings_trackerStatisticsLoadFailed": "Couldn't load tracker statistics.",
+  "@settings_trackerStatisticsLoadFailed": {
+    "description": "Shown under the tracker statistics switch when the engine could not read them."
   }
 }

@@ -77,5 +77,7 @@
   "search_actionSettingLocation": "设置 › {category} › {section}",
   "search_actionSettingCategory": "设置 › {category}",
   "search_actionUnnamedContainer": "未命名容器",
-  "search_actionUntitledFeed": "无标题订阅源"
+  "search_actionUntitledFeed": "无标题订阅源",
+  "search_actionDeleteFromHistory": "从历史记录中删除",
+  "search_deletedFromHistory": "已从历史记录中删除 {site}"
 }

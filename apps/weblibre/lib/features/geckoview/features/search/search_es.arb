@@ -77,5 +77,7 @@
   "search_actionSettingLocation": "Ajustes › {category} › {section}",
   "search_actionSettingCategory": "Ajustes › {category}",
   "search_actionUnnamedContainer": "Contenedor sin nombre",
-  "search_actionUntitledFeed": "Fuente sin título"
+  "search_actionUntitledFeed": "Fuente sin título",
+  "search_actionDeleteFromHistory": "Eliminar del historial",
+  "search_deletedFromHistory": "Se eliminó {site} del historial"
 }

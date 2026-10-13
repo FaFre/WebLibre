@@ -82,11 +82,19 @@ class BrowserDataService extends _$BrowserDataService {
           await _service.deleteTabs();
         }
       case DeleteBrowsingDataType.history:
-        await _service.deleteBrowsingHistory();
-        await ref.read(tabDatabaseProvider).historyDao.clear();
-        // Places visits are gone; drop their container tags too so they
-        // don't dangle (and can't re-attach to a future same-URL visit).
-        await ref.read(tabDatabaseProvider).visitContainerDao.clearAll();
+        // The local records go even when the engine fails part way: the page
+        // contents indexed here are history too.
+        try {
+          await _service.deleteBrowsingHistory();
+        } finally {
+          final db = ref.read(tabDatabaseProvider);
+          await db.historyDao.clear();
+          // Places visits are gone; drop their container tags too so they
+          // don't dangle (and can't re-attach to a future same-URL visit).
+          await db.visitContainerDao.clearAll();
+          // The recently closed list went with the history.
+          await db.tabDao.retainClosedTabContainers(const []);
+        }
       case DeleteBrowsingDataType.recentSearches:
         await ref
             .read(bangDataRepositoryProvider.notifier)

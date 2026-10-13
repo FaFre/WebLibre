@@ -545,9 +545,9 @@
   "settings_trackingProtectionStrictSubtitle": "拦截更多跟踪器类别（包括跟踪内容），但可能导致部分网站无法正常工作。",
   "settings_trackingProtectionCustomLabel": "自定义",
   "settings_trackingProtectionCustomSubtitle": "选择要拦截的跟踪器和脚本。",
-  "settings_contentBlockingDatabaseTitle": "内容拦截数据库",
-  "settings_contentBlockingDatabaseKeywords": "广告,跟踪器,内容拦截",
-  "settings_contentBlockingDatabaseSubtitle": "为广告、分析和社交跟踪器等 ETP 类别使用 GeckoView 拦截列表。需要重启应用。",
+  "settings_trackerStatisticsTitle": "跟踪器统计",
+  "settings_trackerStatisticsKeywords": "跟踪器,统计,已拦截的跟踪器,内容拦截,数据库",
+  "settings_trackerStatisticsSubtitle": "按类别每天统计被拦截的跟踪器数量。仅存储数量和日期，不存储你访问的网站。删除浏览历史记录时也会一并删除。需要重启应用。",
   "settings_bounceTrackingProtectionTitle": "反弹跟踪保护",
   "settings_bounceTrackingProtectionKeywords": "重定向跟踪器",
   "settings_bounceTrackingProtectionSubtitle": "拦截通过网站之间的中间网址重定向收集数据的重定向跟踪器",
@@ -851,7 +851,7 @@
   "settings_privacySectionTrackingProtectionTitle": "跟踪保护",
   "settings_privacySectionTrackingProtectionKeywords": "隐私",
   "settings_indexEnhancedTrackingProtectionSubtitle": "选择拦截跟踪器的力度",
-  "settings_indexContentBlockingDatabaseSubtitle": "为 ETP 类别使用 GeckoView 拦截列表",
+  "settings_indexTrackerStatisticsSubtitle": "每天统计被拦截的跟踪器",
   "settings_indexBounceTrackingProtectionSubtitle": "移除基于重定向的跟踪器留下的跟踪状态",
   "settings_indexQueryParameterStrippingSubtitle": "从网址中移除跟踪参数",
   "settings_privacySectionFingerprintingTitle": "指纹识别",
@@ -1055,5 +1055,10 @@
   "settings_switcherPlacementBelowContextualBarDescription": "位于屏幕底边",
   "settings_tabViewActionsAtBottomTitle": "标签页视图操作置于底部",
   "settings_tabViewActionsAtBottomSubtitle": "搜索、筛选和标签页操作位于底部，新建标签页按钮在其上方",
-  "settings_tabViewActionsAtBottomKeywords": "底部, 拇指, 单手, 工具栏, 标签页视图"
+  "settings_tabViewActionsAtBottomKeywords": "底部, 拇指, 单手, 工具栏, 标签页视图",
+  "settings_trackerStatisticsTotal": "{count, plural, other{自 {date} 起已拦截 {count} 个跟踪器}}",
+  "settings_trackerStatisticsNothingRecorded": "尚未记录任何被拦截的跟踪器。",
+  "settings_trackerStatisticsLastSevenDays": "最近 7 天",
+  "settings_trackerStatisticsNoneLastSevenDays": "最近 7 天未拦截任何跟踪器。",
+  "settings_trackerStatisticsLoadFailed": "无法加载跟踪器统计。"
 }

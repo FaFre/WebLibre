@@ -21,9 +21,43 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
+import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/hooks/scroll_visibility.dart';
+
+/// Room under the last tab so the new-tab button cannot cover it: the
+/// full-screen tray's regular button (56dp) over its 16dp margin, and a gap.
+const tabTrayListBottomPadding = 88.0;
+
+/// The kind of tab the tray's new-tab buttons open.
+///
+/// The kind the tray is filtered to, so a tab opened while only private tabs
+/// are listed is private, and shows up in the list it was opened from.
+/// Otherwise the selected tab's kind, or the default one. The filter only
+/// counts where it is shown: the tree view lists every kind whatever it says,
+/// and synced tabs have no kind.
+TabType trayNewTabType(WidgetRef ref) {
+  final filterIgnored =
+      ref.read(tabsViewModeControllerProvider) == TabsViewMode.tree ||
+      ref.read(effectiveTabsTrayScopeProvider) == TabsTrayScope.synced;
+  final typeFilter = filterIgnored
+      ? TabTypeFilter.all
+      : ref.read(tabViewFilterControllerProvider).tabTypeFilter;
+
+  return switch (typeFilter) {
+    TabTypeFilter.regularOnly => TabType.regular,
+    TabTypeFilter.privateOnly => TabType.private,
+    TabTypeFilter.isolatedOnly => TabType.isolated,
+    TabTypeFilter.all =>
+      ref.read(selectedTabTypeProvider) ??
+          ref
+              .read(generalSettingsWithDefaultsProvider)
+              .effectiveDefaultCreateTabType,
+  };
+}
 
 /// The tab tray's new-tab button, over the bottom-right corner of the tab list
 /// (list, grid and tree alike).
@@ -38,10 +72,14 @@ class TabTrayNewTabFab extends HookConsumerWidget {
   final DraggableScrollableController? sheetController;
   final VoidCallback onClose;
 
+  /// The view the button sits over, whose header it stays clear of.
+  final TabsViewMode tabsViewMode;
+
   const TabTrayNewTabFab({
     required this.scrollController,
     required this.sheetController,
     required this.onClose,
+    required this.tabsViewMode,
     super.key,
   });
 
@@ -70,19 +108,16 @@ class TabTrayNewTabFab extends HookConsumerWidget {
             // sheet slides under it, and grows by its height.
             top:
                 TabViewHeader.headerSize +
+                (watchTabTypeFilterBarVisible(ref, tabsViewMode)
+                    ? tabTypeFilterBarHeight
+                    : 0) +
                 MediaQuery.paddingOf(context).top +
                 4,
             right: 4,
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
-              final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-              await SearchRoute(
-                tabType:
-                    ref.read(selectedTabTypeProvider) ??
-                    settings.effectiveDefaultCreateTabType,
-              ).push(context);
+              await SearchRoute(tabType: trayNewTabType(ref)).push(context);
 
               // A search usually closes the tray, and this button with it.
               if (context.mounted) onClose();

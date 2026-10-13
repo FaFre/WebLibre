@@ -85,6 +85,11 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return select(db.container)..where((t) => t.id.equals(id));
   }
 
+  /// Reads only the container table, so a watch of it ignores tab writes.
+  Selectable<ContainerData> allContainers() {
+    return select(db.container);
+  }
+
   Selectable<Color> getDistinctColors() {
     final query = db.selectOnly(db.container, distinct: true)
       ..addColumns([db.container.color])

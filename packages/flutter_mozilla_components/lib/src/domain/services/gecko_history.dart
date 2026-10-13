@@ -104,6 +104,10 @@ class GeckoHistoryService {
     return _api.getVisited(urls);
   }
 
+  Future<List<String>> getVisitedUrlsContaining(String text) {
+    return _api.getVisitedUrlsContaining(text);
+  }
+
   Future<List<HistorySuggestion>> getSuggestions(
     String query, {
     int limit = 10,

@@ -41,7 +41,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 17;
+  final int schemaVersion = 18;
 
   @override
   final int ftsTokenLimit = 10;
@@ -293,6 +293,11 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // serve because `container_id` is not its leftmost column.
       await m.create(schema.idxTabTimestamp);
       await m.create(schema.idxTabContainerOrder);
+    },
+    from17To18: (m, schema) async {
+      // Nothing to backfill: the recently closed list starts with this
+      // version, so no tab closed earlier is on it.
+      await m.create(schema.closedTabContainer);
     },
   );
 }

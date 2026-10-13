@@ -511,6 +511,14 @@ class VisitInfo {
 
   final String? contentId;
 
+  /// For an entry of the engine's download list: how far it got. Null for a
+  /// page visit.
+  final DownloadStatus? downloadStatus;
+  final int? downloadedBytes;
+
+  /// The size the server announced, if it did.
+  final int? downloadSize;
+
   VisitInfo(
     this.url,
     this.title,
@@ -519,6 +527,9 @@ class VisitInfo {
     this.previewImageUrl,
     this.isRemote,
     this.contentId,
+    this.downloadStatus,
+    this.downloadedBytes,
+    this.downloadSize,
   );
 }
 
@@ -990,11 +1001,6 @@ enum BounceTrackingProtectionMode {
 
 enum ColorScheme { system, light, dark }
 
-// Dead since AC/Gecko 155 removed cookie banner handling (bug 2058143). Nothing
-// reads these any more; drop them (and the `cookieBannerHandling*` fields of
-// GeckoEngineSettings below)
-enum CookieBannerHandlingMode { disabled, rejectAll, rejectOrAcceptAll }
-
 /// App links behavior mode - controls how external app links are handled
 enum AppLinksMode {
   /// Always open links in their native apps without prompting
@@ -1075,10 +1081,6 @@ class GeckoEngineSettings {
   final HttpsOnlyMode? httpsOnlyMode;
   final bool? globalPrivacyControlEnabled;
   final ColorScheme? preferredColorScheme;
-  final CookieBannerHandlingMode? cookieBannerHandlingMode;
-  final CookieBannerHandlingMode? cookieBannerHandlingModePrivateBrowsing;
-  final bool? cookieBannerHandlingGlobalRules;
-  final bool? cookieBannerHandlingGlobalRulesSubFrames;
   final String? userAgent;
   final ContentBlocking? contentBlocking;
   final bool? enterpriseRootsEnabled;
@@ -1086,8 +1088,10 @@ class GeckoEngineSettings {
   final String? fingerprintingProtectionOverrides;
   final List<String>? locales;
 
-  /// Use GeckoView's content-blocking database for tracking protection.
-  /// This is applied when the engine is created and requires app restart.
+  /// Record blocked trackers in Gecko's content-blocking database: per-day
+  /// counts by tracker category, for protection statistics. It does not
+  /// change what is blocked. Applied when the engine is created, so it needs
+  /// an app restart.
   final bool? useContentBlockingDatabase;
 
   // Custom Tracking Protection Settings
@@ -1159,10 +1163,6 @@ class GeckoEngineSettings {
     this.httpsOnlyMode,
     this.globalPrivacyControlEnabled,
     this.preferredColorScheme,
-    this.cookieBannerHandlingMode,
-    this.cookieBannerHandlingModePrivateBrowsing,
-    this.cookieBannerHandlingGlobalRules,
-    this.cookieBannerHandlingGlobalRulesSubFrames,
     this.userAgent,
     this.contentBlocking,
     this.enterpriseRootsEnabled,
@@ -1708,6 +1708,56 @@ abstract class GeckoSessionApi {
   Uint8List? requestScreenshot(bool sendBack);
 
   void dispatchKeyEvent({required int keyCode});
+}
+
+/// A closed tab on the recently closed list. Private and isolated tabs and
+/// tabs of containers excluded from history are never on it.
+class RecentlyClosedTab {
+  final String id;
+  final String url;
+  final String title;
+
+  /// When the tab was last selected, in milliseconds since the epoch. The
+  /// engine orders the list by it, and drops the oldest past ten.
+  final int lastAccess;
+
+  RecentlyClosedTab({
+    required this.id,
+    required this.url,
+    required this.title,
+    required this.lastAccess,
+  });
+}
+
+@HostApi()
+abstract class GeckoRecentlyClosedTabsApi {
+  /// The recently closed tabs, most recently selected first.
+  @async
+  List<RecentlyClosedTab> getRecentlyClosedTabs();
+
+  /// Reopens the closed tab [id] with its back history, under the same id, and
+  /// takes it off the list. Returns the id, or null when it is no longer on
+  /// the list.
+  ///
+  /// The list does not keep a tab's [contextId], so the caller passes it.
+  /// [excludeFromHistory] as for `GeckoTabsApi.addTab`.
+  @async
+  String? restoreRecentlyClosedTab({
+    required String id,
+    required String? contextId,
+    required bool selectTab,
+    required bool excludeFromHistory,
+  });
+
+  @async
+  void removeRecentlyClosedTab(String id);
+
+  @async
+  void removeAllRecentlyClosedTabs();
+
+  /// Keeps the tabs [ids] off the list when they are removed next, for tabs
+  /// WebLibre closes itself rather than the user. Call it before the removal.
+  void keepOffRecentlyClosed(List<String> ids);
 }
 
 @HostApi()
@@ -2557,6 +2607,11 @@ abstract class GeckoHistoryApi {
   @async
   List<bool> getVisited(List<String> urls);
 
+  /// Every address with a visit in the history that contains [text], such
+  /// as a host: how a page's other spellings (a `#fragment`) are found.
+  @async
+  List<String> getVisitedUrlsContaining(String text);
+
   /// Frecency-ranked autocomplete results. Mirrors Places' awesomebar input.
   @async
   List<HistorySuggestion> getSuggestions(String query, int limit);
@@ -2604,9 +2659,17 @@ abstract class GeckoHistoryApi {
   void deleteHistoryMetadataOlderThan(int olderThanMillis);
 }
 
+/// What the downloads list can ask of a download, as its notification can.
+enum DownloadControl { pause, resume, cancel, retry }
+
 @HostApi()
 abstract class GeckoDownloadsApi {
   void requestDownload(String tabId, DownloadState state);
+
+  /// Sends [control] to the download service for [downloadId]. The service
+  /// acts only on downloads it is running or has failed this session, as it
+  /// does for its notification's buttons.
+  void controlDownload(String downloadId, DownloadControl control);
   void copyInternetResource(String tabId, ShareInternetResourceState state);
   void shareInternetResource(String tabId, ShareInternetResourceState state);
   bool openDownloadedFile(
@@ -3100,6 +3163,97 @@ class TrackingProtectionException {
   TrackingProtectionException({required this.url});
 }
 
+/// A tracking category as the engine reports it in a page's tracker log
+/// (AC `TrackingCategory`). Grouping into what the UI shows happens in Dart.
+enum TrackerLogCategory {
+  ad,
+  analytics,
+  social,
+  content,
+  cryptomining,
+  fingerprinting,
+  mozillaSocial,
+  email,
+  scriptsAndSubResources,
+
+  /// A category with no meaning of its own in a log (test lists, the
+  /// composite policies).
+  other,
+}
+
+/// One third-party origin the current page tried to load that matched a
+/// tracking list (AC `TrackerLog`).
+class TrackerLogEntry {
+  /// The tracker's origin, e.g. `https://tracker.example`.
+  final String url;
+
+  /// Categories this origin was blocked for.
+  final List<TrackerLogCategory> blockedCategories;
+
+  /// Categories this origin was allowed to load for.
+  final List<TrackerLogCategory> loadedCategories;
+
+  /// Whether its cross-site tracking cookies were blocked.
+  final bool cookiesBlocked;
+
+  /// Whether SmartBlock let part of the blocked content load to keep the page
+  /// working.
+  final bool unblockedBySmartBlock;
+
+  TrackerLogEntry({
+    required this.url,
+    required this.blockedCategories,
+    required this.loadedCategories,
+    required this.cookiesBlocked,
+    required this.unblockedBySmartBlock,
+  });
+}
+
+/// The kind of blocked item a tracker-statistics record counts
+/// (`nsITrackingDBService` types).
+enum TrackingStatisticsType {
+  /// Cookies blocked by the cookie policy that are not known trackers.
+  otherCookies,
+  trackers,
+  trackingCookies,
+  cryptominers,
+  fingerprinters,
+  social,
+  suspiciousFingerprinters,
+  bounceTrackers,
+}
+
+/// How many items of [type] were blocked on [date].
+class TrackingStatisticsRecord {
+  final TrackingStatisticsType type;
+  final int count;
+
+  /// The day, as `YYYY-MM-DD`, or null when the engine does not know it.
+  final String? date;
+
+  TrackingStatisticsRecord({
+    required this.type,
+    required this.count,
+    required this.date,
+  });
+}
+
+/// Everything in the engine's tracker-statistics database
+/// (`useContentBlockingDatabase`).
+class TrackingStatistics {
+  /// When the oldest record was written, in milliseconds since the epoch, or
+  /// null when there are none.
+  final int? earliestRecordMillis;
+
+  /// Every daily record from [earliestRecordMillis] until now.
+  final List<TrackingStatisticsRecord> records;
+
+  TrackingStatistics({
+    required this.earliestRecordMillis,
+    required this.records,
+  });
+}
+
 /// API for managing per-site tracking protection exceptions
 ///
 /// This API wraps Mozilla Android Components' TrackingProtectionUseCases
@@ -3144,6 +3298,16 @@ abstract class GeckoTrackingProtectionApi {
   /// This re-enables ETP for all exception sites.
   @async
   void removeAllExceptions();
+
+  /// The trackers the page in [tabId] has tried to load so far, blocked or
+  /// not. Fails when the tab has no engine session (it is suspended).
+  @async
+  List<TrackerLogEntry> fetchTrackerLog(String tabId);
+
+  /// Every record in the tracker-statistics database. Empty while
+  /// `useContentBlockingDatabase` is off and nothing was recorded before.
+  @async
+  TrackingStatistics fetchTrackingStatistics();
 }
 
 // =============================================================================

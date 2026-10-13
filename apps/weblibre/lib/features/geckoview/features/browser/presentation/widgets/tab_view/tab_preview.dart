@@ -227,211 +227,204 @@ class GridTabPreview extends HookConsumerWidget {
     return GridTabItemContainer(
       isActive: isActive,
       tabMode: tabState.tabMode,
-      child: InkWell(
-        borderRadius: GridTabItemContainer.borderRadius,
-        onTap: onTap,
-        onDoubleTap: onDoubleTap,
-        child: Column(
-          children: [
-            // Thumbnail or icon area
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (thumbnail != null && !thumbnail.isDisposed)
-                    RepaintBoundary(
-                      child: SafeRawImage(image: thumbnail, fit: BoxFit.cover),
-                    )
-                  else
-                    Center(child: TabIcon(tabState: tabState, iconSize: 48)),
-                  // Close button overlay
-                  if (onDelete != null ||
-                      onDeleteAll != null ||
-                      onCloseSubtree != null)
-                    Positioned(
-                      top: 6.0,
-                      right: 6.0,
-                      child: MenuAnchor(
-                        controller: extendedDeleteMenuController,
-                        builder: (context, controller, child) {
-                          return child!;
-                        },
-                        menuChildren: [
-                          MenuItemButton(
-                            onPressed: () {
-                              onDeleteAll?.call(displayUrl.host);
-                            },
-                            leadingIcon: const Icon(Icons.language),
-                            child: Text(l10n.browser_closeFromSameHost),
-                          ),
-                          if (onCloseSubtree != null)
+      // The active tab is only told apart by its outline otherwise.
+      child: Semantics(
+        selected: isActive,
+        child: InkWell(
+          borderRadius: GridTabItemContainer.borderRadius,
+          onTap: onTap,
+          onDoubleTap: onDoubleTap,
+          child: Column(
+            children: [
+              // Thumbnail or icon area
+              Expanded(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (thumbnail != null && !thumbnail.isDisposed)
+                      RepaintBoundary(
+                        child: SafeRawImage(
+                          image: thumbnail,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    else
+                      Center(child: TabIcon(tabState: tabState, iconSize: 48)),
+                    // Close button overlay
+                    if (onDelete != null ||
+                        onDeleteAll != null ||
+                        onCloseSubtree != null)
+                      Positioned(
+                        top: 0.0,
+                        right: 0.0,
+                        child: MenuAnchor(
+                          controller: extendedDeleteMenuController,
+                          builder: (context, controller, child) {
+                            return child!;
+                          },
+                          menuChildren: [
                             MenuItemButton(
-                              onPressed: onCloseSubtree,
-                              leadingIcon: const Icon(Icons.account_tree),
-                              child: Text(l10n.browser_closeTabAndDescendants),
+                              onPressed: () {
+                                onDeleteAll?.call(displayUrl.host);
+                              },
+                              leadingIcon: const Icon(Icons.language),
+                              child: Text(l10n.browser_closeFromSameHost),
                             ),
-                        ],
-                        child: SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: Material(
-                            color: colorScheme.surfaceContainerHighest
-                                .withAlpha(200),
-                            borderRadius: const BorderRadius.all(
-                              Radius.circular(8.0),
-                            ),
-                            child: InkWell(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(8.0),
+                            if (onCloseSubtree != null)
+                              MenuItemButton(
+                                onPressed: onCloseSubtree,
+                                leadingIcon: const Icon(Icons.account_tree),
+                                child: Text(
+                                  l10n.browser_closeTabAndDescendants,
+                                ),
                               ),
-                              onTap: onDelete,
-                              onLongPress:
-                                  onDeleteAll != null || onCloseSubtree != null
-                                  ? () {
-                                      if (extendedDeleteMenuController.isOpen) {
-                                        extendedDeleteMenuController.close();
-                                      } else {
-                                        extendedDeleteMenuController.open();
-                                      }
+                          ],
+                          child: _GridCloseButton(
+                            onTap: onDelete,
+                            onLongPress:
+                                onDeleteAll != null || onCloseSubtree != null
+                                ? () {
+                                    if (extendedDeleteMenuController.isOpen) {
+                                      extendedDeleteMenuController.close();
+                                    } else {
+                                      extendedDeleteMenuController.open();
                                     }
-                                  : null,
-                              child: Icon(
-                                Icons.close,
-                                size: 16,
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
+                                  }
+                                : null,
                           ),
                         ),
                       ),
-                    ),
-                  if (depth > 0)
-                    Positioned(
-                      bottom: 6.0,
-                      left: 6.0,
-                      child: TabDepthIndicator(depth: depth),
-                    ),
-                  if (trailingChild != null || isPinned || groupToggle != null)
-                    Positioned(
-                      top: 6.0,
-                      left: 6.0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (groupToggle != null) ...[
-                            groupToggle!,
-                            if (trailingChild != null || isPinned)
-                              const SizedBox(width: 4),
-                          ],
-                          ?trailingChild,
-                          if (isPinned)
-                            Padding(
-                              padding: EdgeInsets.only(
-                                left: trailingChild != null ? 4.0 : 0,
-                              ),
-                              child: SizedBox(
-                                width: 28,
-                                height: 28,
-                                child: Material(
-                                  color: colorScheme.surfaceContainerHighest
-                                      .withAlpha(200),
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.circular(8.0),
-                                  ),
-                                  child: InkWell(
+                    if (depth > 0)
+                      Positioned(
+                        bottom: 6.0,
+                        left: 6.0,
+                        child: TabDepthIndicator(depth: depth),
+                      ),
+                    if (trailingChild != null ||
+                        isPinned ||
+                        groupToggle != null)
+                      Positioned(
+                        top: 6.0,
+                        left: 6.0,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (groupToggle != null) ...[
+                              groupToggle!,
+                              if (trailingChild != null || isPinned)
+                                const SizedBox(width: 4),
+                            ],
+                            ?trailingChild,
+                            if (isPinned)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: trailingChild != null ? 4.0 : 0,
+                                ),
+                                child: SizedBox(
+                                  width: 28,
+                                  height: 28,
+                                  child: Material(
+                                    color: colorScheme.surfaceContainerHighest
+                                        .withAlpha(200),
                                     borderRadius: const BorderRadius.all(
                                       Radius.circular(8.0),
                                     ),
-                                    onTap: () async {
-                                      await ref
-                                          .read(
-                                            tabDataRepositoryProvider.notifier,
-                                          )
-                                          .setPinned(tabId, pinned: false);
+                                    child: InkWell(
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(8.0),
+                                      ),
+                                      onTap: () async {
+                                        await ref
+                                            .read(
+                                              tabDataRepositoryProvider
+                                                  .notifier,
+                                            )
+                                            .setPinned(tabId, pinned: false);
 
-                                      if (context.mounted) {
-                                        ui_helper.showInfoMessage(
-                                          context,
-                                          l10n.browser_tabUnpinned,
-                                          action: SnackBarAction(
-                                            label: l10n.common_undo,
-                                            onPressed: () async {
-                                              await ref
-                                                  .read(
-                                                    tabDataRepositoryProvider
-                                                        .notifier,
-                                                  )
-                                                  .setPinned(
-                                                    tabId,
-                                                    pinned: true,
-                                                  );
-                                            },
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: Icon(
-                                      MdiIcons.pin,
-                                      size: 16,
-                                      color: colorScheme.primary,
+                                        if (context.mounted) {
+                                          ui_helper.showInfoMessage(
+                                            context,
+                                            l10n.browser_tabUnpinned,
+                                            action: SnackBarAction(
+                                              label: l10n.common_undo,
+                                              onPressed: () async {
+                                                await ref
+                                                    .read(
+                                                      tabDataRepositoryProvider
+                                                          .notifier,
+                                                    )
+                                                    .setPinned(
+                                                      tabId,
+                                                      pinned: true,
+                                                    );
+                                              },
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Icon(
+                                        MdiIcons.pin,
+                                        size: 16,
+                                        color: colorScheme.primary,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            // Bottom info band
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10.0,
-                vertical: 8.0,
-              ),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withAlpha(120),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    displayTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: modeTextColor,
-                    ),
-                  ),
-                  const SizedBox(height: 2.0),
-                  Row(
-                    children: [
-                      TabIcon(tabState: tabState, iconSize: 14.0),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          displayUrl.authority,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: subtitleColor,
-                          ),
+                          ],
                         ),
                       ),
-                      if (modeBadgeIcon != null) ...[
-                        const SizedBox(width: 4),
-                        Icon(modeBadgeIcon, color: modeBadgeColor, size: 14),
-                      ],
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              // Bottom info band
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10.0,
+                  vertical: 8.0,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceContainerHighest.withAlpha(120),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: modeTextColor,
+                      ),
+                    ),
+                    const SizedBox(height: 2.0),
+                    Row(
+                      children: [
+                        TabIcon(tabState: tabState, iconSize: 14.0),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            displayUrl.authority,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: subtitleColor,
+                            ),
+                          ),
+                        ),
+                        if (modeBadgeIcon != null) ...[
+                          const SizedBox(width: 4),
+                          Icon(modeBadgeIcon, color: modeBadgeColor, size: 14),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -573,106 +566,116 @@ class ListTabPreview extends HookConsumerWidget {
         color: Colors.transparent,
         borderRadius: borderRadius,
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          borderRadius: borderRadius,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 12.0, top: 10.0, bottom: 10.0),
-            child: Row(
-              children: [
-                leadingWidget,
-                const SizedBox(width: 14.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        displayTitle,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: listTextColor,
+        // The active tab is only told apart by its edge otherwise.
+        child: Semantics(
+          selected: isActive,
+          child: InkWell(
+            borderRadius: borderRadius,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 12.0,
+                top: 10.0,
+                bottom: 10.0,
+              ),
+              child: Row(
+                children: [
+                  leadingWidget,
+                  const SizedBox(width: 14.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          displayTitle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: listTextColor,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 3.0),
-                      Row(
-                        children: [
-                          if (isPinned) ...[
-                            Icon(
-                              MdiIcons.pin,
-                              color: colorScheme.primary,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          if (modeBadgeIcon != null) ...[
-                            Icon(
-                              modeBadgeIcon,
-                              color: modeBadgeColor,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Expanded(
-                            child: UriBreadcrumb(
-                              uri: displayUrl,
-                              showHttpScheme: false,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: subtitleColor,
+                        const SizedBox(height: 3.0),
+                        Row(
+                          children: [
+                            if (isPinned) ...[
+                              Icon(
+                                MdiIcons.pin,
+                                color: colorScheme.primary,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            if (modeBadgeIcon != null) ...[
+                              Icon(
+                                modeBadgeIcon,
+                                color: modeBadgeColor,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            Expanded(
+                              child: UriBreadcrumb(
+                                uri: displayUrl,
+                                showHttpScheme: false,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: subtitleColor,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                ?groupToggle,
-                if (onDelete != null ||
-                    onDeleteAll != null ||
-                    onCloseSubtree != null)
-                  MenuAnchor(
-                    controller: extendedDeleteMenuController,
-                    builder: (context, controller, child) {
-                      return child!;
-                    },
-                    menuChildren: [
-                      MenuItemButton(
-                        onPressed: () {
-                          onDeleteAll?.call(displayUrl.host);
-                        },
-                        leadingIcon: const Icon(Icons.language),
-                        child: Text(l10n.browser_closeFromSameHost),
-                      ),
-                      if (onCloseSubtree != null)
-                        MenuItemButton(
-                          onPressed: onCloseSubtree,
-                          leadingIcon: const Icon(Icons.account_tree),
-                          child: Text(l10n.browser_closeTabAndDescendants),
+                          ],
                         ),
-                    ],
-                    child: IconButton(
-                      onPressed: onDelete,
-                      onLongPress: onDeleteAll != null || onCloseSubtree != null
-                          ? () {
-                              if (extendedDeleteMenuController.isOpen) {
-                                extendedDeleteMenuController.close();
-                              } else {
-                                extendedDeleteMenuController.open();
-                              }
-                            }
-                          : null,
-                      icon: Icon(
-                        Icons.close,
-                        size: 20,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                      ],
                     ),
                   ),
-                ?trailingChild,
-              ],
+                  ?groupToggle,
+                  if (onDelete != null ||
+                      onDeleteAll != null ||
+                      onCloseSubtree != null)
+                    MenuAnchor(
+                      controller: extendedDeleteMenuController,
+                      builder: (context, controller, child) {
+                        return child!;
+                      },
+                      menuChildren: [
+                        MenuItemButton(
+                          onPressed: () {
+                            onDeleteAll?.call(displayUrl.host);
+                          },
+                          leadingIcon: const Icon(Icons.language),
+                          child: Text(l10n.browser_closeFromSameHost),
+                        ),
+                        if (onCloseSubtree != null)
+                          MenuItemButton(
+                            onPressed: onCloseSubtree,
+                            leadingIcon: const Icon(Icons.account_tree),
+                            child: Text(l10n.browser_closeTabAndDescendants),
+                          ),
+                      ],
+                      child: IconButton(
+                        tooltip: l10n.browser_tooltipCloseTab,
+                        onPressed: onDelete,
+                        onLongPress:
+                            onDeleteAll != null || onCloseSubtree != null
+                            ? () {
+                                if (extendedDeleteMenuController.isOpen) {
+                                  extendedDeleteMenuController.close();
+                                } else {
+                                  extendedDeleteMenuController.open();
+                                }
+                              }
+                            : null,
+                        icon: Icon(
+                          Icons.close,
+                          size: 20,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ?trailingChild,
+                ],
+              ),
             ),
           ),
         ),
@@ -1096,6 +1099,67 @@ class SuggestedSingleListTabPreview extends StatelessWidget {
           visualDensity: VisualDensity(horizontal: -4.0, vertical: -4.0),
           icon: Icon(MdiIcons.creation),
           onPressed: null,
+        ),
+      ),
+    );
+  }
+}
+
+/// The close button in a grid tile's corner: 28dp to look at, with a 48dp
+/// touch target reaching into the tile from that corner.
+class _GridCloseButton extends StatelessWidget {
+  final VoidCallback? onTap;
+
+  /// Opens the menu of wider close actions.
+  final VoidCallback? onLongPress;
+
+  const _GridCloseButton({required this.onTap, required this.onLongPress});
+
+  static const _inset = 6.0;
+  static const _visualSize = 28.0;
+  static const _borderRadius = BorderRadius.all(Radius.circular(8.0));
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      button: true,
+      label: AppLocalizations.of(context).browser_tooltipCloseTab,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      excludeSemantics: true,
+      child: GestureDetector(
+        // Takes the taps around the visible button; a tap on it reaches its
+        // own InkWell first, which shows the ripple.
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: SizedBox.square(
+          dimension: kMinInteractiveDimension,
+          child: Align(
+            alignment: Alignment.topRight,
+            child: Padding(
+              padding: const EdgeInsets.only(top: _inset, right: _inset),
+              child: SizedBox.square(
+                dimension: _visualSize,
+                child: Material(
+                  color: colorScheme.surfaceContainerHighest.withAlpha(200),
+                  borderRadius: _borderRadius,
+                  child: InkWell(
+                    borderRadius: _borderRadius,
+                    onTap: onTap,
+                    onLongPress: onLongPress,
+                    child: Icon(
+                      Icons.close,
+                      size: 16,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
