@@ -1,0 +1,59 @@
+{
+  "manifest_version": 2,
+  "name": "WebLibre Edge Account Login",
+  "version": "1.0",
+  "description": "Lets a Microsoft account sign-in complete on a Gecko engine by presenting Microsoft's identity pages as Microsoft Edge, instead of letting them answer with \"Browser not supported\".",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "edge-login@weblibre.eu",
+      "strict_min_version": "115.0"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.live.com/*",
+        "*://*.microsoft.com/*",
+        "*://*.microsoftonline.com/*",
+        "*://*.microsoft365.com/*",
+        "*://*.office.com/*",
+        "*://*.office365.com/*",
+        "*://*.sharepoint.com/*",
+        "*://login.windows.net/*",
+        "*://*.bing.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "background": {
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "permissions": [
+    "geckoViewAddons",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.live.com/*",
+    "*://*.microsoft.com/*",
+    "*://*.microsoftonline.com/*",
+    "*://*.microsoft365.com/*",
+    "*://*.office.com/*",
+    "*://*.office365.com/*",
+    "*://*.sharepoint.com/*",
+    "*://login.windows.net/*",
+    "*://*.bing.com/*"
+  ],
+  "weblibre_protection": {
+    "parameters": [
+      "userAgent"
+    ],
+    "profile": "edge-android",
+    "description": "Presents Microsoft identity pages as Edge on Android to bypass browser sniffing."
+  }
+}
