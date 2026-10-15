@@ -34,7 +34,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
-import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
+import 'package:weblibre/presentation/widgets/fitted_pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 
 /// Shows the combined browser menu as a modal bottom sheet.
@@ -102,11 +102,10 @@ class _BrowserMenuSheet extends ConsumerWidget {
         if (didPop) return;
         ref.read(menuReorderModeProvider.notifier).stepBack();
       },
-      child: PointerScrollableSheet(
-        initialChildSize: 0.85,
-        minChildSize: 0.4,
-        expand: false,
-        builder: (context, scrollController) {
+      // As tall as the menu, so one with sections switched off or left out on
+      // the home screen does not open over a blank half sheet (#664).
+      child: FittedPointerScrollableSheet(
+        builder: (context, scrollController, contentEnd) {
           return BrowserSheetSurface(
             child: Column(
               children: [
@@ -123,19 +122,19 @@ class _BrowserMenuSheet extends ConsumerWidget {
                 Expanded(
                   child: CustomScrollView(
                     controller: scrollController,
-                    slivers: isReordering
-                        ? const [MenuReorderView()]
-                        : [
-                            SliverPadding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              sliver: _MenuSections(
-                                selectedTabId: selectedTabId,
-                              ),
-                            ),
-                          ],
+                    slivers: [
+                      if (isReordering)
+                        const MenuReorderView()
+                      else
+                        SliverPadding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          sliver: _MenuSections(selectedTabId: selectedTabId),
+                        ),
+                      contentEnd,
+                    ],
                   ),
                 ),
 
