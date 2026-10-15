@@ -1766,6 +1766,10 @@ abstract class GeckoTabsApi {
   /// next `onTabListChange` will report, without its debounce.
   List<String> getTabIds();
 
+  /// The selected tab in the store right now — what the next
+  /// `onSelectedTabChange` will report, without its debounce.
+  String? getSelectedTabId();
+
   void syncEvents({
     required bool onSelectedTabChange,
     required bool onTabListChange,

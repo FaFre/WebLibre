@@ -23,7 +23,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -41,11 +40,6 @@ part 'home_target_controller.g.dart';
 /// A custom-URL target reopened within this window of the last one is treated
 /// as a loop and suppressed.
 const _customUrlLoopWindow = Duration(seconds: 2);
-
-/// How long the startup check waits for the restored selection to arrive before
-/// concluding that there is none. Covers the native selected-tab debounce (50ms)
-/// plus the channel hop, with room to spare.
-const _restoredSelectionWindow = Duration(milliseconds: 300);
 
 /// What [HomeTargetController] should actually do, given the configuration and
 /// the current state.
@@ -203,13 +197,18 @@ class HomeTargetController extends _$HomeTargetController {
   /// Runs the configured target at cold start, unless the engine restored a
   /// selection of its own — the user is then already looking at a page.
   ///
+  /// "Cold start" is this controller's: a fresh isolate. That is also what
+  /// returning to an activity Android destroyed in the background gets, since
+  /// the engine is discarded with it while the native store — and the tab it
+  /// has selected — lives on.
+  ///
   /// An external launch counts as a selection the session is about to have, and
   /// it loses this race on its own: opening it waits for the engine, while the
-  /// window below is a few hundred milliseconds. The target then latched the
-  /// home surface over the page the launch opened, or resumed a different tab
-  /// entirely (#623), so a claimed launch is waited for instead — twice, since
-  /// one that arrives while the window below is open has the same claim on the
-  /// startup surface as one that was already in flight.
+  /// check below answers at once. The target then latched the home surface
+  /// over the page the launch opened, or resumed a different tab entirely
+  /// (#623), so a claimed launch is waited for instead — twice, since one that
+  /// arrives while the check below is out has the same claim on the startup
+  /// surface as one that was already in flight.
   Future<void> _applyStartupTarget() async {
     final launchClaim = ref.read(intentLaunchClaimProvider.notifier);
 
@@ -224,7 +223,8 @@ class HomeTargetController extends _$HomeTargetController {
     await applyTarget();
   }
 
-  /// Whether the restored session came with a selected tab.
+  /// Whether the session already has a selected tab — restored, or opened by
+  /// the launch the app was started for.
   ///
   /// The answer cannot be read off [selectedTabProvider] the moment restore
   /// completes: the two facts travel over independent native flows, and only
@@ -232,61 +232,31 @@ class HomeTargetController extends _$HomeTargetController {
   /// tab-added and tab-list events). Restore-complete therefore reliably
   /// *overtakes* the selection it implies, and reading at that instant reports
   /// no tab for a session that has one. Acting on that latches the home surface
-  /// over the restored tab, where it stays until the user picks a tab by hand.
+  /// over the tab.
   ///
-  /// So the absence is waited on rather than read. [GeckoTabService.syncEvents]
-  /// nudges native into pushing the current selection undebounced, but its
-  /// reply is deliberately not the signal: native replies once it has *sent*
-  /// the event, which says nothing about the event having arrived here — it
-  /// travels on its own channel, and Flutter orders messages within a channel,
-  /// not across them. The event itself is the signal; the nudge only shortens
-  /// the wait for it.
+  /// So the store is asked directly. Waiting a bounded window for the event
+  /// was the earlier shape, and it lost whenever the platform thread was busy
+  /// past the window — on a loaded start, the event and the timer both queue
+  /// up and the timer can win (#667). The store's answer has no such race: it
+  /// is read on the thread every selection is dispatched on, after each one
+  /// that preceded this call — the restore's (dispatched before restore
+  /// completes) and a claimed launch's (dispatched before its claim is
+  /// released). The event still catches [selectedTabProvider] up on its own.
   Future<bool> _hasRestoredSelection() async {
     if (ref.read(selectedTabProvider) != null) return true;
 
-    final completer = Completer<bool>();
-
-    // A ValueStream, so a selection that arrived before this subscription is
-    // replayed into it — the gap between the read above and here cannot swallow
-    // the event.
-    final subscription = ref
-        .read(eventServiceProvider)
-        .selectedTabEvents
-        .listen((tabId) {
-          if (tabId != null && !completer.isCompleted) {
-            completer.complete(true);
-          }
-        });
-
-    // Bounds the wait for a session that genuinely restored nothing. Paid only
-    // in that case, and against the home surface — which is already on screen
-    // while no tab is selected, so the delay costs a target that opens or
-    // resumes a tab slightly later, not a visible stall.
-    final timeout = Timer(_restoredSelectionWindow, () {
-      if (!completer.isCompleted) {
-        completer.complete(false);
-      }
-    });
-
-    unawaited(
-      GeckoTabService().syncEvents(onSelectedTabChange: true).catchError((
-        Object error,
-        StackTrace stackTrace,
-      ) {
-        // Non-fatal: the debounced push still arrives within the window.
-        logger.w(
-          'Failed to request the selected tab for the startup home target',
-          error: error,
-          stackTrace: stackTrace,
-        );
-      }),
-    );
-
     try {
-      return await completer.future;
-    } finally {
-      timeout.cancel();
-      await subscription.cancel();
+      return await GeckoTabService().getSelectedTabId() != null;
+    } catch (error, stackTrace) {
+      // Treated as no selection: home is what shows while nothing is
+      // selected anyway, and a tab it ends up covering is one tap away in the
+      // tab bar.
+      logger.w(
+        'Failed to read the selected tab for the startup home target',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
     }
   }
 

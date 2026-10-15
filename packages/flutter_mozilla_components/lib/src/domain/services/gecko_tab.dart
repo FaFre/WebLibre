@@ -24,6 +24,12 @@ class GeckoTabService {
     return _api.getTabIds();
   }
 
+  /// The selected tab in the native store right now. The selected-tab events
+  /// are debounced and can lag behind it.
+  Future<String?> getSelectedTabId() {
+    return _api.getSelectedTabId();
+  }
+
   Future<void> syncEvents({
     bool onSelectedTabChange = false,
     bool onTabListChange = false,

@@ -108,7 +108,10 @@ class _TabTreePreview extends HookConsumerWidget {
               onTap: () async {
                 if (entity.totalTabs > 1) {
                   await TabTreeRoute(entity.rootId).push(context);
-                } else if (entity.tabId != activeTabId) {
+                } else if (entity.tabId != activeTabId ||
+                    // Home can be drawn over the active tab; selecting it
+                    // again is what takes home down (#667).
+                    ref.read(shouldShowBrowserHomeProvider)) {
                   //Close first to avoid rebuilds
                   onClose();
                   await ref

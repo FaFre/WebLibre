@@ -10403,6 +10403,27 @@ class GeckoTabsApi {
     return (pigeonVar_replyValue! as List<Object?>).cast<String>();
   }
 
+  /// The selected tab in the store right now — what the next
+  /// `onSelectedTabChange` will report, without its debounce.
+  Future<String?> getSelectedTabId() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getSelectedTabId$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as String?;
+  }
+
   Future<void> syncEvents({
     required bool onSelectedTabChange,
     required bool onTabListChange,

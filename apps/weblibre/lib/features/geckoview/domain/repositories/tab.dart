@@ -693,6 +693,25 @@ class TabRepository extends _$TabRepository {
     }
 
     _clearForceBrowserHome();
+
+    // Selecting the tab that is already selected changes nothing in the
+    // engine, so [SelectedContainer], which follows selection *changes*, never
+    // hears of it. The tab can still be off screen because another container
+    // was picked since (see [shouldShowBrowserHome]); bring its container back
+    // with it, or re-selecting it from the tab bar does nothing (#667).
+    if (ref.read(selectedTabProvider) == tabId) {
+      final selectedContainerNotifier = ref.read(
+        selectedContainerProvider.notifier,
+      );
+      if (containerData != null) {
+        await selectedContainerNotifier.setContainerId(containerData.id);
+      } else {
+        selectedContainerNotifier.clearContainer();
+      }
+
+      if (!ref.mounted) return false;
+    }
+
     await _tabsService.selectTab(tabId: tabId);
     return true;
   }

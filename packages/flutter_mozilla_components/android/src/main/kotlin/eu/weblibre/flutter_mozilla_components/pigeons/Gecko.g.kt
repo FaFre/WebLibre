@@ -9885,6 +9885,11 @@ interface GeckoTabsApi {
    * next `onTabListChange` will report, without its debounce.
    */
   fun getTabIds(): List<String>
+  /**
+   * The selected tab in the store right now — what the next
+   * `onSelectedTabChange` will report, without its debounce.
+   */
+  fun getSelectedTabId(): String?
   fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
@@ -9936,6 +9941,21 @@ interface GeckoTabsApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.getTabIds())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getSelectedTabId$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getSelectedTabId())
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
