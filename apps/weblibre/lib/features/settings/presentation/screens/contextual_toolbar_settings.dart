@@ -355,77 +355,81 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
             color: colorScheme.outlineVariant.withValues(alpha: 0.4),
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(def.icon, color: colorScheme.onSurface),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      def.spec.id.label(context),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Switch.adaptive(
-                    value: isVisible,
-                    onChanged: (v) => repository.assignVisibility(
-                      config.buttonId,
-                      visible: v,
-                    ),
-                  ),
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.drag_handle,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // The settings take the card's full width; the right inset
-              // matches the left one past the drag handle's own padding.
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        // Keep a Material ancestor when the tile moves into the drag overlay.
+        child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    if (hasStatefulFallback) ...[
-                      _FallbackPicker(
-                        current: ToolbarFallbackChoice.fromStored(
-                          config.fallbackId,
+                    Icon(def.icon, color: colorScheme.onSurface),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        def.spec.id.label(context),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w600,
                         ),
-                        options: fallbackOptions,
-                        onChanged: (newFallback) => repository.assignFallback(
-                          config.buttonId,
-                          (newFallback ?? ToolbarFallbackNone())
-                              .toStoredFallbackId(),
-                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                    _LongPressPicker(
-                      builtInActions: longPressActions,
-                      current: config.longPressAction,
-                      onChanged: (action) => repository.assignLongPressAction(
+                    ),
+                    Switch.adaptive(
+                      value: isVisible,
+                      onChanged: (v) => repository.assignVisibility(
                         config.buttonId,
-                        action,
+                        visible: v,
+                      ),
+                    ),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          Icons.drag_handle,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                // The settings take the card's full width; the right inset
+                // matches the left one past the drag handle's own padding.
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (hasStatefulFallback) ...[
+                        _FallbackPicker(
+                          current: ToolbarFallbackChoice.fromStored(
+                            config.fallbackId,
+                          ),
+                          options: fallbackOptions,
+                          onChanged: (newFallback) => repository.assignFallback(
+                            config.buttonId,
+                            (newFallback ?? ToolbarFallbackNone())
+                                .toStoredFallbackId(),
+                          ),
+                        ),
+                      ],
+                      _LongPressPicker(
+                        builtInActions: longPressActions,
+                        current: config.longPressAction,
+                        onChanged: (action) => repository.assignLongPressAction(
+                          config.buttonId,
+                          action,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
