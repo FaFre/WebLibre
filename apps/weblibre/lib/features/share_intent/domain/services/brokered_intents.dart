@@ -49,12 +49,64 @@ Intent brokeredIntentFrom(StartupIntentRecord record) => Intent(
   extra: record.extras,
 );
 
-/// Drains the native broker, oldest launch first.
+/// Drains the native broker, oldest launch first: [claimBrokeredIntents], then
+/// [deliverClaimedLaunches].
+Future<int> drainBrokeredIntents({
+  required String engineId,
+  required Future<void> Function(Intent intent) deliver,
+  GeckoProfileService? service,
+  StartupPaths? startupPaths,
+  Future<Directory> Function()? payloadHome,
+}) async => await deliverClaimedLaunches(
+  await claimBrokeredIntents(engineId: engineId, service: service),
+  engineId: engineId,
+  deliver: deliver,
+  service: service,
+  startupPaths: startupPaths,
+  payloadHome: payloadHome,
+);
+
+/// A queued launch this engine has claimed but not yet delivered.
+typedef ClaimedLaunch = ({String entryId, Intent intent});
+
+/// Claims every queued launch this engine may deliver, oldest first, already in
+/// the shape [deliverClaimedLaunches] publishes.
 ///
-/// Each record has its staged bytes taken over by this process, is handed to
+/// A step of its own so that startup can claim before the router mounts, and
+/// know whether a launch is coming before it decides what the first frame shows
+/// (#612), while delivery still waits until every consumer exists. Native holds
+/// a claim for a minute (`STARTUP_INTENT_CLAIM_TTL_MS`), far longer than the gap
+/// between the two. The same [Intent] objects are delivered later, so what
+/// startup decided about them still matches by identity.
+Future<List<ClaimedLaunch>> claimBrokeredIntents({
+  required String engineId,
+  GeckoProfileService? service,
+}) async {
+  final api = service ?? GeckoProfileService();
+
+  try {
+    final records = await api.claimStartupIntents(engineId);
+
+    return [
+      for (final record in records)
+        (entryId: record.id, intent: brokeredIntentFrom(record)),
+    ];
+  } catch (error, stackTrace) {
+    logger.w(
+      'Could not claim queued launches',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return const [];
+  }
+}
+
+/// Delivers [launches] that [claimBrokeredIntents] took, in order.
+///
+/// Each launch has its staged bytes taken over by this process, is handed to
 /// [deliver], and is acknowledged only once that returns. A delivery that throws
-/// leaves the claim in place to expire, so the launch is retried rather than
-/// quietly retired.
+/// is handed back to the broker, so the launch is retried rather than quietly
+/// retired.
 ///
 /// The order of those first two steps is the whole point of [BrokeredPayloads].
 /// Acknowledging is what tells native to delete the entry's payload directory,
@@ -70,7 +122,8 @@ Intent brokeredIntentFrom(StartupIntentRecord record) => Intent(
 /// the final app service takes ownership" for the *entry*: the intent pipeline is
 /// a stream, so acceptance is the last synchronous moment this code can observe.
 /// It errs towards replaying a launch rather than dropping one.
-Future<int> drainBrokeredIntents({
+Future<int> deliverClaimedLaunches(
+  List<ClaimedLaunch> launches, {
   required String engineId,
   required Future<void> Function(Intent intent) deliver,
   GeckoProfileService? service,
@@ -79,43 +132,30 @@ Future<int> drainBrokeredIntents({
 }) async {
   final api = service ?? GeckoProfileService();
 
-  final List<StartupIntentRecord> records;
-  try {
-    records = await api.claimStartupIntents(engineId);
-  } catch (error, stackTrace) {
-    logger.w(
-      'Could not claim queued launches',
-      error: error,
-      stackTrace: stackTrace,
-    );
-    return 0;
-  }
-
   final payloads = BrokeredPayloads(
-    claimedEntryIds: records.map((record) => record.id).toSet(),
+    claimedEntryIds: launches.map((launch) => launch.entryId).toSet(),
     startupPaths: startupPaths,
     home: payloadHome,
   );
 
   var delivered = 0;
-  for (final record in records) {
+  for (final (:entryId, :intent) in launches) {
     try {
-      final intent = brokeredIntentFrom(record);
-      await payloads.adopt(record.id, intent);
+      await payloads.adopt(entryId, intent);
       await deliver(intent);
     } catch (error, stackTrace) {
       logger.e(
-        'Could not deliver queued launch ${record.id}',
+        'Could not deliver queued launch $entryId',
         error: error,
         stackTrace: stackTrace,
       );
       // Handed back rather than left claimed: waiting out the claim would leave
       // the user looking at a link that does nothing for a minute.
-      await _releaseQuietly(api, record.id, engineId);
+      await _releaseQuietly(api, entryId, engineId);
       continue;
     }
 
-    if (await api.acknowledgeStartupIntent(record.id, engineId)) {
+    if (await api.acknowledgeStartupIntent(entryId, engineId)) {
       delivered++;
     }
   }

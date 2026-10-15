@@ -22,10 +22,12 @@ import 'dart:async';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:simple_intent_receiver/simple_intent_receiver.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/received_intent_parameter.dart';
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 
@@ -55,7 +57,9 @@ final _contentParserTransformer =
 /// Held from the moment the launch is delivered — synchronously, before the
 /// engine-readiness wait — until its tab exists, so that startup logic which
 /// would otherwise conclude the browser has nothing to show waits for it
-/// instead.
+/// instead. On a cold start [StartupLaunchCover] holds one from earlier still,
+/// before the router mounts, covering the stretch before the launch reaches the
+/// consumer.
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
@@ -141,6 +145,110 @@ class IntentLaunchClaim extends _$IntentLaunchClaim {
     ref.onDispose(_settle);
 
     return false;
+  }
+}
+
+/// What a raised cover holds. Exists exactly as long as the cover is up.
+final class _RaisedCover {
+  _RaisedCover({
+    required this.awaited,
+    required IntentLaunchClaim claim,
+    required void Function() onTimeout,
+  }) : _claim = claim..claim(),
+       _timeout = Timer(StartupLaunchCover._maxCover, onTimeout);
+
+  /// By identity: pigeon's `Intent` compares by value, and an equal link that
+  /// arrived later is not the one being waited for.
+  final Set<Intent> awaited;
+  final IntentLaunchClaim _claim;
+  final Timer _timeout;
+
+  void end() {
+    _timeout.cancel();
+    _claim.release();
+  }
+}
+
+/// Keeps the browser behind the startup spinner while a cold start is still
+/// opening the launch the app was started for.
+///
+/// The router mounts as soon as initialization finishes, and the restored
+/// session has no selection yet, so the home surface painted for a quarter of a
+/// second before the launch's tab replaced it (#612).
+///
+/// Raised by startup, before the router mounts, from the receiver's backlog.
+/// While up it holds an [IntentLaunchClaim]: the consumer takes its own only
+/// once the launch has crossed the gatekeeper and reached the browser view, and
+/// a startup home target that ran in between found no claim, no selection, and
+/// latched home over the launch anyway.
+///
+/// Lowered by whichever comes first:
+/// - a tab is selected — normally the launch's own;
+/// - the sharing pipeline let go of every awaited launch without opening it;
+/// - the consumer gave up, or is showing a route rather than a tab ([lower]);
+/// - [_maxCover], so a launch lost on the way never strands the spinner.
+@Riverpod(keepAlive: true)
+class StartupLaunchCover extends _$StartupLaunchCover {
+  /// Past the consumer's 10s wait for the engine, and short of
+  /// [IntentLaunchClaim]'s own bound, so the claim held here is released by
+  /// this rather than expiring underneath it.
+  static const _maxCover = Duration(seconds: 12);
+
+  _RaisedCover? _cover;
+  var _startupHandled = false;
+
+  @override
+  bool build() {
+    ref.listen(selectedTabProvider, (_, tabId) {
+      if (tabId != null) lower();
+    });
+
+    final unopened = ref
+        .watch(unopenedSharingIntentsProvider)
+        .stream
+        .listen(_onUnopened);
+
+    ref.onDispose(() {
+      unawaited(unopened.cancel());
+      // Only the timer: no provider may be modified from a disposal, and the
+      // claim goes with this container and settles itself.
+      _cover?._timeout.cancel();
+    });
+
+    return false;
+  }
+
+  /// Raises the cover for [launches], the openable part of the startup
+  /// backlog. Does nothing when there are none, and nothing on any call after
+  /// the first: only the launch the app was started with is hidden this way.
+  void raiseFor(Iterable<Intent> launches) {
+    if (_startupHandled) return;
+    _startupHandled = true;
+
+    final awaited = Set<Intent>.identity()..addAll(launches);
+    if (awaited.isEmpty) return;
+
+    _cover = _RaisedCover(
+      awaited: awaited,
+      claim: ref.read(intentLaunchClaimProvider.notifier),
+      onTimeout: lower,
+    );
+    state = true;
+  }
+
+  void lower() {
+    final cover = _cover;
+    if (cover == null) return;
+
+    _cover = null;
+    cover.end();
+    state = false;
+  }
+
+  void _onUnopened(Intent intent) {
+    final cover = _cover;
+    if (cover == null || !cover.awaited.remove(intent)) return;
+    if (cover.awaited.isEmpty) lower();
   }
 }
 

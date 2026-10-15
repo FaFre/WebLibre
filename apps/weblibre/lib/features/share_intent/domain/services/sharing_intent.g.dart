@@ -259,7 +259,169 @@ final class BrokeredIntentDeliveryProvider
 }
 
 String _$brokeredIntentDeliveryHash() =>
-    r'2e0693e495cae3dc67bc66fc9e7741e593f76300';
+    r'0b1eb748c4001f6f07ae08bf6ae540da4b9d227a';
+
+/// The broker's queue, claimed ahead of its delivery.
+///
+/// Startup claims it before the router mounts, to know whether a launch is on
+/// its way while the profile picker held it (`StartupLaunchCover` in the
+/// browser); [brokeredIntentDelivery] takes the same claim later and delivers
+/// it. Claimed at most once per delivery: [take] hands the claim over and
+/// forgets it, so a later delivery claims afresh rather than replaying.
+
+@ProviderFor(BrokeredLaunchClaim)
+final brokeredLaunchClaimProvider = BrokeredLaunchClaimProvider._();
+
+/// The broker's queue, claimed ahead of its delivery.
+///
+/// Startup claims it before the router mounts, to know whether a launch is on
+/// its way while the profile picker held it (`StartupLaunchCover` in the
+/// browser); [brokeredIntentDelivery] takes the same claim later and delivers
+/// it. Claimed at most once per delivery: [take] hands the claim over and
+/// forgets it, so a later delivery claims afresh rather than replaying.
+final class BrokeredLaunchClaimProvider
+    extends $NotifierProvider<BrokeredLaunchClaim, void> {
+  /// The broker's queue, claimed ahead of its delivery.
+  ///
+  /// Startup claims it before the router mounts, to know whether a launch is on
+  /// its way while the profile picker held it (`StartupLaunchCover` in the
+  /// browser); [brokeredIntentDelivery] takes the same claim later and delivers
+  /// it. Claimed at most once per delivery: [take] hands the claim over and
+  /// forgets it, so a later delivery claims afresh rather than replaying.
+  BrokeredLaunchClaimProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'brokeredLaunchClaimProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$brokeredLaunchClaimHash();
+
+  @$internal
+  @override
+  BrokeredLaunchClaim create() => BrokeredLaunchClaim();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(void value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<void>(value),
+    );
+  }
+}
+
+String _$brokeredLaunchClaimHash() =>
+    r'be524d1db5d89556395a3a0ef9ec5ed9f390df1c';
+
+/// The broker's queue, claimed ahead of its delivery.
+///
+/// Startup claims it before the router mounts, to know whether a launch is on
+/// its way while the profile picker held it (`StartupLaunchCover` in the
+/// browser); [brokeredIntentDelivery] takes the same claim later and delivers
+/// it. Claimed at most once per delivery: [take] hands the claim over and
+/// forgets it, so a later delivery claims afresh rather than replaying.
+
+abstract class _$BrokeredLaunchClaim extends $Notifier<void> {
+  void build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<void, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<void, void>,
+              void,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Intents the sharing pipeline let go of without passing anything on: blocked
+/// by the gatekeeper, owned by another consumer, carrying nothing to open, or a
+/// file of a type the browser does not take.
+///
+/// For whoever is waiting on a launch to tell when it is not coming, rather
+/// than waiting out a timeout. Synchronous, so the news lands in the same turn
+/// the pipeline gives up.
+///
+/// The pipeline adds to the controller; listeners take its stream.
+
+@ProviderFor(unopenedSharingIntents)
+final unopenedSharingIntentsProvider = UnopenedSharingIntentsProvider._();
+
+/// Intents the sharing pipeline let go of without passing anything on: blocked
+/// by the gatekeeper, owned by another consumer, carrying nothing to open, or a
+/// file of a type the browser does not take.
+///
+/// For whoever is waiting on a launch to tell when it is not coming, rather
+/// than waiting out a timeout. Synchronous, so the news lands in the same turn
+/// the pipeline gives up.
+///
+/// The pipeline adds to the controller; listeners take its stream.
+
+final class UnopenedSharingIntentsProvider
+    extends
+        $FunctionalProvider<
+          Raw<StreamController<Intent>>,
+          Raw<StreamController<Intent>>,
+          Raw<StreamController<Intent>>
+        >
+    with $Provider<Raw<StreamController<Intent>>> {
+  /// Intents the sharing pipeline let go of without passing anything on: blocked
+  /// by the gatekeeper, owned by another consumer, carrying nothing to open, or a
+  /// file of a type the browser does not take.
+  ///
+  /// For whoever is waiting on a launch to tell when it is not coming, rather
+  /// than waiting out a timeout. Synchronous, so the news lands in the same turn
+  /// the pipeline gives up.
+  ///
+  /// The pipeline adds to the controller; listeners take its stream.
+  UnopenedSharingIntentsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'unopenedSharingIntentsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$unopenedSharingIntentsHash();
+
+  @$internal
+  @override
+  $ProviderElement<Raw<StreamController<Intent>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  Raw<StreamController<Intent>> create(Ref ref) {
+    return unopenedSharingIntents(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Raw<StreamController<Intent>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Raw<StreamController<Intent>>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$unopenedSharingIntentsHash() =>
+    r'0406cbe379510442ee26afa182f9c657e0de84b3';
 
 @ProviderFor(sharingIntentStream)
 final sharingIntentStreamProvider = SharingIntentStreamProvider._();
@@ -308,7 +470,7 @@ final class SharingIntentStreamProvider
 }
 
 String _$sharingIntentStreamHash() =>
-    r'8d96256473c24d4939e763036b1d7d32018ea953';
+    r'912751de09d538bd631520955e7405444e626387';
 
 /// Stream of account callback handoff codes extracted from deep link intents.
 

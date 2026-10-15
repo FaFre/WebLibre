@@ -158,6 +158,37 @@ void main() {
       expect(secondRun.read(provider), SearchModuleDisplayState.expanded);
     });
 
+    test('a synchronous storage restores on the very first read', () async {
+      // What the startup preload buys (#665): no read of the default first, so
+      // a collapsed section never paints expanded before snapping shut.
+      final Storage<String, String> storage = Storage.inMemory();
+      await storage.write(
+        searchModuleDisplayStateKey(
+          ModuleSurface.home,
+          SearchModuleType.recentHistory,
+        ),
+        SearchModuleDisplayState.collapsed.name,
+        const StorageOptions(),
+      );
+
+      final run = ProviderContainer(
+        overrides: [
+          riverpodDatabaseStorageProvider.overrideWith((ref) => storage),
+        ],
+      );
+      addTearDown(run.dispose);
+
+      expect(
+        run.read(
+          searchModuleDisplayStateControllerProvider(
+            ModuleSurface.home,
+            SearchModuleType.recentHistory,
+          ),
+        ),
+        SearchModuleDisplayState.collapsed,
+      );
+    });
+
     test('the search screen keeps its two surfaces apart', () async {
       // The search screen is newTab before anything is typed and search after,
       // so the same section can be expanded in one state and not the other.

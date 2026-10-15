@@ -603,6 +603,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       (previous, next) {
         next.whenData((sharedContent) async {
           final settings = ref.read(generalSettingsWithDefaultsProvider);
+          // Held in a local for the reason the claim below is.
+          final launchCover = ref.read(startupLaunchCoverProvider.notifier);
 
           switch (settings.effectiveTabIntentOpenSetting) {
             case TabIntentOpenSetting.regular:
@@ -614,6 +616,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
               // this widget's ref still being usable after the awaits below.
               final launchClaim = ref.read(intentLaunchClaimProvider.notifier)
                 ..claim();
+              var openedTab = false;
 
               try {
                 await ref
@@ -648,6 +651,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                           selectTab: true,
                           containerSelection: containerSelection,
                         );
+                    openedTab = true;
                   case SharedText():
                     final bang =
                         ref.read(selectedBangDataProvider()) ??
@@ -655,7 +659,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
                     if (bang != null && isWebSearchBang(bang)) {
                       final router = await ref.read(routerProvider.future);
-                      await router.push(
+                      final pushed = router.push(
                         SearchRoute(
                           tabType: tabMode.toTabType(),
                           searchText: sharedContent.text,
@@ -663,6 +667,8 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                           autoSubmitSearch: true,
                         ).location,
                       );
+                      launchCover.lower();
+                      await pushed;
                       break;
                     }
 
@@ -674,9 +680,16 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                           launchedFromIntent: true,
                           selectTab: true,
                         );
+                    openedTab = true;
                 }
               } finally {
                 launchClaim.release();
+                // An opened tab lowers the cover itself once it is selected;
+                // lowering here would show home for the frames before the
+                // selection lands. Anything else is followed by no selection.
+                if (!openedTab) {
+                  launchCover.lower();
+                }
               }
             case TabIntentOpenSetting.ask:
               final router = await ref.read(routerProvider.future);
@@ -688,7 +701,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     contextId: sharedContent.contextId,
                     containerMode: sharedContent.containerMode.queryValueOrNull,
                   );
-                  await router.push(route.location);
+                  final pushed = router.push(route.location);
+                  launchCover.lower();
+                  await pushed;
                 case SharedText():
                   final route = SearchRoute(
                     tabType:
@@ -697,7 +712,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                     searchText: sharedContent.text,
                     launchedFromIntent: true, //launched from intent
                   );
-                  await router.push(route.location);
+                  final pushed = router.push(route.location);
+                  launchCover.lower();
+                  await pushed;
               }
           }
         });

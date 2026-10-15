@@ -191,7 +191,10 @@ class SmallWebSessionController extends _$SmallWebSessionController {
       return const AsyncLoading();
     }
 
-    return AsyncData(SmallWebSessionState.initial(SmallWebSourceKind.kagi));
+    // A synchronous read has already decoded the saved session into `state`
+    // during this build; returning the initial state here would discard it.
+    return stateOrNull ??
+        AsyncData(SmallWebSessionState.initial(SmallWebSourceKind.kagi));
   }
 
   void setSourceKind(SmallWebSourceKind kind) {

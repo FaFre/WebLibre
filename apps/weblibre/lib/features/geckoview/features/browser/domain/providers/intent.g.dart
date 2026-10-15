@@ -13,7 +13,9 @@ part of 'intent.dart';
 /// Held from the moment the launch is delivered — synchronously, before the
 /// engine-readiness wait — until its tab exists, so that startup logic which
 /// would otherwise conclude the browser has nothing to show waits for it
-/// instead.
+/// instead. On a cold start [StartupLaunchCover] holds one from earlier still,
+/// before the router mounts, covering the stretch before the launch reaches the
+/// consumer.
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
@@ -32,7 +34,9 @@ final intentLaunchClaimProvider = IntentLaunchClaimProvider._();
 /// Held from the moment the launch is delivered — synchronously, before the
 /// engine-readiness wait — until its tab exists, so that startup logic which
 /// would otherwise conclude the browser has nothing to show waits for it
-/// instead.
+/// instead. On a cold start [StartupLaunchCover] holds one from earlier still,
+/// before the router mounts, covering the stretch before the launch reaches the
+/// consumer.
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
@@ -49,7 +53,9 @@ final class IntentLaunchClaimProvider
   /// Held from the moment the launch is delivered — synchronously, before the
   /// engine-readiness wait — until its tab exists, so that startup logic which
   /// would otherwise conclude the browser has nothing to show waits for it
-  /// instead.
+  /// instead. On a cold start [StartupLaunchCover] holds one from earlier still,
+  /// before the router mounts, covering the stretch before the launch reaches the
+  /// consumer.
   ///
   /// The two are far apart on a cold start. Opening the launch means waiting for
   /// the engine, resolving a container and writing the tab DB, while
@@ -93,7 +99,9 @@ String _$intentLaunchClaimHash() => r'8e6b5ad99d1c451b3b7e8a0379703e96ad1b6ad4';
 /// Held from the moment the launch is delivered — synchronously, before the
 /// engine-readiness wait — until its tab exists, so that startup logic which
 /// would otherwise conclude the browser has nothing to show waits for it
-/// instead.
+/// instead. On a cold start [StartupLaunchCover] holds one from earlier still,
+/// before the router mounts, covering the stretch before the launch reaches the
+/// consumer.
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
@@ -105,6 +113,133 @@ String _$intentLaunchClaimHash() => r'8e6b5ad99d1c451b3b7e8a0379703e96ad1b6ad4';
 /// settled.
 
 abstract class _$IntentLaunchClaim extends $Notifier<bool> {
+  bool build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<bool, bool>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Keeps the browser behind the startup spinner while a cold start is still
+/// opening the launch the app was started for.
+///
+/// The router mounts as soon as initialization finishes, and the restored
+/// session has no selection yet, so the home surface painted for a quarter of a
+/// second before the launch's tab replaced it (#612).
+///
+/// Raised by startup, before the router mounts, from the receiver's backlog.
+/// While up it holds an [IntentLaunchClaim]: the consumer takes its own only
+/// once the launch has crossed the gatekeeper and reached the browser view, and
+/// a startup home target that ran in between found no claim, no selection, and
+/// latched home over the launch anyway.
+///
+/// Lowered by whichever comes first:
+/// - a tab is selected — normally the launch's own;
+/// - the sharing pipeline let go of every awaited launch without opening it;
+/// - the consumer gave up, or is showing a route rather than a tab ([lower]);
+/// - [_maxCover], so a launch lost on the way never strands the spinner.
+
+@ProviderFor(StartupLaunchCover)
+final startupLaunchCoverProvider = StartupLaunchCoverProvider._();
+
+/// Keeps the browser behind the startup spinner while a cold start is still
+/// opening the launch the app was started for.
+///
+/// The router mounts as soon as initialization finishes, and the restored
+/// session has no selection yet, so the home surface painted for a quarter of a
+/// second before the launch's tab replaced it (#612).
+///
+/// Raised by startup, before the router mounts, from the receiver's backlog.
+/// While up it holds an [IntentLaunchClaim]: the consumer takes its own only
+/// once the launch has crossed the gatekeeper and reached the browser view, and
+/// a startup home target that ran in between found no claim, no selection, and
+/// latched home over the launch anyway.
+///
+/// Lowered by whichever comes first:
+/// - a tab is selected — normally the launch's own;
+/// - the sharing pipeline let go of every awaited launch without opening it;
+/// - the consumer gave up, or is showing a route rather than a tab ([lower]);
+/// - [_maxCover], so a launch lost on the way never strands the spinner.
+final class StartupLaunchCoverProvider
+    extends $NotifierProvider<StartupLaunchCover, bool> {
+  /// Keeps the browser behind the startup spinner while a cold start is still
+  /// opening the launch the app was started for.
+  ///
+  /// The router mounts as soon as initialization finishes, and the restored
+  /// session has no selection yet, so the home surface painted for a quarter of a
+  /// second before the launch's tab replaced it (#612).
+  ///
+  /// Raised by startup, before the router mounts, from the receiver's backlog.
+  /// While up it holds an [IntentLaunchClaim]: the consumer takes its own only
+  /// once the launch has crossed the gatekeeper and reached the browser view, and
+  /// a startup home target that ran in between found no claim, no selection, and
+  /// latched home over the launch anyway.
+  ///
+  /// Lowered by whichever comes first:
+  /// - a tab is selected — normally the launch's own;
+  /// - the sharing pipeline let go of every awaited launch without opening it;
+  /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
+  /// - [_maxCover], so a launch lost on the way never strands the spinner.
+  StartupLaunchCoverProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'startupLaunchCoverProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$startupLaunchCoverHash();
+
+  @$internal
+  @override
+  StartupLaunchCover create() => StartupLaunchCover();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$startupLaunchCoverHash() =>
+    r'cfd50ec0f5172b8ca068a3b96efa0620ee11fc3f';
+
+/// Keeps the browser behind the startup spinner while a cold start is still
+/// opening the launch the app was started for.
+///
+/// The router mounts as soon as initialization finishes, and the restored
+/// session has no selection yet, so the home surface painted for a quarter of a
+/// second before the launch's tab replaced it (#612).
+///
+/// Raised by startup, before the router mounts, from the receiver's backlog.
+/// While up it holds an [IntentLaunchClaim]: the consumer takes its own only
+/// once the launch has crossed the gatekeeper and reached the browser view, and
+/// a startup home target that ran in between found no claim, no selection, and
+/// latched home over the launch anyway.
+///
+/// Lowered by whichever comes first:
+/// - a tab is selected — normally the launch's own;
+/// - the sharing pipeline let go of every awaited launch without opening it;
+/// - the consumer gave up, or is showing a route rather than a tab ([lower]);
+/// - [_maxCover], so a launch lost on the way never strands the spinner.
+
+abstract class _$StartupLaunchCover extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override

@@ -224,7 +224,7 @@ final class SmallWebSessionControllerProvider
 }
 
 String _$smallWebSessionControllerHash() =>
-    r'96799489847e377da05be4918bf4d4c9454b5c10';
+    r'6069b59ef693d21c04893e20771f4dd5c16f3eda';
 
 abstract class _$SmallWebSessionController
     extends $Notifier<AsyncValue<SmallWebSessionState>> {

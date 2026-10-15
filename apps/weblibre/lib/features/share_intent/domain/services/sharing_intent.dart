@@ -41,131 +41,169 @@ part 'sharing_intent.g.dart';
 
 const _alwaysAllowPackageExtra = 'eu.weblibre.gatekeeper.always_allow_package';
 
+/// What a launch carries to open: the link, the shared text or file, or the
+/// text to search for. Null for anything else.
+///
+/// Never throws. Extras are whatever the sending app put there, and this also
+/// classifies launches during startup, where a throw would stop the app before
+/// its UI mounts.
+String? _launchPayload(Intent intent) => switch (intent.action) {
+  'android.intent.action.PROCESS_TEXT' => _stringExtra(
+    intent,
+    'android.intent.extra.PROCESS_TEXT',
+  ),
+  'android.intent.action.WEB_SEARCH' => _stringExtra(intent, 'query'),
+  'android.intent.action.VIEW' => intent.data,
+  'android.intent.action.SEND' =>
+    _stringExtra(intent, 'android.intent.extra.STREAM') ??
+        _stringExtra(intent, 'android.intent.extra.TEXT'),
+  _ => null,
+};
+
+/// [key]'s extra when it is a string; null when missing or of any other type.
+String? _stringExtra(Intent intent, String key) => switch (intent.extra[key]) {
+  final String value => value,
+  _ => null,
+};
+
+/// Whether [intent] may end up opening something in the browser.
+///
+/// An upper bound, decided from the intent alone: the gatekeeper can still
+/// block it, and a file can turn out to be a type the browser does not open.
+/// The intents other consumers own — account callbacks, restart requests — are
+/// never openable, because the pipeline below suppresses them.
+bool isOpenableLaunch(Intent intent) =>
+    _extractAccountCallback(intent) == null &&
+    restartProfileIdClaim(intent) == null &&
+    _launchPayload(intent) != null;
+
 StreamTransformer<Intent, ReceivedIntentParameter>
 _buildSharingIntentTransformer(
   IntentGatekeeper gatekeeper,
-  GeneralSettingsRepository settingsRepository,
-) => StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
+  GeneralSettingsRepository settingsRepository, {
+  required void Function(Intent intent) onUnopened,
+}) => StreamTransformer<Intent, ReceivedIntentParameter>.fromHandlers(
   handleData: (intent, sink) async {
-    if (_extractAccountCallback(intent) != null) {
-      // Account callback intents are consumed by accountCallbackStreamProvider —
-      // suppress them from the regular share/sharing intent pipeline so they
-      // don't open a browser tab.
-      return;
+    var forwarded = false;
+
+    try {
+      await _forwardSharingIntent(intent, gatekeeper, settingsRepository, (
+        parameter,
+      ) {
+        forwarded = true;
+        sink.add(parameter);
+      });
+    } finally {
+      if (!forwarded) {
+        onUnopened(intent);
+      }
     }
+  },
+);
 
-    if (restartProfileIdClaim(intent) != null) {
-      // Same reasoning: profileRestartRequestHandlerProvider consumes these. It
-      // carries no URL, so letting it through here would open a blank tab in the
-      // profile the user is about to leave.
-      //
-      // The *claim* rather than the authorization, deliberately: an unauthorized
-      // request is refused there and must be dropped here too. Suppressing it is
-      // the whole answer — it carries nothing to open — and consuming the
-      // authorization twice would spend it on this branch.
-      return;
-    }
+Future<void> _forwardSharingIntent(
+  Intent intent,
+  IntentGatekeeper gatekeeper,
+  GeneralSettingsRepository settingsRepository,
+  void Function(ReceivedIntentParameter parameter) forward,
+) async {
+  if (_extractAccountCallback(intent) != null) {
+    // Account callback intents are consumed by accountCallbackStreamProvider —
+    // suppress them from the regular share/sharing intent pipeline so they
+    // don't open a browser tab.
+    return;
+  }
 
-    final alwaysAllowPackage =
-        intent.extra[_alwaysAllowPackageExtra] as String?;
-    if (alwaysAllowPackage != null) {
-      await settingsRepository.updateSettings(
-        (current) => current.copyWith.externalAppIntentPolicies({
-          ...current.externalAppIntentPolicies,
-          alwaysAllowPackage: IntentSourcePolicy.allow,
-        }),
-      );
-    }
+  if (restartProfileIdClaim(intent) != null) {
+    // Same reasoning: profileRestartRequestHandlerProvider consumes these. It
+    // carries no URL, so letting it through here would open a blank tab in the
+    // profile the user is about to leave.
+    //
+    // The *claim* rather than the authorization, deliberately: an unauthorized
+    // request is refused there and must be dropped here too. Suppressing it is
+    // the whole answer — it carries nothing to open — and consuming the
+    // authorization twice would spend it on this branch.
+    return;
+  }
 
-    final shortcutContextId = intent.action == 'android.intent.action.VIEW'
-        ? intent.extra['pwa_context_id'] as String?
-        : null;
-    final shortcutContainerMode =
-        intent.extra['shortcut_container_mode'] as String?;
-    final hasShortcutContainerMetadata =
-        shortcutContextId != null || shortcutContainerMode != null;
-    final containerMode = intent.action == 'android.intent.action.VIEW'
-        ? hasShortcutContainerMetadata
-              ? IntentContainerMode.fromWireValue(
-                  shortcutContainerMode,
-                  contextId: shortcutContextId,
-                )
-              : IntentContainerMode.unassigned
-        : IntentContainerMode.useSelected;
-
-    final allowed = await gatekeeper.shouldAllow(
-      fromPackageName: intent.fromPackageName,
-      url: intent.data,
+  final alwaysAllowPackage = intent.extra[_alwaysAllowPackageExtra] as String?;
+  if (alwaysAllowPackage != null) {
+    await settingsRepository.updateSettings(
+      (current) => current.copyWith.externalAppIntentPolicies({
+        ...current.externalAppIntentPolicies,
+        alwaysAllowPackage: IntentSourcePolicy.allow,
+      }),
     );
-    if (!allowed) {
-      logger.i(
-        'Blocked intent from ${intent.fromPackageName ?? 'unknown app'}',
-      );
-      return;
-    }
+  }
 
-    final data = switch (intent.action) {
-      'android.intent.action.PROCESS_TEXT' =>
-        intent.extra['android.intent.extra.PROCESS_TEXT'] as String?,
-      'android.intent.action.WEB_SEARCH' => intent.extra['query'] as String?,
-      'android.intent.action.VIEW' => intent.data,
-      'android.intent.action.SEND' =>
-        intent.extra['android.intent.extra.STREAM'] as String? ??
-            intent.extra['android.intent.extra.TEXT'] as String?,
-      _ => null,
-    };
+  final shortcutContextId = intent.action == 'android.intent.action.VIEW'
+      ? intent.extra['pwa_context_id'] as String?
+      : null;
+  final shortcutContainerMode =
+      intent.extra['shortcut_container_mode'] as String?;
+  final hasShortcutContainerMetadata =
+      shortcutContextId != null || shortcutContainerMode != null;
+  final containerMode = intent.action == 'android.intent.action.VIEW'
+      ? hasShortcutContainerMetadata
+            ? IntentContainerMode.fromWireValue(
+                shortcutContainerMode,
+                contextId: shortcutContextId,
+              )
+            : IntentContainerMode.unassigned
+      : IntentContainerMode.useSelected;
 
-    // Extract container context from shortcut intents.
-    final contextId = shortcutContextId;
+  final allowed = await gatekeeper.shouldAllow(
+    fromPackageName: intent.fromPackageName,
+    url: intent.data,
+  );
+  if (!allowed) {
+    logger.i('Blocked intent from ${intent.fromPackageName ?? 'unknown app'}');
+    return;
+  }
 
-    if (data != null) {
-      if (uri_to_file.isUriSupported(data)) {
-        var path = data;
-        if (p.extension(data).whenNotEmpty == null) {
-          if (intent.mimeType.whenNotEmpty != null) {
-            final ext = mime.extensionFromMime(intent.mimeType!);
-            if (ext != null) {
-              path = p.setExtension(path, '.$ext');
-            } else {
-              logger.w(
-                'Could not determine file extension for: ${intent.mimeType}',
-              );
-            }
+  final data = _launchPayload(intent);
+
+  // Extract container context from shortcut intents.
+  final contextId = shortcutContextId;
+
+  if (data != null) {
+    if (uri_to_file.isUriSupported(data)) {
+      var path = data;
+      if (p.extension(data).whenNotEmpty == null) {
+        if (intent.mimeType.whenNotEmpty != null) {
+          final ext = mime.extensionFromMime(intent.mimeType!);
+          if (ext != null) {
+            path = p.setExtension(path, '.$ext');
           } else {
-            logger.w('Received intent without extension and mime type $path');
+            logger.w(
+              'Could not determine file extension for: ${intent.mimeType}',
+            );
           }
+        } else {
+          logger.w('Received intent without extension and mime type $path');
         }
+      }
 
-        try {
-          final file = await uri_to_file.toFile(path);
-          final mimeType = mime.lookupMimeType(file.path);
-          switch (mimeType) {
-            case 'application/pdf':
-              sink.add(
-                ReceivedIntentParameter(
-                  path,
-                  null,
-                  contextId: contextId,
-                  containerMode: containerMode,
-                ),
-              );
-            default:
-              logger.w('Unhandled mime type: $mimeType');
-          }
-        } catch (e) {
-          logger.e('Failed to convert URI to file: $e');
-          // Fallback: pass the original URI
-          sink.add(
-            ReceivedIntentParameter(
-              data,
-              null,
-              contextId: contextId,
-              containerMode: containerMode,
-            ),
-          );
+      try {
+        final file = await uri_to_file.toFile(path);
+        final mimeType = mime.lookupMimeType(file.path);
+        switch (mimeType) {
+          case 'application/pdf':
+            forward(
+              ReceivedIntentParameter(
+                path,
+                null,
+                contextId: contextId,
+                containerMode: containerMode,
+              ),
+            );
+          default:
+            logger.w('Unhandled mime type: $mimeType');
         }
-      } else {
-        sink.add(
+      } catch (e) {
+        logger.e('Failed to convert URI to file: $e');
+        // Fallback: pass the original URI
+        forward(
           ReceivedIntentParameter(
             data,
             null,
@@ -174,9 +212,18 @@ _buildSharingIntentTransformer(
           ),
         );
       }
+    } else {
+      forward(
+        ReceivedIntentParameter(
+          data,
+          null,
+          contextId: contextId,
+          containerMode: containerMode,
+        ),
+      );
     }
-  },
-);
+  }
+}
 
 /// Native intent receiver, consumed only by [intentBus]. Sharing and account
 /// callback handlers subscribe to [allIntents], not directly to this receiver.
@@ -273,14 +320,41 @@ Raw<Stream<Intent>> allIntents(Ref ref) => ref.watch(intentBusProvider).stream;
 /// [bufferedIntentStream]), which covers the second half of the problem: the
 /// widget that finally acts on a replayed launch mounts later still.
 @Riverpod(keepAlive: true)
-Future<int> brokeredIntentDelivery(Ref ref) {
+Future<int> brokeredIntentDelivery(Ref ref) async {
   final bus = ref.watch(intentBusProvider);
   bus.startDelivery();
 
-  return drainBrokeredIntents(
+  return await deliverClaimedLaunches(
+    await ref.read(brokeredLaunchClaimProvider.notifier).take(),
     engineId: engineInstanceId,
     deliver: (intent) async => bus.emit(intent),
   );
+}
+
+/// The broker's queue, claimed ahead of its delivery.
+///
+/// Startup claims it before the router mounts, to know whether a launch is on
+/// its way while the profile picker held it (`StartupLaunchCover` in the
+/// browser); [brokeredIntentDelivery] takes the same claim later and delivers
+/// it. Claimed at most once per delivery: [take] hands the claim over and
+/// forgets it, so a later delivery claims afresh rather than replaying.
+@Riverpod(keepAlive: true)
+class BrokeredLaunchClaim extends _$BrokeredLaunchClaim {
+  Future<List<ClaimedLaunch>>? _claimed;
+
+  @override
+  void build() {}
+
+  /// Claims the queue, or returns the claim already taken.
+  Future<List<ClaimedLaunch>> claim() =>
+      _claimed ??= claimBrokeredIntents(engineId: engineInstanceId);
+
+  /// Hands the claim over for delivery, claiming first if nobody has.
+  Future<List<ClaimedLaunch>> take() {
+    final claimed = claim();
+    _claimed = null;
+    return claimed;
+  }
 }
 
 /// Subscribes to [source] now, and re-publishes it as a broadcast stream that
@@ -324,6 +398,23 @@ Raw<Stream<T>> _consumeIntents<T>(
   StreamTransformer<Intent, T> transformer,
 ) => bufferedIntentStream(ref, intents.transform(transformer));
 
+/// Intents the sharing pipeline let go of without passing anything on: blocked
+/// by the gatekeeper, owned by another consumer, carrying nothing to open, or a
+/// file of a type the browser does not take.
+///
+/// For whoever is waiting on a launch to tell when it is not coming, rather
+/// than waiting out a timeout. Synchronous, so the news lands in the same turn
+/// the pipeline gives up.
+///
+/// The pipeline adds to the controller; listeners take its stream.
+@Riverpod(keepAlive: true)
+Raw<StreamController<Intent>> unopenedSharingIntents(Ref ref) {
+  final controller = StreamController<Intent>.broadcast(sync: true);
+  ref.onDispose(controller.close);
+
+  return controller;
+}
+
 @Riverpod(keepAlive: true)
 Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
   final intents = ref.watch(allIntentsProvider);
@@ -331,10 +422,19 @@ Raw<Stream<ReceivedIntentParameter>> sharingIntentStream(Ref ref) {
   final settingsRepository = ref.watch(
     generalSettingsRepositoryProvider.notifier,
   );
+  final unopened = ref.watch(unopenedSharingIntentsProvider);
   return _consumeIntents(
     ref,
     intents,
-    _buildSharingIntentTransformer(gatekeeper, settingsRepository),
+    _buildSharingIntentTransformer(
+      gatekeeper,
+      settingsRepository,
+      // A handler still awaiting when the container goes reports after the
+      // controller has closed.
+      onUnopened: (intent) {
+        if (!unopened.isClosed) unopened.add(intent);
+      },
+    ),
   );
 }
 

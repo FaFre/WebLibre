@@ -44,6 +44,7 @@ import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 import 'package:logger/logger.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 import 'package:nullability/nullability.dart';
+import 'package:simple_intent_receiver/simple_intent_receiver.dart' as sir;
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/design/dynamic_color_scheme.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
@@ -61,15 +62,20 @@ import 'package:weblibre/features/account/domain/services/account_callback_handl
 import 'package:weblibre/features/app_widget/domain/services/home_widget.dart';
 import 'package:weblibre/features/bangs/domain/services/search_history_cleanup.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/engine_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/history_exclusion_replication.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/services/visit_container_recorder.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
+import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
@@ -78,6 +84,8 @@ import 'package:weblibre/features/proxy/domain/services/proxy_demand.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_log_level_applier.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
+import 'package:weblibre/features/user/data/database/riverpod_storage.dart';
+import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -327,9 +335,47 @@ class _MainWidget extends HookConsumerWidget {
           ref.read(generalSettingsRepositoryProvider.notifier).fetchSettings()
             ..ignore();
 
+      // Every `persist()` provider built after this reads its saved state
+      // synchronously, inside its first build, so its first frame is already
+      // the saved one rather than the default it would snap away from (#665).
+      // Joined here because it is one more small query beside two the engine
+      // waits for anyway, and so that the providers built during the engine
+      // bring-up below are already on the synchronous path.
+      final riverpodStorage = ref.read(riverpodDatabaseStorageProvider);
+      final persistedStatePreload = riverpodStorage is RiverpodStorage
+          ? (riverpodStorage.preload()..ignore())
+          : null;
+
       await countryCodes;
       final engineSettings = await engineSettingsFuture;
       final generalSettings = await generalSettingsFuture;
+
+      try {
+        await persistedStatePreload;
+      } catch (e, s) {
+        // Not fatal: reads keep going to the database, and the only cost is the
+        // flash this is here to prevent.
+        logger.w('Failed preloading persisted state', error: e, stackTrace: s);
+      }
+
+      // Takes the launch backlog from the host, and claims what the broker held
+      // while the profile picker was up, now rather than when the intent
+      // consumers are built after `initialize()`: whether the app was started
+      // for a link has to be known before the router mounts, or the home surface
+      // paints first (#612). Nothing is delivered early — the bus holds every
+      // intent until `brokeredIntentDelivery` starts delivery and delivers the
+      // broker's claim, as it always has.
+      _activateService(ref, intentBusProvider);
+      final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
+        ..ignore();
+      final brokeredLaunches =
+          ref
+              .read(brokeredLaunchClaimProvider.notifier)
+              .claim()
+              .then(
+                (launches) => [for (final launch in launches) launch.intent],
+              )
+            ..ignore();
 
       final startupUBlockFilterListsPref =
           engineSettings.ublockFilterListSettings.enabled
@@ -488,6 +534,66 @@ class _MainWidget extends HookConsumerWidget {
       // Arms the "search history limit was reduced" listener; a reduction made
       // while the browser view was gone used to be missed entirely.
       _activateService(ref, searchHistoryCleanupServiceProvider);
+
+      // What the browser's first frame draws from, loaded before it mounts:
+      // otherwise each one paints its default and then the saved state (#665) —
+      // the stock toolbar buttons, the brand header and profile wallpaper over a
+      // container's own, the gestures toggle in the wrong state. Activated, not
+      // just read: a read takes no listener, and the auto-disposed container
+      // data would be gone again before the first frame.
+      for (final location in ToolbarConfigLocation.values) {
+        _activateService(ref, toolbarButtonConfigsProvider(location));
+      }
+      _activateService(ref, selectedContainerDataProvider);
+      _activateService(ref, gestureSettingsRepositoryProvider);
+
+      try {
+        await Future.wait([
+          for (final location in ToolbarConfigLocation.values)
+            ref.read(toolbarButtonConfigsProvider(location).future),
+          ref.read(selectedContainerDataProvider.future),
+          ref.read(gestureSettingsRepositoryProvider.future),
+        ])
+        // Cosmetic, so it never holds the UI back for long: past this the
+        // first frame shows defaults, as it always did.
+        .timeout(const Duration(seconds: 2));
+      } catch (e, s) {
+        logger.w(
+          'Failed preloading first-frame state',
+          error: e,
+          stackTrace: s,
+        );
+      }
+
+      // Raised before the router mounts, so the spinner stays up until the
+      // launch's tab is selected instead of handing over to the home surface.
+      _activateService(ref, startupLaunchCoverProvider);
+      // Both answered long ago in practice: they were asked for before the
+      // engine started. Bounded anyway, since a source that does not answer
+      // only goes uncovered — which is how every start looked before.
+      final startupLaunches = await Future.wait([
+        for (final launches in [startupBacklog, brokeredLaunches])
+          launches.timeout(const Duration(seconds: 1)).catchError((
+            Object e,
+            StackTrace s,
+          ) {
+            logger.w(
+              'Failed reading startup launches',
+              error: e,
+              stackTrace: s,
+            );
+            return const <sir.Intent>[];
+          }),
+      ]);
+      // The launches are another app's data, read synchronously from here:
+      // nothing in deciding the cover may stop the app from starting.
+      try {
+        ref
+            .read(startupLaunchCoverProvider.notifier)
+            .raiseFor(startupLaunches.expand((l) => l).where(isOpenableLaunch));
+      } catch (e, s) {
+        logger.w('Failed raising the startup cover', error: e, stackTrace: s);
+      }
 
       try {
         // Before `initialize()`, because that is what flips `initialized: true`

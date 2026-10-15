@@ -104,6 +104,46 @@ void main() {
       expect(api.acknowledged, ['a', 'b']);
     });
 
+    test('claiming early delivers the very intents it claimed', () async {
+      // Startup claims before the router mounts and decides the startup cover
+      // from these intents; delivery runs later. The cover matches what it is
+      // waiting for by identity, so delivery must publish the same objects —
+      // and must not ask the broker a second time.
+      final api = _FakeProfileApi([record('a'), record('b', sequence: 2)]);
+      final service = GeckoProfileService(api: api);
+
+      final claimed = await claimBrokeredIntents(
+        engineId: 'engine-1',
+        service: service,
+      );
+      final seen = <sir.Intent>[];
+      final delivered = await deliverClaimedLaunches(
+        claimed,
+        engineId: 'engine-1',
+        service: service,
+        deliver: (intent) async => seen.add(intent),
+      );
+
+      expect(delivered, 2);
+      expect(api.claimCalls, 1);
+      expect(seen, hasLength(2));
+      expect(identical(seen[0], claimed[0].intent), isTrue);
+      expect(identical(seen[1], claimed[1].intent), isTrue);
+      expect(api.acknowledged, ['a', 'b']);
+    });
+
+    test('a failed claim claims nothing', () async {
+      final api = _FakeProfileApi([record('a')])..claimThrows = true;
+
+      expect(
+        await claimBrokeredIntents(
+          engineId: 'engine-1',
+          service: GeckoProfileService(api: api),
+        ),
+        isEmpty,
+      );
+    });
+
     test('a launch that fails to deliver is handed back, not retired', () async {
       // Acknowledging it would retire a launch that never reached the user, with
       // no record that it existed.
