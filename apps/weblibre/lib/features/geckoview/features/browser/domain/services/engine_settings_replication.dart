@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/bro
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -165,14 +166,23 @@ class EngineSettingsReplicationService
     ref.listen(
       fireImmediately: true,
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.pullToRefreshEnabled,
+        (settings) => (
+          enabled: settings.pullToRefreshEnabled,
+          triggerDistanceDp: settings.pullToRefreshTriggerDistance.clamp(
+            minPullToRefreshTriggerDistance,
+            maxPullToRefreshTriggerDistance,
+          ),
+        ),
       ),
       (previous, next) async {
-        await _service.setPullToRefreshEnabled(next);
+        await _service.setPullToRefreshSettings(
+          enabled: next.enabled,
+          triggerDistanceDp: next.triggerDistanceDp,
+        );
       },
       onError: (error, stackTrace) {
         logger.e(
-          'Error listening to pullToRefreshEnabled',
+          'Error listening to pull-to-refresh settings',
           error: error,
           stackTrace: stackTrace,
         );

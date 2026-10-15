@@ -39,6 +39,7 @@ import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
 import eu.weblibre.flutter_mozilla_components.feature.PromptSheet
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
+import eu.weblibre.flutter_mozilla_components.pigeons.PullToRefreshSettings
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
 import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
@@ -178,7 +179,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     // Held as fields so this fragment can unregister exactly its own
     // registration: a Custom Tab window and the main browser window are alive
     // at the same time, and neither may take the other's off GlobalComponents.
-    private val pullToRefreshSettingListener: (Boolean) -> Unit = { updatePullToRefreshEnabled() }
+    private val pullToRefreshSettingListener: () -> Unit = { updatePullToRefresh() }
     private val secureWindowSettingsListener: () -> Unit = { updateSecureWindowState() }
 
     protected abstract fun createEngine(components: Components): EngineView
@@ -396,9 +397,9 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
-            // Apply pull-to-refresh setting
+            // Apply pull-to-refresh settings
             applyPullToRefreshTheme()
-            updatePullToRefreshEnabled()
+            updatePullToRefresh()
             GlobalComponents.addPullToRefreshListener(pullToRefreshSettingListener)
             GlobalComponents.addSecureWindowSettingsListener(secureWindowSettingsListener)
             updateSecureWindowState()
@@ -728,7 +729,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             activity?.exitImmersiveMode()
         }
 
-        updatePullToRefreshEnabled(enabled)
+        updatePullToRefresh(enabled)
     }
 
     /**
@@ -740,12 +741,15 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * scrolled to the top, so without this guard every downward drag over it
      * arms the throbber and reloads the page on release.
      */
-    private fun shouldPullToRefreshBeEnabled(inFullScreen: Boolean): Boolean =
-        GlobalComponents.isPullToRefreshEnabled() && !inFullScreen
+    private fun shouldPullToRefreshBeEnabled(
+        settings: PullToRefreshSettings,
+        inFullScreen: Boolean,
+    ): Boolean = settings.enabled && !inFullScreen
 
     /**
-     * Re-applies [shouldPullToRefreshBeEnabled] to the layout. Called from both
-     * inputs that can change the answer: the setting, and fullscreen entry/exit.
+     * Re-applies [shouldPullToRefreshBeEnabled] and the trigger distance to the
+     * layout. Called from every input that can change either: the settings, and
+     * fullscreen entry/exit.
      *
      * [inFullScreen] defaults to the tab's own state, so a view recreated while
      * a tab is already fullscreen does not come back with pull-to-refresh on.
@@ -754,13 +758,15 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * `GlobalComponents` rather than the `components` lazy, since the default
      * argument is evaluated even when there is no longer a view to apply it to.
      */
-    private fun updatePullToRefreshEnabled(
+    private fun updatePullToRefresh(
         inFullScreen: Boolean = GlobalComponents.components
             ?.core?.store?.state
             ?.findTabOrCustomTabOrSelectedTab(sessionId)?.content?.fullScreen == true,
     ) {
         val layout = _binding?.swipeToRefresh ?: return
-        layout.isEnabled = shouldPullToRefreshBeEnabled(inFullScreen)
+        val settings = GlobalComponents.pullToRefreshSettings()
+        layout.isEnabled = shouldPullToRefreshBeEnabled(settings, inFullScreen)
+        layout.setTriggerDistanceDp(settings.triggerDistanceDp)
     }
 
     /**

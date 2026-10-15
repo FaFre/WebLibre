@@ -7955,6 +7955,17 @@ class AppLocalizationsDe extends AppLocalizations {
       'Auf Seiten nach unten wischen, um sie neu zu laden';
 
   @override
+  String get settings_pullToRefreshDistanceTitle => 'Zugweg zum Aktualisieren';
+
+  @override
+  String get settings_pullToRefreshDistanceKeywords =>
+      'Empfindlichkeit, Schwelle, neu laden, wischen';
+
+  @override
+  String get settings_pullToRefreshDistanceSubtitle =>
+      'Wie weit nach unten gezogen werden muss, bis die Seite neu lädt, im Verhältnis zum Standard';
+
+  @override
   String get settings_customTabsTitle => 'Custom Tabs';
 
   @override
@@ -10983,6 +10994,17 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settings_autoHideTabBarSubtitle =>
       'Tableiste beim Scrollen ausblenden';
+
+  @override
+  String get settings_autoHideTabBarDistanceTitle => 'Scrollweg zum Ausblenden';
+
+  @override
+  String get settings_autoHideTabBarDistanceKeywords =>
+      'Empfindlichkeit, Schwelle, scrollen, wischen';
+
+  @override
+  String get settings_autoHideTabBarDistanceSubtitle =>
+      'Wie weit gescrollt werden muss, bis die Tableiste aus- oder wieder eingeblendet wird, im Verhältnis zum Standard';
 
   @override
   String get settings_autoHideSidePanelTitle =>

@@ -8000,6 +8000,17 @@ class AppLocalizationsEs extends AppLocalizations {
       'Desliza hacia abajo en las páginas para recargarlas';
 
   @override
+  String get settings_pullToRefreshDistanceTitle => 'Distancia para actualizar';
+
+  @override
+  String get settings_pullToRefreshDistanceKeywords =>
+      'sensibilidad, umbral, recargar, deslizar, threshold';
+
+  @override
+  String get settings_pullToRefreshDistanceSubtitle =>
+      'Cuánto deslizar hacia abajo antes de que la página se recargue, en comparación con el valor predeterminado';
+
+  @override
   String get settings_customTabsTitle => 'Pestañas personalizadas';
 
   @override
@@ -11074,6 +11085,18 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_autoHideTabBarSubtitle =>
       'Ocultar la barra de pestañas al desplazarse';
+
+  @override
+  String get settings_autoHideTabBarDistanceTitle =>
+      'Distancia para ocultar automáticamente';
+
+  @override
+  String get settings_autoHideTabBarDistanceKeywords =>
+      'sensibilidad, umbral, desplazamiento, deslizar, scroll, threshold';
+
+  @override
+  String get settings_autoHideTabBarDistanceSubtitle =>
+      'Cuánto desplazarte antes de que la barra de pestañas se oculte o vuelva a aparecer, en comparación con el valor predeterminado';
 
   @override
   String get settings_autoHideSidePanelTitle =>

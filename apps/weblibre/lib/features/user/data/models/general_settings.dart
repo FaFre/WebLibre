@@ -73,6 +73,35 @@ const minQuickTabSwitcherTitleWidth = 32.0;
 const maxQuickTabSwitcherTitleWidth = 128.0;
 const quickTabSwitcherTitleWidthStep = 8.0;
 
+/// The range of the gesture distance sliders, as shares of the setting's
+/// default: a quarter of it up to three times it, in quarters.
+const gestureDistanceMinFactor = 0.25;
+const gestureDistanceMaxFactor = 3.0;
+const gestureDistanceFactorStep = 0.25;
+
+/// How far (logical px) a finger has to travel up the page before an
+/// auto-hiding tab bar hides: two and a quarter toolbar heights, half again the
+/// one and a half the bar used to hide at.
+const defaultAutoHideTabBarDistance = 126.0;
+const minAutoHideTabBarDistance =
+    defaultAutoHideTabBarDistance * gestureDistanceMinFactor;
+const maxAutoHideTabBarDistance =
+    defaultAutoHideTabBarDistance * gestureDistanceMaxFactor;
+
+/// Share of the hide distance the finger has to travel back down before a
+/// hidden tab bar shows again.
+const autoHideTabBarShowFraction = 2 / 3;
+
+/// How far (logical px) the refresh indicator has to be pulled before letting
+/// go reloads the page. The finger travels twice as far: the indicator follows
+/// it at half speed. The default is half again Android's own 64
+/// (`SwipeRefreshLayout`), which the gesture used before this was a setting.
+const defaultPullToRefreshTriggerDistance = 96.0;
+const minPullToRefreshTriggerDistance =
+    defaultPullToRefreshTriggerDistance * gestureDistanceMinFactor;
+const maxPullToRefreshTriggerDistance =
+    defaultPullToRefreshTriggerDistance * gestureDistanceMaxFactor;
+
 /// Width (logical px) of the side panel before the user resizes it. Matches
 /// Material's extended navigation rail.
 const defaultSideRailWidth = 256.0;
@@ -437,6 +466,11 @@ class GeneralSettings with FastEquatable {
   final BackgroundTabOpenAction backgroundTabOpenAction;
   final bool autoHideTabBar;
 
+  /// See [defaultAutoHideTabBarDistance]. Clamp to
+  /// [minAutoHideTabBarDistance]..[maxAutoHideTabBarDistance] where applied: a
+  /// synced or imported value may come from a build with another range.
+  final double autoHideTabBarDistance;
+
   /// Width the side panel was last resized to.
   ///
   /// A value below the panel's minimum means it was collapsed to the icon
@@ -490,6 +524,11 @@ class GeneralSettings with FastEquatable {
   /// leaving the container filter at the top (#651).
   final bool tabTrayActionsAtBottom;
   final bool pullToRefreshEnabled;
+
+  /// See [defaultPullToRefreshTriggerDistance]. Clamp to
+  /// [minPullToRefreshTriggerDistance]..[maxPullToRefreshTriggerDistance]
+  /// where applied, for the same reason as [autoHideTabBarDistance].
+  final double pullToRefreshTriggerDistance;
   final bool useExternalDownloadManager;
 
   /// Where downloads are saved: a Storage Access Framework tree URI
@@ -675,6 +714,7 @@ class GeneralSettings with FastEquatable {
     required this.bookmarkOpenSetting,
     required this.backgroundTabOpenAction,
     required this.autoHideTabBar,
+    required this.autoHideTabBarDistance,
     required this.sideRailWidth,
     required this.sideRailAutoHide,
     required this.tabBarSwipeAction,
@@ -689,6 +729,7 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherPlacement,
     required this.tabTrayActionsAtBottom,
     required this.pullToRefreshEnabled,
+    required this.pullToRefreshTriggerDistance,
     required this.useExternalDownloadManager,
     required this.downloadDirectoryUri,
     required this.doubleBackCloseTab,
@@ -774,6 +815,7 @@ class GeneralSettings with FastEquatable {
     BookmarkOpenSetting? bookmarkOpenSetting,
     BackgroundTabOpenAction? backgroundTabOpenAction,
     bool? autoHideTabBar,
+    double? autoHideTabBarDistance,
     double? sideRailWidth,
     bool? sideRailAutoHide,
     TabBarSwipeAction? tabBarSwipeAction,
@@ -788,6 +830,7 @@ class GeneralSettings with FastEquatable {
     QuickTabSwitcherPlacement? quickTabSwitcherPlacement,
     bool? tabTrayActionsAtBottom,
     bool? pullToRefreshEnabled,
+    double? pullToRefreshTriggerDistance,
     bool? useExternalDownloadManager,
     this.downloadDirectoryUri,
     bool? doubleBackCloseTab,
@@ -883,6 +926,8 @@ class GeneralSettings with FastEquatable {
        backgroundTabOpenAction =
            backgroundTabOpenAction ?? BackgroundTabOpenAction.prompt,
        autoHideTabBar = autoHideTabBar ?? true,
+       autoHideTabBarDistance =
+           autoHideTabBarDistance ?? defaultAutoHideTabBarDistance,
        sideRailWidth = sideRailWidth ?? defaultSideRailWidth,
        sideRailAutoHide = sideRailAutoHide ?? false,
        tabBarSwipeAction =
@@ -903,6 +948,8 @@ class GeneralSettings with FastEquatable {
            quickTabSwitcherPlacement ?? QuickTabSwitcherPlacement.auto,
        tabTrayActionsAtBottom = tabTrayActionsAtBottom ?? false,
        pullToRefreshEnabled = pullToRefreshEnabled ?? true,
+       pullToRefreshTriggerDistance =
+           pullToRefreshTriggerDistance ?? defaultPullToRefreshTriggerDistance,
        useExternalDownloadManager = useExternalDownloadManager ?? false,
        doubleBackCloseTab = doubleBackCloseTab ?? true,
        unassignedTabsAutoCleanInterval =
@@ -1168,6 +1215,7 @@ class GeneralSettings with FastEquatable {
     bookmarkOpenSetting,
     backgroundTabOpenAction,
     autoHideTabBar,
+    autoHideTabBarDistance,
     sideRailWidth,
     sideRailAutoHide,
     tabBarSwipeAction,
@@ -1182,6 +1230,7 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherPlacement,
     tabTrayActionsAtBottom,
     pullToRefreshEnabled,
+    pullToRefreshTriggerDistance,
     useExternalDownloadManager,
     downloadDirectoryUri,
     doubleBackCloseTab,

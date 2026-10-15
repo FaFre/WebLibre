@@ -93,6 +93,8 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings autoHideTabBar(bool autoHideTabBar);
 
+  GeneralSettings autoHideTabBarDistance(double autoHideTabBarDistance);
+
   GeneralSettings sideRailWidth(double sideRailWidth);
 
   GeneralSettings sideRailAutoHide(bool sideRailAutoHide);
@@ -124,6 +126,10 @@ abstract class _$GeneralSettingsCWProxy {
   GeneralSettings tabTrayActionsAtBottom(bool tabTrayActionsAtBottom);
 
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled);
+
+  GeneralSettings pullToRefreshTriggerDistance(
+    double pullToRefreshTriggerDistance,
+  );
 
   GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager);
 
@@ -281,6 +287,7 @@ abstract class _$GeneralSettingsCWProxy {
     BookmarkOpenSetting bookmarkOpenSetting,
     BackgroundTabOpenAction backgroundTabOpenAction,
     bool autoHideTabBar,
+    double autoHideTabBarDistance,
     double sideRailWidth,
     bool sideRailAutoHide,
     TabBarSwipeAction tabBarSwipeAction,
@@ -295,6 +302,7 @@ abstract class _$GeneralSettingsCWProxy {
     QuickTabSwitcherPlacement quickTabSwitcherPlacement,
     bool tabTrayActionsAtBottom,
     bool pullToRefreshEnabled,
+    double pullToRefreshTriggerDistance,
     bool useExternalDownloadManager,
     String? downloadDirectoryUri,
     bool doubleBackCloseTab,
@@ -503,6 +511,10 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
       call(autoHideTabBar: autoHideTabBar);
 
   @override
+  GeneralSettings autoHideTabBarDistance(double autoHideTabBarDistance) =>
+      call(autoHideTabBarDistance: autoHideTabBarDistance);
+
+  @override
   GeneralSettings sideRailWidth(double sideRailWidth) =>
       call(sideRailWidth: sideRailWidth);
 
@@ -563,6 +575,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings pullToRefreshEnabled(bool pullToRefreshEnabled) =>
       call(pullToRefreshEnabled: pullToRefreshEnabled);
+
+  @override
+  GeneralSettings pullToRefreshTriggerDistance(
+    double pullToRefreshTriggerDistance,
+  ) => call(pullToRefreshTriggerDistance: pullToRefreshTriggerDistance);
 
   @override
   GeneralSettings useExternalDownloadManager(bool useExternalDownloadManager) =>
@@ -808,6 +825,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
     Object? autoHideTabBar = const $CopyWithPlaceholder(),
+    Object? autoHideTabBarDistance = const $CopyWithPlaceholder(),
     Object? sideRailWidth = const $CopyWithPlaceholder(),
     Object? sideRailAutoHide = const $CopyWithPlaceholder(),
     Object? tabBarSwipeAction = const $CopyWithPlaceholder(),
@@ -823,6 +841,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherPlacement = const $CopyWithPlaceholder(),
     Object? tabTrayActionsAtBottom = const $CopyWithPlaceholder(),
     Object? pullToRefreshEnabled = const $CopyWithPlaceholder(),
+    Object? pullToRefreshTriggerDistance = const $CopyWithPlaceholder(),
     Object? useExternalDownloadManager = const $CopyWithPlaceholder(),
     Object? downloadDirectoryUri = const $CopyWithPlaceholder(),
     Object? doubleBackCloseTab = const $CopyWithPlaceholder(),
@@ -1075,6 +1094,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.autoHideTabBar
           // ignore: cast_nullable_to_non_nullable
           : autoHideTabBar as bool,
+      autoHideTabBarDistance:
+          autoHideTabBarDistance == const $CopyWithPlaceholder() ||
+              autoHideTabBarDistance == null
+          ? _value.autoHideTabBarDistance
+          // ignore: cast_nullable_to_non_nullable
+          : autoHideTabBarDistance as double,
       sideRailWidth:
           sideRailWidth == const $CopyWithPlaceholder() || sideRailWidth == null
           ? _value.sideRailWidth
@@ -1158,6 +1183,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.pullToRefreshEnabled
           // ignore: cast_nullable_to_non_nullable
           : pullToRefreshEnabled as bool,
+      pullToRefreshTriggerDistance:
+          pullToRefreshTriggerDistance == const $CopyWithPlaceholder() ||
+              pullToRefreshTriggerDistance == null
+          ? _value.pullToRefreshTriggerDistance
+          // ignore: cast_nullable_to_non_nullable
+          : pullToRefreshTriggerDistance as double,
       useExternalDownloadManager:
           useExternalDownloadManager == const $CopyWithPlaceholder() ||
               useExternalDownloadManager == null
@@ -1519,6 +1550,7 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['backgroundTabOpenAction'],
   ),
   autoHideTabBar: json['autoHideTabBar'] as bool?,
+  autoHideTabBarDistance: (json['autoHideTabBarDistance'] as num?)?.toDouble(),
   sideRailWidth: (json['sideRailWidth'] as num?)?.toDouble(),
   sideRailAutoHide: json['sideRailAutoHide'] as bool?,
   tabBarSwipeAction: $enumDecodeNullable(
@@ -1556,6 +1588,8 @@ GeneralSettings _$GeneralSettingsFromJson(
   ),
   tabTrayActionsAtBottom: json['tabTrayActionsAtBottom'] as bool?,
   pullToRefreshEnabled: json['pullToRefreshEnabled'] as bool?,
+  pullToRefreshTriggerDistance: (json['pullToRefreshTriggerDistance'] as num?)
+      ?.toDouble(),
   useExternalDownloadManager: json['useExternalDownloadManager'] as bool?,
   downloadDirectoryUri: json['downloadDirectoryUri'] as String?,
   doubleBackCloseTab: json['doubleBackCloseTab'] as bool?,
@@ -1685,6 +1719,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'backgroundTabOpenAction':
       _$BackgroundTabOpenActionEnumMap[instance.backgroundTabOpenAction]!,
   'autoHideTabBar': instance.autoHideTabBar,
+  'autoHideTabBarDistance': instance.autoHideTabBarDistance,
   'sideRailWidth': instance.sideRailWidth,
   'sideRailAutoHide': instance.sideRailAutoHide,
   'tabBarSwipeAction': _$TabBarSwipeActionEnumMap[instance.tabBarSwipeAction]!,
@@ -1702,6 +1737,7 @@ Map<String, dynamic> _$GeneralSettingsToJson(
       _$QuickTabSwitcherPlacementEnumMap[instance.quickTabSwitcherPlacement]!,
   'tabTrayActionsAtBottom': instance.tabTrayActionsAtBottom,
   'pullToRefreshEnabled': instance.pullToRefreshEnabled,
+  'pullToRefreshTriggerDistance': instance.pullToRefreshTriggerDistance,
   'useExternalDownloadManager': instance.useExternalDownloadManager,
   'downloadDirectoryUri': instance.downloadDirectoryUri,
   'doubleBackCloseTab': instance.doubleBackCloseTab,

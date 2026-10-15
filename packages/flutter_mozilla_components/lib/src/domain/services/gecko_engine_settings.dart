@@ -176,8 +176,16 @@ class GeckoEngineSettingsService {
     return _api.setAllowPrivateTabScreenshots(allow);
   }
 
-  Future<void> setPullToRefreshEnabled(bool enabled) {
-    return _api.setPullToRefreshEnabled(enabled);
+  Future<void> setPullToRefreshSettings({
+    required bool enabled,
+    required double triggerDistanceDp,
+  }) {
+    return _api.setPullToRefreshSettings(
+      PullToRefreshSettings(
+        enabled: enabled,
+        triggerDistanceDp: triggerDistanceDp,
+      ),
+    );
   }
 
   /// Shows the UI of Custom Tab and PWA windows in [languageTag], or in the

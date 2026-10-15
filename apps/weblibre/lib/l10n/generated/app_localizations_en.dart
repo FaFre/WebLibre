@@ -7805,6 +7805,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Swipe down on pages to reload them';
 
   @override
+  String get settings_pullToRefreshDistanceTitle => 'Pull to Refresh Distance';
+
+  @override
+  String get settings_pullToRefreshDistanceKeywords =>
+      'sensitivity, threshold, reload, swipe';
+
+  @override
+  String get settings_pullToRefreshDistanceSubtitle =>
+      'How far to pull down before the page reloads, compared to the default';
+
+  @override
   String get settings_customTabsTitle => 'Custom Tabs';
 
   @override
@@ -10766,6 +10777,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_autoHideTabBarSubtitle => 'Hide tab bar when scrolling';
+
+  @override
+  String get settings_autoHideTabBarDistanceTitle => 'Auto Hide Distance';
+
+  @override
+  String get settings_autoHideTabBarDistanceKeywords =>
+      'sensitivity, threshold, scroll, swipe';
+
+  @override
+  String get settings_autoHideTabBarDistanceSubtitle =>
+      'How far to scroll before the tab bar hides or comes back, compared to the default';
 
   @override
   String get settings_autoHideSidePanelTitle => 'Auto Hide Side Panel';

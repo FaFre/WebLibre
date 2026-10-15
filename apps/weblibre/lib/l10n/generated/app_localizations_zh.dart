@@ -7337,6 +7337,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_pullToRefreshSubtitle => '在页面上向下滑动以重新加载';
 
   @override
+  String get settings_pullToRefreshDistanceTitle => '下拉刷新距离';
+
+  @override
+  String get settings_pullToRefreshDistanceKeywords =>
+      '灵敏度,阈值,刷新,滑动,sensitivity,threshold';
+
+  @override
+  String get settings_pullToRefreshDistanceSubtitle => '页面重新加载前需要下拉的距离，相对于默认值';
+
+  @override
   String get settings_customTabsTitle => '自定义标签页';
 
   @override
@@ -10010,6 +10020,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_autoHideTabBarSubtitle => '滚动时隐藏标签栏';
+
+  @override
+  String get settings_autoHideTabBarDistanceTitle => '自动隐藏距离';
+
+  @override
+  String get settings_autoHideTabBarDistanceKeywords =>
+      '灵敏度,阈值,滚动,滑动,sensitivity,threshold';
+
+  @override
+  String get settings_autoHideTabBarDistanceSubtitle =>
+      '标签栏隐藏或重新出现前需要滚动的距离，相对于默认值';
 
   @override
   String get settings_autoHideSidePanelTitle => '自动隐藏侧边面板';

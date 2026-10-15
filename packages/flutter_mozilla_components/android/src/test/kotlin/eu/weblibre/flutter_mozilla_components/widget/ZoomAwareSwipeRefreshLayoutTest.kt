@@ -227,6 +227,43 @@ class ZoomAwareSwipeRefreshLayoutTest {
         assertFalse(parent.sawDisallow)
     }
 
+    @Test
+    fun `a pull released short of the configured distance does not refresh`() {
+        layout.setTriggerDistanceDp(100.0)
+
+        // The throbber follows at half the finger's speed, so this stops it at
+        // 90 dp — past the library's own 64 dp, so a distance that was never
+        // applied would refresh here.
+        pull(byDp = 180f)
+
+        assertFalse(layout.isRefreshing)
+    }
+
+    @Test
+    fun `a pull released past the configured distance refreshes`() {
+        layout.setTriggerDistanceDp(100.0)
+
+        pull(byDp = 220f)
+
+        assertTrue(layout.isRefreshing)
+    }
+
+    /**
+     * A single-finger pull from the top that moves [byDp] beyond touch slop,
+     * which is where SwipeRefreshLayout starts measuring, and lets go.
+     */
+    private fun pull(byDp: Float) {
+        val density = layout.resources.displayMetrics.density
+        val touchSlop = ViewConfiguration.get(layout.context).scaledTouchSlop
+        val start = 100f
+        val end = start + touchSlop + byDp * density
+
+        dispatch(MotionEvent.ACTION_DOWN, 100f, start, at = 0)
+        dispatch(MotionEvent.ACTION_MOVE, 100f, start + touchSlop + 1, at = 20)
+        dispatch(MotionEvent.ACTION_MOVE, 100f, end, at = 40)
+        dispatch(MotionEvent.ACTION_UP, 100f, end, at = 60)
+    }
+
     private fun pointerDownAction(index: Int) =
         MotionEvent.ACTION_POINTER_DOWN or (index shl MotionEvent.ACTION_POINTER_INDEX_SHIFT)
 

@@ -14,6 +14,7 @@ import android.view.ViewConfiguration
 import androidx.annotation.VisibleForTesting
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * [SwipeRefreshLayout] that only pulls to refresh for a plain vertical drag.
@@ -205,6 +206,18 @@ class ZoomAwareSwipeRefreshLayout @JvmOverloads constructor(
         } else {
             super.onStartNestedScroll(child, target, nestedScrollAxes)
         }
+    }
+
+    /**
+     * How far the throbber has to be pulled before letting go reloads, in
+     * density-independent pixels.
+     *
+     * The finger travels twice as far: SwipeRefreshLayout moves the throbber at
+     * half the speed of the drag (`DRAG_RATE`), and measures this distance
+     * against the throbber.
+     */
+    fun setTriggerDistanceDp(distanceDp: Double) {
+        setDistanceToTriggerSync((distanceDp * resources.displayMetrics.density).roundToInt())
     }
 
     override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {

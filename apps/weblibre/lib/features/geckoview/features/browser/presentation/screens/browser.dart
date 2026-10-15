@@ -241,10 +241,13 @@ class _TabBar extends HookConsumerWidget {
     useOnStreamChange(
       pointerMoveEvents,
       onData: (event) {
-        final autoHide = ref
-            .read(generalSettingsWithDefaultsProvider)
-            .autoHideTabBar;
-        if (!autoHide) return;
+        final settings = ref.read(generalSettingsWithDefaultsProvider);
+        if (!settings.autoHideTabBar) return;
+
+        final hideDistance = settings.autoHideTabBarDistance.clamp(
+          minAutoHideTabBarDistance,
+          maxAutoHideTabBarDistance,
+        );
 
         final diff = event.dy;
         if (diff < 0) {
@@ -252,7 +255,7 @@ class _TabBar extends HookConsumerWidget {
             diffAcc.value = 0.0;
           }
           diffAcc.value += diff;
-          if (diffAcc.value.abs() > kToolbarHeight * 1.5) {
+          if (diffAcc.value.abs() > hideDistance) {
             ref
                 .read(
                   toolbarVisibilityControllerProvider(
@@ -266,7 +269,7 @@ class _TabBar extends HookConsumerWidget {
             diffAcc.value = 0.0;
           }
           diffAcc.value += diff;
-          if (diffAcc.value.abs() > kToolbarHeight) {
+          if (diffAcc.value.abs() > hideDistance * autoHideTabBarShowFraction) {
             resetHiddenState();
           }
         }

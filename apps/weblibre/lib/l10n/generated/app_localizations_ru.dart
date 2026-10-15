@@ -8019,6 +8019,17 @@ class AppLocalizationsRu extends AppLocalizations {
       'Проведите вниз по странице, чтобы перезагрузить её';
 
   @override
+  String get settings_pullToRefreshDistanceTitle => 'Расстояние для обновления';
+
+  @override
+  String get settings_pullToRefreshDistanceKeywords =>
+      'чувствительность, порог, перезагрузка, свайп';
+
+  @override
+  String get settings_pullToRefreshDistanceSubtitle =>
+      'Насколько далеко нужно потянуть вниз, чтобы страница перезагрузилась, относительно значения по умолчанию';
+
+  @override
   String get settings_customTabsTitle => 'Custom Tabs';
 
   @override
@@ -11058,6 +11069,18 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settings_autoHideTabBarSubtitle =>
       'Скрывать панель вкладок при прокрутке';
+
+  @override
+  String get settings_autoHideTabBarDistanceTitle =>
+      'Расстояние для автоскрытия';
+
+  @override
+  String get settings_autoHideTabBarDistanceKeywords =>
+      'чувствительность, порог, прокрутка, свайп';
+
+  @override
+  String get settings_autoHideTabBarDistanceSubtitle =>
+      'Насколько далеко нужно прокрутить, чтобы панель вкладок скрылась или появилась снова, относительно значения по умолчанию';
 
   @override
   String get settings_autoHideSidePanelTitle => 'Автоскрытие боковой панели';

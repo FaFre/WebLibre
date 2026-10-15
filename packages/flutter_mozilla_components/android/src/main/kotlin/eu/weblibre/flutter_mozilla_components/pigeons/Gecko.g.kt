@@ -4810,6 +4810,56 @@ data class PreferredDownloadManager (
 }
 
 /**
+ * Whether and how a pull down at the top of a page reloads it.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PullToRefreshSettings (
+  val enabled: Boolean,
+  /**
+   * How far the refresh indicator has to be pulled before letting go reloads
+   * the page, in density-independent pixels. The finger travels twice as far:
+   * the indicator follows the drag at half its speed.
+   */
+  val triggerDistanceDp: Double
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PullToRefreshSettings {
+      val enabled = pigeonVar_list[0] as Boolean
+      val triggerDistanceDp = pigeonVar_list[1] as Double
+      return PullToRefreshSettings(enabled, triggerDistanceDp)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      enabled,
+      triggerDistanceDp,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as PullToRefreshSettings
+    return GeckoPigeonUtils.deepEquals(this.enabled, other.enabled) && GeckoPigeonUtils.deepEquals(this.triggerDistanceDp, other.triggerDistanceDp)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.enabled)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.triggerDistanceDp)
+    return result
+  }
+  override fun toString(): String {
+    return "PullToRefreshSettings(enabled=$enabled, triggerDistanceDp=$triggerDistanceDp)"
+  }
+}
+
+/**
  * A closed tab on the recently closed list. Private and isolated tabs and
  * tabs of containers excluded from history are never on it.
  *
@@ -7307,50 +7357,52 @@ private data class GeckoPigeonInternalCodecOverflow (
         
     when (type.toInt()) {
       0 ->
-        return SitePermissions.fromList(wrapped as List<Any?>)
+        return BookmarkInfo.fromList(wrapped as List<Any?>)
       1 ->
-        return TrackingProtectionException.fromList(wrapped as List<Any?>)
+        return SitePermissions.fromList(wrapped as List<Any?>)
       2 ->
-        return TrackerLogEntry.fromList(wrapped as List<Any?>)
+        return TrackingProtectionException.fromList(wrapped as List<Any?>)
       3 ->
-        return TrackingStatisticsRecord.fromList(wrapped as List<Any?>)
+        return TrackerLogEntry.fromList(wrapped as List<Any?>)
       4 ->
-        return TrackingStatistics.fromList(wrapped as List<Any?>)
+        return TrackingStatisticsRecord.fromList(wrapped as List<Any?>)
       5 ->
-        return AppLinkTarget.fromList(wrapped as List<Any?>)
+        return TrackingStatistics.fromList(wrapped as List<Any?>)
       6 ->
-        return ProtectedTargetPattern.fromList(wrapped as List<Any?>)
+        return AppLinkTarget.fromList(wrapped as List<Any?>)
       7 ->
-        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
+        return ProtectedTargetPattern.fromList(wrapped as List<Any?>)
       8 ->
-        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
+        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
       9 ->
-        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
+        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
       10 ->
-        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
+        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
       11 ->
-        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
       12 ->
-        return PwaIcon.fromList(wrapped as List<Any?>)
+        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
       13 ->
-        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+        return PwaIcon.fromList(wrapped as List<Any?>)
       14 ->
-        return ShareTargetParams.fromList(wrapped as List<Any?>)
+        return ShareTargetFiles.fromList(wrapped as List<Any?>)
       15 ->
-        return ShareTarget.fromList(wrapped as List<Any?>)
+        return ShareTargetParams.fromList(wrapped as List<Any?>)
       16 ->
-        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+        return ShareTarget.fromList(wrapped as List<Any?>)
       17 ->
-        return PwaManifest.fromList(wrapped as List<Any?>)
+        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
       18 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+        return PwaManifest.fromList(wrapped as List<Any?>)
       19 ->
-        return GestureConfig.fromList(wrapped as List<Any?>)
+        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
       20 ->
-        return PushDistributor.fromList(wrapped as List<Any?>)
+        return GestureConfig.fromList(wrapped as List<Any?>)
       21 ->
-        return PushStatus.fromList(wrapped as List<Any?>)
+        return PushDistributor.fromList(wrapped as List<Any?>)
       22 ->
+        return PushStatus.fromList(wrapped as List<Any?>)
+      23 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7911,82 +7963,82 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecentlyClosedTab.fromList(it)
+          PullToRefreshSettings.fromList(it)
         }
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPref.fromList(it)
+          RecentlyClosedTab.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MlProgressData.fromList(it)
+          GeckoPref.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxySettings.fromList(it)
+          MlProgressData.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxyRoutingSnapshot.fromList(it)
+          GeckoProxySettings.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoRoutingDemand.fromList(it)
+          GeckoProxyRoutingSnapshot.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxyRoutingStatus.fromList(it)
+          GeckoRoutingDemand.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          GeckoProxyRoutingStatus.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProxyLoadError.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ProxyLoadError.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          GeckoFetchResponse.fromList(it)
         }
       }
       252.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkImportNode.fromList(it)
+          BookmarkNode.fromList(it)
         }
       }
       253.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInsertTreeResult.fromList(it)
+          BookmarkImportNode.fromList(it)
         }
       }
       254.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkInfo.fromList(it)
+          BookmarkInsertTreeResult.fromList(it)
         }
       }
       255.toByte() -> {
@@ -8439,182 +8491,187 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(238)
         writeValue(stream, value.toList())
       }
-      is RecentlyClosedTab -> {
+      is PullToRefreshSettings -> {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is GeckoPref -> {
+      is RecentlyClosedTab -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is MlProgressData -> {
+      is GeckoPref -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is GeckoProxySettings -> {
+      is MlProgressData -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is GeckoProxyRoutingSnapshot -> {
+      is GeckoProxySettings -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is GeckoRoutingDemand -> {
+      is GeckoProxyRoutingSnapshot -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is GeckoProxyRoutingStatus -> {
+      is GeckoRoutingDemand -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is GeckoProxyRoutingStatus -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is ProxyLoadError -> {
+      is ContainerSiteAssignment -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ProxyLoadError -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is GeckoHeader -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoFetchRequest -> {
         stream.write(250)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is GeckoFetchResponse -> {
         stream.write(251)
         writeValue(stream, value.toList())
       }
-      is BookmarkImportNode -> {
+      is BookmarkNode -> {
         stream.write(252)
         writeValue(stream, value.toList())
       }
-      is BookmarkInsertTreeResult -> {
+      is BookmarkImportNode -> {
         stream.write(253)
         writeValue(stream, value.toList())
       }
-      is BookmarkInfo -> {
+      is BookmarkInsertTreeResult -> {
         stream.write(254)
         writeValue(stream, value.toList())
       }
-      is SitePermissions -> {
+      is BookmarkInfo -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingProtectionException -> {
+      is SitePermissions -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 1, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackerLogEntry -> {
+      is TrackingProtectionException -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 2, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingStatisticsRecord -> {
+      is TrackerLogEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 3, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingStatistics -> {
+      is TrackingStatisticsRecord -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 4, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkTarget -> {
+      is TrackingStatistics -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 5, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ProtectedTargetPattern -> {
+      is AppLinkTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 6, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is NativeAppLinkRule -> {
+      is ProtectedTargetPattern -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 7, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is NativeAppLinkRule -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is NativeContextAppLinkPolicy -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPromptRequest -> {
+      is AppLinkPolicySnapshot -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkResolutionResult -> {
+      is AppLinkPromptRequest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaIcon -> {
+      is AppLinkResolutionResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetFiles -> {
+      is PwaIcon -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 13, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetParams -> {
+      is ShareTargetFiles -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 14, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetParams -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 15, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 16, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaManifest -> {
+      is ExternalApplicationResource -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 17, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is PwaManifest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 18, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is SandboxCaptureEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 19, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is GestureConfig -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 20, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
+      is PushDistributor -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 21, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushSubscription -> {
+      is PushStatus -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 22, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushSubscription -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 23, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -9085,7 +9142,11 @@ interface GeckoEngineSettingsApi {
    * [setScreenshotProtectionEnabled] still wins when both are enabled.
    */
   fun setAllowPrivateTabScreenshots(allow: Boolean)
-  fun setPullToRefreshEnabled(enabled: Boolean)
+  /**
+   * Both values in one call, so a window never applies a distance from one
+   * update together with the enabled flag from another.
+   */
+  fun setPullToRefreshSettings(settings: PullToRefreshSettings)
   /**
    * The language of the app's own UI as a BCP 47 tag, or null while it
    * follows the system. Custom Tab and PWA windows show their own UI in it.
@@ -9220,13 +9281,13 @@ interface GeckoEngineSettingsApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setPullToRefreshEnabled$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setPullToRefreshSettings$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val enabledArg = args[0] as Boolean
+            val settingsArg = args[0] as PullToRefreshSettings
             val wrapped: List<Any?> = try {
-              api.setPullToRefreshEnabled(enabledArg)
+              api.setPullToRefreshSettings(settingsArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)

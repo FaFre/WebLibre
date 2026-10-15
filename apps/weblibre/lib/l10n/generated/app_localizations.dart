@@ -13322,6 +13322,24 @@ abstract class AppLocalizations {
   /// **'Swipe down on pages to reload them'**
   String get settings_pullToRefreshSubtitle;
 
+  /// Slider: how far a page has to be pulled down before letting go reloads it. Shown under the "Pull to Refresh" switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull to Refresh Distance'**
+  String get settings_pullToRefreshDistanceTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'sensitivity, threshold, reload, swipe'**
+  String get settings_pullToRefreshDistanceKeywords;
+
+  /// Explanation under "Pull to Refresh Distance". The slider's value is a percentage of the default distance, from 25% to 300%, so 100% is the default.
+  ///
+  /// In en, this message translates to:
+  /// **'How far to pull down before the page reloads, compared to the default'**
+  String get settings_pullToRefreshDistanceSubtitle;
+
   /// Switch: let other apps open links in custom tabs (a lightweight in-app browser window).
   ///
   /// In en, this message translates to:
@@ -18305,6 +18323,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide tab bar when scrolling'**
   String get settings_autoHideTabBarSubtitle;
+
+  /// Slider: how far a page has to be scrolled before an auto-hiding tab bar hides, and back before it shows again. Shown under the "Auto Hide Tab Bar" switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Hide Distance'**
+  String get settings_autoHideTabBarDistanceTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'sensitivity, threshold, scroll, swipe'**
+  String get settings_autoHideTabBarDistanceKeywords;
+
+  /// Explanation under "Auto Hide Distance". The slider's value is a percentage of the default distance, from 25% to 300%, so 100% is the default.
+  ///
+  /// In en, this message translates to:
+  /// **'How far to scroll before the tab bar hides or comes back, compared to the default'**
+  String get settings_autoHideTabBarDistanceSubtitle;
 
   /// Switch: hide the side tab bar (left or right rail) until the mouse reaches the screen edge.
   ///

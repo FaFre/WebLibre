@@ -21,6 +21,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HttpsOnlyMode
 import eu.weblibre.flutter_mozilla_components.pigeons.PreferredDownloadManager
+import eu.weblibre.flutter_mozilla_components.pigeons.PullToRefreshSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.TrackingScope
 import mozilla.components.browser.state.action.ContentAction
@@ -403,11 +404,11 @@ class GeckoEngineSettingsApiImpl(
         }
     }
 
-    override fun setPullToRefreshEnabled(enabled: Boolean) {
-        // Through GlobalComponents, which also mirrors the value to the current
+    override fun setPullToRefreshSettings(settings: PullToRefreshSettings) {
+        // Through GlobalComponents, which also mirrors the values to the current
         // profile's native-readable store, for the window a cold start puts on
         // screen before this call arrives (see BrowserSettingsPreferences).
-        GlobalComponents.setPullToRefreshEnabled(enabled)
+        GlobalComponents.setPullToRefreshSettings(settings)
     }
 
     override fun setAppLocale(languageTag: String?) {

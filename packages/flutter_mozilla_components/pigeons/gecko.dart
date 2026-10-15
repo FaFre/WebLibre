@@ -1563,6 +1563,18 @@ class PreferredDownloadManager {
   const PreferredDownloadManager(this.packageName, this.label, this.isThisApp);
 }
 
+/// Whether and how a pull down at the top of a page reloads it.
+class PullToRefreshSettings {
+  final bool enabled;
+
+  /// How far the refresh indicator has to be pulled before letting go reloads
+  /// the page, in density-independent pixels. The finger travels twice as far:
+  /// the indicator follows the drag at half its speed.
+  final double triggerDistanceDp;
+
+  const PullToRefreshSettings(this.enabled, this.triggerDistanceDp);
+}
+
 @HostApi()
 abstract class GeckoEngineSettingsApi {
   void setDefaultSettings(GeckoEngineSettings settings);
@@ -1573,7 +1585,10 @@ abstract class GeckoEngineSettingsApi {
   /// allowing system screenshots and screen recording of private tabs.
   /// [setScreenshotProtectionEnabled] still wins when both are enabled.
   void setAllowPrivateTabScreenshots(bool allow);
-  void setPullToRefreshEnabled(bool enabled);
+
+  /// Both values in one call, so a window never applies a distance from one
+  /// update together with the enabled flag from another.
+  void setPullToRefreshSettings(PullToRefreshSettings settings);
 
   /// The language of the app's own UI as a BCP 47 tag, or null while it
   /// follows the system. Custom Tab and PWA windows show their own UI in it.

@@ -645,6 +645,18 @@
   "@settings_pullToRefreshSubtitle": {
     "description": "Explanation under \"Pull to Refresh\"."
   },
+  "settings_pullToRefreshDistanceTitle": "Pull to Refresh Distance",
+  "@settings_pullToRefreshDistanceTitle": {
+    "description": "Slider: how far a page has to be pulled down before letting go reloads it. Shown under the \"Pull to Refresh\" switch."
+  },
+  "settings_pullToRefreshDistanceKeywords": "sensitivity, threshold, reload, swipe",
+  "@settings_pullToRefreshDistanceKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_pullToRefreshDistanceSubtitle": "How far to pull down before the page reloads, compared to the default",
+  "@settings_pullToRefreshDistanceSubtitle": {
+    "description": "Explanation under \"Pull to Refresh Distance\". The slider's value is a percentage of the default distance, from 25% to 300%, so 100% is the default."
+  },
   "settings_customTabsTitle": "Custom Tabs",
   "@settings_customTabsTitle": {
     "description": "Switch: let other apps open links in custom tabs (a lightweight in-app browser window)."
@@ -4172,6 +4184,18 @@
   "settings_autoHideTabBarSubtitle": "Hide tab bar when scrolling",
   "@settings_autoHideTabBarSubtitle": {
     "description": "Explanation under that switch."
+  },
+  "settings_autoHideTabBarDistanceTitle": "Auto Hide Distance",
+  "@settings_autoHideTabBarDistanceTitle": {
+    "description": "Slider: how far a page has to be scrolled before an auto-hiding tab bar hides, and back before it shows again. Shown under the \"Auto Hide Tab Bar\" switch."
+  },
+  "settings_autoHideTabBarDistanceKeywords": "sensitivity, threshold, scroll, swipe",
+  "@settings_autoHideTabBarDistanceKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_autoHideTabBarDistanceSubtitle": "How far to scroll before the tab bar hides or comes back, compared to the default",
+  "@settings_autoHideTabBarDistanceSubtitle": {
+    "description": "Explanation under \"Auto Hide Distance\". The slider's value is a percentage of the default distance, from 25% to 300%, so 100% is the default."
   },
   "settings_autoHideSidePanelTitle": "Auto Hide Side Panel",
   "@settings_autoHideSidePanelTitle": {

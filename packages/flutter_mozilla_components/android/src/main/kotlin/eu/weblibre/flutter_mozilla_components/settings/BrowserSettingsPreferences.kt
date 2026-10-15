@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.pigeons.PullToRefreshSettings
 
 /**
  * Native-readable mirror of the browser settings a window needs before Flutter
@@ -36,15 +37,45 @@ import eu.weblibre.flutter_mozilla_components.ProfileContext
 object BrowserSettingsPreferences {
     const val PREFS_NAME = "weblibre_browser_settings"
     const val KEY_PULL_TO_REFRESH_ENABLED = "pull_to_refresh_enabled"
+    const val KEY_PULL_TO_REFRESH_TRIGGER_DISTANCE_DP = "pull_to_refresh_trigger_distance_dp"
+
+    /**
+     * Half again `SwipeRefreshLayout`'s own trigger distance (64 dp), which the
+     * layout shipped with before it was configurable. Matches
+     * `defaultPullToRefreshTriggerDistance` in `GeneralSettings`.
+     */
+    const val DEFAULT_PULL_TO_REFRESH_TRIGGER_DISTANCE_DP = 96.0
+
+    /** The defaults stand for whatever a profile has not stored yet. */
+    val DEFAULT_PULL_TO_REFRESH = PullToRefreshSettings(
+        enabled = true,
+        triggerDistanceDp = DEFAULT_PULL_TO_REFRESH_TRIGGER_DISTANCE_DP,
+    )
 
     fun get(context: ProfileContext): SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    /** Defaults to true, matching `GeneralSettings.pullToRefreshEnabled`. */
-    fun isPullToRefreshEnabled(context: ProfileContext): Boolean =
-        get(context).getBoolean(KEY_PULL_TO_REFRESH_ENABLED, true)
+    fun getPullToRefresh(context: ProfileContext): PullToRefreshSettings {
+        val prefs = get(context)
+        return PullToRefreshSettings(
+            enabled = prefs.getBoolean(
+                KEY_PULL_TO_REFRESH_ENABLED,
+                DEFAULT_PULL_TO_REFRESH.enabled,
+            ),
+            triggerDistanceDp = prefs.getFloat(
+                KEY_PULL_TO_REFRESH_TRIGGER_DISTANCE_DP,
+                DEFAULT_PULL_TO_REFRESH.triggerDistanceDp.toFloat(),
+            ).toDouble(),
+        )
+    }
 
-    fun setPullToRefreshEnabled(context: ProfileContext, enabled: Boolean) {
-        get(context).edit { putBoolean(KEY_PULL_TO_REFRESH_ENABLED, enabled) }
+    fun setPullToRefresh(context: ProfileContext, settings: PullToRefreshSettings) {
+        get(context).edit {
+            putBoolean(KEY_PULL_TO_REFRESH_ENABLED, settings.enabled)
+            putFloat(
+                KEY_PULL_TO_REFRESH_TRIGGER_DISTANCE_DP,
+                settings.triggerDistanceDp.toFloat(),
+            )
+        }
     }
 }

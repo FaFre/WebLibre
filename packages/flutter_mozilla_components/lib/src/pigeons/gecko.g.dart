@@ -5206,6 +5206,59 @@ class PreferredDownloadManager {
   }
 }
 
+/// Whether and how a pull down at the top of a page reloads it.
+class PullToRefreshSettings {
+  PullToRefreshSettings({
+    required this.enabled,
+    required this.triggerDistanceDp,
+  });
+
+  bool enabled;
+
+  /// How far the refresh indicator has to be pulled before letting go reloads
+  /// the page, in density-independent pixels. The finger travels twice as far:
+  /// the indicator follows the drag at half its speed.
+  double triggerDistanceDp;
+
+  List<Object?> _toList() {
+    return <Object?>[enabled, triggerDistanceDp];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static PullToRefreshSettings decode(Object result) {
+    result as List<Object?>;
+    return PullToRefreshSettings(
+      enabled: result[0]! as bool,
+      triggerDistanceDp: result[1]! as double,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PullToRefreshSettings || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(enabled, other.enabled) &&
+        _deepEquals(triggerDistanceDp, other.triggerDistanceDp);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'PullToRefreshSettings(enabled: $enabled, triggerDistanceDp: $triggerDistanceDp)';
+  }
+}
+
 /// A closed tab on the recently closed list. Private and isolated tabs and
 /// tabs of containers excluded from history are never on it.
 class RecentlyClosedTab {
@@ -8113,50 +8166,52 @@ class _PigeonCodecOverflow {
 
     switch (type) {
       case 0:
-        return SitePermissions.decode(wrapped!);
+        return BookmarkInfo.decode(wrapped!);
       case 1:
-        return TrackingProtectionException.decode(wrapped!);
+        return SitePermissions.decode(wrapped!);
       case 2:
-        return TrackerLogEntry.decode(wrapped!);
+        return TrackingProtectionException.decode(wrapped!);
       case 3:
-        return TrackingStatisticsRecord.decode(wrapped!);
+        return TrackerLogEntry.decode(wrapped!);
       case 4:
-        return TrackingStatistics.decode(wrapped!);
+        return TrackingStatisticsRecord.decode(wrapped!);
       case 5:
-        return AppLinkTarget.decode(wrapped!);
+        return TrackingStatistics.decode(wrapped!);
       case 6:
-        return ProtectedTargetPattern.decode(wrapped!);
+        return AppLinkTarget.decode(wrapped!);
       case 7:
-        return NativeAppLinkRule.decode(wrapped!);
+        return ProtectedTargetPattern.decode(wrapped!);
       case 8:
-        return NativeContextAppLinkPolicy.decode(wrapped!);
+        return NativeAppLinkRule.decode(wrapped!);
       case 9:
-        return AppLinkPolicySnapshot.decode(wrapped!);
+        return NativeContextAppLinkPolicy.decode(wrapped!);
       case 10:
-        return AppLinkPromptRequest.decode(wrapped!);
+        return AppLinkPolicySnapshot.decode(wrapped!);
       case 11:
-        return AppLinkResolutionResult.decode(wrapped!);
+        return AppLinkPromptRequest.decode(wrapped!);
       case 12:
-        return PwaIcon.decode(wrapped!);
+        return AppLinkResolutionResult.decode(wrapped!);
       case 13:
-        return ShareTargetFiles.decode(wrapped!);
+        return PwaIcon.decode(wrapped!);
       case 14:
-        return ShareTargetParams.decode(wrapped!);
+        return ShareTargetFiles.decode(wrapped!);
       case 15:
-        return ShareTarget.decode(wrapped!);
+        return ShareTargetParams.decode(wrapped!);
       case 16:
-        return ExternalApplicationResource.decode(wrapped!);
+        return ShareTarget.decode(wrapped!);
       case 17:
-        return PwaManifest.decode(wrapped!);
+        return ExternalApplicationResource.decode(wrapped!);
       case 18:
-        return SandboxCaptureEntry.decode(wrapped!);
+        return PwaManifest.decode(wrapped!);
       case 19:
-        return GestureConfig.decode(wrapped!);
+        return SandboxCaptureEntry.decode(wrapped!);
       case 20:
-        return PushDistributor.decode(wrapped!);
+        return GestureConfig.decode(wrapped!);
       case 21:
-        return PushStatus.decode(wrapped!);
+        return PushDistributor.decode(wrapped!);
       case 22:
+        return PushStatus.decode(wrapped!);
+      case 23:
         return PushSubscription.decode(wrapped!);
     }
     return null;
@@ -8500,211 +8555,218 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is PreferredDownloadManager) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    } else if (value is RecentlyClosedTab) {
+    } else if (value is PullToRefreshSettings) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoPref) {
+    } else if (value is RecentlyClosedTab) {
       buffer.putUint8(240);
       writeValue(buffer, value.encode());
-    } else if (value is MlProgressData) {
+    } else if (value is GeckoPref) {
       buffer.putUint8(241);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxySettings) {
+    } else if (value is MlProgressData) {
       buffer.putUint8(242);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxyRoutingSnapshot) {
+    } else if (value is GeckoProxySettings) {
       buffer.putUint8(243);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoRoutingDemand) {
+    } else if (value is GeckoProxyRoutingSnapshot) {
       buffer.putUint8(244);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxyRoutingStatus) {
+    } else if (value is GeckoRoutingDemand) {
       buffer.putUint8(245);
       writeValue(buffer, value.encode());
-    } else if (value is ContainerSiteAssignment) {
+    } else if (value is GeckoProxyRoutingStatus) {
       buffer.putUint8(246);
       writeValue(buffer, value.encode());
-    } else if (value is ProxyLoadError) {
+    } else if (value is ContainerSiteAssignment) {
       buffer.putUint8(247);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoHeader) {
+    } else if (value is ProxyLoadError) {
       buffer.putUint8(248);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoFetchRequest) {
+    } else if (value is GeckoHeader) {
       buffer.putUint8(249);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoFetchResponse) {
+    } else if (value is GeckoFetchRequest) {
       buffer.putUint8(250);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkNode) {
+    } else if (value is GeckoFetchResponse) {
       buffer.putUint8(251);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkImportNode) {
+    } else if (value is BookmarkNode) {
       buffer.putUint8(252);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkInsertTreeResult) {
+    } else if (value is BookmarkImportNode) {
       buffer.putUint8(253);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkInfo) {
+    } else if (value is BookmarkInsertTreeResult) {
       buffer.putUint8(254);
       writeValue(buffer, value.encode());
-    } else if (value is SitePermissions) {
+    } else if (value is BookmarkInfo) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 0,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackingProtectionException) {
+    } else if (value is SitePermissions) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 1,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackerLogEntry) {
+    } else if (value is TrackingProtectionException) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 2,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackingStatisticsRecord) {
+    } else if (value is TrackerLogEntry) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 3,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackingStatistics) {
+    } else if (value is TrackingStatisticsRecord) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 4,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkTarget) {
+    } else if (value is TrackingStatistics) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 5,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ProtectedTargetPattern) {
+    } else if (value is AppLinkTarget) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 6,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is NativeAppLinkRule) {
+    } else if (value is ProtectedTargetPattern) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 7,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is NativeContextAppLinkPolicy) {
+    } else if (value is NativeAppLinkRule) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 8,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkPolicySnapshot) {
+    } else if (value is NativeContextAppLinkPolicy) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 9,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkPromptRequest) {
+    } else if (value is AppLinkPolicySnapshot) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 10,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkResolutionResult) {
+    } else if (value is AppLinkPromptRequest) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 11,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PwaIcon) {
+    } else if (value is AppLinkResolutionResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 12,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTargetFiles) {
+    } else if (value is PwaIcon) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 13,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTargetParams) {
+    } else if (value is ShareTargetFiles) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 14,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTarget) {
+    } else if (value is ShareTargetParams) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 15,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ExternalApplicationResource) {
+    } else if (value is ShareTarget) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 16,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PwaManifest) {
+    } else if (value is ExternalApplicationResource) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 17,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is SandboxCaptureEntry) {
+    } else if (value is PwaManifest) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 18,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is GestureConfig) {
+    } else if (value is SandboxCaptureEntry) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 19,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushDistributor) {
+    } else if (value is GestureConfig) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 20,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushStatus) {
+    } else if (value is PushDistributor) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 21,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushSubscription) {
+    } else if (value is PushStatus) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 22,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is PushSubscription) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 23,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
@@ -8984,37 +9046,37 @@ class _PigeonCodec extends StandardMessageCodec {
       case 238:
         return PreferredDownloadManager.decode(readValue(buffer)!);
       case 239:
-        return RecentlyClosedTab.decode(readValue(buffer)!);
+        return PullToRefreshSettings.decode(readValue(buffer)!);
       case 240:
-        return GeckoPref.decode(readValue(buffer)!);
+        return RecentlyClosedTab.decode(readValue(buffer)!);
       case 241:
-        return MlProgressData.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 242:
-        return GeckoProxySettings.decode(readValue(buffer)!);
+        return MlProgressData.decode(readValue(buffer)!);
       case 243:
-        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
+        return GeckoProxySettings.decode(readValue(buffer)!);
       case 244:
-        return GeckoRoutingDemand.decode(readValue(buffer)!);
+        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
       case 245:
-        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
+        return GeckoRoutingDemand.decode(readValue(buffer)!);
       case 246:
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
       case 247:
-        return ProxyLoadError.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 248:
-        return GeckoHeader.decode(readValue(buffer)!);
+        return ProxyLoadError.decode(readValue(buffer)!);
       case 249:
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 250:
-        return GeckoFetchResponse.decode(readValue(buffer)!);
+        return GeckoFetchRequest.decode(readValue(buffer)!);
       case 251:
-        return BookmarkNode.decode(readValue(buffer)!);
+        return GeckoFetchResponse.decode(readValue(buffer)!);
       case 252:
-        return BookmarkImportNode.decode(readValue(buffer)!);
+        return BookmarkNode.decode(readValue(buffer)!);
       case 253:
-        return BookmarkInsertTreeResult.decode(readValue(buffer)!);
+        return BookmarkImportNode.decode(readValue(buffer)!);
       case 254:
-        return BookmarkInfo.decode(readValue(buffer)!);
+        return BookmarkInsertTreeResult.decode(readValue(buffer)!);
       case 255:
         final _PigeonCodecOverflow wrapper = _PigeonCodecOverflow.decode(
           readValue(buffer)!,
@@ -9610,16 +9672,18 @@ class GeckoEngineSettingsApi {
     );
   }
 
-  Future<void> setPullToRefreshEnabled(bool enabled) async {
+  /// Both values in one call, so a window never applies a distance from one
+  /// update together with the enabled flag from another.
+  Future<void> setPullToRefreshSettings(PullToRefreshSettings settings) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setPullToRefreshEnabled$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoEngineSettingsApi.setPullToRefreshSettings$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[enabled],
+      <Object?>[settings],
     );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 

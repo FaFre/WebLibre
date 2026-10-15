@@ -25,6 +25,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/quick_tab_switcher_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/utils/tab_bar_position_setting_l10n.dart';
+import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -57,6 +58,14 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
           subtitle: l10n.settings_indexAutoHideTabBarSubtitle,
           keywords: settingsKeywords(l10n.settings_autoHideTabBarKeywords),
           child: const _AutoHideTabBarTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_autoHideTabBarDistanceTitle,
+          subtitle: l10n.settings_autoHideTabBarDistanceSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_autoHideTabBarDistanceKeywords,
+          ),
+          child: const _AutoHideTabBarDistanceTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_autoHideSidePanelTitle,
@@ -995,6 +1004,40 @@ class _AutoHideTabBarTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.autoHideTabBar(value),
+            );
+      },
+    );
+  }
+}
+
+class _AutoHideTabBarDistanceTile extends HookConsumerWidget {
+  const _AutoHideTabBarDistanceTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final autoHideTabBar = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.autoHideTabBar),
+    );
+    final distance = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.autoHideTabBarDistance,
+      ),
+    );
+
+    return RelativeDistanceSliderTile(
+      title: l10n.settings_autoHideTabBarDistanceTitle,
+      subtitle: l10n.settings_autoHideTabBarDistanceSubtitle,
+      icon: MdiIcons.arrowExpandVertical,
+      value: distance,
+      defaultValue: defaultAutoHideTabBarDistance,
+      enabled: autoHideTabBar,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.autoHideTabBarDistance(value),
             );
       },
     );

@@ -31,6 +31,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GestureConfig
+import eu.weblibre.flutter_mozilla_components.pigeons.PullToRefreshSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
 import eu.weblibre.flutter_mozilla_components.services.PrivateTabsNotificationService
@@ -174,7 +175,7 @@ object GlobalComponents {
         customTabsInHandover = null
         // Replicated per profile, so it must not outlive the profile it was
         // replicated for; the next one reads its own mirror until Dart speaks.
-        pullToRefreshEnabledValue = null
+        pullToRefreshValue = null
 
         // After the components, so it releases against the absence rather than
         // rebinding to the set being torn down.
@@ -187,45 +188,46 @@ object GlobalComponents {
         EXTERNAL,
     }
 
-    // Pull-to-refresh setting, as last replicated from Flutter for the profile
+    // Pull-to-refresh settings, as last replicated from Flutter for the profile
     // currently set up. Null until that happens — which is always later than the
     // first browser window, since the replication service is activated well
     // after `GeckoBrowserService.initialize` — and again after [tearDown], so
     // the next profile falls back to its own mirror rather than inheriting this
     // one's answer.
-    private var pullToRefreshEnabledValue: Boolean? = null
+    private var pullToRefreshValue: PullToRefreshSettings? = null
 
-    private val pullToRefreshListeners = mutableSetOf<(Boolean) -> Unit>()
+    private val pullToRefreshListeners = mutableSetOf<() -> Unit>()
 
     /**
-     * Whether a pull-down on web content should reload.
+     * Whether a pull-down on web content should reload, and how far it has to
+     * be pulled to.
      *
      * Falls back to the current profile's native-readable mirror while Dart has
-     * not spoken yet, so a user who turned pull-to-refresh off does not get it
-     * anyway for the first seconds of a cold start. With no profile committed
-     * there is nothing to consult and no window to apply it to, so the shipped
-     * default stands.
+     * not spoken yet, so a user who turned pull-to-refresh off, or made it
+     * harder to trigger, does not get the default anyway for the first seconds
+     * of a cold start. With no profile committed there is nothing to consult
+     * and no window to apply it to, so the shipped defaults stand.
      */
-    fun isPullToRefreshEnabled(): Boolean =
-        pullToRefreshEnabledValue
+    fun pullToRefreshSettings(): PullToRefreshSettings =
+        pullToRefreshValue
             ?: _components?.profileApplicationContext
-                ?.let { BrowserSettingsPreferences.isPullToRefreshEnabled(it) }
-            ?: true
+                ?.let { BrowserSettingsPreferences.getPullToRefresh(it) }
+            ?: BrowserSettingsPreferences.DEFAULT_PULL_TO_REFRESH
 
     /**
-     * Records the replicated value and notifies every registered window.
+     * Records the replicated settings and notifies every registered window.
      *
      * Resolves the profile context itself rather than taking one: the mirror is
      * per profile, and a call site that reached for the process-global context
      * would quietly seed the next profile's first window with this one's value.
      */
-    fun setPullToRefreshEnabled(enabled: Boolean) {
+    fun setPullToRefreshSettings(settings: PullToRefreshSettings) {
         _components?.profileApplicationContext
-            ?.let { BrowserSettingsPreferences.setPullToRefreshEnabled(it, enabled) }
-        if (pullToRefreshEnabledValue == enabled) return
-        pullToRefreshEnabledValue = enabled
+            ?.let { BrowserSettingsPreferences.setPullToRefresh(it, settings) }
+        if (pullToRefreshValue == settings) return
+        pullToRefreshValue = settings
         // Over a copy: a listener may remove itself while being notified.
-        pullToRefreshListeners.toList().forEach { it(enabled) }
+        pullToRefreshListeners.toList().forEach { it() }
     }
 
     /**
@@ -237,11 +239,11 @@ object GlobalComponents {
      * once, so neither may displace the other's registration — nor, on its own
      * teardown, clear it.
      */
-    fun addPullToRefreshListener(listener: (Boolean) -> Unit) {
+    fun addPullToRefreshListener(listener: () -> Unit) {
         pullToRefreshListeners.add(listener)
     }
 
-    fun removePullToRefreshListener(listener: (Boolean) -> Unit) {
+    fun removePullToRefreshListener(listener: () -> Unit) {
         pullToRefreshListeners.remove(listener)
     }
 

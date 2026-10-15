@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -111,6 +112,14 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
           subtitle: l10n.settings_pullToRefreshSubtitle,
           keywords: settingsKeywords(l10n.settings_pullToRefreshKeywords),
           child: const _PullToRefreshTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_pullToRefreshDistanceTitle,
+          subtitle: l10n.settings_pullToRefreshDistanceSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_pullToRefreshDistanceKeywords,
+          ),
+          child: const _PullToRefreshDistanceTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_doubleBackCloseTabTitle,
@@ -1326,6 +1335,40 @@ class _PullToRefreshTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.pullToRefreshEnabled(value),
+            );
+      },
+    );
+  }
+}
+
+class _PullToRefreshDistanceTile extends HookConsumerWidget {
+  const _PullToRefreshDistanceTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final pullToRefreshEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
+    );
+    final distance = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.pullToRefreshTriggerDistance,
+      ),
+    );
+
+    return RelativeDistanceSliderTile(
+      title: l10n.settings_pullToRefreshDistanceTitle,
+      subtitle: l10n.settings_pullToRefreshDistanceSubtitle,
+      icon: MdiIcons.arrowExpandDown,
+      value: distance,
+      defaultValue: defaultPullToRefreshTriggerDistance,
+      enabled: pullToRefreshEnabled,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.pullToRefreshTriggerDistance(value),
             );
       },
     );

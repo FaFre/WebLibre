@@ -7895,6 +7895,18 @@ class AppLocalizationsId extends AppLocalizations {
       'Usap ke bawah pada halaman untuk memuat ulang';
 
   @override
+  String get settings_pullToRefreshDistanceTitle =>
+      'Jarak Tarik untuk Menyegarkan';
+
+  @override
+  String get settings_pullToRefreshDistanceKeywords =>
+      'sensitivitas, ambang, muat ulang, usap, threshold';
+
+  @override
+  String get settings_pullToRefreshDistanceSubtitle =>
+      'Seberapa jauh Anda menarik ke bawah sebelum halaman dimuat ulang, dibandingkan dengan bawaan';
+
+  @override
   String get settings_customTabsTitle => 'Tab Kustom';
 
   @override
@@ -10936,6 +10948,17 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settings_autoHideTabBarSubtitle =>
       'Sembunyikan bilah tab saat menggulir';
+
+  @override
+  String get settings_autoHideTabBarDistanceTitle => 'Jarak Sembunyi Otomatis';
+
+  @override
+  String get settings_autoHideTabBarDistanceKeywords =>
+      'sensitivitas, ambang, gulir, usap, scroll, threshold';
+
+  @override
+  String get settings_autoHideTabBarDistanceSubtitle =>
+      'Seberapa jauh Anda menggulir sebelum bilah tab tersembunyi atau muncul kembali, dibandingkan dengan bawaan';
 
   @override
   String get settings_autoHideSidePanelTitle =>
