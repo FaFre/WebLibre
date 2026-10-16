@@ -28,7 +28,32 @@ import mozilla.components.support.utils.ext.packageManagerCompatHelper
  * ([eu.weblibre.flutter_mozilla_components.applinks.WebLibreAppLinksInterceptor]) is the consumer:
  * it lets a sign-in callback return to the app that opened the tab.
  */
+/**
+ * Titanium-inspired scheme guard: reject non-network URLs from external callers.
+ * Prevents malicious apps from injecting file://, content://, javascript:, or
+ * other dangerous schemes via ACTION_VIEW intents. Only http(s) and engine-supported
+ * custom schemes are allowed through.
+ */
+private fun isSafeExternalScheme(intent: Intent): Boolean {
+    val uri = intent.data ?: return true
+    val scheme = uri.scheme?.lowercase() ?: return true
+    return scheme in ALLOWED_EXTERNAL_SCHEMES
+}
+
+private val ALLOWED_EXTERNAL_SCHEMES = setOf(
+    "http", "https",
+    "weblibre", "moz-extension", "about"
+)
+
 fun Activity.addExternalCallerInformation(intent: Intent) {
+    // === Titanium-inspired security hardening ===
+    // Block non-network schemes from external callers to prevent
+    // file://, javascript:, data: and other dangerous URI injection attacks.
+    if (!isSafeExternalScheme(intent)) {
+        intent.data = null
+        return
+    }
+
     val caller = resolveExternalCallerPackage(intent) ?: return
     intent.putExtra(EXTRA_ACTIVITY_REFERRER_PACKAGE, caller)
 
