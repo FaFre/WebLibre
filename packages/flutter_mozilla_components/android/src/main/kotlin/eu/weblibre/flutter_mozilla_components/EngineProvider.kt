@@ -26,6 +26,9 @@ import mozilla.components.concept.fetch.Client
 import mozilla.components.feature.webcompat.WebCompatFeature
 import mozilla.components.support.base.log.Log
 import mozilla.components.support.base.log.logger.Logger
+import eu.weblibre.flutter_mozilla_components.security.FeatureFlagManager
+import eu.weblibre.flutter_mozilla_components.security.ProcessIsolationCompat
+import eu.weblibre.flutter_mozilla_components.security.TitaniumHardeningConfig
 import mozilla.components.support.webextensions.BuiltInWebExtensionController
 import org.mozilla.geckoview.ContentBlocking
 import org.mozilla.geckoview.GeckoRuntime
@@ -159,6 +162,7 @@ object EngineProvider {
             }
 
             val created = GeckoRuntime.create(context, builder.build())
+
             state = GeckoRuntimeState.Live(profileId, created)
             created
         }
@@ -180,11 +184,43 @@ object EngineProvider {
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
 
+            // === Titanium Architecture: Runtime Hardening ===
+            // The hardening prefs go through the engine's browser-pref API, so
+            // they are applied here, where an Engine exists, rather than at
+            // runtime creation: GeckoRuntimeSettings has no generic pref setter
+            // and the runtime alone cannot carry them.
+            TitaniumHardeningConfig.applyRuntimeHardening(it)
+            FeatureFlagManager.applyLockedFlags(it)
+
+            // === Process Isolation Compatibility Fix ===
+            // When isolatedProcess or appZygote is enabled, Android's seccomp/
+            // SELinux restrictions compound with Gecko's internal sandbox,
+            // breaking Cloudflare Turnstile verification and Widevine DRM
+            // playback. Compensate so the two do not stack.
+            GlobalComponents.startupSettings?.let { settings ->
+                ProcessIsolationCompat.applyCompensations(
+                    engine = it,
+                    isolatedProcessEnabled = settings.isolatedProcessEnabled ?: false,
+                    appZygoteProcessEnabled = settings.appZygoteProcessEnabled ?: false,
+                )
+            }
+
             //Install extensions early
             BuiltInWebExtensionController(
                 "readability-extract@weblibre.eu",
                 "resource://android/assets/extensions/readability_extract/",
                 "mozacReaderExtract",
+            ).install(it)
+
+            // Install Titanium-inspired privacy hardening extension.
+            // Mirrors Titanium's bundle.py + stage_bundled_extensions.inc architecture:
+            // a bundled WebExtension that provides canvas/WebGL noise injection,
+            // navigator property spoofing, and tracker blocking at the content
+            // script level — the GeckoView equivalent of Chromium JS injection patches.
+            BuiltInWebExtensionController(
+                "titanium-privacy@weblibre.eu",
+                "resource://android/assets/extensions/titanium_privacy/",
+                "titaniumPrivacyShield",
             ).install(it)
 
             SandboxCaptureFeature.install(it)
