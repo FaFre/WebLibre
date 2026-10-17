@@ -355,6 +355,16 @@ class BrokeredLaunchClaim extends _$BrokeredLaunchClaim {
     _claimed = null;
     return claimed;
   }
+
+  /// Gives back a claim nobody [take]s, so that the next engine to claim gets
+  /// its launches now rather than once the claim expires.
+  Future<void> abandon() async {
+    final claimed = _claimed;
+    if (claimed == null) return;
+
+    _claimed = null;
+    await releaseClaimedLaunches(await claimed, engineId: engineInstanceId);
+  }
 }
 
 /// Subscribes to [source] now, and re-publishes it as a broadcast stream that

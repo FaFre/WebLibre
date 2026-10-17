@@ -169,6 +169,20 @@ Future<int> deliverClaimedLaunches(
   return delivered;
 }
 
+/// Hands [launches] that [claimBrokeredIntents] took back to the broker
+/// undelivered, for whichever engine claims next.
+Future<void> releaseClaimedLaunches(
+  List<ClaimedLaunch> launches, {
+  required String engineId,
+  GeckoProfileService? service,
+}) async {
+  final api = service ?? GeckoProfileService();
+
+  for (final (:entryId, intent: _) in launches) {
+    await _releaseQuietly(api, entryId, engineId);
+  }
+}
+
 /// Where a queued share keeps the bytes it carries.
 ///
 /// Mirrors Kotlin's `StartupIntentPayloads.EXTRA_STREAM`.

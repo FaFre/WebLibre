@@ -132,6 +132,26 @@ void main() {
       expect(api.acknowledged, ['a', 'b']);
     });
 
+    test('a claim startup never delivers is handed back', () async {
+      // Startup claims before it delivers; a start that stops in between must
+      // not keep the launches from the next engine for the claim's minute.
+      final api = _FakeProfileApi([record('a'), record('b', sequence: 2)]);
+      final service = GeckoProfileService(api: api);
+
+      final claimed = await claimBrokeredIntents(
+        engineId: 'engine-1',
+        service: service,
+      );
+      await releaseClaimedLaunches(
+        claimed,
+        engineId: 'engine-1',
+        service: service,
+      );
+
+      expect(api.released, ['a', 'b']);
+      expect(api.acknowledged, isEmpty);
+    });
+
     test('a failed claim claims nothing', () async {
       final api = _FakeProfileApi([record('a')])..claimThrows = true;
 

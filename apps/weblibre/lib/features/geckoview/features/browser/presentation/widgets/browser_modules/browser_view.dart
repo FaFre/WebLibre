@@ -642,15 +642,18 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             sharedContent.containerMode,
                           );
 
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: sharedContent.url,
-                          tabMode: tabMode,
-                          launchedFromIntent: true,
-                          selectTab: true,
-                          containerSelection: containerSelection,
-                        );
+                    launchCover.launchTabOpened(
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(
+                            url: sharedContent.url,
+                            tabMode: tabMode,
+                            launchedFromIntent: true,
+                            selectTab: true,
+                            containerSelection: containerSelection,
+                            onCreated: launchCover.launchTabCreated,
+                          ),
+                    );
                     openedTab = true;
                   case SharedText():
                     final bang =
@@ -672,19 +675,22 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       break;
                     }
 
-                    await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: bang?.getTemplateUrl(sharedContent.text),
-                          tabMode: tabMode,
-                          launchedFromIntent: true,
-                          selectTab: true,
-                        );
+                    launchCover.launchTabOpened(
+                      await ref
+                          .read(tabRepositoryProvider.notifier)
+                          .addTab(
+                            url: bang?.getTemplateUrl(sharedContent.text),
+                            tabMode: tabMode,
+                            launchedFromIntent: true,
+                            selectTab: true,
+                            onCreated: launchCover.launchTabCreated,
+                          ),
+                    );
                     openedTab = true;
                 }
               } finally {
                 launchClaim.release();
-                // An opened tab lowers the cover itself once it is selected;
+                // An opened tab lowers the cover itself once it is on screen;
                 // lowering here would show home for the frames before the
                 // selection lands. Anything else is followed by no selection.
                 if (!openedTab) {
@@ -692,30 +698,36 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                 }
               }
             case TabIntentOpenSetting.ask:
-              final router = await ref.read(routerProvider.future);
+              final Future<Object?> pushed;
+              try {
+                final router = await ref.read(routerProvider.future);
 
-              switch (sharedContent) {
-                case SharedUrl():
-                  final route = OpenSharedContentRoute(
-                    sharedUrl: sharedContent.url.toString(),
-                    contextId: sharedContent.contextId,
-                    containerMode: sharedContent.containerMode.queryValueOrNull,
-                  );
-                  final pushed = router.push(route.location);
-                  launchCover.lower();
-                  await pushed;
-                case SharedText():
-                  final route = SearchRoute(
-                    tabType:
-                        ref.read(selectedTabTypeProvider) ??
-                        settings.effectiveDefaultCreateTabType,
-                    searchText: sharedContent.text,
-                    launchedFromIntent: true, //launched from intent
-                  );
-                  final pushed = router.push(route.location);
-                  launchCover.lower();
-                  await pushed;
+                pushed = switch (sharedContent) {
+                  SharedUrl() => router.push(
+                    OpenSharedContentRoute(
+                      sharedUrl: sharedContent.url.toString(),
+                      contextId: sharedContent.contextId,
+                      containerMode:
+                          sharedContent.containerMode.queryValueOrNull,
+                    ).location,
+                  ),
+                  SharedText() => router.push(
+                    SearchRoute(
+                      tabType:
+                          ref.read(selectedTabTypeProvider) ??
+                          settings.effectiveDefaultCreateTabType,
+                      searchText: sharedContent.text,
+                      launchedFromIntent: true, //launched from intent
+                    ).location,
+                  ),
+                };
+              } finally {
+                // As soon as the route is pushed, not once it is popped, which
+                // is what `pushed` waits for. Also when no route could be:
+                // either way, no tab follows from here.
+                launchCover.lower();
               }
+              await pushed;
           }
         });
       },

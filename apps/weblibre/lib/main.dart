@@ -358,25 +358,6 @@ class _MainWidget extends HookConsumerWidget {
         logger.w('Failed preloading persisted state', error: e, stackTrace: s);
       }
 
-      // Takes the launch backlog from the host, and claims what the broker held
-      // while the profile picker was up, now rather than when the intent
-      // consumers are built after `initialize()`: whether the app was started
-      // for a link has to be known before the router mounts, or the home surface
-      // paints first (#612). Nothing is delivered early — the bus holds every
-      // intent until `brokeredIntentDelivery` starts delivery and delivers the
-      // broker's claim, as it always has.
-      _activateService(ref, intentBusProvider);
-      final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
-        ..ignore();
-      final brokeredLaunches =
-          ref
-              .read(brokeredLaunchClaimProvider.notifier)
-              .claim()
-              .then(
-                (launches) => [for (final launch in launches) launch.intent],
-              )
-            ..ignore();
-
       final startupUBlockFilterListsPref =
           engineSettings.ublockFilterListSettings.enabled
           ? jsonEncode(
@@ -489,6 +470,32 @@ class _MainWidget extends HookConsumerWidget {
         rethrow;
       }
 
+      // Takes the launch backlog from the host, and claims what the broker held
+      // while the profile picker was up, now rather than when the intent
+      // consumers are built after `initialize()`: whether the app was started
+      // for a link has to be known before the router mounts, or the home surface
+      // paints first (#612). Nothing is delivered early — the bus holds every
+      // intent until `brokeredIntentDelivery` starts delivery and delivers the
+      // broker's claim, as it always has.
+      //
+      // Not before the engine, though both would be answered sooner: from here
+      // on these launches are this isolate's alone — the host stops holding
+      // them, and the broker's claim keeps them from any other engine — so a
+      // start that fails or is torn down in between strands them. Past the
+      // engine bring-up, the stretch that can is short, and the claim goes back
+      // in the `finally` below.
+      _activateService(ref, intentBusProvider);
+      final startupBacklog = ref.read(intentReceiverProvider).pendingIntents
+        ..ignore();
+      final brokeredLaunches =
+          ref
+              .read(brokeredLaunchClaimProvider.notifier)
+              .claim()
+              .then(
+                (launches) => [for (final launch in launches) launch.intent],
+              )
+            ..ignore();
+
       // Mirror the startup uBO pref into the fixator so later pref changes are
       // still observed and enforced after native startup initialization.
       try {
@@ -569,8 +576,8 @@ class _MainWidget extends HookConsumerWidget {
       // launch's tab is selected instead of handing over to the home surface.
       _activateService(ref, startupLaunchCoverProvider);
       // Both answered long ago in practice: they were asked for before the
-      // engine started. Bounded anyway, since a source that does not answer
-      // only goes uncovered — which is how every start looked before.
+      // first-frame preload above. Bounded anyway, since a source that does not
+      // answer only goes uncovered — which is how every start looked before.
       final startupLaunches = await Future.wait([
         for (final launches in [startupBacklog, brokeredLaunches])
           launches.timeout(const Duration(seconds: 1)).catchError((
@@ -671,6 +678,11 @@ class _MainWidget extends HookConsumerWidget {
         // without a live endpoint is published as still coming up. It does not
         // terminate — it keeps answering launches for the life of the isolate.
         unawaited(ref.read(proxyDemandServiceProvider.notifier).run());
+
+        // What startup claimed from the broker and never got to deliver goes
+        // back: left claimed, it would be kept from every other engine for the
+        // claim's full minute. Nothing to do once delivery has taken it.
+        unawaited(ref.read(brokeredLaunchClaimProvider.notifier).abandon());
       }
 
       if (!kDebugMode) {

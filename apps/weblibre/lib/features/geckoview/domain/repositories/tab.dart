@@ -211,6 +211,11 @@ class TabRepository extends _$TabRepository {
     return parent != null ? parentId : null;
   }
 
+  /// Opens a tab and returns its id.
+  ///
+  /// [onCreated] is called with that id as soon as the engine has created the
+  /// tab, before its row is written and, for a selected tab, before the
+  /// selected container follows it.
   Future<String> addTab({
     required TabMode tabMode,
     Uri? url,
@@ -225,6 +230,7 @@ class TabRepository extends _$TabRepository {
         const TabContainerSelection.useSelected(),
     bool launchedFromIntent = false,
     TabBackBehavior? onBackBehavior,
+    void Function(String tabId)? onCreated,
   }) async {
     // The startup cleanup deletes the previous session's cookies, cache and
     // site data; a page opened before it finished would lose its own with them.
@@ -268,8 +274,8 @@ class TabRepository extends _$TabRepository {
         : assignedContainer?.metadata.contextualIdentity;
 
     final newTabId = await tabDao.upsertTabTransactional(
-      () {
-        return _tabsService.addTab(
+      () async {
+        final tabId = await _tabsService.addTab(
           url: url,
           selectTab: selectTab,
           startLoading: startLoading,
@@ -285,6 +291,8 @@ class TabRepository extends _$TabRepository {
           excludeFromHistory:
               assignedContainer?.metadata.excludeFromHistory ?? false,
         );
+        onCreated?.call(tabId);
+        return tabId;
       },
       parentId: Value(validatedParentId),
       containerId: Value(assignedContainer?.id),
@@ -704,12 +712,21 @@ class TabRepository extends _$TabRepository {
         selectedContainerProvider.notifier,
       );
       if (containerData != null) {
-        await selectedContainerNotifier.setContainerId(containerData.id);
+        final result = await selectedContainerNotifier.setContainerId(
+          containerData.id,
+        );
+        if (!ref.mounted) return false;
+
+        // The tab stays under home, so nothing was shown.
+        if (result == SetContainerResult.failed) {
+          logger.w(
+            'Could not bring back the container of re-selected tab $tabId',
+          );
+          return false;
+        }
       } else {
         selectedContainerNotifier.clearContainer();
       }
-
-      if (!ref.mounted) return false;
     }
 
     await _tabsService.selectTab(tabId: tabId);
