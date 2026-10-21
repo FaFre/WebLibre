@@ -103,6 +103,68 @@ final class WatchContainersProvider
 
 String _$watchContainersHash() => r'd72af19d1e3bf7211e80100cde73a5461e2a8c64';
 
+/// When each container was last used, keyed by container id. See
+/// `ContainerDao.getContainerLastUsed`.
+///
+/// Kept alive like [watchContainersWithCount]: the accordion leaves the tree
+/// whenever a sheet hides the switcher, and an auto-disposed stream would
+/// leave it without an order for a frame each time it comes back.
+
+@ProviderFor(watchContainerLastUsed)
+final watchContainerLastUsedProvider = WatchContainerLastUsedProvider._();
+
+/// When each container was last used, keyed by container id. See
+/// `ContainerDao.getContainerLastUsed`.
+///
+/// Kept alive like [watchContainersWithCount]: the accordion leaves the tree
+/// whenever a sheet hides the switcher, and an auto-disposed stream would
+/// leave it without an order for a frame each time it comes back.
+
+final class WatchContainerLastUsedProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, DateTime>>,
+          Map<String, DateTime>,
+          Stream<Map<String, DateTime>>
+        >
+    with
+        $FutureModifier<Map<String, DateTime>>,
+        $StreamProvider<Map<String, DateTime>> {
+  /// When each container was last used, keyed by container id. See
+  /// `ContainerDao.getContainerLastUsed`.
+  ///
+  /// Kept alive like [watchContainersWithCount]: the accordion leaves the tree
+  /// whenever a sheet hides the switcher, and an auto-disposed stream would
+  /// leave it without an order for a frame each time it comes back.
+  WatchContainerLastUsedProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchContainerLastUsedProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchContainerLastUsedHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Map<String, DateTime>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Map<String, DateTime>> create(Ref ref) {
+    return watchContainerLastUsed(ref);
+  }
+}
+
+String _$watchContainerLastUsedHash() =>
+    r'742db7724011314e9d06f9b469e6a38f53ee48c9';
+
 /// Which container each closed tab ran in, for the recently closed list.
 
 @ProviderFor(watchClosedTabContainers)

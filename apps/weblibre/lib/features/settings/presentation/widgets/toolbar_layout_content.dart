@@ -112,6 +112,14 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
           child: const _TabBarStackingModeSection(),
         ),
         SettingsEntryDefinition(
+          title: l10n.settings_containersByRecentUseTitle,
+          subtitle: l10n.settings_containersByRecentUseSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_containersByRecentUseKeywords,
+          ),
+          child: const _QuickTabSwitcherContainersByRecentUseTile(),
+        ),
+        SettingsEntryDefinition(
           title: l10n.settings_switcherPlacementTitle,
           subtitle: l10n.settings_switcherPlacementSubtitle,
           keywords: settingsKeywords(l10n.settings_switcherPlacementKeywords),
@@ -851,6 +859,43 @@ class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
                   .save(
                     (currentSettings) => currentSettings.copyWith
                         .quickTabSwitcherShowHistorySuggestions(value),
+                  );
+            }
+          : null,
+    );
+  }
+}
+
+class _QuickTabSwitcherContainersByRecentUseTile extends HookConsumerWidget {
+  const _QuickTabSwitcherContainersByRecentUseTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final containersByRecentUse = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.quickTabSwitcherContainersByRecentUse,
+      ),
+    );
+    // Only the accordion lists containers, so only it has an order to change.
+    final isAccordion = ref.watch(
+      effectiveTabBarStackingModeProvider.select(
+        (mode) => mode == TabBarStackingMode.accordion,
+      ),
+    );
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_containersByRecentUseTitle),
+      subtitle: Text(l10n.settings_containersByRecentUseSubtitle),
+      secondary: const Icon(MdiIcons.sortClockDescending),
+      value: containersByRecentUse,
+      onChanged: isAccordion
+          ? (value) async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save(
+                    (currentSettings) => currentSettings.copyWith
+                        .quickTabSwitcherContainersByRecentUse(value),
                   );
             }
           : null,

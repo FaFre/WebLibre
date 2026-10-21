@@ -127,9 +127,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     );
 
     final containers =
-        ref.watch(
-          watchContainersWithCountProvider.select((value) => value.value),
-        ) ??
+        ref.watch(accordionContainersProvider)?.value ??
         const <ContainerDataWithCount>[];
     final selectedContainerId = ref.watch(selectedContainerProvider);
     final selectedTabId = ref.watch(selectedTabProvider);

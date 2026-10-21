@@ -157,6 +157,10 @@ abstract class _$GeneralSettingsCWProxy {
     bool quickTabSwitcherShowHistorySuggestions,
   );
 
+  GeneralSettings quickTabSwitcherContainersByRecentUse(
+    bool quickTabSwitcherContainersByRecentUse,
+  );
+
   GeneralSettings quickTabSwitcherTitleWidth(double quickTabSwitcherTitleWidth);
 
   GeneralSettings quickTabSwitcherCloseButtonMode(
@@ -313,6 +317,7 @@ abstract class _$GeneralSettingsCWProxy {
     bool quickTabSwitcherShowTitles,
     int quickTabSwitcherHierarchyGlyphs,
     bool quickTabSwitcherShowHistorySuggestions,
+    bool quickTabSwitcherContainersByRecentUse,
     double quickTabSwitcherTitleWidth,
     TabChipCloseButtonMode quickTabSwitcherCloseButtonMode,
     String syncServerOverride,
@@ -628,6 +633,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   );
 
   @override
+  GeneralSettings quickTabSwitcherContainersByRecentUse(
+    bool quickTabSwitcherContainersByRecentUse,
+  ) => call(
+    quickTabSwitcherContainersByRecentUse:
+        quickTabSwitcherContainersByRecentUse,
+  );
+
+  @override
   GeneralSettings quickTabSwitcherTitleWidth(
     double quickTabSwitcherTitleWidth,
   ) => call(quickTabSwitcherTitleWidth: quickTabSwitcherTitleWidth);
@@ -852,6 +865,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? quickTabSwitcherShowTitles = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherHierarchyGlyphs = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherShowHistorySuggestions =
+        const $CopyWithPlaceholder(),
+    Object? quickTabSwitcherContainersByRecentUse =
         const $CopyWithPlaceholder(),
     Object? quickTabSwitcherTitleWidth = const $CopyWithPlaceholder(),
     Object? quickTabSwitcherCloseButtonMode = const $CopyWithPlaceholder(),
@@ -1248,6 +1263,13 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.quickTabSwitcherShowHistorySuggestions
           // ignore: cast_nullable_to_non_nullable
           : quickTabSwitcherShowHistorySuggestions as bool,
+      quickTabSwitcherContainersByRecentUse:
+          quickTabSwitcherContainersByRecentUse ==
+                  const $CopyWithPlaceholder() ||
+              quickTabSwitcherContainersByRecentUse == null
+          ? _value.quickTabSwitcherContainersByRecentUse
+          // ignore: cast_nullable_to_non_nullable
+          : quickTabSwitcherContainersByRecentUse as bool,
       quickTabSwitcherTitleWidth:
           quickTabSwitcherTitleWidth == const $CopyWithPlaceholder() ||
               quickTabSwitcherTitleWidth == null
@@ -1608,6 +1630,8 @@ GeneralSettings _$GeneralSettingsFromJson(
       (json['quickTabSwitcherHierarchyGlyphs'] as num?)?.toInt(),
   quickTabSwitcherShowHistorySuggestions:
       json['quickTabSwitcherShowHistorySuggestions'] as bool?,
+  quickTabSwitcherContainersByRecentUse:
+      json['quickTabSwitcherContainersByRecentUse'] as bool?,
   quickTabSwitcherTitleWidth: (json['quickTabSwitcherTitleWidth'] as num?)
       ?.toDouble(),
   quickTabSwitcherCloseButtonMode: $enumDecodeNullable(
@@ -1750,6 +1774,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'quickTabSwitcherHierarchyGlyphs': instance.quickTabSwitcherHierarchyGlyphs,
   'quickTabSwitcherShowHistorySuggestions':
       instance.quickTabSwitcherShowHistorySuggestions,
+  'quickTabSwitcherContainersByRecentUse':
+      instance.quickTabSwitcherContainersByRecentUse,
   'quickTabSwitcherTitleWidth': instance.quickTabSwitcherTitleWidth,
   'quickTabSwitcherCloseButtonMode':
       _$TabChipCloseButtonModeEnumMap[instance

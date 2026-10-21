@@ -108,6 +108,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'quickTabSwitcherShowTitles': DriftSqlType.bool,
   'quickTabSwitcherHierarchyGlyphs': DriftSqlType.int,
   'quickTabSwitcherShowHistorySuggestions': DriftSqlType.bool,
+  'quickTabSwitcherContainersByRecentUse': DriftSqlType.bool,
   'quickTabSwitcherTitleWidth': DriftSqlType.double,
   // Legacy: superseded by quickTabSwitcherCloseButtonMode.
   'quickTabSwitcherShowCloseButtonOnAllTabs': DriftSqlType.bool,

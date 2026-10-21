@@ -162,6 +162,21 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     return query.map((row) => readTabSummary(row, db.tab));
   }
 
+  /// When a tab of each container was last selected or opened: the newest
+  /// `tab.timestamp`, which selection bumps. Containers without tabs and
+  /// unassigned tabs are left out.
+  Selectable<MapEntry<String, DateTime>> getContainerLastUsed() {
+    final lastUsed = db.tab.timestamp.max();
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.containerId, lastUsed])
+      ..where(db.tab.containerId.isNotNull())
+      ..groupBy([db.tab.containerId]);
+
+    return query.map(
+      (row) => MapEntry(row.read(db.tab.containerId)!, row.read(lastUsed)!),
+    );
+  }
+
   SingleSelectable<String> generateLeadingOrderKey(
     String? containerId, {
     int bucket = 0,

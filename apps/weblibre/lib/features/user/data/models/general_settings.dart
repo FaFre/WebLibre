@@ -549,6 +549,12 @@ class GeneralSettings with FastEquatable {
   final int quickTabSwitcherHierarchyGlyphs;
   final bool quickTabSwitcherShowHistorySuggestions;
 
+  /// Orders the accordion's container headers by when a tab of each was last
+  /// selected or opened, after the pinned containers (#675). Off keeps the
+  /// manual order. Only the accordion follows it; see
+  /// `accordionContainersProvider`.
+  final bool quickTabSwitcherContainersByRecentUse;
+
   /// Max width (logical px) for chip titles in the quick tab switcher.
   final double quickTabSwitcherTitleWidth;
 
@@ -740,6 +746,7 @@ class GeneralSettings with FastEquatable {
     required this.quickTabSwitcherShowTitles,
     required this.quickTabSwitcherHierarchyGlyphs,
     required this.quickTabSwitcherShowHistorySuggestions,
+    required this.quickTabSwitcherContainersByRecentUse,
     required this.quickTabSwitcherTitleWidth,
     required this.quickTabSwitcherCloseButtonMode,
     required this.syncServerOverride,
@@ -841,6 +848,7 @@ class GeneralSettings with FastEquatable {
     bool? quickTabSwitcherShowTitles,
     int? quickTabSwitcherHierarchyGlyphs,
     bool? quickTabSwitcherShowHistorySuggestions,
+    bool? quickTabSwitcherContainersByRecentUse,
     double? quickTabSwitcherTitleWidth,
     TabChipCloseButtonMode? quickTabSwitcherCloseButtonMode,
     String? syncServerOverride,
@@ -963,6 +971,8 @@ class GeneralSettings with FastEquatable {
            defaultQuickTabSwitcherHierarchyGlyphs,
        quickTabSwitcherShowHistorySuggestions =
            quickTabSwitcherShowHistorySuggestions ?? true,
+       quickTabSwitcherContainersByRecentUse =
+           quickTabSwitcherContainersByRecentUse ?? false,
        quickTabSwitcherTitleWidth =
            quickTabSwitcherTitleWidth ?? defaultQuickTabSwitcherTitleWidth,
        quickTabSwitcherCloseButtonMode =
@@ -1241,6 +1251,7 @@ class GeneralSettings with FastEquatable {
     quickTabSwitcherShowTitles,
     quickTabSwitcherHierarchyGlyphs,
     quickTabSwitcherShowHistorySuggestions,
+    quickTabSwitcherContainersByRecentUse,
     quickTabSwitcherTitleWidth,
     quickTabSwitcherCloseButtonMode,
     syncServerOverride,

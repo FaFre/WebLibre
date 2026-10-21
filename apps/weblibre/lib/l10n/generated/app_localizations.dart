@@ -18264,6 +18264,24 @@ abstract class AppLocalizations {
   /// **'Use browsing history suggestions when no tab chips are available'**
   String get settings_historyFallbackSubtitle;
 
+  /// Switch: in the Accordion tab stacking mode (settings_accordionOption), order the container chips by when the user last used one of their tabs instead of the order the user arranged them in.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently Used Containers First'**
+  String get settings_containersByRecentUseTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'container order, sort containers, recent containers, last used, most recently used, accordion'**
+  String get settings_containersByRecentUseKeywords;
+
+  /// Explanation under that switch; also shown as a settings search result. "Accordion" is the tab stacking option name settings_accordionOption; the switch is disabled for the other options. Pinned containers are the ones the user chose to keep at the top of the list.
+  ///
+  /// In en, this message translates to:
+  /// **'Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it'**
+  String get settings_containersByRecentUseSubtitle;
+
   /// Switch: show tab titles, not only icons, in the quick tab switcher bar.
   ///
   /// In en, this message translates to:

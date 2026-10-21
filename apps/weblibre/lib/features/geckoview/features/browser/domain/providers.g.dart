@@ -1273,6 +1273,84 @@ final class TabGroupsQuickTabSwitcherRowsProvider
 String _$tabGroupsQuickTabSwitcherRowsHash() =>
     r'5382be266161ab151c298705d4881fe165f0635d';
 
+/// The containers the accordion shows as group headers, in display order.
+/// Null until they have loaded.
+///
+/// Only the accordion follows
+/// [GeneralSettings.quickTabSwitcherContainersByRecentUse] (#675). The swipe
+/// and gesture orders, the container list and the pickers keep the manual
+/// order: a cross-container swipe order sorted by use would move each
+/// container to the front as it is reached, reshuffling the sequence mid-swipe.
+
+@ProviderFor(accordionContainers)
+final accordionContainersProvider = AccordionContainersProvider._();
+
+/// The containers the accordion shows as group headers, in display order.
+/// Null until they have loaded.
+///
+/// Only the accordion follows
+/// [GeneralSettings.quickTabSwitcherContainersByRecentUse] (#675). The swipe
+/// and gesture orders, the container list and the pickers keep the manual
+/// order: a cross-container swipe order sorted by use would move each
+/// container to the front as it is reached, reshuffling the sequence mid-swipe.
+
+final class AccordionContainersProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<ContainerDataWithCount>>?,
+          EquatableValue<List<ContainerDataWithCount>>?,
+          EquatableValue<List<ContainerDataWithCount>>?
+        >
+    with $Provider<EquatableValue<List<ContainerDataWithCount>>?> {
+  /// The containers the accordion shows as group headers, in display order.
+  /// Null until they have loaded.
+  ///
+  /// Only the accordion follows
+  /// [GeneralSettings.quickTabSwitcherContainersByRecentUse] (#675). The swipe
+  /// and gesture orders, the container list and the pickers keep the manual
+  /// order: a cross-container swipe order sorted by use would move each
+  /// container to the front as it is reached, reshuffling the sequence mid-swipe.
+  AccordionContainersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accordionContainersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accordionContainersHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<ContainerDataWithCount>>?>
+  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<ContainerDataWithCount>>? create(Ref ref) {
+    return accordionContainers(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<List<ContainerDataWithCount>>? value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<ContainerDataWithCount>>?>(
+            value,
+          ),
+    );
+  }
+}
+
+String _$accordionContainersHash() =>
+    r'8d1920b271cc2511af6a20ea7b180df7792ef477';
+
 /// Number of 48px rows the quick tab switcher bar currently occupies.
 /// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
 

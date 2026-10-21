@@ -48,6 +48,18 @@ Stream<List<ContainerData>> watchContainers(Ref ref) {
   return db.containerDao.allContainers().watch();
 }
 
+/// When each container was last used, keyed by container id. See
+/// `ContainerDao.getContainerLastUsed`.
+///
+/// Kept alive like [watchContainersWithCount]: the accordion leaves the tree
+/// whenever a sheet hides the switcher, and an auto-disposed stream would
+/// leave it without an order for a frame each time it comes back.
+@Riverpod(keepAlive: true)
+Stream<Map<String, DateTime>> watchContainerLastUsed(Ref ref) {
+  final db = ref.watch(tabDatabaseProvider);
+  return db.containerDao.getContainerLastUsed().watch().map(Map.fromEntries);
+}
+
 /// Which container each closed tab ran in, for the recently closed list.
 @Riverpod()
 Stream<List<ClosedTabContainerData>> watchClosedTabContainers(Ref ref) {

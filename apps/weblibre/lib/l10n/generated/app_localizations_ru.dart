@@ -11025,6 +11025,18 @@ class AppLocalizationsRu extends AppLocalizations {
       'Показывать подсказки из истории, когда нет чипов вкладок';
 
   @override
+  String get settings_containersByRecentUseTitle =>
+      'Recently Used Containers First';
+
+  @override
+  String get settings_containersByRecentUseKeywords =>
+      'container order, sort containers, recent containers, last used, most recently used, accordion';
+
+  @override
+  String get settings_containersByRecentUseSubtitle =>
+      'Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it';
+
+  @override
   String get settings_showTitlesTitle => 'Заголовки в быстром переключателе';
 
   @override

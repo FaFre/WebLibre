@@ -13353,6 +13353,18 @@
   "@settings_historyFallbackSubtitle": {
     "description": "Explanation under that switch."
   },
+  "settings_containersByRecentUseTitle": "Recently Used Containers First",
+  "@settings_containersByRecentUseTitle": {
+    "description": "Switch: in the Accordion tab stacking mode (settings_accordionOption), order the container chips by when the user last used one of their tabs instead of the order the user arranged them in."
+  },
+  "settings_containersByRecentUseKeywords": "container order, sort containers, recent containers, last used, most recently used, accordion",
+  "@settings_containersByRecentUseKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_containersByRecentUseSubtitle": "Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it",
+  "@settings_containersByRecentUseSubtitle": {
+    "description": "Explanation under that switch; also shown as a settings search result. \"Accordion\" is the tab stacking option name settings_accordionOption; the switch is disabled for the other options. Pinned containers are the ones the user chose to keep at the top of the list."
+  },
   "settings_showTitlesTitle": "Show Titles in Quick Tab Switcher",
   "@settings_showTitlesTitle": {
     "description": "Switch: show tab titles, not only icons, in the quick tab switcher bar."

@@ -635,6 +635,75 @@ tabGroupsQuickTabSwitcherRows(Ref ref) {
   );
 }
 
+/// [containers] (in manual order) reordered for
+/// [GeneralSettings.quickTabSwitcherContainersByRecentUse]: pinned containers
+/// first, keeping their manual order, then the others by [lastUsed], most
+/// recent first. Containers missing from [lastUsed] (no tabs) come last, in
+/// manual order, as do ties.
+List<T> orderContainersByRecentUse<T extends ContainerData>(
+  List<T> containers,
+  Map<String, DateTime> lastUsed,
+) {
+  final ordered = [...containers];
+  // Stable, so every tie keeps the manual order it came in.
+  mergeSort(
+    ordered,
+    compare: (a, b) {
+      if (a.isPinned || b.isPinned) {
+        return a.isPinned == b.isPinned ? 0 : (a.isPinned ? -1 : 1);
+      }
+
+      final aUsed = lastUsed[a.id];
+      final bUsed = lastUsed[b.id];
+      if (aUsed == null || bUsed == null) {
+        return aUsed == bUsed ? 0 : (aUsed == null ? 1 : -1);
+      }
+
+      return bUsed.compareTo(aUsed);
+    },
+  );
+  return ordered;
+}
+
+/// The containers the accordion shows as group headers, in display order.
+/// Null until they have loaded.
+///
+/// Only the accordion follows
+/// [GeneralSettings.quickTabSwitcherContainersByRecentUse] (#675). The swipe
+/// and gesture orders, the container list and the pickers keep the manual
+/// order: a cross-container swipe order sorted by use would move each
+/// container to the front as it is reached, reshuffling the sequence mid-swipe.
+@Riverpod()
+EquatableValue<List<ContainerDataWithCount>>? accordionContainers(Ref ref) {
+  final byRecentUse = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.quickTabSwitcherContainersByRecentUse,
+    ),
+  );
+  final containers = ref.watch(
+    watchContainersWithCountProvider.select((value) => value.value),
+  );
+  if (!byRecentUse) {
+    return containers.mapNotNull(EquatableValue.new);
+  }
+
+  // Watched before the containers are checked, so both queries load at once
+  // rather than one after the other.
+  final lastUsed = ref.watch(watchContainerLastUsedProvider);
+  if (containers == null) {
+    return null;
+  }
+
+  if (lastUsed.value case final lastUsed?) {
+    return EquatableValue(orderContainersByRecentUse(containers, lastUsed));
+  }
+
+  // The first wait for the timestamps shows no headers rather than the manual
+  // order, which would reshuffle a frame later. A failed read must not hide
+  // the containers, though.
+  return lastUsed.hasError ? EquatableValue(containers) : null;
+}
+
 /// Number of 48px rows the quick tab switcher bar currently occupies.
 /// 0 hides the bar; feeds the toolbar height / GeckoView viewport math.
 @Riverpod()

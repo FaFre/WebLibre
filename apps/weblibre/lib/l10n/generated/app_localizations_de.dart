@@ -10951,6 +10951,18 @@ class AppLocalizationsDe extends AppLocalizations {
       'Vorschläge aus dem Browserverlauf verwenden, wenn keine Tab-Chips verfügbar sind';
 
   @override
+  String get settings_containersByRecentUseTitle =>
+      'Zuletzt verwendete Container zuerst';
+
+  @override
+  String get settings_containersByRecentUseKeywords =>
+      'Container-Reihenfolge, Container sortieren, letzte Container, zuletzt verwendet, Akkordeon';
+
+  @override
+  String get settings_containersByRecentUseSubtitle =>
+      'Nur Akkordeon: Der zuletzt verwendete Container rückt nach vorn. Angeheftete Container bleiben davor';
+
+  @override
   String get settings_showTitlesTitle =>
       'Titel im schnellen Tab-Wechsler anzeigen';
 
