@@ -76,7 +76,8 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     // The isolate that registered the handler is going away with the engine, so
     // the gate's answer about it stops being true here. What it is holding is
-    // not that isolate's, and stays.
+    // not that isolate's, and stays — as does what that isolate was handed and
+    // never confirmed, since nothing ran its teardown.
     gate.release()
     intentReceiver = null
     binaryMessenger?.let {
@@ -87,6 +88,8 @@ class SimpleIntentReceiverPlugin: FlutterPlugin, ActivityAware, PluginRegistry.N
   }
 
   override fun takePendingIntents(): List<PigeonIntent> = gate.drain()
+
+  override fun confirmDelivery(backlogReceived: Boolean) = gate.confirm(backlogReceived)
 
   override fun releaseDelivery() = gate.release()
 

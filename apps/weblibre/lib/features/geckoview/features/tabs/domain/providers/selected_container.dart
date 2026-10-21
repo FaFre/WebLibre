@@ -88,6 +88,20 @@ class SelectedContainer extends _$SelectedContainer {
     state = null;
   }
 
+  /// Follows a selected tab into [containerId], the container it is in, or
+  /// out of any container for a tab in none.
+  ///
+  /// The one place that decides what selecting a tab does to the selected
+  /// container, whether the engine reported the selection or the app made it.
+  Future<SetContainerResult> followTab(String? containerId) async {
+    if (containerId == null) {
+      clearContainer();
+      return SetContainerResult.success;
+    }
+
+    return await setContainerId(containerId);
+  }
+
   @override
   String? build() {
     final persistCompleter = Completer();
@@ -142,11 +156,7 @@ class SelectedContainer extends _$SelectedContainer {
           if (ref.mounted &&
               tabData != null &&
               tabData.containerId != stateOrNull) {
-            if (tabData.containerId != null) {
-              await setContainerId(tabData.containerId!);
-            } else {
-              clearContainer();
-            }
+            await followTab(tabData.containerId);
           }
         }
       },
@@ -190,8 +200,25 @@ Stream<ContainerData?> selectedContainerData(Ref ref) {
 /// deliberately going somewhere.
 @Riverpod(keepAlive: true)
 class ForceBrowserHome extends _$ForceBrowserHome {
+  // Beside `state`, not in it: nothing should rebuild because a clear ran.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
+  /// How many times [clear] has run, i.e. something deliberately went
+  /// somewhere.
+  ///
+  /// For a caller deciding on [request] from an asynchronous look at the
+  /// selection. Each clear comes with a selection dispatched to the engine, in
+  /// the same synchronous step or just before it, so a count that changed
+  /// while the look was out means the look may predate that selection, and a
+  /// [request] made from it would latch home over the tab just picked.
+  int get clearCount => _clearCount;
+  var _clearCount = 0;
+
   void request() => state = true;
-  void clear() => state = false;
+
+  void clear() {
+    _clearCount++;
+    state = false;
+  }
 
   @override
   bool build() => false;

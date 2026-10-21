@@ -69,7 +69,7 @@ class IntentReceiver extends IntentEvents {
 
     unawaited(
       pending.then(
-        _openWith,
+        (backlog) => _openWith(backlog, received: true),
         onError: (Object error, StackTrace stackTrace) {
           if (_disposed) return;
 
@@ -78,7 +78,7 @@ class IntentReceiver extends IntentEvents {
           // is never coming.
           // Retain the diagnostic too: startup usually has no listener yet.
           _pendingError = (error, stackTrace);
-          _openWith(const []);
+          _openWith(const [], received: false);
         },
       ),
     );
@@ -120,6 +120,11 @@ class IntentReceiver extends IntentEvents {
   /// consumer has gone for good. It cannot be delivered twice — [_openWith]
   /// runs once, and it is what opens the queue at all.
   var _discardBacklog = false;
+
+  /// Whether the host's backlog made it into [_queue] for a consumer, which is
+  /// what [confirmDelivery] reports. Not when the drain failed or timed out —
+  /// a late reply is ignored — nor when the backlog was discarded.
+  var _backlogReceived = false;
   var _disposed = false;
   (Object, StackTrace)? _pendingError;
 
@@ -159,7 +164,7 @@ class IntentReceiver extends IntentEvents {
   /// The backlog goes in *front* of what is already queued: the host held it
   /// before it let this side have anything live, so it is older by
   /// construction, whichever of the two channels happened to arrive first.
-  void _openWith(List<Intent> backlog) {
+  void _openWith(List<Intent> backlog, {required bool received}) {
     if (_opened || _disposed) {
       return;
     }
@@ -167,6 +172,7 @@ class IntentReceiver extends IntentEvents {
     if (!_discardBacklog) {
       _queue.insertAll(0, backlog);
       _trimQueue();
+      _backlogReceived = received;
     }
     _opened = true;
     _flush();
@@ -208,11 +214,34 @@ class IntentReceiver extends IntentEvents {
     }
   }
 
+  /// Tells the host that what it has handed over reached the app's consumers,
+  /// so it stops keeping a copy to put back on [dispose].
+  ///
+  /// For the consumer of [events] to call once it has passed the launches on,
+  /// not merely received them: in this app, when `IntentBus` starts delivery.
+  /// Waits for the backlog first, since until it lands here it has reached
+  /// nobody — and when it never does, the host is told so and keeps it, rather
+  /// than forgetting a backlog this side ignored. Never throws; an unconfirmed
+  /// launch only means a teardown hands it back to be opened by the next
+  /// isolate.
+  Future<void> confirmDelivery() async {
+    await pendingIntents.then<void>((_) {}, onError: (Object _) {});
+
+    final host = _host;
+    if (_disposed || host == null) return;
+
+    try {
+      await host.confirmDelivery(_backlogReceived).timeout(_hostTimeout);
+    } catch (_) {}
+  }
+
   /// Gives the channel back.
   ///
   /// Requests that the host resume buffering, then unregisters locally without
   /// waiting for its reply. In-flight live events are not acknowledged here;
-  /// local teardown must still complete when the engine cannot answer.
+  /// local teardown must still complete when the engine cannot answer. Whatever
+  /// the host handed over and [confirmDelivery] never confirmed, it puts back
+  /// for the next isolate.
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;

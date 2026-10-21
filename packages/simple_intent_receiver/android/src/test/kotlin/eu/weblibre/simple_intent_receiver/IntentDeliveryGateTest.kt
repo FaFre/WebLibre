@@ -159,6 +159,7 @@ class IntentDeliveryGateTest {
     fun releaseSendsLaterLaunchesBackToTheBacklog() {
         val gate = IntentDeliveryGate()
         gate.drain()
+        gate.confirm(backlogReceived = true)
         assertTrue(gate.offer(link("https://example.com/live")))
 
         gate.release()
@@ -221,6 +222,109 @@ class IntentDeliveryGateTest {
 
         old.release()
         assertTrue(replacement.isReady)
+    }
+
+    /**
+     * A start that fails, or is torn down, after taking the backlog but before
+     * its consumers existed. What it took goes back for the next isolate,
+     * oldest first and ahead of anything held since.
+     */
+    @Test
+    fun releaseBeforeConfirmPutsWhatWasHandedOverBack() {
+        val gate = IntentDeliveryGate()
+        gate.offer(link("https://example.com/backlog"))
+        gate.drain()
+        assertTrue(gate.offer(link("https://example.com/live")))
+
+        gate.release()
+        gate.offer(link("https://example.com/held"))
+
+        assertEquals(
+            listOf(
+                "https://example.com/backlog",
+                "https://example.com/live",
+                "https://example.com/held",
+            ),
+            gate.drain().map { it.data },
+        )
+    }
+
+    /** ...including when nothing ran the isolate's teardown: the engine just went. */
+    @Test
+    fun anUnconfirmedLaunchSurvivesEngineReplacement() {
+        val pending = ArrayDeque<PigeonIntent>()
+        val gate = IntentDeliveryGate(pending = pending)
+        gate.offer(link("https://example.com/a"))
+        gate.drain()
+        gate.release()
+
+        val replacement = IntentDeliveryGate(pending = pending)
+        assertEquals(listOf("https://example.com/a"), replacement.drain().map { it.data })
+    }
+
+    /** Once the consumers have it, a teardown is not a reason to open it again. */
+    @Test
+    fun releaseAfterConfirmPutsNothingBack() {
+        val gate = IntentDeliveryGate()
+        gate.offer(link("https://example.com/backlog"))
+        gate.drain()
+        gate.confirm(backlogReceived = true)
+        assertTrue(gate.offer(link("https://example.com/live")))
+
+        gate.release()
+
+        assertEquals(0, gate.pendingCount)
+    }
+
+    /**
+     * The isolate gave up waiting for the backlog and ignores the late reply:
+     * the backlog never reached it, though the live launches did. Only the
+     * backlog goes back — the live ones would otherwise open a second time.
+     */
+    @Test
+    fun aBacklogTheIsolateNeverReceivedGoesBackWithoutTheLiveLaunches() {
+        val gate = IntentDeliveryGate()
+        gate.offer(link("https://example.com/backlog"))
+        gate.drain()
+        assertTrue(gate.offer(link("https://example.com/live")))
+
+        gate.confirm(backlogReceived = false)
+        assertTrue(gate.offer(link("https://example.com/after")))
+        gate.release()
+
+        assertEquals(listOf("https://example.com/backlog"), gate.drain().map { it.data })
+    }
+
+    /** Confirming is about one isolate: the next one has to confirm its own. */
+    @Test
+    fun confirmationDoesNotOutliveARelease() {
+        val gate = IntentDeliveryGate()
+        gate.drain()
+        gate.confirm(backlogReceived = true)
+        gate.release()
+
+        gate.offer(link("https://example.com/a"))
+        gate.drain()
+        gate.release()
+
+        assertEquals(listOf("https://example.com/a"), gate.drain().map { it.data })
+    }
+
+    /** What goes back is bounded like everything else, and keeps the newest. */
+    @Test
+    fun whatGoesBackIsBounded() {
+        val gate = IntentDeliveryGate(maxPending = 2)
+        gate.drain()
+        gate.offer(link("https://example.com/1"))
+        gate.offer(link("https://example.com/2"))
+        gate.offer(link("https://example.com/3"))
+
+        gate.release()
+
+        assertEquals(
+            listOf("https://example.com/2", "https://example.com/3"),
+            gate.drain().map { it.data },
+        )
     }
 
     @Test

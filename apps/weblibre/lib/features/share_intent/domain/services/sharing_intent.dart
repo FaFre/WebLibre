@@ -323,6 +323,9 @@ Raw<Stream<Intent>> allIntents(Ref ref) => ref.watch(intentBusProvider).stream;
 Future<int> brokeredIntentDelivery(Ref ref) async {
   final bus = ref.watch(intentBusProvider);
   bus.startDelivery();
+  // Until now the host kept a copy of what it handed the bus, for a start torn
+  // down before its consumers existed to give back. They have it now.
+  unawaited(ref.read(intentReceiverProvider).confirmDelivery());
 
   return await deliverClaimedLaunches(
     await ref.read(brokeredLaunchClaimProvider.notifier).take(),

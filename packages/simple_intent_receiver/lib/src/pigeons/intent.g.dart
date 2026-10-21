@@ -242,6 +242,10 @@ class IntentHost {
   ///
   /// Idempotent: a second call drains an empty buffer and leaves the side
   /// ready.
+  ///
+  /// Handing a launch over does not make the host forget it. Until
+  /// [confirmDelivery], the host keeps a copy of the backlog and of every live
+  /// launch it sends, and [releaseDelivery] puts that copy back.
   Future<List<Intent>> takePendingIntents() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.simple_intent_receiver.IntentHost.takePendingIntents$pigeonVar_messageChannelSuffix';
@@ -261,6 +265,38 @@ class IntentHost {
     return (pigeonVar_replyValue! as List<Object?>).cast<Intent>();
   }
 
+  /// Tells the host that the launches it has handed over so far have reached
+  /// the app's consumers, so it may stop keeping a copy.
+  ///
+  /// Separate from [takePendingIntents] because the app takes the backlog long
+  /// before its consumers exist: it decides what the first frame shows from it.
+  /// A start that fails or is torn down in that stretch would otherwise take
+  /// the launches with it. Live launches sent after this are not copied.
+  ///
+  /// [backlogReceived] is false when the reply carrying the backlog never got
+  /// to the Dart side: it gave up waiting and ignores the late reply. The live
+  /// launches did arrive and are forgotten all the same, but the host keeps the
+  /// backlog for [releaseDelivery] to put back.
+  Future<void> confirmDelivery(bool backlogReceived) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.simple_intent_receiver.IntentHost.confirmDelivery$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[backlogReceived],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+  }
+
   /// Withdraws the readiness [takePendingIntents] declared, so the host goes
   /// back to holding launches instead of sending them.
   ///
@@ -271,7 +307,9 @@ class IntentHost {
   ///
   /// Deliberately not a discard: whatever the host is already holding stays
   /// held. It was never delivered to the isolate that is leaving, so there is
-  /// nothing to replay — only something still waiting to be collected.
+  /// nothing to replay — only something still waiting to be collected. The
+  /// same goes for what was handed over but never confirmed: it goes back in
+  /// front of the backlog, for the next isolate to take.
   Future<void> releaseDelivery() async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.simple_intent_receiver.IntentHost.releaseDelivery$pigeonVar_messageChannelSuffix';

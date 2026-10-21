@@ -165,13 +165,32 @@ void main() {
     expect(raised(), isFalse);
   });
 
-  test('the launch tab under home does not lower it until home goes', () {
+  test('the launch tab left under home lowers it once addTab returned', () {
+    // addTab could not move the selected container over to the tab (a proxied
+    // container whose routing never installed, #571). Home stays, and holding
+    // the cover would only make the user wait out its 12s to see it.
     cover().raiseFor([_link('https://example.com')]);
     showHome(shown: true);
 
     cover().launchTabCreated('tab');
     select('tab');
+    expect(raised(), isTrue, reason: 'addTab has not returned yet');
+
     cover().launchTabOpened('tab');
+    expect(raised(), isFalse);
+    expect(claimed(), isFalse);
+  });
+
+  test('a stand-in under home does not lower it until home goes', () {
+    // The selected container is still following the replacement into the
+    // site's assigned container.
+    cover()
+      ..raiseFor([_link('https://example.com')])
+      ..launchTabCreated('tab')
+      ..launchTabOpened('tab');
+    showHome(shown: true);
+
+    select('replacement');
     expect(raised(), isTrue, reason: 'home is still drawn over the tab');
 
     showHome(shown: false);

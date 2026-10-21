@@ -26,6 +26,8 @@ import 'package:simple_intent_receiver/src/pigeons/intent.g.dart';
 
 const _takePendingChannel =
     'dev.flutter.pigeon.simple_intent_receiver.IntentHost.takePendingIntents';
+const _confirmChannel =
+    'dev.flutter.pigeon.simple_intent_receiver.IntentHost.confirmDelivery';
 const _releaseChannel =
     'dev.flutter.pigeon.simple_intent_receiver.IntentHost.releaseDelivery';
 const _eventChannel =
@@ -49,6 +51,10 @@ class _FakeHost {
       _takePendingChannel,
       (_) => _backlog.future.then((b) => <Object?>[b]),
     );
+    _mock(_confirmChannel, (message) {
+      confirmed.add((message! as List<Object?>).single! as bool);
+      return Future<Object?>.value(<Object?>[null]);
+    });
     _mock(_releaseChannel, (_) {
       releaseCount++;
       return releaseReply?.future ?? Future<Object?>.value(<Object?>[null]);
@@ -58,6 +64,8 @@ class _FakeHost {
   final TestDefaultBinaryMessenger messenger;
   final _backlog = Completer<List<Intent>>();
 
+  /// `backlogReceived` of each `confirmDelivery`, in order.
+  final confirmed = <bool>[];
   int releaseCount = 0;
   Completer<Object?>? releaseReply;
 
@@ -90,7 +98,11 @@ class _FakeHost {
   }
 
   void tearDown() {
-    for (final name in const [_takePendingChannel, _releaseChannel]) {
+    for (final name in const [
+      _takePendingChannel,
+      _confirmChannel,
+      _releaseChannel,
+    ]) {
       messenger.setMockDecodedMessageHandler<Object?>(
         BasicMessageChannel<Object?>(name, IntentHost.pigeonChannelCodec),
         null,
@@ -230,6 +242,10 @@ void main() {
       host.answerDrain([_link('https://example.com/late')]);
       await pumpEventQueue();
       expect(seen, ['https://example.com/queued', 'https://example.com/live']);
+
+      // Ignored here, so the host has to keep it.
+      await receiver.confirmDelivery();
+      expect(host.confirmed, [false]);
     },
   );
 
@@ -365,6 +381,41 @@ void main() {
     await host.sendLive(1, _link('https://example.com/current'));
     await pumpEventQueue();
     expect(seen, ['https://example.com/current']);
+  });
+
+  test('delivery is confirmed only once the backlog has landed', () async {
+    receiver.events.listen((_) {});
+    final confirmed = receiver.confirmDelivery();
+    await pumpEventQueue();
+
+    // Still on its way here, so it has reached no consumer: the host has to
+    // keep its copy for a teardown to put back.
+    expect(host.confirmed, isEmpty);
+
+    host.answerDrain([_link('https://example.com/held')]);
+    await confirmed;
+    expect(host.confirmed, [true]);
+  });
+
+  test('a backlog that never arrived is not confirmed as received', () async {
+    receiver.events.listen((_) {}, onError: (_) {});
+    host._backlog.completeError(PlatformException(code: 'gone'));
+    await host.sendLive(1, _link('https://example.com/live'));
+
+    await receiver.confirmDelivery();
+
+    // The live launch got here; the backlog did not, and a late reply would be
+    // ignored. Confirming it would have the host forget it for good.
+    expect(host.confirmed, [false]);
+  });
+
+  test('a disposed receiver confirms nothing', () async {
+    host.answerDrain();
+    await pumpEventQueue();
+    await receiver.dispose();
+
+    await receiver.confirmDelivery();
+    expect(host.confirmed, isEmpty);
   });
 
   test(

@@ -41,7 +41,7 @@ final class SelectedContainerProvider
   }
 }
 
-String _$selectedContainerHash() => r'5ad8fa1be256e98c5efc761049e3f988328b6a7f';
+String _$selectedContainerHash() => r'd59a66ee5dd792a9acb5f4282db16777edf02c10';
 
 abstract class _$SelectedContainer extends $Notifier<String?> {
   String? build();
@@ -167,7 +167,7 @@ final class ForceBrowserHomeProvider
   }
 }
 
-String _$forceBrowserHomeHash() => r'345e17f502b0c438117a0fe9d3f22c929a02c5db';
+String _$forceBrowserHomeHash() => r'4ae28123e7bc7ced963ee0510f5b05989518f3e5';
 
 /// Forces the home surface on regardless of what is selected.
 ///

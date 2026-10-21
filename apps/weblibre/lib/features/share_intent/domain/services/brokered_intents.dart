@@ -49,23 +49,6 @@ Intent brokeredIntentFrom(StartupIntentRecord record) => Intent(
   extra: record.extras,
 );
 
-/// Drains the native broker, oldest launch first: [claimBrokeredIntents], then
-/// [deliverClaimedLaunches].
-Future<int> drainBrokeredIntents({
-  required String engineId,
-  required Future<void> Function(Intent intent) deliver,
-  GeckoProfileService? service,
-  StartupPaths? startupPaths,
-  Future<Directory> Function()? payloadHome,
-}) async => await deliverClaimedLaunches(
-  await claimBrokeredIntents(engineId: engineId, service: service),
-  engineId: engineId,
-  deliver: deliver,
-  service: service,
-  startupPaths: startupPaths,
-  payloadHome: payloadHome,
-);
-
 /// A queued launch this engine has claimed but not yet delivered.
 typedef ClaimedLaunch = ({String entryId, Intent intent});
 

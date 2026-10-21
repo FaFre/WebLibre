@@ -19,12 +19,12 @@ part of 'intent.dart';
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
-/// `HomeTargetController` gives a restored selection ~300ms before it decides
-/// the session is empty and latches the home surface (or resumes some other
-/// tab) over whatever the launch opens next. The launch then loaded behind the
-/// home screen, looking like it had been dropped (#623). "Ask" never showed it,
-/// because the dialog defers the tab to a tap that lands long after startup has
-/// settled.
+/// `HomeTargetController` asks the native store for a selection as soon as
+/// restore completes, and finding none, latches the home surface (or resumes
+/// some other tab) over whatever the launch opens next. The launch then loaded
+/// behind the home screen, looking like it had been dropped (#623). "Ask" never
+/// showed it, because the dialog defers the tab to a tap that lands long after
+/// startup has settled.
 
 @ProviderFor(IntentLaunchClaim)
 final intentLaunchClaimProvider = IntentLaunchClaimProvider._();
@@ -40,12 +40,12 @@ final intentLaunchClaimProvider = IntentLaunchClaimProvider._();
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
-/// `HomeTargetController` gives a restored selection ~300ms before it decides
-/// the session is empty and latches the home surface (or resumes some other
-/// tab) over whatever the launch opens next. The launch then loaded behind the
-/// home screen, looking like it had been dropped (#623). "Ask" never showed it,
-/// because the dialog defers the tab to a tap that lands long after startup has
-/// settled.
+/// `HomeTargetController` asks the native store for a selection as soon as
+/// restore completes, and finding none, latches the home surface (or resumes
+/// some other tab) over whatever the launch opens next. The launch then loaded
+/// behind the home screen, looking like it had been dropped (#623). "Ask" never
+/// showed it, because the dialog defers the tab to a tap that lands long after
+/// startup has settled.
 final class IntentLaunchClaimProvider
     extends $NotifierProvider<IntentLaunchClaim, bool> {
   /// Whether an external launch is on its way to a tab.
@@ -59,12 +59,12 @@ final class IntentLaunchClaimProvider
   ///
   /// The two are far apart on a cold start. Opening the launch means waiting for
   /// the engine, resolving a container and writing the tab DB, while
-  /// `HomeTargetController` gives a restored selection ~300ms before it decides
-  /// the session is empty and latches the home surface (or resumes some other
-  /// tab) over whatever the launch opens next. The launch then loaded behind the
-  /// home screen, looking like it had been dropped (#623). "Ask" never showed it,
-  /// because the dialog defers the tab to a tap that lands long after startup has
-  /// settled.
+  /// `HomeTargetController` asks the native store for a selection as soon as
+  /// restore completes, and finding none, latches the home surface (or resumes
+  /// some other tab) over whatever the launch opens next. The launch then loaded
+  /// behind the home screen, looking like it had been dropped (#623). "Ask" never
+  /// showed it, because the dialog defers the tab to a tap that lands long after
+  /// startup has settled.
   IntentLaunchClaimProvider._()
     : super(
         from: null,
@@ -105,12 +105,12 @@ String _$intentLaunchClaimHash() => r'8e6b5ad99d1c451b3b7e8a0379703e96ad1b6ad4';
 ///
 /// The two are far apart on a cold start. Opening the launch means waiting for
 /// the engine, resolving a container and writing the tab DB, while
-/// `HomeTargetController` gives a restored selection ~300ms before it decides
-/// the session is empty and latches the home surface (or resumes some other
-/// tab) over whatever the launch opens next. The launch then loaded behind the
-/// home screen, looking like it had been dropped (#623). "Ask" never showed it,
-/// because the dialog defers the tab to a tap that lands long after startup has
-/// settled.
+/// `HomeTargetController` asks the native store for a selection as soon as
+/// restore completes, and finding none, latches the home surface (or resumes
+/// some other tab) over whatever the launch opens next. The launch then loaded
+/// behind the home screen, looking like it had been dropped (#623). "Ask" never
+/// showed it, because the dialog defers the tab to a tap that lands long after
+/// startup has settled.
 
 abstract class _$IntentLaunchClaim extends $Notifier<bool> {
   bool build();
@@ -144,10 +144,31 @@ abstract class _$IntentLaunchClaim extends $Notifier<bool> {
 /// latched home over the launch anyway.
 ///
 /// Lowered by whichever comes first:
-/// - a tab is selected — normally the launch's own;
+/// - the launch is on screen: a tab the consumer opened for it
+///   ([launchTabOpened]), or whatever was selected after the engine created
+///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.
+///
+/// Not on just any selection. The restored session's own can land after the
+/// cover went up, and the launch tab's lands before `addTab` has moved the
+/// selected container over to it; lowering on either showed the restored page,
+/// or home, for the frames before the launch took over.
+///
+/// Nor only on the launch's own tab, though. The engine reports the selection
+/// debounced, keeping only the last of each 50ms, and a launch tab can be
+/// replaced inside that window: a first navigation the container extension
+/// cancels is reopened in a new tab in the site's assigned container, and the
+/// launch tab is closed. Dart then never sees it selected, and waiting for it
+/// kept the spinner over the replacement until [_maxCover] (12s). Anything
+/// selected after the engine created the launch tab is past that tab's own
+/// selection, which happened in the same step, so it is that tab or what took
+/// its place. That is also why the selection to hide is taken there and not
+/// once `addTab` has returned: the replacement can be selected while `addTab`
+/// is still moving the selected container, and was then itself hidden.
 
 @ProviderFor(StartupLaunchCover)
 final startupLaunchCoverProvider = StartupLaunchCoverProvider._();
@@ -166,10 +187,31 @@ final startupLaunchCoverProvider = StartupLaunchCoverProvider._();
 /// latched home over the launch anyway.
 ///
 /// Lowered by whichever comes first:
-/// - a tab is selected — normally the launch's own;
+/// - the launch is on screen: a tab the consumer opened for it
+///   ([launchTabOpened]), or whatever was selected after the engine created
+///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.
+///
+/// Not on just any selection. The restored session's own can land after the
+/// cover went up, and the launch tab's lands before `addTab` has moved the
+/// selected container over to it; lowering on either showed the restored page,
+/// or home, for the frames before the launch took over.
+///
+/// Nor only on the launch's own tab, though. The engine reports the selection
+/// debounced, keeping only the last of each 50ms, and a launch tab can be
+/// replaced inside that window: a first navigation the container extension
+/// cancels is reopened in a new tab in the site's assigned container, and the
+/// launch tab is closed. Dart then never sees it selected, and waiting for it
+/// kept the spinner over the replacement until [_maxCover] (12s). Anything
+/// selected after the engine created the launch tab is past that tab's own
+/// selection, which happened in the same step, so it is that tab or what took
+/// its place. That is also why the selection to hide is taken there and not
+/// once `addTab` has returned: the replacement can be selected while `addTab`
+/// is still moving the selected container, and was then itself hidden.
 final class StartupLaunchCoverProvider
     extends $NotifierProvider<StartupLaunchCover, bool> {
   /// Keeps the browser behind the startup spinner while a cold start is still
@@ -186,10 +228,31 @@ final class StartupLaunchCoverProvider
   /// latched home over the launch anyway.
   ///
   /// Lowered by whichever comes first:
-  /// - a tab is selected — normally the launch's own;
+  /// - the launch is on screen: a tab the consumer opened for it
+  ///   ([launchTabOpened]), or whatever was selected after the engine created
+  ///   it ([launchTabCreated]);
+  /// - the launch tab is selected but stays under home, because `addTab` could
+  ///   not move the selected container over to it;
   /// - the sharing pipeline let go of every awaited launch without opening it;
   /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
   /// - [_maxCover], so a launch lost on the way never strands the spinner.
+  ///
+  /// Not on just any selection. The restored session's own can land after the
+  /// cover went up, and the launch tab's lands before `addTab` has moved the
+  /// selected container over to it; lowering on either showed the restored page,
+  /// or home, for the frames before the launch took over.
+  ///
+  /// Nor only on the launch's own tab, though. The engine reports the selection
+  /// debounced, keeping only the last of each 50ms, and a launch tab can be
+  /// replaced inside that window: a first navigation the container extension
+  /// cancels is reopened in a new tab in the site's assigned container, and the
+  /// launch tab is closed. Dart then never sees it selected, and waiting for it
+  /// kept the spinner over the replacement until [_maxCover] (12s). Anything
+  /// selected after the engine created the launch tab is past that tab's own
+  /// selection, which happened in the same step, so it is that tab or what took
+  /// its place. That is also why the selection to hide is taken there and not
+  /// once `addTab` has returned: the replacement can be selected while `addTab`
+  /// is still moving the selected container, and was then itself hidden.
   StartupLaunchCoverProvider._()
     : super(
         from: null,
@@ -218,7 +281,7 @@ final class StartupLaunchCoverProvider
 }
 
 String _$startupLaunchCoverHash() =>
-    r'cfd50ec0f5172b8ca068a3b96efa0620ee11fc3f';
+    r'b9308aad167bf163fa929989d4e25386b0d1a35c';
 
 /// Keeps the browser behind the startup spinner while a cold start is still
 /// opening the launch the app was started for.
@@ -234,10 +297,31 @@ String _$startupLaunchCoverHash() =>
 /// latched home over the launch anyway.
 ///
 /// Lowered by whichever comes first:
-/// - a tab is selected — normally the launch's own;
+/// - the launch is on screen: a tab the consumer opened for it
+///   ([launchTabOpened]), or whatever was selected after the engine created
+///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.
+///
+/// Not on just any selection. The restored session's own can land after the
+/// cover went up, and the launch tab's lands before `addTab` has moved the
+/// selected container over to it; lowering on either showed the restored page,
+/// or home, for the frames before the launch took over.
+///
+/// Nor only on the launch's own tab, though. The engine reports the selection
+/// debounced, keeping only the last of each 50ms, and a launch tab can be
+/// replaced inside that window: a first navigation the container extension
+/// cancels is reopened in a new tab in the site's assigned container, and the
+/// launch tab is closed. Dart then never sees it selected, and waiting for it
+/// kept the spinner over the replacement until [_maxCover] (12s). Anything
+/// selected after the engine created the launch tab is past that tab's own
+/// selection, which happened in the same step, so it is that tab or what took
+/// its place. That is also why the selection to hide is taken there and not
+/// once `addTab` has returned: the replacement can be selected while `addTab`
+/// is still moving the selected container, and was then itself hidden.
 
 abstract class _$StartupLaunchCover extends $Notifier<bool> {
   bool build();

@@ -35,7 +35,6 @@ import 'package:weblibre/features/geckoview/features/find_in_page/domain/entitie
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -820,33 +819,30 @@ class SingleGridTabPreview extends HookConsumerWidget {
         groupToggle: groupToggle,
         depth: depth,
         onTap: () async {
-          // The active tab is off screen while home is drawn over it (the Home
-          // button, the home target); selecting it again is the way back (#667).
-          if (tabId != activeTabId || ref.read(shouldShowBrowserHomeProvider)) {
-            // Offer to locate the match within the page instead of opening
-            // Find in Page unprompted (see #421). Shown before onClose so it
-            // surfaces on the root messenger and survives the tray closing.
-            final query = sourceSearchQuery;
-            if (query != null &&
-                query.isNotEmpty &&
-                ref.read(findInPageControllerProvider(tabId)) ==
-                    FindInPageState.hidden()) {
-              final findController = ref.read(
-                findInPageControllerProvider(tabId).notifier,
-              );
-              ui_helper.showFindInPageSuggestion(
-                context,
-                query: query,
-                onFind: () => findController.findAll(text: query),
-              );
-            }
-
-            //Close first to avoid rebuilds
-            onClose();
-            await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-          } else {
-            onClose();
+          // Offer to locate the match within the page instead of opening Find
+          // in Page unprompted (see #421). Shown before onClose so it surfaces
+          // on the root messenger and survives the tray closing.
+          final query = sourceSearchQuery;
+          if (tabId != activeTabId &&
+              query != null &&
+              query.isNotEmpty &&
+              ref.read(findInPageControllerProvider(tabId)) ==
+                  FindInPageState.hidden()) {
+            final findController = ref.read(
+              findInPageControllerProvider(tabId).notifier,
+            );
+            ui_helper.showFindInPageSuggestion(
+              context,
+              query: query,
+              onFind: () => findController.findAll(text: query),
+            );
           }
+
+          //Close first to avoid rebuilds
+          onClose();
+          // The active tab included: home can be drawn over it, and selecting
+          // it again is what takes home down (#667).
+          await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
         },
         onDeleteAll: (host) async {
           final containerId = await ref
@@ -947,33 +943,30 @@ class SingleListTabPreview extends HookConsumerWidget {
         groupToggle: groupToggle,
         depth: depth,
         onTap: () async {
-          // The active tab is off screen while home is drawn over it (the Home
-          // button, the home target); selecting it again is the way back (#667).
-          if (tabId != activeTabId || ref.read(shouldShowBrowserHomeProvider)) {
-            // Offer to locate the match within the page instead of opening
-            // Find in Page unprompted (see #421). Shown before onClose so it
-            // surfaces on the root messenger and survives the tray closing.
-            final query = sourceSearchQuery;
-            if (query != null &&
-                query.isNotEmpty &&
-                ref.read(findInPageControllerProvider(tabId)) ==
-                    FindInPageState.hidden()) {
-              final findController = ref.read(
-                findInPageControllerProvider(tabId).notifier,
-              );
-              ui_helper.showFindInPageSuggestion(
-                context,
-                query: query,
-                onFind: () => findController.findAll(text: query),
-              );
-            }
-
-            //Close first to avoid rebuilds
-            onClose();
-            await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
-          } else {
-            onClose();
+          // Offer to locate the match within the page instead of opening Find
+          // in Page unprompted (see #421). Shown before onClose so it surfaces
+          // on the root messenger and survives the tray closing.
+          final query = sourceSearchQuery;
+          if (tabId != activeTabId &&
+              query != null &&
+              query.isNotEmpty &&
+              ref.read(findInPageControllerProvider(tabId)) ==
+                  FindInPageState.hidden()) {
+            final findController = ref.read(
+              findInPageControllerProvider(tabId).notifier,
+            );
+            ui_helper.showFindInPageSuggestion(
+              context,
+              query: query,
+              onFind: () => findController.findAll(text: query),
+            );
           }
+
+          //Close first to avoid rebuilds
+          onClose();
+          // The active tab included: home can be drawn over it, and selecting
+          // it again is what takes home down (#667).
+          await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
         },
         onDeleteAll: (host) async {
           final containerId = await ref

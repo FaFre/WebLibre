@@ -246,15 +246,11 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
           showIsolatedTabUi: showIsolatedTabUi,
           showTitles: showTitles,
           hierarchyGlyphs: hierarchyGlyphs,
-          onTap: () {
-            // Home can be drawn over the active tab; selecting it again is
-            // what takes home down (#667).
-            if (!item.isActive || ref.read(shouldShowBrowserHomeProvider)) {
-              unawaited(
-                ref.read(tabRepositoryProvider.notifier).selectTab(item.id),
-              );
-            }
-          },
+          // The active tab included: home can be drawn over it, and selecting
+          // it again is what takes home down (#667).
+          onTap: () => unawaited(
+            ref.read(tabRepositoryProvider.notifier).selectTab(item.id),
+          ),
           onDelete: canClose
               ? () => unawaited(
                   closeTabWithConfirmationAndUndo(context, ref, item.id),
@@ -282,9 +278,6 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         // slice so the slices abut into one continuous background.
         padding: EdgeInsets.zero,
         onTap: () async {
-          if (item.isActive && !ref.read(shouldShowBrowserHomeProvider)) {
-            return;
-          }
           await ref.read(tabRepositoryProvider.notifier).selectTab(item.id);
         },
         onDelete: canClose

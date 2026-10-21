@@ -313,14 +313,9 @@ class TabRepository extends _$TabRepository {
     if (selectTab && ref.mounted) {
       _clearForceBrowserHome();
 
-      final selectedContainerNotifier = ref.read(
-        selectedContainerProvider.notifier,
-      );
-      if (assignedContainer != null) {
-        await selectedContainerNotifier.setContainerId(assignedContainer.id);
-      } else {
-        selectedContainerNotifier.clearContainer();
-      }
+      await ref
+          .read(selectedContainerProvider.notifier)
+          .followTab(assignedContainer?.id);
     }
 
     return newTabId;
@@ -708,24 +703,17 @@ class TabRepository extends _$TabRepository {
     // was picked since (see [shouldShowBrowserHome]); bring its container back
     // with it, or re-selecting it from the tab bar does nothing (#667).
     if (ref.read(selectedTabProvider) == tabId) {
-      final selectedContainerNotifier = ref.read(
-        selectedContainerProvider.notifier,
-      );
-      if (containerData != null) {
-        final result = await selectedContainerNotifier.setContainerId(
-          containerData.id,
-        );
-        if (!ref.mounted) return false;
+      final result = await ref
+          .read(selectedContainerProvider.notifier)
+          .followTab(containerData?.id);
+      if (!ref.mounted) return false;
 
-        // The tab stays under home, so nothing was shown.
-        if (result == SetContainerResult.failed) {
-          logger.w(
-            'Could not bring back the container of re-selected tab $tabId',
-          );
-          return false;
-        }
-      } else {
-        selectedContainerNotifier.clearContainer();
+      // The tab stays under home, so nothing was shown.
+      if (result == SetContainerResult.failed) {
+        logger.w(
+          'Could not bring back the container of re-selected tab $tabId',
+        );
+        return false;
       }
     }
 
@@ -1253,14 +1241,9 @@ class TabRepository extends _$TabRepository {
     if (selectTab && ref.mounted) {
       _clearForceBrowserHome();
 
-      final selectedContainerNotifier = ref.read(
-        selectedContainerProvider.notifier,
-      );
-      if (container != null) {
-        await selectedContainerNotifier.setContainerId(container.id);
-      } else {
-        selectedContainerNotifier.clearContainer();
-      }
+      await ref
+          .read(selectedContainerProvider.notifier)
+          .followTab(container?.id);
     }
 
     return restoredId;

@@ -152,12 +152,17 @@ class IntentLaunchClaim extends _$IntentLaunchClaim {
 
 /// What a raised cover holds. Exists exactly as long as the cover is up.
 final class _RaisedCover {
+  /// Takes the claim last, once everything that could throw has run: a claim
+  /// held for a cover that never came up has nothing to release it but its
+  /// own expiry, and the home target waits that long.
   _RaisedCover({
     required this.awaited,
+    required this.selectedTab,
+    required this.homeShown,
     required IntentLaunchClaim claim,
     required void Function() onTimeout,
-  }) : _claim = claim..claim(),
-       _timeout = Timer(StartupLaunchCover._maxCover, onTimeout);
+  }) : _timeout = Timer(StartupLaunchCover._maxCover, onTimeout),
+       _claim = claim..claim();
 
   /// By identity: pigeon's `Intent` compares by value, and an equal link that
   /// arrived later is not the one being waited for.
@@ -177,11 +182,11 @@ final class _RaisedCover {
 
   /// What tells whether the launch is on screen. Held only while the cover is
   /// up: past startup, nothing here needs either.
-  late final ProviderSubscription<String?> selectedTab;
-  late final ProviderSubscription<bool> homeShown;
+  final ProviderSubscription<String?> selectedTab;
+  final ProviderSubscription<bool> homeShown;
 
-  final IntentLaunchClaim _claim;
   final Timer _timeout;
+  final IntentLaunchClaim _claim;
 
   void end() {
     _timeout.cancel();
@@ -208,6 +213,8 @@ final class _RaisedCover {
 /// - the launch is on screen: a tab the consumer opened for it
 ///   ([launchTabOpened]), or whatever was selected after the engine created
 ///   it ([launchTabCreated]);
+/// - the launch tab is selected but stays under home, because `addTab` could
+///   not move the selected container over to it;
 /// - the sharing pipeline let go of every awaited launch without opening it;
 /// - the consumer gave up, or is showing a route rather than a tab ([lower]);
 /// - [_maxCover], so a launch lost on the way never strands the spinner.
@@ -265,22 +272,24 @@ class StartupLaunchCover extends _$StartupLaunchCover {
     final awaited = Set<Intent>.identity()..addAll(launches);
     if (awaited.isEmpty) return;
 
-    _cover =
-        _RaisedCover(
-            awaited: awaited,
-            claim: ref.read(intentLaunchClaimProvider.notifier),
-            onTimeout: lower,
-          )
-          ..selectedTab = ref.listen(
-            selectedTabProvider,
-            (_, _) => _lowerIfLaunchTabShown(),
-          )
-          // Auto-disposed, and listened only for as long as the cover is up.
-          // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-          ..homeShown = ref.listen(
-            shouldShowBrowserHomeProvider,
-            (_, _) => _lowerIfLaunchTabShown(),
-          );
+    final selectedTab = ref.listen(
+      selectedTabProvider,
+      (_, _) => _lowerIfLaunchTabShown(),
+    );
+    // Auto-disposed, and listened only for as long as the cover is up.
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    final homeShown = ref.listen(
+      shouldShowBrowserHomeProvider,
+      (_, _) => _lowerIfLaunchTabShown(),
+    );
+
+    _cover = _RaisedCover(
+      awaited: awaited,
+      selectedTab: selectedTab,
+      homeShown: homeShown,
+      claim: ref.read(intentLaunchClaimProvider.notifier),
+      onTimeout: lower,
+    );
     state = true;
   }
 
@@ -303,7 +312,7 @@ class StartupLaunchCover extends _$StartupLaunchCover {
   ///
   /// Called once `addTab` has returned, which is also when the selected
   /// container follows the tab: the cover comes down as soon as the tab is
-  /// selected and not hidden under home, which by then it usually already is.
+  /// selected, which by then it usually already is.
   void launchTabOpened(String tabId) {
     final cover = _cover;
     if (cover == null) return;
@@ -327,10 +336,20 @@ class StartupLaunchCover extends _$StartupLaunchCover {
     if (cover == null || !cover.addTabReturned) return;
 
     final selectedTab = cover.selectedTab.read();
-    if (selectedTab == null || cover.homeShown.read()) return;
+    if (selectedTab == null) return;
 
-    if (cover.launchTabs.contains(selectedTab) ||
-        selectedTab != cover.selectionBeforeLaunch) {
+    // Down even with home over it. `addTab` has done all it does to bring the
+    // launch tab's container along; home still up means that failed (a
+    // proxied container whose routing never installed, #571), and stays.
+    // Holding on would only make the user wait out [_maxCover] to see it.
+    if (cover.launchTabs.contains(selectedTab)) {
+      lower();
+      return;
+    }
+
+    // A replacement for the launch tab, which [SelectedContainer] is still
+    // following into its container: home over it is on its way out.
+    if (selectedTab != cover.selectionBeforeLaunch && !cover.homeShown.read()) {
       lower();
     }
   }

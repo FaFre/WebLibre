@@ -288,8 +288,27 @@ interface IntentHost {
    *
    * Idempotent: a second call drains an empty buffer and leaves the side
    * ready.
+   *
+   * Handing a launch over does not make the host forget it. Until
+   * [confirmDelivery], the host keeps a copy of the backlog and of every live
+   * launch it sends, and [releaseDelivery] puts that copy back.
    */
   fun takePendingIntents(): List<Intent>
+  /**
+   * Tells the host that the launches it has handed over so far have reached
+   * the app's consumers, so it may stop keeping a copy.
+   *
+   * Separate from [takePendingIntents] because the app takes the backlog long
+   * before its consumers exist: it decides what the first frame shows from it.
+   * A start that fails or is torn down in that stretch would otherwise take
+   * the launches with it. Live launches sent after this are not copied.
+   *
+   * [backlogReceived] is false when the reply carrying the backlog never got
+   * to the Dart side: it gave up waiting and ignores the late reply. The live
+   * launches did arrive and are forgotten all the same, but the host keeps the
+   * backlog for [releaseDelivery] to put back.
+   */
+  fun confirmDelivery(backlogReceived: Boolean)
   /**
    * Withdraws the readiness [takePendingIntents] declared, so the host goes
    * back to holding launches instead of sending them.
@@ -301,7 +320,9 @@ interface IntentHost {
    *
    * Deliberately not a discard: whatever the host is already holding stays
    * held. It was never delivered to the isolate that is leaving, so there is
-   * nothing to replay — only something still waiting to be collected.
+   * nothing to replay — only something still waiting to be collected. The
+   * same goes for what was handed over but never confirmed: it goes back in
+   * front of the backlog, for the next isolate to take.
    */
   fun releaseDelivery()
 
@@ -320,6 +341,24 @@ interface IntentHost {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.takePendingIntents())
+            } catch (exception: Throwable) {
+              IntentPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.simple_intent_receiver.IntentHost.confirmDelivery$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val backlogReceivedArg = args[0] as Boolean
+            val wrapped: List<Any?> = try {
+              api.confirmDelivery(backlogReceivedArg)
+              listOf(null)
             } catch (exception: Throwable) {
               IntentPigeonUtils.wrapError(exception)
             }

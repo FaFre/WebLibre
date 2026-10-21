@@ -49,6 +49,24 @@ class IntentDeliveryGate(
 
     private var ready = false
 
+    /**
+     * Whether this gate's isolate has said that what it was handed reached its
+     * consumers. See [confirm].
+     */
+    private var confirmed = false
+
+    /**
+     * The backlog [drain] handed over, oldest first, until this gate's isolate
+     * confirms it received it. Put back in front of [pending] on [release].
+     */
+    private val drainedBacklog = ArrayDeque<PigeonIntent>()
+
+    /**
+     * Live launches sent since [drain], oldest first, until this gate's isolate
+     * confirms. Put back after [drainedBacklog] on [release].
+     */
+    private val sentLive = ArrayDeque<PigeonIntent>()
+
     /** Whether Dart has declared itself able to receive live events. */
     val isReady: Boolean get() = ready
 
@@ -62,16 +80,12 @@ class IntentDeliveryGate(
      * caller must not send it as well — a launch delivered twice opens two tabs.
      */
     fun offer(intent: PigeonIntent): Boolean {
-        if (ready) return true
-
-        // A buffer that only grows is a leak in a process whose Dart side may
-        // never come up at all: a headless engine can be created, do its work
-        // and be discarded without anything ever calling `drain`. The newest
-        // launch is the one the user is waiting on, so the oldest goes.
-        while (pending.size >= maxPending) {
-            pending.removeFirst()
+        if (ready) {
+            if (!confirmed) keep(sentLive, intent)
+            return true
         }
-        pending.addLast(intent)
+
+        keep(pending, intent)
         return false
     }
 
@@ -88,7 +102,28 @@ class IntentDeliveryGate(
 
         val drained = pending.toList()
         pending.clear()
+        if (!confirmed) drained.forEach { keep(drainedBacklog, it) }
         return drained
+    }
+
+    /**
+     * Forgets what this gate has handed over: its isolate says it reached the
+     * app's consumers. Launches sent after this are not kept.
+     *
+     * Until then a launch handed over is only in transit. The app takes the
+     * backlog well before its consumers exist, to decide what its first frame
+     * shows, and an isolate torn down in that stretch takes with it whatever it
+     * was holding for them.
+     *
+     * Without [backlogReceived] the backlog is kept for [release]: the reply
+     * that carried it never got there in time, and the isolate ignores it when
+     * it lands. Forgetting it would lose it; holding on to the live launches as
+     * well would open each of them a second time on the next isolate.
+     */
+    fun confirm(backlogReceived: Boolean) {
+        confirmed = true
+        sentLive.clear()
+        if (backlogReceived) drainedBacklog.clear()
     }
 
     /**
@@ -103,8 +138,35 @@ class IntentDeliveryGate(
      * that is leaving, so it is not something to replay — it is a launch the
      * user made that nobody has collected yet, and dropping it here is the
      * failure this whole class exists to prevent.
+     *
+     * What was handed over but never [confirm]ed joins it, in front: it is
+     * older than anything held since, and the leaving isolate may never have
+     * passed it on. If it did, the launch opens twice, which beats not at all.
      */
     fun release() {
         ready = false
+        confirmed = false
+
+        pending.addAll(0, drainedBacklog + sentLive)
+        drainedBacklog.clear()
+        sentLive.clear()
+        while (pending.size > maxPending) {
+            pending.removeFirst()
+        }
+    }
+
+    /**
+     * Appends [intent] to [queue], dropping the oldest past [maxPending].
+     *
+     * A buffer that only grows is a leak in a process whose Dart side may never
+     * come up at all, or never confirm: a headless engine can be created, do its
+     * work and be discarded without anything ever calling [drain]. The newest
+     * launch is the one the user is waiting on, so the oldest goes.
+     */
+    private fun keep(queue: ArrayDeque<PigeonIntent>, intent: PigeonIntent) {
+        while (queue.size >= maxPending) {
+            queue.removeFirst()
+        }
+        queue.addLast(intent)
     }
 }

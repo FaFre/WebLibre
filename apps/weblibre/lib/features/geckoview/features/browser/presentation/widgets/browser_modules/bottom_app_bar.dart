@@ -1456,14 +1456,8 @@ class QuickTabSwitcher extends HookConsumerWidget {
         onCloseItem: (item) =>
             closeTabWithConfirmationAndUndo(context, ref, item.id),
         onSelected: (item) async {
-          // The active chip still has work to do while home is drawn over its
-          // tab (the Home button, the home target): selecting it again is
-          // what takes home down (#667).
-          if (!item.isHistory &&
-              item.isActive &&
-              !ref.read(shouldShowBrowserHomeProvider)) {
-            return;
-          }
+          // The active chip included: selectTab is what takes home down when
+          // it is drawn over the active tab, and does nothing otherwise (#667).
           if (item.isHistory) {
             await ref
                 .read(tabRepositoryProvider.notifier)

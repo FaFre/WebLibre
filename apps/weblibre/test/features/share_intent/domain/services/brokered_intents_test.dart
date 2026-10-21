@@ -87,14 +87,29 @@ StartupIntentRecord record(
 
 const _extraStream = 'android.intent.extra.STREAM';
 
+/// What `brokeredIntentDelivery` does: claims the queue, then delivers what it
+/// claimed.
+Future<int> _drain({
+  required GeckoProfileService service,
+  required Future<void> Function(sir.Intent intent) deliver,
+  StartupPaths? startupPaths,
+  Future<Directory> Function()? payloadHome,
+}) async => await deliverClaimedLaunches(
+  await claimBrokeredIntents(engineId: 'engine-1', service: service),
+  engineId: 'engine-1',
+  service: service,
+  deliver: deliver,
+  startupPaths: startupPaths,
+  payloadHome: payloadHome,
+);
+
 void main() {
   group('draining queued launches', () {
     test('delivers each launch and acknowledges it', () async {
       final api = _FakeProfileApi([record('a'), record('b', sequence: 2)]);
       final seen = <String?>[];
 
-      final delivered = await drainBrokeredIntents(
-        engineId: 'engine-1',
+      final delivered = await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async => seen.add(intent.data),
       );
@@ -169,8 +184,7 @@ void main() {
       // no record that it existed.
       final api = _FakeProfileApi([record('a')]);
 
-      final delivered = await drainBrokeredIntents(
-        engineId: 'engine-1',
+      final delivered = await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async => throw StateError('no route'),
       );
@@ -187,8 +201,7 @@ void main() {
         record('c', sequence: 3),
       ]);
 
-      await drainBrokeredIntents(
-        engineId: 'engine-1',
+      await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async {
           if (intent.extra['fail'] == true) throw StateError('no route');
@@ -203,8 +216,7 @@ void main() {
       // means no queued launches, not a failed startup.
       final api = _FakeProfileApi([])..claimThrows = true;
 
-      final delivered = await drainBrokeredIntents(
-        engineId: 'engine-1',
+      final delivered = await _drain(
         service: GeckoProfileService(api: api),
         deliver: (intent) async {},
       );
@@ -216,8 +228,7 @@ void main() {
       final api = _FakeProfileApi([]);
 
       expect(
-        await drainBrokeredIntents(
-          engineId: 'engine-1',
+        await _drain(
           service: GeckoProfileService(api: api),
           deliver: (intent) async {},
         ),
@@ -246,8 +257,7 @@ void main() {
     Future<int> drain(
       _FakeProfileApi api,
       Future<void> Function(sir.Intent intent) deliver,
-    ) => drainBrokeredIntents(
-      engineId: 'engine-1',
+    ) => _drain(
       service: GeckoProfileService(api: api),
       startupPaths: paths,
       payloadHome: () async => home,
