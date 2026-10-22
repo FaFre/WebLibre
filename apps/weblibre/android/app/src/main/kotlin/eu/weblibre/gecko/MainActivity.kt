@@ -154,12 +154,12 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
     }
 
     /**
-     * Whether the navigation bar lies outside the Flutter UI. Some ROMs (ColorOS 7
-     * on Android 10) keep laying the content out above a three-button navigation
-     * bar despite edge-to-edge, so the transparent bar shows the window
-     * background, which follows the system theme instead of the app's (#657).
-     * Flutter then gives the bar a color of its own (`BrowserSystemBars`,
-     * `NavigationBarStyle`).
+     * Whether the navigation bar lies outside the Flutter UI. Before Android 11,
+     * Flutter's resume reset laid the content out above a three-button navigation
+     * bar ([onPostResume] now undoes it), so the transparent bar showed the window
+     * background, which follows the system theme instead of the app's (#657). Kept
+     * for a window that still ends above the bar: Flutter then gives the bar a
+     * color of its own (`BrowserSystemBars`, `NavigationBarStyle`).
      *
      * This compares the content view (which hosts the FlutterView) with the
      * decor view rather than reading Flutter's padding, which merges display
@@ -361,6 +361,32 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         navigationBarChannel?.setMethodCallHandler(null)
         navigationBarChannel = null
         super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    /**
+     * Undoes the system UI reset Flutter performs on every resume. With no
+     * `SystemUiMode` set from Dart, its PlatformPlugin replaces the decor's
+     * legacy visibility flags with `LAYOUT_STABLE | LAYOUT_FULLSCREEN`. Before
+     * Android 11, edge-to-edge ([enableTransparentSystemBars]) is those flags
+     * plus `LAYOUT_HIDE_NAVIGATION`, and the light bar icons and immersive mode
+     * are legacy flags too: the reset laid the UI out above three-button
+     * navigation, leaving the bar to show the window instead of the app (#657).
+     * Android 11 and later keep all of them outside these flags.
+     *
+     * The flags are taken just before the reset, so they are whatever was last
+     * asked for, by this activity or by Dart's overlay style.
+     */
+    @Suppress("DEPRECATION")
+    override fun onPostResume() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            super.onPostResume()
+            return
+        }
+
+        val decor = window.decorView
+        val visibility = decor.systemUiVisibility
+        super.onPostResume()
+        decor.systemUiVisibility = visibility
     }
 
     override fun onPause() {
