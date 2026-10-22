@@ -27,6 +27,7 @@ void main() {
         'pre_shared_key': 'pre-shared-key',
         'mtu': '1420',
         'persistent_keepalive_interval': '25',
+        'allowed_ips': '0.0.0.0/0\n::/0',
       });
       expect(imported.primaryDnsAddress, 'udp://1.1.1.1');
     });
@@ -148,6 +149,63 @@ void main() {
         () => WireguardConfigImport.fromConfigText('PrivateKey = private-key'),
         throwsFormatException,
       );
+    });
+
+    test('a config with two peers is refused, not merged', () {
+      // Sections used to be keyed by name: the second [Peer] overwrote the
+      // first key by key, mixing two peers into one.
+      expect(
+        () => WireguardConfigImport.fromConfigText('''
+          [Interface]
+          PrivateKey = private-key
+          Address = 10.0.0.2/32
+
+          [Peer]
+          PublicKey = first
+          Endpoint = one.example.com:51820
+
+          [Peer]
+          PublicKey = second
+          Endpoint = two.example.com:51820
+        '''),
+        throwsFormatException,
+      );
+    });
+
+    test('says which DNS servers are not used', () {
+      final imported = WireguardConfigImport.fromConfigText('''
+        [Interface]
+        PrivateKey = private-key
+        Address = 10.0.0.2/32
+        DNS = 10.64.0.1, 10.64.0.2, fd00::1
+
+        [Peer]
+        PublicKey = peer-public-key
+        Endpoint = wg.example.com:51820
+      ''');
+
+      expect(imported.dnsServers.first, '10.64.0.1');
+      expect(imported.extraDnsServers, ['10.64.0.2', 'fd00::1']);
+    });
+
+    test('a split tunnel is told apart from a full one', () {
+      WireguardConfigImport importWith(String allowedIps) =>
+          WireguardConfigImport.fromConfigText('''
+            [Interface]
+            PrivateKey = private-key
+            Address = 10.0.0.2/32
+
+            [Peer]
+            PublicKey = peer-public-key
+            Endpoint = wg.example.com:51820
+            AllowedIPs = $allowedIps
+          ''');
+
+      expect(importWith('0.0.0.0/0, ::/0').splitTunnelAllowedIps, isNull);
+      expect(importWith('192.168.0.0/16, 10.0.0.0/8').splitTunnelAllowedIps, [
+        '192.168.0.0/16',
+        '10.0.0.0/8',
+      ]);
     });
   });
 }

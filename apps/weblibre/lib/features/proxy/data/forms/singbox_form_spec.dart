@@ -103,6 +103,12 @@ class SingboxProxyFormSpec {
           }
         }
       }
+      if (field.wireguardKey && value.isNotEmpty && !isWireguardKey(value)) {
+        return SingboxFormFieldError(
+          field,
+          SingboxFieldErrorKind.invalidWireguardKey,
+        );
+      }
       if (field.isBoolean && value.isNotEmpty && parseFormBool(value) == null) {
         return SingboxFormFieldError(field, SingboxFieldErrorKind.notBoolean);
       }
@@ -121,8 +127,21 @@ class SingboxProxyFormSpec {
     return null;
   }
 
-  String toConfigJson(Map<String, String> values) {
-    final config = <String, dynamic>{'type': outboundType};
+  /// The config JSON for [values], written over [baseConfigJson] when given.
+  ///
+  /// The form shows only some of what sing-box accepts. Building the JSON from
+  /// the fields alone dropped every key the form has no field for, on every
+  /// save — an imported `udp_fragment` or detour, say, was gone the first time
+  /// the profile was edited. So the profile's own JSON is the starting point:
+  /// keys the form owns are cleared and rewritten from [values] (an emptied
+  /// field really is removed), and everything else is left as it was. Secret
+  /// fields are cleared from it too — they belong in [toSecretJson] — and so
+  /// is every key the form has no field for but that holds a credential
+  /// ([_extractSecrets]), which [toSecretJson] picks up from the same base.
+  String toConfigJson(Map<String, String> values, {String? baseConfigJson}) {
+    final config = _baseWithoutFields(baseConfigJson);
+    _extractSecrets(config);
+    config['type'] = outboundType;
     for (final field in fields.where((field) => !field.isSecret)) {
       final value = values[field.key]?.trim() ?? '';
       if (value.isEmpty) continue;
@@ -132,8 +151,16 @@ class SingboxProxyFormSpec {
     return const JsonEncoder.withIndent('  ').convert(config);
   }
 
-  String? toSecretJson(Map<String, String> values) {
-    final secrets = <String, dynamic>{};
+  /// The secret JSON for [values], written over [baseSecretJson] — see
+  /// [toConfigJson]. The credentials [toConfigJson] takes out of
+  /// [baseConfigJson] land here, under [baseSecretJson]'s own values.
+  String? toSecretJson(
+    Map<String, String> values, {
+    String? baseSecretJson,
+    String? baseConfigJson,
+  }) {
+    final secrets = _extractSecrets(_baseWithoutFields(baseConfigJson));
+    _deepMerge(secrets, _baseWithoutFields(baseSecretJson));
     for (final field in fields.where((field) => field.isSecret)) {
       final value = values[field.key]?.trim() ?? '';
       if (value.isEmpty) continue;
@@ -144,15 +171,27 @@ class SingboxProxyFormSpec {
     return const JsonEncoder.withIndent('  ').convert(secrets);
   }
 
+  /// [baseJson] decoded, minus every key a field of this spec owns.
+  Map<String, dynamic> _baseWithoutFields(String? baseJson) {
+    final base = baseJson == null
+        ? <String, dynamic>{}
+        : _decodeJsonObject(baseJson) ?? <String, dynamic>{};
+    for (final field in fields) {
+      _removeJsonValue(base, field.key);
+    }
+    return base;
+  }
+
   Map<String, String> valuesFromJson({
     required String configJson,
     String? secretJson,
   }) {
-    final config = _decodeJsonObject(configJson) ?? const <String, dynamic>{};
-    final secrets = secretJson == null
-        ? const <String, dynamic>{}
-        : _decodeJsonObject(secretJson) ?? const <String, dynamic>{};
-    final merged = {...config, ...secrets};
+    // Merged the way the runtime merges them: a secret field's key shares an
+    // object with plain ones (hysteria2's `obfs.password` and `obfs.type`).
+    final merged = _decodeJsonObject(configJson) ?? <String, dynamic>{};
+    if (secretJson != null) {
+      _deepMerge(merged, _decodeJsonObject(secretJson) ?? const {});
+    }
 
     return {
       for (final field in fields)
@@ -210,6 +249,97 @@ void _setJsonValue(Map<String, dynamic> target, String path, Object value) {
   current[segments.last] = value;
 }
 
+/// Keys that hold a credential in some sing-box outbound, wherever they sit.
+///
+/// A form field marks its own key secret, but the JSON a profile keeps holds
+/// keys no field covers — an imported hysteria `auth`, a shadowsocks
+/// `plugin_opts` carrying an obfs password — and those would otherwise be
+/// stored in the plaintext config instead of secure storage. TLS's
+/// `client_key` is the PEM private key of a client certificate.
+const _secretKeyNames = {
+  'auth',
+  'auth_str',
+  'client_key',
+  'password',
+  'plugin_opts',
+  'pre_shared_key',
+  'private_key',
+  'private_key_passphrase',
+  'uuid',
+  'username',
+};
+
+/// Moves every credential out of [config] and returns them, nested as they
+/// were, ready to be merged back over it.
+///
+/// A secret inside a list takes the whole list with it, because a merge
+/// replaces lists rather than combining them. hysteria's `obfs` is a password
+/// when it is a string and an object holding one in hysteria2.
+Map<String, dynamic> _extractSecrets(Map<String, dynamic> config) {
+  final secrets = <String, dynamic>{};
+  for (final key in config.keys.toList()) {
+    final value = config[key];
+    final isSecretKey =
+        _secretKeyNames.contains(key) || (key == 'obfs' && value is String);
+    if (value is Map<String, dynamic> && !isSecretKey) {
+      final nested = _extractSecrets(value);
+      if (nested.isEmpty) continue;
+      secrets[key] = nested;
+      if (value.isEmpty) config.remove(key);
+    } else if (isSecretKey || (value is List && _containsSecret(value))) {
+      secrets[key] = config.remove(key);
+    }
+  }
+  return secrets;
+}
+
+bool _containsSecret(Object? value) => switch (value) {
+  final Map<String, dynamic> map => map.entries.any(
+    (entry) =>
+        _secretKeyNames.contains(entry.key) ||
+        (entry.key == 'obfs' && entry.value is String) ||
+        _containsSecret(entry.value),
+  ),
+  final List<dynamic> list => list.any(_containsSecret),
+  _ => false,
+};
+
+/// Merges [source] into [target] the way the runtime merges a profile's
+/// secrets over its config: objects combine, everything else replaces.
+void _deepMerge(Map<String, dynamic> target, Map<String, dynamic> source) {
+  for (final MapEntry(:key, :value) in source.entries) {
+    final existing = target[key];
+    if (value is Map<String, dynamic> && existing is Map<String, dynamic>) {
+      _deepMerge(existing, value);
+    } else {
+      target[key] = value;
+    }
+  }
+}
+
+/// Removes [path] from [target], and any object the removal leaves empty.
+void _removeJsonValue(Map<String, dynamic> target, String path) {
+  final segments = path.split('.');
+  if (segments.length == 1) {
+    target.remove(path);
+    return;
+  }
+
+  final child = target[segments.first];
+  if (child is! Map<String, dynamic>) return;
+  _removeJsonValue(child, segments.skip(1).join('.'));
+  if (child.isEmpty) target.remove(segments.first);
+}
+
+/// Whether [value] is a WireGuard key: standard base64 of exactly 32 bytes.
+///
+/// Matched rather than decoded: Dart's decoder also takes the URL-safe
+/// alphabet and a missing pad, and sing-box (Go's `base64.StdEncoding`)
+/// takes neither.
+bool isWireguardKey(String value) => _wireguardKey.hasMatch(value.trim());
+
+final _wireguardKey = RegExp(r'^[A-Za-z0-9+/]{43}=$');
+
 Object? _jsonValueAt(Map<String, dynamic> source, String path) {
   Object? current = source;
   for (final segment in path.split('.')) {
@@ -230,6 +360,7 @@ enum SingboxFieldErrorKind {
   invalidCidr,
   notBoolean,
   notAllowedValue,
+  invalidWireguardKey,
 }
 
 /// A single failed [SingboxProxyFormField], plus whatever the failure needs

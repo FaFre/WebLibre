@@ -10,6 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 const _services = <String>[
   'visitContainerRecorderProvider',
   'proxySettingsReplicationProvider',
+  'proxyTrafficHealthProvider',
+  'singboxStartRetriesProvider',
   'geckoSyncStateServiceProvider',
   'preferenceFixatorProvider',
   'engineSettingsReplicationServiceProvider',

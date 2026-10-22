@@ -24,6 +24,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
+import 'package:weblibre/features/proxy/domain/services/singbox_start_retry.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 
 part 'proxy_demand.g.dart';
@@ -254,6 +255,15 @@ class ProxyDemandService extends _$ProxyDemandService {
           error: error,
           stackTrace: stackTrace,
         );
+        // The launch that asked has given up on it by the time a retry could
+        // land, but its container has not: the next page opened in it needs
+        // the same proxy.
+        final retries = ref.read(singboxStartRetriesProvider.notifier);
+        if (error is SingboxProfilesRejected) {
+          retries.failed(error.rejections.keys, permanent: true);
+        } else {
+          retries.failed(batch);
+        }
       }
     }
   }

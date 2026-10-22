@@ -10846,23 +10846,65 @@ abstract class AppLocalizations {
   /// **'Failed'**
   String get proxy_latencyFailed;
 
-  /// Chip showing the measured response time. ms is the number of milliseconds; "ms" is the unit abbreviation.
+  /// Chip showing the result of a connection test: how long a whole web (HTTP) request through the proxy took. "HTTP" marks it as a web request rather than the tunnel's own ping time. ms is the number of milliseconds; "ms" is the unit abbreviation.
   ///
   /// In en, this message translates to:
-  /// **'{ms} ms'**
+  /// **'HTTP {ms} ms'**
   String proxy_latencyMilliseconds(int ms);
 
-  /// Tooltip of the response time chip. statusCode is the HTTP status number (e.g. 204); ms is milliseconds.
+  /// Tooltip of the connection test result. Explains that the number is the time a web request took to reach host (the test site) through the proxy and come back — longer than the latency of the proxy tunnel itself. statusCode is the HTTP status number (e.g. 200); ms is milliseconds.
   ///
   /// In en, this message translates to:
-  /// **'HTTP {statusCode} in {ms} ms'**
-  String proxy_latencyHttpStatusTooltip(int statusCode, int ms);
+  /// **'A web request through this connection to {host} took {ms} ms (HTTP {statusCode}). It includes the way from the server to that site, so it is longer than the tunnel\'s own latency.'**
+  String proxy_latencyHttpStatusTooltip(String host, int statusCode, int ms);
+
+  /// Short status on a proxy connection that is running but is not carrying traffic: pages loaded through it, or its connection test, keep failing. Shown as a chip in the proxy list and in the connection menu.
+  ///
+  /// In en, this message translates to:
+  /// **'Not responding'**
+  String get proxy_conditionNotResponding;
+
+  /// Short status on a proxy connection that failed to start on its own (at app start, or for a link opened from another app) and will be tried again automatically. The dot is a separator.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t start · retrying'**
+  String get proxy_conditionStartRetrying;
+
+  /// Short status on a proxy connection that failed to start on its own, after the automatic retries have run out. It can still be started by hand.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t start'**
+  String get proxy_conditionStartFailed;
+
+  /// Warning after saving a WireGuard profile whose private key another profile also uses. names is a comma-separated list of those profiles' names, count how many there are. The profile is saved anyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. {count, plural, =1{{names} uses the same private key.} other{{names} use the same private key.}} A WireGuard server treats profiles sharing a key as one client, so running them at the same time makes them cut each other off.'**
+  String proxy_sharedPrivateKeyWarning(int count, String names);
+
+  /// Tooltip and screen-reader label on a proxy connection's start/stop button while the connection is starting — or restarting, because starting or stopping any connection briefly restarts the others too.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting…'**
+  String get proxy_connectionStarting;
 
   /// Error message when starting a proxy failed. error is technical error text, usually English.
   ///
   /// In en, this message translates to:
   /// **'Failed to start proxy: {error}'**
   String proxy_startProxyFailed(String error);
+
+  /// Error when starting proxies failed because of one profile. name is the profile's name, reason sing-box's technical explanation, usually English (for example "resolve endpoint domain for peer[0]: lookup vpn.example.com: no such host").
+  ///
+  /// In en, this message translates to:
+  /// **'{name} could not start: {reason}'**
+  String proxy_profileCouldNotStart(String name, String reason);
+
+  /// Error when a proxy profile was left out of a start because sing-box refuses its configuration. name is the profile's name, reason sing-box's technical explanation, usually English (for example "decode private key: illegal base64 data"). One line per refused profile.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} cannot be used: {reason}'**
+  String proxy_profileRejected(String name, String reason);
 
   /// Error message when stopping a proxy failed. error is technical error text, usually English.
   ///
@@ -11236,16 +11278,16 @@ abstract class AppLocalizations {
   /// **'.conf file with [Interface]/[Peer]'**
   String get proxy_importFileWireGuardSubtitle;
 
-  /// Import option for a sing-box outbound configuration in JSON. sing-box is a product name.
+  /// Import option for sing-box configuration in JSON: a single outbound or endpoint, or a whole config. sing-box is a product name and JSON a file format; keep both unchanged.
   ///
   /// In en, this message translates to:
-  /// **'Sing-box outbound JSON'**
+  /// **'sing-box JSON'**
   String get proxy_importFileSingboxJsonTitle;
 
-  /// List of protocol names supported by that import. Keep the names unchanged.
+  /// Explanation under the sing-box JSON import option: the file may hold one outbound, one endpoint, or a whole sing-box configuration. "Outbound" and "endpoint" are sing-box terms.
   ///
   /// In en, this message translates to:
-  /// **'Shadowsocks, Trojan, VMess, VLESS, Hysteria, …'**
+  /// **'An outbound, an endpoint, or a whole config'**
   String get proxy_importFileSingboxJsonSubtitle;
 
   /// Confirmation after importing a proxy profile. name is its name.
@@ -11307,6 +11349,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{Imported 1 profile} other{Imported {count} profiles}}'**
   String proxy_importedProfilesCount(int count);
+
+  /// Confirmation after importing a sing-box config holding several proxies, some of which were invalid and left out. count is the number imported, skipped the number left out.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Imported 1 profile.} other{Imported {count} profiles.}} {skipped, plural, =1{1 proxy in the config could not be used.} other{{skipped} proxies in the config could not be used.}}'**
+  String proxy_importedProfilesSkipped(int count, int skipped);
+
+  /// Error after importing a sing-box config in which no proxy was valid. count is how many proxies it held.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{The proxy in this config could not be used.} other{None of the {count} proxies in this config could be used.}}'**
+  String proxy_importNoUsableProfiles(int count);
+
+  /// Error when a proxy import file could not be read. error is technical error text, usually English.
+  ///
+  /// In en, this message translates to:
+  /// **'The file could not be read: {error}'**
+  String proxy_importFileUnreadable(String error);
+
+  /// Error when pasted text or a file meant as sing-box JSON is not JSON at all. error is the parser's technical message, usually English.
+  ///
+  /// In en, this message translates to:
+  /// **'This is not valid JSON: {error}'**
+  String proxy_importInvalidJson(String error);
+
+  /// Error when imported sing-box JSON is valid JSON, but not an object (for example a list or a number).
+  ///
+  /// In en, this message translates to:
+  /// **'Expected a sing-box JSON object.'**
+  String get proxy_importNotJsonObject;
+
+  /// Error when imported sing-box JSON is an object that is neither a single proxy nor a config containing proxies. "outbounds" and "endpoints" are sing-box config keys and stay untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected a sing-box outbound or endpoint, or a config with \"outbounds\" or \"endpoints\".'**
+  String get proxy_importNoOutbounds;
+
+  /// Error when a sing-box config key that must hold a list holds something else. key is the sing-box config key ("outbounds" or "endpoints"), untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{key}\" in a sing-box config must be a list.'**
+  String proxy_importNotAList(String key);
+
+  /// Error when an imported sing-box config contains only entries that are not proxies (direct, block, DNS and the like).
+  ///
+  /// In en, this message translates to:
+  /// **'This sing-box config has no proxy WebLibre can import.'**
+  String get proxy_importNoImportableProxy;
+
+  /// Error when an imported sing-box outbound lacks its type field. "type" is the sing-box key, untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'The sing-box outbound has no \"type\".'**
+  String get proxy_importMissingType;
+
+  /// Error when an imported sing-box outbound is of a type the proxy editor has no form for. type is the sing-box outbound type, untranslated. "Custom Outbound JSON" names the profile type for raw JSON in the editor.
+  ///
+  /// In en, this message translates to:
+  /// **'Outbound type \"{type}\" has no form. Use Custom Outbound JSON instead.'**
+  String proxy_importUnsupportedType(String type);
+
+  /// Error when an imported sing-box outbound dials through another outbound of the same config (its "detour"). tag is that outbound's tag from the config, untranslated. Explains why it is not imported without the chain: the server would see the device's real IP address.
+  ///
+  /// In en, this message translates to:
+  /// **'This proxy connects through \"{tag}\", another outbound of its config. WebLibre cannot chain proxies, and connecting to it directly would show it your IP address.'**
+  String proxy_importDetourThroughOtherOutbound(String tag);
+
+  /// Error when a single sing-box outbound is imported on its own and dials through another outbound (its "detour") that is not part of what was imported. tag is that outbound's tag, untranslated. Asks for the whole config instead, since only that says whether the detour is safe to drop.
+  ///
+  /// In en, this message translates to:
+  /// **'This proxy connects through \"{tag}\", which is defined elsewhere in its config. Import the whole config so WebLibre can check what \"{tag}\" does.'**
+  String proxy_importUnresolvedDetour(String tag);
+
+  /// Error when an imported sing-box WireGuard endpoint lists no peer to connect to. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'The {brand} endpoint has no peers.'**
+  String proxy_importEndpointWithoutPeers(String brand);
+
+  /// Error when an imported sing-box WireGuard endpoint lists several peers. count is how many (always 2 or more). brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{The {brand} endpoint has {count} peers. A profile connects to one peer; import each peer as its own profile.}}'**
+  String proxy_importEndpointWithSeveralPeers(int count, String brand);
+
+  /// Error when a peer of an imported sing-box WireGuard endpoint is malformed. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'A {brand} peer in this config is not a JSON object.'**
+  String proxy_importPeerNotObject(String brand);
+
+  /// Error when an imported WireGuard config file lacks one of its two sections. [Interface] and [Peer] are WireGuard config syntax and stay untranslated. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'A {brand} config needs an [Interface] and a [Peer] section.'**
+  String proxy_importWireguardMissingSections(String brand);
+
+  /// Error when an imported WireGuard config file has several [Interface] sections. [Interface] is WireGuard config syntax, untranslated. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'This {brand} config has more than one [Interface] section.'**
+  String proxy_importWireguardSeveralInterfaces(String brand);
+
+  /// Error when an imported WireGuard config file has several [Peer] sections. count is how many (always 2 or more). [Peer] is WireGuard config syntax, untranslated. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{This {brand} config has {count} [Peer] sections. A profile connects to one peer; split the config into one file per peer.}}'**
+  String proxy_importWireguardSeveralPeers(int count, String brand);
+
+  /// Error when an imported WireGuard config file has an empty section header "[]". brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'This {brand} config has a section without a name.'**
+  String proxy_importWireguardEmptySection(String brand);
+
+  /// Error when an imported WireGuard config file has a setting before its first section header. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Every line of a {brand} config has to be inside a section.'**
+  String proxy_importWireguardEntryOutsideSection(String brand);
+
+  /// Error when a line of an imported WireGuard config file is not a "Key = Value" setting. line is the offending line as written. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'This line of the {brand} config is not valid: {line}'**
+  String proxy_importWireguardInvalidLine(String brand, String line);
+
+  /// Error when the Endpoint of an imported WireGuard config is not a host and port. "host:port" is technical notation, untranslated. brand is "WireGuard", untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'The {brand} endpoint has to be host:port.'**
+  String proxy_importWireguardInvalidEndpoint(String brand);
+
+  /// Note shown above the editor after importing a WireGuard config that lists several DNS servers, and under the proxy's name after importing several proxies at once; a profile uses only the first. used is that server, dropped a comma-separated list of the others.
+  ///
+  /// In en, this message translates to:
+  /// **'This connection resolves names through {used}. Also in the config, but not used: {dropped}.'**
+  String proxy_importNoteExtraDnsServers(String used, String dropped);
+
+  /// Note shown above the editor after importing a WireGuard config whose AllowedIPs cover only part of the internet, and under the proxy's name after importing several proxies at once. ranges is a comma-separated list of address ranges.
+  ///
+  /// In en, this message translates to:
+  /// **'Only these addresses go through this tunnel: {ranges}. Other sites cannot be reached through this connection.'**
+  String proxy_importNoteSplitTunnel(String ranges);
 
   /// Import button on the subscription screen. count is the number of selected proxies.
   ///
@@ -12034,6 +12220,18 @@ abstract class AppLocalizations {
   /// **'Peer Public Key'**
   String get proxy_fieldPeerPublicKey;
 
+  /// Label of the WireGuard profile field listing the address ranges sent through the tunnel (WireGuard's AllowedIPs). Keep "IPs" short; it is a WireGuard term.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowed IPs'**
+  String get proxy_fieldAllowedIps;
+
+  /// Helper text under the Allowed IPs field of a WireGuard profile. Explains that an empty value means everything goes through the tunnel, and that a narrower list makes other sites unreachable through this proxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Address ranges sent through the tunnel, one per line. Leave empty to send everything. Sites outside these ranges cannot be reached through this connection.'**
+  String get proxy_fieldAllowedIpsHelper;
+
   /// Label of a field in the proxy profile editor for the sing-box option "wireguardPrivateKey". Technical networking term; keep established English terms where usual.
   ///
   /// In en, this message translates to:
@@ -12147,6 +12345,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{field} must contain IP addresses, optionally with a /prefix — \"{value}\" is not one.'**
   String proxy_fieldErrorInvalidCidr(String field, String value);
+
+  /// Validation error for a WireGuard key field (private, public or pre-shared key) whose value is not a valid key. field is the field name.
+  ///
+  /// In en, this message translates to:
+  /// **'{field} is not a WireGuard key. It should be 44 characters ending in \"=\".'**
+  String proxy_fieldErrorWireguardKey(String field);
 
   /// Validation error in the proxy editor. field is the field's label. "true" and "false" are literal values; keep them unchanged.
   ///

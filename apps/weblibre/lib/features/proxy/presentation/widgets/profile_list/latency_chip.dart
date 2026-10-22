@@ -81,6 +81,7 @@ class _LatencySuccessChip extends StatelessWidget {
     return _LatencyChipContainer(
       label: l10n.proxy_latencyMilliseconds(value.latency.inMilliseconds),
       tooltip: l10n.proxy_latencyHttpStatusTooltip(
+        proxyLatencyProbeHost,
         value.statusCode,
         value.latency.inMilliseconds,
       ),

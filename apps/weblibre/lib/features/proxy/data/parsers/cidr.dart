@@ -77,6 +77,41 @@ String? tryNormalizeCidr(String raw) {
   return '${cidr.address}/${cidr.prefixLength}';
 }
 
+/// [allowedIps] when they leave out part of the IPv4 internet, or null when
+/// they route all of it — or say nothing, which routes everything too.
+///
+/// Sites outside them cannot be reached through the tunnel at all. Coverage
+/// is what counts, not a literal `0.0.0.0/0`: a full tunnel is just as often
+/// written as halves (`0.0.0.0/1, 128.0.0.0/1`) so that wg-quick's own
+/// routes win over the default one, or as the internet minus private ranges.
+List<String>? splitTunnelRanges(List<String> allowedIps) {
+  if (allowedIps.isEmpty || _coversAllIpv4(allowedIps)) return null;
+  return allowedIps;
+}
+
+bool _coversAllIpv4(Iterable<String> ranges) {
+  final intervals = <(int, int)>[];
+  for (final range in ranges) {
+    final cidr = tryParseCidr(range);
+    if (cidr == null || cidr.isIpv6) continue;
+
+    final size = 1 << (32 - cidr.prefixLength);
+    final start = _ipv4Value(cidr.address) & ~(size - 1) & 0xFFFFFFFF;
+    intervals.add((start, start + size));
+  }
+  intervals.sort((a, b) => a.$1.compareTo(b.$1));
+
+  var coveredUntil = 0;
+  for (final (start, end) in intervals) {
+    if (start > coveredUntil) return false;
+    if (end > coveredUntil) coveredUntil = end;
+  }
+  return coveredUntil == 1 << 32;
+}
+
+int _ipv4Value(String address) =>
+    address.split('.').fold(0, (value, octet) => value << 8 | int.parse(octet));
+
 bool _isIpv4(String address) {
   final octets = address.split('.');
   if (octets.length != 4) return false;

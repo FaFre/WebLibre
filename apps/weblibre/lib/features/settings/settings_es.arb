@@ -1066,5 +1066,8 @@
   "settings_trackerStatisticsNothingRecorded": "Aún no se ha registrado ningún rastreador bloqueado.",
   "settings_trackerStatisticsLastSevenDays": "Últimos 7 días",
   "settings_trackerStatisticsNoneLastSevenDays": "No se ha bloqueado ningún rastreador en los últimos 7 días.",
-  "settings_trackerStatisticsLoadFailed": "No se pudieron cargar las estadísticas de rastreadores."
+  "settings_trackerStatisticsLoadFailed": "No se pudieron cargar las estadísticas de rastreadores.",
+  "settings_containersByRecentUseTitle": "Primero los contenedores usados recientemente",
+  "settings_containersByRecentUseKeywords": "orden de contenedores, ordenar contenedores, contenedores recientes, último uso, usados recientemente, acordeón, container order, recently used",
+  "settings_containersByRecentUseSubtitle": "Solo en Acordeón: el contenedor que usaste por última vez pasa al principio. Los contenedores fijados siguen por delante"
 }

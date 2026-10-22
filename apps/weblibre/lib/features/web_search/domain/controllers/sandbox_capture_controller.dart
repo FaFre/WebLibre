@@ -35,6 +35,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/database/definiti
     show CaptureTabData;
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/search_credits/domain/controllers/search_token_issuance_controller.dart';
 import 'package:weblibre/features/search_credits/domain/providers.dart';
 import 'package:weblibre/features/search_credits/domain/providers/proxy_client.dart';
@@ -258,11 +259,11 @@ class SandboxCaptureController extends _$SandboxCaptureController {
             .getTabMode(parentTabId)
             .getSingleOrNull() ??
         TabMode.private;
+    // Opened in the parent's container, or the capture would load the page in
+    // no container: general cookies, over the general route.
     final parentContainer = await ref
-        .read(tabDatabaseProvider)
-        .tabDao
-        .getTabContainerData(parentTabId)
-        .getSingleOrNull();
+        .read(tabDataRepositoryProvider.notifier)
+        .getContainerForCopy(parentTabId);
     final containerSelection = parentContainer == null
         ? const TabContainerSelection.unassigned()
         : TabContainerSelection.specific(parentContainer);

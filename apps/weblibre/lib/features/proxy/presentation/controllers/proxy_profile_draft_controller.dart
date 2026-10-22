@@ -28,6 +28,7 @@ import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_spec.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
+import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
@@ -48,7 +49,12 @@ sealed class SaveOutcome {
 }
 
 class SaveSucceeded extends SaveOutcome {
-  const SaveSucceeded();
+  /// Other WireGuard profiles with the same private key. Saved anyway, but
+  /// worth a warning: a server sees them as one client, so two of them running
+  /// at once keep cutting each other off.
+  final List<String> sharesPrivateKeyWith;
+
+  const SaveSucceeded({this.sharesPrivateKeyWith = const []});
 }
 
 class SaveFailed extends SaveOutcome {
@@ -156,6 +162,12 @@ class ProxyProfileDraftState with FastEquatable {
   final String? dnsOverrideJson;
   final String customConfigJson;
   final String customSecretJson;
+
+  /// The JSON the form's values are saved over: the profile's own when it is
+  /// edited, the imported one when it was seeded from an import. Keeps the keys
+  /// the form has no field for — see [SingboxProxyFormSpec.toConfigJson].
+  final String? baseConfigJson;
+  final String? baseSecretJson;
   final bool autostart;
   final bool isSaving;
   final bool secretLoaded;
@@ -170,6 +182,8 @@ class ProxyProfileDraftState with FastEquatable {
     required this.dnsOverrideJson,
     required this.customConfigJson,
     required this.customSecretJson,
+    this.baseConfigJson,
+    this.baseSecretJson,
     required this.autostart,
     required this.isSaving,
     required this.secretLoaded,
@@ -187,6 +201,7 @@ class ProxyProfileDraftState with FastEquatable {
       dnsOverrideJson: seed?.dnsOverrideJson,
       customConfigJson: defaultCustomOutboundConfigJson,
       customSecretJson: '',
+      baseConfigJson: seed?.baseConfigJson,
       autostart: false,
       isSaving: false,
       secretLoaded: true,
@@ -226,6 +241,8 @@ class ProxyProfileDraftState with FastEquatable {
     dnsOverrideJson,
     customConfigJson,
     customSecretJson,
+    baseConfigJson,
+    baseSecretJson,
     autostart,
     isSaving,
     secretLoaded,
@@ -282,6 +299,8 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
         customSecretJson: profile.type == SingboxProxyProfileType.customOutbound
             ? secretJson ?? ''
             : '',
+        baseConfigJson: profile.configJson,
+        baseSecretJson: secretJson,
         autostart: profile.autostart,
         secretLoaded: true,
       );
@@ -305,6 +324,9 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
       values: _initialValuesForType(type),
       customConfigJson: defaultCustomOutboundConfigJson,
       customSecretJson: '',
+      // A base written for another protocol would carry its keys into this one.
+      baseConfigJson: null,
+      baseSecretJson: null,
       secretLoaded: true,
     );
   }
@@ -377,6 +399,14 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
             );
           }
 
+          final sharesPrivateKeyWith =
+              draft.type == SingboxProxyProfileType.wireguard
+              ? await _wireguardProfilesSharingKey(
+                  profileId: profile.id,
+                  secretJson: secretJson,
+                )
+              : const <String>[];
+
           if (existing == null) {
             await ref
                 .read(singboxProxyProfilesRepositoryProvider.notifier)
@@ -397,7 +427,7 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
                 .writeSecretJson(profile.id, secretJson);
           }
 
-          return const SaveSucceeded();
+          return SaveSucceeded(sharesPrivateKeyWith: sharesPrivateKeyWith);
         } catch (error) {
           return SaveFailed(ProxyProfileSaveUnexpectedError(error));
         } finally {
@@ -406,6 +436,40 @@ class ProxyProfileDraft extends _$ProxyProfileDraft {
           }
         }
     }
+  }
+
+  /// Names of the other WireGuard profiles using the private key in
+  /// [secretJson].
+  Future<List<String>> _wireguardProfilesSharingKey({
+    required String profileId,
+    required String? secretJson,
+  }) async {
+    final privateKey = wireguardPrivateKeyOf(secretJson);
+    if (privateKey == null) return const [];
+
+    final profiles = await ref
+        .read(singboxProxyProfilesRepositoryProvider.notifier)
+        .fetchProfiles();
+    final credentials = ref.read(
+      singboxProxyCredentialsRepositoryProvider.notifier,
+    );
+
+    final others = [
+      for (final other in profiles)
+        if (other.id != profileId &&
+            other.type == SingboxProxyProfileType.wireguard)
+          other,
+    ];
+    // Read together: the save waits on this, one secure-storage read per
+    // WireGuard profile.
+    final secrets = await Future.wait(
+      others.map((other) => credentials.readSecretJson(other.id)),
+    );
+
+    return [
+      for (final (index, other) in others.indexed)
+        if (wireguardPrivateKeyOf(secrets[index]) == privateKey) other.name,
+    ];
   }
 }
 
@@ -462,8 +526,15 @@ _DraftEncodeResult _encodeDraft(ProxyProfileDraftState draft) {
     return _DraftEncodeFailure(ProxyProfileSaveFieldValidation(fieldError));
   }
   return _DraftEncodeSuccess(
-    configJson: spec.toConfigJson(draft.values),
-    secretJson: spec.toSecretJson(draft.values),
+    configJson: spec.toConfigJson(
+      draft.values,
+      baseConfigJson: draft.baseConfigJson,
+    ),
+    secretJson: spec.toSecretJson(
+      draft.values,
+      baseSecretJson: draft.baseSecretJson,
+      baseConfigJson: draft.baseConfigJson,
+    ),
   );
 }
 

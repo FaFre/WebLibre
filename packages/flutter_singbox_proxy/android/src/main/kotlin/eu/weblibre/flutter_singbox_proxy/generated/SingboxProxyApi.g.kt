@@ -841,6 +841,16 @@ val SingboxProxyApiPigeonMethodCodec = StandardMethodCodec(SingboxProxyApiPigeon
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface SingboxProxyApi {
   suspend fun validateProfile(profile: SingboxProxyProfile): String?
+  /**
+   * Why [profile] cannot start right now, as far as can be told without
+   * starting it, or null when nothing speaks against it.
+   *
+   * Resolves a WireGuard profile's peer hostnames through the running
+   * runtime's bootstrap resolver — the lookup sing-box makes once, while it
+   * starts, and the usual reason such a start fails. Null for every other
+   * profile, and while nothing runs.
+   */
+  suspend fun probeProfile(profile: SingboxProxyProfile): String?
   suspend fun buildConfig(profiles: List<SingboxProxyProfile>, options: SingboxProxyRuntimeOptions): SingboxProxyConfigResult
   suspend fun start(profiles: List<SingboxProxyProfile>, options: SingboxProxyRuntimeOptions): SingboxProxyRuntimeState
   suspend fun stop(profileIds: List<String>)
@@ -865,6 +875,25 @@ interface SingboxProxyApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 listOf(api.validateProfile(profileArg))
+              } catch (exception: Throwable) {
+                SingboxProxyApiPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.probeProfile$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val profileArg = args[0] as SingboxProxyProfile
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.probeProfile(profileArg))
               } catch (exception: Throwable) {
                 SingboxProxyApiPigeonUtils.wrapError(exception)
               }

@@ -349,6 +349,43 @@ class TabDataRepository extends _$TabDataRepository {
         .getSingleOrNull();
   }
 
+  /// The container a duplicate or clone of [tabId] goes into.
+  ///
+  /// The tab's own container, or — when the database lists the tab under none
+  /// while the engine runs it in a container's cookie-store context — that
+  /// container. A copy's cookies and route follow from this answer, so an
+  /// empty lookup is not taken at its word while the tab itself says otherwise:
+  /// for as long as [getTabContainerData] read null for every tab, that is how
+  /// every copy of a tab in a proxied container opened in no container, on
+  /// general cookies over the general route.
+  ///
+  /// Every place that duplicates or clones a tab asks this rather than
+  /// [getTabContainerData], so no one of them can fall back on its own.
+  Future<ContainerData?> getContainerForCopy(String tabId) async {
+    final recorded = await getTabContainerData(tabId);
+    if (recorded != null) return recorded;
+
+    // A one-off read of the engine's state, never kept: the repository holds
+    // no subscription to it.
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    final tabState = ref.read(tabStateProvider(tabId));
+    final contextId = tabState?.contextId;
+    if (tabState == null ||
+        !tabState.hasContentState ||
+        contextId == null ||
+        contextId.isEmpty) {
+      return null;
+    }
+
+    // Contexts no container owns — the general one, isolation and private
+    // contexts — find nothing here, which is the right answer for them.
+    return await ref
+        .read(tabDatabaseProvider)
+        .containerDao
+        .getContainerByContextualIdentity(contextId)
+        .getSingleOrNull();
+  }
+
   Future<Map<String, String?>> getTabsContainerId(Iterable<String> tabIds) {
     return ref
         .read(tabDatabaseProvider)

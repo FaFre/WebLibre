@@ -50,6 +50,9 @@ class ProxyNotRunningError implements Exception {
 /// Cloudflare.
 const _probeUrl = 'https://am.i.mullvad.net/json';
 
+/// The host the connection test reaches, for saying what was measured.
+final proxyLatencyProbeHost = Uri.parse(_probeUrl).host;
+
 const _testTimeout = Duration(seconds: 8);
 
 class ProxyLatencyData with FastEquatable {

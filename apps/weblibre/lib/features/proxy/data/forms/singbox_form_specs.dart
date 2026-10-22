@@ -259,7 +259,11 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
         required: true,
         kind: SingboxFieldKind.cidrList,
       ),
-      SingboxProxyFormField(key: 'peer_public_key', required: true),
+      SingboxProxyFormField(
+        key: 'peer_public_key',
+        required: true,
+        wireguardKey: true,
+      ),
       SingboxProxyFormField(
         key: 'private_key',
         // Distinct from SSH's 'private_key' field: same wire-format name,
@@ -267,10 +271,20 @@ const singboxProxyFormSpecs = <SingboxProxyProfileType, SingboxProxyFormSpec>{
         labelKey: 'wireguardPrivateKey',
         required: true,
         kind: SingboxFieldKind.secret,
+        wireguardKey: true,
       ),
       SingboxProxyFormField(
         key: 'pre_shared_key',
         kind: SingboxFieldKind.secret,
+        wireguardKey: true,
+      ),
+      // The peer's AllowedIPs. Left empty, the runtime sends everything through
+      // the tunnel. Imported configs used to lose it — every tunnel became a
+      // full one, which silently broke configs meant to reach only a private
+      // network.
+      SingboxProxyFormField(
+        key: 'allowed_ips',
+        kind: SingboxFieldKind.cidrList,
       ),
       SingboxProxyFormField(
         key: 'mtu',

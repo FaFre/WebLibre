@@ -20,13 +20,17 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_import_failure_l10n.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/error_l10n.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Outcome of the add-proxy bottom sheet. The sheet itself does not navigate
@@ -51,23 +55,50 @@ class AddProxyWithSeed extends AddProxyAction {
 
 class AddProxyImported extends AddProxyAction {
   final String message;
-  const AddProxyImported(this.message);
+
+  /// What the import noted about the imported proxies, to show beside
+  /// [message] — see [ProxyInputImportedMany.notes].
+  final List<ImportedProfileNote> notes;
+
+  const AddProxyImported(this.message, {this.notes = const []});
 }
 
 /// Guided bottom sheet shown when the user adds a new proxy profile. Each
 /// method either pops with an [AddProxyAction] for the caller to apply or
 /// stays open so the user can try another method on error.
-class AddProxyMethodSheet extends ConsumerWidget {
+class AddProxyMethodSheet extends HookConsumerWidget {
   const AddProxyMethodSheet({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
+    final busy = useState(false);
 
     void popWith(AddProxyAction action) {
       if (!context.mounted) return;
       Navigator.of(context).pop(action);
+    }
+
+    /// Runs [consume] once at a time. A config with many proxies validates
+    /// each through sing-box, one after another, and a second tap while that
+    /// ran imported every one of them twice. Whatever it throws is shown: some
+    /// profiles may already be stored, and an error that escaped the tap said
+    /// nothing at all.
+    Future<void> consumeOnce(Future<AddProxyAction?> Function() consume) async {
+      if (busy.value) return;
+      busy.value = true;
+      try {
+        final action = await consume();
+        if (action != null) popWith(action);
+      } catch (error, stackTrace) {
+        logger.e('Failed to add proxy', error: error, stackTrace: stackTrace);
+        if (context.mounted) {
+          showErrorMessage(context, describeError(l10n, error));
+        }
+      } finally {
+        if (context.mounted) busy.value = false;
+      }
     }
 
     Future<void> scanQr() async {
@@ -75,9 +106,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
       final code = result?.code?.trim();
       if (code == null || code.isEmpty) return;
       if (!context.mounted) return;
-      final action = await _consumeRawText(context, ref, code);
-      if (action == null) return;
-      popWith(action);
+      await consumeOnce(() => _consumeRawText(context, ref, code));
     }
 
     Future<void> pasteClipboard() async {
@@ -90,9 +119,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
         return;
       }
       if (!context.mounted) return;
-      final action = await _consumeRawText(context, ref, text);
-      if (action == null) return;
-      popWith(action);
+      await consumeOnce(() => _consumeRawText(context, ref, text));
     }
 
     Future<void> importFromFile() async {
@@ -104,9 +131,7 @@ class AddProxyMethodSheet extends ConsumerWidget {
       );
       if (kind == null) return;
       if (!context.mounted) return;
-      final action = await _consumeFile(context, ref, kind);
-      if (action == null) return;
-      popWith(action);
+      await consumeOnce(() => _consumeFile(context, ref, kind));
     }
 
     return SafeArea(
@@ -135,7 +160,13 @@ class AddProxyMethodSheet extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            // Holds its height either way, so the grid does not jump.
+            SizedBox(
+              height: 4,
+              child: busy.value ? const LinearProgressIndicator() : null,
+            ),
+            const SizedBox(height: 16),
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
@@ -148,33 +179,37 @@ class AddProxyMethodSheet extends ConsumerWidget {
                   icon: Icons.content_paste,
                   title: l10n.proxy_methodClipboardTitle,
                   subtitle: l10n.proxy_methodClipboardSubtitle,
-                  onTap: pasteClipboard,
+                  onTap: busy.value ? null : pasteClipboard,
                   isPrimary: true,
                 ),
                 _MethodCard(
                   icon: Icons.qr_code_scanner,
                   title: l10n.proxy_methodScanQrTitle,
                   subtitle: l10n.proxy_methodScanQrSubtitle,
-                  onTap: scanQr,
+                  onTap: busy.value ? null : scanQr,
                 ),
                 _MethodCard(
                   icon: Icons.cloud_download_outlined,
                   title: l10n.proxy_methodSubscriptionTitle,
                   subtitle: l10n.proxy_methodSubscriptionSubtitle,
-                  onTap: () => popWith(const AddProxySubscription()),
+                  onTap: busy.value
+                      ? null
+                      : () => popWith(const AddProxySubscription()),
                 ),
                 _MethodCard(
                   icon: Icons.upload_file_outlined,
                   title: l10n.proxy_methodImportFileTitle,
                   subtitle: l10n.proxy_methodImportFileSubtitle,
-                  onTap: importFromFile,
+                  onTap: busy.value ? null : importFromFile,
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Center(
               child: TextButton.icon(
-                onPressed: () => popWith(const AddProxyManual()),
+                onPressed: busy.value
+                    ? null
+                    : () => popWith(const AddProxyManual()),
                 icon: const Icon(Icons.edit_note),
                 label: Text(l10n.proxy_enterManually),
               ),
@@ -190,7 +225,7 @@ class _MethodCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool isPrimary;
 
   const _MethodCard({
@@ -302,12 +337,17 @@ Future<AddProxyAction?> _consumeFile(
   WidgetRef ref,
   ProxyFileImportKind kind,
 ) async {
+  final l10n = AppLocalizations.of(context);
   final picked = await FilePicker.pickFile();
   if (picked == null) return null;
 
   final outcome = await ref
       .read(proxyInputConsumerProvider.notifier)
-      .consumeFile(kind, picked);
+      .consumeFile(
+        kind,
+        picked,
+        defaultName: l10n.proxy_importedProfileDefaultName,
+      );
   if (!context.mounted) return null;
   return _actionFromOutcome(context, outcome);
 }
@@ -317,9 +357,13 @@ Future<AddProxyAction?> _consumeRawText(
   WidgetRef ref,
   String rawText,
 ) async {
+  final l10n = AppLocalizations.of(context);
   final outcome = await ref
       .read(proxyInputConsumerProvider.notifier)
-      .consumeRawText(rawText);
+      .consumeRawText(
+        rawText,
+        defaultName: l10n.proxy_importedProfileDefaultName,
+      );
   if (!context.mounted) return null;
   return _actionFromOutcome(context, outcome);
 }
@@ -332,10 +376,21 @@ AddProxyAction? _actionFromOutcome(
   switch (outcome) {
     case ProxyInputImported(:final created):
       return AddProxyImported(l10n.proxy_importedProfileNamed(created.name));
+    case ProxyInputImportedMany(:final created, :final skipped, :final notes):
+      if (created.isEmpty) {
+        showErrorMessage(context, l10n.proxy_importNoUsableProfiles(skipped));
+        return null;
+      }
+      return AddProxyImported(
+        skipped == 0
+            ? l10n.proxy_importedProfilesCount(created.length)
+            : l10n.proxy_importedProfilesSkipped(created.length, skipped),
+        notes: notes,
+      );
     case ProxyInputSeed(:final seed):
       return AddProxyWithSeed(seed);
-    case ProxyInputError(:final message):
-      showErrorMessage(context, message);
+    case ProxyInputError(:final error):
+      showErrorMessage(context, error.describe(context));
       return null;
   }
 }

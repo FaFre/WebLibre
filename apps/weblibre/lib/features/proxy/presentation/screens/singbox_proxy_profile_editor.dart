@@ -29,6 +29,7 @@ import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_draft_controller.dart';
 import 'package:weblibre/features/proxy/presentation/utils/proxy_profile_draft_error_l10n.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_profile_seed_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/utils/singbox_proxy_profile_type_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/custom_outbound_profile_form.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_dns_override_section.dart';
@@ -72,7 +73,11 @@ class SingboxProxyProfileEditorScreen extends ConsumerWidget {
       );
     }
 
-    return _Editor(draftProvider: draftProvider, draft: draft);
+    return _Editor(
+      draftProvider: draftProvider,
+      draft: draft,
+      importNotes: seed?.notes ?? const [],
+    );
   }
 }
 
@@ -80,7 +85,14 @@ class _Editor extends ConsumerWidget {
   final ProxyProfileDraftProvider draftProvider;
   final ProxyProfileDraftState draft;
 
-  const _Editor({required this.draftProvider, required this.draft});
+  /// What the import this draft came from could not carry over as it was.
+  final List<ProxyImportNote> importNotes;
+
+  const _Editor({
+    required this.draftProvider,
+    required this.draft,
+    this.importNotes = const [],
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -91,7 +103,17 @@ class _Editor extends ConsumerWidget {
       if (!context.mounted) return;
 
       switch (outcome) {
-        case SaveSucceeded():
+        case SaveSucceeded(:final sharesPrivateKeyWith):
+          if (sharesPrivateKeyWith.isNotEmpty) {
+            showInfoMessage(
+              context,
+              l10n.proxy_sharedPrivateKeyWarning(
+                sharesPrivateKeyWith.length,
+                sharesPrivateKeyWith.join(', '),
+              ),
+              duration: const Duration(seconds: 10),
+            );
+          }
           Navigator.pop(context);
         case SaveFailed(:final error):
           showErrorMessage(context, error.describe(context));
@@ -143,6 +165,10 @@ class _Editor extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate.fixed([
+                      for (final note in importNotes) ...[
+                        _ImportNoteCard(note: note),
+                        const SizedBox(height: 12),
+                      ],
                       ProfileEditorSection(
                         title: l10n.proxy_sectionGeneral,
                         child: Padding(
@@ -307,6 +333,40 @@ class _ProtocolForm extends StatelessWidget {
       key: ValueKey(('custom', draft.profileId)),
       draftProvider: draftProvider,
       draft: draft,
+    );
+  }
+}
+
+class _ImportNoteCard extends StatelessWidget {
+  final ProxyImportNote note;
+
+  const _ImportNoteCard({required this.note});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.info_outline, color: scheme.onTertiaryContainer),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                note.describe(context),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: scheme.onTertiaryContainer,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

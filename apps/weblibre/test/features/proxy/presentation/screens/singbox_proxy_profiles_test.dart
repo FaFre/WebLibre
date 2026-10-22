@@ -80,6 +80,82 @@ void main() {
     expect(runtimeRepository.deletedProfileIds, ['profile-1']);
   });
 
+  testWidgets(
+    'a profile the runtime is restarting shows as starting, not stopped',
+    (tester) async {
+      // Starting any profile reloads every running one. For the duration the
+      // runtime reports no endpoints at all, which read as "stopped": switches
+      // flicked off and the running tiles moved down and back.
+      final restarting = _profile(id: 'profile-1', name: 'Restarting');
+      final stopped = _profile(id: 'profile-2', name: 'Stopped');
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            singboxProxyProfilesRepositoryProvider.overrideWith(
+              () => _FakeProfilesRepository([stopped, restarting]),
+            ),
+            singboxProxyRuntimeRepositoryProvider.overrideWith(
+              () => _FakeRuntimeRepository(
+                SingboxProxyRuntimeState(
+                  status: SingboxProxyRuntimeStatus.starting,
+                  endpoints: const [],
+                ),
+              ),
+            ),
+            singboxProxyStartingConnectionsProvider.overrideWith(
+              () => _FakeStartingConnections({
+                SingboxProxyConnectionId(restarting.id).encode(),
+              }),
+            ),
+            torSettingsRepositoryProvider.overrideWith(
+              _FakeTorSettingsRepository.new,
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: SingboxProxyProfilesScreen(),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      Finder tileOf(String name) => find.ancestor(
+        of: find.text(name),
+        matching: find.byType(ProfileTile),
+      );
+
+      expect(
+        find.descendant(
+          of: tileOf('Restarting'),
+          matching: find.byTooltip('Starting…'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: tileOf('Restarting'),
+          matching: find.byIcon(Icons.play_arrow_rounded),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: tileOf('Stopped'),
+          matching: find.byIcon(Icons.play_arrow_rounded),
+        ),
+        findsOneWidget,
+      );
+      // Still sorted with the running ones.
+      expect(
+        tester.getTopLeft(tileOf('Restarting')).dy,
+        lessThan(tester.getTopLeft(tileOf('Stopped')).dy),
+      );
+    },
+  );
+
   testWidgets('proxy URI import populates structured editor fields', (
     tester,
   ) async {
@@ -217,6 +293,15 @@ class _FakeCredentialsRepository extends SingboxProxyCredentialsRepository {
 
   @override
   void build() {}
+}
+
+class _FakeStartingConnections extends SingboxProxyStartingConnections {
+  _FakeStartingConnections(this._starting);
+
+  final Set<String> _starting;
+
+  @override
+  Set<String> build() => _starting;
 }
 
 class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {

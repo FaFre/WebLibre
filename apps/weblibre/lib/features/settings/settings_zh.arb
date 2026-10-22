@@ -1066,5 +1066,8 @@
   "settings_trackerStatisticsNothingRecorded": "尚未记录任何被拦截的跟踪器。",
   "settings_trackerStatisticsLastSevenDays": "最近 7 天",
   "settings_trackerStatisticsNoneLastSevenDays": "最近 7 天未拦截任何跟踪器。",
-  "settings_trackerStatisticsLoadFailed": "无法加载跟踪器统计。"
+  "settings_trackerStatisticsLoadFailed": "无法加载跟踪器统计。",
+  "settings_containersByRecentUseTitle": "最近使用的容器优先",
+  "settings_containersByRecentUseKeywords": "容器顺序,容器排序,最近容器,最后使用,最近使用,手风琴,container order,recently used",
+  "settings_containersByRecentUseSubtitle": "仅限手风琴：你最后使用的容器会移到最前面。已固定的容器仍排在它前面"
 }

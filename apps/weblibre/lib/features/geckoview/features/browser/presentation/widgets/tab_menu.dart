@@ -220,7 +220,7 @@ class TabMenu extends HookConsumerWidget {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
                   final containerData = await ref
                       .read(tabDataRepositoryProvider.notifier)
-                      .getTabContainerData(selectedTabId);
+                      .getContainerForCopy(selectedTabId);
 
                   final cloneUrl =
                       ref.read(
@@ -263,7 +263,7 @@ class TabMenu extends HookConsumerWidget {
                   final tabState = ref.read(tabStateProvider(selectedTabId))!;
                   final containerData = await ref
                       .read(tabDataRepositoryProvider.notifier)
-                      .getTabContainerData(selectedTabId);
+                      .getContainerForCopy(selectedTabId);
 
                   final cloneUrl =
                       ref.read(
@@ -307,7 +307,7 @@ class TabMenu extends HookConsumerWidget {
                     final tabState = ref.read(tabStateProvider(selectedTabId))!;
                     final containerData = await ref
                         .read(tabDataRepositoryProvider.notifier)
-                        .getTabContainerData(selectedTabId);
+                        .getContainerForCopy(selectedTabId);
 
                     final cloneUrl =
                         ref.read(

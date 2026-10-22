@@ -1,3 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="eu.weblibre.flutter_singbox_proxy">
+  <!-- PlatformNetworkMonitor follows the default network for sing-box. -->
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 </manifest>

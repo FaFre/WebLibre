@@ -23,6 +23,7 @@ import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/menu_row.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_subtitle.dart';
@@ -88,6 +89,9 @@ class TorProfileTile extends ConsumerWidget {
         typeLabel: l10n.proxy_onionRoutingLabel,
         latency: latencyResult,
         autostart: autostart,
+        condition: ref.watch(
+          proxyConnectionConditionProvider(const TorProxyConnectionId()),
+        ),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

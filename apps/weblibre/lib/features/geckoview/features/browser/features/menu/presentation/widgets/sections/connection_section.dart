@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -42,8 +41,11 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profil
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/connection_usage.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_failure_l10n.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_health_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/utils/tab_routing_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_picker_sheet.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
@@ -93,20 +95,16 @@ class ConnectionSection extends ConsumerWidget {
 
     final profiles =
         ref.watch(singboxProxyProfilesRepositoryProvider).value ?? const [];
-    final runtimeEndpointIds = ref
-        .watch(
-          singboxProxyRuntimeRepositoryProvider.select((value) {
-            final endpoints = value.value?.endpoints;
-            if (endpoints == null) {
-              return EquatableValue(const <String>{});
-            }
-
-            return EquatableValue({
-              for (final endpoint in endpoints) endpoint.profileId,
-            });
-          }),
-        )
-        .value;
+    // Profiles on their way up — every start or stop reloads all of them, and
+    // for the duration none has an endpoint — so their rows read as starting
+    // rather than flick to stopped (and to blocked, for a used one).
+    final startingConnectionIds = ref.watch(
+      singboxProxyStartingConnectionsProvider,
+    );
+    // Not the runtime's raw endpoints: after a failed start it keeps the last
+    // ones while their instance is closed, and a profile that was down read as
+    // on — tapping it stopped it instead of starting it.
+    final runningProfileIds = ref.watch(runningSingboxProfileIdsProvider);
 
     final routeRows = <Widget>[
       // The global route, which every container without its own route inherits.
@@ -364,7 +362,8 @@ class ConnectionSection extends ConsumerWidget {
         ].where((entry) {
           final (profile, usage) = entry;
           return !usage.isUnused ||
-              runtimeEndpointIds.contains(profile.proxyConnectionId);
+              runningProfileIds.contains(profile.id) ||
+              startingConnectionIds.contains(profile.proxyConnectionId);
         }).toList();
 
     final connectionRows = <Widget>[
@@ -372,7 +371,11 @@ class ConnectionSection extends ConsumerWidget {
         icon: TorIcons.onionAlt,
         label: l10n.tor_proxyLabel(torBrand),
         active: isTorActive,
+        starting: isTorBusy,
         enabled: !isTorBusy,
+        condition: ref.watch(
+          proxyConnectionConditionProvider(const TorProxyConnectionId()),
+        ),
         usage: proxyConnectionUsage(
           id: const TorProxyConnectionId(),
           routingSettings: routingSettings,
@@ -395,15 +398,17 @@ class ConnectionSection extends ConsumerWidget {
         _ConnectionRow(
           icon: MdiIcons.lanConnect,
           label: profile.name,
-          active: runtimeEndpointIds.contains(profile.proxyConnectionId),
+          active: runningProfileIds.contains(profile.id),
+          starting: startingConnectionIds.contains(profile.proxyConnectionId),
+          condition: ref.watch(
+            proxyConnectionConditionProvider(profile.proxyConnection),
+          ),
           usage: usage,
           onToggle: () async {
             final runtime = ref.read(
               singboxProxyRuntimeRepositoryProvider.notifier,
             );
-            final isRunning = runtimeEndpointIds.contains(
-              profile.proxyConnectionId,
-            );
+            final isRunning = runningProfileIds.contains(profile.id);
 
             try {
               if (isRunning) {
@@ -420,7 +425,11 @@ class ConnectionSection extends ConsumerWidget {
               if (context.mounted) {
                 ui_helper.showErrorMessage(
                   context,
-                  l10n.menu_connectionProxyError('$error'),
+                  describeProxyFailure(
+                    l10n,
+                    error,
+                    framed: l10n.menu_connectionProxyError,
+                  ),
                 );
               }
             }
@@ -554,11 +563,18 @@ class _ConnectionRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool active;
+
+  /// On its way up, or back up. Drawn as on, with progress for the dot.
+  final bool starting;
   final bool enabled;
 
   /// What routes name this connection, if any. A used connection that is off
   /// blocks those routes, which the row says outright.
   final ProxyConnectionUsage usage;
+
+  /// What is wrong with it beyond on or off: a running connection whose
+  /// traffic fails, or one that could not be started on its own.
+  final ProxyConnectionCondition? condition;
 
   final Future<void> Function() onToggle;
   final Future<void> Function() onEdit;
@@ -570,6 +586,8 @@ class _ConnectionRow extends StatelessWidget {
     required this.usage,
     required this.onToggle,
     required this.onEdit,
+    this.condition,
+    this.starting = false,
     this.enabled = true,
   });
 
@@ -578,40 +596,54 @@ class _ConnectionRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final activeColor = AppColors.of(context).torActiveGreen;
 
-    final isBlocking = !usage.isUnused && !active;
+    final isStarting = starting && !active;
+    final isBlocking = !usage.isUnused && !active && !isStarting;
+    // A running connection that carries nothing is no better than a stopped
+    // one, and must not be drawn in the colour that says it works.
+    final isFaulty = condition != null || isBlocking;
+    final isOn = active || isStarting;
+    final (iconColor, dotColor) = switch ((isFaulty, isOn)) {
+      (true, _) => (colorScheme.error, colorScheme.error),
+      (false, true) => (activeColor, activeColor),
+      (false, false) => (colorScheme.onSurfaceVariant, colorScheme.outline),
+    };
 
     return ListTile(
       contentPadding: const EdgeInsets.only(left: 56, right: 16),
-      leading: Icon(
-        icon,
-        size: 20,
-        color: active
-            ? activeColor
-            : isBlocking
-            ? colorScheme.error
-            : colorScheme.onSurfaceVariant,
-      ),
+      leading: Icon(icon, size: 20, color: iconColor),
       title: Text(
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 14),
       ),
-      subtitle: _ConnectionUsageLine(usage: usage, isBlocking: isBlocking),
+      subtitle: _ConnectionUsageLine(
+        usage: usage,
+        isBlocking: isBlocking,
+        condition: condition,
+      ),
       onTap: enabled ? () => onToggle() : null,
       dense: true,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            active ? Icons.circle : Icons.circle_outlined,
-            size: 12,
-            color: active
-                ? activeColor
-                : isBlocking
-                ? colorScheme.error
-                : colorScheme.outline,
-          ),
+          if (isStarting)
+            SizedBox.square(
+              dimension: 12,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: dotColor,
+                semanticsLabel: AppLocalizations.of(
+                  context,
+                ).proxy_connectionStarting,
+              ),
+            )
+          else
+            Icon(
+              active ? Icons.circle : Icons.circle_outlined,
+              size: 12,
+              color: dotColor,
+            ),
           const SizedBox(width: 16),
           const VerticalDivider(indent: 4, endIndent: 4),
           IconButton(
@@ -643,20 +675,29 @@ class _ConnectionUsageLine extends StatelessWidget {
   /// back to a direct connection, they are stopped.
   final bool isBlocking;
 
-  const _ConnectionUsageLine({required this.usage, required this.isBlocking});
+  /// Said first when present, in place of "blocked": it is the reason.
+  final ProxyConnectionCondition? condition;
+
+  const _ConnectionUsageLine({
+    required this.usage,
+    required this.isBlocking,
+    this.condition,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final color = isBlocking ? colorScheme.error : colorScheme.onSurfaceVariant;
+    final condition = this.condition;
+    final isAlert = isBlocking || condition != null;
+    final color = isAlert ? colorScheme.error : colorScheme.onSurfaceVariant;
     final l10n = AppLocalizations.of(context);
 
     if (usage.isUnused) {
       return Text(
-        l10n.menu_connectionUnused,
+        condition?.label(context) ?? l10n.menu_connectionUnused,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: isBlocking ? TextStyle(color: colorScheme.error) : null,
+        style: isAlert ? TextStyle(color: colorScheme.error) : null,
       );
     }
 
@@ -678,7 +719,10 @@ class _ConnectionUsageLine extends StatelessWidget {
     final parts = <InlineSpan>[
       // Leads rather than trails: it is the one word that must survive the
       // ellipsis, and the icons say nothing about it.
-      if (isBlocking) TextSpan(text: l10n.menu_connectionUsageBlocked),
+      if (condition != null)
+        TextSpan(text: condition.label(context))
+      else if (isBlocking)
+        TextSpan(text: l10n.menu_connectionUsageBlocked),
       if (usage.routesRegularTabs)
         TextSpan(text: l10n.menu_connectionRegularTabs),
       if (usage.routesPrivateTabs)
@@ -708,7 +752,7 @@ class _ConnectionUsageLine extends StatelessWidget {
       ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: isBlocking ? TextStyle(color: colorScheme.error) : null,
+      style: isAlert ? TextStyle(color: colorScheme.error) : null,
     );
   }
 }

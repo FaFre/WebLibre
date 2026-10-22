@@ -27,6 +27,7 @@ import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 import 'package:weblibre/features/proxy/domain/services/subscription_importer.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_import_failure_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/utils/singbox_proxy_profile_type_l10n.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/button_spinner.dart';
@@ -290,7 +291,7 @@ class _EntryTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         subtitle: Text(
-          error is FormatException ? error.message : error.toString(),
+          error is FormatException ? error.describe(context) : '$error',
         ),
         dense: true,
       ),

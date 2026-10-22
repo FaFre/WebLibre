@@ -205,10 +205,18 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   /// driving this off `select(db.tab)` would pull the tab's page text along with
   /// it for nothing.
   SingleOrNullSelectable<ContainerData?> getTabContainerData(String tabId) {
+    // `useColumns: true` is what makes the container readable. `selectOnly`
+    // leaves joined tables out of the parsed result unless a join asks to be
+    // in it, and `readTableOrNull` only sees parsed tables — selecting the
+    // container's columns with `addColumns` instead left this returning null
+    // for every tab, so every caller took every tab for one in no container.
     final query = selectOnly(db.tab)
-      ..addColumns(db.container.$columns)
       ..join([
-        innerJoin(db.container, db.container.id.equalsExp(db.tab.containerId)),
+        innerJoin(
+          db.container,
+          db.container.id.equalsExp(db.tab.containerId),
+          useColumns: true,
+        ),
       ])
       ..where(db.tab.id.equals(tabId));
 
@@ -708,6 +716,55 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Future<void> assignContainer(String id, {required String? containerId}) {
     final statement = _updateByIdStatement(id);
     return statement.write(TabCompanion(containerId: Value(containerId)));
+  }
+
+  /// Puts every tab that has no container here, yet runs in a container's
+  /// cookie-store context in the engine, back into that container, and returns
+  /// the ids it moved.
+  ///
+  /// [engineContextIds] maps tab ids to the context the engine reports for
+  /// them. A context no container owns — the general one, isolation and private
+  /// contexts — moves nothing, and a tab that already has a container keeps it.
+  ///
+  /// The engine is right and this table is wrong whenever the two disagree this
+  /// way: cookies and routing follow the engine's context. The disagreement is
+  /// what taking a tab out of its container produced while
+  /// [getTabContainerData] read null for every tab — the move saw no context to
+  /// leave and only cleared this row, so the tab kept running in the
+  /// container's context while being listed under none. Moving the row back
+  /// changes nothing about how the tab loads; it only stops misdescribing it.
+  Future<List<String>> reattachTabsToContextContainers(
+    Map<String, String> engineContextIds,
+  ) {
+    return transaction(() async {
+      if (engineContextIds.isEmpty) return const <String>[];
+
+      final containerIds = await _containerIdsByContextualIdentity(
+        engineContextIds.values,
+      );
+      final candidateIds = [
+        for (final MapEntry(key: tabId, value: contextId)
+            in engineContextIds.entries)
+          if (containerIds.containsKey(contextId)) tabId,
+      ];
+      if (candidateIds.isEmpty) return const <String>[];
+
+      final unassignedQuery = selectOnly(db.tab)
+        ..addColumns([db.tab.id])
+        ..where(db.tab.id.isIn(candidateIds) & db.tab.containerId.isNull());
+      final unassignedIds = await unassignedQuery
+          .map((row) => row.read(db.tab.id)!)
+          .get();
+
+      for (final tabId in unassignedIds) {
+        await assignContainer(
+          tabId,
+          containerId: containerIds[engineContextIds[tabId]],
+        );
+      }
+
+      return unassignedIds;
+    });
   }
 
   Future<void> addClosedTabTombstones(

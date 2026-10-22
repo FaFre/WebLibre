@@ -47,12 +47,23 @@ part 'proxy_pref_baseline.g.dart';
 /// falling back. It is the same switch Tor Browser compiles in as
 /// `MOZ_PROXY_BYPASS_PROTECTION`, which is off in ordinary GeckoView builds.
 ///
+/// `network.proxy.failover_direct` closes the second way out for the same
+/// requests. A `ServiceRequest` is always "conservative", and when every proxy
+/// in a conservative channel's failover chain has failed,
+/// `nsHttpChannel::ProxyFailover` retries it on a direct connection — which
+/// `allow_bypass` does not cover, because nothing set the bypass flag. That
+/// chain always runs out here: a blocked request is answered with a dead proxy
+/// that fails over to the dead baseline below, which fails too. Mozilla
+/// compiles this in unless a build passes `--disable-proxy-direct-failover`,
+/// and GeckoView builds do not.
+///
 /// Held in both baseline states, not just the armed one: a bypass is a leak
 /// past whatever routing the extension decides per request, including routing
 /// that only some containers use, and there is nothing it buys a profile that
 /// routes everything directly anyway.
 const _proxyBypassProtection = <String, Object>{
   'network.proxy.allow_bypass': false,
+  'network.proxy.failover_direct': false,
 };
 
 /// Proxy prefs pointing at a port nothing listens on.

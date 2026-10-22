@@ -152,9 +152,7 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
         errorType: ErrorType,
         uri: String?,
     ): RequestInterceptor.ErrorResponse {
-        if (errorType == ErrorType.ERROR_PROXY_CONNECTION_REFUSED ||
-            errorType == ErrorType.ERROR_UNKNOWN_PROXY_HOST
-        ) {
+        if (errorType in PROXY_RELATED_ERRORS) {
             val tab = components.core.store.state.findTabOrCustomTab(session)
             components.flutterEvents.onProxyLoadError(
                 EventSequence.next(),
@@ -172,4 +170,26 @@ class AppRequestInterceptor(private val context: Context) : RequestInterceptor {
     }
 
     override fun interceptsAppInitiatedRequests() = true
+
+    private companion object {
+        /**
+         * Error pages the app looks at for proxy trouble.
+         *
+         * The first two name the proxy. The rest name none, yet through a SOCKS
+         * proxy they are what a dead tunnel or a restarting runtime often
+         * produces — the proxy closing a connection mid-handshake surfaces as
+         * "Unable to connect", not as a refusal. Which of them actually concern
+         * a proxy is the app's call: it knows how the tab is routed and whether
+         * that proxy is up.
+         */
+        val PROXY_RELATED_ERRORS = setOf(
+            ErrorType.ERROR_PROXY_CONNECTION_REFUSED,
+            ErrorType.ERROR_UNKNOWN_PROXY_HOST,
+            ErrorType.ERROR_CONNECTION_REFUSED,
+            ErrorType.ERROR_NET_TIMEOUT,
+            ErrorType.ERROR_NET_RESET,
+            ErrorType.ERROR_NET_INTERRUPT,
+            ErrorType.ERROR_UNKNOWN_HOST,
+        )
+    }
 }

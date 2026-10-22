@@ -223,6 +223,15 @@ const _inputRecoveryDelay = Duration(seconds: 15);
 /// but a database that is genuinely broken should not be hammered.
 const _maxInputRecoveryDelay = Duration(minutes: 2);
 
+/// A caller of [ProxySettingsReplication.waitUntilProxyInstalled], completed
+/// with true by the first installed snapshot that passes [test].
+class _InstalledWaiter {
+  final bool Function(ContainerRoutingSnapshot snapshot) test;
+  final completer = Completer<bool>();
+
+  _InstalledWaiter(this.test);
+}
+
 /// Single serialised writer that installs [containerRoutingSnapshotProvider]
 /// into Gecko's proxy extension.
 ///
@@ -240,6 +249,73 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
   var _pushDirty = false;
   Timer? _readinessProbe;
   Timer? _inputRecovery;
+
+  /// The snapshot the extension last acknowledged, as far as this writer knows.
+  /// Null until the first install, and again once the extension is found to
+  /// have lost its routing.
+  ContainerRoutingSnapshot? _installed;
+  final _installedWaiters = <_InstalledWaiter>[];
+
+  /// Completes true once the extension has acknowledged the endpoint the app
+  /// now computes for [encodedProxyId], or false when [timeout] passes first.
+  ///
+  /// What the app computes and what the extension enforces are a push and an
+  /// acknowledgement apart. Anything that acts *on* the routing — reloading a
+  /// page that failed because a proxy was not up yet, say — has to wait for
+  /// the second, or it acts on routing the extension does not hold yet and
+  /// fails the same way again (issue #672).
+  ///
+  /// The endpoint has to be the current one, not just one for that proxy: a
+  /// start gives a proxy a new port and credentials, and until the push that
+  /// removed its old endpoint is acknowledged, the extension still lists that
+  /// one. Matching on the id alone took it for the new routing.
+  Future<bool> waitUntilProxyInstalled(
+    String encodedProxyId, {
+    required Duration timeout,
+  }) {
+    bool test(ContainerRoutingSnapshot installed) {
+      final current = ref
+          .read(containerRoutingSnapshotProvider)
+          ?.proxyEndpoint(encodedProxyId);
+      return current != null &&
+          installed.proxyEndpoint(encodedProxyId) == current;
+    }
+
+    final installed = _installed;
+    if (installed != null && test(installed)) return Future.value(true);
+
+    final waiter = _InstalledWaiter(test);
+    _installedWaiters.add(waiter);
+
+    return waiter.completer.future.timeout(
+      timeout,
+      onTimeout: () {
+        _installedWaiters.remove(waiter);
+        return false;
+      },
+    );
+  }
+
+  /// Whether the snapshot the extension holds satisfies [test]; false while it
+  /// holds none.
+  bool installedSatisfies(
+    bool Function(ContainerRoutingSnapshot snapshot) test,
+  ) {
+    final installed = _installed;
+    return installed != null && test(installed);
+  }
+
+  void _markInstalled(ContainerRoutingSnapshot snapshot) {
+    _installed = snapshot;
+
+    final satisfied = _installedWaiters
+        .where((waiter) => waiter.test(snapshot))
+        .toList();
+    for (final waiter in satisfied) {
+      _installedWaiters.remove(waiter);
+      if (!waiter.completer.isCompleted) waiter.completer.complete(true);
+    }
+  }
 
   Future<void> _queuePush(ContainerRoutingSnapshot snapshot) async {
     _latest = snapshot;
@@ -269,6 +345,7 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
               .read(containerProxyRepositoryProvider.notifier)
               .applySnapshot(pending);
 
+          _markInstalled(pending);
           _startReadinessProbe();
         } catch (error, stackTrace) {
           // Until this lands the extension blocks everything, so retrying is
@@ -348,6 +425,7 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
     // The extension is holding no snapshot, so it is blocking everything.
     logger.w('Container routing was lost by the extension; reinstalling');
+    _installed = null;
     await _queuePush(pending);
   }
 
@@ -358,6 +436,10 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
       _readinessProbe = null;
       _inputRecovery?.cancel();
       _inputRecovery = null;
+      for (final waiter in _installedWaiters) {
+        if (!waiter.completer.isCompleted) waiter.completer.complete(false);
+      }
+      _installedWaiters.clear();
     });
 
     _scheduleInputRecovery(_inputRecoveryDelay);

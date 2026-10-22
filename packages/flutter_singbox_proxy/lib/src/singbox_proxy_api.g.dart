@@ -790,6 +790,34 @@ class SingboxProxyApi {
     return pigeonVar_replyValue as String?;
   }
 
+  /// Why [profile] cannot start right now, as far as can be told without
+  /// starting it, or null when nothing speaks against it.
+  ///
+  /// Resolves a WireGuard profile's peer hostnames through the running
+  /// runtime's bootstrap resolver — the lookup sing-box makes once, while it
+  /// starts, and the usual reason such a start fails. Null for every other
+  /// profile, and while nothing runs.
+  Future<String?> probeProfile(SingboxProxyProfile profile) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.probeProfile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profile],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as String?;
+  }
+
   Future<SingboxProxyConfigResult> buildConfig(
     List<SingboxProxyProfile> profiles,
     SingboxProxyRuntimeOptions options,

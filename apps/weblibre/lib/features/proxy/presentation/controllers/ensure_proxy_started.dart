@@ -28,6 +28,7 @@ import 'package:weblibre/features/proxy/domain/providers/proxy_connection_option
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_failure_l10n.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -122,8 +123,11 @@ Future<bool> _maybeStartSingboxProxy(
   };
   if (!context.mounted) return false;
 
-  final isRunning = resolvedRuntimeState.endpoints.any(
-    (endpoint) => endpoint.profileId == proxyConnectionId.encode(),
+  // Not any endpoint the state names: after a failed start native keeps the
+  // last ones in its ERROR state, and a profile that was down read as started
+  // — nothing was started or asked, and the tab reloaded into the block again.
+  final isRunning = resolvedRuntimeState.runningProfileIds.contains(
+    proxyConnectionId.profileId,
   );
 
   if (isRunning) return true;
@@ -171,9 +175,10 @@ Future<bool> _maybeStartSingboxProxy(
       stackTrace: stackTrace,
     );
     if (context.mounted) {
+      final l10n = AppLocalizations.of(context);
       showErrorMessage(
         context,
-        AppLocalizations.of(context).proxy_startProxyFailed(error.toString()),
+        describeProxyFailure(l10n, error, framed: l10n.proxy_startProxyFailed),
       );
     }
     return false;

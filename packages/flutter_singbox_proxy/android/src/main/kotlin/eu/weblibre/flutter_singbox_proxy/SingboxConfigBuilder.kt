@@ -67,13 +67,25 @@ class SingboxConfigBuilder(
         val rules = JSONArray()
         val endpoints = mutableListOf<SingboxProxyRuntimeEndpoint>()
         val ports = inboundPorts(profiles, options, reusableEndpoints)
+        val reusableByProfile = reusableEndpoints.associateBy { it.profileId }
 
         profiles.forEachIndexed { index, profile ->
             val inboundTag = inboundTag(profile.id)
             val outboundTag = outboundTag(profile.id)
             val port = ports[index]
-            val username = generateToken("u")
-            val password = generateToken("p")
+            // A profile that keeps its port across a reload keeps its
+            // credentials too, so its endpoint comes out of the reload
+            // unchanged. Every start, stop or reload rebuilds the whole
+            // config; fresh credentials for profiles that merely stayed up
+            // turned every one of those into an authentication failure for
+            // whatever Gecko already held their old endpoint for (issue #671).
+            val reused = reusableByProfile[profile.id]?.takeIf { endpoint ->
+                endpoint.port == port &&
+                    endpoint.username.isNotEmpty() &&
+                    endpoint.password.isNotEmpty()
+            }
+            val username = reused?.username ?: generateToken("u")
+            val password = reused?.password ?: generateToken("p")
 
             inbounds.put(JSONObject().apply {
                 put("type", "socks")
@@ -431,6 +443,21 @@ class SingboxConfigBuilder(
         endpoint.remove("system_interface")?.let { endpoint.put("system", it) }
         endpoint.remove("interface_name")?.let { endpoint.put("name", it) }
         endpoint.remove("gso")
+
+        // Let the encrypted packets be fragmented, as WireGuard itself does —
+        // the kernel module and the reference wireguard-go both leave
+        // fragmentation on. sing-box instead sets "don't fragment" on every UDP
+        // socket but direct and hysteria ones, so an encrypted packet bigger
+        // than the path allows is dropped at the socket ("sendmsg: message too
+        // long") and the tunnel's TCP resends the same full-size segment until
+        // it gives up. Lowering the MTU is no way around that here: below 1280
+        // the tunnel's gVisor stack refuses IPv6 altogether, and 1280 itself
+        // needs a 1360-byte path, which mobile networks and a device already
+        // on another VPN routinely do not have. A profile that sets the field
+        // keeps its choice.
+        if (!endpoint.has("udp_fragment")) {
+            endpoint.put("udp_fragment", true)
+        }
 
         return endpoint
     }

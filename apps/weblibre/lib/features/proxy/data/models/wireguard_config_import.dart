@@ -20,7 +20,7 @@
 import 'dart:convert';
 
 import 'package:fast_equatable/fast_equatable.dart';
-import 'package:weblibre/core/branding/proxy_brands.dart';
+import 'package:weblibre/features/proxy/data/models/proxy_import_failure.dart';
 import 'package:weblibre/features/proxy/data/parsers/cidr.dart';
 import 'package:weblibre/features/proxy/data/parsers/host_port.dart';
 
@@ -40,21 +40,36 @@ class WireguardConfigImport with FastEquatable {
 
   factory WireguardConfigImport.fromConfigText(String configText) {
     final sections = _parseWireguardConfig(configText);
-    final interface = sections['interface'];
-    final peer = sections['peer'];
-    if (interface == null || peer == null) {
-      throw const FormatException(
-        '$wireGuardBrand config must contain [Interface] and [Peer] sections.',
+    final interfaces = sections
+        .where((section) => section.name == 'interface')
+        .toList();
+    final peers = sections.where((section) => section.name == 'peer').toList();
+    if (interfaces.isEmpty || peers.isEmpty) {
+      throw const ProxyImportFailure(
+        ProxyImportFailureKind.wireguardMissingSections,
       );
     }
+    // Refused rather than merged: sections used to be keyed by name, so a
+    // second [Peer] overwrote the first key by key and the profile ended up
+    // with one peer's key, another's endpoint and either one's AllowedIPs.
+    if (interfaces.length > 1) {
+      throw const ProxyImportFailure(
+        ProxyImportFailureKind.wireguardSeveralInterfaces,
+      );
+    }
+    if (peers.length > 1) {
+      throw ProxyImportFailure(
+        ProxyImportFailureKind.wireguardSeveralPeers,
+        count: peers.length,
+      );
+    }
+    final interface = interfaces.single.entries;
+    final peer = peers.single.entries;
 
     final rawEndpoint = (peer['endpoint'] ?? '').trim();
     final endpoint = rawEndpoint.isEmpty
         ? (host: '', port: '')
-        : parseHostPort(
-            rawEndpoint,
-            invalidMessage: '$wireGuardBrand endpoint must be host:port.',
-          );
+        : _parseEndpoint(rawEndpoint);
     final mtu = interface['mtu']?.trim();
     // A phone is always behind NAT. Without keepalives the mapping for the
     // tunnel's UDP flow expires while idle, the peer's packets stop arriving,
@@ -83,6 +98,9 @@ class WireguardConfigImport with FastEquatable {
         'persistent_keepalive_interval': keepalive == null || keepalive.isEmpty
             ? '25'
             : keepalive,
+        // Empty when the config has none, which the runtime reads as "route
+        // everything" — WireGuard's own default for a client.
+        'allowed_ips': _wireguardAddressValue(peer['allowedips']),
       },
       dns: _wireguardListValue(interface['dns']),
     );
@@ -105,6 +123,29 @@ class WireguardConfigImport with FastEquatable {
     if (first.contains(':')) return 'udp://[$first]';
     return 'udp://$first';
   }
+
+  /// Every DNS server the config names, in order.
+  List<String> get dnsServers => _splitList(dns);
+
+  /// DNS servers past the first. A profile resolves through one server, so
+  /// these are not used — said at import rather than dropped silently.
+  List<String> get extraDnsServers => _splitList(dns).skip(1).toList();
+
+  /// The peer's AllowedIPs when they leave out part of the IPv4 internet, or
+  /// null when everything is routed (or the config does not say). Sites
+  /// outside them cannot be reached through the profile at all.
+  List<String>? get splitTunnelAllowedIps =>
+      splitTunnelRanges(_splitList(values['allowed_ips'] ?? ''));
+}
+
+HostPort _parseEndpoint(String rawEndpoint) {
+  try {
+    return parseHostPort(rawEndpoint);
+  } on FormatException {
+    throw const ProxyImportFailure(
+      ProxyImportFailureKind.wireguardInvalidEndpoint,
+    );
+  }
 }
 
 List<String> _splitList(String value) {
@@ -117,42 +158,52 @@ List<String> _splitList(String value) {
       .toList();
 }
 
-Map<String, Map<String, String>> _parseWireguardConfig(String configText) {
-  final sections = <String, Map<String, String>>{};
-  String? currentSection;
+typedef _WireguardSection = ({String name, Map<String, String> entries});
+
+/// The config's sections in order, each repeated section kept as its own.
+List<_WireguardSection> _parseWireguardConfig(String configText) {
+  final sections = <_WireguardSection>[];
+  _WireguardSection? currentSection;
 
   for (final rawLine in const LineSplitter().convert(configText)) {
     final line = _stripWireguardComment(rawLine).trim();
     if (line.isEmpty) continue;
 
     if (line.startsWith('[') && line.endsWith(']')) {
-      currentSection = line.substring(1, line.length - 1).trim().toLowerCase();
-      if (currentSection.isEmpty) {
-        throw const FormatException(
-          '$wireGuardBrand config contains empty section.',
+      final name = line.substring(1, line.length - 1).trim().toLowerCase();
+      if (name.isEmpty) {
+        throw const ProxyImportFailure(
+          ProxyImportFailureKind.wireguardEmptySection,
         );
       }
-      sections.putIfAbsent(currentSection, () => <String, String>{});
+      currentSection = (name: name, entries: <String, String>{});
+      sections.add(currentSection);
       continue;
     }
 
     if (currentSection == null) {
-      throw const FormatException(
-        '$wireGuardBrand config entries must be inside a section.',
+      throw const ProxyImportFailure(
+        ProxyImportFailureKind.wireguardEntryOutsideSection,
       );
     }
 
     final separatorIndex = line.indexOf('=');
     if (separatorIndex < 1) {
-      throw FormatException('Invalid $wireGuardBrand config line: $rawLine');
+      throw ProxyImportFailure(
+        ProxyImportFailureKind.wireguardInvalidLine,
+        detail: rawLine,
+      );
     }
 
     final key = line.substring(0, separatorIndex).trim().toLowerCase();
     final value = line.substring(separatorIndex + 1).trim();
     if (key.isEmpty) {
-      throw FormatException('Invalid $wireGuardBrand config line: $rawLine');
+      throw ProxyImportFailure(
+        ProxyImportFailureKind.wireguardInvalidLine,
+        detail: rawLine,
+      );
     }
-    sections[currentSection]![key] = value;
+    currentSection.entries[key] = value;
   }
 
   return sections;

@@ -74,6 +74,7 @@ extension SingboxProxyFormFieldL10n on SingboxProxyFormField {
       'private_key_passphrase' => l10n.proxy_fieldPrivateKeyPassphrase,
       'local_address' => l10n.proxy_fieldLocalAddress,
       'peer_public_key' => l10n.proxy_fieldPeerPublicKey,
+      'allowed_ips' => l10n.proxy_fieldAllowedIps,
       'wireguardPrivateKey' => l10n.proxy_fieldWireguardPrivateKey,
       'pre_shared_key' => l10n.proxy_fieldPreSharedKey,
       'mtu' => l10n.proxy_fieldMtu,
@@ -98,6 +99,7 @@ extension SingboxProxyFormFieldL10n on SingboxProxyFormField {
       'disable_mtu_discovery' => l10n.proxy_fieldDisableMtuDiscoveryHelper,
       'zero_rtt_handshake' => l10n.proxy_fieldZeroRttHandshakeHelper,
       'local_address' => l10n.proxy_fieldLocalAddressHelper,
+      'allowed_ips' => l10n.proxy_fieldAllowedIpsHelper,
       'wireguardPrivateKey' => l10n.proxy_fieldWireguardPrivateKeyHelper,
       'pre_shared_key' => l10n.proxy_fieldPreSharedKeyHelper,
       'mtu' => l10n.proxy_fieldMtuHelper,
@@ -146,6 +148,8 @@ extension SingboxFormFieldErrorL10n on SingboxFormFieldError {
       ),
       SingboxFieldErrorKind.notAllowedValue =>
         l10n.proxy_fieldErrorNotAllowedValue(label, listParam!.join(', ')),
+      SingboxFieldErrorKind.invalidWireguardKey =>
+        l10n.proxy_fieldErrorWireguardKey(label),
     };
   }
 }

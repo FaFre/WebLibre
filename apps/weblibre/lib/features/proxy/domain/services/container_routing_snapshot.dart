@@ -92,6 +92,14 @@ class ContainerRoutingSnapshot with FastEquatable {
     this.awaitingProxyIds = const [],
   });
 
+  /// The live endpoint for [encodedProxyId], or null when it has none here.
+  GeckoProxySettings? proxyEndpoint(String encodedProxyId) {
+    for (final proxy in proxies) {
+      if (proxy.id == encodedProxyId) return proxy;
+    }
+    return null;
+  }
+
   @override
   List<Object?> get hashParameters => [
     proxies,

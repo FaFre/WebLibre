@@ -12,6 +12,7 @@ import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
+import 'package:weblibre/features/proxy/domain/services/singbox_start_retry.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
@@ -155,7 +156,62 @@ void main() {
       service.pendingStartFor(const SingboxProxyConnectionId('profile-1')),
       isNull,
     );
+    // Nobody is there to retry it, so it is handed on to be tried again.
+    expect(container.read(singboxStartRetriesProvider).keys, ['profile-1']);
   });
+
+  test('a profile that cannot start does not keep the others down', () async {
+    final runtimeRepository = _FakeRuntimeRepository(failFor: {'profile-2'});
+    final container = _container(
+      profiles: [
+        _profile(id: 'profile-1', autostart: true),
+        _profile(id: 'profile-2', autostart: true),
+        _profile(id: 'profile-3', autostart: true),
+      ],
+      runtimeRepository: runtimeRepository,
+    );
+    addTearDown(container.dispose);
+
+    await container.read(proxyAutostartServiceProvider.notifier).run();
+
+    // The joint start fails as a whole; one at a time, only the broken
+    // profile is lost (issue #669).
+    expect(runtimeRepository.startCalls, [
+      ['profile-1', 'profile-2', 'profile-3'],
+      ['profile-1'],
+      ['profile-2'],
+      ['profile-3'],
+    ]);
+    expect(container.read(singboxStartRetriesProvider).keys, ['profile-2']);
+  });
+
+  test(
+    'a profile sing-box refuses is given up on, the rest are not touched',
+    () async {
+      final runtimeRepository = _FakeRuntimeRepository(
+        rejectFor: {'profile-2'},
+      );
+      final container = _container(
+        profiles: [
+          _profile(id: 'profile-1', autostart: true),
+          _profile(id: 'profile-2', autostart: true),
+        ],
+        runtimeRepository: runtimeRepository,
+      );
+      addTearDown(container.dispose);
+
+      await container.read(proxyAutostartServiceProvider.notifier).run();
+
+      // The joint start already ran the accepted one; starting them one by
+      // one would only restart it.
+      expect(runtimeRepository.startCalls, [
+        ['profile-1', 'profile-2'],
+      ]);
+      final retries = container.read(singboxStartRetriesProvider);
+      expect(retries.keys, ['profile-2']);
+      expect(retries['profile-2']!.exhausted, isTrue);
+    },
+  );
 
   test('starts Tor only when its autostart setting is on', () async {
     final startedWithoutAutostart = _FakeStartProxyController();
@@ -247,27 +303,46 @@ class _FakeProfilesRepository extends SingboxProxyProfilesRepository {
 class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {
   final bool failStart;
 
-  /// Holds [startProfiles] open until [completeStart], so a test can observe
-  /// the service while a start is still in flight.
+  /// Holds [ensureProfilesStarted] open until [completeStart], so a test can
+  /// observe the service while a start is still in flight.
   final bool holdStart;
   final startCalls = <List<String>>[];
   final _gate = Completer<void>();
 
-  _FakeRuntimeRepository({this.failStart = false, this.holdStart = false});
+  /// A start whose list contains any of these fails, the way the whole
+  /// runtime does when one of its profiles cannot come up.
+  final Set<String> failFor;
+
+  /// A start containing any of these is refused by sing-box for them; the
+  /// rest of the start goes ahead.
+  final Set<String> rejectFor;
+
+  _FakeRuntimeRepository({
+    this.failStart = false,
+    this.holdStart = false,
+    this.failFor = const {},
+    this.rejectFor = const {},
+  });
 
   void completeStart() {
     if (!_gate.isCompleted) _gate.complete();
   }
 
   @override
-  Future<SingboxProxyRuntimeState> startProfiles(
+  Future<SingboxProxyRuntimeState> ensureProfilesStarted(
     List<String> profileIds, {
     SingboxProxyRuntimeOptions? options,
   }) async {
     startCalls.add(profileIds);
     await Future<void>.delayed(Duration.zero);
-    if (failStart) {
+    if (failStart || profileIds.any(failFor.contains)) {
       throw StateError('start failed');
+    }
+    final rejected = profileIds.where(rejectFor.contains);
+    if (rejected.isNotEmpty) {
+      throw SingboxProfilesRejected({
+        for (final id in rejected) id: (name: id, message: 'invalid key'),
+      });
     }
     if (holdStart) {
       await _gate.future;
@@ -276,6 +351,16 @@ class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {
       status: SingboxProxyRuntimeStatus.running,
       endpoints: const [],
     );
+  }
+
+  /// Autostart must never use this: it stops whatever it is not given, and
+  /// a launch may already have started a profile startup does not know about.
+  @override
+  Future<SingboxProxyRuntimeState> startProfiles(
+    List<String> profileIds, {
+    SingboxProxyRuntimeOptions? options,
+  }) {
+    throw StateError('autostart called the authoritative startProfiles');
   }
 
   @override

@@ -302,7 +302,7 @@ Future<void> _cloneCurrentTabMode(
 ) async {
   final containerData = await ref
       .read(tab_data.tabDataRepositoryProvider.notifier)
-      .getTabContainerData(selectedTabId);
+      .getContainerForCopy(selectedTabId);
 
   final tabId = await ref
       .read(tabRepositoryProvider.notifier)
@@ -363,7 +363,7 @@ Future<void> _cloneTabAsMode(
 
   final containerData = await ref
       .read(tab_data.tabDataRepositoryProvider.notifier)
-      .getTabContainerData(selectedTabId);
+      .getContainerForCopy(selectedTabId);
   final repo = ref.read(tabRepositoryProvider.notifier);
 
   final tabId = switch (mode) {

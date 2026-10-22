@@ -6369,17 +6369,49 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String proxy_latencyMilliseconds(int ms) {
-    return '$ms ms';
+    return 'HTTP $ms ms';
   }
 
   @override
-  String proxy_latencyHttpStatusTooltip(int statusCode, int ms) {
-    return 'HTTP $statusCode dalam $ms ms';
+  String proxy_latencyHttpStatusTooltip(String host, int statusCode, int ms) {
+    return 'Permintaan web melalui koneksi ini ke $host memerlukan $ms ms (HTTP $statusCode). Waktu ini mencakup perjalanan dari server ke situs tersebut, sehingga lebih lama daripada latensi terowongan itu sendiri.';
   }
+
+  @override
+  String get proxy_conditionNotResponding => 'Tidak merespons';
+
+  @override
+  String get proxy_conditionStartRetrying => 'Gagal memulai · mencoba lagi';
+
+  @override
+  String get proxy_conditionStartFailed => 'Gagal memulai';
+
+  @override
+  String proxy_sharedPrivateKeyWarning(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$names menggunakan kunci privat yang sama.',
+    );
+    return 'Tersimpan. $_temp0 Server WireGuard memperlakukan profil yang berbagi kunci sebagai satu klien, sehingga jika dijalankan bersamaan, profil-profil itu akan saling memutus koneksi.';
+  }
+
+  @override
+  String get proxy_connectionStarting => 'Memulai…';
 
   @override
   String proxy_startProxyFailed(String error) {
     return 'Gagal memulai proksi: $error';
+  }
+
+  @override
+  String proxy_profileCouldNotStart(String name, String reason) {
+    return '$name tidak dapat dimulai: $reason';
+  }
+
+  @override
+  String proxy_profileRejected(String name, String reason) {
+    return '$name tidak dapat digunakan: $reason';
   }
 
   @override
@@ -6599,11 +6631,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Berkas .conf dengan [Interface]/[Peer]';
 
   @override
-  String get proxy_importFileSingboxJsonTitle => 'JSON outbound sing-box';
+  String get proxy_importFileSingboxJsonTitle => 'sing-box JSON';
 
   @override
   String get proxy_importFileSingboxJsonSubtitle =>
-      'Shadowsocks, Trojan, VMess, VLESS, Hysteria, …';
+      'Satu outbound, satu endpoint, atau seluruh konfigurasi';
 
   @override
   String proxy_importedProfileNamed(String name) {
@@ -6652,6 +6684,152 @@ class AppLocalizationsId extends AppLocalizations {
       one: '1 profil diimpor',
     );
     return '$_temp0';
+  }
+
+  @override
+  String proxy_importedProfilesSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count profil diimpor.',
+      one: '1 profil diimpor.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped proksi dalam konfigurasi tidak dapat digunakan.',
+      one: '1 proksi dalam konfigurasi tidak dapat digunakan.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String proxy_importNoUsableProfiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tidak satu pun dari $count proksi dalam konfigurasi ini dapat digunakan.',
+      one: 'Proksi dalam konfigurasi ini tidak dapat digunakan.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importFileUnreadable(String error) {
+    return 'Berkas tidak dapat dibaca: $error';
+  }
+
+  @override
+  String proxy_importInvalidJson(String error) {
+    return 'Ini bukan JSON yang valid: $error';
+  }
+
+  @override
+  String get proxy_importNotJsonObject => 'Diharapkan objek JSON sing-box.';
+
+  @override
+  String get proxy_importNoOutbounds =>
+      'Diharapkan outbound atau endpoint sing-box, atau konfigurasi dengan \"outbounds\" atau \"endpoints\".';
+
+  @override
+  String proxy_importNotAList(String key) {
+    return '\"$key\" dalam konfigurasi sing-box harus berupa daftar.';
+  }
+
+  @override
+  String get proxy_importNoImportableProxy =>
+      'Konfigurasi sing-box ini tidak berisi proksi yang dapat diimpor WebLibre.';
+
+  @override
+  String get proxy_importMissingType =>
+      'Outbound sing-box tidak memiliki \"type\".';
+
+  @override
+  String proxy_importUnsupportedType(String type) {
+    return 'Jenis outbound \"$type\" tidak memiliki formulir. Gunakan \"Outbound Kustom\" sebagai gantinya.';
+  }
+
+  @override
+  String proxy_importDetourThroughOtherOutbound(String tag) {
+    return 'Proksi ini terhubung melalui \"$tag\", outbound lain dalam konfigurasinya. WebLibre tidak dapat merangkai proksi, dan menghubungkannya secara langsung akan memperlihatkan alamat IP Anda kepada server itu.';
+  }
+
+  @override
+  String proxy_importUnresolvedDetour(String tag) {
+    return 'Proksi ini terhubung melalui \"$tag\", yang didefinisikan di bagian lain konfigurasinya. Impor seluruh konfigurasi agar WebLibre dapat memeriksa apa yang dilakukan \"$tag\".';
+  }
+
+  @override
+  String proxy_importEndpointWithoutPeers(String brand) {
+    return 'Endpoint $brand tidak memiliki peer.';
+  }
+
+  @override
+  String proxy_importEndpointWithSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Endpoint $brand memiliki $count peer. Satu profil terhubung ke satu peer; impor setiap peer sebagai profil tersendiri.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importPeerNotObject(String brand) {
+    return 'Sebuah peer $brand dalam konfigurasi ini bukan objek JSON.';
+  }
+
+  @override
+  String proxy_importWireguardMissingSections(String brand) {
+    return 'Konfigurasi $brand memerlukan bagian [Interface] dan [Peer].';
+  }
+
+  @override
+  String proxy_importWireguardSeveralInterfaces(String brand) {
+    return 'Konfigurasi $brand ini memiliki lebih dari satu bagian [Interface].';
+  }
+
+  @override
+  String proxy_importWireguardSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Konfigurasi $brand ini memiliki $count bagian [Peer]. Satu profil terhubung ke satu peer; pisahkan konfigurasi menjadi satu berkas per peer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importWireguardEmptySection(String brand) {
+    return 'Konfigurasi $brand ini memiliki bagian tanpa nama.';
+  }
+
+  @override
+  String proxy_importWireguardEntryOutsideSection(String brand) {
+    return 'Setiap baris konfigurasi $brand harus berada di dalam sebuah bagian.';
+  }
+
+  @override
+  String proxy_importWireguardInvalidLine(String brand, String line) {
+    return 'Baris konfigurasi $brand ini tidak valid: $line';
+  }
+
+  @override
+  String proxy_importWireguardInvalidEndpoint(String brand) {
+    return 'Endpoint $brand harus berformat host:port.';
+  }
+
+  @override
+  String proxy_importNoteExtraDnsServers(String used, String dropped) {
+    return 'Koneksi ini menguraikan nama melalui $used. Juga ada dalam konfigurasi, tetapi tidak digunakan: $dropped.';
+  }
+
+  @override
+  String proxy_importNoteSplitTunnel(String ranges) {
+    return 'Hanya alamat-alamat ini yang melewati terowongan ini: $ranges. Situs lain tidak dapat dijangkau melalui koneksi ini.';
   }
 
   @override
@@ -7093,6 +7271,13 @@ class AppLocalizationsId extends AppLocalizations {
   String get proxy_fieldPeerPublicKey => 'Kunci Publik Peer';
 
   @override
+  String get proxy_fieldAllowedIps => 'IP yang Diizinkan';
+
+  @override
+  String get proxy_fieldAllowedIpsHelper =>
+      'Rentang alamat yang dikirim melalui terowongan, satu per baris. Biarkan kosong untuk mengirim semuanya. Situs di luar rentang ini tidak dapat dijangkau melalui koneksi ini.';
+
+  @override
   String get proxy_fieldWireguardPrivateKey => 'Kunci Privat';
 
   @override
@@ -7174,6 +7359,11 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String proxy_fieldErrorInvalidCidr(String field, String value) {
     return '\"$field\" harus berisi alamat IP, opsional dengan /prefiks — \"$value\" tidak valid.';
+  }
+
+  @override
+  String proxy_fieldErrorWireguardKey(String field) {
+    return '\"$field\" bukan kunci WireGuard. Kunci harus terdiri dari 44 karakter dan diakhiri \"=\".';
   }
 
   @override
@@ -10906,15 +11096,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_containersByRecentUseTitle =>
-      'Recently Used Containers First';
+      'Kontainer Terakhir Dipakai Lebih Dulu';
 
   @override
   String get settings_containersByRecentUseKeywords =>
-      'container order, sort containers, recent containers, last used, most recently used, accordion';
+      'urutan kontainer, urutkan kontainer, kontainer terbaru, terakhir dipakai, baru dipakai, akordeon, container order, recently used, accordion';
 
   @override
   String get settings_containersByRecentUseSubtitle =>
-      'Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it';
+      'Hanya Akordeon: kontainer yang terakhir Anda pakai pindah ke depan. Kontainer yang disematkan tetap di depannya';
 
   @override
   String get settings_showTitlesTitle =>

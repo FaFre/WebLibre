@@ -183,6 +183,52 @@ internal class FlutterSingboxProxyPluginTest {
         assertEquals("fd00::2/128", addresses.getString(1))
     }
 
+    /**
+     * sing-box sets "don't fragment" on a WireGuard endpoint's socket unless
+     * told otherwise, and then every encrypted packet bigger than the path is
+     * dropped with `sendmsg: message too long` — at MTU 1280 too, on a mobile
+     * network or behind another VPN. WireGuard itself lets them fragment.
+     */
+    @Test
+    fun buildConfig_letsWireGuardPacketsFragment() {
+        val endpoint = buildWireGuardEndpoint(
+            """{"type": "wireguard", "server": "example.test", "server_port": 51820,
+               "local_address": ["10.7.0.2/32"], "peer_public_key": "peer", "mtu": 1280}"""
+        )
+
+        assertEquals(true, endpoint.getBoolean("udp_fragment"))
+    }
+
+    @Test
+    fun buildConfig_keepsAProfilesOwnFragmentationChoice() {
+        val endpoint = buildWireGuardEndpoint(
+            """{"type": "wireguard", "server": "example.test", "server_port": 51820,
+               "local_address": ["10.7.0.2/32"], "peer_public_key": "peer",
+               "udp_fragment": false}"""
+        )
+
+        assertEquals(false, endpoint.getBoolean("udp_fragment"))
+    }
+
+    private fun buildWireGuardEndpoint(configJson: String): JSONObject {
+        val profile = SingboxProxyProfile(
+            id = "wg",
+            name = "WireGuard",
+            type = SingboxProxyProfileType.WIREGUARD,
+            configJson = configJson,
+            secretJson = """{"private_key": "secret"}"""
+        )
+        val result = SingboxConfigBuilder().build(
+            listOf(profile),
+            SingboxProxyRuntimeOptions(
+                preferredBasePort = 12500,
+                blockUnmatchedTraffic = true,
+                logLevel = SingboxProxyLogLevel.WARN
+            )
+        )
+        return JSONObject(result.configJson).getJSONArray("endpoints").getJSONObject(0)
+    }
+
     @Test
     fun buildConfig_stripsEndpointBracketsFromWireGuardAddresses() {
         val builder = SingboxConfigBuilder()

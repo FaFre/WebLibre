@@ -423,6 +423,154 @@ void main() {
   });
 
   test(
+    'waitUntilProxyInstalled resolves once the extension holds the endpoint',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final runtime = _FakeSingboxRuntimeRepository(null);
+      final harness = await _harness(
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+        runtimeRepository: runtime,
+      );
+      await harness.awaitSnapshot();
+      final replication = harness.container.read(
+        proxySettingsReplicationProvider.notifier,
+      );
+
+      bool? installed;
+      unawaited(
+        replication
+            .waitUntilProxyInstalled(
+              profileId.encode(),
+              timeout: const Duration(seconds: 5),
+            )
+            .then((value) => installed = value),
+      );
+      await pumpEventQueue();
+
+      // The block that failed the page is what the extension still holds.
+      expect(installed, isNull);
+
+      runtime.emit(
+        SingboxProxyRuntimeState(
+          status: SingboxProxyRuntimeStatus.running,
+          endpoints: [
+            SingboxProxyRuntimeEndpoint(
+              profileId: profileId.encode(),
+              host: '127.0.0.1',
+              port: 12080,
+              username: 'user',
+              password: 'pass',
+            ),
+          ],
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(installed, isTrue);
+      expect(
+        await replication.waitUntilProxyInstalled(
+          profileId.encode(),
+          timeout: Duration.zero,
+        ),
+        isTrue,
+        reason: 'an already installed snapshot answers without waiting',
+      );
+    },
+  );
+
+  test(
+    'waitUntilProxyInstalled is not satisfied by the endpoint a start replaced',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final runtime = _FakeSingboxRuntimeRepository(null);
+      final harness = await _harness(
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+        runtimeRepository: runtime,
+      );
+      await harness.awaitSnapshot();
+      final replication = harness.container.read(
+        proxySettingsReplicationProvider.notifier,
+      );
+
+      SingboxProxyRuntimeState running(int port, String password) =>
+          SingboxProxyRuntimeState(
+            status: SingboxProxyRuntimeStatus.running,
+            endpoints: [
+              SingboxProxyRuntimeEndpoint(
+                profileId: profileId.encode(),
+                host: '127.0.0.1',
+                port: port,
+                username: 'user',
+                password: password,
+              ),
+            ],
+          );
+
+      runtime.emit(running(12080, 'old'));
+      await pumpEventQueue();
+
+      // The proxy came back with new credentials; the push carrying them has
+      // not been acknowledged, so the extension still lists the old ones.
+      final hold = harness.containerProxy.hold = Completer<void>();
+      runtime.emit(running(12081, 'new'));
+      await pumpEventQueue();
+
+      bool? installed;
+      unawaited(
+        replication
+            .waitUntilProxyInstalled(
+              profileId.encode(),
+              timeout: const Duration(seconds: 5),
+            )
+            .then((value) => installed = value),
+      );
+      await pumpEventQueue();
+      expect(installed, isNull);
+
+      hold.complete();
+      await pumpEventQueue();
+      expect(installed, isTrue);
+    },
+  );
+
+  test(
+    'waitUntilProxyInstalled gives up when the routing never arrives',
+    () async {
+      final harness = await _harness(
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: const SingboxProxyConnectionId('profile-1'),
+          ),
+        ],
+      );
+      await harness.awaitSnapshot();
+
+      final installed = await harness.container
+          .read(proxySettingsReplicationProvider.notifier)
+          .waitUntilProxyInstalled(
+            const SingboxProxyConnectionId('profile-1').encode(),
+            timeout: const Duration(milliseconds: 50),
+          );
+
+      expect(installed, isFalse);
+    },
+  );
+
+  test(
     'proxied routing arms the fail-closed prefs before installing',
     () async {
       final harness = await _harness(
@@ -773,8 +921,13 @@ class _FakeContainerProxyRepository extends ContainerProxyRepository {
   final applied = <ContainerRoutingSnapshot>[];
   List<String>? events;
 
+  /// Holds every push open until completed, as an extension that has not
+  /// acknowledged yet.
+  Completer<void>? hold;
+
   @override
   Future<void> applySnapshot(ContainerRoutingSnapshot snapshot) async {
+    await hold?.future;
     applied.add(snapshot);
     events?.add('snapshot');
   }

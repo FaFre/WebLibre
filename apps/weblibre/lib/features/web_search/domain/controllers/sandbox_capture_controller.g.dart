@@ -515,7 +515,7 @@ final class SandboxCaptureControllerProvider
 }
 
 String _$sandboxCaptureControllerHash() =>
-    r'820179f1dd8669ed59a073393d3decff90099d6c';
+    r'baf34898171bef4a82041434513ec6c53e93720b';
 
 /// Orchestrates sandbox capture browsing:
 ///

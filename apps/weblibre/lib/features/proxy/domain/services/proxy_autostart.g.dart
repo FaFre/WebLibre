@@ -108,7 +108,7 @@ final class ProxyAutostartServiceProvider
 }
 
 String _$proxyAutostartServiceHash() =>
-    r'ded87b4c4fd6fc7db99a3ad33eed1c734cb4cef6';
+    r'8bcaa704b88a65a60c095b9f3078b0cb281891ba';
 
 /// Starts the proxy connections the user flagged for autostart as part of app
 /// startup, so tabs bound to them are usable without the "start this proxy?"

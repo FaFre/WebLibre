@@ -26,7 +26,10 @@ import 'package:weblibre/features/proxy/data/models/proxy_share.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
+import 'package:weblibre/features/proxy/domain/services/singbox_start_retry.dart';
+import 'package:weblibre/features/proxy/presentation/utils/proxy_failure_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/utils/singbox_proxy_profile_type_l10n.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/menu_row.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_subtitle.dart';
@@ -43,6 +46,10 @@ enum ProfileAction { edit, testLatency, share, delete }
 class ProfileTile extends ConsumerWidget {
   final ProxyProfile profile;
   final bool isRunning;
+
+  /// On its way up: started a moment ago, or restarted because another
+  /// connection started or stopped. See [RunSwitch.isStarting].
+  final bool isStarting;
   final bool isDeleting;
   final bool runtimeBusy;
   final void Function(String profileId, bool deleting) onDeletingChanged;
@@ -51,6 +58,7 @@ class ProfileTile extends ConsumerWidget {
     super.key,
     required this.profile,
     required this.isRunning,
+    this.isStarting = false,
     required this.isDeleting,
     required this.runtimeBusy,
     required this.onDeletingChanged,
@@ -65,6 +73,9 @@ class ProfileTile extends ConsumerWidget {
         (map) => map[SingboxProxyConnectionId(profile.id)],
       ),
     );
+    final condition = ref.watch(
+      proxyConnectionConditionProvider(SingboxProxyConnectionId(profile.id)),
+    );
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -76,17 +87,20 @@ class ProfileTile extends ConsumerWidget {
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
             )
-          : ProtocolBadge(type: profile.type, active: isRunning),
+          : ProtocolBadge(type: profile.type, active: isRunning || isStarting),
       title: Text(
         profile.name,
         style: TextStyle(
-          fontWeight: isRunning ? FontWeight.w600 : FontWeight.w500,
+          fontWeight: isRunning || isStarting
+              ? FontWeight.w600
+              : FontWeight.w500,
         ),
       ),
       subtitle: ProfileSubtitle(
         typeLabel: profile.type.label(context),
         latency: latencyResult,
         autostart: profile.autostart,
+        condition: condition,
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -130,6 +144,7 @@ class ProfileTile extends ConsumerWidget {
           ),
           RunSwitch(
             isRunning: isRunning,
+            isStarting: isStarting,
             disabled: isBusy,
             onTap: () => _toggleRunState(context, ref),
           ),
@@ -161,9 +176,13 @@ class ProfileTile extends ConsumerWidget {
         final l10n = AppLocalizations.of(context);
         showErrorMessage(
           context,
-          isRunning
-              ? l10n.proxy_stopProxyFailed(error.toString())
-              : l10n.proxy_startProxyFailed(error.toString()),
+          describeProxyFailure(
+            l10n,
+            error,
+            framed: isRunning
+                ? l10n.proxy_stopProxyFailed
+                : l10n.proxy_startProxyFailed,
+          ),
         );
       }
     }
@@ -246,6 +265,7 @@ class ProfileTile extends ConsumerWidget {
 
     onDeletingChanged(profile.id, true);
     try {
+      ref.read(singboxStartRetriesProvider.notifier).cancel([profile.id]);
       await ref
           .read(singboxProxyRuntimeRepositoryProvider.notifier)
           .deleteProfile(profile.id);
@@ -259,11 +279,14 @@ class ProfileTile extends ConsumerWidget {
         stackTrace: stackTrace,
       );
       if (context.mounted) {
+        final l10n = AppLocalizations.of(context);
         showErrorMessage(
           context,
-          AppLocalizations.of(
-            context,
-          ).proxy_deleteProfileFailed(error.toString()),
+          describeProxyFailure(
+            l10n,
+            error,
+            framed: l10n.proxy_deleteProfileFailed,
+          ),
         );
       }
     } finally {

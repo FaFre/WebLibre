@@ -215,6 +215,16 @@ abstract class SingboxProxyApi {
   @async
   String? validateProfile(SingboxProxyProfile profile);
 
+  /// Why [profile] cannot start right now, as far as can be told without
+  /// starting it, or null when nothing speaks against it.
+  ///
+  /// Resolves a WireGuard profile's peer hostnames through the running
+  /// runtime's bootstrap resolver — the lookup sing-box makes once, while it
+  /// starts, and the usual reason such a start fails. Null for every other
+  /// profile, and while nothing runs.
+  @async
+  String? probeProfile(SingboxProxyProfile profile);
+
   @async
   SingboxProxyConfigResult buildConfig(
     List<SingboxProxyProfile> profiles,

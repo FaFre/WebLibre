@@ -44,8 +44,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/utils/image_helper.dart';
-import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
+import 'package:weblibre/features/proxy/domain/providers/effective_tab_routing.dart';
+import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 
 part 'tab_state.g.dart';
 
@@ -615,48 +615,30 @@ Future<TabState> tabStateWithFallback(Ref ref, String tabId) async {
   return await ref.read(tabStatesProvider.notifier).patchedState(tabId);
 }
 
+/// Whether [tabId]'s traffic goes through a proxy — the URL bar's indicator.
+///
+/// Read off the routing the extension was handed, through the context the
+/// engine reports for the tab: exactly what decides the page's route. It was
+/// re-derived from the routing settings and the tab's container row, and said
+/// the wrong thing whenever that row did — for as long as the container lookup
+/// read null for every tab, a proxied container's tab showed as not tunneled
+/// and, with every tab routed through a proxy, a container set to bypass it
+/// showed as tunneled while it connected directly.
+///
+/// A route through a proxy that is not running still counts: the extension
+/// blocks it rather than connecting directly. Routing that is not installed yet
+/// or a context not reported yet does not: claiming protection nothing has
+/// confirmed is the one answer this must not give.
 @Riverpod()
 Future<bool> isTabTunneled(Ref ref, String? tabId) async {
-  final tabState = ref.watch(tabStateProvider(tabId));
-  final proxyRoutingSettings = ref.watch(
-    proxyRoutingSettingsWithDefaultsProvider,
-  );
+  final routing = ref.watch(effectiveTabRoutingProvider(tabId));
 
-  if (tabState != null) {
-    // Isolated tabs follow the same proxy rules as regular tabs
-    // (container-based routing via proxy aliasing)
-    if (tabState.tabMode is PrivateTabMode) {
-      return proxyRoutingSettings.privateTabsProxyConnectionId != null;
-    } else {
-      switch (proxyRoutingSettings.regularTabsMode) {
-        case ProxyRegularTabRoutingMode.container:
-          final containerData = await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .getTabContainerData(tabState.id);
-
-          if (!ref.mounted) return false;
-
-          return containerData?.metadata.proxyConnectionId != null;
-        case ProxyRegularTabRoutingMode.all:
-          final containerData = await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .getTabContainerData(tabState.id);
-
-          if (!ref.mounted) return false;
-
-          if (containerData?.metadata.proxyConnectionId != null) {
-            return true;
-          }
-          if (containerData?.metadata.bypassGlobalProxy == true) {
-            return false;
-          }
-
-          return proxyRoutingSettings.regularTabsProxyConnectionId != null;
-      }
-    }
-  }
-
-  return false;
+  return switch (routing.status) {
+    TabRoutingStatus.active || TabRoutingStatus.blocked => true,
+    TabRoutingStatus.direct ||
+    TabRoutingStatus.pending ||
+    TabRoutingStatus.unknown => false,
+  };
 }
 
 @Riverpod()

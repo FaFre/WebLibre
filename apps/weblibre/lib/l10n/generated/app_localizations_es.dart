@@ -6452,17 +6452,51 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String proxy_latencyMilliseconds(int ms) {
-    return '$ms ms';
+    return 'HTTP $ms ms';
   }
 
   @override
-  String proxy_latencyHttpStatusTooltip(int statusCode, int ms) {
-    return 'HTTP $statusCode en $ms ms';
+  String proxy_latencyHttpStatusTooltip(String host, int statusCode, int ms) {
+    return 'Una solicitud web a $host a través de esta conexión tardó $ms ms (HTTP $statusCode). Incluye el trayecto del servidor a ese sitio, por lo que tarda más que la latencia del propio túnel.';
   }
+
+  @override
+  String get proxy_conditionNotResponding => 'No responde';
+
+  @override
+  String get proxy_conditionStartRetrying =>
+      'No se pudo iniciar · reintentando';
+
+  @override
+  String get proxy_conditionStartFailed => 'No se pudo iniciar';
+
+  @override
+  String proxy_sharedPrivateKeyWarning(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$names usan la misma clave privada.',
+      one: '$names usa la misma clave privada.',
+    );
+    return 'Guardado. $_temp0 Un servidor WireGuard trata los perfiles que comparten clave como un solo cliente, así que si se ejecutan a la vez se desconectan entre sí.';
+  }
+
+  @override
+  String get proxy_connectionStarting => 'Iniciando…';
 
   @override
   String proxy_startProxyFailed(String error) {
     return 'No se pudo iniciar el proxy: $error';
+  }
+
+  @override
+  String proxy_profileCouldNotStart(String name, String reason) {
+    return 'No se pudo iniciar $name: $reason';
+  }
+
+  @override
+  String proxy_profileRejected(String name, String reason) {
+    return 'No se puede usar $name: $reason';
   }
 
   @override
@@ -6685,11 +6719,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Archivo .conf con [Interface]/[Peer]';
 
   @override
-  String get proxy_importFileSingboxJsonTitle => 'JSON de outbound de sing-box';
+  String get proxy_importFileSingboxJsonTitle => 'JSON de sing-box';
 
   @override
   String get proxy_importFileSingboxJsonSubtitle =>
-      'Shadowsocks, Trojan, VMess, VLESS, Hysteria, …';
+      'Un outbound, un endpoint o una configuración completa';
 
   @override
   String proxy_importedProfileNamed(String name) {
@@ -6738,6 +6772,153 @@ class AppLocalizationsEs extends AppLocalizations {
       one: 'Se importó 1 perfil',
     );
     return '$_temp0';
+  }
+
+  @override
+  String proxy_importedProfilesSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Se importaron $count perfiles.',
+      one: 'Se importó 1 perfil.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: 'No se pudieron usar $skipped proxies de la configuración.',
+      one: 'No se pudo usar 1 proxy de la configuración.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String proxy_importNoUsableProfiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'No se pudo usar ninguno de los $count proxies de esta configuración.',
+      one: 'No se pudo usar el proxy de esta configuración.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importFileUnreadable(String error) {
+    return 'No se pudo leer el archivo: $error';
+  }
+
+  @override
+  String proxy_importInvalidJson(String error) {
+    return 'No es un JSON válido: $error';
+  }
+
+  @override
+  String get proxy_importNotJsonObject =>
+      'Se esperaba un objeto JSON de sing-box.';
+
+  @override
+  String get proxy_importNoOutbounds =>
+      'Se esperaba un outbound o endpoint de sing-box, o una configuración con «outbounds» o «endpoints».';
+
+  @override
+  String proxy_importNotAList(String key) {
+    return '«$key» debe ser una lista en una configuración de sing-box.';
+  }
+
+  @override
+  String get proxy_importNoImportableProxy =>
+      'Esta configuración de sing-box no tiene ningún proxy que WebLibre pueda importar.';
+
+  @override
+  String get proxy_importMissingType =>
+      'El outbound de sing-box no tiene «type».';
+
+  @override
+  String proxy_importUnsupportedType(String type) {
+    return 'El tipo de outbound «$type» no tiene formulario. Usa «Outbound personalizado» en su lugar.';
+  }
+
+  @override
+  String proxy_importDetourThroughOtherOutbound(String tag) {
+    return 'Este proxy se conecta a través de «$tag», otro outbound de su configuración. WebLibre no puede encadenar proxies, y conectarse a él directamente le mostraría tu dirección IP.';
+  }
+
+  @override
+  String proxy_importUnresolvedDetour(String tag) {
+    return 'Este proxy se conecta a través de «$tag», que está definido en otra parte de su configuración. Importa la configuración completa para que WebLibre pueda comprobar qué hace «$tag».';
+  }
+
+  @override
+  String proxy_importEndpointWithoutPeers(String brand) {
+    return 'El endpoint de $brand no tiene pares.';
+  }
+
+  @override
+  String proxy_importEndpointWithSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'El endpoint de $brand tiene $count pares. Un perfil se conecta a un solo par; importa cada par como un perfil propio.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importPeerNotObject(String brand) {
+    return 'Un par de $brand de esta configuración no es un objeto JSON.';
+  }
+
+  @override
+  String proxy_importWireguardMissingSections(String brand) {
+    return 'Una configuración de $brand necesita una sección [Interface] y otra [Peer].';
+  }
+
+  @override
+  String proxy_importWireguardSeveralInterfaces(String brand) {
+    return 'Esta configuración de $brand tiene más de una sección [Interface].';
+  }
+
+  @override
+  String proxy_importWireguardSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Esta configuración de $brand tiene $count secciones [Peer]. Un perfil se conecta a un solo par; divide la configuración en un archivo por par.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importWireguardEmptySection(String brand) {
+    return 'Esta configuración de $brand tiene una sección sin nombre.';
+  }
+
+  @override
+  String proxy_importWireguardEntryOutsideSection(String brand) {
+    return 'Cada línea de una configuración de $brand debe estar dentro de una sección.';
+  }
+
+  @override
+  String proxy_importWireguardInvalidLine(String brand, String line) {
+    return 'Esta línea de la configuración de $brand no es válida: $line';
+  }
+
+  @override
+  String proxy_importWireguardInvalidEndpoint(String brand) {
+    return 'El endpoint de $brand debe tener la forma host:port.';
+  }
+
+  @override
+  String proxy_importNoteExtraDnsServers(String used, String dropped) {
+    return 'Esta conexión resuelve nombres mediante $used. También están en la configuración, pero no se usan: $dropped.';
+  }
+
+  @override
+  String proxy_importNoteSplitTunnel(String ranges) {
+    return 'Solo estas direcciones pasan por este túnel: $ranges. No se puede acceder a otros sitios a través de esta conexión.';
   }
 
   @override
@@ -7185,6 +7366,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get proxy_fieldPeerPublicKey => 'Clave pública del par';
 
   @override
+  String get proxy_fieldAllowedIps => 'IP permitidas';
+
+  @override
+  String get proxy_fieldAllowedIpsHelper =>
+      'Rangos de direcciones que se envían por el túnel, uno por línea. Déjalo vacío para enviarlo todo. No se puede acceder a los sitios fuera de estos rangos a través de esta conexión.';
+
+  @override
   String get proxy_fieldWireguardPrivateKey => 'Clave privada';
 
   @override
@@ -7266,6 +7454,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String proxy_fieldErrorInvalidCidr(String field, String value) {
     return 'El campo «$field» debe contener direcciones IP, opcionalmente con un prefijo tras «/»; «$value» no es una dirección válida.';
+  }
+
+  @override
+  String proxy_fieldErrorWireguardKey(String field) {
+    return 'El campo «$field» no contiene una clave de WireGuard. Debe tener 44 caracteres y terminar en «=».';
   }
 
   @override
@@ -11042,15 +11235,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_containersByRecentUseTitle =>
-      'Recently Used Containers First';
+      'Primero los contenedores usados recientemente';
 
   @override
   String get settings_containersByRecentUseKeywords =>
-      'container order, sort containers, recent containers, last used, most recently used, accordion';
+      'orden de contenedores, ordenar contenedores, contenedores recientes, último uso, usados recientemente, acordeón, container order, recently used';
 
   @override
   String get settings_containersByRecentUseSubtitle =>
-      'Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it';
+      'Solo en Acordeón: el contenedor que usaste por última vez pasa al principio. Los contenedores fijados siguen por delante';
 
   @override
   String get settings_showTitlesTitle =>

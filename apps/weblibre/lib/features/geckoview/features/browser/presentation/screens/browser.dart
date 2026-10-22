@@ -78,6 +78,7 @@ import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/browse
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/small_web/presentation/controllers/small_web_mode_controller.dart';
@@ -373,6 +374,43 @@ ProxyConnectionId? _proxyConnectionIdForLoadError(
   // load failed for some other reason.
   return relation.isEmpty ? null : ProxyConnectionId.decode(relation.first);
 }
+
+/// How long a reload after a proxy start waits for the extension to hold the
+/// proxy's endpoint. Past it the reload goes ahead anyway: a page left on the
+/// error is no better than one that fails again.
+const _proxyRoutingInstallTimeout = Duration(seconds: 10);
+
+/// Pause before retrying a load that failed although its proxy was up, so a
+/// runtime reload or a tunnel still completing its handshake has passed.
+const _proxyRetryDelay = Duration(seconds: 2);
+
+/// A tab whose proxy was up is retried at most once within this window.
+const _proxyRetryWindow = Duration(seconds: 30);
+
+/// Error pages for a request the proxy itself refused or could not be reached
+/// for. Every other type the engine reports here is a connection failure that
+/// names no proxy — "Unable to connect", a timeout, a reset, an unknown host —
+/// and through a proxy that is up, those are as likely the site's as the
+/// tunnel's.
+const _proxyErrorTypes = {
+  'ERROR_PROXY_CONNECTION_REFUSED',
+  'ERROR_UNKNOWN_PROXY_HOST',
+};
+
+/// The error pages that count against the health of a proxy that is up: the
+/// ones a tunnel that carries nothing produces. sing-box answers a dial it
+/// cannot complete with a SOCKS failure, which Gecko shows as the proxy
+/// refusing, unless Gecko's own timeout runs out first.
+///
+/// An unknown host cannot come from the tunnel — the proxy resolves names,
+/// and its failure to is a refusal too — and a refused, reset or interrupted
+/// connection is what a site that is down, or a reload of the runtime closing
+/// connections, produces just as well.
+const _proxyHealthErrorTypes = {
+  'ERROR_PROXY_CONNECTION_REFUSED',
+  'ERROR_UNKNOWN_PROXY_HOST',
+  'ERROR_NET_TIMEOUT',
+};
 
 typedef _PendingProxyLoadError = ({
   String? contextId,
@@ -1178,13 +1216,130 @@ class BrowserScreen extends HookConsumerWidget {
     final viewportService = ref.watch(viewportServiceProvider);
     final activeProxyPromptKeys = useRef(<String>{});
     final pendingProxyLoadErrors = useRef(<String, _PendingProxyLoadError>{});
+    final pendingProxyLoadErrorWatches = useRef(
+      <String, ProviderSubscription<bool>>{},
+    );
+    useEffect(
+      () => () {
+        for (final watch in pendingProxyLoadErrorWatches.value.values) {
+          watch.close();
+        }
+        pendingProxyLoadErrorWatches.value.clear();
+      },
+      const [],
+    );
+
+    _PendingProxyLoadError? takeQueuedProxyLoadError(String tabId) {
+      pendingProxyLoadErrorWatches.value.remove(tabId)?.close();
+      return pendingProxyLoadErrors.value.remove(tabId);
+    }
+
+    /// Defers [error] until [tabId] is shown — unless the tab loads again
+    /// first. A queued error skips [concernsProxy] when it is handled, so it
+    /// must not outlive the load it is about: a tab the engine or the page
+    /// has since loaded again, in the background, is no longer sitting on
+    /// that failure, and reloading it would only throw the new page away.
+    void queueProxyLoadError(String tabId, _PendingProxyLoadError error) {
+      pendingProxyLoadErrors.value[tabId] = error;
+      pendingProxyLoadErrorWatches.value[tabId] ??= ref.listenManual(
+        tabStateProvider(tabId).select((state) => state?.isLoading ?? false),
+        (previous, isLoading) {
+          if (isLoading) takeQueuedProxyLoadError(tabId);
+        },
+      );
+    }
+
+    final proxyRetriedAt = useRef(<String, DateTime>{});
     final selectedTabIdForProxyPrompt = ref.watch(selectedTabProvider);
 
+    /// The encoded id of the proxy that carried the tab's traffic, if one did.
+    ///
+    /// Only while the extension was routing through that proxy: a load that
+    /// failed because the proxy was not up, or before routing was installed,
+    /// says nothing about whether its tunnel works.
+    String? carryingProxyId({
+      required String tabId,
+      required String? contextId,
+    }) {
+      final proxyConnectionId = _proxyConnectionIdForLoadError(
+        ref,
+        tabId: tabId,
+        contextId: contextId,
+      );
+      if (proxyConnectionId == null) return null;
+
+      final encodedProxyId = proxyConnectionId.encode();
+      final carriedByProxy = ref
+          .read(proxySettingsReplicationProvider.notifier)
+          .installedSatisfies(
+            (snapshot) => snapshot.proxyEndpoint(encodedProxyId) != null,
+          );
+      return carriedByProxy ? encodedProxyId : null;
+    }
+
+    /// Counts a failed load against the proxy that carried it, if one did.
+    void recordProxyTrafficFailure({
+      required String tabId,
+      required String? contextId,
+      required String? url,
+      required String errorType,
+    }) {
+      if (!_proxyHealthErrorTypes.contains(errorType)) return;
+
+      final encodedProxyId = carryingProxyId(
+        tabId: tabId,
+        contextId: contextId,
+      );
+      if (encodedProxyId == null) return;
+
+      ref
+          .read(proxyTrafficHealthProvider.notifier)
+          .recordFailedLoad(
+            encodedProxyId,
+            host: url == null ? null : Uri.tryParse(url)?.host,
+          );
+    }
+
+    /// Whether a failed load is this screen's business at all.
+    ///
+    /// Native reports every connection failure, for every tab, because only
+    /// the app knows how a tab is routed. One that names no proxy matters only
+    /// when the tab's proxy is not up — it went down, or the runtime is
+    /// restarting it — which is something starting it can fix. In a tab that
+    /// connects directly, or through a proxy that is up, it is as likely the
+    /// site or a mistyped address, and reloading would only repeat it; through
+    /// a proxy it already counts against the proxy's health.
+    bool concernsProxy({
+      required String tabId,
+      required String? contextId,
+      required String errorType,
+    }) {
+      if (_proxyErrorTypes.contains(errorType)) return true;
+
+      final routedThrough = _proxyConnectionIdForLoadError(
+        ref,
+        tabId: tabId,
+        contextId: contextId,
+      );
+      return routedThrough != null &&
+          ref
+                  .read(containerRoutingSnapshotProvider)
+                  ?.proxyEndpoint(routedThrough.encode()) ==
+              null;
+    }
+
+    /// [concernsProxyDecided] is set for an error from the queue: each one
+    /// passed [concernsProxy] when it was queued, in the routing its load
+    /// failed in. Asked again once the tab is shown, a proxy that has come
+    /// back since says the error is not its business, and the tab stays on
+    /// the error page. The queue drops an error once its tab loads again
+    /// ([queueProxyLoadError]), so the answer is still about the page shown.
     Future<void> handleProxyLoadError({
       required String tabId,
       required String? contextId,
       required String? url,
       required String errorType,
+      bool concernsProxyDecided = false,
     }) async {
       final promptKey = '$tabId:${url ?? errorType}';
       if (!activeProxyPromptKeys.value.add(promptKey)) return;
@@ -1204,11 +1359,24 @@ class BrowserScreen extends HookConsumerWidget {
       );
 
       try {
+        // Every wait below can run for seconds, and the user may navigate
+        // in the meantime; checked here so no path reloads over that.
         Future<void> reloadTab() async {
-          if (!context.mounted || ref.read(selectedTabProvider) != tabId) {
+          if (!context.mounted ||
+              tabReloadedMeanwhile ||
+              ref.read(selectedTabProvider) != tabId) {
             return;
           }
           await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
+        }
+
+        if (!concernsProxyDecided &&
+            !concernsProxy(
+              tabId: tabId,
+              contextId: contextId,
+              errorType: errorType,
+            )) {
+          return;
         }
 
         // The extension blocks *every* request until routing is installed, so a
@@ -1242,7 +1410,7 @@ class BrowserScreen extends HookConsumerWidget {
         if (proxyConnectionId == null) {
           // Nothing to start — this context connects directly, so the block was
           // the install window itself and it is over.
-          if (routingWasPending && !tabReloadedMeanwhile) await reloadTab();
+          if (routingWasPending) await reloadTab();
           return;
         }
 
@@ -1252,23 +1420,70 @@ class BrowserScreen extends HookConsumerWidget {
         // route an error for an unselected tab takes in the first place —
         // instead of prompting over whatever they are looking at now.
         if (ref.read(selectedTabProvider) != tabId) {
-          pendingProxyLoadErrors.value[tabId] = (
-            contextId: contextId,
-            errorType: errorType,
-            url: url,
-          );
+          if (!tabReloadedMeanwhile) {
+            queueProxyLoadError(tabId, (
+              contextId: contextId,
+              errorType: errorType,
+              url: url,
+            ));
+          }
           return;
         }
+
+        final encodedProxyId = proxyConnectionId.encode();
+        // An endpoint in the routing means the proxy was up when this load
+        // failed, so the failure is not one starting it can fix: the tunnel
+        // behind the endpoint is not carrying traffic, or the load fell into a
+        // reload of the runtime. Read before the start below can change it.
+        final proxyWasUp =
+            ref
+                .read(containerRoutingSnapshotProvider)
+                ?.proxyEndpoint(encodedProxyId) !=
+            null;
 
         final isProxyStarted = await ensureProxyStartedForConnection(
           context,
           ref,
           proxyConnectionId,
         );
+        if (!isProxyStarted || !context.mounted) return;
 
-        if (isProxyStarted) {
-          await reloadTab();
+        if (proxyWasUp) {
+          // One retry, not one per failure. Each reload of a page whose proxy
+          // cannot carry it fails again and lands back here, and reloading on
+          // every one of those kept the tab reloading for as long as the
+          // tunnel stayed down.
+          final now = DateTime.now();
+          final lastRetry = proxyRetriedAt.value[tabId];
+          if (lastRetry != null &&
+              now.difference(lastRetry) < _proxyRetryWindow) {
+            return;
+          }
+          proxyRetriedAt.value[tabId] = now;
+
+          await Future<void>.delayed(_proxyRetryDelay);
+          if (!context.mounted || tabReloadedMeanwhile) return;
         }
+
+        // A start that returned has an endpoint in the routing the app
+        // computes, not yet in the routing the extension enforces. Reloading
+        // before that lands sends the page into the snapshot that just
+        // blocked it, and it fails again (issue #672).
+        final installed = await ref
+            .read(proxySettingsReplicationProvider.notifier)
+            .waitUntilProxyInstalled(
+              encodedProxyId,
+              timeout: _proxyRoutingInstallTimeout,
+            );
+        if (!context.mounted) return;
+        if (!installed) {
+          logger.w(
+            'Routing for $encodedProxyId was not installed in time; '
+            'reloading anyway',
+          );
+        }
+
+        await reloadTab();
       } catch (error, stackTrace) {
         logger.e(
           'Failed to handle proxy load error',
@@ -1285,7 +1500,7 @@ class BrowserScreen extends HookConsumerWidget {
       final tabId = selectedTabIdForProxyPrompt;
       if (tabId == null) return null;
 
-      final pending = pendingProxyLoadErrors.value.remove(tabId);
+      final pending = takeQueuedProxyLoadError(tabId);
       if (pending == null) return null;
 
       unawaited(
@@ -1294,6 +1509,7 @@ class BrowserScreen extends HookConsumerWidget {
           contextId: pending.contextId,
           url: pending.url,
           errorType: pending.errorType,
+          concernsProxyDecided: true,
         ),
       );
       return null;
@@ -1303,15 +1519,44 @@ class BrowserScreen extends HookConsumerWidget {
       eventService.proxyLoadErrorEvents,
       onData: (event) async {
         final selectedTabId = ref.read(selectedTabProvider);
-        final tabId = event.tabId ?? selectedTabId;
+        // A session with no tab in the store is engine traffic of its own.
+        // Only an error that names the proxy is still put down to the selected
+        // tab; any other — a timeout, a reset — is as likely that session's
+        // site, and says nothing about the selected tab or its proxy.
+        final tabId =
+            event.tabId ??
+            (_proxyErrorTypes.contains(event.errorType) ? selectedTabId : null);
         if (tabId == null) return;
 
+        // On arrival rather than when handled: an error for a tab in the
+        // background waits until the tab is shown, but it is evidence about the
+        // proxy now. Only for the tab it came from: the selected tab's proxy
+        // did not necessarily carry a tabless session's load.
+        if (event.tabId != null) {
+          recordProxyTrafficFailure(
+            tabId: tabId,
+            contextId: event.contextId,
+            url: event.url,
+            errorType: event.errorType,
+          );
+        }
+
         if (tabId != selectedTabId) {
-          pendingProxyLoadErrors.value[tabId] = (
+          // Decided now, while the routing is the one the load failed in: by
+          // the time the tab is shown it may say something else, and a direct
+          // tab's mistyped address would sit in the queue until then.
+          if (!concernsProxy(
+            tabId: tabId,
+            contextId: event.contextId,
+            errorType: event.errorType,
+          )) {
+            return;
+          }
+          queueProxyLoadError(tabId, (
             contextId: event.contextId,
             errorType: event.errorType,
             url: event.url,
-          );
+          ));
           return;
         }
 
@@ -1321,6 +1566,27 @@ class BrowserScreen extends HookConsumerWidget {
           url: event.url,
           errorType: event.errorType,
         );
+      },
+    );
+
+    // A page that turned secure finished a TLS handshake with its site, so
+    // traffic got through the proxy carrying it — the positive evidence that
+    // keeps a mistyped address and a site that is down from adding up to a
+    // proxy that is not responding.
+    useOnStreamChange(
+      eventService.securityInfoEvents,
+      onData: (event) {
+        if (!event.securityInfo.secure) return;
+
+        final encodedProxyId = carryingProxyId(
+          tabId: event.tabId,
+          contextId: null,
+        );
+        if (encodedProxyId == null) return;
+
+        ref
+            .read(proxyTrafficHealthProvider.notifier)
+            .recordSuccessfulLoad(encodedProxyId);
       },
     );
 

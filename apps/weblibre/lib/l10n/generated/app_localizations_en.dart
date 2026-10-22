@@ -6299,17 +6299,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String proxy_latencyMilliseconds(int ms) {
-    return '$ms ms';
+    return 'HTTP $ms ms';
   }
 
   @override
-  String proxy_latencyHttpStatusTooltip(int statusCode, int ms) {
-    return 'HTTP $statusCode in $ms ms';
+  String proxy_latencyHttpStatusTooltip(String host, int statusCode, int ms) {
+    return 'A web request through this connection to $host took $ms ms (HTTP $statusCode). It includes the way from the server to that site, so it is longer than the tunnel\'s own latency.';
   }
+
+  @override
+  String get proxy_conditionNotResponding => 'Not responding';
+
+  @override
+  String get proxy_conditionStartRetrying => 'Couldn\'t start · retrying';
+
+  @override
+  String get proxy_conditionStartFailed => 'Couldn\'t start';
+
+  @override
+  String proxy_sharedPrivateKeyWarning(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$names use the same private key.',
+      one: '$names uses the same private key.',
+    );
+    return 'Saved. $_temp0 A WireGuard server treats profiles sharing a key as one client, so running them at the same time makes them cut each other off.';
+  }
+
+  @override
+  String get proxy_connectionStarting => 'Starting…';
 
   @override
   String proxy_startProxyFailed(String error) {
     return 'Failed to start proxy: $error';
+  }
+
+  @override
+  String proxy_profileCouldNotStart(String name, String reason) {
+    return '$name could not start: $reason';
+  }
+
+  @override
+  String proxy_profileRejected(String name, String reason) {
+    return '$name cannot be used: $reason';
   }
 
   @override
@@ -6529,11 +6562,11 @@ class AppLocalizationsEn extends AppLocalizations {
       '.conf file with [Interface]/[Peer]';
 
   @override
-  String get proxy_importFileSingboxJsonTitle => 'Sing-box outbound JSON';
+  String get proxy_importFileSingboxJsonTitle => 'sing-box JSON';
 
   @override
   String get proxy_importFileSingboxJsonSubtitle =>
-      'Shadowsocks, Trojan, VMess, VLESS, Hysteria, …';
+      'An outbound, an endpoint, or a whole config';
 
   @override
   String proxy_importedProfileNamed(String name) {
@@ -6582,6 +6615,151 @@ class AppLocalizationsEn extends AppLocalizations {
       one: 'Imported 1 profile',
     );
     return '$_temp0';
+  }
+
+  @override
+  String proxy_importedProfilesSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Imported $count profiles.',
+      one: 'Imported 1 profile.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped proxies in the config could not be used.',
+      one: '1 proxy in the config could not be used.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String proxy_importNoUsableProfiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'None of the $count proxies in this config could be used.',
+      one: 'The proxy in this config could not be used.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importFileUnreadable(String error) {
+    return 'The file could not be read: $error';
+  }
+
+  @override
+  String proxy_importInvalidJson(String error) {
+    return 'This is not valid JSON: $error';
+  }
+
+  @override
+  String get proxy_importNotJsonObject => 'Expected a sing-box JSON object.';
+
+  @override
+  String get proxy_importNoOutbounds =>
+      'Expected a sing-box outbound or endpoint, or a config with \"outbounds\" or \"endpoints\".';
+
+  @override
+  String proxy_importNotAList(String key) {
+    return '\"$key\" in a sing-box config must be a list.';
+  }
+
+  @override
+  String get proxy_importNoImportableProxy =>
+      'This sing-box config has no proxy WebLibre can import.';
+
+  @override
+  String get proxy_importMissingType =>
+      'The sing-box outbound has no \"type\".';
+
+  @override
+  String proxy_importUnsupportedType(String type) {
+    return 'Outbound type \"$type\" has no form. Use Custom Outbound JSON instead.';
+  }
+
+  @override
+  String proxy_importDetourThroughOtherOutbound(String tag) {
+    return 'This proxy connects through \"$tag\", another outbound of its config. WebLibre cannot chain proxies, and connecting to it directly would show it your IP address.';
+  }
+
+  @override
+  String proxy_importUnresolvedDetour(String tag) {
+    return 'This proxy connects through \"$tag\", which is defined elsewhere in its config. Import the whole config so WebLibre can check what \"$tag\" does.';
+  }
+
+  @override
+  String proxy_importEndpointWithoutPeers(String brand) {
+    return 'The $brand endpoint has no peers.';
+  }
+
+  @override
+  String proxy_importEndpointWithSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'The $brand endpoint has $count peers. A profile connects to one peer; import each peer as its own profile.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importPeerNotObject(String brand) {
+    return 'A $brand peer in this config is not a JSON object.';
+  }
+
+  @override
+  String proxy_importWireguardMissingSections(String brand) {
+    return 'A $brand config needs an [Interface] and a [Peer] section.';
+  }
+
+  @override
+  String proxy_importWireguardSeveralInterfaces(String brand) {
+    return 'This $brand config has more than one [Interface] section.';
+  }
+
+  @override
+  String proxy_importWireguardSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'This $brand config has $count [Peer] sections. A profile connects to one peer; split the config into one file per peer.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importWireguardEmptySection(String brand) {
+    return 'This $brand config has a section without a name.';
+  }
+
+  @override
+  String proxy_importWireguardEntryOutsideSection(String brand) {
+    return 'Every line of a $brand config has to be inside a section.';
+  }
+
+  @override
+  String proxy_importWireguardInvalidLine(String brand, String line) {
+    return 'This line of the $brand config is not valid: $line';
+  }
+
+  @override
+  String proxy_importWireguardInvalidEndpoint(String brand) {
+    return 'The $brand endpoint has to be host:port.';
+  }
+
+  @override
+  String proxy_importNoteExtraDnsServers(String used, String dropped) {
+    return 'This connection resolves names through $used. Also in the config, but not used: $dropped.';
+  }
+
+  @override
+  String proxy_importNoteSplitTunnel(String ranges) {
+    return 'Only these addresses go through this tunnel: $ranges. Other sites cannot be reached through this connection.';
   }
 
   @override
@@ -7018,6 +7196,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proxy_fieldPeerPublicKey => 'Peer Public Key';
 
   @override
+  String get proxy_fieldAllowedIps => 'Allowed IPs';
+
+  @override
+  String get proxy_fieldAllowedIpsHelper =>
+      'Address ranges sent through the tunnel, one per line. Leave empty to send everything. Sites outside these ranges cannot be reached through this connection.';
+
+  @override
   String get proxy_fieldWireguardPrivateKey => 'Private Key';
 
   @override
@@ -7099,6 +7284,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String proxy_fieldErrorInvalidCidr(String field, String value) {
     return '$field must contain IP addresses, optionally with a /prefix — \"$value\" is not one.';
+  }
+
+  @override
+  String proxy_fieldErrorWireguardKey(String field) {
+    return '$field is not a WireGuard key. It should be 44 characters ending in \"=\".';
   }
 
   @override

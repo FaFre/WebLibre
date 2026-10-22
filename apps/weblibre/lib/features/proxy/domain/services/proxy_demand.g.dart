@@ -171,7 +171,7 @@ final class ProxyDemandServiceProvider
 }
 
 String _$proxyDemandServiceHash() =>
-    r'b0240b6e9dfe9670c8c99e548baca9e8f5d67515';
+    r'dc617f18ff00479299ed88d0d2308af02d8a8e8f';
 
 /// Starts the proxy connections a Custom Tab or PWA launch is waiting on.
 ///

@@ -19,8 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/autostart_chip.dart';
+import 'package:weblibre/features/proxy/presentation/widgets/profile_list/condition_chip.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/ip_chip.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/latency_chip.dart';
 
@@ -28,12 +30,14 @@ class ProfileSubtitle extends StatelessWidget {
   final String typeLabel;
   final AsyncValue<ProxyLatencyData>? latency;
   final bool autostart;
+  final ProxyConnectionCondition? condition;
 
   const ProfileSubtitle({
     super.key,
     required this.typeLabel,
     required this.latency,
     this.autostart = false,
+    this.condition,
   });
 
   @override
@@ -44,7 +48,17 @@ class ProfileSubtitle extends StatelessWidget {
     // The marker rides in the chip row rather than next to the type label:
     // sharing that line left the label fighting the marker for width, and the
     // label lost (ellipsized to nothing on narrower tiles).
+    // A failed connection test already says "Failed" in its own chip, and is
+    // one of the things "not responding" is concluded from.
+    final condition = this.condition;
+    final showCondition =
+        condition != null &&
+        !(condition == ProxyConnectionCondition.notResponding &&
+            latency is AsyncError);
+
     final chips = <Widget>[
+      // First: it is the one thing in the row that is wrong.
+      if (showCondition) ProxyConditionChip(condition: condition),
       if (autostart) const AutostartChip(),
       if (latency != null) LatencyChip(result: latency),
       if (egressIp != null) IpChip(ip: egressIp),

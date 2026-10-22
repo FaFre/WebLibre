@@ -1066,5 +1066,8 @@
   "settings_trackerStatisticsNothingRecorded": "Belum ada pelacak diblokir yang tercatat.",
   "settings_trackerStatisticsLastSevenDays": "7 hari terakhir",
   "settings_trackerStatisticsNoneLastSevenDays": "Tidak ada pelacak yang diblokir dalam 7 hari terakhir.",
-  "settings_trackerStatisticsLoadFailed": "Statistik pelacak tidak dapat dimuat."
+  "settings_trackerStatisticsLoadFailed": "Statistik pelacak tidak dapat dimuat.",
+  "settings_containersByRecentUseTitle": "Kontainer Terakhir Dipakai Lebih Dulu",
+  "settings_containersByRecentUseKeywords": "urutan kontainer, urutkan kontainer, kontainer terbaru, terakhir dipakai, baru dipakai, akordeon, container order, recently used, accordion",
+  "settings_containersByRecentUseSubtitle": "Hanya Akordeon: kontainer yang terakhir Anda pakai pindah ke depan. Kontainer yang disematkan tetap di depannya"
 }

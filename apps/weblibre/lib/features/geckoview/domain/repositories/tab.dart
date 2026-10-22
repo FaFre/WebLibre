@@ -1141,6 +1141,45 @@ class TabRepository extends _$TabRepository {
     }
   }
 
+  /// Re-attaches restored tabs the database lists under no container although
+  /// the engine runs them in one — see
+  /// [TabDao.reattachTabsToContextContainers] for how they got that way.
+  ///
+  /// Checked on every start rather than once, so any later disagreement of the
+  /// same kind heals the same way. Failures are logged and left: a tab listed
+  /// under the wrong container is a display fault, not a reason to fail a
+  /// restore.
+  Future<void> _reattachTabsToContextContainers() async {
+    final engineContextIds = {
+      for (final MapEntry(key: tabId, value: tabState)
+          in ref.read(tabStatesProvider).entries)
+        if (tabState.hasContentState &&
+            tabState.tabMode is RegularTabMode &&
+            tabState.contextId != null &&
+            tabState.contextId!.isNotEmpty)
+          tabId: tabState.contextId!,
+    };
+
+    try {
+      final reattached = await ref
+          .read(tabDatabaseProvider)
+          .tabDao
+          .reattachTabsToContextContainers(engineContextIds);
+      if (reattached.isNotEmpty) {
+        logger.w(
+          'Re-attached ${reattached.length} tabs to the container they run '
+          'in: $reattached',
+        );
+      }
+    } catch (error, stackTrace) {
+      logger.e(
+        'Could not re-attach tabs to their containers',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   Future<void> _drainPendingIsolationCleanup() async {
     if (_pendingIsolationCleanup.isEmpty) return;
 
@@ -1695,6 +1734,8 @@ class TabRepository extends _$TabRepository {
           syncTabsResult.deletedIsolationContextIds,
         );
         await _drainPendingIsolationCleanup();
+
+        await _reattachTabsToContextContainers();
       }
     });
 

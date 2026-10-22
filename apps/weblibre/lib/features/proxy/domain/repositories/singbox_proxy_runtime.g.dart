@@ -57,6 +57,81 @@ final class SingboxProxyClientProvider
 String _$singboxProxyClientHash() =>
     r'3e56b277667e92a2d4941fd084dddd0ff25afd52';
 
+/// The sing-box profiles that are running, by profile id.
+///
+/// What every reader outside the repository asks of the runtime, so none has
+/// to remember both halves of "running": a runtime status of running, and a
+/// state that holds data ([SingboxProxyRuntimeValueProfiles]).
+
+@ProviderFor(RunningSingboxProfileIds)
+final runningSingboxProfileIdsProvider = RunningSingboxProfileIdsProvider._();
+
+/// The sing-box profiles that are running, by profile id.
+///
+/// What every reader outside the repository asks of the runtime, so none has
+/// to remember both halves of "running": a runtime status of running, and a
+/// state that holds data ([SingboxProxyRuntimeValueProfiles]).
+final class RunningSingboxProfileIdsProvider
+    extends $NotifierProvider<RunningSingboxProfileIds, Set<String>> {
+  /// The sing-box profiles that are running, by profile id.
+  ///
+  /// What every reader outside the repository asks of the runtime, so none has
+  /// to remember both halves of "running": a runtime status of running, and a
+  /// state that holds data ([SingboxProxyRuntimeValueProfiles]).
+  RunningSingboxProfileIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'runningSingboxProfileIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$runningSingboxProfileIdsHash();
+
+  @$internal
+  @override
+  RunningSingboxProfileIds create() => RunningSingboxProfileIds();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<String> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<String>>(value),
+    );
+  }
+}
+
+String _$runningSingboxProfileIdsHash() =>
+    r'dabc817dc09babdd4a4744a0abc551299e408cdb';
+
+/// The sing-box profiles that are running, by profile id.
+///
+/// What every reader outside the repository asks of the runtime, so none has
+/// to remember both halves of "running": a runtime status of running, and a
+/// state that holds data ([SingboxProxyRuntimeValueProfiles]).
+
+abstract class _$RunningSingboxProfileIds extends $Notifier<Set<String>> {
+  Set<String> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<Set<String>, Set<String>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Set<String>, Set<String>>,
+              Set<String>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
 /// The proxy connections a sing-box start is in flight for, encoded.
 ///
 /// The runtime's own status is one flag for the whole runtime — it does not
@@ -128,7 +203,7 @@ final class SingboxProxyStartingConnectionsProvider
 }
 
 String _$singboxProxyStartingConnectionsHash() =>
-    r'3c466aac786a51f155a959fdaec5a5bb9134af3e';
+    r'1c26dff095c3deb715c3c516defe2b4dab27c0e3';
 
 /// The proxy connections a sing-box start is in flight for, encoded.
 ///
@@ -155,6 +230,111 @@ abstract class _$SingboxProxyStartingConnections
             as $ClassProviderElement<
               AnyNotifier<Set<String>, Set<String>>,
               Set<String>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Profiles a failed start took down that putting them back did not bring up
+/// again, as [SingboxProxyRuntimeRepository] last reported them.
+///
+/// Nobody asked for them to go down, and the error that reaches the caller is
+/// the start's, not theirs — so they are announced here for the retries to
+/// pick up, rather than staying down with nothing to say so. A provider of its
+/// own because the retries already watch the runtime, and the runtime must not
+/// depend on them in turn.
+
+@ProviderFor(SingboxProxyLostProfiles)
+final singboxProxyLostProfilesProvider = SingboxProxyLostProfilesProvider._();
+
+/// Profiles a failed start took down that putting them back did not bring up
+/// again, as [SingboxProxyRuntimeRepository] last reported them.
+///
+/// Nobody asked for them to go down, and the error that reaches the caller is
+/// the start's, not theirs — so they are announced here for the retries to
+/// pick up, rather than staying down with nothing to say so. A provider of its
+/// own because the retries already watch the runtime, and the runtime must not
+/// depend on them in turn.
+final class SingboxProxyLostProfilesProvider
+    extends
+        $NotifierProvider<
+          SingboxProxyLostProfiles,
+          ({bool permanent, Set<String> profileIds})?
+        > {
+  /// Profiles a failed start took down that putting them back did not bring up
+  /// again, as [SingboxProxyRuntimeRepository] last reported them.
+  ///
+  /// Nobody asked for them to go down, and the error that reaches the caller is
+  /// the start's, not theirs — so they are announced here for the retries to
+  /// pick up, rather than staying down with nothing to say so. A provider of its
+  /// own because the retries already watch the runtime, and the runtime must not
+  /// depend on them in turn.
+  SingboxProxyLostProfilesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'singboxProxyLostProfilesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$singboxProxyLostProfilesHash();
+
+  @$internal
+  @override
+  SingboxProxyLostProfiles create() => SingboxProxyLostProfiles();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    ({bool permanent, Set<String> profileIds})? value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<({bool permanent, Set<String> profileIds})?>(
+            value,
+          ),
+    );
+  }
+}
+
+String _$singboxProxyLostProfilesHash() =>
+    r'7f650ebcfe224469b1498906f62d15059fcf4532';
+
+/// Profiles a failed start took down that putting them back did not bring up
+/// again, as [SingboxProxyRuntimeRepository] last reported them.
+///
+/// Nobody asked for them to go down, and the error that reaches the caller is
+/// the start's, not theirs — so they are announced here for the retries to
+/// pick up, rather than staying down with nothing to say so. A provider of its
+/// own because the retries already watch the runtime, and the runtime must not
+/// depend on them in turn.
+
+abstract class _$SingboxProxyLostProfiles
+    extends $Notifier<({bool permanent, Set<String> profileIds})?> {
+  ({bool permanent, Set<String> profileIds})? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              ({bool permanent, Set<String> profileIds})?,
+              ({bool permanent, Set<String> profileIds})?
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                ({bool permanent, Set<String> profileIds})?,
+                ({bool permanent, Set<String> profileIds})?
+              >,
+              ({bool permanent, Set<String> profileIds})?,
               Object?,
               Object?
             >;
@@ -192,7 +372,7 @@ final class SingboxProxyRuntimeRepositoryProvider
 }
 
 String _$singboxProxyRuntimeRepositoryHash() =>
-    r'e01fed2037acf01070d28cac15453312fe56ac68';
+    r'a25b1b312043ba35ff16fbfe846699d4fc2c9c17';
 
 abstract class _$SingboxProxyRuntimeRepository
     extends $AsyncNotifier<SingboxProxyRuntimeState> {

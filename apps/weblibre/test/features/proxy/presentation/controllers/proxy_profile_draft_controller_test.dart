@@ -9,6 +9,10 @@ import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_d
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 
+const _privateKey = 'AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=';
+const _otherPrivateKey = 'BAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ=';
+const _peerPublicKey = 'AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI=';
+
 void main() {
   test('save validates and creates a seeded structured profile', () async {
     final runtimeRepository = _FakeRuntimeRepository();
@@ -83,6 +87,133 @@ void main() {
     expect(profilesRepository.updatedProfiles, hasLength(1));
     expect(credentialsRepository.writtenSecrets, {'profile-1': null});
   });
+
+  ProxyProfileSeed wireguardSeed(String privateKey) => ProxyProfileSeed(
+    type: SingboxProxyProfileType.wireguard,
+    name: 'Latvia',
+    values: {
+      'server': 'lv.example.com',
+      'server_port': '51820',
+      'local_address': '10.64.0.2/32',
+      'peer_public_key': _peerPublicKey,
+      'private_key': privateKey,
+    },
+  );
+
+  test(
+    'saving a WireGuard profile warns about another with the same key',
+    () async {
+      // A server sees two connections with one key as one client; running
+      // both makes them cut each other off.
+      final container = _container(
+        profilesRepository: _FakeProfilesRepository(
+          otherProfiles: [
+            _profile(
+              id: 'nl',
+              name: 'Netherlands',
+              type: SingboxProxyProfileType.wireguard,
+              configJson: '{"type":"wireguard"}',
+            ),
+          ],
+        ),
+        credentialsRepository: _FakeCredentialsRepository(
+          secrets: {'nl': '{"private_key": "$_privateKey"}'},
+        ),
+      );
+      addTearDown(container.dispose);
+
+      final outcome = await container
+          .read(
+            proxyProfileDraftProvider(
+              seed: wireguardSeed(_privateKey),
+            ).notifier,
+          )
+          .save();
+
+      expect((outcome as SaveSucceeded).sharesPrivateKeyWith, ['Netherlands']);
+    },
+  );
+
+  test(
+    'a WireGuard profile with its own key saves without a warning',
+    () async {
+      final container = _container(
+        profilesRepository: _FakeProfilesRepository(
+          otherProfiles: [
+            _profile(
+              id: 'nl',
+              name: 'Netherlands',
+              type: SingboxProxyProfileType.wireguard,
+              configJson: '{"type":"wireguard"}',
+            ),
+          ],
+        ),
+        credentialsRepository: _FakeCredentialsRepository(
+          secrets: {'nl': '{"private_key": "$_otherPrivateKey"}'},
+        ),
+      );
+      addTearDown(container.dispose);
+
+      final outcome = await container
+          .read(
+            proxyProfileDraftProvider(
+              seed: wireguardSeed(_privateKey),
+            ).notifier,
+          )
+          .save();
+
+      expect((outcome as SaveSucceeded).sharesPrivateKeyWith, isEmpty);
+    },
+  );
+
+  test('an edit keeps the keys the form has no field for', () async {
+    // The JSON used to be rebuilt from the fields alone, so the first edit of
+    // an imported profile dropped everything the form does not show.
+    final existing = _profile(
+      id: 'wg',
+      name: 'Latvia',
+      type: SingboxProxyProfileType.wireguard,
+      configJson:
+          """
+      {
+        "type": "wireguard",
+        "server": "lv.example.com",
+        "server_port": 51820,
+        "local_address": ["10.64.0.2/32"],
+        "peer_public_key": "$_peerPublicKey",
+        "udp_fragment": true
+      }""",
+    );
+    final profilesRepository = _FakeProfilesRepository(
+      existingProfile: existing,
+    );
+    final container = _container(
+      profilesRepository: profilesRepository,
+      credentialsRepository: _FakeCredentialsRepository(
+        secrets: {'wg': '{"private_key": "$_privateKey"}'},
+      ),
+    );
+    addTearDown(container.dispose);
+
+    final provider = proxyProfileDraftProvider(profileId: 'wg');
+    final subscription = container.listen(
+      provider,
+      (_, _) {},
+      fireImmediately: true,
+    );
+    addTearDown(subscription.close);
+    await _drainAsyncLoad();
+    container
+        .read(provider.notifier)
+        .setFieldValue('server', 'riga.example.com');
+
+    final outcome = await container.read(provider.notifier).save();
+
+    expect(outcome, isA<SaveSucceeded>());
+    final saved = profilesRepository.updatedProfiles.single.configJson;
+    expect(saved, contains('"server": "riga.example.com"'));
+    expect(saved, contains('"udp_fragment": true'));
+  });
 }
 
 ProviderContainer _container({
@@ -151,14 +282,24 @@ class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {
 
 class _FakeProfilesRepository extends SingboxProxyProfilesRepository {
   final ProxyProfile? existingProfile;
+  final List<ProxyProfile> otherProfiles;
   final createdProfiles = <ProxyProfile>[];
   final createdSecrets = <String?>[];
   final updatedProfiles = <ProxyProfile>[];
 
-  _FakeProfilesRepository({this.existingProfile});
+  _FakeProfilesRepository({
+    this.existingProfile,
+    this.otherProfiles = const [],
+  });
 
   @override
   Future<ProxyProfile?> findProfile(String id) async => existingProfile;
+
+  @override
+  Future<List<ProxyProfile>> fetchProfiles() async => [
+    ?existingProfile,
+    ...otherProfiles,
+  ];
 
   @override
   Future<ProxyProfile> createProfile({

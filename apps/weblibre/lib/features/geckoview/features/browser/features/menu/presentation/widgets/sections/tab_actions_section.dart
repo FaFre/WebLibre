@@ -606,7 +606,7 @@ class _CloneTabExpansion extends ConsumerWidget {
                   tabState.url;
               final containerData = await ref
                   .read(tabDataRepositoryProvider.notifier)
-                  .getTabContainerData(selectedTabId);
+                  .getContainerForCopy(selectedTabId);
 
               final tabId = (tabState.tabMode is! RegularTabMode)
                   ? await ref
@@ -646,7 +646,7 @@ class _CloneTabExpansion extends ConsumerWidget {
                   tabState.url;
               final containerData = await ref
                   .read(tabDataRepositoryProvider.notifier)
-                  .getTabContainerData(selectedTabId);
+                  .getContainerForCopy(selectedTabId);
 
               final tabId = (tabState.tabMode is! PrivateTabMode)
                   ? await ref
@@ -687,7 +687,7 @@ class _CloneTabExpansion extends ConsumerWidget {
                     tabState.url;
                 final containerData = await ref
                     .read(tabDataRepositoryProvider.notifier)
-                    .getTabContainerData(selectedTabId);
+                    .getContainerForCopy(selectedTabId);
 
                 final tabId = await ref
                     .read(tabRepositoryProvider.notifier)

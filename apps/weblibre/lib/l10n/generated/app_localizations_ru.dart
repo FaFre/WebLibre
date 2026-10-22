@@ -6462,17 +6462,50 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String proxy_latencyMilliseconds(int ms) {
-    return '$ms мс';
+    return 'HTTP $ms мс';
   }
 
   @override
-  String proxy_latencyHttpStatusTooltip(int statusCode, int ms) {
-    return 'HTTP $statusCode за $ms мс';
+  String proxy_latencyHttpStatusTooltip(String host, int statusCode, int ms) {
+    return 'Веб-запрос через это подключение к $host занял $ms мс (HTTP $statusCode). Сюда входит путь от сервера до этого сайта, поэтому время больше, чем задержка самого туннеля.';
   }
+
+  @override
+  String get proxy_conditionNotResponding => 'Не отвечает';
+
+  @override
+  String get proxy_conditionStartRetrying => 'Не удалось запустить · повтор';
+
+  @override
+  String get proxy_conditionStartFailed => 'Не удалось запустить';
+
+  @override
+  String proxy_sharedPrivateKeyWarning(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$names используют тот же закрытый ключ.',
+      one: '$names использует тот же закрытый ключ.',
+    );
+    return 'Сохранено. $_temp0 Сервер WireGuard считает профили с общим ключом одним клиентом, поэтому при одновременной работе они отключают друг друга.';
+  }
+
+  @override
+  String get proxy_connectionStarting => 'Запуск…';
 
   @override
   String proxy_startProxyFailed(String error) {
     return 'Не удалось запустить прокси: $error';
+  }
+
+  @override
+  String proxy_profileCouldNotStart(String name, String reason) {
+    return 'Не удалось запустить $name: $reason';
+  }
+
+  @override
+  String proxy_profileRejected(String name, String reason) {
+    return 'Нельзя использовать $name: $reason';
   }
 
   @override
@@ -6694,11 +6727,11 @@ class AppLocalizationsRu extends AppLocalizations {
       'Файл .conf с [Interface]/[Peer]';
 
   @override
-  String get proxy_importFileSingboxJsonTitle => 'Sing-box outbound JSON';
+  String get proxy_importFileSingboxJsonTitle => 'sing-box JSON';
 
   @override
   String get proxy_importFileSingboxJsonSubtitle =>
-      'Shadowsocks, Trojan, VMess, VLESS, Hysteria, …';
+      'Outbound, endpoint или целая конфигурация';
 
   @override
   String proxy_importedProfileNamed(String name) {
@@ -6749,6 +6782,167 @@ class AppLocalizationsRu extends AppLocalizations {
       one: 'Импортирован $count профиль',
     );
     return '$_temp0';
+  }
+
+  @override
+  String proxy_importedProfilesSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Импортировано $count профиля.',
+      many: 'Импортировано $count профилей.',
+      few: 'Импортировано $count профиля.',
+      one: 'Импортирован $count профиль.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '$skipped прокси из конфигурации использовать нельзя.',
+      many: '$skipped прокси из конфигурации использовать нельзя.',
+      few: '$skipped прокси из конфигурации использовать нельзя.',
+      one: '$skipped прокси из конфигурации использовать нельзя.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String proxy_importNoUsableProfiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Ни один из $count прокси в этой конфигурации использовать нельзя.',
+      one: 'Прокси из этой конфигурации использовать нельзя.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importFileUnreadable(String error) {
+    return 'Не удалось прочитать файл: $error';
+  }
+
+  @override
+  String proxy_importInvalidJson(String error) {
+    return 'Это некорректный JSON: $error';
+  }
+
+  @override
+  String get proxy_importNotJsonObject => 'Ожидался JSON-объект sing-box.';
+
+  @override
+  String get proxy_importNoOutbounds =>
+      'Ожидался outbound или endpoint sing-box либо конфигурация с «outbounds» или «endpoints».';
+
+  @override
+  String proxy_importNotAList(String key) {
+    return 'Значение «$key» в конфигурации sing-box должно быть списком.';
+  }
+
+  @override
+  String get proxy_importNoImportableProxy =>
+      'В этой конфигурации sing-box нет прокси, которые WebLibre может импортировать.';
+
+  @override
+  String get proxy_importMissingType => 'У outbound sing-box нет «type».';
+
+  @override
+  String proxy_importUnsupportedType(String type) {
+    return 'Для типа outbound «$type» нет формы. Используйте вместо этого «Свой outbound».';
+  }
+
+  @override
+  String proxy_importDetourThroughOtherOutbound(String tag) {
+    return 'Этот прокси подключается через «$tag» — другой outbound из своей конфигурации. WebLibre не умеет объединять прокси в цепочки, а прямое подключение раскрыло бы серверу ваш IP-адрес.';
+  }
+
+  @override
+  String proxy_importUnresolvedDetour(String tag) {
+    return 'Этот прокси подключается через «$tag», который определён в другом месте конфигурации. Импортируйте конфигурацию целиком, чтобы WebLibre мог проверить, что делает «$tag».';
+  }
+
+  @override
+  String proxy_importEndpointWithoutPeers(String brand) {
+    return 'У endpoint $brand нет пиров.';
+  }
+
+  @override
+  String proxy_importEndpointWithSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'У endpoint $brand $count пира. Профиль подключается к одному пиру; импортируйте каждый пир как отдельный профиль.',
+      many:
+          'У endpoint $brand $count пиров. Профиль подключается к одному пиру; импортируйте каждый пир как отдельный профиль.',
+      few:
+          'У endpoint $brand $count пира. Профиль подключается к одному пиру; импортируйте каждый пир как отдельный профиль.',
+      one:
+          'У endpoint $brand $count пир. Профиль подключается к одному пиру; импортируйте каждый пир как отдельный профиль.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importPeerNotObject(String brand) {
+    return 'Один из пиров $brand в этой конфигурации не является JSON-объектом.';
+  }
+
+  @override
+  String proxy_importWireguardMissingSections(String brand) {
+    return 'Конфигурации $brand нужны разделы [Interface] и [Peer].';
+  }
+
+  @override
+  String proxy_importWireguardSeveralInterfaces(String brand) {
+    return 'В этой конфигурации $brand больше одного раздела [Interface].';
+  }
+
+  @override
+  String proxy_importWireguardSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'В этой конфигурации $brand $count раздела [Peer]. Профиль подключается к одному пиру; разделите конфигурацию на отдельные файлы для каждого пира.',
+      many:
+          'В этой конфигурации $brand $count разделов [Peer]. Профиль подключается к одному пиру; разделите конфигурацию на отдельные файлы для каждого пира.',
+      few:
+          'В этой конфигурации $brand $count раздела [Peer]. Профиль подключается к одному пиру; разделите конфигурацию на отдельные файлы для каждого пира.',
+      one:
+          'В этой конфигурации $brand $count раздел [Peer]. Профиль подключается к одному пиру; разделите конфигурацию на отдельные файлы для каждого пира.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importWireguardEmptySection(String brand) {
+    return 'В этой конфигурации $brand есть раздел без имени.';
+  }
+
+  @override
+  String proxy_importWireguardEntryOutsideSection(String brand) {
+    return 'Каждая строка конфигурации $brand должна находиться внутри раздела.';
+  }
+
+  @override
+  String proxy_importWireguardInvalidLine(String brand, String line) {
+    return 'Эта строка конфигурации $brand некорректна: $line';
+  }
+
+  @override
+  String proxy_importWireguardInvalidEndpoint(String brand) {
+    return 'Endpoint $brand должен иметь вид host:port.';
+  }
+
+  @override
+  String proxy_importNoteExtraDnsServers(String used, String dropped) {
+    return 'Это подключение разрешает имена через $used. Также указаны в конфигурации, но не используются: $dropped.';
+  }
+
+  @override
+  String proxy_importNoteSplitTunnel(String ranges) {
+    return 'Через этот туннель идут только эти адреса: $ranges. Другие сайты через это подключение недоступны.';
   }
 
   @override
@@ -7205,6 +7399,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get proxy_fieldPeerPublicKey => 'Открытый ключ пира';
 
   @override
+  String get proxy_fieldAllowedIps => 'Разрешённые IP';
+
+  @override
+  String get proxy_fieldAllowedIpsHelper =>
+      'Диапазоны адресов, которые идут через туннель, по одному на строку. Оставьте пустым, чтобы отправлять всё. Сайты вне этих диапазонов через это подключение недоступны.';
+
+  @override
   String get proxy_fieldWireguardPrivateKey => 'Закрытый ключ';
 
   @override
@@ -7288,6 +7489,11 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String proxy_fieldErrorInvalidCidr(String field, String value) {
     return 'Поле «$field» должно содержать IP-адреса, при необходимости с /префиксом. «$value» не является IP-адресом.';
+  }
+
+  @override
+  String proxy_fieldErrorWireguardKey(String field) {
+    return 'Поле «$field» не содержит ключ WireGuard. Ключ должен состоять из 44 символов и заканчиваться на «=».';
   }
 
   @override
@@ -11026,15 +11232,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_containersByRecentUseTitle =>
-      'Recently Used Containers First';
+      'Сначала недавно использованные контейнеры';
 
   @override
   String get settings_containersByRecentUseKeywords =>
-      'container order, sort containers, recent containers, last used, most recently used, accordion';
+      'порядок контейнеров, сортировка контейнеров, недавние контейнеры, последние использованные, недавно использованные, аккордеон, container order, recently used';
 
   @override
   String get settings_containersByRecentUseSubtitle =>
-      'Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it';
+      'Только для «Аккордеона»: последний использованный контейнер перемещается в начало. Закреплённые контейнеры остаются перед ним';
 
   @override
   String get settings_showTitlesTitle => 'Заголовки в быстром переключателе';

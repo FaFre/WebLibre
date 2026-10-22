@@ -23,11 +23,30 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
+import 'package:weblibre/features/proxy/domain/services/tab_routing.dart';
 
 /// The cookie-store context a tab's requests belong to, matching how the proxy
 /// extension derives one for a tab.
+///
+/// Taken from the engine wherever it has reported the tab, because the engine's
+/// context is what the extension routes the page itself on: requests made on a
+/// tab's behalf can then never take a different route from the page. Deriving
+/// it from the tab's container row instead is how, for as long as that lookup
+/// read null for every tab, every suggestion, favicon lookup and link expansion
+/// for a tab in a proxied container went out over the general route.
 Future<String> routingContextIdForTab(Ref ref, TabState? tabState) async {
   if (tabState == null) return generalContextId;
+
+  if (tabState.hasContentState) {
+    return tabRoutingContextId(
+      contextId: tabState.contextId,
+      isPrivate: tabState.tabMode is PrivateTabMode,
+    );
+  }
+
+  // Before the engine has reported the tab — a tab opened a moment ago — the
+  // database is all there is. Falling back to the general context here would
+  // send what is typed into a new container tab past that container's proxy.
   if (tabState.tabMode is PrivateTabMode) return privateContextId;
 
   // Isolated tabs load under their isolation context, and the snapshot carries

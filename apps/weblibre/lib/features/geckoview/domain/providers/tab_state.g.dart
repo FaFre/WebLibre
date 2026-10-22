@@ -271,12 +271,56 @@ final class TabStateWithFallbackFamily extends $Family
   String toString() => r'tabStateWithFallbackProvider';
 }
 
+/// Whether [tabId]'s traffic goes through a proxy — the URL bar's indicator.
+///
+/// Read off the routing the extension was handed, through the context the
+/// engine reports for the tab: exactly what decides the page's route. It was
+/// re-derived from the routing settings and the tab's container row, and said
+/// the wrong thing whenever that row did — for as long as the container lookup
+/// read null for every tab, a proxied container's tab showed as not tunneled
+/// and, with every tab routed through a proxy, a container set to bypass it
+/// showed as tunneled while it connected directly.
+///
+/// A route through a proxy that is not running still counts: the extension
+/// blocks it rather than connecting directly. Routing that is not installed yet
+/// or a context not reported yet does not: claiming protection nothing has
+/// confirmed is the one answer this must not give.
+
 @ProviderFor(isTabTunneled)
 final isTabTunneledProvider = IsTabTunneledFamily._();
+
+/// Whether [tabId]'s traffic goes through a proxy — the URL bar's indicator.
+///
+/// Read off the routing the extension was handed, through the context the
+/// engine reports for the tab: exactly what decides the page's route. It was
+/// re-derived from the routing settings and the tab's container row, and said
+/// the wrong thing whenever that row did — for as long as the container lookup
+/// read null for every tab, a proxied container's tab showed as not tunneled
+/// and, with every tab routed through a proxy, a container set to bypass it
+/// showed as tunneled while it connected directly.
+///
+/// A route through a proxy that is not running still counts: the extension
+/// blocks it rather than connecting directly. Routing that is not installed yet
+/// or a context not reported yet does not: claiming protection nothing has
+/// confirmed is the one answer this must not give.
 
 final class IsTabTunneledProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
     with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Whether [tabId]'s traffic goes through a proxy — the URL bar's indicator.
+  ///
+  /// Read off the routing the extension was handed, through the context the
+  /// engine reports for the tab: exactly what decides the page's route. It was
+  /// re-derived from the routing settings and the tab's container row, and said
+  /// the wrong thing whenever that row did — for as long as the container lookup
+  /// read null for every tab, a proxied container's tab showed as not tunneled
+  /// and, with every tab routed through a proxy, a container set to bypass it
+  /// showed as tunneled while it connected directly.
+  ///
+  /// A route through a proxy that is not running still counts: the extension
+  /// blocks it rather than connecting directly. Routing that is not installed yet
+  /// or a context not reported yet does not: claiming protection nothing has
+  /// confirmed is the one answer this must not give.
   IsTabTunneledProvider._({
     required IsTabTunneledFamily super.from,
     required String? super.argument,
@@ -320,7 +364,22 @@ final class IsTabTunneledProvider
   }
 }
 
-String _$isTabTunneledHash() => r'd36607ff812f71870af32ce59c2dbe898a9c1917';
+String _$isTabTunneledHash() => r'899a4ac3a5d230f4a3cee73047117b91010e0529';
+
+/// Whether [tabId]'s traffic goes through a proxy — the URL bar's indicator.
+///
+/// Read off the routing the extension was handed, through the context the
+/// engine reports for the tab: exactly what decides the page's route. It was
+/// re-derived from the routing settings and the tab's container row, and said
+/// the wrong thing whenever that row did — for as long as the container lookup
+/// read null for every tab, a proxied container's tab showed as not tunneled
+/// and, with every tab routed through a proxy, a container set to bypass it
+/// showed as tunneled while it connected directly.
+///
+/// A route through a proxy that is not running still counts: the extension
+/// blocks it rather than connecting directly. Routing that is not installed yet
+/// or a context not reported yet does not: claiming protection nothing has
+/// confirmed is the one answer this must not give.
 
 final class IsTabTunneledFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<bool>, String?> {
@@ -332,6 +391,21 @@ final class IsTabTunneledFamily extends $Family
         $allTransitiveDependencies: null,
         isAutoDispose: true,
       );
+
+  /// Whether [tabId]'s traffic goes through a proxy — the URL bar's indicator.
+  ///
+  /// Read off the routing the extension was handed, through the context the
+  /// engine reports for the tab: exactly what decides the page's route. It was
+  /// re-derived from the routing settings and the tab's container row, and said
+  /// the wrong thing whenever that row did — for as long as the container lookup
+  /// read null for every tab, a proxied container's tab showed as not tunneled
+  /// and, with every tab routed through a proxy, a container set to bypass it
+  /// showed as tunneled while it connected directly.
+  ///
+  /// A route through a proxy that is not running still counts: the extension
+  /// blocks it rather than connecting directly. Routing that is not installed yet
+  /// or a context not reported yet does not: claiming protection nothing has
+  /// confirmed is the one answer this must not give.
 
   IsTabTunneledProvider call(String? tabId) =>
       IsTabTunneledProvider._(argument: tabId, from: this);

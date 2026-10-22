@@ -22,6 +22,11 @@ import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class RunSwitch extends StatelessWidget {
   final bool isRunning;
+
+  /// The connection is on its way up — started a moment ago, or restarted
+  /// because another connection started or stopped. Shown as on, with progress
+  /// in place of the icon, and not tappable until it settles.
+  final bool isStarting;
   final bool disabled;
   final VoidCallback onTap;
 
@@ -30,28 +35,40 @@ class RunSwitch extends StatelessWidget {
     required this.isRunning,
     required this.disabled,
     required this.onTap,
+    this.isStarting = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final background = isRunning
-        ? scheme.primary
-        : scheme.surfaceContainerHighest;
-    final foreground = isRunning ? scheme.onPrimary : scheme.onSurface;
+    final isOn = isRunning || isStarting;
+    final background = isOn ? scheme.primary : scheme.surfaceContainerHighest;
+    final foreground = isOn ? scheme.onPrimary : scheme.onSurface;
 
     return IconButton.filled(
-      tooltip: isRunning ? l10n.proxy_actionStop : l10n.proxy_actionStart,
-      onPressed: disabled ? null : onTap,
+      tooltip: isStarting
+          ? l10n.proxy_connectionStarting
+          : isRunning
+          ? l10n.proxy_actionStop
+          : l10n.proxy_actionStart,
+      onPressed: disabled || isStarting ? null : onTap,
       style: IconButton.styleFrom(
         backgroundColor: background,
         foregroundColor: foreground,
-        disabledBackgroundColor: scheme.surfaceContainerHighest.withValues(
-          alpha: 0.5,
-        ),
+        disabledBackgroundColor: isStarting
+            ? scheme.primary.withValues(alpha: 0.7)
+            : scheme.surfaceContainerHighest.withValues(alpha: 0.5),
       ),
-      icon: Icon(isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded),
+      icon: isStarting
+          ? SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: scheme.onPrimary,
+              ),
+            )
+          : Icon(isRunning ? Icons.stop_rounded : Icons.play_arrow_rounded),
     );
   }
 }

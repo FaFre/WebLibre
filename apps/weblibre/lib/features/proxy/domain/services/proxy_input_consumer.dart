@@ -24,12 +24,16 @@ import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
+import 'package:weblibre/features/proxy/data/models/proxy_import_failure.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_share.dart';
 import 'package:weblibre/features/proxy/data/models/wireguard_config_import.dart';
+import 'package:weblibre/features/proxy/data/parsers/singbox_json_import.dart';
 import 'package:weblibre/features/proxy/data/parsers/singbox_proxy_uri.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
+import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/features/user/data/models/proxy_dns_override.dart';
@@ -37,6 +41,10 @@ import 'package:weblibre/features/user/data/models/proxy_dns_override.dart';
 part 'proxy_input_consumer.g.dart';
 
 enum ProxyFileImportKind { wireguardConf, singboxOutboundJson }
+
+/// Something an import noted about one of the proxies it stored, by the name
+/// that proxy was stored under.
+typedef ImportedProfileNote = ({String profileName, ProxyImportNote note});
 
 sealed class ProxyInputOutcome {
   const ProxyInputOutcome();
@@ -48,6 +56,27 @@ class ProxyInputImported extends ProxyInputOutcome {
   const ProxyInputImported(this.created);
 }
 
+/// Several proxies, imported straight away — a whole sing-box config holds as
+/// many as it likes, and one editor per proxy is no way to take them in.
+class ProxyInputImportedMany extends ProxyInputOutcome {
+  final List<ProxyProfile> created;
+
+  /// Proxies in the config that could not be used: their fields did not
+  /// validate, or sing-box refused them.
+  final int skipped;
+
+  /// What the import noted about the proxies in [created]. The editor shows a single proxy's notes before it is
+  /// saved; these are stored without one, so the notes come back here — a
+  /// split tunnel cannot reach most sites, which is no thing to keep quiet.
+  final List<ImportedProfileNote> notes;
+
+  const ProxyInputImportedMany(
+    this.created, {
+    required this.skipped,
+    this.notes = const [],
+  });
+}
+
 class ProxyInputSeed extends ProxyInputOutcome {
   final ProxyProfileSeed seed;
 
@@ -55,14 +84,23 @@ class ProxyInputSeed extends ProxyInputOutcome {
 }
 
 class ProxyInputError extends ProxyInputOutcome {
-  final String message;
+  /// A [ProxyImportFailure] to translate where it is shown, or another
+  /// [FormatException] whose message is all there is to say.
+  final FormatException error;
 
-  const ProxyInputError(this.message);
+  const ProxyInputError(this.error);
 }
+
+/// The name for the [n]th proxy of an import that names none of its own
+/// (1-based). Supplied by the caller, which can translate it.
+typedef ProxyImportDefaultName = String Function(int n);
 
 @Riverpod(keepAlive: true)
 class ProxyInputConsumer extends _$ProxyInputConsumer {
-  Future<ProxyInputOutcome> consumeRawText(String raw) async {
+  Future<ProxyInputOutcome> consumeRawText(
+    String raw, {
+    required ProxyImportDefaultName defaultName,
+  }) async {
     final trimmed = raw.trim();
 
     if (trimmed.startsWith('$weblibreProxyShareScheme://')) {
@@ -77,9 +115,11 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
     }
 
     if (_looksLikeJsonObject(trimmed)) {
-      return _seedOutcome(
-        () => _seedFromSingboxOutboundJson(trimmed, fileName: 'Outbound'),
-        logMessage: 'Failed to parse pasted sing-box outbound JSON',
+      return await _consumeSingboxJson(
+        trimmed,
+        fileName: null,
+        defaultName: defaultName,
+        logMessage: 'Failed to parse pasted sing-box JSON',
       );
     }
 
@@ -95,8 +135,9 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
 
   Future<ProxyInputOutcome> consumeFile(
     ProxyFileImportKind kind,
-    PlatformFile file,
-  ) async {
+    PlatformFile file, {
+    required ProxyImportDefaultName defaultName,
+  }) async {
     final String text;
     try {
       text = await _readFileText(file);
@@ -106,22 +147,145 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
         error: error,
         stackTrace: stackTrace,
       );
-      return ProxyInputError('Failed to read file: $error');
+      return ProxyInputError(
+        ProxyImportFailure(
+          ProxyImportFailureKind.fileUnreadable,
+          detail: '$error',
+        ),
+      );
     }
 
-    return _seedOutcome(
-      () => switch (kind) {
-        ProxyFileImportKind.wireguardConf => _seedFromWireguardConf(
-          text,
-          fileName: file.name,
-        ),
-        ProxyFileImportKind.singboxOutboundJson => _seedFromSingboxOutboundJson(
-          text,
-          fileName: file.name,
-        ),
-      },
-      logMessage: 'Invalid proxy import file ${file.name} ($kind)',
+    final logMessage = 'Invalid proxy import file ${file.name} ($kind)';
+    return switch (kind) {
+      ProxyFileImportKind.wireguardConf => _seedOutcome(
+        () => _seedFromWireguardConf(text, fileName: file.name),
+        logMessage: logMessage,
+      ),
+      ProxyFileImportKind.singboxOutboundJson => await _consumeSingboxJson(
+        text,
+        fileName: file.name,
+        defaultName: defaultName,
+        logMessage: logMessage,
+      ),
+    };
+  }
+
+  /// One proxy from sing-box JSON goes to the editor; several are validated
+  /// and imported as they are.
+  Future<ProxyInputOutcome> _consumeSingboxJson(
+    String text, {
+    required String? fileName,
+    required ProxyImportDefaultName defaultName,
+    required String logMessage,
+  }) async {
+    final SingboxJsonSeeds parsed;
+    try {
+      parsed = seedsFromSingboxJson(
+        text,
+        fallbackName: fileName == null ? null : _stripExtension(fileName),
+      );
+    } on FormatException catch (error, stackTrace) {
+      logger.e(logMessage, error: error, stackTrace: stackTrace);
+      return ProxyInputError(error);
+    }
+
+    final SingboxJsonSeeds(:seeds, :skipped) = parsed;
+    if (seeds.length == 1 && skipped == 0) return ProxyInputSeed(seeds.single);
+    return await _importSeeds(
+      seeds,
+      skipped: skipped,
+      defaultName: defaultName,
     );
+  }
+
+  /// Validates and stores each of [seeds]; one that fails for any reason is
+  /// counted in [ProxyInputImportedMany.skipped], on top of the [skipped] the
+  /// config already had.
+  ///
+  /// A failure is per proxy, never for the whole import: by the time one
+  /// fails, the ones before it are stored, and an error that escaped here
+  /// said nothing about them.
+  Future<ProxyInputOutcome> _importSeeds(
+    List<ProxyProfileSeed> seeds, {
+    required int skipped,
+    required ProxyImportDefaultName defaultName,
+  }) async {
+    final created = <ProxyProfile>[];
+    final notes = <ImportedProfileNote>[];
+    var skippedCount = skipped;
+
+    for (final (index, seed) in seeds.indexed) {
+      final name = seed.name ?? defaultName(index + 1);
+      try {
+        if (await _importSeed(seed, name: name) case final profile?) {
+          created.add(profile);
+          for (final note in seed.notes) {
+            notes.add((profileName: profile.name, note: note));
+          }
+        } else {
+          skippedCount += 1;
+        }
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to import proxy "$name"',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        skippedCount += 1;
+      }
+    }
+
+    return ProxyInputImportedMany(created, skipped: skippedCount, notes: notes);
+  }
+
+  /// [seed] stored as a profile, or null when it does not validate.
+  Future<ProxyProfile?> _importSeed(
+    ProxyProfileSeed seed, {
+    required String name,
+  }) async {
+    final spec = singboxProxyFormSpecs[seed.type]!;
+    if (spec.validate(seed.values) != null) return null;
+
+    final configJson = spec.toConfigJson(
+      seed.values,
+      baseConfigJson: seed.baseConfigJson,
+    );
+    final secretJson = spec.toSecretJson(
+      seed.values,
+      baseConfigJson: seed.baseConfigJson,
+    );
+
+    // What the editor checks before saving, so a bulk import cannot store a
+    // profile the editor would have refused.
+    final validationMessage = await ref
+        .read(singboxProxyRuntimeRepositoryProvider.notifier)
+        .validateProfileDraft(
+          ProxyProfile(
+            id: uuid.v4(),
+            name: name,
+            type: seed.type,
+            configJson: configJson,
+            dnsOverrideJson: seed.dnsOverrideJson,
+            autostart: false,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          secretJson: secretJson,
+        );
+    if (validationMessage != null) {
+      logger.w('Skipped imported proxy "$name": $validationMessage');
+      return null;
+    }
+
+    return await ref
+        .read(singboxProxyProfilesRepositoryProvider.notifier)
+        .createProfile(
+          name: name,
+          type: seed.type,
+          configJson: configJson,
+          secretJson: secretJson,
+          dnsOverrideJson: seed.dnsOverrideJson,
+        );
   }
 
   Future<ProxyInputOutcome> _consumeShareUri(String text) async {
@@ -143,7 +307,7 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
         error: error,
         stackTrace: stackTrace,
       );
-      return ProxyInputError(error.message);
+      return ProxyInputError(error);
     }
   }
 
@@ -155,7 +319,7 @@ class ProxyInputConsumer extends _$ProxyInputConsumer {
       return ProxyInputSeed(createSeed());
     } on FormatException catch (error, stackTrace) {
       logger.e(logMessage, error: error, stackTrace: stackTrace);
-      return ProxyInputError(error.message);
+      return ProxyInputError(error);
     }
   }
 
@@ -177,40 +341,22 @@ ProxyProfileSeed _seedFromWireguardConf(
   final dnsOverrideJson = dnsAddress == null
       ? null
       : jsonEncode(ProxyDnsOverride(remoteServerAddress: dnsAddress).toJson());
+  final extraDnsServers = imported.extraDnsServers;
+  final splitTunnel = imported.splitTunnelAllowedIps;
+
   return ProxyProfileSeed(
     type: SingboxProxyProfileType.wireguard,
     name: _stripExtension(fileName),
     values: imported.values,
     dnsOverrideJson: dnsOverrideJson,
-  );
-}
-
-ProxyProfileSeed _seedFromSingboxOutboundJson(
-  String text, {
-  required String fileName,
-}) {
-  final decoded = jsonDecode(text);
-  if (decoded is! Map<String, dynamic>) {
-    throw const FormatException('Expected a sing-box outbound JSON object.');
-  }
-  final outboundType = decoded['type'];
-  if (outboundType is! String) {
-    throw const FormatException(
-      'Outbound JSON is missing a top-level "type" field.',
-    );
-  }
-  final spec = singboxProxyFormSpecs.values.firstWhere(
-    (entry) => entry.outboundType == outboundType,
-    orElse: () => throw FormatException(
-      'No structured form for outbound type "$outboundType". '
-      'Use Custom Outbound JSON instead.',
-    ),
-  );
-  final values = spec.valuesFromJson(configJson: jsonEncode(decoded));
-  return ProxyProfileSeed(
-    type: spec.type,
-    name: (decoded['tag'] as String?) ?? _stripExtension(fileName),
-    values: values,
+    notes: [
+      if (dnsAddress != null && extraDnsServers.isNotEmpty)
+        ProxyImportExtraDnsServers(
+          used: imported.dnsServers.first,
+          dropped: extraDnsServers,
+        ),
+      if (splitTunnel != null) ProxyImportSplitTunnel(splitTunnel),
+    ],
   );
 }
 

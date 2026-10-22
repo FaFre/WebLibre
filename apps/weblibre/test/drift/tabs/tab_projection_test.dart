@@ -141,6 +141,43 @@ void main() {
       );
     });
 
+    // The projection above once came at the price of the result: the narrowed
+    // query returned null for every tab, and nothing checked what it returned.
+    test('getTabContainerData still returns the container', () async {
+      await db.containerDao.addContainer(
+        ContainerData(
+          id: 'work',
+          name: 'Work',
+          color: Colors.blue,
+          orderKey: 'work',
+          metadata: ContainerMetadata.withDefaults(contextualIdentity: 'work'),
+        ),
+      );
+      await db.tabDao.insertTab(
+        'in-container',
+        source: TabSource.manual,
+        parentId: const Value(null),
+        containerId: const Value('work'),
+      );
+      await db.tabDao.insertTab(
+        'unassigned',
+        source: TabSource.manual,
+        parentId: const Value(null),
+      );
+
+      final container = await db.tabDao
+          .getTabContainerData('in-container')
+          .getSingleOrNull();
+      expect(container?.id, 'work');
+      expect(container?.name, 'Work');
+      expect(container?.metadata.contextualIdentity, 'work');
+
+      expect(
+        await db.tabDao.getTabContainerData('unassigned').getSingleOrNull(),
+        isNull,
+      );
+    });
+
     test('watchTabDbData selects no content columns', () async {
       // Watched for as long as the tab menu or parent picker is open, so it
       // re-runs on every write to `tab`.

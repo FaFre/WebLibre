@@ -67,6 +67,66 @@ void main() {
     },
   );
 
+  testWidgets(
+    'prompts for a profile whose endpoint only an ERROR state still names',
+    (tester) async {
+      // After a failed start native keeps the last endpoints in its ERROR
+      // state, with their instance closed. Taken as started, the tab reloaded
+      // into the block every ten seconds and nothing ever asked.
+      final runtimeRepository = _ErrorRuntimeRepository(
+        initial: SingboxProxyRuntimeState(
+          status: SingboxProxyRuntimeStatus.error,
+          endpoints: [_endpoint('profile-1')],
+          message: 'start failed',
+        ),
+      );
+      final container = ContainerData(
+        id: 'container-1',
+        color: Colors.blue,
+        orderKey: 'a',
+        metadata: ContainerMetadata.withDefaults(
+          proxyConnectionId: const SingboxProxyConnectionId('profile-1'),
+        ),
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            singboxProxyRuntimeRepositoryProvider.overrideWith(
+              () => runtimeRepository,
+            ),
+            proxyConnectionOptionsProvider.overrideWith(
+              (ref) => [
+                ProxyConnectionOption(
+                  id: const SingboxProxyConnectionId('profile-1'),
+                  title: 'Mullvad',
+                  profileType: SingboxProxyProfileType.socks,
+                ),
+              ],
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: _EnsureProxyHarness(container: container),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open container'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Start Proxy Connection?'), findsOneWidget);
+
+      await tester.tap(find.text('Start'));
+      await tester.pumpAndSettle();
+
+      expect(runtimeRepository.startedProfileIds, ['profile-1']);
+      expect(find.text('result:true'), findsOneWidget);
+    },
+  );
+
   testWidgets('resolves sing-box prompt title while profile options load', (
     tester,
   ) async {
@@ -162,11 +222,27 @@ class _EnsureProxyHarnessState extends ConsumerState<_EnsureProxyHarness> {
   }
 }
 
+SingboxProxyRuntimeEndpoint _endpoint(String profileId) {
+  return SingboxProxyRuntimeEndpoint(
+    profileId: SingboxProxyConnectionId(profileId).encode(),
+    host: '127.0.0.1',
+    port: 1080,
+    username: '',
+    password: '',
+  );
+}
+
 class _ErrorRuntimeRepository extends SingboxProxyRuntimeRepository {
+  /// The state the runtime reports; it failed to load when null.
+  final SingboxProxyRuntimeState? initial;
+
   final startedProfileIds = <String>[];
+
+  _ErrorRuntimeRepository({this.initial});
 
   @override
   Future<SingboxProxyRuntimeState> build() {
+    if (initial case final initial?) return Future.value(initial);
     return Future<SingboxProxyRuntimeState>.error(StateError('runtime failed'));
   }
 
@@ -178,15 +254,7 @@ class _ErrorRuntimeRepository extends SingboxProxyRuntimeRepository {
     startedProfileIds.add(profileId);
     return SingboxProxyRuntimeState(
       status: SingboxProxyRuntimeStatus.running,
-      endpoints: [
-        SingboxProxyRuntimeEndpoint(
-          profileId: const SingboxProxyConnectionId('profile-1').encode(),
-          host: '127.0.0.1',
-          port: 1080,
-          username: '',
-          password: '',
-        ),
-      ],
+      endpoints: [_endpoint('profile-1')],
     );
   }
 }

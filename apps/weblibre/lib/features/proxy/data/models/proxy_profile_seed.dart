@@ -32,13 +32,59 @@ class ProxyProfileSeed with FastEquatable {
   final Map<String, String> values;
   final String? dnsOverrideJson;
 
+  /// The imported JSON the form's values are saved over, so keys the form has
+  /// no field for survive the import. Null when the source was not JSON.
+  final String? baseConfigJson;
+
+  /// What the import had to leave out or wants the user to know before
+  /// saving. Shown above the form.
+  final List<ProxyImportNote> notes;
+
   ProxyProfileSeed({
     required this.type,
     this.name,
     this.values = const {},
     this.dnsOverrideJson,
+    this.baseConfigJson,
+    this.notes = const [],
   });
 
   @override
-  List<Object?> get hashParameters => [type, name, values, dnsOverrideJson];
+  List<Object?> get hashParameters => [
+    type,
+    name,
+    values,
+    dnsOverrideJson,
+    baseConfigJson,
+    notes,
+  ];
+}
+
+/// Something an import could not carry over as it was, kept as data and worded
+/// where it is shown.
+sealed class ProxyImportNote with FastEquatable {
+  ProxyImportNote();
+}
+
+/// The config named more DNS servers than a profile holds; only the first is
+/// used.
+class ProxyImportExtraDnsServers extends ProxyImportNote {
+  final String used;
+  final List<String> dropped;
+
+  ProxyImportExtraDnsServers({required this.used, required this.dropped});
+
+  @override
+  List<Object?> get hashParameters => [used, dropped];
+}
+
+/// The tunnel carries only some address ranges, so sites outside them cannot
+/// be reached through it.
+class ProxyImportSplitTunnel extends ProxyImportNote {
+  final List<String> allowedIps;
+
+  ProxyImportSplitTunnel(this.allowedIps);
+
+  @override
+  List<Object?> get hashParameters => [allowedIps];
 }

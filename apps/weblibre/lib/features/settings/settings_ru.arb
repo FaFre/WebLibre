@@ -1066,5 +1066,8 @@
   "settings_trackerStatisticsNothingRecorded": "Заблокированные трекеры пока не записаны.",
   "settings_trackerStatisticsLastSevenDays": "Последние 7 дней",
   "settings_trackerStatisticsNoneLastSevenDays": "За последние 7 дней трекеры не блокировались.",
-  "settings_trackerStatisticsLoadFailed": "Не удалось загрузить статистику трекеров."
+  "settings_trackerStatisticsLoadFailed": "Не удалось загрузить статистику трекеров.",
+  "settings_containersByRecentUseTitle": "Сначала недавно использованные контейнеры",
+  "settings_containersByRecentUseKeywords": "порядок контейнеров, сортировка контейнеров, недавние контейнеры, последние использованные, недавно использованные, аккордеон, container order, recently used",
+  "settings_containersByRecentUseSubtitle": "Только для «Аккордеона»: последний использованный контейнер перемещается в начало. Закреплённые контейнеры остаются перед ним"
 }

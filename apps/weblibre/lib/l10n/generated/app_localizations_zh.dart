@@ -5933,17 +5933,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String proxy_latencyMilliseconds(int ms) {
-    return '$ms 毫秒';
+    return 'HTTP $ms 毫秒';
   }
 
   @override
-  String proxy_latencyHttpStatusTooltip(int statusCode, int ms) {
-    return 'HTTP $statusCode，耗时 $ms 毫秒';
+  String proxy_latencyHttpStatusTooltip(String host, int statusCode, int ms) {
+    return '通过此连接向 $host 发出的网页请求耗时 $ms 毫秒（HTTP $statusCode）。该时间包含服务器到该网站的路程，因此比隧道本身的延迟更长。';
   }
+
+  @override
+  String get proxy_conditionNotResponding => '无响应';
+
+  @override
+  String get proxy_conditionStartRetrying => '无法启动 · 正在重试';
+
+  @override
+  String get proxy_conditionStartFailed => '无法启动';
+
+  @override
+  String proxy_sharedPrivateKeyWarning(int count, String names) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$names 使用了相同的私钥。',
+    );
+    return '已保存。${_temp0}WireGuard 服务器会将共用同一密钥的配置视为同一客户端，因此同时运行它们会导致彼此断开连接。';
+  }
+
+  @override
+  String get proxy_connectionStarting => '正在启动…';
 
   @override
   String proxy_startProxyFailed(String error) {
     return '无法启动代理：$error';
+  }
+
+  @override
+  String proxy_profileCouldNotStart(String name, String reason) {
+    return '$name 无法启动：$reason';
+  }
+
+  @override
+  String proxy_profileRejected(String name, String reason) {
+    return '$name 无法使用：$reason';
   }
 
   @override
@@ -6157,11 +6189,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '包含 [Interface]/[Peer] 的 .conf 文件';
 
   @override
-  String get proxy_importFileSingboxJsonTitle => 'sing-box 出站 JSON';
+  String get proxy_importFileSingboxJsonTitle => 'sing-box JSON';
 
   @override
-  String get proxy_importFileSingboxJsonSubtitle =>
-      'Shadowsocks、Trojan、VMess、VLESS、Hysteria…';
+  String get proxy_importFileSingboxJsonSubtitle => '单个出站、单个端点或完整配置';
 
   @override
   String proxy_importedProfileNamed(String name) {
@@ -6207,6 +6238,146 @@ class AppLocalizationsZh extends AppLocalizations {
       other: '已导入 $count 个配置',
     );
     return '$_temp0';
+  }
+
+  @override
+  String proxy_importedProfilesSkipped(int count, int skipped) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已导入 $count 个配置。',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      skipped,
+      locale: localeName,
+      other: '配置中有 $skipped 个代理无法使用。',
+    );
+    return '$_temp0$_temp1';
+  }
+
+  @override
+  String proxy_importNoUsableProfiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此配置中的 $count 个代理均无法使用。',
+      one: '此配置中的代理无法使用。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importFileUnreadable(String error) {
+    return '无法读取文件：$error';
+  }
+
+  @override
+  String proxy_importInvalidJson(String error) {
+    return '这不是有效的 JSON：$error';
+  }
+
+  @override
+  String get proxy_importNotJsonObject => '应为 sing-box JSON 对象。';
+
+  @override
+  String get proxy_importNoOutbounds =>
+      '应为 sing-box 出站或端点，或包含“outbounds”或“endpoints”的配置。';
+
+  @override
+  String proxy_importNotAList(String key) {
+    return 'sing-box 配置中的“$key”必须是列表。';
+  }
+
+  @override
+  String get proxy_importNoImportableProxy =>
+      '此 sing-box 配置中没有 WebLibre 可导入的代理。';
+
+  @override
+  String get proxy_importMissingType => '该 sing-box 出站缺少“type”。';
+
+  @override
+  String proxy_importUnsupportedType(String type) {
+    return '出站类型“$type”没有对应的表单。请改用“自定义出站”。';
+  }
+
+  @override
+  String proxy_importDetourThroughOtherOutbound(String tag) {
+    return '此代理通过其配置中的另一个出站“$tag”进行连接。WebLibre 无法串联代理，而直接连接会向该服务器暴露你的 IP 地址。';
+  }
+
+  @override
+  String proxy_importUnresolvedDetour(String tag) {
+    return '此代理通过“$tag”进行连接，而它定义在配置的其他位置。请导入完整配置，以便 WebLibre 检查“$tag”的作用。';
+  }
+
+  @override
+  String proxy_importEndpointWithoutPeers(String brand) {
+    return '$brand 端点没有对端。';
+  }
+
+  @override
+  String proxy_importEndpointWithSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$brand 端点有 $count 个对端。一个配置只连接一个对端；请将每个对端分别导入为单独的配置。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importPeerNotObject(String brand) {
+    return '此配置中的某个 $brand 对端不是 JSON 对象。';
+  }
+
+  @override
+  String proxy_importWireguardMissingSections(String brand) {
+    return '$brand 配置需要包含 [Interface] 和 [Peer] 两个部分。';
+  }
+
+  @override
+  String proxy_importWireguardSeveralInterfaces(String brand) {
+    return '此 $brand 配置包含多个 [Interface] 部分。';
+  }
+
+  @override
+  String proxy_importWireguardSeveralPeers(int count, String brand) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此 $brand 配置包含 $count 个 [Peer] 部分。一个配置只连接一个对端；请将配置拆分为每个对端一个文件。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String proxy_importWireguardEmptySection(String brand) {
+    return '此 $brand 配置中有一个没有名称的部分。';
+  }
+
+  @override
+  String proxy_importWireguardEntryOutsideSection(String brand) {
+    return '$brand 配置的每一行都必须位于某个部分内。';
+  }
+
+  @override
+  String proxy_importWireguardInvalidLine(String brand, String line) {
+    return '$brand 配置中的这一行无效：$line';
+  }
+
+  @override
+  String proxy_importWireguardInvalidEndpoint(String brand) {
+    return '$brand 端点必须为 host:port 格式。';
+  }
+
+  @override
+  String proxy_importNoteExtraDnsServers(String used, String dropped) {
+    return '此连接通过 $used 解析域名。配置中还包含以下未使用的服务器：$dropped。';
+  }
+
+  @override
+  String proxy_importNoteSplitTunnel(String ranges) {
+    return '只有以下地址会经过此隧道：$ranges。无法通过此连接访问其他网站。';
   }
 
   @override
@@ -6612,6 +6783,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get proxy_fieldPeerPublicKey => '对端公钥';
 
   @override
+  String get proxy_fieldAllowedIps => '允许的 IP';
+
+  @override
+  String get proxy_fieldAllowedIpsHelper =>
+      '经过隧道发送的地址范围，每行一个。留空则全部经过隧道。无法通过此连接访问这些范围之外的网站。';
+
+  @override
   String get proxy_fieldWireguardPrivateKey => '私钥';
 
   @override
@@ -6689,6 +6867,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String proxy_fieldErrorInvalidCidr(String field, String value) {
     return '“$field”必须包含 IP 地址（可带 /前缀长度）——“$value”不是有效地址。';
+  }
+
+  @override
+  String proxy_fieldErrorWireguardKey(String field) {
+    return '“$field”不是有效的 WireGuard 密钥。密钥应为 44 个字符，并以“=”结尾。';
   }
 
   @override
@@ -9983,16 +10166,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_historyFallbackSubtitle => '没有可用的标签块时使用浏览历史建议';
 
   @override
-  String get settings_containersByRecentUseTitle =>
-      'Recently Used Containers First';
+  String get settings_containersByRecentUseTitle => '最近使用的容器优先';
 
   @override
   String get settings_containersByRecentUseKeywords =>
-      'container order, sort containers, recent containers, last used, most recently used, accordion';
+      '容器顺序,容器排序,最近容器,最后使用,最近使用,手风琴,container order,recently used';
 
   @override
   String get settings_containersByRecentUseSubtitle =>
-      'Accordion only: the container you used last moves to the front. Pinned containers stay ahead of it';
+      '仅限手风琴：你最后使用的容器会移到最前面。已固定的容器仍排在它前面';
 
   @override
   String get settings_showTitlesTitle => '在快速标签页切换栏中显示标题';

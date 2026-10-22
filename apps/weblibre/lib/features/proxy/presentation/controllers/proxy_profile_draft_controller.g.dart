@@ -25,6 +25,10 @@ abstract class _$ProxyProfileDraftStateCWProxy {
 
   ProxyProfileDraftState customSecretJson(String customSecretJson);
 
+  ProxyProfileDraftState baseConfigJson(String? baseConfigJson);
+
+  ProxyProfileDraftState baseSecretJson(String? baseSecretJson);
+
   ProxyProfileDraftState autostart(bool autostart);
 
   ProxyProfileDraftState isSaving(bool isSaving);
@@ -48,6 +52,8 @@ abstract class _$ProxyProfileDraftStateCWProxy {
     String? dnsOverrideJson,
     String customConfigJson,
     String customSecretJson,
+    String? baseConfigJson,
+    String? baseSecretJson,
     bool autostart,
     bool isSaving,
     bool secretLoaded,
@@ -97,6 +103,14 @@ class _$ProxyProfileDraftStateCWProxyImpl
       call(customSecretJson: customSecretJson);
 
   @override
+  ProxyProfileDraftState baseConfigJson(String? baseConfigJson) =>
+      call(baseConfigJson: baseConfigJson);
+
+  @override
+  ProxyProfileDraftState baseSecretJson(String? baseSecretJson) =>
+      call(baseSecretJson: baseSecretJson);
+
+  @override
   ProxyProfileDraftState autostart(bool autostart) =>
       call(autostart: autostart);
 
@@ -125,6 +139,8 @@ class _$ProxyProfileDraftStateCWProxyImpl
     Object? dnsOverrideJson = const $CopyWithPlaceholder(),
     Object? customConfigJson = const $CopyWithPlaceholder(),
     Object? customSecretJson = const $CopyWithPlaceholder(),
+    Object? baseConfigJson = const $CopyWithPlaceholder(),
+    Object? baseSecretJson = const $CopyWithPlaceholder(),
     Object? autostart = const $CopyWithPlaceholder(),
     Object? isSaving = const $CopyWithPlaceholder(),
     Object? secretLoaded = const $CopyWithPlaceholder(),
@@ -170,6 +186,14 @@ class _$ProxyProfileDraftStateCWProxyImpl
           ? _value.customSecretJson
           // ignore: cast_nullable_to_non_nullable
           : customSecretJson as String,
+      baseConfigJson: baseConfigJson == const $CopyWithPlaceholder()
+          ? _value.baseConfigJson
+          // ignore: cast_nullable_to_non_nullable
+          : baseConfigJson as String?,
+      baseSecretJson: baseSecretJson == const $CopyWithPlaceholder()
+          ? _value.baseSecretJson
+          // ignore: cast_nullable_to_non_nullable
+          : baseSecretJson as String?,
       autostart: autostart == const $CopyWithPlaceholder() || autostart == null
           ? _value.autostart
           // ignore: cast_nullable_to_non_nullable
@@ -251,7 +275,7 @@ final class ProxyProfileDraftProvider
   }
 }
 
-String _$proxyProfileDraftHash() => r'16d51df4446ff0a04c2e2803e0b089f786346160';
+String _$proxyProfileDraftHash() => r'4131992a23dcb46db339fa9a81a42d00340715db';
 
 final class ProxyProfileDraftFamily extends $Family
     with

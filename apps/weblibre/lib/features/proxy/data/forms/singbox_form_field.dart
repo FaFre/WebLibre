@@ -62,6 +62,12 @@ class SingboxProxyFormField {
   /// dropdown and enforced during validation.
   final List<String>? allowedValues;
 
+  /// Holds a WireGuard key: standard base64 of exactly 32 bytes. Checked on
+  /// save, because sing-box otherwise only rejects a mistyped key when the
+  /// profile starts — and a start fails as a whole, every other profile in it
+  /// included.
+  final bool wireguardKey;
+
   const SingboxProxyFormField({
     required this.key,
     String? labelKey,
@@ -72,6 +78,7 @@ class SingboxProxyFormField {
     this.minValue,
     this.maxValue,
     this.allowedValues,
+    this.wireguardKey = false,
   }) : labelKey = labelKey ?? key;
 
   bool get isSecret => kind == SingboxFieldKind.secret;

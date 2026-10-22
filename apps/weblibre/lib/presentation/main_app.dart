@@ -92,20 +92,26 @@ class MainApp extends HookConsumerWidget {
                 ),
               );
             },
-            home: Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(),
-                    if (initializationState.stage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(initializationState.stage!.label(context)),
-                      ),
-                  ],
-                ),
-              ),
+            home: Builder(
+              builder: (context) {
+                return Scaffold(
+                  body: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        if (initializationState.stage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              initializationState.stage!.label(context),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           );
         }

@@ -24,6 +24,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
+import 'package:weblibre/features/proxy/domain/services/singbox_start_retry.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
@@ -185,9 +186,16 @@ class ProxyAutostartService extends _$ProxyAutostartService {
 
   Future<void> _runSingboxStart(List<String> profileIds) async {
     try {
+      // Additive, never the authoritative `startProfiles`. Startup is not the
+      // only thing bringing profiles up in this window: a Custom Tab or PWA
+      // launch is served by [ProxyDemandService] from the same `finally` in
+      // main.dart, and it usually reaches the runtime first. An authoritative
+      // start landing after it stopped the profile the launch had just been
+      // given — its page then failed with nothing left to start it again
+      // (issue #670).
       await ref
           .read(singboxProxyRuntimeRepositoryProvider.notifier)
-          .startProfiles(profileIds);
+          .ensureProfilesStarted(profileIds);
       logger.i('Autostarted sing-box proxy profiles: $profileIds');
     } catch (error, stackTrace) {
       logger.e(
@@ -195,12 +203,50 @@ class ProxyAutostartService extends _$ProxyAutostartService {
         error: error,
         stackTrace: stackTrace,
       );
+      if (error is SingboxProfilesRejected) {
+        // The rest are running; only the refused ones are down, for good.
+        ref
+            .read(singboxStartRetriesProvider.notifier)
+            .failed(error.rejections.keys, permanent: true);
+      } else if (profileIds.length > 1) {
+        await _startSingboxProfilesOneByOne(profileIds);
+      } else {
+        ref.read(singboxStartRetriesProvider.notifier).failed(profileIds);
+      }
     } finally {
       _singboxStart = null;
       // Settled, whichever way it went. A start that threw is not one anything
       // is still waiting for.
       _singboxPending = const {};
       _publishPending();
+    }
+  }
+
+  /// Brings [profileIds] up one at a time, after starting them together
+  /// failed.
+  ///
+  /// The runtime starts or fails as a whole, so one autostart profile that
+  /// cannot come up — a WireGuard peer that does not resolve, say — kept every
+  /// other one down with it (issue #669). Started one by one, each failure
+  /// costs only its own profile: the runtime puts back what was already up.
+  /// Only reached when the joint start failed, so a healthy startup still
+  /// restarts the runtime once.
+  Future<void> _startSingboxProfilesOneByOne(List<String> profileIds) async {
+    final runtime = ref.read(singboxProxyRuntimeRepositoryProvider.notifier);
+    for (final profileId in profileIds) {
+      try {
+        await runtime.ensureProfilesStarted([profileId]);
+        logger.i('Autostarted sing-box proxy profile $profileId on its own');
+      } catch (error, stackTrace) {
+        logger.e(
+          'Failed to autostart sing-box proxy profile $profileId',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        ref.read(singboxStartRetriesProvider.notifier).failed([
+          profileId,
+        ], permanent: error is SingboxProfilesRejected);
+      }
     }
   }
 

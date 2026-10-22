@@ -2,6 +2,7 @@ package eu.weblibre.flutter_singbox_proxy
 
 import android.content.Context
 import java.lang.reflect.InvocationHandler
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.util.concurrent.ConcurrentHashMap
@@ -11,6 +12,8 @@ open class LibboxRuntime(
     private val context: Context,
     private val dohResolver: PlatformDohResolver = PlatformDohResolver(),
 ) {
+    private val networkMonitor = PlatformNetworkMonitor(context)
+
     private var setupComplete = false
     private var commandServer: Any? = null
     private var commandServerStarted = false
@@ -58,6 +61,22 @@ open class LibboxRuntime(
         bootstrapAnnounced.set(false)
     }
 
+    /**
+     * Whether [host] has an address, asked the way sing-box would ask it: the
+     * bootstrap DoH resolver. Null when there is no resolver to ask.
+     *
+     * Blocks for up to one DoH exchange per record type; call it off the
+     * runtime thread.
+     */
+    open fun resolvesViaBootstrap(host: String): Boolean? {
+        val url = bootstrapDohUrl ?: return null
+        return listOf(DnsWire.TYPE_A, DnsWire.TYPE_AAAA).any { type ->
+            runCatching {
+                DnsWire.hasAnswer(dohResolver.exchange(url, DnsWire.query(host, type)))
+            }.getOrDefault(false)
+        }
+    }
+
     open fun isAvailable(): Boolean = runCatching {
         Class.forName(LIBBOX_CLASS)
     }.isSuccess
@@ -92,12 +111,46 @@ open class LibboxRuntime(
         }
     }
 
+    /**
+     * sing-box's own verdict on [configJson]: the config is parsed and every
+     * component constructed, but nothing is started — no socket bound, no
+     * name resolved. Null when sing-box accepts it, its message otherwise.
+     *
+     * Only a refusal from sing-box counts. A check that cannot run at all — a
+     * libbox build without the call, a setup failure — accepts: it exists to
+     * keep a broken profile out of a start, and must never be the reason a
+     * working one is refused.
+     */
+    @Synchronized
+    open fun checkConfig(configJson: String): String? {
+        val check = runCatching {
+            ensureSetup()
+            Class.forName(LIBBOX_CLASS).getMethod("checkConfig", String::class.java)
+        }.getOrElse { error ->
+            logSink?.invoke(
+                3,
+                "Could not check a sing-box config: " +
+                    "${error.javaClass.simpleName}: ${error.message ?: "no message"}",
+            )
+            return null
+        }
+
+        return try {
+            check.invoke(null, configJson)
+            null
+        } catch (error: java.lang.reflect.InvocationTargetException) {
+            val cause = error.targetException ?: error
+            cause.message ?: cause.javaClass.simpleName
+        }
+    }
+
     @Synchronized
     open fun stopService() {
         commandServer?.let { server ->
             runCatching { invoke(server, "closeService") }
         }
         disconnectLogClient()
+        networkMonitor.stop()
     }
 
     @Synchronized
@@ -108,6 +161,9 @@ open class LibboxRuntime(
         }
         commandServer = null
         commandServerStarted = false
+        // sing-box closes its monitor when the instance closes; this only
+        // makes sure no network callback outlives the runtime if it did not.
+        networkMonitor.stop()
     }
 
     private fun ensureSetup() {
@@ -185,19 +241,25 @@ open class LibboxRuntime(
             when (method.name) {
                 "autoDetectInterfaceControl",
                 "clearDNSCache",
-                "closeDefaultInterfaceMonitor",
                 "closeNeighborMonitor",
                 "registerMyInterface",
                 "sendNotification",
-                "startDefaultInterfaceMonitor",
                 "startNeighborMonitor" -> null
+                "startDefaultInterfaceMonitor" -> {
+                    args?.firstOrNull()?.let(::startDefaultInterfaceMonitor)
+                    null
+                }
+                "closeDefaultInterfaceMonitor" -> {
+                    networkMonitor.stop(owner = args?.firstOrNull()?.let(::goObjectKey))
+                    null
+                }
                 "findConnectionOwner" -> newInstance(CONNECTION_OWNER_CLASS).also { owner ->
                     invoke(owner, "setUserId", -1)
                     invoke(owner, "setUserName", "")
                     invoke(owner, "setProcessPath", "")
                     invoke(owner, "setAndroidPackageNames", emptyStringIterator())
                 }
-                "getInterfaces" -> emptyIterator(NETWORK_INTERFACE_ITERATOR_CLASS)
+                "getInterfaces" -> networkInterfaceIterator(networkMonitor.interfaces())
                 "includeAllNetworks",
                 "underNetworkExtension",
                 "usePlatformAutoDetectInterfaceControl",
@@ -438,6 +500,86 @@ open class LibboxRuntime(
     private fun elapsedMillis(startedAt: Long): Long =
         (System.nanoTime() - startedAt) / 1_000_000
 
+    /**
+     * Reports the default network to sing-box's [listener] for as long as the
+     * runtime instance that handed it over runs. sing-box stops the monitor
+     * through `closeDefaultInterfaceMonitor` when that instance closes.
+     */
+    /**
+     * What identifies the Go object behind [proxy]: gomobile wraps a Go object
+     * in a new Java proxy every time it crosses over, so the same listener
+     * arrives as a different Java object each time, but always with the same
+     * `refnum`. Null when the proxy does not carry one.
+     */
+    private fun goObjectKey(proxy: Any): Any? = runCatching {
+        proxy.javaClass.getDeclaredField("refnum").apply { isAccessible = true }.getInt(proxy)
+    }.getOrNull()
+
+    private fun startDefaultInterfaceMonitor(listener: Any) {
+        networkMonitor.start(owner = goObjectKey(listener)) { defaultInterface ->
+            runCatching {
+                invoke(
+                    listener,
+                    "updateDefaultInterface",
+                    defaultInterface?.name ?: "",
+                    // -1 is libbox's "no default interface".
+                    defaultInterface?.index ?: -1,
+                    defaultInterface?.expensive ?: false,
+                    false,
+                )
+            }.onFailure { error ->
+                logSink?.invoke(
+                    3,
+                    "Could not report the default network to sing-box: " +
+                        "${error.javaClass.simpleName}: ${error.message ?: "no message"}",
+                )
+            }
+        }
+    }
+
+    private fun networkInterfaceIterator(interfaces: List<PlatformNetworkInterface>): Any {
+        val iteratorInterface = Class.forName(NETWORK_INTERFACE_ITERATOR_CLASS)
+        val values = interfaces.map(::libboxNetworkInterface).iterator()
+        return Proxy.newProxyInstance(
+            iteratorInterface.classLoader,
+            arrayOf(iteratorInterface),
+        ) { _, method, _ ->
+            when (method.name) {
+                "hasNext" -> values.hasNext()
+                "next" -> if (values.hasNext()) values.next() else null
+                else -> defaultValue(method.returnType)
+            }
+        }
+    }
+
+    private fun libboxNetworkInterface(networkInterface: PlatformNetworkInterface): Any =
+        newInstance(NETWORK_INTERFACE_CLASS).also { target ->
+            invoke(target, "setIndex", networkInterface.index)
+            invoke(target, "setMTU", networkInterface.mtu)
+            invoke(target, "setName", networkInterface.name)
+            invoke(target, "setAddresses", stringIterator(networkInterface.addresses))
+            invoke(target, "setFlags", networkInterface.flags)
+            invoke(target, "setType", networkInterface.type)
+            invoke(target, "setDNSServer", stringIterator(networkInterface.dnsServers))
+            invoke(target, "setMetered", networkInterface.metered)
+        }
+
+    private fun stringIterator(strings: List<String>): Any {
+        val iteratorInterface = Class.forName(STRING_ITERATOR_CLASS)
+        val values = strings.iterator()
+        return Proxy.newProxyInstance(
+            iteratorInterface.classLoader,
+            arrayOf(iteratorInterface),
+        ) { _, method, _ ->
+            when (method.name) {
+                "hasNext" -> values.hasNext()
+                "len" -> strings.size
+                "next" -> if (values.hasNext()) values.next() else null
+                else -> defaultValue(method.returnType)
+            }
+        }
+    }
+
     private fun emptyStringIterator(): Any = emptyIterator(STRING_ITERATOR_CLASS)
 
     private fun emptyIterator(interfaceName: String): Any {
@@ -459,9 +601,21 @@ open class LibboxRuntime(
         return Class.forName(className).getConstructor().newInstance()
     }
 
+    /**
+     * [Method.invoke] that throws what the method threw. Reflection wraps it
+     * in an [InvocationTargetException] whose own message is null, so every
+     * sing-box error reached Dart as "InvocationTargetException", with the
+     * actual reason buried in a "Cause:" detail.
+     */
+    private fun Method.call(target: Any?, args: Array<out Any?>): Any? = try {
+        invoke(target, *args)
+    } catch (error: InvocationTargetException) {
+        throw error.targetException ?: error
+    }
+
     private fun invoke(target: Any, methodName: String, vararg args: Any?): Any? {
         val method = findMethod(target.javaClass, methodName, args.size)
-        return method.invoke(target, *args)
+        return method.call(target, args)
     }
 
     /** Returns whether [methodName] existed and was called. */
@@ -474,7 +628,7 @@ open class LibboxRuntime(
             candidate.name == methodName && candidate.parameterTypes.size == args.size
         } ?: return false
 
-        method.invoke(target, *args)
+        method.call(target, args)
         return true
     }
 
@@ -488,7 +642,7 @@ open class LibboxRuntime(
                 candidate.name == name && candidate.parameterTypes.size == args.size
             }
             if (method != null) {
-                method.invoke(target, *args)
+                method.call(target, args)
                 return
             }
         }
@@ -504,7 +658,7 @@ open class LibboxRuntime(
                 candidate.name == name && candidate.parameterTypes.size == args.size
             }
             if (method != null) {
-                return method.invoke(target, *args)
+                return method.call(target, args)
             }
         }
         return null
@@ -571,6 +725,7 @@ open class LibboxRuntime(
         const val OVERRIDE_OPTIONS_CLASS = "io.nekohasekai.libbox.OverrideOptions"
         const val STRING_ITERATOR_CLASS = "io.nekohasekai.libbox.StringIterator"
         const val NETWORK_INTERFACE_ITERATOR_CLASS = "io.nekohasekai.libbox.NetworkInterfaceIterator"
+        const val NETWORK_INTERFACE_CLASS = "io.nekohasekai.libbox.NetworkInterface"
         const val CONNECTION_OWNER_CLASS = "io.nekohasekai.libbox.ConnectionOwner"
         const val SYSTEM_PROXY_STATUS_CLASS = "io.nekohasekai.libbox.SystemProxyStatus"
         const val WIFI_STATE_CLASS = "io.nekohasekai.libbox.WIFIState"

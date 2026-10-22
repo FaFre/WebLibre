@@ -14,6 +14,7 @@ import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeState
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeStatus
 import java.lang.reflect.InvocationTargetException
 import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -49,6 +50,18 @@ class SingboxRuntimeManager(
         message = null
     )
     private var activeProfiles = emptyList<SingboxProxyProfile>()
+
+    /**
+     * The endpoints of the last instance that ran, kept through a failed start
+     * or stop and dropped once the runtime is stopped on purpose.
+     *
+     * A failed start leaves the runtime in ERROR with its instance closed, and
+     * the app answers it by starting the profiles that were running again.
+     * Reusing only a RUNNING state's endpoints gave those profiles new ports
+     * and credentials on the way back, so everything Gecko still held for
+     * them failed to authenticate (issue #671).
+     */
+    private var lastRunningEndpoints = emptyList<SingboxProxyRuntimeEndpoint>()
     private val oversizedPacketsExplained = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /**
@@ -133,10 +146,11 @@ class SingboxRuntimeManager(
         emitLogMessage(
             SingboxProxyLogMessage(
                 level = "warn",
-                message = "Packets are too large for this network. Lower the " +
-                    "profile's MTU (1280 is safe almost everywhere; go lower, " +
-                    "around 1200, when this device is already on another VPN) " +
-                    "and restart the profile.",
+                message = "Packets are too large for this network, and the " +
+                    "profile does not allow them to be fragmented. Remove " +
+                    "\"udp_fragment\": false from the profile, or lower its MTU " +
+                    "(1200 fits almost any network, but below 1280 the tunnel " +
+                    "carries no IPv6), and restart the profile.",
                 timestamp = System.currentTimeMillis(),
                 profileId = null
             )
@@ -165,8 +179,68 @@ class SingboxRuntimeManager(
         profileId = null
     )
 
-    override suspend fun validateProfile(profile: SingboxProxyProfile): String? =
-        configBuilder.validateProfile(profile)
+    /**
+     * Whether [profile] can run: the builder's own checks first, then
+     * sing-box's verdict on a config holding only this profile.
+     *
+     * The second half is what keeps a broken profile out of a start. Every
+     * profile runs in one instance, and an instance whose config sing-box
+     * refuses does not start at all — so one bad key or address used to take
+     * every other profile down with it, and only at the moment of starting.
+     */
+    override suspend fun validateProfile(profile: SingboxProxyProfile): String? {
+        configBuilder.validateProfile(profile)?.let { return it }
+        if (!libboxRuntime.isAvailable()) return null
+
+        return withContext(runtimeDispatcher) {
+            val config = try {
+                configBuilder.build(listOf(profile), validationOptions())
+            } catch (error: IllegalArgumentException) {
+                return@withContext error.message ?: error::class.java.simpleName
+            }
+            libboxRuntime.checkConfig(config.configJson)?.let(SingboxStartFailure::describe)
+        }
+    }
+
+    /**
+     * Resolves [profile]'s peer hostnames through the bootstrap resolver of the
+     * running instance, without touching that instance.
+     *
+     * Every start rebuilds the one instance all profiles share, so a start
+     * that fails cuts every working connection for nothing. An unattended
+     * retry asks this first and leaves the runtime alone while the lookup that
+     * failed it still fails.
+     *
+     * On the IO pool rather than the runtime thread: each lookup can take a
+     * DoH exchange's full timeout, and starts must not queue behind it.
+     */
+    override suspend fun probeProfile(profile: SingboxProxyProfile): String? {
+        val hosts = PeerHostProbe.hostsOf(profile)
+        if (hosts.isEmpty()) return null
+
+        return withContext(Dispatchers.IO) {
+            hosts.firstOrNull { host ->
+                libboxRuntime.resolvesViaBootstrap(host) == false
+            }?.let { host -> "Peer address $host does not resolve" }
+        }
+    }
+
+    /**
+     * Options for checking a single profile: nothing optional, except the DNS
+     * server every real start has.
+     *
+     * The app always starts the runtime with a bootstrap URL, which brings the
+     * platform `local` server, and a profile may name that server as its
+     * `domain_resolver`. Left out, sing-box refuses such a profile with
+     * "domain resolver not found" although it runs fine. The URL itself is
+     * never dialled: a check only builds the instance.
+     */
+    private fun validationOptions() = SingboxProxyRuntimeOptions(
+        preferredBasePort = null,
+        blockUnmatchedTraffic = true,
+        bootstrapDohUrl = VALIDATION_BOOTSTRAP_DOH_URL,
+        logLevel = SingboxProxyLogLevel.WARN
+    )
 
     override suspend fun buildConfig(
         profiles: List<SingboxProxyProfile>,
@@ -234,20 +308,23 @@ class SingboxRuntimeManager(
                         null
                     )
                     state
-                }.onFailure { error ->
+                }.getOrElse { error ->
+                    val failure = SingboxStartFailure.from(error, profiles)
                     updateStateLocked(
                         SingboxProxyRuntimeStatus.ERROR,
                         previousState.endpoints,
-                        error.message ?: error::class.java.simpleName
+                        failure.message
                     )
+                    throw failure
                 }
-            }.getOrThrow()
+            }
         }
     }
 
     override suspend fun stop(profileIds: List<String>) {
         withContext(runtimeDispatcher) {
             synchronized(stateLock) {
+                val previousState = state
                 runCatching {
                     val remaining = activeProfiles.filterNot { profile ->
                         profile.id in profileIds
@@ -263,30 +340,53 @@ class SingboxRuntimeManager(
                             null
                         )
                     } else {
+                        // The remaining profiles go down with the old instance
+                        // and come back with the new one, exactly as on a
+                        // start, so this is announced the same way: published
+                        // endpoints would send requests into the reload, where
+                        // they fail, instead of having them held for it.
+                        updateStateLocked(
+                            SingboxProxyRuntimeStatus.STARTING,
+                            emptyList(),
+                            "Building sing-box config"
+                        )
                         // Partial stop keeps activeOptions.bootstrapDohUrl, so
                         // no setBootstrapDohUrl call is needed here — the
                         // libbox bridge already holds the right URL from the
                         // most recent start().
+                        val remainingOptions = optionsWithoutProfiles(
+                            activeOptions,
+                            removedProfileIds = activeProfiles
+                                .map { profile -> profile.id }
+                                .filter { id -> id in profileIds },
+                        )
                         val config = startWithConfigRetries(
                             profiles = remaining,
-                            options = activeOptions,
-                            reusableEndpoints = reusableEndpoints(state),
+                            options = remainingOptions,
+                            reusableEndpoints = reusableEndpoints(previousState),
                         )
                         activeProfiles = remaining
+                        activeOptions = remainingOptions
                         updateStateLocked(
                             SingboxProxyRuntimeStatus.RUNNING,
                             config.endpoints,
                             null
                         )
                     }
-                }.onFailure { error ->
+                }.getOrElse { error ->
+                    // A partial stop is a reload of the remaining profiles, and
+                    // fails the way a start does — a WireGuard setup error
+                    // carries the device's private key — so it is reported the
+                    // same way.
+                    val failure = SingboxStartFailure.from(error, activeProfiles)
                     updateStateLocked(
                         SingboxProxyRuntimeStatus.ERROR,
-                        state.endpoints,
-                        error.message ?: error::class.java.simpleName
+                        previousState.endpoints,
+                        failure.message
                     )
+                    throw failure
                 }
-            }.getOrThrow()
+            }
         }
     }
 
@@ -303,29 +403,78 @@ class SingboxRuntimeManager(
                         emptyList(),
                         null
                     )
-                }.onFailure { error ->
+                }.getOrElse { error ->
+                    val failure = SingboxStartFailure.stopFailure(error)
                     updateStateLocked(
                         SingboxProxyRuntimeStatus.ERROR,
                         state.endpoints,
-                        error.message ?: error::class.java.simpleName
+                        failure.message
                     )
+                    throw failure
                 }
-            }.getOrThrow()
+            }
         }
+    }
+
+    /**
+     * [options] without the DNS resolvers bound to [removedProfileIds].
+     *
+     * The options are built for the profiles a start brings up, and the DNS
+     * block routes a resolver through each of them — detoured via the
+     * profile's outbound and matched on its inbound. Reused for a smaller set,
+     * those resolvers name outbounds that no longer exist, and sing-box refuses
+     * the whole config ("outbound detour not found") after the old instance is
+     * already closed: stopping one profile took every other one down with it.
+     */
+    internal fun optionsWithoutProfiles(
+        options: SingboxProxyRuntimeOptions,
+        removedProfileIds: Collection<String>,
+    ): SingboxProxyRuntimeOptions {
+        val dnsConfig = options.dnsConfig ?: return options
+        if (removedProfileIds.isEmpty()) return options
+
+        val removedOutbounds = removedProfileIds.map(SingboxTagFormat::outboundTag).toSet()
+        val removedInbounds = removedProfileIds.map(SingboxTagFormat::inboundTag).toSet()
+        val keptServers = dnsConfig.servers.filterNot { server ->
+            server.detourTag in removedOutbounds ||
+                server.matchOutbounds.any { outbound -> outbound in removedOutbounds } ||
+                server.matchInbounds.any { inbound -> inbound in removedInbounds }
+        }
+        if (keptServers.size == dnsConfig.servers.size) return options
+
+        // With no servers left, the builder falls back to the bootstrap-only
+        // block, which is what a start with no resolvers would have had.
+        val keptDnsConfig = if (keptServers.isEmpty()) {
+            null
+        } else {
+            dnsConfig.copy(
+                servers = keptServers,
+                finalServerTag = dnsConfig.finalServerTag?.takeIf { tag ->
+                    keptServers.any { server -> server.tag == tag }
+                },
+            )
+        }
+        return options.copy(dnsConfig = keptDnsConfig)
     }
 
     override fun getState(): SingboxProxyRuntimeState = synchronized(stateLock) { state }
 
     /**
-     * Ports may only be reused while we still hold them, which is exactly the
-     * RUNNING state. The ERROR path deliberately keeps the last endpoints
-     * around for reporting, but those ports are already released — reusing
-     * them risks binding a port the OS has since handed to someone else.
+     * The endpoints a start from [from] tries to keep: the running ones, or
+     * after a failed start or stop those of the last instance that ran
+     * ([lastRunningEndpoints]).
+     *
+     * After a failure the ports are already released, and the OS may have
+     * handed one to someone else since. That costs one attempt: binding it
+     * fails, and [startWithConfigRetries] tries again on fresh ports.
      */
     private fun reusableEndpoints(
         from: SingboxProxyRuntimeState = getState(),
-    ): List<SingboxProxyRuntimeEndpoint> =
-        if (from.status == SingboxProxyRuntimeStatus.RUNNING) from.endpoints else emptyList()
+    ): List<SingboxProxyRuntimeEndpoint> = when (from.status) {
+        SingboxProxyRuntimeStatus.RUNNING -> from.endpoints
+        SingboxProxyRuntimeStatus.ERROR -> lastRunningEndpoints
+        else -> emptyList()
+    }
 
     private fun startWithConfigRetries(
         profiles: List<SingboxProxyProfile>,
@@ -390,6 +539,7 @@ class SingboxRuntimeManager(
                 activeOptions = defaultRuntimeOptions()
                 libboxRuntime.setBootstrapDohUrl(null)
                 libboxRuntime.close()
+                lastRunningEndpoints = emptyList()
                 state = SingboxProxyRuntimeState(
                     status = SingboxProxyRuntimeStatus.STOPPED,
                     endpoints = emptyList(),
@@ -405,6 +555,11 @@ class SingboxRuntimeManager(
         endpoints: List<SingboxProxyRuntimeEndpoint>,
         message: String?
     ) {
+        when (status) {
+            SingboxProxyRuntimeStatus.RUNNING -> lastRunningEndpoints = endpoints
+            SingboxProxyRuntimeStatus.STOPPED -> lastRunningEndpoints = emptyList()
+            else -> Unit
+        }
         state = SingboxProxyRuntimeState(
             status = status,
             endpoints = endpoints,
@@ -430,5 +585,6 @@ class SingboxRuntimeManager(
         const val LIBBOX_LEVEL_DEBUG = 5
         const val LIBBOX_LEVEL_TRACE = 6
         const val EMSGSIZE_MARKER = "message too long"
+        const val VALIDATION_BOOTSTRAP_DOH_URL = "https://dns.quad9.net/dns-query"
     }
 }

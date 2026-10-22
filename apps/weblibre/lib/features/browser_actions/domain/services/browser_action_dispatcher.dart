@@ -216,7 +216,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.duplicateTab:
         final containerData = await ref
             .read(tabDataRepositoryProvider.notifier)
-            .getTabContainerData(pageTabId);
+            .getContainerForCopy(pageTabId);
         await tabRepository.duplicateTab(
           selectTabId: pageTabId,
           containerData: containerData,
@@ -468,7 +468,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
 
     final containerData = await ref
         .read(tabDataRepositoryProvider.notifier)
-        .getTabContainerData(tabId);
+        .getContainerForCopy(tabId);
     final tabRepository = ref.read(tabRepositoryProvider.notifier);
 
     if (tabState.tabMode is PrivateTabMode) {

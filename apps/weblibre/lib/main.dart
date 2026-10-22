@@ -81,7 +81,9 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.d
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_demand.dart';
+import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_log_level_applier.dart';
+import 'package:weblibre/features/proxy/domain/services/singbox_start_retry.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/database/riverpod_storage.dart';
@@ -424,6 +426,13 @@ class _MainWidget extends HookConsumerWidget {
       // installed the shorter the window in which protected containers cannot
       // load — and it is a barrier, never a leak, if it is late.
       _activateService(ref, proxySettingsReplicationProvider);
+
+      // What the proxy screens say about a connection beyond on or off: the
+      // evidence has to be collected from the first failed load, not from when
+      // a screen first shows it, and both clear their state through listeners
+      // that a provider only ever `read` never receives.
+      _activateService(ref, proxyTrafficHealthProvider);
+      _activateService(ref, singboxStartRetriesProvider);
 
       // Same reason, for sync: registering the GeckoSyncStateEvents handler is what
       // makes the account state pushed during `accountManager.start()` reachable.

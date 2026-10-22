@@ -83,4 +83,35 @@ void main() {
       expect(tryParseCidr('2001:db8:0:0:0:0:1'), isNull);
     });
   });
+
+  group('splitTunnelRanges', () {
+    test('a full tunnel is not one', () {
+      expect(splitTunnelRanges(['0.0.0.0/0', '::/0']), isNull);
+    });
+
+    test('nothing said routes everything', () {
+      expect(splitTunnelRanges(const []), isNull);
+    });
+
+    test('a full tunnel written as halves is not one', () {
+      expect(splitTunnelRanges(['0.0.0.0/1', '128.0.0.0/1', '::/0']), isNull);
+    });
+
+    test('a gap in the IPv4 space is one', () {
+      final ranges = ['0.0.0.0/1', '192.0.0.0/2'];
+      expect(splitTunnelRanges(ranges), ranges);
+    });
+
+    test('a private range is one', () {
+      expect(splitTunnelRanges(['10.0.0.0/8']), ['10.0.0.0/8']);
+    });
+
+    test('IPv6 alone leaves the IPv4 internet out', () {
+      expect(splitTunnelRanges(['::/0']), ['::/0']);
+    });
+
+    test('a range written off its network boundary still counts', () {
+      expect(splitTunnelRanges(['1.2.3.4/0']), isNull);
+    });
+  });
 }

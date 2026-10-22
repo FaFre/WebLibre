@@ -4,7 +4,13 @@ import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_spec.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
+import 'package:weblibre/features/proxy/data/parsers/singbox_json_import.dart';
 import 'package:weblibre/features/proxy/data/parsers/singbox_proxy_uri.dart';
+
+// Real-shaped WireGuard keys (base64 of 32 bytes): the form checks the format.
+const _privateKey = 'AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=';
+const _peerPublicKey = 'AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI=';
+const _preSharedKey = 'AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM=';
 
 void main() {
   group('SingboxProxyFormSpec', () {
@@ -134,9 +140,9 @@ void main() {
         'server': 'wg.example.com',
         'server_port': '51820',
         'local_address': '10.0.0.2/32\nfd00::2/128',
-        'private_key': 'private-key',
-        'peer_public_key': 'peer-public-key',
-        'pre_shared_key': 'pre-shared-key',
+        'private_key': _privateKey,
+        'peer_public_key': _peerPublicKey,
+        'pre_shared_key': _preSharedKey,
         'mtu': '1420',
         'reserved': '1, 2, 3',
       };
@@ -151,13 +157,13 @@ void main() {
         'server': 'wg.example.com',
         'server_port': 51820,
         'local_address': ['10.0.0.2/32', 'fd00::2/128'],
-        'peer_public_key': 'peer-public-key',
+        'peer_public_key': _peerPublicKey,
         'mtu': 1420,
         'reserved': [1, 2, 3],
       });
       expect(secrets, {
-        'private_key': 'private-key',
-        'pre_shared_key': 'pre-shared-key',
+        'private_key': _privateKey,
+        'pre_shared_key': _preSharedKey,
       });
     });
 
@@ -167,8 +173,8 @@ void main() {
         'server': 'wg.example.com',
         'server_port': '51820',
         'local_address': '10.0.0.2\nfd00::2',
-        'private_key': 'private-key',
-        'peer_public_key': 'peer-public-key',
+        'private_key': _privateKey,
+        'peer_public_key': _peerPublicKey,
       };
 
       expect(spec.validate(values), isNull);
@@ -188,8 +194,8 @@ void main() {
         'server': 'wg.example.com',
         'server_port': '51820',
         'local_address': '10.0.0.2\nnot-an-address',
-        'private_key': 'private-key',
-        'peer_public_key': 'peer-public-key',
+        'private_key': _privateKey,
+        'peer_public_key': _peerPublicKey,
       };
 
       final error = spec.validate(values);
@@ -237,8 +243,8 @@ void main() {
         'server': 'wg.example.com',
         'server_port': '51820',
         'local_address': '10.0.0.2/32',
-        'private_key': 'private-key',
-        'peer_public_key': 'peer-public-key',
+        'private_key': _privateKey,
+        'peer_public_key': _peerPublicKey,
         'mtu': '1420',
         'reserved': '1, 2',
       });
@@ -414,6 +420,238 @@ void main() {
         () => importSingboxProxyUri('hysteria2://example.com:443'),
         throwsFormatException,
       );
+    });
+
+    test('rejects a WireGuard key that is not one', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
+
+      final error = spec.validate({
+        'server': 'wg.example.com',
+        'server_port': '51820',
+        'local_address': '10.0.0.2/32',
+        'peer_public_key': 'not-a-key',
+        'private_key': _privateKey,
+      });
+
+      expect(error?.field.key, 'peer_public_key');
+      expect(error?.kind, SingboxFieldErrorKind.invalidWireguardKey);
+    });
+
+    test('a WireGuard key is standard, padded base64', () {
+      expect(isWireguardKey(_privateKey), isTrue);
+      // Both decode to 32 bytes in Dart; sing-box refuses both.
+      expect(isWireguardKey('-_${_privateKey.substring(2)}'), isFalse);
+      expect(
+        isWireguardKey(_privateKey.substring(0, _privateKey.length - 1)),
+        isFalse,
+      );
+    });
+
+    test('writes AllowedIPs for the peer', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
+
+      final config =
+          jsonDecode(
+                spec.toConfigJson({
+                  'server': 'wg.example.com',
+                  'server_port': '51820',
+                  'local_address': '10.0.0.2/32',
+                  'peer_public_key': _peerPublicKey,
+                  'allowed_ips': '10.0.0.0/8\nfd00::/8',
+                }),
+              )
+              as Map<String, dynamic>;
+
+      expect(config['allowed_ips'], ['10.0.0.0/8', 'fd00::/8']);
+    });
+
+    test('a save keeps the keys the form has no field for', () {
+      // Imported or hand-written keys used to vanish on the first edit:
+      // the JSON was rebuilt from the fields alone.
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.wireguard]!;
+      const base =
+          """
+      {
+        "type": "wireguard",
+        "server": "old.example.com",
+        "server_port": 51820,
+        "local_address": ["10.0.0.2/32"],
+        "peer_public_key": "$_peerPublicKey",
+        "private_key": "$_privateKey",
+        "mtu": 1420,
+        "udp_fragment": true,
+        "workers": 2
+      }""";
+
+      final config =
+          jsonDecode(
+                spec.toConfigJson({
+                  'server': 'new.example.com',
+                  'server_port': '51820',
+                  'local_address': '10.0.0.2/32',
+                  'peer_public_key': _peerPublicKey,
+                  'private_key': _privateKey,
+                  // Cleared by the user: really removed, not left from base.
+                  'mtu': '',
+                }, baseConfigJson: base),
+              )
+              as Map<String, dynamic>;
+
+      expect(config['server'], 'new.example.com');
+      expect(config['udp_fragment'], isTrue);
+      expect(config['workers'], 2);
+      expect(config.containsKey('mtu'), isFalse);
+      // A secret found in the config JSON moves to the secret JSON.
+      expect(config.containsKey('private_key'), isFalse);
+    });
+
+    test('a cleared nested field is removed with its empty parent', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.vless]!;
+      const base = """
+      {
+        "type": "vless",
+        "server": "example.com",
+        "server_port": 443,
+        "uuid": "00000000-0000-0000-0000-000000000000",
+        "tls": { "enabled": true, "server_name": "example.com" }
+      }""";
+
+      final config =
+          jsonDecode(
+                spec.toConfigJson({
+                  'server': 'example.com',
+                  'server_port': '443',
+                  'uuid': '00000000-0000-0000-0000-000000000000',
+                }, baseConfigJson: base),
+              )
+              as Map<String, dynamic>;
+
+      expect(config.containsKey('tls'), isFalse);
+    });
+
+    test('a credential the form has no field for is kept as a secret', () {
+      // `auth` (hysteria's binary auth) and `plugin_opts` have no field. They
+      // used to be dropped; keeping unknown keys must not leave them in the
+      // plaintext config.
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.hysteria]!;
+      const base = """
+      {
+        "type": "hysteria",
+        "server": "example.com",
+        "server_port": 443,
+        "auth": "c2VjcmV0",
+        "tls": { "certificate_path": "/x", "password": "p" },
+        "hop_interval": "30s"
+      }""";
+      final values = {'server': 'example.com', 'server_port': '443'};
+
+      final config =
+          jsonDecode(spec.toConfigJson(values, baseConfigJson: base))
+              as Map<String, dynamic>;
+      final secrets =
+          jsonDecode(spec.toSecretJson(values, baseConfigJson: base)!)
+              as Map<String, dynamic>;
+
+      expect(config.containsKey('auth'), isFalse);
+      expect(config['hop_interval'], '30s');
+      expect(config['tls'], {'certificate_path': '/x'});
+      expect(secrets, {
+        'auth': 'c2VjcmV0',
+        'tls': {'password': 'p'},
+      });
+    });
+
+    test('an imported TLS client key is kept as a secret', () {
+      const imported = '''
+      {
+        "type": "vless",
+        "tag": "work",
+        "server": "example.com",
+        "server_port": 443,
+        "uuid": "bf000d23-0752-40b4-affe-68f7707a9661",
+        "tls": {
+          "enabled": true,
+          "client_certificate": ["-----BEGIN CERTIFICATE-----"],
+          "client_key": ["-----BEGIN PRIVATE KEY-----"]
+        }
+      }''';
+      final seed = seedsFromSingboxJson(imported).seeds.single;
+      final spec = singboxProxyFormSpecs[seed.type]!;
+
+      final config =
+          jsonDecode(
+                spec.toConfigJson(
+                  seed.values,
+                  baseConfigJson: seed.baseConfigJson,
+                ),
+              )
+              as Map<String, dynamic>;
+      final secretJson = spec.toSecretJson(
+        seed.values,
+        baseConfigJson: seed.baseConfigJson,
+      );
+      final secrets = jsonDecode(secretJson!) as Map<String, dynamic>;
+
+      expect(config['tls'], {
+        'enabled': true,
+        'client_certificate': ['-----BEGIN CERTIFICATE-----'],
+      });
+      expect(secrets['tls'], {
+        'client_key': ['-----BEGIN PRIVATE KEY-----'],
+      });
+      // Read back for editing, the profile still has everything it had.
+      expect(
+        spec.valuesFromJson(
+          configJson: jsonEncode(config),
+          secretJson: secretJson,
+        ),
+        seed.values,
+      );
+    });
+
+    test('a list holding a credential moves to the secrets whole', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.shadowsocks]!;
+      const base = """
+      {
+        "type": "shadowsocks",
+        "server": "example.com",
+        "server_port": 8388,
+        "method": "aes-128-gcm",
+        "extra": [{ "name": "a", "password": "p" }]
+      }""";
+      final values = {
+        'server': 'example.com',
+        'server_port': '8388',
+        'method': 'aes-128-gcm',
+        'password': 'secret',
+      };
+
+      final config =
+          jsonDecode(spec.toConfigJson(values, baseConfigJson: base))
+              as Map<String, dynamic>;
+      final secrets =
+          jsonDecode(spec.toSecretJson(values, baseConfigJson: base)!)
+              as Map<String, dynamic>;
+
+      expect(config.containsKey('extra'), isFalse);
+      expect(secrets, {
+        'password': 'secret',
+        'extra': [
+          {'name': 'a', 'password': 'p'},
+        ],
+      });
+    });
+
+    test('a nested secret field hydrates beside its plain sibling', () {
+      final spec = singboxProxyFormSpecs[SingboxProxyProfileType.hysteria2]!;
+
+      final values = spec.valuesFromJson(
+        configJson: '{"type":"hysteria2","obfs":{"type":"salamander"}}',
+        secretJson: '{"password":"p","obfs":{"password":"o"}}',
+      );
+
+      expect(values['obfs.type'], 'salamander');
+      expect(values['obfs.password'], 'o');
     });
   });
 }
