@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
@@ -29,6 +30,7 @@ import 'package:weblibre/features/geckoview/domain/entities/tab_container_select
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/home/home_search_pill.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/empty_state_content.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
@@ -151,61 +153,107 @@ class BrowserHome extends ConsumerWidget {
         // it, because that inset animates with the toolbar.
         child: SafeArea(
           bottom: false,
-          child: RepaintBoundary(
-            child: ModuleSurfaceScope(
-              surface: ModuleSurface.home,
-              // Unpinned: the sections here are short, and the pinned search pill
-              // above already holds the top of the viewport. Backing each header
-              // so it could pin would lay opaque bands across the aura gradient.
-              pinnedHeaderBackgroundColor: null,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  // Centred as one block while it all fits, so a home page cut
-                  // back to a couple of sections reads as a page rather than as
-                  // content stranded against the top edge. The pill travels
-                  // with it: under [HomeSearchBarPlacement.top] the brand mark,
-                  // the search entry and the sections are one composition, and
-                  // leaving the pill pinned at the top while the rest sank to
-                  // the middle would split it in two.
-                  //
-                  // The trailing spacer is inside the block, which is what
-                  // makes the result land in the middle of what the user can
-                  // *see*: it carries the toolbar inset, so the content ends up
-                  // centred in the viewport minus the toolbar rather than
-                  // centred behind it.
-                  SliverCenterOnUnderflow(
-                    sliver: SliverMainAxisGroup(
-                      slivers: [
-                        const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                        const SliverToBoxAdapter(child: _HomeHeader()),
-                        // Pinned, because under [HomeSearchBarPlacement.top]
-                        // the browser toolbar's address field is suppressed
-                        // while home is showing: this is then the only way into
-                        // search, so it has to survive scrolling. Pinning it
-                        // above the section headers also gives them something
-                        // to slide under. Nothing scrolls while the block is
-                        // centred, so the two never fight.
-                        const _HomeSearchPillSliver(),
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: SupporterHomeBanner(),
+          child: _HomeContentGate(
+            child: RepaintBoundary(
+              child: ModuleSurfaceScope(
+                surface: ModuleSurface.home,
+                // Unpinned: the sections here are short, and the pinned search pill
+                // above already holds the top of the viewport. Backing each header
+                // so it could pin would lay opaque bands across the aura gradient.
+                pinnedHeaderBackgroundColor: null,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    // Centred as one block while it all fits, so a home page cut
+                    // back to a couple of sections reads as a page rather than as
+                    // content stranded against the top edge. The pill travels
+                    // with it: under [HomeSearchBarPlacement.top] the brand mark,
+                    // the search entry and the sections are one composition, and
+                    // leaving the pill pinned at the top while the rest sank to
+                    // the middle would split it in two.
+                    //
+                    // The trailing spacer is inside the block, which is what
+                    // makes the result land in the middle of what the user can
+                    // *see*: it carries the toolbar inset, so the content ends up
+                    // centred in the viewport minus the toolbar rather than
+                    // centred behind it.
+                    SliverCenterOnUnderflow(
+                      sliver: SliverMainAxisGroup(
+                        slivers: [
+                          const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                          const SliverToBoxAdapter(child: _HomeHeader()),
+                          // Pinned, because under [HomeSearchBarPlacement.top]
+                          // the browser toolbar's address field is suppressed
+                          // while home is showing: this is then the only way into
+                          // search, so it has to survive scrolling. Pinning it
+                          // above the section headers also gives them something
+                          // to slide under. Nothing scrolls while the block is
+                          // centred, so the two never fight.
+                          const _HomeSearchPillSliver(),
+                          const SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              child: SupporterHomeBanner(),
+                            ),
                           ),
-                        ),
-                        ModuleSurfaceSliverList(
-                          surface: ModuleSurface.home,
-                          callbacks: callbacks,
-                        ),
-                        const _HomeBottomInsetSpacer(),
-                      ],
+                          ModuleSurfaceSliverList(
+                            surface: ModuleSurface.home,
+                            callbacks: callbacks,
+                          ),
+                          const _HomeBottomInsetSpacer(),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Keeps the home content invisible until its modules have their data.
+///
+/// The content is centred as one block, so a module that appears or grows a
+/// few frames late moves everything above and below it (#665). Holding the page
+/// back until [moduleSurfaceSettledProvider] reports every module loaded makes
+/// it appear once, at its final layout. The backdrop stays visible meanwhile.
+///
+/// The wait is capped: history comes from Gecko, which can be slow while the
+/// engine is still starting, and a late section is better than a blank home.
+/// Once shown, the content stays shown — a module reloading later must not
+/// blank the page again.
+class _HomeContentGate extends HookConsumerWidget {
+  static const _maxHold = Duration(milliseconds: 400);
+
+  final Widget child;
+
+  const _HomeContentGate({required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settled = ref.watch(moduleSurfaceSettledProvider(ModuleSurface.home));
+    final timedOut = useState(false);
+    final revealed = useRef(false);
+
+    useEffect(() {
+      final timer = Timer(_maxHold, () => timedOut.value = true);
+      return timer.cancel;
+    }, const []);
+
+    if (settled || timedOut.value) revealed.value = true;
+
+    return IgnorePointer(
+      ignoring: !revealed.value,
+      // Starts at full opacity when the data is already there, so a warm
+      // home does not fade in.
+      child: AnimatedOpacity(
+        opacity: revealed.value ? 1 : 0,
+        duration: const Duration(milliseconds: 120),
+        child: child,
       ),
     );
   }

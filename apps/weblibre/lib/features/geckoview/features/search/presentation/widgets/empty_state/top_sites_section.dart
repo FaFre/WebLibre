@@ -26,6 +26,7 @@ import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/wallpaper_surface.dart';
+import 'package:weblibre/features/geckoview/features/search/domain/providers/empty_state_content.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/dialogs/edit_top_site_dialog.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
@@ -43,7 +44,6 @@ import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 const _gridMainAxisSpacing = 8.0;
 const _gridCrossAxisSpacing = 8.0;
 const _topSitesPreviewLimit = 8;
-const _topSitesMaxLimit = 25;
 
 class _TopSitesGridLayout {
   final int crossAxisCount;
@@ -122,7 +122,7 @@ class TopSitesSection extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final topSites = ref.watch(
       topSiteListProvider(
-        limit: _topSitesMaxLimit,
+        limit: searchEmptyTopSitesLimit,
       ).select((value) => value.value ?? []),
     );
 
@@ -135,14 +135,14 @@ class TopSitesSection extends HookConsumerWidget {
     // Home leads with the user's own shortcuts, so its preview is sized to the
     // curated tiles rather than to a fixed count: every pinned and default site
     // is on screen from the start, and frecency suggestions — which pad the
-    // list out to [_topSitesMaxLimit] — stay behind "Show all N". The cap only
+    // list out to [searchEmptyTopSitesLimit] — stay behind "Show all N". The cap only
     // bites for someone who has pinned more than a grid's worth.
     //
     // The other surfaces sit above a search field where the grid is one module
     // among many, and keep the short fixed preview.
     final isHome = ModuleSurfaceScope.surfaceOf(context) == ModuleSurface.home;
     final previewLimit = isHome
-        ? persistedItems.length.clamp(0, _topSitesMaxLimit)
+        ? persistedItems.length.clamp(0, searchEmptyTopSitesLimit)
         : _topSitesPreviewLimit;
 
     return SearchModuleSection(
@@ -198,7 +198,8 @@ class TopSitesSection extends HookConsumerWidget {
                     // Counted over curated tiles only: the cap is on how many
                     // shortcuts you may keep, and gating on the padded length
                     // hid the "+" as soon as suggestions filled the list out.
-                    showAddTile: persistedItems.length < _topSitesMaxLimit,
+                    showAddTile:
+                        persistedItems.length < searchEmptyTopSitesLimit,
                   ),
             ];
           },

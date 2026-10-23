@@ -233,7 +233,7 @@ final class SearchEmptyRecentFeedArticlesProvider
 }
 
 String _$searchEmptyRecentFeedArticlesHash() =>
-    r'b0ad09ae55bc5500fe27613a8c737a157684d1a6';
+    r'148792eb7469774f1734461540183bd1173801d3';
 
 final class SearchEmptyRecentFeedArticlesFamily extends $Family
     with $FunctionalFamilyOverride<AsyncValue<List<FeedArticleSummary>>, int> {
@@ -335,4 +335,151 @@ final class SearchEmptyRecentTabsFamily extends $Family
 
   @override
   String toString() => r'searchEmptyRecentTabsProvider';
+}
+
+/// Whether every visible module on [surface] that loads its content
+/// asynchronously has received its first value.
+///
+/// Those modules either hide while their list is empty (recent history,
+/// highlights, articles, recent tabs) or change height once their content lands
+/// (shortcuts, quote). Home centres its content as one block, so each late
+/// arrival shifted the whole page a few frames after it first showed (#665).
+/// Its host holds the page back until this is true. An error counts as
+/// settled, since waiting will not resolve it.
+///
+/// Watching the module providers here keeps them alive alongside the modules'
+/// own subscriptions; the arguments must match the modules' exactly, or this
+/// would wait on a separate query.
+
+@ProviderFor(moduleSurfaceSettled)
+final moduleSurfaceSettledProvider = ModuleSurfaceSettledFamily._();
+
+/// Whether every visible module on [surface] that loads its content
+/// asynchronously has received its first value.
+///
+/// Those modules either hide while their list is empty (recent history,
+/// highlights, articles, recent tabs) or change height once their content lands
+/// (shortcuts, quote). Home centres its content as one block, so each late
+/// arrival shifted the whole page a few frames after it first showed (#665).
+/// Its host holds the page back until this is true. An error counts as
+/// settled, since waiting will not resolve it.
+///
+/// Watching the module providers here keeps them alive alongside the modules'
+/// own subscriptions; the arguments must match the modules' exactly, or this
+/// would wait on a separate query.
+
+final class ModuleSurfaceSettledProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether every visible module on [surface] that loads its content
+  /// asynchronously has received its first value.
+  ///
+  /// Those modules either hide while their list is empty (recent history,
+  /// highlights, articles, recent tabs) or change height once their content lands
+  /// (shortcuts, quote). Home centres its content as one block, so each late
+  /// arrival shifted the whole page a few frames after it first showed (#665).
+  /// Its host holds the page back until this is true. An error counts as
+  /// settled, since waiting will not resolve it.
+  ///
+  /// Watching the module providers here keeps them alive alongside the modules'
+  /// own subscriptions; the arguments must match the modules' exactly, or this
+  /// would wait on a separate query.
+  ModuleSurfaceSettledProvider._({
+    required ModuleSurfaceSettledFamily super.from,
+    required ModuleSurface super.argument,
+  }) : super(
+         retry: null,
+         name: r'moduleSurfaceSettledProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$moduleSurfaceSettledHash();
+
+  @override
+  String toString() {
+    return r'moduleSurfaceSettledProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as ModuleSurface;
+    return moduleSurfaceSettled(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ModuleSurfaceSettledProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$moduleSurfaceSettledHash() =>
+    r'93dcf6195fe13ea80f9fee155fcb41894ef4a1ed';
+
+/// Whether every visible module on [surface] that loads its content
+/// asynchronously has received its first value.
+///
+/// Those modules either hide while their list is empty (recent history,
+/// highlights, articles, recent tabs) or change height once their content lands
+/// (shortcuts, quote). Home centres its content as one block, so each late
+/// arrival shifted the whole page a few frames after it first showed (#665).
+/// Its host holds the page back until this is true. An error counts as
+/// settled, since waiting will not resolve it.
+///
+/// Watching the module providers here keeps them alive alongside the modules'
+/// own subscriptions; the arguments must match the modules' exactly, or this
+/// would wait on a separate query.
+
+final class ModuleSurfaceSettledFamily extends $Family
+    with $FunctionalFamilyOverride<bool, ModuleSurface> {
+  ModuleSurfaceSettledFamily._()
+    : super(
+        retry: null,
+        name: r'moduleSurfaceSettledProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether every visible module on [surface] that loads its content
+  /// asynchronously has received its first value.
+  ///
+  /// Those modules either hide while their list is empty (recent history,
+  /// highlights, articles, recent tabs) or change height once their content lands
+  /// (shortcuts, quote). Home centres its content as one block, so each late
+  /// arrival shifted the whole page a few frames after it first showed (#665).
+  /// Its host holds the page back until this is true. An error counts as
+  /// settled, since waiting will not resolve it.
+  ///
+  /// Watching the module providers here keeps them alive alongside the modules'
+  /// own subscriptions; the arguments must match the modules' exactly, or this
+  /// would wait on a separate query.
+
+  ModuleSurfaceSettledProvider call(ModuleSurface surface) =>
+      ModuleSurfaceSettledProvider._(argument: surface, from: this);
+
+  @override
+  String toString() => r'moduleSurfaceSettledProvider';
 }
