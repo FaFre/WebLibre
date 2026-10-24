@@ -271,10 +271,13 @@ class SettingsSearchField extends StatelessWidget {
   /// Falls back to a localized "Search settings" when not given.
   final String? hintText;
 
+  final FocusNode? focusNode;
+
   const SettingsSearchField({
     super.key,
     required this.controller,
     this.hintText,
+    this.focusNode,
   });
 
   @override
@@ -284,6 +287,7 @@ class SettingsSearchField extends StatelessWidget {
 
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       decoration: InputDecoration(
         hintText: hintText ?? l10n.settings_searchHint,
         prefixIcon: const Icon(Icons.search),

@@ -1458,6 +1458,20 @@ class AppLocalizationsEs extends AppLocalizations {
       'Editar la dirección o empezar una búsqueda';
 
   @override
+  String get browserActions_scanQrCodeTitle => 'Escanear código QR';
+
+  @override
+  String get browserActions_scanQrCodeDescription =>
+      'Scan a QR code into the search field';
+
+  @override
+  String get browserActions_voiceSearchTitle => 'Búsqueda por voz';
+
+  @override
+  String get browserActions_voiceSearchDescription =>
+      'Speak a search into the search field';
+
+  @override
   String get browserActions_backTitle => 'Atrás';
 
   @override
@@ -1712,6 +1726,13 @@ class AppLocalizationsEs extends AppLocalizations {
       'Saltar a la coincidencia anterior de la última búsqueda';
 
   @override
+  String get browserActions_showFontSizeTitle => 'Tamaño del texto';
+
+  @override
+  String get browserActions_showFontSizeDescription =>
+      'Adjust the page font size';
+
+  @override
   String get browserActions_increaseFontSizeTitle => 'Aumentar letra';
 
   @override
@@ -1758,6 +1779,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get browserActions_printPageDescription => 'Imprimir la página actual';
+
+  @override
+  String get browserActions_showBrowserMenuTitle => 'Menú';
+
+  @override
+  String get browserActions_showBrowserMenuDescription =>
+      'Open the browser menu';
 
   @override
   String get browserActions_showHomeTitle => 'Inicio';
@@ -1825,6 +1853,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get browserActions_toggleTabBarDescription =>
       'Ocultar la barra de pestañas o volver a mostrarla';
+
+  @override
+  String get browserActions_toggleGesturesTitle => 'Gestos';
+
+  @override
+  String get browserActions_toggleGesturesDescription =>
+      'Turn drawn gestures on or off';
 
   @override
   String get browserActions_clearBrowsingDataTitle =>
@@ -3594,104 +3629,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Desactiva el tamaño de letra automático en los ajustes para ajustarlo manualmente';
 
   @override
-  String get contextualToolbar_buttonLabelBack => 'Atrás';
-
-  @override
-  String get contextualToolbar_buttonLabelForward => 'Adelante';
-
-  @override
-  String get contextualToolbar_buttonLabelHome => 'Inicio';
-
-  @override
-  String get contextualToolbar_buttonLabelHistory => 'Historial';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarks => 'Marcadores';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarkToggle => 'Marcador';
-
-  @override
-  String get contextualToolbar_buttonLabelShare => 'Compartir';
-
-  @override
-  String get contextualToolbar_buttonLabelAddTab => 'Nueva pestaña';
-
-  @override
-  String get contextualToolbar_buttonLabelTabsCount => 'Pestañas';
-
-  @override
-  String get contextualToolbar_buttonLabelNavigationMenu => 'Menú';
-
-  @override
-  String get contextualToolbar_buttonLabelReload => 'Recargar';
-
-  @override
-  String get contextualToolbar_buttonLabelReaderMode => 'Vista de lectura';
-
-  @override
-  String get contextualToolbar_buttonLabelDesktop => 'Versión de escritorio';
-
-  @override
-  String get contextualToolbar_buttonLabelTranslation => 'Traducir';
-
-  @override
-  String get contextualToolbar_buttonLabelFindInPage => 'Buscar en la página';
-
-  @override
-  String get contextualToolbar_buttonLabelCloseTab => 'Cerrar pestaña';
-
-  @override
-  String get contextualToolbar_buttonLabelInputUrl => 'Barra de direcciones';
-
-  @override
-  String get contextualToolbar_buttonLabelQrScan => 'Escanear código QR';
-
-  @override
-  String get contextualToolbar_buttonLabelVoiceSearch => 'Búsqueda por voz';
-
-  @override
-  String get contextualToolbar_buttonLabelDuplicateTab => 'Duplicar pestaña';
-
-  @override
-  String get contextualToolbar_buttonLabelIncreaseFont => 'Aumentar letra';
-
-  @override
-  String get contextualToolbar_buttonLabelDecreaseFont => 'Reducir letra';
-
-  @override
-  String get contextualToolbar_buttonLabelMoveToBackground => 'Segundo plano';
-
-  @override
-  String get contextualToolbar_buttonLabelToggleGestures => 'Gestos';
-
-  @override
-  String get contextualToolbar_buttonLabelHideTabBar =>
-      'Ocultar barra de pestañas';
-
-  @override
-  String get contextualToolbar_buttonLabelPageUp => 'Retroceder página';
-
-  @override
-  String get contextualToolbar_buttonLabelPageDown => 'Avanzar página';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollTop => 'Ir al principio';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollBottom => 'Ir al final';
-
-  @override
-  String get contextualToolbar_buttonLabelFont => 'Tamaño del texto';
-
-  @override
   String get contextualToolbar_buttonLabelExtensionShortcut => 'Extensiones';
-
-  @override
-  String get contextualToolbar_buttonLabelClearBrowsingData => 'Borrar datos';
-
-  @override
-  String get contextualToolbar_buttonLabelQuit => 'Salir';
 
   @override
   String get contextualToolbar_longPressBackHistoryMenu =>
@@ -5797,6 +5735,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get gestures_chooseActionTitle => 'Elegir acción';
+
+  @override
+  String get gestures_actionSearchHint => 'Search actions';
+
+  @override
+  String get gestures_noMatchingActions => 'No matching actions.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8319,6 +8263,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutLabel => 'Atenuar';
+
+  @override
+  String get settings_fallbackGreyOutDescription =>
+      'Keep this button in place, greyed out';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Si no está disponible';

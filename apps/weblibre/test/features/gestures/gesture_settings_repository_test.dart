@@ -70,4 +70,25 @@ void main() {
       BuiltInGesture.tabSwipeLeft: null,
     });
   });
+
+  test('toggling gestures on also turns on the master switch', () async {
+    final repository = container.read(
+      gestureSettingsRepositoryProvider.notifier,
+    );
+
+    final initial = await repository.fetchSettings();
+    expect(initial.enabled, isFalse);
+
+    await repository.toggleGestures();
+    var settings = await repository.fetchSettings();
+    expect((settings.enabled, settings.active), (true, true));
+
+    await repository.toggleGestures();
+    settings = await repository.fetchSettings();
+    expect((settings.enabled, settings.active), (true, false));
+
+    await repository.toggleGestures();
+    settings = await repository.fetchSettings();
+    expect((settings.enabled, settings.active), (true, true));
+  });
 }

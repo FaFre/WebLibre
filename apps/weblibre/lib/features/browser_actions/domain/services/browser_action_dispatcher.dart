@@ -41,9 +41,11 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/fon
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/browser_menu_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -57,6 +59,8 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
+import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -66,6 +70,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/utils/page_feeds.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 
 part 'browser_action_dispatcher.g.dart';
@@ -110,6 +115,8 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   /// default for a newly added action.
   static bool requiresTab(BrowserAction action) => switch (action) {
     BrowserAction.focusAddressBar ||
+    BrowserAction.scanQrCode ||
+    BrowserAction.voiceSearch ||
     BrowserAction.newTab ||
     BrowserAction.newPrivateTab ||
     BrowserAction.reopenClosedTab ||
@@ -122,7 +129,9 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     BrowserAction.selectTab7 ||
     BrowserAction.selectTab8 ||
     BrowserAction.selectLastTab ||
+    BrowserAction.showFontSize ||
     BrowserAction.resetFontSize ||
+    BrowserAction.showBrowserMenu ||
     BrowserAction.showTabView ||
     BrowserAction.showDownloads ||
     BrowserAction.showAddons ||
@@ -136,6 +145,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     BrowserAction.showBookmarks ||
     BrowserAction.showContainers ||
     BrowserAction.toggleTabBar ||
+    BrowserAction.toggleGestures ||
     BrowserAction.moveToBackground ||
     BrowserAction.quitBrowser ||
     BrowserAction.showFeeds ||
@@ -167,6 +177,18 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     switch (action) {
       case BrowserAction.focusAddressBar:
         await _focusAddressBar(tabId);
+      case BrowserAction.scanQrCode:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          final code = (await showQrScannerDialog(context))?.code;
+          if (code != null) await _searchWith(code, tabId);
+        }
+      case BrowserAction.voiceSearch:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          final text = await dictateText(context);
+          if (text != null) await _searchWith(text, tabId);
+        }
       case BrowserAction.back:
         await ref.read(tabSessionProvider(tabId: pageTabId).notifier).goBack();
       case BrowserAction.forward:
@@ -283,12 +305,22 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         await _findNext(pageTabId, forward: true);
       case BrowserAction.findPrevious:
         await _findNext(pageTabId, forward: false);
+      case BrowserAction.showFontSize:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          await showFontSizeBottomSheet(context);
+        }
       case BrowserAction.increaseFontSize:
         await _adjustFontSize(increase: true);
       case BrowserAction.decreaseFontSize:
         await _adjustFontSize(increase: false);
       case BrowserAction.resetFontSize:
         await _setFontSize(fontSizeDefault);
+      case BrowserAction.showBrowserMenu:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          await showBrowserMenuSheet(context);
+        }
       case BrowserAction.showHome:
         ref.read(forceBrowserHomeProvider.notifier).request();
       case BrowserAction.toggleTabBar:
@@ -305,6 +337,10 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         } else {
           controller.dismiss();
         }
+      case BrowserAction.toggleGestures:
+        await ref
+            .read(gestureSettingsRepositoryProvider.notifier)
+            .toggleGestures();
       case BrowserAction.showHistory:
         await _pushLocation(const HistoryRoute().location);
       case BrowserAction.showBookmarks:
@@ -540,6 +576,30 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           );
 
     await _pushLocation(route.location);
+  }
+
+  /// Opens the search screen with [text] in the field, like the toolbar's
+  /// scan and dictation buttons: aimed at the selected tab, so submitting
+  /// navigates it, or at a new tab of the default type when there is none.
+  ///
+  /// Never navigates by itself: a scanned code or a misheard word is untrusted
+  /// input, and the user confirms it in the field first.
+  Future<void> _searchWith(String text, String? tabId) async {
+    final tabState =
+        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+        tabId == null ? null : ref.read(tabStateProvider(tabId));
+
+    await _pushLocation(
+      SearchRoute(
+        tabId: tabState?.id,
+        searchText: text.isEmpty ? SearchRoute.emptySearchText : text,
+        tabType:
+            tabState?.tabMode.toTabType() ??
+            ref
+                .read(generalSettingsWithDefaultsProvider)
+                .effectiveDefaultCreateTabType,
+      ).location,
+    );
   }
 
   /// Moves the selection one container along the chip order, wrapping at the

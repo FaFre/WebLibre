@@ -29,6 +29,8 @@ extension BrowserActionL10n on BrowserAction {
 
     return switch (this) {
       BrowserAction.focusAddressBar => l10n.browserActions_focusAddressBarTitle,
+      BrowserAction.scanQrCode => l10n.browserActions_scanQrCodeTitle,
+      BrowserAction.voiceSearch => l10n.browserActions_voiceSearchTitle,
       BrowserAction.back => l10n.browserActions_backTitle,
       BrowserAction.forward => l10n.browserActions_forwardTitle,
       BrowserAction.reload => l10n.browserActions_reloadTitle,
@@ -69,6 +71,7 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.findInPage => l10n.browserActions_findInPageTitle,
       BrowserAction.findNext => l10n.browserActions_findNextTitle,
       BrowserAction.findPrevious => l10n.browserActions_findPreviousTitle,
+      BrowserAction.showFontSize => l10n.browserActions_showFontSizeTitle,
       BrowserAction.increaseFontSize =>
         l10n.browserActions_increaseFontSizeTitle,
       BrowserAction.decreaseFontSize =>
@@ -78,6 +81,7 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.sharePage => l10n.browserActions_sharePageTitle,
       BrowserAction.translatePage => l10n.browserActions_translatePageTitle,
       BrowserAction.printPage => l10n.browserActions_printPageTitle,
+      BrowserAction.showBrowserMenu => l10n.browserActions_showBrowserMenuTitle,
       BrowserAction.showHome => l10n.browserActions_showHomeTitle,
       BrowserAction.showHistory => l10n.browserActions_showHistoryTitle,
       BrowserAction.showBookmarks => l10n.browserActions_showBookmarksTitle,
@@ -89,6 +93,7 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.showKeyboardShortcuts =>
         l10n.browserActions_showKeyboardShortcutsTitle,
       BrowserAction.toggleTabBar => l10n.browserActions_toggleTabBarTitle,
+      BrowserAction.toggleGestures => l10n.browserActions_toggleGesturesTitle,
       BrowserAction.clearBrowsingData =>
         l10n.browserActions_clearBrowsingDataTitle,
       BrowserAction.moveToBackground =>
@@ -131,6 +136,8 @@ extension BrowserActionL10n on BrowserAction {
     return switch (this) {
       BrowserAction.focusAddressBar =>
         l10n.browserActions_focusAddressBarDescription,
+      BrowserAction.scanQrCode => l10n.browserActions_scanQrCodeDescription,
+      BrowserAction.voiceSearch => l10n.browserActions_voiceSearchDescription,
       BrowserAction.back => l10n.browserActions_backDescription,
       BrowserAction.forward => l10n.browserActions_forwardDescription,
       BrowserAction.reload => l10n.browserActions_reloadDescription,
@@ -178,6 +185,7 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.findInPage => l10n.browserActions_findInPageDescription,
       BrowserAction.findNext => l10n.browserActions_findNextDescription,
       BrowserAction.findPrevious => l10n.browserActions_findPreviousDescription,
+      BrowserAction.showFontSize => l10n.browserActions_showFontSizeDescription,
       BrowserAction.increaseFontSize =>
         l10n.browserActions_increaseFontSizeDescription,
       BrowserAction.decreaseFontSize =>
@@ -190,6 +198,8 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.translatePage =>
         l10n.browserActions_translatePageDescription,
       BrowserAction.printPage => l10n.browserActions_printPageDescription,
+      BrowserAction.showBrowserMenu =>
+        l10n.browserActions_showBrowserMenuDescription,
       BrowserAction.showHome => l10n.browserActions_showHomeDescription,
       BrowserAction.showHistory => l10n.browserActions_showHistoryDescription,
       BrowserAction.showBookmarks =>
@@ -204,6 +214,8 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.showKeyboardShortcuts =>
         l10n.browserActions_showKeyboardShortcutsDescription,
       BrowserAction.toggleTabBar => l10n.browserActions_toggleTabBarDescription,
+      BrowserAction.toggleGestures =>
+        l10n.browserActions_toggleGesturesDescription,
       BrowserAction.clearBrowsingData =>
         l10n.browserActions_clearBrowsingDataDescription,
       BrowserAction.moveToBackground =>

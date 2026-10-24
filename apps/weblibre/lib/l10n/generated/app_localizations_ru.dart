@@ -1451,6 +1451,20 @@ class AppLocalizationsRu extends AppLocalizations {
       'Изменить адрес или начать поиск';
 
   @override
+  String get browserActions_scanQrCodeTitle => 'Сканировать QR-код';
+
+  @override
+  String get browserActions_scanQrCodeDescription =>
+      'Scan a QR code into the search field';
+
+  @override
+  String get browserActions_voiceSearchTitle => 'Голосовой поиск';
+
+  @override
+  String get browserActions_voiceSearchDescription =>
+      'Speak a search into the search field';
+
+  @override
   String get browserActions_backTitle => 'Назад';
 
   @override
@@ -1708,6 +1722,13 @@ class AppLocalizationsRu extends AppLocalizations {
       'Перейти к предыдущему совпадению последнего поиска';
 
   @override
+  String get browserActions_showFontSizeTitle => 'Размер текста';
+
+  @override
+  String get browserActions_showFontSizeDescription =>
+      'Adjust the page font size';
+
+  @override
   String get browserActions_increaseFontSizeTitle => 'Увеличить шрифт';
 
   @override
@@ -1755,6 +1776,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get browserActions_printPageDescription =>
       'Напечатать текущую страницу';
+
+  @override
+  String get browserActions_showBrowserMenuTitle => 'Меню';
+
+  @override
+  String get browserActions_showBrowserMenuDescription =>
+      'Open the browser menu';
 
   @override
   String get browserActions_showHomeTitle => 'Домой';
@@ -1820,6 +1848,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get browserActions_toggleTabBarDescription =>
       'Скрыть панель вкладок или вернуть её';
+
+  @override
+  String get browserActions_toggleGesturesTitle => 'Жесты';
+
+  @override
+  String get browserActions_toggleGesturesDescription =>
+      'Turn drawn gestures on or off';
 
   @override
   String get browserActions_clearBrowsingDataTitle =>
@@ -3593,104 +3628,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Отключите автоматический размер шрифта в настройках, чтобы менять его вручную';
 
   @override
-  String get contextualToolbar_buttonLabelBack => 'Назад';
-
-  @override
-  String get contextualToolbar_buttonLabelForward => 'Вперёд';
-
-  @override
-  String get contextualToolbar_buttonLabelHome => 'Домой';
-
-  @override
-  String get contextualToolbar_buttonLabelHistory => 'История';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarks => 'Закладки';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarkToggle => 'Закладка';
-
-  @override
-  String get contextualToolbar_buttonLabelShare => 'Поделиться';
-
-  @override
-  String get contextualToolbar_buttonLabelAddTab => 'Новая вкладка';
-
-  @override
-  String get contextualToolbar_buttonLabelTabsCount => 'Вкладки';
-
-  @override
-  String get contextualToolbar_buttonLabelNavigationMenu => 'Меню';
-
-  @override
-  String get contextualToolbar_buttonLabelReload => 'Перезагрузить';
-
-  @override
-  String get contextualToolbar_buttonLabelReaderMode => 'Режим чтения';
-
-  @override
-  String get contextualToolbar_buttonLabelDesktop => 'Версия для ПК';
-
-  @override
-  String get contextualToolbar_buttonLabelTranslation => 'Перевести';
-
-  @override
-  String get contextualToolbar_buttonLabelFindInPage => 'Найти на странице';
-
-  @override
-  String get contextualToolbar_buttonLabelCloseTab => 'Закрыть вкладку';
-
-  @override
-  String get contextualToolbar_buttonLabelInputUrl => 'Адресная строка';
-
-  @override
-  String get contextualToolbar_buttonLabelQrScan => 'Сканировать QR-код';
-
-  @override
-  String get contextualToolbar_buttonLabelVoiceSearch => 'Голосовой поиск';
-
-  @override
-  String get contextualToolbar_buttonLabelDuplicateTab => 'Дублировать вкладку';
-
-  @override
-  String get contextualToolbar_buttonLabelIncreaseFont => 'Увеличить шрифт';
-
-  @override
-  String get contextualToolbar_buttonLabelDecreaseFont => 'Уменьшить шрифт';
-
-  @override
-  String get contextualToolbar_buttonLabelMoveToBackground => 'В фон';
-
-  @override
-  String get contextualToolbar_buttonLabelToggleGestures => 'Жесты';
-
-  @override
-  String get contextualToolbar_buttonLabelHideTabBar => 'Скрыть панель вкладок';
-
-  @override
-  String get contextualToolbar_buttonLabelPageUp => 'Страница вверх';
-
-  @override
-  String get contextualToolbar_buttonLabelPageDown => 'Страница вниз';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollTop => 'Прокрутить в начало';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollBottom => 'Прокрутить в конец';
-
-  @override
-  String get contextualToolbar_buttonLabelFont => 'Размер текста';
-
-  @override
   String get contextualToolbar_buttonLabelExtensionShortcut => 'Расширения';
-
-  @override
-  String get contextualToolbar_buttonLabelClearBrowsingData =>
-      'Очистить данные';
-
-  @override
-  String get contextualToolbar_buttonLabelQuit => 'Выйти';
 
   @override
   String get contextualToolbar_longPressBackHistoryMenu =>
@@ -5810,6 +5748,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get gestures_chooseActionTitle => 'Выбор действия';
+
+  @override
+  String get gestures_actionSearchHint => 'Search actions';
+
+  @override
+  String get gestures_noMatchingActions => 'No matching actions.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8349,6 +8293,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutLabel => 'Затенить';
+
+  @override
+  String get settings_fallbackGreyOutDescription =>
+      'Keep this button in place, greyed out';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Если недоступна';

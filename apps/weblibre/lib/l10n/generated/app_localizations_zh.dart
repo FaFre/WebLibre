@@ -1334,6 +1334,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_focusAddressBarDescription => '编辑地址或开始搜索';
 
   @override
+  String get browserActions_scanQrCodeTitle => '扫描二维码';
+
+  @override
+  String get browserActions_scanQrCodeDescription =>
+      'Scan a QR code into the search field';
+
+  @override
+  String get browserActions_voiceSearchTitle => '语音搜索';
+
+  @override
+  String get browserActions_voiceSearchDescription =>
+      'Speak a search into the search field';
+
+  @override
   String get browserActions_backTitle => '后退';
 
   @override
@@ -1558,6 +1572,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_findPreviousDescription => '跳到上次搜索的上一个匹配项';
 
   @override
+  String get browserActions_showFontSizeTitle => '文字大小';
+
+  @override
+  String get browserActions_showFontSizeDescription =>
+      'Adjust the page font size';
+
+  @override
   String get browserActions_increaseFontSizeTitle => '增大字号';
 
   @override
@@ -1576,7 +1597,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_resetFontSizeDescription => '恢复默认的页面字号';
 
   @override
-  String get browserActions_toggleBookmarkTitle => '书签';
+  String get browserActions_toggleBookmarkTitle => '加入书签';
 
   @override
   String get browserActions_toggleBookmarkDescription => '将当前页面加入书签或移除书签';
@@ -1598,6 +1619,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_printPageDescription => '打印当前页面';
+
+  @override
+  String get browserActions_showBrowserMenuTitle => '菜单';
+
+  @override
+  String get browserActions_showBrowserMenuDescription =>
+      'Open the browser menu';
 
   @override
   String get browserActions_showHomeTitle => '主页';
@@ -1658,6 +1686,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_toggleTabBarDescription => '隐藏标签栏，或重新显示';
+
+  @override
+  String get browserActions_toggleGesturesTitle => '手势';
+
+  @override
+  String get browserActions_toggleGesturesDescription =>
+      'Turn drawn gestures on or off';
 
   @override
   String get browserActions_clearBrowsingDataTitle => '清除浏览数据';
@@ -3274,103 +3309,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '请先在设置中关闭自动字号，才能手动调整';
 
   @override
-  String get contextualToolbar_buttonLabelBack => '后退';
-
-  @override
-  String get contextualToolbar_buttonLabelForward => '前进';
-
-  @override
-  String get contextualToolbar_buttonLabelHome => '主页';
-
-  @override
-  String get contextualToolbar_buttonLabelHistory => '历史记录';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarks => '书签';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarkToggle => '加入书签';
-
-  @override
-  String get contextualToolbar_buttonLabelShare => '分享';
-
-  @override
-  String get contextualToolbar_buttonLabelAddTab => '新建标签页';
-
-  @override
-  String get contextualToolbar_buttonLabelTabsCount => '标签页';
-
-  @override
-  String get contextualToolbar_buttonLabelNavigationMenu => '菜单';
-
-  @override
-  String get contextualToolbar_buttonLabelReload => '重新加载';
-
-  @override
-  String get contextualToolbar_buttonLabelReaderMode => '阅读模式';
-
-  @override
-  String get contextualToolbar_buttonLabelDesktop => '桌面版网站';
-
-  @override
-  String get contextualToolbar_buttonLabelTranslation => '翻译';
-
-  @override
-  String get contextualToolbar_buttonLabelFindInPage => '在页面中查找';
-
-  @override
-  String get contextualToolbar_buttonLabelCloseTab => '关闭标签页';
-
-  @override
-  String get contextualToolbar_buttonLabelInputUrl => '地址栏';
-
-  @override
-  String get contextualToolbar_buttonLabelQrScan => '扫描二维码';
-
-  @override
-  String get contextualToolbar_buttonLabelVoiceSearch => '语音搜索';
-
-  @override
-  String get contextualToolbar_buttonLabelDuplicateTab => '复制标签页';
-
-  @override
-  String get contextualToolbar_buttonLabelIncreaseFont => '增大字号';
-
-  @override
-  String get contextualToolbar_buttonLabelDecreaseFont => '减小字号';
-
-  @override
-  String get contextualToolbar_buttonLabelMoveToBackground => '转到后台';
-
-  @override
-  String get contextualToolbar_buttonLabelToggleGestures => '手势';
-
-  @override
-  String get contextualToolbar_buttonLabelHideTabBar => '隐藏标签栏';
-
-  @override
-  String get contextualToolbar_buttonLabelPageUp => '向上翻页';
-
-  @override
-  String get contextualToolbar_buttonLabelPageDown => '向下翻页';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollTop => '滚动到顶部';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollBottom => '滚动到底部';
-
-  @override
-  String get contextualToolbar_buttonLabelFont => '文字大小';
-
-  @override
   String get contextualToolbar_buttonLabelExtensionShortcut => '扩展';
-
-  @override
-  String get contextualToolbar_buttonLabelClearBrowsingData => '清除数据';
-
-  @override
-  String get contextualToolbar_buttonLabelQuit => '退出';
 
   @override
   String get contextualToolbar_longPressBackHistoryMenu => '历史菜单（之前的页面）';
@@ -5344,6 +5283,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gestures_chooseActionTitle => '选择操作';
+
+  @override
+  String get gestures_actionSearchHint => 'Search actions';
+
+  @override
+  String get gestures_noMatchingActions => 'No matching actions.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle => '笔画长度、超时和冷却时间。';
@@ -7630,6 +7575,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutLabel => '显示为灰色';
+
+  @override
+  String get settings_fallbackGreyOutDescription =>
+      'Keep this button in place, greyed out';
 
   @override
   String get settings_fallbackIfUnavailableTitle => '不可用时';

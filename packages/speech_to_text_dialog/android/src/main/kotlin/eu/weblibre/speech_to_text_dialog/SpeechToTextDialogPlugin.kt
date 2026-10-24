@@ -87,6 +87,9 @@ class SpeechToTextDialogPlugin : FlutterPlugin, ActivityAware,
     /// @param locale The locale string (e.g., "en-US", "de-DE") or null for device default.
     /// @return true if the dialog was shown successfully, false otherwise.
     fun showSpeechDialog(locale: String?): Boolean {
+        // Without an activity nothing opens, so no result would ever arrive.
+        val currentActivity = activity ?: return false
+
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(
                 RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -100,7 +103,7 @@ class SpeechToTextDialogPlugin : FlutterPlugin, ActivityAware,
         }
 
         return try {
-            activity?.startActivityForResult(intent, REQ_CODE_SPEECH_INPUT)
+            currentActivity.startActivityForResult(intent, REQ_CODE_SPEECH_INPUT)
             true
         } catch (e: ActivityNotFoundException) {
             false

@@ -33,7 +33,9 @@ import 'package:weblibre/presentation/icons/tor_icons.dart';
 /// silently drops every binding that points at it.
 enum BrowserAction {
   // Navigation
-  focusAddressBar(Icons.search, BrowserActionCategory.navigation),
+  focusAddressBar(Icons.edit, BrowserActionCategory.navigation),
+  scanQrCode(MdiIcons.barcodeScan, BrowserActionCategory.navigation),
+  voiceSearch(Icons.mic, BrowserActionCategory.navigation),
   back(Icons.arrow_back, BrowserActionCategory.navigation),
   forward(Icons.arrow_forward, BrowserActionCategory.navigation),
   reload(Icons.refresh, BrowserActionCategory.navigation),
@@ -82,12 +84,13 @@ enum BrowserAction {
   // Page tools
   toggleReaderMode(MdiIcons.bookOpenOutline, BrowserActionCategory.page),
   toggleDesktopMode(Icons.desktop_windows, BrowserActionCategory.page),
-  findInPage(Icons.find_in_page, BrowserActionCategory.page),
+  findInPage(Icons.search, BrowserActionCategory.page),
   findNext(Icons.keyboard_arrow_down, BrowserActionCategory.page),
   findPrevious(Icons.keyboard_arrow_up, BrowserActionCategory.page),
+  showFontSize(MdiIcons.formatSize, BrowserActionCategory.page),
   increaseFontSize(MdiIcons.formatFontSizeIncrease, BrowserActionCategory.page),
   decreaseFontSize(MdiIcons.formatFontSizeDecrease, BrowserActionCategory.page),
-  resetFontSize(MdiIcons.formatSize, BrowserActionCategory.page),
+  resetFontSize(MdiIcons.formatClear, BrowserActionCategory.page),
   toggleBookmark(Icons.bookmark_border, BrowserActionCategory.page),
   sharePage(Icons.share, BrowserActionCategory.page),
   translatePage(Icons.translate, BrowserActionCategory.page),
@@ -98,6 +101,7 @@ enum BrowserAction {
   subscribeToPageFeed(MdiIcons.rssBox, BrowserActionCategory.page),
 
   // Open
+  showBrowserMenu(Icons.more_vert, BrowserActionCategory.open),
   showHome(Icons.home_outlined, BrowserActionCategory.open),
   showHistory(Icons.history, BrowserActionCategory.open),
   showBookmarks(MdiIcons.bookmarkMultiple, BrowserActionCategory.open),
@@ -126,6 +130,7 @@ enum BrowserAction {
 
   // App
   toggleTabBar(MdiIcons.dockBottom, BrowserActionCategory.app),
+  toggleGestures(MdiIcons.gestureSwipe, BrowserActionCategory.app),
   clearBrowsingData(MdiIcons.fire, BrowserActionCategory.app),
   moveToBackground(MdiIcons.arrowCollapseDown, BrowserActionCategory.app),
   backupProfile(MdiIcons.backupRestore, BrowserActionCategory.app),

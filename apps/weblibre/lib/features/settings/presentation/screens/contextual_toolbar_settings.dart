@@ -26,6 +26,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
@@ -412,8 +413,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                           options: fallbackOptions,
                           onChanged: (newFallback) => repository.assignFallback(
                             config.buttonId,
-                            (newFallback ?? ToolbarFallbackNone())
-                                .toStoredFallbackId(),
+                            newFallback.toStoredFallbackId(),
                           ),
                         ),
                       ],
@@ -480,6 +480,7 @@ class _LongPressPicker extends StatelessWidget {
       onTap: () async {
         final picked = await showOptionalBrowserActionPicker(
           context,
+          title: l10n.settings_longPressTitle,
           selected: current,
           unsetOption: builtIn,
         );
@@ -493,6 +494,10 @@ class _LongPressPicker extends StatelessWidget {
 
 /// Chooses the button that takes this one's place while its own action is
 /// unavailable, or none to show it greyed out.
+///
+/// Picked from the long press's list, under the names of the actions the
+/// buttons do. A replacement is still a button, so the list only holds the
+/// actions of buttons that can stand in.
 class _FallbackPicker extends StatelessWidget {
   const _FallbackPicker({
     required this.current,
@@ -502,7 +507,7 @@ class _FallbackPicker extends StatelessWidget {
 
   final ToolbarFallbackChoice current;
   final List<ToolbarButtonDefinition> options;
-  final ValueChanged<ToolbarFallbackChoice?> onChanged;
+  final ValueChanged<ToolbarFallbackChoice> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -514,37 +519,36 @@ class _FallbackPicker extends StatelessWidget {
     final currentLabel = currentId == null
         ? l10n.settings_fallbackGreyOutLabel
         : (currentDef?.spec.id.label(context) ?? currentId);
-    final checkColor = Theme.of(context).colorScheme.primary;
 
-    Widget? check(bool selected) =>
-        selected ? Icon(Icons.check, size: 18, color: checkColor) : null;
-
-    return MenuAnchor(
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.block, size: 18),
-          trailingIcon: check(currentId == null),
-          onPressed: () => onChanged(ToolbarFallbackNone()),
-          child: Text(l10n.settings_fallbackGreyOutLabel),
-        ),
-        for (final opt in options)
-          MenuItemButton(
-            leadingIcon: Icon(opt.icon, size: 18),
-            trailingIcon: check(currentId == opt.spec.id.name),
-            onPressed: () =>
-                onChanged(ToolbarFallbackButton(buttonId: opt.spec.id.name)),
-            child: Text(opt.spec.id.label(context)),
+    return SettingValueTile(
+      padding: _settingPadding,
+      icon: Icons.swap_horiz,
+      title: l10n.settings_fallbackIfUnavailableTitle,
+      description: l10n.settings_fallbackIfUnavailableDescription,
+      value: currentLabel,
+      valueIcon: currentDef?.icon ?? Icons.block,
+      onTap: () async {
+        final optionActions = {for (final def in options) ?def.spec.id.action};
+        final picked = await showOptionalBrowserActionPicker(
+          context,
+          title: l10n.settings_fallbackIfUnavailableTitle,
+          selected: currentDef?.spec.id.action,
+          unsetOption: (
+            title: l10n.settings_fallbackGreyOutLabel,
+            description: l10n.settings_fallbackGreyOutDescription,
+            icon: Icons.block,
           ),
-      ],
-      builder: (context, controller, _) => SettingValueTile(
-        padding: _settingPadding,
-        icon: Icons.swap_horiz,
-        title: l10n.settings_fallbackIfUnavailableTitle,
-        description: l10n.settings_fallbackIfUnavailableDescription,
-        value: currentLabel,
-        valueIcon: currentDef?.icon ?? Icons.block,
-        onTap: () => controller.isOpen ? controller.close() : controller.open(),
-      ),
+          // In the order the long press lists them.
+          actions: BrowserAction.values.where(optionActions.contains).toList(),
+        );
+        if (picked == null) return;
+
+        final buttonId = toolbarButtonIdsByAction[picked.action];
+        final choice = buttonId == null
+            ? ToolbarFallbackNone()
+            : ToolbarFallbackButton(buttonId: buttonId.name);
+        if (choice != current) onChanged(choice);
+      },
     );
   }
 }

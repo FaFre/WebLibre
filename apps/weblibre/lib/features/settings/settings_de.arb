@@ -192,6 +192,7 @@
   "settings_longPressTitle": "Langes Drücken",
   "settings_longPressDescription": "Was das Gedrückthalten der Schaltfläche bewirkt",
   "settings_fallbackGreyOutLabel": "Ausgrauen",
+  "settings_fallbackGreyOutDescription": "Diese Schaltfläche ausgegraut stehen lassen",
   "settings_fallbackIfUnavailableTitle": "Wenn nicht verfügbar",
   "settings_fallbackIfUnavailableDescription": "Wird stattdessen angezeigt, solange diese Schaltfläche nicht nutzbar ist",
   "settings_customTrackingProtectionTitle": "Benutzerdefinierter Tracking-Schutz",

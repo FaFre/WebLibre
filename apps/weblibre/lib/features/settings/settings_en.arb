@@ -791,6 +791,10 @@
   "@settings_fallbackGreyOutLabel": {
     "description": "Option for a toolbar button that cannot be used at the moment: show it greyed out instead of replacing it."
   },
+  "settings_fallbackGreyOutDescription": "Keep this button in place, greyed out",
+  "@settings_fallbackGreyOutDescription": {
+    "description": "Explanation under \"Grey out\" in the list of buttons that can replace a toolbar button while it cannot be used: the button stays where it is but cannot be tapped."
+  },
   "settings_fallbackIfUnavailableTitle": "If unavailable",
   "@settings_fallbackIfUnavailableTitle": {
     "description": "Setting for which button replaces a toolbar button while it cannot be used."

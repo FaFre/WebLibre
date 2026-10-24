@@ -1801,15 +1801,31 @@
   },
   "browserActions_focusAddressBarTitle": "Address Bar",
   "@browserActions_focusAddressBarTitle": {
-    "description": "Name of the browser action that puts the cursor in the address field to type a web address or search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that puts the cursor in the address field to type a web address or search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_focusAddressBarDescription": "Edit the address or start a search",
   "@browserActions_focusAddressBarDescription": {
     "description": "Explanation under that browser action's name in the action lists: it puts the cursor in the address field to type a web address or search."
   },
+  "browserActions_scanQrCodeTitle": "Scan QR Code",
+  "@browserActions_scanQrCodeTitle": {
+    "description": "Name of the browser action that scans a QR code with the camera and puts its contents in the search field without opening them, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_scanQrCodeDescription": "Scan a QR code into the search field",
+  "@browserActions_scanQrCodeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it scans a QR code with the camera and puts its contents in the search field without opening them."
+  },
+  "browserActions_voiceSearchTitle": "Voice Search",
+  "@browserActions_voiceSearchTitle": {
+    "description": "Name of the browser action that lets the user speak a search and puts the recognized words in the search field without searching yet, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_voiceSearchDescription": "Speak a search into the search field",
+  "@browserActions_voiceSearchDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it lets the user speak a search and puts the recognized words in the search field without searching yet."
+  },
   "browserActions_backTitle": "Back",
   "@browserActions_backTitle": {
-    "description": "Name of the browser action that goes to the previous page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that goes to the previous page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_backDescription": "Go back in history",
   "@browserActions_backDescription": {
@@ -1817,7 +1833,7 @@
   },
   "browserActions_forwardTitle": "Forward",
   "@browserActions_forwardTitle": {
-    "description": "Name of the browser action that goes to the next page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that goes to the next page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_forwardDescription": "Go forward in history",
   "@browserActions_forwardDescription": {
@@ -1825,7 +1841,7 @@
   },
   "browserActions_reloadTitle": "Reload",
   "@browserActions_reloadTitle": {
-    "description": "Name of the browser action that reloads the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that reloads the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_reloadDescription": "Reload the current page",
   "@browserActions_reloadDescription": {
@@ -1841,7 +1857,7 @@
   },
   "browserActions_scrollTopTitle": "Scroll to Top",
   "@browserActions_scrollTopTitle": {
-    "description": "Name of the browser action that scrolls to the top of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that scrolls to the top of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_scrollTopDescription": "Jump to the top of the page",
   "@browserActions_scrollTopDescription": {
@@ -1849,7 +1865,7 @@
   },
   "browserActions_scrollBottomTitle": "Scroll to Bottom",
   "@browserActions_scrollBottomTitle": {
-    "description": "Name of the browser action that scrolls to the bottom of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that scrolls to the bottom of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_scrollBottomDescription": "Jump to the bottom of the page",
   "@browserActions_scrollBottomDescription": {
@@ -1857,7 +1873,7 @@
   },
   "browserActions_pageUpTitle": "Page Up",
   "@browserActions_pageUpTitle": {
-    "description": "Name of the browser action that scrolls up by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that scrolls up by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_pageUpDescription": "Scroll up by one screen",
   "@browserActions_pageUpDescription": {
@@ -1865,7 +1881,7 @@
   },
   "browserActions_pageDownTitle": "Page Down",
   "@browserActions_pageDownTitle": {
-    "description": "Name of the browser action that scrolls down by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that scrolls down by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_pageDownDescription": "Scroll down by one screen",
   "@browserActions_pageDownDescription": {
@@ -1873,7 +1889,7 @@
   },
   "browserActions_newTabTitle": "New Tab",
   "@browserActions_newTabTitle": {
-    "description": "Name of the browser action that opens a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_newTabDescription": "Open a new tab",
   "@browserActions_newTabDescription": {
@@ -1889,7 +1905,7 @@
   },
   "browserActions_closeTabTitle": "Close Tab",
   "@browserActions_closeTabTitle": {
-    "description": "Name of the browser action that closes the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that closes the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_closeTabDescription": "Close the current tab",
   "@browserActions_closeTabDescription": {
@@ -1905,7 +1921,7 @@
   },
   "browserActions_duplicateTabTitle": "Duplicate Tab",
   "@browserActions_duplicateTabTitle": {
-    "description": "Name of the browser action that copies the current tab into a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that copies the current tab into a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_duplicateTabDescription": "Open a copy of the current tab",
   "@browserActions_duplicateTabDescription": {
@@ -2065,7 +2081,7 @@
   },
   "browserActions_toggleReaderModeTitle": "Reader Mode",
   "@browserActions_toggleReaderModeTitle": {
-    "description": "Name of the browser action that turns reader mode (simplified, easy-to-read text) on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that turns reader mode (simplified, easy-to-read text) on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_toggleReaderModeDescription": "Toggle reader mode for the current page",
   "@browserActions_toggleReaderModeDescription": {
@@ -2073,7 +2089,7 @@
   },
   "browserActions_toggleDesktopModeTitle": "Desktop Site",
   "@browserActions_toggleDesktopModeTitle": {
-    "description": "Name of the browser action that switches between the mobile and desktop version of the website, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that switches between the mobile and desktop version of the website, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_toggleDesktopModeDescription": "Toggle desktop site for the current page",
   "@browserActions_toggleDesktopModeDescription": {
@@ -2081,7 +2097,7 @@
   },
   "browserActions_findInPageTitle": "Find in Page",
   "@browserActions_findInPageTitle": {
-    "description": "Name of the browser action that opens the bar for searching text on the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens the bar for searching text on the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_findInPageDescription": "Open find in page",
   "@browserActions_findInPageDescription": {
@@ -2103,9 +2119,17 @@
   "@browserActions_findPreviousDescription": {
     "description": "Explanation under that browser action's name in the action lists: it jumps to the previous match of the last find-in-page search."
   },
+  "browserActions_showFontSizeTitle": "Text Size",
+  "@browserActions_showFontSizeTitle": {
+    "description": "Name of the browser action that opens the controls for the text size of web pages, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_showFontSizeDescription": "Adjust the page font size",
+  "@browserActions_showFontSizeDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the controls for the text size of web pages."
+  },
   "browserActions_increaseFontSizeTitle": "Increase Font",
   "@browserActions_increaseFontSizeTitle": {
-    "description": "Name of the browser action that makes page text larger, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that makes page text larger, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_increaseFontSizeDescription": "Increase the page font size",
   "@browserActions_increaseFontSizeDescription": {
@@ -2113,7 +2137,7 @@
   },
   "browserActions_decreaseFontSizeTitle": "Decrease Font",
   "@browserActions_decreaseFontSizeTitle": {
-    "description": "Name of the browser action that makes page text smaller, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that makes page text smaller, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_decreaseFontSizeDescription": "Decrease the page font size",
   "@browserActions_decreaseFontSizeDescription": {
@@ -2129,7 +2153,7 @@
   },
   "browserActions_toggleBookmarkTitle": "Bookmark",
   "@browserActions_toggleBookmarkTitle": {
-    "description": "Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_toggleBookmarkDescription": "Bookmark or unbookmark the current page",
   "@browserActions_toggleBookmarkDescription": {
@@ -2137,7 +2161,7 @@
   },
   "browserActions_sharePageTitle": "Share",
   "@browserActions_sharePageTitle": {
-    "description": "Name of the browser action that shares the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that shares the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_sharePageDescription": "Share the current page",
   "@browserActions_sharePageDescription": {
@@ -2145,7 +2169,7 @@
   },
   "browserActions_translatePageTitle": "Translate",
   "@browserActions_translatePageTitle": {
-    "description": "Name of the browser action that opens the page translation options, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens the page translation options, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_translatePageDescription": "Open the page translation sheet",
   "@browserActions_translatePageDescription": {
@@ -2159,9 +2183,17 @@
   "@browserActions_printPageDescription": {
     "description": "Explanation under that browser action's name in the action lists: it prints the current page."
   },
+  "browserActions_showBrowserMenuTitle": "Menu",
+  "@browserActions_showBrowserMenuTitle": {
+    "description": "Name of the browser action that opens the browser menu (the one behind the three-dot button), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_showBrowserMenuDescription": "Open the browser menu",
+  "@browserActions_showBrowserMenuDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it opens the browser menu (the one behind the three-dot button)."
+  },
   "browserActions_showHomeTitle": "Home",
   "@browserActions_showHomeTitle": {
-    "description": "Name of the browser action that opens the home screen, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens the home screen, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_showHomeDescription": "Open the home screen",
   "@browserActions_showHomeDescription": {
@@ -2169,7 +2201,7 @@
   },
   "browserActions_showHistoryTitle": "History",
   "@browserActions_showHistoryTitle": {
-    "description": "Name of the browser action that opens browsing history, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens browsing history, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_showHistoryDescription": "Open browsing history",
   "@browserActions_showHistoryDescription": {
@@ -2177,7 +2209,7 @@
   },
   "browserActions_showBookmarksTitle": "Bookmarks",
   "@browserActions_showBookmarksTitle": {
-    "description": "Name of the browser action that opens the bookmarks list, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens the bookmarks list, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_showBookmarksDescription": "Open bookmarks",
   "@browserActions_showBookmarksDescription": {
@@ -2193,7 +2225,7 @@
   },
   "browserActions_showTabViewTitle": "Tab View",
   "@browserActions_showTabViewTitle": {
-    "description": "Name of the browser action that opens the overview of all open tabs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens the overview of all open tabs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_showTabViewDescription": "Open the tab overview",
   "@browserActions_showTabViewDescription": {
@@ -2233,15 +2265,23 @@
   },
   "browserActions_toggleTabBarTitle": "Hide / Show Tab Bar",
   "@browserActions_toggleTabBarTitle": {
-    "description": "Name of the browser action that hides the tab bar, or shows it again, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that hides the tab bar, or shows it again, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_toggleTabBarDescription": "Hide the tab bar, or bring it back",
   "@browserActions_toggleTabBarDescription": {
     "description": "Explanation under that browser action's name in the action lists: it hides the tab bar, or shows it again."
   },
+  "browserActions_toggleGesturesTitle": "Gestures",
+  "@browserActions_toggleGesturesTitle": {
+    "description": "Name of the browser action that turns drawn gestures on web pages on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_toggleGesturesDescription": "Turn drawn gestures on or off",
+  "@browserActions_toggleGesturesDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it turns drawn gestures on web pages on or off."
+  },
   "browserActions_clearBrowsingDataTitle": "Clear Browsing Data",
   "@browserActions_clearBrowsingDataTitle": {
-    "description": "Name of the browser action that opens the dialog for deleting browsing data, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that opens the dialog for deleting browsing data, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_clearBrowsingDataDescription": "Choose browsing data to delete",
   "@browserActions_clearBrowsingDataDescription": {
@@ -2249,7 +2289,7 @@
   },
   "browserActions_moveToBackgroundTitle": "Minimize",
   "@browserActions_moveToBackgroundTitle": {
-    "description": "Name of the browser action that sends the app to the background, like pressing the Home button, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that sends the app to the background, like pressing the Home button, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_moveToBackgroundDescription": "Send WebLibre to the background",
   "@browserActions_moveToBackgroundDescription": {
@@ -2257,7 +2297,7 @@
   },
   "browserActions_quitBrowserTitle": "Quit",
   "@browserActions_quitBrowserTitle": {
-    "description": "Name of the browser action that closes all tabs and exits the app, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
+    "description": "Name of the browser action that closes all tabs and exits the app, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
   },
   "browserActions_quitBrowserDescription": "Close all tabs and quit WebLibre",
   "@browserActions_quitBrowserDescription": {
@@ -4370,137 +4410,9 @@
   "@contextualToolbar_fontSizeAutoAdjustmentHint": {
     "description": "Message when a text size toolbar button is tapped while automatic font size is on: it must be turned off in settings first."
   },
-  "contextualToolbar_buttonLabelBack": "Back",
-  "@contextualToolbar_buttonLabelBack": {
-    "description": "Name of the Back toolbar button (previous page), shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelForward": "Forward",
-  "@contextualToolbar_buttonLabelForward": {
-    "description": "Name of the Forward toolbar button (next page), shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelHome": "Home",
-  "@contextualToolbar_buttonLabelHome": {
-    "description": "Name of the Home toolbar button, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelHistory": "History",
-  "@contextualToolbar_buttonLabelHistory": {
-    "description": "Name of the toolbar button that opens browsing history, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelBookmarks": "Bookmarks",
-  "@contextualToolbar_buttonLabelBookmarks": {
-    "description": "Name of the toolbar button that opens the bookmarks list, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelBookmarkToggle": "Bookmark",
-  "@contextualToolbar_buttonLabelBookmarkToggle": {
-    "description": "Name of the toolbar button that bookmarks or un-bookmarks the current page, shown in toolbar customization. Verb or noun as fits a button name."
-  },
-  "contextualToolbar_buttonLabelShare": "Share",
-  "@contextualToolbar_buttonLabelShare": {
-    "description": "Name of the toolbar button that shares the current page, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelAddTab": "New Tab",
-  "@contextualToolbar_buttonLabelAddTab": {
-    "description": "Name of the toolbar button that opens a new tab, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelTabsCount": "Tabs",
-  "@contextualToolbar_buttonLabelTabsCount": {
-    "description": "Name of the toolbar button that shows the number of open tabs and opens the tab overview, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelNavigationMenu": "Menu",
-  "@contextualToolbar_buttonLabelNavigationMenu": {
-    "description": "Name of the toolbar button that opens the main browser menu, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelReload": "Reload",
-  "@contextualToolbar_buttonLabelReload": {
-    "description": "Name of the toolbar button that reloads the page, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelReaderMode": "Reader Mode",
-  "@contextualToolbar_buttonLabelReaderMode": {
-    "description": "Name of the toolbar button that shows the page as simplified, easy-to-read text, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelDesktop": "Desktop Site",
-  "@contextualToolbar_buttonLabelDesktop": {
-    "description": "Name of the toolbar button that requests the desktop version of the website, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelTranslation": "Translate",
-  "@contextualToolbar_buttonLabelTranslation": {
-    "description": "Name of the toolbar button that translates the page, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelFindInPage": "Find in Page",
-  "@contextualToolbar_buttonLabelFindInPage": {
-    "description": "Name of the toolbar button that searches for text on the page, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelCloseTab": "Close Tab",
-  "@contextualToolbar_buttonLabelCloseTab": {
-    "description": "Name of the toolbar button that closes the current tab, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelInputUrl": "Address Bar",
-  "@contextualToolbar_buttonLabelInputUrl": {
-    "description": "Name of the toolbar item that shows the address field for typing a web address or search, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelQrScan": "Scan QR Code",
-  "@contextualToolbar_buttonLabelQrScan": {
-    "description": "Name of the toolbar button that scans a QR code with the camera, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelVoiceSearch": "Voice Search",
-  "@contextualToolbar_buttonLabelVoiceSearch": {
-    "description": "Name of the toolbar button that starts a search by voice, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelDuplicateTab": "Duplicate Tab",
-  "@contextualToolbar_buttonLabelDuplicateTab": {
-    "description": "Name of the toolbar button that copies the current tab into a new tab, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelIncreaseFont": "Increase Font",
-  "@contextualToolbar_buttonLabelIncreaseFont": {
-    "description": "Name of the toolbar button that makes page text larger, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelDecreaseFont": "Decrease Font",
-  "@contextualToolbar_buttonLabelDecreaseFont": {
-    "description": "Name of the toolbar button that makes page text smaller, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelMoveToBackground": "Background",
-  "@contextualToolbar_buttonLabelMoveToBackground": {
-    "description": "Name of the toolbar button that sends the app to the background (like pressing Home), shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelToggleGestures": "Gestures",
-  "@contextualToolbar_buttonLabelToggleGestures": {
-    "description": "Name of the toolbar button that turns swipe gestures on or off, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelHideTabBar": "Hide Tab Bar",
-  "@contextualToolbar_buttonLabelHideTabBar": {
-    "description": "Name of the toolbar button that hides the tab bar, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelPageUp": "Page Up",
-  "@contextualToolbar_buttonLabelPageUp": {
-    "description": "Name of the toolbar button that scrolls the page up by one screen, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelPageDown": "Page Down",
-  "@contextualToolbar_buttonLabelPageDown": {
-    "description": "Name of the toolbar button that scrolls the page down by one screen, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelScrollTop": "Scroll to Top",
-  "@contextualToolbar_buttonLabelScrollTop": {
-    "description": "Name of the toolbar button that jumps to the top of the page, shown in toolbar customization and as the button's tooltip."
-  },
-  "contextualToolbar_buttonLabelScrollBottom": "Scroll to Bottom",
-  "@contextualToolbar_buttonLabelScrollBottom": {
-    "description": "Name of the toolbar button that jumps to the bottom of the page, shown in toolbar customization and as the button's tooltip."
-  },
-  "contextualToolbar_buttonLabelFont": "Text Size",
-  "@contextualToolbar_buttonLabelFont": {
-    "description": "Name of the toolbar button for adjusting the page's text size, shown in toolbar customization."
-  },
   "contextualToolbar_buttonLabelExtensionShortcut": "Extensions",
   "@contextualToolbar_buttonLabelExtensionShortcut": {
     "description": "Name of the toolbar button that opens the menu of installed browser extensions, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelClearBrowsingData": "Clear Data",
-  "@contextualToolbar_buttonLabelClearBrowsingData": {
-    "description": "Name of the toolbar button that deletes browsing data, shown in toolbar customization."
-  },
-  "contextualToolbar_buttonLabelQuit": "Quit",
-  "@contextualToolbar_buttonLabelQuit": {
-    "description": "Name of the toolbar button that closes the app completely, shown in toolbar customization."
   },
   "contextualToolbar_longPressBackHistoryMenu": "History Menu (Previous pages)",
   "@contextualToolbar_longPressBackHistoryMenu": {
@@ -7170,6 +7082,14 @@
   "gestures_chooseActionTitle": "Choose action",
   "@gestures_chooseActionTitle": {
     "description": "Title of the list of browser actions to choose from for a gesture."
+  },
+  "gestures_actionSearchHint": "Search actions",
+  "@gestures_actionSearchHint": {
+    "description": "Placeholder of the search field at the top of the list of browser actions to choose from, for a gesture or for what a toolbar button does when held or when it cannot be used."
+  },
+  "gestures_noMatchingActions": "No matching actions.",
+  "@gestures_noMatchingActions": {
+    "description": "Shown in that list when the search matches no action."
   },
   "gestures_behaviorTimingScreenSubtitle": "Stroke length, timeout, and cooldown.",
   "@gestures_behaviorTimingScreenSubtitle": {
@@ -10286,6 +10206,10 @@
   "settings_fallbackGreyOutLabel": "Grey out",
   "@settings_fallbackGreyOutLabel": {
     "description": "Option for a toolbar button that cannot be used at the moment: show it greyed out instead of replacing it."
+  },
+  "settings_fallbackGreyOutDescription": "Keep this button in place, greyed out",
+  "@settings_fallbackGreyOutDescription": {
+    "description": "Explanation under \"Grey out\" in the list of buttons that can replace a toolbar button while it cannot be used: the button stays where it is but cannot be tapped."
   },
   "settings_fallbackIfUnavailableTitle": "If unavailable",
   "@settings_fallbackIfUnavailableTitle": {

@@ -49,6 +49,8 @@
   "gestures_saveGestureButtonLabel": "Geste speichern",
   "gestures_collisionWarning": "Bereits „{action}“ zugewiesen. Beim Speichern wird die bestehende Zuweisung ersetzt.",
   "gestures_chooseActionTitle": "Aktion auswählen",
+  "gestures_actionSearchHint": "Aktionen suchen",
+  "gestures_noMatchingActions": "Keine passenden Aktionen.",
   "gestures_behaviorTimingScreenSubtitle": "Strichlänge, Zeitlimit und Sperrzeit.",
   "gestures_resetToDefaultsTooltip": "Auf Standard zurücksetzen",
   "gestures_resetBehaviorTimingConfirmTitle": "Verhalten & Timing zurücksetzen?",

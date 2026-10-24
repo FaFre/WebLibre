@@ -18,64 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/widgets.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Display label and long-press submenu description for [ToolbarButtonId].
 extension ToolbarButtonIdL10n on ToolbarButtonId {
+  /// Named after its [action], so the toolbar settings and the action lists
+  /// agree; only a button without one has a name of its own.
   String label(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    if (action case final action?) return action.label(context);
 
-    return switch (this) {
-      ToolbarButtonId.back => l10n.contextualToolbar_buttonLabelBack,
-      ToolbarButtonId.forward => l10n.contextualToolbar_buttonLabelForward,
-      ToolbarButtonId.home => l10n.contextualToolbar_buttonLabelHome,
-      ToolbarButtonId.history => l10n.contextualToolbar_buttonLabelHistory,
-      ToolbarButtonId.bookmarks => l10n.contextualToolbar_buttonLabelBookmarks,
-      ToolbarButtonId.bookmarkToggle =>
-        l10n.contextualToolbar_buttonLabelBookmarkToggle,
-      ToolbarButtonId.share => l10n.contextualToolbar_buttonLabelShare,
-      ToolbarButtonId.addTab => l10n.contextualToolbar_buttonLabelAddTab,
-      ToolbarButtonId.tabsCount => l10n.contextualToolbar_buttonLabelTabsCount,
-      ToolbarButtonId.navigationMenu =>
-        l10n.contextualToolbar_buttonLabelNavigationMenu,
-      ToolbarButtonId.reload => l10n.contextualToolbar_buttonLabelReload,
-      ToolbarButtonId.readerMode =>
-        l10n.contextualToolbar_buttonLabelReaderMode,
-      ToolbarButtonId.desktop => l10n.contextualToolbar_buttonLabelDesktop,
-      ToolbarButtonId.translation =>
-        l10n.contextualToolbar_buttonLabelTranslation,
-      ToolbarButtonId.findInPage =>
-        l10n.contextualToolbar_buttonLabelFindInPage,
-      ToolbarButtonId.closeTab => l10n.contextualToolbar_buttonLabelCloseTab,
-      ToolbarButtonId.inputUrl => l10n.contextualToolbar_buttonLabelInputUrl,
-      ToolbarButtonId.qrScan => l10n.contextualToolbar_buttonLabelQrScan,
-      ToolbarButtonId.voiceSearch =>
-        l10n.contextualToolbar_buttonLabelVoiceSearch,
-      ToolbarButtonId.duplicateTab =>
-        l10n.contextualToolbar_buttonLabelDuplicateTab,
-      ToolbarButtonId.increaseFont =>
-        l10n.contextualToolbar_buttonLabelIncreaseFont,
-      ToolbarButtonId.decreaseFont =>
-        l10n.contextualToolbar_buttonLabelDecreaseFont,
-      ToolbarButtonId.moveToBackground =>
-        l10n.contextualToolbar_buttonLabelMoveToBackground,
-      ToolbarButtonId.pageUp => l10n.contextualToolbar_buttonLabelPageUp,
-      ToolbarButtonId.pageDown => l10n.contextualToolbar_buttonLabelPageDown,
-      ToolbarButtonId.scrollTop => l10n.contextualToolbar_buttonLabelScrollTop,
-      ToolbarButtonId.scrollBottom =>
-        l10n.contextualToolbar_buttonLabelScrollBottom,
-      ToolbarButtonId.font => l10n.contextualToolbar_buttonLabelFont,
-      ToolbarButtonId.extensionShortcut =>
-        l10n.contextualToolbar_buttonLabelExtensionShortcut,
-      ToolbarButtonId.toggleGestures =>
-        l10n.contextualToolbar_buttonLabelToggleGestures,
-      ToolbarButtonId.hideTabBar =>
-        l10n.contextualToolbar_buttonLabelHideTabBar,
-      ToolbarButtonId.clearBrowsingData =>
-        l10n.contextualToolbar_buttonLabelClearBrowsingData,
-      ToolbarButtonId.quit => l10n.contextualToolbar_buttonLabelQuit,
-    };
+    return AppLocalizations.of(
+      context,
+    ).contextualToolbar_buttonLabelExtensionShortcut;
   }
 
   /// What the button's long-press submenu offers, for the settings search

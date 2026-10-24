@@ -56,7 +56,6 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -229,7 +228,9 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ),
   ToolbarButtonDefinition(
     spec: tabsCountToolbarButtonSpec,
-    icon: MdiIcons.tab,
+    // The bar draws the tab count instead; this one stands for the tab view
+    // it opens, as [BrowserAction.showTabView] does.
+    icon: MdiIcons.viewGridOutline,
     builder: (scope, context, ref) => scope.isPreview
         ? TabsCountButtonView(
             isActive: false,
@@ -472,15 +473,9 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         onPressed: scope.isPreview
             ? () {}
             : () async {
-                final newActive = !on;
                 await ref
                     .read(gestureSettingsRepositoryProvider.notifier)
-                    .updateSettings(
-                      (s) => s.copyWith(
-                        enabled: s.enabled || newActive,
-                        active: newActive,
-                      ),
-                    );
+                    .toggleGestures();
               },
         icon: Icon(on ? MdiIcons.gestureSwipe : MdiIcons.gestureDoubleTap),
       );

@@ -1446,6 +1446,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Adresse bearbeiten oder eine Suche starten';
 
   @override
+  String get browserActions_scanQrCodeTitle => 'QR-Code scannen';
+
+  @override
+  String get browserActions_scanQrCodeDescription =>
+      'Einen QR-Code ins Suchfeld scannen';
+
+  @override
+  String get browserActions_voiceSearchTitle => 'Sprachsuche';
+
+  @override
+  String get browserActions_voiceSearchDescription =>
+      'Suchbegriff ins Suchfeld sprechen';
+
+  @override
   String get browserActions_backTitle => 'Zurück';
 
   @override
@@ -1701,6 +1715,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zum vorherigen Treffer der letzten Suche springen';
 
   @override
+  String get browserActions_showFontSizeTitle => 'Textgröße';
+
+  @override
+  String get browserActions_showFontSizeDescription =>
+      'Die Schriftgröße der Seite anpassen';
+
+  @override
   String get browserActions_increaseFontSizeTitle => 'Schrift vergrößern';
 
   @override
@@ -1722,7 +1743,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Standard-Schriftgröße der Seite wiederherstellen';
 
   @override
-  String get browserActions_toggleBookmarkTitle => 'Lesezeichen';
+  String get browserActions_toggleBookmarkTitle => 'Lesezeichen setzen';
 
   @override
   String get browserActions_toggleBookmarkDescription =>
@@ -1747,6 +1768,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get browserActions_printPageDescription =>
       'Die aktuelle Seite drucken';
+
+  @override
+  String get browserActions_showBrowserMenuTitle => 'Menü';
+
+  @override
+  String get browserActions_showBrowserMenuDescription =>
+      'Das Browsermenü öffnen';
 
   @override
   String get browserActions_showHomeTitle => 'Startseite';
@@ -1812,6 +1840,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get browserActions_toggleTabBarDescription =>
       'Die Tableiste ausblenden oder wieder einblenden';
+
+  @override
+  String get browserActions_toggleGesturesTitle => 'Gesten';
+
+  @override
+  String get browserActions_toggleGesturesDescription =>
+      'Gezeichnete Gesten ein- oder ausschalten';
 
   @override
   String get browserActions_clearBrowsingDataTitle => 'Browserdaten löschen';
@@ -3572,104 +3607,7 @@ class AppLocalizationsDe extends AppLocalizations {
       'Zum manuellen Anpassen die automatische Schriftgröße in den Einstellungen deaktivieren';
 
   @override
-  String get contextualToolbar_buttonLabelBack => 'Zurück';
-
-  @override
-  String get contextualToolbar_buttonLabelForward => 'Vorwärts';
-
-  @override
-  String get contextualToolbar_buttonLabelHome => 'Startseite';
-
-  @override
-  String get contextualToolbar_buttonLabelHistory => 'Verlauf';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarks => 'Lesezeichen';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarkToggle =>
-      'Lesezeichen setzen';
-
-  @override
-  String get contextualToolbar_buttonLabelShare => 'Teilen';
-
-  @override
-  String get contextualToolbar_buttonLabelAddTab => 'Neuer Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelTabsCount => 'Tabs';
-
-  @override
-  String get contextualToolbar_buttonLabelNavigationMenu => 'Menü';
-
-  @override
-  String get contextualToolbar_buttonLabelReload => 'Neu laden';
-
-  @override
-  String get contextualToolbar_buttonLabelReaderMode => 'Leseansicht';
-
-  @override
-  String get contextualToolbar_buttonLabelDesktop => 'Desktop-Version';
-
-  @override
-  String get contextualToolbar_buttonLabelTranslation => 'Übersetzen';
-
-  @override
-  String get contextualToolbar_buttonLabelFindInPage => 'Auf Seite suchen';
-
-  @override
-  String get contextualToolbar_buttonLabelCloseTab => 'Tab schließen';
-
-  @override
-  String get contextualToolbar_buttonLabelInputUrl => 'Adressleiste';
-
-  @override
-  String get contextualToolbar_buttonLabelQrScan => 'QR-Code scannen';
-
-  @override
-  String get contextualToolbar_buttonLabelVoiceSearch => 'Sprachsuche';
-
-  @override
-  String get contextualToolbar_buttonLabelDuplicateTab => 'Tab duplizieren';
-
-  @override
-  String get contextualToolbar_buttonLabelIncreaseFont => 'Schrift vergrößern';
-
-  @override
-  String get contextualToolbar_buttonLabelDecreaseFont => 'Schrift verkleinern';
-
-  @override
-  String get contextualToolbar_buttonLabelMoveToBackground => 'Hintergrund';
-
-  @override
-  String get contextualToolbar_buttonLabelToggleGestures => 'Gesten';
-
-  @override
-  String get contextualToolbar_buttonLabelHideTabBar => 'Tableiste ausblenden';
-
-  @override
-  String get contextualToolbar_buttonLabelPageUp => 'Bild auf';
-
-  @override
-  String get contextualToolbar_buttonLabelPageDown => 'Bild ab';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollTop => 'Zum Anfang scrollen';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollBottom => 'Zum Ende scrollen';
-
-  @override
-  String get contextualToolbar_buttonLabelFont => 'Textgröße';
-
-  @override
   String get contextualToolbar_buttonLabelExtensionShortcut => 'Erweiterungen';
-
-  @override
-  String get contextualToolbar_buttonLabelClearBrowsingData => 'Daten löschen';
-
-  @override
-  String get contextualToolbar_buttonLabelQuit => 'Beenden';
 
   @override
   String get contextualToolbar_longPressBackHistoryMenu =>
@@ -5779,6 +5717,12 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get gestures_chooseActionTitle => 'Aktion auswählen';
+
+  @override
+  String get gestures_actionSearchHint => 'Aktionen suchen';
+
+  @override
+  String get gestures_noMatchingActions => 'Keine passenden Aktionen.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8269,6 +8213,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutLabel => 'Ausgrauen';
+
+  @override
+  String get settings_fallbackGreyOutDescription =>
+      'Diese Schaltfläche ausgegraut stehen lassen';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Wenn nicht verfügbar';

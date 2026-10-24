@@ -1417,6 +1417,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Edit the address or start a search';
 
   @override
+  String get browserActions_scanQrCodeTitle => 'Scan QR Code';
+
+  @override
+  String get browserActions_scanQrCodeDescription =>
+      'Scan a QR code into the search field';
+
+  @override
+  String get browserActions_voiceSearchTitle => 'Voice Search';
+
+  @override
+  String get browserActions_voiceSearchDescription =>
+      'Speak a search into the search field';
+
+  @override
   String get browserActions_backTitle => 'Back';
 
   @override
@@ -1667,6 +1681,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Jump to the previous match of the last search';
 
   @override
+  String get browserActions_showFontSizeTitle => 'Text Size';
+
+  @override
+  String get browserActions_showFontSizeDescription =>
+      'Adjust the page font size';
+
+  @override
   String get browserActions_increaseFontSizeTitle => 'Increase Font';
 
   @override
@@ -1712,6 +1733,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get browserActions_printPageDescription => 'Print the current page';
+
+  @override
+  String get browserActions_showBrowserMenuTitle => 'Menu';
+
+  @override
+  String get browserActions_showBrowserMenuDescription =>
+      'Open the browser menu';
 
   @override
   String get browserActions_showHomeTitle => 'Home';
@@ -1775,6 +1803,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get browserActions_toggleTabBarDescription =>
       'Hide the tab bar, or bring it back';
+
+  @override
+  String get browserActions_toggleGesturesTitle => 'Gestures';
+
+  @override
+  String get browserActions_toggleGesturesDescription =>
+      'Turn drawn gestures on or off';
 
   @override
   String get browserActions_clearBrowsingDataTitle => 'Clear Browsing Data';
@@ -3504,103 +3539,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Disable automatic font size in settings to adjust manually';
 
   @override
-  String get contextualToolbar_buttonLabelBack => 'Back';
-
-  @override
-  String get contextualToolbar_buttonLabelForward => 'Forward';
-
-  @override
-  String get contextualToolbar_buttonLabelHome => 'Home';
-
-  @override
-  String get contextualToolbar_buttonLabelHistory => 'History';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarks => 'Bookmarks';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarkToggle => 'Bookmark';
-
-  @override
-  String get contextualToolbar_buttonLabelShare => 'Share';
-
-  @override
-  String get contextualToolbar_buttonLabelAddTab => 'New Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelTabsCount => 'Tabs';
-
-  @override
-  String get contextualToolbar_buttonLabelNavigationMenu => 'Menu';
-
-  @override
-  String get contextualToolbar_buttonLabelReload => 'Reload';
-
-  @override
-  String get contextualToolbar_buttonLabelReaderMode => 'Reader Mode';
-
-  @override
-  String get contextualToolbar_buttonLabelDesktop => 'Desktop Site';
-
-  @override
-  String get contextualToolbar_buttonLabelTranslation => 'Translate';
-
-  @override
-  String get contextualToolbar_buttonLabelFindInPage => 'Find in Page';
-
-  @override
-  String get contextualToolbar_buttonLabelCloseTab => 'Close Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelInputUrl => 'Address Bar';
-
-  @override
-  String get contextualToolbar_buttonLabelQrScan => 'Scan QR Code';
-
-  @override
-  String get contextualToolbar_buttonLabelVoiceSearch => 'Voice Search';
-
-  @override
-  String get contextualToolbar_buttonLabelDuplicateTab => 'Duplicate Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelIncreaseFont => 'Increase Font';
-
-  @override
-  String get contextualToolbar_buttonLabelDecreaseFont => 'Decrease Font';
-
-  @override
-  String get contextualToolbar_buttonLabelMoveToBackground => 'Background';
-
-  @override
-  String get contextualToolbar_buttonLabelToggleGestures => 'Gestures';
-
-  @override
-  String get contextualToolbar_buttonLabelHideTabBar => 'Hide Tab Bar';
-
-  @override
-  String get contextualToolbar_buttonLabelPageUp => 'Page Up';
-
-  @override
-  String get contextualToolbar_buttonLabelPageDown => 'Page Down';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollTop => 'Scroll to Top';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollBottom => 'Scroll to Bottom';
-
-  @override
-  String get contextualToolbar_buttonLabelFont => 'Text Size';
-
-  @override
   String get contextualToolbar_buttonLabelExtensionShortcut => 'Extensions';
-
-  @override
-  String get contextualToolbar_buttonLabelClearBrowsingData => 'Clear Data';
-
-  @override
-  String get contextualToolbar_buttonLabelQuit => 'Quit';
 
   @override
   String get contextualToolbar_longPressBackHistoryMenu =>
@@ -5662,6 +5601,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gestures_chooseActionTitle => 'Choose action';
+
+  @override
+  String get gestures_actionSearchHint => 'Search actions';
+
+  @override
+  String get gestures_noMatchingActions => 'No matching actions.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8112,6 +8057,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutLabel => 'Grey out';
+
+  @override
+  String get settings_fallbackGreyOutDescription =>
+      'Keep this button in place, greyed out';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'If unavailable';

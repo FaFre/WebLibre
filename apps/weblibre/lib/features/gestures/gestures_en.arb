@@ -202,6 +202,14 @@
   "@gestures_chooseActionTitle": {
     "description": "Title of the list of browser actions to choose from for a gesture."
   },
+  "gestures_actionSearchHint": "Search actions",
+  "@gestures_actionSearchHint": {
+    "description": "Placeholder of the search field at the top of the list of browser actions to choose from, for a gesture or for what a toolbar button does when held or when it cannot be used."
+  },
+  "gestures_noMatchingActions": "No matching actions.",
+  "@gestures_noMatchingActions": {
+    "description": "Shown in that list when the search matches no action."
+  },
 
   "gestures_behaviorTimingScreenSubtitle": "Stroke length, timeout, and cooldown.",
   "@gestures_behaviorTimingScreenSubtitle": {

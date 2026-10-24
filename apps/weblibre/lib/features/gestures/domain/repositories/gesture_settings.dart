@@ -122,6 +122,16 @@ class GestureSettingsRepository extends _$GestureSettingsRepository {
     });
   }
 
+  /// Turns drawn gestures off, or back on, for the toolbar's Gestures button
+  /// and [BrowserAction.toggleGestures].
+  ///
+  /// Turning them on also sets the master switch, which would otherwise leave
+  /// the toggle doing nothing for someone who never enabled gestures.
+  Future<void> toggleGestures() => updateSettings((current) {
+    final turnOn = !current.effectiveEnabled;
+    return current.copyWith(enabled: current.enabled || turnOn, active: turnOn);
+  });
+
   @override
   Stream<GestureSettings> build() {
     final db = ref.watch(userDatabaseProvider);

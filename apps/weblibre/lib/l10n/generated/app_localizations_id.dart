@@ -1443,6 +1443,20 @@ class AppLocalizationsId extends AppLocalizations {
       'Edit alamat atau mulai pencarian';
 
   @override
+  String get browserActions_scanQrCodeTitle => 'Pindai Kode QR';
+
+  @override
+  String get browserActions_scanQrCodeDescription =>
+      'Scan a QR code into the search field';
+
+  @override
+  String get browserActions_voiceSearchTitle => 'Pencarian Suara';
+
+  @override
+  String get browserActions_voiceSearchDescription =>
+      'Speak a search into the search field';
+
+  @override
   String get browserActions_backTitle => 'Kembali';
 
   @override
@@ -1695,6 +1709,13 @@ class AppLocalizationsId extends AppLocalizations {
       'Lompat ke hasil sebelumnya dari pencarian terakhir';
 
   @override
+  String get browserActions_showFontSizeTitle => 'Ukuran Teks';
+
+  @override
+  String get browserActions_showFontSizeDescription =>
+      'Adjust the page font size';
+
+  @override
   String get browserActions_increaseFontSizeTitle => 'Perbesar Font';
 
   @override
@@ -1740,6 +1761,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browserActions_printPageDescription => 'Cetak halaman saat ini';
+
+  @override
+  String get browserActions_showBrowserMenuTitle => 'Menu';
+
+  @override
+  String get browserActions_showBrowserMenuDescription =>
+      'Open the browser menu';
 
   @override
   String get browserActions_showHomeTitle => 'Beranda';
@@ -1805,6 +1833,13 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get browserActions_toggleTabBarDescription =>
       'Sembunyikan bilah tab, atau tampilkan lagi';
+
+  @override
+  String get browserActions_toggleGesturesTitle => 'Gestur';
+
+  @override
+  String get browserActions_toggleGesturesDescription =>
+      'Turn drawn gestures on or off';
 
   @override
   String get browserActions_clearBrowsingDataTitle => 'Hapus Data Penjelajahan';
@@ -3542,103 +3577,7 @@ class AppLocalizationsId extends AppLocalizations {
       'Nonaktifkan ukuran font otomatis di pengaturan untuk menyesuaikan secara manual';
 
   @override
-  String get contextualToolbar_buttonLabelBack => 'Kembali';
-
-  @override
-  String get contextualToolbar_buttonLabelForward => 'Maju';
-
-  @override
-  String get contextualToolbar_buttonLabelHome => 'Beranda';
-
-  @override
-  String get contextualToolbar_buttonLabelHistory => 'Riwayat';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarks => 'Markah';
-
-  @override
-  String get contextualToolbar_buttonLabelBookmarkToggle => 'Markahi';
-
-  @override
-  String get contextualToolbar_buttonLabelShare => 'Bagikan';
-
-  @override
-  String get contextualToolbar_buttonLabelAddTab => 'Tab Baru';
-
-  @override
-  String get contextualToolbar_buttonLabelTabsCount => 'Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelNavigationMenu => 'Menu';
-
-  @override
-  String get contextualToolbar_buttonLabelReload => 'Muat Ulang';
-
-  @override
-  String get contextualToolbar_buttonLabelReaderMode => 'Mode Pembaca';
-
-  @override
-  String get contextualToolbar_buttonLabelDesktop => 'Situs Desktop';
-
-  @override
-  String get contextualToolbar_buttonLabelTranslation => 'Terjemahkan';
-
-  @override
-  String get contextualToolbar_buttonLabelFindInPage => 'Cari di Halaman';
-
-  @override
-  String get contextualToolbar_buttonLabelCloseTab => 'Tutup Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelInputUrl => 'Bilah Alamat';
-
-  @override
-  String get contextualToolbar_buttonLabelQrScan => 'Pindai Kode QR';
-
-  @override
-  String get contextualToolbar_buttonLabelVoiceSearch => 'Pencarian Suara';
-
-  @override
-  String get contextualToolbar_buttonLabelDuplicateTab => 'Duplikat Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelIncreaseFont => 'Perbesar Font';
-
-  @override
-  String get contextualToolbar_buttonLabelDecreaseFont => 'Perkecil Font';
-
-  @override
-  String get contextualToolbar_buttonLabelMoveToBackground => 'Latar Belakang';
-
-  @override
-  String get contextualToolbar_buttonLabelToggleGestures => 'Gestur';
-
-  @override
-  String get contextualToolbar_buttonLabelHideTabBar => 'Sembunyikan Bilah Tab';
-
-  @override
-  String get contextualToolbar_buttonLabelPageUp => 'Halaman ke Atas';
-
-  @override
-  String get contextualToolbar_buttonLabelPageDown => 'Halaman ke Bawah';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollTop => 'Gulir ke Atas';
-
-  @override
-  String get contextualToolbar_buttonLabelScrollBottom => 'Gulir ke Bawah';
-
-  @override
-  String get contextualToolbar_buttonLabelFont => 'Ukuran Teks';
-
-  @override
   String get contextualToolbar_buttonLabelExtensionShortcut => 'Ekstensi';
-
-  @override
-  String get contextualToolbar_buttonLabelClearBrowsingData => 'Hapus Data';
-
-  @override
-  String get contextualToolbar_buttonLabelQuit => 'Keluar';
 
   @override
   String get contextualToolbar_longPressBackHistoryMenu =>
@@ -5724,6 +5663,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get gestures_chooseActionTitle => 'Pilih tindakan';
+
+  @override
+  String get gestures_actionSearchHint => 'Search actions';
+
+  @override
+  String get gestures_noMatchingActions => 'No matching actions.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8209,6 +8154,10 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutLabel => 'Buat abu-abu';
+
+  @override
+  String get settings_fallbackGreyOutDescription =>
+      'Keep this button in place, greyed out';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Jika tidak tersedia';

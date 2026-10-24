@@ -272,6 +272,8 @@ Map<String, dynamic> _$GestureSettingsToJson(GestureSettings instance) =>
 
 const _$BrowserActionEnumMap = {
   BrowserAction.focusAddressBar: 'focusAddressBar',
+  BrowserAction.scanQrCode: 'scanQrCode',
+  BrowserAction.voiceSearch: 'voiceSearch',
   BrowserAction.back: 'back',
   BrowserAction.forward: 'forward',
   BrowserAction.reload: 'reload',
@@ -311,6 +313,7 @@ const _$BrowserActionEnumMap = {
   BrowserAction.findInPage: 'findInPage',
   BrowserAction.findNext: 'findNext',
   BrowserAction.findPrevious: 'findPrevious',
+  BrowserAction.showFontSize: 'showFontSize',
   BrowserAction.increaseFontSize: 'increaseFontSize',
   BrowserAction.decreaseFontSize: 'decreaseFontSize',
   BrowserAction.resetFontSize: 'resetFontSize',
@@ -322,6 +325,7 @@ const _$BrowserActionEnumMap = {
   BrowserAction.siteSettings: 'siteSettings',
   BrowserAction.addToHomeScreen: 'addToHomeScreen',
   BrowserAction.subscribeToPageFeed: 'subscribeToPageFeed',
+  BrowserAction.showBrowserMenu: 'showBrowserMenu',
   BrowserAction.showHome: 'showHome',
   BrowserAction.showHistory: 'showHistory',
   BrowserAction.showBookmarks: 'showBookmarks',
@@ -346,6 +350,7 @@ const _$BrowserActionEnumMap = {
   BrowserAction.newProfile: 'newProfile',
   BrowserAction.newProxyProfile: 'newProxyProfile',
   BrowserAction.toggleTabBar: 'toggleTabBar',
+  BrowserAction.toggleGestures: 'toggleGestures',
   BrowserAction.clearBrowsingData: 'clearBrowsingData',
   BrowserAction.moveToBackground: 'moveToBackground',
   BrowserAction.backupProfile: 'backupProfile',

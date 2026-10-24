@@ -2452,7 +2452,7 @@ abstract class AppLocalizations {
   /// **'App'**
   String get browserActions_categoryApp;
 
-  /// Name of the browser action that puts the cursor in the address field to type a web address or search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that puts the cursor in the address field to type a web address or search, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Address Bar'**
@@ -2464,7 +2464,31 @@ abstract class AppLocalizations {
   /// **'Edit the address or start a search'**
   String get browserActions_focusAddressBarDescription;
 
-  /// Name of the browser action that goes to the previous page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that scans a QR code with the camera and puts its contents in the search field without opening them, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get browserActions_scanQrCodeTitle;
+
+  /// Explanation under that browser action's name in the action lists: it scans a QR code with the camera and puts its contents in the search field without opening them.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a QR code into the search field'**
+  String get browserActions_scanQrCodeDescription;
+
+  /// Name of the browser action that lets the user speak a search and puts the recognized words in the search field without searching yet, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice Search'**
+  String get browserActions_voiceSearchTitle;
+
+  /// Explanation under that browser action's name in the action lists: it lets the user speak a search and puts the recognized words in the search field without searching yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Speak a search into the search field'**
+  String get browserActions_voiceSearchDescription;
+
+  /// Name of the browser action that goes to the previous page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Back'**
@@ -2476,7 +2500,7 @@ abstract class AppLocalizations {
   /// **'Go back in history'**
   String get browserActions_backDescription;
 
-  /// Name of the browser action that goes to the next page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that goes to the next page in the tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Forward'**
@@ -2488,7 +2512,7 @@ abstract class AppLocalizations {
   /// **'Go forward in history'**
   String get browserActions_forwardDescription;
 
-  /// Name of the browser action that reloads the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that reloads the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Reload'**
@@ -2512,7 +2536,7 @@ abstract class AppLocalizations {
   /// **'Reload the current page, bypassing the cache'**
   String get browserActions_hardReloadDescription;
 
-  /// Name of the browser action that scrolls to the top of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that scrolls to the top of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Scroll to Top'**
@@ -2524,7 +2548,7 @@ abstract class AppLocalizations {
   /// **'Jump to the top of the page'**
   String get browserActions_scrollTopDescription;
 
-  /// Name of the browser action that scrolls to the bottom of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that scrolls to the bottom of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Scroll to Bottom'**
@@ -2536,7 +2560,7 @@ abstract class AppLocalizations {
   /// **'Jump to the bottom of the page'**
   String get browserActions_scrollBottomDescription;
 
-  /// Name of the browser action that scrolls up by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that scrolls up by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Page Up'**
@@ -2548,7 +2572,7 @@ abstract class AppLocalizations {
   /// **'Scroll up by one screen'**
   String get browserActions_pageUpDescription;
 
-  /// Name of the browser action that scrolls down by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that scrolls down by one screen height, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Page Down'**
@@ -2560,7 +2584,7 @@ abstract class AppLocalizations {
   /// **'Scroll down by one screen'**
   String get browserActions_pageDownDescription;
 
-  /// Name of the browser action that opens a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'New Tab'**
@@ -2584,7 +2608,7 @@ abstract class AppLocalizations {
   /// **'Open a new private tab'**
   String get browserActions_newPrivateTabDescription;
 
-  /// Name of the browser action that closes the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that closes the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Close Tab'**
@@ -2608,7 +2632,7 @@ abstract class AppLocalizations {
   /// **'Bring back the most recently closed tab'**
   String get browserActions_reopenClosedTabDescription;
 
-  /// Name of the browser action that copies the current tab into a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that copies the current tab into a new tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Duplicate Tab'**
@@ -2848,7 +2872,7 @@ abstract class AppLocalizations {
   /// **'Switch to the previous container and its last used tab'**
   String get browserActions_previousContainerDescription;
 
-  /// Name of the browser action that turns reader mode (simplified, easy-to-read text) on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that turns reader mode (simplified, easy-to-read text) on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Reader Mode'**
@@ -2860,7 +2884,7 @@ abstract class AppLocalizations {
   /// **'Toggle reader mode for the current page'**
   String get browserActions_toggleReaderModeDescription;
 
-  /// Name of the browser action that switches between the mobile and desktop version of the website, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that switches between the mobile and desktop version of the website, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Desktop Site'**
@@ -2872,7 +2896,7 @@ abstract class AppLocalizations {
   /// **'Toggle desktop site for the current page'**
   String get browserActions_toggleDesktopModeDescription;
 
-  /// Name of the browser action that opens the bar for searching text on the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens the bar for searching text on the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Find in Page'**
@@ -2908,7 +2932,19 @@ abstract class AppLocalizations {
   /// **'Jump to the previous match of the last search'**
   String get browserActions_findPreviousDescription;
 
-  /// Name of the browser action that makes page text larger, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens the controls for the text size of web pages, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Text Size'**
+  String get browserActions_showFontSizeTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the controls for the text size of web pages.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the page font size'**
+  String get browserActions_showFontSizeDescription;
+
+  /// Name of the browser action that makes page text larger, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Increase Font'**
@@ -2920,7 +2956,7 @@ abstract class AppLocalizations {
   /// **'Increase the page font size'**
   String get browserActions_increaseFontSizeDescription;
 
-  /// Name of the browser action that makes page text smaller, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that makes page text smaller, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Decrease Font'**
@@ -2944,7 +2980,7 @@ abstract class AppLocalizations {
   /// **'Restore the default page font size'**
   String get browserActions_resetFontSizeDescription;
 
-  /// Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Bookmark'**
@@ -2956,7 +2992,7 @@ abstract class AppLocalizations {
   /// **'Bookmark or unbookmark the current page'**
   String get browserActions_toggleBookmarkDescription;
 
-  /// Name of the browser action that shares the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that shares the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Share'**
@@ -2968,7 +3004,7 @@ abstract class AppLocalizations {
   /// **'Share the current page'**
   String get browserActions_sharePageDescription;
 
-  /// Name of the browser action that opens the page translation options, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens the page translation options, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Translate'**
@@ -2992,7 +3028,19 @@ abstract class AppLocalizations {
   /// **'Print the current page'**
   String get browserActions_printPageDescription;
 
-  /// Name of the browser action that opens the home screen, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens the browser menu (the one behind the three-dot button), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get browserActions_showBrowserMenuTitle;
+
+  /// Explanation under that browser action's name in the action lists: it opens the browser menu (the one behind the three-dot button).
+  ///
+  /// In en, this message translates to:
+  /// **'Open the browser menu'**
+  String get browserActions_showBrowserMenuDescription;
+
+  /// Name of the browser action that opens the home screen, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Home'**
@@ -3004,7 +3052,7 @@ abstract class AppLocalizations {
   /// **'Open the home screen'**
   String get browserActions_showHomeDescription;
 
-  /// Name of the browser action that opens browsing history, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens browsing history, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'History'**
@@ -3016,7 +3064,7 @@ abstract class AppLocalizations {
   /// **'Open browsing history'**
   String get browserActions_showHistoryDescription;
 
-  /// Name of the browser action that opens the bookmarks list, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens the bookmarks list, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Bookmarks'**
@@ -3040,7 +3088,7 @@ abstract class AppLocalizations {
   /// **'Open the container list'**
   String get browserActions_showContainersDescription;
 
-  /// Name of the browser action that opens the overview of all open tabs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that opens the overview of all open tabs, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Tab View'**
@@ -3100,7 +3148,7 @@ abstract class AppLocalizations {
   /// **'List the keys that run browser actions'**
   String get browserActions_showKeyboardShortcutsDescription;
 
-  /// Name of the browser action that hides the tab bar, or shows it again, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that hides the tab bar, or shows it again, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Hide / Show Tab Bar'**
@@ -3112,7 +3160,19 @@ abstract class AppLocalizations {
   /// **'Hide the tab bar, or bring it back'**
   String get browserActions_toggleTabBarDescription;
 
-  /// Name of the browser action that opens the dialog for deleting browsing data, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that turns drawn gestures on web pages on or off, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures'**
+  String get browserActions_toggleGesturesTitle;
+
+  /// Explanation under that browser action's name in the action lists: it turns drawn gestures on web pages on or off.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn drawn gestures on or off'**
+  String get browserActions_toggleGesturesDescription;
+
+  /// Name of the browser action that opens the dialog for deleting browsing data, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Clear Browsing Data'**
@@ -3124,7 +3184,7 @@ abstract class AppLocalizations {
   /// **'Choose browsing data to delete'**
   String get browserActions_clearBrowsingDataDescription;
 
-  /// Name of the browser action that sends the app to the background, like pressing the Home button, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that sends the app to the background, like pressing the Home button, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Minimize'**
@@ -3136,7 +3196,7 @@ abstract class AppLocalizations {
   /// **'Send WebLibre to the background'**
   String get browserActions_moveToBackgroundDescription;
 
-  /// Name of the browser action that closes all tabs and exits the app, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
+  /// Name of the browser action that closes all tabs and exits the app, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
   /// In en, this message translates to:
   /// **'Quit'**
@@ -6022,203 +6082,11 @@ abstract class AppLocalizations {
   /// **'Disable automatic font size in settings to adjust manually'**
   String get contextualToolbar_fontSizeAutoAdjustmentHint;
 
-  /// Name of the Back toolbar button (previous page), shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Back'**
-  String get contextualToolbar_buttonLabelBack;
-
-  /// Name of the Forward toolbar button (next page), shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Forward'**
-  String get contextualToolbar_buttonLabelForward;
-
-  /// Name of the Home toolbar button, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Home'**
-  String get contextualToolbar_buttonLabelHome;
-
-  /// Name of the toolbar button that opens browsing history, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'History'**
-  String get contextualToolbar_buttonLabelHistory;
-
-  /// Name of the toolbar button that opens the bookmarks list, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Bookmarks'**
-  String get contextualToolbar_buttonLabelBookmarks;
-
-  /// Name of the toolbar button that bookmarks or un-bookmarks the current page, shown in toolbar customization. Verb or noun as fits a button name.
-  ///
-  /// In en, this message translates to:
-  /// **'Bookmark'**
-  String get contextualToolbar_buttonLabelBookmarkToggle;
-
-  /// Name of the toolbar button that shares the current page, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Share'**
-  String get contextualToolbar_buttonLabelShare;
-
-  /// Name of the toolbar button that opens a new tab, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'New Tab'**
-  String get contextualToolbar_buttonLabelAddTab;
-
-  /// Name of the toolbar button that shows the number of open tabs and opens the tab overview, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Tabs'**
-  String get contextualToolbar_buttonLabelTabsCount;
-
-  /// Name of the toolbar button that opens the main browser menu, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Menu'**
-  String get contextualToolbar_buttonLabelNavigationMenu;
-
-  /// Name of the toolbar button that reloads the page, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Reload'**
-  String get contextualToolbar_buttonLabelReload;
-
-  /// Name of the toolbar button that shows the page as simplified, easy-to-read text, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Reader Mode'**
-  String get contextualToolbar_buttonLabelReaderMode;
-
-  /// Name of the toolbar button that requests the desktop version of the website, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Desktop Site'**
-  String get contextualToolbar_buttonLabelDesktop;
-
-  /// Name of the toolbar button that translates the page, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate'**
-  String get contextualToolbar_buttonLabelTranslation;
-
-  /// Name of the toolbar button that searches for text on the page, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Find in Page'**
-  String get contextualToolbar_buttonLabelFindInPage;
-
-  /// Name of the toolbar button that closes the current tab, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Close Tab'**
-  String get contextualToolbar_buttonLabelCloseTab;
-
-  /// Name of the toolbar item that shows the address field for typing a web address or search, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Address Bar'**
-  String get contextualToolbar_buttonLabelInputUrl;
-
-  /// Name of the toolbar button that scans a QR code with the camera, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan QR Code'**
-  String get contextualToolbar_buttonLabelQrScan;
-
-  /// Name of the toolbar button that starts a search by voice, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Voice Search'**
-  String get contextualToolbar_buttonLabelVoiceSearch;
-
-  /// Name of the toolbar button that copies the current tab into a new tab, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Duplicate Tab'**
-  String get contextualToolbar_buttonLabelDuplicateTab;
-
-  /// Name of the toolbar button that makes page text larger, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Increase Font'**
-  String get contextualToolbar_buttonLabelIncreaseFont;
-
-  /// Name of the toolbar button that makes page text smaller, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Decrease Font'**
-  String get contextualToolbar_buttonLabelDecreaseFont;
-
-  /// Name of the toolbar button that sends the app to the background (like pressing Home), shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Background'**
-  String get contextualToolbar_buttonLabelMoveToBackground;
-
-  /// Name of the toolbar button that turns swipe gestures on or off, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Gestures'**
-  String get contextualToolbar_buttonLabelToggleGestures;
-
-  /// Name of the toolbar button that hides the tab bar, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide Tab Bar'**
-  String get contextualToolbar_buttonLabelHideTabBar;
-
-  /// Name of the toolbar button that scrolls the page up by one screen, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Page Up'**
-  String get contextualToolbar_buttonLabelPageUp;
-
-  /// Name of the toolbar button that scrolls the page down by one screen, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Page Down'**
-  String get contextualToolbar_buttonLabelPageDown;
-
-  /// Name of the toolbar button that jumps to the top of the page, shown in toolbar customization and as the button's tooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Scroll to Top'**
-  String get contextualToolbar_buttonLabelScrollTop;
-
-  /// Name of the toolbar button that jumps to the bottom of the page, shown in toolbar customization and as the button's tooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Scroll to Bottom'**
-  String get contextualToolbar_buttonLabelScrollBottom;
-
-  /// Name of the toolbar button for adjusting the page's text size, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Text Size'**
-  String get contextualToolbar_buttonLabelFont;
-
   /// Name of the toolbar button that opens the menu of installed browser extensions, shown in toolbar customization.
   ///
   /// In en, this message translates to:
   /// **'Extensions'**
   String get contextualToolbar_buttonLabelExtensionShortcut;
-
-  /// Name of the toolbar button that deletes browsing data, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear Data'**
-  String get contextualToolbar_buttonLabelClearBrowsingData;
-
-  /// Name of the toolbar button that closes the app completely, shown in toolbar customization.
-  ///
-  /// In en, this message translates to:
-  /// **'Quit'**
-  String get contextualToolbar_buttonLabelQuit;
 
   /// Description, in toolbar customization, of what long-pressing the Back button does: shows a list of previous pages in this tab.
   ///
@@ -9780,6 +9648,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose action'**
   String get gestures_chooseActionTitle;
+
+  /// Placeholder of the search field at the top of the list of browser actions to choose from, for a gesture or for what a toolbar button does when held or when it cannot be used.
+  ///
+  /// In en, this message translates to:
+  /// **'Search actions'**
+  String get gestures_actionSearchHint;
+
+  /// Shown in that list when the search matches no action.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching actions.'**
+  String get gestures_noMatchingActions;
 
   /// Subtitle of the gesture behavior & timing screen listing what it contains.
   ///
@@ -13729,6 +13609,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grey out'**
   String get settings_fallbackGreyOutLabel;
+
+  /// Explanation under "Grey out" in the list of buttons that can replace a toolbar button while it cannot be used: the button stays where it is but cannot be tapped.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep this button in place, greyed out'**
+  String get settings_fallbackGreyOutDescription;
 
   /// Setting for which button replaces a toolbar button while it cannot be used.
   ///
