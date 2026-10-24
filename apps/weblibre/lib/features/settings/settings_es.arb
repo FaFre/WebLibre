@@ -192,6 +192,7 @@
   "settings_longPressTitle": "Mantener pulsado",
   "settings_longPressDescription": "Qué hace mantener pulsado el botón",
   "settings_fallbackGreyOutLabel": "Atenuar",
+  "settings_fallbackGreyOutDescription": "Mantener este botón en su sitio, atenuado",
   "settings_fallbackIfUnavailableTitle": "Si no está disponible",
   "settings_fallbackIfUnavailableDescription": "Se muestra en su lugar mientras este botón no se puede usar",
   "settings_customTrackingProtectionTitle": "Protección contra el rastreo personalizada",

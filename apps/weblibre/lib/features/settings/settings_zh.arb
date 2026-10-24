@@ -192,6 +192,7 @@
   "settings_longPressTitle": "长按",
   "settings_longPressDescription": "长按按钮时执行的操作",
   "settings_fallbackGreyOutLabel": "显示为灰色",
+  "settings_fallbackGreyOutDescription": "保留此按钮的位置，显示为灰色",
   "settings_fallbackIfUnavailableTitle": "不可用时",
   "settings_fallbackIfUnavailableDescription": "此按钮无法使用时改为显示",
   "settings_customTrackingProtectionTitle": "自定义跟踪保护",

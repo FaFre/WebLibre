@@ -49,6 +49,8 @@
   "gestures_saveGestureButtonLabel": "保存手势",
   "gestures_collisionWarning": "已分配给“{action}”。保存将替换它。",
   "gestures_chooseActionTitle": "选择操作",
+  "gestures_actionSearchHint": "搜索操作",
+  "gestures_noMatchingActions": "没有匹配的操作。",
   "gestures_behaviorTimingScreenSubtitle": "笔画长度、超时和冷却时间。",
   "gestures_resetToDefaultsTooltip": "恢复默认",
   "gestures_resetBehaviorTimingConfirmTitle": "重置行为与时间？",

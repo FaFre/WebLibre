@@ -192,6 +192,7 @@
   "settings_longPressTitle": "Долгое нажатие",
   "settings_longPressDescription": "Что делает удержание кнопки",
   "settings_fallbackGreyOutLabel": "Затенить",
+  "settings_fallbackGreyOutDescription": "Оставить эту кнопку на месте в затенённом виде",
   "settings_fallbackIfUnavailableTitle": "Если недоступна",
   "settings_fallbackIfUnavailableDescription": "Показывается вместо этой кнопки, пока её нельзя использовать",
   "settings_customTrackingProtectionTitle": "Своя защита от отслеживания",

@@ -1447,14 +1447,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browserActions_scanQrCodeDescription =>
-      'Scan a QR code into the search field';
+      'Pindai kode QR ke kolom pencarian';
 
   @override
   String get browserActions_voiceSearchTitle => 'Pencarian Suara';
 
   @override
   String get browserActions_voiceSearchDescription =>
-      'Speak a search into the search field';
+      'Ucapkan pencarian ke kolom pencarian';
 
   @override
   String get browserActions_backTitle => 'Kembali';
@@ -1713,7 +1713,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browserActions_showFontSizeDescription =>
-      'Adjust the page font size';
+      'Sesuaikan ukuran font halaman';
 
   @override
   String get browserActions_increaseFontSizeTitle => 'Perbesar Font';
@@ -1807,8 +1807,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get browserActions_showBrowserMenuTitle => 'Menu';
 
   @override
-  String get browserActions_showBrowserMenuDescription =>
-      'Open the browser menu';
+  String get browserActions_showBrowserMenuDescription => 'Buka menu peramban';
 
   @override
   String get browserActions_showHomeTitle => 'Beranda';
@@ -1880,7 +1879,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browserActions_toggleGesturesDescription =>
-      'Turn drawn gestures on or off';
+      'Aktifkan atau nonaktifkan gestur gambar';
 
   @override
   String get browserActions_clearBrowsingDataTitle => 'Hapus Data Penjelajahan';
@@ -5733,10 +5732,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get gestures_chooseActionTitle => 'Pilih tindakan';
 
   @override
-  String get gestures_actionSearchHint => 'Search actions';
+  String get gestures_actionSearchHint => 'Cari tindakan';
 
   @override
-  String get gestures_noMatchingActions => 'No matching actions.';
+  String get gestures_noMatchingActions => 'Tidak ada tindakan yang cocok.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8225,7 +8224,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutDescription =>
-      'Keep this button in place, greyed out';
+      'Pertahankan tombol ini di tempatnya, berwarna abu-abu';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Jika tidak tersedia';

@@ -1337,15 +1337,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_scanQrCodeTitle => '扫描二维码';
 
   @override
-  String get browserActions_scanQrCodeDescription =>
-      'Scan a QR code into the search field';
+  String get browserActions_scanQrCodeDescription => '扫描二维码并填入搜索框';
 
   @override
   String get browserActions_voiceSearchTitle => '语音搜索';
 
   @override
-  String get browserActions_voiceSearchDescription =>
-      'Speak a search into the search field';
+  String get browserActions_voiceSearchDescription => '说出搜索内容并填入搜索框';
 
   @override
   String get browserActions_backTitle => '后退';
@@ -1575,8 +1573,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_showFontSizeTitle => '文字大小';
 
   @override
-  String get browserActions_showFontSizeDescription =>
-      'Adjust the page font size';
+  String get browserActions_showFontSizeDescription => '调整页面字号';
 
   @override
   String get browserActions_increaseFontSizeTitle => '增大字号';
@@ -1662,8 +1659,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_showBrowserMenuTitle => '菜单';
 
   @override
-  String get browserActions_showBrowserMenuDescription =>
-      'Open the browser menu';
+  String get browserActions_showBrowserMenuDescription => '打开浏览器菜单';
 
   @override
   String get browserActions_showHomeTitle => '主页';
@@ -1729,8 +1725,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_toggleGesturesTitle => '手势';
 
   @override
-  String get browserActions_toggleGesturesDescription =>
-      'Turn drawn gestures on or off';
+  String get browserActions_toggleGesturesDescription => '开启或关闭绘制手势';
 
   @override
   String get browserActions_clearBrowsingDataTitle => '清除浏览数据';
@@ -5347,10 +5342,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gestures_chooseActionTitle => '选择操作';
 
   @override
-  String get gestures_actionSearchHint => 'Search actions';
+  String get gestures_actionSearchHint => '搜索操作';
 
   @override
-  String get gestures_noMatchingActions => 'No matching actions.';
+  String get gestures_noMatchingActions => '没有匹配的操作。';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle => '笔画长度、超时和冷却时间。';
@@ -7639,8 +7634,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_fallbackGreyOutLabel => '显示为灰色';
 
   @override
-  String get settings_fallbackGreyOutDescription =>
-      'Keep this button in place, greyed out';
+  String get settings_fallbackGreyOutDescription => '保留此按钮的位置，显示为灰色';
 
   @override
   String get settings_fallbackIfUnavailableTitle => '不可用时';

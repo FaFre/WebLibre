@@ -1462,14 +1462,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get browserActions_scanQrCodeDescription =>
-      'Scan a QR code into the search field';
+      'Escanear un código QR en el campo de búsqueda';
 
   @override
   String get browserActions_voiceSearchTitle => 'Búsqueda por voz';
 
   @override
   String get browserActions_voiceSearchDescription =>
-      'Speak a search into the search field';
+      'Dictar una búsqueda en el campo de búsqueda';
 
   @override
   String get browserActions_backTitle => 'Atrás';
@@ -1730,7 +1730,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get browserActions_showFontSizeDescription =>
-      'Adjust the page font size';
+      'Ajustar el tamaño de letra de la página';
 
   @override
   String get browserActions_increaseFontSizeTitle => 'Aumentar letra';
@@ -1826,7 +1826,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get browserActions_showBrowserMenuDescription =>
-      'Open the browser menu';
+      'Abrir el menú del navegador';
 
   @override
   String get browserActions_showHomeTitle => 'Inicio';
@@ -1900,7 +1900,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get browserActions_toggleGesturesDescription =>
-      'Turn drawn gestures on or off';
+      'Activar o desactivar los gestos dibujados';
 
   @override
   String get browserActions_clearBrowsingDataTitle =>
@@ -5806,10 +5806,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gestures_chooseActionTitle => 'Elegir acción';
 
   @override
-  String get gestures_actionSearchHint => 'Search actions';
+  String get gestures_actionSearchHint => 'Buscar acciones';
 
   @override
-  String get gestures_noMatchingActions => 'No matching actions.';
+  String get gestures_noMatchingActions => 'No hay acciones que coincidan.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8335,7 +8335,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutDescription =>
-      'Keep this button in place, greyed out';
+      'Mantener este botón en su sitio, atenuado';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Si no está disponible';

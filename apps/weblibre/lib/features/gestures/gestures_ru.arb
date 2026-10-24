@@ -49,6 +49,8 @@
   "gestures_saveGestureButtonLabel": "Сохранить жест",
   "gestures_collisionWarning": "Уже назначено действию «{action}». При сохранении будет заменено.",
   "gestures_chooseActionTitle": "Выбор действия",
+  "gestures_actionSearchHint": "Поиск действий",
+  "gestures_noMatchingActions": "Нет подходящих действий.",
   "gestures_behaviorTimingScreenSubtitle": "Длина штриха, тайм-аут и пауза.",
   "gestures_resetToDefaultsTooltip": "Сбросить по умолчанию",
   "gestures_resetBehaviorTimingConfirmTitle": "Сбросить поведение и тайминги?",

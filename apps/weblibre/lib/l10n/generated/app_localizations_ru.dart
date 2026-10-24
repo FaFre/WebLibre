@@ -1455,14 +1455,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get browserActions_scanQrCodeDescription =>
-      'Scan a QR code into the search field';
+      'Отсканировать QR-код в поле поиска';
 
   @override
   String get browserActions_voiceSearchTitle => 'Голосовой поиск';
 
   @override
   String get browserActions_voiceSearchDescription =>
-      'Speak a search into the search field';
+      'Продиктовать запрос в поле поиска';
 
   @override
   String get browserActions_backTitle => 'Назад';
@@ -1726,7 +1726,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get browserActions_showFontSizeDescription =>
-      'Adjust the page font size';
+      'Настроить размер шрифта страницы';
 
   @override
   String get browserActions_increaseFontSizeTitle => 'Увеличить шрифт';
@@ -1823,7 +1823,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get browserActions_showBrowserMenuDescription =>
-      'Open the browser menu';
+      'Открыть меню браузера';
 
   @override
   String get browserActions_showHomeTitle => 'Домой';
@@ -1895,7 +1895,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get browserActions_toggleGesturesDescription =>
-      'Turn drawn gestures on or off';
+      'Включить или выключить рисуемые жесты';
 
   @override
   String get browserActions_clearBrowsingDataTitle =>
@@ -5818,10 +5818,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get gestures_chooseActionTitle => 'Выбор действия';
 
   @override
-  String get gestures_actionSearchHint => 'Search actions';
+  String get gestures_actionSearchHint => 'Поиск действий';
 
   @override
-  String get gestures_noMatchingActions => 'No matching actions.';
+  String get gestures_noMatchingActions => 'Нет подходящих действий.';
 
   @override
   String get gestures_behaviorTimingScreenSubtitle =>
@@ -8364,7 +8364,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_fallbackGreyOutDescription =>
-      'Keep this button in place, greyed out';
+      'Оставить эту кнопку на месте в затенённом виде';
 
   @override
   String get settings_fallbackIfUnavailableTitle => 'Если недоступна';

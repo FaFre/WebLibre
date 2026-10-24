@@ -49,6 +49,8 @@
   "gestures_saveGestureButtonLabel": "Simpan gestur",
   "gestures_collisionWarning": "Sudah ditetapkan ke \"{action}\". Menyimpan akan menggantikannya.",
   "gestures_chooseActionTitle": "Pilih tindakan",
+  "gestures_actionSearchHint": "Cari tindakan",
+  "gestures_noMatchingActions": "Tidak ada tindakan yang cocok.",
   "gestures_behaviorTimingScreenSubtitle": "Panjang goresan, batas waktu, dan jeda.",
   "gestures_resetToDefaultsTooltip": "Atur ulang ke bawaan",
   "gestures_resetBehaviorTimingConfirmTitle": "Atur ulang perilaku & waktu?",

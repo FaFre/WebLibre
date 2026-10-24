@@ -192,6 +192,7 @@
   "settings_longPressTitle": "Tekan lama",
   "settings_longPressDescription": "Fungsi saat tombol ditahan",
   "settings_fallbackGreyOutLabel": "Buat abu-abu",
+  "settings_fallbackGreyOutDescription": "Pertahankan tombol ini di tempatnya, berwarna abu-abu",
   "settings_fallbackIfUnavailableTitle": "Jika tidak tersedia",
   "settings_fallbackIfUnavailableDescription": "Ditampilkan sebagai pengganti saat tombol ini tidak dapat digunakan",
   "settings_customTrackingProtectionTitle": "Perlindungan Pelacakan Kustom",
