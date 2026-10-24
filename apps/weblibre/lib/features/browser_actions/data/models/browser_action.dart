@@ -91,7 +91,15 @@ enum BrowserAction {
   increaseFontSize(MdiIcons.formatFontSizeIncrease, BrowserActionCategory.page),
   decreaseFontSize(MdiIcons.formatFontSizeDecrease, BrowserActionCategory.page),
   resetFontSize(MdiIcons.formatClear, BrowserActionCategory.page),
-  toggleBookmark(Icons.bookmark_border, BrowserActionCategory.page),
+
+  /// Opens the bookmark editor for the page: a new bookmark, or the page's
+  /// existing one. Named for the toggle it used to be; kept so saved bindings
+  /// survive.
+  toggleBookmark(MdiIcons.bookmarkPlus, BrowserActionCategory.page),
+
+  /// Adds or removes the page's bookmark without asking, like the toolbar's
+  /// bookmark toggle button.
+  quickToggleBookmark(Icons.bookmark_border, BrowserActionCategory.page),
   sharePage(Icons.share, BrowserActionCategory.page),
   translatePage(Icons.translate, BrowserActionCategory.page),
   printPage(MdiIcons.printer, BrowserActionCategory.page),

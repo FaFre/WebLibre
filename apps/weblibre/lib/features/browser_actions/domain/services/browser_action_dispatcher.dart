@@ -29,6 +29,8 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_feedback.dart';
+import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_feedback_l10n.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
@@ -49,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/recently_closed_tabs.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
@@ -59,6 +62,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -234,16 +238,17 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           );
         }
       case BrowserAction.reopenClosedTab:
-        await tabRepository.undoClose();
+        await _reopenClosedTab();
       case BrowserAction.duplicateTab:
         final containerData = await ref
             .read(tabDataRepositoryProvider.notifier)
             .getContainerForCopy(pageTabId);
-        await tabRepository.duplicateTab(
+        final duplicateId = await tabRepository.duplicateTab(
           selectTabId: pageTabId,
           containerData: containerData,
-          selectTab: true,
+          selectTab: false,
         );
+        await _handleBackgroundTabOpened(duplicateId);
       case BrowserAction.nextTab:
         await tabRepository.selectNextTab(pageTabId);
       case BrowserAction.previousTab:
@@ -283,6 +288,11 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         await ref
             .read(tabDataRepositoryProvider.notifier)
             .setPinned(pageTabId, pinned: !pinned);
+        await _showFeedback(
+          pinned
+              ? BrowserActionFeedback.tabUnpinned
+              : BrowserActionFeedback.tabPinned,
+        );
       case BrowserAction.nextContainer:
         await _switchContainer(ContainerCycleDirection.next);
       case BrowserAction.previousContainer:
@@ -290,10 +300,22 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.toggleReaderMode:
         // One-shot reads from this keep-alive service take no subscription,
         // so nothing auto-disposed is pinned by them.
-        final readerActive =
+        final readerableState =
             // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-            ref.read(tabStateProvider(pageTabId))?.readerableState.active ??
-            false;
+            ref.read(tabStateProvider(pageTabId))?.readerableState;
+        final readerActive = readerableState?.active ?? false;
+        final settings = ref.read(generalSettingsWithDefaultsProvider);
+        // Asking the engine for reader view on a page that has none changes
+        // nothing at all, unless reader view is enforced: then it is tried on
+        // any page, as the toolbar and menu do.
+        final forced =
+            settings.enableReadability && settings.enforceReadability;
+        if (!readerActive &&
+            !forced &&
+            !(readerableState?.readerable ?? false)) {
+          await _showFeedback(BrowserActionFeedback.readerViewUnavailable);
+          return;
+        }
         await ref
             .read(readerableScreenControllerProvider.notifier)
             .toggleReaderView(!readerActive);
@@ -338,9 +360,20 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           controller.dismiss();
         }
       case BrowserAction.toggleGestures:
+        // Decided like [GestureSettingsRepository.toggleGestures] does, before
+        // the setting is written back.
+        final turnOn = !ref
+            .read(gestureSettingsWithDefaultsProvider)
+            .effectiveEnabled;
         await ref
             .read(gestureSettingsRepositoryProvider.notifier)
             .toggleGestures();
+        // Turned off by a gesture, gestures stop answering with no hint why.
+        await _showFeedback(
+          turnOn
+              ? BrowserActionFeedback.gesturesEnabled
+              : BrowserActionFeedback.gesturesDisabled,
+        );
       case BrowserAction.showHistory:
         await _pushLocation(const HistoryRoute().location);
       case BrowserAction.showBookmarks:
@@ -360,6 +393,8 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.showKeyboardShortcuts:
         await _pushLocation(const KeyboardShortcutsOverviewRoute().location);
       case BrowserAction.toggleBookmark:
+        await _openBookmarkEditor(pageTabId);
+      case BrowserAction.quickToggleBookmark:
         await _toggleBookmark(pageTabId);
       case BrowserAction.sharePage:
         final context = await _navigatorContext();
@@ -406,7 +441,10 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         final shortcutable =
             // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
             ref.read(isTabShortcutableProvider(pageTabId));
-        if (!installable && !shortcutable) return;
+        if (!installable && !shortcutable) {
+          await _showFeedback(BrowserActionFeedback.homeScreenUnavailable);
+          return;
+        }
 
         final context = await _navigatorContext();
         if (context != null && context.mounted) {
@@ -495,8 +533,9 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     return sandboxSource ?? ref.read(tabStateProvider(tabId))!.url;
   }
 
-  /// Opens the page in a new private tab, in the same container, and selects
-  /// it. A private tab is simply duplicated, like the menu's private clone.
+  /// Opens the page in a new private tab, in the same container, in the
+  /// background like the menu's private clone, which is also why a private tab
+  /// is simply duplicated.
   Future<void> _openInPrivateTab(String tabId) async {
     // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
     final tabState = ref.read(tabStateProvider(tabId));
@@ -507,21 +546,81 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         .getContainerForCopy(tabId);
     final tabRepository = ref.read(tabRepositoryProvider.notifier);
 
-    if (tabState.tabMode is PrivateTabMode) {
-      await tabRepository.duplicateTab(
-        selectTabId: tabId,
-        containerData: containerData,
-        selectTab: true,
+    final privateTabId = tabState.tabMode is PrivateTabMode
+        ? await tabRepository.duplicateTab(
+            selectTabId: tabId,
+            containerData: containerData,
+            selectTab: false,
+          )
+        : await tabRepository.addTab(
+            url: _pageUrl(tabId),
+            tabMode: TabMode.private,
+            containerSelection: containerData == null
+                ? const TabContainerSelection.unassigned()
+                : TabContainerSelection.specific(containerData),
+            selectTab: false,
+          );
+    await _handleBackgroundTabOpened(privateTabId);
+  }
+
+  /// Follows up on a tab opened in the background the way the menu does:
+  /// "New tab opened" with Switch, or switching at once, as the user chose.
+  /// The new tab can look just like the one it came from, so selecting it
+  /// silently would read as nothing having happened.
+  Future<void> _handleBackgroundTabOpened(String tabId) async {
+    final context = await _navigatorContext();
+    if (context != null && context.mounted) {
+      handleBackgroundTabOpenedUsing(context, ref.read, tabId);
+    } else if (ref.mounted) {
+      await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+    }
+  }
+
+  /// The reopen in progress, which the next one waits for.
+  Future<void> _pendingReopen = Future.value();
+
+  /// Reopens one closed tab per call, each after the previous one finished: a
+  /// repeated key press must not pick the entry an unfinished restore is
+  /// still taking off the list.
+  Future<void> _reopenClosedTab() {
+    final reopen = _pendingReopen.then((_) => _reopenNextClosedTab());
+    // A failed reopen is reported by [run]; the queue just moves on.
+    _pendingReopen = reopen.catchError((_) {});
+    return reopen;
+  }
+
+  /// Reopens the tabs closed last while the engine can still undo that, and
+  /// otherwise the newest tab on the recently closed list, which is where
+  /// closed tabs go once their undo has run out.
+  Future<void> _reopenNextClosedTab() async {
+    if (!ref.mounted) return;
+    if (await ref.read(tabRepositoryProvider.notifier).undoClose()) return;
+    if (!ref.mounted) return;
+
+    // The list is auto-disposed: held open until the restore is done, and
+    // released right after, so this keep-alive service does not pin it.
+    final subscription = ref.listen(
+      // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+      recentlyClosedTabsRepositoryProvider,
+      (previous, next) {},
+    );
+    try {
+      final entries = await ref.read(
+        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+        recentlyClosedTabsRepositoryProvider.future,
       );
-    } else {
-      await tabRepository.addTab(
-        url: _pageUrl(tabId),
-        tabMode: TabMode.private,
-        containerSelection: containerData == null
-            ? const TabContainerSelection.unassigned()
-            : TabContainerSelection.specific(containerData),
-        selectTab: true,
-      );
+      final newest = entries.firstOrNull;
+      final tabId = newest == null
+          ? null
+          : await ref
+                // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+                .read(recentlyClosedTabsRepositoryProvider.notifier)
+                .restore(newest, selectTab: true);
+      if (tabId == null) {
+        await _showFeedback(BrowserActionFeedback.noClosedTabs);
+      }
+    } finally {
+      subscription.close();
     }
   }
 
@@ -645,6 +744,40 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         .resumeLatestContainerTab(container?.id);
   }
 
+  /// Opens the bookmark editor for the page, so the user picks the name and
+  /// folder: the page's existing bookmark when it has one, otherwise a new one
+  /// filled in like the menu's "Add bookmark". Repeating it never removes or
+  /// duplicates anything.
+  Future<void> _openBookmarkEditor(String tabId) async {
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    final tabState = ref.read(tabStateProvider(tabId));
+    if (tabState == null) return;
+
+    final bookmarkUrl =
+        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+        ref.read(sandboxSourceUriForTabProvider(tabId: tabId)) ?? tabState.url;
+
+    final existing = await ref
+        .read(bookmarksRepositoryProvider.notifier)
+        .firstBookmarkForUrl(bookmarkUrl);
+    if (!ref.mounted) return;
+
+    await _pushLocation(
+      existing != null
+          ? BookmarkEntryEditRoute(
+              bookmarkEntry: jsonEncode(existing.toJson()),
+            ).location
+          : BookmarkEntryAddRoute(
+              bookmarkInfo: jsonEncode(
+                BookmarkInfo(
+                  title: tabState.titleOrAuthority,
+                  url: bookmarkUrl.toString(),
+                ).encode(),
+              ),
+            ).location,
+    );
+  }
+
   /// Adds the current page to bookmarks, or removes it if already bookmarked,
   /// mirroring the contextual toolbar's bookmark toggle button.
   Future<void> _toggleBookmark(String tabId) async {
@@ -658,16 +791,33 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
 
     final repository = ref.read(bookmarksRepositoryProvider.notifier);
     final existingGuids = await repository.bookmarkGuidsForUrl(bookmarkUrl);
-    if (existingGuids.isNotEmpty) {
-      for (final guid in existingGuids) {
-        await repository.delete(guid);
-      }
-    } else {
+    final added = existingGuids.isEmpty;
+    if (added) {
       await repository.addBookmark(
         parentGuid: BookmarkRoot.mobile.id,
         url: bookmarkUrl,
         title: tabState.titleOrAuthority,
       );
+    } else {
+      for (final guid in existingGuids) {
+        await repository.delete(guid);
+      }
+    }
+
+    // A gesture or key press leaves nothing on screen to show the change, so
+    // say what happened, as the toolbar button does.
+    await _showFeedback(
+      added
+          ? BrowserActionFeedback.bookmarkAdded
+          : BrowserActionFeedback.bookmarkRemoved,
+    );
+  }
+
+  /// Tells the user [feedback] in a snackbar.
+  Future<void> _showFeedback(BrowserActionFeedback feedback) async {
+    final context = await _navigatorContext();
+    if (context != null && context.mounted) {
+      showBrowserActionFeedback(context, feedback);
     }
   }
 
@@ -695,8 +845,12 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   Future<void> _setFontSize(double factor) async {
     final settings = ref.read(engineSettingsWithDefaultsProvider);
 
-    // Manual adjustment is a no-op while automatic font sizing is enabled.
-    if (settings.automaticFontSizeAdjustment) return;
+    // Manual adjustment is a no-op while automatic font sizing is enabled;
+    // the toolbar's font buttons say so, and so does this.
+    if (settings.automaticFontSizeAdjustment) {
+      await _showFeedback(BrowserActionFeedback.fontSizeAutomatic);
+      return;
+    }
 
     final rounded = (factor.clamp(fontSizeMin, fontSizeMax) * 10).round() / 10;
     if (rounded == settings.fontSizeFactor) return;

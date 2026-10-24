@@ -1750,11 +1750,52 @@ class AppLocalizationsRu extends AppLocalizations {
       'Вернуть стандартный размер шрифта страницы';
 
   @override
-  String get browserActions_toggleBookmarkTitle => 'Закладка';
+  String get browserActions_toggleBookmarkTitle => 'Добавить закладку';
 
   @override
   String get browserActions_toggleBookmarkDescription =>
-      'Добавить текущую страницу в закладки или удалить из них';
+      'Сохранить текущую страницу в выбранную папку или изменить её закладку';
+
+  @override
+  String get browserActions_quickToggleBookmarkTitle => 'Быстрая закладка';
+
+  @override
+  String get browserActions_quickToggleBookmarkDescription =>
+      'Добавить текущую страницу в закладки или удалить из них в одно действие';
+
+  @override
+  String get browserActions_bookmarkAddedMessage => 'Закладка добавлена';
+
+  @override
+  String get browserActions_bookmarkRemovedMessage => 'Закладка удалена';
+
+  @override
+  String get browserActions_gesturesEnabledMessage => 'Жесты включены';
+
+  @override
+  String get browserActions_gesturesDisabledMessage => 'Жесты выключены';
+
+  @override
+  String get browserActions_fontSizeAutomaticMessage =>
+      'Отключите автоматический размер шрифта в настройках, чтобы менять его вручную';
+
+  @override
+  String get browserActions_tabPinnedMessage => 'Вкладка закреплена';
+
+  @override
+  String get browserActions_tabUnpinnedMessage => 'Вкладка откреплена';
+
+  @override
+  String get browserActions_homeScreenUnavailableMessage =>
+      'Эту страницу нельзя добавить на главный экран';
+
+  @override
+  String get browserActions_readerViewUnavailableMessage =>
+      'Режим чтения недоступен для этой страницы';
+
+  @override
+  String get browserActions_noClosedTabsMessage =>
+      'Нет недавно закрытых вкладок';
 
   @override
   String get browserActions_sharePageTitle => 'Поделиться';
@@ -2028,6 +2069,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get browserActions_toggleBookmarkKeywords =>
       'избранное, сохранить страницу, звёздочка, закладка';
+
+  @override
+  String get browserActions_quickToggleBookmarkKeywords =>
+      'избранное, звёздочка, удалить закладку, закладка';
 
   @override
   String get browserActions_findInPageKeywords =>

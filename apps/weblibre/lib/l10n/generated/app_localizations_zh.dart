@@ -1597,10 +1597,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_resetFontSizeDescription => '恢复默认的页面字号';
 
   @override
-  String get browserActions_toggleBookmarkTitle => '加入书签';
+  String get browserActions_toggleBookmarkTitle => '添加书签';
 
   @override
-  String get browserActions_toggleBookmarkDescription => '将当前页面加入书签或移除书签';
+  String get browserActions_toggleBookmarkDescription =>
+      '将当前页面保存到你选择的文件夹，或编辑其书签';
+
+  @override
+  String get browserActions_quickToggleBookmarkTitle => '快速书签';
+
+  @override
+  String get browserActions_quickToggleBookmarkDescription =>
+      '一步将当前页面加入书签或移除书签';
+
+  @override
+  String get browserActions_bookmarkAddedMessage => '已添加书签';
+
+  @override
+  String get browserActions_bookmarkRemovedMessage => '已移除书签';
+
+  @override
+  String get browserActions_gesturesEnabledMessage => '已开启手势';
+
+  @override
+  String get browserActions_gesturesDisabledMessage => '已关闭手势';
+
+  @override
+  String get browserActions_fontSizeAutomaticMessage => '请先在设置中关闭自动字号，才能手动调整';
+
+  @override
+  String get browserActions_tabPinnedMessage => '已固定标签页';
+
+  @override
+  String get browserActions_tabUnpinnedMessage => '已取消固定标签页';
+
+  @override
+  String get browserActions_homeScreenUnavailableMessage => '此页面无法添加到主屏幕';
+
+  @override
+  String get browserActions_readerViewUnavailableMessage => '此页面不支持阅读模式';
+
+  @override
+  String get browserActions_noClosedTabsMessage => '没有最近关闭的标签页';
 
   @override
   String get browserActions_sharePageTitle => '分享';
@@ -1844,6 +1882,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_toggleBookmarkKeywords => '收藏,收藏夹,保存页面,星标';
+
+  @override
+  String get browserActions_quickToggleBookmarkKeywords => '收藏,星标,移除书签,取消收藏';
 
   @override
   String get browserActions_findInPageKeywords => '页内搜索,搜索文本,查找文本';

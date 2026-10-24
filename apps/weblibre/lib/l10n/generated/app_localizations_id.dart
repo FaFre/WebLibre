@@ -1737,11 +1737,52 @@ class AppLocalizationsId extends AppLocalizations {
       'Kembalikan ukuran font halaman ke bawaan';
 
   @override
-  String get browserActions_toggleBookmarkTitle => 'Markahi';
+  String get browserActions_toggleBookmarkTitle => 'Tambah markah';
 
   @override
   String get browserActions_toggleBookmarkDescription =>
-      'Markahi atau hapus markah halaman saat ini';
+      'Simpan halaman saat ini ke folder pilihan Anda atau sunting markahnya';
+
+  @override
+  String get browserActions_quickToggleBookmarkTitle => 'Markah cepat';
+
+  @override
+  String get browserActions_quickToggleBookmarkDescription =>
+      'Markahi atau hapus markah halaman saat ini dalam satu langkah';
+
+  @override
+  String get browserActions_bookmarkAddedMessage => 'Markah ditambahkan';
+
+  @override
+  String get browserActions_bookmarkRemovedMessage => 'Markah dihapus';
+
+  @override
+  String get browserActions_gesturesEnabledMessage => 'Gestur diaktifkan';
+
+  @override
+  String get browserActions_gesturesDisabledMessage => 'Gestur dinonaktifkan';
+
+  @override
+  String get browserActions_fontSizeAutomaticMessage =>
+      'Nonaktifkan ukuran font otomatis di pengaturan untuk menyesuaikan secara manual';
+
+  @override
+  String get browserActions_tabPinnedMessage => 'Tab disematkan';
+
+  @override
+  String get browserActions_tabUnpinnedMessage => 'Sematan tab dilepas';
+
+  @override
+  String get browserActions_homeScreenUnavailableMessage =>
+      'Halaman ini tidak dapat ditambahkan ke layar utama';
+
+  @override
+  String get browserActions_readerViewUnavailableMessage =>
+      'Mode pembaca tidak tersedia untuk halaman ini';
+
+  @override
+  String get browserActions_noClosedTabsMessage =>
+      'Tidak ada tab yang baru ditutup';
 
   @override
   String get browserActions_sharePageTitle => 'Bagikan';
@@ -2009,6 +2050,10 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get browserActions_toggleBookmarkKeywords =>
       'favorit, simpan halaman, bintang, markah, bookmark, favorite';
+
+  @override
+  String get browserActions_quickToggleBookmarkKeywords =>
+      'favorit, bintang, hapus markah, markah, bookmark';
 
   @override
   String get browserActions_findInPageKeywords =>

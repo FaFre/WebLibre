@@ -68,7 +68,7 @@ enum ToolbarButtonId {
     home => BrowserAction.showHome,
     history => BrowserAction.showHistory,
     bookmarks => BrowserAction.showBookmarks,
-    bookmarkToggle => BrowserAction.toggleBookmark,
+    bookmarkToggle => BrowserAction.quickToggleBookmark,
     share => BrowserAction.sharePage,
     addTab => BrowserAction.newTab,
     tabsCount => BrowserAction.showTabView,

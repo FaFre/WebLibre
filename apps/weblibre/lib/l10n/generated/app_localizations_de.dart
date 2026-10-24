@@ -1743,11 +1743,52 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Standard-Schriftgröße der Seite wiederherstellen';
 
   @override
-  String get browserActions_toggleBookmarkTitle => 'Lesezeichen setzen';
+  String get browserActions_toggleBookmarkTitle => 'Lesezeichen hinzufügen';
 
   @override
   String get browserActions_toggleBookmarkDescription =>
-      'Lesezeichen für die aktuelle Seite setzen oder entfernen';
+      'Aktuelle Seite in einem frei wählbaren Ordner speichern oder ihr Lesezeichen bearbeiten';
+
+  @override
+  String get browserActions_quickToggleBookmarkTitle => 'Schnell-Lesezeichen';
+
+  @override
+  String get browserActions_quickToggleBookmarkDescription =>
+      'Lesezeichen für die aktuelle Seite in einem Schritt setzen oder entfernen';
+
+  @override
+  String get browserActions_bookmarkAddedMessage => 'Lesezeichen hinzugefügt';
+
+  @override
+  String get browserActions_bookmarkRemovedMessage => 'Lesezeichen entfernt';
+
+  @override
+  String get browserActions_gesturesEnabledMessage => 'Gesten aktiviert';
+
+  @override
+  String get browserActions_gesturesDisabledMessage => 'Gesten deaktiviert';
+
+  @override
+  String get browserActions_fontSizeAutomaticMessage =>
+      'Zum manuellen Anpassen die automatische Schriftgröße in den Einstellungen deaktivieren';
+
+  @override
+  String get browserActions_tabPinnedMessage => 'Tab angeheftet';
+
+  @override
+  String get browserActions_tabUnpinnedMessage => 'Tab gelöst';
+
+  @override
+  String get browserActions_homeScreenUnavailableMessage =>
+      'Diese Seite kann nicht zum Startbildschirm hinzugefügt werden';
+
+  @override
+  String get browserActions_readerViewUnavailableMessage =>
+      'Leseansicht ist für diese Seite nicht verfügbar';
+
+  @override
+  String get browserActions_noClosedTabsMessage =>
+      'Keine kürzlich geschlossenen Tabs';
 
   @override
   String get browserActions_sharePageTitle => 'Teilen';
@@ -2020,6 +2061,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get browserActions_toggleBookmarkKeywords =>
       'Favorit, Seite speichern, Stern';
+
+  @override
+  String get browserActions_quickToggleBookmarkKeywords =>
+      'Favorit, Stern, Lesezeichen entfernen, Lesezeichen umschalten';
 
   @override
   String get browserActions_findInPageKeywords =>

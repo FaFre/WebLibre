@@ -37,6 +37,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 const searchableBrowserActions = <BrowserAction>{
   // Page
   BrowserAction.toggleBookmark,
+  BrowserAction.quickToggleBookmark,
   BrowserAction.findInPage,
   BrowserAction.copyLink,
   BrowserAction.sharePage,

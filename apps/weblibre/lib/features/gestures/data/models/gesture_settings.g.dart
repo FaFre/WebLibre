@@ -318,6 +318,7 @@ const _$BrowserActionEnumMap = {
   BrowserAction.decreaseFontSize: 'decreaseFontSize',
   BrowserAction.resetFontSize: 'resetFontSize',
   BrowserAction.toggleBookmark: 'toggleBookmark',
+  BrowserAction.quickToggleBookmark: 'quickToggleBookmark',
   BrowserAction.sharePage: 'sharePage',
   BrowserAction.translatePage: 'translatePage',
   BrowserAction.printPage: 'printPage',

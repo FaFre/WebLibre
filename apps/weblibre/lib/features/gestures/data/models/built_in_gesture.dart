@@ -62,6 +62,7 @@ enum BuiltInGesture {
   static const tabActions = [
     BrowserAction.closeTab,
     BrowserAction.toggleBookmark,
+    BrowserAction.quickToggleBookmark,
     BrowserAction.sharePage,
     BrowserAction.togglePinTab,
     BrowserAction.duplicateTab,

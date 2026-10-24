@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -40,11 +41,21 @@ void handleBackgroundTabOpened(
   WidgetRef ref,
   String tabId, {
   String? tabName,
+}) =>
+    handleBackgroundTabOpenedUsing(context, ref.read, tabId, tabName: tabName);
+
+/// [handleBackgroundTabOpened] for callers holding a provider [Ref] rather
+/// than a [WidgetRef], such as the browser action dispatcher.
+void handleBackgroundTabOpenedUsing(
+  BuildContext context,
+  ProviderRead read,
+  String tabId, {
+  String? tabName,
 }) {
-  final repository = ref.read(tabRepositoryProvider.notifier);
-  final action = ref
-      .read(generalSettingsWithDefaultsProvider)
-      .backgroundTabOpenAction;
+  final repository = read(tabRepositoryProvider.notifier);
+  final action = read(
+    generalSettingsWithDefaultsProvider,
+  ).backgroundTabOpenAction;
 
   switch (action) {
     case BackgroundTabOpenAction.switchImmediately:

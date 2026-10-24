@@ -2980,17 +2980,89 @@ abstract class AppLocalizations {
   /// **'Restore the default page font size'**
   String get browserActions_resetFontSizeDescription;
 
-  /// Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  /// Name of the browser action that opens the bookmark editor for the current page (a new bookmark, or the page's existing one), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
   ///
   /// In en, this message translates to:
-  /// **'Bookmark'**
+  /// **'Add bookmark'**
   String get browserActions_toggleBookmarkTitle;
 
-  /// Explanation under that browser action's name in the action lists: it bookmarks the current page, or removes its bookmark.
+  /// Explanation under that browser action's name in the action lists: it opens the bookmark editor, where the user picks the bookmark's name and folder; if the page is already bookmarked, the editor shows that bookmark.
   ///
   /// In en, this message translates to:
-  /// **'Bookmark or unbookmark the current page'**
+  /// **'Save the current page to a folder of your choice, or edit its bookmark'**
   String get browserActions_toggleBookmarkDescription;
+
+  /// Name of the browser action that bookmarks the current page, or removes its bookmark, in one step without opening the bookmark editor. Shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick bookmark'**
+  String get browserActions_quickToggleBookmarkTitle;
+
+  /// Explanation under that browser action's name in the action lists: it bookmarks the current page, or removes its bookmark, without asking for a name or folder.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark or unbookmark the current page in one step'**
+  String get browserActions_quickToggleBookmarkDescription;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or swipe bookmarked the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark added'**
+  String get browserActions_bookmarkAddedMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or swipe removed the page's bookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark removed'**
+  String get browserActions_bookmarkRemovedMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or toolbar long-press turned drawn gestures on.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures on'**
+  String get browserActions_gesturesEnabledMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or toolbar long-press turned drawn gestures off. Matters most when a gesture did it, since gestures then stop responding.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures off'**
+  String get browserActions_gesturesDisabledMessage;
+
+  /// Shown when a gesture or keyboard shortcut tried to change the font size while automatic font sizing is on, which makes manual changes do nothing.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable automatic font size in settings to adjust manually'**
+  String get browserActions_fontSizeAutomaticMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or swipe pinned the tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab pinned'**
+  String get browserActions_tabPinnedMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or swipe unpinned the tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab unpinned'**
+  String get browserActions_tabUnpinnedMessage;
+
+  /// Shown when a gesture or keyboard shortcut asked to add the page to the Android home screen, but the page is not eligible (for example a plain HTTP or internal page).
+  ///
+  /// In en, this message translates to:
+  /// **'This page can\'t be added to the home screen'**
+  String get browserActions_homeScreenUnavailableMessage;
+
+  /// Shown when a gesture or keyboard shortcut asked for reader view on a page that cannot be shown in reader view.
+  ///
+  /// In en, this message translates to:
+  /// **'Reader view isn\'t available for this page'**
+  String get browserActions_readerViewUnavailableMessage;
+
+  /// Shown when a gesture or keyboard shortcut asked to reopen a closed tab, but there is none to reopen.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently closed tabs'**
+  String get browserActions_noClosedTabsMessage;
 
   /// Name of the browser action that shares the current page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
   ///
@@ -3471,6 +3543,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'favorite, save page, star'**
   String get browserActions_toggleBookmarkKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'favorite, star, unbookmark, remove bookmark, toggle bookmark'**
+  String get browserActions_quickToggleBookmarkKeywords;
 
   /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
   ///

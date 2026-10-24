@@ -1754,11 +1754,52 @@ class AppLocalizationsEs extends AppLocalizations {
       'Restaurar el tamaño de letra predeterminado de la página';
 
   @override
-  String get browserActions_toggleBookmarkTitle => 'Marcador';
+  String get browserActions_toggleBookmarkTitle => 'Añadir marcador';
 
   @override
   String get browserActions_toggleBookmarkDescription =>
-      'Añadir o quitar un marcador de la página actual';
+      'Guardar la página actual en la carpeta que elijas o editar su marcador';
+
+  @override
+  String get browserActions_quickToggleBookmarkTitle => 'Marcador rápido';
+
+  @override
+  String get browserActions_quickToggleBookmarkDescription =>
+      'Añadir o quitar un marcador de la página actual en un solo paso';
+
+  @override
+  String get browserActions_bookmarkAddedMessage => 'Marcador añadido';
+
+  @override
+  String get browserActions_bookmarkRemovedMessage => 'Marcador quitado';
+
+  @override
+  String get browserActions_gesturesEnabledMessage => 'Gestos activados';
+
+  @override
+  String get browserActions_gesturesDisabledMessage => 'Gestos desactivados';
+
+  @override
+  String get browserActions_fontSizeAutomaticMessage =>
+      'Desactiva el tamaño de letra automático en los ajustes para ajustarlo manualmente';
+
+  @override
+  String get browserActions_tabPinnedMessage => 'Pestaña fijada';
+
+  @override
+  String get browserActions_tabUnpinnedMessage => 'Pestaña desfijada';
+
+  @override
+  String get browserActions_homeScreenUnavailableMessage =>
+      'Esta página no se puede añadir a la pantalla de inicio';
+
+  @override
+  String get browserActions_readerViewUnavailableMessage =>
+      'La vista de lectura no está disponible para esta página';
+
+  @override
+  String get browserActions_noClosedTabsMessage =>
+      'No hay pestañas cerradas recientemente';
 
   @override
   String get browserActions_sharePageTitle => 'Compartir';
@@ -2035,6 +2076,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get browserActions_toggleBookmarkKeywords =>
       'favorito, guardar página, estrella, marcador, bookmark';
+
+  @override
+  String get browserActions_quickToggleBookmarkKeywords =>
+      'favorito, estrella, quitar marcador, alternar marcador, bookmark';
 
   @override
   String get browserActions_findInPageKeywords =>

@@ -381,13 +381,61 @@
   "@browserActions_resetFontSizeDescription": {
     "description": "Explanation under that browser action's name in the action lists: it restores the default page text size."
   },
-  "browserActions_toggleBookmarkTitle": "Bookmark",
+  "browserActions_toggleBookmarkTitle": "Add bookmark",
   "@browserActions_toggleBookmarkTitle": {
-    "description": "Name of the browser action that bookmarks the current page, or removes its bookmark, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+    "description": "Name of the browser action that opens the bookmark editor for the current page (a new bookmark, or the page's existing one), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
   },
-  "browserActions_toggleBookmarkDescription": "Bookmark or unbookmark the current page",
+  "browserActions_toggleBookmarkDescription": "Save the current page to a folder of your choice, or edit its bookmark",
   "@browserActions_toggleBookmarkDescription": {
-    "description": "Explanation under that browser action's name in the action lists: it bookmarks the current page, or removes its bookmark."
+    "description": "Explanation under that browser action's name in the action lists: it opens the bookmark editor, where the user picks the bookmark's name and folder; if the page is already bookmarked, the editor shows that bookmark."
+  },
+  "browserActions_quickToggleBookmarkTitle": "Quick bookmark",
+  "@browserActions_quickToggleBookmarkTitle": {
+    "description": "Name of the browser action that bookmarks the current page, or removes its bookmark, in one step without opening the bookmark editor. Shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_quickToggleBookmarkDescription": "Bookmark or unbookmark the current page in one step",
+  "@browserActions_quickToggleBookmarkDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it bookmarks the current page, or removes its bookmark, without asking for a name or folder."
+  },
+  "browserActions_bookmarkAddedMessage": "Bookmark added",
+  "@browserActions_bookmarkAddedMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or swipe bookmarked the page."
+  },
+  "browserActions_bookmarkRemovedMessage": "Bookmark removed",
+  "@browserActions_bookmarkRemovedMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or swipe removed the page's bookmark."
+  },
+  "browserActions_gesturesEnabledMessage": "Gestures on",
+  "@browserActions_gesturesEnabledMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or toolbar long-press turned drawn gestures on."
+  },
+  "browserActions_gesturesDisabledMessage": "Gestures off",
+  "@browserActions_gesturesDisabledMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or toolbar long-press turned drawn gestures off. Matters most when a gesture did it, since gestures then stop responding."
+  },
+  "browserActions_fontSizeAutomaticMessage": "Disable automatic font size in settings to adjust manually",
+  "@browserActions_fontSizeAutomaticMessage": {
+    "description": "Shown when a gesture or keyboard shortcut tried to change the font size while automatic font sizing is on, which makes manual changes do nothing."
+  },
+  "browserActions_tabPinnedMessage": "Tab pinned",
+  "@browserActions_tabPinnedMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or swipe pinned the tab."
+  },
+  "browserActions_tabUnpinnedMessage": "Tab unpinned",
+  "@browserActions_tabUnpinnedMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or swipe unpinned the tab."
+  },
+  "browserActions_homeScreenUnavailableMessage": "This page can't be added to the home screen",
+  "@browserActions_homeScreenUnavailableMessage": {
+    "description": "Shown when a gesture or keyboard shortcut asked to add the page to the Android home screen, but the page is not eligible (for example a plain HTTP or internal page)."
+  },
+  "browserActions_readerViewUnavailableMessage": "Reader view isn't available for this page",
+  "@browserActions_readerViewUnavailableMessage": {
+    "description": "Shown when a gesture or keyboard shortcut asked for reader view on a page that cannot be shown in reader view."
+  },
+  "browserActions_noClosedTabsMessage": "No recently closed tabs",
+  "@browserActions_noClosedTabsMessage": {
+    "description": "Shown when a gesture or keyboard shortcut asked to reopen a closed tab, but there is none to reopen."
   },
   "browserActions_sharePageTitle": "Share",
   "@browserActions_sharePageTitle": {
@@ -711,6 +759,10 @@
 
   "browserActions_toggleBookmarkKeywords": "favorite, save page, star",
   "@browserActions_toggleBookmarkKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_quickToggleBookmarkKeywords": "favorite, star, unbookmark, remove bookmark, toggle bookmark",
+  "@browserActions_quickToggleBookmarkKeywords": {
     "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
   },
   "browserActions_findInPageKeywords": "search in page, search text, find text",

@@ -180,6 +180,15 @@ class BookmarksRepository extends _$BookmarksRepository {
     return nodes.map((node) => node.guid).toList();
   }
 
+  /// The first bookmark saved for [url], or null when the page has none.
+  Future<BookmarkEntry?> firstBookmarkForUrl(Uri url) async {
+    final nodes = await _service.getBookmarksWithUrl(url);
+    return nodes
+        .map(BookmarkItem.parseRecursive)
+        .whereType<BookmarkEntry>()
+        .firstOrNull;
+  }
+
   /// Saved pages whose title or address matches [query], at most [limit],
   /// in storage's own ranking.
   ///

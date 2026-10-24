@@ -78,6 +78,8 @@ extension BrowserActionL10n on BrowserAction {
         l10n.browserActions_decreaseFontSizeTitle,
       BrowserAction.resetFontSize => l10n.browserActions_resetFontSizeTitle,
       BrowserAction.toggleBookmark => l10n.browserActions_toggleBookmarkTitle,
+      BrowserAction.quickToggleBookmark =>
+        l10n.browserActions_quickToggleBookmarkTitle,
       BrowserAction.sharePage => l10n.browserActions_sharePageTitle,
       BrowserAction.translatePage => l10n.browserActions_translatePageTitle,
       BrowserAction.printPage => l10n.browserActions_printPageTitle,
@@ -194,6 +196,8 @@ extension BrowserActionL10n on BrowserAction {
         l10n.browserActions_resetFontSizeDescription,
       BrowserAction.toggleBookmark =>
         l10n.browserActions_toggleBookmarkDescription,
+      BrowserAction.quickToggleBookmark =>
+        l10n.browserActions_quickToggleBookmarkDescription,
       BrowserAction.sharePage => l10n.browserActions_sharePageDescription,
       BrowserAction.translatePage =>
         l10n.browserActions_translatePageDescription,
@@ -267,6 +271,8 @@ extension BrowserActionL10n on BrowserAction {
     final message = switch (this) {
       BrowserAction.toggleBookmark =>
         l10n.browserActions_toggleBookmarkKeywords,
+      BrowserAction.quickToggleBookmark =>
+        l10n.browserActions_quickToggleBookmarkKeywords,
       BrowserAction.findInPage => l10n.browserActions_findInPageKeywords,
       BrowserAction.copyLink => l10n.browserActions_copyLinkKeywords,
       BrowserAction.sharePage => l10n.browserActions_sharePageKeywords,

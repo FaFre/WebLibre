@@ -1709,11 +1709,51 @@ class AppLocalizationsEn extends AppLocalizations {
       'Restore the default page font size';
 
   @override
-  String get browserActions_toggleBookmarkTitle => 'Bookmark';
+  String get browserActions_toggleBookmarkTitle => 'Add bookmark';
 
   @override
   String get browserActions_toggleBookmarkDescription =>
-      'Bookmark or unbookmark the current page';
+      'Save the current page to a folder of your choice, or edit its bookmark';
+
+  @override
+  String get browserActions_quickToggleBookmarkTitle => 'Quick bookmark';
+
+  @override
+  String get browserActions_quickToggleBookmarkDescription =>
+      'Bookmark or unbookmark the current page in one step';
+
+  @override
+  String get browserActions_bookmarkAddedMessage => 'Bookmark added';
+
+  @override
+  String get browserActions_bookmarkRemovedMessage => 'Bookmark removed';
+
+  @override
+  String get browserActions_gesturesEnabledMessage => 'Gestures on';
+
+  @override
+  String get browserActions_gesturesDisabledMessage => 'Gestures off';
+
+  @override
+  String get browserActions_fontSizeAutomaticMessage =>
+      'Disable automatic font size in settings to adjust manually';
+
+  @override
+  String get browserActions_tabPinnedMessage => 'Tab pinned';
+
+  @override
+  String get browserActions_tabUnpinnedMessage => 'Tab unpinned';
+
+  @override
+  String get browserActions_homeScreenUnavailableMessage =>
+      'This page can\'t be added to the home screen';
+
+  @override
+  String get browserActions_readerViewUnavailableMessage =>
+      'Reader view isn\'t available for this page';
+
+  @override
+  String get browserActions_noClosedTabsMessage => 'No recently closed tabs';
 
   @override
   String get browserActions_sharePageTitle => 'Share';
@@ -1977,6 +2017,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get browserActions_toggleBookmarkKeywords =>
       'favorite, save page, star';
+
+  @override
+  String get browserActions_quickToggleBookmarkKeywords =>
+      'favorite, star, unbookmark, remove bookmark, toggle bookmark';
 
   @override
   String get browserActions_findInPageKeywords =>

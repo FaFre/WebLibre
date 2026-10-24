@@ -1192,7 +1192,9 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  Future<void> undoClose() async {
+  /// Reopens the tabs closed last, while the engine can still undo that
+  /// close. Returns whether anything was reopened.
+  Future<bool> undoClose() async {
     // Suppress the next reclose pass: undo can resurrect a tab whose
     // tombstone is still on disk (from a previous session); without this
     // flag the listener would immediately re-close it.
@@ -1210,6 +1212,7 @@ class TabRepository extends _$TabRepository {
     } finally {
       if (!restoresTabs) _suppressNextReclose = false;
     }
+    return restoresTabs;
   }
 
   /// Reopens [tab] from the recently closed list with its back history, in the
