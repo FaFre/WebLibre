@@ -8,6 +8,8 @@ package eu.weblibre.flutter_mozilla_components.applinks
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import androidx.core.net.toUri
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
@@ -16,6 +18,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkPromptOwner
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.state.CustomTabSessionState
 import mozilla.components.browser.state.state.SessionState
+import mozilla.components.browser.state.state.TabSessionState
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.engine.request.RequestInterceptor
 import mozilla.components.support.base.log.logger.Logger
@@ -37,11 +40,13 @@ class WebLibreAppLinksInterceptor(
 ) {
     private val logger = Logger("WebLibreAppLinks")
     private val runtime get() = AppLinkRuntime.get(context)
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     /**
      * @return the interception response, or `null` to let the engine proceed. Creating a pending
      * prompt is a side effect performed here; the return value only controls the current load.
      */
+    @Suppress("LongParameterList")
     fun onLoadRequest(
         engineSession: EngineSession,
         uri: String,
@@ -50,11 +55,17 @@ class WebLibreAppLinksInterceptor(
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        isNewWindowRequest: Boolean = false,
     ): RequestInterceptor.InterceptionResponse? {
         val components = GlobalComponents.components ?: return null
+        val opensNewWindow = opensNewTab(
+            isNewWindowRequest,
+            isSubframeRequest,
+            components.core.store.state.findTabOrCustomTab(engineSession),
+        )
         val response = decide(
             components, engineSession, uri, lastUri,
-            hasUserGesture, isRedirect, isDirectNavigation, isSubframeRequest,
+            hasUserGesture, isRedirect, isDirectNavigation, isSubframeRequest, opensNewWindow,
         )
 
         // Advance the tab's navigation generation only for a navigation that is actually going to
@@ -66,7 +77,8 @@ class WebLibreAppLinksInterceptor(
         //
         // `null` (the engine proceeds) and `Url` (we hand over a fallback to load) both move the tab,
         // and both must invalidate any older hold. Subframes are excluded throughout: an iframe
-        // loading does not mean the tab left the page.
+        // loading does not mean the tab left the page. So is a load for a new tab: it is asked
+        // about on its opener, which stays where it is.
         val tabId = components.core.store.state.findTabOrCustomTab(engineSession)?.id
         val outcome = when (response) {
             null -> "proceed"
@@ -78,7 +90,7 @@ class WebLibreAppLinksInterceptor(
             "onLoadRequest tab=$tabId subframe=$isSubframeRequest gesture=$hasUserGesture " +
                 "redirect=$isRedirect direct=$isDirectNavigation uri=$uri last=$lastUri -> $outcome",
         )
-        if (!isSubframeRequest && response !is RequestInterceptor.InterceptionResponse.Deny) {
+        if (movesTab(isSubframeRequest, opensNewWindow, response)) {
             tabId?.let { pendingStoreFor(components).beginNavigation(it, reason = "intercept:$outcome") }
         }
         return response
@@ -94,6 +106,7 @@ class WebLibreAppLinksInterceptor(
         isRedirect: Boolean,
         isDirectNavigation: Boolean,
         isSubframeRequest: Boolean,
+        opensNewWindow: Boolean,
     ): RequestInterceptor.InterceptionResponse? {
 
         val uriScheme = runCatching { uri.toUri().scheme }.getOrNull()
@@ -129,6 +142,9 @@ class WebLibreAppLinksInterceptor(
         }
 
         val pendingStore = pendingStoreFor(components)
+        // Where an in-browser answer to a load for a new tab goes: a new tab of the opener, never
+        // the opener itself. Null for every other load.
+        val newTabHost = if (opensNewWindow) ComponentsNewTabHost(components) else null
 
         // Fallback re-entry guard (§2.7): a fallback we issued has come back around. Keep it in the
         // browser — never let it bounce out to an app. Consulted before resolution/classification.
@@ -230,7 +246,7 @@ class WebLibreAppLinksInterceptor(
             return if (result == AppLinkLaunchResult.LAUNCHED) {
                 RequestInterceptor.InterceptionResponse.Deny
             } else {
-                safeNonLaunchResponse(pendingStore, session?.id, resolved)
+                safeNonLaunchResponse(pendingStore, session?.id, resolved, newTabHost)
             }
         }
 
@@ -263,6 +279,7 @@ class WebLibreAppLinksInterceptor(
             // loads into the tab, and replaying an iframe's target as a top-level load would replace
             // the whole page the user was reading. Let those load in their frame as before.
             blockWhilePrompting = policy.blockWhilePrompting && !isSubframeRequest,
+            newTabHost = newTabHost,
         )
     }
 
@@ -277,6 +294,7 @@ class WebLibreAppLinksInterceptor(
         hasUserGesture: Boolean,
         navGeneration: Long,
         blockWhilePrompting: Boolean,
+        newTabHost: NewTabHost?,
     ): RequestInterceptor.InterceptionResponse? {
         val resolved = input.resolved
         return when (decision) {
@@ -285,7 +303,7 @@ class WebLibreAppLinksInterceptor(
             is AppLinkDecision.DenyKeepPage -> RequestInterceptor.InterceptionResponse.Deny
 
             is AppLinkDecision.LoadFallback ->
-                fallbackResponse(pendingStore, session?.id, decision.url)
+                fallbackResponse(pendingStore, session?.id, decision.url, newTabHost)
 
             is AppLinkDecision.AutoLaunch -> {
                 val result = runtime.launcher.launch(
@@ -308,7 +326,7 @@ class WebLibreAppLinksInterceptor(
                         execute(
                             AppLinkClassifier.classify(withoutRule),
                             components, pendingStore, session, uri, lastUri, withoutRule, hasUserGesture,
-                            navGeneration, blockWhilePrompting,
+                            navGeneration, blockWhilePrompting, newTabHost,
                         )
                     }
 
@@ -317,7 +335,7 @@ class WebLibreAppLinksInterceptor(
                     else -> when {
                         resolved.engineSupportsScheme -> null
                         resolved.fallbackUrl != null ->
-                            fallbackResponse(pendingStore, session?.id, resolved.fallbackUrl)
+                            fallbackResponse(pendingStore, session?.id, resolved.fallbackUrl, newTabHost)
                         else -> RequestInterceptor.InterceptionResponse.Deny
                     }
                 }
@@ -337,6 +355,7 @@ class WebLibreAppLinksInterceptor(
                     pendingStore, tab, uri, lastUri, input, decision, hasUserGesture,
                     heldNavigation = holdNavigation,
                     navGeneration = navGeneration,
+                    opensNewWindow = newTabHost != null,
                 )
                 if (decision.kind == AppLinkPromptKind.BANNER && !holdNavigation) {
                     // Engine-supported: allow the page to load while the non-modal banner is up.
@@ -361,6 +380,7 @@ class WebLibreAppLinksInterceptor(
         hasUserGesture: Boolean,
         heldNavigation: Boolean,
         navGeneration: Long,
+        opensNewWindow: Boolean,
     ) {
         val resolved = input.resolved
         val owner = if (tab is CustomTabSessionState) {
@@ -401,11 +421,12 @@ class WebLibreAppLinksInterceptor(
                 heldNavigation = heldNavigation,
                 // Where the tab is left standing while the prompt is up. Read from the store rather
                 // than `lastUri`, which is the previous load *request* and need not be what actually
-                // committed. Empty for a tab opened for this very link, which is exactly right: it
-                // stays empty until something loads, so the release still recognises it.
-                heldAnchorUrl = if (heldNavigation) tab.content.url else null,
+                // committed. None for a load meant for a new tab: that page is owed to a new tab,
+                // so where the opener stands does not decide whether it may still be opened.
+                heldAnchorUrl = if (heldNavigation && !opensNewWindow) tab.content.url else null,
                 navGeneration = navGeneration,
                 isUserGesture = hasUserGesture,
+                opensNewWindow = opensNewWindow,
             ),
         )
 
@@ -433,11 +454,12 @@ class WebLibreAppLinksInterceptor(
         pendingStore: PendingAppLinkStore,
         tabId: String?,
         resolved: ResolvedAppLink,
+        newTabHost: NewTabHost? = null,
     ): RequestInterceptor.InterceptionResponse? {
         return if (resolved.engineSupportsScheme) {
             null
         } else {
-            resolved.fallbackUrl?.let { fallbackResponse(pendingStore, tabId, it) }
+            resolved.fallbackUrl?.let { fallbackResponse(pendingStore, tabId, it, newTabHost) }
                 ?: RequestInterceptor.InterceptionResponse.Deny
         }
     }
@@ -466,17 +488,36 @@ class WebLibreAppLinksInterceptor(
      *   take `AppRequestInterceptor`'s sandbox-capture, PWA/TWA and `weblibre://` guards out of its
      *   path — a sandbox tab could reach the live web through an `intent:` link's fallback. The
      *   re-entry map is what keeps the returning load from being re-classified as an app link.
+     *
+     * With [newTabHost] the load targeted a new tab and [tabId] is its opener, so the fallback is
+     * opened in a new tab of it instead ([openInNewTab]) and the opener's own load is denied. That
+     * happens from a posted task, never inside the engine's delegate callback this runs in, and only
+     * takes focus when the opener is the tab in view: nobody chose this, the page asked for it.
      */
     private fun fallbackResponse(
         pendingStore: PendingAppLinkStore,
         tabId: String?,
         fallbackUrl: String,
+        newTabHost: NewTabHost? = null,
     ): RequestInterceptor.InterceptionResponse {
         if (!pendingStore.claimFallbackIssue(tabId, fallbackUrl)) {
             logger.info("fallback re-issue refused tab=$tabId url=$fallbackUrl")
             // A fallback is only ever extracted for a non-engine-supported original
             // (ExternalAppResolver.validateFallback), so there is no original load to allow
             // instead: deny and leave the fallback page already on screen standing.
+            return RequestInterceptor.InterceptionResponse.Deny
+        }
+        if (newTabHost != null && tabId != null) {
+            mainHandler.post {
+                openInNewTab(
+                    newTabHost,
+                    openerId = tabId,
+                    url = fallbackUrl,
+                    load = NewTabLoad.FALLBACK,
+                    focus = NewTabFocus.IF_OPENER_SELECTED,
+                    reason = "fallback",
+                )
+            }
             return RequestInterceptor.InterceptionResponse.Deny
         }
         pendingStore.recordFallbackReentry(tabId, canonicalReentryKey(fallbackUrl))
@@ -546,3 +587,27 @@ class WebLibreAppLinksInterceptor(
         return PendingAppLinkStores.forProfile(components.profileApplicationContext.relativePath)
     }
 }
+
+/**
+ * Whether a load is meant for a new tab, which the engine asks about on [session], its opener.
+ *
+ * Only the browser's own tabs open one: a Custom Tab has no tab strip, so its loads — and anything
+ * the user keeps in the browser from a prompt there — stay in place. A subframe never opens a tab.
+ */
+internal fun opensNewTab(
+    isNewWindowRequest: Boolean,
+    isSubframeRequest: Boolean,
+    session: SessionState?,
+): Boolean = isNewWindowRequest && !isSubframeRequest && session is TabSessionState
+
+/**
+ * Whether the tab the interceptor was asked about is actually going somewhere, which advances its
+ * navigation generation and so invalidates the holds taken on it. A denied load leaves it where it
+ * was; so does a subframe load, and a load for a new tab, which never touches its opener.
+ */
+internal fun movesTab(
+    isSubframeRequest: Boolean,
+    opensNewWindow: Boolean,
+    response: RequestInterceptor.InterceptionResponse?,
+): Boolean = !isSubframeRequest && !opensNewWindow &&
+    response !is RequestInterceptor.InterceptionResponse.Deny

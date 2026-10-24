@@ -50,7 +50,8 @@ class AppLinkNavigationReleaseTest {
 
     @Test
     fun aTabOpenedForTheLinkStartsAndStaysEmpty() {
-        // A link that opened its own tab anchors on "", and nothing has loaded since.
+        // A tab the app opened for the link anchors on "", and nothing has loaded since. (A link
+        // the page itself opens in a new tab is held on its opener instead; see opensNewWindow.)
         assertTrue(isSameDocumentTarget("", ""))
     }
 

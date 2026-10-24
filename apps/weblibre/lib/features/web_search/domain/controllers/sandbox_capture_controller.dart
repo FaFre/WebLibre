@@ -243,10 +243,12 @@ class SandboxCaptureController extends _$SandboxCaptureController {
 
   // Called from Kotlin via pigeon when a sandbox tab tried to navigate to a
   // non-loopback URL. We open a fresh private tab and run the capture
-  // pipeline into it.
+  // pipeline into it. [selectTab] is false when the load did not come from
+  // the tab the user is looking at, which must keep focus.
   Future<void> captureIntoNewTab({
     required String parentTabId,
     required Uri targetUrl,
+    bool selectTab = true,
   }) async {
     if (_inFlight.contains((parentTabId, targetUrl))) return;
 
@@ -277,7 +279,7 @@ class SandboxCaptureController extends _$SandboxCaptureController {
         .read(tabRepositoryProvider.notifier)
         .addTab(
           tabMode: parentTabMode,
-          selectTab: true,
+          selectTab: selectTab,
           parentId: parentTabId,
           containerSelection: containerSelection,
           startLoading: false,
@@ -690,11 +692,18 @@ class _SandboxHostEventsHandler implements fmc.SandboxCaptureHostEvents {
     int sequence,
     String parentTabId,
     String targetUrl,
+    bool selectTab,
   ) async {
     final uri = Uri.tryParse(targetUrl);
     final c = controller;
     if (uri == null || c == null) return;
-    unawaited(c.captureIntoNewTab(parentTabId: parentTabId, targetUrl: uri));
+    unawaited(
+      c.captureIntoNewTab(
+        parentTabId: parentTabId,
+        targetUrl: uri,
+        selectTab: selectTab,
+      ),
+    );
   }
 
   @override

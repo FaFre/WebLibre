@@ -480,10 +480,25 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   /// recorded as *its* child. With [reposition] (pass it for
   /// [ChildTabPlacement.afterParent]) the row moves, together with that
   /// container-local subtree as one block, to where it would have landed had
-  /// the opener been known at insert; a repaired container follows the block,
-  /// so it stays in one container. A parent outside the row's container
+  /// the opener been known at insert. A parent outside the row's container
   /// resolves no anchor and leaves the position alone, rather than sending the
   /// row to the end a second time.
+  ///
+  /// A row still without a container, which [repairedContainerId] (the engine
+  /// context's container) could not place, takes its opener's. The context
+  /// cannot name a container that shares the general cookie store, or the one
+  /// an isolated context belongs to, and the row had no opener to inherit from
+  /// at insert. A row that already has a container keeps it, so a tab moved
+  /// out by a site assignment stays where it was moved.
+  ///
+  /// A repaired container moves, repositioned or not, the row together with
+  /// everything the engine opened from it, transitively, that is still in
+  /// the row's empty container: those run in the row's context, which is
+  /// what the container stands for. Claimed or not makes no difference —
+  /// engine provenance (`engine_opener_id`) survives the claim. A tab the app
+  /// created runs in the context it was created with — an "open in new tab"
+  /// while the row was filed in no container ran in none — so it keeps its
+  /// container and its position, and so does everything opened from it.
   ///
   /// Callers linking several rows must go one at a time, in current order, so
   /// each sees the previous as a sibling.
@@ -494,12 +509,26 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     required bool reposition,
     Value<String?> repairedContainerId = const Value.absent(),
   }) async {
+    final containerRepair = repairedContainerId.present || containerId != null
+        ? repairedContainerId
+        : Value.absentIfNull(
+            await getTabContainerId(parentId).getSingleOrNull(),
+          );
+
+    // Moving container, only what runs in the row's context goes along; staying
+    // in it, the whole container-local subtree keeps together as one block.
+    final blockIds = containerRepair.present
+        ? await _engineOpenedContainerDescendantIds(childId)
+        : reposition
+        ? await _collectContainerSubtreeIds(childId)
+        : const <String>{};
+
     final ranked = reposition
         ? await _rankBlockBehindParent(
-            await _collectContainerSubtreeIds(childId),
+            blockIds,
             parentId: parentId,
-            containerId: repairedContainerId.present
-                ? repairedContainerId.value
+            containerId: containerRepair.present
+                ? containerRepair.value
                 : containerId,
           )
         : null;
@@ -510,21 +539,33 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         TabCompanion(
           parentId: Value(parentId),
           source: const Value(TabSource.manual),
-          containerId: repairedContainerId,
         ),
         where: (t) => t.id.equals(childId),
       );
+      if (containerRepair.present) {
+        batch.update(
+          db.tab,
+          TabCompanion(containerId: containerRepair),
+          where: (t) => t.id.isIn(blockIds),
+        );
+      }
       for (final (id, orderKey) in ranked ?? const <(String, String)>[]) {
         batch.update(
           db.tab,
-          TabCompanion(
-            orderKey: Value(orderKey),
-            containerId: repairedContainerId,
-          ),
+          TabCompanion(orderKey: Value(orderKey)),
           where: (t) => t.id.equals(id),
         );
       }
     });
+  }
+
+  /// [tabId] and what the engine opened from it, transitively, while it stays
+  /// in [tabId]'s container: the rows that run in [tabId]'s context.
+  Future<Set<String>> _engineOpenedContainerDescendantIds(String tabId) async {
+    final ids = await db.definitionsDrift
+        .engineOpenedContainerDescendants(tabId: tabId)
+        .get();
+    return ids.toSet();
   }
 
   Future<String> _generateOrderKey({
@@ -640,8 +681,16 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   // than on the opener itself and therefore *before* it. The row keeps its
   // unclaimed [source], so [seedParentFromEngineState] still does the container
   // repair and claims it. A missing opener is left out (parent_id is a
-  // self-referential FK) and linked later by the seeding paths. Ignored when
-  // [parentId] is set.
+  // self-referential FK) and linked later by the seeding paths. Ignored as a
+  // parent when [parentId] is set. Either way it is kept as the row's engine
+  // provenance (`engine_opener_id`), which the claim does not erase.
+  //
+  // Without a [containerId], a row whose opener exists is filed in the
+  // opener's container: the engine runs the tab in the opener's context, and
+  // only the opener's row can say which container that is — a container that
+  // shares the general cookie store, or an isolated context, cannot be found
+  // from the context id. Without an opener row the container stays empty
+  // until [_linkLateParent] inherits it.
   Future<String> insertTab(
     String tabId, {
     required TabSource source,
@@ -665,12 +714,15 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       final effectiveParentId = openerRowExists
           ? Value<String?>(openerId.value)
           : parentId;
+      final effectiveContainerId = containerId.present || !openerRowExists
+          ? containerId
+          : Value(await getTabContainerId(openerId.value!).getSingleOrNull());
 
       final currentOrderKey =
           orderKey.value ??
           await _generateOrderKey(
             parentId: effectiveParentId,
-            containerId: containerId,
+            containerId: effectiveContainerId,
             afterTabId: afterTabId,
             childPlacement: childPlacement,
           );
@@ -685,9 +737,10 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         TabCompanion.insert(
           id: tabId,
           parentId: effectiveParentId,
+          engineOpenerId: openerId,
           source: source,
           timestamp: DateTime.now(),
-          containerId: containerId,
+          containerId: effectiveContainerId,
           orderKey: currentOrderKey,
           url: url,
           title: title,
@@ -698,7 +751,8 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           (old) => TabCompanion(
             source: Value(source),
             parentId: effectiveParentId,
-            containerId: containerId,
+            engineOpenerId: openerId,
+            containerId: effectiveContainerId,
             url: url,
             title: title,
             orderKey: Value.absentIfNull(orderKey.value),

@@ -13,10 +13,14 @@ import eu.weblibre.flutter_mozilla_components.applinks.AppLinkLaunchMode
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkLaunchResult
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkPolicyStores
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
+import eu.weblibre.flutter_mozilla_components.applinks.ComponentsNewTabHost
 import eu.weblibre.flutter_mozilla_components.applinks.FALLBACK_LOAD_FLAGS
+import eu.weblibre.flutter_mozilla_components.applinks.NewTabFocus
+import eu.weblibre.flutter_mozilla_components.applinks.NewTabLoad
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkRequest
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStore
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
+import eu.weblibre.flutter_mozilla_components.applinks.openInNewTab
 import eu.weblibre.flutter_mozilla_components.applinks.releaseHeldNavigation
 import eu.weblibre.flutter_mozilla_components.applinks.toAppLinkPolicy
 import eu.weblibre.flutter_mozilla_components.pigeons.AppLinkDecision
@@ -174,6 +178,8 @@ class GeckoAppLinksApiImpl(
                             components.useCases.sessionUseCases,
                             request,
                             reason = "cancel",
+                            newTabHost = ComponentsNewTabHost(components),
+                            suppressionKey = request.suppressionKey,
                         )
                         AppLinkResolutionResult(false, false, null)
                     }
@@ -213,6 +219,19 @@ class GeckoAppLinksApiImpl(
 
         // Launch failed: load a validated fallback if present, else leave the page.
         val fallback = request.fallbackUrl
+        if (fallback != null && request.opensNewWindow) {
+            // The link asked for a new tab, so its fallback opens in one rather than replacing the
+            // opener's page. The user just tapped "Open", so it takes focus.
+            openInNewTab(
+                ComponentsNewTabHost(components),
+                openerId = request.tabId,
+                url = fallback,
+                load = NewTabLoad.FALLBACK,
+                focus = NewTabFocus.ALWAYS,
+                reason = "launch_failed",
+            )
+            return AppLinkResolutionResult(false, true, "launch_failed")
+        }
         if (fallback != null) {
             // Guard the fallback load against immediately bouncing back out to an app (§2.7): a
             // validated http(s) fallback can itself resolve to an external handler, which would
@@ -236,6 +255,7 @@ class GeckoAppLinksApiImpl(
             components.useCases.sessionUseCases,
             request,
             reason = "launch_failed",
+            newTabHost = ComponentsNewTabHost(components),
         )
         return AppLinkResolutionResult(false, false, "launch_failed")
     }

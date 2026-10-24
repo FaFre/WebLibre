@@ -95,6 +95,13 @@ data class PendingAppLinkRequest(
      * `onLoadRequest`, the moment a navigation is attempted.
      */
     val navGeneration: Long,
+    /**
+     * The load targeted a new tab (`target="_blank"`, `window.open`). The engine asks about such a
+     * load on the *opener's* session, before the new tab exists, so [tabId] is the opener and a
+     * held [url] is owed to a new tab opened from it, never to the opener itself. That also means
+     * the opener's own navigation state cannot invalidate it: opening a tab replaces nothing.
+     */
+    val opensNewWindow: Boolean = false,
     val createdAt: Long,
 ) {
     /** See [appLinkSuppressionKey]. */
@@ -154,6 +161,8 @@ data class NewAppLinkRequest(
     val navGeneration: Long = 0L,
     /** A user-gesture attempt is never deduped into an older request (§2.6). */
     val isUserGesture: Boolean = false,
+    /** See [PendingAppLinkRequest.opensNewWindow]. */
+    val opensNewWindow: Boolean = false,
 )
 
 /**
@@ -269,6 +278,9 @@ class PendingAppLinkStore(
                         // would then refuse a decline that deserves its load.
                         candidate.heldNavigation == input.heldNavigation &&
                         candidate.heldAnchorUrl == input.heldAnchorUrl &&
+                        // The same link opened in place and in a new tab owes two different
+                        // pages: one replaces the opener, the other must not.
+                        candidate.opensNewWindow == input.opensNewWindow &&
                         clock.elapsedRealtime() <= candidate.createdAt + dedupeWindowMs
                 }
                 if (existing != null) {
@@ -308,6 +320,7 @@ class PendingAppLinkStore(
                 heldNavigation = input.heldNavigation,
                 heldAnchorUrl = input.heldAnchorUrl,
                 navGeneration = input.navGeneration,
+                opensNewWindow = input.opensNewWindow,
                 createdAt = clock.elapsedRealtime(),
             )
             // At most one live banner per tab: the surface renders one anyway, and a second
@@ -356,7 +369,9 @@ class PendingAppLinkStore(
         synchronized(lock) {
             val next = (navGeneration[tabId] ?: 0L) + 1L
             navGeneration[tabId] = next
-            val heldHere = requests.values.count { it.tabId == tabId && it.heldNavigation }
+            val heldHere = requests.values.count {
+                it.tabId == tabId && it.heldNavigation && !it.opensNewWindow
+            }
             logger.info(
                 "nav bump tab=$tabId gen=${next - 1} -> $next reason=$reason " +
                     "(invalidates $heldHere live hold(s))",
@@ -382,10 +397,17 @@ class PendingAppLinkStore(
     fun claimRelease(request: PendingAppLinkRequest, currentUrl: String): Boolean {
         synchronized(lock) {
             sweepExpiredLocked()
-            val liveGeneration = navGeneration[request.tabId] ?: 0L
-            val newerHold = requests.values
-                .firstOrNull { it.tabId == request.tabId && it.heldNavigation }
             if (!request.heldNavigation) return false
+            // Owed to a new tab, so nothing the opener did since can make loading it unsafe: it
+            // replaces no page. Still decided here, under the lock, so it stays one-shot.
+            if (request.opensNewWindow) {
+                logger.info("claimRelease id=${request.requestId} GRANTED (new tab) -> will open ${request.url}")
+                return true
+            }
+            val liveGeneration = navGeneration[request.tabId] ?: 0L
+            // A pending new-tab hold is not something this tab is waiting on.
+            val newerHold = requests.values
+                .firstOrNull { it.tabId == request.tabId && it.heldNavigation && !it.opensNewWindow }
             // The tab has moved on since the hold was taken.
             if (liveGeneration != request.navGeneration) {
                 logger.info(

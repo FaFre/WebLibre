@@ -88,9 +88,9 @@ object SandboxCaptureBridge {
     @Volatile
     var events: SandboxCaptureHostEvents? = null
 
-    fun dispatchLinkClick(parentTabId: String, targetUrl: String) {
+    fun dispatchLinkClick(parentTabId: String, targetUrl: String, selectTab: Boolean = true) {
         val e = events ?: return
-        e.onSandboxLinkClick(EventSequence.next(), parentTabId, targetUrl) {}
+        e.onSandboxLinkClick(EventSequence.next(), parentTabId, targetUrl, selectTab) {}
     }
 
     fun dispatchNewTab(parentTabId: String, newTabId: String, targetUrl: String) {

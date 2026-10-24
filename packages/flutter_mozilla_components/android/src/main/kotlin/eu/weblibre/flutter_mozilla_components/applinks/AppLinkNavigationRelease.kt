@@ -7,6 +7,11 @@
 package eu.weblibre.flutter_mozilla_components.applinks
 
 import androidx.annotation.MainThread
+import eu.weblibre.flutter_mozilla_components.Components
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureBridge
+import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureRegistry
+import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTab
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
@@ -68,10 +73,16 @@ internal val FALLBACK_LOAD_FLAGS: EngineSession.LoadUrlFlags = EngineSession.Loa
  * hold left it.
  *
  * Under `blockWhilePrompting` the interceptor answers a prompted engine-supported navigation with
- * `Deny`, so the tab stays on its previous page (or stays blank, for a link that opened a new tab)
- * while the prompt is up. An explicit "stay in browser" choice owes the tab that page, as does a
- * launch that failed with no fallback. Passive dismissal and expiry deliberately do nothing and do
+ * `Deny`, so the tab stays on its previous page (or stays blank, for a tab the app opened for the
+ * link) while the prompt is up. An explicit "stay in browser" choice owes the tab that page, as does
+ * a launch that failed with no fallback. Passive dismissal and expiry deliberately do nothing and do
  * not route here.
+ *
+ * A link that targeted a new tab was denied on its *opener*, before any new tab existed
+ * ([PendingAppLinkRequest.opensNewWindow]). Its page is owed to a new tab of the opener, opened
+ * through [newTabHost] — loading it into the opener would replace what the user was reading. A
+ * "stay in the browser" answer passes its [suppressionKey], which the new tab inherits: the caller
+ * already recorded it for the opener, but the page and the next navigation on it are in the new tab.
  *
  * A no-op when the request was not holding a navigation — the non-blocking path, where the page is
  * already on screen; every unsupported-scheme prompt, where there was never a loadable page; and
@@ -124,6 +135,8 @@ internal fun releaseHeldNavigation(
     sessionUseCases: SessionUseCases,
     request: PendingAppLinkRequest,
     reason: String,
+    newTabHost: NewTabHost? = null,
+    suppressionKey: String? = null,
 ) {
     if (!request.heldNavigation) return
     // Belt and braces: `heldNavigation` is only ever set for an engine-supported target, and
@@ -147,6 +160,26 @@ internal fun releaseHeldNavigation(
         return
     }
 
+    // The link asked for a new tab, and [request.tabId] is its opener: loading the page there
+    // would replace what the user is reading. Only the browser's own tabs carry this flag, and
+    // their release always passes a host.
+    if (request.opensNewWindow) {
+        if (newTabHost == null) {
+            logger.error("release dropped ($reason): new-tab request ${request.requestId} without a host")
+            return
+        }
+        openInNewTab(
+            newTabHost,
+            openerId = request.tabId,
+            url = request.url,
+            load = NewTabLoad.HELD,
+            focus = NewTabFocus.ALWAYS,
+            reason = reason,
+            suppressionKey = suppressionKey,
+        )
+        return
+    }
+
     logger.info(
         "release LOADING ($reason) tab=${request.tabId} url=${request.url} flags=${SELF_ISSUED_LOAD_FLAGS.value}",
     )
@@ -155,6 +188,182 @@ internal fun releaseHeldNavigation(
         sessionId = request.tabId,
         flags = SELF_ISSUED_LOAD_FLAGS,
     )
+}
+
+/** What a new tab opened by [openInNewTab] loads, which decides how its load is flagged. */
+internal enum class NewTabLoad {
+    /** A held navigation the guards already vetted: loads with [SELF_ISSUED_LOAD_FLAGS]. */
+    HELD,
+
+    /** A page-supplied fallback: loads with [FALLBACK_LOAD_FLAGS], recorded for re-entry first. */
+    FALLBACK,
+}
+
+/** Whether a tab opened by [openInNewTab] takes focus. */
+internal enum class NewTabFocus {
+    /** The user just chose this in a prompt, so the tab is what they want to see. */
+    ALWAYS,
+
+    /**
+     * Nobody chose anything: the page asked for it. Only a page in view may take focus, so a
+     * background tab's link never pulls the user away from what they are reading.
+     */
+    IF_OPENER_SELECTED,
+}
+
+/**
+ * What [openInNewTab] needs from the browser: the seam that keeps the decisions testable without
+ * an engine. [ComponentsNewTabHost] is the real one.
+ */
+internal interface NewTabHost {
+    val browserStore: BrowserStore
+
+    /**
+     * Whether the components this host was made from are still the process's current ones. An open
+     * queued before a teardown or a profile switch must not land in their replacement — and the old
+     * store it holds can still list the opener.
+     */
+    fun isCurrent(): Boolean
+
+    fun isSandboxCapture(tabId: String): Boolean
+
+    fun dispatchSandboxLinkClick(parentTabId: String, url: String, selectTab: Boolean)
+
+    @Suppress("LongParameterList")
+    fun addTab(
+        url: String,
+        selectTab: Boolean,
+        startLoading: Boolean,
+        parentId: String,
+        contextId: String?,
+        private: Boolean,
+        flags: EngineSession.LoadUrlFlags,
+    ): String
+
+    fun loadUrl(url: String, tabId: String, flags: EngineSession.LoadUrlFlags)
+
+    fun recordFallbackReentry(tabId: String, url: String)
+
+    fun recordSuppression(tabId: String, key: String)
+}
+
+internal class ComponentsNewTabHost(private val components: Components) : NewTabHost {
+    override val browserStore: BrowserStore get() = components.core.store
+
+    override fun isCurrent(): Boolean = GlobalComponents.components === components
+
+    override fun isSandboxCapture(tabId: String): Boolean = SandboxCaptureRegistry.get(tabId) != null
+
+    override fun dispatchSandboxLinkClick(parentTabId: String, url: String, selectTab: Boolean) =
+        SandboxCaptureBridge.dispatchLinkClick(parentTabId, url, selectTab)
+
+    override fun addTab(
+        url: String,
+        selectTab: Boolean,
+        startLoading: Boolean,
+        parentId: String,
+        contextId: String?,
+        private: Boolean,
+        flags: EngineSession.LoadUrlFlags,
+    ): String = components.useCases.tabsUseCases.addTab(
+        url = url,
+        selectTab = selectTab,
+        startLoading = startLoading,
+        parentId = parentId,
+        flags = flags,
+        contextId = contextId,
+        private = private,
+    )
+
+    override fun loadUrl(url: String, tabId: String, flags: EngineSession.LoadUrlFlags) =
+        components.useCases.sessionUseCases.loadUrl(url = url, sessionId = tabId, flags = flags)
+
+    override fun recordFallbackReentry(tabId: String, url: String) =
+        pendingStore().recordFallbackReentry(tabId, url)
+
+    override fun recordSuppression(tabId: String, key: String) =
+        pendingStore().recordSuppression(tabId, key)
+
+    private fun pendingStore() =
+        PendingAppLinkStores.forProfile(components.profileApplicationContext.relativePath)
+}
+
+/**
+ * Open [url] in a new tab of [openerId] — where a link that targeted a new tab should land, instead
+ * of replacing the opener's page.
+ *
+ * The opener is read again here rather than trusted from when the open was decided: a fallback is
+ * opened from a posted task, by which time the opener may be closed, or the components it lived in
+ * torn down. Either way the open is dropped — there is no tab left to have asked for it. The new tab
+ * gets the opener's context, private flag and position, as a tab the page opened itself would.
+ *
+ * A sandbox-capture opener never gets a live tab: `SandboxCaptureMiddleware` would rewrite it to
+ * `about:blank`, but the load issued after that would still reach the live web, from a tab the
+ * sandbox registry does not know. It goes through the capture flow instead, which opens a new
+ * sandboxed tab — `intent:` links are inert in a sandbox tab and reach the app-link fallback, so
+ * this is a real path.
+ *
+ * [suppressionKey] carries a "stay in the browser" answer over to the new tab, recorded before its
+ * first load: that is where the page — and the user's next navigation on that site — now lives, and
+ * suppression is kept per tab. The self-issued load does not clear it.
+ *
+ * @return whether a tab (or a sandbox capture) was opened.
+ */
+@Suppress("LongParameterList")
+@MainThread
+internal fun openInNewTab(
+    host: NewTabHost,
+    openerId: String,
+    url: String,
+    load: NewTabLoad,
+    focus: NewTabFocus,
+    reason: String,
+    suppressionKey: String? = null,
+): Boolean {
+    if (!host.isCurrent()) {
+        logger.info("new tab dropped ($reason): opener $openerId belongs to replaced components")
+        return false
+    }
+    val state = host.browserStore.state
+    val opener = state.findTab(openerId)
+    if (opener == null) {
+        logger.info("new tab dropped ($reason): opener $openerId is gone")
+        return false
+    }
+    val selectTab = when (focus) {
+        NewTabFocus.ALWAYS -> true
+        NewTabFocus.IF_OPENER_SELECTED -> state.selectedTabId == openerId
+    }
+
+    if (host.isSandboxCapture(openerId)) {
+        logger.info("new tab via sandbox capture ($reason) opener=$openerId select=$selectTab")
+        host.dispatchSandboxLinkClick(openerId, url, selectTab)
+        return true
+    }
+
+    logger.info("new tab OPENING ($reason) opener=$openerId load=$load select=$selectTab url=$url")
+    val flags = when (load) {
+        NewTabLoad.HELD -> SELF_ISSUED_LOAD_FLAGS
+        NewTabLoad.FALLBACK -> FALLBACK_LOAD_FLAGS
+    }
+    // Created without loading, so whatever the new tab must know about this link is in place
+    // before its first load reaches the interceptor.
+    val tabId = host.addTab(
+        url,
+        selectTab = selectTab,
+        startLoading = false,
+        parentId = openerId,
+        contextId = opener.contextId,
+        private = opener.content.private,
+        flags = flags,
+    )
+    // A fallback is not offered straight back to an app (see [FALLBACK_LOAD_FLAGS]).
+    if (load == NewTabLoad.FALLBACK) {
+        host.recordFallbackReentry(tabId, url)
+    }
+    suppressionKey?.let { host.recordSuppression(tabId, it) }
+    host.loadUrl(url, tabId, flags)
+    return true
 }
 
 /**

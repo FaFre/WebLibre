@@ -15755,10 +15755,13 @@ abstract class SandboxCaptureHostEvents {
   /// Emitted when a sandbox tab attempted to navigate to a non-loopback,
   /// non-source URL (e.g., user clicked a link or typed a new URL into the
   /// address bar). Dart should open a new sandbox tab and capture [targetUrl].
+  /// [selectTab] is false for a load the user did not start from the sandbox
+  /// tab in view, which must not take focus from what they are looking at.
   Future<void> onSandboxLinkClick(
     int sequence,
     String parentTabId,
     String targetUrl,
+    bool selectTab,
   );
 
   /// Emitted when GeckoView created a new tab (via `window.open`,
@@ -15795,11 +15798,13 @@ abstract class SandboxCaptureHostEvents {
           final int arg_sequence = args[0]! as int;
           final String arg_parentTabId = args[1]! as String;
           final String arg_targetUrl = args[2]! as String;
+          final bool arg_selectTab = args[3]! as bool;
           try {
             await api.onSandboxLinkClick(
               arg_sequence,
               arg_parentTabId,
               arg_targetUrl,
+              arg_selectTab,
             );
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {

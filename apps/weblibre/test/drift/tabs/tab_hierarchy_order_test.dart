@@ -473,6 +473,267 @@ void main() {
     );
   });
 
+  group('an engine-opened tab is filed with its opener', () {
+    // The engine runs a popup in its opener's context, so the opener's row —
+    // not the container selected in the UI — decides where it is filed.
+
+    setUp(() async {
+      await _insertContainers(db, const [
+        _ContainerFixture('work', 'work-context'),
+        _ContainerFixture('home', 'home-context'),
+        _ContainerFixture('shared', null),
+      ]);
+    });
+
+    Future<String?> containerOf(String tabId) async {
+      final tab = await db.tabDao.getTabDataById(tabId).getSingleOrNull();
+      return tab?.containerId;
+    }
+
+    test("takes its opener's container at insert", () async {
+      await _insertTabs(db, const [_TabFixture('opener', containerId: 'work')]);
+
+      await db.tabDao.insertTab(
+        'popup',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('opener'),
+      );
+
+      expect(await containerOf('popup'), 'work');
+      expect(await _orderedTabIdsInContainer(db, 'work'), ['opener', 'popup']);
+    });
+
+    test('a container passed by the caller wins over the opener', () async {
+      await _insertTabs(db, const [_TabFixture('opener', containerId: 'work')]);
+
+      await db.tabDao.insertTab(
+        'tab',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('opener'),
+        containerId: const Value('home'),
+      );
+
+      expect(await containerOf('tab'), 'home');
+    });
+
+    test('an app-created row is not overwritten by its engine event', () async {
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'work'),
+        _TabFixture('app-tab', parentId: 'opener', containerId: 'home'),
+      ]);
+
+      await db.tabDao.insertTab(
+        'app-tab',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('opener'),
+      );
+
+      expect(await containerOf('app-tab'), 'home');
+    });
+
+    /// `child` inserted before its opener had a row, so with no container.
+    Future<void> insertBeforeOpener() async {
+      await db.tabDao.insertTab(
+        'child',
+        source: TabSource.addedEvent,
+        parentId: const Value.absent(),
+        openerId: const Value('opener'),
+      );
+      expect(await containerOf('child'), isNull);
+    }
+
+    test(
+      'a late opener in a shared-cookie container is inherited on linking',
+      () async {
+        await insertBeforeOpener();
+        await _insertTabs(db, const [
+          _TabFixture('opener', containerId: 'shared'),
+        ]);
+
+        // The engine reports no context: a shared-cookie container runs in
+        // the general cookie store, so the context names no container.
+        await db.tabDao.seedParentFromEngineState(
+          childId: 'child',
+          parentId: 'opener',
+          contextId: null,
+        );
+
+        expect(await containerOf('child'), 'shared');
+      },
+    );
+
+    test('a late opener of an isolated tab is inherited on linking', () async {
+      await insertBeforeOpener();
+      await _insertTabs(db, const [_TabFixture('opener', containerId: 'work')]);
+
+      // An isolated context belongs to no container's identity.
+      await db.tabDao.seedParentFromEngineState(
+        childId: 'child',
+        parentId: 'opener',
+        contextId: 'iso1_00000000-0000-4000-8000-000000000000',
+      );
+
+      expect(await containerOf('child'), 'work');
+    });
+
+    test("the pending-parent pass inherits the opener's container", () async {
+      await insertBeforeOpener();
+      // No opener row yet, so seeding parks the link as pending.
+      expect(
+        await db.tabDao.seedParentFromEngineState(
+          childId: 'child',
+          parentId: 'opener',
+          contextId: null,
+        ),
+        isFalse,
+      );
+      await _insertTabs(db, const [
+        _TabFixture('opener', containerId: 'shared'),
+      ]);
+
+      await db.tabDao.syncTabs(retainTabIds: const ['child', 'opener']);
+
+      expect(await containerOf('child'), 'shared');
+    });
+
+    /// Opened by the engine from [openerId], whose row exists.
+    Future<void> insertEngineOpened(String id, {required String openerId}) =>
+        db.tabDao.insertTab(
+          id,
+          source: TabSource.addedEvent,
+          parentId: const Value.absent(),
+          openerId: Value(openerId),
+        );
+
+    /// Ordinary engine-parent seeding, which claims the row (`manual`).
+    Future<void> seed(String id, {required String parentId}) async {
+      final seeded = await db.tabDao.seedParentFromEngineState(
+        childId: id,
+        parentId: parentId,
+        contextId: null,
+      );
+      expect(seeded, isTrue);
+      final row = await db.tabDao.getTabDataById(id).getSingleOrNull();
+      expect(row?.source, TabSource.manual);
+    }
+
+    /// A late-linked tab with what was opened from it before its opener
+    /// arrived:
+    /// - `grandchild`, engine-opened and not claimed yet;
+    /// - `seeded-grandchild`, engine-opened and already claimed by seeding;
+    /// - `assigned-grandchild`, reopened into `home` by a site assignment;
+    /// - `general-grandchild`, opened by the app in no container, so it runs
+    ///   in the general context — and below it `engine-under-general` (not
+    ///   claimed) and `seeded-under-general` (claimed), opened by the engine
+    ///   from it and so running in the general context too.
+    Future<void> arrangeLateOpenerWithGrandchildren() async {
+      await _insertTabs(db, const [_TabFixture('unrelated')]);
+      await insertBeforeOpener();
+      await insertEngineOpened('grandchild', openerId: 'child');
+      await insertEngineOpened('seeded-grandchild', openerId: 'child');
+      await seed('seeded-grandchild', parentId: 'child');
+      await db.tabDao.insertTab(
+        'assigned-grandchild',
+        source: TabSource.manual,
+        parentId: const Value('child'),
+        containerId: const Value('home'),
+      );
+      await db.tabDao.insertTab(
+        'general-grandchild',
+        source: TabSource.manual,
+        parentId: const Value('child'),
+        containerId: const Value(null),
+      );
+      await insertEngineOpened(
+        'engine-under-general',
+        openerId: 'general-grandchild',
+      );
+      await insertEngineOpened(
+        'seeded-under-general',
+        openerId: 'general-grandchild',
+      );
+      await seed('seeded-under-general', parentId: 'general-grandchild');
+      await db.tabDao.insertTab(
+        'opener',
+        source: TabSource.syncEvent,
+        parentId: const Value.absent(),
+        containerId: const Value('shared'),
+      );
+    }
+
+    test(
+      'the inherited container reaches the subtree without moving it',
+      () async {
+        await arrangeLateOpenerWithGrandchildren();
+        final keys = {
+          for (final id in ['child', 'grandchild', 'seeded-grandchild'])
+            id: await _orderKeyOf(db, id),
+        };
+
+        await db.tabDao.seedParentFromEngineState(
+          childId: 'child',
+          parentId: 'opener',
+          contextId: null,
+          childPlacement: ChildTabPlacement.endOfList,
+        );
+
+        // Engine-opened, claimed or not: they run in the child's context.
+        for (final MapEntry(key: id, value: key) in keys.entries) {
+          expect(await containerOf(id), 'shared', reason: id);
+          expect(await _orderKeyOf(db, id), key, reason: id);
+        }
+        // Explicitly moved elsewhere, so not part of the inherited block.
+        expect(await containerOf('assigned-grandchild'), 'home');
+        // Created by the app in no container, so it runs in the general
+        // context, and so does everything the engine opened from it: filing
+        // them under the opener's container would claim a context they do
+        // not have.
+        for (final id in [
+          'general-grandchild',
+          'engine-under-general',
+          'seeded-under-general',
+        ]) {
+          expect(await containerOf(id), isNull, reason: id);
+        }
+      },
+    );
+
+    test('the inherited container follows the repositioned block', () async {
+      await arrangeLateOpenerWithGrandchildren();
+      final generalKeys = {
+        for (final id in [
+          'general-grandchild',
+          'engine-under-general',
+          'seeded-under-general',
+        ])
+          id: await _orderKeyOf(db, id),
+      };
+
+      await db.tabDao.seedParentFromEngineState(
+        childId: 'child',
+        parentId: 'opener',
+        contextId: null,
+      );
+
+      expect(await _orderedTabIdsInContainer(db, 'shared'), [
+        'opener',
+        'child',
+        'grandchild',
+        'seeded-grandchild',
+      ]);
+      expect(await containerOf('assigned-grandchild'), 'home');
+      // The general branch is neither moved into the container nor re-ranked
+      // against its rows.
+      for (final MapEntry(key: id, value: key) in generalKeys.entries) {
+        expect(await containerOf(id), isNull, reason: id);
+        expect(await _orderKeyOf(db, id), key, reason: id);
+      }
+    });
+  });
+
   test('setTabParent appends after the existing last child subtree', () async {
     await _insertTabs(db, const [
       _TabFixture('parent'),
@@ -1389,7 +1650,9 @@ class _TabFixture {
 
 class _ContainerFixture {
   final String id;
-  final String contextId;
+
+  /// Null for a container that shares the general cookie store.
+  final String? contextId;
 
   const _ContainerFixture(this.id, this.contextId);
 }

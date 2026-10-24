@@ -14484,13 +14484,15 @@ class SandboxCaptureHostEvents(private val binaryMessenger: BinaryMessenger, pri
    * Emitted when a sandbox tab attempted to navigate to a non-loopback,
    * non-source URL (e.g., user clicked a link or typed a new URL into the
    * address bar). Dart should open a new sandbox tab and capture [targetUrl].
+   * [selectTab] is false for a load the user did not start from the sandbox
+   * tab in view, which must not take focus from what they are looking at.
    */
-  fun onSandboxLinkClick(sequenceArg: Long, parentTabIdArg: String, targetUrlArg: String, callback: (Result<Unit>) -> Unit)
+  fun onSandboxLinkClick(sequenceArg: Long, parentTabIdArg: String, targetUrlArg: String, selectTabArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.SandboxCaptureHostEvents.onSandboxLinkClick$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
-    channel.send(listOf(sequenceArg, parentTabIdArg, targetUrlArg)) {
+    channel.send(listOf(sequenceArg, parentTabIdArg, targetUrlArg, selectTabArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

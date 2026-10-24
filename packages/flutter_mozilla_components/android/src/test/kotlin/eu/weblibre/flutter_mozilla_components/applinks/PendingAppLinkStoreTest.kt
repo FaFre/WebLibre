@@ -699,4 +699,51 @@ class PendingAppLinkStoreTest {
 
         assertFalse(store.claimRelease(request, "https://source.example/page"))
     }
+
+    // ---- Holds owed to a new tab ----
+
+    /** A link that targeted a new tab, held on its opener `tab1` — as the interceptor records it. */
+    private fun heldForNewTab(store: PendingAppLinkStore, fingerprint: String = "fp1"): PendingAppLinkRequest =
+        store.createRequest(
+            heldBanner(fingerprint = fingerprint).copy(
+                opensNewWindow = true,
+                navGeneration = store.currentNavGeneration("tab1"),
+            ),
+        )
+
+    @Test
+    fun aNewTabHoldIsClaimableWhereverTheOpenerWent() {
+        // Opening a tab replaces nothing in the opener, so its navigation cannot make the debt unsafe.
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldForNewTab(store)
+        assertNotNull(store.consume(request.requestId))
+
+        store.beginNavigation("tab1")
+
+        assertTrue(store.claimRelease(request, "https://elsewhere.example/"))
+    }
+
+    @Test
+    fun aNewTabHoldIsNotANewerHoldForTheOpener() {
+        // The opener is not waiting on a page meant for another tab, so its own debt still stands.
+        val store = PendingAppLinkStore(FakeClock())
+        val request = heldAt(store)
+        assertNotNull(store.consume(request.requestId))
+
+        heldForNewTab(store, fingerprint = "newer")
+
+        assertTrue(store.claimRelease(request, "https://source.example/page"))
+    }
+
+    @Test
+    fun aNewTabHoldIsNotDedupedIntoASameTabHold() {
+        // The same link opened in place and in a new tab owes two different pages.
+        val store = PendingAppLinkStore(FakeClock())
+        val sameTab = store.createRequest(heldBanner().copy(heldAnchorUrl = null))
+
+        val newTab = heldForNewTab(store)
+
+        assertNotEquals(sameTab.requestId, newTab.requestId)
+        assertTrue(newTab.opensNewWindow)
+    }
 }

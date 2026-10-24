@@ -1547,7 +1547,13 @@ class TabRepository extends _$TabRepository {
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
       (event) async {
-        final containerId = ref.read(selectedContainerProvider);
+        // A tab opened from another tab runs in its opener's context, so
+        // `insertTab` files it with the opener rather than with whatever
+        // container is selected. A tab without an opener (an extension's
+        // `tabs.create`) still lands in the selected container.
+        final containerId = event.parentId == null
+            ? Value(ref.read(selectedContainerProvider))
+            : const Value<String?>.absent();
         await db.tabDao.insertTab(
           event.tabId,
           parentId: const Value.absent(),
@@ -1560,7 +1566,7 @@ class TabRepository extends _$TabRepository {
               .read(generalSettingsWithDefaultsProvider)
               .childTabPlacement,
           source: TabSource.addedEvent,
-          containerId: Value(containerId),
+          containerId: containerId,
         );
       },
       onError: (Object error, StackTrace stackTrace) {

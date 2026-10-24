@@ -21,6 +21,12 @@ CREATE TABLE tab(
   id TEXT PRIMARY KEY NOT NULL,
   source ENUM(TabSource) NOT NULL,
   parent_id TEXT REFERENCES tab (id) ON DELETE SET NULL,
+  -- The tab the engine opened this one from (`window.open`, `target="_blank"`),
+  -- which it therefore runs in the context of. Unlike `parent_id` it is never
+  -- rewritten by the hierarchy, and unlike `source` it survives the claim, so
+  -- it is the record of engine provenance. No foreign key: it is written when
+  -- the opener's row may not exist yet, and outlives it.
+  engine_opener_id TEXT,
   container_id TEXT REFERENCES container (id) ON DELETE CASCADE,
   order_key TEXT NOT NULL,
   url TEXT MAPPED BY `const UriConverterNullable()`,
@@ -1102,6 +1108,27 @@ unorderedTabDescendants:
       JOIN descendants d ON t.parent_id = d.id
   )
   SELECT id, parent_id
+  FROM descendants;
+
+-- The seed tab and everything the engine opened from it, transitively, that
+-- is still filed in the seed's container: the rows that run in the seed's
+-- context. Walks engine provenance, not the hierarchy, and stops at any row
+-- filed elsewhere, so a branch the app created (or one moved to another
+-- container) is never crossed, and neither is anything opened from it.
+engineOpenedContainerDescendants:
+  WITH RECURSIVE descendants AS (
+      SELECT id, container_id
+      FROM tab
+      WHERE id = :tab_id
+
+      UNION ALL
+
+      SELECT t.id, t.container_id
+      FROM tab t
+      JOIN descendants d ON t.engine_opener_id = d.id
+      WHERE t.container_id IS d.container_id
+  )
+  SELECT id
   FROM descendants;
 
 -- As `unorderedTabDescendants`, but the walk stops at the container the seed

@@ -3817,8 +3817,15 @@ abstract class SandboxCaptureHostEvents {
   /// Emitted when a sandbox tab attempted to navigate to a non-loopback,
   /// non-source URL (e.g., user clicked a link or typed a new URL into the
   /// address bar). Dart should open a new sandbox tab and capture [targetUrl].
+  /// [selectTab] is false for a load the user did not start from the sandbox
+  /// tab in view, which must not take focus from what they are looking at.
   @asyncCallback
-  void onSandboxLinkClick(int sequence, String parentTabId, String targetUrl);
+  void onSandboxLinkClick(
+    int sequence,
+    String parentTabId,
+    String targetUrl,
+    bool selectTab,
+  );
 
   /// Emitted when GeckoView created a new tab (via `window.open`,
   /// `target="_blank"`, or a middle-click) whose parent is a sandbox tab.

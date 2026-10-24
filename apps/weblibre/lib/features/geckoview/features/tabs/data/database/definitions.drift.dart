@@ -471,6 +471,7 @@ typedef $TabCreateCompanionBuilder =
       required String id,
       required i6.TabSource source,
       i0.Value<String?> parentId,
+      i0.Value<String?> engineOpenerId,
       i0.Value<String?> containerId,
       required String orderKey,
       i0.Value<Uri?> url,
@@ -491,6 +492,7 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<String> id,
       i0.Value<i6.TabSource> source,
       i0.Value<String?> parentId,
+      i0.Value<String?> engineOpenerId,
       i0.Value<String?> containerId,
       i0.Value<String> orderKey,
       i0.Value<Uri?> url,
@@ -594,6 +596,11 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
   get source => $composableBuilder(
     column: $table.source,
     builder: (column) => i0.ColumnWithTypeConverterFilters(column),
+  );
+
+  i0.ColumnFilters<String> get engineOpenerId => $composableBuilder(
+    column: $table.engineOpenerId,
+    builder: (column) => i0.ColumnFilters(column),
   );
 
   i0.ColumnFilters<String> get orderKey => $composableBuilder(
@@ -761,6 +768,11 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<String> get engineOpenerId => $composableBuilder(
+    column: $table.engineOpenerId,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<String> get orderKey => $composableBuilder(
     column: $table.orderKey,
     builder: (column) => i0.ColumnOrderings(column),
@@ -890,6 +902,11 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.GeneratedColumnWithTypeConverter<i6.TabSource, int> get source =>
       $composableBuilder(column: $table.source, builder: (column) => column);
+
+  i0.GeneratedColumn<String> get engineOpenerId => $composableBuilder(
+    column: $table.engineOpenerId,
+    builder: (column) => column,
+  );
 
   i0.GeneratedColumn<String> get orderKey =>
       $composableBuilder(column: $table.orderKey, builder: (column) => column);
@@ -1059,6 +1076,7 @@ class $TabTableManager
                 i0.Value<String> id = const i0.Value.absent(),
                 i0.Value<i6.TabSource> source = const i0.Value.absent(),
                 i0.Value<String?> parentId = const i0.Value.absent(),
+                i0.Value<String?> engineOpenerId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 i0.Value<String> orderKey = const i0.Value.absent(),
                 i0.Value<Uri?> url = const i0.Value.absent(),
@@ -1079,6 +1097,7 @@ class $TabTableManager
                 id: id,
                 source: source,
                 parentId: parentId,
+                engineOpenerId: engineOpenerId,
                 containerId: containerId,
                 orderKey: orderKey,
                 url: url,
@@ -1099,6 +1118,7 @@ class $TabTableManager
                 required String id,
                 required i6.TabSource source,
                 i0.Value<String?> parentId = const i0.Value.absent(),
+                i0.Value<String?> engineOpenerId = const i0.Value.absent(),
                 i0.Value<String?> containerId = const i0.Value.absent(),
                 required String orderKey,
                 i0.Value<Uri?> url = const i0.Value.absent(),
@@ -1119,6 +1139,7 @@ class $TabTableManager
                 id: id,
                 source: source,
                 parentId: parentId,
+                engineOpenerId: engineOpenerId,
                 containerId: containerId,
                 orderKey: orderKey,
                 url: url,
@@ -3461,6 +3482,15 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     requiredDuringInsert: false,
     $customConstraints: 'REFERENCES tab(id)ON DELETE SET NULL',
   );
+  late final i0.GeneratedColumn<String> engineOpenerId =
+      i0.GeneratedColumn<String>(
+        'engine_opener_id',
+        aliasedName,
+        true,
+        type: i0.DriftSqlType.string,
+        requiredDuringInsert: false,
+        $customConstraints: '',
+      );
   late final i0.GeneratedColumn<String> containerId =
       i0.GeneratedColumn<String>(
         'container_id',
@@ -3597,6 +3627,7 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     id,
     source,
     parentId,
+    engineOpenerId,
     containerId,
     orderKey,
     url,
@@ -3636,6 +3667,10 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
       parentId: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
         data['${effectivePrefix}parent_id'],
+      ),
+      engineOpenerId: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.string,
+        data['${effectivePrefix}engine_opener_id'],
       ),
       containerId: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.string,
@@ -3723,6 +3758,13 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final String id;
   final i6.TabSource source;
   final String? parentId;
+
+  /// The tab the engine opened this one from (`window.open`, `target="_blank"`),
+  /// which it therefore runs in the context of. Unlike `parent_id` it is never
+  /// rewritten by the hierarchy, and unlike `source` it survives the claim, so
+  /// it is the record of engine provenance. No foreign key: it is written when
+  /// the opener's row may not exist yet, and outlives it.
+  final String? engineOpenerId;
   final String? containerId;
   final String orderKey;
   final Uri? url;
@@ -3747,6 +3789,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     required this.id,
     required this.source,
     this.parentId,
+    this.engineOpenerId,
     this.containerId,
     required this.orderKey,
     this.url,
@@ -3771,6 +3814,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = i0.Variable<String>(parentId);
+    }
+    if (!nullToAbsent || engineOpenerId != null) {
+      map['engine_opener_id'] = i0.Variable<String>(engineOpenerId);
     }
     if (!nullToAbsent || containerId != null) {
       map['container_id'] = i0.Variable<String>(containerId);
@@ -3825,6 +3871,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
         serializer.fromJson<int>(json['source']),
       ),
       parentId: serializer.fromJson<String?>(json['parent_id']),
+      engineOpenerId: serializer.fromJson<String?>(json['engine_opener_id']),
       containerId: serializer.fromJson<String?>(json['container_id']),
       orderKey: serializer.fromJson<String>(json['order_key']),
       url: serializer.fromJson<Uri?>(json['url']),
@@ -3862,6 +3909,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       'id': serializer.toJson<String>(id),
       'source': serializer.toJson<int>(i3.Tab.$convertersource.toJson(source)),
       'parent_id': serializer.toJson<String?>(parentId),
+      'engine_opener_id': serializer.toJson<String?>(engineOpenerId),
       'container_id': serializer.toJson<String?>(containerId),
       'order_key': serializer.toJson<String>(orderKey),
       'url': serializer.toJson<Uri?>(url),
@@ -3889,6 +3937,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     String? id,
     i6.TabSource? source,
     i0.Value<String?> parentId = const i0.Value.absent(),
+    i0.Value<String?> engineOpenerId = const i0.Value.absent(),
     i0.Value<String?> containerId = const i0.Value.absent(),
     String? orderKey,
     i0.Value<Uri?> url = const i0.Value.absent(),
@@ -3907,6 +3956,9 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     id: id ?? this.id,
     source: source ?? this.source,
     parentId: parentId.present ? parentId.value : this.parentId,
+    engineOpenerId: engineOpenerId.present
+        ? engineOpenerId.value
+        : this.engineOpenerId,
     containerId: containerId.present ? containerId.value : this.containerId,
     orderKey: orderKey ?? this.orderKey,
     url: url.present ? url.value : this.url,
@@ -3940,6 +3992,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           ..write('id: $id, ')
           ..write('source: $source, ')
           ..write('parentId: $parentId, ')
+          ..write('engineOpenerId: $engineOpenerId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
@@ -3963,6 +4016,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     id,
     source,
     parentId,
+    engineOpenerId,
     containerId,
     orderKey,
     url,
@@ -3985,6 +4039,7 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           other.id == this.id &&
           other.source == this.source &&
           other.parentId == this.parentId &&
+          other.engineOpenerId == this.engineOpenerId &&
           other.containerId == this.containerId &&
           other.orderKey == this.orderKey &&
           other.url == this.url &&
@@ -4005,6 +4060,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<String> id;
   final i0.Value<i6.TabSource> source;
   final i0.Value<String?> parentId;
+  final i0.Value<String?> engineOpenerId;
   final i0.Value<String?> containerId;
   final i0.Value<String> orderKey;
   final i0.Value<Uri?> url;
@@ -4023,6 +4079,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.id = const i0.Value.absent(),
     this.source = const i0.Value.absent(),
     this.parentId = const i0.Value.absent(),
+    this.engineOpenerId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     this.orderKey = const i0.Value.absent(),
     this.url = const i0.Value.absent(),
@@ -4042,6 +4099,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     required String id,
     required i6.TabSource source,
     this.parentId = const i0.Value.absent(),
+    this.engineOpenerId = const i0.Value.absent(),
     this.containerId = const i0.Value.absent(),
     required String orderKey,
     this.url = const i0.Value.absent(),
@@ -4064,6 +4122,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Expression<String>? id,
     i0.Expression<int>? source,
     i0.Expression<String>? parentId,
+    i0.Expression<String>? engineOpenerId,
     i0.Expression<String>? containerId,
     i0.Expression<String>? orderKey,
     i0.Expression<String>? url,
@@ -4083,6 +4142,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       if (id != null) 'id': id,
       if (source != null) 'source': source,
       if (parentId != null) 'parent_id': parentId,
+      if (engineOpenerId != null) 'engine_opener_id': engineOpenerId,
       if (containerId != null) 'container_id': containerId,
       if (orderKey != null) 'order_key': orderKey,
       if (url != null) 'url': url,
@@ -4109,6 +4169,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Value<String>? id,
     i0.Value<i6.TabSource>? source,
     i0.Value<String?>? parentId,
+    i0.Value<String?>? engineOpenerId,
     i0.Value<String?>? containerId,
     i0.Value<String>? orderKey,
     i0.Value<Uri?>? url,
@@ -4128,6 +4189,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       id: id ?? this.id,
       source: source ?? this.source,
       parentId: parentId ?? this.parentId,
+      engineOpenerId: engineOpenerId ?? this.engineOpenerId,
       containerId: containerId ?? this.containerId,
       orderKey: orderKey ?? this.orderKey,
       url: url ?? this.url,
@@ -4160,6 +4222,9 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     }
     if (parentId.present) {
       map['parent_id'] = i0.Variable<String>(parentId.value);
+    }
+    if (engineOpenerId.present) {
+      map['engine_opener_id'] = i0.Variable<String>(engineOpenerId.value);
     }
     if (containerId.present) {
       map['container_id'] = i0.Variable<String>(containerId.value);
@@ -4224,6 +4289,7 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
           ..write('id: $id, ')
           ..write('source: $source, ')
           ..write('parentId: $parentId, ')
+          ..write('engineOpenerId: $engineOpenerId, ')
           ..write('containerId: $containerId, ')
           ..write('orderKey: $orderKey, ')
           ..write('url: $url, ')
@@ -7216,6 +7282,16 @@ class DefinitionsDrift extends i9.ModularAccessor {
         parentId: row.readNullable<String>('parent_id'),
       ),
     );
+  }
+
+  i0.Selectable<String> engineOpenedContainerDescendants({
+    required String tabId,
+  }) {
+    return customSelect(
+      'WITH RECURSIVE descendants AS (SELECT id, container_id FROM tab WHERE id = ?1 UNION ALL SELECT t.id, t.container_id FROM tab AS t JOIN descendants AS d ON t.engine_opener_id = d.id WHERE t.container_id IS d.container_id) SELECT id FROM descendants',
+      variables: [i0.Variable<String>(tabId)],
+      readsFrom: {this.tab},
+    ).map((i0.QueryRow row) => row.read<String>('id'));
   }
 
   i0.Selectable<UnorderedContainerTabDescendantsResult>
