@@ -41,7 +41,7 @@ final class ProfileAuthStateProvider
   }
 }
 
-String _$profileAuthStateHash() => r'6345a572163d786e1990b7b2f1b6453161222ecd';
+String _$profileAuthStateHash() => r'fb338695d6e21974fec049886d96f42b5be504bc';
 
 abstract class _$ProfileAuthState extends $Notifier<bool> {
   bool build();
