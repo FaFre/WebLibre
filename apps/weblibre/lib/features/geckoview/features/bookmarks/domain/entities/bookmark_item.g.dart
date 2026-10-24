@@ -22,7 +22,8 @@ abstract class _$BookmarkEntryCWProxy {
   BookmarkEntry dateAdded(int dateAdded);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkEntry(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `BookmarkEntry(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -69,7 +70,8 @@ class _$BookmarkEntryCWProxyImpl implements _$BookmarkEntryCWProxy {
   BookmarkEntry dateAdded(int dateAdded) => call(dateAdded: dateAdded);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkEntry(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `BookmarkEntry(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -141,7 +143,8 @@ abstract class _$BookmarkFolderCWProxy {
   BookmarkFolder children(List<BookmarkItem>? children);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkFolder(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `BookmarkFolder(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -184,7 +187,8 @@ class _$BookmarkFolderCWProxyImpl implements _$BookmarkFolderCWProxy {
       call(children: children);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BookmarkFolder(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `BookmarkFolder(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

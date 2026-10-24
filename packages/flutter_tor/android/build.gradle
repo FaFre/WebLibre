@@ -54,7 +54,7 @@ android {
 
     dependencies {
         // Tor core libraries
-        implementation("info.guardianproject:tor-android:0.4.9.12")
+        implementation("info.guardianproject:tor-android:0.4.9.14")
         implementation("info.guardianproject:jtorctl:0.4.5.7")
 
         // Pluggable transports are provided by the app-level combined gomobile AAR.
@@ -67,7 +67,7 @@ android {
 
         // Testing
         testImplementation("org.jetbrains.kotlin:kotlin-test")
-        testImplementation("org.mockito:mockito-core:5.23.0")
+        testImplementation("org.mockito:mockito-core:5.24.0")
     }
 
     testOptions {

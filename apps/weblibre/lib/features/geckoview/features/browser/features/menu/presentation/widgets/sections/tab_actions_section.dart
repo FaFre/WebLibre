@@ -758,8 +758,6 @@ class _ExportExpansion extends ConsumerWidget {
               ) async {
                 await FilePicker.saveFile(
                   fileName: fileName ?? 'page',
-                  type: FileType.custom,
-                  allowedExtensions: ['md'],
                   bytes: utf8.encode(content),
                 );
               }, Text(l10n.menu_exportAsMarkdown));
@@ -788,8 +786,6 @@ class _ExportExpansion extends ConsumerWidget {
               if (screenshot != null) {
                 await FilePicker.saveFile(
                   fileName: '${ts.titleOrAuthority}.png',
-                  type: FileType.custom,
-                  allowedExtensions: ['png'],
                   bytes: screenshot,
                 );
               }

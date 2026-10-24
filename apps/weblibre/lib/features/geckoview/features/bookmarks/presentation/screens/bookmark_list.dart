@@ -1266,8 +1266,6 @@ class BookmarkListScreen extends HookConsumerWidget {
       final outputPath = await FilePicker.saveFile(
         dialogTitle: AppLocalizations.of(context).bookmarks_exportDialogTitle,
         fileName: defaultFileName,
-        type: FileType.custom,
-        allowedExtensions: format == 'json' ? ['json'] : ['html', 'htm'],
         bytes: bytes,
       );
 

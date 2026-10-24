@@ -12,7 +12,8 @@ abstract class _$FindInPageStateCWProxy {
   FindInPageState lastSearchText(String? lastSearchText);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `FindInPageState(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `FindInPageState(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -36,7 +37,8 @@ class _$FindInPageStateCWProxyImpl implements _$FindInPageStateCWProxy {
       call(lastSearchText: lastSearchText);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `FindInPageState(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `FindInPageState(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

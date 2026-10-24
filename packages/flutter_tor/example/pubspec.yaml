@@ -25,7 +25,7 @@ dependencies:
   http: ^1.6.0
 
   # SOCKS5 proxy client for Tor
-  socks5_proxy: ^2.1.1
+  socks5_proxy: ^2.1.2
 
 dev_dependencies:
   flutter_test:

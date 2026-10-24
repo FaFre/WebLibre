@@ -44,7 +44,8 @@ abstract class _$SitePermissionsWrapperCWProxy {
   SitePermissionsWrapper savedAt(int savedAt);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SitePermissionsWrapper(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `SitePermissionsWrapper(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -131,7 +132,8 @@ class _$SitePermissionsWrapperCWProxyImpl
   SitePermissionsWrapper savedAt(int savedAt) => call(savedAt: savedAt);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `SitePermissionsWrapper(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `SitePermissionsWrapper(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

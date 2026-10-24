@@ -410,27 +410,27 @@ class $ContainerTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (tabRefs)
-                        await i0.$_getPrefetchedData<
+                        await i0.$_getPrefetchedDataByColumns<
                           i1.ContainerData,
                           i3.Container,
-                          i3.TabData
+                          i3.TabData,
+                          i3.Tab
                         >(
                           currentTable: table,
                           referencedTable: i3.$ContainerReferences
                               ._tabRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               i3.$ContainerReferences(db, table, p0).tabRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.containerId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'container_id',
                           typedResults: items,
                         ),
                       if (visitContainerRefs)
-                        await i0.$_getPrefetchedData<
+                        await i0.$_getPrefetchedDataByColumns<
                           i1.ContainerData,
                           i3.Container,
-                          i3.VisitContainerData
+                          i3.VisitContainerData,
+                          i3.VisitContainer
                         >(
                           currentTable: table,
                           referencedTable: i3.$ContainerReferences
@@ -438,10 +438,8 @@ class $ContainerTableManager
                           managerFromTypedResult: (p0) => i3
                               .$ContainerReferences(db, table, p0)
                               .visitContainerRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.containerId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'container_id',
                           typedResults: items,
                         ),
                     ];
@@ -1225,20 +1223,19 @@ class $TabTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (captureTabRefs)
-                        await i0.$_getPrefetchedData<
+                        await i0.$_getPrefetchedDataByColumns<
                           i3.TabData,
                           i3.Tab,
-                          i3.CaptureTabData
+                          i3.CaptureTabData,
+                          i3.CaptureTab
                         >(
                           currentTable: table,
                           referencedTable: i3.$TabReferences
                               ._captureTabRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               i3.$TabReferences(db, table, p0).captureTabRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.tabId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'tab_id',
                           typedResults: items,
                         ),
                     ];

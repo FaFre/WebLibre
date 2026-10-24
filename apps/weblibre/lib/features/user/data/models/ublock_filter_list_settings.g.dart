@@ -12,7 +12,8 @@ abstract class _$UBlockExternalListCWProxy {
   UBlockExternalList description(String? description);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `UBlockExternalList(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `UBlockExternalList(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -36,7 +37,8 @@ class _$UBlockExternalListCWProxyImpl implements _$UBlockExternalListCWProxy {
       call(description: description);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `UBlockExternalList(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `UBlockExternalList(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -88,7 +90,8 @@ abstract class _$UBlockFilterListSettingsCWProxy {
   );
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `UBlockFilterListSettings(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `UBlockFilterListSettings(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -135,7 +138,8 @@ class _$UBlockFilterListSettingsCWProxyImpl
   ) => call(externalFilterLists: externalFilterLists);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `UBlockFilterListSettings(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `UBlockFilterListSettings(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

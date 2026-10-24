@@ -14,7 +14,8 @@ abstract class _$ParticipantRecordCWProxy {
   ParticipantRecord error(String? error);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ParticipantRecord(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ParticipantRecord(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -40,7 +41,8 @@ class _$ParticipantRecordCWProxyImpl implements _$ParticipantRecordCWProxy {
   ParticipantRecord error(String? error) => call(error: error);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ParticipantRecord(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ParticipantRecord(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -98,7 +100,8 @@ abstract class _$MaintenanceJournalCWProxy {
   MaintenanceJournal participants(List<ParticipantRecord> participants);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MaintenanceJournal(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `MaintenanceJournal(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -157,7 +160,8 @@ class _$MaintenanceJournalCWProxyImpl implements _$MaintenanceJournalCWProxy {
       call(participants: participants);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MaintenanceJournal(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `MaintenanceJournal(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

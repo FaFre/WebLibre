@@ -16,7 +16,8 @@ abstract class _$StartupIntentClaimCWProxy {
   StartupIntentClaim expiresAt(DateTime expiresAt);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupIntentClaim(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupIntentClaim(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -53,7 +54,8 @@ class _$StartupIntentClaimCWProxyImpl implements _$StartupIntentClaimCWProxy {
       call(expiresAt: expiresAt);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupIntentClaim(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupIntentClaim(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -129,7 +131,8 @@ abstract class _$StartupIntentEntryCWProxy {
   StartupIntentEntry acknowledged(bool acknowledged);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupIntentEntry(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupIntentEntry(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -216,7 +219,8 @@ class _$StartupIntentEntryCWProxyImpl implements _$StartupIntentEntryCWProxy {
       call(acknowledged: acknowledged);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupIntentEntry(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupIntentEntry(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -326,7 +330,8 @@ abstract class _$StartupIntentQueueCWProxy {
   StartupIntentQueue entries(List<StartupIntentEntry> entries);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupIntentQueue(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupIntentQueue(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -358,7 +363,8 @@ class _$StartupIntentQueueCWProxyImpl implements _$StartupIntentQueueCWProxy {
       call(entries: entries);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupIntentQueue(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupIntentQueue(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

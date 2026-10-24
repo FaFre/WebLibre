@@ -72,7 +72,7 @@ dependencies {
     requireWebLibreGoMobileAar()
     compileOnly(files(weblibreGoMobileAar))
 
-    implementation("com.squareup.okhttp3:okhttp:5.5.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
 
     // Pigeon's generated Kotlin drives @async host methods and the main-thread
     // dispatch through coroutines.
@@ -81,5 +81,5 @@ dependencies {
 
     testImplementation("org.json:json:20260814")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-core:5.24.0")
 }

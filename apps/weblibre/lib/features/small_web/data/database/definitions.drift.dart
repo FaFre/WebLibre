@@ -474,10 +474,11 @@ class $SmallWebItemsTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (smallWebMembershipsRefs)
-                        await i0.$_getPrefetchedData<
+                        await i0.$_getPrefetchedDataByColumns<
                           i1.SmallWebItem,
                           i1.SmallWebItems,
-                          i1.SmallWebMembership
+                          i1.SmallWebMembership,
+                          i1.SmallWebMemberships
                         >(
                           currentTable: table,
                           referencedTable: i1.$SmallWebItemsReferences
@@ -485,17 +486,16 @@ class $SmallWebItemsTableManager
                           managerFromTypedResult: (p0) => i1
                               .$SmallWebItemsReferences(db, table, p0)
                               .smallWebMembershipsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.itemId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'item_id',
                           typedResults: items,
                         ),
                       if (smallWebVisitsRefs)
-                        await i0.$_getPrefetchedData<
+                        await i0.$_getPrefetchedDataByColumns<
                           i1.SmallWebItem,
                           i1.SmallWebItems,
-                          i1.SmallWebVisit
+                          i1.SmallWebVisit,
+                          i1.SmallWebVisits
                         >(
                           currentTable: table,
                           referencedTable: i1.$SmallWebItemsReferences
@@ -503,10 +503,8 @@ class $SmallWebItemsTableManager
                           managerFromTypedResult: (p0) => i1
                               .$SmallWebItemsReferences(db, table, p0)
                               .smallWebVisitsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.itemId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'item_id',
                           typedResults: items,
                         ),
                     ];

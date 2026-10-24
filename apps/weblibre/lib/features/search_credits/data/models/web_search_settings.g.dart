@@ -20,7 +20,8 @@ abstract class _$WebSearchSettingsCWProxy {
   WebSearchSettings timeRange(TimeRange? timeRange);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebSearchSettings(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `WebSearchSettings(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -66,7 +67,8 @@ class _$WebSearchSettingsCWProxyImpl implements _$WebSearchSettingsCWProxy {
       call(timeRange: timeRange);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `WebSearchSettings(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `WebSearchSettings(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

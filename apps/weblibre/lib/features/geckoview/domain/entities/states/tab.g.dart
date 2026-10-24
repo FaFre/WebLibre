@@ -32,7 +32,8 @@ abstract class _$TabStateCWProxy {
   TabState readerableState(ReaderableState readerableState);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -102,7 +103,8 @@ class _$TabStateCWProxyImpl implements _$TabStateCWProxy {
       call(readerableState: readerableState);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `TabState(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `TabState(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

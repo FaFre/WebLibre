@@ -12,7 +12,8 @@ abstract class _$CustomDohProviderCWProxy {
   CustomDohProvider name(String? name);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -35,7 +36,8 @@ class _$CustomDohProviderCWProxyImpl implements _$CustomDohProviderCWProxy {
   CustomDohProvider name(String? name) => call(name: name);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `CustomDohProvider(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -183,7 +185,8 @@ abstract class _$EngineSettingsCWProxy {
   EngineSettings lnaEnabled(bool? lnaEnabled);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -457,7 +460,8 @@ class _$EngineSettingsCWProxyImpl implements _$EngineSettingsCWProxy {
   EngineSettings lnaEnabled(bool? lnaEnabled) => call(lnaEnabled: lnaEnabled);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `EngineSettings(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

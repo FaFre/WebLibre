@@ -286,8 +286,6 @@ class ExportScreenshotMenuItemButton extends HookConsumerWidget {
         if (screenshot != null) {
           await FilePicker.saveFile(
             fileName: '${tabState.titleOrAuthority}.png',
-            type: FileType.custom,
-            allowedExtensions: ['png'],
             bytes: screenshot,
           );
         }

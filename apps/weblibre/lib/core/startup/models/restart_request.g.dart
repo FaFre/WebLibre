@@ -26,7 +26,8 @@ abstract class _$RestartRequestCWProxy {
   RestartRequest appliedAt(DateTime? appliedAt);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `RestartRequest(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `RestartRequest(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -83,7 +84,8 @@ class _$RestartRequestCWProxyImpl implements _$RestartRequestCWProxy {
   RestartRequest appliedAt(DateTime? appliedAt) => call(appliedAt: appliedAt);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `RestartRequest(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `RestartRequest(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

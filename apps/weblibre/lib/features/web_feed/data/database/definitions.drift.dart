@@ -374,17 +374,18 @@ class $FeedTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (articleRefs)
-                    await i0.$_getPrefetchedData<
+                    await i0.$_getPrefetchedDataByColumns<
                       i1.FeedData,
                       i1.Feed,
-                      i7.FeedArticle
+                      i7.FeedArticle,
+                      i1.Article
                     >(
                       currentTable: table,
                       referencedTable: i1.$FeedReferences._articleRefsTable(db),
                       managerFromTypedResult: (p0) =>
                           i1.$FeedReferences(db, table, p0).articleRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.feedId == item.url),
+                      currentColumn: 'url',
+                      referencedColumn: 'feed_id',
                       typedResults: items,
                     ),
                 ];

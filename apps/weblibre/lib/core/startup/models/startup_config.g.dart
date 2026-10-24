@@ -36,7 +36,8 @@ abstract class _$MaintenanceTaskCWProxy {
   MaintenanceTask errorDetailId(String? errorDetailId);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MaintenanceTask(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `MaintenanceTask(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -118,7 +119,8 @@ class _$MaintenanceTaskCWProxyImpl implements _$MaintenanceTaskCWProxy {
       call(errorDetailId: errorDetailId);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `MaintenanceTask(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `MaintenanceTask(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -225,7 +227,8 @@ abstract class _$StartupConfigCWProxy {
   StartupConfig pendingTasks(List<MaintenanceTask> pendingTasks);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupConfig(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupConfig(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -262,7 +265,8 @@ class _$StartupConfigCWProxyImpl implements _$StartupConfigCWProxy {
       call(pendingTasks: pendingTasks);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `StartupConfig(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `StartupConfig(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart

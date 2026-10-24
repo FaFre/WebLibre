@@ -564,8 +564,6 @@ class TabMenu extends HookConsumerWidget {
                 shareMarkdownAction: (content, fileName) async {
                   await FilePicker.saveFile(
                     fileName: fileName ?? 'page',
-                    type: FileType.custom,
-                    allowedExtensions: ['md'],
                     bytes: utf8.encode(content),
                   );
                 },

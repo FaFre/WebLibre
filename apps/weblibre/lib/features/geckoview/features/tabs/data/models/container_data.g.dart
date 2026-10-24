@@ -32,7 +32,8 @@ abstract class _$ContainerMetadataCWProxy {
   ContainerMetadata wallpaper(WallpaperOverride? wallpaper);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -108,7 +109,8 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
       call(wallpaper: wallpaper);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -217,7 +219,8 @@ abstract class _$ContainerDataCWProxy {
   ContainerData metadata(ContainerMetadata? metadata);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
@@ -260,7 +263,8 @@ class _$ContainerDataCWProxyImpl implements _$ContainerDataCWProxy {
       call(metadata: metadata);
 
   /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ContainerData(...).copyWith.fieldName(value)`.
   ///
   /// Example:
   /// ```dart
