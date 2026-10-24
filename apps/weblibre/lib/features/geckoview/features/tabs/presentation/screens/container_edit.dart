@@ -31,6 +31,7 @@ import 'package:weblibre/features/app_links/presentation/widgets/container_app_l
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/container_isolation_required_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
@@ -295,10 +296,24 @@ class ContainerEditScreen extends HookConsumerWidget {
       useCustomColor: useCustomColor.value,
     );
     final assignedSiteCount = assignedSites.value?.length ?? 0;
-    final canPickProxy =
-        _mode == _DialogMode.create || contextualIdentity.value != null;
-    final canBypassGlobalProxy =
-        contextualIdentity.value != null && proxyConnectionId.value == null;
+    final isIsolated = contextualIdentity.value != null;
+    // A saved container's contextId is fixed, so without one the settings
+    // that need it can never be enabled here. Tapping any of them explains
+    // that instead of doing nothing (#678).
+    final isolationLocked = _mode == _DialogMode.edit && !isIsolated;
+    final canPickProxy = _mode == _DialogMode.create || isIsolated;
+    final canBypassGlobalProxy = isIsolated && proxyConnectionId.value == null;
+
+    Widget explainWhenLocked(Widget tile) {
+      if (!isolationLocked) return tile;
+
+      // The disabled tile takes neither taps nor focus, so this wrapper is
+      // what a tap or a keyboard (Tab, then Enter or Space) reaches.
+      return InkWell(
+        onTap: () => unawaited(showContainerIsolationRequiredDialog(context)),
+        child: tile,
+      );
+    }
 
     return PopScope(
       canPop: container == comparison,
@@ -501,249 +516,195 @@ class ContainerEditScreen extends HookConsumerWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    l10n.tabs_sectionPrivacySecurity,
+                    l10n.tabs_sectionIsolation,
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: colorScheme.primary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: 12),
+                  // Everything keyed on the Gecko contextId sits under the
+                  // switch that provides it, so the dependency reads from the
+                  // layout rather than from rows that grey out elsewhere.
                   Card.filled(
                     margin: EdgeInsets.zero,
                     color: colorScheme.surfaceContainer,
                     clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
-                        SwitchListTile.adaptive(
-                          value: contextualIdentity.value != null,
-                          title: Text(l10n.tabs_cookieIsolation),
-                          secondary: const Icon(MdiIcons.cookieLock),
-                          onChanged: (_mode == _DialogMode.create)
-                              ? (value) {
-                                  contextualIdentity.value = value
-                                      ? initialContainer
-                                                .metadata
-                                                .contextualIdentity ??
-                                            uuid.v4()
-                                      : null;
+                        explainWhenLocked(
+                          SwitchListTile.adaptive(
+                            value: isIsolated,
+                            title: Text(l10n.tabs_cookieIsolation),
+                            subtitle: Text(switch (_mode) {
+                              _DialogMode.create =>
+                                l10n.tabs_cookieIsolationCreateSubtitle,
+                              _DialogMode.edit when isIsolated =>
+                                l10n.tabs_cookieIsolationOnSubtitle,
+                              _DialogMode.edit =>
+                                l10n.tabs_cookieIsolationOffSubtitle,
+                            }),
+                            secondary: const Icon(MdiIcons.cookieLock),
+                            onChanged: (_mode == _DialogMode.create)
+                                ? (value) {
+                                    contextualIdentity.value = value
+                                        ? initialContainer
+                                                  .metadata
+                                                  .contextualIdentity ??
+                                              uuid.v4()
+                                        : null;
 
-                                  if (!value) {
-                                    proxyConnectionId.value = null;
-                                    bypassGlobalProxy.value = false;
-                                  }
-
-                                  if (!value && clearDataOnExit.value) {
-                                    clearDataOnExit.value = false;
-                                  }
-                                }
-                              : null,
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        ListTile(
-                          leading: const Icon(Icons.route_outlined),
-                          title: Text(l10n.tabs_proxyConnectionLabel),
-                          subtitle: Text(switch (proxyConnectionId.value) {
-                            final id? => proxyConnectionTitle(
-                              proxyOptions,
-                              id,
-                              l10n,
-                              isLoading: proxyOptionsLoading,
-                            ),
-                            null => l10n.tabs_proxyConnectionNone,
-                          }),
-                          trailing: const Icon(Icons.chevron_right),
-                          enabled: canPickProxy,
-                          onTap: canPickProxy
-                              ? () async {
-                                  final createdTemporaryIdentity =
-                                      contextualIdentity.value == null;
-
-                                  if (createdTemporaryIdentity) {
-                                    contextualIdentity.value =
-                                        initialContainer
-                                            .metadata
-                                            .contextualIdentity ??
-                                        uuid.v4();
-                                  }
-
-                                  final outcome =
-                                      await showProxyConnectionPicker(
-                                        context,
-                                        selectedProxyConnectionId:
-                                            proxyConnectionId.value,
-                                      );
-
-                                  switch (outcome) {
-                                    case null:
-                                      // Dismissed without selecting — leave
-                                      // existing value untouched, but undo any
-                                      // temporary identity we created.
-                                      if (createdTemporaryIdentity) {
-                                        contextualIdentity.value = null;
-                                      }
-                                    case ProxyPickerCleared():
+                                    if (!value) {
                                       proxyConnectionId.value = null;
-                                      if (createdTemporaryIdentity) {
-                                        contextualIdentity.value = null;
-                                        bypassGlobalProxy.value = false;
-                                      }
-                                    case ProxyPickerSelected(:final id):
-                                      proxyConnectionId.value = id;
                                       bypassGlobalProxy.value = false;
-                                    case ProxyPickerDirect():
-                                      // Not offered here — this screen has its
-                                      // own bypass switch below — but the
-                                      // mapping is the same one it performs.
-                                      proxyConnectionId.value = null;
-                                      bypassGlobalProxy.value = true;
-                                  }
-                                }
-                              : null,
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value:
-                              canBypassGlobalProxy && bypassGlobalProxy.value,
-                          title: Text(l10n.tabs_bypassGlobalProxy),
-                          subtitle: Text(l10n.tabs_bypassGlobalProxySubtitle),
-                          secondary: const Icon(Icons.public),
-                          onChanged: canBypassGlobalProxy
-                              ? (value) {
-                                  bypassGlobalProxy.value = value;
-                                }
-                              : null,
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value: clearDataOnExit.value,
-                          title: Text(l10n.tabs_clearDataOnExit),
-                          subtitle: Text(l10n.tabs_clearDataOnExitSubtitle),
-                          secondary: const Icon(MdiIcons.databaseRemove),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  clearDataOnExit.value = value;
-                                }
-                              : null,
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value: excludeFromIndex.value,
-                          title: Text(l10n.tabs_excludeFromSearchIndex),
-                          subtitle: Text(
-                            l10n.tabs_excludeFromSearchIndexSubtitle,
-                          ),
-                          secondary: const Icon(MdiIcons.magnifyRemoveOutline),
-                          onChanged: (value) {
-                            excludeFromIndex.value = value;
-                          },
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value: excludeFromHistory.value,
-                          title: Text(l10n.tabs_excludeFromHistory),
-                          subtitle: Text(l10n.tabs_excludeFromHistorySubtitle),
-                          secondary: const Icon(MdiIcons.incognito),
-                          onChanged: (value) {
-                            excludeFromHistory.value = value;
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.tabs_sectionAssignments,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Card.filled(
-                    margin: EdgeInsets.zero,
-                    color: colorScheme.surfaceContainer,
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: const Icon(Icons.web),
-                          title: Text(l10n.tabs_assignedSites),
-                          subtitle: assignedSiteCount > 0
-                              ? Text(
-                                  l10n.tabs_assignedSitesCount(
-                                    assignedSiteCount,
-                                  ),
-                                )
-                              : Text(l10n.tabs_assignedSitesEmptySubtitle),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () async {
-                            final result = await showDialog<Set<Uri>>(
-                              context: context,
-                              builder: (context) => ContainerSitesScreen(
-                                initialSites:
-                                    assignedSites.value?.toSet() ?? {},
-                              ),
-                            );
+                                    }
 
-                            if (result == null || result.isEmpty) {
-                              assignedSites.value = null;
-                            } else {
-                              assignedSites.value = result.toList();
-                            }
-                          },
+                                    if (!value && clearDataOnExit.value) {
+                                      clearDataOnExit.value = false;
+                                    }
+                                  }
+                                : null,
+                          ),
                         ),
                         const Divider(height: 1, indent: 56),
-                        SwitchListTile.adaptive(
-                          value:
-                              contextualIdentity.value != null &&
-                              strictMode.value,
-                          title: Text(l10n.tabs_strictMode),
-                          subtitle: Text(
-                            contextualIdentity.value != null
-                                ? l10n.tabs_strictModeSubtitle
-                                : l10n.tabs_requiresCookieIsolation,
+                        explainWhenLocked(
+                          ListTile(
+                            leading: const Icon(Icons.route_outlined),
+                            title: Text(l10n.tabs_proxyConnectionLabel),
+                            subtitle: Text(switch (proxyConnectionId.value) {
+                              _ when isolationLocked =>
+                                l10n.tabs_requiresCookieIsolation,
+                              final id? => proxyConnectionTitle(
+                                proxyOptions,
+                                id,
+                                l10n,
+                                isLoading: proxyOptionsLoading,
+                              ),
+                              null => l10n.tabs_proxyConnectionNone,
+                            }),
+                            trailing: const Icon(Icons.chevron_right),
+                            enabled: canPickProxy,
+                            onTap: canPickProxy
+                                ? () async {
+                                    final createdTemporaryIdentity =
+                                        contextualIdentity.value == null;
+
+                                    if (createdTemporaryIdentity) {
+                                      contextualIdentity.value =
+                                          initialContainer
+                                              .metadata
+                                              .contextualIdentity ??
+                                          uuid.v4();
+                                    }
+
+                                    final outcome =
+                                        await showProxyConnectionPicker(
+                                          context,
+                                          selectedProxyConnectionId:
+                                              proxyConnectionId.value,
+                                        );
+
+                                    switch (outcome) {
+                                      case null:
+                                        // Dismissed without selecting — leave
+                                        // existing value untouched, but undo
+                                        // any temporary identity we created.
+                                        if (createdTemporaryIdentity) {
+                                          contextualIdentity.value = null;
+                                        }
+                                      case ProxyPickerCleared():
+                                        proxyConnectionId.value = null;
+                                        if (createdTemporaryIdentity) {
+                                          contextualIdentity.value = null;
+                                          bypassGlobalProxy.value = false;
+                                        }
+                                      case ProxyPickerSelected(:final id):
+                                        proxyConnectionId.value = id;
+                                        bypassGlobalProxy.value = false;
+                                      case ProxyPickerDirect():
+                                        // Not offered here — this screen has
+                                        // its own bypass switch below — but
+                                        // the mapping is the same one it
+                                        // performs.
+                                        proxyConnectionId.value = null;
+                                        bypassGlobalProxy.value = true;
+                                    }
+                                  }
+                                : null,
                           ),
-                          secondary: const Icon(MdiIcons.shieldLockOutline),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  strictMode.value = value;
-                                }
-                              : null,
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.tabs_sectionAppLinks,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: colorScheme.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Card.filled(
-                    margin: EdgeInsets.zero,
-                    color: colorScheme.surfaceContainer,
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      children: [
-                        SwitchListTile.adaptive(
-                          value:
-                              contextualIdentity.value != null &&
-                              isolatedAppLinkSettings.value,
-                          title: Text(l10n.tabs_isolatedAppLinkSettings),
-                          subtitle: Text(
-                            contextualIdentity.value != null
-                                ? l10n.tabs_isolatedAppLinkSettingsSubtitle
-                                : l10n.tabs_requiresCookieIsolation,
+                        const Divider(height: 1, indent: 56),
+                        explainWhenLocked(
+                          SwitchListTile.adaptive(
+                            value:
+                                canBypassGlobalProxy && bypassGlobalProxy.value,
+                            title: Text(l10n.tabs_bypassGlobalProxy),
+                            subtitle: Text(
+                              isIsolated
+                                  ? l10n.tabs_bypassGlobalProxySubtitle
+                                  : l10n.tabs_requiresCookieIsolation,
+                            ),
+                            secondary: const Icon(Icons.public),
+                            onChanged: canBypassGlobalProxy
+                                ? (value) {
+                                    bypassGlobalProxy.value = value;
+                                  }
+                                : null,
                           ),
-                          secondary: const Icon(MdiIcons.openInApp),
-                          onChanged: (contextualIdentity.value != null)
-                              ? (value) {
-                                  isolatedAppLinkSettings.value = value;
-                                }
-                              : null,
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        explainWhenLocked(
+                          SwitchListTile.adaptive(
+                            value: clearDataOnExit.value,
+                            title: Text(l10n.tabs_clearDataOnExit),
+                            subtitle: Text(
+                              isIsolated
+                                  ? l10n.tabs_clearDataOnExitSubtitle
+                                  : l10n.tabs_requiresCookieIsolation,
+                            ),
+                            secondary: const Icon(MdiIcons.databaseRemove),
+                            onChanged: isIsolated
+                                ? (value) {
+                                    clearDataOnExit.value = value;
+                                  }
+                                : null,
+                          ),
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        explainWhenLocked(
+                          SwitchListTile.adaptive(
+                            value: isIsolated && strictMode.value,
+                            title: Text(l10n.tabs_strictMode),
+                            subtitle: Text(
+                              isIsolated
+                                  ? l10n.tabs_strictModeSubtitle
+                                  : l10n.tabs_requiresCookieIsolation,
+                            ),
+                            secondary: const Icon(MdiIcons.shieldLockOutline),
+                            onChanged: isIsolated
+                                ? (value) {
+                                    strictMode.value = value;
+                                  }
+                                : null,
+                          ),
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        explainWhenLocked(
+                          SwitchListTile.adaptive(
+                            value: isIsolated && isolatedAppLinkSettings.value,
+                            title: Text(l10n.tabs_isolatedAppLinkSettings),
+                            subtitle: Text(
+                              isIsolated
+                                  ? l10n.tabs_isolatedAppLinkSettingsSubtitle
+                                  : l10n.tabs_requiresCookieIsolation,
+                            ),
+                            secondary: const Icon(MdiIcons.openInApp),
+                            onChanged: isIsolated
+                                ? (value) {
+                                    isolatedAppLinkSettings.value = value;
+                                  }
+                                : null,
+                          ),
                         ),
                         // The per-container mode + rules live in GeneralSettings
                         // (keyed by the persisted contextId) and are edited live,
@@ -782,6 +743,83 @@ class ContainerEditScreen extends HookConsumerWidget {
                           ),
                         ],
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.tabs_sectionPrivacySecurity,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      children: [
+                        SwitchListTile.adaptive(
+                          value: excludeFromIndex.value,
+                          title: Text(l10n.tabs_excludeFromSearchIndex),
+                          subtitle: Text(
+                            l10n.tabs_excludeFromSearchIndexSubtitle,
+                          ),
+                          secondary: const Icon(MdiIcons.magnifyRemoveOutline),
+                          onChanged: (value) {
+                            excludeFromIndex.value = value;
+                          },
+                        ),
+                        const Divider(height: 1, indent: 56),
+                        SwitchListTile.adaptive(
+                          value: excludeFromHistory.value,
+                          title: Text(l10n.tabs_excludeFromHistory),
+                          subtitle: Text(l10n.tabs_excludeFromHistorySubtitle),
+                          secondary: const Icon(MdiIcons.incognito),
+                          onChanged: (value) {
+                            excludeFromHistory.value = value;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.tabs_sectionAssignments,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Card.filled(
+                    margin: EdgeInsets.zero,
+                    color: colorScheme.surfaceContainer,
+                    clipBehavior: Clip.antiAlias,
+                    child: ListTile(
+                      leading: const Icon(Icons.web),
+                      title: Text(l10n.tabs_assignedSites),
+                      subtitle: assignedSiteCount > 0
+                          ? Text(
+                              l10n.tabs_assignedSitesCount(assignedSiteCount),
+                            )
+                          : Text(l10n.tabs_assignedSitesEmptySubtitle),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final result = await showDialog<Set<Uri>>(
+                          context: context,
+                          builder: (context) => ContainerSitesScreen(
+                            initialSites: assignedSites.value?.toSet() ?? {},
+                          ),
+                        );
+
+                        if (result == null || result.isEmpty) {
+                          assignedSites.value = null;
+                        } else {
+                          assignedSites.value = result.toList();
+                        }
+                      },
                     ),
                   ),
                 ],

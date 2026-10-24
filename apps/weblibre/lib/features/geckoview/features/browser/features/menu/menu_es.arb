@@ -137,6 +137,7 @@
   "menu_connectionIsolatedDirectSubtitle": "Omitir la ruta que aplicaría su contenedor",
   "menu_connectionThisContainer": "Este contenedor",
   "menu_connectionFollowsGlobalRouting": "Sigue el enrutamiento global",
+  "menu_connectionContainerNotIsolated": "Sigue el enrutamiento global · sin aislamiento de cookies",
   "menu_connectionContainerFallbackTitle": "Contenedor",
   "menu_connectionFollowGlobalRoutingOption": "Seguir el enrutamiento global",
   "menu_connectionFollowGlobalRoutingOptionSubtitle": "Usar la misma ruta que las pestañas normales",

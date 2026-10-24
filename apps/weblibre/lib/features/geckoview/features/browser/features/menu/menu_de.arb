@@ -137,6 +137,7 @@
   "menu_connectionIsolatedDirectSubtitle": "Die Route seines Containers umgehen",
   "menu_connectionThisContainer": "Dieser Container",
   "menu_connectionFollowsGlobalRouting": "Folgt der globalen Route",
+  "menu_connectionContainerNotIsolated": "Folgt der globalen Route · keine Cookie-Isolierung",
   "menu_connectionContainerFallbackTitle": "Container",
   "menu_connectionFollowGlobalRoutingOption": "Globaler Route folgen",
   "menu_connectionFollowGlobalRoutingOptionSubtitle": "Dieselbe Route wie normale Tabs verwenden",

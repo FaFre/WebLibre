@@ -4142,6 +4142,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menu_connectionFollowsGlobalRouting => 'Folgt der globalen Route';
 
   @override
+  String get menu_connectionContainerNotIsolated =>
+      'Folgt der globalen Route · keine Cookie-Isolierung';
+
+  @override
   String get menu_connectionContainerFallbackTitle => 'Container';
 
   @override
@@ -5477,6 +5481,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tabs_cookieIsolation => 'Cookie-Isolierung';
 
   @override
+  String get tabs_sectionIsolation => 'Isolierung';
+
+  @override
+  String get tabs_cookieIsolationCreateSubtitle =>
+      'Eigene Cookies und Websitedaten für diesen Container. Lässt sich später nicht mehr ändern.';
+
+  @override
+  String get tabs_cookieIsolationOnSubtitle =>
+      'Dieser Container hat eigene Cookies und Websitedaten. Beim Erstellen festgelegt.';
+
+  @override
+  String get tabs_cookieIsolationOffSubtitle =>
+      'Dieser Container teilt Cookies und Websitedaten mit anderen Tabs. Beim Erstellen festgelegt.';
+
+  @override
+  String get tabs_isolationRequiredTitle => 'Cookie-Isolierung ist aus';
+
+  @override
+  String get tabs_isolationRequiredBody =>
+      'Proxy-Routing, Daten beim Beenden löschen, strikter Modus und eigene App-Link-Einstellungen benötigen einen Container mit eigenen Cookies und Websitedaten.\n\nCookie-Isolierung lässt sich nur beim Erstellen eines Containers aktivieren. Für diese Einstellungen einen neuen Container mit aktivierter Cookie-Isolierung erstellen.';
+
+  @override
   String get tabs_proxyConnectionLabel => 'Proxy-Verbindung';
 
   @override
@@ -5541,9 +5567,6 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get tabs_requiresCookieIsolation =>
       'Erfordert aktivierte Cookie-Isolierung';
-
-  @override
-  String get tabs_sectionAppLinks => 'App-Links';
 
   @override
   String get tabs_isolatedAppLinkSettings => 'Eigene App-Link-Einstellungen';

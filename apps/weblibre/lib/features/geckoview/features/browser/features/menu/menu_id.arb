@@ -137,6 +137,7 @@
   "menu_connectionIsolatedDirectSubtitle": "Lewati rute yang akan diterapkan kontainernya",
   "menu_connectionThisContainer": "Kontainer ini",
   "menu_connectionFollowsGlobalRouting": "Mengikuti perutean global",
+  "menu_connectionContainerNotIsolated": "Mengikuti perutean global · tanpa isolasi kuki",
   "menu_connectionContainerFallbackTitle": "Kontainer",
   "menu_connectionFollowGlobalRoutingOption": "Ikuti perutean global",
   "menu_connectionFollowGlobalRoutingOptionSubtitle": "Gunakan rute yang sama dengan tab biasa",

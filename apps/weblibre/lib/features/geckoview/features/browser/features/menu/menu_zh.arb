@@ -137,6 +137,7 @@
   "menu_connectionIsolatedDirectSubtitle": "绕过其容器将应用的路由",
   "menu_connectionThisContainer": "此容器",
   "menu_connectionFollowsGlobalRouting": "跟随全局路由",
+  "menu_connectionContainerNotIsolated": "跟随全局路由 · 未启用 Cookie 隔离",
   "menu_connectionContainerFallbackTitle": "容器",
   "menu_connectionFollowGlobalRoutingOption": "跟随全局路由",
   "menu_connectionFollowGlobalRoutingOptionSubtitle": "使用与普通标签页相同的路由",

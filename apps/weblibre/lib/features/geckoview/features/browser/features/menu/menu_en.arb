@@ -571,6 +571,10 @@
   "@menu_connectionFollowsGlobalRouting": {
     "description": "Route value of a container that uses the app-wide route."
   },
+  "menu_connectionContainerNotIsolated": "Follows global routing · no cookie isolation",
+  "@menu_connectionContainerNotIsolated": {
+    "description": "Route value in the browser menu's connection section for a container without cookie isolation: it uses the app-wide route and can't get a route of its own. Tapping the row explains why."
+  },
   "menu_connectionContainerFallbackTitle": "Container",
   "@menu_connectionContainerFallbackTitle": {
     "description": "Fallback title of the proxy picker for an unnamed container."

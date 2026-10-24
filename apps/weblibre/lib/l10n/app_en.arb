@@ -5093,6 +5093,10 @@
   "@menu_connectionFollowsGlobalRouting": {
     "description": "Route value of a container that uses the app-wide route."
   },
+  "menu_connectionContainerNotIsolated": "Follows global routing · no cookie isolation",
+  "@menu_connectionContainerNotIsolated": {
+    "description": "Route value in the browser menu's connection section for a container without cookie isolation: it uses the app-wide route and can't get a route of its own. Tapping the row explains why."
+  },
   "menu_connectionContainerFallbackTitle": "Container",
   "@menu_connectionContainerFallbackTitle": {
     "description": "Fallback title of the proxy picker for an unnamed container."
@@ -6791,6 +6795,30 @@
   "@tabs_cookieIsolation": {
     "description": "Switch in the container editor: give the container its own separate cookies and site data. Can only be set when the container is created."
   },
+  "tabs_sectionIsolation": "Isolation",
+  "@tabs_sectionIsolation": {
+    "description": "Section heading in the container editor that groups \"Cookie Isolation\" with every setting that needs it (proxy, clear data on exit, strict mode, app link settings)."
+  },
+  "tabs_cookieIsolationCreateSubtitle": "Give this container its own cookies and site data. This can't be changed later.",
+  "@tabs_cookieIsolationCreateSubtitle": {
+    "description": "Line under the \"Cookie Isolation\" switch while a new container is being created: what the switch does, and that it is fixed once the container exists."
+  },
+  "tabs_cookieIsolationOnSubtitle": "This container has its own cookies and site data. Set when it was created.",
+  "@tabs_cookieIsolationOnSubtitle": {
+    "description": "Line under the locked \"Cookie Isolation\" switch when editing a container that has it turned on."
+  },
+  "tabs_cookieIsolationOffSubtitle": "This container shares cookies and site data with other tabs. Set when it was created.",
+  "@tabs_cookieIsolationOffSubtitle": {
+    "description": "Line under the locked \"Cookie Isolation\" switch when editing a container that has it turned off. \"Other tabs\" are tabs outside cookie-isolated containers."
+  },
+  "tabs_isolationRequiredTitle": "Cookie isolation is off",
+  "@tabs_isolationRequiredTitle": {
+    "description": "Title of the dialog shown when tapping a locked container setting (proxy, strict mode, …) on a container without cookie isolation."
+  },
+  "tabs_isolationRequiredBody": "Proxy routing, clearing data on exit, strict mode and separate app link settings need a container with its own cookies and site data.\n\nCookie isolation can only be turned on when a container is created. To use these settings, create a new container with it turned on.",
+  "@tabs_isolationRequiredBody": {
+    "description": "Body of the dialog shown when tapping a locked container setting on a container without cookie isolation. Explains which settings need it and that the only way is a new container. Keep the blank line between the paragraphs."
+  },
   "tabs_proxyConnectionLabel": "Proxy Connection",
   "@tabs_proxyConnectionLabel": {
     "description": "Row in the container editor for choosing a proxy that all of the container's traffic goes through."
@@ -6863,10 +6891,6 @@
   "tabs_requiresCookieIsolation": "Requires cookie isolation to be enabled",
   "@tabs_requiresCookieIsolation": {
     "description": "Line under a disabled container setting explaining that it needs \"Cookie Isolation\" to be turned on."
-  },
-  "tabs_sectionAppLinks": "App Links",
-  "@tabs_sectionAppLinks": {
-    "description": "Section heading in the container editor for opening links in installed apps."
   },
   "tabs_isolatedAppLinkSettings": "Isolated App Link Settings",
   "@tabs_isolatedAppLinkSettings": {

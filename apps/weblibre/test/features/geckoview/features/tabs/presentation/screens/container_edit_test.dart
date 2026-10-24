@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -140,6 +141,110 @@ void main() {
 
     expect(find.text('Unknown proxy'), findsNothing);
     expect(find.text('Clear'), findsNothing);
+  });
+
+  group('editing a container without cookie isolation', () {
+    Future<void> pumpEditScreen(WidgetTester tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            proxyConnectionOptionsProvider.overrideWith(
+              (ref) => const <ProxyConnectionOption>[],
+            ),
+            singboxProxyProfilesRepositoryProvider.overrideWith(
+              () => _LoadedProfilesRepository(const []),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ContainerEditScreen.edit(
+              initialContainer: ContainerDataWithCount(
+                id: 'container-1',
+                color: Colors.blue,
+                orderKey: 'a',
+                tabCount: 0,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('says why the proxy row is locked', (tester) async {
+      await pumpEditScreen(tester);
+
+      final proxyTile = find.widgetWithText(ListTile, 'Proxy Connection');
+      expect(
+        find.descendant(
+          of: proxyTile,
+          matching: find.text('Requires cookie isolation to be enabled'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(proxyTile);
+      await tester.pumpAndSettle();
+      await tester.tap(proxyTile);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cookie isolation is off'), findsOneWidget);
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cookie isolation is off'), findsNothing);
+    });
+
+    testWidgets('explains a locked switch instead of ignoring the tap', (
+      tester,
+    ) async {
+      await pumpEditScreen(tester);
+
+      final strictModeTile = find.widgetWithText(SwitchListTile, 'Strict Mode');
+      await tester.ensureVisible(strictModeTile);
+      await tester.pumpAndSettle();
+      await tester.tap(strictModeTile);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cookie isolation is off'), findsOneWidget);
+      expect(tester.widget<SwitchListTile>(strictModeTile).value, isFalse);
+    });
+
+    testWidgets('opens the explanation from the keyboard', (tester) async {
+      await pumpEditScreen(tester);
+
+      final proxyTile = find.widgetWithText(ListTile, 'Proxy Connection');
+      await tester.ensureVisible(proxyTile);
+      await tester.pumpAndSettle();
+      final wrapper = tester.element(
+        find.ancestor(of: proxyTile, matching: find.byType(InkWell)).first,
+      );
+
+      bool wrapperFocused() {
+        final focused = FocusManager.instance.primaryFocus?.context;
+        if (focused == null) return false;
+        if (focused == wrapper) return true;
+        var found = false;
+        focused.visitAncestorElements((element) {
+          found = element == wrapper;
+          return !found;
+        });
+        return found;
+      }
+
+      for (var i = 0; i < 20 && !wrapperFocused(); i++) {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+      }
+      expect(wrapperFocused(), isTrue);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cookie isolation is off'), findsOneWidget);
+    });
   });
 }
 

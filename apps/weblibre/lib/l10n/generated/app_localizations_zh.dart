@@ -3819,6 +3819,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu_connectionFollowsGlobalRouting => '跟随全局路由';
 
   @override
+  String get menu_connectionContainerNotIsolated => '跟随全局路由 · 未启用 Cookie 隔离';
+
+  @override
   String get menu_connectionContainerFallbackTitle => '容器';
 
   @override
@@ -5061,6 +5064,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabs_cookieIsolation => 'Cookie 隔离';
 
   @override
+  String get tabs_sectionIsolation => '隔离';
+
+  @override
+  String get tabs_cookieIsolationCreateSubtitle =>
+      '为此容器提供独立的 Cookie 和网站数据。创建后无法更改。';
+
+  @override
+  String get tabs_cookieIsolationOnSubtitle => '此容器拥有独立的 Cookie 和网站数据。创建时已设定。';
+
+  @override
+  String get tabs_cookieIsolationOffSubtitle =>
+      '此容器与其他标签页共享 Cookie 和网站数据。创建时已设定。';
+
+  @override
+  String get tabs_isolationRequiredTitle => 'Cookie 隔离已关闭';
+
+  @override
+  String get tabs_isolationRequiredBody =>
+      '代理路由、退出时清除数据、严格模式和独立的应用链接设置需要容器拥有独立的 Cookie 和网站数据。\n\nCookie 隔离只能在创建容器时开启。要使用这些设置，请新建一个开启了 Cookie 隔离的容器。';
+
+  @override
   String get tabs_proxyConnectionLabel => '代理连接';
 
   @override
@@ -5119,9 +5143,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tabs_requiresCookieIsolation => '需要启用 Cookie 隔离';
-
-  @override
-  String get tabs_sectionAppLinks => '应用链接';
 
   @override
   String get tabs_isolatedAppLinkSettings => '独立的应用链接设置';

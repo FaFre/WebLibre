@@ -4107,6 +4107,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get menu_connectionFollowsGlobalRouting => 'Mengikuti perutean global';
 
   @override
+  String get menu_connectionContainerNotIsolated =>
+      'Mengikuti perutean global · tanpa isolasi kuki';
+
+  @override
   String get menu_connectionContainerFallbackTitle => 'Kontainer';
 
   @override
@@ -5424,6 +5428,28 @@ class AppLocalizationsId extends AppLocalizations {
   String get tabs_cookieIsolation => 'Isolasi Kuki';
 
   @override
+  String get tabs_sectionIsolation => 'Isolasi';
+
+  @override
+  String get tabs_cookieIsolationCreateSubtitle =>
+      'Berikan kuki dan data situs tersendiri untuk kontainer ini. Tidak dapat diubah nanti.';
+
+  @override
+  String get tabs_cookieIsolationOnSubtitle =>
+      'Kontainer ini memiliki kuki dan data situs tersendiri. Ditetapkan saat dibuat.';
+
+  @override
+  String get tabs_cookieIsolationOffSubtitle =>
+      'Kontainer ini berbagi kuki dan data situs dengan tab lain. Ditetapkan saat dibuat.';
+
+  @override
+  String get tabs_isolationRequiredTitle => 'Isolasi kuki nonaktif';
+
+  @override
+  String get tabs_isolationRequiredBody =>
+      'Perutean proksi, penghapusan data saat keluar, mode ketat, dan pengaturan tautan aplikasi terpisah memerlukan kontainer dengan kuki dan data situs tersendiri.\n\nIsolasi kuki hanya dapat diaktifkan saat kontainer dibuat. Untuk menggunakan pengaturan ini, buat kontainer baru dengan isolasi kuki diaktifkan.';
+
+  @override
   String get tabs_proxyConnectionLabel => 'Koneksi Proksi';
 
   @override
@@ -5488,9 +5514,6 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get tabs_requiresCookieIsolation =>
       'Memerlukan isolasi kuki untuk diaktifkan';
-
-  @override
-  String get tabs_sectionAppLinks => 'Tautan Aplikasi';
 
   @override
   String get tabs_isolatedAppLinkSettings =>

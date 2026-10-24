@@ -137,6 +137,7 @@
   "menu_connectionIsolatedDirectSubtitle": "В обход маршрута, который применил бы её контейнер",
   "menu_connectionThisContainer": "Этот контейнер",
   "menu_connectionFollowsGlobalRouting": "Глобальная маршрутизация",
+  "menu_connectionContainerNotIsolated": "Глобальная маршрутизация · без изоляции куки",
   "menu_connectionContainerFallbackTitle": "Контейнер",
   "menu_connectionFollowGlobalRoutingOption": "Глобальная маршрутизация",
   "menu_connectionFollowGlobalRoutingOptionSubtitle": "Тот же маршрут, что и у обычных вкладок",

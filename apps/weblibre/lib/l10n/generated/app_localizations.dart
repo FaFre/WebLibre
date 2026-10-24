@@ -7072,6 +7072,12 @@ abstract class AppLocalizations {
   /// **'Follows global routing'**
   String get menu_connectionFollowsGlobalRouting;
 
+  /// Route value in the browser menu's connection section for a container without cookie isolation: it uses the app-wide route and can't get a route of its own. Tapping the row explains why.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows global routing · no cookie isolation'**
+  String get menu_connectionContainerNotIsolated;
+
   /// Fallback title of the proxy picker for an unnamed container.
   ///
   /// In en, this message translates to:
@@ -9241,6 +9247,42 @@ abstract class AppLocalizations {
   /// **'Cookie Isolation'**
   String get tabs_cookieIsolation;
 
+  /// Section heading in the container editor that groups "Cookie Isolation" with every setting that needs it (proxy, clear data on exit, strict mode, app link settings).
+  ///
+  /// In en, this message translates to:
+  /// **'Isolation'**
+  String get tabs_sectionIsolation;
+
+  /// Line under the "Cookie Isolation" switch while a new container is being created: what the switch does, and that it is fixed once the container exists.
+  ///
+  /// In en, this message translates to:
+  /// **'Give this container its own cookies and site data. This can\'t be changed later.'**
+  String get tabs_cookieIsolationCreateSubtitle;
+
+  /// Line under the locked "Cookie Isolation" switch when editing a container that has it turned on.
+  ///
+  /// In en, this message translates to:
+  /// **'This container has its own cookies and site data. Set when it was created.'**
+  String get tabs_cookieIsolationOnSubtitle;
+
+  /// Line under the locked "Cookie Isolation" switch when editing a container that has it turned off. "Other tabs" are tabs outside cookie-isolated containers.
+  ///
+  /// In en, this message translates to:
+  /// **'This container shares cookies and site data with other tabs. Set when it was created.'**
+  String get tabs_cookieIsolationOffSubtitle;
+
+  /// Title of the dialog shown when tapping a locked container setting (proxy, strict mode, …) on a container without cookie isolation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookie isolation is off'**
+  String get tabs_isolationRequiredTitle;
+
+  /// Body of the dialog shown when tapping a locked container setting on a container without cookie isolation. Explains which settings need it and that the only way is a new container. Keep the blank line between the paragraphs.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy routing, clearing data on exit, strict mode and separate app link settings need a container with its own cookies and site data.\n\nCookie isolation can only be turned on when a container is created. To use these settings, create a new container with it turned on.'**
+  String get tabs_isolationRequiredBody;
+
   /// Row in the container editor for choosing a proxy that all of the container's traffic goes through.
   ///
   /// In en, this message translates to:
@@ -9342,12 +9384,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Requires cookie isolation to be enabled'**
   String get tabs_requiresCookieIsolation;
-
-  /// Section heading in the container editor for opening links in installed apps.
-  ///
-  /// In en, this message translates to:
-  /// **'App Links'**
-  String get tabs_sectionAppLinks;
 
   /// Switch in the container editor: use separate open-in-app settings for this container.
   ///

@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolatio
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/container_isolation_required_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -269,8 +270,16 @@ class ConnectionSection extends ConsumerWidget {
           },
         ),
       // Only a container with a cookie-store context of its own can carry a
-      // route; the others share the general context.
-      if (container != null && container.metadata.contextualIdentity != null)
+      // route; the others share the general context. Those still get a row,
+      // so the menu says why instead of leaving the container out (#678).
+      if (container != null && container.metadata.contextualIdentity == null)
+        _RouteRow(
+          icon: resolveContainerIcon(container.metadata.iconData),
+          label: container.name ?? l10n.menu_connectionThisContainer,
+          value: l10n.menu_connectionContainerNotIsolated,
+          onTap: () => showContainerIsolationRequiredDialog(context),
+        )
+      else if (container != null)
         _RouteRow(
           icon: resolveContainerIcon(container.metadata.iconData),
           label: container.name ?? l10n.menu_connectionThisContainer,

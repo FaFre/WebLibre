@@ -4157,6 +4157,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menu_connectionFollowsGlobalRouting => 'Глобальная маршрутизация';
 
   @override
+  String get menu_connectionContainerNotIsolated =>
+      'Глобальная маршрутизация · без изоляции куки';
+
+  @override
   String get menu_connectionContainerFallbackTitle => 'Контейнер';
 
   @override
@@ -5504,6 +5508,28 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tabs_cookieIsolation => 'Изоляция куки';
 
   @override
+  String get tabs_sectionIsolation => 'Изоляция';
+
+  @override
+  String get tabs_cookieIsolationCreateSubtitle =>
+      'Отдельные куки и данные сайтов для этого контейнера. Позже изменить нельзя.';
+
+  @override
+  String get tabs_cookieIsolationOnSubtitle =>
+      'У этого контейнера отдельные куки и данные сайтов. Задано при создании.';
+
+  @override
+  String get tabs_cookieIsolationOffSubtitle =>
+      'Куки и данные сайтов этого контейнера общие с другими вкладками. Задано при создании.';
+
+  @override
+  String get tabs_isolationRequiredTitle => 'Изоляция куки выключена';
+
+  @override
+  String get tabs_isolationRequiredBody =>
+      'Маршрутизации через прокси, очистке данных при выходе, строгому режиму и отдельным настройкам ссылок на приложения нужен контейнер с собственными куки и данными сайтов.\n\nИзоляцию куки можно включить только при создании контейнера. Чтобы использовать эти настройки, создайте новый контейнер с включённой изоляцией куки.';
+
+  @override
   String get tabs_proxyConnectionLabel => 'Прокси-подключение';
 
   @override
@@ -5570,9 +5596,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get tabs_requiresCookieIsolation =>
       'Требуется включённая изоляция куки';
-
-  @override
-  String get tabs_sectionAppLinks => 'Ссылки на приложения';
 
   @override
   String get tabs_isolatedAppLinkSettings =>

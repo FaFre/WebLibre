@@ -4160,6 +4160,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Sigue el enrutamiento global';
 
   @override
+  String get menu_connectionContainerNotIsolated =>
+      'Sigue el enrutamiento global · sin aislamiento de cookies';
+
+  @override
   String get menu_connectionContainerFallbackTitle => 'Contenedor';
 
   @override
@@ -5492,6 +5496,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tabs_cookieIsolation => 'Aislamiento de cookies';
 
   @override
+  String get tabs_sectionIsolation => 'Aislamiento';
+
+  @override
+  String get tabs_cookieIsolationCreateSubtitle =>
+      'Da a este contenedor sus propias cookies y datos de sitios. No se puede cambiar después.';
+
+  @override
+  String get tabs_cookieIsolationOnSubtitle =>
+      'Este contenedor tiene sus propias cookies y datos de sitios. Se definió al crearlo.';
+
+  @override
+  String get tabs_cookieIsolationOffSubtitle =>
+      'Este contenedor comparte cookies y datos de sitios con otras pestañas. Se definió al crearlo.';
+
+  @override
+  String get tabs_isolationRequiredTitle =>
+      'El aislamiento de cookies está desactivado';
+
+  @override
+  String get tabs_isolationRequiredBody =>
+      'El enrutamiento por proxy, borrar datos al salir, el modo estricto y los ajustes propios de enlaces de aplicaciones requieren un contenedor con sus propias cookies y datos de sitios.\n\nEl aislamiento de cookies solo se puede activar al crear un contenedor. Para usar estos ajustes, crea un contenedor nuevo con el aislamiento activado.';
+
+  @override
   String get tabs_proxyConnectionLabel => 'Conexión proxy';
 
   @override
@@ -5556,9 +5583,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tabs_requiresCookieIsolation =>
       'Requiere activar el aislamiento de cookies';
-
-  @override
-  String get tabs_sectionAppLinks => 'Enlaces de aplicaciones';
 
   @override
   String get tabs_isolatedAppLinkSettings =>
