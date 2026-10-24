@@ -17,6 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+// The notifier subclasses below are test doubles: driving a collaborator's
+// state from the test is their whole purpose.
+// ignore_for_file: riverpod_lint/avoid_public_notifier_properties
+
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -32,8 +36,6 @@ class _FakePendingQuitDeletionRepository extends PendingQuitDeletionRepository {
 
   final List<String> log;
 
-  // A test fake: tests seed and read back the record.
-  // ignore: riverpod_lint/avoid_public_notifier_properties
   PendingDeletions requests = const {};
 
   Set<DeleteBrowsingDataType> get types => requests.keys.toSet();

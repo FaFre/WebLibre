@@ -22,7 +22,6 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 void main() {

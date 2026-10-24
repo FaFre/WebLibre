@@ -1,4 +1,8 @@
 import 'package:drift/native.dart';
+// The notifier subclasses below are test doubles: driving a collaborator's
+// state from the test is their whole purpose.
+// ignore_for_file: riverpod_lint/avoid_public_notifier_properties
+
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

@@ -51,9 +51,10 @@ class _DefaultOrder extends SearchModuleOrder {
       null,
       surface.defaultModules,
     ))
-      entry.type == SearchModuleType.actions
-          ? ModuleOrderEntry(type: entry.type, visible: true)
-          : entry,
+      if (entry.type == SearchModuleType.actions)
+        ModuleOrderEntry(type: entry.type, visible: true)
+      else
+        entry,
   ];
 }
 

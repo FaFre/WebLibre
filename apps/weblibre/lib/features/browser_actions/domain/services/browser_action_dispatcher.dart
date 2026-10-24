@@ -599,21 +599,21 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
 
     // The list is auto-disposed: held open until the restore is done, and
     // released right after, so this keep-alive service does not pin it.
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
     final subscription = ref.listen(
-      // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
       recentlyClosedTabsRepositoryProvider,
       (previous, next) {},
     );
     try {
+      // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
       final entries = await ref.read(
-        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
         recentlyClosedTabsRepositoryProvider.future,
       );
       final newest = entries.firstOrNull;
       final tabId = newest == null
           ? null
+          // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
           : await ref
-                // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
                 .read(recentlyClosedTabsRepositoryProvider.notifier)
                 .restore(newest, selectTab: true);
       if (tabId == null) {

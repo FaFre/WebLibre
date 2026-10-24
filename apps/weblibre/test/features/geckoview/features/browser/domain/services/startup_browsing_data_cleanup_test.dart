@@ -17,6 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+// The notifier subclasses below are test doubles: driving a collaborator's
+// state from the test is their whole purpose.
+// ignore_for_file: riverpod_lint/avoid_public_notifier_properties
+
 import 'dart:async';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -32,8 +36,6 @@ import 'package:weblibre/utils/exit_app.dart';
 class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
   _FakeGeneralSettingsRepository(this.settings);
 
-  // A test fake: tests change the selection between runs.
-  // ignore: riverpod_lint/avoid_public_notifier_properties
   GeneralSettings settings;
 
   @override
@@ -47,12 +49,9 @@ class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
 class _FakePendingQuitDeletionRepository extends PendingQuitDeletionRepository {
   _FakePendingQuitDeletionRepository(this.requests);
 
-  // A test fake: tests seed and read back the record.
-  // ignore: riverpod_lint/avoid_public_notifier_properties
   PendingDeletions requests;
 
   /// While set, writes wait for it: a stalled database.
-  // ignore: riverpod_lint/avoid_public_notifier_properties
   Completer<void>? stallWrites;
 
   Set<DeleteBrowsingDataType> get types => requests.keys.toSet();

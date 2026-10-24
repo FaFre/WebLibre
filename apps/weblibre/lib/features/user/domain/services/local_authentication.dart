@@ -110,6 +110,9 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
 
   int _departures = 0;
 
+  // Beside `state`, not in it: callers sample it before and after a check,
+  // and nothing should rebuild because the app left the foreground.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
   /// How many times the app has left the foreground since this service
   /// started — every lifecycle change that drops background-mode unlocks.
   ///
