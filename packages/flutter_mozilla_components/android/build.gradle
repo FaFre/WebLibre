@@ -2,7 +2,7 @@ group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.mozillaComponentsVersion = '157.0'
+    ext.mozillaComponentsVersion = '158.0.2'
 
     repositories {
         google()
@@ -118,6 +118,7 @@ dependencies {
     implementation "org.mozilla.components:concept-toolbar:$mozillaComponentsVersion"
     implementation "org.mozilla.components:concept-awesomebar:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-engine-gecko:$mozillaComponentsVersion"
+    implementation "org.mozilla.components:browser-errorpages:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-state:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-session-storage:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-storage-sync:$mozillaComponentsVersion"
