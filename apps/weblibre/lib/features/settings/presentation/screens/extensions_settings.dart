@@ -26,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/features/settings/presentation/screens/protection_coherence_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -76,6 +77,7 @@ List<SettingsSectionDefinition> extensionsSettingsSections(
         ),
       ],
     ),
+    ...protectionCoherenceSections(context),
   ];
 }
 
