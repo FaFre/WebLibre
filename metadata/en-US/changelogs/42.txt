@@ -1,0 +1,169 @@
+GeckoView 158.0.2
+
+This release brings together ten alpha updates since v0.30.0. WebLibre adapts better to larger screens, adds customizable keyboard shortcuts and more flexible gestures, introduces five interface translations, and gives you more control over downloads, profile locks, and automatic browsing-data deletion. It also improves tab recovery, connection reliability, and everyday browsing.
+
+## Highlights
+
+- **Adaptive Layout** — resizable side tab panels for tablets, foldables, and larger Android windows
+- **Customizable Controls** — keyboard shortcuts, tab swipes, toolbar long-press actions, and searchable action pickers
+- **Tab Groups & Recovery** — a new grouped quick switcher and a Recently Closed Tabs list
+- **Five New Languages** — German, Spanish, Indonesian, Russian, and Simplified Chinese
+- **Better Downloads** — choose a folder, follow progress, pause, resume, and retry
+- **Profile Passwords** — separate passwords for individual profiles, including protection for installed website apps
+- **Automatic Data Cleanup** — choose what to delete on Quit and startup, with recovery after interrupted cleanup
+- **More Reliable Connections** — clearer proxy health, safer imports, and better WireGuard support
+- **Engine Upgrade** — GeckoView 158.0.2 and Tor 0.4.9.14
+
+## Adaptive Layout
+
+- **Automatic tab-bar positioning** keeps tabs at the bottom on phones and can move them into a side panel on larger screens. Choose a fixed position in Toolbar & Layout settings if you prefer.
+- **Resizable side panels** can show readable tab titles and browser controls, collapse into a compact icon rail, or hide automatically while using a mouse or trackpad.
+- Tab groups can be expanded or collapsed without switching the current tab, and several groups can stay open at once on wide screens.
+- Tab grids adapt to the available space. Dialogs, menus, and settings pages fit larger windows more comfortably, and foldables place panels on the more useful side of the screen.
+- Slide-up panels, including the browser menu, tab overview, Site settings, add-on popups, and Small Web, have more consistent layouts and can expand to full height without hiding controls behind the keyboard or system bars.
+- Fixed content overlapping Android's three-button navigation bar, unreachable page-bottom content when the toolbar hides, and navigation-bar appearance on older Android versions. Landscape spacing and Find in Page keyboard alignment are improved too.
+
+## Keyboard Shortcuts, Gestures & Toolbar
+
+- **New Keyboard Shortcuts settings** let you add, change, remove, reassign, or reset shortcuts for navigation, tab management, browser screens, text size, bookmarking, and more. Shortcuts work while a web page has focus, and menus can show shortcut hints when using a hardware keyboard or mouse.
+- **Gestures and shortcuts share the same browser actions.** Drawn-gesture bindings can be added, edited, removed, or reset, with configurable feedback and timing. Gesture and keyboard-shortcut settings are included in settings exports.
+- **Customize swipes on the tab bar, side rail, and tabs in the list or grid.** Assign actions such as closing, bookmarking, sharing, pinning, duplicating, or moving a tab, or disable a swipe entirely.
+- **Customize toolbar long presses and fallback buttons** — choose what holding a button does and which button appears when its normal action is unavailable. The customization screen is easier to use, including when dragging buttons to reorder them.
+- **Search for actions** by name, description, or related terms when configuring gestures, long presses, and fallback buttons. Names and icons are consistent across these screens.
+- More assignable actions include **QR scanning, voice search, text-size controls, the browser menu, and toggling drawn gestures**. Optional toolbar buttons also include **Scroll to Top**, **Scroll to Bottom**, and **Clear Browsing Data**; the latter can be added to the browser menu too.
+- QR scans and spoken searches appear in the search field for review before you open a page or submit a search. Voice search no longer loses text when several microphone buttons are present, and repeat taps cannot start competing speech dialogs.
+- **Adjust pull-to-refresh and automatic tab-bar hiding distances**, from 25% to 300%. The new 100% defaults require a longer gesture than before to reduce accidental refreshes and toolbar movement.
+- Pull-to-refresh no longer activates accidentally during horizontal or nested scrolling, pinch or double-tap zoom, or fullscreen videos and games. The auto-hiding toolbar is also less likely to reappear while you are reading.
+- Clearer feedback confirms actions such as bookmarking or pinning and explains when Reader Mode, home-screen shortcuts, or manual text sizing are unavailable.
+
+## Tabs, Groups & Recovery
+
+- **New Tab Groups quick-switcher layout** keeps tabs opened from the same tab together, shows each group's tab count, and adds a second row for the current group's tabs. Tapping a group returns to its most recently used tab. Smaller windows temporarily use a simpler layout.
+- **Choose the quick switcher's position** above or below the address bar, or below the bottom contextual toolbar. Tab-overview search, filters, and actions can also move to the bottom for easier one-handed use.
+- **Recently Closed Tabs** in History lets you recover up to 10 regular tabs, including their back-button history and original container when it still exists. Reopen in the background, remove individual entries, or clear the list. Private and isolated tabs are not saved.
+- **Reopen Closed Tab reaches beyond the immediate undo**, restoring the newest entry from Recently Closed Tabs once undo is no longer available. Repeated shortcut presses are handled in order, and a message explains when nothing remains to restore.
+- **Choose where new child tabs appear** — directly after the tab that opened them (the default), or at the end of the list. Their parent-child relationships are preserved either way.
+- **Recently Used Containers First** optionally sorts Accordion switcher containers by recent use, keeping pinned containers first. Manual ordering elsewhere, including swipe navigation, stays unchanged.
+- The list and grid overviews offer directly accessible **All, Regular, Private, and Isolated** filters when relevant. The **+** button opens the selected tab type. Searching expands the overview above the keyboard, and leaving search clears its query.
+- Drag tabs within a group or between containers, with an explanation when filtering or searching prevents reordering. Tab order is more reliable after restores, pop-ups, and moves between containers.
+- Adding or closing other tabs no longer unnecessarily scrolls the overview away from your position. Grid close buttons have larger touch targets, and empty switcher rows and seams between grouped tabs are fixed.
+- Tapping an already-selected tab brings its page back when the home screen or another container is showing. Duplicating tabs and opening private copies through actions now respects your background-tab preference.
+- Fixed back navigation unexpectedly closing new search tabs, the home screen showing a hidden tab's title or address, and closing a container's last tab affecting tabs in other containers.
+
+## Two Ways to Bookmark
+
+- **Add bookmark** opens the editor to choose a name and folder. If the page is already bookmarked, it edits that bookmark instead of removing it.
+- **Quick bookmark** saves or removes a bookmark immediately, without opening the editor. It is also available for swipes on tabs in the overview. Both actions appear in the search screen's Actions results.
+- **Changed behavior:** existing Bookmark gesture, keyboard-shortcut, and long-press assignments now open the editor, including the default **Ctrl+D** shortcut. Choose Quick bookmark to keep the previous one-step behavior. The toolbar's bookmark button keeps its one-step behavior.
+
+## Languages, Search & Suggestions
+
+- **Choose your app language** in Settings > General > App Language: German, Spanish, Indonesian, Russian, and Simplified Chinese join English. You can also choose System default; English remains the default until you change it.
+- Installed website apps, Custom Tabs, and the separate add-on popup window follow the language selected inside WebLibre.
+- **Find browser actions from search**, alongside settings, feeds, containers, and profiles. Tap a result to use it; pressing Enter still searches for the text normally.
+- Address completion now includes **bookmarks and paths within bookmarked sites**.
+- **Control history-based suggestions** separately from your stored history. Turning them off does not delete your history.
+- **Private searches do not use remote suggestions or regular browsing history by default.** You can opt in to either if you prefer.
+- Selecting a search provider no longer shows address-completion suggestions that will not be used. The provider choice clears when you leave search, rather than carrying over to a later search, and fast typing is less likely to show outdated results.
+
+## History
+
+- **Distinct URLs view** groups repeated visits to the same address. Delete history from the last hour, today, the last week, or a custom date and time range. Time-range deletion also removes matching download-list entries, but keeps downloaded files.
+- History entries have a **More actions** menu for opening in the background, copying or sharing a link, and deleting. Long-press a history suggestion beneath the address bar to delete it, with Undo available.
+- History and Downloads group entries under **Today**, **Yesterday**, and calendar dates, and show times using your device's 12- or 24-hour preference. Redirect labels are more accurate.
+- Clearing all browsing history also removes Recently Closed Tabs and tracker statistics, with more reliable cleanup of locally saved page content.
+
+## Downloads
+
+- **Choose a download folder** under Settings > General > Downloads. It also applies to saved links, images, and media. Android's folder-access permission is required; if the folder becomes unavailable, new downloads fall back to the system Downloads folder.
+- **Follow download progress in Downloads**, including starting, running, paused, and failed states and the amount downloaded.
+- **Pause, resume, cancel, or retry** from a download's action menu. Menus and selections stay in place while progress updates.
+- Tapping an unfinished download no longer tries to open it, and removing a running or paused download also cancels it.
+- Copy or share a download's source link through its More actions menu.
+- **Remember an external download manager** with Always use this app, and clear that choice in Downloads settings when needed. An external manager continues to control its own download location.
+
+## Site Settings & Tracking Protection
+
+- **See which trackers a page blocked.** Open Site settings from the site icon beside the address, then expand the blocked-tracker count to inspect categories and tracker addresses.
+- **Tracker Statistics** in Privacy & Security shows a blocked-tracker total and category breakdown for the last seven days. This is the renamed Content Blocking Database setting: it records daily counts and dates, not the addresses of sites you visit. Changing recording requires a restart.
+- Site settings now puts tracking protection, connection information, and permissions first, with desktop mode, App Links, and gestures grouped under Behavior.
+- **Inspect a website's certificate** from the certificate row when one is available.
+- See the current tab's **Tor or proxy status** in Site settings, with a Start button when its assigned connection is stopped.
+- Site-data deletion identifies the affected domain and explains that it includes subdomains and matching data across containers, private tabs, and isolated tabs. This action is shown only in regular tabs.
+
+## Profile Passwords, Locks & Backups
+
+- **Lock each profile with its own password**, use Android's fingerprint/PIN protection, or leave it unlocked. A device fingerprint or PIN cannot unlock a password-protected profile.
+- Locked profiles require their own unlock method before they can be **backed up, deleted, or replaced by a backup**, including when managed from another profile. Changing a password or disabling its lock requires the current unlock method too.
+- After five incorrect password attempts, an increasing waiting period slows further attempts and remains in effect after restarting WebLibre.
+- **Profile locks also protect installed website apps and Custom Tabs**, before their content is shown. Unlocking can be shared with the main browser when your auto-lock settings allow it, with fewer unnecessary relocks during brief interruptions.
+- Choose another profile from the lock screen when one exists, even with the startup profile picker disabled. Clearer errors explain missing Android screen-lock setup, authentication lockouts, and unavailable authentication; failed password checks return focus to the password field.
+- Restoring a backup as a new profile preserves the lock saved in that backup. Device-protected restores first check that authentication works on the current device. Backup reads from shared storage and recovery information for interrupted restores are more reliable.
+- **Important:** profile passwords protect access through WebLibre; they do **not** encrypt profile data on the device. Forgotten profile passwords cannot be recovered in the app. A backup file's encryption password is separate.
+
+## Automatic Browsing-Data Deletion
+
+- **Incognito Mode is now called Delete Browsing Data Automatically**, to make its purpose clearer. Your existing selection is preserved.
+- **Automatic deletion runs when you use Quit.** The new **Also Delete on Start** option controls whether it also runs at startup. Existing automatic-deletion settings keep startup cleanup enabled unless you turn it off.
+- Expand Delete browsing data in the Quit confirmation to choose **extra data to clear just this once**, without changing your normal automatic-cleanup selection.
+- **Choose whether Quit asks for confirmation**, using Don't ask again or Confirm Before Quitting. Choosing Don't ask again also remembers the cleanup categories selected in that dialog for future automatic Quit cleanup. Long-pressing Quit skips confirmation but still applies automatic cleanup.
+- **Interrupted cleanup is remembered and retried on a later start**, including one-time choices and unfinished Quit cleanup when routine startup deletion is disabled. Failure to clear one category no longer prevents the others from being attempted.
+- Tab cleanup targets the original session's tabs rather than new tabs opened afterward. Cleared tabs and download-list entries are less likely to return after a restart.
+- **Quit-only cleanup requires WebLibre's Quit action.** Swiping the app away or Android closing it does not run that cleanup. Leave Also Delete on Start enabled to cover those sessions on the next start.
+
+## Proxy & Tor Connections
+
+- **Clearer connection health** — Tor and proxies can show Not responding when tests or repeated page failures indicate traffic is not getting through, rather than appearing healthy merely because they are switched on.
+- Connection startup shows steadier progress and running counts. Automatic startup failures distinguish retrying from couldn't start, identify the affected connection where possible, and explain errors more usefully. Response-time tests explain that they measure a complete web request, not the tunnel's ping time.
+- **One invalid connection is less likely to disrupt others.** Profiles are checked separately, usable ones can still start, and WebLibre attempts to restore running connections if adding another fails. Stopping or deleting one proxy no longer unexpectedly takes down the others.
+- Failed automatic starts are retried for a limited time, and **Stop All cancels pending retries**. Automatic startup no longer interferes with a connection just started for an incoming link.
+- Better recovery when switching between Wi-Fi and mobile data, and fixes for WireGuard stalls on some mobile networks or while another VPN is active.
+- Pages recovering after proxy startup wait for browser routing to catch up. Repeated failures no longer cause continuous automatic reloads, and recovery avoids replacing a page you have since navigated to.
+- **Background requests follow the appropriate tab or container connection**, including search suggestions, site icons, link expansion, and web-search page captures. Protection against falling back to a direct connection after proxy failure is strengthened, and the address-bar indicator reflects actual routing, including direct-connection overrides.
+- **Import several supported connections from sing-box JSON**, using a file or pasted configuration, including WireGuard endpoints. A single connection opens for review; multiple connections are validated and imported together, with a summary of imported or skipped entries.
+- Editing imported connections preserves advanced settings without their own form fields. WireGuard imports preserve **Allowed IPs**, make them editable, and warn when only certain address ranges are reachable. Imports also explain when only the first configured DNS server is used.
+- Invalid WireGuard keys are caught earlier, and saving profiles that share a private key warns about conflicts when run together. Credential storage is improved, and private-key configuration details are removed from WireGuard failure messages.
+- Unsupported proxy chains are rejected rather than silently changed into direct connections to the proxy server. Multi-peer WireGuard configurations receive guidance instead of being incorrectly combined.
+
+## Containers & Links to Other Apps
+
+- **Duplicating a container tab preserves its container and connection**, and moving a tab out correctly leaves that container's session and connection. Website-opened tabs and pop-ups stay with the container of their opener, not whichever container happens to be selected.
+- A new **Isolation** section groups Cookie Isolation and its dependent settings. The container editor explains whether cookies are shared or separate, that this choice is fixed at creation, and why dependent settings may be locked.
+- Containers without cookie isolation now show that they follow browser-wide connection settings in the browser menu.
+- **Clearer App Link prompts** show the destination and link. Remembered choices stay tied to the app originally selected; if the available apps change, WebLibre asks again. The chooser avoids sending links back to WebLibre or another browser.
+- Protected, private, and wallet-related contexts cannot silently open another app. Fixed unwanted prompts when external apps are disabled or a request has already been declined, and improved sign-in callbacks and missing-app handling.
+- **New-tab requests stay in new tabs** when you choose to remain in WebLibre or an app cannot open the link. Alternative pages preserve the original tab's private-browsing status and separate cookies, and background fallbacks no longer steal focus.
+- Fixed an alternative web link from a sandboxed search page potentially bypassing its sandbox protections.
+
+## Home Screen & Installed Websites
+
+- Home, new-tab, and search sections **remember whether they are expanded or collapsed**, including across restarts. Reset to Defaults resets these choices too.
+- Reduced home-screen jumping as shortcuts, recent tabs, quotes, and other sections load. Saved toolbar, menu, section, and container customizations load earlier, reducing flashes of the default layout.
+- Pages opened from the browser home screen return there when pressing Back, while keeping the tab available.
+- **Choose a standalone website app or a regular home-screen shortcut**, even for installable websites. Shortcuts use the storage or container associated with their source tab, including when created from a tab card.
+- Installed website apps **remember desktop or mobile mode** from the tab used during installation. Reinstall an existing website app from a tab using your preferred mode to update that choice.
+- Separate website windows preserve their current page and navigation controls more reliably when the main browser starts in the background.
+
+## Accessibility, Performance & Reliability
+
+- **Better screen-reader support** includes clearer Site settings, tab-type, connection-status, and bookmark labels, plus actions to rearrange tabs in list and grid views.
+- Keyboard focus stays within the tab overview or Site settings while open; Escape dismisses the panel and restores focus. Browser shortcuts no longer activate covered controls, and non-shortcut keyboard input reaches web pages correctly.
+- Mouse scrolling affects the open menu or panel rather than the page beneath it. Pointer behavior and cursors are more consistent, and side panels support mouse resizing.
+- **More reliable startup** keeps the loading screen visible until an incoming link is ready and avoids the home screen covering restored tabs or new links. Links, shares, and widget actions are delivered more reliably during interrupted startup or profile selection, including after Android closes the browser in the background.
+- Reduced memory buildup during long sessions, more responsive AI tab-group suggestions, and smoother searches through large histories and feed collections.
+- Feed processing handles backlogs in smaller batches, retries temporary failures, and prevents one troublesome article from blocking the rest. Older queries and refreshes are less likely to overwrite newer results or article text.
+- Reduced pauses when sharing or saving page screenshots and unnecessary processing when importing wallpapers. Tab titles, icons, and thumbnails are less likely to become stale after rapid changes or restores.
+- Add-on actions, popups, labels, and badges are more reliable, including on the home screen and after session restoration. Reader View switches more reliably and handles potentially unsafe article content more carefully while preserving its language.
+- Light/dark website preferences persist more reliably during startup, and changing the page color scheme updates all open pages. Clearing a custom user agent restores normal behavior, including desktop mode. Window resizing and desktop-mode navigation avoid unnecessary reloads.
+- Updated **Mozilla Components / GeckoView to 158.0.2** and **built-in Tor to 0.4.9.14**.
+
+## Upgrade Notes
+
+- Review older custom drawn-gesture assignments under Settings > Gestures > Gesture bindings; some may need to be recreated. Existing tab-bar swipe preferences are preserved.
+- Existing Bookmark action assignments, including Ctrl+D, now open the bookmark editor. Select Quick bookmark if you want one-step saving and removal. The toolbar bookmark button is unchanged.
+- English remains the interface default. Select another language or System default in App Language settings.
+- Automatic layout may place tabs in a side panel on larger screens. Choose a fixed tab-bar position in Toolbar & Layout if you prefer.
+- Existing automatic-deletion selections carry over and continue to include startup cleanup. Turning off Also Delete on Start does not cancel recovery of unfinished Quit cleanup.
+- Recently Closed Tabs records regular tabs only. Clearing all browsing history removes this list and tracker statistics too.
+- Some tabs previously listed as unassigned may return to their original container, correcting the list to match the browsing session they were still using.
+- Profile passwords are access locks, not on-device encryption, and cannot be recovered in the app. Keep profile passwords and backup encryption passwords safe and separate.
