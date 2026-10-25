@@ -16,6 +16,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMo
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.QueryParameterStripping
+import eu.weblibre.flutter_mozilla_components.privacy.LadybirdFingerprintProtection
+import eu.weblibre.flutter_mozilla_components.security.GeckoPrefs
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import mozilla.components.browser.engine.gecko.GeckoEngine
 import mozilla.components.browser.engine.gecko.fetch.GeckoViewFetchClient
@@ -54,6 +56,17 @@ object EngineProvider {
 
     @Synchronized
     fun runtimeState(): GeckoRuntimeState = state
+
+    /**
+     * The pref writer for the live engine, or null before an engine exists.
+     *
+     * GeckoRuntimeSettings has no generic pref setter, so prefs go through the
+     * engine's browser-pref API; this is how the power manager reaches it.
+     */
+    @Volatile
+    private var prefsWriter: GeckoPrefs? = null
+
+    fun prefsWriter(): GeckoPrefs? = prefsWriter
 
     private val components: Components
         get() = requireNotNull(GlobalComponents.components) { "Components not initialized" }
@@ -180,11 +193,40 @@ object EngineProvider {
             BrowserExtensionFeature.install(it, extensionEvents)
             MLEngineFeature.install(it)
 
+            // Prefs go through the engine, so the writer is created here rather
+            // than at runtime creation, where no engine exists yet.
+            prefsWriter = GeckoPrefs(it)
+
+            // === Ladybird-inspired fingerprint protection ===
+            // Ports Ladybird's LibPrivacy module: per-origin UA spoofing,
+            // deterministic noise seeds, and Fingerprinting Protection targets.
+            LadybirdFingerprintProtection.apply(it)
+
             //Install extensions early
             BuiltInWebExtensionController(
                 "readability-extract@weblibre.eu",
                 "resource://android/assets/extensions/readability_extract/",
                 "mozacReaderExtract",
+            ).install(it)
+
+            // Fingerprint Shield: per-origin spoofing of UA, screen, canvas,
+            // WebGL, audio, fonts, timezone and WebRTC, applied to both
+            // JavaScript and the outgoing User-Agent header.
+            BuiltInWebExtensionController(
+                "fingerprint-shield@weblibre.eu",
+                "resource://android/assets/extensions/fingerprint_shield/",
+                "fingerprintShield",
+            ).install(it)
+
+            // Edge Login: lets Microsoft account sign-in complete on Gecko by
+            // presenting identity pages as Microsoft Edge on Android. Essential
+            // for users who want to log into their Microsoft 365 / Outlook /
+            // OneDrive accounts without hitting the "Browser not supported"
+            // wall. The extension rewrites only the Microsoft identity domains.
+            BuiltInWebExtensionController(
+                "edge-login@weblibre.eu",
+                "resource://android/assets/extensions/edge_login/",
+                "edgeLogin",
             ).install(it)
 
             SandboxCaptureFeature.install(it)

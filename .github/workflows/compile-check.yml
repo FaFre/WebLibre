@@ -1,0 +1,123 @@
+name: Compile check
+
+# The upstream release workflow only runs on version tags, so a pull request
+# never gets compiled until it is tagged. This runs the same toolchain on every
+# push so a branch that does not build is caught where it is pushed.
+#
+# It is deliberately a debug build: no signing secrets are available on a fork,
+# and a debug APK still compiles every Kotlin module and the Dart entrypoint.
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: compile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+
+      - name: Install Android NDK
+        run: |
+          set -euo pipefail
+          ANDROID_NDK_VERSION="$(
+            sed -n 's/^weblibre\.ndkVersion[[:space:]]*=[[:space:]]*//p' \
+              apps/weblibre/android/gradle.properties
+          )"
+          if [[ -z "$ANDROID_NDK_VERSION" ]]; then
+            echo "Missing weblibre.ndkVersion in apps/weblibre/android/gradle.properties" >&2
+            exit 1
+          fi
+          set +e
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;$ANDROID_NDK_VERSION"
+          sdkmanager_status=${PIPESTATUS[1]}
+          set -e
+          if [[ $sdkmanager_status -ne 0 ]]; then
+            exit "$sdkmanager_status"
+          fi
+          test -f "$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION/source.properties"
+          {
+            echo "ANDROID_NDK_VERSION=$ANDROID_NDK_VERSION"
+            echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
+            echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
+            echo "NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION"
+          } >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.5
+          cache: true
+
+      - name: Bootstrap
+        run: |
+          dart pub global activate melos 7.8.1
+          melos bootstrap
+
+      # `flutter build` regenerates AppLocalizations from lib/l10n/app_en.arb
+      # but never re-merges the per-feature fragments into it.
+      - name: Check localization template is up to date
+        run: python3 scripts/merge_l10n_arb.py --check
+
+      - name: Analyze Dart
+        working-directory: apps/weblibre
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+
+      - name: Update external assets
+        run: melos run update-assets --no-select
+
+      - name: Build components
+        run: melos run build-components --no-select
+
+      - name: Checkout native runtime sources
+        run: |
+          set -euo pipefail
+          source native/go_mobile_runtime/pins.env
+
+          git clone https://github.com/SagerNet/sing-box.git "$RUNNER_TEMP/sing-box"
+          git -C "$RUNNER_TEMP/sing-box" checkout "$SING_BOX_TAG"
+          test "$(git -C "$RUNNER_TEMP/sing-box" rev-parse HEAD)" = "$SING_BOX_COMMIT"
+
+          git clone https://github.com/tladesignz/IPtProxy.git "$RUNNER_TEMP/IPtProxy"
+          git -C "$RUNNER_TEMP/IPtProxy" checkout "$IPTPROXY_TAG"
+          test "$(git -C "$RUNNER_TEMP/IPtProxy" rev-parse HEAD)" = "$IPTPROXY_COMMIT"
+          git -C "$RUNNER_TEMP/IPtProxy" submodule update --init dnstt
+
+      - name: Build native gomobile runtime
+        env:
+          SING_BOX_SOURCE: ${{ runner.temp }}/sing-box
+          IPTPROXY_SOURCE: ${{ runner.temp }}/IPtProxy
+        run: melos run build-go-runtime --no-select
+
+      - name: Build APK (debug, arm64)
+        working-directory: apps/weblibre
+        run: |
+          flutter build apk --debug --flavor alpha --target-platform android-arm64
