@@ -32,7 +32,6 @@ part 'engine_settings.g.dart';
 
 enum BuiltInDohProviders {
   quad9('Quad9', 'https://dns.quad9.net/dns-query'),
-  mullvad('Mullvad', 'https://dns.mullvad.net/dns-query'),
   adguard('AdGuard', 'https://dns.adguard-dns.com/dns-query'),
   ffmuc('Freifunk München', 'https://doh.ffmuc.net/dns-query');
 
@@ -41,6 +40,14 @@ enum BuiltInDohProviders {
 
   static bool isBuiltin(String url) =>
       BuiltInDohProviders.values.any((provider) => provider.url == url);
+
+  /// Built-in providers that have since shut down. A stored selection of one
+  /// is moved to Quad9 on deserialization instead of being adopted as a custom
+  /// resolver that no longer answers.
+  static const _retiredUrls = {'https://dns.mullvad.net/dns-query'};
+
+  static String? replaceRetired(String? url) =>
+      _retiredUrls.contains(url) ? quad9.url : url;
 
   const BuiltInDohProviders(this.name, this.url);
 }
@@ -111,6 +118,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
       super.trackingProtectionPolicy!;
   @override
   HttpsOnlyMode get httpsOnlyMode => super.httpsOnlyMode!;
+
   /// Always null: the app theme (`GeneralSettings.themeMode`) is the only
   /// source of the web content color scheme. A value here would ride along
   /// with every full settings push and override the theme (issue #657).
@@ -334,13 +342,17 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
        bounceTrackingProtectionMode =
            bounceTrackingProtectionMode ?? BounceTrackingProtectionMode.enabled,
        dohSettingsMode = dohSettingsMode ?? DohSettingsMode.increased,
-       dohProviderUrl = dohProviderUrl ?? BuiltInDohProviders.quad9.url,
+       dohProviderUrl =
+           BuiltInDohProviders.replaceRetired(dohProviderUrl) ??
+           BuiltInDohProviders.quad9.url,
        dohDefaultProviderUrl =
-           dohDefaultProviderUrl ?? BuiltInDohProviders.quad9.url,
+           BuiltInDohProviders.replaceRetired(dohDefaultProviderUrl) ??
+           BuiltInDohProviders.quad9.url,
        dohExceptionsList = dohExceptionsList ?? [],
        customDohProviders = CustomDohProvider.adoptSelected(
          customDohProviders ?? [],
-         dohProviderUrl ?? BuiltInDohProviders.quad9.url,
+         BuiltInDohProviders.replaceRetired(dohProviderUrl) ??
+             BuiltInDohProviders.quad9.url,
        ),
        enablePdfJs = enablePdfJs ?? true,
        safeBrowsingMalwareEnabled = safeBrowsingMalwareEnabled ?? true,

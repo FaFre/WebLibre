@@ -182,6 +182,32 @@ void main() {
     });
   });
 
+  group('retired built-in providers', () {
+    const mullvadUrl = 'https://dns.mullvad.net/dns-query';
+
+    test('a stored selection is moved to Quad9', () async {
+      await repository().updateSettings(
+        (current) => current.copyWith.dohProviderUrl(mullvadUrl),
+      );
+
+      final settings = await repository().fetchSettings();
+
+      expect(settings.dohProviderUrl, BuiltInDohProviders.quad9.url);
+      // Not adopted as a custom resolver that no longer answers.
+      expect(settings.customDohProviders, isEmpty);
+    });
+
+    test('a stored default is moved to Quad9', () async {
+      await repository().updateSettings(
+        (current) => current.copyWith.dohDefaultProviderUrl(mullvadUrl),
+      );
+
+      final settings = await repository().fetchSettings();
+
+      expect(settings.dohDefaultProviderUrl, BuiltInDohProviders.quad9.url);
+    });
+  });
+
   group('CustomDohProvider.displayName', () {
     test('uses the name when one was given', () {
       expect(
