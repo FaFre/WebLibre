@@ -27,6 +27,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
+import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/features/addons/domain/providers.dart'
     show pinnedAddonIdsProvider;
 import 'package:weblibre/features/addons/presentation/widgets/pinned_addon_bar.dart';
@@ -50,6 +51,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/app_bar_title.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_system_bars.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_accordion.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/side_rail_resize_handle.dart';
@@ -136,7 +138,7 @@ class BrowserTopAppBar extends StatelessWidget {
   Size get preferredSize => _size;
 }
 
-class BrowserBottomAppBar extends StatelessWidget {
+class BrowserBottomAppBar extends ConsumerWidget {
   /// Whether the address bar is drawn here, i.e. the tab bar is at the bottom.
   final bool showMainToolbar;
   final bool showContextualToolbar;
@@ -183,16 +185,31 @@ class BrowserBottomAppBar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    // The padding is painted in the BrowserSystemBars strip's own color rather
+    // than left transparent over the strip. Under Skia every picture layer is
+    // drawn at a whole-pixel offset, and this bar is a layer of its own (the
+    // slide animation's RepaintBoundary): when its height is not a whole number
+    // of physical pixels, its edge shifts by up to half a pixel against the
+    // strip, and the page showed through the seam as a hairline
+    // (https://github.com/FaFre/WebLibre/issues/685). Painted, the edge falls
+    // on the window's bottom instead, over a strip of the same color. Where the
+    // navigation bar lies outside Flutter there is no strip to match, and the
+    // padding stays clear.
+    final navigationBarOutsideFlutter = ref.watch(
+      navigationBarLayoutControllerProvider.select(
+        (layout) => layout.outsideFlutter,
+      ),
+    );
 
     return Material(
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
-      // Transparent so the navigation-bar inset region behind this padding is
-      // filled by the BrowserSystemBars tint strip (matching the active
-      // container color), instead of a fixed surfaceContainer fill.
-      color: Colors.transparent,
+      color: navigationBarOutsideFlutter
+          ? Colors.transparent
+          : watchBrowserBarTintColor(context, ref),
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: SizedBox(height: _size.height, child: _tabBar),
@@ -264,30 +281,7 @@ class BrowserSideRail extends ConsumerWidget {
     // strips (status/nav bar, docked-edge notch) blend with the rail instead
     // of showing a neutral surfaceContainer gap. Falls back to surfaceContainer
     // when no container is active.
-    final selectedTabId = ref.watch(selectedTabProvider);
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-    );
-    final containerColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.color),
-    );
-    final useCustomColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.metadata.useCustomColor ?? false),
-    );
-    final effectiveContainerColor = (showContainerUi && containerColor != null)
-        ? containerColor
-        : null;
-    final tintColor = effectiveContainerColor != null
-        ? ContainerColors.palette(
-            context,
-            effectiveContainerColor,
-            useCustomColor: useCustomColor,
-          ).surfaceColor
-        : Theme.of(context).colorScheme.surfaceContainer;
+    final tintColor = watchBrowserBarTintColor(context, ref);
 
     return ColoredBox(
       color: tintColor,
@@ -428,19 +422,51 @@ class BrowserTabBar extends HookConsumerWidget {
   /// [preferredWidth] is the width the user resized the panel to (or is
   /// dragging it to), and [windowWidth] the window it has to fit; see
   /// [panelWidthFor].
+  ///
+  /// With [devicePixelRatio], the width is snapped to whole physical pixels
+  /// (see [snapRailWidthToPixels]). The browser passes it; a preview that never
+  /// sits beside the page can leave it out.
   static double railWidthFor(
     WindowSizeClass window, {
     required bool hasTabList,
     required double preferredWidth,
     required double windowWidth,
+    double? devicePixelRatio,
   }) {
+    final double width;
     if (canResizeRail(window, hasTabList: hasTabList)) {
-      return panelWidthFor(preferredWidth, windowWidth: windowWidth);
+      width = panelWidthFor(preferredWidth, windowWidth: windowWidth);
+    } else if (window.width != WindowWidthClass.compact) {
+      // By width alone, unlike where the auto position puts the bar: a rail
+      // the user placed in a wide but short window still has the width for it.
+      width = mediumRailWidth;
+    } else {
+      width = compactRailWidth;
     }
-    // By width alone, unlike where the auto position puts the bar: a rail the
-    // user placed in a wide but short window still has the width for it.
-    if (window.width != WindowWidthClass.compact) return mediumRailWidth;
-    return compactRailWidth;
+
+    return devicePixelRatio != null
+        ? snapRailWidthToPixels(width, devicePixelRatio)
+        : width;
+  }
+
+  /// [width] widened to the next whole physical pixel.
+  ///
+  /// Under Skia every picture layer is drawn at a whole-pixel offset, and the
+  /// rail is a layer of its own (the slide animation's RepaintBoundary). A
+  /// right rail starts at the window width less its own, so at a width that is
+  /// not a whole number of pixels — any dragged one — it was drawn up to half a
+  /// pixel off its place, leaving a sliver of the page at the window's edge and
+  /// a seam against the page beside it (the same mechanism as
+  /// https://github.com/FaFre/WebLibre/issues/685).
+  ///
+  /// Rounded up rather than to the nearest pixel, and never below [width], so
+  /// a panel at [minExpandedRailWidth] stays a panel ([isWideRailWidth]). The
+  /// tolerance keeps a width that is already whole from gaining a pixel to
+  /// floating-point noise.
+  static double snapRailWidthToPixels(double width, double devicePixelRatio) {
+    final snapped =
+        (width * devicePixelRatio - 1e-6).ceilToDouble() / devicePixelRatio;
+    return snapped < width ? width : snapped;
   }
 
   /// Whether [window] shows the resizable tab panel, or the icon rail it was

@@ -457,4 +457,69 @@ void main() {
       expect(isAtSideRailEdge(dx: 0, width: 1280, railOnLeft: false), isFalse);
     });
   });
+
+  group('BrowserTabBar.snapRailWidthToPixels', () {
+    const ratios = [1.0, 1.5, 1.75, 2.0, 2.625, 2.6875, 2.75, 3.0, 3.5];
+
+    bool isWholePixels(double width, double ratio) {
+      final pixels = width * ratio;
+      return (pixels - pixels.roundToDouble()).abs() < 1e-6;
+    }
+
+    test('lands on a whole physical pixel', () {
+      for (final ratio in ratios) {
+        for (final width in [56.0, 80.0, 200.0, 233.7, 256.0, 333.33, 480.0]) {
+          final snapped = BrowserTabBar.snapRailWidthToPixels(width, ratio);
+          expect(
+            isWholePixels(snapped, ratio),
+            isTrue,
+            reason: '$width at $ratio gave $snapped',
+          );
+          expect(snapped, greaterThanOrEqualTo(width));
+          expect(snapped - width, lessThan(1 / ratio));
+        }
+      }
+    });
+
+    test('leaves a width that is already whole unchanged', () {
+      expect(BrowserTabBar.snapRailWidthToPixels(56, 2.625), 56);
+      expect(BrowserTabBar.snapRailWidthToPixels(80, 1.75), 80);
+      expect(BrowserTabBar.snapRailWidthToPixels(256, 3), 256);
+    });
+
+    test('keeps a panel at the minimum width a panel', () {
+      for (final ratio in ratios) {
+        expect(
+          BrowserTabBar.isWideRailWidth(
+            BrowserTabBar.snapRailWidthToPixels(
+              BrowserTabBar.minExpandedRailWidth,
+              ratio,
+            ),
+          ),
+          isTrue,
+          reason: 'at $ratio',
+        );
+      }
+    });
+
+    test('railWidthFor snaps only when given a pixel ratio', () {
+      // A dragged width, here clamped to half of an odd window width.
+      final unsnapped = railFor(
+        tablet,
+        preferredWidth: 480,
+        windowWidth: 913.3,
+      );
+      expect(unsnapped, 913.3 / 2);
+
+      final snapped = BrowserTabBar.railWidthFor(
+        tablet,
+        hasTabList: true,
+        preferredWidth: 480,
+        windowWidth: 913.3,
+        devicePixelRatio: 2.625,
+      );
+      expect(isWholePixels(snapped, 2.625), isTrue);
+      expect(snapped, greaterThanOrEqualTo(unsnapped));
+    });
+  });
 }

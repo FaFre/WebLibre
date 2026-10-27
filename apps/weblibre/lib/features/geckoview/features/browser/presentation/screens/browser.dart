@@ -330,6 +330,7 @@ class _TabBar extends HookConsumerWidget {
                 ),
               ),
           windowWidth: MediaQuery.sizeOf(context).width,
+          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
         ),
         suppressMainToolbar: suppressMainToolbar,
       ),
@@ -1651,6 +1652,7 @@ class BrowserScreen extends HookConsumerWidget {
             generalSettingsWithDefaultsProvider.select((s) => s.sideRailWidth),
           ),
       windowWidth: MediaQuery.sizeOf(context).width,
+      devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
     );
 
     // The auto-hiding rail slides in over the page instead of sitting beside

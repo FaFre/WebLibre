@@ -27,6 +27,43 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 
+/// The color the browser chrome fills the system bar insets with: the active
+/// container's surface color, or the tab bar's surfaceContainer fallback when
+/// no container is active.
+///
+/// The tab bar computes the same color for its background, so everything that
+/// borders it — the [BrowserSystemBars] strips, the bottom bar's safe-area
+/// padding, the side rail's outer fill — reads it from here to stay seamless.
+Color watchBrowserBarTintColor(BuildContext context, WidgetRef ref) {
+  final selectedTabId = ref.watch(selectedTabProvider);
+
+  final showContainerUi = ref.watch(
+    generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
+  );
+  final containerColor = ref.watch(
+    watchTabContainerDataProvider(
+      selectedTabId,
+    ).select((data) => data.value?.color),
+  );
+  final useCustomColor = ref.watch(
+    watchTabContainerDataProvider(
+      selectedTabId,
+    ).select((data) => data.value?.metadata.useCustomColor ?? false),
+  );
+
+  final effectiveContainerColor = (showContainerUi && containerColor != null)
+      ? containerColor
+      : null;
+
+  return effectiveContainerColor != null
+      ? ContainerColors.palette(
+          context,
+          effectiveContainerColor,
+          useCustomColor: useCustomColor,
+        ).surfaceColor
+      : Theme.of(context).colorScheme.surfaceContainer;
+}
+
 /// Tints the status-bar (top) and navigation-bar (bottom) inset regions with
 /// the active container's surface color, mirroring how the tab bar
 /// ([BrowserBottomAppBar]) tints itself, and drives the system bar icon
@@ -42,9 +79,10 @@ import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 /// so the tint goes into the bar's own color through [SystemUiOverlayStyle].
 ///
 /// Designed to be placed as a full-bleed ([Positioned.fill]) layer in the
-/// browser [Stack], above the browser content but below the toolbars. The tab
-/// bar's safe-area padding is transparent, so the bottom strip shows through
-/// behind a visible bottom toolbar and remains visible when it is hidden.
+/// browser [Stack], above the browser content but below the toolbars. The
+/// bottom strip stays visible when the bottom toolbar hides; while it shows,
+/// the bar's safe-area padding covers the strip in the same color (see
+/// [BrowserBottomAppBar] for why it isn't left transparent).
 class BrowserSystemBars extends HookConsumerWidget {
   final double topInset;
   final double bottomInset;
@@ -57,37 +95,7 @@ class BrowserSystemBars extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final selectedTabId = ref.watch(selectedTabProvider);
-
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-    );
-    final containerColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.color),
-    );
-    final useCustomColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.metadata.useCustomColor ?? false),
-    );
-
-    final effectiveContainerColor = (showContainerUi && containerColor != null)
-        ? containerColor
-        : null;
-    final palette = effectiveContainerColor != null
-        ? ContainerColors.palette(
-            context,
-            effectiveContainerColor,
-            useCustomColor: useCustomColor,
-          )
-        : null;
-
-    // Mirror the tab bar's surfaceContainer fallback so the inset regions stay
-    // visually attached to the toolbar even when no container is active.
-    final tintColor = palette?.surfaceColor ?? colorScheme.surfaceContainer;
+    final tintColor = watchBrowserBarTintColor(context, ref);
 
     // Where the navigation bar lies outside the Flutter UI, the strip below
     // can't reach it (see [browserSystemBarsStyle]). The bottom strip is
