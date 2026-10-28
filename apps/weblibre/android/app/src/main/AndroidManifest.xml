@@ -54,7 +54,8 @@
         android:name=".MyApplication"
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="true"
+        android:memtagMode="async">
         
         <activity 
             android:name="eu.weblibre.flutter_mozilla_components.activities.NotificationActivity" 
