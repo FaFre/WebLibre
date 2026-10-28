@@ -3918,6 +3918,21 @@ abstract class GeckoGestureEvents {
   /// [sequence] Event sequence number for ordering.
   @asyncCallback
   void onGestureReset(int sequence);
+
+  /// Emitted when native text selection appears or disappears, tracked from the
+  /// selection action mode (the floating copy/paste toolbar) the engine starts
+  /// on the host activity.
+  ///
+  /// Selection handles are drawn by the compositor, not as Android views, so
+  /// dragging one produces an ordinary touch stream that the toolbar auto-hide
+  /// accumulator would otherwise read as a swipe. Consumers latch this flag on
+  /// pointer-down and ignore the stream for its duration. See
+  /// https://github.com/FaFre/WebLibre/issues/578.
+  ///
+  /// [sequence] Event sequence number for ordering.
+  /// [active] Whether a text selection is currently on screen.
+  @asyncCallback
+  void onTextSelectionActiveChange(int sequence, bool active);
 }
 
 /// Lifecycle state of the selected UnifiedPush distributor.

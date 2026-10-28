@@ -25,6 +25,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.ActionMode
 import android.view.View
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -33,6 +34,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
+import eu.weblibre.flutter_mozilla_components.feature.TextSelectionTracker
 import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
 import eu.weblibre.flutter_mozilla_components.startup.StartupIntentBroker
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
@@ -389,6 +391,23 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         decor.systemUiVisibility = visibility
     }
 
+    /**
+     * GeckoView's selection toolbar is an action mode started on this window
+     * (`BasicSelectionActionDelegate` → `Activity.startActionMode`). Reporting
+     * it is what lets the touch pipeline tell a selection-handle drag apart
+     * from a swipe. See [TextSelectionTracker] and
+     * https://github.com/FaFre/WebLibre/issues/578.
+     */
+    override fun onActionModeStarted(mode: ActionMode?) {
+        super.onActionModeStarted(mode)
+        TextSelectionTracker.onActionModeStarted()
+    }
+
+    override fun onActionModeFinished(mode: ActionMode?) {
+        super.onActionModeFinished(mode)
+        TextSelectionTracker.onActionModeFinished()
+    }
+
     override fun onPause() {
         Log.d(TAG, "onPause")
         super.onPause()
@@ -398,6 +417,15 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         Log.d(TAG, "onDestroy: isFinishing=$isFinishing, " +
             "cachedEngine=${engineTag(FlutterEngineCache.getInstance().get(ENGINE_ID))}")
         super.onDestroy()
+
+        // The selection toolbar dies with this window, but detaching the decor
+        // only dismisses a floating mode's toolbar without finishing the mode,
+        // so its finish never reaches onActionModeFinished. The process-wide
+        // tracker would stay stuck true for the next activity, silently
+        // disabling gestures and toolbar auto-hide. Not on resume: a pause
+        // (a translucent activity on top, a split-screen focus change) only
+        // hides the toolbar, and the mode that survives it reports no new start.
+        TextSelectionTracker.reset()
 
         if (!isFinishing) {
             Log.d(TAG, "onDestroy: system-initiated destroy, clearing stale engine")

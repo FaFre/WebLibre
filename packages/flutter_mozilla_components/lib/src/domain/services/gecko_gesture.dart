@@ -28,6 +28,8 @@ class GeckoGestureService extends GeckoGestureEvents {
 
   final _gestureProgressSubject = BehaviorSubject<String?>.seeded(null);
 
+  final _textSelectionActiveSubject = BehaviorSubject<bool>.seeded(false);
+
   /// Stream of recognized gesture keys.
   ///
   /// Emits the canonical key (e.g. `D-R`) each time the native recognizer
@@ -40,6 +42,18 @@ class GeckoGestureService extends GeckoGestureEvents {
   /// arrow is drawn, and `null` when the stroke ends (release, cancel or idle
   /// timeout). Consumers render the overlay while non-null.
   Stream<String?> get gestureProgress => _gestureProgressSubject.stream;
+
+  /// Whether native text selection is currently on screen.
+  ///
+  /// Selection handles are drawn by the compositor rather than as Android
+  /// views, so dragging one produces a plain touch stream that pointer-delta
+  /// consumers (the toolbar auto-hide accumulator) would read as a swipe. Latch
+  /// this on pointer-down and ignore the stream while it is set, rather than
+  /// sampling it mid-drag: the engine tears the selection toolbar down for the
+  /// duration of a handle drag, so it reads false exactly while one is in
+  /// progress. See https://github.com/FaFre/WebLibre/issues/578.
+  ValueStream<bool> get textSelectionActive =>
+      _textSelectionActiveSubject.stream;
 
   /// Creates a new gesture service.
   ///
@@ -90,9 +104,15 @@ class GeckoGestureService extends GeckoGestureEvents {
     _gestureProgressSubject.addWhenMoreRecent(sequence, null, null);
   }
 
+  @override
+  Future<void> onTextSelectionActiveChange(int sequence, bool active) async {
+    _textSelectionActiveSubject.addWhenMoreRecent(sequence, null, active);
+  }
+
   /// Disposes the service and closes all streams.
   Future<void> dispose() async {
     await _recognizedGestureSubject.close();
     await _gestureProgressSubject.close();
+    await _textSelectionActiveSubject.close();
   }
 }

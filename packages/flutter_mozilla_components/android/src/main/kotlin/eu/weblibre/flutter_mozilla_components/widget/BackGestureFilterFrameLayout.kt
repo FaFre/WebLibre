@@ -15,6 +15,7 @@ import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.feature.GestureRecognizer
+import eu.weblibre.flutter_mozilla_components.feature.TextSelectionTracker
 import kotlin.math.abs
 
 /**
@@ -64,6 +65,18 @@ class BackGestureFilterFrameLayout(
      * progress event, keeping plain taps and scrolls off the platform channel.
      */
     private var gestureFeedbackActive = false
+
+    /**
+     * Whether gesture recognition is suppressed for the touch stream currently
+     * in flight because it is a text-selection interaction (a handle drag).
+     *
+     * Latched on ACTION_DOWN rather than consulted per-event: Gecko tears the
+     * selection action mode down *during* a handle drag, so
+     * [TextSelectionTracker.isActive] goes false a few frames in. Touch-down is
+     * the only moment it reliably reports the truth. See
+     * https://github.com/FaFre/WebLibre/issues/578.
+     */
+    private var gestureSuppressedBySelection = false
 
     init {
         // A new direction arrow was registered: restart the idle-timeout (the
@@ -145,6 +158,44 @@ class BackGestureFilterFrameLayout(
         val config = GlobalComponents.gestureConfig
         gestureRecognizer.config = config
 
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                // New touch: clear any gesture claim so pull-to-refresh is only
+                // suppressed when this stroke actually matches a gesture.
+                GlobalComponents.touchConsumedByGesture = false
+                // A touch that starts while a selection is on screen belongs to
+                // the selection (dragging a handle), not to a gesture.
+                gestureSuppressedBySelection = TextSelectionTracker.onTouchStreamStarted()
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> Unit
+
+            // A long press that selects a word and then extends it without ever
+            // lifting starts as an ordinary stroke: the selection only appears
+            // mid-stream. Discard whatever was assembled so far and stay out of
+            // the way for the rest of the stream.
+            else -> if (!gestureSuppressedBySelection && TextSelectionTracker.isActive) {
+                gestureSuppressedBySelection = true
+                cancelGesture()
+            }
+        }
+
+        if (gestureSuppressedBySelection) {
+            // The recognizer either never saw this stream's ACTION_DOWN or was
+            // cancelled mid-stream, so it must not see the terminating event
+            // either — release the latch only once the stream is over.
+            if (ev.actionMasked == MotionEvent.ACTION_UP ||
+                ev.actionMasked == MotionEvent.ACTION_CANCEL
+            ) {
+                gestureSuppressedBySelection = false
+                // Cover a quick re-grab of a handle until Gecko re-shows the
+                // selection toolbar for the release.
+                TextSelectionTracker.onSelectionStreamEnded()
+            }
+            return
+        }
+
         val key = gestureRecognizer.feed(
             ev,
             width,
@@ -156,9 +207,6 @@ class BackGestureFilterFrameLayout(
             // Start the idle window on touch-down; subsequent restarts happen
             // only when the recognizer reports a new arrow (see onProgress).
             MotionEvent.ACTION_DOWN -> {
-                // New touch: clear any gesture claim so pull-to-refresh is only
-                // suppressed when this stroke actually matches a gesture.
-                GlobalComponents.touchConsumedByGesture = false
                 if (config != null && config.enabled) {
                     removeCallbacks(gestureTimeoutRunnable)
                     postDelayed(gestureTimeoutRunnable, config.timeoutMs)

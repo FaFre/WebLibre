@@ -42,6 +42,7 @@ import 'package:weblibre/features/geckoview/domain/providers/browser_extension.d
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/text_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -122,6 +123,22 @@ class _BrowserViewState extends ConsumerState<BrowserView>
   static const _pointerThrottleInterval = Duration(milliseconds: 32);
   DateTime _lastPointerEvent = DateTime(0);
   Offset _accumulatedDelta = Offset.zero;
+
+  /// Whether the touch stream in flight is a text-selection interaction rather
+  /// than a scroll, in which case its deltas must not reach the toolbar
+  /// auto-hide accumulator.
+  ///
+  /// Latched on pointer-down, because the engine hides the selection toolbar
+  /// for the duration of a handle drag and [textSelectionActiveProvider] reads
+  /// false while one is in progress. See
+  /// https://github.com/FaFre/WebLibre/issues/578.
+  bool _selectionDragInFlight = false;
+
+  /// Pointers currently down on the page, so [_selectionDragInFlight] spans the
+  /// whole stream from the first finger down to the last one up — as the native
+  /// gesture recognizer's latch does — rather than being re-decided whenever
+  /// another finger lands.
+  final Set<int> _downPointers = {};
 
   /// Whether anything has happened to the page since the last thumbnail was
   /// captured.
@@ -335,9 +352,30 @@ class _BrowserViewState extends ConsumerState<BrowserView>
       // A touch is the cheapest available proxy for "the page may look
       // different now" — it covers scrolling, tapping a disclosure, dismissing a
       // banner. Marked on down rather than on move so a tap counts too.
-      onPointerDown: (_) => _pageDirtySinceCapture = true,
-      onPointerUp: (_) {
+      onPointerDown: (event) {
         _pageDirtySinceCapture = true;
+
+        // A touch that starts while a selection is on screen belongs to the
+        // selection (dragging a handle), not to a scroll.
+        if (_downPointers.isEmpty) {
+          _selectionDragInFlight = ref.read(textSelectionActiveProvider);
+          if (_selectionDragInFlight) {
+            _accumulatedDelta = Offset.zero;
+          }
+        }
+        _downPointers.add(event.pointer);
+      },
+      onPointerUp: (event) {
+        _pageDirtySinceCapture = true;
+
+        _downPointers.remove(event.pointer);
+        if (_selectionDragInFlight) {
+          if (_downPointers.isEmpty) {
+            _selectionDragInFlight = false;
+          }
+          _accumulatedDelta = Offset.zero;
+          return;
+        }
 
         if (widget.pointerMoveEventSink != null &&
             _accumulatedDelta != Offset.zero) {
@@ -345,9 +383,29 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           _accumulatedDelta = Offset.zero;
         }
       },
+      onPointerCancel: (event) {
+        _downPointers.remove(event.pointer);
+        if (_downPointers.isEmpty) {
+          _selectionDragInFlight = false;
+        }
+        _accumulatedDelta = Offset.zero;
+      },
       onPointerMove: (widget.pointerMoveEventSink != null)
           ? (event) {
               if (event.down) {
+                // A long press that selects a word and then extends it without
+                // ever lifting starts as an ordinary stroke: the selection only
+                // appears mid-stream. Drop what was accumulated so far and stay
+                // out of the way for the rest of it.
+                if (!_selectionDragInFlight &&
+                    ref.read(textSelectionActiveProvider)) {
+                  _selectionDragInFlight = true;
+                  _accumulatedDelta = Offset.zero;
+                }
+                if (_selectionDragInFlight) {
+                  return;
+                }
+
                 _accumulatedDelta += event.localDelta;
                 final now = DateTime.now();
                 if (now.difference(_lastPointerEvent) >=
