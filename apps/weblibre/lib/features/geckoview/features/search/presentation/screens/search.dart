@@ -21,6 +21,7 @@ import 'dart:async';
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -47,6 +48,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_source_policy.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/bottom_field_layout.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/clipboard_fill.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_slivers.dart';
@@ -70,6 +72,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/c
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
@@ -673,6 +676,25 @@ class SearchScreen extends HookConsumerWidget {
       return null;
     }, [autoSubmitSearch, initialSearchText, activeBang]);
 
+    final showWebSearchResults =
+        isWebSearchBang(activeBang) &&
+        ref.watch(
+          metaSearchControllerProvider.select(
+            (s) => s.status != WebSearchStatus.idle || s.query.isNotEmpty,
+          ),
+        );
+
+    // By default the field follows the tab bar, so the input opens where the
+    // user just tapped (see [SearchFieldPlacement]). At the bottom, the list
+    // above it runs bottom-up: the first module, and each module's best match,
+    // end up next to the field and the thumb. Web search results are the
+    // exception — they are read top to bottom and page in at the end, so they
+    // keep the normal direction.
+    final fieldAtBottom =
+        ref.watch(effectiveSearchFieldPlacementProvider) ==
+        SearchFieldPlacement.bottom;
+    final reverseList = fieldAtBottom && !showWebSearchResults;
+
     // Persist the results scroll offset across navigation so returning to
     // the search screen after opening a result restores the user's place
     // instead of jumping back to the top. The offset provider is reset on
@@ -680,9 +702,13 @@ class SearchScreen extends HookConsumerWidget {
     final scrollController = useScrollController(
       initialScrollOffset: ref.read(webSearchScrollOffsetProvider),
     );
+    final reverseListRef = useRef(reverseList);
+    reverseListRef.value = reverseList;
     useEffect(() {
       void listener() {
-        if (scrollController.hasClients) {
+        // A reversed offset counts from the bottom; it is not a place in the
+        // results and must not be restored as one.
+        if (scrollController.hasClients && !reverseListRef.value) {
           ref
               .read(webSearchScrollOffsetProvider.notifier)
               .update(scrollController.offset);
@@ -692,6 +718,18 @@ class SearchScreen extends HookConsumerWidget {
       scrollController.addListener(listener);
       return () => scrollController.removeListener(listener);
     }, [scrollController]);
+
+    // Flipping the direction keeps the pixel offset, which then means a
+    // place measured from the other end. Start the new list at its beginning.
+    final previousReverseList = useRef(reverseList);
+    useEffect(() {
+      if (previousReverseList.value == reverseList) return null;
+      previousReverseList.value = reverseList;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.hasClients) scrollController.jumpTo(0);
+      });
+      return null;
+    }, [reverseList]);
 
     // The screen is two surfaces in one: before anything is typed it is the
     // new-tab page, afterwards it is the search results page. They are mutually
@@ -795,6 +833,262 @@ class SearchScreen extends HookConsumerWidget {
     // Only meaningful when there is a route to pop back to.
     final showCloseButton = context.canPop() && settings.showSearchCloseButton;
 
+    final closeButton = showCloseButton
+        ? IconButton(
+            tooltip: l10n.common_close,
+            icon: const Icon(Icons.close),
+            onPressed: () => context.pop(),
+          )
+        : null;
+
+    // The tab-type switcher and container selector. Edit mode has neither: the
+    // tab it edits already has both.
+    final Widget? toolbarTitle = isEditMode
+        ? null
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Builder(
+              builder: (context) {
+                final tabTypeSwitcher = Focus(
+                  canRequestFocus: false,
+                  child: AnimatedTabTypeSwitcher(
+                    selected: selectedTabType.value,
+                    onChanged: (value) {
+                      selectedTabType.value = value;
+                      // Restore focus to search field after segment change
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        searchFocusNode.requestFocus();
+                      });
+                    },
+                    showChildOption: createChildTabsOption,
+                    showIsolatedOption: settings.showIsolatedTabUi,
+                    selectedBackgroundColor: switch (selectedTabType.value) {
+                      TabType.regular => null,
+                      TabType.private => appColors.privateSelectionOverlay,
+                      TabType.isolated => appColors.isolatedSelectionOverlay,
+                      TabType.child => switch (currentTabTabType) {
+                        TabType.private => appColors.privateSelectionOverlay,
+                        TabType.isolated => appColors.isolatedSelectionOverlay,
+                        _ => null,
+                      },
+                    },
+                  ),
+                );
+
+                if (!settings.showContainerUi) {
+                  return Center(
+                    child: Transform.scale(scale: 1.08, child: tabTypeSwitcher),
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: tabTypeSwitcher,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      flex: 2,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: CompactContainerSelector(
+                          selectedContainer: selectedContainer,
+                          emphasizeSelection: false,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          );
+
+    final searchField = SearchField(
+      textFieldKey: textFieldKey,
+      showBangIcon: showBangIcon,
+      explicitBangSelected: showBangIcon,
+      textEditingController: searchTextController,
+      focusNode: searchFocusNode,
+      maxLines: isEditMode ? 3 : 1,
+      privateMode: privateTabMode,
+      label: Text(l10n.search_searchFieldLabel),
+      unfocusOnTapOutside: false,
+      onClearPressed: () {
+        final url = revertUrl.value;
+        if (url != null &&
+            searchTextController.text == reverseMatchedQuery.value) {
+          // First press after a reverse-match swap: restore the
+          // original URL and drop the auto-selected bang. The
+          // user can press again to actually clear.
+          searchTextController.value = TextEditingValue(
+            text: url,
+            selection: TextSelection(baseOffset: 0, extentOffset: url.length),
+          );
+          revertUrl.value = null;
+          reverseMatchedQuery.value = null;
+          ref.read(selectedBangTriggerProvider().notifier).clearTrigger();
+        } else {
+          revertUrl.value = null;
+          reverseMatchedQuery.value = null;
+          searchTextController.clear();
+        }
+      },
+      onSubmitted: (value) async {
+        if (value.isEmpty) return;
+
+        switch (classifyAddressBarInput(value)) {
+          case NavigateInputClassification(:final uri):
+            await openUriInTab(uri);
+          case SearchInputClassification(:final query):
+            // Resolved from the submitted text rather than the
+            // provider's state so a lookup still in flight for
+            // the last keystroke cannot misroute the search.
+            final inline = await ref
+                .read(inlineBangProvider.notifier)
+                .resolve(query);
+
+            // Read from both providers - use site if set, otherwise global
+            final siteBang = isEditMode
+                ? ref.read(
+                    selectedBangDataProvider(domain: existingTabState.url.host),
+                  )
+                : null;
+            final globalBang = ref.read(selectedBangDataProvider());
+            final bang =
+                inline?.bang ??
+                siteBang ??
+                globalBang ??
+                await ref.read(defaultSearchBangProvider.future);
+
+            if (bang == null) return;
+
+            // `!g` on its own carries no query, which every
+            // bang already reads as "open the site itself".
+            final uri = await resolveSearchUri(bang, inline?.query ?? query);
+            if (uri == null) {
+              // Web search dispatched in-app; reset edit state.
+              isEditingAfterSearch.value = false;
+              return;
+            }
+            await openUriInTab(uri);
+          case InvalidInputClassification():
+            if (context.mounted) {
+              ui_helper.showErrorMessage(context, l10n.search_invalidAddress);
+            }
+        }
+      },
+      activeBang: activeBang,
+      showSuggestions: true,
+    );
+
+    final clipboardFillLink = ClipboardFillLink(
+      controller: searchTextController,
+    );
+
+    final scrollView = CustomScrollView(
+      controller: scrollController,
+      reverse: reverseList,
+      slivers: [
+        if (!fieldAtBottom)
+          SliverAppBar(
+            floating: true,
+            pinned: true,
+            automaticallyImplyLeading: false,
+            leading: closeButton,
+            backgroundColor: colorScheme.surface,
+            scrolledUnderElevation: 0,
+            shadowColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            // Collapse the toolbar in edit mode (no tab-type switcher), but
+            // keep it when the close button needs somewhere to render.
+            toolbarHeight: (isEditMode && !showCloseButton)
+                ? 0
+                : kToolbarHeight,
+            titleSpacing: 0.0,
+            title: toolbarTitle,
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(preferredHeight.value),
+              child: searchField,
+            ),
+          ),
+        // In a reversed list the first sliver sits right above the field, so
+        // the prompt stays beside it there too. It scrolls rather than joining
+        // the bottom bar: a short window would not fit it next to the field.
+        SliverToBoxAdapter(child: clipboardFillLink),
+        // Next to the clipboard prompt, so a reversed list keeps it close to
+        // the field as well.
+        if (isWebSearchBang(activeBang))
+          const SliverPadding(
+            padding: EdgeInsets.fromLTRB(0, 8, 0, 4),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _WebSearchOptionsRow(),
+                  WebSearchTorBootstrapProgress(),
+                ],
+              ),
+            ),
+          ),
+        if (reorderActive)
+          SearchModuleReorderView(surface: activeSurface)
+        else if (showWebSearchResults) ...[
+          // Once a web search has been dispatched, the screen shows
+          // the fetched results only — search suggestions and search
+          // providers belong to the normal search page, not the
+          // results view.
+          WebSearchResultsSection(
+            resolveOpenTarget: () => WebSearchOpenTarget(
+              tabMode: effectiveTabMode,
+              containerSelection: selectedContainer == null
+                  ? const TabContainerSelection.unassigned()
+                  : TabContainerSelection.specific(selectedContainer),
+              parentId: (selectedTabType.value == TabType.child)
+                  ? ref.read(selectedTabProvider)
+                  : null,
+            ),
+          ),
+        ] else if (showNoInputSections)
+          ModuleSurfaceSliverList(
+            surface: ModuleSurface.newTab,
+            callbacks: moduleCallbacks,
+          )
+        else ...[
+          for (final entry in searchOrder)
+            if (searchWidgets.containsKey(entry.type) &&
+                entry.visible &&
+                canShowSearchModule(entry.type))
+              searchWidgets[entry.type]!,
+          const CustomizeSectionsButton(surface: ModuleSurface.search),
+        ],
+      ],
+    );
+
+    // With the keyboard covering half the screen, what is left of the list is
+    // too small to browse, wherever the field sits. A drag hides the keyboard
+    // but keeps the field focused, so tapping it brings the keyboard straight
+    // back. Only the list's own drags count: nested strips report a non-zero
+    // depth, and programmatic scrolls carry no drag details.
+    final keyboardHidingScrollView =
+        NotificationListener<ScrollStartNotification>(
+          onNotification: (notification) {
+            if (notification.depth == 0 &&
+                notification.dragDetails != null &&
+                searchFocusNode.hasFocus) {
+              unawaited(
+                SystemChannels.textInput.invokeMethod<void>('TextInput.hide'),
+              );
+            }
+            return false;
+          },
+          child: scrollView,
+        );
+
     // Arranging this surface's sections is a mode on top of the screen, not a
     // route, so back leaves the arrangement before it leaves the screen — the
     // same ladder the "Done" button offers.
@@ -813,266 +1107,32 @@ class SearchScreen extends HookConsumerWidget {
             child: ModuleSurfaceScope(
               surface: activeSurface,
               pinnedHeaderBackgroundColor: Theme.of(context).canvasColor,
-              child: CustomScrollView(
-                controller: scrollController,
-                slivers: [
-                  SliverAppBar(
-                    floating: true,
-                    pinned: true,
-                    automaticallyImplyLeading: false,
-                    leading: showCloseButton
-                        ? IconButton(
-                            tooltip: l10n.common_close,
-                            icon: const Icon(Icons.close),
-                            onPressed: () => context.pop(),
-                          )
-                        : null,
-                    backgroundColor: colorScheme.surface,
-                    scrolledUnderElevation: 0,
-                    shadowColor: Colors.transparent,
-                    surfaceTintColor: Colors.transparent,
-                    // Collapse the toolbar in edit mode (no tab-type switcher), but
-                    // keep it when the close button needs somewhere to render.
-                    toolbarHeight: (isEditMode && !showCloseButton)
-                        ? 0
-                        : kToolbarHeight,
-                    titleSpacing: 0.0,
-                    title: isEditMode
-                        ? null
-                        : Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0,
-                            ),
-                            child: Builder(
-                              builder: (context) {
-                                final tabTypeSwitcher = Focus(
-                                  canRequestFocus: false,
-                                  child: AnimatedTabTypeSwitcher(
-                                    selected: selectedTabType.value,
-                                    onChanged: (value) {
-                                      selectedTabType.value = value;
-                                      // Restore focus to search field after segment change
-                                      WidgetsBinding.instance
-                                          .addPostFrameCallback((_) {
-                                            searchFocusNode.requestFocus();
-                                          });
-                                    },
-                                    showChildOption: createChildTabsOption,
-                                    showIsolatedOption:
-                                        settings.showIsolatedTabUi,
-                                    selectedBackgroundColor:
-                                        switch (selectedTabType.value) {
-                                          TabType.regular => null,
-                                          TabType.private =>
-                                            appColors.privateSelectionOverlay,
-                                          TabType.isolated =>
-                                            appColors.isolatedSelectionOverlay,
-                                          TabType.child =>
-                                            switch (currentTabTabType) {
-                                              TabType.private =>
-                                                appColors
-                                                    .privateSelectionOverlay,
-                                              TabType.isolated =>
-                                                appColors
-                                                    .isolatedSelectionOverlay,
-                                              _ => null,
-                                            },
-                                        },
-                                  ),
-                                );
-
-                                if (!settings.showContainerUi) {
-                                  return Center(
-                                    child: Transform.scale(
-                                      scale: 1.08,
-                                      child: tabTypeSwitcher,
-                                    ),
-                                  );
-                                }
-
-                                return Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 4,
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: tabTypeSwitcher,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      flex: 2,
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: CompactContainerSelector(
-                                          selectedContainer: selectedContainer,
-                                          emphasizeSelection: false,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                    bottom: PreferredSize(
-                      preferredSize: Size.fromHeight(preferredHeight.value),
-                      child: SearchField(
-                        textFieldKey: textFieldKey,
-                        showBangIcon: showBangIcon,
-                        explicitBangSelected: showBangIcon,
-                        textEditingController: searchTextController,
-                        focusNode: searchFocusNode,
-                        maxLines: isEditMode ? 3 : 1,
-                        privateMode: privateTabMode,
-                        label: Text(l10n.search_searchFieldLabel),
-                        unfocusOnTapOutside: false,
-                        onClearPressed: () {
-                          final url = revertUrl.value;
-                          if (url != null &&
-                              searchTextController.text ==
-                                  reverseMatchedQuery.value) {
-                            // First press after a reverse-match swap: restore the
-                            // original URL and drop the auto-selected bang. The
-                            // user can press again to actually clear.
-                            searchTextController.value = TextEditingValue(
-                              text: url,
-                              selection: TextSelection(
-                                baseOffset: 0,
-                                extentOffset: url.length,
-                              ),
-                            );
-                            revertUrl.value = null;
-                            reverseMatchedQuery.value = null;
-                            ref
-                                .read(selectedBangTriggerProvider().notifier)
-                                .clearTrigger();
-                          } else {
-                            revertUrl.value = null;
-                            reverseMatchedQuery.value = null;
-                            searchTextController.clear();
-                          }
-                        },
-                        onSubmitted: (value) async {
-                          if (value.isEmpty) return;
-
-                          switch (classifyAddressBarInput(value)) {
-                            case NavigateInputClassification(:final uri):
-                              await openUriInTab(uri);
-                            case SearchInputClassification(:final query):
-                              // Resolved from the submitted text rather than the
-                              // provider's state so a lookup still in flight for
-                              // the last keystroke cannot misroute the search.
-                              final inline = await ref
-                                  .read(inlineBangProvider.notifier)
-                                  .resolve(query);
-
-                              // Read from both providers - use site if set, otherwise global
-                              final siteBang = isEditMode
-                                  ? ref.read(
-                                      selectedBangDataProvider(
-                                        domain: existingTabState.url.host,
-                                      ),
-                                    )
-                                  : null;
-                              final globalBang = ref.read(
-                                selectedBangDataProvider(),
-                              );
-                              final bang =
-                                  inline?.bang ??
-                                  siteBang ??
-                                  globalBang ??
-                                  await ref.read(
-                                    defaultSearchBangProvider.future,
-                                  );
-
-                              if (bang == null) return;
-
-                              // `!g` on its own carries no query, which every
-                              // bang already reads as "open the site itself".
-                              final uri = await resolveSearchUri(
-                                bang,
-                                inline?.query ?? query,
-                              );
-                              if (uri == null) {
-                                // Web search dispatched in-app; reset edit state.
-                                isEditingAfterSearch.value = false;
-                                return;
-                              }
-                              await openUriInTab(uri);
-                            case InvalidInputClassification():
-                              if (context.mounted) {
-                                ui_helper.showErrorMessage(
-                                  context,
-                                  l10n.search_invalidAddress,
-                                );
-                              }
-                          }
-                        },
-                        activeBang: activeBang,
-                        showSuggestions: true,
-                      ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: ClipboardFillLink(controller: searchTextController),
-                  ),
-                  if (isWebSearchBang(activeBang))
-                    const SliverPadding(
-                      padding: EdgeInsets.fromLTRB(0, 8, 0, 4),
-                      sliver: SliverToBoxAdapter(
+              reversed: reverseList,
+              child: !fieldAtBottom
+                  ? keyboardHidingScrollView
+                  : BottomFieldLayout(
+                      body: keyboardHidingScrollView,
+                      footer: ColoredBox(
+                        color: colorScheme.surface,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _WebSearchOptionsRow(),
-                            WebSearchTorBootstrapProgress(),
+                            if (closeButton != null || toolbarTitle != null)
+                              SizedBox(
+                                height: kToolbarHeight,
+                                child: Row(
+                                  children: [
+                                    ?closeButton,
+                                    if (toolbarTitle != null)
+                                      Expanded(child: toolbarTitle),
+                                  ],
+                                ),
+                              ),
+                            searchField,
                           ],
                         ),
                       ),
                     ),
-                  if (reorderActive)
-                    SearchModuleReorderView(surface: activeSurface)
-                  else if (isWebSearchBang(activeBang) &&
-                      ref.watch(
-                        metaSearchControllerProvider.select(
-                          (s) =>
-                              s.status != WebSearchStatus.idle ||
-                              s.query.isNotEmpty,
-                        ),
-                      )) ...[
-                    // Once a web search has been dispatched, the screen shows
-                    // the fetched results only — search suggestions and search
-                    // providers belong to the normal search page, not the
-                    // results view.
-                    WebSearchResultsSection(
-                      resolveOpenTarget: () => WebSearchOpenTarget(
-                        tabMode: effectiveTabMode,
-                        containerSelection: selectedContainer == null
-                            ? const TabContainerSelection.unassigned()
-                            : TabContainerSelection.specific(selectedContainer),
-                        parentId: (selectedTabType.value == TabType.child)
-                            ? ref.read(selectedTabProvider)
-                            : null,
-                      ),
-                    ),
-                  ] else if (showNoInputSections)
-                    ModuleSurfaceSliverList(
-                      surface: ModuleSurface.newTab,
-                      callbacks: moduleCallbacks,
-                    )
-                  else ...[
-                    for (final entry in searchOrder)
-                      if (searchWidgets.containsKey(entry.type) &&
-                          entry.visible &&
-                          canShowSearchModule(entry.type))
-                        searchWidgets[entry.type]!,
-                    const CustomizeSectionsButton(
-                      surface: ModuleSurface.search,
-                    ),
-                  ],
-                ],
-              ),
             ),
           ),
         ),

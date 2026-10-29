@@ -329,6 +329,16 @@ enum TabChipCloseButtonMode {
 /// thumb reach instead of moving it to the top of the screen.
 enum HomeSearchBarPlacement { auto, top, tabBar }
 
+/// Which edge of the search screen — the new-tab page and the address editor —
+/// holds its input field.
+///
+/// [auto] puts it on the edge the tab bar is drawn on, so the field opens where
+/// the user just tapped: at the bottom only for a bottom tab bar, and at the top
+/// for a top bar or a vertical side rail, which has no bottom row to follow.
+/// With the field at the bottom the suggestions above it run bottom-up, so the
+/// best match sits next to it.
+enum SearchFieldPlacement { auto, top, bottom }
+
 enum DeleteBrowsingDataType {
   tabs,
   history,
@@ -425,6 +435,11 @@ class GeneralSettings with FastEquatable {
   /// [HomeSearchBarPlacement] and [effectiveHomeSearchBarPlacement].
   @JsonKey(unknownEnumValue: HomeSearchBarPlacement.auto)
   final HomeSearchBarPlacement homeSearchBarPlacement;
+
+  /// Where the search screen's input field sits. See [SearchFieldPlacement]
+  /// and [effectiveSearchFieldPlacement].
+  @JsonKey(unknownEnumValue: SearchFieldPlacement.auto)
+  final SearchFieldPlacement searchFieldPlacement;
 
   /// The wallpaper shown behind the home surface, as a file name within the
   /// profile's wallpaper directory — never a path. Null means no wallpaper, and
@@ -709,6 +724,7 @@ class GeneralSettings with FastEquatable {
     required this.homeTargetUrl,
     required this.homeTargetOnLastTabClosed,
     required this.homeSearchBarPlacement,
+    required this.searchFieldPlacement,
     required this.homeWallpaperFile,
     required this.homeWallpaperBlur,
     required this.homeWallpaperDim,
@@ -811,6 +827,7 @@ class GeneralSettings with FastEquatable {
     this.homeTargetUrl,
     bool? homeTargetOnLastTabClosed,
     HomeSearchBarPlacement? homeSearchBarPlacement,
+    SearchFieldPlacement? searchFieldPlacement,
     this.homeWallpaperFile,
     double? homeWallpaperBlur,
     double? homeWallpaperDim,
@@ -913,6 +930,7 @@ class GeneralSettings with FastEquatable {
        // tab bar position is the one they can reach.
        homeSearchBarPlacement =
            homeSearchBarPlacement ?? HomeSearchBarPlacement.auto,
+       searchFieldPlacement = searchFieldPlacement ?? SearchFieldPlacement.auto,
        // Clamped on the way in: these reach the widget tree as an ImageFilter
        // sigma and a colour alpha, and a value read back from a hand-edited
        // database must not be able to hand either one something invalid.
@@ -1135,6 +1153,22 @@ class GeneralSettings with FastEquatable {
     final placement => placement,
   };
 
+  /// [searchFieldPlacement] with [SearchFieldPlacement.auto] resolved against
+  /// the tab bar's *resolved* position. Never returns
+  /// [SearchFieldPlacement.auto].
+  ///
+  /// Only a bottom tab bar resolves to [SearchFieldPlacement.bottom]. An
+  /// explicit choice is returned untouched, side rail or not.
+  SearchFieldPlacement effectiveSearchFieldPlacement({
+    required WindowSizeClass window,
+  }) => switch (searchFieldPlacement) {
+    SearchFieldPlacement.auto =>
+      effectiveTabBarPosition(window: window) == TabBarPosition.bottom
+          ? SearchFieldPlacement.bottom
+          : SearchFieldPlacement.top,
+    final placement => placement,
+  };
+
   /// Container-dependent stacking modes degrade to a single recently-used
   /// row when the container UI is disabled.
   ///
@@ -1214,6 +1248,7 @@ class GeneralSettings with FastEquatable {
     homeTargetUrl,
     homeTargetOnLastTabClosed,
     homeSearchBarPlacement,
+    searchFieldPlacement,
     homeWallpaperFile,
     homeWallpaperBlur,
     homeWallpaperDim,

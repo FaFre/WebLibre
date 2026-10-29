@@ -401,6 +401,63 @@ final class EffectiveAppLocaleProvider
 String _$effectiveAppLocaleHash() =>
     r'ab79e794177a3521e25451dd865a6a919dd37778';
 
+/// [GeneralSettings.effectiveSearchFieldPlacement] resolved against the
+/// current window.
+
+@ProviderFor(effectiveSearchFieldPlacement)
+final effectiveSearchFieldPlacementProvider =
+    EffectiveSearchFieldPlacementProvider._();
+
+/// [GeneralSettings.effectiveSearchFieldPlacement] resolved against the
+/// current window.
+
+final class EffectiveSearchFieldPlacementProvider
+    extends
+        $FunctionalProvider<
+          SearchFieldPlacement,
+          SearchFieldPlacement,
+          SearchFieldPlacement
+        >
+    with $Provider<SearchFieldPlacement> {
+  /// [GeneralSettings.effectiveSearchFieldPlacement] resolved against the
+  /// current window.
+  EffectiveSearchFieldPlacementProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveSearchFieldPlacementProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveSearchFieldPlacementHash();
+
+  @$internal
+  @override
+  $ProviderElement<SearchFieldPlacement> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SearchFieldPlacement create(Ref ref) {
+    return effectiveSearchFieldPlacement(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SearchFieldPlacement value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SearchFieldPlacement>(value),
+    );
+  }
+}
+
+String _$effectiveSearchFieldPlacementHash() =>
+    r'045ab5e28bd7e421645e64dfd3fb282b1483f1a1';
+
 /// [GeneralSettings.effectiveHomeSearchBarPlacement] resolved against the
 /// current window.
 

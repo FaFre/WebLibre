@@ -146,6 +146,7 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'homeTargetUrl': DriftSqlType.string,
   'homeTargetOnLastTabClosed': DriftSqlType.bool,
   'homeSearchBarPlacement': DriftSqlType.string,
+  'searchFieldPlacement': DriftSqlType.string,
   'homeWallpaperFile': DriftSqlType.string,
   'homeWallpaperBlur': DriftSqlType.double,
   'homeWallpaperDim': DriftSqlType.double,
@@ -363,6 +364,19 @@ Locale? effectiveAppLocale(Ref ref) {
   }
 
   return resolved;
+}
+
+/// [GeneralSettings.effectiveSearchFieldPlacement] resolved against the
+/// current window.
+@Riverpod(keepAlive: true)
+SearchFieldPlacement effectiveSearchFieldPlacement(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveSearchFieldPlacement(window: window),
+    ),
+  );
 }
 
 /// [GeneralSettings.effectiveHomeSearchBarPlacement] resolved against the

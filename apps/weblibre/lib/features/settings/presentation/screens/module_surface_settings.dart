@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/utils/search_module_type_l10n.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/home_search_bar_placement_l10n.dart';
+import 'package:weblibre/features/settings/presentation/utils/search_field_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -87,6 +88,10 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
         // discovering the home page is configurable.
         if (surface == ModuleSurface.home)
           const SliverToBoxAdapter(child: _HomeSearchBarRow()),
+        // The new tab page's field moves too, and where it sits decides which
+        // end of this list is nearest to it.
+        if (surface == ModuleSurface.newTab)
+          const SliverToBoxAdapter(child: _SearchFieldRow()),
         SliverReorderableList(
           itemCount: entries.length,
           onReorderItem: notifier.reorder,
@@ -166,6 +171,54 @@ class _HomeSearchBarRow extends ConsumerWidget {
         title: Text(l10n.settings_homeSearchBarRowTitle),
         subtitle: Text(
           stored == HomeSearchBarPlacement.auto
+              ? l10n.settings_currentlyResolvesTo(
+                  stored.label(context),
+                  resolved.label(context),
+                )
+              : stored.label(context),
+        ),
+        trailing: const Icon(Icons.arrow_drop_down),
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+      ),
+    );
+  }
+}
+
+/// Where the new tab page's input field sits, as a one-tap menu. Shows what
+/// "Follow the tab bar" currently resolves to, like [_HomeSearchBarRow].
+class _SearchFieldRow extends ConsumerWidget {
+  const _SearchFieldRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final stored = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.searchFieldPlacement),
+    );
+    final resolved = ref.watch(effectiveSearchFieldPlacementProvider);
+
+    return MenuAnchor(
+      menuChildren: [
+        for (final placement in SearchFieldPlacement.values)
+          MenuItemButton(
+            leadingIcon: Icon(
+              placement == stored
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked,
+            ),
+            onPressed: () async {
+              await ref
+                  .read(saveGeneralSettingsControllerProvider.notifier)
+                  .save((s) => s.copyWith.searchFieldPlacement(placement));
+            },
+            child: Text(placement.label(context)),
+          ),
+      ],
+      builder: (context, controller, child) => ListTile(
+        leading: const Icon(Icons.search),
+        title: Text(l10n.settings_searchFieldRowTitle),
+        subtitle: Text(
+          stored == SearchFieldPlacement.auto
               ? l10n.settings_currentlyResolvesTo(
                   stored.label(context),
                   resolved.label(context),

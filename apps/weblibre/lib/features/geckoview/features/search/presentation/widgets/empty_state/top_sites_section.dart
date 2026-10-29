@@ -341,6 +341,14 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final localItems = useKeyedState(persistedItems, [persistedItems]);
 
+    // The arrangement must not move a tile from where the normal grid shows
+    // it. In a reversed surface that grid is a sliver laid out bottom-up, with
+    // the shortcuts in the rows nearest the field and suggestions above them,
+    // while these grids sit in a box that would lay out top-down: entering the
+    // mode flipped the rows, and a tile dropped into an upper row came back in
+    // a lower one.
+    final reversed = ModuleSurfaceScope.of(context).reversed;
+
     // Attached to the inner grid below, and handed to ReorderableBuilder so it
     // reads its scroll position from there rather than from the enclosing
     // CustomScrollView.
@@ -459,44 +467,48 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                   reorderBusy.value = false;
                 }
               },
+              // Bookkeeping for a children list in reverse order; this grid
+              // never scrolls, so it changes nothing today but keeps the
+              // package's contract.
+              reverse: reversed,
               childBuilder: (reorderableItemBuilder) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    GridView.builder(
-                      // Never scrolls (the outer surface does), so this
-                      // controller's offset stays at zero — which is exactly
-                      // what ReorderableBuilder needs to read. Only this grid
-                      // gets it: a controller attached to two positions throws
-                      // when the package asks for `position`.
-                      controller: gridScrollController,
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: layout.crossAxisCount,
-                        mainAxisSpacing: _gridMainAxisSpacing,
-                        crossAxisSpacing: _gridCrossAxisSpacing,
-                        childAspectRatio: layout.childAspectRatio,
+                final persistedGrid = GridView.builder(
+                  // Never scrolls (the outer surface does), so this
+                  // controller's offset stays at zero — which is exactly
+                  // what ReorderableBuilder needs to read. Only this grid
+                  // gets it: a controller attached to two positions throws
+                  // when the package asks for `position`.
+                  controller: gridScrollController,
+                  reverse: reversed,
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: layout.crossAxisCount,
+                    mainAxisSpacing: _gridMainAxisSpacing,
+                    crossAxisSpacing: _gridCrossAxisSpacing,
+                    childAspectRatio: layout.childAspectRatio,
+                  ),
+                  itemCount: localItems.value.length,
+                  itemBuilder: (context, index) {
+                    final item = localItems.value[index];
+                    final draggable = CustomDraggable(
+                      key: ValueKey(item.id ?? 'top-site-$index'),
+                      data: item.id ?? 'top-site-$index',
+                      child: _TopSiteGridTile(
+                        item: item,
+                        onTap: () => onUriSelected(item.url),
+                        showDragHandle: true,
                       ),
-                      itemCount: localItems.value.length,
-                      itemBuilder: (context, index) {
-                        final item = localItems.value[index];
-                        final draggable = CustomDraggable(
-                          key: ValueKey(item.id ?? 'top-site-$index'),
-                          data: item.id ?? 'top-site-$index',
-                          child: _TopSiteGridTile(
-                            item: item,
-                            onTap: () => onUriSelected(item.url),
-                            showDragHandle: true,
-                          ),
-                        );
-                        return reorderableItemBuilder(draggable, index);
-                      },
-                    ),
-                    if (historyItems.isNotEmpty) ...[
-                      const SizedBox(height: 8.0),
-                      GridView.builder(
+                    );
+                    return reorderableItemBuilder(draggable, index);
+                  },
+                );
+
+                final historyGrid = historyItems.isEmpty
+                    ? null
+                    : GridView.builder(
+                        reverse: reversed,
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -517,9 +529,19 @@ class _ReorderableTopSitesGrid extends HookConsumerWidget {
                             ),
                           );
                         },
-                      ),
-                    ],
+                      );
+
+                final groups = [
+                  persistedGrid,
+                  if (historyGrid != null) ...[
+                    const SizedBox(height: 8.0),
+                    historyGrid,
                   ],
+                ];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: reversed ? groups.reversed.toList() : groups,
                 );
               },
             );

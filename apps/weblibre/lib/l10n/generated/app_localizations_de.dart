@@ -9187,6 +9187,43 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wo die Startseite ihr Suchfeld anbietet';
 
   @override
+  String get settings_indexSearchFieldPlacementTitle =>
+      'Suchfeld bei neuen Tabs';
+
+  @override
+  String get settings_indexSearchFieldPlacementKeywords =>
+      'Suche, Suchfeld, Eingabe, Position, Adresse, URL, bearbeiten, oben, unten, Tableiste, neuer Tab, einhändig, Daumen';
+
+  @override
+  String get settings_indexSearchFieldPlacementSubtitle =>
+      'Wo die Neuer-Tab-Seite und das Bearbeiten der Adresse das Eingabefeld zeigen';
+
+  @override
+  String get settings_searchFieldPlacementAutoLabel => 'Der Tableiste folgen';
+
+  @override
+  String get settings_searchFieldPlacementTopLabel => 'Oben';
+
+  @override
+  String get settings_searchFieldPlacementBottomLabel => 'Unten';
+
+  @override
+  String settings_searchFieldPlacementCurrentlyLabel(String value) {
+    return 'Derzeit: $value';
+  }
+
+  @override
+  String get settings_searchFieldPlacementTopDescription =>
+      'Vorschläge stehen unter dem Feld';
+
+  @override
+  String get settings_searchFieldPlacementBottomDescription =>
+      'In Daumenreichweite, Vorschläge darüber, der beste direkt am Feld';
+
+  @override
+  String get settings_searchFieldRowTitle => 'Suchfeld';
+
+  @override
   String get settings_allowlistExceptionsSectionTitle =>
       'Ausnahmen der Positivliste';
 

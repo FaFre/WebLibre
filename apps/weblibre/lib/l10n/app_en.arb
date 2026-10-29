@@ -11316,6 +11316,51 @@
   "@settings_indexHomeSearchBarPlacementSubtitle": {
     "description": "Explanation of that setting."
   },
+  "settings_indexSearchFieldPlacementTitle": "Search field on new tabs",
+  "@settings_indexSearchFieldPlacementTitle": {
+    "description": "Setting for which edge of the new tab page — also used when editing a page's address — holds the input field."
+  },
+  "settings_indexSearchFieldPlacementKeywords": "search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb",
+  "@settings_indexSearchFieldPlacementKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "settings_indexSearchFieldPlacementSubtitle": "Where the new tab page and address editing put the input field",
+  "@settings_indexSearchFieldPlacementSubtitle": {
+    "description": "Explanation of that setting."
+  },
+  "settings_searchFieldPlacementAutoLabel": "Follow the tab bar",
+  "@settings_searchFieldPlacementAutoLabel": {
+    "description": "Option for where the new tab page's input field sits: on the same edge as the tab bar."
+  },
+  "settings_searchFieldPlacementTopLabel": "Top",
+  "@settings_searchFieldPlacementTopLabel": {
+    "description": "Option for where the new tab page's input field sits: at the top of the screen."
+  },
+  "settings_searchFieldPlacementBottomLabel": "Bottom",
+  "@settings_searchFieldPlacementBottomLabel": {
+    "description": "Option for where the new tab page's input field sits: at the bottom of the screen, above the keyboard."
+  },
+  "settings_searchFieldPlacementCurrentlyLabel": "Currently: {value}",
+  "@settings_searchFieldPlacementCurrentlyLabel": {
+    "description": "Line under the \"Follow the tab bar\" option for the new tab page's input field. value is the name of the position it currently uses, exactly as shown in the option list, e.g. \"Bottom\".",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_searchFieldPlacementTopDescription": "Suggestions are listed below the field",
+  "@settings_searchFieldPlacementTopDescription": {
+    "description": "Explanation under \"Top\"."
+  },
+  "settings_searchFieldPlacementBottomDescription": "Within thumb reach, with suggestions above it and the best match nearest",
+  "@settings_searchFieldPlacementBottomDescription": {
+    "description": "Explanation under \"Bottom\". The best match is the suggestion listed closest to the field."
+  },
+  "settings_searchFieldRowTitle": "Search field",
+  "@settings_searchFieldRowTitle": {
+    "description": "Row in the new tab page section editor for the input field's position."
+  },
   "settings_allowlistExceptionsSectionTitle": "Allowlist Exceptions",
   "@settings_allowlistExceptionsSectionTitle": {
     "description": "Section heading on the custom tracking protection screen for compatibility exceptions (Mozilla's allowlist)."

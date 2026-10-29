@@ -65,6 +65,10 @@ abstract class _$GeneralSettingsCWProxy {
     HomeSearchBarPlacement homeSearchBarPlacement,
   );
 
+  GeneralSettings searchFieldPlacement(
+    SearchFieldPlacement searchFieldPlacement,
+  );
+
   GeneralSettings homeWallpaperFile(String? homeWallpaperFile);
 
   GeneralSettings homeWallpaperBlur(double homeWallpaperBlur);
@@ -281,6 +285,7 @@ abstract class _$GeneralSettingsCWProxy {
     String? homeTargetUrl,
     bool homeTargetOnLastTabClosed,
     HomeSearchBarPlacement homeSearchBarPlacement,
+    SearchFieldPlacement searchFieldPlacement,
     String? homeWallpaperFile,
     double homeWallpaperBlur,
     double homeWallpaperDim,
@@ -467,6 +472,11 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   GeneralSettings homeSearchBarPlacement(
     HomeSearchBarPlacement homeSearchBarPlacement,
   ) => call(homeSearchBarPlacement: homeSearchBarPlacement);
+
+  @override
+  GeneralSettings searchFieldPlacement(
+    SearchFieldPlacement searchFieldPlacement,
+  ) => call(searchFieldPlacement: searchFieldPlacement);
 
   @override
   GeneralSettings homeWallpaperFile(String? homeWallpaperFile) =>
@@ -829,6 +839,7 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
+    Object? searchFieldPlacement = const $CopyWithPlaceholder(),
     Object? homeWallpaperFile = const $CopyWithPlaceholder(),
     Object? homeWallpaperBlur = const $CopyWithPlaceholder(),
     Object? homeWallpaperDim = const $CopyWithPlaceholder(),
@@ -1047,6 +1058,12 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeSearchBarPlacement
           // ignore: cast_nullable_to_non_nullable
           : homeSearchBarPlacement as HomeSearchBarPlacement,
+      searchFieldPlacement:
+          searchFieldPlacement == const $CopyWithPlaceholder() ||
+              searchFieldPlacement == null
+          ? _value.searchFieldPlacement
+          // ignore: cast_nullable_to_non_nullable
+          : searchFieldPlacement as SearchFieldPlacement,
       homeWallpaperFile: homeWallpaperFile == const $CopyWithPlaceholder()
           ? _value.homeWallpaperFile
           // ignore: cast_nullable_to_non_nullable
@@ -1542,6 +1559,11 @@ GeneralSettings _$GeneralSettingsFromJson(
     json['homeSearchBarPlacement'],
     unknownValue: HomeSearchBarPlacement.auto,
   ),
+  searchFieldPlacement: $enumDecodeNullable(
+    _$SearchFieldPlacementEnumMap,
+    json['searchFieldPlacement'],
+    unknownValue: SearchFieldPlacement.auto,
+  ),
   homeWallpaperFile: json['homeWallpaperFile'] as String?,
   homeWallpaperBlur: (json['homeWallpaperBlur'] as num?)?.toDouble(),
   homeWallpaperDim: (json['homeWallpaperDim'] as num?)?.toDouble(),
@@ -1730,6 +1752,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
+  'searchFieldPlacement':
+      _$SearchFieldPlacementEnumMap[instance.searchFieldPlacement]!,
   'homeWallpaperFile': instance.homeWallpaperFile,
   'homeWallpaperBlur': instance.homeWallpaperBlur,
   'homeWallpaperDim': instance.homeWallpaperDim,
@@ -1862,6 +1886,12 @@ const _$HomeSearchBarPlacementEnumMap = {
   HomeSearchBarPlacement.auto: 'auto',
   HomeSearchBarPlacement.top: 'top',
   HomeSearchBarPlacement.tabBar: 'tabBar',
+};
+
+const _$SearchFieldPlacementEnumMap = {
+  SearchFieldPlacement.auto: 'auto',
+  SearchFieldPlacement.top: 'top',
+  SearchFieldPlacement.bottom: 'bottom',
 };
 
 const _$TabTypeEnumMap = {

@@ -114,8 +114,74 @@ class SearchField extends HookConsumerWidget {
         privateMode: privateMode,
       ).select((policy) => policy.savedHistory),
     );
+    // While the keyboard is away with the field still focused — a drag on the
+    // list below, or back — the completion is held back rather than shown.
+    // Otherwise the tap that brings the keyboard back would land on a
+    // completion the user is no longer looking at and take it. It returns with
+    // the keyboard — where the cursor allows, see [cursorAtEnd].
+    //
+    // Watched through the metrics rather than MediaQuery, which would rebuild
+    // the field on every frame of the keyboard's slide. A hardware keyboard
+    // never reports an inset, so it never holds one back — but one connected
+    // while the on-screen keyboard is up makes that keyboard go away for good.
+    // A key pressed on it is how the user says they are typing again, so it
+    // releases the completion; with the on-screen keyboard down there is no
+    // other source of key events. A floating on-screen keyboard reports no
+    // inset either and sends no key events, so text it commits releases the
+    // completion too — see [userInputFormatter].
+    final view = View.of(context);
+    final keyboardShown = useRef(view.viewInsets.bottom > 0);
+    final keyboardAway = useState(false);
+    useEffect(() {
+      final observer = _MetricsObserver(() {
+        final shown = view.viewInsets.bottom > 0;
+        if (keyboardShown.value && !shown && safeFocusNode.hasFocus) {
+          keyboardAway.value = true;
+        } else if (!keyboardShown.value && shown && keyboardAway.value) {
+          keyboardAway.value = false;
+        }
+        keyboardShown.value = shown;
+      });
+      bool onHardwareKey(KeyEvent event) {
+        if (event is KeyDownEvent &&
+            keyboardAway.value &&
+            safeFocusNode.hasFocus) {
+          keyboardAway.value = false;
+        }
+        return false;
+      }
+
+      WidgetsBinding.instance.addObserver(observer);
+      HardwareKeyboard.instance.addHandler(onHardwareKey);
+      return () {
+        WidgetsBinding.instance.removeObserver(observer);
+        HardwareKeyboard.instance.removeHandler(onHardwareKey);
+      };
+    }, [view, safeFocusNode, textEditingController]);
+
+    // A completion continues the typed text from its end, so it is shown — and
+    // taken on enter — only while the cursor is there. A cursor moved into the
+    // text (arrow keys, the selection handles, the tap that brought the
+    // keyboard back) holds it back until the cursor returns, so enter always
+    // submits what the field visibly says. No cursor placed yet counts as the
+    // end: setting the text programmatically leaves the selection invalid.
+    final cursorAtEnd = useListenableSelector(textEditingController, () {
+      final selection = textEditingController.selection;
+      return !selection.isValid ||
+          (selection.isCollapsed &&
+              selection.baseOffset == textEditingController.text.length);
+    });
+
+    // Input formatters run only for text the user enters — the IME, a paste —
+    // never for text set on the controller, which is how a suggestion row or
+    // the clipboard prompt fills the field while the keyboard is away. So only
+    // real typing ends the hold-back, and the race it guards stays closed.
+    final userInputFormatter = useMemoized(
+      () => _UserTextInputFormatter(() => keyboardAway.value = false),
+    );
+
     final suggestion = switch (completion.value) {
-      _ when explicitBangSelected => null,
+      _ when explicitBangSelected || keyboardAway.value || !cursorAtEnd => null,
       (:final text, :final usedHistory)
           when !usedHistory || savedHistoryAllowed =>
         text,
@@ -188,7 +254,21 @@ class SearchField extends HookConsumerWidget {
             : TextInputAction.send,
         minLines: minLines,
         autofocus: autofocus,
+        inputFormatters: [userInputFormatter],
         onSuggestionDismiss: () {
+          completion.value = null;
+        },
+        onSuggestionAccept: () {
+          final accepted = suggestion;
+          if (accepted == null) return;
+
+          unawaited(HapticFeedback.lightImpact());
+
+          textEditingController.text = accepted;
+          textEditingController.selection = TextSelection.collapsed(
+            offset: accepted.length,
+          );
+
           completion.value = null;
         },
         decoration: InputDecoration(
@@ -245,19 +325,33 @@ class SearchField extends HookConsumerWidget {
               }
             : null,
         onSubmitted: onSubmitted,
-        onTap: () {
-          if (suggestion != null) {
-            unawaited(HapticFeedback.lightImpact());
-
-            textEditingController.text = suggestion;
-            textEditingController.selection = TextSelection.collapsed(
-              offset: suggestion.length,
-            );
-
-            completion.value = null;
-          }
-        },
       ),
     );
+  }
+}
+
+/// Bridges [WidgetsBindingObserver.didChangeMetrics] to a plain callback.
+class _MetricsObserver extends WidgetsBindingObserver {
+  final VoidCallback onChanged;
+
+  _MetricsObserver(this.onChanged);
+
+  @override
+  void didChangeMetrics() => onChanged();
+}
+
+/// Reports text the user entered, without changing it.
+class _UserTextInputFormatter extends TextInputFormatter {
+  final VoidCallback onInput;
+
+  _UserTextInputFormatter(this.onInput);
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text != oldValue.text) onInput();
+    return newValue;
   }
 }

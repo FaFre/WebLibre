@@ -48,10 +48,22 @@ class ModuleSurfaceScope extends InheritedWidget {
   /// the bands land next to each other and the surface reads as stripes.
   final Color? pinnedHeaderBackgroundColor;
 
+  /// Whether the host's scroll view runs from the bottom up
+  /// (`CustomScrollView.reverse`), so the first module sits at the bottom edge,
+  /// next to a search field placed below the list.
+  ///
+  /// Slivers lay out along the flipped axis on their own, which already puts a
+  /// list's first row nearest the field. What they cannot know is that a
+  /// section's header is still meant to read *above* its rows — sections use
+  /// this to put it there. Headers do not pin while it is set: a pinned sliver
+  /// sticks to the leading edge, which in a reversed list is the bottom one.
+  final bool reversed;
+
   const ModuleSurfaceScope({
     super.key,
     required this.surface,
     required this.pinnedHeaderBackgroundColor,
+    this.reversed = false,
     required super.child,
   });
 
@@ -72,5 +84,6 @@ class ModuleSurfaceScope extends InheritedWidget {
   @override
   bool updateShouldNotify(ModuleSurfaceScope oldWidget) =>
       surface != oldWidget.surface ||
-      pinnedHeaderBackgroundColor != oldWidget.pinnedHeaderBackgroundColor;
+      pinnedHeaderBackgroundColor != oldWidget.pinnedHeaderBackgroundColor ||
+      reversed != oldWidget.reversed;
 }

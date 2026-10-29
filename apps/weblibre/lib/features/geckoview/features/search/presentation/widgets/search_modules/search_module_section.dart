@@ -152,7 +152,14 @@ class SearchModuleSection extends ConsumerWidget {
         ? null
         : (scope == null
               ? Theme.of(context).canvasColor
-              : scope.pinnedHeaderBackgroundColor);
+              : (scope.reversed ? null : scope.pinnedHeaderBackgroundColor));
+
+    // In a reversed scroll view slivers stack from the bottom up, so the
+    // header goes last to still read above its rows. The rows themselves need
+    // nothing: a list's first item lands at the bottom, nearest the field.
+    final reversed = scope?.reversed ?? false;
+    List<Widget> inReadingOrder(List<Widget> slivers) =>
+        reversed ? slivers.reversed.toList() : slivers;
 
     final header = SearchModuleHeader(
       title: title,
@@ -205,13 +212,15 @@ class SearchModuleSection extends ConsumerWidget {
           sliver: SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: MultiSliver(
-              children: [
+              children: inReadingOrder([
                 SliverToBoxAdapter(child: header),
-                ...contentSliverBuilder(
-                  isCollapsed: isCollapsed,
-                  visibleCount: visibleCount,
+                MultiSliver(
+                  children: contentSliverBuilder(
+                    isCollapsed: isCollapsed,
+                    visibleCount: visibleCount,
+                  ),
                 ),
-              ],
+              ]),
             ),
           ),
         ),
@@ -220,7 +229,7 @@ class SearchModuleSection extends ConsumerWidget {
 
     return MultiSliver(
       pushPinnedChildren: pinnedBackground != null,
-      children: [
+      children: inReadingOrder([
         // Sections are separated by space rather than a rule. A divider drawn
         // directly above a header that carries its own backdrop produces two
         // edges where the eye expects one.
@@ -231,11 +240,13 @@ class SearchModuleSection extends ConsumerWidget {
           )
         else
           SliverToBoxAdapter(child: header),
-        ...contentSliverBuilder(
-          isCollapsed: isCollapsed,
-          visibleCount: visibleCount,
+        MultiSliver(
+          children: contentSliverBuilder(
+            isCollapsed: isCollapsed,
+            visibleCount: visibleCount,
+          ),
         ),
-      ],
+      ]),
     );
   }
 }

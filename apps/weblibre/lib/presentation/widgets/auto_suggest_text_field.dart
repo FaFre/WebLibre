@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nullability/nullability.dart';
@@ -51,6 +52,16 @@ class AutoSuggestTextField extends HookWidget {
   final TapRegionCallback? onTapOutside;
   final VoidCallback? onTap;
   final VoidCallback? onSuggestionDismiss;
+
+  /// Called when a tap lands on the shown suggestion's completion — the part
+  /// past the typed text.
+  ///
+  /// Where the tap lands decides, as in Firefox's inline autocomplete: a tap
+  /// inside the typed text places the cursor there and dismisses the
+  /// suggestion ([onSuggestionDismiss]), and a tap at the end of the typed
+  /// text, where the cursor already sits, leaves the suggestion as it is. Only
+  /// a tap on the completion itself says "take this".
+  final VoidCallback? onSuggestionAccept;
   final bool enableSuggestions;
   final bool autocorrect;
   final GlobalKey? textFieldKey;
@@ -87,6 +98,7 @@ class AutoSuggestTextField extends HookWidget {
     this.onTapOutside,
     this.onTap,
     this.onSuggestionDismiss,
+    this.onSuggestionAccept,
     this.enableSuggestions = true,
     this.autocorrect = false,
     this.textFieldKey,
@@ -138,6 +150,10 @@ class AutoSuggestTextField extends HookWidget {
     });
 
     final baseDecoration = decoration ?? const InputDecoration();
+
+    // A tap callback carries no position, so the pointer-down that started it
+    // is kept to find out where it landed.
+    final lastPointerDown = useRef<Offset?>(null);
 
     return Stack(
       children: [
@@ -197,49 +213,117 @@ class AutoSuggestTextField extends HookWidget {
               ),
             ),
           ),
-        TextFormField(
-          key: textFieldKey,
-          controller: controller,
-          focusNode: focusNode,
-          decoration: baseDecoration.copyWith(
-            label: baseDecoration.label ?? const Text(''),
-            floatingLabelBehavior:
-                baseDecoration.floatingLabelBehavior ??
-                FloatingLabelBehavior.never,
-          ),
-          style: effectiveStyle,
-          keyboardType: keyboardType,
-          textInputAction: textInputAction,
-          textCapitalization: textCapitalization,
-          autofocus: autofocus,
-          obscureText: obscureText,
-          maxLines: maxLines,
-          minLines: minLines,
-          maxLength: maxLength,
-          onChanged: onChanged,
-          onEditingComplete: onEditingComplete,
-          validator: validator,
-          enableSuggestions: enableSuggestions,
-          autocorrect: autocorrect,
-          onFieldSubmitted: onSubmitted.mapNotNull(
-            (onSubmitted) => (value) {
-              if (acceptSuggestionOnSubmit && _suggestionHasMatch()) {
-                onSubmitted(suggestion!);
-              } else {
-                onSubmitted(value);
+        Listener(
+          onPointerDown: (event) => lastPointerDown.value = event.position,
+          child: TextFormField(
+            key: textFieldKey,
+            controller: controller,
+            focusNode: focusNode,
+            decoration: baseDecoration.copyWith(
+              label: baseDecoration.label ?? const Text(''),
+              floatingLabelBehavior:
+                  baseDecoration.floatingLabelBehavior ??
+                  FloatingLabelBehavior.never,
+            ),
+            style: effectiveStyle,
+            keyboardType: keyboardType,
+            textInputAction: textInputAction,
+            textCapitalization: textCapitalization,
+            autofocus: autofocus,
+            obscureText: obscureText,
+            maxLines: maxLines,
+            minLines: minLines,
+            maxLength: maxLength,
+            onChanged: onChanged,
+            onEditingComplete: onEditingComplete,
+            validator: validator,
+            enableSuggestions: enableSuggestions,
+            autocorrect: autocorrect,
+            onFieldSubmitted: onSubmitted.mapNotNull(
+              (onSubmitted) => (value) {
+                if (acceptSuggestionOnSubmit && _suggestionHasMatch()) {
+                  onSubmitted(suggestion!);
+                } else {
+                  onSubmitted(value);
+                }
+              },
+            ),
+            inputFormatters: [dismissFormatter, ...?inputFormatters],
+            enabled: enabled,
+            cursorColor: cursorColor,
+            enableIMEPersonalizedLearning:
+                enableIMEPersonalizedLearning ?? true,
+            onTapOutside: onTapOutside,
+            onTap: () {
+              final position = lastPointerDown.value;
+              if (position != null && showSuggestion && _suggestionHasMatch()) {
+                switch (_classifySuggestionTap(
+                  textFieldKey,
+                  position,
+                  controller.text.length,
+                )) {
+                  case _SuggestionTap.completion:
+                    onSuggestionAccept?.call();
+                  case _SuggestionTap.typedText:
+                    onSuggestionDismiss?.call();
+                  case _SuggestionTap.end:
+                    break;
+                }
               }
+              onTap?.call();
             },
           ),
-          inputFormatters: [dismissFormatter, ...?inputFormatters],
-          enabled: enabled,
-          cursorColor: cursorColor,
-          enableIMEPersonalizedLearning: enableIMEPersonalizedLearning ?? true,
-          onTapOutside: onTapOutside,
-          onTap: onTap,
         ),
       ],
     );
   }
+}
+
+enum _SuggestionTap { typedText, end, completion }
+
+/// How far past the end of the typed text a tap still counts as a tap *at* the
+/// end — placing the cursor where it already is — rather than on the
+/// completion. A fingertip is not that precise.
+const _suggestionEndSlop = kMinInteractiveDimension / 4;
+
+/// Where a tap at [globalPosition] landed relative to the typed text of
+/// [textLength] characters, in the field under [textFieldKey].
+///
+/// The completion is drawn as a continuation of the typed text, so anything
+/// past the caret at its end, in the text's own direction, is on the
+/// completion.
+_SuggestionTap _classifySuggestionTap(
+  GlobalKey textFieldKey,
+  Offset globalPosition,
+  int textLength,
+) {
+  final root = textFieldKey.currentContext?.findRenderObject();
+  final editable = root == null ? null : _findRenderEditable(root);
+  if (editable == null || !editable.hasSize) return _SuggestionTap.end;
+
+  if (editable.getPositionForPoint(globalPosition).offset < textLength) {
+    return _SuggestionTap.typedText;
+  }
+
+  final local = editable.globalToLocal(globalPosition);
+  final start = editable.getLocalRectForCaret(const TextPosition(offset: 0));
+  final end = editable.getLocalRectForCaret(TextPosition(offset: textLength));
+  final pastEnd = end.left >= start.left
+      ? local.dx - end.left
+      : end.left - local.dx;
+
+  return pastEnd > _suggestionEndSlop
+      ? _SuggestionTap.completion
+      : _SuggestionTap.end;
+}
+
+RenderEditable? _findRenderEditable(RenderObject node) {
+  if (node is RenderEditable) return node;
+  RenderEditable? found;
+  node.visitChildren((child) {
+    found ??= _findRenderEditable(child);
+  });
+  return found;
 }
 
 class _SuggestionDismissFormatter extends TextInputFormatter {

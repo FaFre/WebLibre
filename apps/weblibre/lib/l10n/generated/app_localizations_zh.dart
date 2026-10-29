@@ -8423,6 +8423,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexHomeSearchBarPlacementSubtitle => '主页提供搜索框的位置';
 
   @override
+  String get settings_indexSearchFieldPlacementTitle =>
+      'Search field on new tabs';
+
+  @override
+  String get settings_indexSearchFieldPlacementKeywords =>
+      'search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb';
+
+  @override
+  String get settings_indexSearchFieldPlacementSubtitle =>
+      'Where the new tab page and address editing put the input field';
+
+  @override
+  String get settings_searchFieldPlacementAutoLabel => 'Follow the tab bar';
+
+  @override
+  String get settings_searchFieldPlacementTopLabel => 'Top';
+
+  @override
+  String get settings_searchFieldPlacementBottomLabel => 'Bottom';
+
+  @override
+  String settings_searchFieldPlacementCurrentlyLabel(String value) {
+    return 'Currently: $value';
+  }
+
+  @override
+  String get settings_searchFieldPlacementTopDescription =>
+      'Suggestions are listed below the field';
+
+  @override
+  String get settings_searchFieldPlacementBottomDescription =>
+      'Within thumb reach, with suggestions above it and the best match nearest';
+
+  @override
+  String get settings_searchFieldRowTitle => 'Search field';
+
+  @override
   String get settings_allowlistExceptionsSectionTitle => '允许列表例外';
 
   @override

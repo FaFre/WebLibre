@@ -15208,6 +15208,66 @@ abstract class AppLocalizations {
   /// **'Where the home page offers its search field'**
   String get settings_indexHomeSearchBarPlacementSubtitle;
 
+  /// Setting for which edge of the new tab page — also used when editing a page's address — holds the input field.
+  ///
+  /// In en, this message translates to:
+  /// **'Search field on new tabs'**
+  String get settings_indexSearchFieldPlacementTitle;
+
+  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb'**
+  String get settings_indexSearchFieldPlacementKeywords;
+
+  /// Explanation of that setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the new tab page and address editing put the input field'**
+  String get settings_indexSearchFieldPlacementSubtitle;
+
+  /// Option for where the new tab page's input field sits: on the same edge as the tab bar.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the tab bar'**
+  String get settings_searchFieldPlacementAutoLabel;
+
+  /// Option for where the new tab page's input field sits: at the top of the screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Top'**
+  String get settings_searchFieldPlacementTopLabel;
+
+  /// Option for where the new tab page's input field sits: at the bottom of the screen, above the keyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom'**
+  String get settings_searchFieldPlacementBottomLabel;
+
+  /// Line under the "Follow the tab bar" option for the new tab page's input field. value is the name of the position it currently uses, exactly as shown in the option list, e.g. "Bottom".
+  ///
+  /// In en, this message translates to:
+  /// **'Currently: {value}'**
+  String settings_searchFieldPlacementCurrentlyLabel(String value);
+
+  /// Explanation under "Top".
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions are listed below the field'**
+  String get settings_searchFieldPlacementTopDescription;
+
+  /// Explanation under "Bottom". The best match is the suggestion listed closest to the field.
+  ///
+  /// In en, this message translates to:
+  /// **'Within thumb reach, with suggestions above it and the best match nearest'**
+  String get settings_searchFieldPlacementBottomDescription;
+
+  /// Row in the new tab page section editor for the input field's position.
+  ///
+  /// In en, this message translates to:
+  /// **'Search field'**
+  String get settings_searchFieldRowTitle;
+
   /// Section heading on the custom tracking protection screen for compatibility exceptions (Mozilla's allowlist).
   ///
   /// In en, this message translates to:

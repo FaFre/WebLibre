@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/hom
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/home_search_bar_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/utils/home_target_l10n.dart';
+import 'package:weblibre/features/settings/presentation/utils/search_field_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -89,6 +90,14 @@ List<SettingsSectionDefinition> homeSettingsSections(BuildContext context) {
             l10n.settings_customizeHomeSectionsKeywords,
           ),
           child: const _CustomizeHomeSectionsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_indexSearchFieldPlacementTitle,
+          subtitle: l10n.settings_indexSearchFieldPlacementSubtitle,
+          keywords: settingsKeywords(
+            l10n.settings_indexSearchFieldPlacementKeywords,
+          ),
+          child: const _SearchFieldPlacementTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_customizeNewTabSectionsTitle,
@@ -266,6 +275,49 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
                         resolved.label(context),
                       )
                     : placement.description(context),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Which edge of the new tab page — and the address editor, the same screen —
+/// holds the input field.
+class _SearchFieldPlacementTile extends ConsumerWidget {
+  const _SearchFieldPlacementTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stored = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.searchFieldPlacement),
+    );
+    final resolved = ref.watch(effectiveSearchFieldPlacementProvider);
+    final l10n = AppLocalizations.of(context);
+
+    return RadioGroup<SearchFieldPlacement>(
+      groupValue: stored,
+      onChanged: (value) async {
+        if (value == null) return;
+
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save((s) => s.copyWith.searchFieldPlacement(value));
+      },
+      child: Column(
+        children: [
+          for (final placement in SearchFieldPlacement.values)
+            RadioListTile<SearchFieldPlacement>(
+              value: placement,
+              title: Text(placement.label(context)),
+              // Follow says what it currently resolves to; the fixed choices
+              // describe themselves.
+              subtitle: Text(
+                placement.description(context) ??
+                    l10n.settings_searchFieldPlacementCurrentlyLabel(
+                      resolved.label(context),
+                    ),
               ),
             ),
         ],
