@@ -1,1 +1,1 @@
-Privacy-focused browser with local AI, advanced tab management, personal search, and Tor.
+Private Gecko browser with containers, web apps, Tor/VPN, and on-device search

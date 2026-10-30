@@ -1,31 +1,40 @@
-<b>Privacy-Focused Browser with Local AI Assistance</b>
+<b>A private, personal web environment for Android</b>
 
-WebLibre is an independent privacy-focused browser for Android built on Mozilla's Gecko Engine and Mozilla Android Components. It offers a fully-featured web browser with extension support, enhanced by powerful privacy features, local AI assistance (opt-in), and advanced tab organization tools.
+WebLibre is an independent, privacy-focused browser built on Mozilla's Gecko engine, the engine used by Firefox. It brings browsing and web apps together in one place, with separate spaces for different accounts and activities, built-in Tor, WireGuard VPN, and proxy support, and full-text search of the pages you've visited that never leaves your device.
 
-<b>Privacy by Design</b>
+<b>Spaces with Their Own Rules</b>
 
-WebLibre shields you from third-party surveillance—whether by ISPs, tracking companies, or other entities seeking to monitor your browsing habits:
+- <b>Isolated tabs</b>: Each keeps its own cookies and logins. Unlike private tabs, they survive quitting and reopening WebLibre.
+- <b>Containers</b>: Group recurring activities, open assigned sites automatically, and can exclude pages from history and search. Cookie-isolated containers can also use Tor, a VPN, or a proxy, and clear their site data on exit.
+- <b>Profiles</b>: Separate the whole setup, from tabs, bookmarks, and history to logins, extensions, feeds, and settings. Each profile can be locked with a password or Android device authentication.
+- <b>On-device AI</b> (optional): Suggests containers and names for open tabs, and asks before changing anything.
 
-- <b>Web Engine Hardening</b>: Comprehensive privacy and security presets to resist tracking and fingerprinting
-- <b>Cookie Isolation</b>: Cookies separated by container or context, preventing cross-site tracking
-- <b>Content Blocking</b>: Blocks ads, trackers, and unwanted content by default
-- <b>Tor Proxying</b>: Route browsing traffic through the Tor network for enhanced anonymity
-- <b>Local Search Engine</b>: Your device handles search and retrieval, minimizing remote service contact
-- <b>No Tracking or Telemetry</b>: WebLibre does not track, monitor, or collect any browsing data
+<b>A Searchable Local Library</b>
 
-<b>Advanced Tab Management</b>
+WebLibre keeps a full-text index of the pages you visit, on your device. Type a word you remember from an article, recipe, or forum thread, and it finds the page even if that word never appeared in its title or address. Tabs, bookmarks, history, and saved feed articles appear in the same address bar search, and bang shortcuts such as !w send a search straight to a specific site.
 
-- <b>Tab Containers</b>: Organize tabs into isolated containers with separate cookie contexts, Tor proxy support, biometric authentication, and automatic site assignments
-- <b>Tree View Navigation</b>: Visualize and manage complex tab hierarchies with parent-child relationships
-- <b>Local AI Assistance</b>: Use on-device AI models to intelligently group related tabs into new containers
-- <b>Flexible Views</b>: Choose between list view, grid view, or tree view with tab hierarchy
+RSS/Atom feeds, Reader Mode, PDF/Markdown/full-page image export, and on-device translation are built in.
 
-<b>Personal Local Search Engine</b>
+<b>Websites as Apps</b>
 
-Instantly search across open tabs (with full page content), bookmarks, web feeds, browsing history, and bangs. All indexing and search operations happen on your device—your data never leaves your control.
+Install sites you use often on your home screen, where they open in their own window like an app. Choose whether each one shares logins with your browser or a container, or keeps its own, so the same service can be signed in to different accounts. Website notifications work through UnifiedPush (requires a separate delivery app).
 
-<b>Multi-User Profiles</b>
+<b>Built-in Tor, VPN, and Proxies</b>
 
-Complete profile isolation with separate browsing data, extensions, settings, and databases per user. Each profile maintains its own containers, add-ons, privacy settings, and preferences.
+Use Tor without a separate app, import a WireGuard VPN configuration, or connect through SOCKS, HTTP, Shadowsocks, and other supported proxy protocols. These connections apply only to WebLibre. Keep everyday browsing on your normal connection while private tabs, isolated tabs, or cookie-isolated containers use Tor, a VPN, or a proxy, or send all regular browsing through one.
 
-<b>Download WebLibre and browse freely and privately with genuine control over your online experience.</b>
+<b>An Interface You Can Shape</b>
+
+- Bottom controls on phones, side panels on tablets, foldables, and larger Android windows
+- Tree, list, and grid tab views with grouping, pinning, and filtering
+- Customizable menus, toolbar buttons, gestures, and keyboard shortcuts
+
+<b>Privacy Defaults and Extensions</b>
+
+Strict tracking protection, DNS over HTTPS, HTTPS-only protection, tracking-parameter removal, Global Privacy Control, and site isolation are enabled by default, with per-site controls for exceptions. Firefox-compatible extensions are supported, and Quick Start installs uBlock Origin automatically.
+
+WebLibre has no telemetry or crash reporting of its own, and Gecko's telemetry, studies, and experiments are switched off and locked so engine updates can't turn them back on. Optional services such as Firefox Sync, WebLibre Search, and encrypted settings sync connect only when you use them.
+
+Encrypted profile backups, settings export and import, and Firefox Sync let you keep your setup and move it between devices.
+
+WebLibre is under active development. Documentation: https://docs.weblibre.eu/
