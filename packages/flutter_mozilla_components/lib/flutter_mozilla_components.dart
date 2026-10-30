@@ -52,6 +52,7 @@ export 'src/pigeons/gecko.g.dart'
         AddonStoreInfo,
         AddonStorePromoted,
         AddonUpdateAttemptInfo,
+        AddonUpdatePermissionRequest,
         AddonUpdateStatus,
         AppLinkDecision,
         AppLinkPolicySnapshot,

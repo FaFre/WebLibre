@@ -150,6 +150,7 @@ String formatUpdateAttemptStatus(
       attempt?.message?.isNotEmpty == true
           ? l10n.addons_updateFailedWithMessage(attempt!.message!)
           : l10n.addons_updateFailedGeneric,
+    AddonUpdateStatus.needsPermissions => l10n.addons_updateNeedsPermissions,
     null => l10n.addons_noUpdateChecksRecorded,
   };
 }

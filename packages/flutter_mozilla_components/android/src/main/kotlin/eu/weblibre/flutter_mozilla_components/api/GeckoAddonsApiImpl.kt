@@ -8,7 +8,13 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import android.content.Context
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.addons.AddonPrefs
+import eu.weblibre.flutter_mozilla_components.addons.AddonUpdateAttempts
+import eu.weblibre.flutter_mozilla_components.addons.AddonUpdateGrants
+import eu.weblibre.flutter_mozilla_components.addons.AddonUpdatePermissionNotification
+import eu.weblibre.flutter_mozilla_components.addons.AddonUpdatePermissionRequests
+import eu.weblibre.flutter_mozilla_components.addons.toPigeon
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
 import eu.weblibre.flutter_mozilla_components.feature.WebExtensionActionsHost
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonDisabledReason
@@ -20,9 +26,11 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AddonStoreApp
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonStoreInfo
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonStorePromoted
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonUpdateAttemptInfo
+import eu.weblibre.flutter_mozilla_components.pigeons.AddonUpdatePermissionRequest
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonUpdateStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionActionType
+import eu.weblibre.flutter_mozilla_components.rootApplicationContext
 import org.json.JSONArray
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -51,8 +59,14 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
     }
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    // Through the application context, never the profile's. The attempts
+    // database is a process-wide singleton bound to whichever context opens it
+    // first, and AC's update worker only has the application context. Opening
+    // it the same way here leaves one place to pick the file: the app routes it
+    // to the committed profile (ActiveProfile.PROFILE_DATABASE_NAMES). With a
+    // profile context each run picked one of two files by that race.
     private val updateAttemptStorage by lazy {
-        DefaultAddonUpdater.UpdateAttemptStorage(context.applicationContext)
+        DefaultAddonUpdater.UpdateAttemptStorage(context.rootApplicationContext)
     }
     private val prefs by lazy {
         AddonPrefs.get(context.applicationContext)
@@ -278,7 +292,10 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
                 onSuccess = {
                     clearAddonAutoUpdatePreference(addon.id)
                     clearLocalFileInstalledAddon(addon.id)
-                    clearManualUpdateAttempt(addon.id)
+                    AddonUpdateAttempts.clear(context, addon.id)
+                    AddonUpdateGrants.clear(context.applicationContext, addon.id)
+                    AddonUpdatePermissionRequests.clear(context.applicationContext, addon.id)
+                    cancelUpdatePermissionNotification(addon.id)
                     result(Result.success(Unit))
                 },
                 onError = { _, throwable ->
@@ -327,9 +344,40 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         addonId: String
     ): AddonUpdateAttemptInfo? = withContext(Dispatchers.IO) {
         val updaterAttempt = updateAttemptStorage.findUpdateAttemptBy(addonId)?.toPigeon()
-        val manualAttempt = getManualUpdateAttempt(addonId)
-        listOfNotNull(updaterAttempt, manualAttempt)
+        val attempt = AddonUpdateAttempts.get(context, addonId)
+        listOfNotNull(updaterAttempt, attempt)
             .maxByOrNull { it.dateMillisecondsSinceEpoch }
+    }
+
+    override suspend fun acceptAddonUpdatePermissions(
+        addonId: String,
+        requestId: String,
+    ): AddonUpdateAttemptInfo? {
+        val replaced = withContext(Dispatchers.IO) {
+            !AddonUpdatePermissionRequests.accept(context, addonId, requestId) &&
+                AddonUpdatePermissionRequests.get(context, addonId) != null
+        }
+        // A later check asked for something else, the request to answer now.
+        if (replaced) return null
+
+        // Accepted, or nothing waits for an answer any more: the notification
+        // answered first, say. The user asked for the update either way, and it
+        // asks again if it still needs permissions nobody granted.
+        cancelUpdatePermissionNotification(addonId)
+        return triggerAddonUpdate(addonId)
+    }
+
+    override suspend fun declineAddonUpdatePermissions(addonId: String, requestId: String) {
+        val declined = withContext(Dispatchers.IO) {
+            AddonUpdatePermissionRequests.decline(context, addonId, requestId)
+        }
+        // Otherwise the notification asks for the request that replaced it.
+        if (declined) cancelUpdatePermissionNotification(addonId)
+    }
+
+    private fun cancelUpdatePermissionNotification(addonId: String) {
+        val profileId = (context as? ProfileContext)?.profileId ?: return
+        AddonUpdatePermissionNotification.cancel(context, profileId, addonId)
     }
 
     override suspend fun isAddonAutoUpdateEnabled(): Boolean =
@@ -656,55 +704,6 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         AddonStoreApp.FIREFOX -> "firefox"
     }
 
-    private fun saveManualUpdateAttempt(
-        addonId: String,
-        status: AddonUpdateStatus,
-        message: String? = null,
-    ) {
-        prefs.edit()
-            .putLong(manualAttemptTimestampKey(addonId), System.currentTimeMillis())
-            .putString(manualAttemptStatusKey(addonId), status.name)
-            .putString(manualAttemptMessageKey(addonId), message)
-            .apply()
-    }
-
-    private fun getManualUpdateAttempt(addonId: String): AddonUpdateAttemptInfo? {
-        val timestamp = prefs.getLong(manualAttemptTimestampKey(addonId), -1L)
-        if (timestamp < 0) {
-            return null
-        }
-
-        val status = prefs.getString(manualAttemptStatusKey(addonId), null)
-            ?.let { runCatching { AddonUpdateStatus.valueOf(it) }.getOrNull() }
-
-        return AddonUpdateAttemptInfo(
-            addonId = addonId,
-            dateMillisecondsSinceEpoch = timestamp,
-            status = status,
-            message = prefs.getString(manualAttemptMessageKey(addonId), null),
-        )
-    }
-
-    private fun clearManualUpdateAttempt(addonId: String) {
-        prefs.edit()
-            .remove(manualAttemptTimestampKey(addonId))
-            .remove(manualAttemptStatusKey(addonId))
-            .remove(manualAttemptMessageKey(addonId))
-            .apply()
-    }
-
-    private fun manualAttemptTimestampKey(addonId: String): String {
-        return "$AddonPrefs.PREF_MANUAL_UPDATE_ATTEMPT_PREFIX$addonId.timestamp"
-    }
-
-    private fun manualAttemptStatusKey(addonId: String): String {
-        return "$AddonPrefs.PREF_MANUAL_UPDATE_ATTEMPT_PREFIX$addonId.status"
-    }
-
-    private fun manualAttemptMessageKey(addonId: String): String {
-        return "$AddonPrefs.PREF_MANUAL_UPDATE_ATTEMPT_PREFIX$addonId.message"
-    }
-
     private fun performAddonInstall(
         url: String,
         isLocalFileInstall: Boolean,
@@ -739,7 +738,8 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
         return withInstalledAddon(addonId) { addon, result ->
             val storeInfo = fetchAddonStoreInfo(addonId)
             if (storeInfo == null) {
-                saveManualUpdateAttempt(
+                AddonUpdateAttempts.save(
+                    context = context,
                     addonId = addonId,
                     status = AddonUpdateStatus.ERROR,
                     message = LOCAL_ADDON_UPDATE_SOURCE_MISSING_MESSAGE,
@@ -749,11 +749,12 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
             }
 
             if (addon.installedState?.version == storeInfo.latestVersion) {
-                saveManualUpdateAttempt(
+                AddonUpdateAttempts.save(
+                    context = context,
                     addonId = addonId,
                     status = AddonUpdateStatus.NO_UPDATE_AVAILABLE,
                 )
-                result(Result.success(getManualUpdateAttempt(addonId)))
+                result(Result.success(AddonUpdateAttempts.get(context, addonId)))
                 return@withInstalledAddon
             }
 
@@ -766,26 +767,29 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
                         callback = { installResult ->
                             installResult.fold(
                                 onSuccess = {
-                                    saveManualUpdateAttempt(
+                                    AddonUpdateAttempts.save(
+                                        context = context,
                                         addonId = addonId,
                                         status = AddonUpdateStatus.SUCCESSFULLY_UPDATED,
                                     )
-                                    result(Result.success(getManualUpdateAttempt(addonId)))
+                                    result(Result.success(AddonUpdateAttempts.get(context, addonId)))
                                 },
                                 onFailure = { throwable ->
                                     if (isPostponedInstallException(throwable)) {
                                         clearLocalFileInstalledAddon(addonId)
                                         updateAddonAutoUpdateRegistration(addonId)
-                                        saveManualUpdateAttempt(
+                                        AddonUpdateAttempts.save(
+                                            context = context,
                                             addonId = addonId,
                                             status = AddonUpdateStatus.SUCCESSFULLY_UPDATED,
                                             message = LOCAL_ADDON_UPDATE_POSTPONED_MESSAGE,
                                         )
-                                        result(Result.success(getManualUpdateAttempt(addonId)))
+                                        result(Result.success(AddonUpdateAttempts.get(context, addonId)))
                                         return@fold
                                     }
 
-                                    saveManualUpdateAttempt(
+                                    AddonUpdateAttempts.save(
+                                        context = context,
                                         addonId = addonId,
                                         status = AddonUpdateStatus.ERROR,
                                         message = throwable.message,
@@ -797,7 +801,8 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
                     )
                 },
                 onError = { _, throwable ->
-                    saveManualUpdateAttempt(
+                    AddonUpdateAttempts.save(
+                        context = context,
                         addonId = addonId,
                         status = AddonUpdateStatus.ERROR,
                         message = throwable.message,
@@ -895,11 +900,10 @@ class GeckoAddonsApiImpl(private val context: Context) : GeckoAddonsApi {
             components.core.addonUpdater.unregisterForFutureUpdates(addonId)
         }
 
+        val startedAt = System.currentTimeMillis()
         components.core.addonManager.updateAddon(addonId) { status ->
-            val pigeonStatus = status.toPigeon()
-            val message = (status as? AddonUpdater.Status.Error)?.message
-            saveManualUpdateAttempt(addonId, pigeonStatus, message)
-            onComplete(getManualUpdateAttempt(addonId))
+            AddonUpdateAttempts.save(context, addonId, status, startedAt)
+            onComplete(AddonUpdateAttempts.get(context, addonId))
 
             if (shouldRestorePeriodicRegistration) {
                 scope.launch {
@@ -1020,8 +1024,19 @@ private fun Addon.toPigeon(
         openOptionsPageInTab = installedState?.openOptionsPageInTab ?: false,
         disabledReason = installedState?.disabledReason?.toPigeon(),
         incognito = incognito.toPigeon(),
+        pendingUpdatePermissions = installedState?.let {
+            AddonUpdatePermissionRequests.get(context, id, it.version)?.toPigeon(context)
+        },
     )
 }
+
+private fun AddonUpdatePermissionRequests.Request.toPigeon(context: Context) =
+    AddonUpdatePermissionRequest(
+        id = id,
+        translatedPermissions = Addon.localizePermissions(permissions, context, forUpdate = true),
+        translatedDataCollectionPermissions =
+            Addon.localizeDataCollectionPermissions(dataCollectionPermissions, context),
+    )
 
 private fun Addon.DisabledReason.toPigeon(): AddonDisabledReason {
     return when (this) {
@@ -1051,11 +1066,3 @@ private fun AddonUpdater.UpdateAttempt.toPigeon(): AddonUpdateAttemptInfo {
     )
 }
 
-private fun AddonUpdater.Status.toPigeon(): AddonUpdateStatus {
-    return when (this) {
-        AddonUpdater.Status.NotInstalled -> AddonUpdateStatus.NOT_INSTALLED
-        AddonUpdater.Status.SuccessfullyUpdated -> AddonUpdateStatus.SUCCESSFULLY_UPDATED
-        AddonUpdater.Status.NoUpdateAvailable -> AddonUpdateStatus.NO_UPDATE_AVAILABLE
-        is AddonUpdater.Status.Error -> AddonUpdateStatus.ERROR
-    }
-}

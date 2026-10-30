@@ -607,5 +607,18 @@
   "@addons_permissionAccessDataFor": {
     "description": "Plain-language description of a permission to access specific websites. host is a website pattern such as \"*://*.example.com/*\".",
     "placeholders": { "host": { "type": "String" } }
+  },
+
+  "addons_updatePermissionsTitle": "Update needs new permissions",
+  "@addons_updatePermissionsTitle": {
+    "description": "Heading of a card on the extension details screen when an update is waiting for the user to allow new permissions."
+  },
+  "addons_updatePermissionsBody": "The new version asks for the permissions below. It is installed once you allow them.",
+  "@addons_updatePermissionsBody": {
+    "description": "Text under addons_updatePermissionsTitle, above the list of new permissions. Its buttons are addons_actionNotNow and addons_actionUpdate."
+  },
+  "addons_updateNeedsPermissions": "This update asks for new permissions. Review them to install it.",
+  "@addons_updateNeedsPermissions": {
+    "description": "Message after an update check when the update stopped because it needs new permissions, and the status line under the extension's Updates section afterwards. The permissions then show on the extension details screen."
   }
 }

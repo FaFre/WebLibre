@@ -454,6 +454,10 @@ class _UpdatesSection extends ConsumerWidget {
       children: [
         Text(l10n.addons_sectionUpdates, style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
+        if (addon.pendingUpdatePermissions case final request?) ...[
+          _PendingUpdatePermissionsCard(addonId: addonId, request: request),
+          const SizedBox(height: 12),
+        ],
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -510,6 +514,116 @@ class _UpdatesSection extends ConsumerWidget {
   }
 }
 
+/// An update waiting for new permissions. The system notification asks too,
+/// but it can be swiped away, and is never shown with notifications off.
+class _PendingUpdatePermissionsCard extends ConsumerWidget {
+  final String addonId;
+  final AddonUpdatePermissionRequest request;
+
+  const _PendingUpdatePermissionsCard({
+    required this.addonId,
+    required this.request,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    // Also while "Not now" is on its way: an update tapped then would find
+    // nothing left to accept.
+    final busy =
+        ref.watch(addonUpdateCheckProvider(addonId)).isLoading ||
+        ref.watch(addonDetailsProvider(addonId)).isLoading;
+
+    Widget permissionLine(String text, IconData icon) => Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: theme.colorScheme.primary),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.addons_updatePermissionsTitle,
+              style: theme.textTheme.titleSmall,
+            ),
+            const SizedBox(height: 4),
+            Text(l10n.addons_updatePermissionsBody),
+            if (request.translatedPermissions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                l10n.addons_permissionsTitle,
+                style: theme.textTheme.labelLarge,
+              ),
+              for (final permission in request.translatedPermissions)
+                permissionLine(permission, Icons.check_circle_outline),
+            ],
+            if (request.translatedDataCollectionPermissions.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text(
+                l10n.addons_requiredDataCollectionTitle,
+                style: theme.textTheme.labelLarge,
+              ),
+              for (final permission
+                  in request.translatedDataCollectionPermissions)
+                permissionLine(permission, Icons.data_usage_outlined),
+            ],
+            const SizedBox(height: 12),
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              spacing: 8,
+              children: [
+                TextButton(
+                  onPressed: busy
+                      ? null
+                      : () => ref
+                            .read(addonDetailsProvider(addonId).notifier)
+                            .declineUpdatePermissions(request.id),
+                  child: Text(l10n.addons_actionNotNow),
+                ),
+                FilledButton(
+                  onPressed: busy
+                      ? null
+                      : () => _acceptUpdatePermissions(
+                          context,
+                          ref,
+                          addonId,
+                          request.id,
+                        ),
+                  child: Text(l10n.addons_actionUpdate),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _acceptUpdatePermissions(
+  BuildContext context,
+  WidgetRef ref,
+  String addonId,
+  String requestId,
+) async {
+  final result = await ref
+      .read(addonUpdateCheckProvider(addonId).notifier)
+      .acceptPermissionsAndUpdate(requestId);
+  if (!context.mounted) return;
+  _reportUpdateResult(context, result);
+}
+
 String _displayAvailableVersion(AddonInfo addon, AddonStoreInfo? storeInfo) {
   final latest = storeInfo?.latestVersion.trim();
   return (latest != null && latest.isNotEmpty) ? latest : addon.version;
@@ -534,11 +648,7 @@ Future<void> _runUpdateCheck(
           .read(addonUpdateCheckProvider(addonId).notifier)
           .triggerAndAwait();
       if (!context.mounted) return;
-      _reportUpdateResult(
-        context,
-        result,
-        fallback: AppLocalizations.of(context).addons_noUpdateAvailable,
-      );
+      _reportUpdateResult(context, result);
     case AddonUpdateOutcomeAvailable(
       addon: final fresh,
       :final availableVersion,
@@ -593,15 +703,12 @@ Future<bool?> _confirmUpdateDialog(
   );
 }
 
-void _reportUpdateResult(
-  BuildContext context,
-  AddonUpdateRunResult result, {
-  String? fallback,
-}) {
+void _reportUpdateResult(BuildContext context, AddonUpdateRunResult result) {
   switch (result) {
-    case AddonUpdateRunDone(:final message):
-      final text = (message != null && message.isNotEmpty) ? message : fallback;
-      if (text != null) showInfoMessage(context, text);
+    case AddonUpdateRunDone(:final attempt):
+      if (attempt != null) {
+        showInfoMessage(context, formatUpdateAttemptStatus(context, attempt));
+      }
     case AddonUpdateRunNoRemoteSource():
       showErrorMessage(
         context,
@@ -611,6 +718,11 @@ void _reportUpdateResult(
       showErrorMessage(
         context,
         AppLocalizations.of(context).addons_updateCheckFailed,
+      );
+    case AddonUpdateRunNeedsPermissions():
+      showInfoMessage(
+        context,
+        AppLocalizations.of(context).addons_updateNeedsPermissions,
       );
   }
 }

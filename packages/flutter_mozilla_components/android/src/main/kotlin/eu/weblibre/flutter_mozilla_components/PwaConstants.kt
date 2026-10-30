@@ -33,7 +33,6 @@ object PwaConstants {
     const val SHORTCUT_CONTAINER_MODE_UNASSIGNED = "unassigned"
 
     // Profile and file paths
-    const val CURRENT_PROFILE_FILE = "weblibre_profiles/current_profile"
     const val PROFILE_MAPPING_PREFS = "pwa_profile_mapping"
     const val PROFILE_MAPPING_TOKEN_PREFIX = "token_"
 

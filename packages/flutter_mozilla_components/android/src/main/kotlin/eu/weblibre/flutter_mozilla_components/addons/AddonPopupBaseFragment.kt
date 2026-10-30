@@ -55,7 +55,7 @@ abstract class AddonPopupBaseFragment : Fragment(), EngineSession.Observer, User
                     store = components.core.store,
                     customTabId = it.id,
                     fragmentManager = parentFragmentManager,
-                    fileUploadsDirCleaner = components.core.fileUploadsDirCleaner,
+                    fileUploadsDirCleaner = components.core.newFileUploadsDirCleaner(),
                     tabsUseCases = components.useCases.tabsUseCases,
                     onNeedToRequestPermissions = { permissions ->
                         @Suppress("DEPRECATION")

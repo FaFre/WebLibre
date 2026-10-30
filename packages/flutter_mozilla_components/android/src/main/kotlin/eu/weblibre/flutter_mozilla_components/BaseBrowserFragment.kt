@@ -514,7 +514,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     customTabId = sessionId,
                     tabsUseCases = components.useCases.tabsUseCases,
                     fragmentManager = parentFragmentManager,
-                    fileUploadsDirCleaner = components.core.fileUploadsDirCleaner,
+                    fileUploadsDirCleaner = components.core.newFileUploadsDirCleaner(),
                     onNeedToRequestPermissions = { permissions ->
                         requestPromptsPermissionsLauncher.launch(permissions)
                     },

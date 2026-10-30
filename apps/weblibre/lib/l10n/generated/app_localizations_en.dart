@@ -1166,6 +1166,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get addons_updatePermissionsTitle => 'Update needs new permissions';
+
+  @override
+  String get addons_updatePermissionsBody =>
+      'The new version asks for the permissions below. It is installed once you allow them.';
+
+  @override
+  String get addons_updateNeedsPermissions =>
+      'This update asks for new permissions. Review them to install it.';
+
+  @override
   String appLinks_bannerTitleNamed(String appName) {
     return 'Open this link in $appName?';
   }

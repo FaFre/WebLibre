@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import eu.weblibre.flutter_mozilla_components.components.StaleUploads
 import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
@@ -61,6 +62,7 @@ import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.CustomTabListAction
 import mozilla.components.browser.state.store.BrowserStore
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
 import mozilla.components.browser.state.selector.findCustomTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.ExperimentalAndroidComponentsApi
@@ -87,6 +89,9 @@ object GlobalComponents {
     private var currentMode: ComponentsMode? = null
     private var privateTabsNotificationFeature:
         PrivateNotificationFeature<PrivateTabsNotificationService>? = null
+
+    /** Whether this process has moved earlier uploads aside; see [setUp]. */
+    private val staleUploadsDetached = AtomicBoolean(false)
 
     val components: Components?
         get() = _components
@@ -527,6 +532,18 @@ object GlobalComponents {
             )
         }
 
+        // Uploads an earlier process left behind, so once per process, and moved
+        // aside here, before a session exists that could choose a file: the
+        // directory also holds the files behind uploads chosen later in this
+        // process, and a rebuild keeps those sessions (a custom tab handed over
+        // to the main browser still submits its form). Later uploads go when
+        // their own tab moves to another host or closes (TabUploadsMiddleware).
+        if (staleUploadsDetached.compareAndSet(false, true)) {
+            val cacheDir = applicationContext.rootApplicationContext.cacheDir
+            StaleUploads.detach(cacheDir)
+            GlobalScope.launch(Dispatchers.IO) { StaleUploads.deleteDetached(cacheDir) }
+        }
+
         val previousComponents = _components
         val previousMode = currentMode
 
@@ -730,6 +747,9 @@ object GlobalComponents {
                             )
                         }
                         newComponents.core.supportedAddonsChecker.registerForChecks()
+                        newComponents.core.addonUpdater.onExtensionsLoaded(
+                            extensions.map { it.id },
+                        )
                     },
                 )
             } catch (e: UnsupportedOperationException) {
@@ -740,10 +760,6 @@ object GlobalComponents {
             // Answer browser.bookmarks requests from extensions (e.g. floccus)
             // out of the shared application-services Places store.
             GeckoBookmarksExtensionBridge.register()
-
-            GlobalScope.launch(Dispatchers.IO) {
-                newComponents.core.fileUploadsDirCleaner.cleanUploadsDirectory()
-            }
 
             // Eagerly initialize account manager so sync starts
             newComponents.backgroundServices.accountManager

@@ -25,9 +25,7 @@ import androidx.preference.PreferenceManager
  */
 internal object ProfilePrefs {
     fun of(context: Context): SharedPreferences =
-        PreferenceManager.getDefaultSharedPreferences(
-            (context as? ProfileContext)?.rootApplicationContext ?: context.applicationContext,
-        )
+        PreferenceManager.getDefaultSharedPreferences(context.rootApplicationContext)
 
     /**
      * Scopes [base] to the *committed* profile, or returns `null` when the process

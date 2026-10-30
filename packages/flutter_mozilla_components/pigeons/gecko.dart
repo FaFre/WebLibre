@@ -746,6 +746,24 @@ enum AddonUpdateStatus {
   successfullyUpdated,
   noUpdateAvailable,
   error,
+
+  /// Stopped to ask for new permissions; the request is on the add-on
+  /// ([AddonInfo.pendingUpdatePermissions]).
+  needsPermissions,
+}
+
+/// New permissions an update asked for, still waiting for an answer.
+class AddonUpdatePermissionRequest {
+  /// Identifies exactly these permissions; pass it back to accept them.
+  final String id;
+  final List<String> translatedPermissions;
+  final List<String> translatedDataCollectionPermissions;
+
+  const AddonUpdatePermissionRequest({
+    required this.id,
+    required this.translatedPermissions,
+    required this.translatedDataCollectionPermissions,
+  });
 }
 
 class AddonInfo {
@@ -778,6 +796,7 @@ class AddonInfo {
   final bool openOptionsPageInTab;
   final AddonDisabledReason? disabledReason;
   final AddonIncognito incognito;
+  final AddonUpdatePermissionRequest? pendingUpdatePermissions;
 
   const AddonInfo({
     required this.id,
@@ -809,6 +828,7 @@ class AddonInfo {
     required this.openOptionsPageInTab,
     this.disabledReason,
     this.incognito = AddonIncognito.spanning,
+    this.pendingUpdatePermissions,
   });
 }
 
@@ -2433,6 +2453,20 @@ abstract class GeckoAddonsApi {
 
   @async
   AddonUpdateAttemptInfo? getLastAddonUpdateAttempt(String addonId);
+
+  /// Allows the new permissions of the request [requestId] names, the one the
+  /// user saw, and runs the update. Null, allowing nothing, when that request
+  /// is no longer the pending one.
+  @async
+  AddonUpdateAttemptInfo? acceptAddonUpdatePermissions(
+    String addonId,
+    String requestId,
+  );
+
+  /// Puts off the request [requestId] names until the next check asks again.
+  /// Does nothing once a later check replaced it.
+  @async
+  void declineAddonUpdatePermissions(String addonId, String requestId);
 
   @async
   void installAddon(String url);

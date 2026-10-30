@@ -220,6 +220,10 @@ enum AddonUpdateStatus {
   successfullyUpdated,
   noUpdateAvailable,
   error,
+
+  /// Stopped to ask for new permissions; the request is on the add-on
+  /// ([AddonInfo.pendingUpdatePermissions]).
+  needsPermissions,
 }
 
 enum AddonStoreApp { android, firefox }
@@ -2830,6 +2834,71 @@ class WebExtensionData {
   }
 }
 
+/// New permissions an update asked for, still waiting for an answer.
+class AddonUpdatePermissionRequest {
+  AddonUpdatePermissionRequest({
+    required this.id,
+    required this.translatedPermissions,
+    required this.translatedDataCollectionPermissions,
+  });
+
+  /// Identifies exactly these permissions; pass it back to accept them.
+  String id;
+
+  List<String> translatedPermissions;
+
+  List<String> translatedDataCollectionPermissions;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      translatedPermissions,
+      translatedDataCollectionPermissions,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static AddonUpdatePermissionRequest decode(Object result) {
+    result as List<Object?>;
+    return AddonUpdatePermissionRequest(
+      id: result[0]! as String,
+      translatedPermissions: (result[1]! as List<Object?>).cast<String>(),
+      translatedDataCollectionPermissions: (result[2]! as List<Object?>)
+          .cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! AddonUpdatePermissionRequest ||
+        other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(id, other.id) &&
+        _deepEquals(translatedPermissions, other.translatedPermissions) &&
+        _deepEquals(
+          translatedDataCollectionPermissions,
+          other.translatedDataCollectionPermissions,
+        );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'AddonUpdatePermissionRequest(id: $id, translatedPermissions: $translatedPermissions, translatedDataCollectionPermissions: $translatedDataCollectionPermissions)';
+  }
+}
+
 class AddonInfo {
   AddonInfo({
     required this.id,
@@ -2861,6 +2930,7 @@ class AddonInfo {
     required this.openOptionsPageInTab,
     this.disabledReason,
     required this.incognito,
+    this.pendingUpdatePermissions,
   });
 
   String id;
@@ -2921,6 +2991,8 @@ class AddonInfo {
 
   AddonIncognito incognito;
 
+  AddonUpdatePermissionRequest? pendingUpdatePermissions;
+
   List<Object?> _toList() {
     return <Object?>[
       id,
@@ -2952,6 +3024,7 @@ class AddonInfo {
       openOptionsPageInTab,
       disabledReason,
       incognito,
+      pendingUpdatePermissions,
     ];
   }
 
@@ -2992,6 +3065,7 @@ class AddonInfo {
       openOptionsPageInTab: result[26]! as bool,
       disabledReason: result[27] as AddonDisabledReason?,
       incognito: result[28]! as AddonIncognito,
+      pendingUpdatePermissions: result[29] as AddonUpdatePermissionRequest?,
     );
   }
 
@@ -3038,7 +3112,8 @@ class AddonInfo {
         _deepEquals(optionsPageUrl, other.optionsPageUrl) &&
         _deepEquals(openOptionsPageInTab, other.openOptionsPageInTab) &&
         _deepEquals(disabledReason, other.disabledReason) &&
-        _deepEquals(incognito, other.incognito);
+        _deepEquals(incognito, other.incognito) &&
+        _deepEquals(pendingUpdatePermissions, other.pendingUpdatePermissions);
   }
 
   @override
@@ -3047,7 +3122,7 @@ class AddonInfo {
 
   @override
   String toString() {
-    return 'AddonInfo(id: $id, displayName: $displayName, summary: $summary, description: $description, downloadUrl: $downloadUrl, version: $version, installedVersion: $installedVersion, translatedPermissions: $translatedPermissions, translatedRequiredDataCollectionPermissions: $translatedRequiredDataCollectionPermissions, authorName: $authorName, authorUrl: $authorUrl, homepageUrl: $homepageUrl, detailUrl: $detailUrl, ratingUrl: $ratingUrl, ratingAverage: $ratingAverage, ratingReviews: $ratingReviews, createdAt: $createdAt, updatedAt: $updatedAt, icon: $icon, isInstalled: $isInstalled, isEnabled: $isEnabled, isSupported: $isSupported, isAllowedInPrivateBrowsing: $isAllowedInPrivateBrowsing, isAutoUpdateEnabled: $isAutoUpdateEnabled, isLocalFileInstalled: $isLocalFileInstalled, optionsPageUrl: $optionsPageUrl, openOptionsPageInTab: $openOptionsPageInTab, disabledReason: $disabledReason, incognito: $incognito)';
+    return 'AddonInfo(id: $id, displayName: $displayName, summary: $summary, description: $description, downloadUrl: $downloadUrl, version: $version, installedVersion: $installedVersion, translatedPermissions: $translatedPermissions, translatedRequiredDataCollectionPermissions: $translatedRequiredDataCollectionPermissions, authorName: $authorName, authorUrl: $authorUrl, homepageUrl: $homepageUrl, detailUrl: $detailUrl, ratingUrl: $ratingUrl, ratingAverage: $ratingAverage, ratingReviews: $ratingReviews, createdAt: $createdAt, updatedAt: $updatedAt, icon: $icon, isInstalled: $isInstalled, isEnabled: $isEnabled, isSupported: $isSupported, isAllowedInPrivateBrowsing: $isAllowedInPrivateBrowsing, isAutoUpdateEnabled: $isAutoUpdateEnabled, isLocalFileInstalled: $isLocalFileInstalled, optionsPageUrl: $optionsPageUrl, openOptionsPageInTab: $openOptionsPageInTab, disabledReason: $disabledReason, incognito: $incognito, pendingUpdatePermissions: $pendingUpdatePermissions)';
   }
 }
 
@@ -8166,52 +8241,54 @@ class _PigeonCodecOverflow {
 
     switch (type) {
       case 0:
-        return BookmarkInfo.decode(wrapped!);
+        return BookmarkInsertTreeResult.decode(wrapped!);
       case 1:
-        return SitePermissions.decode(wrapped!);
+        return BookmarkInfo.decode(wrapped!);
       case 2:
-        return TrackingProtectionException.decode(wrapped!);
+        return SitePermissions.decode(wrapped!);
       case 3:
-        return TrackerLogEntry.decode(wrapped!);
+        return TrackingProtectionException.decode(wrapped!);
       case 4:
-        return TrackingStatisticsRecord.decode(wrapped!);
+        return TrackerLogEntry.decode(wrapped!);
       case 5:
-        return TrackingStatistics.decode(wrapped!);
+        return TrackingStatisticsRecord.decode(wrapped!);
       case 6:
-        return AppLinkTarget.decode(wrapped!);
+        return TrackingStatistics.decode(wrapped!);
       case 7:
-        return ProtectedTargetPattern.decode(wrapped!);
+        return AppLinkTarget.decode(wrapped!);
       case 8:
-        return NativeAppLinkRule.decode(wrapped!);
+        return ProtectedTargetPattern.decode(wrapped!);
       case 9:
-        return NativeContextAppLinkPolicy.decode(wrapped!);
+        return NativeAppLinkRule.decode(wrapped!);
       case 10:
-        return AppLinkPolicySnapshot.decode(wrapped!);
+        return NativeContextAppLinkPolicy.decode(wrapped!);
       case 11:
-        return AppLinkPromptRequest.decode(wrapped!);
+        return AppLinkPolicySnapshot.decode(wrapped!);
       case 12:
-        return AppLinkResolutionResult.decode(wrapped!);
+        return AppLinkPromptRequest.decode(wrapped!);
       case 13:
-        return PwaIcon.decode(wrapped!);
+        return AppLinkResolutionResult.decode(wrapped!);
       case 14:
-        return ShareTargetFiles.decode(wrapped!);
+        return PwaIcon.decode(wrapped!);
       case 15:
-        return ShareTargetParams.decode(wrapped!);
+        return ShareTargetFiles.decode(wrapped!);
       case 16:
-        return ShareTarget.decode(wrapped!);
+        return ShareTargetParams.decode(wrapped!);
       case 17:
-        return ExternalApplicationResource.decode(wrapped!);
+        return ShareTarget.decode(wrapped!);
       case 18:
-        return PwaManifest.decode(wrapped!);
+        return ExternalApplicationResource.decode(wrapped!);
       case 19:
-        return SandboxCaptureEntry.decode(wrapped!);
+        return PwaManifest.decode(wrapped!);
       case 20:
-        return GestureConfig.decode(wrapped!);
+        return SandboxCaptureEntry.decode(wrapped!);
       case 21:
-        return PushDistributor.decode(wrapped!);
+        return GestureConfig.decode(wrapped!);
       case 22:
-        return PushStatus.decode(wrapped!);
+        return PushDistributor.decode(wrapped!);
       case 23:
+        return PushStatus.decode(wrapped!);
+      case 24:
         return PushSubscription.decode(wrapped!);
     }
     return null;
@@ -8468,305 +8545,312 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is WebExtensionData) {
       buffer.putUint8(209);
       writeValue(buffer, value.encode());
-    } else if (value is AddonInfo) {
+    } else if (value is AddonUpdatePermissionRequest) {
       buffer.putUint8(210);
       writeValue(buffer, value.encode());
-    } else if (value is AddonListingPreview) {
+    } else if (value is AddonInfo) {
       buffer.putUint8(211);
       writeValue(buffer, value.encode());
-    } else if (value is AddonListing) {
+    } else if (value is AddonListingPreview) {
       buffer.putUint8(212);
       writeValue(buffer, value.encode());
-    } else if (value is AddonStoreInfo) {
+    } else if (value is AddonListing) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
-    } else if (value is AddonUpdateAttemptInfo) {
+    } else if (value is AddonStoreInfo) {
       buffer.putUint8(214);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoSuggestion) {
+    } else if (value is AddonUpdateAttemptInfo) {
       buffer.putUint8(215);
       writeValue(buffer, value.encode());
-    } else if (value is TabContent) {
+    } else if (value is GeckoSuggestion) {
       buffer.putUint8(216);
       writeValue(buffer, value.encode());
-    } else if (value is ContentBlocking) {
+    } else if (value is TabContent) {
       buffer.putUint8(217);
       writeValue(buffer, value.encode());
-    } else if (value is DohSettings) {
+    } else if (value is ContentBlocking) {
       buffer.putUint8(218);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoEngineSettings) {
+    } else if (value is DohSettings) {
       buffer.putUint8(219);
       writeValue(buffer, value.encode());
-    } else if (value is AutocompleteResult) {
+    } else if (value is GeckoEngineSettings) {
       buffer.putUint8(220);
       writeValue(buffer, value.encode());
-    } else if (value is UnknownHitResult) {
+    } else if (value is AutocompleteResult) {
       buffer.putUint8(221);
       writeValue(buffer, value.encode());
-    } else if (value is ImageHitResult) {
+    } else if (value is UnknownHitResult) {
       buffer.putUint8(222);
       writeValue(buffer, value.encode());
-    } else if (value is VideoHitResult) {
+    } else if (value is ImageHitResult) {
       buffer.putUint8(223);
       writeValue(buffer, value.encode());
-    } else if (value is AudioHitResult) {
+    } else if (value is VideoHitResult) {
       buffer.putUint8(224);
       writeValue(buffer, value.encode());
-    } else if (value is ImageSrcHitResult) {
+    } else if (value is AudioHitResult) {
       buffer.putUint8(225);
       writeValue(buffer, value.encode());
-    } else if (value is PhoneHitResult) {
+    } else if (value is ImageSrcHitResult) {
       buffer.putUint8(226);
       writeValue(buffer, value.encode());
-    } else if (value is EmailHitResult) {
+    } else if (value is PhoneHitResult) {
       buffer.putUint8(227);
       writeValue(buffer, value.encode());
-    } else if (value is GeoHitResult) {
+    } else if (value is EmailHitResult) {
       buffer.putUint8(228);
       writeValue(buffer, value.encode());
-    } else if (value is DownloadState) {
+    } else if (value is GeoHitResult) {
       buffer.putUint8(229);
       writeValue(buffer, value.encode());
-    } else if (value is ShareInternetResourceState) {
+    } else if (value is DownloadState) {
       buffer.putUint8(230);
       writeValue(buffer, value.encode());
-    } else if (value is AddonCollection) {
+    } else if (value is ShareInternetResourceState) {
       buffer.putUint8(231);
       writeValue(buffer, value.encode());
-    } else if (value is SyncEngineStatus) {
+    } else if (value is AddonCollection) {
       buffer.putUint8(232);
       writeValue(buffer, value.encode());
-    } else if (value is SyncAccountInfo) {
+    } else if (value is SyncEngineStatus) {
       buffer.putUint8(233);
       writeValue(buffer, value.encode());
-    } else if (value is SyncDevice) {
+    } else if (value is SyncAccountInfo) {
       buffer.putUint8(234);
       writeValue(buffer, value.encode());
-    } else if (value is SyncIncomingTab) {
+    } else if (value is SyncDevice) {
       buffer.putUint8(235);
       writeValue(buffer, value.encode());
-    } else if (value is SyncRemoteTab) {
+    } else if (value is SyncIncomingTab) {
       buffer.putUint8(236);
       writeValue(buffer, value.encode());
-    } else if (value is SyncDeviceTabs) {
+    } else if (value is SyncRemoteTab) {
       buffer.putUint8(237);
       writeValue(buffer, value.encode());
-    } else if (value is PreferredDownloadManager) {
+    } else if (value is SyncDeviceTabs) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    } else if (value is PullToRefreshSettings) {
+    } else if (value is PreferredDownloadManager) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    } else if (value is RecentlyClosedTab) {
+    } else if (value is PullToRefreshSettings) {
       buffer.putUint8(240);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoPref) {
+    } else if (value is RecentlyClosedTab) {
       buffer.putUint8(241);
       writeValue(buffer, value.encode());
-    } else if (value is MlProgressData) {
+    } else if (value is GeckoPref) {
       buffer.putUint8(242);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxySettings) {
+    } else if (value is MlProgressData) {
       buffer.putUint8(243);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxyRoutingSnapshot) {
+    } else if (value is GeckoProxySettings) {
       buffer.putUint8(244);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoRoutingDemand) {
+    } else if (value is GeckoProxyRoutingSnapshot) {
       buffer.putUint8(245);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoProxyRoutingStatus) {
+    } else if (value is GeckoRoutingDemand) {
       buffer.putUint8(246);
       writeValue(buffer, value.encode());
-    } else if (value is ContainerSiteAssignment) {
+    } else if (value is GeckoProxyRoutingStatus) {
       buffer.putUint8(247);
       writeValue(buffer, value.encode());
-    } else if (value is ProxyLoadError) {
+    } else if (value is ContainerSiteAssignment) {
       buffer.putUint8(248);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoHeader) {
+    } else if (value is ProxyLoadError) {
       buffer.putUint8(249);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoFetchRequest) {
+    } else if (value is GeckoHeader) {
       buffer.putUint8(250);
       writeValue(buffer, value.encode());
-    } else if (value is GeckoFetchResponse) {
+    } else if (value is GeckoFetchRequest) {
       buffer.putUint8(251);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkNode) {
+    } else if (value is GeckoFetchResponse) {
       buffer.putUint8(252);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkImportNode) {
+    } else if (value is BookmarkNode) {
       buffer.putUint8(253);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkInsertTreeResult) {
+    } else if (value is BookmarkImportNode) {
       buffer.putUint8(254);
       writeValue(buffer, value.encode());
-    } else if (value is BookmarkInfo) {
+    } else if (value is BookmarkInsertTreeResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 0,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is SitePermissions) {
+    } else if (value is BookmarkInfo) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 1,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackingProtectionException) {
+    } else if (value is SitePermissions) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 2,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackerLogEntry) {
+    } else if (value is TrackingProtectionException) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 3,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackingStatisticsRecord) {
+    } else if (value is TrackerLogEntry) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 4,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is TrackingStatistics) {
+    } else if (value is TrackingStatisticsRecord) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 5,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkTarget) {
+    } else if (value is TrackingStatistics) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 6,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ProtectedTargetPattern) {
+    } else if (value is AppLinkTarget) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 7,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is NativeAppLinkRule) {
+    } else if (value is ProtectedTargetPattern) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 8,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is NativeContextAppLinkPolicy) {
+    } else if (value is NativeAppLinkRule) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 9,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkPolicySnapshot) {
+    } else if (value is NativeContextAppLinkPolicy) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 10,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkPromptRequest) {
+    } else if (value is AppLinkPolicySnapshot) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 11,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is AppLinkResolutionResult) {
+    } else if (value is AppLinkPromptRequest) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 12,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PwaIcon) {
+    } else if (value is AppLinkResolutionResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 13,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTargetFiles) {
+    } else if (value is PwaIcon) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 14,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTargetParams) {
+    } else if (value is ShareTargetFiles) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 15,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ShareTarget) {
+    } else if (value is ShareTargetParams) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 16,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is ExternalApplicationResource) {
+    } else if (value is ShareTarget) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 17,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PwaManifest) {
+    } else if (value is ExternalApplicationResource) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 18,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is SandboxCaptureEntry) {
+    } else if (value is PwaManifest) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 19,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is GestureConfig) {
+    } else if (value is SandboxCaptureEntry) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 20,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushDistributor) {
+    } else if (value is GestureConfig) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 21,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushStatus) {
+    } else if (value is PushDistributor) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 22,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    } else if (value is PushSubscription) {
+    } else if (value is PushStatus) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
         type: 23,
+        wrapped: value.encode(),
+      );
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    } else if (value is PushSubscription) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(
+        type: 24,
         wrapped: value.encode(),
       );
       buffer.putUint8(255);
@@ -8988,95 +9072,95 @@ class _PigeonCodec extends StandardMessageCodec {
       case 209:
         return WebExtensionData.decode(readValue(buffer)!);
       case 210:
-        return AddonInfo.decode(readValue(buffer)!);
+        return AddonUpdatePermissionRequest.decode(readValue(buffer)!);
       case 211:
-        return AddonListingPreview.decode(readValue(buffer)!);
+        return AddonInfo.decode(readValue(buffer)!);
       case 212:
-        return AddonListing.decode(readValue(buffer)!);
+        return AddonListingPreview.decode(readValue(buffer)!);
       case 213:
-        return AddonStoreInfo.decode(readValue(buffer)!);
+        return AddonListing.decode(readValue(buffer)!);
       case 214:
-        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
+        return AddonStoreInfo.decode(readValue(buffer)!);
       case 215:
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
       case 216:
-        return TabContent.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 217:
-        return ContentBlocking.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 218:
-        return DohSettings.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 219:
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 220:
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 221:
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 222:
-        return ImageHitResult.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 223:
-        return VideoHitResult.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 224:
-        return AudioHitResult.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 225:
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 226:
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 227:
-        return EmailHitResult.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 228:
-        return GeoHitResult.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 229:
-        return DownloadState.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 230:
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 231:
-        return AddonCollection.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 232:
-        return SyncEngineStatus.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 233:
-        return SyncAccountInfo.decode(readValue(buffer)!);
+        return SyncEngineStatus.decode(readValue(buffer)!);
       case 234:
-        return SyncDevice.decode(readValue(buffer)!);
+        return SyncAccountInfo.decode(readValue(buffer)!);
       case 235:
-        return SyncIncomingTab.decode(readValue(buffer)!);
+        return SyncDevice.decode(readValue(buffer)!);
       case 236:
-        return SyncRemoteTab.decode(readValue(buffer)!);
+        return SyncIncomingTab.decode(readValue(buffer)!);
       case 237:
-        return SyncDeviceTabs.decode(readValue(buffer)!);
+        return SyncRemoteTab.decode(readValue(buffer)!);
       case 238:
-        return PreferredDownloadManager.decode(readValue(buffer)!);
+        return SyncDeviceTabs.decode(readValue(buffer)!);
       case 239:
-        return PullToRefreshSettings.decode(readValue(buffer)!);
+        return PreferredDownloadManager.decode(readValue(buffer)!);
       case 240:
-        return RecentlyClosedTab.decode(readValue(buffer)!);
+        return PullToRefreshSettings.decode(readValue(buffer)!);
       case 241:
-        return GeckoPref.decode(readValue(buffer)!);
+        return RecentlyClosedTab.decode(readValue(buffer)!);
       case 242:
-        return MlProgressData.decode(readValue(buffer)!);
+        return GeckoPref.decode(readValue(buffer)!);
       case 243:
-        return GeckoProxySettings.decode(readValue(buffer)!);
+        return MlProgressData.decode(readValue(buffer)!);
       case 244:
-        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
+        return GeckoProxySettings.decode(readValue(buffer)!);
       case 245:
-        return GeckoRoutingDemand.decode(readValue(buffer)!);
+        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
       case 246:
-        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
+        return GeckoRoutingDemand.decode(readValue(buffer)!);
       case 247:
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
       case 248:
-        return ProxyLoadError.decode(readValue(buffer)!);
+        return ContainerSiteAssignment.decode(readValue(buffer)!);
       case 249:
-        return GeckoHeader.decode(readValue(buffer)!);
+        return ProxyLoadError.decode(readValue(buffer)!);
       case 250:
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return GeckoHeader.decode(readValue(buffer)!);
       case 251:
-        return GeckoFetchResponse.decode(readValue(buffer)!);
+        return GeckoFetchRequest.decode(readValue(buffer)!);
       case 252:
-        return BookmarkNode.decode(readValue(buffer)!);
+        return GeckoFetchResponse.decode(readValue(buffer)!);
       case 253:
-        return BookmarkImportNode.decode(readValue(buffer)!);
+        return BookmarkNode.decode(readValue(buffer)!);
       case 254:
-        return BookmarkInsertTreeResult.decode(readValue(buffer)!);
+        return BookmarkImportNode.decode(readValue(buffer)!);
       case 255:
         final _PigeonCodecOverflow wrapper = _PigeonCodecOverflow.decode(
           readValue(buffer)!,
@@ -12985,6 +13069,58 @@ class GeckoAddonsApi {
       isNullValid: true,
     );
     return pigeonVar_replyValue as AddonUpdateAttemptInfo?;
+  }
+
+  /// Allows the new permissions of the request [requestId] names, the one the
+  /// user saw, and runs the update. Null, allowing nothing, when that request
+  /// is no longer the pending one.
+  Future<AddonUpdateAttemptInfo?> acceptAddonUpdatePermissions(
+    String addonId,
+    String requestId,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.acceptAddonUpdatePermissions$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[addonId, requestId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as AddonUpdateAttemptInfo?;
+  }
+
+  /// Puts off the request [requestId] names until the next check asks again.
+  /// Does nothing once a later check replaced it.
+  Future<void> declineAddonUpdatePermissions(
+    String addonId,
+    String requestId,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoAddonsApi.declineAddonUpdatePermissions$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[addonId, requestId],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   Future<void> installAddon(String url) async {

@@ -14,6 +14,7 @@ import eu.weblibre.flutter_mozilla_components.DownloadLocationPreference
 import eu.weblibre.flutter_mozilla_components.ColorSchemePreference
 import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.interceptor.AppRequestInterceptor
+import eu.weblibre.flutter_mozilla_components.addons.ProfileAddonUpdater
 import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.EngineProvider.getOrCreateRuntime
@@ -35,6 +36,7 @@ import eu.weblibre.flutter_mozilla_components.middleware.RecentlyClosedFilterMid
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.TabUploadsMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
@@ -73,7 +75,6 @@ import mozilla.components.feature.media.middleware.LastMediaAccessMiddleware
 import mozilla.components.feature.media.middleware.RecordingDevicesMiddleware
 import mozilla.components.feature.prompts.PromptMiddleware
 import mozilla.components.feature.prompts.file.FileUploadsDirCleaner
-import mozilla.components.feature.prompts.file.FileUploadsDirCleanerMiddleware
 import mozilla.components.feature.readerview.ReaderViewMiddleware
 import mozilla.components.feature.recentlyclosed.RecentlyClosedMiddleware
 import mozilla.components.feature.recentlyclosed.RecentlyClosedTabsStorage
@@ -198,15 +199,26 @@ class Core(
     }
 
     // Addons
-    val addonManager by lazy {
+    val addonManager: AddonManager by lazy {
         AddonManager(store, engine, addonsProvider, addonUpdater)
     }
 
     val addonUpdater by lazy {
-        DefaultAddonUpdater(
-            context,
-            Frequency(12, TimeUnit.HOURS),
-            components.notificationsDelegate
+        val frequency = Frequency(12, TimeUnit.HOURS)
+        ProfileAddonUpdater(
+            profileContext = components.profileApplicationContext,
+            updater = DefaultAddonUpdater(
+                // The application context, the only one AC's update worker
+                // has, so every opener of the update-attempts database goes
+                // through the app's routing to this profile. See
+                // ActiveProfile.PROFILE_DATABASE_NAMES.
+                components.profileApplicationContext.rootApplicationContext,
+                frequency,
+                components.notificationsDelegate
+            ),
+            updateAddon = { addonId, onFinish -> addonManager.updateAddon(addonId, onFinish) },
+            notificationsDelegate = components.notificationsDelegate,
+            frequency = frequency,
         )
     }
 
@@ -234,8 +246,15 @@ class Core(
         )
     }
 
-    val fileUploadsDirCleaner: FileUploadsDirCleaner by lazy {
-        FileUploadsDirCleaner(scope = applicationScope) { context.cacheDir }
+    /**
+     * Only because PromptFeature needs one to list chosen files in. Nothing asks
+     * it to delete them: one list for every tab is how a host change in one tab
+     * deleted another tab's pending upload. TabUploadsMiddleware deletes per tab
+     * instead. One for each feature, since its list only grows: it goes with the
+     * feature.
+     */
+    fun newFileUploadsDirCleaner() = FileUploadsDirCleaner(scope = applicationScope) {
+        components.profileApplicationContext.rootApplicationContext.cacheDir
     }
 
     val historyMetadataService by lazy {
@@ -314,7 +333,10 @@ class Core(
                 RecordingDevicesMiddleware(context, components.notificationsDelegate),
                 PromptMiddleware(),
                 SaveToPDFMiddleware(),
-                FileUploadsDirCleanerMiddleware(fileUploadsDirCleaner),
+                // Uploads are copied into the activity's cache, never a profile's.
+                TabUploadsMiddleware({
+                    components.profileApplicationContext.rootApplicationContext.cacheDir
+                }),
                 LastMediaAccessMiddleware(),
                 // Keep parity with Fenix: do not initialize translations on store init.
                 // EngineObserver will dispatch InitTranslationsBrowserState after first completed page load.

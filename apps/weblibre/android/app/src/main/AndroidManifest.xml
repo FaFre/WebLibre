@@ -73,6 +73,21 @@
         </receiver>
 
         <receiver
+            android:name="eu.weblibre.flutter_mozilla_components.addons.AddonUpdatePermissionReceiver"
+            android:exported="false" />
+
+        <!-- Merged in by org.mozilla.components:feature-addons and removed here.
+             It answers the buttons of AC's add-on update notification, reading the
+             notification id and the "allowed" flag through its own context rather
+             than the profile context the updater wrote them with, so neither
+             button worked; it also crashed in a process without components.
+             ProfileAddonUpdater posts its own notification, answered by
+             AddonUpdatePermissionReceiver, and nothing posts AC's any more. -->
+        <service
+            android:name="mozilla.components.feature.addons.update.DefaultAddonUpdater$NotificationHandlerService"
+            tools:node="remove" />
+
+        <receiver
             android:name="org.ironfoxoss.unifiedpush.PushReceiver"
             tools:node="remove" />
 

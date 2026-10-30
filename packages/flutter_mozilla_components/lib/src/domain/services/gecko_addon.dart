@@ -130,6 +130,17 @@ class GeckoAddonService extends GeckoAddonEvents {
     return _api.getLastAddonUpdateAttempt(addonId);
   }
 
+  Future<AddonUpdateAttemptInfo?> acceptAddonUpdatePermissions(
+    String addonId,
+    String requestId,
+  ) {
+    return _api.acceptAddonUpdatePermissions(addonId, requestId);
+  }
+
+  Future<void> declineAddonUpdatePermissions(String addonId, String requestId) {
+    return _api.declineAddonUpdatePermissions(addonId, requestId);
+  }
+
   Future<bool> isAddonAutoUpdateEnabled() {
     return _api.isAddonAutoUpdateEnabled();
   }

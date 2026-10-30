@@ -10,6 +10,7 @@ import android.util.Log
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
+import eu.weblibre.flutter_mozilla_components.rootApplicationContext
 import eu.weblibre.flutter_mozilla_components.startup.ProfileCandidateResolver
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
@@ -211,12 +212,7 @@ class UnifiedPushReceiver : MessagingReceiver() {
      * be in hand — where no uncommitted process could ever read it.
      */
     private fun ownershipStore(context: Context) = PushOwnershipStore(
-        StartupPaths(
-            when (context) {
-                is ProfileContext -> context.rootApplicationContext
-                else -> context.applicationContext
-            },
-        ),
+        StartupPaths(context.rootApplicationContext),
     )
 
     private fun FailedReason.toPushError(): PushError = when (this) {

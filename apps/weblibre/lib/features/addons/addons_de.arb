@@ -140,5 +140,9 @@
   "addons_permissionTopSites": "Auf den Browserverlauf zugreifen",
   "addons_permissionWebNavigation": "Während der Navigation auf Browseraktivität zugreifen",
   "addons_permissionAllUrls": "Auf Daten aller Websites zugreifen",
-  "addons_permissionAccessDataFor": "Auf Daten für {host} zugreifen"
+  "addons_permissionAccessDataFor": "Auf Daten für {host} zugreifen",
+
+  "addons_updatePermissionsTitle": "Update benötigt neue Berechtigungen",
+  "addons_updatePermissionsBody": "Die neue Version fordert die folgenden Berechtigungen an. Sie wird installiert, sobald diese erlaubt sind.",
+  "addons_updateNeedsPermissions": "Dieses Update fordert neue Berechtigungen an, die vor der Installation erlaubt werden müssen."
 }

@@ -2032,6 +2032,24 @@ abstract class AppLocalizations {
   /// **'Access your data for {host}'**
   String addons_permissionAccessDataFor(String host);
 
+  /// Heading of a card on the extension details screen when an update is waiting for the user to allow new permissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Update needs new permissions'**
+  String get addons_updatePermissionsTitle;
+
+  /// Text under addons_updatePermissionsTitle, above the list of new permissions. Its buttons are addons_actionNotNow and addons_actionUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'The new version asks for the permissions below. It is installed once you allow them.'**
+  String get addons_updatePermissionsBody;
+
+  /// Message after an update check when the update stopped because it needs new permissions, and the status line under the extension's Updates section afterwards. The permissions then show on the extension details screen.
+  ///
+  /// In en, this message translates to:
+  /// **'This update asks for new permissions. Review them to install it.'**
+  String get addons_updateNeedsPermissions;
+
   /// Question in the banner shown when a tapped link can be opened by an installed app instead of the browser. appName is that app's name.
   ///
   /// In en, this message translates to:

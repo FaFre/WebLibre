@@ -23,6 +23,8 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.database.DatabaseErrorHandler
+import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import android.os.Process
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
@@ -32,6 +34,7 @@ import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import java.io.File
 
 class MyApplication : Application() {
 
@@ -89,6 +92,11 @@ class MyApplication : Application() {
         StartupArbiter.onCommitted { _, _ ->
             ActiveProfile.resolveContext(this)?.let(PushMessageScheduler::recoverLater)
         }
+
+        // The base context, which looks names up without the routing below.
+        StartupArbiter.onCommitted { _, _ ->
+            ActiveProfile.deleteUnscopedDatabases(baseContext)
+        }
     }
 
     /**
@@ -115,6 +123,42 @@ class MyApplication : Application() {
 
         return super.getSharedPreferences("${prefix}_$name", mode)
     }
+
+    /**
+     * Routes the databases mozilla-components opens by bare name from its workers
+     * (see [ActiveProfile.PROFILE_DATABASE_NAMES]), so their records land in the
+     * profile whose engine produced them.
+     *
+     * Unlike [getSharedPreferences] this falls back to the unscoped file rather
+     * than throwing. Room asks once per process, on first use, which comes after
+     * commitment unless the process is already restarting. The profile folder is
+     * off limits then, and these hold update status, not account state: not worth
+     * crashing a restart over.
+     */
+    override fun getDatabasePath(name: String): File =
+        ActiveProfile.profileDatabasePath(this, name) ?: super.getDatabasePath(name)
+
+    /**
+     * Opens the databases [getDatabasePath] routes at the same place. Android 8.0's
+     * `SQLiteOpenHelper` opens through here, and the framework's own implementation
+     * never asks [getDatabasePath]. See [ActiveProfile.openProfileDatabase].
+     */
+    override fun openOrCreateDatabase(
+        name: String,
+        mode: Int,
+        factory: SQLiteDatabase.CursorFactory?,
+    ): SQLiteDatabase =
+        ActiveProfile.openProfileDatabase(this, name, mode, factory, null)
+            ?: super.openOrCreateDatabase(name, mode, factory)
+
+    override fun openOrCreateDatabase(
+        name: String,
+        mode: Int,
+        factory: SQLiteDatabase.CursorFactory?,
+        errorHandler: DatabaseErrorHandler?,
+    ): SQLiteDatabase =
+        ActiveProfile.openProfileDatabase(this, name, mode, factory, errorHandler)
+            ?: super.openOrCreateDatabase(name, mode, factory, errorHandler)
 
     private fun isDefaultProcess(context: Context): Boolean =
         currentProcessName(context) == context.packageName

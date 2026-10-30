@@ -16,6 +16,8 @@ object AddonPrefs {
     const val PREF_AUTO_UPDATE_DISABLED_IDS = "pinned_local_addon_ids"
     const val PREF_LOCAL_FILE_ADDON_IDS = "local_file_addon_ids"
     const val PREF_MANUAL_UPDATE_ATTEMPT_PREFIX = "manual_addon_update_attempt."
+    // App-wide, in the application context's file rather than a profile's.
+    const val PREF_LEGACY_UPDATE_STATE_REMOVED = "legacy_update_state_removed"
 
     fun get(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

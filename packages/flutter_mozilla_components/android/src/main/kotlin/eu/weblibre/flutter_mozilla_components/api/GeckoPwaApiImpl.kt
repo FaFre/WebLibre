@@ -8,6 +8,7 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
@@ -15,9 +16,12 @@ import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.getSystemService
+import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.activities.IntentReceiverActivity
+import eu.weblibre.flutter_mozilla_components.maintenance.PwaShortcutParticipant
 import eu.weblibre.flutter_mozilla_components.pigeons.ExternalApplicationResource
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPwaApi
 import eu.weblibre.flutter_mozilla_components.pigeons.PwaIcon
@@ -25,14 +29,17 @@ import eu.weblibre.flutter_mozilla_components.pigeons.PwaManifest
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTarget
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetFiles
 import eu.weblibre.flutter_mozilla_components.pigeons.ShareTargetParams
+import eu.weblibre.flutter_mozilla_components.rootApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.selectedTab
 import mozilla.components.concept.engine.manifest.WebAppManifest
 import mozilla.components.support.base.log.logger.Logger
-import java.io.File
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -54,11 +61,39 @@ class GeckoPwaApiImpl(
     }
 
     private val logger = Logger("GeckoPwaApiImpl")
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    /**
+     * The global token index that `LaunchTrust` and `PwaShortcutParticipant` read.
+     *
+     * Never through `context` itself: that is a [ProfileContext], whose
+     * application context is itself and whose preference files carry the
+     * profile's prefix. The index used to land in
+     * `profile-<uuid>_pwa_profile_mapping`, where neither reader looks.
+     * Launches survived on LaunchTrust's pinned-shortcut fallback; profile
+     * backups never carried the tokens.
+     */
     private val appPrefs by lazy {
-        context.applicationContext.getSharedPreferences(
+        context.rootApplicationContext.getSharedPreferences(
             PwaConstants.PROFILE_MAPPING_PREFS,
             Context.MODE_PRIVATE,
-        )
+        ).also { global ->
+            (context as? ProfileContext)?.let { migrateProfileScopedLaunchTokens(it, global) }
+        }
+    }
+
+    init {
+        // At once rather than on first use, so the tokens move whenever the
+        // profile's browser starts: only installs use the index here, and a
+        // profile that never installs again would keep its tokens where nothing
+        // reads them. Through appPrefs, which every write waits for, so a token
+        // written meanwhile is never replaced by the older one moving over.
+        if (context is ProfileContext) {
+            scope.launch {
+                runCatching { appPrefs }
+                    .onFailure { logger.error("Could not move this profile's launch tokens", it) }
+            }
+        }
     }
 
     private val components by lazy {
@@ -546,7 +581,7 @@ class GeckoPwaApiImpl(
         return withContext(Dispatchers.Default) {
             try {
                 val storage = components.core.webAppManifestStorage
-                val currentProfileUuid = getCurrentProfileUuid()
+                val currentProfileUuid = ActiveProfile.committedProfileId
 
                 // Pinned shortcuts are the source of truth for installs: each
                 // pinned shortcut carries its own label, profile, and
@@ -573,7 +608,7 @@ class GeckoPwaApiImpl(
                         intent.getStringExtra(PwaConstants.EXTRA_PWA_PROFILE_UUID)
                     if (currentProfileUuid != null &&
                         shortcutProfile != null &&
-                        shortcutProfile != currentProfileUuid
+                        !shortcutProfile.equals(currentProfileUuid, ignoreCase = true)
                     ) {
                         return@mapNotNull null
                     }
@@ -669,20 +704,6 @@ class GeckoPwaApiImpl(
         }.commit()
     }
 
-    private fun getCurrentProfileUuid(): String? {
-        return try {
-            val startupProfileFile = File(context.filesDir, PwaConstants.CURRENT_PROFILE_FILE)
-            if (startupProfileFile.exists()) {
-                startupProfileFile.readText().trim().ifEmpty { null }
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            logger.error("Failed to read current profile UUID", e)
-            null
-        }
-    }
-
     private fun WebAppManifest.toPwaManifest(
         currentUrl: String = startUrl,
         contextId: String? = null,
@@ -740,5 +761,46 @@ class GeckoPwaApiImpl(
                 )
             },
         )
+    }
+
+    internal companion object {
+        /**
+         * Moves the launch tokens [profileContext] wrote into its own preference
+         * file over to [global], the index everything else reads. A token found
+         * in both is taken from the profile file, which is where every write has
+         * gone since the index was misplaced.
+         *
+         * Only tokens naming this profile move. The file may hold others: a
+         * restored preference snapshot can bring keys naming another profile,
+         * and copying those would replace that profile's trusted-launch tokens.
+         * They are dropped with the rest of the file, which nothing else reads.
+         *
+         * Each profile's file is migrated the next time that profile runs.
+         */
+        fun migrateProfileScopedLaunchTokens(
+            profileContext: ProfileContext,
+            global: SharedPreferences,
+        ) {
+            val profileId = profileContext.profileId ?: return
+            val legacy = profileContext.getSharedPreferences(
+                PwaConstants.PROFILE_MAPPING_PREFS,
+                Context.MODE_PRIVATE,
+            )
+            val entries = legacy.all
+            if (entries.isEmpty()) return
+
+            val editor = global.edit()
+            for ((key, token) in entries) {
+                if (token is String && PwaShortcutParticipant.belongsToProfile(key, profileId)) {
+                    editor.putString(key, token)
+                }
+            }
+            // Emptied rather than deleted: ProfileContext does not override
+            // deleteSharedPreferences, so a delete through it would remove the
+            // global file of the same name instead.
+            if (editor.commit()) {
+                legacy.edit().clear().commit()
+            }
+        }
     }
 }

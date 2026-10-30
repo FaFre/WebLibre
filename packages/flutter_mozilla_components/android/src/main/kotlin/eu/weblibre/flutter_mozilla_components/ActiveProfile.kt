@@ -20,6 +20,8 @@
 package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
+import android.database.DatabaseErrorHandler
+import android.database.sqlite.SQLiteDatabase
 import android.util.AtomicFile
 import eu.weblibre.flutter_mozilla_components.startup.CommittedProfileWriter
 import eu.weblibre.flutter_mozilla_components.startup.ExternalCommitResult
@@ -62,6 +64,17 @@ object ActiveProfile {
         "syncEngines",                  // Per-engine enabled/disabled state
         "syncPrefs",                    // Last-synced timestamp + persisted sync state
         SyncStateCache.STORAGE_NAME,    // Last-known account profile + device constellation
+    )
+
+    /**
+     * Databases mozilla-components opens by bare name from its workers, which only
+     * ever get the application context. `MyApplication` routes them to the
+     * committed profile through [profileDatabasePath].
+     *
+     * Names are AC internals, so check them on every AC upgrade.
+     */
+    val PROFILE_DATABASE_NAMES = setOf(
+        "addons_updater_attempts_database", // Add-on update results (AddonUpdaterWorker)
     )
 
     /**
@@ -118,6 +131,51 @@ object ActiveProfile {
             ProfileContext(context.applicationContext, relativePath).also {
                 cachedContext = it
             }
+        }
+    }
+
+    /**
+     * Where the database [name] lives for the committed profile, or `null` when
+     * it is not one of [PROFILE_DATABASE_NAMES] or no profile is bound right now.
+     */
+    fun profileDatabasePath(context: Context, name: String): File? {
+        // Before the arbiter: every database in the process is opened through
+        // here, including in processes that never initialize it.
+        if (name !in PROFILE_DATABASE_NAMES) return null
+        return resolveContext(context)?.getDatabasePath(name)
+    }
+
+    /**
+     * Opens [name] at [profileDatabasePath] the way `Context.openOrCreateDatabase`
+     * would, or returns `null` where that has no path for it.
+     *
+     * Android 8.0's `SQLiteOpenHelper` opens through `openOrCreateDatabase`, and
+     * `ContextWrapper` hands that straight to the framework context, which looks
+     * the path up itself rather than through an overridden `getDatabasePath`.
+     */
+    fun openProfileDatabase(
+        context: Context,
+        name: String,
+        mode: Int,
+        factory: SQLiteDatabase.CursorFactory?,
+        errorHandler: DatabaseErrorHandler?,
+    ): SQLiteDatabase? {
+        if (name !in PROFILE_DATABASE_NAMES) return null
+        return resolveContext(context)?.openOrCreateDatabase(name, mode, factory, errorHandler)
+    }
+
+    /**
+     * Deletes the copies of [PROFILE_DATABASE_NAMES] in the app's global
+     * folder, where they were kept before being routed. Nothing reads them: the
+     * records carry no profile, so no profile can claim them.
+     *
+     * [unrouted] must look names up the framework's way, as `MyApplication`'s
+     * base context does. Runs at commitment, after which nothing opens them
+     * there; a restart that did is cleaned up by the next process.
+     */
+    fun deleteUnscopedDatabases(unrouted: Context) {
+        for (name in PROFILE_DATABASE_NAMES) {
+            SQLiteDatabase.deleteDatabase(unrouted.getDatabasePath(name))
         }
     }
 
