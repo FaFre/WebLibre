@@ -1014,7 +1014,7 @@ class GeneralSettings with FastEquatable {
        tabBarLongPressUrlCopy = tabBarLongPressUrlCopy ?? true,
        unshortenerEnabled = unshortenerEnabled ?? false,
        unshortenerToken = unshortenerToken ?? '',
-       allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? false,
+       allowNonManifestPwaInstall = allowNonManifestPwaInstall ?? true,
        blockExternalAppsEnabled = blockExternalAppsEnabled ?? false,
        externalAppIntentPolicies = externalAppIntentPolicies ?? const {},
        customTabsEnabled = customTabsEnabled ?? true,
