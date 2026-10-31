@@ -102,7 +102,13 @@ const _deadProxyPrefs = <String, Object>{
   'network.proxy.socks_port': 1,
   'network.proxy.socks_version': 5,
   // Resolve names through the (dead) proxy as well, so a blocked request cannot
-  // still leak the hostname to the system resolver.
+  // still leak the hostname to the system resolver. This is the SOCKS5 pref:
+  // with `socks_version` 5 Gecko reads it both for the fallback proxy's remote
+  // DNS and for the DNS service's guard that refuses local lookups while a
+  // manual proxy is set. Its default is already true, but a user or about:config
+  // value of false would silently undo both, so it is pinned here.
+  'network.proxy.socks5_remote_dns': true,
+  // The SOCKS4 equivalent. It does nothing while `socks_version` is 5.
   'network.proxy.socks_remote_dns': true,
 };
 
@@ -121,7 +127,9 @@ const _directProxyPrefs = <String, Object>{
 };
 
 /// The dead endpoint itself is cleared on disarm, so no user-branch residue is
-/// left pointing at a port nothing listens on.
+/// left pointing at a port nothing listens on. That includes
+/// `socks5_remote_dns`, which falls back to Gecko's default (true) and has no
+/// effect without a manual proxy: the extension sets remote DNS per request.
 final _socksEndpointPrefNames = _deadProxyPrefs.keys
     .where((name) => !_directProxyPrefs.containsKey(name))
     .toList();
