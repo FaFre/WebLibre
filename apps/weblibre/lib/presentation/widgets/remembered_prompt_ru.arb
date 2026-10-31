@@ -1,0 +1,22 @@
+{
+  "@@locale": "ru",
+  "rememberedPrompt_dontAskAgain": "Больше не спрашивать",
+  "rememberedPrompt_dontAskAgainHint": "Это можно изменить в настройках.",
+  "rememberedPrompt_answerAsk": "Спрашивать",
+  "rememberedPrompt_answerKeep": "Оставить",
+  "rememberedPrompt_keepExternalTabLabel": "Выход из вкладки, открытой другим приложением",
+  "rememberedPrompt_keepExternalTabDescription": "Когда «Назад» возвращает в другое приложение: оставить вкладку, отбросить её или спрашивать каждый раз",
+  "rememberedPrompt_keepExternalTabKeywords": "оставить вкладку, отбросить вкладку, внешнее приложение, ссылка, назад, выйти, больше не спрашивать, intent, keep tab",
+  "rememberedPrompt_closeIsolatedTabsLabel": "Спрашивать перед закрытием изолированных вкладок",
+  "rememberedPrompt_closeIsolatedTabsDescription": "При закрытии последней вкладки изолированной группы удаляются её куки и данные сайтов",
+  "rememberedPrompt_closeIsolatedTabsKeywords": "изолированная, закрыть вкладку, удалить данные, куки, подтверждение, больше не спрашивать, isolated, cookies",
+  "rememberedPrompt_closeAllTabsLabel": "Спрашивать перед закрытием всех вкладок",
+  "rememberedPrompt_closeAllTabsDescription": "При закрытии всех вкладок через меню контейнера",
+  "rememberedPrompt_closeAllTabsKeywords": "закрыть все, вкладки, подтверждение, больше не спрашивать, close all",
+  "rememberedPrompt_startTorLabel": "Спрашивать перед запуском {torBrand}",
+  "rememberedPrompt_startTorDescription": "Когда вкладке нужен {torBrand}, а он не запущен",
+  "rememberedPrompt_startTorKeywords": "tor, onion, прокси, запустить, подтверждение, больше не спрашивать",
+  "rememberedPrompt_startProxyConnectionLabel": "Спрашивать перед запуском прокси-подключения",
+  "rememberedPrompt_startProxyConnectionDescription": "Когда прокси-подключение контейнера не запущено",
+  "rememberedPrompt_startProxyConnectionKeywords": "прокси, vpn, подключение, контейнер, запустить, подтверждение, больше не спрашивать, proxy"
+}

@@ -28,7 +28,6 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
@@ -138,25 +137,37 @@ class ContainerMenu extends HookConsumerWidget {
     final container = this.container;
     final contextualIdentity = container?.metadata.contextualIdentity;
 
+    /// Every close item ends here, so closing the last tab of an isolation
+    /// group always asks first — "Close all tabs" may no longer have, once
+    /// its own question is answered with "Don't ask again".
     Future<void> closeTabs({
       bool includeRegular = true,
       bool includePrivate = true,
       bool includeIsolated = true,
     }) async {
-      final closed = await ref
+      final tabIds = await ref
           .read(tabDataRepositoryProvider.notifier)
-          .closeContainerTabs(
+          .getContainerTabIds(
             scopeContainerId,
             includeRegular: includeRegular,
             includePrivate: includePrivate,
             includeIsolated: includeIsolated,
           );
 
+      if (!context.mounted ||
+          !await confirmBulkTabCloseIfNeeded(context, ref, tabIds)) {
+        return;
+      }
+
+      if (tabIds.isNotEmpty) {
+        await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
+      }
+
       if (context.mounted) {
         ui_helper.showTabUndoClose(
           context,
           ref.read(tabRepositoryProvider.notifier).undoClose,
-          count: closed.length,
+          count: tabIds.length,
         );
       }
     }
@@ -232,8 +243,7 @@ class ContainerMenu extends HookConsumerWidget {
                 leadingIcon: const Icon(MdiIcons.closeCircle),
                 onPressed: enabled
                     ? () async {
-                        final result = await showCloseAllTabsDialog(context);
-                        if (result == true) {
+                        if (await showCloseAllTabsDialog(context)) {
                           await closeTabs();
                         }
                       }
@@ -268,28 +278,7 @@ class ContainerMenu extends HookConsumerWidget {
                   ),
                   onPressed: enabled
                       ? () async {
-                          // Count the distinct isolation groups that will be
-                          // destroyed so the confirmation can name them.
-                          final isolatedContextIds = ref
-                              .read(tabStatesProvider)
-                              .values
-                              .where(
-                                (state) =>
-                                    state.tabMode is IsolatedTabMode &&
-                                    state.isolationContextId != null,
-                              )
-                              .map((state) => state.isolationContextId!)
-                              .toSet();
-
-                          if (isolatedContextIds.isNotEmpty) {
-                            final confirmed = await ui_helper
-                                .confirmIsolatedTabClose(
-                                  context,
-                                  groupCount: isolatedContextIds.length,
-                                );
-                            if (!confirmed) return;
-                          }
-
+                          // closeTabs asks before deleting the groups' data.
                           await closeTabs(
                             includeRegular: false,
                             includePrivate: false,

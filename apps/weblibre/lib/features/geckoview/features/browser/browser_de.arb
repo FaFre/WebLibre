@@ -1,7 +1,6 @@
 {
   "@@locale": "de",
   "browser_actionSelect": "Auswählen",
-  "browser_actionKeep": "Behalten",
   "browser_actionInstall": "Installieren",
   "browser_bookmarkAllTitle": "Alle Tabs als Lesezeichen speichern",
   "browser_bookmarkAllFastTitle": "Schnell",

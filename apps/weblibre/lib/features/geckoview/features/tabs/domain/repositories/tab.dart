@@ -274,15 +274,14 @@ class TabDataRepository extends _$TabDataRepository {
     return tabIds.length;
   }
 
-  /// [keepOffRecentlyClosed] as for [TabRepository.closeTab].
-  Future<List<String>> closeContainerTabs(
+  /// The tabs [closeContainerTabs] would close, for confirming before it does.
+  Future<List<String>> getContainerTabIds(
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
     bool includeIsolated = true,
-    bool keepOffRecentlyClosed = false,
-  }) async {
-    final tabIds = await ref
+  }) {
+    return ref
         .read(tabDatabaseProvider)
         .containerDao
         .getContainerTabIds(
@@ -292,6 +291,22 @@ class TabDataRepository extends _$TabDataRepository {
           includeIsolated: includeIsolated,
         )
         .get();
+  }
+
+  /// [keepOffRecentlyClosed] as for [TabRepository.closeTab].
+  Future<List<String>> closeContainerTabs(
+    String? containerId, {
+    bool includeRegular = true,
+    bool includePrivate = true,
+    bool includeIsolated = true,
+    bool keepOffRecentlyClosed = false,
+  }) async {
+    final tabIds = await getContainerTabIds(
+      containerId,
+      includeRegular: includeRegular,
+      includePrivate: includePrivate,
+      includeIsolated: includeIsolated,
+    );
 
     if (tabIds.isNotEmpty) {
       await ref

@@ -1,0 +1,204 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+
+/// What a [RememberablePromptDialog] was answered with.
+typedef RememberablePromptResult<T extends Enum> = ({T answer, bool remember});
+
+/// A button that answers a [RememberablePromptDialog].
+class PromptAnswerAction<T extends Enum> {
+  final T answer;
+  final String label;
+
+  /// Whether this is the dialog's primary action, drawn filled.
+  final bool primary;
+
+  const PromptAnswerAction({
+    required this.answer,
+    required this.label,
+    this.primary = false,
+  });
+}
+
+/// An [AlertDialog] with a "Don't ask again" checkbox, for the prompts in
+/// [RememberedPrompt]. Show it through [askUnlessRemembered], which skips it
+/// once an answer is remembered.
+///
+/// Pops a [RememberablePromptResult] for an answer button, and null for Cancel
+/// or a dismissal — neither is ever remembered, so ticking the box and then
+/// backing out stores nothing.
+class RememberablePromptDialog<T extends Enum> extends HookWidget {
+  final Widget? icon;
+  final Widget title;
+  final Widget content;
+  final List<PromptAnswerAction<T>> answers;
+
+  /// Whether a Cancel button comes first. A question that has no "not now",
+  /// like keeping or discarding a tab, leaves it out.
+  final bool cancellable;
+
+  const RememberablePromptDialog({
+    required this.title,
+    required this.content,
+    required this.answers,
+    this.icon,
+    this.cancellable = true,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final dontAskAgain = useState(false);
+
+    return AlertDialog(
+      icon: icon,
+      title: title,
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          content,
+          const SizedBox(height: 8),
+          CheckboxListTile.adaptive(
+            value: dontAskAgain.value,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            title: Text(l10n.rememberedPrompt_dontAskAgain),
+            subtitle: Text(l10n.rememberedPrompt_dontAskAgainHint),
+            onChanged: (value) => dontAskAgain.value = value ?? false,
+          ),
+        ],
+      ),
+      actions: [
+        if (cancellable)
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.common_cancel),
+          ),
+        for (final action in answers)
+          if (action.primary)
+            FilledButton(
+              onPressed: () => _answer(context, action.answer, dontAskAgain),
+              child: Text(action.label),
+            )
+          else
+            TextButton(
+              onPressed: () => _answer(context, action.answer, dontAskAgain),
+              child: Text(action.label),
+            ),
+      ],
+    );
+  }
+
+  void _answer(BuildContext context, T answer, ValueNotifier<bool> remember) {
+    Navigator.of(context).pop<RememberablePromptResult<T>>((
+      answer: answer,
+      remember: remember.value,
+    ));
+  }
+}
+
+/// Answers [prompt] with what was remembered for it, or asks with the
+/// [RememberablePromptDialog] that [builder] returns and remembers the answer
+/// when "Don't ask again" was ticked.
+///
+/// [T] is the prompt's answer type, one of [RememberedPrompt.answers]. Returns
+/// null when the dialog was cancelled or dismissed.
+Future<T?> askUnlessRemembered<T extends Enum>(
+  BuildContext context,
+  RememberedPrompt prompt, {
+  required WidgetBuilder builder,
+}) async {
+  final container = ProviderScope.containerOf(context, listen: false);
+
+  final remembered = container
+      .read(generalSettingsWithDefaultsProvider)
+      .rememberedAnswer<T>(prompt);
+  if (remembered != null) return remembered;
+
+  final result = await showDialog<RememberablePromptResult<T>>(
+    context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+    builder: builder,
+  );
+  if (result == null) return null;
+
+  if (result.remember) {
+    try {
+      await container
+          .read(generalSettingsRepositoryProvider.notifier)
+          .updateSettings(
+            (current) => current.copyWith.rememberedPrompts({
+              ...current.rememberedPrompts,
+              prompt: result.answer.name,
+            }),
+          );
+    } catch (error, stackTrace) {
+      // The answer still stands for this time; it is only asked again.
+      logger.e(
+        'Failed to remember the answer to ${prompt.name}',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  return result.answer;
+}
+
+/// [askUnlessRemembered] for a yes/no confirmation: Cancel, and a primary
+/// [confirmLabel] button. Returns whether to go ahead.
+Future<bool> confirmUnlessRemembered(
+  BuildContext context,
+  RememberedPrompt prompt, {
+  required String title,
+  required String content,
+  required String confirmLabel,
+  Widget? icon,
+}) async {
+  final answer = await askUnlessRemembered<PromptConfirmation>(
+    context,
+    prompt,
+    builder: (context) => RememberablePromptDialog<PromptConfirmation>(
+      icon: icon,
+      title: Text(title),
+      content: Text(content),
+      answers: [
+        PromptAnswerAction(
+          answer: PromptConfirmation.confirmed,
+          label: confirmLabel,
+          primary: true,
+        ),
+      ],
+    ),
+  );
+
+  return answer == PromptConfirmation.confirmed;
+}

@@ -1,0 +1,22 @@
+{
+  "@@locale": "id",
+  "rememberedPrompt_dontAskAgain": "Jangan tanya lagi",
+  "rememberedPrompt_dontAskAgainHint": "Anda dapat mengubahnya di pengaturan.",
+  "rememberedPrompt_answerAsk": "Tanya",
+  "rememberedPrompt_answerKeep": "Pertahankan",
+  "rememberedPrompt_keepExternalTabLabel": "Meninggalkan tab yang dibuka oleh aplikasi lain",
+  "rememberedPrompt_keepExternalTabDescription": "Saat tombol Kembali membawa Anda ke aplikasi lain: pertahankan tab, buang tab, atau tanya setiap kali",
+  "rememberedPrompt_keepExternalTabKeywords": "pertahankan tab, buang tab, aplikasi eksternal, tautan, kembali, keluar, jangan tanya lagi, intent, keep tab",
+  "rememberedPrompt_closeIsolatedTabsLabel": "Tanya sebelum menutup tab terisolasi",
+  "rememberedPrompt_closeIsolatedTabsDescription": "Menutup tab terakhir dari grup terisolasi akan menghapus kuki dan data situsnya",
+  "rememberedPrompt_closeIsolatedTabsKeywords": "terisolasi, tutup tab, hapus data, kuki, konfirmasi, jangan tanya lagi, isolated, cookies",
+  "rememberedPrompt_closeAllTabsLabel": "Tanya sebelum menutup semua tab",
+  "rememberedPrompt_closeAllTabsDescription": "Saat menutup semua tab dari menu kontainer",
+  "rememberedPrompt_closeAllTabsKeywords": "tutup semua, tab, konfirmasi, jangan tanya lagi, close all",
+  "rememberedPrompt_startTorLabel": "Tanya sebelum memulai {torBrand}",
+  "rememberedPrompt_startTorDescription": "Saat sebuah tab memerlukan {torBrand} dan {torBrand} sedang tidak berjalan",
+  "rememberedPrompt_startTorKeywords": "tor, onion, proksi, proxy, mulai, konfirmasi, jangan tanya lagi",
+  "rememberedPrompt_startProxyConnectionLabel": "Tanya sebelum memulai koneksi proksi",
+  "rememberedPrompt_startProxyConnectionDescription": "Saat koneksi proksi sebuah kontainer sedang tidak berjalan",
+  "rememberedPrompt_startProxyConnectionKeywords": "proksi, proxy, vpn, koneksi, kontainer, mulai, konfirmasi, jangan tanya lagi"
+}

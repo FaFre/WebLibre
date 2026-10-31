@@ -1,0 +1,22 @@
+{
+  "@@locale": "de",
+  "rememberedPrompt_dontAskAgain": "Nicht mehr fragen",
+  "rememberedPrompt_dontAskAgainHint": "Lässt sich in den Einstellungen ändern.",
+  "rememberedPrompt_answerAsk": "Fragen",
+  "rememberedPrompt_answerKeep": "Behalten",
+  "rememberedPrompt_keepExternalTabLabel": "Von einer anderen App geöffneten Tab verlassen",
+  "rememberedPrompt_keepExternalTabDescription": "Wenn Zurück zur anderen App führt: Tab behalten, verwerfen oder jedes Mal fragen",
+  "rememberedPrompt_keepExternalTabKeywords": "tab behalten, tab verwerfen, externe app, intent, link, zurück, verlassen, nicht mehr fragen",
+  "rememberedPrompt_closeIsolatedTabsLabel": "Vor dem Schließen isolierter Tabs fragen",
+  "rememberedPrompt_closeIsolatedTabsDescription": "Das Schließen des letzten Tabs einer isolierten Gruppe löscht deren Cookies und Websitedaten",
+  "rememberedPrompt_closeIsolatedTabsKeywords": "isoliert, tab schließen, daten löschen, cookies, bestätigung, nicht mehr fragen",
+  "rememberedPrompt_closeAllTabsLabel": "Vor dem Schließen aller Tabs fragen",
+  "rememberedPrompt_closeAllTabsDescription": "Beim Schließen aller Tabs über das Container-Menü",
+  "rememberedPrompt_closeAllTabsKeywords": "alle schließen, tabs, bestätigung, nicht mehr fragen",
+  "rememberedPrompt_startTorLabel": "Vor dem Starten von {torBrand} fragen",
+  "rememberedPrompt_startTorDescription": "Wenn ein Tab {torBrand} braucht und es nicht läuft",
+  "rememberedPrompt_startTorKeywords": "tor, onion, proxy, starten, bestätigung, nicht mehr fragen",
+  "rememberedPrompt_startProxyConnectionLabel": "Vor dem Starten einer Proxy-Verbindung fragen",
+  "rememberedPrompt_startProxyConnectionDescription": "Wenn die Proxy-Verbindung eines Containers nicht läuft",
+  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, verbindung, container, starten, bestätigung, nicht mehr fragen"
+}

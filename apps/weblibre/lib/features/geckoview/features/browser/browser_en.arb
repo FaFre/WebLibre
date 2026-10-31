@@ -5,10 +5,6 @@
   "@browser_actionSelect": {
     "description": "Confirm button of the bookmark folder picker dialog."
   },
-  "browser_actionKeep": "Keep",
-  "@browser_actionKeep": {
-    "description": "Button in the \"Keep tab?\" dialog: keep the tab that was opened by another app."
-  },
   "browser_actionInstall": "Install",
   "@browser_actionInstall": {
     "description": "Button that installs the chosen extension file."

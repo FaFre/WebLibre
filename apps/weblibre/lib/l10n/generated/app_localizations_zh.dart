@@ -2322,9 +2322,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_actionSelect => '选择';
 
   @override
-  String get browser_actionKeep => '保留';
-
-  @override
   String get browser_actionInstall => '安装';
 
   @override
@@ -8276,6 +8273,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_downloadsSectionTitle => '下载';
 
   @override
+  String get settings_confirmationsSectionTitle => '确认';
+
+  @override
+  String get settings_confirmationsSubtitle => '选择在关闭标签页或启动代理前询问哪些内容';
+
+  @override
+  String get settings_confirmationsSectionKeywords =>
+      '确认,提示,对话框,询问,不再询问,记住选择,prompt';
+
+  @override
   String get settings_indexDownloadFolderSubtitle => '选择下载文件的保存位置';
 
   @override
@@ -12879,6 +12886,74 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get failureWidget_unknownError => '未知错误';
+
+  @override
+  String get rememberedPrompt_dontAskAgain => '不再询问';
+
+  @override
+  String get rememberedPrompt_dontAskAgainHint => '你可以在设置中更改。';
+
+  @override
+  String get rememberedPrompt_answerAsk => '询问';
+
+  @override
+  String get rememberedPrompt_answerKeep => '保留';
+
+  @override
+  String get rememberedPrompt_keepExternalTabLabel => '离开由其他应用打开的标签页';
+
+  @override
+  String get rememberedPrompt_keepExternalTabDescription =>
+      '当返回会回到其他应用时：保留标签页、舍弃标签页，或每次询问';
+
+  @override
+  String get rememberedPrompt_keepExternalTabKeywords =>
+      '保留标签页,舍弃标签页,外部应用,链接,返回,离开,不再询问,intent,keep tab';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsLabel => '关闭隔离标签页前询问';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsDescription =>
+      '关闭隔离组的最后一个标签页会删除其 Cookie 和网站数据';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsKeywords =>
+      '隔离,关闭标签页,删除数据,Cookie,确认,不再询问,isolated';
+
+  @override
+  String get rememberedPrompt_closeAllTabsLabel => '关闭所有标签页前询问';
+
+  @override
+  String get rememberedPrompt_closeAllTabsDescription => '从容器菜单关闭所有标签页时';
+
+  @override
+  String get rememberedPrompt_closeAllTabsKeywords =>
+      '全部关闭,标签页,确认,不再询问,close all';
+
+  @override
+  String rememberedPrompt_startTorLabel(String torBrand) {
+    return '启动 $torBrand 前询问';
+  }
+
+  @override
+  String rememberedPrompt_startTorDescription(String torBrand) {
+    return '当标签页需要 $torBrand 但它未运行时';
+  }
+
+  @override
+  String get rememberedPrompt_startTorKeywords =>
+      'tor,onion,洋葱,代理,proxy,启动,确认,不再询问';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionLabel => '启动代理连接前询问';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionDescription => '当容器的代理连接未运行时';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionKeywords =>
+      '代理,proxy,vpn,连接,容器,启动,确认,不再询问';
 
   @override
   String get speechToTextButton_serviceNotAvailable => '语音识别不可用';

@@ -3080,10 +3080,6 @@
   "@browser_actionSelect": {
     "description": "Confirm button of the bookmark folder picker dialog."
   },
-  "browser_actionKeep": "Keep",
-  "@browser_actionKeep": {
-    "description": "Button in the \"Keep tab?\" dialog: keep the tab that was opened by another app."
-  },
   "browser_actionInstall": "Install",
   "@browser_actionInstall": {
     "description": "Button that installs the chosen extension file."
@@ -11128,6 +11124,18 @@
   "@settings_downloadsSectionTitle": {
     "description": "Section heading on the general settings screen for download settings."
   },
+  "settings_confirmationsSectionTitle": "Confirmations",
+  "@settings_confirmationsSectionTitle": {
+    "description": "Section heading on the general settings screen, title of the tile under it and of the screen it opens. That screen lists the questions WebLibre asks before an action, which the user can answer once with \"Don't ask again\" and change back there."
+  },
+  "settings_confirmationsSubtitle": "Choose what is asked before closing tabs or starting a proxy",
+  "@settings_confirmationsSubtitle": {
+    "description": "Subtitle of the Confirmations tile on the general settings screen and of the Confirmations screen it opens."
+  },
+  "settings_confirmationsSectionKeywords": "confirmation, prompt, dialog, ask, don't ask again, remember choice",
+  "@settings_confirmationsSectionKeywords": {
+    "description": "Comma-separated search keywords for the Confirmations section on the general settings screen. Never displayed."
+  },
   "settings_indexDownloadFolderSubtitle": "Choose where downloaded files are saved",
   "@settings_indexDownloadFolderSubtitle": {
     "description": "Summary of the download folder setting, shown as a settings search result."
@@ -17373,6 +17381,94 @@
   "failureWidget_unknownError": "Unknown error",
   "@failureWidget_unknownError": {
     "description": "Shown as the error details when a failure carries no message of its own."
+  },
+  "rememberedPrompt_dontAskAgain": "Don't ask again",
+  "@rememberedPrompt_dontAskAgain": {
+    "description": "Checkbox in confirmation dialogs (keep tab, close isolated tabs, close all tabs, start Tor, start a proxy connection). When ticked, the button the user taps next is remembered and the dialog is not shown again."
+  },
+  "rememberedPrompt_dontAskAgainHint": "You can change this in settings.",
+  "@rememberedPrompt_dontAskAgainHint": {
+    "description": "Small text under the \"Don't ask again\" checkbox, pointing to the Confirmations section in the general settings."
+  },
+  "rememberedPrompt_answerAsk": "Ask",
+  "@rememberedPrompt_answerAsk": {
+    "description": "Option in the Confirmations settings: show the dialog every time instead of using a remembered answer."
+  },
+  "rememberedPrompt_answerKeep": "Keep",
+  "@rememberedPrompt_answerKeep": {
+    "description": "Option in the Confirmations settings for a tab opened by another app: keep the tab when going back leaves the app."
+  },
+  "rememberedPrompt_keepExternalTabLabel": "Leaving a tab opened by another app",
+  "@rememberedPrompt_keepExternalTabLabel": {
+    "description": "Settings row title. Back on a tab another app opened, once the tab has no earlier page, leaves WebLibre; this sets whether that asks, keeps the tab or discards it."
+  },
+  "rememberedPrompt_keepExternalTabDescription": "When back returns you to the other app, keep the tab, discard it, or ask each time",
+  "@rememberedPrompt_keepExternalTabDescription": {
+    "description": "Subtitle of the settings row for leaving a tab another app opened."
+  },
+  "rememberedPrompt_keepExternalTabKeywords": "keep tab, discard tab, external app, intent, link, back, leave, don't ask again",
+  "@rememberedPrompt_keepExternalTabKeywords": {
+    "description": "Comma-separated search keywords for the settings row about leaving a tab another app opened. Never displayed."
+  },
+  "rememberedPrompt_closeIsolatedTabsLabel": "Ask before closing isolated tabs",
+  "@rememberedPrompt_closeIsolatedTabsLabel": {
+    "description": "Switch in the Confirmations settings: ask before closing the last tab of an isolated group, which deletes its site data."
+  },
+  "rememberedPrompt_closeIsolatedTabsDescription": "Closing the last tab of an isolated group deletes its cookies and site data",
+  "@rememberedPrompt_closeIsolatedTabsDescription": {
+    "description": "Subtitle of the switch for asking before closing isolated tabs."
+  },
+  "rememberedPrompt_closeIsolatedTabsKeywords": "isolated, close tab, delete data, cookies, confirmation, don't ask again",
+  "@rememberedPrompt_closeIsolatedTabsKeywords": {
+    "description": "Comma-separated search keywords for the switch for asking before closing isolated tabs. Never displayed."
+  },
+  "rememberedPrompt_closeAllTabsLabel": "Ask before closing all tabs",
+  "@rememberedPrompt_closeAllTabsLabel": {
+    "description": "Switch in the Confirmations settings: ask before \"Close all tabs\" in the container menu closes them."
+  },
+  "rememberedPrompt_closeAllTabsDescription": "When closing all tabs from the container menu",
+  "@rememberedPrompt_closeAllTabsDescription": {
+    "description": "Subtitle of the switch for asking before closing all tabs."
+  },
+  "rememberedPrompt_closeAllTabsKeywords": "close all, tabs, confirmation, don't ask again",
+  "@rememberedPrompt_closeAllTabsKeywords": {
+    "description": "Comma-separated search keywords for the switch for asking before closing all tabs. Never displayed."
+  },
+  "rememberedPrompt_startTorLabel": "Ask before starting {torBrand}",
+  "@rememberedPrompt_startTorLabel": {
+    "description": "Switch in the Confirmations settings: ask before starting Tor when a tab needs it and it is not running. Off, it starts without asking.",
+    "placeholders": {
+      "torBrand": {
+        "type": "String",
+        "example": "Tor"
+      }
+    }
+  },
+  "rememberedPrompt_startTorDescription": "When a tab needs {torBrand} and it is not running",
+  "@rememberedPrompt_startTorDescription": {
+    "description": "Subtitle of the switch for asking before starting Tor.",
+    "placeholders": {
+      "torBrand": {
+        "type": "String",
+        "example": "Tor"
+      }
+    }
+  },
+  "rememberedPrompt_startTorKeywords": "tor, onion, proxy, start, confirmation, don't ask again",
+  "@rememberedPrompt_startTorKeywords": {
+    "description": "Comma-separated search keywords for the switch for asking before starting Tor. Never displayed."
+  },
+  "rememberedPrompt_startProxyConnectionLabel": "Ask before starting a proxy connection",
+  "@rememberedPrompt_startProxyConnectionLabel": {
+    "description": "Switch in the Confirmations settings: ask before starting a container's proxy connection when a tab needs it and it is not running. Off, it starts without asking."
+  },
+  "rememberedPrompt_startProxyConnectionDescription": "When a container's proxy connection is not running",
+  "@rememberedPrompt_startProxyConnectionDescription": {
+    "description": "Subtitle of the switch for asking before starting a proxy connection."
+  },
+  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, connection, container, start, confirmation, don't ask again",
+  "@rememberedPrompt_startProxyConnectionKeywords": {
+    "description": "Comma-separated search keywords for the switch for asking before starting a proxy connection. Never displayed."
   },
   "speechToTextButton_serviceNotAvailable": "Speech recognition is not available",
   "@speechToTextButton_serviceNotAvailable": {

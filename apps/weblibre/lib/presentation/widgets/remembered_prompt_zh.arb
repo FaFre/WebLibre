@@ -1,0 +1,22 @@
+{
+  "@@locale": "zh",
+  "rememberedPrompt_dontAskAgain": "不再询问",
+  "rememberedPrompt_dontAskAgainHint": "你可以在设置中更改。",
+  "rememberedPrompt_answerAsk": "询问",
+  "rememberedPrompt_answerKeep": "保留",
+  "rememberedPrompt_keepExternalTabLabel": "离开由其他应用打开的标签页",
+  "rememberedPrompt_keepExternalTabDescription": "当返回会回到其他应用时：保留标签页、舍弃标签页，或每次询问",
+  "rememberedPrompt_keepExternalTabKeywords": "保留标签页,舍弃标签页,外部应用,链接,返回,离开,不再询问,intent,keep tab",
+  "rememberedPrompt_closeIsolatedTabsLabel": "关闭隔离标签页前询问",
+  "rememberedPrompt_closeIsolatedTabsDescription": "关闭隔离组的最后一个标签页会删除其 Cookie 和网站数据",
+  "rememberedPrompt_closeIsolatedTabsKeywords": "隔离,关闭标签页,删除数据,Cookie,确认,不再询问,isolated",
+  "rememberedPrompt_closeAllTabsLabel": "关闭所有标签页前询问",
+  "rememberedPrompt_closeAllTabsDescription": "从容器菜单关闭所有标签页时",
+  "rememberedPrompt_closeAllTabsKeywords": "全部关闭,标签页,确认,不再询问,close all",
+  "rememberedPrompt_startTorLabel": "启动 {torBrand} 前询问",
+  "rememberedPrompt_startTorDescription": "当标签页需要 {torBrand} 但它未运行时",
+  "rememberedPrompt_startTorKeywords": "tor,onion,洋葱,代理,proxy,启动,确认,不再询问",
+  "rememberedPrompt_startProxyConnectionLabel": "启动代理连接前询问",
+  "rememberedPrompt_startProxyConnectionDescription": "当容器的代理连接未运行时",
+  "rememberedPrompt_startProxyConnectionKeywords": "代理,proxy,vpn,连接,容器,启动,确认,不再询问"
+}

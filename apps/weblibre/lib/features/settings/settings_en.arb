@@ -1624,6 +1624,18 @@
   "@settings_downloadsSectionTitle": {
     "description": "Section heading on the general settings screen for download settings."
   },
+  "settings_confirmationsSectionTitle": "Confirmations",
+  "@settings_confirmationsSectionTitle": {
+    "description": "Section heading on the general settings screen, title of the tile under it and of the screen it opens. That screen lists the questions WebLibre asks before an action, which the user can answer once with \"Don't ask again\" and change back there."
+  },
+  "settings_confirmationsSubtitle": "Choose what is asked before closing tabs or starting a proxy",
+  "@settings_confirmationsSubtitle": {
+    "description": "Subtitle of the Confirmations tile on the general settings screen and of the Confirmations screen it opens."
+  },
+  "settings_confirmationsSectionKeywords": "confirmation, prompt, dialog, ask, don't ask again, remember choice",
+  "@settings_confirmationsSectionKeywords": {
+    "description": "Comma-separated search keywords for the Confirmations section on the general settings screen. Never displayed."
+  },
   "settings_indexDownloadFolderSubtitle": "Choose where downloaded files are saved",
   "@settings_indexDownloadFolderSubtitle": {
     "description": "Summary of the download folder setting, shown as a settings search result."

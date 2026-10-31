@@ -2570,9 +2570,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browser_actionSelect => 'Seleccionar';
 
   @override
-  String get browser_actionKeep => 'Conservar';
-
-  @override
   String get browser_actionInstall => 'Instalar';
 
   @override
@@ -9082,6 +9079,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_downloadsSectionTitle => 'Descargas';
 
   @override
+  String get settings_confirmationsSectionTitle => 'Confirmaciones';
+
+  @override
+  String get settings_confirmationsSubtitle =>
+      'Elige qué se pregunta antes de cerrar pestañas o iniciar un proxy';
+
+  @override
+  String get settings_confirmationsSectionKeywords =>
+      'confirmación, aviso, diálogo, preguntar, no volver a preguntar, recordar elección, prompt';
+
+  @override
   String get settings_indexDownloadFolderSubtitle =>
       'Elegir dónde se guardan los archivos descargados';
 
@@ -14193,6 +14201,81 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get failureWidget_unknownError => 'Error desconocido';
+
+  @override
+  String get rememberedPrompt_dontAskAgain => 'No volver a preguntar';
+
+  @override
+  String get rememberedPrompt_dontAskAgainHint =>
+      'Puedes cambiarlo en Ajustes.';
+
+  @override
+  String get rememberedPrompt_answerAsk => 'Preguntar';
+
+  @override
+  String get rememberedPrompt_answerKeep => 'Conservar';
+
+  @override
+  String get rememberedPrompt_keepExternalTabLabel =>
+      'Salir de una pestaña abierta por otra app';
+
+  @override
+  String get rememberedPrompt_keepExternalTabDescription =>
+      'Cuando Atrás te devuelve a la otra app: conservar la pestaña, descartarla o preguntar cada vez';
+
+  @override
+  String get rememberedPrompt_keepExternalTabKeywords =>
+      'conservar pestaña, descartar pestaña, app externa, enlace, atrás, salir, no volver a preguntar, intent, keep tab';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsLabel =>
+      'Preguntar antes de cerrar pestañas aisladas';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsDescription =>
+      'Al cerrar la última pestaña de un grupo aislado se borran sus cookies y datos de sitios';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsKeywords =>
+      'aislada, cerrar pestaña, borrar datos, cookies, confirmación, no volver a preguntar, isolated';
+
+  @override
+  String get rememberedPrompt_closeAllTabsLabel =>
+      'Preguntar antes de cerrar todas las pestañas';
+
+  @override
+  String get rememberedPrompt_closeAllTabsDescription =>
+      'Al cerrar todas las pestañas desde el menú del contenedor';
+
+  @override
+  String get rememberedPrompt_closeAllTabsKeywords =>
+      'cerrar todas, pestañas, confirmación, no volver a preguntar, close all';
+
+  @override
+  String rememberedPrompt_startTorLabel(String torBrand) {
+    return 'Preguntar antes de iniciar $torBrand';
+  }
+
+  @override
+  String rememberedPrompt_startTorDescription(String torBrand) {
+    return 'Cuando una pestaña necesita $torBrand y no se está ejecutando';
+  }
+
+  @override
+  String get rememberedPrompt_startTorKeywords =>
+      'tor, onion, proxy, iniciar, confirmación, no volver a preguntar';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionLabel =>
+      'Preguntar antes de iniciar una conexión proxy';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionDescription =>
+      'Cuando la conexión proxy de un contenedor no se está ejecutando';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionKeywords =>
+      'proxy, vpn, conexión, contenedor, iniciar, confirmación, no volver a preguntar';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

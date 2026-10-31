@@ -30,6 +30,7 @@ import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/domain/repositories/locale_resolver.dart';
 import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/settings/domain/providers/preferred_download_manager.dart';
@@ -42,6 +43,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:weblibre/presentation/utils/remembered_prompt_l10n.dart';
 
 List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
@@ -161,7 +163,43 @@ List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
         ),
       ],
     ),
+    SettingsSectionDefinition(
+      title: l10n.settings_confirmationsSectionTitle,
+      keywords: settingsKeywords(l10n.settings_confirmationsSectionKeywords),
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_confirmationsSectionTitle,
+          subtitle: l10n.settings_confirmationsSubtitle,
+          // Each prompt's own words too, so searching for one finds the way
+          // to the screen it lives on.
+          keywords: [
+            for (final prompt in RememberedPrompt.values) ...[
+              prompt.label(context),
+              ...settingsKeywords(prompt.keywords(context)),
+            ],
+          ],
+          child: const _ConfirmationSettingsTile(),
+        ),
+      ],
+    ),
   ];
+}
+
+class _ConfirmationSettingsTile extends StatelessWidget {
+  const _ConfirmationSettingsTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return ListTile(
+      leading: const Icon(MdiIcons.messageQuestionOutline),
+      title: Text(l10n.settings_confirmationsSectionTitle),
+      subtitle: Text(l10n.settings_confirmationsSubtitle),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => const ConfirmationSettingsRoute().push(context),
+    );
+  }
 }
 
 /// Takes a backup of the *active* profile without switching away from it.

@@ -18,12 +18,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/app_colors.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
+import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 
+/// Asks to start Tor for a tab that needs it, for [RememberedPrompt.startTor].
+/// Show it through [askUnlessRemembered].
 class TorDialog extends StatelessWidget {
   const TorDialog({super.key});
 
@@ -31,22 +34,15 @@ class TorDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final appColors = AppColors.of(context);
-    return AlertDialog(
+    return RememberablePromptDialog<PromptConfirmation>(
       icon: Icon(TorIcons.onionAlt, color: appColors.torPurple),
       title: Text(l10n.tor_proxyLabel(torBrand)),
       content: Text(l10n.tor_dialogContent(torBrand)),
-      actions: [
-        TextButton(
-          onPressed: () {
-            context.pop(false);
-          },
-          child: Text(l10n.common_cancel),
-        ),
-        TextButton(
-          onPressed: () {
-            context.pop(true);
-          },
-          child: Text(l10n.tor_actionEnable),
+      answers: [
+        PromptAnswerAction(
+          answer: PromptConfirmation.confirmed,
+          label: l10n.tor_actionEnable,
+          primary: true,
         ),
       ],
     );

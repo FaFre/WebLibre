@@ -165,6 +165,7 @@ const generalSettingJsonKeys = <String>{
   'appLinkContextOverrides',
   'desktopModeSites',
   'pinnedBangs',
+  'rememberedPrompts',
 };
 
 @Riverpod(keepAlive: true)

@@ -1,7 +1,6 @@
 {
   "@@locale": "es",
   "browser_actionSelect": "Seleccionar",
-  "browser_actionKeep": "Conservar",
   "browser_actionInstall": "Instalar",
   "browser_bookmarkAllTitle": "Añadir todas las pestañas a marcadores",
   "browser_bookmarkAllFastTitle": "Rápido",

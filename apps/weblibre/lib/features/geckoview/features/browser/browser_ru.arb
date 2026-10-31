@@ -1,7 +1,6 @@
 {
   "@@locale": "ru",
   "browser_actionSelect": "Выбрать",
-  "browser_actionKeep": "Оставить",
   "browser_actionInstall": "Установить",
   "browser_bookmarkAllTitle": "Добавить все вкладки в закладки",
   "browser_bookmarkAllFastTitle": "Быстро",

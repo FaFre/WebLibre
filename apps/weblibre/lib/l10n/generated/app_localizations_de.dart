@@ -2553,9 +2553,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get browser_actionSelect => 'Auswählen';
 
   @override
-  String get browser_actionKeep => 'Behalten';
-
-  @override
   String get browser_actionInstall => 'Installieren';
 
   @override
@@ -9017,6 +9014,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_downloadsSectionTitle => 'Downloads';
 
   @override
+  String get settings_confirmationsSectionTitle => 'Rückfragen';
+
+  @override
+  String get settings_confirmationsSubtitle =>
+      'Festlegen, was vor dem Schließen von Tabs oder dem Starten eines Proxys gefragt wird';
+
+  @override
+  String get settings_confirmationsSectionKeywords =>
+      'bestätigung, rückfrage, dialog, fragen, nicht mehr fragen, auswahl merken';
+
+  @override
   String get settings_indexDownloadFolderSubtitle =>
       'Festlegen, wo heruntergeladene Dateien gespeichert werden';
 
@@ -14094,6 +14102,81 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get failureWidget_unknownError => 'Unbekannter Fehler';
+
+  @override
+  String get rememberedPrompt_dontAskAgain => 'Nicht mehr fragen';
+
+  @override
+  String get rememberedPrompt_dontAskAgainHint =>
+      'Lässt sich in den Einstellungen ändern.';
+
+  @override
+  String get rememberedPrompt_answerAsk => 'Fragen';
+
+  @override
+  String get rememberedPrompt_answerKeep => 'Behalten';
+
+  @override
+  String get rememberedPrompt_keepExternalTabLabel =>
+      'Von einer anderen App geöffneten Tab verlassen';
+
+  @override
+  String get rememberedPrompt_keepExternalTabDescription =>
+      'Wenn Zurück zur anderen App führt: Tab behalten, verwerfen oder jedes Mal fragen';
+
+  @override
+  String get rememberedPrompt_keepExternalTabKeywords =>
+      'tab behalten, tab verwerfen, externe app, intent, link, zurück, verlassen, nicht mehr fragen';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsLabel =>
+      'Vor dem Schließen isolierter Tabs fragen';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsDescription =>
+      'Das Schließen des letzten Tabs einer isolierten Gruppe löscht deren Cookies und Websitedaten';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsKeywords =>
+      'isoliert, tab schließen, daten löschen, cookies, bestätigung, nicht mehr fragen';
+
+  @override
+  String get rememberedPrompt_closeAllTabsLabel =>
+      'Vor dem Schließen aller Tabs fragen';
+
+  @override
+  String get rememberedPrompt_closeAllTabsDescription =>
+      'Beim Schließen aller Tabs über das Container-Menü';
+
+  @override
+  String get rememberedPrompt_closeAllTabsKeywords =>
+      'alle schließen, tabs, bestätigung, nicht mehr fragen';
+
+  @override
+  String rememberedPrompt_startTorLabel(String torBrand) {
+    return 'Vor dem Starten von $torBrand fragen';
+  }
+
+  @override
+  String rememberedPrompt_startTorDescription(String torBrand) {
+    return 'Wenn ein Tab $torBrand braucht und es nicht läuft';
+  }
+
+  @override
+  String get rememberedPrompt_startTorKeywords =>
+      'tor, onion, proxy, starten, bestätigung, nicht mehr fragen';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionLabel =>
+      'Vor dem Starten einer Proxy-Verbindung fragen';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionDescription =>
+      'Wenn die Proxy-Verbindung eines Containers nicht läuft';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionKeywords =>
+      'proxy, vpn, verbindung, container, starten, bestätigung, nicht mehr fragen';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

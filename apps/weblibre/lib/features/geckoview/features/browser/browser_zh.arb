@@ -1,7 +1,6 @@
 {
   "@@locale": "zh",
   "browser_actionSelect": "选择",
-  "browser_actionKeep": "保留",
   "browser_actionInstall": "安装",
   "browser_bookmarkAllTitle": "将所有标签页加入书签",
   "browser_bookmarkAllFastTitle": "快速",

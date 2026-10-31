@@ -2503,9 +2503,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browser_actionSelect => 'Select';
 
   @override
-  String get browser_actionKeep => 'Keep';
-
-  @override
   String get browser_actionInstall => 'Install';
 
   @override
@@ -8843,6 +8840,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_downloadsSectionTitle => 'Downloads';
 
   @override
+  String get settings_confirmationsSectionTitle => 'Confirmations';
+
+  @override
+  String get settings_confirmationsSubtitle =>
+      'Choose what is asked before closing tabs or starting a proxy';
+
+  @override
+  String get settings_confirmationsSectionKeywords =>
+      'confirmation, prompt, dialog, ask, don\'t ask again, remember choice';
+
+  @override
   String get settings_indexDownloadFolderSubtitle =>
       'Choose where downloaded files are saved';
 
@@ -13825,6 +13833,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failureWidget_unknownError => 'Unknown error';
+
+  @override
+  String get rememberedPrompt_dontAskAgain => 'Don\'t ask again';
+
+  @override
+  String get rememberedPrompt_dontAskAgainHint =>
+      'You can change this in settings.';
+
+  @override
+  String get rememberedPrompt_answerAsk => 'Ask';
+
+  @override
+  String get rememberedPrompt_answerKeep => 'Keep';
+
+  @override
+  String get rememberedPrompt_keepExternalTabLabel =>
+      'Leaving a tab opened by another app';
+
+  @override
+  String get rememberedPrompt_keepExternalTabDescription =>
+      'When back returns you to the other app, keep the tab, discard it, or ask each time';
+
+  @override
+  String get rememberedPrompt_keepExternalTabKeywords =>
+      'keep tab, discard tab, external app, intent, link, back, leave, don\'t ask again';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsLabel =>
+      'Ask before closing isolated tabs';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsDescription =>
+      'Closing the last tab of an isolated group deletes its cookies and site data';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsKeywords =>
+      'isolated, close tab, delete data, cookies, confirmation, don\'t ask again';
+
+  @override
+  String get rememberedPrompt_closeAllTabsLabel =>
+      'Ask before closing all tabs';
+
+  @override
+  String get rememberedPrompt_closeAllTabsDescription =>
+      'When closing all tabs from the container menu';
+
+  @override
+  String get rememberedPrompt_closeAllTabsKeywords =>
+      'close all, tabs, confirmation, don\'t ask again';
+
+  @override
+  String rememberedPrompt_startTorLabel(String torBrand) {
+    return 'Ask before starting $torBrand';
+  }
+
+  @override
+  String rememberedPrompt_startTorDescription(String torBrand) {
+    return 'When a tab needs $torBrand and it is not running';
+  }
+
+  @override
+  String get rememberedPrompt_startTorKeywords =>
+      'tor, onion, proxy, start, confirmation, don\'t ask again';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionLabel =>
+      'Ask before starting a proxy connection';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionDescription =>
+      'When a container\'s proxy connection is not running';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionKeywords =>
+      'proxy, vpn, connection, container, start, confirmation, don\'t ask again';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

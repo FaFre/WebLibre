@@ -20,9 +20,10 @@
 import 'package:flutter/material.dart';
 import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 import 'package:weblibre/utils/clipboard.dart';
 
 /// Creates a floating snackbar.
@@ -334,32 +335,20 @@ void showTabUndoClose(
 }
 
 /// Shows a confirmation dialog before closing isolated tabs whose data
-/// will be permanently cleared. Returns `true` if the user confirms.
+/// will be permanently cleared. Returns `true` if the user confirms, or without
+/// asking once "Don't ask again" was ticked
+/// ([RememberedPrompt.closeIsolatedTabs]).
 Future<bool> confirmIsolatedTabClose(
   BuildContext context, {
   int groupCount = 1,
-}) async {
+}) {
   final l10n = AppLocalizations.of(context);
-  final message = l10n.uiHelper_closeIsolatedTabsConfirm(groupCount);
 
-  final result = await showDialog<bool>(
-    context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      title: Text(l10n.uiHelper_closeIsolatedTabsTitle),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.common_cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(l10n.common_close),
-        ),
-      ],
-    ),
+  return confirmUnlessRemembered(
+    context,
+    RememberedPrompt.closeIsolatedTabs,
+    title: l10n.uiHelper_closeIsolatedTabsTitle,
+    content: l10n.uiHelper_closeIsolatedTabsConfirm(groupCount),
+    confirmLabel: l10n.common_close,
   );
-
-  return result ?? false;
 }

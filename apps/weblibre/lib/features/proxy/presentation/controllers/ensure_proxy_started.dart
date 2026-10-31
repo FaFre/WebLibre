@@ -20,8 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
@@ -32,6 +32,7 @@ import 'package:weblibre/features/proxy/presentation/utils/proxy_failure_l10n.da
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/widgets/tor_dialog.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Single entry point that prompts the user to start whichever proxy backend
@@ -85,13 +86,13 @@ Future<bool> _ensureTorStarted(BuildContext context, WidgetRef ref) async {
   if (!context.mounted) return false;
   if (!shouldPrompt) return true;
 
-  final dialogResult = await showDialog<bool>(
-    context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+  final answer = await askUnlessRemembered<PromptConfirmation>(
+    context,
+    RememberedPrompt.startTor,
     builder: (context) => const TorDialog(),
   );
 
-  if (dialogResult == true) {
+  if (answer == PromptConfirmation.confirmed) {
     await ref.read(startProxyControllerProvider.notifier).startProxy();
     return true;
   }
@@ -141,27 +142,18 @@ Future<bool> _maybeStartSingboxProxy(
   if (!context.mounted) return false;
 
   final l10n = AppLocalizations.of(context);
-  final shouldStart = await showDialog<bool>(
-    context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => AlertDialog(
-      icon: const Icon(Icons.route_outlined),
-      title: Text(l10n.proxy_startConnectionDialogTitle),
-      content: Text(l10n.proxy_startConnectionDialogContent(proxyTitle)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: Text(l10n.common_cancel),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: Text(l10n.proxy_actionStart),
-        ),
-      ],
-    ),
+  // Remembered for every connection: the question is whether to start one
+  // without asking, not which.
+  final shouldStart = await confirmUnlessRemembered(
+    context,
+    RememberedPrompt.startProxyConnection,
+    icon: const Icon(Icons.route_outlined),
+    title: l10n.proxy_startConnectionDialogTitle,
+    content: l10n.proxy_startConnectionDialogContent(proxyTitle),
+    confirmLabel: l10n.proxy_actionStart,
   );
 
-  if (shouldStart != true) return false;
+  if (!shouldStart) return false;
 
   try {
     await ref

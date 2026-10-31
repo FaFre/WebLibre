@@ -18,35 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 
-Future<bool?> showCloseAllTabsDialog(BuildContext context) {
-  return showDialog<bool?>(
-    context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (BuildContext context) {
-      final l10n = AppLocalizations.of(context);
+/// Asks before closing all tabs, unless "Don't ask again" was ticked
+/// ([RememberedPrompt.closeAllTabs]). Returns whether to close them.
+Future<bool> showCloseAllTabsDialog(BuildContext context) {
+  final l10n = AppLocalizations.of(context);
 
-      return AlertDialog(
-        icon: const Icon(Icons.warning),
-        title: Text(l10n.browser_closeAllTabsTitle),
-        content: Text(l10n.browser_closeAllTabsContent),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: Text(l10n.common_cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-            child: Text(l10n.common_close),
-          ),
-        ],
-      );
-    },
+  return confirmUnlessRemembered(
+    context,
+    RememberedPrompt.closeAllTabs,
+    icon: const Icon(Icons.warning),
+    title: l10n.browser_closeAllTabsTitle,
+    content: l10n.browser_closeAllTabsContent,
+    confirmLabel: l10n.common_close,
   );
 }

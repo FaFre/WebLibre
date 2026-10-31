@@ -2571,9 +2571,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browser_actionSelect => 'Выбрать';
 
   @override
-  String get browser_actionKeep => 'Оставить';
-
-  @override
   String get browser_actionInstall => 'Установить';
 
   @override
@@ -9093,6 +9090,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_downloadsSectionTitle => 'Загрузки';
 
   @override
+  String get settings_confirmationsSectionTitle => 'Подтверждения';
+
+  @override
+  String get settings_confirmationsSubtitle =>
+      'Выберите, о чём спрашивать перед закрытием вкладок или запуском прокси';
+
+  @override
+  String get settings_confirmationsSectionKeywords =>
+      'подтверждение, запрос, диалог, спрашивать, больше не спрашивать, запомнить выбор, prompt';
+
+  @override
   String get settings_indexDownloadFolderSubtitle =>
       'Выбор места сохранения загруженных файлов';
 
@@ -14194,6 +14202,81 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failureWidget_unknownError => 'Неизвестная ошибка';
+
+  @override
+  String get rememberedPrompt_dontAskAgain => 'Больше не спрашивать';
+
+  @override
+  String get rememberedPrompt_dontAskAgainHint =>
+      'Это можно изменить в настройках.';
+
+  @override
+  String get rememberedPrompt_answerAsk => 'Спрашивать';
+
+  @override
+  String get rememberedPrompt_answerKeep => 'Оставить';
+
+  @override
+  String get rememberedPrompt_keepExternalTabLabel =>
+      'Выход из вкладки, открытой другим приложением';
+
+  @override
+  String get rememberedPrompt_keepExternalTabDescription =>
+      'Когда «Назад» возвращает в другое приложение: оставить вкладку, отбросить её или спрашивать каждый раз';
+
+  @override
+  String get rememberedPrompt_keepExternalTabKeywords =>
+      'оставить вкладку, отбросить вкладку, внешнее приложение, ссылка, назад, выйти, больше не спрашивать, intent, keep tab';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsLabel =>
+      'Спрашивать перед закрытием изолированных вкладок';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsDescription =>
+      'При закрытии последней вкладки изолированной группы удаляются её куки и данные сайтов';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsKeywords =>
+      'изолированная, закрыть вкладку, удалить данные, куки, подтверждение, больше не спрашивать, isolated, cookies';
+
+  @override
+  String get rememberedPrompt_closeAllTabsLabel =>
+      'Спрашивать перед закрытием всех вкладок';
+
+  @override
+  String get rememberedPrompt_closeAllTabsDescription =>
+      'При закрытии всех вкладок через меню контейнера';
+
+  @override
+  String get rememberedPrompt_closeAllTabsKeywords =>
+      'закрыть все, вкладки, подтверждение, больше не спрашивать, close all';
+
+  @override
+  String rememberedPrompt_startTorLabel(String torBrand) {
+    return 'Спрашивать перед запуском $torBrand';
+  }
+
+  @override
+  String rememberedPrompt_startTorDescription(String torBrand) {
+    return 'Когда вкладке нужен $torBrand, а он не запущен';
+  }
+
+  @override
+  String get rememberedPrompt_startTorKeywords =>
+      'tor, onion, прокси, запустить, подтверждение, больше не спрашивать';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionLabel =>
+      'Спрашивать перед запуском прокси-подключения';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionDescription =>
+      'Когда прокси-подключение контейнера не запущено';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionKeywords =>
+      'прокси, vpn, подключение, контейнер, запустить, подтверждение, больше не спрашивать, proxy';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

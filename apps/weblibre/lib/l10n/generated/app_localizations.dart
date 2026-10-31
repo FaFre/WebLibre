@@ -4294,12 +4294,6 @@ abstract class AppLocalizations {
   /// **'Select'**
   String get browser_actionSelect;
 
-  /// Button in the "Keep tab?" dialog: keep the tab that was opened by another app.
-  ///
-  /// In en, this message translates to:
-  /// **'Keep'**
-  String get browser_actionKeep;
-
   /// Button that installs the chosen extension file.
   ///
   /// In en, this message translates to:
@@ -14926,6 +14920,24 @@ abstract class AppLocalizations {
   /// **'Downloads'**
   String get settings_downloadsSectionTitle;
 
+  /// Section heading on the general settings screen, title of the tile under it and of the screen it opens. That screen lists the questions WebLibre asks before an action, which the user can answer once with "Don't ask again" and change back there.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmations'**
+  String get settings_confirmationsSectionTitle;
+
+  /// Subtitle of the Confirmations tile on the general settings screen and of the Confirmations screen it opens.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what is asked before closing tabs or starting a proxy'**
+  String get settings_confirmationsSubtitle;
+
+  /// Comma-separated search keywords for the Confirmations section on the general settings screen. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'confirmation, prompt, dialog, ask, don\'t ask again, remember choice'**
+  String get settings_confirmationsSectionKeywords;
+
   /// Summary of the download folder setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
@@ -23014,6 +23026,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown error'**
   String get failureWidget_unknownError;
+
+  /// Checkbox in confirmation dialogs (keep tab, close isolated tabs, close all tabs, start Tor, start a proxy connection). When ticked, the button the user taps next is remembered and the dialog is not shown again.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t ask again'**
+  String get rememberedPrompt_dontAskAgain;
+
+  /// Small text under the "Don't ask again" checkbox, pointing to the Confirmations section in the general settings.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this in settings.'**
+  String get rememberedPrompt_dontAskAgainHint;
+
+  /// Option in the Confirmations settings: show the dialog every time instead of using a remembered answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get rememberedPrompt_answerAsk;
+
+  /// Option in the Confirmations settings for a tab opened by another app: keep the tab when going back leaves the app.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep'**
+  String get rememberedPrompt_answerKeep;
+
+  /// Settings row title. Back on a tab another app opened, once the tab has no earlier page, leaves WebLibre; this sets whether that asks, keeps the tab or discards it.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaving a tab opened by another app'**
+  String get rememberedPrompt_keepExternalTabLabel;
+
+  /// Subtitle of the settings row for leaving a tab another app opened.
+  ///
+  /// In en, this message translates to:
+  /// **'When back returns you to the other app, keep the tab, discard it, or ask each time'**
+  String get rememberedPrompt_keepExternalTabDescription;
+
+  /// Comma-separated search keywords for the settings row about leaving a tab another app opened. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'keep tab, discard tab, external app, intent, link, back, leave, don\'t ask again'**
+  String get rememberedPrompt_keepExternalTabKeywords;
+
+  /// Switch in the Confirmations settings: ask before closing the last tab of an isolated group, which deletes its site data.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before closing isolated tabs'**
+  String get rememberedPrompt_closeIsolatedTabsLabel;
+
+  /// Subtitle of the switch for asking before closing isolated tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing the last tab of an isolated group deletes its cookies and site data'**
+  String get rememberedPrompt_closeIsolatedTabsDescription;
+
+  /// Comma-separated search keywords for the switch for asking before closing isolated tabs. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'isolated, close tab, delete data, cookies, confirmation, don\'t ask again'**
+  String get rememberedPrompt_closeIsolatedTabsKeywords;
+
+  /// Switch in the Confirmations settings: ask before "Close all tabs" in the container menu closes them.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before closing all tabs'**
+  String get rememberedPrompt_closeAllTabsLabel;
+
+  /// Subtitle of the switch for asking before closing all tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'When closing all tabs from the container menu'**
+  String get rememberedPrompt_closeAllTabsDescription;
+
+  /// Comma-separated search keywords for the switch for asking before closing all tabs. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'close all, tabs, confirmation, don\'t ask again'**
+  String get rememberedPrompt_closeAllTabsKeywords;
+
+  /// Switch in the Confirmations settings: ask before starting Tor when a tab needs it and it is not running. Off, it starts without asking.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before starting {torBrand}'**
+  String rememberedPrompt_startTorLabel(String torBrand);
+
+  /// Subtitle of the switch for asking before starting Tor.
+  ///
+  /// In en, this message translates to:
+  /// **'When a tab needs {torBrand} and it is not running'**
+  String rememberedPrompt_startTorDescription(String torBrand);
+
+  /// Comma-separated search keywords for the switch for asking before starting Tor. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'tor, onion, proxy, start, confirmation, don\'t ask again'**
+  String get rememberedPrompt_startTorKeywords;
+
+  /// Switch in the Confirmations settings: ask before starting a container's proxy connection when a tab needs it and it is not running. Off, it starts without asking.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before starting a proxy connection'**
+  String get rememberedPrompt_startProxyConnectionLabel;
+
+  /// Subtitle of the switch for asking before starting a proxy connection.
+  ///
+  /// In en, this message translates to:
+  /// **'When a container\'s proxy connection is not running'**
+  String get rememberedPrompt_startProxyConnectionDescription;
+
+  /// Comma-separated search keywords for the switch for asking before starting a proxy connection. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'proxy, vpn, connection, container, start, confirmation, don\'t ask again'**
+  String get rememberedPrompt_startProxyConnectionKeywords;
 
   /// Error message shown when the user taps the voice-input button but the device has no speech recognition service.
   ///

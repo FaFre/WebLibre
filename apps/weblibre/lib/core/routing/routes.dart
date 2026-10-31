@@ -77,6 +77,7 @@ import 'package:weblibre/features/settings/presentation/screens/addon_collection
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/bang_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/browsing_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/confirmation_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/contextual_toolbar_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/custom_tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/screens/desktop_mode_sites_screen.dart';

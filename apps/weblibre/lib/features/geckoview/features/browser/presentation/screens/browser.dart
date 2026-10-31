@@ -31,6 +31,7 @@ import 'package:weblibre/core/providers/pointer_device.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/extensions/draggable_scrollable_controller.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_host.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
@@ -2437,12 +2438,15 @@ class _Browser extends HookConsumerWidget {
               } else if (onBackBehavior != null) {
                 if (!context.mounted) return false;
 
-                final keep = await showKeepTabDialog(context);
-                if (keep == null) {
+                final answer = await showKeepTabDialog(
+                  context,
+                  rememberable: onBackBehavior is BackgroundAppTabBackBehavior,
+                );
+                if (answer == null) {
                   return true;
                 }
 
-                if (keep) {
+                if (answer == KeepTabAnswer.keep) {
                   if (tabState == null) {
                     return true;
                   }

@@ -2537,9 +2537,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get browser_actionSelect => 'Pilih';
 
   @override
-  String get browser_actionKeep => 'Pertahankan';
-
-  @override
   String get browser_actionInstall => 'Pasang';
 
   @override
@@ -8957,6 +8954,17 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_downloadsSectionTitle => 'Unduhan';
 
   @override
+  String get settings_confirmationsSectionTitle => 'Konfirmasi';
+
+  @override
+  String get settings_confirmationsSubtitle =>
+      'Pilih apa yang ditanyakan sebelum menutup tab atau memulai proksi';
+
+  @override
+  String get settings_confirmationsSectionKeywords =>
+      'konfirmasi, pertanyaan, dialog, tanya, jangan tanya lagi, ingat pilihan, prompt';
+
+  @override
   String get settings_indexDownloadFolderSubtitle =>
       'Pilih lokasi penyimpanan berkas yang diunduh';
 
@@ -14026,6 +14034,81 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get failureWidget_unknownError => 'Galat tidak dikenal';
+
+  @override
+  String get rememberedPrompt_dontAskAgain => 'Jangan tanya lagi';
+
+  @override
+  String get rememberedPrompt_dontAskAgainHint =>
+      'Anda dapat mengubahnya di pengaturan.';
+
+  @override
+  String get rememberedPrompt_answerAsk => 'Tanya';
+
+  @override
+  String get rememberedPrompt_answerKeep => 'Pertahankan';
+
+  @override
+  String get rememberedPrompt_keepExternalTabLabel =>
+      'Meninggalkan tab yang dibuka oleh aplikasi lain';
+
+  @override
+  String get rememberedPrompt_keepExternalTabDescription =>
+      'Saat tombol Kembali membawa Anda ke aplikasi lain: pertahankan tab, buang tab, atau tanya setiap kali';
+
+  @override
+  String get rememberedPrompt_keepExternalTabKeywords =>
+      'pertahankan tab, buang tab, aplikasi eksternal, tautan, kembali, keluar, jangan tanya lagi, intent, keep tab';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsLabel =>
+      'Tanya sebelum menutup tab terisolasi';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsDescription =>
+      'Menutup tab terakhir dari grup terisolasi akan menghapus kuki dan data situsnya';
+
+  @override
+  String get rememberedPrompt_closeIsolatedTabsKeywords =>
+      'terisolasi, tutup tab, hapus data, kuki, konfirmasi, jangan tanya lagi, isolated, cookies';
+
+  @override
+  String get rememberedPrompt_closeAllTabsLabel =>
+      'Tanya sebelum menutup semua tab';
+
+  @override
+  String get rememberedPrompt_closeAllTabsDescription =>
+      'Saat menutup semua tab dari menu kontainer';
+
+  @override
+  String get rememberedPrompt_closeAllTabsKeywords =>
+      'tutup semua, tab, konfirmasi, jangan tanya lagi, close all';
+
+  @override
+  String rememberedPrompt_startTorLabel(String torBrand) {
+    return 'Tanya sebelum memulai $torBrand';
+  }
+
+  @override
+  String rememberedPrompt_startTorDescription(String torBrand) {
+    return 'Saat sebuah tab memerlukan $torBrand dan $torBrand sedang tidak berjalan';
+  }
+
+  @override
+  String get rememberedPrompt_startTorKeywords =>
+      'tor, onion, proksi, proxy, mulai, konfirmasi, jangan tanya lagi';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionLabel =>
+      'Tanya sebelum memulai koneksi proksi';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionDescription =>
+      'Saat koneksi proksi sebuah kontainer sedang tidak berjalan';
+
+  @override
+  String get rememberedPrompt_startProxyConnectionKeywords =>
+      'proksi, proxy, vpn, koneksi, kontainer, mulai, konfirmasi, jangan tanya lagi';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

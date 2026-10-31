@@ -1,0 +1,22 @@
+{
+  "@@locale": "es",
+  "rememberedPrompt_dontAskAgain": "No volver a preguntar",
+  "rememberedPrompt_dontAskAgainHint": "Puedes cambiarlo en Ajustes.",
+  "rememberedPrompt_answerAsk": "Preguntar",
+  "rememberedPrompt_answerKeep": "Conservar",
+  "rememberedPrompt_keepExternalTabLabel": "Salir de una pestaña abierta por otra app",
+  "rememberedPrompt_keepExternalTabDescription": "Cuando Atrás te devuelve a la otra app: conservar la pestaña, descartarla o preguntar cada vez",
+  "rememberedPrompt_keepExternalTabKeywords": "conservar pestaña, descartar pestaña, app externa, enlace, atrás, salir, no volver a preguntar, intent, keep tab",
+  "rememberedPrompt_closeIsolatedTabsLabel": "Preguntar antes de cerrar pestañas aisladas",
+  "rememberedPrompt_closeIsolatedTabsDescription": "Al cerrar la última pestaña de un grupo aislado se borran sus cookies y datos de sitios",
+  "rememberedPrompt_closeIsolatedTabsKeywords": "aislada, cerrar pestaña, borrar datos, cookies, confirmación, no volver a preguntar, isolated",
+  "rememberedPrompt_closeAllTabsLabel": "Preguntar antes de cerrar todas las pestañas",
+  "rememberedPrompt_closeAllTabsDescription": "Al cerrar todas las pestañas desde el menú del contenedor",
+  "rememberedPrompt_closeAllTabsKeywords": "cerrar todas, pestañas, confirmación, no volver a preguntar, close all",
+  "rememberedPrompt_startTorLabel": "Preguntar antes de iniciar {torBrand}",
+  "rememberedPrompt_startTorDescription": "Cuando una pestaña necesita {torBrand} y no se está ejecutando",
+  "rememberedPrompt_startTorKeywords": "tor, onion, proxy, iniciar, confirmación, no volver a preguntar",
+  "rememberedPrompt_startProxyConnectionLabel": "Preguntar antes de iniciar una conexión proxy",
+  "rememberedPrompt_startProxyConnectionDescription": "Cuando la conexión proxy de un contenedor no se está ejecutando",
+  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, conexión, contenedor, iniciar, confirmación, no volver a preguntar"
+}

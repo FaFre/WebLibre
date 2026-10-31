@@ -25,6 +25,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
@@ -698,6 +699,13 @@ class GeneralSettings with FastEquatable {
   /// is left here is the memory trade this describes.
   final bool unmountGeckoViewOffRoute;
 
+  /// Answers given with "Don't ask again", keyed by the prompt they answer and
+  /// stored as the answer's enum name. A prompt without an entry asks. Read
+  /// them through [rememberedAnswer]; malformed entries are dropped on read
+  /// (see [parseRememberedPrompts]).
+  @JsonKey(fromJson: parseRememberedPrompts)
+  final Map<RememberedPrompt, String> rememberedPrompts;
+
   GeneralSettings({
     required this.themeMode,
     required this.appLocale,
@@ -799,6 +807,7 @@ class GeneralSettings with FastEquatable {
     required this.globalDesktopMode,
     required this.desktopModeSites,
     required this.unmountGeckoViewOffRoute,
+    required this.rememberedPrompts,
   });
 
   GeneralSettings.withDefaults({
@@ -902,6 +911,7 @@ class GeneralSettings with FastEquatable {
     bool? globalDesktopMode,
     List<String>? desktopModeSites,
     bool? unmountGeckoViewOffRoute,
+    Map<RememberedPrompt, String>? rememberedPrompts,
   }) : themeMode = themeMode ?? ThemeMode.dark,
        uiScaleFactor = uiScaleFactor ?? defaultUiScaleFactor,
        disableAnimations = disableAnimations ?? false,
@@ -1035,7 +1045,8 @@ class GeneralSettings with FastEquatable {
        pureBlack = pureBlack ?? false,
        globalDesktopMode = globalDesktopMode ?? false,
        desktopModeSites = desktopModeSites ?? const [],
-       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false;
+       unmountGeckoViewOffRoute = unmountGeckoViewOffRoute ?? false,
+       rememberedPrompts = rememberedPrompts ?? const {};
 
   factory GeneralSettings.fromJson(Map<String, dynamic> json) {
     // Migrate legacy `newTabPosition` setting to direction settings.
@@ -1092,6 +1103,15 @@ class GeneralSettings with FastEquatable {
       return TabType.regular;
     }
     return storedDefaultCreateTabType;
+  }
+
+  /// The answer remembered for [prompt], or null while it should ask.
+  ///
+  /// [T] is the prompt's answer type, one of [RememberedPrompt.answers].
+  T? rememberedAnswer<T extends Enum>(RememberedPrompt prompt) {
+    final name = rememberedPrompts[prompt];
+    if (name == null) return null;
+    return prompt.answers.whereType<T>().asNameMap()[name];
   }
 
   TabType get effectiveSmallWebTabType {
@@ -1323,5 +1343,6 @@ class GeneralSettings with FastEquatable {
     globalDesktopMode,
     desktopModeSites,
     unmountGeckoViewOffRoute,
+    rememberedPrompts,
   ];
 }
