@@ -1,0 +1,6 @@
+{
+    "speechToTextButton_serviceNotAvailable": "Kõnetuvastus pole saadaval",
+    "@speechToTextButton_serviceNotAvailable": {
+        "description": "Error message shown when the user taps the voice-input button but the device has no speech recognition service."
+    }
+}
