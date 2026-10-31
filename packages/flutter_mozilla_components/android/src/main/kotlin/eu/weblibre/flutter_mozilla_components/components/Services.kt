@@ -60,7 +60,7 @@ class Services(
             store = store,
             accountManager = accountManager,
             serverConfig = serverConfig,
-            fxaCapabilities = setOf(FxaCapability.CHOOSE_WHAT_TO_SYNC),
+            fxaCapabilities = setOf(FxaCapability.ChooseWhatToSync),
         )
     }
 

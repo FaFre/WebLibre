@@ -627,7 +627,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                     store = components.core.store,
                     accountManager = components.backgroundServices.accountManager,
                     serverConfig = components.backgroundServices.serverConfig,
-                    fxaCapabilities = setOf(FxaCapability.CHOOSE_WHAT_TO_SYNC),
+                    fxaCapabilities = setOf(FxaCapability.ChooseWhatToSync),
                 ),
                 owner = this,
                 view = view,
