@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
+import 'package:flutter_tor/flutter_tor.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -28,7 +30,25 @@ Future<PackageInfo> packageInfo(Ref ref) async {
   return await PackageInfo.fromPlatform();
 }
 
-@Riverpod(keepAlive: true)
-Future<String> geckoVersion(Ref ref) async {
-  return await GeckoBrowserService().getGeckoVersion();
+// The component versions are fixed for the life of the process, so each is
+// read from native once and kept.
+
+/// The versions are compiled into the app: a read that failed once fails every
+/// time, and retrying would only keep the About dialog blank while it tries.
+Duration? _noRetry(int retryCount, Object error) => null;
+
+@Riverpod(keepAlive: true, retry: _noRetry)
+Future<GeckoComponentVersions> geckoComponentVersions(Ref ref) async {
+  return await GeckoBrowserService().getComponentVersions();
+}
+
+@Riverpod(keepAlive: true, retry: _noRetry)
+Future<TorComponentVersions> torComponentVersions(Ref ref) async {
+  return await FlutterTor().getComponentVersions();
+}
+
+/// Null when the bundled runtime carries no version stamp.
+@Riverpod(keepAlive: true, retry: _noRetry)
+Future<String?> singboxVersion(Ref ref) async {
+  return await FlutterSingboxProxy().getVersion();
 }

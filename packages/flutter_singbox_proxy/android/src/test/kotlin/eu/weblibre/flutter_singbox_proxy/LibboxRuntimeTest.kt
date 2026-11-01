@@ -3,6 +3,7 @@ package eu.weblibre.flutter_singbox_proxy
 import android.content.Context
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import org.mockito.Mockito.mock
 
 internal class LibboxRuntimeTest {
@@ -42,6 +43,29 @@ internal class LibboxRuntimeTest {
             ),
             received,
         )
+    }
+
+    @Test
+    fun version_isNullWithoutLibbox() {
+        val runtime = LibboxRuntime(
+            mock(Context::class.java),
+            mock(PlatformDohResolver::class.java),
+        )
+
+        assertNull(runtime.version())
+    }
+
+    @Test
+    fun stampedVersion_keepsAStampedVersion() {
+        assertEquals("1.14.4", stampedVersion("1.14.4"))
+        assertEquals("1.14.4", stampedVersion(" 1.14.4\n"))
+    }
+
+    @Test
+    fun stampedVersion_dropsAnUnstampedBuild() {
+        assertNull(stampedVersion("unknown"))
+        assertNull(stampedVersion(""))
+        assertNull(stampedVersion(null))
     }
 }
 

@@ -309,11 +309,13 @@ args=(
   -tags "$GO_MOBILE_TAGS"
 )
 
+# Stamp sing-box's version the way its own Makefile does; without it libbox
+# reports "unknown" (shown in the app's About dialog).
+LDFLAGS="-X github.com/sagernet/sing-box/constant.Version=${SING_BOX_TAG#v} -checklinkname=0"
 if [[ $DEBUG -eq 0 ]]; then
-  args+=(-ldflags "-s -w -checklinkname=0")
-else
-  args+=(-ldflags "-checklinkname=0")
+  LDFLAGS="-s -w $LDFLAGS"
 fi
+args+=(-ldflags "$LDFLAGS")
 
 args+=(
   github.com/sagernet/sing-box/experimental/libbox

@@ -9,9 +9,11 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import eu.weblibre.flutter_tor.generated.IPtProxyController
 import eu.weblibre.flutter_tor.generated.TorApi
+import eu.weblibre.flutter_tor.generated.TorComponentVersions
 import eu.weblibre.flutter_tor.generated.TorConfiguration
 import eu.weblibre.flutter_tor.generated.TorStatus
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.nekohasekai.IPtProxy.IPtProxy
 import kotlinx.coroutines.*
 import java.io.File
 
@@ -274,6 +276,33 @@ class FlutterTorPlugin : FlutterPlugin, TorApi {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to request new identity", e)
             throw e
+        }
+    }
+
+    override fun getComponentVersions(): TorComponentVersions {
+        return TorComponentVersions(
+            tor = org.torproject.jni.TorService.VERSION_NAME,
+            snowflake = transportVersion("Snowflake") { IPtProxy.snowflakeVersion() },
+            lyrebird = transportVersion("Lyrebird") {
+                IPtProxy.lyrebirdVersion().removePrefix("lyrebird-")
+            },
+        )
+    }
+
+    /**
+     * The bare version number a pluggable transport reports, or null when the
+     * Go runtime cannot answer.
+     *
+     * Snowflake appends the VCS revision of whatever module the runtime was
+     * built from ("2.13.1 (2b0b6093)"), which is not Snowflake's own, so only
+     * the first word is kept.
+     */
+    private inline fun transportVersion(name: String, read: () -> String): String? {
+        return try {
+            read().trim().substringBefore(' ').takeIf { it.isNotEmpty() }
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to read $name version", e)
+            null
         }
     }
 }

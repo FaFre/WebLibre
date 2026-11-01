@@ -40,7 +40,7 @@
   "httpErrorHandler_clientError": "Der Dienst ist nicht erreichbar",
   "profileDiscovery_recoveredProfileName": "Wiederhergestelltes Profil {idFragment}",
   "about_copyright": "Copyright © Fabian Freund, 2024-2026",
-  "about_geckoVersionTitle": "Gecko-Version",
+  "about_componentVersionsTitle": "Komponentenversionen",
   "about_notAvailable": "k. A.",
   "about_feedbackTitle": "Feedback",
   "about_donateTitle": "Spenden",

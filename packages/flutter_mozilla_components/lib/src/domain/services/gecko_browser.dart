@@ -13,8 +13,8 @@ class GeckoBrowserService {
 
   GeckoBrowserService({GeckoBrowserApi? api}) : _api = api ?? _apiInstance;
 
-  Future<String> getGeckoVersion() {
-    return _api.getGeckoVersion();
+  Future<GeckoComponentVersions> getComponentVersions() {
+    return _api.getComponentVersions();
   }
 
   Future<void> initialize(

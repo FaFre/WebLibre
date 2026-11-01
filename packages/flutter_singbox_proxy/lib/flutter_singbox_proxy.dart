@@ -104,4 +104,7 @@ class FlutterSingboxProxy {
   Future<void> stopAll() => _api.stopAll();
 
   Future<SingboxProxyRuntimeState> getState() => _api.getState();
+
+  /// The bundled sing-box core's version, or null when it is unknown.
+  Future<String?> getVersion() => _api.getVersion();
 }

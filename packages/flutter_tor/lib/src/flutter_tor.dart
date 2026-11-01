@@ -40,4 +40,9 @@ class FlutterTor {
   Future<void> requestNewIdentity() async {
     await _torApi.requestNewIdentity();
   }
+
+  /// Versions of the bundled Tor components; Tor does not need to run
+  Future<TorComponentVersions> getComponentVersions() {
+    return _torApi.getComponentVersions();
+  }
 }

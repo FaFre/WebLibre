@@ -37,6 +37,10 @@ native/go_mobile_runtime/scripts/build-android.sh \
 
 The output AAR is written to `native/go_mobile_runtime/build/weblibre-go.aar`.
 
+The build stamps `SING_BOX_TAG` into sing-box's `constant.Version` (as sing-box's
+own Makefile does), which the About dialog shows. An AAR built before that stamp
+reports `unknown`, and the dialog shows "N/A" for sing-box until it is rebuilt.
+
 GitHub release builds clone the pinned sources from `pins.env` and run the same
 Melos command before building the Flutter APK/AAB artifacts. The app Gradle
 build and CI native runtime build both read `weblibre.ndkVersion` from

@@ -1406,9 +1406,27 @@ class AddonCollection {
     dartPackageName: 'flutter_mozilla_components',
   ),
 )
+/// Versions of the Mozilla components the browser engine is built from.
+class GeckoComponentVersions {
+  GeckoComponentVersions({
+    required this.gecko,
+    required this.androidComponents,
+    required this.applicationServices,
+  });
+
+  /// GeckoView, as `<version>-<build id>` (e.g. "159.0-20261020123456").
+  final String gecko;
+
+  /// Mozilla Android Components (e.g. "159.0").
+  final String androidComponents;
+
+  /// Mozilla Application Services that Android Components was built against.
+  final String applicationServices;
+}
+
 @HostApi()
 abstract class GeckoBrowserApi {
-  String getGeckoVersion();
+  GeckoComponentVersions getComponentVersions();
   // [startupUBlockFilterListsPref] is the JSON-encoded value to write to the
   // managed-storage pref read by uBlock Origin at extension startup. The pref
   // must be written before the extension registers, so it is plumbed through

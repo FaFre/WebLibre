@@ -150,7 +150,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get about_copyright => 'Copyright © Fabian Freund, 2024-2026';
 
   @override
-  String get about_geckoVersionTitle => 'Gecko 版本';
+  String get about_componentVersionsTitle => '组件版本';
 
   @override
   String get about_notAvailable => '不可用';

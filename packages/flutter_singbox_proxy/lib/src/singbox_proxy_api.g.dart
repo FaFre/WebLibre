@@ -980,6 +980,28 @@ class SingboxProxyApi {
     );
     return pigeonVar_replyValue! as SingboxProxyRuntimeState;
   }
+
+  /// The version of the bundled sing-box core (e.g. "1.14.4"), or null when
+  /// libbox is missing or was built without a version stamp. Does not need the
+  /// runtime to run.
+  Future<String?> getVersion() async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.getVersion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
+    return pigeonVar_replyValue as String?;
+  }
 }
 
 /// Returns a broadcast [Stream] of events from the `streamState` event channel.

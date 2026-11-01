@@ -346,13 +346,13 @@ abstract class AppLocalizations {
   /// **'Copyright © Fabian Freund, 2024-2026'**
   String get about_copyright;
 
-  /// Row title in the About dialog; the version number of the Gecko browser engine is shown below it. Gecko is a product name.
+  /// Section title in the About dialog; below it is a list of the bundled components (Gecko, Android Components, Application Services, Tor, Snowflake, Lyrebird, sing-box), each next to its version number. The component names are product names and are not translated.
   ///
   /// In en, this message translates to:
-  /// **'Gecko Version'**
-  String get about_geckoVersionTitle;
+  /// **'Component Versions'**
+  String get about_componentVersionsTitle;
 
-  /// Abbreviation for "not available", shown in the About dialog when the Gecko engine version cannot be determined.
+  /// Abbreviation for "not available", shown in the About dialog in place of a component's version number when it cannot be determined. Keep it short; it sits in a narrow column.
   ///
   /// In en, this message translates to:
   /// **'N/A'**

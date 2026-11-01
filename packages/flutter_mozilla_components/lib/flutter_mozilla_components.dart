@@ -85,6 +85,7 @@ export 'src/pigeons/gecko.g.dart'
         FrecencyThresholdOption,
         GeckoAppLinkEvents,
         GeckoBookmarksEvents,
+        GeckoComponentVersions,
         GeckoDeleteBrowsingDataController,
         GeckoEngineSettings,
         GeckoFetchResponse,

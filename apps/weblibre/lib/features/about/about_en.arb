@@ -5,13 +5,13 @@
   "@about_copyright": {
     "description": "Copyright line in the About dialog. Keep the name and years unchanged."
   },
-  "about_geckoVersionTitle": "Gecko Version",
-  "@about_geckoVersionTitle": {
-    "description": "Row title in the About dialog; the version number of the Gecko browser engine is shown below it. Gecko is a product name."
+  "about_componentVersionsTitle": "Component Versions",
+  "@about_componentVersionsTitle": {
+    "description": "Section title in the About dialog; below it is a list of the bundled components (Gecko, Android Components, Application Services, Tor, Snowflake, Lyrebird, sing-box), each next to its version number. The component names are product names and are not translated."
   },
   "about_notAvailable": "N/A",
   "@about_notAvailable": {
-    "description": "Abbreviation for \"not available\", shown in the About dialog when the Gecko engine version cannot be determined."
+    "description": "Abbreviation for \"not available\", shown in the About dialog in place of a component's version number when it cannot be determined. Keep it short; it sits in a narrow column."
   },
   "about_feedbackTitle": "Feedback",
   "@about_feedbackTitle": {

@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
@@ -52,14 +53,8 @@ class AboutDialogScreen extends HookConsumerWidget {
       children: [
         ListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(l10n.about_geckoVersionTitle),
-          subtitle: Consumer(
-            builder: (context, ref, child) {
-              final geckoVersion = ref.watch(geckoVersionProvider);
-
-              return Text(geckoVersion.value ?? l10n.about_notAvailable);
-            },
-          ),
+          title: Text(l10n.about_componentVersionsTitle),
+          subtitle: const _ComponentVersions(),
         ),
         const Divider(),
         ListTile(
@@ -137,6 +132,70 @@ class AboutDialogScreen extends HookConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// The bundled engine and proxy components, each with its version.
+///
+/// Every source is read on its own, so one that fails or is still loading
+/// leaves the others readable.
+class _ComponentVersions extends HookConsumerWidget {
+  const _ComponentVersions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
+    final gecko = ref.watch(geckoComponentVersionsProvider);
+    final tor = ref.watch(torComponentVersionsProvider);
+    final singbox = ref.watch(singboxVersionProvider);
+
+    // Blank while loading, so a version that is on its way never flashes N/A.
+    // A failure counts even while Riverpod still reports it as loading (a
+    // provider that retries does until it gives up).
+    String version<T>(AsyncValue<T> source, String? Function(T value) read) {
+      return switch (source) {
+        AsyncData(:final value) => read(value) ?? l10n.about_notAvailable,
+        _ when source.hasError => l10n.about_notAvailable,
+        _ => '',
+      };
+    }
+
+    // Product names, never translated.
+    final rows = [
+      ('Gecko', version(gecko, (v) => v.gecko)),
+      ('Android Components', version(gecko, (v) => v.androidComponents)),
+      ('Application Services', version(gecko, (v) => v.applicationServices)),
+      (torBrand, version(tor, (v) => v.tor)),
+      ('Snowflake', version(tor, (v) => v.snowflake)),
+      ('Lyrebird', version(tor, (v) => v.lyrebird)),
+      ('sing-box', version(singbox, (v) => v)),
+    ];
+
+    final nameStyle = TextStyle(color: Theme.of(context).colorScheme.onSurface);
+
+    // A row per component rather than a table: with large text or on a narrow
+    // phone the names would claim the width and squeeze the versions out of a
+    // column. A row that does not fit puts the version under its name instead.
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final (name, value) in rows)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Wrap(
+                spacing: 12,
+                children: [
+                  Text(name, style: nameStyle),
+                  Text(value),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

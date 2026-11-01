@@ -916,6 +916,12 @@ interface SingboxProxyApi {
   suspend fun stop(profileIds: List<String>)
   suspend fun stopAll()
   fun getState(): SingboxProxyRuntimeState
+  /**
+   * The version of the bundled sing-box core (e.g. "1.14.4"), or null when
+   * libbox is missing or was built without a version stamp. Does not need the
+   * runtime to run.
+   */
+  fun getVersion(): String?
 
   companion object {
     /** The codec used by SingboxProxyApi. */
@@ -1048,6 +1054,21 @@ interface SingboxProxyApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.getState())
+            } catch (exception: Throwable) {
+              SingboxProxyApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyApi.getVersion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getVersion())
             } catch (exception: Throwable) {
               SingboxProxyApiPigeonUtils.wrapError(exception)
             }

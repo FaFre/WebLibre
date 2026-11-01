@@ -106,6 +106,21 @@ class TorLogMessage {
   final int timestamp;
 }
 
+/// Versions of the Tor components bundled with the app
+class TorComponentVersions {
+  TorComponentVersions({required this.tor, this.snowflake, this.lyrebird});
+
+  /// The tor daemon (tor-android), e.g. "0.4.9.14"
+  final String tor;
+
+  /// The Snowflake pluggable transport, or null when it cannot be determined
+  final String? snowflake;
+
+  /// The Lyrebird pluggable transport (obfs4, meek, WebTunnel), or null when it
+  /// cannot be determined
+  final String? lyrebird;
+}
+
 /// Host API (Flutter -> Native)
 @HostApi()
 abstract class TorApi {
@@ -123,6 +138,9 @@ abstract class TorApi {
 
   /// Request a new Tor identity (new circuit)
   void requestNewIdentity();
+
+  /// Versions of the bundled Tor components. Does not need Tor to run.
+  TorComponentVersions getComponentVersions();
 }
 
 /// Event streams (Native -> Flutter)

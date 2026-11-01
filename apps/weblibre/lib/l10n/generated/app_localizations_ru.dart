@@ -173,7 +173,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get about_copyright => 'Copyright © Fabian Freund, 2024-2026';
 
   @override
-  String get about_geckoVersionTitle => 'Версия Gecko';
+  String get about_componentVersionsTitle => 'Версии компонентов';
 
   @override
   String get about_notAvailable => 'Н/Д';

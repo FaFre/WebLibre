@@ -485,6 +485,8 @@ class SingboxRuntimeManager(
 
     override fun getState(): SingboxProxyRuntimeState = synchronized(stateLock) { state }
 
+    override fun getVersion(): String? = libboxRuntime.version()
+
     /**
      * The endpoints a start from [from] tries to keep: the running ones, or
      * after a failed start or stop those of the last instance that ran

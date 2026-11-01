@@ -164,7 +164,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get about_copyright => 'Copyright © Fabian Freund, 2024-2026';
 
   @override
-  String get about_geckoVersionTitle => 'Versión de Gecko';
+  String get about_componentVersionsTitle => 'Versiones de componentes';
 
   @override
   String get about_notAvailable => 'N/D';

@@ -40,7 +40,7 @@
   "httpErrorHandler_clientError": "No se pudo contactar con el servicio remoto",
   "profileDiscovery_recoveredProfileName": "Perfil recuperado {idFragment}",
   "about_copyright": "Copyright © Fabian Freund, 2024-2026",
-  "about_geckoVersionTitle": "Versión de Gecko",
+  "about_componentVersionsTitle": "Versiones de componentes",
   "about_notAvailable": "N/D",
   "about_feedbackTitle": "Comentarios",
   "about_donateTitle": "Donar",

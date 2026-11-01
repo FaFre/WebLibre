@@ -40,7 +40,7 @@
   "httpErrorHandler_clientError": "无法连接远程服务",
   "profileDiscovery_recoveredProfileName": "已恢复的配置文件 {idFragment}",
   "about_copyright": "Copyright © Fabian Freund, 2024-2026",
-  "about_geckoVersionTitle": "Gecko 版本",
+  "about_componentVersionsTitle": "组件版本",
   "about_notAvailable": "不可用",
   "about_feedbackTitle": "反馈",
   "about_donateTitle": "捐赠",

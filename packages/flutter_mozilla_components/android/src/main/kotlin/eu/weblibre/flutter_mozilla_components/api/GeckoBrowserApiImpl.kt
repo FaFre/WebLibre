@@ -24,6 +24,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ContentBlocking
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoComponentVersions
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAddonsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoAppLinksApi
@@ -255,8 +256,12 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         this.activity = null
     }
 
-    override fun getGeckoVersion(): String {
-        return GeckoViewBuildConfig.MOZ_APP_VERSION + "-" + GeckoViewBuildConfig.MOZ_APP_BUILDID
+    override fun getComponentVersions(): GeckoComponentVersions {
+        return GeckoComponentVersions(
+            gecko = GeckoViewBuildConfig.MOZ_APP_VERSION + "-" + GeckoViewBuildConfig.MOZ_APP_BUILDID,
+            androidComponents = mozilla.components.Build.VERSION,
+            applicationServices = mozilla.components.Build.APPLICATION_SERVICES_VERSION,
+        )
     }
 
     override fun initialize(

@@ -82,6 +82,18 @@ open class LibboxRuntime(
     }.isSuccess
 
     /**
+     * The sing-box version libbox was built as, or null when libbox is missing
+     * or carries no version stamp.
+     *
+     * Needs no setup, and is not synchronized so it never waits behind a start.
+     */
+    open fun version(): String? = stampedVersion(
+        runCatching {
+            Class.forName(LIBBOX_CLASS).getMethod("version").invoke(null) as String?
+        }.getOrNull(),
+    )
+
+    /**
      * Register a callback that receives every log message emitted by sing-box
      * (level: int, message: String). Pass null to clear. The callback is
      * invoked from a background thread; the receiver must be thread-safe.
@@ -837,3 +849,15 @@ open class LibboxRuntime(
         const val CONNECTION_EVENT_CLOSED = 2
     }
 }
+
+/** What sing-box's `constant.Version` holds when the build did not stamp it. */
+private const val UNSTAMPED_VERSION = "unknown"
+
+/**
+ * [raw] as reported by libbox's `version()`, or null when it says nothing.
+ *
+ * The version is sing-box's `constant.Version`, set by the runtime build's
+ * `-X` linker flag; a build without the flag reports [UNSTAMPED_VERSION].
+ */
+internal fun stampedVersion(raw: String?): String? =
+    raw?.trim()?.takeUnless { it.isEmpty() || it == UNSTAMPED_VERSION }

@@ -258,6 +258,11 @@ abstract class SingboxProxyApi {
   void stopAll();
 
   SingboxProxyRuntimeState getState();
+
+  /// The version of the bundled sing-box core (e.g. "1.14.4"), or null when
+  /// libbox is missing or was built without a version stamp. Does not need the
+  /// runtime to run.
+  String? getVersion();
 }
 
 @EventChannelApi()

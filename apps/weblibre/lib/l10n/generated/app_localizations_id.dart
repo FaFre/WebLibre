@@ -164,7 +164,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get about_copyright => 'Hak Cipta © Fabian Freund, 2024-2026';
 
   @override
-  String get about_geckoVersionTitle => 'Versi Gecko';
+  String get about_componentVersionsTitle => 'Versi Komponen';
 
   @override
   String get about_notAvailable => 'T/A';
