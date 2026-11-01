@@ -140,5 +140,8 @@
   "addons_permissionTopSites": "Получать доступ к истории просмотра",
   "addons_permissionWebNavigation": "Получать доступ к активности браузера во время навигации",
   "addons_permissionAllUrls": "Получать доступ к вашим данным на всех сайтах",
-  "addons_permissionAccessDataFor": "Получать доступ к вашим данным для {host}"
+  "addons_permissionAccessDataFor": "Получать доступ к вашим данным для {host}",
+  "addons_updatePermissionsTitle": "Обновлению нужны новые разрешения",
+  "addons_updatePermissionsBody": "Новая версия запрашивает разрешения ниже. Она будет установлена, как только вы их разрешите.",
+  "addons_updateNeedsPermissions": "Это обновление запрашивает новые разрешения. Проверьте их, чтобы установить его."
 }

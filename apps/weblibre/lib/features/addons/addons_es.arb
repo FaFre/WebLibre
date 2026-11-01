@@ -140,5 +140,8 @@
   "addons_permissionTopSites": "Acceder al historial de navegación",
   "addons_permissionWebNavigation": "Acceder a la actividad del navegador durante la navegación",
   "addons_permissionAllUrls": "Acceder a tus datos de todos los sitios web",
-  "addons_permissionAccessDataFor": "Acceder a tus datos de {host}"
+  "addons_permissionAccessDataFor": "Acceder a tus datos de {host}",
+  "addons_updatePermissionsTitle": "La actualización necesita nuevos permisos",
+  "addons_updatePermissionsBody": "La nueva versión solicita los permisos siguientes. Se instalará en cuanto los permitas.",
+  "addons_updateNeedsPermissions": "Esta actualización solicita nuevos permisos. Revísalos para instalarla."
 }

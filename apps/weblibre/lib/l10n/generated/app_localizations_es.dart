@@ -1201,15 +1201,16 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get addons_updatePermissionsTitle => 'Update needs new permissions';
+  String get addons_updatePermissionsTitle =>
+      'La actualización necesita nuevos permisos';
 
   @override
   String get addons_updatePermissionsBody =>
-      'The new version asks for the permissions below. It is installed once you allow them.';
+      'La nueva versión solicita los permisos siguientes. Se instalará en cuanto los permitas.';
 
   @override
   String get addons_updateNeedsPermissions =>
-      'This update asks for new permissions. Review them to install it.';
+      'Esta actualización solicita nuevos permisos. Revísalos para instalarla.';
 
   @override
   String appLinks_bannerTitleNamed(String appName) {
@@ -9276,40 +9277,41 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_indexSearchFieldPlacementTitle =>
-      'Search field on new tabs';
+      'Campo de búsqueda en pestañas nuevas';
 
   @override
   String get settings_indexSearchFieldPlacementKeywords =>
-      'search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb';
+      'búsqueda, campo, entrada, posición, dirección, url, editar, arriba, abajo, barra de pestañas, nueva pestaña, una mano, pulgar';
 
   @override
   String get settings_indexSearchFieldPlacementSubtitle =>
-      'Where the new tab page and address editing put the input field';
+      'Dónde colocan el campo de entrada la página de nueva pestaña y la edición de la dirección';
 
   @override
-  String get settings_searchFieldPlacementAutoLabel => 'Follow the tab bar';
+  String get settings_searchFieldPlacementAutoLabel =>
+      'Seguir la barra de pestañas';
 
   @override
-  String get settings_searchFieldPlacementTopLabel => 'Top';
+  String get settings_searchFieldPlacementTopLabel => 'Arriba';
 
   @override
-  String get settings_searchFieldPlacementBottomLabel => 'Bottom';
+  String get settings_searchFieldPlacementBottomLabel => 'Abajo';
 
   @override
   String settings_searchFieldPlacementCurrentlyLabel(String value) {
-    return 'Currently: $value';
+    return 'Actualmente: $value';
   }
 
   @override
   String get settings_searchFieldPlacementTopDescription =>
-      'Suggestions are listed below the field';
+      'Las sugerencias aparecen debajo del campo';
 
   @override
   String get settings_searchFieldPlacementBottomDescription =>
-      'Within thumb reach, with suggestions above it and the best match nearest';
+      'Al alcance del pulgar, con las sugerencias encima y la más relevante junto al campo';
 
   @override
-  String get settings_searchFieldRowTitle => 'Search field';
+  String get settings_searchFieldRowTitle => 'Campo de búsqueda';
 
   @override
   String get settings_allowlistExceptionsSectionTitle =>

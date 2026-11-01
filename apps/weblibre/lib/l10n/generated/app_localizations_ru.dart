@@ -1200,15 +1200,16 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get addons_updatePermissionsTitle => 'Update needs new permissions';
+  String get addons_updatePermissionsTitle =>
+      'Обновлению нужны новые разрешения';
 
   @override
   String get addons_updatePermissionsBody =>
-      'The new version asks for the permissions below. It is installed once you allow them.';
+      'Новая версия запрашивает разрешения ниже. Она будет установлена, как только вы их разрешите.';
 
   @override
   String get addons_updateNeedsPermissions =>
-      'This update asks for new permissions. Review them to install it.';
+      'Это обновление запрашивает новые разрешения. Проверьте их, чтобы установить его.';
 
   @override
   String appLinks_bannerTitleNamed(String appName) {
@@ -9284,40 +9285,40 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_indexSearchFieldPlacementTitle =>
-      'Search field on new tabs';
+      'Поле поиска на новой вкладке';
 
   @override
   String get settings_indexSearchFieldPlacementKeywords =>
-      'search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb';
+      'поиск, поле, ввод, положение, адрес, url, редактирование, вверху, внизу, панель вкладок, новая вкладка, одной рукой, большой палец';
 
   @override
   String get settings_indexSearchFieldPlacementSubtitle =>
-      'Where the new tab page and address editing put the input field';
+      'Где находится поле ввода на новой вкладке и при редактировании адреса';
 
   @override
-  String get settings_searchFieldPlacementAutoLabel => 'Follow the tab bar';
+  String get settings_searchFieldPlacementAutoLabel => 'Как у панели вкладок';
 
   @override
-  String get settings_searchFieldPlacementTopLabel => 'Top';
+  String get settings_searchFieldPlacementTopLabel => 'Вверху';
 
   @override
-  String get settings_searchFieldPlacementBottomLabel => 'Bottom';
+  String get settings_searchFieldPlacementBottomLabel => 'Внизу';
 
   @override
   String settings_searchFieldPlacementCurrentlyLabel(String value) {
-    return 'Currently: $value';
+    return 'Сейчас: $value';
   }
 
   @override
   String get settings_searchFieldPlacementTopDescription =>
-      'Suggestions are listed below the field';
+      'Подсказки показываются под полем';
 
   @override
   String get settings_searchFieldPlacementBottomDescription =>
-      'Within thumb reach, with suggestions above it and the best match nearest';
+      'В зоне досягаемости большого пальца: подсказки над полем, лучшая — ближе всего к нему';
 
   @override
-  String get settings_searchFieldRowTitle => 'Search field';
+  String get settings_searchFieldRowTitle => 'Поле поиска';
 
   @override
   String get settings_allowlistExceptionsSectionTitle =>

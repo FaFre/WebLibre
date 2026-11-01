@@ -1194,15 +1194,15 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get addons_updatePermissionsTitle => 'Update needs new permissions';
+  String get addons_updatePermissionsTitle => 'Pembaruan memerlukan izin baru';
 
   @override
   String get addons_updatePermissionsBody =>
-      'The new version asks for the permissions below. It is installed once you allow them.';
+      'Versi baru meminta izin di bawah ini. Versi tersebut akan dipasang setelah Anda mengizinkannya.';
 
   @override
   String get addons_updateNeedsPermissions =>
-      'This update asks for new permissions. Review them to install it.';
+      'Pembaruan ini meminta izin baru. Tinjau izin tersebut untuk memasangnya.';
 
   @override
   String appLinks_bannerTitleNamed(String appName) {
@@ -9149,40 +9149,40 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexSearchFieldPlacementTitle =>
-      'Search field on new tabs';
+      'Kolom pencarian di tab baru';
 
   @override
   String get settings_indexSearchFieldPlacementKeywords =>
-      'search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb';
+      'pencarian, kolom, input, posisi, alamat, url, edit, atas, bawah, bilah tab, tab baru, satu tangan, jempol, search, field, new tab';
 
   @override
   String get settings_indexSearchFieldPlacementSubtitle =>
-      'Where the new tab page and address editing put the input field';
+      'Tempat halaman tab baru dan pengeditan alamat menampilkan kolom input';
 
   @override
-  String get settings_searchFieldPlacementAutoLabel => 'Follow the tab bar';
+  String get settings_searchFieldPlacementAutoLabel => 'Ikuti bilah tab';
 
   @override
-  String get settings_searchFieldPlacementTopLabel => 'Top';
+  String get settings_searchFieldPlacementTopLabel => 'Atas';
 
   @override
-  String get settings_searchFieldPlacementBottomLabel => 'Bottom';
+  String get settings_searchFieldPlacementBottomLabel => 'Bawah';
 
   @override
   String settings_searchFieldPlacementCurrentlyLabel(String value) {
-    return 'Currently: $value';
+    return 'Saat ini: $value';
   }
 
   @override
   String get settings_searchFieldPlacementTopDescription =>
-      'Suggestions are listed below the field';
+      'Saran ditampilkan di bawah kolom';
 
   @override
   String get settings_searchFieldPlacementBottomDescription =>
-      'Within thumb reach, with suggestions above it and the best match nearest';
+      'Terjangkau jempol, dengan saran di atasnya dan hasil terbaik paling dekat dengan kolom';
 
   @override
-  String get settings_searchFieldRowTitle => 'Search field';
+  String get settings_searchFieldRowTitle => 'Kolom pencarian';
 
   @override
   String get settings_allowlistExceptionsSectionTitle =>

@@ -1095,15 +1095,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get addons_updatePermissionsTitle => 'Update needs new permissions';
+  String get addons_updatePermissionsTitle => '更新需要新权限';
 
   @override
-  String get addons_updatePermissionsBody =>
-      'The new version asks for the permissions below. It is installed once you allow them.';
+  String get addons_updatePermissionsBody => '新版本请求以下权限。你允许后即会安装。';
 
   @override
-  String get addons_updateNeedsPermissions =>
-      'This update asks for new permissions. Review them to install it.';
+  String get addons_updateNeedsPermissions => '此更新请求新权限，查看并允许后即可安装。';
 
   @override
   String appLinks_bannerTitleNamed(String appName) {
@@ -8441,41 +8439,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexHomeSearchBarPlacementSubtitle => '主页提供搜索框的位置';
 
   @override
-  String get settings_indexSearchFieldPlacementTitle =>
-      'Search field on new tabs';
+  String get settings_indexSearchFieldPlacementTitle => '新标签页上的搜索框';
 
   @override
   String get settings_indexSearchFieldPlacementKeywords =>
-      'search, field, input, position, address, url, edit, top, bottom, tab bar, new tab, one-handed, thumb';
+      '搜索,搜索框,输入框,位置,地址,网址,编辑,顶部,底部,标签栏,新标签页,单手,拇指';
 
   @override
-  String get settings_indexSearchFieldPlacementSubtitle =>
-      'Where the new tab page and address editing put the input field';
+  String get settings_indexSearchFieldPlacementSubtitle => '新标签页和编辑地址时输入框的位置';
 
   @override
-  String get settings_searchFieldPlacementAutoLabel => 'Follow the tab bar';
+  String get settings_searchFieldPlacementAutoLabel => '跟随标签栏';
 
   @override
-  String get settings_searchFieldPlacementTopLabel => 'Top';
+  String get settings_searchFieldPlacementTopLabel => '顶部';
 
   @override
-  String get settings_searchFieldPlacementBottomLabel => 'Bottom';
+  String get settings_searchFieldPlacementBottomLabel => '底部';
 
   @override
   String settings_searchFieldPlacementCurrentlyLabel(String value) {
-    return 'Currently: $value';
+    return '当前：$value';
   }
 
   @override
-  String get settings_searchFieldPlacementTopDescription =>
-      'Suggestions are listed below the field';
+  String get settings_searchFieldPlacementTopDescription => '建议显示在输入框下方';
 
   @override
   String get settings_searchFieldPlacementBottomDescription =>
-      'Within thumb reach, with suggestions above it and the best match nearest';
+      '拇指易于触及，建议显示在上方，最佳匹配紧邻输入框';
 
   @override
-  String get settings_searchFieldRowTitle => 'Search field';
+  String get settings_searchFieldRowTitle => '搜索框';
 
   @override
   String get settings_allowlistExceptionsSectionTitle => '允许列表例外';

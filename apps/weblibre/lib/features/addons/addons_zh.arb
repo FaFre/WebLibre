@@ -140,5 +140,8 @@
   "addons_permissionTopSites": "获取浏览历史",
   "addons_permissionWebNavigation": "访问浏览器导航期间的活动信息",
   "addons_permissionAllUrls": "访问你在所有网站的数据",
-  "addons_permissionAccessDataFor": "访问你在 {host} 的数据"
+  "addons_permissionAccessDataFor": "访问你在 {host} 的数据",
+  "addons_updatePermissionsTitle": "更新需要新权限",
+  "addons_updatePermissionsBody": "新版本请求以下权限。你允许后即会安装。",
+  "addons_updateNeedsPermissions": "此更新请求新权限，查看并允许后即可安装。"
 }

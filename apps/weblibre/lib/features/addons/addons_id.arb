@@ -140,5 +140,8 @@
   "addons_permissionTopSites": "Mengakses riwayat penjelajahan",
   "addons_permissionWebNavigation": "Mengakses aktivitas peramban selama navigasi",
   "addons_permissionAllUrls": "Mengakses data Anda untuk semua situs web",
-  "addons_permissionAccessDataFor": "Mengakses data Anda untuk {host}"
+  "addons_permissionAccessDataFor": "Mengakses data Anda untuk {host}",
+  "addons_updatePermissionsTitle": "Pembaruan memerlukan izin baru",
+  "addons_updatePermissionsBody": "Versi baru meminta izin di bawah ini. Versi tersebut akan dipasang setelah Anda mengizinkannya.",
+  "addons_updateNeedsPermissions": "Pembaruan ini meminta izin baru. Tinjau izin tersebut untuk memasangnya."
 }
