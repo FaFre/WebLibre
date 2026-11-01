@@ -1129,7 +1129,7 @@ class _FakeSingboxProxyClient implements SingboxProxyClient {
   Stream<SingboxProxyRuntimeState> get stateStream => _stateController.stream;
 
   @override
-  Stream<SingboxProxyTunnelEvent> get tunnelStream => const Stream.empty();
+  Stream<SingboxProxyTunnelState> get tunnelStream => const Stream.empty();
 
   @override
   Stream<SingboxProxyLogMessage> get logStream => const Stream.empty();

@@ -17,13 +17,22 @@ package eu.weblibre.flutter_singbox_proxy
  * ```
  * endpoint/wireguard[out-…]: peer(7ept…vJwE) - handshake did not complete after 5 seconds, retrying (try 2)
  * endpoint/wireguard[out-…]: peer(7ept…vJwE) - received handshake response
+ * endpoint/wireguard[out-…]: peer(7ept…vJwE) - received handshake initiation
  * ```
+ *
+ * Either side may start a handshake, so a peer answers in two ways: with a
+ * response to ours, or with an initiation of its own, which we answer. Both
+ * are logged only once wireguard-go has authenticated the message — a forged
+ * or garbled one reads "received invalid … message" and has no `peer(…)` — so
+ * both prove the peer is there. A tunnel that recovered through the peer's
+ * handshake would otherwise read as not answering until we started one
+ * ourselves, up to two minutes later, and nothing else could take that back.
  *
  * The verdict is per endpoint tag and changes on evidence only, and only a
  * change is reported. A tunnel is "not answering" after [UNANSWERED_RETRIES]
  * retries in a row without a response — fifteen seconds of silence — or when
- * wireguard-go gives up; it answers with the next response, the first of a run
- * included. Nothing is said before the first handshake, so a tunnel nobody has
+ * wireguard-go gives up; it answers with the next response or initiation from
+ * the peer, the first of a run included. Nothing is said before the first handshake, so a tunnel nobody has
  * used yet stays as it was. [reset] forgets everything: a new runtime instance
  * handshakes from scratch.
  *
@@ -49,7 +58,8 @@ internal class WireGuardHandshakeWatch(
         val event = match.groupValues[2]
 
         when {
-            event.startsWith(RESPONSE_RECEIVED) -> answered(tag)
+            event.startsWith(RESPONSE_RECEIVED) || event.startsWith(INITIATION_RECEIVED) ->
+                answered(tag)
             // "… after 20 attempts, giving up" and "… after 5 seconds,
             // retrying (try 2)" share their start.
             event.startsWith(NOT_COMPLETED) && event.contains(GIVING_UP) ->
@@ -95,6 +105,7 @@ internal class WireGuardHandshakeWatch(
         private const val ENDPOINT_MARKER = "endpoint/wireguard["
         private val PEER_EVENT = Regex("""endpoint/wireguard\[([^\]]+)\]: peer\([^)]*\) - (.+)$""")
         private const val RESPONSE_RECEIVED = "received handshake response"
+        private const val INITIATION_RECEIVED = "received handshake initiation"
         private const val NOT_COMPLETED = "handshake did not complete after"
         private const val RETRYING = "retrying"
         private const val GIVING_UP = "giving up"

@@ -28,6 +28,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -217,6 +218,26 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
         }
       }
     });
+  }
+
+  /// Remembers [answer] to [prompt], or forgets what was remembered when it is
+  /// null, so [prompt] is asked again.
+  ///
+  /// The one way to change a remembered answer, whether a dialog's "Don't ask
+  /// again" stores it or the confirmations screen changes it.
+  Future<void> setRememberedAnswer(RememberedPrompt prompt, Enum? answer) {
+    assert(
+      answer == null || prompt.answers.contains(answer),
+      '$answer is not an answer to ${prompt.name}',
+    );
+
+    return updateSettings(
+      (current) => current.copyWith.rememberedPrompts(
+        answer == null
+            ? ({...current.rememberedPrompts}..remove(prompt))
+            : {...current.rememberedPrompts, prompt: answer.name},
+      ),
+    );
   }
 
   @override

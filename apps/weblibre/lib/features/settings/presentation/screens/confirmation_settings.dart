@@ -21,9 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -104,14 +102,8 @@ class _RememberedPromptTile extends HookConsumerWidget {
 
     Future<void> remember(Enum? answer) async {
       await ref
-          .read(saveGeneralSettingsControllerProvider.notifier)
-          .save(
-            (current) => current.copyWith.rememberedPrompts(
-              answer == null
-                  ? ({...current.rememberedPrompts}..remove(prompt))
-                  : {...current.rememberedPrompts, prompt: answer.name},
-            ),
-          );
+          .read(generalSettingsRepositoryProvider.notifier)
+          .setRememberedAnswer(prompt, answer);
     }
 
     final icon = Icon(switch (prompt) {
@@ -135,7 +127,7 @@ class _RememberedPromptTile extends HookConsumerWidget {
     }
 
     final l10n = AppLocalizations.of(context);
-    final selected = KeepTabAnswer.values.asNameMap()[remembered];
+    final selected = prompt.answers.asNameMap()[remembered];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -150,16 +142,16 @@ class _RememberedPromptTile extends HookConsumerWidget {
             contentPadding: EdgeInsets.zero,
           ),
           Center(
-            child: SegmentedButton<KeepTabAnswer?>(
+            child: SegmentedButton<Enum?>(
               segments: [
                 ButtonSegment(
                   value: null,
                   label: Text(l10n.rememberedPrompt_answerAsk),
                 ),
-                for (final answer in KeepTabAnswer.values)
+                for (final answer in prompt.answers)
                   ButtonSegment(
                     value: answer,
-                    label: Text(answer.label(context)),
+                    label: Text(rememberedAnswerLabel(context, answer)),
                   ),
               ],
               selected: {selected},

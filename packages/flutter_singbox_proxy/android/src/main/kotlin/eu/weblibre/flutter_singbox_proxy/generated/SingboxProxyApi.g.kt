@@ -725,32 +725,31 @@ data class SingboxProxyLogMessage (
 }
 
 /**
- * Whether a WireGuard profile's peer answers its handshakes, as far as the
- * runtime has seen.
+ * The WireGuard profiles whose peer does not answer its handshakes, as far
+ * as the runtime has seen: every one of them, not a change.
  *
- * Sent on a change only: [answering] false once handshakes have gone
- * unanswered for a while, true again when one is answered. A (re)start of the
- * runtime forgets everything said before; nothing is sent for a profile until
- * its tunnel has tried to handshake.
+ * Sent whenever the set changes, and to a listener as it subscribes, so one
+ * that comes late still learns how things stand. A profile is in it once its
+ * handshakes have gone unanswered for a while, and leaves it when one is
+ * answered or the runtime (re)starts — every profile shares one instance, so a
+ * (re)start of any of them forgets all. A profile whose tunnel has not tried
+ * to handshake since is not in it.
  *
  * Generated class from Pigeon that represents data sent in messages.
  */
-data class SingboxProxyTunnelEvent (
-  val profileId: String,
-  val answering: Boolean
+data class SingboxProxyTunnelState (
+  val unansweredProfileIds: List<String>
 )
  {
   companion object {
-    fun fromList(pigeonVar_list: List<Any?>): SingboxProxyTunnelEvent {
-      val profileId = pigeonVar_list[0] as String
-      val answering = pigeonVar_list[1] as Boolean
-      return SingboxProxyTunnelEvent(profileId, answering)
+    fun fromList(pigeonVar_list: List<Any?>): SingboxProxyTunnelState {
+      val unansweredProfileIds = pigeonVar_list[0] as List<String>
+      return SingboxProxyTunnelState(unansweredProfileIds)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
-      profileId,
-      answering,
+      unansweredProfileIds,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -760,18 +759,17 @@ data class SingboxProxyTunnelEvent (
     if (this === other) {
       return true
     }
-    val other = other as SingboxProxyTunnelEvent
-    return SingboxProxyApiPigeonUtils.deepEquals(this.profileId, other.profileId) && SingboxProxyApiPigeonUtils.deepEquals(this.answering, other.answering)
+    val other = other as SingboxProxyTunnelState
+    return SingboxProxyApiPigeonUtils.deepEquals(this.unansweredProfileIds, other.unansweredProfileIds)
   }
 
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
-    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.profileId)
-    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.answering)
+    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.unansweredProfileIds)
     return result
   }
   override fun toString(): String {
-    return "SingboxProxyTunnelEvent(profileId=$profileId, answering=$answering)"
+    return "SingboxProxyTunnelState(unansweredProfileIds=$unansweredProfileIds)"
   }
 }
 private open class SingboxProxyApiPigeonCodec : StandardMessageCodec() {
@@ -834,7 +832,7 @@ private open class SingboxProxyApiPigeonCodec : StandardMessageCodec() {
       }
       140.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SingboxProxyTunnelEvent.fromList(it)
+          SingboxProxyTunnelState.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -886,7 +884,7 @@ private open class SingboxProxyApiPigeonCodec : StandardMessageCodec() {
         stream.write(139)
         writeValue(stream, value.toList())
       }
-      is SingboxProxyTunnelEvent -> {
+      is SingboxProxyTunnelState -> {
         stream.write(140)
         writeValue(stream, value.toList())
       }
@@ -1152,19 +1150,19 @@ override fun onListen(p0: Any?, sink: PigeonEventSink<SingboxProxyLogMessage>) {
 override fun onCancel(p0: Any?) {}
 }
       
-abstract class StreamTunnelsStreamHandler : SingboxProxyApiPigeonEventChannelWrapper<SingboxProxyTunnelEvent> {
+abstract class StreamTunnelsStreamHandler : SingboxProxyApiPigeonEventChannelWrapper<SingboxProxyTunnelState> {
   companion object {
     fun register(messenger: BinaryMessenger, streamHandler: StreamTunnelsStreamHandler, instanceName: String = "") {
       var channelName: String = "dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.streamTunnels"
       if (instanceName.isNotEmpty()) {
         channelName += ".$instanceName"
       }
-      val internalStreamHandler = SingboxProxyApiPigeonStreamHandler<SingboxProxyTunnelEvent>(streamHandler)
+      val internalStreamHandler = SingboxProxyApiPigeonStreamHandler<SingboxProxyTunnelState>(streamHandler)
       EventChannel(messenger, channelName, SingboxProxyApiPigeonMethodCodec).setStreamHandler(internalStreamHandler)
     }
   }
 // Implement methods from SingboxProxyApiPigeonEventChannelWrapper
-override fun onListen(p0: Any?, sink: PigeonEventSink<SingboxProxyTunnelEvent>) {}
+override fun onListen(p0: Any?, sink: PigeonEventSink<SingboxProxyTunnelState>) {}
 
 override fun onCancel(p0: Any?) {}
 }

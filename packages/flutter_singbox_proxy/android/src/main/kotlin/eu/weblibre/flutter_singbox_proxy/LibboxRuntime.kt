@@ -8,6 +8,20 @@ import java.lang.reflect.Proxy
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
+/**
+ * Deletes every copy of libbox's config snapshot below [directory], however deep, and nothing
+ * else. See [LibboxRuntime.deleteArchivedConfigSnapshots] for where they come from.
+ */
+internal fun deleteConfigSnapshotCopies(directory: java.io.File) {
+    directory.walkTopDown()
+        .filter { file -> file.isFile && file.name == LIBBOX_CONFIG_SNAPSHOT_FILE }
+        .toList()
+        .forEach { file -> file.delete() }
+}
+
+/** The name libbox gives its copy of the running config, keys and credentials included. */
+internal const val LIBBOX_CONFIG_SNAPSHOT_FILE = "configuration.json"
+
 open class LibboxRuntime(
     private val context: Context,
     private val dohResolver: PlatformDohResolver = PlatformDohResolver(),
@@ -121,6 +135,8 @@ open class LibboxRuntime(
             invoke(server, "startOrReloadService", configJson, overrideOptions)
         } finally {
             deleteConfigSnapshot()
+            // A report written while the snapshot existed took a copy of it.
+            deleteArchivedConfigSnapshots()
         }
         if (logSink != null) {
             ensureLogClientConnected()
@@ -144,20 +160,25 @@ open class LibboxRuntime(
     }
 
     /**
-     * Removes the config copies libbox files with its crash reports.
+     * Removes the config copies libbox files with its reports.
      *
-     * At setup, libbox moves the Go crash log of the previous run into
-     * `<working>/crash_reports/<time>/` together with the config snapshot of
-     * that run — private keys included. The crash log is kept, the config is
-     * not.
+     * Every report libbox writes takes a copy of the config snapshot while it
+     * exists — private keys included — and they all live under the working
+     * directory:
+     * - at setup, the Go crash log of the previous run moves to
+     *   `crash_reports/<time>/`;
+     * - the OOM recorder, which runs whatever the OOM killer is set to,
+     *   snapshots into `oom_draft/`, and a report copies that draft to
+     *   `oom_reports/<time>/`;
+     * - with power reporting on, every start copies it into `power_draft/`,
+     *   which is later moved to `power_reports/`.
+     *
+     * So any `configuration.json` below it goes, wherever libbox put it; the
+     * reports themselves stay. Runs at setup and after every start, as the
+     * snapshot only exists in between.
      */
     private fun deleteArchivedConfigSnapshots() {
-        val reports = baseDir().resolve(WORKING_DIR).resolve(CRASH_REPORTS_DIR)
-        runCatching {
-            reports.listFiles()?.forEach { report ->
-                report.resolve(CONFIG_SNAPSHOT_FILE).delete()
-            }
-        }
+        runCatching { deleteConfigSnapshotCopies(baseDir().resolve(WORKING_DIR)) }
     }
 
     private fun baseDir() = context.filesDir.resolve(BASE_DIR)
@@ -820,10 +841,9 @@ open class LibboxRuntime(
         const val PLATFORM_INTERFACE_CLASS = "io.nekohasekai.libbox.PlatformInterface"
         const val BASE_DIR = "singbox_proxy"
         const val WORKING_DIR = "working"
-        const val CRASH_REPORTS_DIR = "crash_reports"
 
         /** libbox's `configSnapshotPath()`, relative to the base path. */
-        const val CONFIG_SNAPSHOT_FILE = "configuration.json"
+        const val CONFIG_SNAPSHOT_FILE = LIBBOX_CONFIG_SNAPSHOT_FILE
         const val LOCAL_DNS_TRANSPORT_CLASS = "io.nekohasekai.libbox.LocalDNSTransport"
         const val DNS_RCODE_SERVFAIL = 2
 

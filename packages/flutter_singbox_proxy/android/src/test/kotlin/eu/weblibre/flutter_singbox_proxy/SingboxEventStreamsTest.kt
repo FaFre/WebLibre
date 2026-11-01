@@ -4,6 +4,7 @@ import eu.weblibre.flutter_singbox_proxy.generated.PigeonEventSink
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyLogMessage
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeState
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyRuntimeStatus
+import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyTunnelState
 import io.flutter.plugin.common.EventChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,6 +24,37 @@ internal class SingboxEventStreamsTest {
 
         assertTrue(states.events.isEmpty())
         assertTrue(logs.events.isEmpty())
+    }
+
+    /**
+     * The tunnel state is a standing verdict, not news: a runtime that started
+     * before Dart listened (a headless launch, an autostart) must not leave a
+     * dead tunnel reading as up because its one report went nowhere.
+     */
+    @Test
+    fun tunnelState_reachesAListenerThatComesLate() {
+        val streams = SingboxEventStreams()
+        streams.emitTunnel(tunnels("wg-a"))
+        streams.emitTunnel(tunnels("wg-a", "wg-b"))
+
+        val first = RecordingSink()
+        streams.tunnelHandler.onListen(null, PigeonEventSink(first))
+        streams.tunnelHandler.onCancel(null)
+        val second = RecordingSink()
+        streams.tunnelHandler.onListen(null, PigeonEventSink(second))
+
+        assertEquals(listOf<Any?>(tunnels("wg-a", "wg-b")), first.events)
+        assertEquals(listOf<Any?>(tunnels("wg-a", "wg-b")), second.events)
+    }
+
+    @Test
+    fun tunnelState_isNotSentBeforeThereIsOne() {
+        val streams = SingboxEventStreams()
+        val sink = RecordingSink()
+
+        streams.tunnelHandler.onListen(null, PigeonEventSink(sink))
+
+        assertTrue(sink.events.isEmpty())
     }
 
     @Test
@@ -112,3 +144,6 @@ private fun log(message: String) = SingboxProxyLogMessage(
     timestamp = 1L,
     profileId = null
 )
+
+private fun tunnels(vararg profileIds: String) =
+    SingboxProxyTunnelState(unansweredProfileIds = profileIds.toList())

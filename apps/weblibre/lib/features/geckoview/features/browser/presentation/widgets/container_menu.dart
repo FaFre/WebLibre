@@ -140,10 +140,14 @@ class ContainerMenu extends HookConsumerWidget {
     /// Every close item ends here, so closing the last tab of an isolation
     /// group always asks first — "Close all tabs" may no longer have, once
     /// its own question is answered with "Don't ask again".
+    ///
+    /// [confirm] is the item's own question. It is asked in place of the
+    /// groups' one, not after it: see [confirmBulkTabCloseIfNeeded].
     Future<void> closeTabs({
       bool includeRegular = true,
       bool includePrivate = true,
       bool includeIsolated = true,
+      Future<bool> Function()? confirm,
     }) async {
       final tabIds = await ref
           .read(tabDataRepositoryProvider.notifier)
@@ -155,7 +159,12 @@ class ContainerMenu extends HookConsumerWidget {
           );
 
       if (!context.mounted ||
-          !await confirmBulkTabCloseIfNeeded(context, ref, tabIds)) {
+          !await confirmBulkTabCloseIfNeeded(
+            context,
+            ref,
+            tabIds,
+            otherwise: confirm,
+          )) {
         return;
       }
 
@@ -243,9 +252,9 @@ class ContainerMenu extends HookConsumerWidget {
                 leadingIcon: const Icon(MdiIcons.closeCircle),
                 onPressed: enabled
                     ? () async {
-                        if (await showCloseAllTabsDialog(context)) {
-                          await closeTabs();
-                        }
+                        await closeTabs(
+                          confirm: () => showCloseAllTabsDialog(context),
+                        );
                       }
                     : null,
                 child: Text(l10n.browser_closeSubmenuAllTabs),

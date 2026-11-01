@@ -19,8 +19,10 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 int countIsolatedGroupsRemovedByClosingTabs(
@@ -52,13 +54,31 @@ int countIsolatedGroupsRemovedByClosingTabs(
   }).length;
 }
 
+/// Asks before closing [tabIds] when that deletes the data of isolation
+/// groups, or otherwise asks [otherwise], the question the caller has of its
+/// own. Returns whether to go ahead.
+///
+/// One question at most, never one after the other: the groups' question
+/// warns of more than any other, so it is the one asked while it would be. Once
+/// it is answered with "Don't ask again" ([RememberedPrompt.closeIsolatedTabs])
+/// it is not asked, and [otherwise] is.
 Future<bool> confirmBulkTabCloseIfNeeded(
   BuildContext context,
   WidgetRef ref,
-  Iterable<String> tabIds,
-) async {
+  Iterable<String> tabIds, {
+  Future<bool> Function()? otherwise,
+}) async {
   final groupsToDelete = countIsolatedGroupsRemovedByClosingTabs(ref, tabIds);
-  if (groupsToDelete <= 0) return true;
+  final asksAboutGroups =
+      groupsToDelete > 0 &&
+      ref
+              .read(generalSettingsWithDefaultsProvider)
+              .rememberedAnswer<PromptConfirmation>(
+                RememberedPrompt.closeIsolatedTabs,
+              ) ==
+          null;
+
+  if (!asksAboutGroups) return await otherwise?.call() ?? true;
   if (!context.mounted) return false;
 
   return await ui_helper.confirmIsolatedTabClose(

@@ -15,7 +15,7 @@ class FlutterSingboxProxyPlugin : FlutterPlugin {
             context = binding.applicationContext,
             onStateChanged = events::emitState,
             onLogMessage = events::emitLog,
-            onTunnelEvent = events::emitTunnel
+            onTunnelState = events::emitTunnel
         )
         runtimeManager = manager
         SingboxProxyApi.setUp(binding.binaryMessenger, manager)

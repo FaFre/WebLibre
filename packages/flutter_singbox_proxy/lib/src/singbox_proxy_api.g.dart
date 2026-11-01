@@ -669,47 +669,45 @@ class SingboxProxyLogMessage {
   }
 }
 
-/// Whether a WireGuard profile's peer answers its handshakes, as far as the
-/// runtime has seen.
+/// The WireGuard profiles whose peer does not answer its handshakes, as far
+/// as the runtime has seen: every one of them, not a change.
 ///
-/// Sent on a change only: [answering] false once handshakes have gone
-/// unanswered for a while, true again when one is answered. A (re)start of the
-/// runtime forgets everything said before; nothing is sent for a profile until
-/// its tunnel has tried to handshake.
-class SingboxProxyTunnelEvent {
-  SingboxProxyTunnelEvent({required this.profileId, required this.answering});
+/// Sent whenever the set changes, and to a listener as it subscribes, so one
+/// that comes late still learns how things stand. A profile is in it once its
+/// handshakes have gone unanswered for a while, and leaves it when one is
+/// answered or the runtime (re)starts — every profile shares one instance, so a
+/// (re)start of any of them forgets all. A profile whose tunnel has not tried
+/// to handshake since is not in it.
+class SingboxProxyTunnelState {
+  SingboxProxyTunnelState({required this.unansweredProfileIds});
 
-  String profileId;
-
-  bool answering;
+  List<String> unansweredProfileIds;
 
   List<Object?> _toList() {
-    return <Object?>[profileId, answering];
+    return <Object?>[unansweredProfileIds];
   }
 
   Object encode() {
     return _toList();
   }
 
-  static SingboxProxyTunnelEvent decode(Object result) {
+  static SingboxProxyTunnelState decode(Object result) {
     result as List<Object?>;
-    return SingboxProxyTunnelEvent(
-      profileId: result[0]! as String,
-      answering: result[1]! as bool,
+    return SingboxProxyTunnelState(
+      unansweredProfileIds: (result[0]! as List<Object?>).cast<String>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! SingboxProxyTunnelEvent || other.runtimeType != runtimeType) {
+    if (other is! SingboxProxyTunnelState || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(profileId, other.profileId) &&
-        _deepEquals(answering, other.answering);
+    return _deepEquals(unansweredProfileIds, other.unansweredProfileIds);
   }
 
   @override
@@ -718,7 +716,7 @@ class SingboxProxyTunnelEvent {
 
   @override
   String toString() {
-    return 'SingboxProxyTunnelEvent(profileId: $profileId, answering: $answering)';
+    return 'SingboxProxyTunnelState(unansweredProfileIds: $unansweredProfileIds)';
   }
 }
 
@@ -762,7 +760,7 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is SingboxProxyLogMessage) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is SingboxProxyTunnelEvent) {
+    } else if (value is SingboxProxyTunnelState) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
     } else {
@@ -799,7 +797,7 @@ class _PigeonCodec extends StandardMessageCodec {
       case 139:
         return SingboxProxyLogMessage.decode(readValue(buffer)!);
       case 140:
-        return SingboxProxyTunnelEvent.decode(readValue(buffer)!);
+        return SingboxProxyTunnelState.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1048,7 +1046,7 @@ Stream<SingboxProxyLogMessage> streamLogs({String instanceName = ''}) {
 /// not be called multiple times for the same `instanceName`. To deliver
 /// events to multiple listeners, call this method once and listen to the
 /// returned broadcast stream multiple times instead.
-Stream<SingboxProxyTunnelEvent> streamTunnels({String instanceName = ''}) {
+Stream<SingboxProxyTunnelState> streamTunnels({String instanceName = ''}) {
   if (instanceName.isNotEmpty) {
     instanceName = '.$instanceName';
   }
@@ -1057,6 +1055,6 @@ Stream<SingboxProxyTunnelEvent> streamTunnels({String instanceName = ''}) {
     pigeonMethodCodec,
   );
   return streamTunnelsChannel.receiveBroadcastStream().map((dynamic event) {
-    return event as SingboxProxyTunnelEvent;
+    return event as SingboxProxyTunnelState;
   });
 }

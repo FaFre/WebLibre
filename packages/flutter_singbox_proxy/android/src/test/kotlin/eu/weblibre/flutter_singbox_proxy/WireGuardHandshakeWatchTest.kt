@@ -43,6 +43,29 @@ internal class WireGuardHandshakeWatchTest {
         assertEquals(listOf(TAG to false, TAG to true), changes)
     }
 
+    /**
+     * The peer may start the handshake itself. wireguard-go then logs the
+     * initiation it received and the response it sent, never a "received
+     * handshake response", and the tunnel works all the same.
+     */
+    @Test
+    fun reportsATunnelThatRecoversThroughThePeersHandshake() {
+        repeat(WireGuardHandshakeWatch.UNANSWERED_RETRIES) { watch.onLogLine(retry()) }
+        watch.onLogLine(line(TAG, "received handshake initiation"))
+        watch.onLogLine(line(TAG, "sending handshake response"))
+
+        assertEquals(listOf(TAG to false, TAG to true), changes)
+    }
+
+    /** Ours to send, so it says nothing about whether the peer is there. */
+    @Test
+    fun sendingAResponseIsNoAnswer() {
+        repeat(WireGuardHandshakeWatch.UNANSWERED_RETRIES) { watch.onLogLine(retry()) }
+        watch.onLogLine(line(TAG, "sending handshake response"))
+
+        assertEquals(listOf(TAG to false), changes)
+    }
+
     @Test
     fun aSingleLostHandshakeIsNotNews() {
         watch.onLogLine(response())

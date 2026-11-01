@@ -222,6 +222,9 @@ void main() {
   });
 
   group('WireGuard handshakes', () {
+    const other = SingboxProxyConnectionId('profile-2');
+    final otherEncoded = other.encode();
+
     test('a peer that stops answering reads as not responding', () async {
       final harness = _Harness(running: [encoded]);
       addTearDown(harness.dispose);
@@ -229,7 +232,7 @@ void main() {
 
       // Issue #693: no load had to fail for the menu to stop showing it as
       // fine — the runtime saw the handshakes go unanswered.
-      harness.tunnel(encoded, answering: false);
+      harness.unanswered({encoded});
       await pumpEventQueue();
 
       expect(harness.evidence(encoded)?.peerUnanswered, isTrue);
@@ -244,7 +247,7 @@ void main() {
       addTearDown(harness.dispose);
       await harness.settle();
 
-      harness.tunnel(encoded, answering: false);
+      harness.unanswered({encoded});
       await pumpEventQueue();
       // One failing site is no evidence by itself. It must not wipe what the
       // runtime said either: it only reports changes, so the warning would
@@ -259,15 +262,57 @@ void main() {
       );
     });
 
+    test('a load that got through leaves an unanswered peer', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.unanswered({encoded});
+      await pumpEventQueue();
+      harness.health
+        ..recordFailedLoad(encoded, host: 'a.example')
+        // A page back from the cache, which never needed the tunnel. The
+        // runtime would not say "not answering" again while the peer stayed
+        // silent, so dropping it here would leave the tunnel reading as up.
+        ..recordSuccessfulLoad(encoded);
+
+      expect(harness.evidence(encoded)?.peerUnanswered, isTrue);
+      expect(harness.evidence(encoded)?.failedLoads, isEmpty);
+      expect(
+        harness.condition(profile),
+        ProxyConnectionCondition.notResponding,
+      );
+    });
+
+    test('a test that got through leaves an unanswered peer', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.unanswered({encoded});
+      await pumpEventQueue();
+      harness.latency.put(
+        profile,
+        AsyncData(
+          ProxyLatencyData(
+            latency: const Duration(milliseconds: 80),
+            statusCode: 200,
+          ),
+        ),
+      );
+
+      expect(harness.evidence(encoded)?.peerUnanswered, isTrue);
+    });
+
     test('a peer that answers again clears it, and only it', () async {
       final harness = _Harness(running: [encoded]);
       addTearDown(harness.dispose);
       await harness.settle();
 
       harness.health.recordFailedLoad(encoded, host: 'a.example');
-      harness.tunnel(encoded, answering: false);
+      harness.unanswered({encoded});
       await pumpEventQueue();
-      harness.tunnel(encoded, answering: true);
+      harness.unanswered({});
       await pumpEventQueue();
 
       expect(harness.evidence(encoded)?.peerUnanswered, isFalse);
@@ -276,27 +321,46 @@ void main() {
       expect(harness.condition(profile), isNull);
     });
 
-    test('an answer with nothing on record leaves nothing behind', () async {
+    test('an empty state with nothing on record leaves nothing', () async {
       final harness = _Harness(running: [encoded]);
       addTearDown(harness.dispose);
       await harness.settle();
 
-      harness.tunnel(encoded, answering: true);
+      harness.unanswered({});
       await pumpEventQueue();
 
       expect(harness.evidence(encoded), isNull);
     });
 
-    test('a restart of the proxy drops what was said of its peer', () async {
+    test('the runtime starting over clears every profile it forgot', () async {
+      final harness = _Harness(running: [encoded, otherEncoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.unanswered({encoded, otherEncoded});
+      await pumpEventQueue();
+      // Starting another profile reloads the shared instance, which forgets
+      // every tunnel's verdict — also of this one, which was not starting.
+      harness.starting.announce([otherEncoded]);
+      harness.unanswered({});
+      await pumpEventQueue();
+
+      expect(harness.evidence(encoded), isNull);
+      expect(harness.evidence(otherEncoded), isNull);
+    });
+
+    test('a restart Dart sees leaves the runtime its verdict', () async {
       final harness = _Harness(running: [encoded]);
       addTearDown(harness.dispose);
       await harness.settle();
 
-      harness.tunnel(encoded, answering: false);
+      harness.unanswered({encoded});
       await pumpEventQueue();
+      // Whether a restart reached the runtime only the runtime knows; once it
+      // forgets the verdict it says so.
       harness.starting.announce([encoded]);
 
-      expect(harness.evidence(encoded), isNull);
+      expect(harness.evidence(encoded)?.peerUnanswered, isTrue);
     });
   });
 
@@ -409,15 +473,11 @@ class _Harness {
   late final ProviderContainer container;
   final client = _FakeClient();
 
-  /// The runtime reports whether the WireGuard peer of [encodedProxyId]
-  /// answers.
-  void tunnel(String encodedProxyId, {required bool answering}) =>
-      client.tunnels.add(
-        SingboxProxyTunnelEvent(
-          profileId: encodedProxyId,
-          answering: answering,
-        ),
-      );
+  /// The runtime reports that the WireGuard peers of [encodedProxyIds], and
+  /// only those, do not answer.
+  void unanswered(Set<String> encodedProxyIds) => client.tunnels.add(
+    SingboxProxyTunnelState(unansweredProfileIds: encodedProxyIds.toList()),
+  );
 
   _FakeRuntimeRepository get runtime =>
       container.read(singboxProxyRuntimeRepositoryProvider.notifier)
@@ -452,10 +512,10 @@ class _Harness {
 }
 
 class _FakeClient extends Fake implements SingboxProxyClient {
-  final tunnels = StreamController<SingboxProxyTunnelEvent>.broadcast();
+  final tunnels = StreamController<SingboxProxyTunnelState>.broadcast();
 
   @override
-  Stream<SingboxProxyTunnelEvent> get tunnelStream => tunnels.stream;
+  Stream<SingboxProxyTunnelState> get tunnelStream => tunnels.stream;
 }
 
 class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {

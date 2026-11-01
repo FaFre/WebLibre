@@ -3,10 +3,47 @@ package eu.weblibre.flutter_singbox_proxy
 import android.content.Context
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.assertNull
 import org.mockito.Mockito.mock
 
 internal class LibboxRuntimeTest {
+    /**
+     * libbox 1.14 copies the config — WireGuard private keys, SOCKS
+     * credentials — into every report it writes: crash reports, the OOM
+     * recorder's draft and reports, the power report draft. Each copy goes;
+     * the reports themselves stay.
+     */
+    @Test
+    fun deleteConfigSnapshotCopies_removesEveryCopyAndNothingElse() {
+        val working = kotlin.io.path.createTempDirectory("libbox-working").toFile()
+        try {
+            val copies = listOf(
+                "crash_reports/2026-11-01T05-00-00/configuration.json",
+                "oom_draft/configuration.json",
+                "oom_reports/2026-11-01T05-00-00/configuration.json",
+                "power_draft/configuration.json",
+                "power_reports/2026-11-01T05-00-00/configuration.json",
+            ).map { path -> working.resolve(path) }
+            val kept = listOf(
+                "crash_reports/2026-11-01T05-00-00/go.log",
+                "oom_draft/metadata.json",
+                "cache.db",
+            ).map { path -> working.resolve(path) }
+            (copies + kept).forEach { file ->
+                file.parentFile.mkdirs()
+                file.writeText("{}")
+            }
+
+            deleteConfigSnapshotCopies(working)
+
+            assertEquals(emptyList(), copies.filter { file -> file.exists() })
+            assertTrue(kept.all { file -> file.exists() })
+        } finally {
+            working.deleteRecursively()
+        }
+    }
+
     /**
      * sing-box hands the platform writer every line whatever `log.level` says
      * (`log/observable.go` only takes its early return when there is no

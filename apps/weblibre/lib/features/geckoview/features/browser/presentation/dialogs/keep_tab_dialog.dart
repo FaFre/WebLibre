@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/remembered_prompt_l10n.dart';
@@ -35,54 +34,40 @@ import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 Future<KeepTabAnswer?> showKeepTabDialog(
   BuildContext context, {
   required bool rememberable,
-}) {
-  if (!rememberable) {
-    return showDialog<KeepTabAnswer>(
-      context: context,
-      anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-      builder: (context) {
-        final l10n = AppLocalizations.of(context);
+}) async {
+  Widget buildDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
 
-        return AlertDialog(
-          title: Text(l10n.browser_keepTabTitle),
-          content: Text(l10n.browser_keepTabContent),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(KeepTabAnswer.discard),
-              child: Text(KeepTabAnswer.discard.label(context)),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(KeepTabAnswer.keep),
-              child: Text(KeepTabAnswer.keep.label(context)),
-            ),
-          ],
-        );
-      },
+    return RememberablePromptDialog<KeepTabAnswer>(
+      title: Text(l10n.browser_keepTabTitle),
+      content: Text(l10n.browser_keepTabContent),
+      cancellable: false,
+      offerRemember: rememberable,
+      answers: [
+        PromptAnswerAction(
+          answer: KeepTabAnswer.discard,
+          label: KeepTabAnswer.discard.label(context),
+        ),
+        PromptAnswerAction(
+          answer: KeepTabAnswer.keep,
+          label: KeepTabAnswer.keep.label(context),
+          primary: true,
+        ),
+      ],
     );
   }
 
-  return askUnlessRemembered<KeepTabAnswer>(
+  if (!rememberable) {
+    final result = await showRememberablePromptDialog<KeepTabAnswer>(
+      context,
+      builder: buildDialog,
+    );
+    return result?.answer;
+  }
+
+  return await askUnlessRemembered<KeepTabAnswer>(
     context,
     RememberedPrompt.keepExternalTab,
-    builder: (context) {
-      final l10n = AppLocalizations.of(context);
-
-      return RememberablePromptDialog<KeepTabAnswer>(
-        title: Text(l10n.browser_keepTabTitle),
-        content: Text(l10n.browser_keepTabContent),
-        cancellable: false,
-        answers: [
-          PromptAnswerAction(
-            answer: KeepTabAnswer.discard,
-            label: KeepTabAnswer.discard.label(context),
-          ),
-          PromptAnswerAction(
-            answer: KeepTabAnswer.keep,
-            label: KeepTabAnswer.keep.label(context),
-            primary: true,
-          ),
-        ],
-      );
-    },
+    builder: buildDialog,
   );
 }

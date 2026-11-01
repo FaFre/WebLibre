@@ -84,3 +84,19 @@ extension KeepTabAnswerL10n on KeepTabAnswer {
     };
   }
 }
+
+/// The label of [answer], one of the [RememberedPrompt.answers] of a prompt
+/// that offers a choice.
+///
+/// Throws for an answer type with no label yet: a new choice prompt needs its
+/// case here before the confirmations screen can list it.
+String rememberedAnswerLabel(BuildContext context, Enum answer) {
+  return switch (answer) {
+    final KeepTabAnswer answer => answer.label(context),
+    _ => throw ArgumentError.value(
+      answer,
+      'answer',
+      'No label for this remembered answer',
+    ),
+  };
+}

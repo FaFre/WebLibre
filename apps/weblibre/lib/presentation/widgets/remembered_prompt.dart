@@ -23,7 +23,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -52,6 +51,10 @@ class PromptAnswerAction<T extends Enum> {
 /// Pops a [RememberablePromptResult] for an answer button, and null for Cancel
 /// or a dismissal — neither is ever remembered, so ticking the box and then
 /// backing out stores nothing.
+///
+/// With [offerRemember] false the checkbox is left out, for a question that
+/// sometimes cannot be remembered; show it with [showRememberablePromptDialog]
+/// then.
 class RememberablePromptDialog<T extends Enum> extends HookWidget {
   final Widget? icon;
   final Widget title;
@@ -62,12 +65,17 @@ class RememberablePromptDialog<T extends Enum> extends HookWidget {
   /// like keeping or discarding a tab, leaves it out.
   final bool cancellable;
 
+  /// Whether the "Don't ask again" checkbox is shown. Without it, every answer
+  /// pops with `remember` false.
+  final bool offerRemember;
+
   const RememberablePromptDialog({
     required this.title,
     required this.content,
     required this.answers,
     this.icon,
     this.cancellable = true,
+    this.offerRemember = true,
     super.key,
   });
 
@@ -80,22 +88,24 @@ class RememberablePromptDialog<T extends Enum> extends HookWidget {
       icon: icon,
       title: title,
       scrollable: true,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          content,
-          const SizedBox(height: 8),
-          CheckboxListTile.adaptive(
-            value: dontAskAgain.value,
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            title: Text(l10n.rememberedPrompt_dontAskAgain),
-            subtitle: Text(l10n.rememberedPrompt_dontAskAgainHint),
-            onChanged: (value) => dontAskAgain.value = value ?? false,
-          ),
-        ],
-      ),
+      content: offerRemember
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                content,
+                const SizedBox(height: 8),
+                CheckboxListTile.adaptive(
+                  value: dontAskAgain.value,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(l10n.rememberedPrompt_dontAskAgain),
+                  subtitle: Text(l10n.rememberedPrompt_dontAskAgainHint),
+                  onChanged: (value) => dontAskAgain.value = value ?? false,
+                ),
+              ],
+            )
+          : content,
       actions: [
         if (cancellable)
           TextButton(
@@ -125,6 +135,19 @@ class RememberablePromptDialog<T extends Enum> extends HookWidget {
   }
 }
 
+/// Shows the [RememberablePromptDialog] that [builder] returns, without
+/// looking at or storing a remembered answer. [askUnlessRemembered] is the
+/// usual way in; this is for asking a prompt that is not remembered this time.
+Future<RememberablePromptResult<T>?> showRememberablePromptDialog<
+  T extends Enum
+>(BuildContext context, {required WidgetBuilder builder}) {
+  return showDialog<RememberablePromptResult<T>>(
+    context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+    builder: builder,
+  );
+}
+
 /// Answers [prompt] with what was remembered for it, or asks with the
 /// [RememberablePromptDialog] that [builder] returns and remembers the answer
 /// when "Don't ask again" was ticked.
@@ -143,9 +166,8 @@ Future<T?> askUnlessRemembered<T extends Enum>(
       .rememberedAnswer<T>(prompt);
   if (remembered != null) return remembered;
 
-  final result = await showDialog<RememberablePromptResult<T>>(
-    context: context,
-    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+  final result = await showRememberablePromptDialog<T>(
+    context,
     builder: builder,
   );
   if (result == null) return null;
@@ -154,12 +176,7 @@ Future<T?> askUnlessRemembered<T extends Enum>(
     try {
       await container
           .read(generalSettingsRepositoryProvider.notifier)
-          .updateSettings(
-            (current) => current.copyWith.rememberedPrompts({
-              ...current.rememberedPrompts,
-              prompt: result.answer.name,
-            }),
-          );
+          .setRememberedAnswer(prompt, result.answer);
     } catch (error, stackTrace) {
       // The answer still stands for this time; it is only asked again.
       logger.e(
