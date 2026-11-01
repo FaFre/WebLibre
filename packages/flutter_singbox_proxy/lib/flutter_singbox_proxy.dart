@@ -13,7 +13,8 @@ export 'src/singbox_proxy_api.g.dart'
         SingboxProxyRuntimeEndpoint,
         SingboxProxyRuntimeOptions,
         SingboxProxyRuntimeState,
-        SingboxProxyRuntimeStatus;
+        SingboxProxyRuntimeStatus,
+        SingboxProxyTunnelEvent;
 
 /// sing-box could not start: [reason] is its own explanation (English,
 /// technical), and [profileId] / [profileName] the profile it failed on, when
@@ -60,9 +61,13 @@ class FlutterSingboxProxy {
   // therefore created once, and every subscriber shares it.
   late final Stream<SingboxProxyRuntimeState> _states = streamState();
   late final Stream<SingboxProxyLogMessage> _logs = streamLogs();
+  late final Stream<SingboxProxyTunnelEvent> _tunnels = streamTunnels();
 
   Stream<SingboxProxyRuntimeState> get stateStream => _states;
   Stream<SingboxProxyLogMessage> get logStream => _logs;
+
+  /// Whether WireGuard tunnels' peers answer their handshakes, on a change.
+  Stream<SingboxProxyTunnelEvent> get tunnelStream => _tunnels;
 
   Future<String?> validateProfile(SingboxProxyProfile profile) {
     return _api.validateProfile(profile);

@@ -21,6 +21,7 @@ import 'dart:async';
 
 import 'package:clock/clock.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -59,27 +60,40 @@ class ProxyTrafficEvidence with FastEquatable {
   /// The last connection test through it failed.
   final bool testFailed;
 
-  ProxyTrafficEvidence({required this.failedLoads, required this.testFailed});
+  /// Its WireGuard peer stopped answering handshakes.
+  ///
+  /// Reported by the runtime itself, which sees every handshake: no load has
+  /// to fail first, and a tunnel nobody is using still shows as down.
+  final bool peerUnanswered;
+
+  ProxyTrafficEvidence({
+    required this.failedLoads,
+    required this.testFailed,
+    this.peerUnanswered = false,
+  });
 
   bool get notResponding =>
       testFailed ||
+      peerUnanswered ||
       failedLoads.map((load) => load.host).toSet().length >=
           proxyFailedHostsForNotResponding;
 
-  bool get isEmpty => failedLoads.isEmpty && !testFailed;
+  bool get isEmpty => failedLoads.isEmpty && !testFailed && !peerUnanswered;
 
   ProxyTrafficEvidence copyWith({
     List<ProxyFailedLoad>? failedLoads,
     bool? testFailed,
+    bool? peerUnanswered,
   }) {
     return ProxyTrafficEvidence(
       failedLoads: failedLoads ?? this.failedLoads,
       testFailed: testFailed ?? this.testFailed,
+      peerUnanswered: peerUnanswered ?? this.peerUnanswered,
     );
   }
 
   @override
-  List<Object?> get hashParameters => [failedLoads, testFailed];
+  List<Object?> get hashParameters => [failedLoads, testFailed, peerUnanswered];
 }
 
 /// Evidence that a proxy which is up is not carrying traffic, keyed by encoded
@@ -90,7 +104,9 @@ class ProxyTrafficEvidence with FastEquatable {
 /// answers starts just as successfully as one that works (issue #669). What
 /// actually shows a tunnel is down is traffic through it failing, so failed
 /// page loads and failed connection tests are collected here — passively, from
-/// traffic the user sent anyway, with no probing of its own.
+/// traffic the user sent anyway, with no probing of its own. So is what the
+/// runtime reports of a WireGuard tunnel's handshakes, which go unanswered
+/// before any load has had the time to fail (issue #693).
 ///
 /// Evidence is about one run of a tunnel. It is dropped when a (re)start of
 /// the proxy begins and again when it ends, when traffic through it gets
@@ -133,6 +149,12 @@ class ProxyTrafficHealth extends _$ProxyTrafficHealth {
       }
     });
 
+    final tunnels = ref
+        .read(singboxProxyClientProvider)
+        .tunnelStream
+        .listen(_applyTunnelEvent);
+    ref.onDispose(tunnels.cancel);
+
     return const {};
   }
 
@@ -151,10 +173,11 @@ class ProxyTrafficHealth extends _$ProxyTrafficHealth {
 
     state = {
       ...state,
-      encodedProxyId: ProxyTrafficEvidence(
-        failedLoads: failedLoads,
-        testFailed: current?.testFailed ?? false,
-      ),
+      // Copied rather than rebuilt, so what else is on record — a failed test,
+      // an unanswered peer — stays.
+      encodedProxyId:
+          current?.copyWith(failedLoads: failedLoads) ??
+          ProxyTrafficEvidence(failedLoads: failedLoads, testFailed: false),
     };
     _prune();
   }
@@ -227,6 +250,40 @@ class ProxyTrafficHealth extends _$ProxyTrafficHealth {
       case AsyncLoading():
         _testStartedAt[encodedProxyId] = clock.now();
     }
+  }
+
+  /// The runtime's word on whether a WireGuard tunnel's peer answers.
+  ///
+  /// Not subject to [_failedFromRestart]: the runtime starts over watching
+  /// handshakes with every (re)start, so whatever it says is about the
+  /// instance running now.
+  void _applyTunnelEvent(SingboxProxyTunnelEvent event) {
+    // The runtime's profile ids are the encoded connection ids.
+    final encodedProxyId = event.profileId;
+    final current = state[encodedProxyId];
+
+    if (event.answering) {
+      if (current == null || !current.peerUnanswered) return;
+      final next = current.copyWith(peerUnanswered: false);
+      state = {
+        for (final entry in state.entries)
+          if (entry.key != encodedProxyId) entry.key: entry.value,
+        if (!next.isEmpty) encodedProxyId: next,
+      };
+      return;
+    }
+
+    if (current?.peerUnanswered ?? false) return;
+    state = {
+      ...state,
+      encodedProxyId:
+          current?.copyWith(peerUnanswered: true) ??
+          ProxyTrafficEvidence(
+            failedLoads: const [],
+            testFailed: false,
+            peerUnanswered: true,
+          ),
+    };
   }
 
   void _clear(Set<String> encodedProxyIds) {

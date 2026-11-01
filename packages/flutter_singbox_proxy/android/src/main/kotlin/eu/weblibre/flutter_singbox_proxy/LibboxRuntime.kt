@@ -105,11 +105,50 @@ open class LibboxRuntime(
         invoke(overrideOptions, "setAutoRedirect", false)
         invoke(overrideOptions, "setIncludePackage", emptyStringIterator())
         invoke(overrideOptions, "setExcludePackage", emptyStringIterator())
-        invoke(server, "startOrReloadService", configJson, overrideOptions)
+        try {
+            invoke(server, "startOrReloadService", configJson, overrideOptions)
+        } finally {
+            deleteConfigSnapshot()
+        }
         if (logSink != null) {
             ensureLogClientConnected()
         }
     }
+
+    /**
+     * Removes the copy of the running config that libbox 1.14 writes on every
+     * start or reload.
+     *
+     * libbox keeps it as `<base>/configuration.json` for its crash and OOM
+     * reports, and the config holds every WireGuard private key and the SOCKS
+     * credentials of each profile in plain text. Nothing here reads those
+     * reports, so the copy has no use and would only outlive the profiles it
+     * describes. It is gone again before a start returns; a crash in the
+     * moment between can still leave it behind, which the next [ensureSetup]
+     * cleans up.
+     */
+    private fun deleteConfigSnapshot() {
+        runCatching { baseDir().resolve(CONFIG_SNAPSHOT_FILE).delete() }
+    }
+
+    /**
+     * Removes the config copies libbox files with its crash reports.
+     *
+     * At setup, libbox moves the Go crash log of the previous run into
+     * `<working>/crash_reports/<time>/` together with the config snapshot of
+     * that run — private keys included. The crash log is kept, the config is
+     * not.
+     */
+    private fun deleteArchivedConfigSnapshots() {
+        val reports = baseDir().resolve(WORKING_DIR).resolve(CRASH_REPORTS_DIR)
+        runCatching {
+            reports.listFiles()?.forEach { report ->
+                report.resolve(CONFIG_SNAPSHOT_FILE).delete()
+            }
+        }
+    }
+
+    private fun baseDir() = context.filesDir.resolve(BASE_DIR)
 
     /**
      * sing-box's own verdict on [configJson]: the config is parsed and every
@@ -168,8 +207,8 @@ open class LibboxRuntime(
 
     private fun ensureSetup() {
         if (setupComplete) return
-        val baseDir = context.filesDir.resolve("singbox_proxy")
-        val workingDir = baseDir.resolve("working")
+        val baseDir = baseDir()
+        val workingDir = baseDir.resolve(WORKING_DIR)
         val tempDir = baseDir.resolve("tmp")
         workingDir.mkdirs()
         tempDir.mkdirs()
@@ -194,7 +233,24 @@ open class LibboxRuntime(
         invokeIfAvailable(options, "setOomMemoryLimit", 0L)
 
         val libbox = Class.forName(LIBBOX_CLASS)
-        libbox.getMethod("setup", Class.forName(SETUP_OPTIONS_CLASS)).invoke(null, options)
+        try {
+            libbox.getMethod("setup", Class.forName(SETUP_OPTIONS_CLASS)).invoke(null, options)
+        } catch (error: InvocationTargetException) {
+            // Since 1.14 the only thing Setup can fail on is pointing Go's
+            // crash output at a file in the working directory, and it does
+            // that after every option above is already in force. Losing the
+            // crash log is no reason to refuse to run.
+            val cause = error.targetException ?: error
+            logSink?.invoke(
+                LOG_LEVEL_WARN,
+                "sing-box crash log unavailable: ${cause.message ?: cause.javaClass.simpleName}",
+            )
+        } finally {
+            // Setup archives the previous run's crash log along with its config
+            // snapshot, and may do so even when it then fails.
+            deleteConfigSnapshot()
+            deleteArchivedConfigSnapshots()
+        }
         setupComplete = true
     }
 
@@ -223,7 +279,7 @@ open class LibboxRuntime(
     }
 
     private fun commandServerHandler(): InvocationHandler {
-        return InvocationHandler { _, method, args ->
+        return InvocationHandler { proxy, method, args ->
             when (method.name) {
                 "getSystemProxyStatus" -> newInstance(SYSTEM_PROXY_STATUS_CLASS).also { status ->
                     invoke(status, "setAvailable", false)
@@ -231,20 +287,36 @@ open class LibboxRuntime(
                 }
                 "serviceReload", "serviceStop", "setSystemProxyEnabled", "writeDebugMessage" -> null
                 "triggerNativeCrash" -> throw UnsupportedOperationException("Native crash trigger is disabled")
-                else -> defaultValue(method.returnType, args)
+                // Only reachable through sing-box's SSH server, which no config
+                // built here has.
+                "connectSSHAgent" -> throw UnsupportedOperationException("No SSH agent")
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
 
     private fun platformHandler(): InvocationHandler {
-        return InvocationHandler { _, method, args ->
+        return InvocationHandler { proxy, method, args ->
             when (method.name) {
                 "autoDetectInterfaceControl",
+                "cancelNotification",
                 "clearDNSCache",
                 "closeNeighborMonitor",
                 "registerMyInterface",
                 "sendNotification",
                 "startNeighborMonitor" -> null
+                // Shell sessions, SFTP, SSH host keys, Tailscale and L3 bridges
+                // belong to features no config built here uses. They answer with
+                // an error rather than a default: a null object handed back to
+                // Go reads as success and is dereferenced.
+                "checkPlatformShell",
+                "createBridge",
+                "lookupSFTPServer",
+                "lookupUser",
+                "openShellSession",
+                "readSystemSSHHostKey" ->
+                    throw UnsupportedOperationException("${method.name} is not supported")
+                "tailscaleHostname" -> ""
                 "startDefaultInterfaceMonitor" -> {
                     args?.firstOrNull()?.let(::startDefaultInterfaceMonitor)
                     null
@@ -263,14 +335,14 @@ open class LibboxRuntime(
                 "includeAllNetworks",
                 "underNetworkExtension",
                 "usePlatformAutoDetectInterfaceControl",
-                "useProcFS" -> false
+                "usePlatformBridge",
+                "usePlatformShell" -> false
                 "localDNSTransport" -> createLocalDnsTransport()
                 "openTun" -> throw UnsupportedOperationException("TUN is not supported by WebLibre proxy routing")
                 "readWIFIState" -> Class.forName(WIFI_STATE_CLASS)
                     .getConstructor(String::class.java, String::class.java)
                     .newInstance("", "")
-                "systemCertificates" -> emptyStringIterator()
-                else -> defaultValue(method.returnType, args)
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
@@ -325,7 +397,7 @@ open class LibboxRuntime(
     }
 
     private fun commandClientHandler(): InvocationHandler {
-        return InvocationHandler { _, method, args ->
+        return InvocationHandler { proxy, method, args ->
             when (method.name) {
                 "writeLogs" -> {
                     val iterator = args?.firstOrNull()
@@ -350,7 +422,7 @@ open class LibboxRuntime(
                     }
                     null
                 }
-                else -> defaultValue(method.returnType, args)
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
@@ -438,7 +510,7 @@ open class LibboxRuntime(
         return Proxy.newProxyInstance(
             iface.classLoader,
             arrayOf(iface),
-        ) { _, method, args ->
+        ) { proxy, method, args ->
             when (method.name) {
                 "raw" -> true
                 "exchange" -> {
@@ -452,7 +524,7 @@ open class LibboxRuntime(
                 // Lookup is only reachable when raw() returns false. We
                 // always return true above, so this path is dead.
                 "lookup" -> null
-                else -> defaultValue(method.returnType, args)
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
@@ -543,11 +615,11 @@ open class LibboxRuntime(
         return Proxy.newProxyInstance(
             iteratorInterface.classLoader,
             arrayOf(iteratorInterface),
-        ) { _, method, _ ->
+        ) { proxy, method, args ->
             when (method.name) {
                 "hasNext" -> values.hasNext()
                 "next" -> if (values.hasNext()) values.next() else null
-                else -> defaultValue(method.returnType)
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
@@ -570,12 +642,12 @@ open class LibboxRuntime(
         return Proxy.newProxyInstance(
             iteratorInterface.classLoader,
             arrayOf(iteratorInterface),
-        ) { _, method, _ ->
+        ) { proxy, method, args ->
             when (method.name) {
                 "hasNext" -> values.hasNext()
                 "len" -> strings.size
                 "next" -> if (values.hasNext()) values.next() else null
-                else -> defaultValue(method.returnType)
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
@@ -587,12 +659,12 @@ open class LibboxRuntime(
         return Proxy.newProxyInstance(
             iteratorInterface.classLoader,
             arrayOf(iteratorInterface),
-        ) { _, method, _ ->
+        ) { proxy, method, args ->
             when (method.name) {
                 "hasNext" -> false
                 "len" -> 0
                 "next" -> null
-                else -> defaultValue(method.returnType)
+                else -> defaultValue(proxy, method, args)
             }
         }
     }
@@ -696,15 +768,35 @@ open class LibboxRuntime(
         )
     }
 
-    private fun defaultValue(returnType: Class<*>, args: Array<Any?>? = null): Any? {
-        return when (returnType) {
+    /**
+     * The answer to a call none of the handlers above names.
+     *
+     * `Object`'s own methods answer as an object would — gomobile tells Go
+     * objects apart by `refnum`, never by `equals`, but Java code that keeps a
+     * proxy in a collection still needs them to be consistent. Anything else
+     * gets its type's zero value: libbox adds platform calls with nearly every
+     * release, and a call nobody here knows about must stay harmless. An object
+     * is null and a String empty; gomobile cannot hand a null String to Go.
+     */
+    private fun defaultValue(proxy: Any, method: Method, args: Array<Any?>?): Any? {
+        if (method.declaringClass == Any::class.java) {
+            return when (method.name) {
+                "equals" -> proxy === args?.firstOrNull()
+                "hashCode" -> System.identityHashCode(proxy)
+                "toString" -> "${proxy.javaClass.interfaces.firstOrNull()?.simpleName}@" +
+                    Integer.toHexString(System.identityHashCode(proxy))
+                else -> null
+            }
+        }
+        return when (method.returnType) {
             java.lang.Boolean.TYPE -> false
             java.lang.Integer.TYPE -> 0
             java.lang.Long.TYPE -> 0L
             java.lang.Float.TYPE -> 0f
             java.lang.Double.TYPE -> 0.0
             java.lang.Void.TYPE -> null
-            else -> args?.firstOrNull()
+            String::class.java -> ""
+            else -> null
         }
     }
 
@@ -714,6 +806,12 @@ open class LibboxRuntime(
         const val COMMAND_SERVER_CLASS = "io.nekohasekai.libbox.CommandServer"
         const val COMMAND_SERVER_HANDLER_CLASS = "io.nekohasekai.libbox.CommandServerHandler"
         const val PLATFORM_INTERFACE_CLASS = "io.nekohasekai.libbox.PlatformInterface"
+        const val BASE_DIR = "singbox_proxy"
+        const val WORKING_DIR = "working"
+        const val CRASH_REPORTS_DIR = "crash_reports"
+
+        /** libbox's `configSnapshotPath()`, relative to the base path. */
+        const val CONFIG_SNAPSHOT_FILE = "configuration.json"
         const val LOCAL_DNS_TRANSPORT_CLASS = "io.nekohasekai.libbox.LocalDNSTransport"
         const val DNS_RCODE_SERVFAIL = 2
 

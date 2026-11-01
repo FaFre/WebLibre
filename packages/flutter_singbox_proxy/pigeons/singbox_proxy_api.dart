@@ -210,6 +210,20 @@ class SingboxProxyLogMessage {
   final String? profileId;
 }
 
+/// Whether a WireGuard profile's peer answers its handshakes, as far as the
+/// runtime has seen.
+///
+/// Sent on a change only: [answering] false once handshakes have gone
+/// unanswered for a while, true again when one is answered. A (re)start of the
+/// runtime forgets everything said before; nothing is sent for a profile until
+/// its tunnel has tried to handshake.
+class SingboxProxyTunnelEvent {
+  SingboxProxyTunnelEvent({required this.profileId, required this.answering});
+
+  final String profileId;
+  final bool answering;
+}
+
 @HostApi()
 abstract class SingboxProxyApi {
   @async
@@ -251,4 +265,6 @@ abstract class SingboxProxyEventsApi {
   SingboxProxyRuntimeState streamState();
 
   SingboxProxyLogMessage streamLogs();
+
+  SingboxProxyTunnelEvent streamTunnels();
 }

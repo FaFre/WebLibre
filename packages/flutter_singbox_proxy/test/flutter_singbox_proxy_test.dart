@@ -8,6 +8,8 @@ const _stateChannel =
     'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.streamState';
 const _logsChannel =
     'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.streamLogs';
+const _tunnelsChannel =
+    'dev.flutter.pigeon.flutter_singbox_proxy.SingboxProxyEventsApi.streamTunnels';
 
 /// Stands in for the native side of one event channel.
 class _NativeStream<T> {
@@ -68,15 +70,18 @@ void main() {
   group('event streams', () {
     late _NativeStream<SingboxProxyRuntimeState> states;
     late _NativeStream<SingboxProxyLogMessage> logs;
+    late _NativeStream<SingboxProxyTunnelEvent> tunnels;
 
     setUp(() {
       states = _NativeStream(_stateChannel);
       logs = _NativeStream(_logsChannel);
+      tunnels = _NativeStream(_tunnelsChannel);
     });
 
     tearDown(() {
       states.close();
       logs.close();
+      tunnels.close();
     });
 
     test('stateStream delivers the state changes native sends', () async {
@@ -112,6 +117,25 @@ void main() {
 
       expect(received.single.message, 'started');
       await subscription.cancel();
+    });
+
+    test('tunnelStream delivers the tunnel events native sends', () async {
+      final received = <SingboxProxyTunnelEvent>[];
+      final proxy = FlutterSingboxProxy();
+      final first = proxy.tunnelStream.listen(received.add);
+      final second = proxy.tunnelStream.listen((_) {});
+      await pumpEventQueue();
+
+      tunnels.emit(
+        SingboxProxyTunnelEvent(profileId: 'singbox:wg', answering: false),
+      );
+      await pumpEventQueue();
+
+      expect(received.single.profileId, 'singbox:wg');
+      expect(received.single.answering, isFalse);
+      expect(tunnels.listens, 1);
+      await first.cancel();
+      await second.cancel();
     });
 
     test('every subscriber shares one native listener', () async {

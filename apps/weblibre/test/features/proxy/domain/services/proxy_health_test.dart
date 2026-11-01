@@ -2,6 +2,8 @@
 // state from the test is their whole purpose.
 // ignore_for_file: riverpod_lint/avoid_public_notifier_properties
 
+import 'dart:async';
+
 import 'package:clock/clock.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -219,6 +221,85 @@ void main() {
     });
   });
 
+  group('WireGuard handshakes', () {
+    test('a peer that stops answering reads as not responding', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      // Issue #693: no load had to fail for the menu to stop showing it as
+      // fine — the runtime saw the handshakes go unanswered.
+      harness.tunnel(encoded, answering: false);
+      await pumpEventQueue();
+
+      expect(harness.evidence(encoded)?.peerUnanswered, isTrue);
+      expect(
+        harness.condition(profile),
+        ProxyConnectionCondition.notResponding,
+      );
+    });
+
+    test('a failed load keeps an unanswered peer on record', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.tunnel(encoded, answering: false);
+      await pumpEventQueue();
+      // One failing site is no evidence by itself. It must not wipe what the
+      // runtime said either: it only reports changes, so the warning would
+      // not come back while the peer stayed silent.
+      harness.health.recordFailedLoad(encoded, host: 'a.example');
+
+      expect(harness.evidence(encoded)?.peerUnanswered, isTrue);
+      expect(harness.evidence(encoded)?.failedLoads, hasLength(1));
+      expect(
+        harness.condition(profile),
+        ProxyConnectionCondition.notResponding,
+      );
+    });
+
+    test('a peer that answers again clears it, and only it', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.health.recordFailedLoad(encoded, host: 'a.example');
+      harness.tunnel(encoded, answering: false);
+      await pumpEventQueue();
+      harness.tunnel(encoded, answering: true);
+      await pumpEventQueue();
+
+      expect(harness.evidence(encoded)?.peerUnanswered, isFalse);
+      // The failed load is still evidence of its own.
+      expect(harness.evidence(encoded)?.failedLoads, hasLength(1));
+      expect(harness.condition(profile), isNull);
+    });
+
+    test('an answer with nothing on record leaves nothing behind', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.tunnel(encoded, answering: true);
+      await pumpEventQueue();
+
+      expect(harness.evidence(encoded), isNull);
+    });
+
+    test('a restart of the proxy drops what was said of its peer', () async {
+      final harness = _Harness(running: [encoded]);
+      addTearDown(harness.dispose);
+      await harness.settle();
+
+      harness.tunnel(encoded, answering: false);
+      await pumpEventQueue();
+      harness.starting.announce([encoded]);
+
+      expect(harness.evidence(encoded), isNull);
+    });
+  });
+
   group('condition', () {
     test('a running proxy with failing traffic is not responding', () async {
       final harness = _Harness(running: [encoded]);
@@ -318,6 +399,7 @@ class _Harness {
         singboxStartRetriesProvider.overrideWith(
           () => _FakeStartRetries(retries),
         ),
+        singboxProxyClientProvider.overrideWithValue(client),
       ],
     );
     // Keep the evidence alive and listening, as the app does.
@@ -325,6 +407,17 @@ class _Harness {
   }
 
   late final ProviderContainer container;
+  final client = _FakeClient();
+
+  /// The runtime reports whether the WireGuard peer of [encodedProxyId]
+  /// answers.
+  void tunnel(String encodedProxyId, {required bool answering}) =>
+      client.tunnels.add(
+        SingboxProxyTunnelEvent(
+          profileId: encodedProxyId,
+          answering: answering,
+        ),
+      );
 
   _FakeRuntimeRepository get runtime =>
       container.read(singboxProxyRuntimeRepositoryProvider.notifier)
@@ -352,7 +445,17 @@ class _Harness {
     await pumpEventQueue();
   }
 
-  void dispose() => container.dispose();
+  void dispose() {
+    container.dispose();
+    unawaited(client.tunnels.close());
+  }
+}
+
+class _FakeClient extends Fake implements SingboxProxyClient {
+  final tunnels = StreamController<SingboxProxyTunnelEvent>.broadcast();
+
+  @override
+  Stream<SingboxProxyTunnelEvent> get tunnelStream => tunnels.stream;
 }
 
 class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {

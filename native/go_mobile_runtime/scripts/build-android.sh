@@ -269,11 +269,11 @@ mkdir -p "$WORK_DIR" "$(dirname "$OUTPUT_AAR")"
 cat > "$WORK_DIR/go.mod" <<EOF
 module eu.weblibre.go_mobile_runtime
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/sagernet/gomobile $GOMOBILE_VERSION
-	github.com/sagernet/sing-box v1.13.12
+	github.com/sagernet/sing-box v1.14.4
 	github.com/tladesignz/IPtProxy.git v0.0.0
 )
 

@@ -19,6 +19,26 @@ import org.json.JSONObject
 
 private const val LOCALHOST = "127.0.0.1"
 private const val BASE64_URL_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+private val IPV4_LITERAL = Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")
+private val IPV6_LITERAL = Regex("^[0-9A-Fa-f:.]+$")
+
+/** An address family, as far as a tunnel can carry one. */
+internal enum class IpFamily(
+    /** The DNS question for the other family's addresses. */
+    val otherFamilyQueryType: String,
+    /** The sing-box domain strategy that asks for this family alone. */
+    val onlyStrategy: String,
+) {
+    IPV4(otherFamilyQueryType = "AAAA", onlyStrategy = "ipv4_only"),
+    IPV6(otherFamilyQueryType = "A", onlyStrategy = "ipv6_only"),
+}
+
+/** A profile whose tunnel carries one address family only. */
+internal data class SingleFamilyTunnel(
+    val inboundTag: String,
+    val outboundTag: String,
+    val family: IpFamily,
+)
 
 /**
  * Tag of the always-emitted `type: "local"` DNS server. Hooked at runtime by
@@ -68,6 +88,7 @@ class SingboxConfigBuilder(
         val endpoints = mutableListOf<SingboxProxyRuntimeEndpoint>()
         val ports = inboundPorts(profiles, options, reusableEndpoints)
         val reusableByProfile = reusableEndpoints.associateBy { it.profileId }
+        val singleFamilyTunnels = mutableListOf<SingleFamilyTunnel>()
 
         profiles.forEachIndexed { index, profile ->
             val inboundTag = inboundTag(profile.id)
@@ -99,7 +120,11 @@ class SingboxConfigBuilder(
             })
 
             if (profile.type == SingboxProxyProfileType.WIREGUARD) {
-                endpointsJson.put(buildWireGuardEndpoint(profile, outboundTag))
+                val endpoint = buildWireGuardEndpoint(profile, outboundTag)
+                endpointsJson.put(endpoint)
+                tunnelFamily(endpoint)?.let { family ->
+                    singleFamilyTunnels += SingleFamilyTunnel(inboundTag, outboundTag, family)
+                }
             } else {
                 outbounds.put(buildOutbound(profile).apply {
                     put("tag", outboundTag)
@@ -135,7 +160,9 @@ class SingboxConfigBuilder(
             })
         }
 
-        val configuredDnsBlock = options.dnsConfig?.let(::buildDnsBlock)
+        val configuredDnsBlock = options.dnsConfig?.let { dns ->
+            buildDnsBlock(dns, singleFamilyTunnels)
+        }
         if (configuredDnsBlock != null && options.bootstrapDohUrl.isNullOrBlank()) {
             throw IllegalArgumentException(
                 "bootstrapDohUrl is required when dnsConfig is provided."
@@ -146,7 +173,8 @@ class SingboxConfigBuilder(
         // `dns` block sing-box resolves through /etc/resolv.conf, which does
         // not exist on Android — every hostname, the WireGuard peer included,
         // then fails to resolve.
-        val dnsBlock = configuredDnsBlock ?: bootstrapOnlyDnsBlock(options.bootstrapDohUrl)
+        val dnsBlock = configuredDnsBlock
+            ?: bootstrapOnlyDnsBlock(options.bootstrapDohUrl, singleFamilyTunnels)
 
         val config = JSONObject().apply {
             put("log", JSONObject().apply {
@@ -240,20 +268,55 @@ class SingboxConfigBuilder(
     }
 
     /** DNS block holding nothing but the platform bootstrap transport. */
-    private fun bootstrapOnlyDnsBlock(bootstrapDohUrl: String?): JSONObject? {
+    private fun bootstrapOnlyDnsBlock(
+        bootstrapDohUrl: String?,
+        singleFamilyTunnels: List<SingleFamilyTunnel>,
+    ): JSONObject? {
         if (bootstrapDohUrl.isNullOrBlank()) return null
+
+        val rulesJson = JSONArray()
+        singleFamilyTunnels.forEach { tunnel -> rulesJson.put(otherFamilyRule(tunnel)) }
 
         return JSONObject().apply {
             put("servers", JSONArray().put(JSONObject().apply {
                 put("type", "local")
                 put("tag", DNS_BOOTSTRAP_TAG)
             }))
+            if (rulesJson.length() > 0) {
+                put("rules", rulesJson)
+            }
             put("final", DNS_BOOTSTRAP_TAG)
         }
     }
 
-    private fun buildDnsBlock(dns: SingboxProxyDnsConfig): JSONObject? {
+    /**
+     * Answers every lookup a single-family tunnel makes for the other family
+     * with "no such record".
+     *
+     * A tunnel that only has an IPv4 address cannot reach anything over IPv6,
+     * yet its lookups asked for both, waited on both, and handed sing-box IPv6
+     * addresses to dial — each one failing as `missing IPv6 local address`,
+     * which is what the logs in issue #694 are full of. sing-box 1.14 applies
+     * `query_type` to its own lookups too (the ones an endpoint makes to reach
+     * a domain), so this keeps the question from being asked at all. The
+     * tunnel's own traffic decides the family, not the device's network.
+     *
+     * Not the rule action's `strategy`, which would say the same in fewer
+     * words: 1.14 deprecated it and 1.16 removes it.
+     */
+    private fun otherFamilyRule(tunnel: SingleFamilyTunnel) = JSONObject().apply {
+        put("inbound", JSONArray().put(tunnel.inboundTag))
+        put("query_type", JSONArray().put(tunnel.family.otherFamilyQueryType))
+        put("action", "predefined")
+        put("rcode", "NOERROR")
+    }
+
+    private fun buildDnsBlock(
+        dns: SingboxProxyDnsConfig,
+        singleFamilyTunnels: List<SingleFamilyTunnel>,
+    ): JSONObject? {
         if (dns.servers.isEmpty()) return null
+        val familyByOutbound = singleFamilyTunnels.associate { it.outboundTag to it.family }
 
         val serversJson = JSONArray()
         val rulesJson = JSONArray()
@@ -284,8 +347,12 @@ class SingboxConfigBuilder(
             })
         }
 
+        // Ahead of the per-inbound routes below, which would otherwise answer
+        // first and send the other family's question into the tunnel anyway.
+        singleFamilyTunnels.forEach { tunnel -> rulesJson.put(otherFamilyRule(tunnel)) }
+
         for (server in dns.servers) {
-            serversJson.put(buildDnsServer(server))
+            serversJson.put(buildDnsServer(server, server.detourTag?.let(familyByOutbound::get)))
 
             if (server.matchDomainSuffixes.isNotEmpty() ||
                 server.matchInbounds.isNotEmpty()
@@ -319,7 +386,14 @@ class SingboxConfigBuilder(
         }
     }
 
-    private fun buildDnsServer(server: SingboxProxyDnsServerConfig): JSONObject {
+    /**
+     * [detourFamily] is the one family the tunnel [server] is reached through
+     * can carry, if it carries only one.
+     */
+    private fun buildDnsServer(
+        server: SingboxProxyDnsServerConfig,
+        detourFamily: IpFamily?,
+    ): JSONObject {
         val parsed = parseDnsAddress(server.address)
         return JSONObject().apply {
             put("type", parsed.type)
@@ -332,7 +406,19 @@ class SingboxConfigBuilder(
             // ignores `domain_resolver` for IP-literal servers, so emitting
             // it unconditionally is fine and keeps the JSON uniform.
             if (parsed.server != null && !parsed.serverIsIpLiteral) {
-                put("domain_resolver", DNS_BOOTSTRAP_TAG)
+                if (detourFamily == null) {
+                    put("domain_resolver", DNS_BOOTSTRAP_TAG)
+                } else {
+                    // The server's name resolves outside the tunnel, so the
+                    // rule that keeps a tunnel's lookups to its own family
+                    // never sees it. Unrestricted, a resolver behind an
+                    // IPv4-only tunnel got its IPv6 addresses too, and its
+                    // connections tried them first.
+                    put("domain_resolver", JSONObject().apply {
+                        put("server", DNS_BOOTSTRAP_TAG)
+                        put("strategy", detourFamily.onlyStrategy)
+                    })
+                }
             }
         }
     }
@@ -388,8 +474,8 @@ class SingboxConfigBuilder(
     }
 
     private fun isIpLiteral(host: String): Boolean {
-        if (host.matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$"))) return true
-        if (host.contains(":") && host.matches(Regex("^[0-9A-Fa-f:.]+$"))) return true
+        if (host.matches(IPV4_LITERAL)) return true
+        if (host.contains(":") && host.matches(IPV6_LITERAL)) return true
         return false
     }
 
@@ -460,6 +546,52 @@ class SingboxConfigBuilder(
         }
 
         return endpoint
+    }
+
+    /**
+     * The one IP family the WireGuard [endpoint] can carry, or null when it
+     * carries both — or when that cannot be told from the config.
+     *
+     * A family needs both an address of the tunnel's own and a peer that
+     * routes it: an IPv6 address with `AllowedIPs = 0.0.0.0/0` sends nothing
+     * over IPv6 either. Anything that is not plainly an address or a prefix
+     * (a malformed entry, a peer without `allowed_ips`) answers null, which
+     * leaves the tunnel unrestricted; guessing wrong here would hide a family
+     * the tunnel does carry.
+     */
+    internal fun tunnelFamily(endpoint: JSONObject): IpFamily? {
+        val own = prefixFamilies(endpoint.opt("address")) ?: return null
+        val peers = endpoint.optJSONArray("peers") ?: return null
+        if (peers.length() == 0) return null
+
+        val routed = mutableSetOf<IpFamily>()
+        for (index in 0 until peers.length()) {
+            val peer = peers.optJSONObject(index) ?: return null
+            routed += prefixFamilies(peer.opt("allowed_ips")) ?: return null
+        }
+
+        return own.intersect(routed).singleOrNull()
+    }
+
+    /** The families of [prefixes], or null when one of them is not a prefix. */
+    private fun prefixFamilies(prefixes: Any?): Set<IpFamily>? {
+        val values = when (prefixes) {
+            is JSONArray -> (0 until prefixes.length()).map { prefixes.opt(it) }
+            is String -> listOf(prefixes)
+            else -> return null
+        }
+        if (values.isEmpty()) return null
+
+        return values.map { value ->
+            val address = (value as? String)?.trim()?.substringBefore('/')
+                ?.removeSurrounding("[", "]")
+                ?: return null
+            when {
+                address.matches(IPV4_LITERAL) -> IpFamily.IPV4
+                address.contains(':') && address.matches(IPV6_LITERAL) -> IpFamily.IPV6
+                else -> return null
+            }
+        }.toSet()
     }
 
     /**

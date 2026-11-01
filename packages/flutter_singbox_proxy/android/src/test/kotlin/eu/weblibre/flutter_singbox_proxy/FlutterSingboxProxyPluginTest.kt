@@ -484,6 +484,180 @@ internal class FlutterSingboxProxyPluginTest {
         assertEquals("local", dns.getString("final"))
     }
 
+    /**
+     * Issue #694: an IPv4-only tunnel asked for AAAA records too and then
+     * dialled the IPv6 addresses it got, each failing as `missing IPv6 local
+     * address`.
+     */
+    @Test
+    fun buildConfig_keepsAnIpv4OnlyTunnelsLookupsToIpv4() {
+        val dns = buildDnsForWireGuard(
+            addresses = """["10.64.0.2/32"]""",
+            allowedIps = null,
+        )
+        val rules = dns.getJSONArray("rules")
+
+        // The DoH endpoint's own name still comes first, then the family rule,
+        // then the route into the tunnel's resolver — which would otherwise
+        // answer the AAAA question itself.
+        assertEquals("local", rules.getJSONObject(0).getString("server"))
+        val familyRule = rules.getJSONObject(1)
+        assertEquals("in-wg-v4", familyRule.getJSONArray("inbound").getString(0))
+        assertEquals("AAAA", familyRule.getJSONArray("query_type").getString(0))
+        assertEquals("predefined", familyRule.getString("action"))
+        assertEquals("NOERROR", familyRule.getString("rcode"))
+        assertEquals("browser-doh-wg-v4", rules.getJSONObject(2).getString("server"))
+        // Not the rule action's `strategy`: deprecated in 1.14, gone in 1.16.
+        for (index in 0 until rules.length()) {
+            assertFalse(rules.getJSONObject(index).has("strategy"))
+        }
+
+        // The resolver reached through the tunnel resolves its own name to
+        // the tunnel's family as well.
+        val tunnelled = dnsServerTagged(dns, "browser-doh-wg-v4")
+        val resolver = tunnelled.getJSONObject("domain_resolver")
+        assertEquals("local", resolver.getString("server"))
+        assertEquals("ipv4_only", resolver.getString("strategy"))
+        // One outside the tunnel is not restricted.
+        assertEquals("local", dnsServerTagged(dns, "browser-doh").getString("domain_resolver"))
+    }
+
+    @Test
+    fun buildConfig_keepsAnIpv6OnlyTunnelsLookupsToIpv6() {
+        val dns = buildDnsForWireGuard(
+            addresses = """["fd00::2/128"]""",
+            allowedIps = """["::/0"]""",
+        )
+        val familyRule = dns.getJSONArray("rules").getJSONObject(1)
+
+        assertEquals("A", familyRule.getJSONArray("query_type").getString(0))
+        assertEquals(
+            "ipv6_only",
+            dnsServerTagged(dns, "browser-doh-wg-v4")
+                .getJSONObject("domain_resolver")
+                .getString("strategy"),
+        )
+    }
+
+    /** An IPv6 address the peer never routes carries nothing. */
+    @Test
+    fun buildConfig_treatsAFamilyThePeerDoesNotRouteAsMissing() {
+        val dns = buildDnsForWireGuard(
+            addresses = """["10.64.0.2/32", "fd00::2/128"]""",
+            allowedIps = """["0.0.0.0/0"]""",
+        )
+
+        assertEquals(
+            "AAAA",
+            dns.getJSONArray("rules").getJSONObject(1).getJSONArray("query_type").getString(0),
+        )
+    }
+
+    @Test
+    fun buildConfig_leavesADualStackTunnelUnrestricted() {
+        val dns = buildDnsForWireGuard(
+            addresses = """["10.64.0.2/32", "fd00::2/128"]""",
+            allowedIps = null,
+        )
+        val rules = dns.getJSONArray("rules")
+
+        for (index in 0 until rules.length()) {
+            assertFalse(rules.getJSONObject(index).has("query_type"))
+        }
+        assertEquals("local", dnsServerTagged(dns, "browser-doh-wg-v4").getString("domain_resolver"))
+    }
+
+    /** A value that is not an address leaves the tunnel as it is. */
+    @Test
+    fun buildConfig_leavesATunnelWithAnUnreadableAddressUnrestricted() {
+        val dns = buildDnsForWireGuard(
+            addresses = """["10.64.0.2/32", "not-an-address"]""",
+            allowedIps = null,
+        )
+        val rules = dns.getJSONArray("rules")
+
+        for (index in 0 until rules.length()) {
+            assertFalse(rules.getJSONObject(index).has("query_type"))
+        }
+    }
+
+    @Test
+    fun buildConfig_keepsAnIpv4OnlyTunnelToIpv4WithTheBootstrapResolverAlone() {
+        val profile = SingboxProxyProfile(
+            id = "wg-v4",
+            name = "WireGuard",
+            type = SingboxProxyProfileType.WIREGUARD,
+            configJson = """{"server": "example.test", "server_port": 51820,
+                "local_address": ["10.64.0.2/32"], "peer_public_key": "peer"}""",
+            secretJson = """{"private_key": "secret"}""",
+        )
+
+        val dns = JSONObject(
+            SingboxConfigBuilder().build(
+                listOf(profile),
+                SingboxProxyRuntimeOptions(
+                    preferredBasePort = 12500,
+                    blockUnmatchedTraffic = true,
+                    bootstrapDohUrl = "https://dns.example/dns-query",
+                    logLevel = SingboxProxyLogLevel.WARN,
+                ),
+            ).configJson,
+        ).getJSONObject("dns")
+
+        val rule = dns.getJSONArray("rules").getJSONObject(0)
+        assertEquals("AAAA", rule.getJSONArray("query_type").getString(0))
+        assertEquals("in-wg-v4", rule.getJSONArray("inbound").getString(0))
+    }
+
+    /**
+     * The DNS block for one WireGuard profile `wg-v4` with the given tunnel
+     * [addresses] and peer [allowedIps] (absent: the full-tunnel default),
+     * resolving through a browser DoH server mirrored into the tunnel.
+     */
+    private fun buildDnsForWireGuard(addresses: String, allowedIps: String?): JSONObject {
+        val profile = SingboxProxyProfile(
+            id = "wg-v4",
+            name = "WireGuard",
+            type = SingboxProxyProfileType.WIREGUARD,
+            configJson = """{"server": "example.test", "server_port": 51820,
+                "local_address": $addresses, "peer_public_key": "peer"
+                ${allowedIps?.let { ", \"allowed_ips\": $it" } ?: ""}}""",
+            secretJson = """{"private_key": "secret"}""",
+        )
+        val result = SingboxConfigBuilder().build(
+            listOf(profile),
+            SingboxProxyRuntimeOptions(
+                preferredBasePort = 12500,
+                blockUnmatchedTraffic = true,
+                bootstrapDohUrl = "https://dns.example/dns-query",
+                dnsConfig = SingboxProxyDnsConfig(
+                    servers = listOf(
+                        dnsServer(tag = "browser-doh", address = "https://dns.example/dns-query"),
+                        dnsServer(
+                            tag = "browser-doh-wg-v4",
+                            address = "https://dns.example/dns-query",
+                            detourTag = "out-wg-v4",
+                            matchInbounds = listOf("in-wg-v4"),
+                        ),
+                    ),
+                    finalServerTag = "browser-doh",
+                    domainStrategy = "prefer_ipv4",
+                ),
+                logLevel = SingboxProxyLogLevel.WARN,
+            ),
+        )
+        return JSONObject(result.configJson).getJSONObject("dns")
+    }
+
+    private fun dnsServerTagged(dns: JSONObject, tag: String): JSONObject {
+        val servers = dns.getJSONArray("servers")
+        for (index in 0 until servers.length()) {
+            val server = servers.getJSONObject(index)
+            if (server.getString("tag") == tag) return server
+        }
+        throw AssertionError("no DNS server tagged $tag")
+    }
+
     @Test
     fun buildConfig_emitsBootstrapDnsBlockWhenNoDnsConfigIsGiven() {
         val builder = SingboxConfigBuilder()

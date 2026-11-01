@@ -8,7 +8,7 @@ the generated Go runtime/JNI symbols collide. WebLibre therefore binds sing-box
 
 Pinned inputs are defined in `pins.env`:
 
-- sing-box `v1.13.12`
+- sing-box `v1.14.4`
 - IPtProxy `5.4.2`
 - IPtProxy's `dnstt` submodule commit `f1b9b97a269f83bad41d2ceef291b4d2c161cd11`
 - `github.com/sagernet/gomobile@v0.1.12`
