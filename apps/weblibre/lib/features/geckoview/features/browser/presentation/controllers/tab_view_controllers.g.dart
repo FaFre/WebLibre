@@ -62,6 +62,165 @@ abstract class _$TabsViewModeController extends $Notifier<TabsViewMode> {
   }
 }
 
+/// Whether the Tree layout is offered (`tabs.tree_view_mode`, guarded by
+/// `switch.tree_tabs`).
+
+@ProviderFor(treeViewModeShown)
+final treeViewModeShownProvider = TreeViewModeShownProvider._();
+
+/// Whether the Tree layout is offered (`tabs.tree_view_mode`, guarded by
+/// `switch.tree_tabs`).
+
+final class TreeViewModeShownProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether the Tree layout is offered (`tabs.tree_view_mode`, guarded by
+  /// `switch.tree_tabs`).
+  TreeViewModeShownProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'treeViewModeShownProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$treeViewModeShownHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return treeViewModeShown(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$treeViewModeShownHash() => r'e9055e52943f0dda21d26deeee459d7b52ab9de7';
+
+/// The layout the tab view draws: the saved [TabsViewModeController] choice,
+/// except that a hidden Tree layout is drawn as List. The saved choice is left
+/// alone, so Tree comes back when it is shown again (acceptance scenario 18).
+/// Tree relationships are recorded either way; Tab Groups read them.
+
+@ProviderFor(effectiveTabsViewMode)
+final effectiveTabsViewModeProvider = EffectiveTabsViewModeProvider._();
+
+/// The layout the tab view draws: the saved [TabsViewModeController] choice,
+/// except that a hidden Tree layout is drawn as List. The saved choice is left
+/// alone, so Tree comes back when it is shown again (acceptance scenario 18).
+/// Tree relationships are recorded either way; Tab Groups read them.
+
+final class EffectiveTabsViewModeProvider
+    extends $FunctionalProvider<TabsViewMode, TabsViewMode, TabsViewMode>
+    with $Provider<TabsViewMode> {
+  /// The layout the tab view draws: the saved [TabsViewModeController] choice,
+  /// except that a hidden Tree layout is drawn as List. The saved choice is left
+  /// alone, so Tree comes back when it is shown again (acceptance scenario 18).
+  /// Tree relationships are recorded either way; Tab Groups read them.
+  EffectiveTabsViewModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveTabsViewModeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveTabsViewModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<TabsViewMode> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabsViewMode create(Ref ref) {
+    return effectiveTabsViewMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabsViewMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabsViewMode>(value),
+    );
+  }
+}
+
+String _$effectiveTabsViewModeHash() =>
+    r'061ec5cf4ad1d0d5a98f5b9f08cec3d448cd4556';
+
+/// Whether List and Grid draw the tab hierarchy: the saved filter choice,
+/// while `tabs.hierarchy_display` is shown. The choice is kept while hidden,
+/// like a hidden Tree layout.
+
+@ProviderFor(effectiveShowHierarchicalTabs)
+final effectiveShowHierarchicalTabsProvider =
+    EffectiveShowHierarchicalTabsProvider._();
+
+/// Whether List and Grid draw the tab hierarchy: the saved filter choice,
+/// while `tabs.hierarchy_display` is shown. The choice is kept while hidden,
+/// like a hidden Tree layout.
+
+final class EffectiveShowHierarchicalTabsProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether List and Grid draw the tab hierarchy: the saved filter choice,
+  /// while `tabs.hierarchy_display` is shown. The choice is kept while hidden,
+  /// like a hidden Tree layout.
+  EffectiveShowHierarchicalTabsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveShowHierarchicalTabsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveShowHierarchicalTabsHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return effectiveShowHierarchicalTabs(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$effectiveShowHierarchicalTabsHash() =>
+    r'6f8a38f4e9d09a894547501c80c1805e3bb60a83';
+
 @ProviderFor(TabViewFilterController)
 @JsonPersist()
 final tabViewFilterControllerProvider = TabViewFilterControllerProvider._();

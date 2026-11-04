@@ -88,6 +88,7 @@ Future<bool> _ensureTorStarted(BuildContext context, WidgetRef ref) async {
 
   final answer = await askUnlessRemembered<PromptConfirmation>(
     context,
+    ref.read,
     RememberedPrompt.startTor,
     builder: (context) => const TorDialog(),
   );
@@ -146,6 +147,7 @@ Future<bool> _maybeStartSingboxProxy(
   // without asking, not which.
   final shouldStart = await confirmUnlessRemembered(
     context,
+    ref.read,
     RememberedPrompt.startProxyConnection,
     icon: const Icon(Icons.route_outlined),
     title: l10n.proxy_startConnectionDialogTitle,

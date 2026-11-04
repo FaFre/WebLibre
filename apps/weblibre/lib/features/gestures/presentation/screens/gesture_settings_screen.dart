@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
@@ -32,12 +33,14 @@ import 'package:weblibre/features/gestures/presentation/screens/gesture_excluded
 import 'package:weblibre/features/gestures/presentation/screens/gesture_feedback_screen.dart';
 import 'package:weblibre/features/gestures/presentation/utils/built_in_gesture_l10n.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/setting_value_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 /// Every gesture WebLibre knows, grouped by where it is made (issue #626):
 /// the swipes on the tab bar and on tabs, each rebindable, the fixed ones
@@ -49,7 +52,7 @@ class GestureSettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
     final repository = ref.read(gestureSettingsRepositoryProvider.notifier);
 
     void open(Widget screen) {
@@ -67,6 +70,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
             title: gesture.label(context),
             subtitle: gesture.description(context),
             keywords: settingsKeywords(l10n.gestures_builtInGestureKeywords),
+            feature: FeatureId.inputTabSwipeRemap,
+            hiddenSettings: const [HiddenSetting.tabSwipes],
             child: _BuiltInGestureTile(gesture: gesture),
           ),
     ];
@@ -74,32 +79,38 @@ class GestureSettingsScreen extends HookConsumerWidget {
     return SettingsCustomScrollScaffold(
       title: l10n.gestures_screenTitle,
       actions: [
-        MenuAnchor(
-          builder: (context, controller, child) => IconButton(
-            onPressed: () =>
-                controller.isOpen ? controller.close() : controller.open(),
-            icon: const Icon(Icons.more_vert),
-          ),
-          menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.restore),
-              onPressed: settings.builtInOverrides.isEmpty
-                  ? null
-                  : () => repository.updateSettings(
-                      (current) => current.copyWith.builtInOverrides(const {}),
-                    ),
-              child: Text(l10n.gestures_resetSwipesToDefaultsAction),
+        HiddenFeatureGate.feature(
+          FeatureId.inputTabSwipeRemap,
+          child: MenuAnchor(
+            builder: (context, controller, child) => IconButton(
+              onPressed: () =>
+                  controller.isOpen ? controller.close() : controller.open(),
+              icon: const Icon(Icons.more_vert),
             ),
-          ],
+            menuChildren: [
+              MenuItemButton(
+                leadingIcon: const Icon(Icons.restore),
+                onPressed: settings.builtInOverrides.isEmpty
+                    ? null
+                    : () => repository.updateSettings(
+                        (current) =>
+                            current.copyWith.builtInOverrides(const {}),
+                      ),
+                child: Text(l10n.gestures_resetSwipesToDefaultsAction),
+              ),
+            ],
+          ),
         ),
       ],
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
           sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: buildSettingsSectionWidgets(context, [
+            // Like every settings screen: entries whose feature is hidden are
+            // grayed out.
+            child: SettingsSectionList(
+              query: '',
+              sections: [
                 SettingsSectionDefinition(
                   title: BuiltInGestureSurface.tabBar.label(context),
                   entries: builtInEntries(BuiltInGestureSurface.tabBar),
@@ -110,6 +121,7 @@ class GestureSettingsScreen extends HookConsumerWidget {
                     ...builtInEntries(BuiltInGestureSurface.tabView),
                     SettingsEntryDefinition(
                       title: l10n.gestures_twoFingerSwipeTitle,
+                      feature: FeatureId.containerCore,
                       keywords: settingsKeywords(
                         l10n.gestures_twoFingerSwipeKeywords,
                       ),
@@ -140,6 +152,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
                       keywords: settingsKeywords(
                         l10n.gestures_drawnGesturesKeywords,
                       ),
+                      feature: FeatureId.inputDrawnGestures,
+                      hiddenSettings: const [HiddenSetting.drawnGestures],
                       child: SwitchListTile.adaptive(
                         secondary: const Icon(MdiIcons.gestureSwipe),
                         title: Text(l10n.gestures_drawnGesturesTitle),
@@ -153,6 +167,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
                     if (settings.enabled) ...[
                       SettingsEntryDefinition(
                         title: l10n.gestures_gestureBindingsTitle,
+                        feature: FeatureId.inputDrawnGestures,
+                        opensScreen: true,
                         child: ListTile(
                           leading: const Icon(MdiIcons.gestureDoubleTap),
                           title: Text(l10n.gestures_gestureBindingsTitle),
@@ -165,6 +181,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
                       ),
                       SettingsEntryDefinition(
                         title: l10n.gestures_behaviorTimingTitle,
+                        feature: FeatureId.inputDrawnGestures,
+                        opensScreen: true,
                         child: ListTile(
                           leading: const Icon(Icons.tune),
                           title: Text(l10n.gestures_behaviorTimingTitle),
@@ -177,6 +195,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
                       ),
                       SettingsEntryDefinition(
                         title: l10n.gestures_excludedSitesTitle,
+                        feature: FeatureId.inputDrawnGestures,
+                        opensScreen: true,
                         child: ListTile(
                           leading: const Icon(Icons.public_off),
                           title: Text(l10n.gestures_excludedSitesTitle),
@@ -189,6 +209,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
                       ),
                       SettingsEntryDefinition(
                         title: l10n.gestures_feedbackTitle,
+                        feature: FeatureId.inputDrawnGestures,
+                        opensScreen: true,
                         child: ListTile(
                           leading: const Icon(Icons.bolt_outlined),
                           title: Text(l10n.gestures_feedbackTitle),
@@ -212,6 +234,8 @@ class GestureSettingsScreen extends HookConsumerWidget {
                   entries: [
                     SettingsEntryDefinition(
                       title: l10n.gestures_longPressButtonsTitle,
+                      feature: FeatureId.layoutContextualToolbarAdvanced,
+                      opensScreen: true,
                       child: ListTile(
                         leading: const Icon(Icons.touch_app_outlined),
                         title: Text(l10n.gestures_longPressButtonsTitle),
@@ -223,7 +247,7 @@ class GestureSettingsScreen extends HookConsumerWidget {
                     ),
                   ],
                 ),
-              ]),
+              ],
             ),
           ),
         ),
@@ -248,9 +272,16 @@ class _BuiltInGestureTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final doNothing = _doNothing(l10n);
-    final action = ref.watch(builtInGestureBindingProvider(gesture));
+    // The binding as stored, like everything else this screen edits: while
+    // the remap is hidden the default applies (H1), but the row shows the
+    // saved choice, which comes back when it is shown.
     final legacyTabBarSwipe = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarSwipeAction),
+      storedGeneralSettingsProvider.select((s) => s.tabBarSwipeAction),
+    );
+    final action = ref.watch(
+      storedGestureSettingsProvider.select(
+        (s) => s.builtInBinding(gesture, legacyTabBarSwipe: legacyTabBarSwipe),
+      ),
     );
 
     return SettingValueTile(
@@ -262,6 +293,7 @@ class _BuiltInGestureTile extends HookConsumerWidget {
       onTap: () async {
         final picked = await showOptionalBrowserActionPicker(
           context,
+          ref,
           selected: action,
           unsetOption: doNothing,
           actions: gesture.allowedActions,
@@ -322,7 +354,7 @@ class _PullToRefreshTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
+      storedGeneralSettingsProvider.select((s) => s.pullToRefreshEnabled),
     );
 
     return SwitchListTile.adaptive(

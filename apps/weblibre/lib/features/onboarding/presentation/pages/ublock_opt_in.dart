@@ -24,8 +24,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
-import 'package:weblibre/features/onboarding/presentation/onboarding_defaults.dart';
+import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
@@ -67,8 +66,8 @@ class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
                   if (newValue == true) {
                     unawaited(
                       ref
-                          .read(browserAddonServiceProvider.notifier)
-                          .install('uBlock0@raymondhill.net'),
+                          .read(setupStepRunnerProvider.notifier)
+                          .runOnce(SetupStep.installUBlock),
                     );
                   }
                 },
@@ -87,7 +86,11 @@ class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
                 onSaved: (newValue) {
                   if (newValue != true || !installUBlock.value) return;
 
-                  unawaited(applyOnboardingOptimizedUBlockDefaults(ref));
+                  unawaited(
+                    ref
+                        .read(setupStepRunnerProvider.notifier)
+                        .runOnce(SetupStep.optimizedUBlockFilters),
+                  );
                 },
                 builder: (field) => SwitchListTile(
                   contentPadding: EdgeInsets.zero,

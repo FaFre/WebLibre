@@ -259,7 +259,9 @@ class _TabListView extends HookConsumerWidget {
         (value) => value.value ?? const <String>{},
       ),
     );
-    final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
+    final showHierarchicalTabs = ref.watch(
+      effectiveShowHierarchicalTabsProvider,
+    );
     final tabListDirection = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );

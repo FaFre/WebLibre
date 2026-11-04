@@ -91,9 +91,123 @@ final class ToolbarButtonConfigsFamily extends $Family
   String toString() => r'toolbarButtonConfigsProvider';
 }
 
+/// The configuration of [location] as stored, for the screen that edits it:
+/// known buttons only, the defaults while loading or empty.
+
+@ProviderFor(storedToolbarButtonConfigs)
+final storedToolbarButtonConfigsProvider = StoredToolbarButtonConfigsFamily._();
+
+/// The configuration of [location] as stored, for the screen that edits it:
+/// known buttons only, the defaults while loading or empty.
+
+final class StoredToolbarButtonConfigsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<ToolbarButtonConfig>>,
+          EquatableValue<List<ToolbarButtonConfig>>,
+          EquatableValue<List<ToolbarButtonConfig>>
+        >
+    with $Provider<EquatableValue<List<ToolbarButtonConfig>>> {
+  /// The configuration of [location] as stored, for the screen that edits it:
+  /// known buttons only, the defaults while loading or empty.
+  StoredToolbarButtonConfigsProvider._({
+    required StoredToolbarButtonConfigsFamily super.from,
+    required ToolbarConfigLocation super.argument,
+  }) : super(
+         retry: null,
+         name: r'storedToolbarButtonConfigsProvider',
+         isAutoDispose: false,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$storedToolbarButtonConfigsHash();
+
+  @override
+  String toString() {
+    return r'storedToolbarButtonConfigsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<ToolbarButtonConfig>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<ToolbarButtonConfig>> create(Ref ref) {
+    final argument = this.argument as ToolbarConfigLocation;
+    return storedToolbarButtonConfigs(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<ToolbarButtonConfig>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<ToolbarButtonConfig>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is StoredToolbarButtonConfigsProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$storedToolbarButtonConfigsHash() =>
+    r'58d3641e8079472739198b478ef786cdd75fcf93';
+
+/// The configuration of [location] as stored, for the screen that edits it:
+/// known buttons only, the defaults while loading or empty.
+
+final class StoredToolbarButtonConfigsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<ToolbarButtonConfig>>,
+          ToolbarConfigLocation
+        > {
+  StoredToolbarButtonConfigsFamily._()
+    : super(
+        retry: null,
+        name: r'storedToolbarButtonConfigsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: false,
+      );
+
+  /// The configuration of [location] as stored, for the screen that edits it:
+  /// known buttons only, the defaults while loading or empty.
+
+  StoredToolbarButtonConfigsProvider call(ToolbarConfigLocation location) =>
+      StoredToolbarButtonConfigsProvider._(argument: location, from: this);
+
+  @override
+  String toString() => r'storedToolbarButtonConfigsProvider';
+}
+
+/// The configuration of [location] as it applies: [storedToolbarButtonConfigs]
+/// with the default fallbacks and no long-press actions while the advanced
+/// toolbar options are hidden (`layout.contextual_toolbar_advanced`). Order and
+/// visibility are ordinary layout and stay as stored.
+
 @ProviderFor(effectiveToolbarButtonConfigs)
 final effectiveToolbarButtonConfigsProvider =
     EffectiveToolbarButtonConfigsFamily._();
+
+/// The configuration of [location] as it applies: [storedToolbarButtonConfigs]
+/// with the default fallbacks and no long-press actions while the advanced
+/// toolbar options are hidden (`layout.contextual_toolbar_advanced`). Order and
+/// visibility are ordinary layout and stay as stored.
 
 final class EffectiveToolbarButtonConfigsProvider
     extends
@@ -103,6 +217,10 @@ final class EffectiveToolbarButtonConfigsProvider
           EquatableValue<List<ToolbarButtonConfig>>
         >
     with $Provider<EquatableValue<List<ToolbarButtonConfig>>> {
+  /// The configuration of [location] as it applies: [storedToolbarButtonConfigs]
+  /// with the default fallbacks and no long-press actions while the advanced
+  /// toolbar options are hidden (`layout.contextual_toolbar_advanced`). Order and
+  /// visibility are ordinary layout and stay as stored.
   EffectiveToolbarButtonConfigsProvider._({
     required EffectiveToolbarButtonConfigsFamily super.from,
     required ToolbarConfigLocation super.argument,
@@ -158,7 +276,12 @@ final class EffectiveToolbarButtonConfigsProvider
 }
 
 String _$effectiveToolbarButtonConfigsHash() =>
-    r'6cd77c8af6df8943db6778b5222bb6ae9fb40025';
+    r'55a366ca96e196373ab6c4f07f59b480c44411f7';
+
+/// The configuration of [location] as it applies: [storedToolbarButtonConfigs]
+/// with the default fallbacks and no long-press actions while the advanced
+/// toolbar options are hidden (`layout.contextual_toolbar_advanced`). Order and
+/// visibility are ordinary layout and stay as stored.
 
 final class EffectiveToolbarButtonConfigsFamily extends $Family
     with
@@ -174,6 +297,11 @@ final class EffectiveToolbarButtonConfigsFamily extends $Family
         $allTransitiveDependencies: null,
         isAutoDispose: false,
       );
+
+  /// The configuration of [location] as it applies: [storedToolbarButtonConfigs]
+  /// with the default fallbacks and no long-press actions while the advanced
+  /// toolbar options are hidden (`layout.contextual_toolbar_advanced`). Order and
+  /// visibility are ordinary layout and stay as stored.
 
   EffectiveToolbarButtonConfigsProvider call(ToolbarConfigLocation location) =>
       EffectiveToolbarButtonConfigsProvider._(argument: location, from: this);

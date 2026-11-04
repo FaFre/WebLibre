@@ -13,7 +13,7 @@
   "uiHelper_newTabOpened": "Nueva pestaña abierta",
   "uiHelper_actionSwitch": "Cambiar",
   "uiHelper_couldNotLaunchUrl": "No se pudo abrir la URL ({url})",
-  "uiHelper_canNotHandleScheme": "No se puede abrir «{scheme}»",
+  "uiHelper_canNotHandleScheme": "Ninguna app puede abrir enlaces «{scheme}»",
   "uiHelper_tabsClosedCount": "{count, plural, =1{Pestaña cerrada} other{{count} pestañas cerradas}}",
   "uiHelper_closeIsolatedTabsTitle": "¿Cerrar las pestañas aisladas?",
   "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{Se borrarán de forma permanente todos los datos de navegación de esta sesión aislada.} other{Se borrarán de forma permanente los datos de navegación de {count} sesiones aisladas.}}"

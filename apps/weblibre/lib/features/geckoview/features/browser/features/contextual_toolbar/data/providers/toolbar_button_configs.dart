@@ -18,14 +18,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:drift/drift.dart' show Value;
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:lexo_rank/lexo_rank.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'toolbar_button_configs.g.dart';
 
@@ -80,8 +84,10 @@ Stream<List<ToolbarButtonConfig>> toolbarButtonConfigs(
   yield* repository.watchAll();
 }
 
+/// The configuration of [location] as stored, for the screen that edits it:
+/// known buttons only, the defaults while loading or empty.
 @Riverpod(keepAlive: true)
-EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
+EquatableValue<List<ToolbarButtonConfig>> storedToolbarButtonConfigs(
   Ref ref,
   ToolbarConfigLocation location,
 ) {
@@ -102,4 +108,49 @@ EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
     loading: () => defaultToolbarButtonConfigsFor(location),
     error: (_, _) => defaultToolbarButtonConfigsFor(location),
   );
+}
+
+/// The configuration of [location] as it applies: [storedToolbarButtonConfigs]
+/// with the default fallbacks and no long-press actions while the advanced
+/// toolbar options are hidden (`layout.contextual_toolbar_advanced`). Order and
+/// visibility are ordinary layout and stay as stored.
+@Riverpod(keepAlive: true)
+EquatableValue<List<ToolbarButtonConfig>> effectiveToolbarButtonConfigs(
+  Ref ref,
+  ToolbarConfigLocation location,
+) {
+  final stored = ref.watch(storedToolbarButtonConfigsProvider(location));
+  final advancedShown = ref.watch(
+    shownFeaturesProvider.select(
+      (shown) => shown.contains(FeatureId.layoutContextualToolbarAdvanced),
+    ),
+  );
+  if (advancedShown) return stored;
+
+  return EquatableValue(
+    toolbarButtonConfigsAsApplied(stored.value, location, advancedShown: false),
+  );
+}
+
+/// [stored] as it applies: with the advanced toolbar options hidden
+/// ([advancedShown] false), every button falls back the default way and has
+/// no long-press action.
+List<ToolbarButtonConfig> toolbarButtonConfigsAsApplied(
+  List<ToolbarButtonConfig> stored,
+  ToolbarConfigLocation location, {
+  required bool advancedShown,
+}) {
+  if (advancedShown) return stored;
+
+  final defaultFallbacks = {
+    for (final config in defaultToolbarButtonConfigsFor(location).value)
+      config.buttonId: config.fallbackId,
+  };
+  return [
+    for (final config in stored)
+      config.copyWith(
+        fallbackId: Value(defaultFallbacks[config.buttonId]),
+        longPressAction: const Value(null),
+      ),
+  ];
 }

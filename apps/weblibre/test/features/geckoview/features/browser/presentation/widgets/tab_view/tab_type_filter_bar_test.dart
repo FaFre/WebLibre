@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -89,6 +90,13 @@ List<Override> _overrides({
     () => _TestTabsViewModeController(viewMode),
   ),
   selectedContainerProvider.overrideWith(_TestSelectedContainer.new),
+  // The filter row (container chips, Synced chip) is always built and
+  // would otherwise open the tab database and the sync engine.
+  matchSortedContainersWithCountProvider.overrideWith(
+    (ref, searchText) => const AsyncData([]),
+  ),
+  syncIsAuthenticatedProvider.overrideWith((ref) => false),
+  syncedTabsTotalCountProvider.overrideWith((ref) => Future.value(0)),
   selectedContainerDataProvider.overrideWith((ref) => Stream.value(null)),
   selectedTabTypeProvider.overrideWith((ref) => selectedTabType),
   tabSortKeysProvider.overrideWith(

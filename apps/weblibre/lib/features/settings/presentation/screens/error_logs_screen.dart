@@ -28,10 +28,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logger/logger.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/domain/providers/log_filter.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/log_details_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 IconData _levelIcon(Level level) {
@@ -136,8 +138,19 @@ class ErrorLogsScreen extends HookConsumerWidget {
           },
           menuChildren: [
             const Divider(height: 0),
-            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.trace),
-            _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.debug),
+            // TRACE and DEBUG are verbose diagnostics, grayed out while
+            // hidden; one already selected stays so it can be switched back.
+            for (final level in [Level.trace, Level.debug])
+              HiddenFeatureGate.feature(
+                FeatureId.diagnosticsVerboseLogs,
+                inForce: minLogLevel == level,
+                child: _buildLevelFilterMenuItem(
+                  context,
+                  ref,
+                  minLogLevel,
+                  level,
+                ),
+              ),
             _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.info),
             _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.warning),
             _buildLevelFilterMenuItem(context, ref, minLogLevel, Level.error),

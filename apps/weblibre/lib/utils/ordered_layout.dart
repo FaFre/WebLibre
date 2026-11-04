@@ -72,3 +72,33 @@ List<E> mergeOrderedLayout<E, D>({
 
   return result;
 }
+
+/// [entries] with one element moved, for a list that shows only the elements
+/// whose keys are in [shown], in saved order: [oldIndex] and [newIndex] (after
+/// removal) index into [shown].
+///
+/// The moved element lands right before the shown element it was dropped on,
+/// or right after the last one. Elements left out of [shown] — the ones a
+/// hidden feature skips — stay in place relative to every element that did
+/// not move, so they return among the same neighbours once their feature is
+/// shown again.
+List<E> moveAmongShown<E, K>(
+  List<E> entries,
+  K Function(E entry) entryKey,
+  List<K> shown,
+  int oldIndex,
+  int newIndex,
+) {
+  final rest = [...shown];
+  final moved = rest.removeAt(oldIndex);
+  if (rest.isEmpty) return entries;
+
+  final list = [...entries];
+  final entry = list.firstWhere((e) => entryKey(e) == moved);
+  list.remove(entry);
+  final insertAt = newIndex < rest.length
+      ? list.indexWhere((e) => entryKey(e) == rest[newIndex])
+      : list.indexWhere((e) => entryKey(e) == rest.last) + 1;
+  list.insert(insertAt, entry);
+  return list;
+}

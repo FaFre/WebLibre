@@ -28,7 +28,7 @@
   "contextualToolbar_longPressAddPrivateTab": "Добавить приватную вкладку",
   "contextualToolbar_longPressAddIsolatedTab": "Добавить изолированную вкладку",
   "contextualToolbar_longPressOpenSettings": "Открыть настройки",
-  "contextualToolbar_longPressHardRefresh": "Полная перезагрузка (без кеша)",
+  "contextualToolbar_longPressHardRefresh": "Полная перезагрузка",
   "contextualToolbar_longPressShowTranslationOptions": "Показать параметры перевода",
   "contextualToolbar_longPressScrollToTop": "Прокрутить в начало",
   "contextualToolbar_longPressScrollToBottom": "Прокрутить в конец",

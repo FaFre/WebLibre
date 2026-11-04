@@ -77,16 +77,16 @@ class ContextualToolbar extends HookConsumerWidget {
       isPreview: false,
     );
 
-    final resolvedButtons = useMemoized(
-      () => resolveVisibleContextualToolbarButtons(
-        configs: configs.value,
-        knownButtonIds: knownToolbarButtonIds,
-        isPrimaryAvailable: (buttonId) {
-          final def = toolbarButtonRegistryById[buttonId];
-          return def?.isPrimaryAvailable?.call(scope, ref) ?? true;
-        },
-      ),
-      [configs, scope],
+    // Resolved on every build, not memoized: isPrimaryAvailable watches
+    // providers (a hidden feature's button falls back), and a watch inside a
+    // memoized callback subscribes once and then lapses.
+    final resolvedButtons = resolveVisibleContextualToolbarButtons(
+      configs: configs.value,
+      knownButtonIds: knownToolbarButtonIds,
+      isPrimaryAvailable: (buttonId) {
+        final def = toolbarButtonRegistryById[buttonId];
+        return def?.isPrimaryAvailable?.call(scope, ref) ?? true;
+      },
     );
     final configById = useMemoized(
       () => {for (final config in configs.value) config.buttonId: config},

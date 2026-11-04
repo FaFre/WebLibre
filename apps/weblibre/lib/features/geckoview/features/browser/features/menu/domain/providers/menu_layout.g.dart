@@ -62,7 +62,7 @@ final class MenuLayoutProvider
   }
 }
 
-String _$menuLayoutHash() => r'f21d2e659c250cd70ccfcecabc82f8be155c7d4e';
+String _$menuLayoutHash() => r'9018173260f99c101631e26d7db0f87873b2a9bf';
 
 /// The user's arrangement of the browser menu sheet: which sections appear, in
 /// what order, how the rows inside each one are ordered, and how the rows an
@@ -90,6 +90,65 @@ abstract class _$MenuLayout extends $Notifier<List<MenuSectionEntry>> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// The menu as drawn: the user's arrangement ([MenuLayout]), or the shipped
+/// one while menu customization is hidden (`layout.menu_customization`). The
+/// arrangement is kept and comes back with the feature.
+
+@ProviderFor(effectiveMenuLayout)
+final effectiveMenuLayoutProvider = EffectiveMenuLayoutProvider._();
+
+/// The menu as drawn: the user's arrangement ([MenuLayout]), or the shipped
+/// one while menu customization is hidden (`layout.menu_customization`). The
+/// arrangement is kept and comes back with the feature.
+
+final class EffectiveMenuLayoutProvider
+    extends
+        $FunctionalProvider<
+          List<MenuSectionEntry>,
+          List<MenuSectionEntry>,
+          List<MenuSectionEntry>
+        >
+    with $Provider<List<MenuSectionEntry>> {
+  /// The menu as drawn: the user's arrangement ([MenuLayout]), or the shipped
+  /// one while menu customization is hidden (`layout.menu_customization`). The
+  /// arrangement is kept and comes back with the feature.
+  EffectiveMenuLayoutProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveMenuLayoutProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveMenuLayoutHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<MenuSectionEntry>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  List<MenuSectionEntry> create(Ref ref) {
+    return effectiveMenuLayout(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<MenuSectionEntry> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<MenuSectionEntry>>(value),
+    );
+  }
+}
+
+String _$effectiveMenuLayoutHash() =>
+    r'de3f97245e77bf4cf6a0a42a29ed0a07b20b4ab8';
 
 /// Whether the sheet is currently showing its arrangement UI instead of the
 /// menu.

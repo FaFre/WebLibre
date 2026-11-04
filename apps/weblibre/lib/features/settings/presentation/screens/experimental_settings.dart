@@ -20,12 +20,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/dialogs/quit_browser_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
 List<SettingsSectionDefinition> experimentalSettingsSections(
@@ -43,12 +46,14 @@ List<SettingsSectionDefinition> experimentalSettingsSections(
           keywords: settingsKeywords(
             l10n.settings_isolatedContentProcessKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.isolatedProcess],
           child: const _IsolatedProcessEnabledTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_appZygoteProcessTitle,
           subtitle: l10n.settings_indexAppZygoteProcessSubtitle,
           keywords: settingsKeywords(l10n.settings_appZygoteProcessKeywords),
+          hiddenSettings: const [HiddenSetting.appZygoteProcess],
           child: const _AppZygoteProcessEnabledTile(),
         ),
       ],
@@ -63,11 +68,14 @@ class ExperimentalSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return SettingsDetailScaffold(
-      title: l10n.settings_experimentalTitle,
-      subtitle: l10n.settings_experimentalSubtitle,
-      icon: MdiIcons.flaskOutline,
-      sections: experimentalSettingsSections(context),
+    return HiddenFeatureScope(
+      feature: FeatureId.advancedExperimentalProcess,
+      child: SettingsDetailScaffold(
+        title: l10n.settings_experimentalTitle,
+        subtitle: l10n.settings_experimentalSubtitle,
+        icon: MdiIcons.flaskOutline,
+        sections: experimentalSettingsSections(context),
+      ),
     );
   }
 }
@@ -78,9 +86,7 @@ class _IsolatedProcessEnabledTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isolatedProcessEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.isolatedProcessEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.isolatedProcessEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -97,7 +103,7 @@ class _IsolatedProcessEnabledTile extends HookConsumerWidget {
                   currentSettings.copyWith.isolatedProcessEnabled(value),
             );
         if (context.mounted) {
-          await _showRestartDialog(context);
+          await _showRestartDialog(context, ref);
         }
       },
     );
@@ -110,9 +116,7 @@ class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appZygoteProcessEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.appZygoteProcessEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.appZygoteProcessEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -129,16 +133,16 @@ class _AppZygoteProcessEnabledTile extends HookConsumerWidget {
                   currentSettings.copyWith.appZygoteProcessEnabled(value),
             );
         if (context.mounted) {
-          await _showRestartDialog(context);
+          await _showRestartDialog(context, ref);
         }
       },
     );
   }
 }
 
-Future<void> _showRestartDialog(BuildContext context) async {
+Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
   final result = await showQuitBrowserDialog(context);
   if (result == true && context.mounted) {
-    await exitApp(ProviderScope.containerOf(context));
+    await exitApp(ref.container);
   }
 }

@@ -22,6 +22,7 @@
   "keyboardShortcuts_recorderProblemAlreadyBound": "Ini sudah menjadi pintasan untuk tindakan ini.",
   "keyboardShortcuts_recorderTakesFromOther": "Saat ini digunakan oleh \"{ownerTitle}\". Menyimpan akan memindahkannya ke sini.",
   "keyboardShortcuts_actionCustomize": "Sesuaikan",
+  "keyboardShortcuts_actionShowAll": "Tampilkan semua",
   "keyboardShortcuts_actionReassign": "Tetapkan ulang",
   "keyboardShortcuts_actionRestore": "Pulihkan"
 }

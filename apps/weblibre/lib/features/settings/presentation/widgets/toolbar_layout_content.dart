@@ -22,6 +22,8 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/quick_tab_switcher_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/utils/tab_bar_position_setting_l10n.dart';
@@ -31,6 +33,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
   BuildContext context,
@@ -98,6 +101,9 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
           keywords: settingsKeywords(
             l10n.settings_customizeToolbarButtonsKeywords,
           ),
+          // Ordinary buttons are basic layout (`layout.basic`); only their
+          // fallbacks and long-press actions are advanced, hidden inside.
+          liveOnly: true,
           child: const _CustomizeToolbarButtonsTile(),
         ),
       ],
@@ -113,6 +119,7 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
         ),
         SettingsEntryDefinition(
           title: l10n.settings_containersByRecentUseTitle,
+          feature: FeatureId.layoutStackingContainerModes,
           subtitle: l10n.settings_containersByRecentUseSubtitle,
           keywords: settingsKeywords(
             l10n.settings_containersByRecentUseKeywords,
@@ -131,6 +138,9 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
           keywords: settingsKeywords(
             l10n.settings_customizeSwitcherButtonsKeywords,
           ),
+          // Ordinary buttons are basic layout (`layout.basic`); only their
+          // fallbacks and long-press actions are advanced, hidden inside.
+          liveOnly: true,
           child: const _CustomizeQuickSwitcherButtonsTile(),
         ),
         SettingsEntryDefinition(
@@ -159,6 +169,8 @@ List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
         ),
         SettingsEntryDefinition(
           title: l10n.settings_hierarchyDepthTitle,
+          feature: FeatureId.tabsHierarchyDisplay,
+          hiddenSettings: const [HiddenSetting.hierarchyGlyphs],
           subtitle: l10n.settings_indexHierarchyDepthSubtitle,
           keywords: settingsKeywords(l10n.settings_hierarchyDepthKeywords),
           child: const _QuickTabSwitcherHierarchyGlyphsTile(),
@@ -215,6 +227,11 @@ List<SettingsSectionDefinition> menuLayoutSettingsSections(
           title: l10n.settings_customizeMenu,
           subtitle: l10n.settings_customizeMenuSubtitle,
           keywords: settingsKeywords(l10n.settings_customizeMenuKeywords),
+          feature: FeatureId.layoutMenuCustomization,
+          hiddenSettings: const [HiddenSetting.menuLayout],
+          liveOnly: true,
+          // The arrangement screen is an editor as a whole, so a hidden one
+          // asks before it opens.
           child: const _CustomizeMenuTile(),
         ),
       ],
@@ -274,7 +291,7 @@ class _TabBarPositionSection extends HookConsumerWidget {
     // reads effectiveTabBarPositionProvider.
     final l10n = AppLocalizations.of(context);
     final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarPosition),
+      storedGeneralSettingsProvider.select((s) => s.tabBarPosition),
     );
     final resolved = ref.watch(effectiveTabBarPositionProvider);
 
@@ -334,7 +351,7 @@ class _TabBarLayoutModeSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabBarLayout = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarLayout),
+      storedGeneralSettingsProvider.select((s) => s.tabBarLayout),
     );
 
     return Padding(
@@ -388,9 +405,7 @@ class _ShowContextualTabBarTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabBarShowContextualBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowContextualBar,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.tabBarShowContextualBar),
     );
 
     return SwitchListTile.adaptive(
@@ -417,9 +432,7 @@ class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabBarShowContextualBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarShowContextualBar,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.tabBarShowContextualBar),
     );
 
     return ListTile(
@@ -465,25 +478,41 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGeneralSettingsProvider);
     final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
     final window = ref.watch(windowSizeClassControllerProvider);
     final railIsNarrow =
         ref.watch(effectiveTabBarPositionProvider).isVertical &&
         !window.allowsWideRail;
 
+    // Two stacked rows don't fit the *narrow* vertical side rail, which no
+    // resize can widen in this window; those options are hidden there to
+    // avoid a no-op choice. A short window or a collapsed panel can change,
+    // so there they stay offered and name their stand-in (see selectedMode).
     final offeredModes = {
-      TabBarStackingMode.lastUsedTabs,
-      if (settings.showContainerUi) ...[
-        TabBarStackingMode.containerTabs,
-        TabBarStackingMode.accordion,
-        if (!railIsNarrow) ...[
-          TabBarStackingMode.twoLevel,
-          TabBarStackingMode.tabGroups,
-        ],
-      ],
-      TabBarStackingMode.disabled,
+      for (final mode in TabBarStackingMode.values)
+        if (!(railIsNarrow &&
+            (mode == TabBarStackingMode.twoLevel ||
+                mode == TabBarStackingMode.tabGroups)))
+          mode,
     };
+
+    // Modes whose feature is hidden stay listed, grayed out; picking one asks
+    // to show it. The current choice does not apply then (Recently used tabs
+    // does), and says so.
+    Widget gated(TabBarStackingMode mode, Widget option) =>
+        settings.isStackingModeShown(mode)
+        ? option
+        : HiddenFeatureGate.feature(
+            mode == TabBarStackingMode.tabGroups
+                ? FeatureId.layoutStackingTabGroups
+                : FeatureId.layoutStackingContainerModes,
+            hiddenSettings: mode == settings.tabBarStackingMode
+                ? const [HiddenSetting.tabStacking]
+                : const [],
+            indicator: true,
+            child: option,
+          );
     // The radio shows what the user picked, not what the current room reduces
     // it to: a short window or a collapsed side panel stands a stacked mode in
     // for a single row, and marking that row selected would make picking the
@@ -538,6 +567,21 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
           RadioGroup(
             groupValue: selectedMode,
             onChanged: (value) async {
+              // The group also selects with the arrow keys, past the gate
+              // around a hidden option.
+              final feature = switch (value) {
+                TabBarStackingMode.tabGroups =>
+                  FeatureId.layoutStackingTabGroups,
+                TabBarStackingMode.containerTabs ||
+                TabBarStackingMode.accordion ||
+                TabBarStackingMode.twoLevel =>
+                  FeatureId.layoutStackingContainerModes,
+                _ => null,
+              };
+              if (feature != null &&
+                  !await mayPickHiddenOption(context, ref, feature)) {
+                return;
+              }
               if (value != null) {
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
@@ -554,31 +598,41 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                   title: Text(l10n.settings_recentlyUsedTabsOption),
                   subtitle: Text(l10n.settings_recentlyUsedTabsDescription),
                 ),
-                if (settings.showContainerUi) ...[
-                  RadioListTile.adaptive(
-                    value: TabBarStackingMode.containerTabs,
-                    title: Text(l10n.settings_containerTabsOption),
-                    subtitle: Text(l10n.settings_containerTabsDescription),
-                  ),
-                  RadioListTile.adaptive(
-                    value: TabBarStackingMode.accordion,
-                    title: Text(l10n.settings_accordionOption),
-                    subtitle: Text(l10n.settings_accordionDescription),
-                  ),
-                  // Two stacked rows don't fit the *narrow* vertical side
-                  // rail, which no resize can widen in this window; hide the
-                  // options there to avoid a no-op choice. A short window or a
-                  // collapsed panel can change, so there they stay offered and
-                  // name their stand-in (see selectedMode).
-                  if (!railIsNarrow) ...[
+                if (offeredModes.contains(
+                  TabBarStackingMode.containerTabs,
+                )) ...[
+                  gated(
+                    TabBarStackingMode.containerTabs,
                     RadioListTile.adaptive(
-                      value: TabBarStackingMode.twoLevel,
-                      title: Text(l10n.settings_twoRowsOption),
-                      subtitle: optionSubtitle(
-                        TabBarStackingMode.twoLevel,
-                        l10n.settings_twoRowsDescription,
+                      value: TabBarStackingMode.containerTabs,
+                      title: Text(l10n.settings_containerTabsOption),
+                      subtitle: Text(l10n.settings_containerTabsDescription),
+                    ),
+                  ),
+                  gated(
+                    TabBarStackingMode.accordion,
+                    RadioListTile.adaptive(
+                      value: TabBarStackingMode.accordion,
+                      title: Text(l10n.settings_accordionOption),
+                      subtitle: Text(l10n.settings_accordionDescription),
+                    ),
+                  ),
+                  if (offeredModes.contains(TabBarStackingMode.twoLevel))
+                    gated(
+                      TabBarStackingMode.twoLevel,
+                      RadioListTile.adaptive(
+                        value: TabBarStackingMode.twoLevel,
+                        title: Text(l10n.settings_twoRowsOption),
+                        subtitle: optionSubtitle(
+                          TabBarStackingMode.twoLevel,
+                          l10n.settings_twoRowsDescription,
+                        ),
                       ),
                     ),
+                ],
+                if (offeredModes.contains(TabBarStackingMode.tabGroups))
+                  gated(
+                    TabBarStackingMode.tabGroups,
                     RadioListTile.adaptive(
                       value: TabBarStackingMode.tabGroups,
                       title: Text(l10n.settings_tabGroupsOption),
@@ -587,8 +641,7 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
                         l10n.settings_tabGroupsDescription,
                       ),
                     ),
-                  ],
-                ],
+                  ),
                 RadioListTile.adaptive(
                   value: TabBarStackingMode.disabled,
                   title: Text(l10n.settings_disabledOption),
@@ -610,7 +663,7 @@ class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final closeButtonMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.quickTabSwitcherCloseButtonMode,
       ),
     );
@@ -680,9 +733,7 @@ class _QuickTabSwitcherPlacementSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final placement = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherPlacement,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherPlacement),
     );
     final switcherEnabled = ref.watch(
       effectiveTabBarStackingModeProvider.select(
@@ -750,14 +801,10 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final titleWidth = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherTitleWidth,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherTitleWidth),
     );
     final showTitles = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowTitles,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherShowTitles),
     );
     final switcherEnabled = ref.watch(
       effectiveTabBarStackingModeProvider.select(
@@ -837,7 +884,7 @@ class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final showHistorySuggestions = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.quickTabSwitcherShowHistorySuggestions,
       ),
     );
@@ -873,7 +920,7 @@ class _QuickTabSwitcherContainersByRecentUseTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final containersByRecentUse = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.quickTabSwitcherContainersByRecentUse,
       ),
     );
@@ -910,9 +957,7 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final quickTabSwitcherShowTitles = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherShowTitles,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherShowTitles),
     );
     final switcherEnabled = ref.watch(
       effectiveTabBarStackingModeProvider.select(
@@ -949,7 +994,7 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final hierarchyGlyphs = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.quickTabSwitcherHierarchyGlyphs,
       ),
     );
@@ -1035,7 +1080,7 @@ class _AutoHideTabBarTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final autoHideTabBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.autoHideTabBar),
+      storedGeneralSettingsProvider.select((s) => s.autoHideTabBar),
     );
 
     return SwitchListTile.adaptive(
@@ -1062,12 +1107,10 @@ class _AutoHideTabBarDistanceTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final autoHideTabBar = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.autoHideTabBar),
+      storedGeneralSettingsProvider.select((s) => s.autoHideTabBar),
     );
     final distance = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.autoHideTabBarDistance,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.autoHideTabBarDistance),
     );
 
     return RelativeDistanceSliderTile(
@@ -1096,7 +1139,7 @@ class _SideRailAutoHideTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final sideRailAutoHide = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.sideRailAutoHide),
+      storedGeneralSettingsProvider.select((s) => s.sideRailAutoHide),
     );
 
     return SwitchListTile.adaptive(
@@ -1123,7 +1166,7 @@ class _BottomSheetTabViewTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabViewBottomSheet = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabViewBottomSheet),
+      storedGeneralSettingsProvider.select((s) => s.tabViewBottomSheet),
     );
 
     return SwitchListTile.adaptive(
@@ -1150,9 +1193,7 @@ class _TabViewActionsAtBottomTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final actionsAtBottom = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabTrayActionsAtBottom,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.tabTrayActionsAtBottom),
     );
 
     return SwitchListTile.adaptive(
@@ -1179,9 +1220,7 @@ class _TabBarLongPressUrlCopyTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabBarLongPressUrlCopy = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.tabBarLongPressUrlCopy,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.tabBarLongPressUrlCopy),
     );
 
     return SwitchListTile.adaptive(
@@ -1208,7 +1247,7 @@ class _TabListShowFaviconsTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabListShowFavicons = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabListShowFavicons),
+      storedGeneralSettingsProvider.select((s) => s.tabListShowFavicons),
     );
 
     return SwitchListTile.adaptive(

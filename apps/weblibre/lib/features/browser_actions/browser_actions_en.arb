@@ -78,7 +78,7 @@
   "@browserActions_hardReloadTitle": {
     "description": "Name of the browser action that reloads the page ignoring cached copies, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
   },
-  "browserActions_hardReloadDescription": "Reload the current page, bypassing the cache",
+  "browserActions_hardReloadDescription": "Reload the page and download everything again",
   "@browserActions_hardReloadDescription": {
     "description": "Explanation under that browser action's name in the action lists: it reloads the page ignoring cached copies."
   },
@@ -652,13 +652,13 @@
   "@browserActions_showProfilesDescription": {
     "description": "Explanation under that browser action's name in the action lists: it opens the list of browser profiles."
   },
-  "browserActions_showProxySettingsTitle": "Proxy",
+  "browserActions_showProxySettingsTitle": "Connections",
   "@browserActions_showProxySettingsTitle": {
-    "description": "Name of the browser action that opens the proxy settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
+    "description": "Name of the browser action that opens the connection settings (Tor, VPNs and proxies), named like that settings category, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short."
   },
-  "browserActions_showProxySettingsDescription": "Open proxy settings",
+  "browserActions_showProxySettingsDescription": "Open connection settings",
   "@browserActions_showProxySettingsDescription": {
-    "description": "Explanation under that browser action's name in the action lists: it opens the proxy settings."
+    "description": "Explanation under that browser action's name in the action lists: it opens the connection settings (Tor, VPNs and proxies)."
   },
   "browserActions_showTorTitle": "Tor",
   "@browserActions_showTorTitle": {
@@ -869,7 +869,7 @@
   "@browserActions_showProfilesKeywords": {
     "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
   },
-  "browserActions_showProxySettingsKeywords": "vpn, sing-box, socks, connection, network",
+  "browserActions_showProxySettingsKeywords": "proxy, tor, vpn, sing-box, socks, connection, network",
   "@browserActions_showProxySettingsKeywords": {
     "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
   },

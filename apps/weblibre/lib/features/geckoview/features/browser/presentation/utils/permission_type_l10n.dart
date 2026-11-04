@@ -38,4 +38,11 @@ extension PermissionTypeL10n on PermissionType {
       PermissionType.mediaKeySystem => l10n.browser_permissionMediaKeySystem,
     };
   }
+
+  String? description(BuildContext context) => switch (this) {
+    PermissionType.persistentStorage => AppLocalizations.of(
+      context,
+    ).browser_permissionPersistentStorageDescription,
+    _ => null,
+  };
 }

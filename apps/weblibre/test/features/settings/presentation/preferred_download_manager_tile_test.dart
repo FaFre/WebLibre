@@ -63,7 +63,7 @@ Future<_FakeChoice> _pump(
     ProviderScope(
       overrides: [
         preferredDownloadManagerChoiceProvider.overrideWith(() => fake),
-        generalSettingsWithDefaultsProvider.overrideWith(
+        storedGeneralSettingsProvider.overrideWith(
           (ref) => GeneralSettings.withDefaults(
             useExternalDownloadManager: useExternalDownloadManager,
           ),

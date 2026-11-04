@@ -72,7 +72,7 @@ final class ProxyLogLevelApplierProvider
 }
 
 String _$proxyLogLevelApplierHash() =>
-    r'd5113086f6d8980662b90b2ecb7d0bdf602df181';
+    r'9707d689672fc144da168245df60cdc3589834ea';
 
 /// Restarts the sing-box runtime when the diagnostic log level changes.
 ///

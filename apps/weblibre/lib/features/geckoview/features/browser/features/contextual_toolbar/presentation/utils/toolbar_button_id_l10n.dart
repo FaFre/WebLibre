@@ -20,6 +20,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// Display label and long-press submenu description for [ToolbarButtonId].
@@ -37,8 +38,16 @@ extension ToolbarButtonIdL10n on ToolbarButtonId {
   /// What the button's long-press submenu offers, for the settings search
   /// index and the settings screen's own display. Empty for buttons with no
   /// long-press menu.
-  List<String> longPressActions(BuildContext context) {
+  /// What a long press offers, as [settings] show it: entries of hidden
+  /// features (child and isolated tabs) are left out, as in the menus
+  /// themselves.
+  List<String> longPressActions(
+    BuildContext context,
+    GeneralSettings settings,
+  ) {
     final l10n = AppLocalizations.of(context);
+    final childShown = settings.childTabEntryPointsShown;
+    final isolatedShown = settings.isolatedTabEntryPointsShown;
 
     return switch (this) {
       ToolbarButtonId.back => [l10n.contextualToolbar_longPressBackHistoryMenu],
@@ -54,9 +63,9 @@ extension ToolbarButtonIdL10n on ToolbarButtonId {
       ],
       ToolbarButtonId.addTab || ToolbarButtonId.tabsCount => [
         l10n.contextualToolbar_longPressAddRegularTab,
-        l10n.contextualToolbar_longPressAddChildTab,
+        if (childShown) l10n.contextualToolbar_longPressAddChildTab,
         l10n.contextualToolbar_longPressAddPrivateTab,
-        l10n.contextualToolbar_longPressAddIsolatedTab,
+        if (isolatedShown) l10n.contextualToolbar_longPressAddIsolatedTab,
       ],
       ToolbarButtonId.navigationMenu => [
         l10n.contextualToolbar_longPressOpenSettings,
@@ -72,7 +81,7 @@ extension ToolbarButtonIdL10n on ToolbarButtonId {
       ToolbarButtonId.duplicateTab => [
         l10n.contextualToolbar_actionCloneAsRegular,
         l10n.contextualToolbar_actionCloneAsPrivate,
-        l10n.contextualToolbar_actionCloneAsIsolated,
+        if (isolatedShown) l10n.contextualToolbar_actionCloneAsIsolated,
       ],
       ToolbarButtonId.pageUp => [l10n.contextualToolbar_longPressScrollToTop],
       ToolbarButtonId.pageDown => [

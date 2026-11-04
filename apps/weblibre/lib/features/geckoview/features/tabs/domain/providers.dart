@@ -21,15 +21,18 @@ import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/search/util/tokenized_filter.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'providers.g.dart';
 
@@ -195,6 +198,62 @@ Stream<List<TabSummary>> watchContainerTabsData(Ref ref, String? containerId) {
   return db.containerDao.getContainerTabsData(containerId).watch();
 }
 
+/// Whether a container menu for [containerId] offers closing its isolated
+/// tabs. Closing them is a way out, not creation: it stays while the scope
+/// still holds isolated tabs, even with isolated tabs hidden (P5).
+///
+/// The tab stream is watched only while isolated tabs are hidden: a container
+/// menu is built for every container chip, and the stream is only needed then.
+@Riverpod()
+bool closeIsolatedTabsShown(Ref ref, String? containerId) {
+  final isolatedTabsShown = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.isolatedTabEntryPointsShown,
+    ),
+  );
+  if (isolatedTabsShown) return true;
+
+  return ref.watch(
+    watchContainerTabsDataProvider(containerId).select(
+      (tabs) =>
+          tabs.value?.any((tab) => tab.tabMode == TabModeDbValue.isolated) ??
+          false,
+    ),
+  );
+}
+
+/// What a tab's menu needs to keep the ways out of a container while
+/// containers are hidden (P5): whether [tabId] is in a container, and whether
+/// its site is assigned to one. Neither applies while containers are shown,
+/// or for a menu without container rows ([enabled]): every tab's menu would
+/// otherwise hold two database streams open for nothing.
+@Riverpod()
+({bool inContainer, bool siteAssigned}) hiddenContainerWayOut(
+  Ref ref,
+  String tabId, {
+  required bool enabled,
+}) {
+  const none = (inContainer: false, siteAssigned: false);
+  if (!enabled) return none;
+
+  final containersShown = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.containerEntryPointsShown,
+    ),
+  );
+  if (containersShown) return none;
+
+  final inContainer = ref.watch(
+    watchContainerTabIdProvider(tabId).select((value) => value.value != null),
+  );
+  final siteAssigned = ref.watch(
+    watchIsSiteAssignedToContainerProvider(
+      tabId,
+    ).select((value) => value.value ?? false),
+  );
+  return (inContainer: inContainer, siteAssigned: siteAssigned);
+}
+
 @Riverpod(keepAlive: true)
 Stream<Set<String>> watchPinnedTabIds(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
@@ -258,8 +317,19 @@ Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
 /// its isolated tabs) mapped to the base contextualIdentities its site
 /// assignments are keyed on. Replicated to the container-proxy extension by
 /// ProxySettingsReplication.
+///
+/// Empty while strict mode is hidden (`container.strict_mode`): the
+/// containers keep the option, and it applies again once shown. Watching the
+/// switch re-sends the policies whenever it changes.
 @Riverpod(keepAlive: true)
 Stream<Map<String, List<String>>> watchStrictContextAssignments(Ref ref) {
+  final strictModeShown = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.isFeatureShown(FeatureId.containerStrictMode),
+    ),
+  );
+  if (!strictModeShown) return Stream.value(const {});
+
   final db = ref.watch(tabDatabaseProvider);
   return db.containerDao.strictContextAssignments().watch().map((rows) {
     final assignments = <String, Set<String>>{};
@@ -299,12 +369,14 @@ Stream<Map<String, Set<String>>> watchIsolatedContextContainerMap(Ref ref) {
   });
 }
 
+/// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
+/// a menu opened for a tab other than the selected one asks about its own.
 @Riverpod()
-Stream<bool> watchIsCurrentSiteAssignedToContainer(Ref ref) {
+Stream<bool> watchIsSiteAssignedToContainer(Ref ref, String tabId) {
   final currentUri = ref.watch(
-    selectedTabStateProvider.select(
-      (value) => value?.url ?? TabState.$default('').url,
-    ),
+    tabStateProvider(
+      tabId,
+    ).select((value) => value?.url ?? TabState.$default('').url),
   );
 
   final db = ref.watch(tabDatabaseProvider);

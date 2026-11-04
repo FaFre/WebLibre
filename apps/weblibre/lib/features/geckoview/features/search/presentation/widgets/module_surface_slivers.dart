@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_module_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/action_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_article_summary.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -159,6 +160,7 @@ class ModuleSurfaceSliverList extends ConsumerWidget {
     }
 
     final order = ref.watch(searchModuleOrderProvider(surface));
+    final shownFeatures = ref.watch(shownFeaturesProvider);
     final builders = buildSurfaceModuleBuilders(
       surface: surface,
       callbacks: callbacks,
@@ -169,6 +171,7 @@ class ModuleSurfaceSliverList extends ConsumerWidget {
         for (final entry in order)
           if (entry.visible &&
               builders.containsKey(entry.type) &&
+              isSearchModuleFeatureShown(entry.type, shownFeatures) &&
               (moduleFilter?.call(entry.type) ?? true))
             builders[entry.type]!(),
         CustomizeSectionsButton(surface: surface),

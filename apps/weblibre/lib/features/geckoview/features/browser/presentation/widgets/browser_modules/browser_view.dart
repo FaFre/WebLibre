@@ -502,7 +502,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             final settings = ref.read(
                               generalSettingsWithDefaultsProvider,
                             );
-                            if (!settings.showIsolatedTabUi) {
+                            if (!settings.isolatedTabEntryPointsShown) {
                               return;
                             }
 
@@ -538,7 +538,7 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                           localizedTitle: l10n.browser_quickActionNewPrivateTab,
                           icon: 'mdi_icon_domino_mask',
                         ),
-                        if (settings.showIsolatedTabUi)
+                        if (settings.isolatedTabEntryPointsShown)
                           ShortcutItem(
                             type: 'new_isolated_tab',
                             localizedTitle:

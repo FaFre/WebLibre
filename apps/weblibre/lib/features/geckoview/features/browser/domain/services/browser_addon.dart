@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
@@ -31,6 +32,16 @@ import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart'
 part 'browser_addon.g.dart';
 
 const _signatureRequiredPref = 'xpinstall.signatures.required';
+
+/// How [BrowserAddonService.install] ended.
+enum AddonInstallOutcome {
+  installed,
+
+  /// The user declined the permission prompt. Not a failure: asking again
+  /// would only repeat the prompt they just answered.
+  cancelled,
+  failed,
+}
 
 @Riverpod(keepAlive: true)
 class AllowUnsignedExtensions extends _$AllowUnsignedExtensions {
@@ -112,20 +123,29 @@ class BrowserAddonService extends _$BrowserAddonService {
     }
   }
 
-  Future<bool> install(String addonGuid) async {
+  Future<AddonInstallOutcome> install(String addonGuid) async {
     try {
       final xpiUrl = await getAddonXpiUrl(addonGuid);
-      if (!ref.mounted) return false;
+      if (!ref.mounted) return AddonInstallOutcome.failed;
 
       await ref.read(addonServiceProvider).installAddon(xpiUrl);
 
-      return true;
+      return AddonInstallOutcome.installed;
     } catch (e, s) {
+      if (e is PlatformException && e.code == _userCancelledCode) {
+        logger.i('Installing $addonGuid was cancelled by the user');
+        return AddonInstallOutcome.cancelled;
+      }
+
       logger.e('Failed installing $addonGuid', error: e, stackTrace: s);
 
-      return false;
+      return AddonInstallOutcome.failed;
     }
   }
+
+  /// The Pigeon error code of a declined permission prompt: the class name of
+  /// Android Components' `WebExtensionInstallException.UserCancelled`.
+  static const _userCancelledCode = 'UserCancelled';
 
   Future<bool> installFromFile(String filePath) async {
     try {

@@ -22,8 +22,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
@@ -83,6 +85,13 @@ class ContainerSitesScreen extends HookConsumerWidget {
     final textController = useTextEditingController();
 
     final sites = useState(initialSites);
+    // `*.` entries still work and existing ones stay listed; only the hint
+    // that offers them follows the feature (`container.wildcard_assignments`).
+    final wildcardsShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.containerWildcardAssignments),
+      ),
+    );
 
     return PopScope(
       canPop: false,
@@ -111,8 +120,12 @@ class ContainerSitesScreen extends HookConsumerWidget {
                   child: TextFormField(
                     decoration: InputDecoration(
                       label: Text(l10n.tabs_addSiteLabel),
-                      hintText: l10n.tabs_addSiteHint,
-                      helperText: l10n.tabs_addSiteHelperText,
+                      hintText: wildcardsShown
+                          ? l10n.tabs_addSiteHint
+                          : l10n.tabs_addSiteHintSingle,
+                      helperText: wildcardsShown
+                          ? l10n.tabs_addSiteHelperText
+                          : null,
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       suffix: TextButton(
                         onPressed: () {

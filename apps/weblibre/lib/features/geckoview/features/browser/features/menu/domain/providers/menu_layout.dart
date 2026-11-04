@@ -20,10 +20,14 @@
 import 'dart:convert';
 
 import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/utils/ordered_layout.dart';
 
 part 'menu_layout.g.dart';
 
@@ -36,11 +40,15 @@ part 'menu_layout.g.dart';
 /// layout can be reconciled against the shipped defaults in one pass on read.
 @Riverpod(keepAlive: true)
 class MenuLayout extends _$MenuLayout {
-  void reorderSections(int oldIndex, int newIndex) {
-    final sections = [...state];
-    final section = sections.removeAt(oldIndex);
-    sections.insert(newIndex, section);
-    state = sections;
+  /// Moves a section within a list that shows only the sections in [shown];
+  /// the others stay among the same neighbours (see
+  /// [moveAmongShown]).
+  void reorderShownSections(
+    List<MenuSectionType> shown,
+    int oldIndex,
+    int newIndex,
+  ) {
+    state = moveAmongShown(state, (e) => e.type, shown, oldIndex, newIndex);
   }
 
   void toggleSectionVisibility(MenuSectionType type) {
@@ -53,20 +61,23 @@ class MenuLayout extends _$MenuLayout {
     ];
   }
 
-  /// Reorders the rows of [section], or — when [parent] is given — the rows
-  /// that [parent] reveals when it expands.
-  void reorderItems(
+  /// Moves a row of [section], or — when [parent] is given — of the rows
+  /// [parent] reveals when it expands, within a list that shows only the rows
+  /// in [shown]; the others stay among the same neighbours (see
+  /// [moveAmongShown]).
+  void reorderShownItems(
     MenuSectionType section,
     MenuItemType? parent,
+    List<MenuItemType> shown,
     int oldIndex,
     int newIndex,
   ) {
-    state = _mapSectionItems(section, parent, (items) {
-      final reordered = [...items];
-      final item = reordered.removeAt(oldIndex);
-      reordered.insert(newIndex, item);
-      return reordered;
-    });
+    state = _mapSectionItems(
+      section,
+      parent,
+      (items) =>
+          moveAmongShown(items, (e) => e.type, shown, oldIndex, newIndex),
+    );
   }
 
   void toggleItemVisibility(
@@ -148,6 +159,23 @@ class MenuLayout extends _$MenuLayout {
     return stateOrNull ?? mergeMenuLayoutWithDefaults(null);
   }
 }
+
+/// The menu as drawn: the user's arrangement ([MenuLayout]), or the shipped
+/// one while menu customization is hidden (`layout.menu_customization`). The
+/// arrangement is kept and comes back with the feature.
+@Riverpod(keepAlive: true)
+List<MenuSectionEntry> effectiveMenuLayout(Ref ref) {
+  final customizationShown = ref.watch(
+    shownFeaturesProvider.select(
+      (shown) => shown.contains(FeatureId.layoutMenuCustomization),
+    ),
+  );
+  if (!customizationShown) return defaultMenuLayout;
+  return ref.watch(menuLayoutProvider);
+}
+
+/// The shipped menu, as drawn while menu customization is hidden.
+final defaultMenuLayout = mergeMenuLayoutWithDefaults(null);
 
 /// Where the sheet is in its arrangement UI: not in it at all, arranging the
 /// sections, arranging the rows of one section, or arranging the rows one of

@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart' show immutable;
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/app_links/domain/services/effective_app_link_policy.dart';
@@ -206,6 +207,10 @@ class AppLinksCoordinator extends _$AppLinksCoordinator {
       liveContextId: contextId,
       containers: containers,
       isolationContextContainerMap: isolationMap,
+      // As the published policy reads it (`effectiveAppLinkPolicy`).
+      containerAppLinksShown: ref
+          .read(shownFeaturesProvider)
+          .contains(FeatureId.containerAppLinks),
     );
   }
 }

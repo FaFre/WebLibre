@@ -27,6 +27,7 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -36,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/c
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/proxy/data/models/singbox_proxy_profile.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/proxy/domain/providers/effective_tab_routing.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
@@ -52,6 +54,7 @@ import 'package:weblibre/features/proxy/presentation/widgets/proxy_connection_pi
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/tor/presentation/controllers/start_tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
@@ -107,67 +110,111 @@ class ConnectionSection extends ConsumerWidget {
     // on — tapping it stopped it instead of starting it.
     final runningProfileIds = ref.watch(runningSingboxProfileIdsProvider);
 
+    // Routing all regular or private tabs is `connections.global_routing`. A
+    // global route already in place keeps its row, which is how it is seen and
+    // undone (P5).
+    final globalRoutingShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.connectionsGlobalRouting),
+      ),
+    );
+
+    // The section can be here only because a connection is running or a tab
+    // needs one (P5). Then the rows for hidden features stay only where they
+    // are in use: a container's own route, and Tor while it is set up
+    // ([torInUse]) or starting.
+    final containerRoutingShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.containerProxyRouting),
+      ),
+    );
+    // A route of its own for one isolated tab is
+    // `connections.isolated_tab_routing`; a route the tab already has
+    // keeps its row (P5).
+    final isolatedTabRoutingShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.connectionsIsolatedTabRouting),
+      ),
+    );
+    final torFeatureShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.connectionsTorBasic),
+      ),
+    );
+    final torInUse = ref.watch(torInUseProvider);
+    final torShown = torFeatureShown || torInUse;
+    final torUsage = proxyConnectionUsage(
+      id: const TorProxyConnectionId(),
+      routingSettings: routingSettings,
+      containers: containers,
+    );
+
     final routeRows = <Widget>[
       // The global route, which every container without its own route inherits.
-      _RouteRow(
-        icon: MdiIcons.tab,
-        label: l10n.menu_connectionRegularTabs,
-        value:
-            routingSettings.regularTabsMode == ProxyRegularTabRoutingMode.all &&
-                routingSettings.regularTabsProxyConnectionId != null
-            ? l10n.menu_connectionAllThrough(
-                proxyConnectionTitle(
-                  proxyOptions,
-                  routingSettings.regularTabsProxyConnectionId!,
-                  l10n,
-                ),
-              )
-            : l10n.menu_connectionPerContainer,
-        onTap: () async {
-          // Read before the picker opens. The sheet can outlive this row —
-          // the menu behind it closes on a drag or an external navigation —
-          // and a `WidgetRef` throws once its widget is gone.
-          final repository = ref.read(
-            proxyRoutingSettingsRepositoryProvider.notifier,
-          );
+      if (globalRoutingShown ||
+          routingSettings.regularTabsMode == ProxyRegularTabRoutingMode.all)
+        _RouteRow(
+          icon: MdiIcons.tab,
+          label: l10n.menu_connectionRegularTabs,
+          value:
+              routingSettings.regularTabsMode ==
+                      ProxyRegularTabRoutingMode.all &&
+                  routingSettings.regularTabsProxyConnectionId != null
+              ? l10n.menu_connectionAllThrough(
+                  proxyConnectionTitle(
+                    proxyOptions,
+                    routingSettings.regularTabsProxyConnectionId!,
+                    l10n,
+                  ),
+                )
+              : l10n.menu_connectionPerContainer,
+          onTap: () async {
+            // Read before the picker opens. The sheet can outlive this row —
+            // the menu behind it closes on a drag or an external navigation —
+            // and a `WidgetRef` throws once its widget is gone.
+            final repository = ref.read(
+              proxyRoutingSettingsRepositoryProvider.notifier,
+            );
 
-          final outcome = await showProxyConnectionPicker(
-            context,
-            title: l10n.menu_connectionRegularTabs,
-            selectedProxyConnectionId:
-                routingSettings.regularTabsMode ==
-                    ProxyRegularTabRoutingMode.all
-                ? routingSettings.regularTabsProxyConnectionId
-                : null,
-            noneTitle: l10n.menu_connectionPerContainer,
-            noneSubtitle: l10n.menu_connectionPerContainerSubtitle,
-          );
+            final outcome = await showProxyConnectionPicker(
+              context,
+              title: l10n.menu_connectionRegularTabs,
+              selectedProxyConnectionId:
+                  routingSettings.regularTabsMode ==
+                      ProxyRegularTabRoutingMode.all
+                  ? routingSettings.regularTabsProxyConnectionId
+                  : null,
+              noneTitle: l10n.menu_connectionPerContainer,
+              noneSubtitle: l10n.menu_connectionPerContainerSubtitle,
+            );
 
-          switch (outcome) {
-            case null:
-              break;
-            case ProxyPickerCleared() || ProxyPickerDirect():
-              await repository.updateSettings(
-                (current) => current.copyWith(
-                  regularTabsMode: ProxyRegularTabRoutingMode.container,
-                ),
-              );
-            case ProxyPickerSelected(:final id):
-              await repository.updateSettings(
-                (current) => current.copyWith(
-                  regularTabsMode: ProxyRegularTabRoutingMode.all,
-                  regularTabsProxyConnectionId: id,
-                ),
-              );
-              if (context.mounted) {
-                await ensureProxyStartedForConnection(context, ref, id);
-              }
-          }
-        },
-      ),
+            switch (outcome) {
+              case null:
+                break;
+              case ProxyPickerCleared() || ProxyPickerDirect():
+                await repository.updateSettings(
+                  (current) => current.copyWith(
+                    regularTabsMode: ProxyRegularTabRoutingMode.container,
+                  ),
+                );
+              case ProxyPickerSelected(:final id):
+                await repository.updateSettings(
+                  (current) => current.copyWith(
+                    regularTabsMode: ProxyRegularTabRoutingMode.all,
+                    regularTabsProxyConnectionId: id,
+                  ),
+                );
+                if (context.mounted) {
+                  await ensureProxyStartedForConnection(context, ref, id);
+                }
+            }
+          },
+        ),
       // Private tabs have their own route and never inherit the global one, so
       // it is only worth a row while a private tab is in front.
-      if (routing.contextId == privateContextId)
+      if (routing.contextId == privateContextId &&
+          (globalRoutingShown ||
+              routingSettings.privateTabsProxyConnectionId != null))
         _RouteRow(
           icon: MdiIcons.dominoMask,
           iconColor: appColors.privateTabPurple,
@@ -215,7 +262,11 @@ class ConnectionSection extends ConsumerWidget {
       // An isolated tab has a cookie store of its own, so it can be routed
       // independently of the container it sits in.
       if (routing.contextId case final isolationContextId?
-          when isIsolatedContextId(isolationContextId))
+          when isIsolatedContextId(isolationContextId) &&
+              (isolatedTabRoutingShown ||
+                  routingSettings.isolationContextRoutes.containsKey(
+                    isolationContextId,
+                  )))
         _RouteRow(
           icon: MdiIcons.snowflake,
           iconColor: appColors.isolatedTabTeal,
@@ -272,14 +323,19 @@ class ConnectionSection extends ConsumerWidget {
       // Only a container with a cookie-store context of its own can carry a
       // route; the others share the general context. Those still get a row,
       // so the menu says why instead of leaving the container out (#678).
-      if (container != null && container.metadata.contextualIdentity == null)
+      if (containerRoutingShown &&
+          container != null &&
+          container.metadata.contextualIdentity == null)
         _RouteRow(
           icon: resolveContainerIcon(container.metadata.iconData),
           label: container.name ?? l10n.menu_connectionThisContainer,
           value: l10n.menu_connectionContainerNotIsolated,
           onTap: () => showContainerIsolationRequiredDialog(context),
         )
-      else if (container != null)
+      else if (container != null &&
+          (containerRoutingShown ||
+              container.metadata.proxyConnectionId != null ||
+              container.metadata.bypassGlobalProxy))
         _RouteRow(
           icon: resolveContainerIcon(container.metadata.iconData),
           label: container.name ?? l10n.menu_connectionThisContainer,
@@ -293,6 +349,14 @@ class ConnectionSection extends ConsumerWidget {
             final containerRepository = ref.read(
               containerRepositoryProvider.notifier,
             );
+            // "Direct" here is bypassing the global route,
+            // `container.bypass_global_proxy` (Expert), as in the container
+            // editor; a container that already bypasses keeps the choice.
+            final offerBypass =
+                container.metadata.bypassGlobalProxy ||
+                ref
+                    .read(generalSettingsWithDefaultsProvider)
+                    .isFeatureShown(FeatureId.containerBypassGlobalProxy);
 
             final outcome = await showProxyConnectionPicker(
               context,
@@ -303,8 +367,10 @@ class ConnectionSection extends ConsumerWidget {
               noneTitle: l10n.menu_connectionFollowGlobalRoutingOption,
               noneSubtitle:
                   l10n.menu_connectionFollowGlobalRoutingOptionSubtitle,
-              directTitle: l10n.menu_connectionDirect,
-              directSubtitle: l10n.menu_connectionContainerDirectSubtitle,
+              directTitle: offerBypass ? l10n.menu_connectionDirect : null,
+              directSubtitle: offerBypass
+                  ? l10n.menu_connectionContainerDirectSubtitle
+                  : null,
             );
             if (outcome == null) return;
 
@@ -376,42 +442,37 @@ class ConnectionSection extends ConsumerWidget {
         }).toList();
 
     final connectionRows = <Widget>[
-      _ConnectionRow(
-        icon: TorIcons.onionAlt,
-        label: l10n.tor_proxyLabel(torBrand),
-        active: isTorActive,
-        starting: isTorBusy,
-        enabled: !isTorBusy,
-        condition: ref.watch(
-          proxyConnectionConditionProvider(const TorProxyConnectionId()),
+      if (torShown || isTorBusy)
+        _ConnectionRow(
+          icon: TorIcons.onionAlt,
+          label: l10n.tor_proxyLabel(torBrand),
+          active: isTorActive,
+          starting: isTorBusy,
+          enabled: !isTorBusy,
+          connectionId: const TorProxyConnectionId(),
+          usage: torUsage,
+          onToggle: () async {
+            if (isTorBusy) return;
+            if (isTorActive) {
+              await ref.read(torProxyServiceProvider.notifier).disconnect();
+            } else {
+              await ref
+                  .read(startProxyControllerProvider.notifier)
+                  .startProxy();
+            }
+          },
+          onEdit: () async {
+            Navigator.pop(context);
+            await const TorProxyRoute().push(context);
+          },
         ),
-        usage: proxyConnectionUsage(
-          id: const TorProxyConnectionId(),
-          routingSettings: routingSettings,
-          containers: containers,
-        ),
-        onToggle: () async {
-          if (isTorBusy) return;
-          if (isTorActive) {
-            await ref.read(torProxyServiceProvider.notifier).disconnect();
-          } else {
-            await ref.read(startProxyControllerProvider.notifier).startProxy();
-          }
-        },
-        onEdit: () async {
-          Navigator.pop(context);
-          await const TorProxyRoute().push(context);
-        },
-      ),
       for (final (profile, usage) in relevantProfiles)
         _ConnectionRow(
           icon: MdiIcons.lanConnect,
           label: profile.name,
           active: runningProfileIds.contains(profile.id),
           starting: startingConnectionIds.contains(profile.proxyConnectionId),
-          condition: ref.watch(
-            proxyConnectionConditionProvider(profile.proxyConnection),
-          ),
+          connectionId: profile.proxyConnection,
           usage: usage,
           onToggle: () async {
             final runtime = ref.read(
@@ -498,8 +559,10 @@ class ConnectionSection extends ConsumerWidget {
                     ),
                   ),
                 ),
-              for (final row in routeRows) row,
-              const Divider(indent: 56, endIndent: 16),
+              if (routeRows.isNotEmpty) ...[
+                for (final row in routeRows) row,
+                const Divider(indent: 56, endIndent: 16),
+              ],
               for (final row in connectionRows) row,
               const Divider(indent: 56, endIndent: 16),
               // One way out of the menu: the proxy settings screen forks into
@@ -568,7 +631,7 @@ class _RouteRow extends StatelessWidget {
   }
 }
 
-class _ConnectionRow extends StatelessWidget {
+class _ConnectionRow extends ConsumerWidget {
   final IconData icon;
   final String label;
   final bool active;
@@ -581,9 +644,10 @@ class _ConnectionRow extends StatelessWidget {
   /// blocks those routes, which the row says outright.
   final ProxyConnectionUsage usage;
 
-  /// What is wrong with it beyond on or off: a running connection whose
-  /// traffic fails, or one that could not be started on its own.
-  final ProxyConnectionCondition? condition;
+  /// The connection the row is for, whose condition it shows: what is wrong
+  /// with it beyond on or off, like a running connection whose traffic fails,
+  /// or one that could not be started on its own.
+  final ProxyConnectionId connectionId;
 
   final Future<void> Function() onToggle;
   final Future<void> Function() onEdit;
@@ -595,15 +659,16 @@ class _ConnectionRow extends StatelessWidget {
     required this.usage,
     required this.onToggle,
     required this.onEdit,
-    this.condition,
+    required this.connectionId,
     this.starting = false,
     this.enabled = true,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final activeColor = AppColors.of(context).torActiveGreen;
+    final condition = ref.watch(proxyConnectionConditionProvider(connectionId));
 
     final isStarting = starting && !active;
     final isBlocking = !usage.isUnused && !active && !isStarting;

@@ -57,7 +57,7 @@ final class BrowserActionDispatcherProvider
 }
 
 String _$browserActionDispatcherHash() =>
-    r'2e2efa1000bdbb60d23780707b0491b2d726c37f';
+    r'0a516817088317052e82bf558263813bf6677d57';
 
 /// Carries out [BrowserAction]s against the currently selected tab.
 ///

@@ -320,7 +320,6 @@ void main() {
         TabBarStackingMode.containerTabs,
         TabBarStackingMode.accordion,
         TabBarStackingMode.twoLevel,
-        TabBarStackingMode.tabGroups,
       ]) {
         expect(
           settingsWith(
@@ -331,6 +330,18 @@ void main() {
           reason: '$mode without container UI',
         );
       }
+    });
+
+    // Tab Groups group by the recorded tab relationships, not by container:
+    // the feature policy guards them with the advanced layout options only.
+    test('Tab Groups stay when the container UI is off', () {
+      expect(
+        settingsWith(
+          stacking: TabBarStackingMode.tabGroups,
+          showContainerUi: false,
+        ).effectiveTabBarStackingMode(window: tablet),
+        TabBarStackingMode.tabGroups,
+      );
     });
 
     test('disabled is never resurrected by any window', () {

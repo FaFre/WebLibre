@@ -65,7 +65,7 @@ class OpenInContainer extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    if (!settings.showContainerUi) {
+    if (!settings.containerEntryPointsShown) {
       return const SizedBox.shrink();
     }
 

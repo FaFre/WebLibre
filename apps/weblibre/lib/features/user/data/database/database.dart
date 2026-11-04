@@ -30,6 +30,7 @@ import 'package:weblibre/features/user/data/database/daos/setting.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.dart';
 import 'package:weblibre/features/user/data/database/database.drift.dart';
 import 'package:weblibre/features/user/data/database/database.steps.dart';
+import 'package:weblibre/features/user/data/models/legacy_setting_fallbacks.dart';
 
 @DriftDatabase(
   include: {'definitions.drift'},
@@ -45,7 +46,7 @@ import 'package:weblibre/features/user/data/database/database.steps.dart';
 )
 class UserDatabase extends $UserDatabase {
   @override
-  final int schemaVersion = 11;
+  final int schemaVersion = 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -139,6 +140,28 @@ class UserDatabase extends $UserDatabase {
         schema.quickSwitcherButtonConfigs,
         schema.quickSwitcherButtonConfigs.longPressAction,
       );
+    },
+    // Data only: three settings changed their fallback (the value used while
+    // nothing is stored). A profile from before keeps the old fallback, so
+    // its behavior does not change: missing rows and `NULL` values (written
+    // when a snapshot restored an untouched nullable field) get it; a value
+    // the user wrote is left alone. New profiles never run this and get the
+    // new fallbacks. See [legacySettingFallbacks].
+    from11To12: (m, schema) async {
+      for (final (:partition, :key, :value) in legacySettingFallbacks) {
+        // Booleans are stored as 0/1, as drift writes them.
+        final stored = value ? 1 : 0;
+        await m.database.customStatement(
+          'UPDATE setting SET "value" = ? '
+          'WHERE "key" = ? AND "value" IS NULL',
+          [stored, key],
+        );
+        await m.database.customStatement(
+          'INSERT OR IGNORE INTO setting ("key", partition_key, "value") '
+          'VALUES (?, ?, ?)',
+          [key, partition, stored],
+        );
+      }
     },
   );
 }

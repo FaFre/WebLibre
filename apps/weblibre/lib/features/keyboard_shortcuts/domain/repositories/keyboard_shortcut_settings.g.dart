@@ -137,4 +137,4 @@ final class EffectiveKeyboardShortcutsProvider
 }
 
 String _$effectiveKeyboardShortcutsHash() =>
-    r'e3d379129233c281357dc46df5d7d1d1b5cdb5f8';
+    r'a12f6b2d160a952259a23f40372e47890e1cb2f2';

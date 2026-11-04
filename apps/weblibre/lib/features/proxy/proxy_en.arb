@@ -336,6 +336,15 @@
   "@proxy_protocolFixedHelper": {
     "description": "Help text under the protocol field when editing an existing profile."
   },
+  "proxy_protocolFromImportHelper": "Set by the import. To enter a connection by hand, show “{featureName}” in Settings > Feature Control.",
+  "@proxy_protocolFromImportHelper": {
+    "description": "Help text under the protocol field of a connection being imported (from a link, QR code or file) while manual connection setup is hidden. The protocol comes from what was imported and cannot be switched. featureName is the name of the hidden feature that allows manual setup (for example \"Expert settings\"), quoted as a UI name; 'Settings > Feature Control' is the settings screen where features are shown and hidden.",
+    "placeholders": {
+      "featureName": {
+        "type": "String"
+      }
+    }
+  },
   "proxy_customOutboundLabel": "Custom Outbound",
   "@proxy_customOutboundLabel": {
     "description": "Protocol option in the proxy editor: enter a raw sing-box outbound configuration in JSON. \"Outbound\" is a sing-box term."

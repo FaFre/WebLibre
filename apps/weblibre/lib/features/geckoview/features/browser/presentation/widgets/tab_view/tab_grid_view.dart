@@ -191,7 +191,9 @@ class _TabGridView extends HookConsumerWidget {
     final containerId = ref.watch(selectedContainerProvider);
     final reorderEnabled = tabsReorderable && canManualReorder;
     final filterOptions = ref.watch(tabViewFilterControllerProvider);
-    final showHierarchicalTabs = filterOptions.showHierarchicalTabs;
+    final showHierarchicalTabs = ref.watch(
+      effectiveShowHierarchicalTabsProvider,
+    );
     final tabListDirection = ref.watch(
       generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
     );

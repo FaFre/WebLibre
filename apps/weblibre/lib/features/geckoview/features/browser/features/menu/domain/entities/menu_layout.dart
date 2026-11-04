@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/utils/ordered_layout.dart';
 
 part 'menu_layout.g.dart';
@@ -143,6 +145,26 @@ enum MenuItemType {
 
   // About
   about;
+
+  /// The policy feature this row is an entry point of, or null for rows that
+  /// are always offered. A row whose feature is hidden is left out of the menu
+  /// (and stays in the saved arrangement, so it returns in place).
+  ///
+  /// The Containers row itself is not guarded: it also holds the ways out of
+  /// a container (unassign the tab or the site), which are safe exits and
+  /// never hidden (P5). Its guarded children are filtered inside it. The
+  /// profile row is the entry to this profile's own controls (lock, password,
+  /// backup), which are never hidden; it switches profiles only when there is
+  /// something to switch to (`canSwitchProfilesProvider`).
+  FeatureId? get feature => switch (this) {
+    gestures => FeatureId.inputDrawnGestures,
+    manageContainers ||
+    assignContainer ||
+    assignUrlToContainer => FeatureId.containerCore,
+    cloneIsolatedTab => FeatureId.tabsIsolatedUi,
+    profileSwitch => FeatureId.profilesCurrentProfileControls,
+    _ => null,
+  };
 
   /// Identity icon for the arrangement UI.
   ///
@@ -429,6 +451,14 @@ List<MenuItemEntry> menuItemEntriesFromJson(Object? json) {
       .whereType<MenuItemEntry>()
       .toList();
 }
+
+/// Whether [layout] differs from the shipped menu. While menu customization
+/// is hidden the shipped menu is drawn instead (`effectiveMenuLayout`).
+bool menuLayoutIsCustomized(List<MenuSectionEntry> layout) =>
+    !const ListEquality<MenuSectionEntry>().equals(
+      layout,
+      mergeMenuLayoutWithDefaults(null),
+    );
 
 /// Reconciles a persisted menu layout with what the app currently offers, at
 /// every level: sections against [defaults], each surviving section's rows

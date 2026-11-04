@@ -35,6 +35,10 @@ part of 'routes.dart';
       name: 'ConfirmationSettingsRoute',
       path: 'confirmations',
     ),
+    TypedGoRoute<FeatureControlSettingsRoute>(
+      name: 'FeatureControlSettingsRoute',
+      path: 'feature_control',
+    ),
     TypedGoRoute<BrowsingSettingsRoute>(
       name: 'BrowsingSettingsRoute',
       path: 'browsing',
@@ -203,6 +207,16 @@ class SettingsTransferRoute extends GoRouteData with $SettingsTransferRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const SettingsTransferScreen();
+  }
+}
+
+class FeatureControlSettingsRoute extends GoRouteData
+    with $FeatureControlSettingsRoute {
+  const FeatureControlSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const FeatureControlSettingsScreen();
   }
 }
 

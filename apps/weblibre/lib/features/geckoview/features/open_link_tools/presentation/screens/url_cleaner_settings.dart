@@ -22,9 +22,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/format.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/dialogs/url_cleaner_restore_defaults_dialog.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/attribution_link.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -64,24 +66,33 @@ List<SettingsSectionDefinition> urlCleanerSettingsSections(
         ),
         SettingsEntryDefinition(
           title: l10n.openLinkTools_autoApplyTitle,
+          feature: FeatureId.urlCleanerReviewAndReferral,
           subtitle: l10n.openLinkTools_autoApplySubtitle,
           keywords: settingsKeywords(l10n.openLinkTools_autoApplyKeywords),
+          hiddenSettings: const [HiddenSetting.urlCleanerAutoApply],
           child: const _UrlCleanerAutoApplyTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.openLinkTools_allowReferralTitle,
+          feature: FeatureId.urlCleanerReviewAndReferral,
           subtitle: l10n.openLinkTools_allowReferralSubtitle,
           keywords: settingsKeywords(l10n.openLinkTools_allowReferralKeywords),
+          hiddenSettings: const [HiddenSetting.urlCleanerReferral],
           child: const _UrlCleanerAllowReferralTile(),
         ),
       ],
     ),
+    // The review prompt, the referral option and the catalog are
+    // `url_cleaner.review_and_referral` (Advanced privacy); the cleaner's
+    // own switch stays for everyone.
     SettingsSectionDefinition(
       title: l10n.openLinkTools_urlCleanerCatalogSectionTitle,
+      feature: FeatureId.urlCleanerReviewAndReferral,
       entries: [
         SettingsEntryDefinition(
           title: l10n.openLinkTools_autoUpdateCatalogTitle,
           subtitle: l10n.openLinkTools_autoUpdateCatalogSubtitle,
+          hiddenSettings: const [HiddenSetting.urlCleanerRules],
           child: const _UrlCleanerAutoUpdateTile(),
         ),
         SettingsEntryDefinition(
@@ -147,7 +158,7 @@ class _UrlCleanerEnabledTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.urlCleanerEnabled),
+      storedGeneralSettingsProvider.select((s) => s.urlCleanerEnabled),
     );
 
     return SwitchListTile.adaptive(
@@ -171,7 +182,7 @@ class _UrlCleanerAutoApplyTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final autoApply = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.urlCleanerAutoApply),
+      storedGeneralSettingsProvider.select((s) => s.urlCleanerAutoApply),
     );
 
     return SwitchListTile.adaptive(
@@ -195,7 +206,7 @@ class _UrlCleanerAllowReferralTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final allowReferral = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.urlCleanerAllowReferralMarketing,
       ),
     );
@@ -224,7 +235,7 @@ class _UrlCleanerAutoUpdateTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final autoUpdate = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.urlCleanerAutoUpdate),
+      storedGeneralSettingsProvider.select((s) => s.urlCleanerAutoUpdate),
     );
 
     return SwitchListTile.adaptive(
@@ -249,12 +260,10 @@ class _UrlCleanerUpdateButton extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final isUpdating = useState(false);
     final lastCheckEpochMs = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.urlCleanerLastCheckEpochMs,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.urlCleanerLastCheckEpochMs),
     );
     final lastUpdateWasAuto = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.urlCleanerLastUpdateWasAuto,
       ),
     );

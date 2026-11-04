@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
@@ -28,6 +29,7 @@ import 'package:weblibre/features/gestures/presentation/widgets/gesture_binding_
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_stroke_view.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 /// Lists the configured gesture → action bindings, grouped by action category,
 /// and lets the user add, edit and remove them.
@@ -37,7 +39,7 @@ class GestureBindingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
 
     Future<void> upsertBinding(
       ({GestureStroke stroke, BrowserAction action}) result, {
@@ -72,7 +74,7 @@ class GestureBindingsScreen extends HookConsumerWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(l10n.common_cancel),
             ),
-            FilledButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(l10n.gestures_actionRestore),
             ),
@@ -98,76 +100,88 @@ class GestureBindingsScreen extends HookConsumerWidget {
       );
     }
 
-    return SettingsCustomScrollScaffold(
-      title: l10n.gestures_gestureBindingsTitle,
-      actions: [
-        if (settings.hasCustomBindings)
-          IconButton(
-            icon: const Icon(Icons.restart_alt),
-            tooltip: l10n.gestures_restoreDefaultGesturesTooltip,
-            onPressed: restoreDefaults,
-          ),
-      ],
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add),
-        label: Text(l10n.gestures_addGestureButtonLabel),
-        onPressed: () async {
-          final result = await showGestureBindingEditor(
-            context,
-            existingBindings: settings.bindings,
-            maxFingers: settings.maxFingers,
-          );
-          if (result != null) {
-            await upsertBinding(result);
-          }
-        },
-      ),
-      slivers: [
-        if (settings.bindings.isEmpty)
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: Center(child: Text(l10n.gestures_noGesturesAssignedMessage)),
-          )
-        else
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-            sliver: SliverList.list(
-              children: [
-                for (final category in BrowserActionCategory.values)
-                  if (byCategory[category] case final entries?
-                      when entries.isNotEmpty)
-                    _GestureBindingGroup(
-                      title: category.label(context),
-                      children: [
-                        for (final binding in entries)
-                          _GestureBindingTile(
-                            gestureKey: binding.key,
-                            action: binding.value,
-                            onEdit: () async {
-                              final result = await showGestureBindingEditor(
-                                context,
-                                initialStroke: GestureStroke.fromKey(
-                                  binding.key,
-                                ),
-                                initialAction: binding.value,
-                                existingBindings: settings.bindings,
-                                maxFingers: settings.maxFingers,
-                              );
-                              if (result != null) {
-                                await upsertBinding(
-                                  result,
-                                  replacedKey: binding.key,
-                                );
-                              }
-                            },
-                            onRemove: () => removeBinding(binding.key),
-                          ),
-                      ],
-                    ),
-              ],
+    return HiddenFeatureScope(
+      feature: FeatureId.inputDrawnGestures,
+      child: SettingsCustomScrollScaffold(
+        title: l10n.gestures_gestureBindingsTitle,
+        actions: [
+          if (settings.hasCustomBindings)
+            HiddenFeatureGate(
+              child: IconButton(
+                icon: const Icon(Icons.restart_alt),
+                tooltip: l10n.gestures_restoreDefaultGesturesTooltip,
+                onPressed: restoreDefaults,
+              ),
             ),
+        ],
+        floatingActionButton: HiddenFeatureGate(
+          child: FloatingActionButton.extended(
+            icon: const Icon(Icons.add),
+            label: Text(l10n.gestures_addGestureButtonLabel),
+            onPressed: () async {
+              final result = await showGestureBindingEditor(
+                context,
+                existingBindings: settings.bindings,
+                maxFingers: settings.maxFingers,
+              );
+              if (result != null) {
+                await upsertBinding(result);
+              }
+            },
           ),
-      ],
+        ),
+        slivers: [
+          if (settings.bindings.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(l10n.gestures_noGesturesAssignedMessage),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+              sliver: SliverList.list(
+                children: [
+                  for (final category in BrowserActionCategory.values)
+                    if (byCategory[category] case final entries?
+                        when entries.isNotEmpty)
+                      _GestureBindingGroup(
+                        title: category.label(context),
+                        children: [
+                          for (final binding in entries)
+                            HiddenFeatureGate(
+                              indicator: true,
+                              child: _GestureBindingTile(
+                                gestureKey: binding.key,
+                                action: binding.value,
+                                onEdit: () async {
+                                  final result = await showGestureBindingEditor(
+                                    context,
+                                    initialStroke: GestureStroke.fromKey(
+                                      binding.key,
+                                    ),
+                                    initialAction: binding.value,
+                                    existingBindings: settings.bindings,
+                                    maxFingers: settings.maxFingers,
+                                  );
+                                  if (result != null) {
+                                    await upsertBinding(
+                                      result,
+                                      replacedKey: binding.key,
+                                    );
+                                  }
+                                },
+                                onRemove: () => removeBinding(binding.key),
+                              ),
+                            ),
+                        ],
+                      ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

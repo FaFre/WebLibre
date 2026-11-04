@@ -21,19 +21,24 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 
-/// Shows [child] only once [watchIsCurrentSiteAssignedToContainerProvider]
-/// has resolved and the current tab's site is not yet assigned to a
+/// Shows [child] only once [watchIsSiteAssignedToContainerProvider] has
+/// resolved and [tabId]'s site is not yet assigned to a
 /// container. Shared between TabMenu and the browser menu bottom sheet so
 /// the "assign URL to container" affordance stays in sync in both surfaces.
 class ContainerRelationUnassignedVisibility extends ConsumerWidget {
+  final String tabId;
   final Widget child;
 
-  const ContainerRelationUnassignedVisibility({super.key, required this.child});
+  const ContainerRelationUnassignedVisibility({
+    super.key,
+    required this.tabId,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSiteAssigned = ref.watch(
-      watchIsCurrentSiteAssignedToContainerProvider,
+      watchIsSiteAssignedToContainerProvider(tabId),
     );
 
     return Visibility(
@@ -43,18 +48,23 @@ class ContainerRelationUnassignedVisibility extends ConsumerWidget {
   }
 }
 
-/// Shows [child] only once [watchIsCurrentSiteAssignedToContainerProvider]
-/// has resolved and the current tab's site is already assigned to a
+/// Shows [child] only once [watchIsSiteAssignedToContainerProvider] has
+/// resolved and [tabId]'s site is already assigned to a
 /// container. Shared between TabMenu and the browser menu bottom sheet.
 class ContainerRelationAssignedVisibility extends ConsumerWidget {
+  final String tabId;
   final Widget child;
 
-  const ContainerRelationAssignedVisibility({super.key, required this.child});
+  const ContainerRelationAssignedVisibility({
+    super.key,
+    required this.tabId,
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isSiteAssigned = ref.watch(
-      watchIsCurrentSiteAssignedToContainerProvider,
+      watchIsSiteAssignedToContainerProvider(tabId),
     );
 
     return Visibility(

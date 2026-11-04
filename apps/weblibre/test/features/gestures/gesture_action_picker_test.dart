@@ -19,8 +19,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 const UnsetActionOption _greyOut = (
@@ -37,23 +40,33 @@ Future<void> _openPicker(
   BrowserAction? selected,
 }) async {
   await tester.pumpWidget(
-    MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Builder(
-        builder: (context) => Scaffold(
-          body: Center(
-            child: TextButton(
-              onPressed: () async => onPicked(
-                await showOptionalBrowserActionPicker(
-                  context,
-                  title: 'If unavailable',
-                  selected: selected,
-                  unsetOption: _greyOut,
-                  actions: actions,
+    ProviderScope(
+      overrides: [
+        // The visibility switches are read from the settings; without this a
+        // real settings database opens and outlives the test.
+        generalSettingsWithDefaultsProvider.overrideWithValue(
+          GeneralSettings.withDefaults(),
+        ),
+      ],
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Consumer(
+          builder: (context, ref, _) => Scaffold(
+            body: Center(
+              child: TextButton(
+                onPressed: () async => onPicked(
+                  await showOptionalBrowserActionPicker(
+                    context,
+                    ref,
+                    title: 'If unavailable',
+                    selected: selected,
+                    unsetOption: _greyOut,
+                    actions: actions,
+                  ),
                 ),
+                child: const Text('open'),
               ),
-              child: const Text('open'),
             ),
           ),
         ),

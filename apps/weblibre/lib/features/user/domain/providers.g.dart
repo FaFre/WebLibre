@@ -263,9 +263,17 @@ final class IncognitoModeEnabledProvider
 String _$incognitoModeEnabledHash() =>
     r'ed42b82b361521ea77d41fdab0e3e8bde69a9a78';
 
+/// The stored per-target fingerprinting overrides, for their editor: while
+/// they are hidden the engine applies the defaults (H1), but the editor shows
+/// what was saved and comes back when they are shown.
+
 @ProviderFor(fingerprintOverrideSettings)
 final fingerprintOverrideSettingsProvider =
     FingerprintOverrideSettingsProvider._();
+
+/// The stored per-target fingerprinting overrides, for their editor: while
+/// they are hidden the engine applies the defaults (H1), but the editor shows
+/// what was saved and comes back when they are shown.
 
 final class FingerprintOverrideSettingsProvider
     extends
@@ -277,6 +285,9 @@ final class FingerprintOverrideSettingsProvider
     with
         $FutureModifier<Result<FingerprintOverrides>>,
         $FutureProvider<Result<FingerprintOverrides>> {
+  /// The stored per-target fingerprinting overrides, for their editor: while
+  /// they are hidden the engine applies the defaults (H1), but the editor shows
+  /// what was saved and comes back when they are shown.
   FingerprintOverrideSettingsProvider._()
     : super(
         from: null,
@@ -304,7 +315,7 @@ final class FingerprintOverrideSettingsProvider
 }
 
 String _$fingerprintOverrideSettingsHash() =>
-    r'd4d40ec425098fb1f5a2f0c4944f058829a41a0a';
+    r'2a909c4fbd0f0a1fd71b7513d460dc2df052cd44';
 
 @ProviderFor(selectedProfile)
 final selectedProfileProvider = SelectedProfileProvider._();
@@ -338,6 +349,58 @@ final class SelectedProfileProvider
 }
 
 String _$selectedProfileHash() => r'c703cad8f30abb4f5f42db0119756ee6791ac477';
+
+/// Whether the profile switcher has anything to offer: another profile to
+/// switch to, or the multiple-profiles controls shown so one can be added.
+/// Without either, the profile entry opens this profile's own controls.
+
+@ProviderFor(canSwitchProfiles)
+final canSwitchProfilesProvider = CanSwitchProfilesProvider._();
+
+/// Whether the profile switcher has anything to offer: another profile to
+/// switch to, or the multiple-profiles controls shown so one can be added.
+/// Without either, the profile entry opens this profile's own controls.
+
+final class CanSwitchProfilesProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether the profile switcher has anything to offer: another profile to
+  /// switch to, or the multiple-profiles controls shown so one can be added.
+  /// Without either, the profile entry opens this profile's own controls.
+  CanSwitchProfilesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'canSwitchProfilesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$canSwitchProfilesHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return canSwitchProfiles(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$canSwitchProfilesHash() => r'a7413df75bffd871ca4565099070202aadac7449';
 
 @ProviderFor(backupList)
 final backupListProvider = BackupListProvider._();

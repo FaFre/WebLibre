@@ -19,10 +19,13 @@
  */
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
@@ -35,10 +38,13 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/setting_value_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   const ContextualToolbarSettingsScreen({
@@ -56,10 +62,12 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final configs = ref.watch(effectiveToolbarButtonConfigsProvider(location));
+    final configs = ref.watch(storedToolbarButtonConfigsProvider(location));
     final repository = ref.watch(toolbarConfigRepositoryProvider(location));
     final search = useSettingsSearch();
     final query = search.normalizedQuery;
+
+    final settings = ref.watch(storedGeneralSettingsProvider);
 
     bool matchesQuery(ToolbarButtonConfig config) {
       if (query.isEmpty) return true;
@@ -67,7 +75,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
       if (def == null) return false;
       return matchesSettingsSearch(query, [
         def.spec.id.label(context),
-        ...def.spec.id.longPressActions(context),
+        ...def.spec.id.longPressActions(context, settings),
         config.buttonId,
       ]);
     }
@@ -79,12 +87,21 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
           .toList(growable: false),
       [configs, query],
     );
+    // A switched-off button is offered only while the feature its action
+    // belongs to is shown, like the action pickers (`shownBrowserActions`).
+    // One already on the toolbar stays listed so it can still be taken off.
+    bool offered(ToolbarButtonConfig config) =>
+        ToolbarButtonId.values.asNameMap()[config.buttonId]?.action?.isShownIn(
+          settings,
+        ) ??
+        true;
     final hiddenConfigs = useMemoized(
       () => configs.value
           .where((c) => !c.isVisible)
+          .where(offered)
           .where(matchesQuery)
           .toList(growable: false),
-      [configs, query],
+      [configs, query, settings],
     );
 
     return SettingsCustomScrollScaffold(
@@ -162,6 +179,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
                 index: index,
                 config: config,
                 repository: repository,
+                location: location,
               );
             },
           ),
@@ -206,6 +224,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
                 index: index,
                 config: config,
                 repository: repository,
+                location: location,
               );
             },
           ),
@@ -317,11 +336,13 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
     required this.index,
     required this.config,
     required this.repository,
+    required this.location,
   });
 
   final int index;
   final ToolbarButtonConfig config;
   final ToolbarButtonConfigRepository repository;
+  final ToolbarConfigLocation location;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -332,6 +353,14 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
     final hasStatefulFallback =
         def.isPrimaryAvailable != null || def.spec.defaultFallback != null;
 
+    // Fallbacks and long-press actions are advanced
+    // (`layout.contextual_toolbar_advanced`), grayed out while it is hidden.
+    // One the user changed does not apply then, and says so.
+    final defaultFallbackId = defaultToolbarButtonConfigsFor(
+      location,
+    ).value.firstWhereOrNull((c) => c.buttonId == config.buttonId)?.fallbackId;
+    final fallbackChanged = config.fallbackId != defaultFallbackId;
+
     final fallbackOptions = toolbarButtonRegistry
         .where(
           (d) =>
@@ -339,7 +368,10 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
         )
         .toList();
 
-    final longPressActions = def.spec.id.longPressActions(context);
+    final longPressActions = def.spec.id.longPressActions(
+      context,
+      ref.watch(storedGeneralSettingsProvider),
+    );
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -405,24 +437,34 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (hasStatefulFallback) ...[
-                        _FallbackPicker(
-                          current: ToolbarFallbackChoice.fromStored(
-                            config.fallbackId,
-                          ),
-                          options: fallbackOptions,
-                          onChanged: (newFallback) => repository.assignFallback(
-                            config.buttonId,
-                            newFallback.toStoredFallbackId(),
+                      if (hasStatefulFallback)
+                        HiddenFeatureGate.feature(
+                          FeatureId.layoutContextualToolbarAdvanced,
+                          hiddenSettings: fallbackChanged
+                              ? const [HiddenSetting.toolbarButtons]
+                              : const [],
+                          child: _FallbackPicker(
+                            current: ToolbarFallbackChoice.fromStored(
+                              config.fallbackId,
+                            ),
+                            options: fallbackOptions,
+                            onChanged: (newFallback) =>
+                                repository.assignFallback(
+                                  config.buttonId,
+                                  newFallback.toStoredFallbackId(),
+                                ),
                           ),
                         ),
-                      ],
-                      _LongPressPicker(
-                        builtInActions: longPressActions,
-                        current: config.longPressAction,
-                        onChanged: (action) => repository.assignLongPressAction(
-                          config.buttonId,
-                          action,
+                      HiddenFeatureGate.feature(
+                        FeatureId.layoutContextualToolbarAdvanced,
+                        hiddenSettings: config.longPressAction != null
+                            ? const [HiddenSetting.toolbarButtons]
+                            : const [],
+                        child: _LongPressPicker(
+                          builtInActions: longPressActions,
+                          current: config.longPressAction,
+                          onChanged: (action) => repository
+                              .assignLongPressAction(config.buttonId, action),
                         ),
                       ),
                     ],
@@ -439,7 +481,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
 
 /// Chooses what holding the button does: its own built-in long press
 /// ([builtInActions], possibly nothing) or any [BrowserAction].
-class _LongPressPicker extends StatelessWidget {
+class _LongPressPicker extends ConsumerWidget {
   const _LongPressPicker({
     required this.builtInActions,
     required this.current,
@@ -466,7 +508,7 @@ class _LongPressPicker extends StatelessWidget {
         );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final builtIn = _builtInOption(l10n);
 
@@ -480,6 +522,7 @@ class _LongPressPicker extends StatelessWidget {
       onTap: () async {
         final picked = await showOptionalBrowserActionPicker(
           context,
+          ref,
           title: l10n.settings_longPressTitle,
           selected: current,
           unsetOption: builtIn,
@@ -498,7 +541,7 @@ class _LongPressPicker extends StatelessWidget {
 /// Picked from the long press's list, under the names of the actions the
 /// buttons do. A replacement is still a button, so the list only holds the
 /// actions of buttons that can stand in.
-class _FallbackPicker extends StatelessWidget {
+class _FallbackPicker extends ConsumerWidget {
   const _FallbackPicker({
     required this.current,
     required this.options,
@@ -510,7 +553,7 @@ class _FallbackPicker extends StatelessWidget {
   final ValueChanged<ToolbarFallbackChoice> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final currentId = current.resolveRuntimeFallbackId();
     final currentDef = currentId == null
@@ -531,6 +574,7 @@ class _FallbackPicker extends StatelessWidget {
         final optionActions = {for (final def in options) ?def.spec.id.action};
         final picked = await showOptionalBrowserActionPicker(
           context,
+          ref,
           title: l10n.settings_fallbackIfUnavailableTitle,
           selected: currentDef?.spec.id.action,
           unsetOption: (

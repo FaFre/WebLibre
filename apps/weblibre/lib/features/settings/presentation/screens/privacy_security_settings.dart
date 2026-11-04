@@ -25,12 +25,15 @@ import 'package:intl/intl.dart' show DateFormat, NumberFormat;
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/blocked_trackers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/blocked_trackers_l10n.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/package_label_resolver.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/web_engine_hardening_group.dart';
 import 'package:weblibre/features/settings/presentation/widgets/sections.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -40,6 +43,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/presentation/utils/delete_browsing_data_type_l10n.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/exit_app.dart';
 
 List<SettingsSectionDefinition> privacySecuritySettingsSections(
@@ -56,10 +60,12 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_enhancedTrackingProtectionTitle,
+          feature: FeatureId.privacyTrackingProtectionLevel,
           subtitle: l10n.settings_indexEnhancedTrackingProtectionSubtitle,
           keywords: settingsKeywords(
             l10n.settings_enhancedTrackingProtectionKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.trackingProtection],
           child: const _EnhancedTrackingProtectionSection(),
         ),
         SettingsEntryDefinition(
@@ -70,18 +76,22 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
         ),
         SettingsEntryDefinition(
           title: l10n.settings_bounceTrackingProtectionTitle,
+          feature: FeatureId.privacyBasicSwitches,
           subtitle: l10n.settings_indexBounceTrackingProtectionSubtitle,
           keywords: settingsKeywords(
             l10n.settings_bounceTrackingProtectionKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.bounceTrackingProtection],
           child: const _BounceTrackingProtectionTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_queryParameterStrippingTitle,
+          feature: FeatureId.privacyBasicSwitches,
           subtitle: l10n.settings_indexQueryParameterStrippingSubtitle,
           keywords: settingsKeywords(
             l10n.settings_queryParameterStrippingKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.queryParameterStripping],
           child: const _QueryParameterStrippingSection(),
         ),
         SettingsEntryDefinition(
@@ -107,24 +117,31 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_browserLanguagesTitle,
+          feature: FeatureId.privacyBrowserLanguages,
           subtitle: l10n.settings_indexBrowserLanguagesSubtitle,
           keywords: settingsKeywords(l10n.settings_browserLanguagesKeywords),
+          opensScreen: true,
+          hiddenSettings: const [HiddenSetting.browserLanguages],
           child: const _BrowserLanguagesTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_fingerprintProtectionTitle,
+          feature: FeatureId.privacyFpHardenedDefaults,
           subtitle: l10n.settings_fingerprintProtectionTileSubtitle,
           keywords: settingsKeywords(
             l10n.settings_fingerprintProtectionKeywords,
           ),
+          opensScreen: true,
           child: const _FingerprintProtectionTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_resistFingerprintingTileTitle,
+          feature: FeatureId.privacyResistFingerprinting,
           subtitle: l10n.settings_resistFingerprintingTileSubtitle,
           keywords: settingsKeywords(
             l10n.settings_resistFingerprintingTileKeywords,
           ),
+          opensScreen: true,
           child: const _ResistFingerprintingTile(),
         ),
       ],
@@ -134,14 +151,18 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_httpsOnlyModeTitle,
+          feature: FeatureId.privacyBasicSwitches,
           subtitle: l10n.settings_indexHttpsOnlyModeSubtitle,
           keywords: settingsKeywords(l10n.settings_httpsOnlyModeKeywords),
+          hiddenSettings: const [HiddenSetting.httpsOnly],
           child: const _HttpsOnlyModeSection(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_indexDnsOverHttpsTitle,
+          feature: FeatureId.privacyDohProviderControl,
           subtitle: l10n.settings_indexDnsOverHttpsSubtitle,
           keywords: settingsKeywords(l10n.settings_indexDnsOverHttpsKeywords),
+          opensScreen: true,
           child: const _DnsTile(),
         ),
       ],
@@ -151,20 +172,26 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_lnaEnabledTitle,
+          feature: FeatureId.privacyLocalNetworkBlockingSwitch,
           subtitle: l10n.settings_lnaEnabledSubtitle,
           keywords: settingsKeywords(l10n.settings_lnaEnabledKeywords),
+          hiddenSettings: const [HiddenSetting.localNetworkProtection],
           child: const _LnaEnabledTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_lnaBlockingTitle,
+          feature: FeatureId.privacyLocalNetworkBlockingSwitch,
           subtitle: l10n.settings_indexLnaBlockingSubtitle,
           keywords: settingsKeywords(l10n.settings_lnaBlockingKeywords),
+          hiddenSettings: const [HiddenSetting.localNetworkBlocking],
           child: const _LnaBlockingTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_lnaBlockTrackersTitle,
+          feature: FeatureId.privacyLocalNetworkBlockingSwitch,
           subtitle: l10n.settings_indexLnaBlockTrackersSubtitle,
           keywords: settingsKeywords(l10n.settings_lnaBlockTrackersKeywords),
+          hiddenSettings: const [HiddenSetting.localNetworkTrackers],
           child: const _LnaBlockTrackersTile(),
         ),
       ],
@@ -190,10 +217,12 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
         ),
         SettingsEntryDefinition(
           title: l10n.settings_globalPrivacyControlTitle,
+          feature: FeatureId.privacyBasicSwitches,
           subtitle: l10n.settings_indexGlobalPrivacyControlSubtitle,
           keywords: settingsKeywords(
             l10n.settings_globalPrivacyControlKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.globalPrivacyControl],
           child: const _GlobalPrivacyControlTile(),
         ),
       ],
@@ -257,16 +286,20 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_safeBrowsingMalwareTitle,
+          feature: FeatureId.privacySafeBrowsingSwitches,
           subtitle: l10n.settings_indexSafeBrowsingMalwareSubtitle,
           keywords: settingsKeywords(l10n.settings_safeBrowsingMalwareKeywords),
+          hiddenSettings: const [HiddenSetting.safeBrowsingMalware],
           child: const _SafeBrowsingMalwareTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_safeBrowsingPhishingTitle,
+          feature: FeatureId.privacySafeBrowsingSwitches,
           subtitle: l10n.settings_indexSafeBrowsingPhishingSubtitle,
           keywords: settingsKeywords(
             l10n.settings_safeBrowsingPhishingKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.safeBrowsingPhishing],
           child: const _SafeBrowsingPhishingTile(),
         ),
       ],
@@ -276,14 +309,18 @@ List<SettingsSectionDefinition> privacySecuritySettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_webEngineHardeningTitle,
+          feature: FeatureId.privacyCompleteHardeningSwitch,
           subtitle: l10n.settings_indexWebEngineHardeningSubtitle,
           keywords: settingsKeywords(l10n.settings_webEngineHardeningKeywords),
+          opensScreen: true,
           child: const _WebEngineHardeningTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_fissionEnabledTitle,
+          feature: FeatureId.privacySiteIsolationSwitch,
           subtitle: l10n.settings_indexFissionEnabledSubtitle,
           keywords: settingsKeywords(l10n.settings_fissionEnabledKeywords),
+          hiddenSettings: const [HiddenSetting.siteIsolation],
           child: const _FissionEnabledTile(),
         ),
         SettingsEntryDefinition(
@@ -338,12 +375,10 @@ class _AutoDeleteBrowsingDataSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final autoDeleteBrowsingData = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.autoDeleteBrowsingData,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.autoDeleteBrowsingData),
     );
     final deleteOnStart = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.autoDeleteBrowsingDataOnStart,
       ),
     );
@@ -446,7 +481,7 @@ class _ConfirmBeforeQuitTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final confirmBeforeQuit = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.confirmBeforeQuit),
+      storedGeneralSettingsProvider.select((s) => s.confirmBeforeQuit),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -492,9 +527,7 @@ class _AutoClearHistorySection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAutoCleanInterval = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.historyAutoCleanInterval,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.historyAutoCleanInterval),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -572,7 +605,7 @@ class _AutoClearUnassignedTabsSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unassignedTabsAutoCleanInterval = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.unassignedTabsAutoCleanInterval,
       ),
     );
@@ -654,9 +687,7 @@ class _GlobalPrivacyControlTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final globalPrivacyControlEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.globalPrivacyControlEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.globalPrivacyControlEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -682,7 +713,7 @@ class _ScreenshotProtectionTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.screenshotProtectionEnabled,
       ),
     );
@@ -717,12 +748,10 @@ class _AllowPrivateTabScreenshotsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allow = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.allowPrivateTabScreenshots,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.allowPrivateTabScreenshots),
     );
     final overridden = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.screenshotProtectionEnabled,
       ),
     );
@@ -757,7 +786,7 @@ class _HttpsOnlyModeSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final httpsOnlyMode = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.httpsOnlyMode),
+      storedEngineSettingsProvider.select((s) => s.httpsOnlyMode),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -833,9 +862,7 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trackingProtectionPolicy = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.trackingProtectionPolicy,
-      ),
+      storedEngineSettingsProvider.select((s) => s.trackingProtectionPolicy),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -853,6 +880,17 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
           RadioGroup(
             groupValue: trackingProtectionPolicy,
             onChanged: (value) async {
+              // The group also selects with the arrow keys, past the gate
+              // around a hidden option.
+              if (value == TrackingProtectionPolicy.custom &&
+                  !await mayPickHiddenOption(
+                    context,
+                    ref,
+                    FeatureId.privacyEtpCustomPolicies,
+                  )) {
+                return;
+              }
+
               if (value != null) {
                 // Save the policy change
                 await ref
@@ -893,14 +931,22 @@ class _EnhancedTrackingProtectionSection extends HookConsumerWidget {
                     l10n.settings_trackingProtectionStrictSubtitle,
                   ),
                 ),
-                RadioListTile<TrackingProtectionPolicy>.adaptive(
-                  value: TrackingProtectionPolicy.custom,
-                  toggleable: true,
-                  title: Text(l10n.settings_trackingProtectionCustomLabel),
-                  subtitle: Text(
-                    l10n.settings_trackingProtectionCustomSubtitle,
+                // The custom policies editor is `privacy.etp_custom_policies`
+                // (Expert). While hidden a custom policy does not apply:
+                // Strict does.
+                HiddenFeatureGate.feature(
+                  FeatureId.privacyEtpCustomPolicies,
+                  hiddenSettings: const [HiddenSetting.trackingProtection],
+                  indicator: true,
+                  child: RadioListTile<TrackingProtectionPolicy>.adaptive(
+                    value: TrackingProtectionPolicy.custom,
+                    toggleable: true,
+                    title: Text(l10n.settings_trackingProtectionCustomLabel),
+                    subtitle: Text(
+                      l10n.settings_trackingProtectionCustomSubtitle,
+                    ),
+                    secondary: const Icon(Icons.chevron_right),
                   ),
-                  secondary: const Icon(Icons.chevron_right),
                 ),
               ],
             ),
@@ -917,9 +963,7 @@ class _ContentBlockingDatabaseTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final useContentBlockingDatabase = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.useContentBlockingDatabase,
-      ),
+      storedEngineSettingsProvider.select((s) => s.useContentBlockingDatabase),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1066,7 +1110,7 @@ class _BounceTrackingProtectionTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final bounceTrackingProtectionMode = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
+      storedEngineSettingsProvider.select(
         (s) => s.contentBlocking.bounceTrackingProtectionMode,
       ),
     );
@@ -1110,9 +1154,7 @@ class _QueryParameterStrippingSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final queryParameterStripping = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.queryParameterStripping,
-      ),
+      storedEngineSettingsProvider.select((s) => s.queryParameterStripping),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1218,7 +1260,7 @@ class _FissionEnabledTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fissionEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.fissionEnabled),
+      storedEngineSettingsProvider.select((s) => s.fissionEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1248,9 +1290,7 @@ class _SafeBrowsingMalwareTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final safeBrowsingMalwareEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.safeBrowsingMalwareEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.safeBrowsingMalwareEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1277,9 +1317,7 @@ class _SafeBrowsingPhishingTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final safeBrowsingPhishingEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.safeBrowsingPhishingEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.safeBrowsingPhishingEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1306,9 +1344,7 @@ class _ExtensionsWebAPIEnabledTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final extensionsWebAPIEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.extensionsWebAPIEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.extensionsWebAPIEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1335,7 +1371,7 @@ class _ExtensionsWebAPIEnabledTile extends HookConsumerWidget {
 Future<void> _showRestartDialog(BuildContext context, WidgetRef ref) async {
   final result = await showQuitBrowserDialog(context);
   if (result == true && context.mounted) {
-    await exitApp(ProviderScope.containerOf(context));
+    await exitApp(ref.container);
   }
 }
 
@@ -1345,14 +1381,10 @@ class _AppOpeningProtectionSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.blockExternalAppsEnabled,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.blockExternalAppsEnabled),
     );
     final policies = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.externalAppIntentPolicies,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.externalAppIntentPolicies),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1556,7 +1588,7 @@ class _ResistFingerprintingTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await const WebEngineHardeningGroupRoute(
-          group: 'Resist Fingerprinting',
+          group: resistFingerprintingGroup,
         ).push(context);
       },
     );
@@ -1569,7 +1601,7 @@ class _LnaEnabledTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lnaEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
+      storedEngineSettingsProvider.select((s) => s.lnaEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1595,17 +1627,17 @@ class _LnaBlockingTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lnaEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
+      storedEngineSettingsProvider.select((s) => s.lnaEnabled),
     );
     final lnaBlocking = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaBlocking),
+      storedEngineSettingsProvider.select((s) => s.lnaBlocking),
     );
     final l10n = AppLocalizations.of(context);
 
     return SwitchListTile.adaptive(
       title: Text(l10n.settings_lnaBlockingTitle),
       subtitle: Text(l10n.settings_lnaBlockingSubtitle),
-      secondary: const Icon(MdiIcons.shieldLockOpen),
+      secondary: const Icon(MdiIcons.lanPending),
       value: lnaBlocking ?? false,
       onChanged: lnaEnabled == true
           ? (value) async {
@@ -1627,10 +1659,10 @@ class _LnaBlockTrackersTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lnaEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaEnabled),
+      storedEngineSettingsProvider.select((s) => s.lnaEnabled),
     );
     final lnaBlockTrackers = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.lnaBlockTrackers),
+      storedEngineSettingsProvider.select((s) => s.lnaBlockTrackers),
     );
     final l10n = AppLocalizations.of(context);
 

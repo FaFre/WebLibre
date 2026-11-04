@@ -43,6 +43,14 @@ Map<String, Object?> _wireguardEndpoint({
 }
 
 void main() {
+  // Pasted or scanned sing-box JSON is manual configuration: the add sheet
+  // asks to show that feature before importing it.
+  test('isSingboxJsonInput recognizes only a JSON object', () {
+    expect(isSingboxJsonInput('  {"type": "socks"}\n'), isTrue);
+    expect(isSingboxJsonInput('vless://example'), isFalse);
+    expect(isSingboxJsonInput('[Interface]\nPrivateKey = x'), isFalse);
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late _FakeProfilesRepository profiles;

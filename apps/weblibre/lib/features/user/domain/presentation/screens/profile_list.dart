@@ -26,17 +26,22 @@ import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_settings.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 class ProfileListScreen extends HookConsumerWidget {
   const ProfileListScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Adding profiles is `profiles.multi`, grayed out while hidden; managing
+    // the existing ones, and this profile's lock and backup, always stay (P5).
     final usersAsync = ref.watch(profileRepositoryProvider);
+    final profilePromptSetting = ref.watch(profilePromptSettingProvider);
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -58,6 +63,11 @@ class ProfileListScreen extends HookConsumerWidget {
             // Two users with one name are two identical rows, and the row you
             // tap is the one whose Delete you reach.
             final labels = profileLabels(profiles);
+            // The startup prompt only does something with a second profile:
+            // grayed out with multiple profiles hidden, unless more than one
+            // exists or it is on, so it can be turned off again (P5).
+            final promptOn =
+                profilePromptSetting.value == ProfilePromptMode.browserOnly;
 
             return ListView.builder(
               // One extra row for the startup prompt switch, kept in the same
@@ -65,7 +75,12 @@ class ProfileListScreen extends HookConsumerWidget {
               itemCount: profiles.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return const _StartupPromptTile();
+                  return HiddenFeatureGate.feature(
+                    FeatureId.profilesMulti,
+                    inForce: profiles.length > 1 || promptOn,
+                    indicator: true,
+                    child: const _StartupPromptTile(),
+                  );
                 }
 
                 final profile = profiles[index - 1];
@@ -101,11 +116,14 @@ class ProfileListScreen extends HookConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await CreateProfileRoute().push(context);
-        },
-        child: const Icon(Icons.person_add),
+      floatingActionButton: HiddenFeatureGate.feature(
+        FeatureId.profilesMulti,
+        child: FloatingActionButton(
+          onPressed: () async {
+            await CreateProfileRoute().push(context);
+          },
+          child: const Icon(Icons.person_add),
+        ),
       ),
     );
   }

@@ -22,11 +22,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'tab_view_controllers.g.dart';
 
@@ -64,6 +67,53 @@ class TabsViewModeController extends _$TabsViewModeController {
     return stateOrNull ?? TabsViewMode.list;
   }
 }
+
+/// Whether the Tree layout is offered (`tabs.tree_view_mode`, guarded by
+/// `switch.tree_tabs`).
+@Riverpod(keepAlive: true)
+bool treeViewModeShown(Ref ref) => ref.watch(
+  generalSettingsWithDefaultsProvider.select(
+    (s) => s.isFeatureShown(FeatureId.tabsTreeViewMode),
+  ),
+);
+
+/// The layout the tab view draws: the saved [TabsViewModeController] choice,
+/// except that a hidden Tree layout is drawn as List. The saved choice is left
+/// alone, so Tree comes back when it is shown again (acceptance scenario 18).
+/// Tree relationships are recorded either way; Tab Groups read them.
+@Riverpod(keepAlive: true)
+TabsViewMode effectiveTabsViewMode(Ref ref) {
+  final mode = ref.watch(tabsViewModeControllerProvider);
+  if (mode == TabsViewMode.tree && !ref.watch(treeViewModeShownProvider)) {
+    return TabsViewMode.list;
+  }
+  return mode;
+}
+
+/// Whether List and Grid draw the tab hierarchy: the saved filter choice,
+/// while `tabs.hierarchy_display` is shown. The choice is kept while hidden,
+/// like a hidden Tree layout.
+@Riverpod(keepAlive: true)
+bool effectiveShowHierarchicalTabs(Ref ref) {
+  final shown = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (s) => s.isFeatureShown(FeatureId.tabsHierarchyDisplay),
+    ),
+  );
+  final enabled = ref.watch(
+    tabViewFilterControllerProvider.select((o) => o.showHierarchicalTabs),
+  );
+  return shown && enabled;
+}
+
+/// The layouts the view menu and the pinch cycle offer, in [order].
+List<TabsViewMode> offeredTabsViewModes({
+  required bool treeShown,
+  List<TabsViewMode> order = TabsViewMode.values,
+}) => [
+  for (final mode in order)
+    if (mode != TabsViewMode.tree || treeShown) mode,
+];
 
 @Riverpod(keepAlive: true)
 @JsonPersist()

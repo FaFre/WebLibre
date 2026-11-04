@@ -339,7 +339,7 @@ class _UiZoomSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiScaleFactor = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.uiScaleFactor),
+      storedGeneralSettingsProvider.select((s) => s.uiScaleFactor),
     );
     final sliderValue = useKeyedState(uiScaleFactor, [uiScaleFactor]);
 
@@ -408,7 +408,7 @@ class _DisableAnimationsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final disableAnimations = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.disableAnimations),
+      storedGeneralSettingsProvider.select((s) => s.disableAnimations),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -435,7 +435,7 @@ class _ShowModalBarrierTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showModalBarrier = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showModalBarrier),
+      storedGeneralSettingsProvider.select((s) => s.showModalBarrier),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -462,9 +462,7 @@ class _ShowSearchCloseButtonTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final showSearchCloseButton = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.showSearchCloseButton,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.showSearchCloseButton),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -491,10 +489,10 @@ class _PureBlackTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pureBlack = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.pureBlack),
+      storedGeneralSettingsProvider.select((s) => s.pureBlack),
     );
     final themeMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
+      storedGeneralSettingsProvider.select((s) => s.themeMode),
     );
 
     // OLED surfaces only apply to dark mode; disable the toggle when the app
@@ -527,7 +525,7 @@ class _ThemeSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.themeMode),
+      storedGeneralSettingsProvider.select((s) => s.themeMode),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -716,7 +714,7 @@ class _RefreshRateSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final refreshRateMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.refreshRateMode),
+      storedGeneralSettingsProvider.select((s) => s.refreshRateMode),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -810,13 +808,13 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final directoryUri = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.downloadDirectoryUri),
+      storedGeneralSettingsProvider.select((s) => s.downloadDirectoryUri),
     );
     // With WebLibre remembered as the download manager, the chooser is skipped
     // and WebLibre downloads the file itself, into this folder.
     final useExternalDownloadManager =
         ref.watch(
-          generalSettingsWithDefaultsProvider.select(
+          storedGeneralSettingsProvider.select(
             (s) => s.useExternalDownloadManager,
           ),
         ) &&
@@ -937,9 +935,7 @@ class PreferredDownloadManagerTile extends HookConsumerWidget {
     });
 
     final useExternalDownloadManager = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.useExternalDownloadManager,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.useExternalDownloadManager),
     );
     final choice = ref.watch(preferredDownloadManagerChoiceProvider).value;
     final l10n = AppLocalizations.of(context);
@@ -1003,9 +999,7 @@ class _ExternalDownloadManagerTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final useExternalDownloadManager = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.useExternalDownloadManager,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.useExternalDownloadManager),
     );
     final l10n = AppLocalizations.of(context);
 

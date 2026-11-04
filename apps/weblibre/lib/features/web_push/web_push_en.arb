@@ -4,15 +4,15 @@
   "@webPush_screenTitle": {
     "description": "Title of the settings screen for website push notifications. \"Web Push\" is the name of the web standard that lets websites send notifications."
   },
-  "webPush_screenSubtitle": "Website notifications delivered through UnifiedPush",
+  "webPush_screenSubtitle": "Receive website notifications through a separate app",
   "@webPush_screenSubtitle": {
-    "description": "Subtitle of the web push settings screen. UnifiedPush is the name of an open notification delivery system and must not be translated."
+    "description": "Subtitle of the website notification settings screen. Notifications arrive through a separate compatible app."
   },
-  "webPush_distributorTileTitle": "UnifiedPush Distributor",
+  "webPush_distributorTileTitle": "Notification Delivery App",
   "@webPush_distributorTileTitle": {
-    "description": "Title of the setting for the UnifiedPush distributor: a separate app (such as ntfy) that receives push messages from the internet and passes them to WebLibre. UnifiedPush is a product name."
+    "description": "Title of the row for the app that delivers website notifications to WebLibre (a UnifiedPush distributor such as ntfy)."
   },
-  "webPush_distributorTileKeywords": "notifications, push, unifiedpush, ntfy",
+  "webPush_distributorTileKeywords": "notifications, push, unifiedpush, distributor, ntfy",
   "@webPush_distributorTileKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -50,11 +50,11 @@
   "@webPush_disablingWebPush": {
     "description": "Label of the disable button while web push is being turned off."
   },
-  "webPush_disableWebPush": "Disable web push",
+  "webPush_disableWebPush": "Turn off website notifications",
   "@webPush_disableWebPush": {
     "description": "Button that turns web push off by removing the chosen distributor."
   },
-  "webPush_statusNoneAvailable": "No distributor available",
+  "webPush_statusNoneAvailable": "No compatible notification app installed",
   "@webPush_statusNoneAvailable": {
     "description": "Short status of the push distributor: no distributor app is installed on the device. Shown after the distributor's name or alone."
   },
@@ -70,43 +70,43 @@
   "@webPush_statusReady": {
     "description": "Short status of the push distributor: working and delivering notifications. Shown after the distributor's name, e.g. \"ntfy — Active\"."
   },
-  "webPush_statusUnavailable": "Distributor unavailable",
+  "webPush_statusUnavailable": "Notification app unavailable",
   "@webPush_statusUnavailable": {
     "description": "Short status of the push distributor: the chosen distributor app can no longer be reached."
   },
-  "webPush_statusDescNoneAvailable": "Install a UnifiedPush distributor app, such as ntfy, to receive website notifications.",
+  "webPush_statusDescNoneAvailable": "To receive website notifications, install ntfy or another app that supports UnifiedPush.",
   "@webPush_statusDescNoneAvailable": {
     "description": "Explanation under the distributor setting when no distributor app is installed. ntfy is an app name."
   },
-  "webPush_statusDescNotSelected": "Choose a distributor below to enable website notifications.",
+  "webPush_statusDescNotSelected": "Choose a notification app below to turn on website notifications.",
   "@webPush_statusDescNotSelected": {
     "description": "Explanation under the distributor setting when distributor apps are installed but none is chosen."
   },
-  "webPush_statusDescPending": "Waiting for the distributor to acknowledge registration.",
+  "webPush_statusDescPending": "Waiting for the notification app to finish setting up.",
   "@webPush_statusDescPending": {
     "description": "Explanation under the distributor setting while waiting for the distributor app to confirm registration."
   },
-  "webPush_statusDescReady": "Website notifications are delivered through this distributor.",
+  "webPush_statusDescReady": "Website notifications are delivered through this app.",
   "@webPush_statusDescReady": {
     "description": "Explanation under the distributor setting when push notifications are working."
   },
-  "webPush_statusDescUnavailable": "The chosen distributor is no longer installed. Website notifications will not be delivered until you choose another one.",
+  "webPush_statusDescUnavailable": "The chosen notification app is no longer installed. Website notifications will not arrive until you choose another one.",
   "@webPush_statusDescUnavailable": {
     "description": "Explanation under the distributor setting when the previously chosen distributor app was uninstalled."
   },
-  "webPush_noDistributorInstalled": "No UnifiedPush distributor is installed. Install one, such as ntfy, and try again.",
+  "webPush_noDistributorInstalled": "No compatible notification app is installed. Install ntfy or another app that supports UnifiedPush, then try again.",
   "@webPush_noDistributorInstalled": {
     "description": "Error message when the user tries to choose a distributor but no UnifiedPush distributor app is installed. ntfy is an app name."
   },
-  "webPush_chooseDistributorTitle": "Choose distributor",
+  "webPush_chooseDistributorTitle": "Choose notification delivery app",
   "@webPush_chooseDistributorTitle": {
     "description": "Title of the dialog listing installed UnifiedPush distributor apps to choose from."
   },
-  "webPush_distributorConfigured": "UnifiedPush distributor configured.",
+  "webPush_distributorConfigured": "Notification app set up.",
   "@webPush_distributorConfigured": {
     "description": "Confirmation after a push distributor was chosen successfully."
   },
-  "webPush_couldNotConfigureDistributor": "Could not configure distributor: {error}",
+  "webPush_couldNotConfigureDistributor": "Could not set up the notification app: {error}",
   "@webPush_couldNotConfigureDistributor": {
     "description": "Error message when setting the chosen push distributor failed. error is technical error text, usually English.",
     "placeholders": {
@@ -115,11 +115,11 @@
       }
     }
   },
-  "webPush_webPushDisabled": "Web push disabled.",
+  "webPush_webPushDisabled": "Website notifications turned off.",
   "@webPush_webPushDisabled": {
     "description": "Confirmation after web push was turned off."
   },
-  "webPush_couldNotDisableWebPush": "Could not disable web push: {error}",
+  "webPush_couldNotDisableWebPush": "Could not turn off website notifications: {error}",
   "@webPush_couldNotDisableWebPush": {
     "description": "Error message when turning web push off failed. error is technical error text, usually English.",
     "placeholders": {
@@ -186,11 +186,11 @@
   "@webPush_subscriptionActive": {
     "description": "Status under a website in the push subscription list: notifications from it are delivered."
   },
-  "webPush_subscriptionDelayedDelivery": "Endpoint saved; delivery is paused until the distributor is ready",
+  "webPush_subscriptionDelayedDelivery": "Subscribed; notifications can arrive once the notification app is ready",
   "@webPush_subscriptionDelayedDelivery": {
     "description": "Status under a website in the push subscription list: the delivery address (\"endpoint\") is set up, but notifications are held back until the distributor app works again."
   },
-  "webPush_subscriptionWaitingForEndpoint": "Waiting for the distributor to assign an endpoint",
+  "webPush_subscriptionWaitingForEndpoint": "Waiting for the notification app to finish the subscription",
   "@webPush_subscriptionWaitingForEndpoint": {
     "description": "Status under a website in the push subscription list: the distributor app has not yet provided the delivery address (\"endpoint\") for it."
   },
@@ -202,7 +202,7 @@
   "@webPush_deliverySectionTitle": {
     "description": "Section heading on the web push settings screen for how notifications are delivered (distributor app and notification permission)."
   },
-  "webPush_indexDistributorSubtitle": "The app that delivers website push notifications",
+  "webPush_indexDistributorSubtitle": "The app that delivers website notifications, such as ntfy (UnifiedPush)",
   "@webPush_indexDistributorSubtitle": {
     "description": "Short explanation of the UnifiedPush distributor setting, shown as a settings search result."
   },
@@ -222,7 +222,7 @@
   "@webPush_indexSiteSubscriptionsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "webPush_indexSiteSubscriptionsSubtitle": "Websites subscribed to push notifications",
+  "webPush_indexSiteSubscriptionsSubtitle": "Websites allowed to send you notifications",
   "@webPush_indexSiteSubscriptionsSubtitle": {
     "description": "Short explanation of the site subscriptions list, shown as a settings search result."
   }

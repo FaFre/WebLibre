@@ -91,7 +91,7 @@ Future<String?> showStoreLabelDialog(BuildContext context) {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () {
               final label = controller.text.trim();
               Navigator.of(context).pop(label.isEmpty ? '' : label);
@@ -132,7 +132,7 @@ Future<String?> showEditLabelDialog(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () {
               final label = controller.text.trim();
               Navigator.of(context).pop(label.isEmpty ? '' : label);
@@ -189,7 +189,7 @@ Future<bool?> showRestoreConfirmation(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l10n.account_actionRestore),
           ),
@@ -220,9 +220,9 @@ Future<bool?> showDeleteConfirmation(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
             ),
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l10n.common_delete),

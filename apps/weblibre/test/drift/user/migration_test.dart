@@ -17,6 +17,35 @@ void main() {
     verifier = SchemaVerifier(GeneratedHelper());
   });
 
+  test('v12 keeps the old fallbacks of an existing profile', () async {
+    final schema = await verifier.schemaAt(11);
+    // Written by the user before: left alone.
+    schema.rawDatabase.execute(
+      'INSERT INTO setting ("key", partition_key, "value") '
+      "VALUES ('urlCleanerAutoApply', 'general', 1)",
+    );
+    // Written as NULL by restoring an untouched nullable field: still the old
+    // fallback.
+    schema.rawDatabase.execute(
+      'INSERT INTO setting ("key", partition_key, "value") '
+      "VALUES ('lnaBlocking', 'engine', NULL)",
+    );
+    final db = UserDatabase(schema.newConnection());
+    await verifier.migrateAndValidate(db, 12);
+
+    final rows = {
+      for (final row in await db.select(db.setting).get())
+        row.key: (
+          row.partitionKey,
+          row.value?.readAs(DriftSqlType.bool, db.typeMapping),
+        ),
+    };
+    expect(rows['enableLocalAiFeatures'], ('general', true));
+    expect(rows['urlCleanerAutoApply'], ('general', true));
+    expect(rows['lnaBlocking'], ('engine', false));
+    await db.close();
+  });
+
   group('simple database migrations', () {
     // These simple tests verify all possible schema updates with a simple (no
     // data) migration. This is a quick way to ensure that written database

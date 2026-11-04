@@ -25,7 +25,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -46,8 +48,11 @@ List<SettingsSectionDefinition> extensionsSettingsSections(
         ),
         SettingsEntryDefinition(
           title: l10n.settings_customCollectionTitle,
+          feature: FeatureId.extensionsCustomCollection,
+          hiddenSettings: const [HiddenSetting.addonCollection],
           subtitle: l10n.settings_customCollectionSubtitle,
           keywords: settingsKeywords(l10n.settings_customCollectionKeywords),
+          opensScreen: true,
           child: const _AddonCollectionTile(),
         ),
       ],
@@ -68,6 +73,10 @@ List<SettingsSectionDefinition> extensionsSettingsSections(
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_allowUnsignedExtensionsTitle,
+          feature: FeatureId.extensionsAllowUnsigned,
+          keptWhen: allowUnsignedExtensionsProvider.select(
+            (s) => s.value ?? false,
+          ),
           subtitle: l10n.settings_allowUnsignedExtensionsSubtitle,
           keywords: settingsKeywords(
             l10n.settings_allowUnsignedExtensionsKeywords,
@@ -313,12 +322,9 @@ class _AllowUnsignedConfirmationDialog extends HookWidget {
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(l10n.common_cancel),
         ),
-        FilledButton(
+        TextButton(
           onPressed: canConfirm ? () => Navigator.of(context).pop(true) : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: theme.colorScheme.error,
-            foregroundColor: theme.colorScheme.onError,
-          ),
+          style: TextButton.styleFrom(foregroundColor: theme.colorScheme.error),
           child: Text(
             canConfirm
                 ? l10n.settings_allowAction

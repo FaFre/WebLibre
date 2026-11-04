@@ -5,6 +5,8 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_push/domain/providers.dart';
 import 'package:weblibre/features/web_push/presentation/screens/web_push_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -59,17 +61,17 @@ void main() {
     );
     await _pumpSettings(tester, pushService: pushService);
 
-    await tester.tap(find.text('UnifiedPush Distributor'));
+    await tester.tap(find.text('Notification Delivery App'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Test Distributor'));
     await tester.pumpAndSettle();
 
     expect(pushService.setDistributorCalls, 1);
     expect(
-      find.textContaining('Could not configure distributor'),
+      find.textContaining('Could not set up the notification app'),
       findsOneWidget,
     );
-    expect(find.text('UnifiedPush distributor configured.'), findsNothing);
+    expect(find.text('Notification app set up.'), findsNothing);
   });
 }
 
@@ -81,6 +83,11 @@ Future<void> _pumpSettings(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        // The visibility switches are read from the settings; without this a
+        // real settings database opens and outlives the test.
+        generalSettingsWithDefaultsProvider.overrideWithValue(
+          GeneralSettings.withDefaults(),
+        ),
         pushServiceProvider.overrideWithValue(
           pushService ?? _FakePushService(),
         ),

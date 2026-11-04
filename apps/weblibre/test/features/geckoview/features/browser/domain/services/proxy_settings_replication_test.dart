@@ -34,7 +34,9 @@ import 'package:weblibre/features/proxy/domain/services/proxy_pref_baseline.dart
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 
 void main() {
@@ -827,6 +829,10 @@ Future<_Harness> _harness({
   final providerContainer = ProviderContainer(
     overrides: [
       tabDatabaseProvider.overrideWith((ref) => db),
+      // Strict mode follows its visibility switches; everything is shown.
+      generalSettingsWithDefaultsProvider.overrideWithValue(
+        GeneralSettings.withDefaults(),
+      ),
       containerProxyRepositoryProvider.overrideWith(() => containerProxy),
       containerRepositoryProvider.overrideWith(
         () => _FakeContainerRepository(containers),

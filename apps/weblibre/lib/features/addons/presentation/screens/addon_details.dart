@@ -414,7 +414,7 @@ Future<bool?> _showConfirmUninstallDialog(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l10n.common_remove),
           ),
@@ -693,7 +693,7 @@ Future<bool?> _confirmUpdateDialog(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.addons_actionNotNow),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l10n.addons_actionUpdate),
           ),

@@ -28,7 +28,7 @@
   "contextualToolbar_longPressAddPrivateTab": "Privaten Tab öffnen",
   "contextualToolbar_longPressAddIsolatedTab": "Isolierten Tab öffnen",
   "contextualToolbar_longPressOpenSettings": "Einstellungen öffnen",
-  "contextualToolbar_longPressHardRefresh": "Vollständig neu laden (Cache umgehen)",
+  "contextualToolbar_longPressHardRefresh": "Vollständig neu laden",
   "contextualToolbar_longPressShowTranslationOptions": "Übersetzungsoptionen anzeigen",
   "contextualToolbar_longPressScrollToTop": "Zum Anfang scrollen",
   "contextualToolbar_longPressScrollToBottom": "Zum Ende scrollen",

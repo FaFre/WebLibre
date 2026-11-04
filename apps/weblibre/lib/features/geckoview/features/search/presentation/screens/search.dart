@@ -71,7 +71,6 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
-import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -140,7 +139,7 @@ class SearchScreen extends HookConsumerWidget {
 
     final createChildTabsOption = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (value) => value.createChildTabsOption,
+        (value) => value.childTabEntryPointsShown,
       ),
     );
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
@@ -466,7 +465,7 @@ class SearchScreen extends HookConsumerWidget {
     final selectedBangSiteHost = useRef<String?>(null);
     selectedBangSiteHost.value = isEditMode ? existingTabState.url.host : null;
     useEffect(() {
-      final container = ProviderScope.containerOf(context, listen: false);
+      final container = ref.container;
       return () {
         final siteHost = selectedBangSiteHost.value;
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -642,18 +641,7 @@ class SearchScreen extends HookConsumerWidget {
         case FeedSearchItem(:final feed):
           await FeedArticleListRoute(feedId: feed.url).push(context);
         case SettingSearchItem(:final target):
-          // The same hand-off the settings search makes, so the screen opens
-          // scrolled to the setting.
-          final pendingHighlight = ref.read(
-            pendingSettingsHighlightProvider.notifier,
-          );
-          if (!target.isCategory) pendingHighlight.set(target.title);
-          try {
-            await target.open(context);
-          } catch (_) {
-            pendingHighlight.clear();
-            rethrow;
-          }
+          await target.openFromSearch(context, ref);
       }
     }
 
@@ -815,6 +803,13 @@ class SearchScreen extends HookConsumerWidget {
         return false;
       }
 
+      // Modules that follow a hidden feature are skipped, never removed from
+      // the saved layout (`home.module_feature_filter`).
+      if (searchModuleFeature(type) case final feature?
+          when !settings.isFeatureShown(feature)) {
+        return false;
+      }
+
       if (!isUrlInput.value) {
         return true;
       }
@@ -861,7 +856,7 @@ class SearchScreen extends HookConsumerWidget {
                       });
                     },
                     showChildOption: createChildTabsOption,
-                    showIsolatedOption: settings.showIsolatedTabUi,
+                    showIsolatedOption: settings.isolatedTabEntryPointsShown,
                     selectedBackgroundColor: switch (selectedTabType.value) {
                       TabType.regular => null,
                       TabType.private => appColors.privateSelectionOverlay,
@@ -875,7 +870,10 @@ class SearchScreen extends HookConsumerWidget {
                   ),
                 );
 
-                if (!settings.showContainerUi) {
+                // A selected container keeps its way out while containers
+                // are hidden (P5): the selector then only leaves it.
+                if (!settings.containerEntryPointsShown &&
+                    selectedContainer == null) {
                   return Center(
                     child: Transform.scale(scale: 1.08, child: tabTypeSwitcher),
                   );

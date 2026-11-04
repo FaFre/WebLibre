@@ -13,7 +13,7 @@
   "uiHelper_newTabOpened": "Neuer Tab geöffnet",
   "uiHelper_actionSwitch": "Wechseln",
   "uiHelper_couldNotLaunchUrl": "URL konnte nicht geöffnet werden ({url})",
-  "uiHelper_canNotHandleScheme": "„{scheme}“ kann nicht verarbeitet werden",
+  "uiHelper_canNotHandleScheme": "Keine App kann „{scheme}“-Links öffnen",
   "uiHelper_tabsClosedCount": "{count, plural, =1{Tab geschlossen} other{{count} Tabs geschlossen}}",
   "uiHelper_closeIsolatedTabsTitle": "Isolierte Tabs schließen?",
   "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{Dadurch werden alle Browserdaten dieser isolierten Sitzung endgültig gelöscht.} other{Dadurch werden die Browserdaten von {count} isolierten Sitzungen endgültig gelöscht.}}"

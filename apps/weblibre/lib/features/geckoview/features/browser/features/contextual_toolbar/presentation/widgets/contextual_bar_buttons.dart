@@ -220,7 +220,7 @@ class CloneTabMenu extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (value) => value.showIsolatedTabUi,
+        (value) => value.isolatedTabEntryPointsShown,
       ),
     );
 

@@ -127,10 +127,17 @@ class GestureSettingsRepository extends _$GestureSettingsRepository {
   ///
   /// Turning them on also sets the master switch, which would otherwise leave
   /// the toggle doing nothing for someone who never enabled gestures.
-  Future<void> toggleGestures() => updateSettings((current) {
-    final turnOn = !current.effectiveEnabled;
-    return current.copyWith(enabled: current.enabled || turnOn, active: turnOn);
-  });
+  Future<void> toggleGestures() => updateSettings(
+    (current) => _withGesturesOn(current, !current.effectiveEnabled),
+  );
+
+  /// Turns drawn gestures on or off, the way [toggleGestures] does, for a
+  /// caller that decided which before the stored settings could change.
+  Future<void> setGesturesOn(bool turnOn) =>
+      updateSettings((current) => _withGesturesOn(current, turnOn));
+
+  static GestureSettings _withGesturesOn(GestureSettings current, bool on) =>
+      current.copyWith(enabled: current.enabled || on, active: on);
 
   @override
   Stream<GestureSettings> build() {
@@ -145,13 +152,21 @@ class GestureSettingsRepository extends _$GestureSettingsRepository {
   }
 }
 
+/// The gesture settings as stored, for the screens that edit them.
 @Riverpod(keepAlive: true)
-GestureSettings gestureSettingsWithDefaults(Ref ref) {
+GestureSettings storedGestureSettings(Ref ref) {
   return ref.watch(
     gestureSettingsRepositoryProvider.select(
       (value) => value.value ?? GestureSettings.withDefaults(),
     ),
   );
+}
+
+/// The gesture settings as they apply ([GestureSettings.effective]).
+@Riverpod(keepAlive: true)
+GestureSettings gestureSettingsWithDefaults(Ref ref) {
+  final shown = ref.watch(shownFeaturesProvider);
+  return ref.watch(storedGestureSettingsProvider).effective(shown.contains);
 }
 
 /// What [gesture] currently does, or null when the user switched it off.

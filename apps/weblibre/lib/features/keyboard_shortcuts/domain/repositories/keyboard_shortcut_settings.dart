@@ -26,6 +26,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'keyboard_shortcut_settings.g.dart';
 
@@ -91,6 +92,9 @@ class KeyboardShortcutSettingsRepository
 /// change, which is what lets the shortcut widgets memoize on it.
 @Riverpod(keepAlive: true)
 Map<BrowserAction, List<KeyChord>> effectiveKeyboardShortcuts(Ref ref) {
-  final settings = ref.watch(keyboardShortcutSettingsRepositoryProvider);
+  final shown = ref.watch(shownFeaturesProvider);
+  final settings = ref
+      .watch(keyboardShortcutSettingsRepositoryProvider)
+      .effective(shown.contains);
   return settings.enabled ? settings.bindings : const {};
 }

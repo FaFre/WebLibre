@@ -22,7 +22,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/routing/widgets/bottom_sheet_page.dart';
 import 'package:weblibre/core/routing/widgets/dialog_page.dart';
@@ -85,6 +84,7 @@ import 'package:weblibre/features/settings/presentation/screens/doh_settings.dar
 import 'package:weblibre/features/settings/presentation/screens/error_logs_screen.dart';
 import 'package:weblibre/features/settings/presentation/screens/experimental_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/extensions_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/feature_control_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/fingerprint_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/general_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/home_settings.dart';
@@ -113,7 +113,6 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_edit.
 import 'package:weblibre/features/user/domain/presentation/screens/profile_list.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/presentation/widgets/auth_gate.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/presentation/screens/wallpaper_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/add_feed_dialog.dart';
 import 'package:weblibre/features/web_feed/presentation/screens/feed_article.dart';

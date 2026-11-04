@@ -30,7 +30,9 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 ContainerData _container(String id, String name) => ContainerData(
@@ -59,6 +61,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // The visibility switches are read from the settings; without this a
+          // real settings database opens and outlives the test.
+          generalSettingsWithDefaultsProvider.overrideWithValue(
+            GeneralSettings.withDefaults(),
+          ),
           userDatabaseProvider.overrideWith((ref) => db),
           selectedTabProvider.overrideWithValue('selected'),
           selectedContainerDataProvider.overrideWith(

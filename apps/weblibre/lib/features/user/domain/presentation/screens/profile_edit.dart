@@ -39,6 +39,7 @@ import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/user/domain/services/local_authentication.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/maintenance_outcome_l10n.dart';
+import 'package:weblibre/presentation/widgets/highlight_pulse.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -71,7 +72,15 @@ List<DropdownMenuItem<Duration?>> _timeoutOptions(AppLocalizations l10n) => [
 class ProfileEditScreen extends HookConsumerWidget {
   final Profile? profile;
 
-  const ProfileEditScreen({super.key, required this.profile});
+  /// Scrolls to the lock settings and highlights them once: opened from the
+  /// onboarding's "Lock the browser" goal.
+  final bool focusLock;
+
+  const ProfileEditScreen({
+    super.key,
+    required this.profile,
+    this.focusLock = false,
+  });
 
   Future<void> _handleSave(
     BuildContext context,
@@ -250,11 +259,14 @@ class ProfileEditScreen extends HookConsumerWidget {
                 validator: (value) => validateProfileName(value, l10n: l10n),
               ),
               const SizedBox(height: 24),
-              _AuthSection(
-                authSettings: authSettings.value,
-                onAuthSettingsChanged: (newSettings) {
-                  authSettings.value = newSettings;
-                },
+              HighlightPulse(
+                active: focusLock,
+                child: _AuthSection(
+                  authSettings: authSettings.value,
+                  onAuthSettingsChanged: (newSettings) {
+                    authSettings.value = newSettings;
+                  },
+                ),
               ),
               const SizedBox(height: 24),
               if (profile != null) ...[

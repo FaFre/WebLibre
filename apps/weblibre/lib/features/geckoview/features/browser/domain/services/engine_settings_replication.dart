@@ -278,24 +278,24 @@ class EngineSettingsReplicationService
 
     ref.listen(
       fireImmediately: true,
-      engineSettingsRepositoryProvider,
-      (previous, next) async {
-        final settings = next.value;
-
+      // The settings as they apply: a hidden feature's settings reach the
+      // engine at their hidden values, and the stored ones again once it is
+      // shown. Null until both settings partitions have loaded.
+      loadedEngineSettingsProvider,
+      (previous, settings) async {
         if (settings != null) {
           if (initialSettingsSent && previous != null) {
-            if (previous.value?.javascriptEnabled !=
-                settings.javascriptEnabled) {
+            if (previous.javascriptEnabled != settings.javascriptEnabled) {
               await _service.javascriptEnabled(settings.javascriptEnabled);
             }
             // Check if tracking protection policy mode changed OR any custom ETP setting changed
             final policyModeChanged =
-                previous.value?.trackingProtectionPolicy !=
+                previous.trackingProtectionPolicy !=
                 settings.trackingProtectionPolicy;
             final customSettingsChanged =
                 settings.trackingProtectionPolicy ==
                     TrackingProtectionPolicy.custom &&
-                _customEtpSettingsChanged(previous.value, settings);
+                _customEtpSettingsChanged(previous, settings);
 
             if (policyModeChanged || customSettingsChanged) {
               // Always send full custom settings when in CUSTOM mode
@@ -327,13 +327,25 @@ class EngineSettingsReplicationService
                 );
               }
             }
-            if (previous.value?.httpsOnlyMode != settings.httpsOnlyMode) {
+            if (previous.httpsOnlyMode != settings.httpsOnlyMode) {
               await _service.httpsOnlyMode(settings.httpsOnlyMode);
             }
-            if (previous.value?.globalPrivacyControlEnabled !=
+            if (previous.globalPrivacyControlEnabled !=
                 settings.globalPrivacyControlEnabled) {
               await _service.globalPrivacyControlEnabled(
                 settings.globalPrivacyControlEnabled,
+              );
+            }
+            if (previous.userAgent != settings.userAgent) {
+              // An empty string clears the override natively, where null
+              // would leave the old one in place. Tabs already open keep
+              // theirs until the app restarts.
+              await _service.userAgent(settings.userAgent ?? '');
+            }
+            if (previous.enterpriseRootsEnabled !=
+                settings.enterpriseRootsEnabled) {
+              await _service.enterpriseRootsEnabled(
+                settings.enterpriseRootsEnabled,
               );
             }
             // Note: preferredColorScheme is intentionally NOT replicated from the
@@ -342,24 +354,24 @@ class EngineSettingsReplicationService
             // above. EngineSettings.preferredColorScheme is always null, so the
             // full push in setDefaultSettings below leaves the theme alone
             // (issues #436, #657).
-            if (previous.value?.contentBlocking != settings.contentBlocking) {
+            if (previous.contentBlocking != settings.contentBlocking) {
               await _service.contentBlocking(settings.contentBlocking);
             }
-            if (previous.value?.dohSettings != settings.dohSettings) {
+            if (previous.dohSettings != settings.dohSettings) {
               await _service.dohSettings(settings.dohSettings);
             }
-            if (previous.value?.fingerprintingProtectionOverrides !=
+            if (previous.fingerprintingProtectionOverrides !=
                 settings.fingerprintingProtectionOverrides) {
               await _service.fingerprintingProtectionOverrides(
                 settings.fingerprintingProtectionOverrides,
               );
             }
-            if (previous.value?.enablePdfJs != settings.enablePdfJs) {
+            if (previous.enablePdfJs != settings.enablePdfJs) {
               await ref
                   .read(preferenceFixatorProvider.notifier)
                   .register('pdfjs.disabled', !settings.enablePdfJs);
             }
-            if (previous.value?.safeBrowsingMalwareEnabled !=
+            if (previous.safeBrowsingMalwareEnabled !=
                 settings.safeBrowsingMalwareEnabled) {
               await ref
                   .read(preferenceFixatorProvider.notifier)
@@ -368,7 +380,7 @@ class EngineSettingsReplicationService
                     settings.safeBrowsingMalwareEnabled,
                   );
             }
-            if (previous.value?.safeBrowsingPhishingEnabled !=
+            if (previous.safeBrowsingPhishingEnabled !=
                 settings.safeBrowsingPhishingEnabled) {
               await ref
                   .read(preferenceFixatorProvider.notifier)
@@ -378,7 +390,7 @@ class EngineSettingsReplicationService
                   );
             }
             if (!const DeepCollectionEquality.unordered().equals(
-              previous.value?.locales,
+              previous.locales,
               settings.locales,
             )) {
               await ref
@@ -389,47 +401,47 @@ class EngineSettingsReplicationService
                   );
             }
             // Web Content Settings
-            if (previous.value?.webFontsEnabled != settings.webFontsEnabled) {
+            if (previous.webFontsEnabled != settings.webFontsEnabled) {
               await _service.webFontsEnabled(settings.webFontsEnabled);
             }
-            if (previous.value?.automaticFontSizeAdjustment !=
+            if (previous.automaticFontSizeAdjustment !=
                 settings.automaticFontSizeAdjustment) {
               await _service.automaticFontSizeAdjustment(
                 settings.automaticFontSizeAdjustment,
               );
             }
-            if (previous.value?.fontSizeFactor != settings.fontSizeFactor) {
+            if (previous.fontSizeFactor != settings.fontSizeFactor) {
               await _service.fontSizeFactor(settings.fontSizeFactor);
             }
-            if (previous.value?.fontInflationEnabled !=
+            if (previous.fontInflationEnabled !=
                 settings.fontInflationEnabled) {
               await _service.fontInflationEnabled(
                 settings.fontInflationEnabled,
               );
             }
-            if (previous.value?.inputAutoZoomEnabled !=
+            if (previous.inputAutoZoomEnabled !=
                 settings.inputAutoZoomEnabled) {
               await _service.inputAutoZoomEnabled(
                 settings.inputAutoZoomEnabled,
               );
             }
-            if (previous.value?.forceUserScalableContent !=
+            if (previous.forceUserScalableContent !=
                 settings.forceUserScalableContent) {
               await _service.forceUserScalableContent(
                 settings.forceUserScalableContent,
               );
             }
             // LNA Settings
-            if (previous.value?.lnaBlocking != settings.lnaBlocking) {
+            if (previous.lnaBlocking != settings.lnaBlocking) {
               await _service.lnaBlocking(settings.lnaBlocking);
             }
-            if (previous.value?.lnaBlockTrackers != settings.lnaBlockTrackers) {
+            if (previous.lnaBlockTrackers != settings.lnaBlockTrackers) {
               await _service.lnaBlockTrackers(settings.lnaBlockTrackers);
             }
-            if (previous.value?.lnaEnabled != settings.lnaEnabled) {
+            if (previous.lnaEnabled != settings.lnaEnabled) {
               await _service.lnaEnabled(settings.lnaEnabled);
             }
-            if (previous.value?.ublockFilterListSettings !=
+            if (previous.ublockFilterListSettings !=
                 settings.ublockFilterListSettings) {
               await syncUBlockFilterLists(
                 ref.read(preferenceFixatorProvider.notifier),
@@ -473,7 +485,7 @@ class EngineSettingsReplicationService
       },
       onError: (error, stackTrace) {
         logger.e(
-          'Error listening to engineSettingsRepositoryProvider',
+          'Error listening to loadedEngineSettingsProvider',
           error: error,
           stackTrace: stackTrace,
         );

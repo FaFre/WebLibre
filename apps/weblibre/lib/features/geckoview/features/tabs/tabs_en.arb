@@ -125,6 +125,10 @@
   "@tabs_addSiteHint": {
     "description": "Example placeholder of the add-site field. Domain examples; keep them unchanged."
   },
+  "tabs_addSiteHintSingle": "example.com",
+  "@tabs_addSiteHintSingle": {
+    "description": "Example placeholder of the add-site field while wildcard assignments are hidden. A domain example; keep it unchanged."
+  },
   "tabs_addSiteHelperText": "Match a single site, or use *.example.com to match all its subdomains",
   "@tabs_addSiteHelperText": {
     "description": "Help text under the add-site field: \"*.\" matches all subdomains. Keep \"*.example.com\" unchanged."

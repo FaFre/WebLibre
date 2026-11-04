@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:weblibre/core/providers/provider_read.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/remembered_prompt_l10n.dart';
@@ -32,7 +33,8 @@ import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 ///
 /// Returns null when the dialog is dismissed, which keeps the user on the tab.
 Future<KeepTabAnswer?> showKeepTabDialog(
-  BuildContext context, {
+  BuildContext context,
+  ProviderRead read, {
   required bool rememberable,
 }) async {
   Widget buildDialog(BuildContext context) {
@@ -67,6 +69,7 @@ Future<KeepTabAnswer?> showKeepTabDialog(
 
   return await askUnlessRemembered<KeepTabAnswer>(
     context,
+    read,
     RememberedPrompt.keepExternalTab,
     builder: buildDialog,
   );

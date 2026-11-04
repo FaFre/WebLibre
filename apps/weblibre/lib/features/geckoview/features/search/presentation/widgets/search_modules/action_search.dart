@@ -24,7 +24,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_search.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
@@ -126,9 +128,7 @@ class ActionSearch extends HookConsumerWidget {
     final readerable = ref.watch(
       tabStateProvider(pageTabId).select((state) => state?.readerableState),
     );
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-    );
+    final shownFeatures = ref.watch(shownFeaturesProvider);
     final automaticFontSize = ref.watch(
       engineSettingsWithDefaultsProvider.select(
         (s) => s.automaticFontSizeAdjustment,
@@ -142,14 +142,15 @@ class ActionSearch extends HookConsumerWidget {
       if (pageTabId == null && BrowserActionDispatcher.requiresTab(action)) {
         return false;
       }
+      // Actions of hidden features are not offered: the container actions,
+      // for one, belong to `container.core`, hidden with the Containers
+      // switch.
+      if (!shownFeatures.contains(action.owningFeature)) return false;
 
       return switch (action) {
         BrowserAction.toggleReaderMode =>
           readerable != null && (readerable.readerable || readerable.active),
         BrowserAction.addToHomeScreen => canAddToHomeScreen,
-        BrowserAction.showContainers ||
-        BrowserAction.newContainer ||
-        BrowserAction.moveTabToContainer => showContainerUi,
         BrowserAction.increaseFontSize ||
         BrowserAction.decreaseFontSize ||
         BrowserAction.resetFontSize => !automaticFontSize,
@@ -171,7 +172,7 @@ class ActionSearch extends HookConsumerWidget {
     if (query == null) {
       items = [for (final action in available) BrowserActionSearchItem(action)];
     } else {
-      final containers = showContainerUi
+      final containers = shownFeatures.contains(FeatureId.containerCore)
           ? ref.watch(watchContainersWithCountProvider).value ?? const []
           : const <ContainerDataWithCount>[];
       final profiles = ref.watch(profileRepositoryProvider).value ?? const [];

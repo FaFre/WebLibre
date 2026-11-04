@@ -19,9 +19,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_reorder_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/navigation_row.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/about_section.dart';
@@ -32,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_links_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/quick_toggles_section.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/sections/tab_actions_section.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_sheet_surface.dart';
 import 'package:weblibre/presentation/widgets/fitted_pointer_scrollable_sheet.dart';
@@ -51,34 +54,48 @@ Future<void> showBrowserMenuSheet(BuildContext context) {
 /// hidden Extensions section keep watching the installed add-ons every time the
 /// menu opens.
 Map<MenuSectionType, Widget Function(MenuSectionEntry section)>
-_buildSectionBuilders(String? selectedTabId) {
+_buildSectionBuilders(
+  String? selectedTabId, {
+  required bool Function(MenuItemType type) itemShown,
+}) {
+  List<MenuItemType> types(MenuSectionEntry section) => [
+    for (final type in section.visibleItemTypes)
+      if (itemShown(type)) type,
+  ];
+
   return {
     // The sections that act on a page only exist while one is in front. Left
     // out of the map rather than rendered empty, so their place in the user's
     // order is remembered without leaving a gap on the home screen.
     if (selectedTabId case final tabId?) ...{
-      MenuSectionType.quickToggles: (section) => QuickTogglesSection(
-        selectedTabId: tabId,
-        items: section.visibleItemTypes,
-      ),
-      MenuSectionType.pageActions: (section) => PageActionsSection(
-        selectedTabId: tabId,
-        items: section.visibleItemTypes,
-      ),
+      MenuSectionType.quickToggles: (section) =>
+          QuickTogglesSection(selectedTabId: tabId, items: types(section)),
+      MenuSectionType.pageActions: (section) =>
+          PageActionsSection(selectedTabId: tabId, items: types(section)),
       // The only section whose rows open rows of their own, so the only one
-      // handed the entries rather than just their types.
-      MenuSectionType.tabActions: (section) =>
-          TabActionsSection(selectedTabId: tabId, items: section.visibleItems),
+      // handed the entries rather than just their types; their rows are
+      // filtered the same way.
+      MenuSectionType.tabActions: (section) => TabActionsSection(
+        selectedTabId: tabId,
+        items: [
+          for (final item in section.visibleItems)
+            if (itemShown(item.type))
+              item.copyWith(
+                items: [
+                  for (final child in item.items)
+                    if (itemShown(child.type)) child,
+                ],
+              ),
+        ],
+      ),
     },
     MenuSectionType.extensions: (_) => const ExtensionsSection(),
     MenuSectionType.quickLinks: (section) =>
-        QuickLinksSection(items: section.visibleItemTypes),
+        QuickLinksSection(items: types(section)),
     MenuSectionType.connection: (_) =>
         ConnectionSection(selectedTabId: selectedTabId),
-    MenuSectionType.profile: (section) =>
-        ProfileSection(items: section.visibleItemTypes),
-    MenuSectionType.about: (section) =>
-        AboutSection(items: section.visibleItemTypes),
+    MenuSectionType.profile: (section) => ProfileSection(items: types(section)),
+    MenuSectionType.about: (section) => AboutSection(items: types(section)),
   };
 }
 
@@ -164,22 +181,41 @@ class _MenuSections extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final layout = ref.watch(menuLayoutProvider);
-    final builders = _buildSectionBuilders(selectedTabId);
+    final layout = ref.watch(effectiveMenuLayoutProvider);
+    final shownFeatures = ref.watch(shownFeaturesProvider);
+    final connectionShown = ref.watch(
+      menuConnectionSectionShownProvider(selectedTabId),
+    );
+
+    bool itemShown(MenuItemType type) => switch (type.feature) {
+      final feature? => shownFeatures.contains(feature),
+      null => true,
+    };
+    bool sectionShown(MenuSectionType type) =>
+        type != MenuSectionType.connection || connectionShown;
+
+    final builders = _buildSectionBuilders(selectedTabId, itemShown: itemShown);
+    final drawn = [
+      for (final section in layout)
+        if (section.visible && sectionShown(section.type))
+          if (builders[section.type] case final build?) build(section),
+    ];
 
     return SliverList.list(
       children: [
-        for (final section in layout)
-          if (section.visible)
-            if (builders[section.type] case final build?) build(section),
-        const _CustomizeMenuButton(),
+        ...drawn,
+        // Menu customization follows its feature; a menu with every section
+        // switched off keeps the way back into the arrangement regardless.
+        if (shownFeatures.contains(FeatureId.layoutMenuCustomization) ||
+            drawn.isEmpty)
+          const _CustomizeMenuButton(),
       ],
     );
   }
 }
 
-/// Always-present entry into the arrangement UI, so a menu whose sections are
-/// all switched off is still configurable.
+/// Entry into the arrangement UI: shown with menu customization, and always
+/// for a menu whose sections are all switched off, so it stays configurable.
 class _CustomizeMenuButton extends ConsumerWidget {
   const _CustomizeMenuButton();
 

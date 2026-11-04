@@ -824,10 +824,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addons_menuExtensionSettingsSubtitleInline => '打开扩展选项页面';
 
   @override
-  String get addons_menuFilterListsTitle => '过滤规则列表与加固';
+  String get addons_menuFilterListsTitle => '过滤列表';
 
   @override
-  String get addons_menuFilterListsSubtitle => '管理过滤规则列表并应用 WebLibre 加固';
+  String get addons_menuFilterListsSubtitle => '管理过滤列表并开启 WebLibre 推荐的过滤规则';
 
   @override
   String get addons_permissionsTitle => '权限';
@@ -1376,7 +1376,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_hardReloadTitle => '强制重新加载';
 
   @override
-  String get browserActions_hardReloadDescription => '跳过缓存，重新加载当前页面';
+  String get browserActions_hardReloadDescription => '重新加载页面并重新下载所有内容';
 
   @override
   String get browserActions_scrollTopTitle => '滚动到顶部';
@@ -1806,10 +1806,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_showProfilesDescription => '管理你的配置文件';
 
   @override
-  String get browserActions_showProxySettingsTitle => '代理';
+  String get browserActions_showProxySettingsTitle => '连接';
 
   @override
-  String get browserActions_showProxySettingsDescription => '打开代理设置';
+  String get browserActions_showProxySettingsDescription => '打开连接设置';
 
   @override
   String get browserActions_showTorTitle => 'Tor';
@@ -1974,7 +1974,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_showProxySettingsKeywords =>
-      'vpn,sing-box,socks,连接,网络,翻墙';
+      '代理,tor,vpn,sing-box,socks,连接,网络,翻墙';
 
   @override
   String get browserActions_showTorKeywords => '洋葱,匿名,网桥,匿名性,onion';
@@ -2689,7 +2689,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_dataTypeSiteData => '网站数据';
 
   @override
-  String get browser_dataTypeSiteDataSubtitle => '离线存储、数据库、本地文件';
+  String get browser_dataTypeSiteDataSubtitle => '网站保存在此设备上的数据，例如用于离线使用';
 
   @override
   String get browser_dataTypeCookies => 'Cookie';
@@ -3213,13 +3213,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_permissionNotification => '通知';
 
   @override
-  String get browser_permissionPersistentStorage => '持久存储';
+  String get browser_permissionPersistentStorage => '保护已保存的网站数据';
 
   @override
-  String get browser_permissionCrossOriginStorage => '跨源存储';
+  String get browser_permissionPersistentStorageDescription =>
+      '即使存储空间不足，也保留此网站的数据。';
 
   @override
-  String get browser_permissionMediaKeySystem => '媒体密钥系统（DRM）';
+  String get browser_permissionCrossOriginStorage => '在其他网站上使用 Cookie';
+
+  @override
+  String get browser_permissionMediaKeySystem => '播放受保护的内容（DRM）';
 
   @override
   String get browser_tabReorderBlockedMessage => '请清除标签页视图的筛选或搜索后再调整顺序';
@@ -3378,7 +3382,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contextualToolbar_longPressOpenSettings => '打开设置';
 
   @override
-  String get contextualToolbar_longPressHardRefresh => '强制刷新（跳过缓存）';
+  String get contextualToolbar_longPressHardRefresh => '完全重新加载';
 
   @override
   String get contextualToolbar_longPressShowTranslationOptions => '显示翻译选项';
@@ -3628,6 +3632,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu_profileTapToSwitch => '点按以切换配置文件';
 
   @override
+  String get menu_profileManageCurrent => '锁定并备份此配置文件';
+
+  @override
   String get menu_profileSyncComplete => '同步完成';
 
   @override
@@ -3851,7 +3858,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get menu_connectionProxySettings => '代理设置';
+  String get menu_connectionProxySettings => '连接设置';
 
   @override
   String get menu_connectionUnused => '未被任何路由使用';
@@ -4323,7 +4330,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openLinkTools_restoreDefaultsTitle => '恢复默认设置？';
 
   @override
-  String get openLinkTools_restoreDefaultsContent => '这将重置网址清理设置，并移除本地存储的规则库。';
+  String get openLinkTools_restoreDefaultsContent => '这将重置 URL 清理器设置并删除已下载的规则。';
 
   @override
   String get openLinkTools_actionRestore => '恢复';
@@ -4419,7 +4426,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openLinkTools_urlCleanerSettingsTitle => '网址清理';
 
   @override
-  String get openLinkTools_urlCleanerSettingsSubtitle => '网址清理行为、规则库更新和来源说明。';
+  String get openLinkTools_urlCleanerSettingsSubtitle => '从链接中移除哪些内容、规则更新和致谢。';
 
   @override
   String get openLinkTools_urlCleanerDescriptionBody =>
@@ -4433,7 +4440,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '清理网址,clean urls,clearurls';
 
   @override
-  String get openLinkTools_urlCleanerEnabledSubtitle => '从网址中移除跟踪参数';
+  String get openLinkTools_urlCleanerEnabledSubtitle => '移除链接中的跟踪部分';
 
   @override
   String get openLinkTools_autoApplyTitle => '自动应用';
@@ -4452,16 +4459,16 @@ class AppLocalizationsZh extends AppLocalizations {
       '联盟营销,推广,返利,affiliate,referral';
 
   @override
-  String get openLinkTools_allowReferralSubtitle => '保留推广和联盟营销跟踪参数';
+  String get openLinkTools_allowReferralSubtitle => '保留链接中的推荐码和联盟推广码';
 
   @override
-  String get openLinkTools_autoUpdateCatalogTitle => '自动更新规则库';
+  String get openLinkTools_autoUpdateCatalogTitle => '自动更新规则';
 
   @override
   String get openLinkTools_autoUpdateCatalogSubtitle => '每周检查规则更新';
 
   @override
-  String get openLinkTools_updateCatalogTitle => '更新规则库';
+  String get openLinkTools_updateCatalogTitle => '更新规则';
 
   @override
   String get openLinkTools_lastUpdateNotAvailable => '上次更新：无';
@@ -4482,7 +4489,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get openLinkTools_catalogUpdatedMessage => '规则库已更新';
+  String get openLinkTools_catalogUpdatedMessage => '规则已更新';
 
   @override
   String openLinkTools_updateFailedWithError(String error) {
@@ -4493,7 +4500,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openLinkTools_restoreDefaultsButtonTitle => '恢复默认设置';
 
   @override
-  String get openLinkTools_restoreDefaultsButtonSubtitle => '重置为内置规则库和默认设置';
+  String get openLinkTools_restoreDefaultsButtonSubtitle => '恢复为内置规则和默认设置';
 
   @override
   String get openLinkTools_clearUrlAttributionText => '此模块基于 ClearURL 规则：';
@@ -4515,7 +4522,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openLinkTools_urlCleanerBehaviorSectionTitle => '行为';
 
   @override
-  String get openLinkTools_urlCleanerCatalogSectionTitle => '规则库';
+  String get openLinkTools_urlCleanerCatalogSectionTitle => '规则';
 
   @override
   String get openLinkTools_indexUrlCleanerUpdateCatalogSubtitle =>
@@ -4996,6 +5003,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tabs_addSiteHint => 'example.com 或 *.example.com';
+
+  @override
+  String get tabs_addSiteHintSingle => 'example.com';
 
   @override
   String get tabs_addSiteHelperText => '匹配单个网站，或使用 *.example.com 匹配其所有子域名';
@@ -5640,6 +5650,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get keyboardShortcuts_actionCustomize => '自定义';
 
   @override
+  String get keyboardShortcuts_actionShowAll => '显示全部';
+
+  @override
   String get keyboardShortcuts_actionReassign => '重新分配';
 
   @override
@@ -5652,31 +5665,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_actionNext => '下一步';
 
   @override
-  String get onboarding_actionRestore => '恢复';
-
-  @override
   String get onboarding_restoreTargetUnreadable => '无法读取此配置文件，因此无法向其中恢复任何内容。';
 
   @override
   String get onboarding_welcomeBackTitle => '欢迎回来！';
 
   @override
-  String get onboarding_welcomeReadyTitle => 'WebLibre 已准备就绪';
-
-  @override
-  String get onboarding_chooseExperience => '选择你的初始设置方式：';
-
-  @override
-  String get onboarding_modeExpressTitle => '快速开始';
-
-  @override
-  String get onboarding_modeExpressSubtitle => '使用推荐的默认设置，直接开始浏览。';
-
-  @override
-  String get onboarding_modeDetailedTitle => '自定义设置';
-
-  @override
-  String get onboarding_modeDetailedSubtitle => '配置 DNS、工具栏、扩展等。';
+  String get onboarding_welcomeTitle => '欢迎使用 WebLibre';
 
   @override
   String get onboarding_modeRestoreTitle => '从备份恢复';
@@ -5712,42 +5707,41 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_aiFeaturesTitle => 'AI 功能';
 
   @override
-  String get onboarding_aiOnDeviceTitle => '设备端 AI';
+  String get onboarding_aiUseOnDeviceTitle => '使用设备端 AI';
 
   @override
-  String get onboarding_aiOnDeviceSubtitle => '在本地设备上运行的功能，包括容器主题和标签页建议';
+  String get onboarding_aiOnDeviceSubtitle => '直接在此设备上建议如何分组和命名你的标签页';
 
   @override
   String get onboarding_aiWarningTitle => '注意事项';
 
   @override
   String get onboarding_aiWarningPoint1 =>
-      'WebLibre 使用本地 AI 模型分析你打开的标签页标题，建议将标签页归入哪些容器以及如何为这些容器命名。所有处理完全在你的设备上进行。';
+      'WebLibre 会读取你已打开标签页的标题，并建议每个标签页应放入哪个容器以及容器的名称。';
 
   @override
-  String get onboarding_aiWarningPoint2 =>
-      'AI 增强功能完全在浏览器内运行，所有数据都保留在你的设备上。本地 AI 处理尊重你的隐私，并能更快地提供容器分组和名称建议。你可以随时在设置中控制此行为。';
+  String get onboarding_aiWarningPoint2 => 'AI 功能完全在此设备上运行，所有数据都保留在设备上。';
 
   @override
   String get onboarding_aiWarningPoint3 => 'AI 有时会出错，请检查建议的分组名称和所选标签页。';
 
   @override
-  String get onboarding_searchTitle => '搜索';
-
-  @override
-  String get onboarding_searchDefaultProviderLabel => '默认搜索提供商';
+  String get onboarding_searchDefaultProviderLabel => '搜索引擎';
 
   @override
   String get onboarding_searchMore => '搜索更多';
 
   @override
-  String get onboarding_searchDefaultAutocompleteLabel => '默认自动补全提供商';
+  String get onboarding_searchDefaultAutocompleteLabel => '搜索建议';
 
   @override
   String get onboarding_searchLoadFailedTitle => '无法加载搜索引擎';
 
   @override
-  String get onboarding_dohTitle => 'DNS over HTTPS';
+  String get onboarding_dohTitle => '安全 DNS';
+
+  @override
+  String get onboarding_dohSubtitle => '加密网站地址查询，增强隐私保护';
 
   @override
   String get onboarding_permissionsTitle => '权限';
@@ -5766,70 +5760,41 @@ class AppLocalizationsZh extends AppLocalizations {
       '将 WebLibre 设为默认浏览器';
 
   @override
-  String get onboarding_privacyTitle => '隐私与加固';
+  String get onboarding_privacyBrowserLanguagesTitle => '网站语言';
 
   @override
-  String get onboarding_privacyBrowserLanguagesTitle => '浏览器语言';
+  String get onboarding_privacyBrowserLanguagesSubtitle => '希望网站用哪些语言显示';
 
   @override
-  String get onboarding_privacyBrowserLanguagesSubtitle => '配置向网站公开的语言偏好';
+  String get onboarding_webEngineHardeningTitle => '更严格的安全设置';
 
   @override
-  String get onboarding_multipleLanguagesDetectedTitle => '检测到多种语言';
+  String get onboarding_webEngineHardeningSubtitle => '开启 WebLibre 推荐的所有安全设置';
 
   @override
-  String onboarding_multipleLanguagesWarning(int count, String locales) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '你的浏览器配置了 $count 种语言（$locales）。',
-    );
-    return '$_temp0网站可以利用你独特的语言组合生成指纹，并在网络上跟踪你。';
-  }
+  String get onboarding_fingerprintProtectionTitle => '让此设备更难被识别';
 
   @override
-  String get onboarding_multipleLanguagesSuggestion =>
-      '建议只保留一种浏览器语言，以减少可用于识别你的语言特征。';
+  String get onboarding_fingerprintProtectionSubtitle =>
+      '隐藏网站无需 Cookie 也能识别你的细节信息（指纹识别）';
 
   @override
-  String get onboarding_reviewLanguages => '检查语言';
-
-  @override
-  String get onboarding_webEngineHardeningTitle => '全面加固网页引擎';
-
-  @override
-  String get onboarding_webEngineHardeningSubtitle => '为网页引擎应用所有推荐的安全加固首选项';
-
-  @override
-  String get onboarding_fingerprintProtectionTitle => '强化指纹保护';
-
-  @override
-  String get onboarding_fingerprintProtectionSubtitle => '加载全面的指纹保护默认设置';
-
-  @override
-  String get onboarding_compatibilityWarningTitle => '兼容性警告';
+  String get onboarding_compatibilityWarningTitle => '部分网站可能无法正常工作';
 
   @override
   String get onboarding_fingerprintWarningPoint1 =>
-      '强化指纹保护会启用 60 多项保护目标，包括 Canvas 随机化、Navigator 伪装、媒体设备屏蔽等。';
+      '这会改变 60 多项网站可以读取的细节，例如图形的绘制方式，以及连接了哪些摄像头和麦克风。';
 
   @override
   String get onboarding_fingerprintWarningPoint2 =>
-      '这可能导致网站无法正常显示或出现异常行为。你可以在设置中微调各项保护目标。';
+      '如果某个网站运行异常，可以在设置中调整各项保护措施。';
 
   @override
-  String get onboarding_localNetworkProtectionTitle => '本地网络保护';
-
-  @override
-  String get onboarding_localNetworkProtectionSubtitle =>
-      '网站可能会尝试访问你的设备以及家庭网络中的其他设备，例如路由器、打印机或智能家居设备。默认情况下，已知跟踪器的此类访问会被自动阻止。';
-
-  @override
-  String get onboarding_blockAllLocalNetworkTitle => '阻止所有本地网络请求';
+  String get onboarding_blockAllLocalNetworkTitle => '本地连接前先询问';
 
   @override
   String get onboarding_blockAllLocalNetworkSubtitle =>
-      '任何网站访问你家庭网络中的设备前都需征得许可，而不仅限于已知跟踪器';
+      '网站在连接此设备上的应用或你网络中的设备之前必须先征求许可';
 
   @override
   String get onboarding_toolbarLayoutTitle => '工具栏与布局';
@@ -5839,16 +5804,206 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_ublockDescription =>
-      'uBlock Origin（uBO）是由 **Raymond Hill** 开发的一款 CPU 和内存占用都很低的 **广谱内容拦截器**，可作为浏览器扩展在 WebLibre 中使用。\n\n默认情况下，它使用 **EasyList、EasyPrivacy、Peter Lowe\'s Blocklist、Online Malicious URL Blocklist 和 uBO 过滤规则列表** 拦截广告、跟踪器、挖矿脚本、弹出窗口、烦人的反拦截脚本、恶意网站等。\n\n还有许多其他列表可用于拦截更多内容。';
+      'uBlock Origin 是一款浏览器扩展，可拦截广告、跟踪器、弹出窗口和已知的有害网站。\n\n安装后即可自动工作。你可以在设置中添加更多拦截规则。\n\n由 **Raymond Hill** 开发。';
 
   @override
-  String get onboarding_ublockInstallTitle => '安装 uBlock Origin 扩展';
+  String get onboarding_ublockInstallTitle => '安装 uBlock Origin';
 
   @override
-  String get onboarding_ublockApplyDefaultsTitle => '应用优化的默认设置';
+  String get onboarding_ublockInstallSubtitle => '拦截广告、跟踪器和有害网站';
 
   @override
-  String get onboarding_ublockApplyDefaultsSubtitle => '启用 WebLibre 加固过滤规则列表。';
+  String get onboarding_ublockApplyDefaultsTitle => '使用推荐的过滤规则';
+
+  @override
+  String get onboarding_ublockApplyDefaultsSubtitle =>
+      '开启 WebLibre 为 uBlock Origin 推荐的过滤列表';
+
+  @override
+  String get onboarding_presetTitle => 'WebLibre 应该显示多少功能？';
+
+  @override
+  String get onboarding_presetAverageTitle => '随便逛逛';
+
+  @override
+  String get onboarding_presetAverageSubtitle => '要隐私，不要复杂';
+
+  @override
+  String get onboarding_presetAveragePoint1 => '标签页、书签、历史记录和阅读模式';
+
+  @override
+  String get onboarding_presetAveragePoint2 => '通过 uBlock Origin 拦截广告和跟踪器';
+
+  @override
+  String get onboarding_presetAveragePoint3 => '搜索快捷方式、扩展和网页翻译';
+
+  @override
+  String get onboarding_presetAveragePoint4 => '通过 Firefox Sync 与你的其他设备同步';
+
+  @override
+  String get onboarding_presetAdvancedTitle => '爱折腾';
+
+  @override
+  String get onboarding_presetAdvancedSubtitle => '我喜欢按自己的方式来设置';
+
+  @override
+  String get onboarding_presetAdvancedPoint1 => '用容器和隔离标签页分开 Cookie 和登录信息';
+
+  @override
+  String get onboarding_presetAdvancedPoint2 => 'Tor、VPN 和代理连接';
+
+  @override
+  String get onboarding_presetAdvancedPoint3 => '树状标签页、手势和更多布局选项';
+
+  @override
+  String get onboarding_presetAdvancedPoint4 => '高级隐私设置和设备端 AI 控制选项';
+
+  @override
+  String get onboarding_presetExpertTitle => '专家模式';
+
+  @override
+  String get onboarding_presetExpertSubtitle => '我想要所有设置和控制选项';
+
+  @override
+  String get onboarding_presetExpertPoint1 => '引擎加固分组和指纹识别例外';
+
+  @override
+  String get onboarding_presetExpertPoint2 => '按容器路由、DNS 覆盖和多条隧道';
+
+  @override
+  String get onboarding_presetExpertPoint3 => 'JavaScript、User Agent 和证书控制';
+
+  @override
+  String get onboarding_basicsTitle => '基础设置';
+
+  @override
+  String get onboarding_basicsTabBarTitle => '标签栏位置';
+
+  @override
+  String get onboarding_basicsTabBarAutoHint => '“自动”会适应窗口大小，并在较大屏幕上保留侧边栏';
+
+  @override
+  String get onboarding_basicsMoreSearchOptions => '更多搜索选项';
+
+  @override
+  String get onboarding_yourSetupTitle => '你的设置';
+
+  @override
+  String get onboarding_yourSetupOnTitle => '从一开始就开启';
+
+  @override
+  String get onboarding_yourSetupProtections => '拦截跟踪器并使用加密连接';
+
+  @override
+  String get onboarding_yourSetupHardening => '更严格的安全设置';
+
+  @override
+  String get onboarding_yourSetupLocalNetwork => '本地连接需要许可';
+
+  @override
+  String get onboarding_yourSetupContentBlocker => '使用 uBlock Origin 拦截广告';
+
+  @override
+  String onboarding_yourSetupHistoryRetention(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days 天',
+    );
+    return '历史记录保留 $_temp0';
+  }
+
+  @override
+  String get onboarding_yourSetupHiddenForNowTitle => '暂时隐藏';
+
+  @override
+  String get onboarding_presetChangeLater => '你可以随时在“设置 > 功能管理”中更改。';
+
+  @override
+  String get onboarding_presetAdvancedIncludes => '包含“随便逛逛”的全部内容，另外还有：';
+
+  @override
+  String get onboarding_presetExpertIncludes => '包含“爱折腾”的全部内容，另外还有：';
+
+  @override
+  String get onboarding_presetChangeResetCustomize => '“自定义”和“你的设置”中的更改已重置。';
+
+  @override
+  String get onboarding_goalsTitle => '还有其他需要吗？';
+
+  @override
+  String get onboarding_goalKeepAccountsApart => '分开不同账号';
+
+  @override
+  String get onboarding_goalLockBrowser => '锁定浏览器';
+
+  @override
+  String get onboarding_goalSetUpConnections => '设置 Tor、VPN 或代理';
+
+  @override
+  String get onboarding_goalSyncDevices => '与我的其他设备同步';
+
+  @override
+  String get onboarding_goalKeepAccountsApartSubtitle =>
+      '在同一网站上使用多个账号，每个账号放在自己的容器中';
+
+  @override
+  String get onboarding_goalLockBrowserSubtitle => '用设备锁或密码解锁此配置文件';
+
+  @override
+  String get onboarding_goalSetUpConnectionsSubtitle =>
+      '完成后打开连接设置。在你启动之前不会建立任何连接。';
+
+  @override
+  String get onboarding_goalSyncDevicesSubtitle => '设置完成后登录 Firefox Sync';
+
+  @override
+  String get onboarding_customizeAction => '自定义';
+
+  @override
+  String get onboarding_customizeCaption => '功能、隐私、广告拦截和布局';
+
+  @override
+  String get onboarding_customizeGroupPrivacy => '隐私与安全';
+
+  @override
+  String get onboarding_customizeGroupTabs => '标签页与配置文件';
+
+  @override
+  String get onboarding_customizeGroupConnections => '连接';
+
+  @override
+  String get onboarding_customizeGroupLayout => '布局与输入';
+
+  @override
+  String get onboarding_customizeSaveFailed => '无法保存要显示的功能。请重试。';
+
+  @override
+  String get onboarding_customizeGroupMore => '更多';
+
+  @override
+  String get onboarding_customizeHomeSections => '主页板块';
+
+  @override
+  String get onboarding_customizeNewTabSections => '新标签页板块';
+
+  @override
+  String get onboarding_commitFailed => '无法保存设置，请重试。';
+
+  @override
+  String get onboarding_restoreRequiresEula => '请先接受最终用户许可协议和隐私政策。';
+
+  @override
+  String get onboarding_setupStepFailedUBlock =>
+      '无法安装 uBlock Origin。WebLibre 会在下次启动时重试。';
+
+  @override
+  String get onboarding_setupStepFailedFilters =>
+      '无法开启 uBlock Origin 的推荐过滤规则。WebLibre 会在下次启动时重试。';
+
+  @override
+  String get onboarding_setupStepFailedHardening =>
+      '无法完整开启更严格的安全设置。WebLibre 会在下次启动时重试。';
 
   @override
   String get proxy_actionChange => '更改';
@@ -6077,6 +6232,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get proxy_protocolFixedHelper => '配置创建后协议不可更改。';
+
+  @override
+  String proxy_protocolFromImportHelper(String featureName) {
+    return '由导入决定。如需手动输入连接，请在“设置 > 功能管理”中显示“$featureName”。';
+  }
 
   @override
   String get proxy_customOutboundLabel => '自定义出站';
@@ -7085,7 +7245,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_iconCacheKeywords => '网站图标,favicon,缓存';
 
   @override
-  String get settings_iconCacheSubtitle => '已存储的网站图标';
+  String get settings_iconCacheSubtitle => '已保存的网站图标';
 
   @override
   String get settings_iconCacheSizeLabel => '大小';
@@ -7341,24 +7501,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '显示一个按钮，用于在当前标签页下创建子标签页（仅限树状视图）';
 
   @override
-  String get settings_showContainerUiTitle => '显示容器界面';
-
-  @override
-  String get settings_showContainerUiKeywords => '容器';
-
-  @override
-  String get settings_showContainerUiSubtitle => '显示容器选择器、菜单和管理功能';
-
-  @override
-  String get settings_showIsolatedTabUiTitle => '显示隔离标签页界面';
-
-  @override
-  String get settings_showIsolatedTabUiKeywords => '隔离标签页';
-
-  @override
-  String get settings_showIsolatedTabUiSubtitle => '在界面中显示创建隔离标签页的选项';
-
-  @override
   String get settings_backgroundTabBehaviorTitle => '后台标签页行为';
 
   @override
@@ -7566,7 +7708,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_allowNonManifestPwaInstallSubtitle =>
-      '允许将没有 PWA 清单的网站安装为独立应用';
+      '允许将任何网站安装为应用，即使它并非为安装而设计';
 
   @override
   String get settings_urlCleanerTitle => '网址清理';
@@ -7575,7 +7717,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_urlCleanerKeywords => 'utm,跟踪参数,clearurls';
 
   @override
-  String get settings_urlCleanerSubtitle => '跟踪移除规则和规则库更新';
+  String get settings_urlCleanerSubtitle => '移除链接中的跟踪部分';
 
   @override
   String get settings_unshortenerTitle => '短链接还原';
@@ -7748,10 +7890,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_desktopModeSitesEmptyLabel => '尚未添加网站。';
 
   @override
-  String get settings_dohTitle => 'DNS over HTTPS';
+  String get settings_dohTitle => '安全 DNS';
 
   @override
-  String get settings_dohSubtitle => '加密 DNS 保护级别和解析服务器选择。';
+  String get settings_dohSubtitle => '网站查询如何加密，以及由谁处理';
 
   @override
   String get settings_errorLogsCopiedMessage => '日志已复制';
@@ -7867,7 +8009,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_fingerprintProtectionTitle => '指纹保护';
 
   @override
-  String get settings_fingerprintProtectionKeywords => '隐私,指纹,fingerprint';
+  String get settings_fingerprintProtectionKeywords =>
+      '隐私,指纹,fingerprint,让此设备更难被识别';
 
   @override
   String get settings_fingerprintSearchHint => '搜索指纹覆盖目标';
@@ -7880,6 +8023,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_fingerprintOverrideTargetsSection => '覆盖目标';
+
+  @override
+  String get settings_fingerprintPresetsSection => '预设';
 
   @override
   String get settings_fingerprintInvalidOverride => '已保存的指纹覆盖格式无效';
@@ -7948,37 +8094,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_customizeNewTabSectionsSubtitle => '选择新标签页显示的内容及其顺序';
 
   @override
-  String get settings_browserLanguagesTitle => '浏览器语言';
+  String get settings_browserLanguagesTitle => '网站语言';
 
   @override
-  String get settings_browserLanguagesKeywords => '语言,区域,locale';
+  String get settings_browserLanguagesKeywords =>
+      '浏览器语言, 语言, 区域设置, locale, accept language';
 
   @override
-  String get settings_browserLanguagesSearchHint => '按标签搜索语言区域';
+  String get settings_browserLanguagesSearchHint => '搜索语言';
 
   @override
-  String get settings_languageRegionSettingsSection => '语言与地区设置';
+  String get settings_languageRegionSettingsSection => '语言';
 
   @override
-  String get settings_browserLanguagePreferenceLabel => '浏览器语言偏好';
+  String get settings_browserLanguagePreferenceLabel => '网站可以使用的显示语言';
 
   @override
-  String get settings_customLocaleSection => '自定义语言区域';
+  String get settings_customLocaleSection => '其他语言';
 
   @override
-  String get settings_addCustomLocaleTitle => '添加自定义语言区域';
+  String get settings_addCustomLocaleTitle => '添加其他语言';
 
   @override
-  String get settings_addCustomLocaleKeywords => '语言区域标签,locale';
+  String get settings_addCustomLocaleKeywords => '语言标签, 语言代码, locale tag';
 
   @override
-  String get settings_addCustomLocaleSubtitle => '输入语言区域标签，例如 en-US';
+  String get settings_addCustomLocaleSubtitle => '输入语言代码，例如 en-US';
 
   @override
-  String get settings_customLocaleFieldLabel => '自定义语言区域';
+  String get settings_customLocaleFieldLabel => '语言代码';
 
   @override
-  String get settings_invalidLocaleError => '语言区域标识符无效';
+  String get settings_invalidLocaleError => '这不是有效的语言代码';
 
   @override
   String get settings_homeTargetHomeLabel => '主页';
@@ -8083,10 +8230,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_disableAnimationsSubtitle => '减少动态效果并关闭应用动画';
 
   @override
-  String get settings_showModalBarrierTitle => '显示模态遮罩';
+  String get settings_showModalBarrierTitle => '对话框后方变暗';
 
   @override
-  String get settings_showModalBarrierKeywords => '对话框,底部面板,遮罩';
+  String get settings_showModalBarrierKeywords =>
+      '对话框, 底部面板, 遮罩, overlay, modal barrier';
 
   @override
   String get settings_showModalBarrierSubtitle => '在对话框和底部面板后方调暗背景';
@@ -8358,8 +8506,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_homeScreenSectionTitle => '主屏幕';
 
   @override
-  String get settings_indexAllowNonManifestPwaInstallSubtitle =>
-      '允许将没有清单的网站安装为应用';
+  String get settings_indexAllowNonManifestPwaInstallSubtitle => '将任何网站安装为应用';
 
   @override
   String get settings_externalLinksSectionTitle => '外部链接';
@@ -8372,18 +8519,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_bookmarksSectionTitle => '书签';
 
   @override
-  String get settings_resolverSettingsSectionTitle => '解析服务器设置';
+  String get settings_resolverSettingsSectionTitle => '服务商设置';
 
   @override
-  String get settings_indexDnsOverHttpsResolverTitle => 'DNS over HTTPS';
+  String get settings_indexDnsOverHttpsResolverTitle => '安全 DNS';
 
   @override
   String get settings_indexDnsOverHttpsResolverKeywords =>
-      'doh,解析服务器,dns 提供商,自定义解析服务器,加密 dns';
+      'dns over https, doh, 解析器, resolver, dns 服务商, 自定义解析器';
 
   @override
-  String get settings_indexDnsOverHttpsResolverSubtitle =>
-      '保护级别、提供商选择和已保存的自定义解析服务器';
+  String get settings_indexDnsOverHttpsResolverSubtitle => '保护级别、服务商和你自己的服务商';
 
   @override
   String get settings_runtimeStartupSectionTitle => '运行时与启动';
@@ -8579,10 +8725,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_homeSearchBarRowTitle => '搜索栏';
 
   @override
-  String get settings_proxyTitle => '代理';
+  String get settings_proxyTitle => '连接';
 
   @override
-  String get settings_proxySubtitle => '管理代理连接并选择哪些标签页使用它们。';
+  String get settings_proxySubtitle => '管理 Tor、VPN 和代理连接，并选择哪些标签页使用它们。';
 
   @override
   String get settings_proxyConnectionsTitle => '代理连接';
@@ -8619,7 +8765,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_privacySecurityTitle => '隐私与安全';
 
   @override
-  String get settings_privacySecuritySubtitle => '跟踪保护、指纹识别、浏览数据和网络加固。';
+  String get settings_privacySecuritySubtitle => '跟踪保护、浏览数据和安全。';
 
   @override
   String get settings_trackingProtectionExceptionsTitle => '跟踪保护例外';
@@ -8775,10 +8921,11 @@ class AppLocalizationsZh extends AppLocalizations {
       '隐私标签页可以被截图和录屏，并会显示在应用切换器的预览中。';
 
   @override
-  String get settings_httpsOnlyModeTitle => '阻止不安全的 HTTP 连接';
+  String get settings_httpsOnlyModeTitle => '仅使用安全连接（HTTPS）';
 
   @override
-  String get settings_httpsOnlyModeKeywords => '仅 https,https only';
+  String get settings_httpsOnlyModeKeywords =>
+      '仅 https, https only, 阻止不安全的 http';
 
   @override
   String get settings_httpsOnlyModeDisabledLabel => '停用';
@@ -8790,7 +8937,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_httpsOnlyModePrivateOnlyLabel => '仅隐私模式';
 
   @override
-  String get settings_dnsOverHttpsTileTitle => 'DNS over HTTPS';
+  String get settings_dnsOverHttpsTileTitle => '安全 DNS';
 
   @override
   String get settings_enhancedTrackingProtectionTitle => '增强型跟踪保护';
@@ -8860,14 +9007,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_queryParameterStrippingPrivateOnlyLabel => '仅隐私模式';
 
   @override
-  String get settings_uBlockFilterListsTileTitle => 'uBlock 过滤规则列表与加固';
+  String get settings_uBlockFilterListsTileTitle => 'uBlock Origin 过滤列表';
 
   @override
-  String get settings_uBlockFilterListsTileKeywords => 'ublock,过滤器,过滤规则,广告拦截';
+  String get settings_uBlockFilterListsTileKeywords =>
+      'ublock, 过滤器, 广告拦截, 加固, hardenings';
 
   @override
   String get settings_uBlockFilterListsTileSubtitle =>
-      '管理过滤规则列表并应用 WebLibre 加固';
+      '管理过滤列表并开启 WebLibre 推荐的过滤规则';
 
   @override
   String get settings_fissionEnabledTitle => 'Fission（站点隔离）';
@@ -8939,10 +9087,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_managedAppActionBlock => '阻止';
 
   @override
-  String get settings_browserLanguagesTileTitle => '浏览器语言';
+  String get settings_browserLanguagesTileTitle => '网站语言';
 
   @override
-  String get settings_browserLanguagesTileSubtitle => '配置向网站公开的语言偏好';
+  String get settings_browserLanguagesTileSubtitle => '希望网站用哪些语言显示';
 
   @override
   String get settings_fingerprintProtectionTileTitle => '指纹保护';
@@ -8961,31 +9109,32 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_resistFingerprintingTileSubtitle => '高级指纹保护加固';
 
   @override
-  String get settings_lnaEnabledTitle => '本地网络访问';
+  String get settings_lnaEnabledTitle => '保护本地应用和设备';
 
   @override
-  String get settings_lnaEnabledKeywords => 'lan,局域网,本地网络';
+  String get settings_lnaEnabledKeywords =>
+      'lan, 本地网络, 本地网络访问, localhost, 本地连接';
 
   @override
-  String get settings_lnaEnabledSubtitle => '启用对本地网络和设备访问的拦截';
+  String get settings_lnaEnabledSubtitle => '控制网站能否连接此设备上的应用或你网络中的设备';
 
   @override
-  String get settings_lnaBlockingTitle => '拦截本地网络请求';
+  String get settings_lnaBlockingTitle => '本地连接前先询问';
 
   @override
-  String get settings_lnaBlockingKeywords => 'lan,局域网,本地网络';
+  String get settings_lnaBlockingKeywords => 'lan, 本地网络, localhost, 阻止本地连接';
 
   @override
-  String get settings_lnaBlockingSubtitle => '拦截网页对本地网络地址的请求';
+  String get settings_lnaBlockingSubtitle => '网站在连接此设备上的应用或你网络中的设备之前必须先询问';
 
   @override
-  String get settings_lnaBlockTrackersTitle => '拦截本地网络跟踪器';
+  String get settings_lnaBlockTrackersTitle => '阻止跟踪器的本地连接';
 
   @override
-  String get settings_lnaBlockTrackersKeywords => 'lan,局域网,本地网络';
+  String get settings_lnaBlockTrackersKeywords => 'lan, 本地网络跟踪器, localhost';
 
   @override
-  String get settings_lnaBlockTrackersSubtitle => '阻止跟踪器访问本地网络资源';
+  String get settings_lnaBlockTrackersSubtitle => '已知跟踪器无法连接此设备上的应用或你网络中的设备';
 
   @override
   String get settings_transferTitle => '导出与导入';
@@ -9085,7 +9234,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get settings_transferSectionGeckoPrefsTitle => 'Gecko 首选项';
+  String get settings_transferSectionGeckoPrefsTitle => '网页引擎首选项';
 
   @override
   String get settings_transferSectionGeckoPrefsDescription => '你手动更改过的高级引擎首选项';
@@ -9164,7 +9313,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_webEngineHardeningTitle => '网页引擎加固';
 
   @override
-  String get settings_webEngineHardeningKeywords => '加固,安全,hardening';
+  String get settings_webEngineHardeningKeywords => '加固,安全,hardening,更严格的安全设置';
 
   @override
   String get settings_webEngineHardeningSearchHint => '搜索加固分组';
@@ -9223,16 +9372,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_searchSubtitle => '提供商、Bang、历史建议和设备端搜索。';
 
   @override
-  String get settings_defaultSearchProviderTitle => '默认搜索提供商';
+  String get settings_defaultSearchProviderTitle => '搜索引擎';
 
   @override
-  String get settings_defaultSearchProviderKeywords => '搜索引擎';
+  String get settings_defaultSearchProviderKeywords =>
+      '搜索引擎, 默认搜索服务商, default search provider';
 
   @override
-  String get settings_defaultAutocompleteProviderTitle => '默认自动补全提供商';
+  String get settings_defaultAutocompleteProviderTitle => '搜索建议';
 
   @override
-  String get settings_defaultAutocompleteProviderKeywords => '建议,联想';
+  String get settings_defaultAutocompleteProviderKeywords =>
+      '建议, 自动补全, 自动补全服务商, autocomplete provider';
 
   @override
   String get settings_customSearchEnginesTitle => '自定义搜索引擎';
@@ -9316,36 +9467,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_popularSitesAutocompleteSubtitle =>
-      '当历史记录和书签中没有匹配项时，用知名域名补全输入的文字';
+      '当历史记录和书签中没有匹配项时，用知名网站补全你输入的内容';
 
   @override
-  String get settings_localIndexEnabledTitle => '启用本地搜索索引';
+  String get settings_localIndexEnabledTitle => '在访问过的页面中搜索';
 
   @override
-  String get settings_localIndexEnabledKeywords => '页面文字,历史记录,全文搜索';
+  String get settings_localIndexEnabledKeywords =>
+      '页面文字, 历史记录, 本地搜索索引, local search index';
 
   @override
   String get settings_localIndexEnabledSubtitle =>
-      '在本地为访问过的页面建立索引，以便浏览器搜索其内容。访问元数据保留在引擎中；只有页面文字存储在设备上。';
+      '在此设备上保存你访问过的页面文字，以便搜索能找到其中的词语。';
 
   @override
-  String get settings_indexPrivateTabsTitle => '为隐私标签页建立索引';
+  String get settings_indexPrivateTabsTitle => '保存隐私标签页中的文字';
 
   @override
-  String get settings_indexPrivateTabsKeywords => '无痕,隐私';
+  String get settings_indexPrivateTabsKeywords => '无痕, 隐私, 为隐私标签页建立索引';
 
   @override
-  String get settings_indexPrivateTabsSubtitle => '将在隐私标签页中打开的页面加入本地索引。默认关闭。';
+  String get settings_indexPrivateTabsSubtitle => '同时保存在隐私标签页中打开的页面文字。默认关闭。';
 
   @override
-  String get settings_clearLocalIndexDialogTitle => '清除本地搜索索引？';
+  String get settings_clearLocalIndexDialogTitle => '删除已保存的页面文字？';
 
   @override
   String get settings_clearLocalIndexDialogContent =>
-      '这将移除所有本地索引的页面内容。引擎历史记录（访问元数据）不受影响。';
+      '删除为搜索而保存的页面文字。你的浏览历史记录会保留。';
 
   @override
-  String get settings_localIndexStatsTitle => '已索引的页面';
+  String get settings_localIndexStatsTitle => '已保存的页面文字';
 
   @override
   String get settings_localIndexStatsKeywords => '清除索引,统计';
@@ -9355,7 +9507,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '已索引 $count 个页面',
+      other: '已保存 $count 个页面的文字',
     );
     return '$_temp0';
   }
@@ -9376,7 +9528,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_searchSectionHistorySuggestionsTitle => '历史记录与建议';
 
   @override
-  String get settings_searchSectionLocalIndexTitle => '本地搜索索引';
+  String get settings_searchSectionLocalIndexTitle => '在访问过的页面中搜索';
 
   @override
   String get settings_searchSectionLocalIndexKeywords => '设备端搜索,索引';
@@ -9385,7 +9537,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexDefaultSearchProviderSubtitle => '选择默认的搜索引擎';
 
   @override
-  String get settings_indexDefaultAutocompleteProviderSubtitle => '选择搜索建议的提供商';
+  String get settings_indexDefaultAutocompleteProviderSubtitle => '选择搜索建议的来源';
 
   @override
   String get settings_indexAcceptSuggestionOnSubmitSubtitle => '按下回车键时接受内联建议';
@@ -9398,16 +9550,16 @@ class AppLocalizationsZh extends AppLocalizations {
       '在隐私标签页中使用建议和历史记录';
 
   @override
-  String get settings_indexPopularSitesAutocompleteSubtitle => '用知名域名补全输入的文字';
+  String get settings_indexPopularSitesAutocompleteSubtitle => '用知名网站补全你输入的内容';
 
   @override
-  String get settings_indexLocalIndexEnabledSubtitle => '在本地为访问过的页面建立索引以搜索内容';
+  String get settings_indexLocalIndexEnabledSubtitle => '在此设备上保存页面文字，以便搜索找到';
 
   @override
-  String get settings_indexIndexPrivateTabsSubtitle => '将隐私标签页加入本地索引';
+  String get settings_indexIndexPrivateTabsSubtitle => '同时保存隐私标签页中的文字';
 
   @override
-  String get settings_indexLocalIndexStatsSubtitle => '查看并清除本地索引';
+  String get settings_indexLocalIndexStatsSubtitle => '查看并删除已保存的页面文字';
 
   @override
   String get settings_webContentTitle => '网页内容';
@@ -9447,23 +9599,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_disabledWhileAutomaticFontSize => '启用自动字号时不可用';
 
   @override
-  String get settings_fontInflationTitle => '字体放大';
+  String get settings_fontInflationTitle => '放大小字';
 
   @override
-  String get settings_fontInflationKeywords => '可读性';
+  String get settings_fontInflationKeywords => '可读性, font inflation, 放大文字';
 
   @override
-  String get settings_fontInflationSubtitle =>
-      '放大缺少移动端 viewport meta 标签的页面上的文字';
+  String get settings_fontInflationSubtitle => '让不是为手机设计的页面上的文字清晰可读';
 
   @override
-  String get settings_inputAutoZoomTitle => '输入时自动缩放';
+  String get settings_inputAutoZoomTitle => '点按文本框时放大';
 
   @override
-  String get settings_inputAutoZoomKeywords => '表单';
+  String get settings_inputAutoZoomKeywords => '表单, 输入框, 自动缩放';
 
   @override
-  String get settings_inputAutoZoomSubtitle => '聚焦文本输入框时自动放大';
+  String get settings_inputAutoZoomSubtitle => '点按文本框时自动放大';
 
   @override
   String get settings_forceUserScalableTitle => '在所有网站上允许缩放';
@@ -9494,14 +9645,14 @@ class AppLocalizationsZh extends AppLocalizations {
       '在浏览器应用栏中添加一个可选工具，通过移除广告、侧边栏及其他非必要元素来简化网页。';
 
   @override
-  String get settings_enforceReaderModeTitle => '强制阅读模式';
+  String get settings_enforceReaderModeTitle => '始终提供阅读模式';
 
   @override
-  String get settings_enforceReaderModeKeywords => '阅读';
+  String get settings_enforceReaderModeKeywords => '阅读, 阅读模式, 强制阅读模式';
 
   @override
   String get settings_enforceReaderModeSubtitle =>
-      '忽略网站的可读性评分，始终显示阅读模式，即使网站可能不支持。';
+      '在每个页面上都提供阅读模式，即使在可能效果不佳的页面上。';
 
   @override
   String get settings_onDeviceAiTitle => '设备端 AI';
@@ -9522,19 +9673,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexAutomaticFontSizeSubtitle => '根据系统设置调整字号';
 
   @override
-  String get settings_indexFontInflationSubtitle => '放大没有移动端 viewport 的页面上的文字';
+  String get settings_indexFontInflationSubtitle => '放大不是为手机设计的页面上的文字';
 
   @override
-  String get settings_indexInputAutoZoomSubtitle => '聚焦文本输入框时自动缩放';
+  String get settings_indexInputAutoZoomSubtitle => '点按文本框时自动放大';
 
   @override
   String get settings_indexPdfViewerSubtitle => '直接在浏览器中打开 PDF 文件';
 
   @override
-  String get settings_indexEnableReaderModeSubtitle => '提取并简化页面以提高可读性';
+  String get settings_indexEnableReaderModeSubtitle => '以整洁、易读的版式显示文章';
 
   @override
-  String get settings_indexEnforceReaderModeSubtitle => '始终显示阅读模式功能';
+  String get settings_indexEnforceReaderModeSubtitle => '在每个页面上都提供阅读模式';
 
   @override
   String get settings_indexOnDeviceAiSubtitle => '本地 AI 功能，包括容器主题和标签页建议';
@@ -9568,11 +9719,11 @@ class AppLocalizationsZh extends AppLocalizations {
       '这将把 uBlock Origin 恢复为默认的过滤规则列表配置，并移除你添加的所有外部列表。';
 
   @override
-  String get settings_ublockApplyHardeningsDialogTitle => '应用 WebLibre 加固？';
+  String get settings_ublockApplyHardeningsDialogTitle => '开启推荐的过滤规则？';
 
   @override
   String get settings_ublockApplyHardeningsDialogMessage =>
-      '这将启用一组精选的额外过滤规则列表，并将一个合法短网址列表添加为外部列表。';
+      '这将开启 WebLibre 选定的额外过滤列表，并添加一个移除链接中跟踪部分的列表。';
 
   @override
   String get settings_ublockInfoBannerMessage =>
@@ -9591,7 +9742,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '恢复 uBlock Origin 的默认过滤规则列表配置。';
 
   @override
-  String get settings_ublockQuickApplyHardeningsTitle => '应用 WebLibre 加固';
+  String get settings_ublockQuickApplyHardeningsTitle => '开启推荐的过滤规则';
 
   @override
   String get settings_ublockQuickApplyHardeningsSubtitle => '启用一组精选的额外过滤规则列表。';
@@ -9737,7 +9888,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_categoryWebContentKeywords => '阅读模式,pdf,字体';
 
   @override
-  String get settings_categoryWebContentSubtitle => '页面显示、PDF、阅读模式、AI';
+  String get settings_categoryWebContentSubtitle => '页面显示、PDF、阅读模式';
 
   @override
   String get settings_categoryNotificationsTitle => '通知';
@@ -9747,7 +9898,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '推送,unifiedpush,ntfy,分发器';
 
   @override
-  String get settings_categoryNotificationsSubtitle => '网页推送方式、分发器、网站订阅';
+  String get settings_categoryNotificationsSubtitle => '网站通知以及负责传递通知的应用';
 
   @override
   String get settings_categorySearchTitle => '搜索';
@@ -9769,14 +9920,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_categoryPrivacySecuritySubtitle => '跟踪保护、数据清除';
 
   @override
-  String get settings_categoryProxyTitle => '代理';
+  String get settings_categoryProxyTitle => '连接';
 
   @override
   String get settings_categoryProxyKeywords =>
       '代理,sing-box,socks,vpn,wireguard,路由,tor,容器,翻墙';
 
   @override
-  String get settings_categoryProxySubtitle => '连接和路由';
+  String get settings_categoryProxySubtitle => 'Tor、VPN、代理和路由';
 
   @override
   String get settings_categoryExtensionsTitle => '扩展';
@@ -9849,25 +10000,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_privacySectionConnectionSecurityTitle => '连接安全';
 
   @override
-  String get settings_indexHttpsOnlyModeSubtitle => '优先使用 HTTPS 并阻止不安全的连接';
+  String get settings_indexHttpsOnlyModeSubtitle => '打开未加密的网站前发出警告';
 
   @override
-  String get settings_indexDnsOverHttpsTitle => 'DNS over HTTPS';
+  String get settings_indexDnsOverHttpsTitle => '安全 DNS';
 
   @override
-  String get settings_indexDnsOverHttpsKeywords => 'doh,加密 dns';
+  String get settings_indexDnsOverHttpsKeywords =>
+      'dns over https, doh, 加密 dns';
 
   @override
-  String get settings_indexDnsOverHttpsSubtitle => '加密 DNS 查询';
+  String get settings_indexDnsOverHttpsSubtitle => '加密网站查询';
 
   @override
   String get settings_privacySectionNetworkProtectionTitle => '网络保护';
 
   @override
-  String get settings_indexLnaBlockingSubtitle => '拦截对本地网络设备和服务的请求';
+  String get settings_indexLnaBlockingSubtitle => '网站连接本地应用和设备前必须先询问';
 
   @override
-  String get settings_indexLnaBlockTrackersSubtitle => '拦截类似跟踪器的本地网络请求';
+  String get settings_indexLnaBlockTrackersSubtitle => '阻止已知跟踪器访问本地应用和设备';
 
   @override
   String get settings_privacySectionSignalsModesTitle => '隐私信号与模式';
@@ -9961,46 +10113,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_protectionLevelDescription =>
-      'DNS over HTTPS 通过加密连接发送域名解析请求，以保护这些请求，让他人更难得知你即将访问哪些网站。';
+      '打开网站之前，浏览器会先查询它的地址。安全 DNS 会加密这一查询，让你的网络服务商和其他人更难看到你访问了哪些网站。';
 
   @override
   String get settings_defaultProtectionTitle => '默认保护';
 
   @override
-  String get settings_defaultProtectionSubtitle => '仅在默认 DNS 失败时使用 DoH';
+  String get settings_defaultProtectionSubtitle => '仅在你网络的 DNS 失效时使用安全 DNS';
 
   @override
   String get settings_increasedProtectionTitle => '增强保护';
 
   @override
-  String get settings_increasedProtectionSubtitle => '优先使用 DoH，以默认 DNS 作为备用';
+  String get settings_increasedProtectionSubtitle => '优先使用安全 DNS，失效时改用你网络的 DNS';
 
   @override
   String get settings_maxProtectionTitle => '最大保护';
 
   @override
-  String get settings_maxProtectionSubtitle => '仅使用 DoH，无备用';
+  String get settings_maxProtectionSubtitle => '始终使用安全 DNS。失效时网站将无法加载';
 
   @override
   String get settings_protectionOffTitle => '关闭';
 
   @override
-  String get settings_protectionOffSubtitle => '使用你的默认 DNS 解析服务器';
+  String get settings_protectionOffSubtitle => '使用你网络的 DNS';
 
   @override
-  String get settings_dohProviderTitle => 'DoH 提供商';
+  String get settings_dohProviderTitle => '服务商';
 
   @override
-  String get settings_yourResolvers => '你的解析服务器';
+  String get settings_yourResolvers => '你的服务商';
 
   @override
-  String get settings_addCustomResolver => '添加自定义解析服务器';
+  String get settings_addCustomResolver => '添加你自己的服务商';
 
   @override
-  String get settings_editCustomResolverTitle => '编辑自定义解析服务器';
+  String get settings_editCustomResolverTitle => '编辑服务商';
 
   @override
-  String get settings_resolverUrlLabel => '解析服务器网址';
+  String get settings_resolverUrlLabel => '服务商 URL';
 
   @override
   String get settings_alreadyBuiltInProvider => '已作为内置提供商提供';
@@ -10088,13 +10240,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_withTitleOption => '带标题';
 
   @override
-  String get settings_withTitleDescription => '显示页面标题和网址路径';
+  String get settings_withTitleDescription => '显示页面标题和地址';
 
   @override
   String get settings_compactOption => '紧凑';
 
   @override
-  String get settings_compactDescription => '居中的网址胶囊，不显示页面标题';
+  String get settings_compactDescription => '仅显示地址，居中';
 
   @override
   String get settings_showContextualToolbarTitle => '显示上下文工具栏';
@@ -10301,19 +10453,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_bottomSheetTabViewSubtitle => '在底部面板而非全屏中显示标签页';
 
   @override
-  String get settings_longPressUrlCopyTitle => '长按网址即可复制';
+  String get settings_longPressUrlCopyTitle => '长按地址即可复制';
 
   @override
   String get settings_longPressUrlCopyKeywords => '复制网址';
 
   @override
-  String get settings_longPressUrlCopySubtitle => '长按地址栏时将页面网址复制到剪贴板';
+  String get settings_longPressUrlCopySubtitle => '长按地址栏复制页面地址';
 
   @override
   String get settings_showFaviconsTitle => '在列表视图中显示网站图标';
 
   @override
-  String get settings_showFaviconsKeywords => '图标';
+  String get settings_showFaviconsKeywords => '图标, favicons';
 
   @override
   String get settings_showFaviconsSubtitle => '在标签页列表视图中显示网站图标而非页面缩略图';
@@ -10427,7 +10579,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexAutoHideSidePanelSubtitle => '鼠标移到侧边面板所在边缘时显示它';
 
   @override
-  String get settings_indexLongPressUrlCopySubtitle => '从标签栏复制当前网址';
+  String get settings_indexLongPressUrlCopySubtitle => '从标签栏复制页面地址';
 
   @override
   String get settings_indexShowContextualToolbarSubtitle => '显示用于导航和操作的额外工具栏';
@@ -10532,6 +10684,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_trackerStatisticsLoadFailed => '无法加载跟踪器统计。';
+
+  @override
+  String get settings_categoryFeatureControlTitle => '功能管理';
+
+  @override
+  String get settings_categoryFeatureControlSubtitle => '选择 WebLibre 显示哪些功能';
+
+  @override
+  String get settings_categoryFeatureControlKeywords =>
+      '功能管理, 功能, 可见性, 显示, 隐藏, 已隐藏, 预设, 应用预设, 随便逛逛, 爱折腾, 专家模式, 简单, 高级, 自定义, feature control, preset';
+
+  @override
+  String get settings_featureControlIntro =>
+      '隐藏不用的功能，让 WebLibre 保持简洁。功能隐藏期间，其设置使用默认值。你的更改会被保留，再次显示后重新生效。连接以及你创建的内容会继续工作。';
+
+  @override
+  String get settings_featureControlHiddenInUse => '功能已隐藏。你已经设置好的内容会继续工作。';
+
+  @override
+  String get settings_featureControlKeepsWorking => '你已经设置好的内容会继续工作。';
+
+  @override
+  String get settings_featureControlShownApplyingAgain => '功能已显示。你之前的更改重新生效。';
+
+  @override
+  String get settings_featureControlApplyPresetTitle => '应用预设';
+
+  @override
+  String get settings_featureControlApplyPresetSubtitle => '像预设那样显示和隐藏功能。';
+
+  @override
+  String settings_featureControlApplyPresetDialogTitle(String preset) {
+    return '要应用“$preset”吗？';
+  }
+
+  @override
+  String get settings_featureControlApplyPresetDialogContent => '只有以下功能会改变。';
+
+  @override
+  String get settings_featureControlFeaturesToShow => '将显示的功能';
+
+  @override
+  String get settings_featureControlFeaturesToHide => '将隐藏的功能';
+
+  @override
+  String get settings_featureControlApplyPresetConfirm => '应用';
+
+  @override
+  String settings_featureControlApplyPresetUnchanged(String preset) {
+    return '显示的功能已与“$preset”一致。';
+  }
+
+  @override
+  String get settings_featureControlSectionTitle => '功能';
 
   @override
   String get smallWeb_sheetTitle => '小众网络';
@@ -11945,13 +12151,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webPush_screenTitle => '通知';
 
   @override
-  String get webPush_screenSubtitle => '通过 UnifiedPush 推送的网站通知';
+  String get webPush_screenSubtitle => '通过单独的应用接收网站通知';
 
   @override
-  String get webPush_distributorTileTitle => 'UnifiedPush 分发器';
+  String get webPush_distributorTileTitle => '通知传递应用';
 
   @override
-  String get webPush_distributorTileKeywords => '通知,推送,unifiedpush,ntfy,push';
+  String get webPush_distributorTileKeywords =>
+      '通知, 推送, push, unifiedpush, 分发器, distributor, ntfy';
 
   @override
   String get webPush_checking => '正在检查…';
@@ -11976,10 +12183,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webPush_disablingWebPush => '正在停用…';
 
   @override
-  String get webPush_disableWebPush => '停用网页推送';
+  String get webPush_disableWebPush => '关闭网站通知';
 
   @override
-  String get webPush_statusNoneAvailable => '没有可用的分发器';
+  String get webPush_statusNoneAvailable => '未安装兼容的通知应用';
 
   @override
   String get webPush_statusNotSelected => '未配置';
@@ -11991,46 +12198,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webPush_statusReady => '已启用';
 
   @override
-  String get webPush_statusUnavailable => '分发器不可用';
+  String get webPush_statusUnavailable => '通知应用不可用';
 
   @override
   String get webPush_statusDescNoneAvailable =>
-      '安装 UnifiedPush 分发器应用（例如 ntfy）以接收网站通知。';
+      '要接收网站通知，请安装 ntfy 或其他支持 UnifiedPush 的应用。';
 
   @override
-  String get webPush_statusDescNotSelected => '在下方选择一个分发器以启用网站通知。';
+  String get webPush_statusDescNotSelected => '在下方选择一个通知应用以开启网站通知。';
 
   @override
-  String get webPush_statusDescPending => '正在等待分发器确认注册。';
+  String get webPush_statusDescPending => '正在等待通知应用完成设置。';
 
   @override
-  String get webPush_statusDescReady => '网站通知将通过此分发器送达。';
+  String get webPush_statusDescReady => '网站通知通过此应用传递。';
 
   @override
   String get webPush_statusDescUnavailable =>
-      '所选分发器已不再安装。在你选择其他分发器之前，网站通知将无法送达。';
+      '所选的通知应用已卸载。在你选择其他应用之前，网站通知将无法送达。';
 
   @override
   String get webPush_noDistributorInstalled =>
-      '未安装 UnifiedPush 分发器。请安装一个（例如 ntfy）后重试。';
+      '未安装兼容的通知应用。请安装 ntfy 或其他支持 UnifiedPush 的应用后重试。';
 
   @override
-  String get webPush_chooseDistributorTitle => '选择分发器';
+  String get webPush_chooseDistributorTitle => '选择通知传递应用';
 
   @override
-  String get webPush_distributorConfigured => 'UnifiedPush 分发器已配置。';
+  String get webPush_distributorConfigured => '通知应用已设置。';
 
   @override
   String webPush_couldNotConfigureDistributor(String error) {
-    return '无法配置分发器：$error';
+    return '无法设置通知应用：$error';
   }
 
   @override
-  String get webPush_webPushDisabled => '网页推送已停用。';
+  String get webPush_webPushDisabled => '网站通知已关闭。';
 
   @override
   String webPush_couldNotDisableWebPush(String error) {
-    return '无法停用网页推送：$error';
+    return '无法关闭网站通知：$error';
   }
 
   @override
@@ -12074,10 +12281,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webPush_subscriptionActive => '已启用';
 
   @override
-  String get webPush_subscriptionDelayedDelivery => '端点已保存；在分发器就绪前暂停推送';
+  String get webPush_subscriptionDelayedDelivery => '已订阅；通知应用就绪后即可接收通知';
 
   @override
-  String get webPush_subscriptionWaitingForEndpoint => '正在等待分发器分配端点';
+  String get webPush_subscriptionWaitingForEndpoint => '正在等待通知应用完成订阅';
 
   @override
   String get webPush_revokeSubscriptionHint => '如需阻止某个网站发送通知，请在网站设置中撤销其通知权限。';
@@ -12086,7 +12293,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webPush_deliverySectionTitle => '推送方式';
 
   @override
-  String get webPush_indexDistributorSubtitle => '负责推送网站通知的应用';
+  String get webPush_indexDistributorSubtitle =>
+      '负责传递网站通知的应用，例如 ntfy（UnifiedPush）';
 
   @override
   String get webPush_indexNotificationPermissionSubtitle => '显示网站通知所必需';
@@ -12101,7 +12309,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get webPush_indexSiteSubscriptionsKeywords => '网站,订阅';
 
   @override
-  String get webPush_indexSiteSubscriptionsSubtitle => '已订阅推送通知的网站';
+  String get webPush_indexSiteSubscriptionsSubtitle => '允许向你发送通知的网站';
 
   @override
   String get webSearch_fetchPageDataTitle => '获取页面数据';
@@ -12857,6 +13065,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get startup_maintenanceUnknownDescribeDone => '完成。';
 
   @override
+  String get listFormat_separator => '、';
+
+  @override
   String units_bytes(String value) {
     return '$value B';
   }
@@ -12875,6 +13086,190 @@ class AppLocalizationsZh extends AppLocalizations {
   String units_milliseconds(String value) {
     return '$value 毫秒';
   }
+
+  @override
+  String get visibilitySwitch_containersLabel => '容器';
+
+  @override
+  String get visibilitySwitch_containersDescription =>
+      '把 Cookie 和登录信息放在独立空间中，例如工作和个人';
+
+  @override
+  String get visibilitySwitch_isolatedTabsLabel => '隔离标签页';
+
+  @override
+  String get visibilitySwitch_isolatedTabsDescription =>
+      '打开拥有独立 Cookie 和登录信息的标签页，与隐私标签页不同，退出后仍会保留';
+
+  @override
+  String get visibilitySwitch_connectionsLabel => 'Tor、VPN 和代理';
+
+  @override
+  String get visibilitySwitch_connectionsDescription => '通过 Tor、VPN 或代理浏览';
+
+  @override
+  String get visibilitySwitch_profilesLabel => '多个配置文件';
+
+  @override
+  String get visibilitySwitch_profilesDescription => '创建独立的配置文件并在它们之间切换';
+
+  @override
+  String get visibilitySwitch_treeTabsLabel => '树状标签页';
+
+  @override
+  String get visibilitySwitch_treeTabsDescription => '把从某个页面打开的标签页显示在其来源标签页下方';
+
+  @override
+  String get visibilitySwitch_layoutAdvancedLabel => '更多布局选项';
+
+  @override
+  String get visibilitySwitch_layoutAdvancedDescription =>
+      '选择工具栏按钮、菜单顺序以及标签栏如何分组标签页';
+
+  @override
+  String get visibilitySwitch_gesturesLabel => '手势';
+
+  @override
+  String get visibilitySwitch_gesturesDescription => '滑动或绘制图形来执行操作';
+
+  @override
+  String get visibilitySwitch_keyboardCustomizationLabel => '自定义键盘快捷键';
+
+  @override
+  String get visibilitySwitch_keyboardCustomizationDescription =>
+      '选择哪个按键执行哪个操作';
+
+  @override
+  String get visibilitySwitch_privacyAdvancedLabel => '高级隐私设置';
+
+  @override
+  String get visibilitySwitch_privacyAdvancedDescription =>
+      '细调跟踪保护、安全 DNS、更严格的安全设置，以及让此设备更难被识别的保护。隐藏这些设置不会关闭保护。';
+
+  @override
+  String get visibilitySwitch_webappStorageLabel => '网页应用存储';
+
+  @override
+  String get visibilitySwitch_webappStorageDescription =>
+      '选择添加到主屏幕的应用使用哪些 Cookie 和登录信息';
+
+  @override
+  String get visibilitySwitch_aiLabel => '设备端 AI';
+
+  @override
+  String get visibilitySwitch_aiDescription => '获取由只在此设备上运行的 AI 提供的标签页分组建议';
+
+  @override
+  String get visibilitySwitch_expertDetailsLabel => '专家设置';
+
+  @override
+  String get visibilitySwitch_expertDetailsDescription =>
+      '控制引擎加固分组、按容器路由、JavaScript、User Agent、证书等';
+
+  @override
+  String visibilitySwitch_alsoNeeds(String switches) {
+    return '此功能的部分内容还需要：$switches';
+  }
+
+  @override
+  String visibilitySwitch_revealTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '要显示隐藏的功能吗？',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String visibilitySwitch_revealIntro(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '此项需要几项当前已隐藏的功能：',
+      one: '此项属于一项当前已隐藏的功能：',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String visibilitySwitch_revealOutcome(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '显示后，其按钮和设置会重新出现。其他内容不变。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String visibilitySwitch_revealResumesIntro(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '隐藏期间，这些设置使用默认值。你的更改会被保留，再次显示后重新生效：',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get visibilitySwitch_takesEffectAfterRestart => '重启后生效';
+
+  @override
+  String get visibilitySwitch_revealConfirm => '显示';
+
+  @override
+  String get visibilitySwitch_stillHiddenNote =>
+      '此项属于一项隐藏的功能。你可以在“设置 > 功能管理”中显示它。';
+
+  @override
+  String get visibilitySwitch_hiddenControlHint => '属于隐藏的功能。激活以显示该功能';
+
+  @override
+  String visibilitySwitch_hiddenStatus(String switchLabel) {
+    return '属于隐藏的功能“$switchLabel”';
+  }
+
+  @override
+  String visibilitySwitch_hiddenStatusSeveral(String switchLabels) {
+    return '属于以下隐藏的功能：$switchLabels';
+  }
+
+  @override
+  String get visibilitySwitch_notAppliedWhileHidden => '隐藏期间不生效';
+
+  @override
+  String visibilitySwitch_hideWarningTitle(String feature) {
+    return '隐藏“$feature”？';
+  }
+
+  @override
+  String visibilitySwitch_hideWarningContent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '隐藏期间，这些设置使用默认值。你的更改会被保留，再次显示后重新生效。',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get visibilitySwitch_hideWarningConfirm => '隐藏';
+
+  @override
+  String get visibilitySwitch_stopsApplyingTitle => '将不再生效的更改';
+
+  @override
+  String get visibilitySwitch_appliesAgainTitle => '将重新生效的更改';
+
+  @override
+  String get visibilitySwitch_hiddenSettingUrlCleanerAutoApply => '网址清理自动应用';
+
+  @override
+  String get visibilitySwitch_hiddenSettingUrlCleanerRules => '网址清理规则';
+
+  @override
+  String get visibilitySwitch_hiddenSettingToolbarButtons => '工具栏按钮的替代和长按';
 
   @override
   String get failureWidget_defaultTitle => '出了点问题';
@@ -13024,7 +13419,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String uiHelper_canNotHandleScheme(String scheme) {
-    return '无法处理“$scheme”';
+    return '没有应用可以打开“$scheme”链接';
   }
 
   @override

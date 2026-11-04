@@ -51,6 +51,7 @@
   "proxy_fieldProfileName": "Nama Profil",
   "proxy_fieldProtocol": "Protokol",
   "proxy_protocolFixedHelper": "Protokol tidak dapat diubah setelah profil dibuat.",
+  "proxy_protocolFromImportHelper": "Ditetapkan oleh impor. Untuk memasukkan koneksi secara manual, tampilkan \"{featureName}\" di Pengaturan > Kontrol Fitur.",
   "proxy_customOutboundLabel": "Outbound Kustom",
   "proxy_startAutomaticallyTitle": "Mulai Otomatis",
   "proxy_startAutomaticallySubtitle": "Hubungkan profil ini saat WebLibre dimulai, sehingga tab yang menggunakannya langsung siap tanpa konfirmasi",

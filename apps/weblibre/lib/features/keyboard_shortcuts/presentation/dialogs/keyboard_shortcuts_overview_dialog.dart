@@ -23,10 +23,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/key_chord_label.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// A read-only list of the keys that currently run browser actions, grouped by
@@ -41,9 +44,10 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
     final settings = ref.watch(keyboardShortcutSettingsRepositoryProvider);
     final bindings = ref.watch(effectiveKeyboardShortcutsProvider);
 
+    final general = ref.watch(generalSettingsWithDefaultsProvider);
     final byCategory = <BrowserActionCategory, List<BrowserAction>>{};
     for (final action in BrowserAction.values) {
-      if (bindings.containsKey(action)) {
+      if (bindings.containsKey(action) && action.isShownIn(general)) {
         byCategory.putIfAbsent(action.category, () => []).add(action);
       }
     }
@@ -106,11 +110,17 @@ class KeyboardShortcutsOverviewDialog extends HookConsumerWidget {
               ),
       ),
       actions: [
+        // The settings screen stays reachable (it switches shortcuts on and
+        // off), but only offers changing them with their customization shown.
         TextButton(
           onPressed: customize,
-          child: Text(l10n.keyboardShortcuts_actionCustomize),
+          child: Text(
+            general.isFeatureShown(FeatureId.inputKeyboardShortcutCustomization)
+                ? l10n.keyboardShortcuts_actionCustomize
+                : l10n.keyboardShortcuts_actionShowAll,
+          ),
         ),
-        FilledButton(
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.common_close),
         ),

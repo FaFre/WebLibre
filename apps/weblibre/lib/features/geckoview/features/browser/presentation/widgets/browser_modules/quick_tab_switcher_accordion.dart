@@ -112,7 +112,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
     );
     final hierarchyGlyphs = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherHierarchyGlyphs,
+        (s) => s.effectiveQuickTabSwitcherHierarchyGlyphs,
       ),
     );
     final titleMaxWidth = ref.watch(

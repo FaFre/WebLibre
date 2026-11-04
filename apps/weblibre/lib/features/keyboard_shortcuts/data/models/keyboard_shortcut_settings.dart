@@ -20,6 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/default_keyboard_shortcuts.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
@@ -109,6 +110,15 @@ class KeyboardShortcutSettings with FastEquatable {
 
   /// Whether any action's chords differ from its defaults.
   bool get hasCustomizations => overrides.isNotEmpty;
+
+  /// These settings as they apply while [isShown] says which features are
+  /// shown: the default shortcuts while customizing them is hidden. The
+  /// stored changes are kept, and so is the master switch, which is not
+  /// part of the customization.
+  KeyboardShortcutSettings effective(bool Function(FeatureId feature) isShown) {
+    if (isShown(FeatureId.inputKeyboardShortcutCustomization)) return this;
+    return copyWith(overrides: const {});
+  }
 
   /// Adds [chord] to [action], taking it from whichever action had it.
   KeyboardShortcutSettings withChordAdded(

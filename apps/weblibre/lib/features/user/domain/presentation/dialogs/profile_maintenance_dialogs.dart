@@ -78,10 +78,9 @@ Future<bool?> showDeleteProfileDialog(
             },
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
-              foregroundColor: theme.colorScheme.onError,
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
             ),
             onPressed: () {
               Navigator.pop(context, true);
@@ -196,10 +195,9 @@ Future<bool?> showReplaceProfileDialog(
             onPressed: () => Navigator.pop(context, false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: theme.colorScheme.error,
-              foregroundColor: theme.colorScheme.onError,
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
             ),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.user_actionReplaceAndRestart),
@@ -257,7 +255,7 @@ Future<bool?> showBackupProfileDialog(
             onPressed: () => Navigator.pop(context, false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.user_actionBackupAndRestart),
           ),

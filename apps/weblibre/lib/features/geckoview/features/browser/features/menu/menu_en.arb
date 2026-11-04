@@ -310,6 +310,10 @@
   "@menu_profileTapToSwitch": {
     "description": "Line under the profile name in the browser menu."
   },
+  "menu_profileManageCurrent": "Lock and back up this profile",
+  "@menu_profileManageCurrent": {
+    "description": "Line under the profile name in the browser menu when there is only one profile and the multiple-profiles controls are hidden. Tapping opens the profile's lock, password and backup settings."
+  },
   "menu_profileSyncComplete": "Synchronization complete",
   "@menu_profileSyncComplete": {
     "description": "Confirmation after a manual Firefox Sync finished."
@@ -606,9 +610,9 @@
     "description": "Button that starts the stopped proxy. proxyTitle is the proxy's name.",
     "placeholders": { "proxyTitle": { "type": "String" } }
   },
-  "menu_connectionProxySettings": "Proxy Settings",
+  "menu_connectionProxySettings": "Connection Settings",
   "@menu_connectionProxySettings": {
-    "description": "Row in the connection group that opens proxy settings."
+    "description": "Row in the connection group of the browser menu that opens the connection settings (Tor, VPNs and proxies), named like that settings category."
   },
   "menu_connectionUnused": "Not used by any route",
   "@menu_connectionUnused": {

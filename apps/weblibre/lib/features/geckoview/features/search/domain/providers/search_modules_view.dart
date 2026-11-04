@@ -20,6 +20,7 @@
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
 part 'search_modules_view.g.dart';
@@ -81,6 +82,30 @@ enum SearchModuleType {
   /// on the new-tab page "New tab" is the page you are already looking at.
   quickActions,
 }
+
+/// The policy feature a module shows, for the modules that follow a feature's
+/// visibility (`home.module_feature_filter`). A module whose feature is hidden
+/// is skipped when drawn; its slot in the saved layout is kept, so it returns
+/// where it was once the feature is shown again.
+///
+/// Only Containers today: bangs, feeds and the Actions section are always
+/// shown, and Actions filters its rows by each action's owning feature.
+FeatureId? searchModuleFeature(SearchModuleType module) => switch (module) {
+  SearchModuleType.containers => FeatureId.containerCore,
+  _ => null,
+};
+
+/// Whether [module] follows a feature that is in [shownFeatures], or follows
+/// none. Everything that lists modules — the surfaces that draw them and the
+/// screens that arrange them — asks this, so a module never draws or offers a
+/// switch for a hidden feature.
+bool isSearchModuleFeatureShown(
+  SearchModuleType module,
+  Set<FeatureId> shownFeatures,
+) => switch (searchModuleFeature(module)) {
+  final feature? => shownFeatures.contains(feature),
+  null => true,
+};
 
 /// One module slot on a surface: which module, and whether it starts enabled.
 typedef ModuleSurfaceDefault = ({SearchModuleType type, bool visible});

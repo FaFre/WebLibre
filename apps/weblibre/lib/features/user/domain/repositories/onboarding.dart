@@ -26,14 +26,6 @@ part 'onboarding.g.dart';
 class OnboardingRepository extends _$OnboardingRepository {
   static const targetRevision = 3;
 
-  Future<int?> getCurrentRevision() {
-    return ref
-        .read(userDatabaseProvider)
-        .onboardingDao
-        .getLastRevision()
-        .getSingleOrNull();
-  }
-
   Future<void> pushRevision(int revision) {
     return ref
         .read(userDatabaseProvider)
@@ -41,13 +33,17 @@ class OnboardingRepository extends _$OnboardingRepository {
         .pushRevision(revision, DateTime.now());
   }
 
-  Future<bool> isOutdated() async {
-    final current = await getCurrentRevision();
-    return current == null || current < targetRevision;
-  }
-
   @override
   void build() {
     return;
   }
+}
+
+/// The last onboarding revision this profile completed, or null before the
+/// first one. Follows the database, so a completed onboarding is seen by
+/// everything that reads it without anyone refreshing it.
+@Riverpod(keepAlive: true)
+Stream<int?> completedOnboardingRevision(Ref ref) {
+  final db = ref.watch(userDatabaseProvider);
+  return db.onboardingDao.getLastRevision().watchSingleOrNull();
 }

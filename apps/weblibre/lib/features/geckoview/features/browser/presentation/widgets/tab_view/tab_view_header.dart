@@ -29,6 +29,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
@@ -235,7 +236,7 @@ class _TabTypeFilterBar extends ConsumerWidget {
     final openTypes = _watchOpenTabTypes(ref);
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showIsolatedTabUi,
+        (settings) => settings.isolatedTabEntryPointsShown,
       ),
     );
 
@@ -333,11 +334,6 @@ class TabViewHeader extends HookConsumerWidget {
 
     final scrolledUnder = useValueListenable(this.scrolledUnder);
 
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showContainerUi,
-      ),
-    );
     final isSyncedScope = ref.watch(
       effectiveTabsTrayScopeProvider.select(
         (scope) => scope == TabsTrayScope.synced,
@@ -478,7 +474,10 @@ class TabViewHeader extends HookConsumerWidget {
               if (searchMode) const Divider(),
               if (watchTabTypeFilterBarVisible(ref, tabsViewMode))
                 const _TabTypeFilterBar(),
-              if (showContainerUi) _TabFilters(tabsViewMode: tabsViewMode),
+              // Always: the Synced chip and the way back to local tabs live
+              // here too, and while containers are hidden ContainerChips
+              // reduces itself to navigation, or to nothing (P5).
+              _TabFilters(tabsViewMode: tabsViewMode),
               const SizedBox(height: 8),
             ],
           ),
@@ -604,7 +603,7 @@ class _TabViewActionRow extends HookConsumerWidget {
 
     final enableAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.enableLocalAiFeatures,
+        (settings) => settings.containerSuggestionsActive,
       ),
     );
     final isSyncedScope = ref.watch(
@@ -614,6 +613,7 @@ class _TabViewActionRow extends HookConsumerWidget {
     );
     final canManualTabReorder = ref.watch(canManualTabReorderProvider);
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
+    final treeViewModeShown = ref.watch(treeViewModeShownProvider);
     final canManualReorder =
         !isSyncedScope &&
         tabsViewMode != TabsViewMode.tree &&
@@ -635,6 +635,11 @@ class _TabViewActionRow extends HookConsumerWidget {
           Consumer(
             builder: (context, ref, child) {
               final filterOptions = ref.watch(tabViewFilterControllerProvider);
+              final hierarchyDisplayShown = ref.watch(
+                generalSettingsWithDefaultsProvider.select(
+                  (s) => s.isFeatureShown(FeatureId.tabsHierarchyDisplay),
+                ),
+              );
               // The tab-type filter shows itself in [_TabTypeFilterBar].
               final hasActiveFilter = filterOptions.copyWith
                   .tabTypeFilter(TabTypeFilter.all)
@@ -687,21 +692,22 @@ class _TabViewActionRow extends HookConsumerWidget {
                     ],
                     child: Text(l10n.browser_filterSort),
                   ),
-                  MenuItemButton(
-                    leadingIcon: Icon(
-                      filterOptions.showHierarchicalTabs
-                          ? Icons.check_box
-                          : Icons.check_box_outline_blank,
+                  if (hierarchyDisplayShown)
+                    MenuItemButton(
+                      leadingIcon: Icon(
+                        filterOptions.showHierarchicalTabs
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                      ),
+                      onPressed: () {
+                        ref
+                            .read(tabViewFilterControllerProvider.notifier)
+                            .setShowHierarchicalTabs(
+                              !filterOptions.showHierarchicalTabs,
+                            );
+                      },
+                      child: Text(l10n.browser_hierarchicalView),
                     ),
-                    onPressed: () {
-                      ref
-                          .read(tabViewFilterControllerProvider.notifier)
-                          .setShowHierarchicalTabs(
-                            !filterOptions.showHierarchicalTabs,
-                          );
-                    },
-                    child: Text(l10n.browser_hierarchicalView),
-                  ),
                   const Divider(),
                   // Date range picker
                   MenuItemButton(
@@ -808,7 +814,7 @@ class _TabViewActionRow extends HookConsumerWidget {
         const Spacer(),
         MenuAnchor(
           controller: viewModeMenuController,
-          menuChildren: TabsViewMode.values
+          menuChildren: offeredTabsViewModes(treeShown: treeViewModeShown)
               .map(
                 (mode) => MenuItemButton(
                   leadingIcon: Icon(mode.icon),

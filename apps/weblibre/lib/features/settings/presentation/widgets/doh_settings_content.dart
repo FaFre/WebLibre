@@ -39,14 +39,12 @@ class DohSettingsContent extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     final dohSettings = ref.watch(
-      engineSettingsWithDefaultsProvider.select((value) => value.dohSettings),
+      storedEngineSettingsProvider.select((value) => value.dohSettings),
     );
     // Already includes a resolver that predates saved resolvers — the model
     // adopts it out of `dohProviderUrl` on deserialization.
     final resolvers = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (value) => value.customDohProviders,
-      ),
+      storedEngineSettingsProvider.select((value) => value.customDohProviders),
     );
 
     Future<void> save(UpdateEngineSettingsFunc updateSettings) {
@@ -351,7 +349,7 @@ class _CustomResolverDialog extends HookWidget {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.common_cancel),
         ),
-        FilledButton(
+        TextButton(
           onPressed: () {
             if (formKey.currentState?.validate() == true) {
               final name = nameController.text.trim();

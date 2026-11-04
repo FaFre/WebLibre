@@ -20,13 +20,16 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
+import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/settings/presentation/widgets/hardening_group_icon.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 class WebEngineHardeningGroupScreen extends HookConsumerWidget {
   final String groupName;
@@ -47,130 +50,161 @@ class WebEngineHardeningGroupScreen extends HookConsumerWidget {
     final search = useSettingsSearch();
     final query = search.normalizedQuery;
 
-    return SettingsCustomScrollScaffold(
-      title: groupName,
-      searchController: search.controller,
-      searchHintText: l10n.settings_webEngineHardeningGroupSearchHint,
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-          sliver: SliverToBoxAdapter(
-            child: settings.when(
-              skipLoadingOnReload: true,
-              data: (group) {
-                final groupControlMatches =
-                    query.isEmpty ||
-                    matchesSettingsSearch(query, [
-                      groupName,
-                      if (group.description != null) group.description!,
-                      'group controls complete hardening',
+    return HiddenFeatureScope(
+      feature: groupFeature(groupName),
+      child: SettingsCustomScrollScaffold(
+        title: groupName,
+        searchController: search.controller,
+        searchHintText: l10n.settings_webEngineHardeningGroupSearchHint,
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+            sliver: SliverToBoxAdapter(
+              child: settings.when(
+                skipLoadingOnReload: true,
+                data: (group) {
+                  final groupControlMatches =
+                      query.isEmpty ||
+                      matchesSettingsSearch(query, [
+                        groupName,
+                        if (group.description != null) group.description!,
+                        'group controls complete hardening',
+                      ]);
+                  final filteredSettings = group.settings.entries.where((
+                    setting,
+                  ) {
+                    if (query.isEmpty) return true;
+                    return matchesSettingsSearch(query, [
+                      setting.key,
+                      if (setting.value.title != null) setting.value.title!,
+                      if (setting.value.description != null)
+                        setting.value.description!,
                     ]);
-                final filteredSettings = group.settings.entries.where((
-                  setting,
-                ) {
-                  if (query.isEmpty) return true;
-                  return matchesSettingsSearch(query, [
-                    setting.key,
-                    if (setting.value.title != null) setting.value.title!,
-                    if (setting.value.description != null)
-                      setting.value.description!,
-                  ]);
-                }).toList();
+                  }).toList();
 
-                final sections = <SettingsSectionDefinition>[
-                  if (group.showMasterSwitch && groupControlMatches)
-                    SettingsSectionDefinition(
-                      title: l10n.settings_webEngineHardeningGroupControlsTitle,
-                      entries: [
-                        SettingsEntryDefinition(
-                          title: groupName,
-                          subtitle: group.description,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: SwitchListTile.adaptive(
-                                value: group.isActiveOrOptional,
-                                title: Text(
-                                  groupName,
-                                  style: TextStyle(
-                                    color: theme.colorScheme.onPrimaryContainer,
-                                  ),
+                  final sections = <SettingsSectionDefinition>[
+                    if (group.showMasterSwitch && groupControlMatches)
+                      SettingsSectionDefinition(
+                        title:
+                            l10n.settings_webEngineHardeningGroupControlsTitle,
+                        entries: [
+                          SettingsEntryDefinition(
+                            title: groupName,
+                            subtitle: group.description,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                                subtitle: group.description.mapNotNull(
-                                  (description) => Text(
-                                    description,
+                                child: SwitchListTile.adaptive(
+                                  value: group.isActiveOrOptional,
+                                  title: Text(
+                                    groupName,
                                     style: TextStyle(
                                       color:
                                           theme.colorScheme.onPrimaryContainer,
                                     ),
                                   ),
-                                ),
-                                onChanged: (value) async {
-                                  final notifier = ref.read(
-                                    preferenceSettingsGroupRepositoryProvider(
-                                      PreferencePartition.user,
-                                      groupName,
-                                    ).notifier,
-                                  );
+                                  subtitle: group.description.mapNotNull(
+                                    (description) => Text(
+                                      description,
+                                      style: TextStyle(
+                                        color: theme
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                      ),
+                                    ),
+                                  ),
+                                  onChanged: (value) async {
+                                    final notifier = ref.read(
+                                      preferenceSettingsGroupRepositoryProvider(
+                                        PreferencePartition.user,
+                                        groupName,
+                                      ).notifier,
+                                    );
 
-                                  if (value) {
-                                    await notifier.apply();
-                                  } else {
-                                    await notifier.reset();
-                                  }
-                                },
+                                    await stopHardeningBaselineRetry(ref);
+                                    if (value) {
+                                      await notifier.apply();
+                                    } else {
+                                      await notifier.reset();
+                                    }
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  if (filteredSettings.isNotEmpty)
-                    SettingsSectionDefinition(
-                      title: l10n
-                          .settings_webEngineHardeningPreferenceSettingsTitle,
-                      entries: [
-                        for (final setting in filteredSettings)
-                          SettingsEntryDefinition(
-                            title: setting.value.title ?? setting.key,
-                            subtitle: setting.value.description,
-                            child: _HardeningSettingTile(
-                              groupName: groupName,
-                              settingKey: setting.key,
-                              settingValue: setting.value,
+                        ],
+                      ),
+                    if (filteredSettings.isNotEmpty)
+                      SettingsSectionDefinition(
+                        title: l10n
+                            .settings_webEngineHardeningPreferenceSettingsTitle,
+                        entries: [
+                          for (final setting in filteredSettings)
+                            SettingsEntryDefinition(
+                              title: setting.value.title ?? setting.key,
+                              subtitle: setting.value.description,
+                              // Single preferences are Expert
+                              // (`privacy.engine_hardening_groups`, optional ones
+                              // `_optional`). An optional one that is on stays usable,
+                              // the screen's scope included, so it can always be
+                              // turned off again (P5).
+                              feature: setting.value.requireUserOptIn
+                                  ? FeatureId.privacyEngineHardeningOptional
+                                  : FeatureId.privacyEngineHardeningGroups,
+                              inForce:
+                                  setting.value.requireUserOptIn &&
+                                  setting.value.isActive,
+                              child: _HardeningSettingTile(
+                                groupName: groupName,
+                                settingKey: setting.key,
+                                settingValue: setting.value,
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                ];
+                        ],
+                      ),
+                  ];
 
-                return SettingsSectionList(
-                  sections: sections,
-                  query: search.rawQuery,
-                );
-              },
-              error: (error, stackTrace) => FailureWidget(
-                title: l10n.settings_webEngineHardeningLoadFailedTitle,
-                exception: error,
-                onRetry: () => ref.refresh(
-                  preferenceSettingsGroupRepositoryProvider(
-                    PreferencePartition.user,
-                    groupName,
+                  return SettingsSectionList(
+                    sections: sections,
+                    query: search.rawQuery,
+                  );
+                },
+                error: (error, stackTrace) => FailureWidget(
+                  title: l10n.settings_webEngineHardeningLoadFailedTitle,
+                  exception: error,
+                  onRetry: () => ref.refresh(
+                    preferenceSettingsGroupRepositoryProvider(
+                      PreferencePartition.user,
+                      groupName,
+                    ),
                   ),
                 ),
+                loading: () => const Center(child: CircularProgressIndicator()),
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
+
+/// The feature a group screen configures as a whole: Resist Fingerprinting
+/// has its own switch on the Privacy screen, every other group is one of the
+/// hardening groups.
+@visibleForTesting
+FeatureId groupFeature(String groupName) =>
+    groupName == resistFingerprintingGroup
+    ? FeatureId.privacyResistFingerprinting
+    : FeatureId.privacyEngineHardeningGroups;
+
+/// The preference group the Privacy screen's Resist Fingerprinting entry
+/// opens.
+const resistFingerprintingGroup = 'Resist Fingerprinting';
 
 class _HardeningSettingTile extends ConsumerWidget {
   const _HardeningSettingTile({
@@ -247,6 +281,7 @@ class _HardeningSettingTile extends ConsumerWidget {
                   ).notifier,
                 );
 
+                await stopHardeningBaselineRetry(ref);
                 if (value) {
                   await notifier.apply(filter: [settingKey]);
                 } else {
@@ -268,3 +303,11 @@ class _HardeningSettingTile extends ConsumerWidget {
     );
   }
 }
+
+/// Called before every hardening change made here. A baseline the engine
+/// refused during setup is retried on each start
+/// ([SetupStep.hardeningBaseline]); once the user has set hardening up
+/// themselves, that retry would overwrite their choice, so it stops.
+Future<void> stopHardeningBaselineRetry(WidgetRef ref) => ref
+    .read(setupStepRunnerProvider.notifier)
+    .cancel(SetupStep.hardeningBaseline);

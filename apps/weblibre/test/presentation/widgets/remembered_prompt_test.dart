@@ -77,6 +77,7 @@ void main() {
                   onPressed: () async {
                     lastResult = await confirmUnlessRemembered(
                       context,
+                      ref.read,
                       RememberedPrompt.closeAllTabs,
                       title: 'Close all tabs?',
                       content: 'Body',

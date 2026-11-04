@@ -30,6 +30,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/providers/app_state.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/user_agent_restart_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
@@ -55,18 +57,24 @@ List<SettingsSectionDefinition> advancedSettingsSections(BuildContext context) {
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_javascriptTitle,
+          feature: FeatureId.advancedJavascriptControl,
+          hiddenSettings: const [HiddenSetting.javascript],
           subtitle: l10n.settings_indexJavascriptSubtitle,
           keywords: settingsKeywords(l10n.settings_javascriptKeywords),
           child: const _JavaScriptTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_userAgentLabel,
+          feature: FeatureId.advancedCustomUserAgent,
+          hiddenSettings: const [HiddenSetting.userAgent],
           subtitle: l10n.settings_indexUserAgentSubtitle,
           keywords: settingsKeywords(l10n.settings_userAgentLabelKeywords),
           child: const _UserAgentTile(),
         ),
         SettingsEntryDefinition(
           title: l10n.settings_enterpriseRootsTitle,
+          feature: FeatureId.advancedThirdPartyCa,
+          hiddenSettings: const [HiddenSetting.thirdPartyCertificates],
           subtitle: l10n.settings_indexEnterpriseRootsSubtitle,
           keywords: settingsKeywords(l10n.settings_enterpriseRootsKeywords),
           child: const _EnterpriseRootsTile(),
@@ -78,10 +86,16 @@ List<SettingsSectionDefinition> advancedSettingsSections(BuildContext context) {
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_experimentalFeaturesTitle,
+          feature: FeatureId.advancedExperimentalProcess,
+          hiddenSettings: const [
+            HiddenSetting.isolatedProcess,
+            HiddenSetting.appZygoteProcess,
+          ],
           subtitle: l10n.settings_experimentalFeaturesSubtitle,
           keywords: settingsKeywords(
             l10n.settings_experimentalFeaturesKeywords,
           ),
+          opensScreen: true,
           child: const _ExperimentalSettingsTile(),
         ),
       ],
@@ -92,6 +106,8 @@ List<SettingsSectionDefinition> advancedSettingsSections(BuildContext context) {
       entries: [
         SettingsEntryDefinition(
           title: l10n.settings_unmountGeckoViewTitle,
+          feature: FeatureId.advancedUnmountEngineOffscreen,
+          hiddenSettings: const [HiddenSetting.unmountEngine],
           subtitle: l10n.settings_indexUnmountGeckoViewSubtitle,
           keywords: settingsKeywords(l10n.settings_unmountGeckoViewKeywords),
           child: const _UnmountGeckoViewOffRouteTile(),
@@ -153,7 +169,7 @@ class _JavaScriptTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final javascriptEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.javascriptEnabled),
+      storedEngineSettingsProvider.select((s) => s.javascriptEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -181,7 +197,7 @@ class _UserAgentTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAgent = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.userAgent),
+      storedEngineSettingsProvider.select((s) => s.userAgent),
     );
 
     final userAgentTextController = useTextEditingController(
@@ -229,9 +245,7 @@ class _EnterpriseRootsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enterpriseRootsEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.enterpriseRootsEnabled,
-      ),
+      storedEngineSettingsProvider.select((s) => s.enterpriseRootsEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -281,9 +295,7 @@ class _UnmountGeckoViewOffRouteTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final unmountGeckoViewOffRoute = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.unmountGeckoViewOffRoute,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.unmountGeckoViewOffRoute),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -371,7 +383,7 @@ class _MlCacheTile extends HookWidget {
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l10n.common_clear),
           ),

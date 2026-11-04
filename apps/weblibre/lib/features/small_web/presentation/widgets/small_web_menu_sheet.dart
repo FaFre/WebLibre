@@ -360,7 +360,8 @@ class _WebCategoriesPanel extends ConsumerWidget {
                   sourceKind: session.sourceKind,
                   mode: session.mode,
                 ),
-                onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
+                onOpenUri: (uri) =>
+                    openSmallWebAttributionUri(context, ref.read, uri),
                 compact: true,
               ),
               const SizedBox(height: 8),
@@ -471,7 +472,8 @@ class _ModeContextPanel extends ConsumerWidget {
                 sourceKind: session.sourceKind,
                 mode: session.mode,
               ),
-              onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
+              onOpenUri: (uri) =>
+                  openSmallWebAttributionUri(context, ref.read, uri),
               compact: true,
             ),
             const SizedBox(height: 8),
@@ -525,7 +527,8 @@ class _DefaultContentPanel extends ConsumerWidget {
                 sourceKind: session.sourceKind,
                 mode: session.mode,
               ),
-              onOpenUri: (uri) => openSmallWebAttributionUri(context, uri),
+              onOpenUri: (uri) =>
+                  openSmallWebAttributionUri(context, ref.read, uri),
             ),
             const SizedBox(height: 12),
             if (session.sourceKind == SmallWebSourceKind.wander) ...[

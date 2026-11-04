@@ -76,8 +76,9 @@ void main() {
     return () => (closed: closed, chord: result);
   }
 
-  FilledButton confirmButton(WidgetTester tester) =>
-      tester.widget<FilledButton>(find.byType(FilledButton));
+  // Cancel first, then the confirming action.
+  TextButton confirmButton(WidgetTester tester) =>
+      tester.widget<TextButton>(find.byType(TextButton).last);
 
   testWidgets('records a chord and returns it on save', (tester) async {
     final result = await openRecorder(tester, BrowserAction.duplicateTab);

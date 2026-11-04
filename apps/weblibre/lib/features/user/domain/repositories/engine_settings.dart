@@ -26,6 +26,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'engine_settings.g.dart';
 
@@ -283,15 +284,46 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
   }
 }
 
-/// Kept alive like its `generalSettingsWithDefaults` counterpart: it is
-/// a pure projection of the keep-alive repository, so caching it costs a single
+/// The engine settings as stored, hidden features included.
+///
+/// For the screens that show and edit settings, the onboarding draft and
+/// Feature Control. Behavior reads [engineSettingsWithDefaults].
+///
+/// Kept alive like its `storedGeneralSettings` counterpart: it is a pure
+/// projection of the keep-alive repository, so caching it costs a single
 /// derived value and lets keep-alive consumers read it without pinning an
 /// auto-disposed provider.
 @Riverpod(keepAlive: true)
-EngineSettings engineSettingsWithDefaults(Ref ref) {
+EngineSettings storedEngineSettings(Ref ref) {
   return ref.watch(
     engineSettingsRepositoryProvider.select(
       (value) => value.value ?? EngineSettings.withDefaults(),
     ),
   );
+}
+
+/// The engine settings as they apply: the settings of hidden features at
+/// their hidden values ([EngineSettings.effective]).
+@Riverpod(keepAlive: true)
+EngineSettings engineSettingsWithDefaults(Ref ref) {
+  final shown = ref.watch(shownFeaturesProvider);
+  return ref.watch(storedEngineSettingsProvider).effective(shown.contains);
+}
+
+/// [engineSettingsWithDefaults] once both the engine and the general settings
+/// have loaded, null before: what the engine is told. The placeholder
+/// defaults are no input for it, and neither are stored values whose
+/// visibility is not known yet.
+@Riverpod(keepAlive: true)
+EngineSettings? loadedEngineSettings(Ref ref) {
+  final stored = ref.watch(
+    engineSettingsRepositoryProvider.select((value) => value.value),
+  );
+  final generalLoaded = ref.watch(
+    generalSettingsRepositoryProvider.select((value) => value.hasValue),
+  );
+  if (stored == null || !generalLoaded) return null;
+
+  final shown = ref.watch(shownFeaturesProvider);
+  return stored.effective(shown.contains);
 }

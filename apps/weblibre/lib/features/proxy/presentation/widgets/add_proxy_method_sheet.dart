@@ -25,12 +25,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
 import 'package:weblibre/features/proxy/presentation/utils/proxy_import_failure_l10n.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/error_l10n.dart';
+import 'package:weblibre/presentation/widgets/reveal_feature.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Outcome of the add-proxy bottom sheet. The sheet itself does not navigate
@@ -74,6 +77,16 @@ class AddProxyMethodSheet extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final busy = useState(false);
+    // Sing-box outbounds and the manual form are
+    // `connections.manual_proxy_config` (Expert). Adding a connection is a
+    // task, not a settings screen, so while hidden they are left out rather
+    // than grayed out. Importing a WireGuard file, a proxy link or QR code or
+    // a subscription stays.
+    final manualShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.connectionsManualProxyConfig),
+      ),
+    );
 
     void popWith(AddProxyAction action) {
       if (!context.mounted) return;
@@ -127,7 +140,7 @@ class AddProxyMethodSheet extends HookConsumerWidget {
         context: context,
         anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
         showDragHandle: true,
-        builder: (_) => const _FileKindPicker(),
+        builder: (_) => _FileKindPicker(showSingboxJson: manualShown),
       );
       if (kind == null) return;
       if (!context.mounted) return;
@@ -204,16 +217,18 @@ class AddProxyMethodSheet extends HookConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton.icon(
-                onPressed: busy.value
-                    ? null
-                    : () => popWith(const AddProxyManual()),
-                icon: const Icon(Icons.edit_note),
-                label: Text(l10n.proxy_enterManually),
+            if (manualShown) ...[
+              const SizedBox(height: 12),
+              Center(
+                child: TextButton.icon(
+                  onPressed: busy.value
+                      ? null
+                      : () => popWith(const AddProxyManual()),
+                  icon: const Icon(Icons.edit_note),
+                  label: Text(l10n.proxy_enterManually),
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -288,7 +303,9 @@ class _MethodCard extends StatelessWidget {
 }
 
 class _FileKindPicker extends StatelessWidget {
-  const _FileKindPicker();
+  const _FileKindPicker({required this.showSingboxJson});
+
+  final bool showSingboxJson;
 
   @override
   Widget build(BuildContext context) {
@@ -317,14 +334,15 @@ class _FileKindPicker extends StatelessWidget {
               onTap: () =>
                   Navigator.of(context).pop(ProxyFileImportKind.wireguardConf),
             ),
-            ListTile(
-              leading: const Icon(Icons.data_object),
-              title: Text(l10n.proxy_importFileSingboxJsonTitle),
-              subtitle: Text(l10n.proxy_importFileSingboxJsonSubtitle),
-              onTap: () => Navigator.of(
-                context,
-              ).pop(ProxyFileImportKind.singboxOutboundJson),
-            ),
+            if (showSingboxJson)
+              ListTile(
+                leading: const Icon(Icons.data_object),
+                title: Text(l10n.proxy_importFileSingboxJsonTitle),
+                subtitle: Text(l10n.proxy_importFileSingboxJsonSubtitle),
+                onTap: () => Navigator.of(
+                  context,
+                ).pop(ProxyFileImportKind.singboxOutboundJson),
+              ),
           ],
         ),
       ),
@@ -358,6 +376,26 @@ Future<AddProxyAction?> _consumeRawText(
   String rawText,
 ) async {
   final l10n = AppLocalizations.of(context);
+
+  // Pasted or scanned sing-box JSON is manual configuration, offered by the
+  // file picker only while that is shown. Here the input arrives first, so
+  // ask to show the feature instead of importing it silently.
+  if (isSingboxJsonInput(rawText) &&
+      !ref
+          .read(generalSettingsWithDefaultsProvider)
+          .isFeatureShown(FeatureId.connectionsManualProxyConfig) &&
+      !await askToRevealFeature(
+        context,
+        ref.read(featureRevealProvider.notifier),
+        FeatureId.connectionsManualProxyConfig,
+        // A deliberate import, like tapping a grayed-out setting: "Cancel"
+        // asks again next time.
+        askOnce: false,
+      )) {
+    return null;
+  }
+  if (!context.mounted) return null;
+
   final outcome = await ref
       .read(proxyInputConsumerProvider.notifier)
       .consumeRawText(

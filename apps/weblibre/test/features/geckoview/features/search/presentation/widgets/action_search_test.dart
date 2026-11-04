@@ -223,7 +223,7 @@ void main() {
   testWidgets('a section synonym finds the settings in that section', (
     tester,
   ) async {
-    // "on device search" is a keyword of the Local Search Index section, not
+    // "on device search" is a keyword of the Search Inside Visited Pages section, not
     // of any one setting in it.
     final query = ValueNotifier(
       const TextEditingValue(text: 'on device search'),
@@ -233,9 +233,9 @@ void main() {
     await pumpActions(tester, surface: ModuleSurface.search, query: query);
 
     expect(
-      find.textContaining('› Local Search Index'),
+      find.textContaining('› Search Inside Visited Pages'),
       findsWidgets,
-      reason: 'rows from the Local Search Index section should match',
+      reason: 'rows from the Search Inside Visited Pages section should match',
     );
   });
 

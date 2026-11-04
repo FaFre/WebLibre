@@ -66,7 +66,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.regular),
               ),
-              if (showChildOption) ...[
+              if (showChildOption || selected == TabType.child) ...[
                 _divider(borderColor),
                 _Segment(
                   tabType: TabType.child,
@@ -86,7 +86,10 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
                 selectedBackgroundColor: selectedBackgroundColor,
                 onTap: () => onChanged(TabType.private),
               ),
-              if (showIsolatedOption) ...[
+              // An isolated selection stays visible while isolated tabs are
+              // hidden, e.g. searching from an isolated tab (P5): the
+              // switcher must say what the tab will be.
+              if (showIsolatedOption || selected == TabType.isolated) ...[
                 _divider(borderColor),
                 _Segment(
                   tabType: TabType.isolated,

@@ -69,7 +69,12 @@ AppLinkProtection appLinkProtection(Ref ref) {
 /// input, §2.8). Combines the user-intent settings with computed protection.
 @Riverpod(keepAlive: true)
 AppLinkPolicySnapshot? appLinkPolicySnapshot(Ref ref) {
-  final settings = ref.watch(generalSettingsRepositoryProvider).value;
+  // As they apply: while per-container app links are hidden, every
+  // container follows the global policy (`containerAppLinksApply`).
+  final settings = ref
+      .watch(generalSettingsRepositoryProvider)
+      .value
+      ?.effective();
   if (settings == null) return null;
 
   // Don't push a snapshot until the protection/override inputs have actually
@@ -161,7 +166,10 @@ Map<String, NativeContextAppLinkPolicy> _computeContextOverrides(
   final baseContextIdByContainerId = <String, String>{};
   for (final container in containers) {
     final contextId = container.metadata.contextualIdentity;
-    if (contextId == null || !container.metadata.isolatedAppLinkSettings) {
+    if (contextId == null ||
+        !settings.containerAppLinksApply(
+          isolatedAppLinkSettings: container.metadata.isolatedAppLinkSettings,
+        )) {
       continue;
     }
     overrideByBaseContextId[contextId] = toNative(

@@ -25,6 +25,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
@@ -35,9 +37,22 @@ import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
-List<SettingsSectionDefinition> _torProxySettingsSections(
+// Manual transports and country restrictions are `connections.tor_manual`
+// (Expert). One that is configured keeps its entry, to be checked or undone
+// (P5).
+final _manualTransportInUse = torSettingsWithDefaultsProvider.select(
+  (s) =>
+      s.config == TorConnectionConfig.obfs4 ||
+      s.config == TorConnectionConfig.snowflake,
+);
+final _countriesInUse = torSettingsWithDefaultsProvider.select(
+  (s) => s.entryNodeCountry != null || s.exitNodeCountry != null,
+);
+
+List<SettingsSectionDefinition> torProxySettingsSections(
   AppLocalizations l10n,
 ) => [
   SettingsSectionDefinition(
@@ -76,6 +91,8 @@ List<SettingsSectionDefinition> _torProxySettingsSections(
       ),
       SettingsEntryDefinition(
         title: l10n.tor_transportTitle,
+        feature: FeatureId.connectionsTorManual,
+        keptWhen: _manualTransportInUse,
         subtitle: l10n.tor_transportSectionSubtitle(torBrand),
         keywords: settingsKeywords(l10n.tor_transportKeywords),
         child: const _TransportSection(),
@@ -84,6 +101,8 @@ List<SettingsSectionDefinition> _torProxySettingsSections(
   ),
   SettingsSectionDefinition(
     title: l10n.tor_sectionCountryRestrictions,
+    feature: FeatureId.connectionsTorManual,
+    keptWhen: _countriesInUse,
     keywords: settingsKeywords(l10n.tor_sectionCountryRestrictionsKeywords),
     entries: [
       SettingsEntryDefinition(
@@ -124,7 +143,6 @@ class TorProxyScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-
     useOnInitialization(() async {
       await ref.read(torProxyServiceProvider.notifier).requestSync();
     });
@@ -150,11 +168,16 @@ class TorProxyScreen extends HookConsumerWidget {
       }
     });
 
-    return SettingsDetailScaffold(
-      title: l10n.tor_proxyLabel(torBrand),
-      subtitle: l10n.tor_screenSubtitle,
-      icon: TorIcons.onionAlt,
-      sections: _torProxySettingsSections(l10n),
+    // Tor in use stays usable, so it can be checked and stopped (P5).
+    return HiddenFeatureScope(
+      feature: FeatureId.connectionsTorBasic,
+      keptWhen: torInUseProvider,
+      child: SettingsDetailScaffold(
+        title: l10n.tor_proxyLabel(torBrand),
+        subtitle: l10n.tor_screenSubtitle,
+        icon: TorIcons.onionAlt,
+        sections: torProxySettingsSections(l10n),
+      ),
     );
   }
 }

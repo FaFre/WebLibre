@@ -48,12 +48,18 @@ class ProfileSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final profile = ref.watch(selectedProfileProvider);
+    // With a single profile and Profiles hidden there is nothing to switch
+    // to, but this profile's lock, password and backup are never hidden: the
+    // entry then opens the profile list, which keeps them and hides only
+    // adding profiles.
+    final canSwitch = ref.watch(canSwitchProfilesProvider);
+    final syncAuthenticated = ref.watch(syncIsAuthenticatedProvider);
     final tiles = <MenuItemType, Widget>{};
 
     for (final item in items) {
       switch (item) {
         case MenuItemType.profileSwitch:
-          final profile = ref.watch(selectedProfileProvider);
           tiles[item] = ListTile(
             leading: CircleAvatar(
               backgroundColor: theme.colorScheme.primaryContainer,
@@ -64,7 +70,9 @@ class ProfileSection extends HookConsumerWidget {
             ),
             title: Text(profile.value?.name ?? item.label(context)),
             subtitle: Text(
-              l10n.menu_profileTapToSwitch,
+              canSwitch
+                  ? l10n.menu_profileTapToSwitch
+                  : l10n.menu_profileManageCurrent,
               style: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 12,
@@ -72,12 +80,16 @@ class ProfileSection extends HookConsumerWidget {
             ),
             onTap: () async {
               Navigator.pop(context);
-              await const SelectProfileRoute().push(context);
+              if (canSwitch) {
+                await const SelectProfileRoute().push(context);
+              } else {
+                await ProfileListRoute().push(context);
+              }
             },
           );
 
         case MenuItemType.syncNow:
-          if (!ref.watch(syncIsAuthenticatedProvider)) continue;
+          if (!syncAuthenticated) continue;
           tiles[item] = const _SyncTile();
 
         case MenuItemType.appSettings:

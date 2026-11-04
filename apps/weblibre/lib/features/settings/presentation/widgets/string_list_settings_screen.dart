@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/settings/presentation/widgets/string_list_editor.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 /// Settings sub-screen that manages a list of unique string entries: an
 /// optional description followed by a [StringListEditor]. Callers own the
@@ -78,13 +79,16 @@ class StringListSettingsScreen extends StatelessWidget {
             ),
           ),
         SliverToBoxAdapter(
-          child: StringListEditor(
-            values: values,
-            hintText: hintText,
-            itemIcon: itemIcon,
-            emptyLabel: emptyLabel,
-            normalize: normalize,
-            onChanged: onChanged,
+          // Grayed out while a HiddenFeatureScope above hides what it edits.
+          child: HiddenFeatureGate(
+            child: StringListEditor(
+              values: values,
+              hintText: hintText,
+              itemIcon: itemIcon,
+              emptyLabel: emptyLabel,
+              normalize: normalize,
+              onChanged: onChanged,
+            ),
           ),
         ),
       ],

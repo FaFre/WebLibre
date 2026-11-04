@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -110,6 +111,13 @@ Future<void> _pumpTray(
           _TestTabViewFilterController.new,
         ),
         selectedContainerProvider.overrideWith(_TestSelectedContainer.new),
+        // The filter row (container chips, Synced chip) is always built and
+        // would otherwise open the tab database and the sync engine.
+        matchSortedContainersWithCountProvider.overrideWith(
+          (ref, searchText) => const AsyncData([]),
+        ),
+        syncIsAuthenticatedProvider.overrideWith((ref) => false),
+        syncedTabsTotalCountProvider.overrideWith((ref) => Future.value(0)),
         selectedContainerDataProvider.overrideWith((ref) => Stream.value(null)),
         // The tab-type filter bar reads which kinds of tab are open, which
         // would wait for the engine.

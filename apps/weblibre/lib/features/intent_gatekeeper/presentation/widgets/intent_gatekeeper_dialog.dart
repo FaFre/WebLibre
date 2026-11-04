@@ -109,7 +109,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            FilledButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(
                 const DialogOutcome(
                   decision: IntentSourcePolicy.allow,
@@ -119,7 +119,7 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
               child: Text(l10n.intentGatekeeper_alwaysAllow),
             ),
             const SizedBox(height: 8),
-            FilledButton.tonal(
+            TextButton(
               onPressed: () => Navigator.of(
                 context,
               ).pop(const DialogOutcome(decision: IntentSourcePolicy.allow)),

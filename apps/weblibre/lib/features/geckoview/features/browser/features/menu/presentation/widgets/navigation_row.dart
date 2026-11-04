@@ -203,6 +203,7 @@ class MenuNavigationRow extends HookConsumerWidget {
                 if (groupCount <= 1 && context.mounted) {
                   final confirmed = await ui_helper.confirmIsolatedTabClose(
                     context,
+                    ref.read,
                   );
                   if (!confirmed) return;
                 }

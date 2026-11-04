@@ -106,7 +106,7 @@ class SmallWebHistoryHeader extends ConsumerWidget {
                         onPressed: () => Navigator.pop(context, false),
                         child: Text(l10n.common_cancel),
                       ),
-                      FilledButton(
+                      TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         child: Text(l10n.smallWeb_actionClearAll),
                       ),

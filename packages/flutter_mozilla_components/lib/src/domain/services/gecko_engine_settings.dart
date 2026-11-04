@@ -29,6 +29,18 @@ class GeckoEngineSettingsService {
     );
   }
 
+  /// Sets the user agent override; an empty [state] clears it. Null cannot:
+  /// natively, a null field means "leave unchanged".
+  Future<void> userAgent(String state) {
+    return _api.updateRuntimeSettings(GeckoEngineSettings(userAgent: state));
+  }
+
+  Future<void> enterpriseRootsEnabled(bool state) {
+    return _api.updateRuntimeSettings(
+      GeckoEngineSettings(enterpriseRootsEnabled: state),
+    );
+  }
+
   Future<void> trackingProtectionPolicy(
     TrackingProtectionPolicy state, {
     required ContentBlocking contentBlocking,

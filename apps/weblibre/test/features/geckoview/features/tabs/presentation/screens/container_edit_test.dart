@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -11,7 +12,10 @@ import 'package:weblibre/features/proxy/domain/providers/proxy_connection_option
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 void main() {
   testWidgets(
@@ -20,6 +24,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            // The visibility switches are read from the settings; without this a
+            // real settings database opens and outlives the test.
+            generalSettingsWithDefaultsProvider.overrideWithValue(
+              GeneralSettings.withDefaults(),
+            ),
             proxyConnectionOptionsProvider.overrideWith(
               (ref) => const <ProxyConnectionOption>[],
             ),
@@ -67,6 +76,11 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            // The visibility switches are read from the settings; without this a
+            // real settings database opens and outlives the test.
+            generalSettingsWithDefaultsProvider.overrideWithValue(
+              GeneralSettings.withDefaults(),
+            ),
             proxyConnectionOptionsProvider.overrideWith(
               (ref) => const <ProxyConnectionOption>[],
             ),
@@ -109,6 +123,11 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // The visibility switches are read from the settings; without this a
+          // real settings database opens and outlives the test.
+          generalSettingsWithDefaultsProvider.overrideWithValue(
+            GeneralSettings.withDefaults(),
+          ),
           proxyConnectionOptionsProvider.overrideWith(
             (ref) => const <ProxyConnectionOption>[],
           ),
@@ -143,11 +162,69 @@ void main() {
     expect(find.text('Clear'), findsNothing);
   });
 
+  testWidgets('hidden options are left out, even one that is on', (
+    tester,
+  ) async {
+    // Expert details hidden: strict mode, app links and the bypass are
+    // hidden, and so is the proxy row with connections off. Strict mode is
+    // on, but does not apply while hidden, so it is left out too.
+    final settings = GeneralSettings.withDefaults()
+        .withVisibilitySwitch(VisibilitySwitch.expertDetails, enabled: false)
+        .withVisibilitySwitch(VisibilitySwitch.connections, enabled: false);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          generalSettingsWithDefaultsProvider.overrideWithValue(settings),
+          proxyConnectionOptionsProvider.overrideWith(
+            (ref) => const <ProxyConnectionOption>[],
+          ),
+          singboxProxyProfilesRepositoryProvider.overrideWith(
+            () => _LoadedProfilesRepository(const []),
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ContainerEditScreen.edit(
+            initialContainer: ContainerDataWithCount(
+              id: 'container-1',
+              color: Colors.blue,
+              orderKey: 'a',
+              tabCount: 0,
+              metadata: ContainerMetadata.withDefaults(
+                contextualIdentity: 'context-1',
+                strictMode: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Strict Mode'), findsNothing);
+    expect(find.text('Proxy Connection'), findsNothing);
+    expect(find.text('Bypass Global Proxy'), findsNothing);
+    expect(find.text('Isolated App Link Settings'), findsNothing);
+    expect(
+      find.byWidgetPredicate(
+        (widget) => widget is Opacity && widget.opacity == hiddenFeatureOpacity,
+      ),
+      findsNothing,
+    );
+  });
+
   group('editing a container without cookie isolation', () {
     Future<void> pumpEditScreen(WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            // The visibility switches are read from the settings; without this a
+            // real settings database opens and outlives the test.
+            generalSettingsWithDefaultsProvider.overrideWithValue(
+              GeneralSettings.withDefaults(),
+            ),
             proxyConnectionOptionsProvider.overrideWith(
               (ref) => const <ProxyConnectionOption>[],
             ),

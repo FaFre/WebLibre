@@ -95,16 +95,15 @@ Future<DeleteDecision?> showDeleteFileDialog(
                 },
                 child: Text(l10n.history_deleteFileActionKeep),
               ),
-              FilledButton(
+              TextButton(
                 onPressed: () {
                   context.pop<DeleteDecision>((
                     delete: true,
                     remember: remember.value,
                   ));
                 },
-                style: FilledButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.error,
-                  foregroundColor: Theme.of(context).colorScheme.onError,
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
                 ),
                 child: Text(l10n.common_delete),
               ),

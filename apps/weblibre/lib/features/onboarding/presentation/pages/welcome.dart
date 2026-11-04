@@ -24,7 +24,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/design/display_features.dart';
-import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/localized_spans.dart';
@@ -34,7 +33,11 @@ import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 class WelcomePage extends ConsumerWidget {
   final bool isReturningUser;
 
-  const WelcomePage({super.key, this.isReturningUser = false});
+  /// Restores a backup into this profile. Offered to new users only; null
+  /// hides the button.
+  final VoidCallback? onRestore;
+
+  const WelcomePage({super.key, this.isReturningUser = false, this.onRestore});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,7 +45,6 @@ class WelcomePage extends ConsumerWidget {
     final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
 
-    final selectedMode = ref.watch(onboardingModeProvider);
     final accepted = ref.watch(eulaAcceptedProvider);
 
     return BrowserPage(
@@ -56,7 +58,7 @@ class WelcomePage extends ConsumerWidget {
             Text(
               isReturningUser
                   ? l10n.onboarding_welcomeBackTitle
-                  : l10n.onboarding_welcomeReadyTitle,
+                  : l10n.onboarding_welcomeTitle,
               textAlign: TextAlign.center,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w700,
@@ -66,60 +68,53 @@ class WelcomePage extends ConsumerWidget {
               const SizedBox(height: 16),
               _UpdateNotice(colorScheme: colorScheme, theme: theme),
             ],
-            if (!isReturningUser) ...[
-              const SizedBox(height: 40),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.onboarding_chooseExperience,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              _ModeOption(
-                mode: OnboardingMode.express,
-                title: l10n.onboarding_modeExpressTitle,
-                subtitle: l10n.onboarding_modeExpressSubtitle,
-                icon: Icons.bolt,
-                selected: selectedMode == OnboardingMode.express,
-                onTap: () => ref
-                    .read(onboardingModeProvider.notifier)
-                    .select(OnboardingMode.express),
-              ),
-              const SizedBox(height: 12),
-              _ModeOption(
-                mode: OnboardingMode.detailed,
-                title: l10n.onboarding_modeDetailedTitle,
-                subtitle: l10n.onboarding_modeDetailedSubtitle,
-                icon: Icons.tune,
-                selected: selectedMode == OnboardingMode.detailed,
-                onTap: () => ref
-                    .read(onboardingModeProvider.notifier)
-                    .select(OnboardingMode.detailed),
-              ),
-              const SizedBox(height: 12),
-              _ModeOption(
-                mode: OnboardingMode.restore,
-                title: l10n.onboarding_modeRestoreTitle,
-                subtitle: l10n.onboarding_modeRestoreSubtitle,
-                icon: Icons.settings_backup_restore,
-                selected: selectedMode == OnboardingMode.restore,
-                onTap: () => ref
-                    .read(onboardingModeProvider.notifier)
-                    .select(OnboardingMode.restore),
-              ),
-            ],
             const SizedBox(height: 40),
             _EulaCheckbox(
               accepted: accepted,
               onAcceptedChanged: (value) =>
                   ref.read(eulaAcceptedProvider.notifier).accept(value),
             ),
+            if (!isReturningUser && onRestore != null) ...[
+              const SizedBox(height: 24),
+              _RestoreOption(enabled: accepted, onTap: onRestore!),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Restoring replaces this profile with a backup at once, so it is an action
+/// of its own rather than a preset: the backup brings its own settings
+/// and skips the Preset step.
+class _RestoreOption extends StatelessWidget {
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _RestoreOption({required this.enabled, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ListTile(
+      enabled: enabled,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      leading: const Icon(Icons.settings_backup_restore),
+      title: Text(l10n.onboarding_modeRestoreTitle),
+      subtitle: Text(
+        enabled
+            ? l10n.onboarding_modeRestoreSubtitle
+            : l10n.onboarding_restoreRequiresEula,
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onTap,
     );
   }
 }
@@ -140,12 +135,10 @@ class _UpdateNotice extends StatelessWidget {
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(16),
+          // Opaque tonal role, like the onboarding's other notices.
           decoration: BoxDecoration(
-            color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+            color: colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.primary.withValues(alpha: 0.3),
-            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,6 +154,7 @@ class _UpdateNotice extends StatelessWidget {
                   Text(
                     l10n.onboarding_updateNoticeTitle,
                     style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -170,7 +164,7 @@ class _UpdateNotice extends StatelessWidget {
               Text(
                 l10n.onboarding_updateNoticeBody,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: colorScheme.onSecondaryContainer,
                 ),
               ),
               const SizedBox(height: 12),
@@ -180,14 +174,14 @@ class _UpdateNotice extends StatelessWidget {
                   Icon(
                     Icons.extension,
                     size: 16,
-                    color: colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSecondaryContainer,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       l10n.onboarding_updateNoticeExtensions,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ),
@@ -200,14 +194,14 @@ class _UpdateNotice extends StatelessWidget {
                   Icon(
                     Icons.shield_outlined,
                     size: 16,
-                    color: colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSecondaryContainer,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       l10n.onboarding_updateNoticeSettingsPreserved,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSecondaryContainer,
                       ),
                     ),
                   ),
@@ -217,87 +211,6 @@ class _UpdateNotice extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _ModeOption extends StatelessWidget {
-  final OnboardingMode mode;
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ModeOption({
-    required this.mode,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: selected
-              ? colorScheme.primaryContainer.withValues(alpha: 0.4)
-              : colorScheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? colorScheme.primary : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: selected
-                  ? AppColors.of(context).brandLink
-                  : colorScheme.onSurfaceVariant,
-              size: 28,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: selected
-                          ? colorScheme.onSurface
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: selected
-                          ? colorScheme.onSurfaceVariant
-                          : colorScheme.outline,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (selected) Icon(Icons.check_circle, color: colorScheme.primary),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -318,7 +231,12 @@ class _EulaCheckbox extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return CheckboxListTile.adaptive(
-      contentPadding: EdgeInsets.zero,
+      // Lined up with the restore card below, whose content sits 17 dp in
+      // (1 dp border + 16 dp padding) on both sides: the 40 dp checkbox is
+      // centered on the card's 24 dp icon (17 - 8 = 9), and the text starts
+      // where the card's title does (9 + 40 + 8 = 17 + 24 + 16).
+      contentPadding: const EdgeInsetsDirectional.only(start: 9, end: 17),
+      horizontalTitleGap: 8,
       value: accepted,
       controlAffinity: ListTileControlAffinity.leading,
       onChanged: (value) => onAcceptedChanged(value ?? false),

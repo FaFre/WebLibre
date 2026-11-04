@@ -28,7 +28,7 @@
   "contextualToolbar_longPressAddPrivateTab": "新建隐私标签页",
   "contextualToolbar_longPressAddIsolatedTab": "新建隔离标签页",
   "contextualToolbar_longPressOpenSettings": "打开设置",
-  "contextualToolbar_longPressHardRefresh": "强制刷新（跳过缓存）",
+  "contextualToolbar_longPressHardRefresh": "完全重新加载",
   "contextualToolbar_longPressShowTranslationOptions": "显示翻译选项",
   "contextualToolbar_longPressScrollToTop": "滚动到顶部",
   "contextualToolbar_longPressScrollToBottom": "滚动到底部",

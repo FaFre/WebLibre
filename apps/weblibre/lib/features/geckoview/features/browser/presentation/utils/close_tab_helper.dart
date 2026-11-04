@@ -19,14 +19,11 @@
  */
 import 'package:flutter/widgets.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
+import 'package:weblibre/core/providers/provider_read.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
-
-/// Reads a provider once; satisfied by both `WidgetRef.read` and `Ref.read`.
-typedef ProviderRead = T Function<T>(ProviderListenable<T> provider);
 
 /// Closes [tabId] with the shared UX contract: confirm before closing the
 /// last tab of an isolation group, then offer undo via snackbar.
@@ -51,7 +48,7 @@ Future<void> closeTabWithConfirmationAndUndoUsing(
         .where((s) => s.isolationContextId == tabState.isolationContextId)
         .length;
     if (groupCount <= 1 && context.mounted) {
-      final confirmed = await ui_helper.confirmIsolatedTabClose(context);
+      final confirmed = await ui_helper.confirmIsolatedTabClose(context, read);
       if (!confirmed) return;
     }
   }

@@ -76,6 +76,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/browser_keyboard_shortcuts.dart';
+import 'package:weblibre/features/onboarding/presentation/hooks/use_setup_follow_ups.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
@@ -1214,6 +1215,8 @@ class BrowserScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useSetupFollowUps(context, ref);
+
     final eventService = ref.watch(eventServiceProvider);
     final viewportService = ref.watch(viewportServiceProvider);
     final activeProxyPromptKeys = useRef(<String>{});
@@ -2289,7 +2292,7 @@ class _Browser extends HookConsumerWidget {
 
       if (groupCount > 1 || !context.mounted) return groupCount > 1;
 
-      return await ui_helper.confirmIsolatedTabClose(context);
+      return await ui_helper.confirmIsolatedTabClose(context, ref.read);
     }
 
     return DragTarget<TabDragData>(
@@ -2440,6 +2443,7 @@ class _Browser extends HookConsumerWidget {
 
                 final answer = await showKeepTabDialog(
                   context,
+                  ref.read,
                   rememberable: onBackBehavior is BackgroundAppTabBackBehavior,
                 );
                 if (answer == null) {
@@ -2699,7 +2703,7 @@ class _ViewTabsSheet extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabsViewMode = ref.watch(tabsViewModeControllerProvider);
+    final tabsViewMode = ref.watch(effectiveTabsViewModeProvider);
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
     final isSyncedScope = ref.watch(

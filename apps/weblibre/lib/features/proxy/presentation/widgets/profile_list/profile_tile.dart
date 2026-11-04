@@ -39,6 +39,7 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_list/share_
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 enum ProfileAction { edit, testLatency, share, delete }
@@ -142,11 +143,16 @@ class ProfileTile extends ConsumerWidget {
               ),
             ],
           ),
-          RunSwitch(
-            isRunning: isRunning,
-            isStarting: isStarting,
-            disabled: isBusy,
-            onTap: () => _toggleRunState(context, ref),
+          // Grayed out with the screen's scope; a running or starting
+          // connection can always be stopped (P5).
+          HiddenFeatureGate(
+            inForce: isRunning || isStarting,
+            child: RunSwitch(
+              isRunning: isRunning,
+              isStarting: isStarting,
+              disabled: isBusy,
+              onTap: () => _toggleRunState(context, ref),
+            ),
           ),
         ],
       ),
@@ -252,7 +258,7 @@ class ProfileTile extends ConsumerWidget {
             onPressed: () => Navigator.pop(context, false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               isRunning ? l10n.proxy_actionStopAndDelete : l10n.common_delete,

@@ -20,10 +20,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/proxy/presentation/utils/proxy_log_level_l10n.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 /// How much the proxy runtimes write to the log, asked where the log is read.
 ///
@@ -47,9 +50,7 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final logLevel = ref
-        .watch(proxyDiagnosticsSettingsWithDefaultsProvider)
-        .logLevel;
+    final logLevel = ref.watch(storedProxyDiagnosticsSettingsProvider).logLevel;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -77,6 +78,16 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
               groupValue: logLevel,
               onChanged: (value) async {
                 if (value == null) return;
+                // The group also selects with the arrow keys, past the gate
+                // around a hidden verbose level.
+                if (value.isVerbose &&
+                    !await mayPickHiddenOption(
+                      context,
+                      ref,
+                      FeatureId.diagnosticsVerboseLogs,
+                    )) {
+                  return;
+                }
 
                 await ref
                     .read(proxyDiagnosticsSettingsRepositoryProvider.notifier)
@@ -84,11 +95,22 @@ class _ProxyLogLevelSheet extends ConsumerWidget {
               },
               child: Column(
                 children: [
+                  // Verbose levels are expert diagnostics, grayed out while
+                  // hidden. A verbose level picked before does not apply then
+                  // (warnings do), and says so.
                   for (final level in ProxyLogLevel.values)
-                    RadioListTile.adaptive(
-                      value: level,
-                      title: Text(level.label(context)),
-                      subtitle: Text(level.description(context)),
+                    HiddenFeatureGate.feature(
+                      FeatureId.diagnosticsVerboseLogs,
+                      inForce: !level.isVerbose,
+                      hiddenSettings: level == logLevel
+                          ? const [HiddenSetting.proxyLogLevel]
+                          : const [],
+                      indicator: true,
+                      child: RadioListTile.adaptive(
+                        value: level,
+                        title: Text(level.label(context)),
+                        subtitle: Text(level.description(context)),
+                      ),
                     ),
                 ],
               ),

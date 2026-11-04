@@ -51,6 +51,7 @@
   "proxy_fieldProfileName": "Nombre del perfil",
   "proxy_fieldProtocol": "Protocolo",
   "proxy_protocolFixedHelper": "El protocolo no se puede cambiar una vez creado el perfil.",
+  "proxy_protocolFromImportHelper": "Lo define la importación. Para introducir una conexión a mano, muestra «{featureName}» en Ajustes > Control de funciones.",
   "proxy_customOutboundLabel": "Outbound personalizado",
   "proxy_startAutomaticallyTitle": "Iniciar automáticamente",
   "proxy_startAutomaticallySubtitle": "Conectar este perfil al iniciar WebLibre, para que las pestañas que lo usan estén listas sin preguntar",

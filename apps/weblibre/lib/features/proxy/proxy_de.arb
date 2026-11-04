@@ -60,6 +60,7 @@
   "proxy_fieldProfileName": "Profilname",
   "proxy_fieldProtocol": "Protokoll",
   "proxy_protocolFixedHelper": "Das Protokoll kann nach dem Erstellen eines Profils nicht mehr geändert werden.",
+  "proxy_protocolFromImportHelper": "Durch den Import festgelegt. Zum Eingeben einer Verbindung von Hand „{featureName}“ unter Einstellungen > Funktionsauswahl anzeigen.",
   "proxy_customOutboundLabel": "Eigenes Outbound",
   "proxy_startAutomaticallyTitle": "Automatisch starten",
   "proxy_startAutomaticallySubtitle": "Dieses Profil beim Start von WebLibre verbinden, damit Tabs, die es nutzen, ohne Nachfrage bereit sind",

@@ -171,7 +171,7 @@ class KeyChordRecorderDialog extends HookWidget {
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: canSave ? save : null,
             child: Text(
               takesFromOther

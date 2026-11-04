@@ -19,9 +19,11 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/presentation/widgets/doh_settings_content.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> dohSettingsSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
@@ -50,11 +52,14 @@ class DohSettingsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
 
-    return SettingsDetailScaffold(
-      title: l10n.settings_dohTitle,
-      subtitle: l10n.settings_dohSubtitle,
-      icon: Icons.dns_outlined,
-      sections: dohSettingsSections(context),
+    return HiddenFeatureScope(
+      feature: FeatureId.privacyDohProviderControl,
+      child: SettingsDetailScaffold(
+        title: l10n.settings_dohTitle,
+        subtitle: l10n.settings_dohSubtitle,
+        icon: Icons.dns_outlined,
+        sections: dohSettingsSections(context),
+      ),
     );
   }
 }

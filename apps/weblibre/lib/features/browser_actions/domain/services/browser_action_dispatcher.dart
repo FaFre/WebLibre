@@ -23,13 +23,13 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/domain/entities/browser_action_feedback.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_feedback_l10n.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
@@ -64,8 +64,10 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
+import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
+import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/quit_browser.dart';
@@ -74,6 +76,7 @@ import 'package:weblibre/features/user/domain/repositories/engine_settings.dart'
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/presentation/utils/page_feeds.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
+import 'package:weblibre/presentation/widgets/reveal_feature.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/move_to_background.dart';
 
@@ -98,12 +101,26 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   /// Actions that work on a page do nothing while no tab is selected; the ones
   /// that act on the browser itself (opening a tab, a screen, switching
   /// containers) still run.
+  ///
+  /// A binding to an action whose feature is hidden asks once whether to show
+  /// that feature, and does nothing if declined: every trigger that
+  /// reaches here is something the user did on purpose.
   Future<void> run(BrowserAction action, {String? tabId}) async {
+    // Checked before asking to show anything: a page action with no page
+    // would do nothing after the user said "Show".
     tabId ??= ref.read(selectedTabProvider);
     if (tabId == null && requiresTab(action)) return;
 
+    // A toggle means the opposite of what the user sees now. Showing the
+    // feature below can bring a stored state back, so decide first.
+    final turnGesturesOn = !ref
+        .read(gestureSettingsWithDefaultsProvider)
+        .effectiveEnabled;
+
+    if (!await _ensureShown(action)) return;
+
     try {
-      await _execute(action, tabId);
+      await _execute(action, tabId, turnGesturesOn: turnGesturesOn);
     } catch (error, stackTrace) {
       logger.e(
         'Error executing browser action ${action.name}',
@@ -112,6 +129,36 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       );
     }
   }
+
+  Future<bool> _ensureShown(BrowserAction action) async {
+    final settings = ref.read(generalSettingsWithDefaultsProvider);
+    if (action.isShownIn(settings)) return true;
+    if (_keptInUse(action)) return true;
+
+    final context = await _navigatorContext();
+    if (context == null || !context.mounted) return false;
+    return await askToRevealFeature(
+      context,
+      ref.read(featureRevealProvider.notifier),
+      action.owningFeature,
+    );
+  }
+
+  /// Whether [action] opens the screen of a connection that is in place
+  /// while its feature is hidden: its status and controls stay reachable
+  /// (P5), as the browser menu and Settings keep them. Adding a new one is
+  /// not covered and still asks.
+  ///
+  /// One-off reads that hold nothing open. Their inputs are kept alive and
+  /// loaded, except the container list behind "Tor is routed", which may
+  /// still be loading here: then the binding asks, as it did before.
+  bool _keptInUse(BrowserAction action) => switch (action) {
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    BrowserAction.showTor => ref.read(torInUseProvider),
+    // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+    BrowserAction.showProxySettings => ref.read(connectionsInUseProvider),
+    _ => false,
+  };
 
   /// Whether [action] needs a selected tab to mean anything.
   ///
@@ -172,7 +219,14 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
 
   /// Performs [action]. [tabId] is only null for actions [requiresTab] lets
   /// through.
-  Future<void> _execute(BrowserAction action, String? tabId) async {
+  ///
+  /// [turnGesturesOn] is what [BrowserAction.toggleGestures] does, decided
+  /// before the feature was shown.
+  Future<void> _execute(
+    BrowserAction action,
+    String? tabId, {
+    required bool turnGesturesOn,
+  }) async {
     final tabRepository = ref.read(tabRepositoryProvider.notifier);
     // Only evaluated by the page actions, which [run] never lets through
     // without a selected tab.
@@ -360,17 +414,14 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           controller.dismiss();
         }
       case BrowserAction.toggleGestures:
-        // Decided like [GestureSettingsRepository.toggleGestures] does, before
-        // the setting is written back.
-        final turnOn = !ref
-            .read(gestureSettingsWithDefaultsProvider)
-            .effectiveEnabled;
+        // Set rather than toggled: showing the feature may already have
+        // brought stored gestures back, and toggling would turn them off.
         await ref
             .read(gestureSettingsRepositoryProvider.notifier)
-            .toggleGestures();
+            .setGesturesOn(turnGesturesOn);
         // Turned off by a gesture, gestures stop answering with no hint why.
         await _showFeedback(
-          turnOn
+          turnGesturesOn
               ? BrowserActionFeedback.gesturesEnabled
               : BrowserActionFeedback.gesturesDisabled,
         );
@@ -514,10 +565,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.quitBrowser:
         final context = await _navigatorContext();
         if (context != null && context.mounted) {
-          await quitBrowser(
-            context,
-            ProviderScope.containerOf(context, listen: false),
-          );
+          await quitBrowser(context, ref.container);
         }
     }
   }
@@ -713,11 +761,10 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   /// container's proxy — a stroke gesture has no context to host the dialog —
   /// so it relies on [SelectedContainer.setContainerId] refusing a container
   /// whose routing is not ready, like the quick tab switcher does.
+  ///
+  /// Only runs while containers are shown: both actions belong to
+  /// `container.core`, which [run] has already offered to show.
   Future<void> _switchContainer(ContainerCycleDirection direction) async {
-    // Containers are hidden entirely when their UI is off, and stepping through
-    // them would move browsing state the user cannot see.
-    if (!ref.read(generalSettingsWithDefaultsProvider).showContainerUi) return;
-
     // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
     final cycleOrder = ref.read(containerCycleOrderProvider);
     final index = adjacentContainerIndex(

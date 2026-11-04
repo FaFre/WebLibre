@@ -21,9 +21,9 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/provider_read.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/utils/ui_helper.dart';

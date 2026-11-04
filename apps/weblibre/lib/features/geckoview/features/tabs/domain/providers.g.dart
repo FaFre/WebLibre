@@ -986,6 +986,240 @@ final class WatchContainerTabsDataFamily extends $Family
   String toString() => r'watchContainerTabsDataProvider';
 }
 
+/// Whether a container menu for [containerId] offers closing its isolated
+/// tabs. Closing them is a way out, not creation: it stays while the scope
+/// still holds isolated tabs, even with isolated tabs hidden (P5).
+///
+/// The tab stream is watched only while isolated tabs are hidden: a container
+/// menu is built for every container chip, and the stream is only needed then.
+
+@ProviderFor(closeIsolatedTabsShown)
+final closeIsolatedTabsShownProvider = CloseIsolatedTabsShownFamily._();
+
+/// Whether a container menu for [containerId] offers closing its isolated
+/// tabs. Closing them is a way out, not creation: it stays while the scope
+/// still holds isolated tabs, even with isolated tabs hidden (P5).
+///
+/// The tab stream is watched only while isolated tabs are hidden: a container
+/// menu is built for every container chip, and the stream is only needed then.
+
+final class CloseIsolatedTabsShownProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether a container menu for [containerId] offers closing its isolated
+  /// tabs. Closing them is a way out, not creation: it stays while the scope
+  /// still holds isolated tabs, even with isolated tabs hidden (P5).
+  ///
+  /// The tab stream is watched only while isolated tabs are hidden: a container
+  /// menu is built for every container chip, and the stream is only needed then.
+  CloseIsolatedTabsShownProvider._({
+    required CloseIsolatedTabsShownFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'closeIsolatedTabsShownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$closeIsolatedTabsShownHash();
+
+  @override
+  String toString() {
+    return r'closeIsolatedTabsShownProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return closeIsolatedTabsShown(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CloseIsolatedTabsShownProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$closeIsolatedTabsShownHash() =>
+    r'c1c65716286d8c6fb7fbac35f19fde9288198e59';
+
+/// Whether a container menu for [containerId] offers closing its isolated
+/// tabs. Closing them is a way out, not creation: it stays while the scope
+/// still holds isolated tabs, even with isolated tabs hidden (P5).
+///
+/// The tab stream is watched only while isolated tabs are hidden: a container
+/// menu is built for every container chip, and the stream is only needed then.
+
+final class CloseIsolatedTabsShownFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  CloseIsolatedTabsShownFamily._()
+    : super(
+        retry: null,
+        name: r'closeIsolatedTabsShownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether a container menu for [containerId] offers closing its isolated
+  /// tabs. Closing them is a way out, not creation: it stays while the scope
+  /// still holds isolated tabs, even with isolated tabs hidden (P5).
+  ///
+  /// The tab stream is watched only while isolated tabs are hidden: a container
+  /// menu is built for every container chip, and the stream is only needed then.
+
+  CloseIsolatedTabsShownProvider call(String? containerId) =>
+      CloseIsolatedTabsShownProvider._(argument: containerId, from: this);
+
+  @override
+  String toString() => r'closeIsolatedTabsShownProvider';
+}
+
+/// What a tab's menu needs to keep the ways out of a container while
+/// containers are hidden (P5): whether [tabId] is in a container, and whether
+/// its site is assigned to one. Neither applies while containers are shown,
+/// or for a menu without container rows ([enabled]): every tab's menu would
+/// otherwise hold two database streams open for nothing.
+
+@ProviderFor(hiddenContainerWayOut)
+final hiddenContainerWayOutProvider = HiddenContainerWayOutFamily._();
+
+/// What a tab's menu needs to keep the ways out of a container while
+/// containers are hidden (P5): whether [tabId] is in a container, and whether
+/// its site is assigned to one. Neither applies while containers are shown,
+/// or for a menu without container rows ([enabled]): every tab's menu would
+/// otherwise hold two database streams open for nothing.
+
+final class HiddenContainerWayOutProvider
+    extends
+        $FunctionalProvider<
+          ({bool inContainer, bool siteAssigned}),
+          ({bool inContainer, bool siteAssigned}),
+          ({bool inContainer, bool siteAssigned})
+        >
+    with $Provider<({bool inContainer, bool siteAssigned})> {
+  /// What a tab's menu needs to keep the ways out of a container while
+  /// containers are hidden (P5): whether [tabId] is in a container, and whether
+  /// its site is assigned to one. Neither applies while containers are shown,
+  /// or for a menu without container rows ([enabled]): every tab's menu would
+  /// otherwise hold two database streams open for nothing.
+  HiddenContainerWayOutProvider._({
+    required HiddenContainerWayOutFamily super.from,
+    required (String, {bool enabled}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'hiddenContainerWayOutProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$hiddenContainerWayOutHash();
+
+  @override
+  String toString() {
+    return r'hiddenContainerWayOutProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<({bool inContainer, bool siteAssigned})> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ({bool inContainer, bool siteAssigned}) create(Ref ref) {
+    final argument = this.argument as (String, {bool enabled});
+    return hiddenContainerWayOut(ref, argument.$1, enabled: argument.enabled);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(({bool inContainer, bool siteAssigned}) value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<({bool inContainer, bool siteAssigned})>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is HiddenContainerWayOutProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$hiddenContainerWayOutHash() =>
+    r'd4c23422921f4b643616dc4abd1addaa8b334e3b';
+
+/// What a tab's menu needs to keep the ways out of a container while
+/// containers are hidden (P5): whether [tabId] is in a container, and whether
+/// its site is assigned to one. Neither applies while containers are shown,
+/// or for a menu without container rows ([enabled]): every tab's menu would
+/// otherwise hold two database streams open for nothing.
+
+final class HiddenContainerWayOutFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          ({bool inContainer, bool siteAssigned}),
+          (String, {bool enabled})
+        > {
+  HiddenContainerWayOutFamily._()
+    : super(
+        retry: null,
+        name: r'hiddenContainerWayOutProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// What a tab's menu needs to keep the ways out of a container while
+  /// containers are hidden (P5): whether [tabId] is in a container, and whether
+  /// its site is assigned to one. Neither applies while containers are shown,
+  /// or for a menu without container rows ([enabled]): every tab's menu would
+  /// otherwise hold two database streams open for nothing.
+
+  HiddenContainerWayOutProvider call(String tabId, {required bool enabled}) =>
+      HiddenContainerWayOutProvider._(
+        argument: (tabId, enabled: enabled),
+        from: this,
+      );
+
+  @override
+  String toString() => r'hiddenContainerWayOutProvider';
+}
+
 @ProviderFor(watchPinnedTabIds)
 final watchPinnedTabIdsProvider = WatchPinnedTabIdsProvider._();
 
@@ -1459,6 +1693,10 @@ String _$watchAllAssignedSitesHash() =>
 /// its isolated tabs) mapped to the base contextualIdentities its site
 /// assignments are keyed on. Replicated to the container-proxy extension by
 /// ProxySettingsReplication.
+///
+/// Empty while strict mode is hidden (`container.strict_mode`): the
+/// containers keep the option, and it applies again once shown. Watching the
+/// switch re-sends the policies whenever it changes.
 
 @ProviderFor(watchStrictContextAssignments)
 final watchStrictContextAssignmentsProvider =
@@ -1469,6 +1707,10 @@ final watchStrictContextAssignmentsProvider =
 /// its isolated tabs) mapped to the base contextualIdentities its site
 /// assignments are keyed on. Replicated to the container-proxy extension by
 /// ProxySettingsReplication.
+///
+/// Empty while strict mode is hidden (`container.strict_mode`): the
+/// containers keep the option, and it applies again once shown. Watching the
+/// switch re-sends the policies whenever it changes.
 
 final class WatchStrictContextAssignmentsProvider
     extends
@@ -1485,6 +1727,10 @@ final class WatchStrictContextAssignmentsProvider
   /// its isolated tabs) mapped to the base contextualIdentities its site
   /// assignments are keyed on. Replicated to the container-proxy extension by
   /// ProxySettingsReplication.
+  ///
+  /// Empty while strict mode is hidden (`container.strict_mode`): the
+  /// containers keep the option, and it applies again once shown. Watching the
+  /// switch re-sends the policies whenever it changes.
   WatchStrictContextAssignmentsProvider._()
     : super(
         from: null,
@@ -1512,7 +1758,7 @@ final class WatchStrictContextAssignmentsProvider
 }
 
 String _$watchStrictContextAssignmentsHash() =>
-    r'01a92529a90baf955c96c35180a50ec21ff913a8';
+    r'8b9e56bf03bb9d7d7b37f0fdb7544f8118e93676';
 
 /// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
 /// assigned to containers. Used by ProxySettingsReplication to manage proxy
@@ -1580,27 +1826,41 @@ final class WatchIsolatedContextContainerMapProvider
 String _$watchIsolatedContextContainerMapHash() =>
     r'6275a6c508777c306e2ababca83e2792d6d5efe1';
 
-@ProviderFor(watchIsCurrentSiteAssignedToContainer)
-final watchIsCurrentSiteAssignedToContainerProvider =
-    WatchIsCurrentSiteAssignedToContainerProvider._();
+/// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
+/// a menu opened for a tab other than the selected one asks about its own.
 
-final class WatchIsCurrentSiteAssignedToContainerProvider
+@ProviderFor(watchIsSiteAssignedToContainer)
+final watchIsSiteAssignedToContainerProvider =
+    WatchIsSiteAssignedToContainerFamily._();
+
+/// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
+/// a menu opened for a tab other than the selected one asks about its own.
+
+final class WatchIsSiteAssignedToContainerProvider
     extends $FunctionalProvider<AsyncValue<bool>, bool, Stream<bool>>
     with $FutureModifier<bool>, $StreamProvider<bool> {
-  WatchIsCurrentSiteAssignedToContainerProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'watchIsCurrentSiteAssignedToContainerProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  /// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
+  /// a menu opened for a tab other than the selected one asks about its own.
+  WatchIsSiteAssignedToContainerProvider._({
+    required WatchIsSiteAssignedToContainerFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'watchIsSiteAssignedToContainerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
-  String debugGetCreateSourceHash() =>
-      _$watchIsCurrentSiteAssignedToContainerHash();
+  String debugGetCreateSourceHash() => _$watchIsSiteAssignedToContainerHash();
+
+  @override
+  String toString() {
+    return r'watchIsSiteAssignedToContainerProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -1609,9 +1869,45 @@ final class WatchIsCurrentSiteAssignedToContainerProvider
 
   @override
   Stream<bool> create(Ref ref) {
-    return watchIsCurrentSiteAssignedToContainer(ref);
+    final argument = this.argument as String;
+    return watchIsSiteAssignedToContainer(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is WatchIsSiteAssignedToContainerProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-String _$watchIsCurrentSiteAssignedToContainerHash() =>
-    r'b4e39fecacc84f53adfd1d6368a70a84db181661';
+String _$watchIsSiteAssignedToContainerHash() =>
+    r'0b4bf8245341fcc1a9ea444d8232ce787ae51f48';
+
+/// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
+/// a menu opened for a tab other than the selected one asks about its own.
+
+final class WatchIsSiteAssignedToContainerFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<bool>, String> {
+  WatchIsSiteAssignedToContainerFamily._()
+    : super(
+        retry: null,
+        name: r'watchIsSiteAssignedToContainerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
+  /// a menu opened for a tab other than the selected one asks about its own.
+
+  WatchIsSiteAssignedToContainerProvider call(String tabId) =>
+      WatchIsSiteAssignedToContainerProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'watchIsSiteAssignedToContainerProvider';
+}

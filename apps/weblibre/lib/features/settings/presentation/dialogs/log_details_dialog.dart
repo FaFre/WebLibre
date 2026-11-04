@@ -24,9 +24,12 @@ import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -62,7 +65,7 @@ Color _levelColor(Level level) {
   };
 }
 
-class LogDetailsDialog extends StatelessWidget {
+class LogDetailsDialog extends ConsumerWidget {
   const LogDetailsDialog({
     required this.level,
     required this.message,
@@ -107,8 +110,15 @@ class LogDetailsDialog extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // Stack traces are verbose diagnostics (`diagnostics.verbose_logs`). Copying
+    // the entry still includes one, so a bug report never loses it.
+    final stackTraceShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.diagnosticsVerboseLogs),
+      ),
+    );
 
     return AlertDialog(
       title: Row(
@@ -169,7 +179,7 @@ class LogDetailsDialog extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  if (stackTrace != null) ...[
+                  if (stackTrace != null && stackTraceShown) ...[
                     Text(
                       l10n.settings_stackTraceLabel,
                       style: TextStyle(

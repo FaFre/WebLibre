@@ -20,6 +20,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 
@@ -243,6 +244,84 @@ void main() {
           .toList();
 
       expect(_types(decoded), [SearchModuleType.topSites]);
+    });
+  });
+
+  group('reorderShownModules', () {
+    // Containers sits between the shown modules and is left out of the list
+    // the user drags in, as it is while the containers switch is off.
+    final entries = [
+      _entry(SearchModuleType.recentSearches),
+      _entry(SearchModuleType.containers),
+      _entry(SearchModuleType.topSites),
+      _entry(SearchModuleType.quote),
+    ];
+    const shown = [
+      SearchModuleType.recentSearches,
+      SearchModuleType.topSites,
+      SearchModuleType.quote,
+    ];
+
+    test('moves a module to the end without touching the hidden slot', () {
+      final reordered = reorderShownModules(entries, shown, 0, 2);
+
+      expect(_types(reordered), [
+        SearchModuleType.containers,
+        SearchModuleType.topSites,
+        SearchModuleType.quote,
+        SearchModuleType.recentSearches,
+      ]);
+    });
+
+    test('drops a module right before the shown module it lands on', () {
+      final reordered = reorderShownModules(entries, shown, 2, 0);
+
+      expect(_types(reordered), [
+        SearchModuleType.quote,
+        SearchModuleType.recentSearches,
+        SearchModuleType.containers,
+        SearchModuleType.topSites,
+      ]);
+    });
+
+    test('keeps visibility and leaves a single shown module alone', () {
+      final single = reorderShownModules(
+        [_entry(SearchModuleType.containers), _entry(SearchModuleType.quote)],
+        const [SearchModuleType.quote],
+        0,
+        0,
+      );
+      expect(_types(single), [
+        SearchModuleType.containers,
+        SearchModuleType.quote,
+      ]);
+
+      final hidden = reorderShownModules(
+        [...entries.take(3), _entry(SearchModuleType.quote, visible: false)],
+        shown,
+        2,
+        0,
+      );
+      expect(hidden.first.visible, isFalse);
+    });
+  });
+
+  group('isSearchModuleFeatureShown', () {
+    test('a module follows its feature, others are always shown', () {
+      expect(
+        isSearchModuleFeatureShown(SearchModuleType.containers, const {}),
+        isFalse,
+      );
+      expect(
+        isSearchModuleFeatureShown(SearchModuleType.containers, const {
+          FeatureId.containerCore,
+        }),
+        isTrue,
+      );
+      expect(
+        isSearchModuleFeatureShown(SearchModuleType.topSites, const {}),
+        isTrue,
+      );
     });
   });
 }

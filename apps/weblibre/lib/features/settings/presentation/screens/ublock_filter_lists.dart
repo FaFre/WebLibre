@@ -24,6 +24,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/settings/presentation/utils/ublock_asset_group_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
@@ -48,7 +49,7 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
+      storedEngineSettingsProvider.select(
         (value) => value.ublockFilterListSettings,
       ),
     );
@@ -107,7 +108,19 @@ class UBlockFilterListsScreen extends HookConsumerWidget {
       ],
     );
 
-    final updateSettings = updateSettingsImpl;
+    // A change made here is the user's own filter setup. A retry of the
+    // onboarding's optimized lists, pending since its uBlock install failed,
+    // would replace it, so it stops first. The regional fix-up above is not
+    // a choice and leaves it pending.
+    Future<void> updateSettings(
+      UBlockFilterListSettings Function(UBlockFilterListSettings current)
+      mutator,
+    ) async {
+      await ref
+          .read(setupStepRunnerProvider.notifier)
+          .cancel(SetupStep.optimizedUBlockFilters);
+      await updateSettingsImpl(mutator);
+    }
 
     Future<void> enableManagement(UBlockFilterListSettings current) async {
       final registry = registryAsync.value!;
@@ -285,7 +298,7 @@ Future<void> _confirmAndRun(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(l10n.common_cancel),
         ),
-        FilledButton(
+        TextButton(
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(confirmLabel),
         ),
@@ -1136,7 +1149,7 @@ class _ExternalListDialog extends HookWidget {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.common_cancel),
         ),
-        FilledButton(
+        TextButton(
           onPressed: () {
             if (formKey.currentState?.validate() == true) {
               final desc = descriptionController.text.trim();

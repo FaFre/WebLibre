@@ -21,14 +21,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
+
+/// What the settings search indexes of this screen. The targets come from
+/// the engine, so the search knows the list only by its heading, with its
+/// hidden status while `privacy.fp_overrides` (Expert) is.
+List<SettingsSectionDefinition> fingerprintSettingsSearchSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.settings_fingerprintOverrideTargetsSection,
+      feature: FeatureId.privacyFpOverrides,
+      entries: [
+        SettingsEntryDefinition.searchOnly(
+          title: l10n.settings_fingerprintOverrideTargetsSection,
+          keywords: settingsKeywords(
+            l10n.settings_fingerprintProtectionKeywords,
+          ),
+        ),
+      ],
+    ),
+  ];
+}
 
 class FingerprintSettingsScreen extends HookConsumerWidget {
   const FingerprintSettingsScreen({super.key});
@@ -39,182 +67,224 @@ class FingerprintSettingsScreen extends HookConsumerWidget {
     final settingsAsync = ref.watch(fingerprintOverrideSettingsProvider);
     final search = useSettingsSearch();
     final l10n = AppLocalizations.of(context);
+    // Per-target overrides are `privacy.fp_overrides` (Expert). While they are
+    // hidden they stay listed, grayed out, and the presets the app bar menu
+    // offers are listed on the screen too.
+    final overridesShown = ref.watch(
+      storedGeneralSettingsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.privacyFpOverrides),
+      ),
+    );
 
-    return SettingsCustomScrollScaffold(
-      title: l10n.settings_fingerprintProtectionTitle,
-      searchController: search.controller,
-      searchHintText: l10n.settings_fingerprintSearchHint,
-      actions: [
-        MenuAnchor(
-          builder: (context, controller, child) {
-            return IconButton(
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
-              icon: const Icon(Icons.more_vert),
-            );
-          },
-          menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(MdiIcons.restore),
-              child: Text(l10n.settings_loadDefaultsAction),
-              onPressed: () async {
-                await ref
-                    .read(saveEngineSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .fingerprintingProtectionOverrides(
-                            FingerprintOverrides.defaults().toString(),
-                          ),
-                    );
-              },
-            ),
-            MenuItemButton(
-              leadingIcon: const Icon(MdiIcons.restore),
-              child: Text(l10n.settings_loadHardenedDefaultsAction),
-              onPressed: () async {
-                await ref
-                    .read(saveEngineSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) => currentSettings.copyWith
-                          .fingerprintingProtectionOverrides(
-                            FingerprintOverrides.hardenedDefaults().toString(),
-                          ),
-                    );
-              },
-            ),
-          ],
+    Future<void> loadOverrides(FingerprintOverrides overrides) => ref
+        .read(saveEngineSettingsControllerProvider.notifier)
+        .save(
+          (currentSettings) => currentSettings.copyWith
+              .fingerprintingProtectionOverrides(overrides.toString()),
+        );
+
+    final presetsSection = SettingsSectionDefinition(
+      title: l10n.settings_fingerprintPresetsSection,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_loadDefaultsAction,
+          child: ListTile(
+            leading: const Icon(MdiIcons.restore),
+            title: Text(l10n.settings_loadDefaultsAction),
+            onTap: () => loadOverrides(FingerprintOverrides.defaults()),
+          ),
         ),
-      ],
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-          sliver: SliverToBoxAdapter(
-            child: settingsAsync.when(
-              skipLoadingOnReload: true,
-              data: (result) {
-                return result.fold(
-                  (overrides) {
-                    return targetsAsync.when(
-                      skipLoadingOnReload: true,
-                      data: (targets) {
-                        final filteredTargets = targets.where((target) {
-                          if (search.normalizedQuery.isEmpty) return true;
-                          return matchesSettingsSearch(search.normalizedQuery, [
-                            target.name,
-                            if (target.description != null) target.description!,
-                          ]);
-                        }).toList();
-
-                        return SettingsSectionList(
-                          sections: filteredTargets.isEmpty
-                              ? const []
-                              : [
-                                  SettingsSectionDefinition(
-                                    title: l10n
-                                        .settings_fingerprintOverrideTargetsSection,
-                                    entries: [
-                                      for (final target in filteredTargets)
-                                        SettingsEntryDefinition(
-                                          title: target.name,
-                                          subtitle: target.description,
-                                          child: CheckboxListTile.adaptive(
-                                            value:
-                                                (overrides.allTargets == true &&
-                                                    overrides.targets[target
-                                                            .name] !=
-                                                        false) ||
-                                                overrides.targets[target
-                                                        .name] ==
-                                                    true,
-                                            onChanged: (value) async {
-                                              if (value != null) {
-                                                final newOverrides = overrides
-                                                    .copyWithTarget(
-                                                      target.name,
-                                                      value,
-                                                    )
-                                                    .toString();
-
-                                                await ref
-                                                    .read(
-                                                      saveEngineSettingsControllerProvider
-                                                          .notifier,
-                                                    )
-                                                    .save(
-                                                      (
-                                                        currentSettings,
-                                                      ) => currentSettings
-                                                          .copyWith
-                                                          .fingerprintingProtectionOverrides(
-                                                            newOverrides,
-                                                          ),
-                                                    );
-                                              }
-                                            },
-                                            title: Text(target.name),
-                                            subtitle: target.description
-                                                .mapNotNull(
-                                                  (desc) => Text(desc),
-                                                ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                          query: search.rawQuery,
-                        );
-                      },
-                      error: (error, stackTrace) {
-                        return FailureWidget(
-                          exception: error,
-                          onRetry: () {
-                            ref.invalidate(fingerprintTargetsProvider);
-                          },
-                        );
-                      },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                    );
-                  },
-                  onFailure: (errorMessage) {
-                    return FailureWidget(
-                      title: switch (errorMessage.details) {
-                        FingerprintOverrideParseFailure.invalidOverride =>
-                          l10n.settings_fingerprintInvalidOverride,
-                        FingerprintOverrideParseFailure.unknownTarget =>
-                          l10n.settings_fingerprintUnknownTarget,
-                        _ => errorMessage.message,
-                      },
-                      exception:
-                          errorMessage.details
-                              is FingerprintOverrideParseFailure
-                          ? null
-                          : errorMessage.details,
-                      onRetry: () {
-                        ref.invalidate(fingerprintOverrideSettingsProvider);
-                      },
-                    );
-                  },
-                );
-              },
-              error: (error, stackTrace) {
-                return FailureWidget(
-                  exception: error,
-                  onRetry: () {
-                    ref.invalidate(fingerprintOverrideSettingsProvider);
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-            ),
+        SettingsEntryDefinition(
+          title: l10n.settings_loadHardenedDefaultsAction,
+          child: ListTile(
+            leading: const Icon(MdiIcons.restore),
+            title: Text(l10n.settings_loadHardenedDefaultsAction),
+            onTap: () => loadOverrides(FingerprintOverrides.hardenedDefaults()),
           ),
         ),
       ],
+    );
+
+    return HiddenFeatureScope(
+      feature: FeatureId.privacyFpHardenedDefaults,
+      child: SettingsCustomScrollScaffold(
+        title: l10n.settings_fingerprintProtectionTitle,
+        searchController: search.controller,
+        searchHintText: l10n.settings_fingerprintSearchHint,
+        actions: [
+          HiddenFeatureGate(
+            child: MenuAnchor(
+              builder: (context, controller, child) {
+                return IconButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  icon: const Icon(Icons.more_vert),
+                );
+              },
+              menuChildren: [
+                MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.restore),
+                  child: Text(l10n.settings_loadDefaultsAction),
+                  onPressed: () =>
+                      loadOverrides(FingerprintOverrides.defaults()),
+                ),
+                MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.restore),
+                  child: Text(l10n.settings_loadHardenedDefaultsAction),
+                  onPressed: () =>
+                      loadOverrides(FingerprintOverrides.hardenedDefaults()),
+                ),
+              ],
+            ),
+          ),
+        ],
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+            sliver: SliverToBoxAdapter(
+              child: settingsAsync.when(
+                skipLoadingOnReload: true,
+                data: (result) {
+                  return result.fold(
+                    (overrides) {
+                      return targetsAsync.when(
+                        skipLoadingOnReload: true,
+                        data: (targets) {
+                          final filteredTargets = targets.where((target) {
+                            if (search.normalizedQuery.isEmpty) return true;
+                            return matchesSettingsSearch(
+                              search.normalizedQuery,
+                              [
+                                target.name,
+                                if (target.description != null)
+                                  target.description!,
+                              ],
+                            );
+                          }).toList();
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Saved overrides the engine does not apply
+                              // while they are hidden: the boxes show them.
+                              const NotAppliedWhileHiddenNote([
+                                HiddenSetting.fingerprintingOverrides,
+                              ]),
+                              SettingsSectionList(
+                                sections: [
+                                  if (!overridesShown) presetsSection,
+                                  if (filteredTargets.isNotEmpty)
+                                    SettingsSectionDefinition(
+                                      title: l10n
+                                          .settings_fingerprintOverrideTargetsSection,
+                                      feature: FeatureId.privacyFpOverrides,
+                                      entries: [
+                                        for (final target in filteredTargets)
+                                          SettingsEntryDefinition(
+                                            title: target.name,
+                                            subtitle: target.description,
+                                            child: CheckboxListTile.adaptive(
+                                              value:
+                                                  (overrides.allTargets ==
+                                                          true &&
+                                                      overrides.targets[target
+                                                              .name] !=
+                                                          false) ||
+                                                  overrides.targets[target
+                                                          .name] ==
+                                                      true,
+                                              onChanged: (value) async {
+                                                if (value != null) {
+                                                  final newOverrides = overrides
+                                                      .copyWithTarget(
+                                                        target.name,
+                                                        value,
+                                                      )
+                                                      .toString();
+
+                                                  await ref
+                                                      .read(
+                                                        saveEngineSettingsControllerProvider
+                                                            .notifier,
+                                                      )
+                                                      .save(
+                                                        (
+                                                          currentSettings,
+                                                        ) => currentSettings
+                                                            .copyWith
+                                                            .fingerprintingProtectionOverrides(
+                                                              newOverrides,
+                                                            ),
+                                                      );
+                                                }
+                                              },
+                                              title: Text(target.name),
+                                              subtitle: target.description
+                                                  .mapNotNull(
+                                                    (desc) => Text(desc),
+                                                  ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                ],
+                                query: search.rawQuery,
+                              ),
+                            ],
+                          );
+                        },
+                        error: (error, stackTrace) {
+                          return FailureWidget(
+                            exception: error,
+                            onRetry: () {
+                              ref.invalidate(fingerprintTargetsProvider);
+                            },
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                      );
+                    },
+                    onFailure: (errorMessage) {
+                      return FailureWidget(
+                        title: switch (errorMessage.details) {
+                          FingerprintOverrideParseFailure.invalidOverride =>
+                            l10n.settings_fingerprintInvalidOverride,
+                          FingerprintOverrideParseFailure.unknownTarget =>
+                            l10n.settings_fingerprintUnknownTarget,
+                          _ => errorMessage.message,
+                        },
+                        exception:
+                            errorMessage.details
+                                is FingerprintOverrideParseFailure
+                            ? null
+                            : errorMessage.details,
+                        onRetry: () {
+                          ref.invalidate(fingerprintOverrideSettingsProvider);
+                        },
+                      );
+                    },
+                  );
+                },
+                error: (error, stackTrace) {
+                  return FailureWidget(
+                    exception: error,
+                    onRetry: () {
+                      ref.invalidate(fingerprintOverrideSettingsProvider);
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

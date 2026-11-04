@@ -51,6 +51,7 @@
   "proxy_fieldProfileName": "Имя профиля",
   "proxy_fieldProtocol": "Протокол",
   "proxy_protocolFixedHelper": "После создания профиля протокол изменить нельзя.",
+  "proxy_protocolFromImportHelper": "Задано импортом. Чтобы ввести подключение вручную, покажите «{featureName}» в разделе «Настройки > Управление функциями».",
   "proxy_customOutboundLabel": "Свой outbound",
   "proxy_startAutomaticallyTitle": "Запускать автоматически",
   "proxy_startAutomaticallySubtitle": "Подключать этот профиль при запуске WebLibre, чтобы использующие его вкладки были готовы без запроса",

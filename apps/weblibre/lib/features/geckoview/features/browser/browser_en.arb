@@ -486,7 +486,7 @@
   "@browser_dataTypeSiteData": {
     "description": "Checkbox in the clear site data options: everything the site stores (includes cookies and cache)."
   },
-  "browser_dataTypeSiteDataSubtitle": "Offline storage, databases, local files",
+  "browser_dataTypeSiteDataSubtitle": "Data sites save on this device, for example to work offline",
   "@browser_dataTypeSiteDataSubtitle": {
     "description": "Explanation under \"Site Data\"."
   },
@@ -1167,17 +1167,21 @@
   "@browser_permissionNotification": {
     "description": "Name of a site permission in the site info sheet: showing notifications."
   },
-  "browser_permissionPersistentStorage": "Persistent Storage",
+  "browser_permissionPersistentStorage": "Protect Saved Site Data",
   "@browser_permissionPersistentStorage": {
-    "description": "Name of a site permission: keep the site's stored data even when space runs low."
+    "description": "Site permission: the site may keep its stored data even when the device runs low on space (persistent storage)."
   },
-  "browser_permissionCrossOriginStorage": "Cross-Origin Storage",
+  "browser_permissionPersistentStorageDescription": "Keep this site's data even when storage space is low.",
+  "@browser_permissionPersistentStorageDescription": {
+    "description": "Explanation under the persistent storage site permission. Allowing this protects stored site data from automatic removal when space is low; it does not prevent the user from clearing it."
+  },
+  "browser_permissionCrossOriginStorage": "Cookies on Other Sites",
   "@browser_permissionCrossOriginStorage": {
-    "description": "Name of a site permission: let embedded content from other sites use its storage (storage access)."
+    "description": "Site permission: the site may use its cookies while embedded in another site (cross-origin storage access)."
   },
-  "browser_permissionMediaKeySystem": "Media Key System (DRM)",
+  "browser_permissionMediaKeySystem": "Play Protected Content (DRM)",
   "@browser_permissionMediaKeySystem": {
-    "description": "Name of a site permission: play copy-protected (DRM) media. DRM is a technical abbreviation."
+    "description": "Site permission: the site may play copy-protected video or music. DRM stays as the technical term."
   },
 
   "browser_tabReorderBlockedMessage": "Clear the tab view filter or search to reorder tabs",

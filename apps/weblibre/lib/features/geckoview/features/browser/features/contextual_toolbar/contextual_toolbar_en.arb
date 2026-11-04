@@ -117,9 +117,9 @@
   "@contextualToolbar_longPressOpenSettings": {
     "description": "Description, in toolbar customization, of what long-pressing the menu button does: opens settings."
   },
-  "contextualToolbar_longPressHardRefresh": "Hard Refresh (bypass cache)",
+  "contextualToolbar_longPressHardRefresh": "Full Reload",
   "@contextualToolbar_longPressHardRefresh": {
-    "description": "Description, in toolbar customization, of what long-pressing the reload button does: reload without using cached copies."
+    "description": "Long-press action on the reload button: reload the page and download everything again instead of using saved copies (hard refresh)."
   },
   "contextualToolbar_longPressShowTranslationOptions": "Show Translation Options",
   "@contextualToolbar_longPressShowTranslationOptions": {

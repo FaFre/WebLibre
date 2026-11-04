@@ -892,11 +892,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Buka halaman opsi ekstensi';
 
   @override
-  String get addons_menuFilterListsTitle => 'Daftar Filter & Pengerasan';
+  String get addons_menuFilterListsTitle => 'Daftar Filter';
 
   @override
   String get addons_menuFilterListsSubtitle =>
-      'Kelola daftar filter dan terapkan pengerasan WebLibre';
+      'Kelola daftar filter dan aktifkan filter yang direkomendasikan WebLibre';
 
   @override
   String get addons_permissionsTitle => 'Izin';
@@ -1490,7 +1490,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browserActions_hardReloadDescription =>
-      'Muat ulang halaman saat ini tanpa memakai cache';
+      'Muat ulang halaman dan unduh ulang semuanya';
 
   @override
   String get browserActions_scrollTopTitle => 'Gulir ke Atas';
@@ -1971,11 +1971,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get browserActions_showProfilesDescription => 'Kelola profil Anda';
 
   @override
-  String get browserActions_showProxySettingsTitle => 'Proksi';
+  String get browserActions_showProxySettingsTitle => 'Koneksi';
 
   @override
   String get browserActions_showProxySettingsDescription =>
-      'Buka pengaturan proksi';
+      'Buka pengaturan koneksi';
 
   @override
   String get browserActions_showTorTitle => 'Tor';
@@ -2170,7 +2170,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browserActions_showProxySettingsKeywords =>
-      'vpn, sing-box, socks, koneksi, jaringan, proxy';
+      'proksi, proxy, tor, vpn, sing-box, socks, koneksi, jaringan';
 
   @override
   String get browserActions_showTorKeywords =>
@@ -2929,7 +2929,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browser_dataTypeSiteDataSubtitle =>
-      'Penyimpanan luring, basis data, berkas lokal';
+      'Data yang disimpan situs di perangkat ini, misalnya agar bisa dipakai secara offline';
 
   @override
   String get browser_dataTypeCookies => 'Kuki';
@@ -3481,13 +3481,19 @@ class AppLocalizationsId extends AppLocalizations {
   String get browser_permissionNotification => 'Notifikasi';
 
   @override
-  String get browser_permissionPersistentStorage => 'Penyimpanan Persisten';
+  String get browser_permissionPersistentStorage =>
+      'Lindungi Data Situs yang Disimpan';
 
   @override
-  String get browser_permissionCrossOriginStorage => 'Penyimpanan Lintas Asal';
+  String get browser_permissionPersistentStorageDescription =>
+      'Simpan data situs ini meskipun ruang penyimpanan hampir habis.';
 
   @override
-  String get browser_permissionMediaKeySystem => 'Sistem Kunci Media (DRM)';
+  String get browser_permissionCrossOriginStorage => 'Kuki di Situs Lain';
+
+  @override
+  String get browser_permissionMediaKeySystem =>
+      'Putar Konten Terlindungi (DRM)';
 
   @override
   String get browser_tabReorderBlockedMessage =>
@@ -3659,8 +3665,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get contextualToolbar_longPressOpenSettings => 'Buka Pengaturan';
 
   @override
-  String get contextualToolbar_longPressHardRefresh =>
-      'Muat Ulang Paksa (lewati cache)';
+  String get contextualToolbar_longPressHardRefresh => 'Muat Ulang Penuh';
 
   @override
   String get contextualToolbar_longPressShowTranslationOptions =>
@@ -3918,6 +3923,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get menu_profileTapToSwitch => 'Ketuk untuk beralih profil';
 
   @override
+  String get menu_profileManageCurrent => 'Kunci dan cadangkan profil ini';
+
+  @override
   String get menu_profileSyncComplete => 'Sinkronisasi selesai';
 
   @override
@@ -4148,7 +4156,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get menu_connectionProxySettings => 'Pengaturan Proksi';
+  String get menu_connectionProxySettings => 'Pengaturan Koneksi';
 
   @override
   String get menu_connectionUnused => 'Tidak digunakan oleh rute mana pun';
@@ -4647,7 +4655,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get openLinkTools_restoreDefaultsContent =>
-      'Ini akan mengatur ulang pengaturan pembersih URL dan menghapus katalog yang tersimpan secara lokal.';
+      'Ini akan mengatur ulang pengaturan Pembersih URL dan menghapus aturan yang telah diunduh.';
 
   @override
   String get openLinkTools_actionRestore => 'Pulihkan';
@@ -4753,7 +4761,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get openLinkTools_urlCleanerSettingsSubtitle =>
-      'Perilaku pembersihan URL, pembaruan katalog aturan, dan atribusi.';
+      'Apa yang dihapus dari tautan, pembaruan aturan, dan kredit.';
 
   @override
   String get openLinkTools_urlCleanerDescriptionBody =>
@@ -4768,7 +4776,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get openLinkTools_urlCleanerEnabledSubtitle =>
-      'Hapus parameter pelacakan dari URL';
+      'Hapus bagian pelacakan dari tautan';
 
   @override
   String get openLinkTools_autoApplyTitle => 'Terapkan otomatis';
@@ -4789,18 +4797,18 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get openLinkTools_allowReferralSubtitle =>
-      'Pertahankan parameter pelacakan rujukan dan afiliasi';
+      'Pertahankan kode referal dan afiliasi di tautan';
 
   @override
   String get openLinkTools_autoUpdateCatalogTitle =>
-      'Perbarui katalog otomatis';
+      'Perbarui aturan secara otomatis';
 
   @override
   String get openLinkTools_autoUpdateCatalogSubtitle =>
       'Periksa pembaruan aturan setiap minggu';
 
   @override
-  String get openLinkTools_updateCatalogTitle => 'Perbarui katalog';
+  String get openLinkTools_updateCatalogTitle => 'Perbarui aturan';
 
   @override
   String get openLinkTools_lastUpdateNotAvailable =>
@@ -4822,7 +4830,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get openLinkTools_catalogUpdatedMessage => 'Katalog diperbarui';
+  String get openLinkTools_catalogUpdatedMessage => 'Aturan diperbarui';
 
   @override
   String openLinkTools_updateFailedWithError(String error) {
@@ -4834,7 +4842,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get openLinkTools_restoreDefaultsButtonSubtitle =>
-      'Kembalikan ke katalog bawaan aplikasi dan pengaturan bawaan';
+      'Kembali ke aturan bawaan dan pengaturan default';
 
   @override
   String get openLinkTools_clearUrlAttributionText =>
@@ -4858,7 +4866,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get openLinkTools_urlCleanerBehaviorSectionTitle => 'Perilaku';
 
   @override
-  String get openLinkTools_urlCleanerCatalogSectionTitle => 'Katalog';
+  String get openLinkTools_urlCleanerCatalogSectionTitle => 'Aturan';
 
   @override
   String get openLinkTools_indexUrlCleanerUpdateCatalogSubtitle =>
@@ -5361,6 +5369,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get tabs_addSiteHint => 'example.com atau *.example.com';
+
+  @override
+  String get tabs_addSiteHintSingle => 'example.com';
 
   @override
   String get tabs_addSiteHelperText =>
@@ -6064,6 +6075,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get keyboardShortcuts_actionCustomize => 'Sesuaikan';
 
   @override
+  String get keyboardShortcuts_actionShowAll => 'Tampilkan semua';
+
+  @override
   String get keyboardShortcuts_actionReassign => 'Tetapkan ulang';
 
   @override
@@ -6076,9 +6090,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get onboarding_actionNext => 'Berikutnya';
 
   @override
-  String get onboarding_actionRestore => 'Pulihkan';
-
-  @override
   String get onboarding_restoreTargetUnreadable =>
       'Profil ini tidak dapat dibaca, jadi tidak ada yang dapat dipulihkan ke dalamnya.';
 
@@ -6086,24 +6097,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get onboarding_welcomeBackTitle => 'Selamat datang kembali!';
 
   @override
-  String get onboarding_welcomeReadyTitle => 'WebLibre sudah siap';
-
-  @override
-  String get onboarding_chooseExperience => 'Pilih cara memulai:';
-
-  @override
-  String get onboarding_modeExpressTitle => 'Mulai Cepat';
-
-  @override
-  String get onboarding_modeExpressSubtitle =>
-      'Gunakan pengaturan bawaan yang disarankan dan langsung menjelajah.';
-
-  @override
-  String get onboarding_modeDetailedTitle => 'Penyiapan Kustom';
-
-  @override
-  String get onboarding_modeDetailedSubtitle =>
-      'Atur DNS, bilah alat, ekstensi, dan lainnya.';
+  String get onboarding_welcomeTitle => 'Selamat datang di WebLibre';
 
   @override
   String get onboarding_modeRestoreTitle => 'Pulihkan dari Cadangan';
@@ -6142,47 +6136,46 @@ class AppLocalizationsId extends AppLocalizations {
   String get onboarding_aiFeaturesTitle => 'Fitur AI';
 
   @override
-  String get onboarding_aiOnDeviceTitle => 'AI di perangkat';
+  String get onboarding_aiUseOnDeviceTitle => 'Gunakan AI di perangkat';
 
   @override
   String get onboarding_aiOnDeviceSubtitle =>
-      'Fitur lokal di perangkat, termasuk saran topik kontainer dan tab';
+      'Menyarankan cara mengelompokkan dan menamai tab Anda, langsung di perangkat ini';
 
   @override
   String get onboarding_aiWarningTitle => 'Hal yang perlu diperhatikan';
 
   @override
   String get onboarding_aiWarningPoint1 =>
-      'WebLibre menggunakan model AI lokal untuk menganalisis judul tab yang terbuka dan menyarankan kontainer untuk mengelompokkan tab tersebut serta nama untuk kontainer itu. Semua pemrosesan berlangsung sepenuhnya di perangkat Anda.';
+      'WebLibre membaca judul tab yang terbuka dan menyarankan kontainer yang cocok untuk tiap tab beserta namanya.';
 
   @override
   String get onboarding_aiWarningPoint2 =>
-      'Peningkatan AI bekerja sepenuhnya di dalam peramban Anda, sehingga semua data tetap berada di perangkat. Pemrosesan AI lokal menghormati privasi Anda dan memberikan saran kelompok dan nama kontainer yang lebih cepat. Anda dapat mengatur perilaku ini kapan saja di Pengaturan.';
+      'Fitur AI berjalan sepenuhnya di perangkat ini, dan semua data tetap berada di perangkat.';
 
   @override
   String get onboarding_aiWarningPoint3 =>
       'AI terkadang bisa keliru, jadi harap tinjau nama kelompok dan pilihan tab yang disarankan.';
 
   @override
-  String get onboarding_searchTitle => 'Pencarian';
-
-  @override
-  String get onboarding_searchDefaultProviderLabel =>
-      'Penyedia Pencarian Bawaan';
+  String get onboarding_searchDefaultProviderLabel => 'Mesin pencari';
 
   @override
   String get onboarding_searchMore => 'Cari lainnya';
 
   @override
-  String get onboarding_searchDefaultAutocompleteLabel =>
-      'Penyedia Pelengkapan Otomatis Bawaan';
+  String get onboarding_searchDefaultAutocompleteLabel => 'Saran pencarian';
 
   @override
   String get onboarding_searchLoadFailedTitle =>
       'Tidak dapat memuat mesin pencari';
 
   @override
-  String get onboarding_dohTitle => 'DNS over HTTPS';
+  String get onboarding_dohTitle => 'DNS Aman';
+
+  @override
+  String get onboarding_dohSubtitle =>
+      'Mengenkripsi pencarian alamat situs web untuk privasi yang lebih baik';
 
   @override
   String get onboarding_permissionsTitle => 'Izin';
@@ -6202,79 +6195,47 @@ class AppLocalizationsId extends AppLocalizations {
       'Jadikan WebLibre sebagai peramban bawaan Anda';
 
   @override
-  String get onboarding_privacyTitle => 'Privasi & Pengerasan';
-
-  @override
-  String get onboarding_privacyBrowserLanguagesTitle => 'Bahasa Peramban';
+  String get onboarding_privacyBrowserLanguagesTitle => 'Bahasa situs web';
 
   @override
   String get onboarding_privacyBrowserLanguagesSubtitle =>
-      'Atur preferensi bahasa yang diperlihatkan ke situs web';
-
-  @override
-  String get onboarding_multipleLanguagesDetectedTitle =>
-      'Beberapa Bahasa Terdeteksi';
-
-  @override
-  String onboarding_multipleLanguagesWarning(int count, String locales) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Peramban Anda dikonfigurasi dengan $count bahasa ($locales).',
-    );
-    return '$_temp0 Situs web dapat menggunakan kombinasi bahasa Anda yang unik untuk membuat sidik jari dan melacak Anda di seluruh web.';
-  }
-
-  @override
-  String get onboarding_multipleLanguagesSuggestion =>
-      'Pertimbangkan untuk mengurangi bahasa peramban menjadi satu bahasa saja untuk memperkecil permukaan sidik jari Anda.';
-
-  @override
-  String get onboarding_reviewLanguages => 'Tinjau Bahasa';
+      'Bahasa yang sebaiknya digunakan situs web untuk Anda';
 
   @override
   String get onboarding_webEngineHardeningTitle =>
-      'Pengerasan Mesin Web Lengkap';
+      'Pengaturan keamanan yang lebih ketat';
 
   @override
   String get onboarding_webEngineHardeningSubtitle =>
-      'Terapkan semua preferensi pengerasan keamanan yang disarankan ke mesin web';
+      'Mengaktifkan semua pengaturan keamanan yang direkomendasikan WebLibre';
 
   @override
   String get onboarding_fingerprintProtectionTitle =>
-      'Perlindungan Sidik Jari yang Diperketat';
+      'Buat perangkat ini lebih sulit dikenali';
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      'Muat pengaturan bawaan perlindungan sidik jari yang menyeluruh';
+      'Menyembunyikan detail yang dipakai situs untuk mengenali Anda tanpa kuki (sidik jari)';
 
   @override
   String get onboarding_compatibilityWarningTitle =>
-      'Peringatan Kompatibilitas';
+      'Beberapa situs web mungkin tidak berfungsi';
 
   @override
   String get onboarding_fingerprintWarningPoint1 =>
-      'Perlindungan sidik jari yang diperketat mengaktifkan lebih dari 60 target perlindungan, termasuk pengacakan canvas, pemalsuan navigator, penyamaran perangkat media, dan lainnya.';
+      'Ini mengubah lebih dari 60 detail yang dapat dibaca situs web, seperti cara grafis digambar serta kamera dan mikrofon mana yang terhubung.';
 
   @override
   String get onboarding_fingerprintWarningPoint2 =>
-      'Hal ini dapat membuat situs web rusak atau berperilaku tidak terduga. Anda dapat menyesuaikan setiap target di pengaturan.';
-
-  @override
-  String get onboarding_localNetworkProtectionTitle =>
-      'Perlindungan Jaringan Lokal';
-
-  @override
-  String get onboarding_localNetworkProtectionSubtitle =>
-      'Situs web dapat mencoba menjangkau perangkat Anda dan perangkat lain di jaringan rumah, seperti router, printer, atau perangkat rumah pintar. Secara bawaan, pelacak yang dikenal otomatis diblokir agar tidak dapat melakukannya.';
+      'Jika situs web tidak berfungsi dengan baik, Anda dapat menyesuaikan setiap perlindungan di Pengaturan.';
 
   @override
   String get onboarding_blockAllLocalNetworkTitle =>
-      'Blokir Semua Permintaan Jaringan Lokal';
+      'Minta izin sebelum koneksi lokal';
 
   @override
   String get onboarding_blockAllLocalNetworkSubtitle =>
-      'Minta izin sebelum situs web mana pun mengakses perangkat di jaringan rumah Anda, bukan hanya pelacak yang dikenal';
+      'Situs web harus meminta izin sebelum terhubung ke aplikasi di perangkat ini atau perangkat di jaringan Anda';
 
   @override
   String get onboarding_toolbarLayoutTitle => 'Bilah Alat & Tata Letak';
@@ -6284,18 +6245,239 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_ublockDescription =>
-      'uBlock Origin (uBO) adalah **pemblokir konten spektrum luas** yang hemat CPU dan memori buatan **Raymond Hill**, dan tersedia sebagai ekstensi peramban untuk WebLibre.\n\nSecara bawaan, uBO memblokir iklan, pelacak, penambang kripto, pop-up, anti-pemblokir yang mengganggu, situs malware, dan lainnya menggunakan **EasyList, EasyPrivacy, Peter Lowe\'s Blocklist, Online Malicious URL Blocklist, dan daftar filter uBO**.\n\nBanyak daftar lain yang tersedia untuk memblokir konten tambahan.';
+      'uBlock Origin adalah ekstensi peramban yang memblokir iklan, pelacak, pop-up, dan situs berbahaya yang dikenal.\n\nEkstensi ini bekerja otomatis setelah dipasang. Anda dapat menambahkan aturan pemblokiran di Pengaturan.\n\nDibuat oleh **Raymond Hill**.';
 
   @override
-  String get onboarding_ublockInstallTitle => 'Pasang Ekstensi uBlock Origin';
+  String get onboarding_ublockInstallTitle => 'Pasang uBlock Origin';
+
+  @override
+  String get onboarding_ublockInstallSubtitle =>
+      'Memblokir iklan, pelacak, dan situs berbahaya';
 
   @override
   String get onboarding_ublockApplyDefaultsTitle =>
-      'Terapkan pengaturan bawaan yang dioptimalkan';
+      'Gunakan filter yang direkomendasikan';
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      'Aktifkan daftar filter pengerasan WebLibre.';
+      'Mengaktifkan daftar filter yang direkomendasikan WebLibre untuk uBlock Origin';
+
+  @override
+  String get onboarding_presetTitle =>
+      'Seberapa banyak yang perlu ditampilkan WebLibre?';
+
+  @override
+  String get onboarding_presetAverageTitle => 'Sekadar menjelajah';
+
+  @override
+  String get onboarding_presetAverageSubtitle =>
+      'Saya ingin privat, bukan rumit';
+
+  @override
+  String get onboarding_presetAveragePoint1 =>
+      'Tab, markah, riwayat, dan Mode Pembaca';
+
+  @override
+  String get onboarding_presetAveragePoint2 =>
+      'Memblokir iklan dan pelacak dengan uBlock Origin';
+
+  @override
+  String get onboarding_presetAveragePoint3 =>
+      'Pintasan pencarian, ekstensi, dan terjemahan halaman';
+
+  @override
+  String get onboarding_presetAveragePoint4 =>
+      'Firefox Sync dengan perangkat Anda yang lain';
+
+  @override
+  String get onboarding_presetAdvancedTitle => 'Suka utak-atik';
+
+  @override
+  String get onboarding_presetAdvancedSubtitle =>
+      'Saya suka mengatur semuanya dengan cara saya sendiri';
+
+  @override
+  String get onboarding_presetAdvancedPoint1 =>
+      'Kontainer dan tab terisolasi untuk memisahkan kuki dan info masuk';
+
+  @override
+  String get onboarding_presetAdvancedPoint2 => 'Koneksi Tor, VPN, dan proksi';
+
+  @override
+  String get onboarding_presetAdvancedPoint3 =>
+      'Tab pohon, gestur, dan opsi tata letak lainnya';
+
+  @override
+  String get onboarding_presetAdvancedPoint4 =>
+      'Pengaturan privasi lanjutan dan kontrol AI di perangkat';
+
+  @override
+  String get onboarding_presetExpertTitle => 'Mode ahli';
+
+  @override
+  String get onboarding_presetExpertSubtitle =>
+      'Saya ingin semua pengaturan dan kontrol';
+
+  @override
+  String get onboarding_presetExpertPoint1 =>
+      'Grup pengerasan mesin dan pengecualian sidik jari';
+
+  @override
+  String get onboarding_presetExpertPoint2 =>
+      'Perutean per kontainer, penggantian DNS, dan beberapa terowongan';
+
+  @override
+  String get onboarding_presetExpertPoint3 =>
+      'Kontrol JavaScript, user agent, dan sertifikat';
+
+  @override
+  String get onboarding_basicsTitle => 'Dasar-dasar';
+
+  @override
+  String get onboarding_basicsTabBarTitle => 'Posisi bilah tab';
+
+  @override
+  String get onboarding_basicsTabBarAutoHint =>
+      'Otomatis menyesuaikan dengan jendela dan mempertahankan panel samping di layar yang lebih besar';
+
+  @override
+  String get onboarding_basicsMoreSearchOptions => 'Opsi pencarian lainnya';
+
+  @override
+  String get onboarding_yourSetupTitle => 'Pengaturan Anda';
+
+  @override
+  String get onboarding_yourSetupOnTitle => 'Aktif sejak awal';
+
+  @override
+  String get onboarding_yourSetupProtections =>
+      'Pemblokiran pelacak dan koneksi terenkripsi';
+
+  @override
+  String get onboarding_yourSetupHardening =>
+      'Pengaturan keamanan yang lebih ketat';
+
+  @override
+  String get onboarding_yourSetupLocalNetwork =>
+      'Koneksi lokal memerlukan izin';
+
+  @override
+  String get onboarding_yourSetupContentBlocker =>
+      'Pemblokiran iklan dengan uBlock Origin';
+
+  @override
+  String onboarding_yourSetupHistoryRetention(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days hari',
+    );
+    return 'Riwayat disimpan selama $_temp0';
+  }
+
+  @override
+  String get onboarding_yourSetupHiddenForNowTitle =>
+      'Disembunyikan untuk saat ini';
+
+  @override
+  String get onboarding_presetChangeLater =>
+      'Anda dapat mengubahnya kapan saja di Pengaturan > Kontrol Fitur.';
+
+  @override
+  String get onboarding_presetAdvancedIncludes =>
+      'Semua yang ada di Sekadar menjelajah, ditambah:';
+
+  @override
+  String get onboarding_presetExpertIncludes =>
+      'Semua yang ada di Suka utak-atik, ditambah:';
+
+  @override
+  String get onboarding_presetChangeResetCustomize =>
+      'Perubahan di Sesuaikan dan Pengaturan Anda telah diatur ulang.';
+
+  @override
+  String get onboarding_goalsTitle => 'Ada lagi?';
+
+  @override
+  String get onboarding_goalKeepAccountsApart => 'Pisahkan akun';
+
+  @override
+  String get onboarding_goalLockBrowser => 'Kunci peramban';
+
+  @override
+  String get onboarding_goalSetUpConnections => 'Siapkan Tor, VPN, atau proksi';
+
+  @override
+  String get onboarding_goalSyncDevices =>
+      'Sinkronkan dengan perangkat saya yang lain';
+
+  @override
+  String get onboarding_goalKeepAccountsApartSubtitle =>
+      'Gunakan beberapa akun di situs yang sama, masing-masing dalam kontainernya sendiri';
+
+  @override
+  String get onboarding_goalLockBrowserSubtitle =>
+      'Buka kunci profil ini dengan kunci perangkat atau kata sandi';
+
+  @override
+  String get onboarding_goalSetUpConnectionsSubtitle =>
+      'Membuka pengaturan koneksi setelah selesai. Tidak ada yang tersambung sampai Anda memulainya.';
+
+  @override
+  String get onboarding_goalSyncDevicesSubtitle =>
+      'Masuk ke Firefox Sync setelah pengaturan selesai';
+
+  @override
+  String get onboarding_customizeAction => 'Sesuaikan';
+
+  @override
+  String get onboarding_customizeCaption =>
+      'Fitur, privasi, pemblokiran iklan, dan tata letak';
+
+  @override
+  String get onboarding_customizeGroupPrivacy => 'Privasi & keamanan';
+
+  @override
+  String get onboarding_customizeGroupTabs => 'Tab & profil';
+
+  @override
+  String get onboarding_customizeGroupConnections => 'Koneksi';
+
+  @override
+  String get onboarding_customizeGroupLayout => 'Tata letak & input';
+
+  @override
+  String get onboarding_customizeSaveFailed =>
+      'Tidak dapat menyimpan fitur yang ditampilkan. Coba lagi.';
+
+  @override
+  String get onboarding_customizeGroupMore => 'Lainnya';
+
+  @override
+  String get onboarding_customizeHomeSections => 'Bagian beranda';
+
+  @override
+  String get onboarding_customizeNewTabSections => 'Bagian tab baru';
+
+  @override
+  String get onboarding_commitFailed =>
+      'Pengaturan tidak dapat disimpan. Coba lagi.';
+
+  @override
+  String get onboarding_restoreRequiresEula =>
+      'Terima EULA dan Kebijakan Privasi terlebih dahulu.';
+
+  @override
+  String get onboarding_setupStepFailedUBlock =>
+      'uBlock Origin tidak dapat dipasang. WebLibre akan mencoba lagi saat dimulai berikutnya.';
+
+  @override
+  String get onboarding_setupStepFailedFilters =>
+      'Filter uBlock Origin yang direkomendasikan tidak dapat diaktifkan. WebLibre akan mencoba lagi saat dimulai berikutnya.';
+
+  @override
+  String get onboarding_setupStepFailedHardening =>
+      'Pengaturan keamanan yang lebih ketat tidak dapat diaktifkan sepenuhnya. WebLibre akan mencoba lagi saat dimulai berikutnya.';
 
   @override
   String get proxy_actionChange => 'Ubah';
@@ -6528,6 +6710,11 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get proxy_protocolFixedHelper =>
       'Protokol tidak dapat diubah setelah profil dibuat.';
+
+  @override
+  String proxy_protocolFromImportHelper(String featureName) {
+    return 'Ditetapkan oleh impor. Untuk memasukkan koneksi secara manual, tampilkan \"$featureName\" di Pengaturan > Kontrol Fitur.';
+  }
 
   @override
   String get proxy_customOutboundLabel => 'Outbound Kustom';
@@ -7605,7 +7792,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_iconCacheKeywords => 'favicon, cache, ikon';
 
   @override
-  String get settings_iconCacheSubtitle => 'Favicon yang tersimpan';
+  String get settings_iconCacheSubtitle => 'Ikon situs yang tersimpan';
 
   @override
   String get settings_iconCacheSizeLabel => 'Ukuran';
@@ -7894,27 +8081,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Tampilkan tombol untuk membuat tab anak di bawah tab saat ini (hanya tampilan pohon)';
 
   @override
-  String get settings_showContainerUiTitle => 'Tampilkan UI Kontainer';
-
-  @override
-  String get settings_showContainerUiKeywords => 'kontainer, containers';
-
-  @override
-  String get settings_showContainerUiSubtitle =>
-      'Tampilkan pemilih, menu, dan pengelolaan kontainer';
-
-  @override
-  String get settings_showIsolatedTabUiTitle => 'Tampilkan UI Tab Terisolasi';
-
-  @override
-  String get settings_showIsolatedTabUiKeywords =>
-      'tab terisolasi, isolated tabs';
-
-  @override
-  String get settings_showIsolatedTabUiSubtitle =>
-      'Tampilkan opsi pembuatan tab terisolasi di UI';
-
-  @override
   String get settings_backgroundTabBehaviorTitle =>
       'Perilaku Tab Latar Belakang';
 
@@ -8149,7 +8315,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_allowNonManifestPwaInstallSubtitle =>
-      'Izinkan pemasangan situs web tanpa manifes PWA sebagai aplikasi mandiri';
+      'Izinkan memasang situs web apa pun sebagai aplikasi, bahkan yang tidak dibuat untuk dipasang';
 
   @override
   String get settings_urlCleanerTitle => 'Pembersih URL';
@@ -8160,7 +8326,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_urlCleanerSubtitle =>
-      'Aturan penghapusan pelacakan dan pembaruan katalog';
+      'Hapus bagian pelacakan dari tautan';
 
   @override
   String get settings_unshortenerTitle => 'Pengurai Tautan Pendek';
@@ -8358,11 +8524,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Belum ada situs yang ditambahkan.';
 
   @override
-  String get settings_dohTitle => 'DNS over HTTPS';
+  String get settings_dohTitle => 'DNS Aman';
 
   @override
   String get settings_dohSubtitle =>
-      'Tingkat perlindungan DNS terenkripsi dan pilihan resolver.';
+      'Cara pencarian alamat situs dienkripsi, dan oleh siapa';
 
   @override
   String get settings_errorLogsCopiedMessage => 'Log disalin';
@@ -8493,7 +8659,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_fingerprintProtectionKeywords =>
-      'privasi, sidik jari, privacy, fingerprint';
+      'privasi, sidik jari, privacy, fingerprint, Buat perangkat ini lebih sulit dikenali';
 
   @override
   String get settings_fingerprintSearchHint =>
@@ -8508,6 +8674,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_fingerprintOverrideTargetsSection => 'Target Penggantian';
+
+  @override
+  String get settings_fingerprintPresetsSection => 'Prasetel';
 
   @override
   String get settings_fingerprintInvalidOverride =>
@@ -8590,42 +8759,41 @@ class AppLocalizationsId extends AppLocalizations {
       'Pilih dan urutkan yang ditampilkan di halaman tab baru';
 
   @override
-  String get settings_browserLanguagesTitle => 'Bahasa Peramban';
+  String get settings_browserLanguagesTitle => 'Bahasa Situs Web';
 
   @override
   String get settings_browserLanguagesKeywords =>
-      'lokal, bahasa, locale, language';
+      'bahasa peramban, bahasa, lokal, locale, accept language';
 
   @override
-  String get settings_browserLanguagesSearchHint =>
-      'Cari lokal berdasarkan tag bahasa';
+  String get settings_browserLanguagesSearchHint => 'Cari bahasa';
 
   @override
-  String get settings_languageRegionSettingsSection =>
-      'Pengaturan Bahasa & Wilayah';
+  String get settings_languageRegionSettingsSection => 'Bahasa';
 
   @override
   String get settings_browserLanguagePreferenceLabel =>
-      'Preferensi bahasa peramban';
+      'Bahasa yang dapat digunakan situs web untuk Anda';
 
   @override
-  String get settings_customLocaleSection => 'Lokal Kustom';
+  String get settings_customLocaleSection => 'Bahasa Lain';
 
   @override
-  String get settings_addCustomLocaleTitle => 'Tambah lokal kustom';
+  String get settings_addCustomLocaleTitle => 'Tambahkan bahasa lain';
 
   @override
-  String get settings_addCustomLocaleKeywords => 'tag lokal, locale tag';
+  String get settings_addCustomLocaleKeywords =>
+      'tag lokal, kode bahasa, locale tag';
 
   @override
   String get settings_addCustomLocaleSubtitle =>
-      'Masukkan tag lokal seperti en-US';
+      'Masukkan kode bahasa seperti en-US';
 
   @override
-  String get settings_customLocaleFieldLabel => 'Lokal Kustom';
+  String get settings_customLocaleFieldLabel => 'Kode bahasa';
 
   @override
-  String get settings_invalidLocaleError => 'Pengenal lokal tidak valid';
+  String get settings_invalidLocaleError => 'Ini bukan kode bahasa yang valid';
 
   @override
   String get settings_homeTargetHomeLabel => 'Beranda';
@@ -8745,11 +8913,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Kurangi gerakan dan matikan animasi aplikasi';
 
   @override
-  String get settings_showModalBarrierTitle => 'Tampilkan Latar Modal';
+  String get settings_showModalBarrierTitle => 'Redupkan di Belakang Dialog';
 
   @override
   String get settings_showModalBarrierKeywords =>
-      'dialog, lembar bawah, overlay, bottom sheets';
+      'dialog, lembar bawah, overlay, modal barrier';
 
   @override
   String get settings_showModalBarrierSubtitle =>
@@ -9057,7 +9225,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexAllowNonManifestPwaInstallSubtitle =>
-      'Izinkan situs web tanpa manifes dipasang sebagai aplikasi';
+      'Pasang situs web apa pun sebagai aplikasi';
 
   @override
   String get settings_externalLinksSectionTitle => 'Tautan Eksternal';
@@ -9070,18 +9238,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_bookmarksSectionTitle => 'Markah';
 
   @override
-  String get settings_resolverSettingsSectionTitle => 'Pengaturan Resolver';
+  String get settings_resolverSettingsSectionTitle => 'Pengaturan Penyedia';
 
   @override
-  String get settings_indexDnsOverHttpsResolverTitle => 'DNS over HTTPS';
+  String get settings_indexDnsOverHttpsResolverTitle => 'DNS Aman';
 
   @override
   String get settings_indexDnsOverHttpsResolverKeywords =>
-      'doh, resolver, penyedia dns, resolver kustom, dns provider';
+      'dns over https, doh, resolver, penyedia dns, resolver khusus';
 
   @override
   String get settings_indexDnsOverHttpsResolverSubtitle =>
-      'Tingkat perlindungan, pilihan penyedia, dan resolver kustom yang tersimpan';
+      'Tingkat perlindungan, penyedia, dan penyedia Anda sendiri';
 
   @override
   String get settings_runtimeStartupSectionTitle => 'Runtime & Saat Mulai';
@@ -9307,11 +9475,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_homeSearchBarRowTitle => 'Bilah pencarian';
 
   @override
-  String get settings_proxyTitle => 'Proksi';
+  String get settings_proxyTitle => 'Koneksi';
 
   @override
   String get settings_proxySubtitle =>
-      'Kelola koneksi proksi dan pilih tab yang menggunakannya.';
+      'Kelola koneksi Tor, VPN, dan proksi, lalu pilih tab yang menggunakannya.';
 
   @override
   String get settings_proxyConnectionsTitle => 'Koneksi Proksi';
@@ -9354,7 +9522,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_privacySecuritySubtitle =>
-      'Perlindungan pelacakan, sidik jari, data penjelajahan, dan pengerasan jaringan.';
+      'Perlindungan pelacakan, data penjelajahan, dan keamanan.';
 
   @override
   String get settings_trackingProtectionExceptionsTitle =>
@@ -9530,11 +9698,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Tab pribadi dapat ditangkap layar dan direkam, dan muncul di pratinjau pengalih aplikasi.';
 
   @override
-  String get settings_httpsOnlyModeTitle =>
-      'Blokir koneksi HTTP yang tidak aman';
+  String get settings_httpsOnlyModeTitle => 'Hanya Koneksi Aman (HTTPS)';
 
   @override
-  String get settings_httpsOnlyModeKeywords => 'hanya https, https only';
+  String get settings_httpsOnlyModeKeywords =>
+      'hanya https, https only, blokir http tidak aman';
 
   @override
   String get settings_httpsOnlyModeDisabledLabel => 'Nonaktif';
@@ -9546,7 +9714,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_httpsOnlyModePrivateOnlyLabel => 'Hanya pribadi';
 
   @override
-  String get settings_dnsOverHttpsTileTitle => 'DNS over HTTPS';
+  String get settings_dnsOverHttpsTileTitle => 'DNS Aman';
 
   @override
   String get settings_enhancedTrackingProtectionTitle =>
@@ -9627,15 +9795,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_uBlockFilterListsTileTitle =>
-      'Daftar Filter & Pengerasan uBlock';
+      'Daftar Filter uBlock Origin';
 
   @override
   String get settings_uBlockFilterListsTileKeywords =>
-      'ublock, filter, filters';
+      'ublock, filter, pemblokir iklan, pengerasan, hardenings';
 
   @override
   String get settings_uBlockFilterListsTileSubtitle =>
-      'Kelola daftar filter dan terapkan pengerasan WebLibre';
+      'Kelola daftar filter dan aktifkan filter yang direkomendasikan WebLibre';
 
   @override
   String get settings_fissionEnabledTitle => 'Fission (Isolasi Situs)';
@@ -9713,11 +9881,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_managedAppActionBlock => 'Blokir';
 
   @override
-  String get settings_browserLanguagesTileTitle => 'Bahasa Peramban';
+  String get settings_browserLanguagesTileTitle => 'Bahasa Situs Web';
 
   @override
   String get settings_browserLanguagesTileSubtitle =>
-      'Atur preferensi bahasa yang diperlihatkan ke situs web';
+      'Bahasa yang sebaiknya digunakan situs web untuk Anda';
 
   @override
   String get settings_fingerprintProtectionTileTitle =>
@@ -9740,34 +9908,39 @@ class AppLocalizationsId extends AppLocalizations {
       'Pengerasan perlindungan sidik jari lanjutan';
 
   @override
-  String get settings_lnaEnabledTitle => 'Akses Jaringan Lokal';
+  String get settings_lnaEnabledTitle =>
+      'Lindungi Aplikasi dan Perangkat Lokal';
 
   @override
-  String get settings_lnaEnabledKeywords => 'lan, jaringan lokal';
+  String get settings_lnaEnabledKeywords =>
+      'lan, jaringan lokal, akses jaringan lokal, localhost, koneksi lokal';
 
   @override
   String get settings_lnaEnabledSubtitle =>
-      'Aktifkan pemblokiran akses ke jaringan lokal dan perangkat';
+      'Atur apakah situs web boleh terhubung ke aplikasi di perangkat ini atau ke perangkat di jaringan Anda';
 
   @override
-  String get settings_lnaBlockingTitle => 'Blokir Permintaan Jaringan Lokal';
+  String get settings_lnaBlockingTitle => 'Minta Izin Sebelum Koneksi Lokal';
 
   @override
-  String get settings_lnaBlockingKeywords => 'lan, jaringan lokal';
+  String get settings_lnaBlockingKeywords =>
+      'lan, jaringan lokal, localhost, blokir koneksi lokal';
 
   @override
   String get settings_lnaBlockingSubtitle =>
-      'Blokir permintaan halaman web ke alamat jaringan lokal';
+      'Situs web harus meminta izin sebelum terhubung ke aplikasi di perangkat ini atau ke perangkat di jaringan Anda';
 
   @override
-  String get settings_lnaBlockTrackersTitle => 'Blokir Pelacak Jaringan Lokal';
+  String get settings_lnaBlockTrackersTitle =>
+      'Blokir Koneksi Lokal dari Pelacak';
 
   @override
-  String get settings_lnaBlockTrackersKeywords => 'lan, jaringan lokal';
+  String get settings_lnaBlockTrackersKeywords =>
+      'lan, pelacak jaringan lokal, localhost';
 
   @override
   String get settings_lnaBlockTrackersSubtitle =>
-      'Blokir pelacak agar tidak mengakses sumber daya jaringan lokal';
+      'Pelacak yang dikenal tidak dapat terhubung ke aplikasi di perangkat ini atau ke perangkat di jaringan Anda';
 
   @override
   String get settings_transferTitle => 'Ekspor & Impor';
@@ -9872,7 +10045,7 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get settings_transferSectionGeckoPrefsTitle => 'Preferensi Gecko';
+  String get settings_transferSectionGeckoPrefsTitle => 'Preferensi mesin web';
 
   @override
   String get settings_transferSectionGeckoPrefsDescription =>
@@ -9956,7 +10129,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_webEngineHardeningKeywords =>
-      'pengerasan, keamanan, hardening';
+      'pengerasan, keamanan, hardening, Pengaturan keamanan yang lebih ketat';
 
   @override
   String get settings_webEngineHardeningSearchHint => 'Cari grup pengerasan';
@@ -10022,19 +10195,18 @@ class AppLocalizationsId extends AppLocalizations {
       'Penyedia, bang, saran riwayat, dan pencarian di perangkat.';
 
   @override
-  String get settings_defaultSearchProviderTitle => 'Penyedia Pencarian Bawaan';
+  String get settings_defaultSearchProviderTitle => 'Mesin Pencari';
 
   @override
   String get settings_defaultSearchProviderKeywords =>
-      'mesin pencari, search engine';
+      'mesin pencari, penyedia pencarian default, default search provider';
 
   @override
-  String get settings_defaultAutocompleteProviderTitle =>
-      'Penyedia Pelengkapan Otomatis Bawaan';
+  String get settings_defaultAutocompleteProviderTitle => 'Saran Pencarian';
 
   @override
   String get settings_defaultAutocompleteProviderKeywords =>
-      'saran, pelengkapan otomatis, suggestions, autocomplete';
+      'saran, pelengkapan otomatis, autocomplete provider';
 
   @override
   String get settings_customSearchEnginesTitle => 'Mesin Pencari Kustom';
@@ -10133,41 +10305,41 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_popularSitesAutocompleteSubtitle =>
-      'Lengkapi teks yang diketik dengan domain terkenal jika riwayat dan markah Anda tidak memiliki kecocokan';
+      'Lengkapi ketikan Anda dengan situs terkenal jika riwayat dan markah tidak memiliki kecocokan';
 
   @override
   String get settings_localIndexEnabledTitle =>
-      'Aktifkan indeks pencarian lokal';
+      'Cari di dalam halaman yang dikunjungi';
 
   @override
   String get settings_localIndexEnabledKeywords =>
-      'teks halaman, riwayat, page text, history';
+      'teks halaman, riwayat, indeks pencarian lokal';
 
   @override
   String get settings_localIndexEnabledSubtitle =>
-      'Indekskan halaman yang dikunjungi secara lokal agar peramban dapat mencari isinya. Metadata kunjungan tetap di mesin; hanya teks halaman yang disimpan di perangkat.';
+      'Menyimpan teks halaman yang Anda kunjungi di perangkat ini agar pencarian dapat menemukan kata di dalamnya.';
 
   @override
-  String get settings_indexPrivateTabsTitle => 'Indeks tab pribadi';
+  String get settings_indexPrivateTabsTitle => 'Simpan teks dari tab pribadi';
 
   @override
   String get settings_indexPrivateTabsKeywords =>
-      'penyamaran, pribadi, incognito';
+      'penyamaran, pribadi, incognito, indeks tab pribadi';
 
   @override
   String get settings_indexPrivateTabsSubtitle =>
-      'Sertakan halaman yang dibuka di tab pribadi dalam indeks lokal. Nonaktif secara bawaan.';
+      'Simpan juga teks halaman yang dibuka di tab pribadi. Nonaktif secara default.';
 
   @override
   String get settings_clearLocalIndexDialogTitle =>
-      'Hapus indeks pencarian lokal?';
+      'Hapus teks halaman yang tersimpan?';
 
   @override
   String get settings_clearLocalIndexDialogContent =>
-      'Ini menghapus semua konten halaman yang diindeks secara lokal. Riwayat mesin (metadata kunjungan) tidak terpengaruh.';
+      'Menghapus teks halaman yang disimpan untuk pencarian. Riwayat penjelajahan Anda tetap tersimpan.';
 
   @override
-  String get settings_localIndexStatsTitle => 'Halaman terindeks';
+  String get settings_localIndexStatsTitle => 'Teks halaman tersimpan';
 
   @override
   String get settings_localIndexStatsKeywords =>
@@ -10178,8 +10350,8 @@ class AppLocalizationsId extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count halaman terindeks',
-      one: '1 halaman terindeks',
+      other: 'Teks dari $count halaman disimpan',
+      one: 'Teks dari 1 halaman disimpan',
     );
     return '$_temp0';
   }
@@ -10201,7 +10373,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_searchSectionHistorySuggestionsTitle => 'Riwayat & Saran';
 
   @override
-  String get settings_searchSectionLocalIndexTitle => 'Indeks Pencarian Lokal';
+  String get settings_searchSectionLocalIndexTitle =>
+      'Cari di Dalam Halaman yang Dikunjungi';
 
   @override
   String get settings_searchSectionLocalIndexKeywords =>
@@ -10213,7 +10386,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexDefaultAutocompleteProviderSubtitle =>
-      'Pilih penyedia saran pencarian';
+      'Pilih asal saran pencarian';
 
   @override
   String get settings_indexAcceptSuggestionOnSubmitSubtitle =>
@@ -10229,19 +10402,19 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexPopularSitesAutocompleteSubtitle =>
-      'Lengkapi teks yang diketik dengan domain terkenal';
+      'Lengkapi ketikan Anda dengan situs terkenal';
 
   @override
   String get settings_indexLocalIndexEnabledSubtitle =>
-      'Indekskan halaman yang dikunjungi secara lokal untuk pencarian konten';
+      'Simpan teks halaman di perangkat ini agar dapat ditemukan pencarian';
 
   @override
   String get settings_indexIndexPrivateTabsSubtitle =>
-      'Sertakan tab pribadi dalam indeks lokal';
+      'Simpan juga teks dari tab pribadi';
 
   @override
   String get settings_indexLocalIndexStatsSubtitle =>
-      'Lihat dan hapus indeks lokal';
+      'Lihat dan hapus teks halaman yang tersimpan';
 
   @override
   String get settings_webContentTitle => 'Konten Web';
@@ -10285,25 +10458,26 @@ class AppLocalizationsId extends AppLocalizations {
       'Dinonaktifkan selama ukuran font otomatis aktif';
 
   @override
-  String get settings_fontInflationTitle => 'Pembesaran Font';
+  String get settings_fontInflationTitle => 'Perbesar Teks Kecil';
 
   @override
   String get settings_fontInflationKeywords =>
-      'keterbacaan, readability, font inflation';
+      'keterbacaan, font inflation, perbesar teks';
 
   @override
   String get settings_fontInflationSubtitle =>
-      'Perbesar teks pada halaman yang tidak memiliki meta tag viewport seluler';
+      'Membuat teks mudah dibaca di halaman yang tidak dibuat untuk ponsel';
 
   @override
-  String get settings_inputAutoZoomTitle => 'Zoom Otomatis pada Input';
+  String get settings_inputAutoZoomTitle => 'Perbesar pada Kolom Teks';
 
   @override
-  String get settings_inputAutoZoomKeywords => 'formulir, forms';
+  String get settings_inputAutoZoomKeywords =>
+      'formulir, kolom input, zoom otomatis';
 
   @override
   String get settings_inputAutoZoomSubtitle =>
-      'Perbesar otomatis saat memfokuskan kolom input teks';
+      'Perbesar tampilan saat Anda mengetuk kolom teks';
 
   @override
   String get settings_forceUserScalableTitle => 'Zoom di Semua Situs Web';
@@ -10338,14 +10512,15 @@ class AppLocalizationsId extends AppLocalizations {
       'Menambahkan alat opsional ke bilah aplikasi peramban yang menyederhanakan halaman web dengan menghapus iklan, bilah samping, dan elemen lain yang tidak penting.';
 
   @override
-  String get settings_enforceReaderModeTitle => 'Paksa Mode Pembaca';
+  String get settings_enforceReaderModeTitle => 'Selalu Tawarkan Mode Pembaca';
 
   @override
-  String get settings_enforceReaderModeKeywords => 'pembaca, reader';
+  String get settings_enforceReaderModeKeywords =>
+      'pembaca, mode pembaca, paksa mode pembaca';
 
   @override
   String get settings_enforceReaderModeSubtitle =>
-      'Abaikan skor keterbacaan situs dan selalu tampilkan Mode Pembaca, bahkan di situs yang mungkin tidak mendukungnya.';
+      'Tawarkan Mode Pembaca di setiap halaman, bahkan di halaman yang mungkin tidak mendukungnya dengan baik.';
 
   @override
   String get settings_onDeviceAiTitle => 'AI di perangkat';
@@ -10370,11 +10545,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexFontInflationSubtitle =>
-      'Perbesar teks pada halaman tanpa viewport seluler';
+      'Perbesar teks di halaman yang tidak dibuat untuk ponsel';
 
   @override
   String get settings_indexInputAutoZoomSubtitle =>
-      'Perbesar otomatis saat memfokuskan input teks';
+      'Perbesar tampilan saat Anda mengetuk kolom teks';
 
   @override
   String get settings_indexPdfViewerSubtitle =>
@@ -10382,11 +10557,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexEnableReaderModeSubtitle =>
-      'Ekstrak dan sederhanakan halaman agar mudah dibaca';
+      'Tampilkan artikel dalam tata letak yang bersih dan mudah dibaca';
 
   @override
   String get settings_indexEnforceReaderModeSubtitle =>
-      'Selalu tampilkan kemampuan Mode Pembaca';
+      'Tawarkan Mode Pembaca di setiap halaman';
 
   @override
   String get settings_indexOnDeviceAiSubtitle =>
@@ -10423,11 +10598,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_ublockApplyHardeningsDialogTitle =>
-      'Terapkan Pengerasan WebLibre?';
+      'Aktifkan Filter yang Direkomendasikan?';
 
   @override
   String get settings_ublockApplyHardeningsDialogMessage =>
-      'Ini akan mengaktifkan sekumpulan daftar filter tambahan pilihan dan menambahkan daftar pemendek URL yang sah sebagai daftar eksternal.';
+      'Ini mengaktifkan daftar filter tambahan pilihan WebLibre dan menambahkan daftar yang menghapus bagian pelacakan dari tautan.';
 
   @override
   String get settings_ublockInfoBannerMessage =>
@@ -10447,7 +10622,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_ublockQuickApplyHardeningsTitle =>
-      'Terapkan Pengerasan WebLibre';
+      'Aktifkan Filter yang Direkomendasikan';
 
   @override
   String get settings_ublockQuickApplyHardeningsSubtitle =>
@@ -10612,7 +10787,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_categoryWebContentSubtitle =>
-      'Tampilan halaman, PDF, mode pembaca, AI';
+      'Tampilan halaman, PDF, mode pembaca';
 
   @override
   String get settings_categoryNotificationsTitle => 'Notifikasi';
@@ -10623,7 +10798,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_categoryNotificationsSubtitle =>
-      'Pengiriman web push, distributor, langganan situs';
+      'Notifikasi situs web dan aplikasi yang mengirimkannya';
 
   @override
   String get settings_categorySearchTitle => 'Pencarian';
@@ -10648,14 +10823,14 @@ class AppLocalizationsId extends AppLocalizations {
       'Perlindungan pelacakan, penghapusan data';
 
   @override
-  String get settings_categoryProxyTitle => 'Proksi';
+  String get settings_categoryProxyTitle => 'Koneksi';
 
   @override
   String get settings_categoryProxyKeywords =>
       'proksi, proxy, sing-box, socks, vpn, wireguard, perutean, routing, tor, kontainer';
 
   @override
-  String get settings_categoryProxySubtitle => 'Koneksi dan perutean';
+  String get settings_categoryProxySubtitle => 'Tor, VPN, proksi, dan perutean';
 
   @override
   String get settings_categoryExtensionsTitle => 'Ekstensi';
@@ -10745,16 +10920,18 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexHttpsOnlyModeSubtitle =>
-      'Utamakan HTTPS dan blokir koneksi yang tidak aman';
+      'Beri peringatan sebelum membuka situs yang tidak terenkripsi';
 
   @override
-  String get settings_indexDnsOverHttpsTitle => 'DNS over HTTPS';
+  String get settings_indexDnsOverHttpsTitle => 'DNS Aman';
 
   @override
-  String get settings_indexDnsOverHttpsKeywords => 'doh, dns';
+  String get settings_indexDnsOverHttpsKeywords =>
+      'dns over https, doh, dns terenkripsi';
 
   @override
-  String get settings_indexDnsOverHttpsSubtitle => 'Enkripsi pencarian DNS';
+  String get settings_indexDnsOverHttpsSubtitle =>
+      'Enkripsi pencarian alamat situs';
 
   @override
   String get settings_privacySectionNetworkProtectionTitle =>
@@ -10762,11 +10939,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexLnaBlockingSubtitle =>
-      'Blokir permintaan ke perangkat dan layanan jaringan lokal';
+      'Situs web harus meminta izin sebelum terhubung ke aplikasi dan perangkat lokal';
 
   @override
   String get settings_indexLnaBlockTrackersSubtitle =>
-      'Blokir permintaan jaringan lokal yang menyerupai pelacak';
+      'Cegah pelacak yang dikenal menjangkau aplikasi dan perangkat lokal';
 
   @override
   String get settings_privacySectionSignalsModesTitle =>
@@ -10873,49 +11050,49 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_protectionLevelDescription =>
-      'Domain Name System (DNS) over HTTPS mengirim permintaan nama domain melalui koneksi terenkripsi, sehingga melindunginya dan mempersulit orang lain melihat situs web mana yang akan Anda kunjungi.';
+      'Sebelum sebuah situs terbuka, peramban mencari alamatnya. DNS Aman mengenkripsi pencarian itu, sehingga penyedia jaringan Anda dan pihak lain lebih sulit melihat situs mana yang Anda kunjungi.';
 
   @override
   String get settings_defaultProtectionTitle => 'Perlindungan Bawaan';
 
   @override
   String get settings_defaultProtectionSubtitle =>
-      'DoH hanya digunakan jika DNS bawaan gagal';
+      'Menggunakan DNS aman hanya jika DNS jaringan Anda gagal';
 
   @override
   String get settings_increasedProtectionTitle => 'Perlindungan Ditingkatkan';
 
   @override
   String get settings_increasedProtectionSubtitle =>
-      'DoH diutamakan, DNS bawaan sebagai cadangan';
+      'Menggunakan DNS aman terlebih dahulu, lalu DNS jaringan Anda jika gagal';
 
   @override
   String get settings_maxProtectionTitle => 'Perlindungan Maksimum';
 
   @override
-  String get settings_maxProtectionSubtitle => 'Hanya DoH, tanpa cadangan';
+  String get settings_maxProtectionSubtitle =>
+      'Selalu menggunakan DNS aman. Situs tidak dimuat jika gagal';
 
   @override
   String get settings_protectionOffTitle => 'Nonaktif';
 
   @override
-  String get settings_protectionOffSubtitle =>
-      'Gunakan resolver DNS bawaan Anda';
+  String get settings_protectionOffSubtitle => 'Menggunakan DNS jaringan Anda';
 
   @override
-  String get settings_dohProviderTitle => 'Penyedia DoH';
+  String get settings_dohProviderTitle => 'Penyedia';
 
   @override
-  String get settings_yourResolvers => 'Resolver Anda';
+  String get settings_yourResolvers => 'Penyedia Anda';
 
   @override
-  String get settings_addCustomResolver => 'Tambah resolver kustom';
+  String get settings_addCustomResolver => 'Tambahkan penyedia Anda sendiri';
 
   @override
-  String get settings_editCustomResolverTitle => 'Edit resolver kustom';
+  String get settings_editCustomResolverTitle => 'Edit penyedia';
 
   @override
-  String get settings_resolverUrlLabel => 'URL Resolver';
+  String get settings_resolverUrlLabel => 'URL penyedia';
 
   @override
   String get settings_alreadyBuiltInProvider =>
@@ -11014,14 +11191,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_withTitleDescription =>
-      'Menampilkan judul halaman dan jejak URL';
+      'Menampilkan judul halaman dan alamatnya';
 
   @override
   String get settings_compactOption => 'Ringkas';
 
   @override
-  String get settings_compactDescription =>
-      'Kapsul URL di tengah tanpa judul halaman';
+  String get settings_compactDescription => 'Hanya alamat, di tengah';
 
   @override
   String get settings_showContextualToolbarTitle =>
@@ -11257,21 +11433,22 @@ class AppLocalizationsId extends AppLocalizations {
       'Tampilkan tab di lembar bawah, bukan layar penuh';
 
   @override
-  String get settings_longPressUrlCopyTitle => 'Tekan Lama URL untuk Menyalin';
+  String get settings_longPressUrlCopyTitle =>
+      'Tekan Lama Alamat untuk Menyalin';
 
   @override
   String get settings_longPressUrlCopyKeywords => 'salin url, copy url';
 
   @override
   String get settings_longPressUrlCopySubtitle =>
-      'Salin URL halaman ke papan klip saat menekan lama bilah alamat';
+      'Tekan lama bilah alamat untuk menyalin alamat halaman';
 
   @override
   String get settings_showFaviconsTitle =>
-      'Tampilkan Favicon di Tampilan Daftar';
+      'Tampilkan Ikon Situs di Tampilan Daftar';
 
   @override
-  String get settings_showFaviconsKeywords => 'ikon, favicon, icons';
+  String get settings_showFaviconsKeywords => 'ikon, favicons';
 
   @override
   String get settings_showFaviconsSubtitle =>
@@ -11399,7 +11576,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexLongPressUrlCopySubtitle =>
-      'Salin URL saat ini dari bilah tab';
+      'Salin alamat halaman dari bilah tab';
 
   @override
   String get settings_indexShowContextualToolbarSubtitle =>
@@ -11520,6 +11697,68 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settings_trackerStatisticsLoadFailed =>
       'Statistik pelacak tidak dapat dimuat.';
+
+  @override
+  String get settings_categoryFeatureControlTitle => 'Kontrol Fitur';
+
+  @override
+  String get settings_categoryFeatureControlSubtitle =>
+      'Pilih fitur yang ditampilkan WebLibre';
+
+  @override
+  String get settings_categoryFeatureControlKeywords =>
+      'kontrol fitur, fitur, visibilitas, tampilkan, sembunyikan, disembunyikan, prasetel, sekadar menjelajah, suka utak-atik, mode ahli, sederhana, lanjutan, sesuaikan, pengaturan awal, feature control, preset';
+
+  @override
+  String get settings_featureControlIntro =>
+      'Sembunyikan fitur yang tidak Anda gunakan agar WebLibre tetap sederhana. Selama fitur disembunyikan, pengaturannya menggunakan nilai bawaan. Perubahan Anda tetap disimpan dan diterapkan lagi saat Anda menampilkannya. Koneksi dan apa pun yang Anda buat tetap berjalan.';
+
+  @override
+  String get settings_featureControlHiddenInUse =>
+      'Fitur disembunyikan. Apa pun yang sudah Anda atur tetap berjalan.';
+
+  @override
+  String get settings_featureControlKeepsWorking =>
+      'Apa pun yang sudah Anda atur tetap berjalan.';
+
+  @override
+  String get settings_featureControlShownApplyingAgain =>
+      'Fitur ditampilkan. Perubahan Anda sebelumnya diterapkan lagi.';
+
+  @override
+  String get settings_featureControlApplyPresetTitle => 'Terapkan prasetel';
+
+  @override
+  String get settings_featureControlApplyPresetSubtitle =>
+      'Tampilkan dan sembunyikan fitur seperti sebuah prasetel.';
+
+  @override
+  String settings_featureControlApplyPresetDialogTitle(String preset) {
+    return 'Terapkan \"$preset\"?';
+  }
+
+  @override
+  String get settings_featureControlApplyPresetDialogContent =>
+      'Hanya fitur berikut yang berubah.';
+
+  @override
+  String get settings_featureControlFeaturesToShow =>
+      'Fitur yang akan ditampilkan';
+
+  @override
+  String get settings_featureControlFeaturesToHide =>
+      'Fitur yang akan disembunyikan';
+
+  @override
+  String get settings_featureControlApplyPresetConfirm => 'Terapkan';
+
+  @override
+  String settings_featureControlApplyPresetUnchanged(String preset) {
+    return 'Fitur yang ditampilkan sudah sesuai dengan \"$preset\".';
+  }
+
+  @override
+  String get settings_featureControlSectionTitle => 'Fitur';
 
   @override
   String get smallWeb_sheetTitle => 'Small Web';
@@ -13031,14 +13270,14 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get webPush_screenSubtitle =>
-      'Notifikasi situs web yang dikirim melalui UnifiedPush';
+      'Terima notifikasi situs web melalui aplikasi terpisah';
 
   @override
-  String get webPush_distributorTileTitle => 'Distributor UnifiedPush';
+  String get webPush_distributorTileTitle => 'Aplikasi Pengirim Notifikasi';
 
   @override
   String get webPush_distributorTileKeywords =>
-      'notifikasi, push, unifiedpush, ntfy, pemberitahuan';
+      'notifikasi, push, unifiedpush, distributor, ntfy';
 
   @override
   String get webPush_checking => 'Memeriksa…';
@@ -13064,11 +13303,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get webPush_disablingWebPush => 'Menonaktifkan…';
 
   @override
-  String get webPush_disableWebPush => 'Nonaktifkan web push';
+  String get webPush_disableWebPush => 'Matikan notifikasi situs web';
 
   @override
   String get webPush_statusNoneAvailable =>
-      'Tidak ada distributor yang tersedia';
+      'Tidak ada aplikasi notifikasi yang kompatibel terpasang';
 
   @override
   String get webPush_statusNotSelected => 'Belum dikonfigurasi';
@@ -13080,50 +13319,51 @@ class AppLocalizationsId extends AppLocalizations {
   String get webPush_statusReady => 'Aktif';
 
   @override
-  String get webPush_statusUnavailable => 'Distributor tidak tersedia';
+  String get webPush_statusUnavailable => 'Aplikasi notifikasi tidak tersedia';
 
   @override
   String get webPush_statusDescNoneAvailable =>
-      'Pasang aplikasi distributor UnifiedPush, misalnya ntfy, untuk menerima notifikasi situs web.';
+      'Untuk menerima notifikasi situs web, pasang ntfy atau aplikasi lain yang mendukung UnifiedPush.';
 
   @override
   String get webPush_statusDescNotSelected =>
-      'Pilih distributor di bawah untuk mengaktifkan notifikasi situs web.';
+      'Pilih aplikasi notifikasi di bawah untuk mengaktifkan notifikasi situs web.';
 
   @override
   String get webPush_statusDescPending =>
-      'Menunggu distributor mengonfirmasi pendaftaran.';
+      'Menunggu aplikasi notifikasi selesai disiapkan.';
 
   @override
   String get webPush_statusDescReady =>
-      'Notifikasi situs web dikirim melalui distributor ini.';
+      'Notifikasi situs web dikirim melalui aplikasi ini.';
 
   @override
   String get webPush_statusDescUnavailable =>
-      'Distributor yang dipilih sudah tidak terpasang. Notifikasi situs web tidak akan dikirim sampai Anda memilih yang lain.';
+      'Aplikasi notifikasi yang dipilih sudah tidak terpasang. Notifikasi situs web tidak akan tiba sampai Anda memilih aplikasi lain.';
 
   @override
   String get webPush_noDistributorInstalled =>
-      'Tidak ada distributor UnifiedPush yang terpasang. Pasang salah satunya, misalnya ntfy, lalu coba lagi.';
+      'Tidak ada aplikasi notifikasi yang kompatibel terpasang. Pasang ntfy atau aplikasi lain yang mendukung UnifiedPush, lalu coba lagi.';
 
   @override
-  String get webPush_chooseDistributorTitle => 'Pilih distributor';
+  String get webPush_chooseDistributorTitle =>
+      'Pilih aplikasi pengirim notifikasi';
 
   @override
   String get webPush_distributorConfigured =>
-      'Distributor UnifiedPush telah dikonfigurasi.';
+      'Aplikasi notifikasi sudah disiapkan.';
 
   @override
   String webPush_couldNotConfigureDistributor(String error) {
-    return 'Tidak dapat mengonfigurasi distributor: $error';
+    return 'Tidak dapat menyiapkan aplikasi notifikasi: $error';
   }
 
   @override
-  String get webPush_webPushDisabled => 'Web push dinonaktifkan.';
+  String get webPush_webPushDisabled => 'Notifikasi situs web dimatikan.';
 
   @override
   String webPush_couldNotDisableWebPush(String error) {
-    return 'Tidak dapat menonaktifkan web push: $error';
+    return 'Tidak dapat mematikan notifikasi situs web: $error';
   }
 
   @override
@@ -13172,11 +13412,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get webPush_subscriptionDelayedDelivery =>
-      'Endpoint tersimpan; pengiriman dijeda sampai distributor siap';
+      'Berlangganan; notifikasi dapat tiba setelah aplikasi notifikasi siap';
 
   @override
   String get webPush_subscriptionWaitingForEndpoint =>
-      'Menunggu distributor menetapkan endpoint';
+      'Menunggu aplikasi notifikasi menyelesaikan langganan';
 
   @override
   String get webPush_revokeSubscriptionHint =>
@@ -13187,7 +13427,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get webPush_indexDistributorSubtitle =>
-      'Aplikasi yang mengirimkan notifikasi push situs web';
+      'Aplikasi yang mengirimkan notifikasi situs web, seperti ntfy (UnifiedPush)';
 
   @override
   String get webPush_indexNotificationPermissionSubtitle =>
@@ -13205,7 +13445,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get webPush_indexSiteSubscriptionsSubtitle =>
-      'Situs web yang Anda ikuti untuk menerima notifikasi push';
+      'Situs web yang diizinkan mengirimi Anda notifikasi';
 
   @override
   String get webSearch_fetchPageDataTitle => 'Ambil Data Halaman';
@@ -14010,6 +14250,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get startup_maintenanceUnknownDescribeDone => 'Selesai.';
 
   @override
+  String get listFormat_separator => ', ';
+
+  @override
   String units_bytes(String value) {
     return '$value B';
   }
@@ -14028,6 +14271,208 @@ class AppLocalizationsId extends AppLocalizations {
   String units_milliseconds(String value) {
     return '$value ms';
   }
+
+  @override
+  String get visibilitySwitch_containersLabel => 'Kontainer';
+
+  @override
+  String get visibilitySwitch_containersDescription =>
+      'Simpan kuki dan info masuk di ruang terpisah, misalnya untuk kerja dan pribadi';
+
+  @override
+  String get visibilitySwitch_isolatedTabsLabel => 'Tab terisolasi';
+
+  @override
+  String get visibilitySwitch_isolatedTabsDescription =>
+      'Buka tab dengan kuki dan info masuk sendiri yang, tidak seperti tab pribadi, tetap ada setelah keluar';
+
+  @override
+  String get visibilitySwitch_connectionsLabel => 'Tor, VPN, dan proksi';
+
+  @override
+  String get visibilitySwitch_connectionsDescription =>
+      'Menjelajah melalui Tor, VPN, atau proksi';
+
+  @override
+  String get visibilitySwitch_profilesLabel => 'Beberapa profil';
+
+  @override
+  String get visibilitySwitch_profilesDescription =>
+      'Buat profil terpisah dan beralih di antaranya';
+
+  @override
+  String get visibilitySwitch_treeTabsLabel => 'Tab pohon';
+
+  @override
+  String get visibilitySwitch_treeTabsDescription =>
+      'Tampilkan tab yang dibuka dari sebuah halaman di bawah tab asalnya';
+
+  @override
+  String get visibilitySwitch_layoutAdvancedLabel => 'Opsi tata letak lainnya';
+
+  @override
+  String get visibilitySwitch_layoutAdvancedDescription =>
+      'Pilih tombol bilah alat, urutan menu, dan cara bilah tab mengelompokkan tab';
+
+  @override
+  String get visibilitySwitch_gesturesLabel => 'Gestur';
+
+  @override
+  String get visibilitySwitch_gesturesDescription =>
+      'Usap atau gambar bentuk untuk menjalankan tindakan';
+
+  @override
+  String get visibilitySwitch_keyboardCustomizationLabel =>
+      'Pintasan keyboard khusus';
+
+  @override
+  String get visibilitySwitch_keyboardCustomizationDescription =>
+      'Pilih tombol mana yang menjalankan tindakan mana';
+
+  @override
+  String get visibilitySwitch_privacyAdvancedLabel =>
+      'Pengaturan privasi lanjutan';
+
+  @override
+  String get visibilitySwitch_privacyAdvancedDescription =>
+      'Sesuaikan perlindungan pelacakan, DNS aman, pengaturan keamanan yang lebih ketat, dan seberapa sulit perangkat ini dikenali. Menyembunyikan pengaturan ini tidak menonaktifkan perlindungan.';
+
+  @override
+  String get visibilitySwitch_webappStorageLabel => 'Penyimpanan aplikasi web';
+
+  @override
+  String get visibilitySwitch_webappStorageDescription =>
+      'Pilih kuki dan info masuk yang digunakan aplikasi yang ditambahkan ke layar utama';
+
+  @override
+  String get visibilitySwitch_aiLabel => 'AI di perangkat';
+
+  @override
+  String get visibilitySwitch_aiDescription =>
+      'Dapatkan saran untuk mengelompokkan tab dari AI yang hanya berjalan di perangkat ini';
+
+  @override
+  String get visibilitySwitch_expertDetailsLabel => 'Pengaturan ahli';
+
+  @override
+  String get visibilitySwitch_expertDetailsDescription =>
+      'Kendalikan grup pengerasan mesin, perutean per kontainer, JavaScript, user agent, sertifikat, dan lainnya';
+
+  @override
+  String visibilitySwitch_alsoNeeds(String switches) {
+    return 'Sebagian fitur ini juga memerlukan: $switches';
+  }
+
+  @override
+  String visibilitySwitch_revealTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tampilkan fitur tersembunyi?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String visibilitySwitch_revealIntro(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ini memerlukan fitur yang sedang disembunyikan:',
+      one: 'Ini bagian dari fitur yang sedang disembunyikan:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String visibilitySwitch_revealOutcome(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Menampilkannya akan mengembalikan tombol dan pengaturannya. Tidak ada yang lain berubah.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String visibilitySwitch_revealResumesIntro(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Selama disembunyikan, pengaturan ini menggunakan nilai bawaan. Perubahan Anda tetap disimpan dan diterapkan lagi saat Anda menampilkannya:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get visibilitySwitch_takesEffectAfterRestart =>
+      'Berlaku setelah memulai ulang';
+
+  @override
+  String get visibilitySwitch_revealConfirm => 'Tampilkan';
+
+  @override
+  String get visibilitySwitch_stillHiddenNote =>
+      'Ini bagian dari fitur tersembunyi. Anda dapat menampilkannya di Pengaturan > Kontrol Fitur.';
+
+  @override
+  String get visibilitySwitch_hiddenControlHint =>
+      'Bagian dari fitur tersembunyi. Aktifkan untuk menampilkan fitur';
+
+  @override
+  String visibilitySwitch_hiddenStatus(String switchLabel) {
+    return 'Bagian dari fitur tersembunyi \"$switchLabel\"';
+  }
+
+  @override
+  String visibilitySwitch_hiddenStatusSeveral(String switchLabels) {
+    return 'Bagian dari fitur tersembunyi: $switchLabels';
+  }
+
+  @override
+  String get visibilitySwitch_notAppliedWhileHidden =>
+      'Tidak diterapkan selama disembunyikan';
+
+  @override
+  String visibilitySwitch_hideWarningTitle(String feature) {
+    return 'Sembunyikan $feature?';
+  }
+
+  @override
+  String visibilitySwitch_hideWarningContent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Selama disembunyikan, pengaturan ini menggunakan nilai bawaan. Perubahan Anda tetap disimpan dan diterapkan lagi saat Anda menampilkannya.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get visibilitySwitch_hideWarningConfirm => 'Sembunyikan';
+
+  @override
+  String get visibilitySwitch_stopsApplyingTitle =>
+      'Perubahan yang tidak lagi diterapkan';
+
+  @override
+  String get visibilitySwitch_appliesAgainTitle =>
+      'Perubahan yang diterapkan lagi';
+
+  @override
+  String get visibilitySwitch_hiddenSettingUrlCleanerAutoApply =>
+      'Terapkan otomatis Pembersih URL';
+
+  @override
+  String get visibilitySwitch_hiddenSettingUrlCleanerRules =>
+      'Aturan Pembersih URL';
+
+  @override
+  String get visibilitySwitch_hiddenSettingToolbarButtons =>
+      'Cadangan dan tekan lama tombol bilah alat';
 
   @override
   String get failureWidget_defaultTitle => 'Terjadi kesalahan';
@@ -14191,7 +14636,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String uiHelper_canNotHandleScheme(String scheme) {
-    return 'Tidak dapat menangani \"$scheme\"';
+    return 'Tidak ada aplikasi yang dapat membuka tautan \"$scheme\"';
   }
 
   @override

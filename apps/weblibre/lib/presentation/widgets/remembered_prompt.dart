@@ -19,9 +19,9 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/provider_read.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -114,7 +114,7 @@ class RememberablePromptDialog<T extends Enum> extends HookWidget {
           ),
         for (final action in answers)
           if (action.primary)
-            FilledButton(
+            TextButton(
               onPressed: () => _answer(context, action.answer, dontAskAgain),
               child: Text(action.label),
             )
@@ -150,20 +150,19 @@ Future<RememberablePromptResult<T>?> showRememberablePromptDialog<
 
 /// Answers [prompt] with what was remembered for it, or asks with the
 /// [RememberablePromptDialog] that [builder] returns and remembers the answer
-/// when "Don't ask again" was ticked.
+/// when "Don't ask again" was ticked. [read] is the caller's `ref.read`.
 ///
 /// [T] is the prompt's answer type, one of [RememberedPrompt.answers]. Returns
 /// null when the dialog was cancelled or dismissed.
 Future<T?> askUnlessRemembered<T extends Enum>(
   BuildContext context,
+  ProviderRead read,
   RememberedPrompt prompt, {
   required WidgetBuilder builder,
 }) async {
-  final container = ProviderScope.containerOf(context, listen: false);
-
-  final remembered = container
-      .read(generalSettingsWithDefaultsProvider)
-      .rememberedAnswer<T>(prompt);
+  final remembered = read(
+    generalSettingsWithDefaultsProvider,
+  ).rememberedAnswer<T>(prompt);
   if (remembered != null) return remembered;
 
   final result = await showRememberablePromptDialog<T>(
@@ -174,11 +173,14 @@ Future<T?> askUnlessRemembered<T extends Enum>(
 
   if (result.remember) {
     try {
-      await container
-          .read(generalSettingsRepositoryProvider.notifier)
-          .setRememberedAnswer(prompt, result.answer);
+      // Read only now, and only to remember: the repository is not created
+      // for a prompt that stores nothing.
+      await read(
+        generalSettingsRepositoryProvider.notifier,
+      ).setRememberedAnswer(prompt, result.answer);
     } catch (error, stackTrace) {
-      // The answer still stands for this time; it is only asked again.
+      // The answer still stands for this time; it is only asked again. Also
+      // where a caller that went away while the dialog was open ends up.
       logger.e(
         'Failed to remember the answer to ${prompt.name}',
         error: error,
@@ -194,6 +196,7 @@ Future<T?> askUnlessRemembered<T extends Enum>(
 /// [confirmLabel] button. Returns whether to go ahead.
 Future<bool> confirmUnlessRemembered(
   BuildContext context,
+  ProviderRead read,
   RememberedPrompt prompt, {
   required String title,
   required String content,
@@ -202,6 +205,7 @@ Future<bool> confirmUnlessRemembered(
 }) async {
   final answer = await askUnlessRemembered<PromptConfirmation>(
     context,
+    read,
     prompt,
     builder: (context) => RememberablePromptDialog<PromptConfirmation>(
       icon: icon,

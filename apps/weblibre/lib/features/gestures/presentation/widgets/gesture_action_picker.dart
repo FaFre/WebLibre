@@ -19,10 +19,13 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/pointer_scrollable_sheet.dart';
 import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
@@ -34,11 +37,16 @@ import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 /// The one list for every trigger it is assigned from — drawn gestures, the
 /// built-in swipes, a toolbar button's long press and its replacement — so an
 /// action is found under the same name and in the same place each time.
+///
+/// [ref] is the caller's: under the onboarding's draft scope it reads the
+/// draft's visibility switches, which the sheet, built above that scope in
+/// the navigator's overlay, could not.
 Future<BrowserAction?> showGestureActionPicker(
-  BuildContext context, {
+  BuildContext context,
+  WidgetRef ref, {
   required BrowserAction selected,
 }) async {
-  final picked = await _showPicker(context, selected: selected);
+  final picked = await _showPicker(context, ref, selected: selected);
   return picked?.action;
 }
 
@@ -54,7 +62,8 @@ typedef UnsetActionOption = ({String title, String description, IconData icon});
 /// Returns null if dismissed; otherwise a record whose `action` is null when
 /// [unsetOption] was chosen.
 Future<({BrowserAction? action})?> showOptionalBrowserActionPicker(
-  BuildContext context, {
+  BuildContext context,
+  WidgetRef ref, {
   required BrowserAction? selected,
   required UnsetActionOption unsetOption,
   List<BrowserAction> actions = BrowserAction.values,
@@ -62,6 +71,7 @@ Future<({BrowserAction? action})?> showOptionalBrowserActionPicker(
 }) {
   return _showPicker(
     context,
+    ref,
     selected: selected,
     unsetOption: unsetOption,
     actions: actions,
@@ -70,12 +80,21 @@ Future<({BrowserAction? action})?> showOptionalBrowserActionPicker(
 }
 
 Future<({BrowserAction? action})?> _showPicker(
-  BuildContext context, {
+  BuildContext context,
+  WidgetRef ref, {
   required BrowserAction? selected,
   UnsetActionOption? unsetOption,
   List<BrowserAction> actions = BrowserAction.values,
   String? title,
 }) {
+  // Hidden features' actions are not offered; the current binding
+  // stays listed so the picker still shows what it is set to.
+  final offered = shownBrowserActions(
+    actions,
+    ref.read(generalSettingsWithDefaultsProvider),
+    selected: selected,
+  );
+
   return showModalBottomSheet<({BrowserAction? action})>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
@@ -87,7 +106,7 @@ Future<({BrowserAction? action})?> _showPicker(
     builder: (context) => _GestureActionPicker(
       selected: selected,
       unsetOption: unsetOption,
-      actions: actions,
+      actions: offered,
       title: title,
     ),
   );

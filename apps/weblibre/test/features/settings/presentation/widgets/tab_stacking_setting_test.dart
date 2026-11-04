@@ -43,7 +43,7 @@ Future<void> _pumpStackingSetting(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        generalSettingsWithDefaultsProvider.overrideWith(
+        storedGeneralSettingsProvider.overrideWith(
           (ref) => GeneralSettings.withDefaults(
             tabBarPosition: TabBarPositionSetting.bottom,
             tabBarStackingMode: stacking,

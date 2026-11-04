@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/bangs/data/models/bang.dart';
 import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
@@ -30,6 +32,7 @@ import 'package:weblibre/features/bangs/domain/repositories/data.dart';
 import 'package:weblibre/features/bangs/domain/services/bang_query.dart';
 import 'package:weblibre/features/bangs/presentation/dialogs/delete_bang_dialog.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
@@ -74,10 +77,23 @@ class EditBangScreen extends HookConsumerWidget {
 
     final category = useState(initialBang?.category);
     final subCategory = useState(initialBang?.subCategory);
-    final formatFlags = useState(
-      initialBang?.format ??
-          {BangFormat.urlEncodePlaceholder, BangFormat.urlEncodeSpaceToPlus},
-    );
+    const defaultFormatFlags = {
+      BangFormat.urlEncodePlaceholder,
+      BangFormat.urlEncodeSpaceToPlus,
+    };
+    final formatFlags = useState(initialBang?.format ?? defaultFormatFlags);
+
+    // Format flags are expert details (`bangs.custom_format_flags`). This
+    // editor is reached while searching, so while they are hidden they are
+    // left out rather than grayed out. A bang that already uses them keeps
+    // them, so they can be checked and undone (P5); flags that are left out
+    // are still saved unchanged. Aliases are always offered.
+    final formatFlagsInUse =
+        initialBang?.format != null &&
+        !const SetEquality<BangFormat>().equals(
+          initialBang!.format,
+          defaultFormatFlags,
+        );
 
     void updateFormatFlag(BangFormat flag, bool enabled) {
       final flags = {...formatFlags.value};
@@ -281,48 +297,70 @@ class EditBangScreen extends HookConsumerWidget {
                     }
                   },
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.bangs_flagsLabel,
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                const SizedBox(height: 4),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: formatFlags.value.contains(BangFormat.openBasePath),
-                  title: Text(l10n.bangs_flagOpenBasePathTitle),
-                  subtitle: Text(l10n.bangs_flagOpenBasePathSubtitle),
-                  onChanged: (value) {
-                    if (value != null) {
-                      updateFormatFlag(BangFormat.openBasePath, value);
-                    }
-                  },
-                ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: formatFlags.value.contains(
-                    BangFormat.urlEncodePlaceholder,
+                HiddenFeatureGate.feature(
+                  FeatureId.bangsCustomFormatFlags,
+                  inForce: formatFlagsInUse,
+                  omitWhenHidden: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.bangs_flagsLabel,
+                        style: Theme.of(context).textTheme.labelMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: formatFlags.value.contains(
+                          BangFormat.openBasePath,
+                        ),
+                        title: Text(l10n.bangs_flagOpenBasePathTitle),
+                        subtitle: Text(l10n.bangs_flagOpenBasePathSubtitle),
+                        onChanged: (value) {
+                          if (value != null) {
+                            updateFormatFlag(BangFormat.openBasePath, value);
+                          }
+                        },
+                      ),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: formatFlags.value.contains(
+                          BangFormat.urlEncodePlaceholder,
+                        ),
+                        title: Text(l10n.bangs_flagUrlEncodePlaceholderTitle),
+                        subtitle: Text(
+                          l10n.bangs_flagUrlEncodePlaceholderSubtitle,
+                        ),
+                        onChanged: (value) {
+                          if (value != null) {
+                            updateFormatFlag(
+                              BangFormat.urlEncodePlaceholder,
+                              value,
+                            );
+                          }
+                        },
+                      ),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: formatFlags.value.contains(
+                          BangFormat.urlEncodeSpaceToPlus,
+                        ),
+                        title: Text(l10n.bangs_flagUrlEncodeSpaceToPlusTitle),
+                        subtitle: Text(
+                          l10n.bangs_flagUrlEncodeSpaceToPlusSubtitle,
+                        ),
+                        onChanged: (value) {
+                          if (value != null) {
+                            updateFormatFlag(
+                              BangFormat.urlEncodeSpaceToPlus,
+                              value,
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                  title: Text(l10n.bangs_flagUrlEncodePlaceholderTitle),
-                  subtitle: Text(l10n.bangs_flagUrlEncodePlaceholderSubtitle),
-                  onChanged: (value) {
-                    if (value != null) {
-                      updateFormatFlag(BangFormat.urlEncodePlaceholder, value);
-                    }
-                  },
-                ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: formatFlags.value.contains(
-                    BangFormat.urlEncodeSpaceToPlus,
-                  ),
-                  title: Text(l10n.bangs_flagUrlEncodeSpaceToPlusTitle),
-                  subtitle: Text(l10n.bangs_flagUrlEncodeSpaceToPlusSubtitle),
-                  onChanged: (value) {
-                    if (value != null) {
-                      updateFormatFlag(BangFormat.urlEncodeSpaceToPlus, value);
-                    }
-                  },
                 ),
                 if (editsExistingUserBang)
                   SizedBox(

@@ -41,7 +41,7 @@ const tabTrayListBottomPadding = 88.0;
 /// and synced tabs have no kind.
 TabType trayNewTabType(WidgetRef ref) {
   final filterIgnored =
-      ref.read(tabsViewModeControllerProvider) == TabsViewMode.tree ||
+      ref.read(effectiveTabsViewModeProvider) == TabsViewMode.tree ||
       ref.read(effectiveTabsTrayScopeProvider) == TabsTrayScope.synced;
   final typeFilter = filterIgnored
       ? TabTypeFilter.all

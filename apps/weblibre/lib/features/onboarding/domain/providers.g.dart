@@ -9,59 +9,6 @@ part of 'providers.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(OnboardingModeNotifier)
-final onboardingModeProvider = OnboardingModeNotifierProvider._();
-
-final class OnboardingModeNotifierProvider
-    extends $NotifierProvider<OnboardingModeNotifier, OnboardingMode> {
-  OnboardingModeNotifierProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'onboardingModeProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$onboardingModeNotifierHash();
-
-  @$internal
-  @override
-  OnboardingModeNotifier create() => OnboardingModeNotifier();
-
-  /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(OnboardingMode value) {
-    return $ProviderOverride(
-      origin: this,
-      providerOverride: $SyncValueProvider<OnboardingMode>(value),
-    );
-  }
-}
-
-String _$onboardingModeNotifierHash() =>
-    r'84cd9a7436fd4ac20972c25ed015c1c6b20f5a00';
-
-abstract class _$OnboardingModeNotifier extends $Notifier<OnboardingMode> {
-  OnboardingMode build();
-  @$mustCallSuper
-  @override
-  WhenComplete runBuild() {
-    final ref = this.ref as $Ref<OnboardingMode, OnboardingMode>;
-    final element =
-        ref.element
-            as $ClassProviderElement<
-              AnyNotifier<OnboardingMode, OnboardingMode>,
-              OnboardingMode,
-              Object?,
-              Object?
-            >;
-    return element.handleCreate(ref, build);
-  }
-}
-
 @ProviderFor(EulaAcceptedNotifier)
 final eulaAcceptedProvider = EulaAcceptedNotifierProvider._();
 

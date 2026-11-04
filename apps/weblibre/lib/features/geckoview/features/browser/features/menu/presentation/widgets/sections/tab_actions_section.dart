@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/presentatio
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_relation_visibility.dart';
@@ -59,6 +60,7 @@ import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/controllers/website_title.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/utils/list_format_l10n.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Actions on the tab itself.
@@ -83,52 +85,77 @@ class TabActionsSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final showContainerUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (value) => value.showContainerUi,
+        (value) => value.containerEntryPointsShown,
       ),
+    );
+    final containerWayOut = ref.watch(
+      hiddenContainerWayOutProvider(selectedTabId, enabled: true),
     );
     final showMore = useState(false);
 
-    final applicable = [
-      for (final item in items)
-        if (item.type != MenuItemType.containers || showContainerUi) item,
-    ];
-
-    final markerIndex = applicable.indexWhere(
+    // Every item is listed, including the Containers row while containers
+    // are hidden: it stays, reduced to its ways out (P5); see
+    // _ContainerExpansion.
+    final markerIndex = items.indexWhere(
       (item) => item.type == MenuItemType.moreDisclosure,
     );
-    final upfront = markerIndex == -1
-        ? applicable
-        : applicable.sublist(0, markerIndex);
+    final upfront = markerIndex == -1 ? items : items.sublist(0, markerIndex);
     final folded = markerIndex == -1
         ? const <MenuItemEntry>[]
-        : applicable.sublist(markerIndex + 1);
+        : items.sublist(markerIndex + 1);
+
+    // While hidden, the Containers row is only its ways out, each shown when
+    // it applies. The "More" row names only what it reveals, so it does not
+    // advertise the hidden feature when none of them applies.
+    final inContainer = containerWayOut.inContainer;
+    final siteAssigned = containerWayOut.siteAssigned;
+    bool revealsSomething(MenuItemEntry item) =>
+        showContainerUi ||
+        item.type != MenuItemType.containers ||
+        item.visibleItems.any(
+          (row) => switch (row.type) {
+            MenuItemType.unassignContainer => inContainer,
+            MenuItemType.unassignUrlFromContainer => siteAssigned,
+            _ => true,
+          },
+        );
+    final foldedShown = folded.where(revealsSomething).toList();
 
     return buildMenuCard(
       context,
       children: [
-        for (final item in upfront) _buildItem(item),
+        for (final item in upfront)
+          _buildItem(item, showContainerUi: showContainerUi),
         // A marker with nothing behind it would be a "More" row that reveals an
         // empty card, so it only earns its place once something is folded.
-        if (folded.isNotEmpty && !showMore.value)
+        if (foldedShown.isNotEmpty && !showMore.value)
           ListTile(
             leading: const Icon(Icons.more_horiz),
             title: Text(MenuItemType.moreDisclosure.label(context)),
             subtitle: Text(
-              folded.map((item) => item.type.label(context)).join(', '),
+              formatList(
+                AppLocalizations.of(context),
+                foldedShown.map((item) => item.type.label(context)),
+              ),
             ),
             trailing: const Icon(Icons.expand_more),
             onTap: () => showMore.value = true,
           )
         else
-          for (final item in folded) _buildItem(item),
+          for (final item in folded)
+            _buildItem(item, showContainerUi: showContainerUi),
       ],
     );
   }
 
-  Widget _buildItem(MenuItemEntry item) => switch (item.type) {
+  Widget _buildItem(
+    MenuItemEntry item, {
+    required bool showContainerUi,
+  }) => switch (item.type) {
     MenuItemType.containers => _ContainerExpansion(
       selectedTabId: selectedTabId,
       items: item.visibleItems,
+      exitsOnly: !showContainerUi,
     ),
     MenuItemType.share => _ShareExpansion(
       selectedTabId: selectedTabId,
@@ -152,160 +179,169 @@ class _ContainerExpansion extends ConsumerWidget {
   final String selectedTabId;
   final List<MenuItemEntry> items;
 
-  const _ContainerExpansion({required this.selectedTabId, required this.items});
+  /// Containers are hidden: only the ways out of a container are offered,
+  /// as plain rows that show up only when they apply (P5). The guarded rows
+  /// are already filtered out of [items].
+  final bool exitsOnly;
+
+  const _ContainerExpansion({
+    required this.selectedTabId,
+    required this.items,
+    required this.exitsOnly,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+
+    final children = orderMenuChildren(items, {
+      MenuItemType.manageContainers: () => buildMenuSubTile(
+        l10n.menu_containersManage,
+        icon: MdiIcons.folder,
+        onTap: () async {
+          Navigator.pop(context);
+          await const ContainerListRoute().push(context);
+        },
+      ),
+      MenuItemType.assignContainer: () => buildMenuSubTile(
+        l10n.menu_containersAssign,
+        icon: MdiIcons.folderArrowUpDownOutline,
+        onTap: () async {
+          final selection = await const ContainerSelectionRoute()
+              .push<ContainerSelectionResult?>(context);
+
+          switch (selection) {
+            case ContainerSelectionSelected(:final containerId):
+              final containerData = await ref
+                  .read(containerRepositoryProvider.notifier)
+                  .getContainerData(containerId);
+
+              if (containerData != null) {
+                final tabState = ref.read(tabStateProvider(selectedTabId))!;
+                await ref
+                    .read(tabDataRepositoryProvider.notifier)
+                    .assignContainer(tabState.id, containerData);
+              }
+            case ContainerSelectionUnassigned():
+              final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .unassignContainer(tabState.id);
+            case null:
+              break;
+          }
+
+          if (context.mounted) Navigator.pop(context);
+        },
+      ),
+      MenuItemType.assignUrlToContainer: () =>
+          ContainerRelationUnassignedVisibility(
+            tabId: selectedTabId,
+            child: buildMenuSubTile(
+              l10n.menu_containersAssignUrl,
+              icon: MdiIcons.webPlus,
+              onTap: () async {
+                final selection = await const ContainerSelectionRoute()
+                    .push<ContainerSelectionResult?>(context);
+
+                if (selection case ContainerSelectionSelected(
+                  :final containerId,
+                )) {
+                  final containerData = await ref
+                      .read(containerRepositoryProvider.notifier)
+                      .getContainerData(containerId);
+
+                  if (containerData != null) {
+                    final tabState = ref.read(tabStateProvider(selectedTabId));
+                    final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+
+                    if (origin != null) {
+                      await ref
+                          .read(containerRepositoryProvider.notifier)
+                          .replaceContainer(
+                            containerData.copyWith.metadata(
+                              containerData.metadata.copyWith.assignedSites([
+                                ...?containerData.metadata.assignedSites,
+                                origin,
+                              ]),
+                            ),
+                          );
+                    }
+                  }
+                }
+
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+          ),
+      MenuItemType.unassignUrlFromContainer: () =>
+          ContainerRelationAssignedVisibility(
+            tabId: selectedTabId,
+            child: buildMenuSubTile(
+              l10n.menu_containersUnassignUrl,
+              icon: MdiIcons.webMinus,
+              onTap: () async {
+                final tabState = ref.read(tabStateProvider(selectedTabId));
+                final origin = tabState?.url.origin.mapNotNull(Uri.parse);
+
+                if (origin != null) {
+                  final containerId = await ref
+                      .read(containerRepositoryProvider.notifier)
+                      .siteAssignedContainerId(origin);
+
+                  if (containerId != null) {
+                    final containerData = await ref
+                        .read(containerRepositoryProvider.notifier)
+                        .getContainerData(containerId);
+
+                    if (containerData != null) {
+                      final updatedSites = containerData.metadata.assignedSites
+                          ?.where((site) => site != origin)
+                          .toList();
+
+                      await ref
+                          .read(containerRepositoryProvider.notifier)
+                          .replaceContainer(
+                            containerData.copyWith.metadata(
+                              containerData.metadata.copyWith.assignedSites(
+                                updatedSites,
+                              ),
+                            ),
+                          );
+                    }
+                  }
+                }
+
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+          ),
+      MenuItemType.unassignContainer: () => ContainerAssignedVisibility(
+        tabId: selectedTabId,
+        child: buildMenuSubTile(
+          l10n.menu_containersUnassign,
+          icon: MdiIcons.folderCancelOutline,
+          onTap: () async {
+            final tabState = ref.read(tabStateProvider(selectedTabId))!;
+            await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .unassignContainer(tabState.id);
+            if (context.mounted) Navigator.pop(context);
+          },
+        ),
+      ),
+    });
+
+    if (exitsOnly) {
+      return Column(mainAxisSize: MainAxisSize.min, children: children);
+    }
 
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         leading: const Icon(MdiIcons.folder),
         title: Text(l10n.menu_containersExpansionTitle),
-        children: orderMenuChildren(items, {
-          MenuItemType.manageContainers: () => buildMenuSubTile(
-            l10n.menu_containersManage,
-            icon: MdiIcons.folder,
-            onTap: () async {
-              Navigator.pop(context);
-              await const ContainerListRoute().push(context);
-            },
-          ),
-          MenuItemType.assignContainer: () => buildMenuSubTile(
-            l10n.menu_containersAssign,
-            icon: MdiIcons.folderArrowUpDownOutline,
-            onTap: () async {
-              final selection = await const ContainerSelectionRoute()
-                  .push<ContainerSelectionResult?>(context);
-
-              switch (selection) {
-                case ContainerSelectionSelected(:final containerId):
-                  final containerData = await ref
-                      .read(containerRepositoryProvider.notifier)
-                      .getContainerData(containerId);
-
-                  if (containerData != null) {
-                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                    await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .assignContainer(tabState.id, containerData);
-                  }
-                case ContainerSelectionUnassigned():
-                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                  await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .unassignContainer(tabState.id);
-                case null:
-                  break;
-              }
-
-              if (context.mounted) Navigator.pop(context);
-            },
-          ),
-          MenuItemType.assignUrlToContainer: () =>
-              ContainerRelationUnassignedVisibility(
-                child: buildMenuSubTile(
-                  l10n.menu_containersAssignUrl,
-                  icon: MdiIcons.webPlus,
-                  onTap: () async {
-                    final selection = await const ContainerSelectionRoute()
-                        .push<ContainerSelectionResult?>(context);
-
-                    if (selection case ContainerSelectionSelected(
-                      :final containerId,
-                    )) {
-                      final containerData = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .getContainerData(containerId);
-
-                      if (containerData != null) {
-                        final tabState = ref.read(
-                          tabStateProvider(selectedTabId),
-                        );
-                        final origin = tabState?.url.origin.mapNotNull(
-                          Uri.parse,
-                        );
-
-                        if (origin != null) {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    [
-                                      ...?containerData.metadata.assignedSites,
-                                      origin,
-                                    ],
-                                  ),
-                                ),
-                              );
-                        }
-                      }
-                    }
-
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                ),
-              ),
-          MenuItemType.unassignUrlFromContainer: () =>
-              ContainerRelationAssignedVisibility(
-                child: buildMenuSubTile(
-                  l10n.menu_containersUnassignUrl,
-                  icon: MdiIcons.webMinus,
-                  onTap: () async {
-                    final tabState = ref.read(tabStateProvider(selectedTabId));
-                    final origin = tabState?.url.origin.mapNotNull(Uri.parse);
-
-                    if (origin != null) {
-                      final containerId = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .siteAssignedContainerId(origin);
-
-                      if (containerId != null) {
-                        final containerData = await ref
-                            .read(containerRepositoryProvider.notifier)
-                            .getContainerData(containerId);
-
-                        if (containerData != null) {
-                          final updatedSites = containerData
-                              .metadata
-                              .assignedSites
-                              ?.where((site) => site != origin)
-                              .toList();
-
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    updatedSites,
-                                  ),
-                                ),
-                              );
-                        }
-                      }
-                    }
-
-                    if (context.mounted) Navigator.pop(context);
-                  },
-                ),
-              ),
-          MenuItemType.unassignContainer: () => ContainerAssignedVisibility(
-            tabId: selectedTabId,
-            child: buildMenuSubTile(
-              l10n.menu_containersUnassign,
-              icon: MdiIcons.folderCancelOutline,
-              onTap: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .unassignContainer(tabState.id);
-                if (context.mounted) Navigator.pop(context);
-              },
-            ),
-          ),
-        }),
+        children: children,
       ),
     );
   }
@@ -586,7 +622,6 @@ class _CloneTabExpansion extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final appColors = AppColors.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -673,39 +708,38 @@ class _CloneTabExpansion extends ConsumerWidget {
               }
             },
           ),
-          if (settings.showIsolatedTabUi)
-            MenuItemType.cloneIsolatedTab: () => buildMenuSubTile(
-              l10n.menu_cloneTypeIsolated,
-              icon: MdiIcons.snowflake,
-              iconColor: appColors.isolatedTabTeal,
-              onTap: () async {
-                final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                final cloneUrl =
-                    ref.read(
-                      sandboxSourceUriForTabProvider(tabId: tabState.id),
-                    ) ??
-                    tabState.url;
-                final containerData = await ref
-                    .read(tabDataRepositoryProvider.notifier)
-                    .getContainerForCopy(selectedTabId);
+          MenuItemType.cloneIsolatedTab: () => buildMenuSubTile(
+            l10n.menu_cloneTypeIsolated,
+            icon: MdiIcons.snowflake,
+            iconColor: appColors.isolatedTabTeal,
+            onTap: () async {
+              final tabState = ref.read(tabStateProvider(selectedTabId))!;
+              final cloneUrl =
+                  ref.read(
+                    sandboxSourceUriForTabProvider(tabId: tabState.id),
+                  ) ??
+                  tabState.url;
+              final containerData = await ref
+                  .read(tabDataRepositoryProvider.notifier)
+                  .getContainerForCopy(selectedTabId);
 
-                final tabId = await ref
-                    .read(tabRepositoryProvider.notifier)
-                    .addTab(
-                      url: cloneUrl,
-                      tabMode: TabMode.newIsolated(),
-                      containerSelection: containerData == null
-                          ? const TabContainerSelection.unassigned()
-                          : TabContainerSelection.specific(containerData),
-                      selectTab: false,
-                    );
+              final tabId = await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .addTab(
+                    url: cloneUrl,
+                    tabMode: TabMode.newIsolated(),
+                    containerSelection: containerData == null
+                        ? const TabContainerSelection.unassigned()
+                        : TabContainerSelection.specific(containerData),
+                    selectTab: false,
+                  );
 
-                if (context.mounted) {
-                  handleBackgroundTabOpened(context, ref, tabId);
-                  Navigator.pop(context);
-                }
-              },
-            ),
+              if (context.mounted) {
+                handleBackgroundTabOpened(context, ref, tabId);
+                Navigator.pop(context);
+              }
+            },
+          ),
         }),
       ),
     );

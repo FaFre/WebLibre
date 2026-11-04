@@ -1468,7 +1468,7 @@ final class SuggestedTabEntitiesProvider
 }
 
 String _$suggestedTabEntitiesHash() =>
-    r'b140a1d0badad3d976b91ab9154300873a8bd4e9';
+    r'c29f4864a5f3d736adb1c2fae7d6bc37bfc20908';
 
 final class SuggestedTabEntitiesFamily extends $Family
     with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
@@ -1987,7 +1987,7 @@ final class VisibleTabListItemsProvider
 }
 
 String _$visibleTabListItemsHash() =>
-    r'df52784bf71442e7f3c76b665e7a343276d78cf2';
+    r'2b297bb6b4f56fbab57b4aa66204aacb19f57db1';
 
 /// The final row order a surface renders, i.e. [groupedTabListItemsProvider]
 /// plus the flat post-processing: where there are no visible groups to keep
@@ -2253,4 +2253,4 @@ final class SequentialTabNavigationOrderProvider
 }
 
 String _$sequentialTabNavigationOrderHash() =>
-    r'b12d52fa5733aa93a414e934aa8813e78ae7cf89';
+    r'8c5d5f0d756515ee9a55ce658dbeb9bae6a7ec8d';

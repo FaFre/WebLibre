@@ -22,6 +22,7 @@
   "keyboardShortcuts_recorderProblemAlreadyBound": "Dies ist bereits ein Tastenkürzel für diese Aktion.",
   "keyboardShortcuts_recorderTakesFromOther": "Wird derzeit von „{ownerTitle}“ verwendet. Beim Speichern wird es hierher verschoben.",
   "keyboardShortcuts_actionCustomize": "Anpassen",
+  "keyboardShortcuts_actionShowAll": "Alle anzeigen",
   "keyboardShortcuts_actionReassign": "Neu zuweisen",
   "keyboardShortcuts_actionRestore": "Wiederherstellen"
 }

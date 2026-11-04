@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_tor/flutter_tor.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_credentials.dart';
@@ -10,11 +13,18 @@ import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtim
 import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profile_editor.dart';
 import 'package:weblibre/features/proxy/presentation/screens/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_tile.dart';
+import 'package:weblibre/features/proxy/presentation/widgets/profile_list/tor_tile.dart';
+import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ProxyProfile;
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 void main() {
   testWidgets('deleting a running profile stops through runtime repository', (
@@ -40,6 +50,17 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // Tor's routes, read by `torInUse` for the list: none.
+          watchContainersWithCountProvider.overrideWith(
+            (ref) => Stream.value(const []),
+          ),
+          proxyRoutingSettingsWithDefaultsProvider.overrideWithValue(
+            ProxyRoutingSettings.withDefaults(),
+          ),
+          // The Add button follows the connections switch.
+          generalSettingsWithDefaultsProvider.overrideWithValue(
+            GeneralSettings.withDefaults(),
+          ),
           singboxProxyProfilesRepositoryProvider.overrideWith(
             () => profilesRepository,
           ),
@@ -92,6 +113,17 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            // Tor's routes, read by `torInUse` for the list: none.
+            watchContainersWithCountProvider.overrideWith(
+              (ref) => Stream.value(const []),
+            ),
+            proxyRoutingSettingsWithDefaultsProvider.overrideWithValue(
+              ProxyRoutingSettings.withDefaults(),
+            ),
+            // The Add button follows the connections switch.
+            generalSettingsWithDefaultsProvider.overrideWithValue(
+              GeneralSettings.withDefaults(),
+            ),
             singboxProxyProfilesRepositoryProvider.overrideWith(
               () => _FakeProfilesRepository([stopped, restarting]),
             ),
@@ -188,6 +220,81 @@ void main() {
     );
   });
 
+  testWidgets('adding a connection and an unused Tor follow the switch', (
+    tester,
+  ) async {
+    // Hidden, everything stays listed but grayed out: adding a connection or
+    // starting an unused Tor asks to show it first
+    // (`connections.import_vpn_proxy`).
+    Future<void> pump(GeneralSettings settings, {TorSettings? tor}) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          key: UniqueKey(),
+          overrides: [
+            generalSettingsWithDefaultsProvider.overrideWithValue(settings),
+            singboxProxyProfilesRepositoryProvider.overrideWith(
+              () => _FakeProfilesRepository([_profile(id: 'p', name: 'Kept')]),
+            ),
+            singboxProxyRuntimeRepositoryProvider.overrideWith(
+              () => _FakeRuntimeRepository(
+                SingboxProxyRuntimeState(
+                  status: SingboxProxyRuntimeStatus.stopped,
+                  endpoints: const [],
+                ),
+              ),
+            ),
+            torSettingsRepositoryProvider.overrideWith(
+              () => _FakeTorSettingsRepository(tor),
+            ),
+            // Tor is stopped and nothing routes through it, for `torInUse`.
+            torProxyServiceProvider.overrideWith(_StoppedTorProxyService.new),
+            watchContainersWithCountProvider.overrideWith(
+              (ref) => Stream.value(const []),
+            ),
+            proxyRoutingSettingsWithDefaultsProvider.overrideWithValue(
+              ProxyRoutingSettings.withDefaults(),
+            ),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: SingboxProxyProfilesScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    final hidden = GeneralSettings.withDefaults().withVisibilitySwitch(
+      VisibilitySwitch.connections,
+      enabled: false,
+    );
+
+    Finder grayed(Finder finder) => find.ancestor(
+      of: finder,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Opacity && widget.opacity == hiddenFeatureOpacity,
+      ),
+    );
+
+    await pump(hidden);
+    expect(find.text('Kept'), findsOneWidget);
+    expect(grayed(find.text('Add Profile')), findsOneWidget);
+    // An unused, stopped Tor is grayed out too.
+    expect(grayed(find.byType(TorProfileTile)), findsOneWidget);
+
+    // Set to start automatically — which may have failed — it stays usable,
+    // so it can be repaired or turned off (P5).
+    await pump(hidden, tor: TorSettings.withDefaults(autostart: true));
+    expect(find.byType(TorProfileTile), findsOneWidget);
+    expect(grayed(find.byType(TorProfileTile)), findsNothing);
+
+    await pump(GeneralSettings.withDefaults());
+    expect(find.text('Add Profile'), findsOneWidget);
+    expect(grayed(find.text('Add Profile')), findsNothing);
+    expect(grayed(find.byType(TorProfileTile)), findsNothing);
+  });
+
   testWidgets('WireGuard config import populates WireGuard form fields', (
     tester,
   ) async {
@@ -227,6 +334,11 @@ Future<void> _pumpEditor(
         ),
         singboxProxyCredentialsRepositoryProvider.overrideWith(
           _FakeCredentialsRepository.new,
+        ),
+        // The editor reads which features are shown; the defaults show
+        // every one, so the DNS override section is there.
+        generalSettingsWithDefaultsProvider.overrideWith(
+          (ref) => GeneralSettings.withDefaults(),
         ),
         singboxProxyRuntimeRepositoryProvider.overrideWith(
           () => _FakeRuntimeRepository(
@@ -283,8 +395,13 @@ class _FakeProfilesRepository extends SingboxProxyProfilesRepository {
 }
 
 class _FakeTorSettingsRepository extends TorSettingsRepository {
+  _FakeTorSettingsRepository([TorSettings? settings])
+    : _settings = settings ?? TorSettings.withDefaults();
+
+  final TorSettings _settings;
+
   @override
-  Stream<TorSettings> build() => Stream.value(TorSettings.withDefaults());
+  Stream<TorSettings> build() => Stream.value(_settings);
 }
 
 class _FakeCredentialsRepository extends SingboxProxyCredentialsRepository {
@@ -316,5 +433,12 @@ class _FakeRuntimeRepository extends SingboxProxyRuntimeRepository {
   @override
   Future<void> deleteProfile(String profileId) async {
     deletedProfileIds.add(profileId);
+  }
+}
+
+class _StoppedTorProxyService extends TorProxyService {
+  @override
+  Stream<TorStatus> build() async* {
+    yield TorStatus(isRunning: false, bootstrapProgress: 0);
   }
 }

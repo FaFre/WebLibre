@@ -72,7 +72,7 @@
   "@settings_iconCacheKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_iconCacheSubtitle": "Stored favicons",
+  "settings_iconCacheSubtitle": "Stored site icons",
   "@settings_iconCacheSubtitle": {
     "description": "Explanation under \"Icon Cache\": saved website icons (favicons)."
   },
@@ -409,30 +409,6 @@
   "@settings_createChildTabsSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_showContainerUiTitle": "Show Container UI",
-  "@settings_showContainerUiTitle": {
-    "description": "Switch: show container features in the interface (a container is a separate browsing identity)."
-  },
-  "settings_showContainerUiKeywords": "containers",
-  "@settings_showContainerUiKeywords": {
-    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
-  },
-  "settings_showContainerUiSubtitle": "Show container selectors, menus, and management",
-  "@settings_showContainerUiSubtitle": {
-    "description": "Explanation under that switch."
-  },
-  "settings_showIsolatedTabUiTitle": "Show Isolated Tab UI",
-  "@settings_showIsolatedTabUiTitle": {
-    "description": "Switch: show options for creating isolated tabs (tabs with their own temporary cookies and site data)."
-  },
-  "settings_showIsolatedTabUiKeywords": "isolated tabs",
-  "@settings_showIsolatedTabUiKeywords": {
-    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
-  },
-  "settings_showIsolatedTabUiSubtitle": "Show isolated-tab creation options in the UI",
-  "@settings_showIsolatedTabUiSubtitle": {
-    "description": "Explanation under that switch."
-  },
   "settings_backgroundTabBehaviorTitle": "Background Tab Behavior",
   "@settings_backgroundTabBehaviorTitle": {
     "description": "Setting for what happens when an action opens a tab in the background."
@@ -689,7 +665,7 @@
   "@settings_allowNonManifestPwaInstallKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_allowNonManifestPwaInstallSubtitle": "Allow installing websites without a PWA manifest as standalone apps",
+  "settings_allowNonManifestPwaInstallSubtitle": "Allow installing any website as an app, even ones not made to be installed",
   "@settings_allowNonManifestPwaInstallSubtitle": {
     "description": "Explanation under that switch. PWA (progressive web app) is a technical abbreviation."
   },
@@ -701,7 +677,7 @@
   "@settings_urlCleanerKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_urlCleanerSubtitle": "Tracking removal rules and catalog updates",
+  "settings_urlCleanerSubtitle": "Remove tracking parts from links",
   "@settings_urlCleanerSubtitle": {
     "description": "Explanation under \"URL Cleaner\"."
   },
@@ -931,11 +907,11 @@
   "@settings_desktopModeSitesEmptyLabel": {
     "description": "Shown when the desktop mode site list is empty."
   },
-  "settings_dohTitle": "DNS over HTTPS",
+  "settings_dohTitle": "Secure DNS",
   "@settings_dohTitle": {
-    "description": "Title of the DNS over HTTPS settings screen (encrypted lookups of website addresses). Technical term; usually kept in English."
+    "description": "Title of the secure DNS settings screen. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers."
   },
-  "settings_dohSubtitle": "Encrypted DNS protection level and resolver selection.",
+  "settings_dohSubtitle": "How site lookups are encrypted, and by whom",
   "@settings_dohSubtitle": {
     "description": "Subtitle of that screen listing what it contains."
   },
@@ -1089,7 +1065,7 @@
   "@settings_fingerprintProtectionTitle": {
     "description": "Title of the fingerprint protection screen, and its row: settings that hide characteristics websites use to identify the browser."
   },
-  "settings_fingerprintProtectionKeywords": "privacy",
+  "settings_fingerprintProtectionKeywords": "privacy, Make this device harder to recognize",
   "@settings_fingerprintProtectionKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -1108,6 +1084,10 @@
   "settings_fingerprintOverrideTargetsSection": "Override Targets",
   "@settings_fingerprintOverrideTargetsSection": {
     "description": "Heading above the list of individual fingerprint protections (targets) that can be switched on or off."
+  },
+  "settings_fingerprintPresetsSection": "Presets",
+  "@settings_fingerprintPresetsSection": {
+    "description": "Heading above the two fingerprint protection presets (load defaults, load hardened defaults), shown while the individual fingerprint protections are hidden by Feature Control."
   },
   "settings_fingerprintInvalidOverride": "The saved fingerprint overrides are not in a valid format",
   "@settings_fingerprintInvalidOverride": {
@@ -1198,47 +1178,47 @@
   "@settings_customizeNewTabSectionsSubtitle": {
     "description": "Explanation under that row."
   },
-  "settings_browserLanguagesTitle": "Browser Languages",
+  "settings_browserLanguagesTitle": "Website Languages",
   "@settings_browserLanguagesTitle": {
-    "description": "Title of the screen and row for the languages websites are told the user prefers (not the app's own language)."
+    "description": "Title of the screen, and of its settings entry, where the user picks the languages websites are asked to show (the Accept-Language list websites can read)."
   },
-  "settings_browserLanguagesKeywords": "locale",
+  "settings_browserLanguagesKeywords": "browser languages, locale, accept language",
   "@settings_browserLanguagesKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_browserLanguagesSearchHint": "Search locales by tag",
+  "settings_browserLanguagesSearchHint": "Search languages",
   "@settings_browserLanguagesSearchHint": {
     "description": "Placeholder of the search field on the browser languages screen. A locale tag is a code like \"en-US\"."
   },
-  "settings_languageRegionSettingsSection": "Language & Region Settings",
+  "settings_languageRegionSettingsSection": "Languages",
   "@settings_languageRegionSettingsSection": {
     "description": "Section heading above the list of selectable languages and regions."
   },
-  "settings_browserLanguagePreferenceLabel": "Browser language preference",
+  "settings_browserLanguagePreferenceLabel": "Language websites can show you",
   "@settings_browserLanguagePreferenceLabel": {
     "description": "Line under each language code in that list."
   },
-  "settings_customLocaleSection": "Custom Locale",
+  "settings_customLocaleSection": "Other Language",
   "@settings_customLocaleSection": {
     "description": "Section heading for adding a language code that is not in the list."
   },
-  "settings_addCustomLocaleTitle": "Add custom locale",
+  "settings_addCustomLocaleTitle": "Add another language",
   "@settings_addCustomLocaleTitle": {
     "description": "Title of the entry for adding a custom language code."
   },
-  "settings_addCustomLocaleKeywords": "locale tag",
+  "settings_addCustomLocaleKeywords": "locale tag, language code",
   "@settings_addCustomLocaleKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_addCustomLocaleSubtitle": "Enter a locale tag such as en-US",
+  "settings_addCustomLocaleSubtitle": "Enter a language code such as en-US",
   "@settings_addCustomLocaleSubtitle": {
     "description": "Explanation of that entry. \"en-US\" is an example code; keep it unchanged."
   },
-  "settings_customLocaleFieldLabel": "Custom Locale",
+  "settings_customLocaleFieldLabel": "Language code",
   "@settings_customLocaleFieldLabel": {
     "description": "Label of the field for a custom language code."
   },
-  "settings_invalidLocaleError": "Invalid locale identifier",
+  "settings_invalidLocaleError": "This is not a valid language code",
   "@settings_invalidLocaleError": {
     "description": "Validation error when the entered language code is not valid."
   },
@@ -1379,11 +1359,11 @@
   "@settings_disableAnimationsSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_showModalBarrierTitle": "Show Modal Barrier",
+  "settings_showModalBarrierTitle": "Dim Behind Dialogs",
   "@settings_showModalBarrierTitle": {
     "description": "Switch: dim the screen behind dialogs and sheets. \"Modal barrier\" is the darkened layer behind them."
   },
-  "settings_showModalBarrierKeywords": "dialogs, bottom sheets, overlay",
+  "settings_showModalBarrierKeywords": "dialogs, bottom sheets, overlay, modal barrier",
   "@settings_showModalBarrierKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -1736,7 +1716,7 @@
   "@settings_homeScreenSectionTitle": {
     "description": "Section heading on the browsing settings screen for adding sites to the Android home screen."
   },
-  "settings_indexAllowNonManifestPwaInstallSubtitle": "Allow websites without a manifest to be installed as apps",
+  "settings_indexAllowNonManifestPwaInstallSubtitle": "Install any website as an app",
   "@settings_indexAllowNonManifestPwaInstallSubtitle": {
     "description": "Summary of the install-sites-as-apps setting, shown as a settings search result. A manifest is the file that describes a web app."
   },
@@ -1752,19 +1732,19 @@
   "@settings_bookmarksSectionTitle": {
     "description": "Section heading on the browsing settings screen for bookmark settings."
   },
-  "settings_resolverSettingsSectionTitle": "Resolver Settings",
+  "settings_resolverSettingsSectionTitle": "Provider Settings",
   "@settings_resolverSettingsSectionTitle": {
     "description": "Section heading on the DNS over HTTPS screen."
   },
-  "settings_indexDnsOverHttpsResolverTitle": "DNS over HTTPS",
+  "settings_indexDnsOverHttpsResolverTitle": "Secure DNS",
   "@settings_indexDnsOverHttpsResolverTitle": {
-    "description": "Title of the DNS over HTTPS entry, shown as a settings search result. Technical term; usually kept in English."
+    "description": "Title of the secure DNS entry, shown as a settings search result. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers."
   },
-  "settings_indexDnsOverHttpsResolverKeywords": "doh, resolver, dns provider, custom resolver",
+  "settings_indexDnsOverHttpsResolverKeywords": "dns over https, doh, resolver, dns provider, custom resolver",
   "@settings_indexDnsOverHttpsResolverKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_indexDnsOverHttpsResolverSubtitle": "Protection level, provider choice, and saved custom resolvers",
+  "settings_indexDnsOverHttpsResolverSubtitle": "Protection level, provider and your own providers",
   "@settings_indexDnsOverHttpsResolverSubtitle": {
     "description": "Summary of that entry, shown as a settings search result."
   },
@@ -2021,11 +2001,11 @@
   "@settings_homeSearchBarRowTitle": {
     "description": "Row in the home section editor for the search bar position."
   },
-  "settings_proxyTitle": "Proxy",
+  "settings_proxyTitle": "Connections",
   "@settings_proxyTitle": {
-    "description": "Title of the proxy settings screen and category."
+    "description": "Title of the connection settings screen: Tor, VPNs and proxies, and which tabs use them. Use the same word as the \"Connections\" group of the setup's Customize step (onboarding_customizeGroupConnections)."
   },
-  "settings_proxySubtitle": "Manage proxy connections and choose which tabs use them.",
+  "settings_proxySubtitle": "Manage Tor, VPN and proxy connections and choose which tabs use them.",
   "@settings_proxySubtitle": {
     "description": "Subtitle of that screen."
   },
@@ -2073,7 +2053,7 @@
   "@settings_privacySecurityTitle": {
     "description": "Title of the privacy & security settings screen and category."
   },
-  "settings_privacySecuritySubtitle": "Tracking protection, fingerprinting, browsing data, and network hardening.",
+  "settings_privacySecuritySubtitle": "Tracking protection, browsing data and security.",
   "@settings_privacySecuritySubtitle": {
     "description": "Subtitle under the header of the Privacy & Security settings screen, summarizing everything on it. The shorter line on the settings home tile is settings_categoryPrivacySecuritySubtitle."
   },
@@ -2271,11 +2251,11 @@
   "@settings_allowPrivateTabScreenshotsSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_httpsOnlyModeTitle": "Block insecure HTTP connections",
+  "settings_httpsOnlyModeTitle": "Secure Connections Only (HTTPS)",
   "@settings_httpsOnlyModeTitle": {
-    "description": "Setting for only loading pages over encrypted HTTPS connections."
+    "description": "Title of the HTTPS-Only Mode choice: warn before opening a site over an unencrypted (HTTP) connection."
   },
-  "settings_httpsOnlyModeKeywords": "https only",
+  "settings_httpsOnlyModeKeywords": "https only, block insecure http",
   "@settings_httpsOnlyModeKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -2291,9 +2271,9 @@
   "@settings_httpsOnlyModePrivateOnlyLabel": {
     "description": "HTTPS-only option: on in private tabs only. One of three segments sharing a single row on a phone: keep it to one or two short words."
   },
-  "settings_dnsOverHttpsTileTitle": "DNS over HTTPS",
+  "settings_dnsOverHttpsTileTitle": "Secure DNS",
   "@settings_dnsOverHttpsTileTitle": {
-    "description": "Row that opens the DNS over HTTPS settings. Technical term; usually kept in English."
+    "description": "Row that opens the secure DNS settings. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers."
   },
   "settings_enhancedTrackingProtectionTitle": "Enhanced Tracking Protection",
   "@settings_enhancedTrackingProtectionTitle": {
@@ -2379,15 +2359,15 @@
   "@settings_queryParameterStrippingPrivateOnlyLabel": {
     "description": "Parameter stripping option: on in private tabs only. One of three segments sharing a single row on a phone: keep it to one or two short words."
   },
-  "settings_uBlockFilterListsTileTitle": "uBlock Filter Lists & Hardenings",
+  "settings_uBlockFilterListsTileTitle": "uBlock Origin Filter Lists",
   "@settings_uBlockFilterListsTileTitle": {
     "description": "Row that opens the filter list settings of the uBlock Origin extension. uBlock is a product name."
   },
-  "settings_uBlockFilterListsTileKeywords": "ublock, filters",
+  "settings_uBlockFilterListsTileKeywords": "ublock, filters, hardenings",
   "@settings_uBlockFilterListsTileKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_uBlockFilterListsTileSubtitle": "Manage filter lists and apply WebLibre hardenings",
+  "settings_uBlockFilterListsTileSubtitle": "Manage filter lists and turn on WebLibre's recommended filters",
   "@settings_uBlockFilterListsTileSubtitle": {
     "description": "Explanation under that row. WebLibre is the app name."
   },
@@ -2475,11 +2455,11 @@
   "@settings_managedAppActionBlock": {
     "description": "Menu item that sets the app to always blocked."
   },
-  "settings_browserLanguagesTileTitle": "Browser Languages",
+  "settings_browserLanguagesTileTitle": "Website Languages",
   "@settings_browserLanguagesTileTitle": {
-    "description": "Row that opens the browser languages settings (languages websites are told you prefer)."
+    "description": "Row that opens the website languages screen."
   },
-  "settings_browserLanguagesTileSubtitle": "Configure language preferences exposed to websites",
+  "settings_browserLanguagesTileSubtitle": "Which languages websites should show you",
   "@settings_browserLanguagesTileSubtitle": {
     "description": "Explanation under that row."
   },
@@ -2503,39 +2483,39 @@
   "@settings_resistFingerprintingTileSubtitle": {
     "description": "Explanation under that row."
   },
-  "settings_lnaEnabledTitle": "Local Network Access",
+  "settings_lnaEnabledTitle": "Protect Local Apps and Devices",
   "@settings_lnaEnabledTitle": {
-    "description": "Switch that turns on protection against websites reaching devices on the local network. \"Local Network Access\" is the feature name."
+    "description": "Title of the switch for local connection protection. Local connections: websites reaching apps on this device (localhost) or devices on the local network. Apps listening on the device have been used to track people across websites."
   },
-  "settings_lnaEnabledKeywords": "lan",
+  "settings_lnaEnabledKeywords": "lan, local network access, localhost, local connections",
   "@settings_lnaEnabledKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_lnaEnabledSubtitle": "Enable local network and device access blocking",
+  "settings_lnaEnabledSubtitle": "Control whether websites can connect to apps on this device or to devices on your network",
   "@settings_lnaEnabledSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_lnaBlockingTitle": "Block Local Network Requests",
+  "settings_lnaBlockingTitle": "Ask Before Local Connections",
   "@settings_lnaBlockingTitle": {
-    "description": "Switch: block all web page requests to local network addresses."
+    "description": "Switch: every website must ask before a local connection. Local connections: websites reaching apps on this device (localhost) or devices on the local network. Apps listening on the device have been used to track people across websites."
   },
-  "settings_lnaBlockingKeywords": "lan",
+  "settings_lnaBlockingKeywords": "lan, local network, localhost, block local connections",
   "@settings_lnaBlockingKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_lnaBlockingSubtitle": "Block web page requests to local network addresses",
+  "settings_lnaBlockingSubtitle": "Websites must ask before connecting to apps on this device or to devices on your network",
   "@settings_lnaBlockingSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_lnaBlockTrackersTitle": "Block Local Network Trackers",
+  "settings_lnaBlockTrackersTitle": "Block Local Connections from Trackers",
   "@settings_lnaBlockTrackersTitle": {
-    "description": "Switch: block trackers from reaching local network addresses."
+    "description": "Switch: known trackers may not make local connections. Local connections: websites reaching apps on this device (localhost) or devices on the local network. Apps listening on the device have been used to track people across websites."
   },
-  "settings_lnaBlockTrackersKeywords": "lan",
+  "settings_lnaBlockTrackersKeywords": "lan, local network trackers, localhost",
   "@settings_lnaBlockTrackersKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_lnaBlockTrackersSubtitle": "Block trackers from accessing local network resources",
+  "settings_lnaBlockTrackersSubtitle": "Known trackers can't connect to apps on this device or to devices on your network",
   "@settings_lnaBlockTrackersSubtitle": {
     "description": "Explanation under that switch."
   },
@@ -2683,9 +2663,9 @@
       }
     }
   },
-  "settings_transferSectionGeckoPrefsTitle": "Gecko preferences",
+  "settings_transferSectionGeckoPrefsTitle": "Web engine preferences",
   "@settings_transferSectionGeckoPrefsTitle": {
-    "description": "Name of the export section holding the browser engine preferences (Gecko is the engine's name), shown as a checkbox on the export screen and in the import dialog."
+    "description": "Section of the settings export: preferences of the web engine (Gecko) itself."
   },
   "settings_transferSectionGeckoPrefsDescription": "Advanced engine preferences you changed by hand",
   "@settings_transferSectionGeckoPrefsDescription": {
@@ -2825,7 +2805,7 @@
   "@settings_webEngineHardeningTitle": {
     "description": "Title of the screen, and its row, for extra security settings of the browser engine (\"hardening\" means stricter security)."
   },
-  "settings_webEngineHardeningKeywords": "hardening",
+  "settings_webEngineHardeningKeywords": "hardening, Stricter security settings",
   "@settings_webEngineHardeningKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -2901,19 +2881,19 @@
   "@settings_searchSubtitle": {
     "description": "Subtitle of that screen listing what it contains."
   },
-  "settings_defaultSearchProviderTitle": "Default Search Provider",
+  "settings_defaultSearchProviderTitle": "Search Engine",
   "@settings_defaultSearchProviderTitle": {
     "description": "Heading of the choice of default search engine."
   },
-  "settings_defaultSearchProviderKeywords": "search engine",
+  "settings_defaultSearchProviderKeywords": "search engine, default search provider",
   "@settings_defaultSearchProviderKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_defaultAutocompleteProviderTitle": "Default Autocomplete Provider",
+  "settings_defaultAutocompleteProviderTitle": "Search Suggestions",
   "@settings_defaultAutocompleteProviderTitle": {
     "description": "Heading of the choice of service that suggests search terms while typing."
   },
-  "settings_defaultAutocompleteProviderKeywords": "suggestions",
+  "settings_defaultAutocompleteProviderKeywords": "suggestions, autocomplete provider",
   "@settings_defaultAutocompleteProviderKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -3021,53 +3001,53 @@
   "@settings_popularSitesAutocompleteKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_popularSitesAutocompleteSubtitle": "Complete typed text with well-known domains when your history and bookmarks have no match",
+  "settings_popularSitesAutocompleteSubtitle": "Complete what you type with well-known sites when your history and bookmarks have no match",
   "@settings_popularSitesAutocompleteSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_localIndexEnabledTitle": "Enable local search index",
+  "settings_localIndexEnabledTitle": "Search inside visited pages",
   "@settings_localIndexEnabledTitle": {
     "description": "Switch: store the text of visited pages on the device so it can be searched."
   },
-  "settings_localIndexEnabledKeywords": "page text, history",
+  "settings_localIndexEnabledKeywords": "page text, history, local search index",
   "@settings_localIndexEnabledKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_localIndexEnabledSubtitle": "Index visited pages locally so the browser can search their content. Visit metadata stays in the engine; only page text is stored on-device.",
+  "settings_localIndexEnabledSubtitle": "Saves the text of pages you visit on this device, so search can find words inside them.",
   "@settings_localIndexEnabledSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_indexPrivateTabsTitle": "Index private tabs",
+  "settings_indexPrivateTabsTitle": "Save text from private tabs",
   "@settings_indexPrivateTabsTitle": {
     "description": "Switch: also store the text of pages visited in private tabs."
   },
-  "settings_indexPrivateTabsKeywords": "incognito",
+  "settings_indexPrivateTabsKeywords": "incognito, index private tabs",
   "@settings_indexPrivateTabsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_indexPrivateTabsSubtitle": "Include pages opened in private tabs in the local index. Off by default.",
+  "settings_indexPrivateTabsSubtitle": "Also save the text of pages opened in private tabs. Off by default.",
   "@settings_indexPrivateTabsSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_clearLocalIndexDialogTitle": "Clear local search index?",
+  "settings_clearLocalIndexDialogTitle": "Delete saved page text?",
   "@settings_clearLocalIndexDialogTitle": {
     "description": "Title of the confirmation dialog before deleting the local page index."
   },
-  "settings_clearLocalIndexDialogContent": "This removes all locally indexed page content. Engine history (visit metadata) is not affected.",
+  "settings_clearLocalIndexDialogContent": "Deletes the page text saved for searching. Your browsing history is kept.",
   "@settings_clearLocalIndexDialogContent": {
     "description": "Body of that dialog."
   },
-  "settings_localIndexStatsTitle": "Indexed pages",
+  "settings_localIndexStatsTitle": "Saved page text",
   "@settings_localIndexStatsTitle": {
-    "description": "Row showing how many pages are stored in the local index, with a clear button."
+    "description": "Row showing how many pages have text saved for searching, with a clear button. These are not complete pages saved for offline reading."
   },
   "settings_localIndexStatsKeywords": "clear index, stats",
   "@settings_localIndexStatsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_localIndexPagesIndexed": "{count, plural, =1{1 page indexed} other{{count} pages indexed}}",
+  "settings_localIndexPagesIndexed": "{count, plural, =1{Text saved from 1 page} other{Text saved from {count} pages}}",
   "@settings_localIndexPagesIndexed": {
-    "description": "Line under \"Indexed pages\". count is the number of pages.",
+    "description": "Line under \"Saved page text\". count is the number of pages whose text is saved for searching.",
     "placeholders": {
       "count": {
         "type": "int"
@@ -3094,7 +3074,7 @@
   "@settings_searchSectionHistorySuggestionsTitle": {
     "description": "Section heading on the search settings screen for history and suggestions."
   },
-  "settings_searchSectionLocalIndexTitle": "Local Search Index",
+  "settings_searchSectionLocalIndexTitle": "Search Inside Visited Pages",
   "@settings_searchSectionLocalIndexTitle": {
     "description": "Section heading on the search settings screen for the on-device page index."
   },
@@ -3106,7 +3086,7 @@
   "@settings_indexDefaultSearchProviderSubtitle": {
     "description": "Summary of the default search engine setting, shown as a settings search result."
   },
-  "settings_indexDefaultAutocompleteProviderSubtitle": "Choose the provider for search suggestions",
+  "settings_indexDefaultAutocompleteProviderSubtitle": "Choose where search suggestions come from",
   "@settings_indexDefaultAutocompleteProviderSubtitle": {
     "description": "Summary of the autocomplete provider setting, shown as a settings search result."
   },
@@ -3122,19 +3102,19 @@
   "@settings_indexPrivateSearchSuggestionsSubtitle": {
     "description": "Summary of the private tab suggestions setting, shown as a settings search result."
   },
-  "settings_indexPopularSitesAutocompleteSubtitle": "Complete typed text with well-known domains",
+  "settings_indexPopularSitesAutocompleteSubtitle": "Complete what you type with well-known sites",
   "@settings_indexPopularSitesAutocompleteSubtitle": {
     "description": "Summary of the popular site suggestions setting, shown as a settings search result."
   },
-  "settings_indexLocalIndexEnabledSubtitle": "Index visited pages locally for content search",
+  "settings_indexLocalIndexEnabledSubtitle": "Save page text on this device so search can find it",
   "@settings_indexLocalIndexEnabledSubtitle": {
     "description": "Summary of the local search index setting, shown as a settings search result."
   },
-  "settings_indexIndexPrivateTabsSubtitle": "Include private tabs in the local index",
+  "settings_indexIndexPrivateTabsSubtitle": "Also save text from private tabs",
   "@settings_indexIndexPrivateTabsSubtitle": {
-    "description": "Summary of the \"Index private tabs\" setting, shown as a settings search result."
+    "description": "Summary of the \"Save text from private tabs\" setting, shown as a settings search result."
   },
-  "settings_indexLocalIndexStatsSubtitle": "View and clear the local index",
+  "settings_indexLocalIndexStatsSubtitle": "See and delete the saved page text",
   "@settings_indexLocalIndexStatsSubtitle": {
     "description": "Summary of the indexed pages entry, shown as a settings search result."
   },
@@ -3186,27 +3166,27 @@
   "@settings_disabledWhileAutomaticFontSize": {
     "description": "Line under a text size setting that cannot be changed while automatic font size is on."
   },
-  "settings_fontInflationTitle": "Font Inflation",
+  "settings_fontInflationTitle": "Enlarge Small Text",
   "@settings_fontInflationTitle": {
     "description": "Switch that enlarges text on pages not designed for phones. \"Font inflation\" is the browser engine's term."
   },
-  "settings_fontInflationKeywords": "readability",
+  "settings_fontInflationKeywords": "readability, font inflation",
   "@settings_fontInflationKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_fontInflationSubtitle": "Enlarge text on pages that lack a mobile viewport meta tag",
+  "settings_fontInflationSubtitle": "Make text readable on pages that weren't made for phones",
   "@settings_fontInflationSubtitle": {
     "description": "Explanation under that switch. \"Viewport meta tag\" is a web technical term."
   },
-  "settings_inputAutoZoomTitle": "Input Auto Zoom",
+  "settings_inputAutoZoomTitle": "Zoom In on Text Fields",
   "@settings_inputAutoZoomTitle": {
     "description": "Switch: zoom in automatically when a text field on a page is tapped."
   },
-  "settings_inputAutoZoomKeywords": "forms",
+  "settings_inputAutoZoomKeywords": "forms, input auto zoom",
   "@settings_inputAutoZoomKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_inputAutoZoomSubtitle": "Automatically zoom in when focusing text inputs",
+  "settings_inputAutoZoomSubtitle": "Zoom in when you tap a text field",
   "@settings_inputAutoZoomSubtitle": {
     "description": "Explanation under that switch."
   },
@@ -3246,15 +3226,15 @@
   "@settings_enableReaderModeSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_enforceReaderModeTitle": "Enforce Reader Mode",
+  "settings_enforceReaderModeTitle": "Always Offer Reader Mode",
   "@settings_enforceReaderModeTitle": {
     "description": "Switch: offer reader mode on every page, even ones it may not work on."
   },
-  "settings_enforceReaderModeKeywords": "reader",
+  "settings_enforceReaderModeKeywords": "reader, enforce reader mode",
   "@settings_enforceReaderModeKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_enforceReaderModeSubtitle": "Ignore a site's readability score and always show Reader Mode, even on sites that may not support it.",
+  "settings_enforceReaderModeSubtitle": "Offer Reader Mode on every page, even where it may not work well.",
   "@settings_enforceReaderModeSubtitle": {
     "description": "Explanation under that switch."
   },
@@ -3282,11 +3262,11 @@
   "@settings_indexAutomaticFontSizeSubtitle": {
     "description": "Summary of the automatic font size setting, shown as a settings search result."
   },
-  "settings_indexFontInflationSubtitle": "Enlarge text on pages without a mobile viewport",
+  "settings_indexFontInflationSubtitle": "Enlarge text on pages not made for phones",
   "@settings_indexFontInflationSubtitle": {
     "description": "Summary of the font inflation setting, shown as a settings search result."
   },
-  "settings_indexInputAutoZoomSubtitle": "Automatically zoom when focusing text inputs",
+  "settings_indexInputAutoZoomSubtitle": "Zoom in when you tap a text field",
   "@settings_indexInputAutoZoomSubtitle": {
     "description": "Summary of the input auto zoom setting, shown as a settings search result."
   },
@@ -3294,11 +3274,11 @@
   "@settings_indexPdfViewerSubtitle": {
     "description": "Summary of the PDF viewer setting, shown as a settings search result."
   },
-  "settings_indexEnableReaderModeSubtitle": "Extract and simplify pages for readability",
+  "settings_indexEnableReaderModeSubtitle": "Show articles in a clean, easy-to-read layout",
   "@settings_indexEnableReaderModeSubtitle": {
     "description": "Summary of the reader mode setting, shown as a settings search result."
   },
-  "settings_indexEnforceReaderModeSubtitle": "Always show Reader Mode capabilities",
+  "settings_indexEnforceReaderModeSubtitle": "Offer Reader Mode on every page",
   "@settings_indexEnforceReaderModeSubtitle": {
     "description": "Summary of the enforce reader mode setting, shown as a settings search result."
   },
@@ -3342,11 +3322,11 @@
   "@settings_ublockResetDialogMessage": {
     "description": "Body of that dialog."
   },
-  "settings_ublockApplyHardeningsDialogTitle": "Apply WebLibre Hardenings?",
+  "settings_ublockApplyHardeningsDialogTitle": "Turn On Recommended Filters?",
   "@settings_ublockApplyHardeningsDialogTitle": {
     "description": "Title of the confirmation dialog before enabling WebLibre's recommended extra filter lists. WebLibre is the app name."
   },
-  "settings_ublockApplyHardeningsDialogMessage": "This will enable a curated set of additional filter lists and add a legitimate URL shortener list as an external list.",
+  "settings_ublockApplyHardeningsDialogMessage": "This turns on extra filter lists chosen by WebLibre and adds a list that removes tracking parts from links.",
   "@settings_ublockApplyHardeningsDialogMessage": {
     "description": "Body of that dialog."
   },
@@ -3371,7 +3351,7 @@
   "@settings_ublockQuickResetSubtitle": {
     "description": "Explanation under that row."
   },
-  "settings_ublockQuickApplyHardeningsTitle": "Apply WebLibre Hardenings",
+  "settings_ublockQuickApplyHardeningsTitle": "Turn On Recommended Filters",
   "@settings_ublockQuickApplyHardeningsTitle": {
     "description": "Row that enables WebLibre's recommended extra filter lists (asks for confirmation)."
   },
@@ -3564,7 +3544,7 @@
   "@settings_categoryWebContentKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_categoryWebContentSubtitle": "Page display, PDF, reader mode, AI",
+  "settings_categoryWebContentSubtitle": "Page display, PDF, reader mode",
   "@settings_categoryWebContentSubtitle": {
     "description": "Summary under the \"Web Content\" category."
   },
@@ -3576,7 +3556,7 @@
   "@settings_categoryNotificationsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_categoryNotificationsSubtitle": "Web push delivery, distributor, site subscriptions",
+  "settings_categoryNotificationsSubtitle": "Website notifications and the app that delivers them",
   "@settings_categoryNotificationsSubtitle": {
     "description": "Summary under the \"Notifications\" category. A distributor is the app that delivers push messages."
   },
@@ -3604,17 +3584,17 @@
   "@settings_categoryPrivacySecuritySubtitle": {
     "description": "Summary under the \"Privacy & Security\" category."
   },
-  "settings_categoryProxyTitle": "Proxy",
+  "settings_categoryProxyTitle": "Connections",
   "@settings_categoryProxyTitle": {
-    "description": "Category on the main settings screen."
+    "description": "Category on the main settings screen that opens the connection settings: Tor, VPNs and proxies. Use the same word as the \"Connections\" group of the setup's Customize step (onboarding_customizeGroupConnections)."
   },
   "settings_categoryProxyKeywords": "proxy, sing-box, socks, vpn, wireguard, routing, tor, container",
   "@settings_categoryProxyKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_categoryProxySubtitle": "Connections and routing",
+  "settings_categoryProxySubtitle": "Tor, VPN, proxies and routing",
   "@settings_categoryProxySubtitle": {
-    "description": "Summary under the \"Proxy\" category."
+    "description": "Summary under the \"Connections\" category. Tor and VPN stay untranslated."
   },
   "settings_categoryExtensionsTitle": "Extensions",
   "@settings_categoryExtensionsTitle": {
@@ -3708,19 +3688,19 @@
   "@settings_privacySectionConnectionSecurityTitle": {
     "description": "Section heading on the privacy & security screen."
   },
-  "settings_indexHttpsOnlyModeSubtitle": "Prefer HTTPS and block insecure connections",
+  "settings_indexHttpsOnlyModeSubtitle": "Warn before opening a site that isn't encrypted",
   "@settings_indexHttpsOnlyModeSubtitle": {
     "description": "Summary of the HTTPS-only setting, shown as a settings search result."
   },
-  "settings_indexDnsOverHttpsTitle": "DNS over HTTPS",
+  "settings_indexDnsOverHttpsTitle": "Secure DNS",
   "@settings_indexDnsOverHttpsTitle": {
-    "description": "Title of the DNS over HTTPS entry on the privacy & security screen. Technical term."
+    "description": "Title of the secure DNS entry on the privacy & security screen. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers."
   },
-  "settings_indexDnsOverHttpsKeywords": "doh",
+  "settings_indexDnsOverHttpsKeywords": "dns over https, doh, encrypted dns",
   "@settings_indexDnsOverHttpsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_indexDnsOverHttpsSubtitle": "Encrypt DNS lookups",
+  "settings_indexDnsOverHttpsSubtitle": "Encrypt site lookups",
   "@settings_indexDnsOverHttpsSubtitle": {
     "description": "Summary of that entry. DNS is a technical abbreviation."
   },
@@ -3728,11 +3708,11 @@
   "@settings_privacySectionNetworkProtectionTitle": {
     "description": "Section heading on the privacy & security screen for local network protection."
   },
-  "settings_indexLnaBlockingSubtitle": "Block requests to local network devices and services",
+  "settings_indexLnaBlockingSubtitle": "Websites must ask before connecting to local apps and devices",
   "@settings_indexLnaBlockingSubtitle": {
     "description": "Summary of the block local network requests setting, shown as a settings search result."
   },
-  "settings_indexLnaBlockTrackersSubtitle": "Block tracker-like local network requests",
+  "settings_indexLnaBlockTrackersSubtitle": "Stop known trackers from reaching local apps and devices",
   "@settings_indexLnaBlockTrackersSubtitle": {
     "description": "Summary of the block local network trackers setting, shown as a settings search result."
   },
@@ -3852,7 +3832,7 @@
   "@settings_protectionLevelTitle": {
     "description": "Heading of the DNS over HTTPS protection level choice."
   },
-  "settings_protectionLevelDescription": "Domain Name System (DNS) over HTTPS sends domain-name requests through an encrypted connection, protecting them and making it harder for others to see which websites you’re about to visit.",
+  "settings_protectionLevelDescription": "Before a site opens, the browser looks up its address. Secure DNS encrypts that lookup, so it is harder for your network provider and others to see which sites you visit.",
   "@settings_protectionLevelDescription": {
     "description": "Explanation under that heading. DNS and HTTPS are technical abbreviations."
   },
@@ -3860,51 +3840,51 @@
   "@settings_defaultProtectionTitle": {
     "description": "DNS over HTTPS level option: the browser engine's default behavior."
   },
-  "settings_defaultProtectionSubtitle": "DoH used only when default DNS fails",
+  "settings_defaultProtectionSubtitle": "Uses secure DNS only when your network's DNS fails",
   "@settings_defaultProtectionSubtitle": {
-    "description": "Explanation under the \"Default Protection\" DNS over HTTPS option. DoH is short for DNS over HTTPS."
+    "description": "Explanation under the \"Default Protection\" secure DNS option."
   },
   "settings_increasedProtectionTitle": "Increased Protection",
   "@settings_increasedProtectionTitle": {
     "description": "DNS over HTTPS level option: use encrypted DNS when possible."
   },
-  "settings_increasedProtectionSubtitle": "DoH preferred, default DNS as fallback",
+  "settings_increasedProtectionSubtitle": "Uses secure DNS first, and your network's DNS if that fails",
   "@settings_increasedProtectionSubtitle": {
-    "description": "Explanation under \"Increased Protection\". DoH is short for DNS over HTTPS."
+    "description": "Explanation under \"Increased Protection\"."
   },
   "settings_maxProtectionTitle": "Max Protection",
   "@settings_maxProtectionTitle": {
     "description": "DNS over HTTPS level option: always use encrypted DNS."
   },
-  "settings_maxProtectionSubtitle": "DoH only, no fallback",
+  "settings_maxProtectionSubtitle": "Always uses secure DNS. Sites don't load when it fails",
   "@settings_maxProtectionSubtitle": {
-    "description": "Explanation under \"Max Protection\". DoH is short for DNS over HTTPS."
+    "description": "Explanation under \"Max Protection\"."
   },
   "settings_protectionOffTitle": "Off",
   "@settings_protectionOffTitle": {
     "description": "DNS over HTTPS level option: off."
   },
-  "settings_protectionOffSubtitle": "Use your default DNS resolver",
+  "settings_protectionOffSubtitle": "Uses your network's DNS",
   "@settings_protectionOffSubtitle": {
     "description": "Explanation under \"Off\": the device's normal DNS server is used."
   },
-  "settings_dohProviderTitle": "DoH Provider",
+  "settings_dohProviderTitle": "Provider",
   "@settings_dohProviderTitle": {
-    "description": "Heading above the list of DNS over HTTPS servers to choose from. DoH is short for DNS over HTTPS."
+    "description": "Heading above the list of secure DNS (DNS over HTTPS) servers to choose from."
   },
-  "settings_yourResolvers": "Your resolvers",
+  "settings_yourResolvers": "Your providers",
   "@settings_yourResolvers": {
     "description": "Heading above the DNS over HTTPS servers the user added."
   },
-  "settings_addCustomResolver": "Add custom resolver",
+  "settings_addCustomResolver": "Add your own provider",
   "@settings_addCustomResolver": {
     "description": "Button that adds a DNS over HTTPS server by address; also the title of the dialog it opens."
   },
-  "settings_editCustomResolverTitle": "Edit custom resolver",
+  "settings_editCustomResolverTitle": "Edit provider",
   "@settings_editCustomResolverTitle": {
     "description": "Title of the dialog for editing a user-added DNS over HTTPS server."
   },
-  "settings_resolverUrlLabel": "Resolver URL",
+  "settings_resolverUrlLabel": "Provider URL",
   "@settings_resolverUrlLabel": {
     "description": "Label of the field for the DNS over HTTPS server address."
   },
@@ -4029,7 +4009,7 @@
   "@settings_withTitleOption": {
     "description": "Tab bar style option: shows the page title. Keep it short."
   },
-  "settings_withTitleDescription": "Shows page title and URL breadcrumb",
+  "settings_withTitleDescription": "Shows the page title and the address",
   "@settings_withTitleDescription": {
     "description": "Explanation under \"With Title\". A breadcrumb is the shortened path of the address."
   },
@@ -4037,7 +4017,7 @@
   "@settings_compactOption": {
     "description": "Tab bar style option: compact, address only. Keep it short."
   },
-  "settings_compactDescription": "Centered URL pill without page title",
+  "settings_compactDescription": "Only the address, centered",
   "@settings_compactDescription": {
     "description": "Explanation under \"Compact\". A pill is a rounded box."
   },
@@ -4294,7 +4274,7 @@
   "@settings_bottomSheetTabViewSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_longPressUrlCopyTitle": "Long Press URL to Copy",
+  "settings_longPressUrlCopyTitle": "Long Press Address to Copy",
   "@settings_longPressUrlCopyTitle": {
     "description": "Switch: long pressing the address bar copies the page address."
   },
@@ -4302,15 +4282,15 @@
   "@settings_longPressUrlCopyKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_longPressUrlCopySubtitle": "Copy the page URL to clipboard when long pressing the address bar",
+  "settings_longPressUrlCopySubtitle": "Long press the address bar to copy the page address",
   "@settings_longPressUrlCopySubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_showFaviconsTitle": "Show Favicons in List View",
+  "settings_showFaviconsTitle": "Show Site Icons in List View",
   "@settings_showFaviconsTitle": {
     "description": "Switch: the tab overview's list layout shows site icons instead of page thumbnails."
   },
-  "settings_showFaviconsKeywords": "icons",
+  "settings_showFaviconsKeywords": "icons, favicons",
   "@settings_showFaviconsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -4458,7 +4438,7 @@
   "@settings_indexAutoHideSidePanelSubtitle": {
     "description": "Summary of the auto-hide side panel setting, shown as a settings search result."
   },
-  "settings_indexLongPressUrlCopySubtitle": "Copy the current URL from the tab bar",
+  "settings_indexLongPressUrlCopySubtitle": "Copy the page address from the tab bar",
   "@settings_indexLongPressUrlCopySubtitle": {
     "description": "Summary of the long-press-to-copy setting, shown as a settings search result."
   },
@@ -4557,7 +4537,15 @@
   "settings_trackerStatisticsTotal": "{count, plural, =1{1 tracker blocked since {date}} other{{count} trackers blocked since {date}}}",
   "@settings_trackerStatisticsTotal": {
     "description": "Total under the tracker statistics switch. date is the day recording started, formatted like \"Oct 12, 2026\".",
-    "placeholders": { "count": {"type": "int", "format": "decimalPattern"}, "date": {"type": "String"} }
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "settings_trackerStatisticsNothingRecorded": "No blocked trackers recorded yet.",
   "@settings_trackerStatisticsNothingRecorded": {
@@ -4574,5 +4562,79 @@
   "settings_trackerStatisticsLoadFailed": "Couldn't load tracker statistics.",
   "@settings_trackerStatisticsLoadFailed": {
     "description": "Shown under the tracker statistics switch when the engine could not read them."
+  },
+  "settings_categoryFeatureControlTitle": "Feature Control",
+  "@settings_categoryFeatureControlTitle": {
+    "description": "Settings category and screen title. Lists the features WebLibre can show or hide (each with a switch) and the presets that set them all at once; the same switches as Customize in the first-run setup."
+  },
+  "settings_categoryFeatureControlSubtitle": "Choose which features WebLibre shows",
+  "@settings_categoryFeatureControlSubtitle": {
+    "description": "Subtitle of the Feature Control settings category."
+  },
+  "settings_categoryFeatureControlKeywords": "feature control, features, visibility, show, hide, hidden, preset, apply preset, just browsing, tinkerer, expert, simple, advanced, customize, setup, onboarding",
+  "@settings_categoryFeatureControlKeywords": {
+    "description": "Comma-separated search terms for the Feature Control settings category. Never displayed."
+  },
+  "settings_featureControlIntro": "Hide features you don't use to keep WebLibre simple. While a feature is hidden, its settings use their defaults. Your changes are kept and apply again when you show it. Connections and anything you created keep working.",
+  "@settings_featureControlIntro": {
+    "description": "Intro at the top of Settings > Feature Control: why to hide features, and what hiding one does and does not do."
+  },
+  "settings_featureControlHiddenInUse": "Feature hidden. Anything you already set up keeps working.",
+  "@settings_featureControlHiddenInUse": {
+    "description": "Snackbar after hiding a feature that is in use, for example connections while a VPN runs, or containers that exist: it keeps working."
+  },
+  "settings_featureControlKeepsWorking": "Anything you already set up keeps working.",
+  "@settings_featureControlKeepsWorking": {
+    "description": "Line in the confirmation for hiding a feature or applying a preset on Settings > Feature Control, shown when something hidden is already set up and in use (a running connection, containers): it keeps working while hidden."
+  },
+  "settings_featureControlShownApplyingAgain": "Feature shown. Your earlier changes apply again.",
+  "@settings_featureControlShownApplyingAgain": {
+    "description": "Snackbar on Settings > Feature Control after a feature was shown again whose settings the user had changed: those changes apply again. Shown with an Undo button that hides the feature again."
+  },
+  "settings_featureControlApplyPresetTitle": "Apply preset",
+  "@settings_featureControlApplyPresetTitle": {
+    "description": "Heading on Settings > Feature Control above one row per preset chosen at first start (Just browsing, Tinkerer, Expert). Tapping a row shows and hides features the way that preset does, after a confirmation."
+  },
+  "settings_featureControlApplyPresetSubtitle": "Show and hide features the way a preset does.",
+  "@settings_featureControlApplyPresetSubtitle": {
+    "description": "Line under the \"Apply preset\" heading: only which features are shown changes, no setting does."
+  },
+  "settings_featureControlApplyPresetDialogTitle": "Apply “{preset}”?",
+  "@settings_featureControlApplyPresetDialogTitle": {
+    "description": "Title of the confirmation after tapping a preset under \"Apply preset\". preset is the preset's name (Just browsing, Tinkerer or Expert), quoted as a UI name.",
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_featureControlApplyPresetDialogContent": "Only these features change.",
+  "@settings_featureControlApplyPresetDialogContent": {
+    "description": "Text of the \"Apply preset\" confirmation, above the lists of features to show and to hide."
+  },
+  "settings_featureControlFeaturesToShow": "Features to show",
+  "@settings_featureControlFeaturesToShow": {
+    "description": "Heading in the \"Apply preset\" confirmation above the features that applying it shows."
+  },
+  "settings_featureControlFeaturesToHide": "Features to hide",
+  "@settings_featureControlFeaturesToHide": {
+    "description": "Heading in the \"Apply preset\" confirmation above the features that applying it hides."
+  },
+  "settings_featureControlApplyPresetConfirm": "Apply",
+  "@settings_featureControlApplyPresetConfirm": {
+    "description": "Confirm button of the \"Apply preset\" confirmation."
+  },
+  "settings_featureControlApplyPresetUnchanged": "The features shown already match “{preset}”.",
+  "@settings_featureControlApplyPresetUnchanged": {
+    "description": "Snackbar after tapping a preset under \"Apply preset\" when the features shown already match it, so nothing changes. preset is the preset's name, quoted as a UI name.",
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_featureControlSectionTitle": "Features",
+  "@settings_featureControlSectionTitle": {
+    "description": "Section title used by settings search for the feature switches on the Feature Control screen."
   }
 }

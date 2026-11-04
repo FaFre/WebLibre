@@ -262,11 +262,11 @@
   "@addons_menuExtensionSettingsSubtitleInline": {
     "description": "Line under \"Extension Settings\" when the settings page opens inside this screen."
   },
-  "addons_menuFilterListsTitle": "Filter Lists & Hardenings",
+  "addons_menuFilterListsTitle": "Filter Lists",
   "@addons_menuFilterListsTitle": {
     "description": "Row shown only for the uBlock Origin extension: manage its filter lists and WebLibre's extra hardening lists."
   },
-  "addons_menuFilterListsSubtitle": "Manage filter lists and apply WebLibre hardenings",
+  "addons_menuFilterListsSubtitle": "Manage filter lists and turn on WebLibre's recommended filters",
   "@addons_menuFilterListsSubtitle": {
     "description": "Line under \"Filter Lists & Hardenings\"."
   },

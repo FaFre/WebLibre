@@ -28,7 +28,7 @@
   "contextualToolbar_longPressAddPrivateTab": "Añadir pestaña privada",
   "contextualToolbar_longPressAddIsolatedTab": "Añadir pestaña aislada",
   "contextualToolbar_longPressOpenSettings": "Abrir ajustes",
-  "contextualToolbar_longPressHardRefresh": "Recarga forzada (sin caché)",
+  "contextualToolbar_longPressHardRefresh": "Recarga completa",
   "contextualToolbar_longPressShowTranslationOptions": "Mostrar opciones de traducción",
   "contextualToolbar_longPressScrollToTop": "Ir al principio",
   "contextualToolbar_longPressScrollToBottom": "Ir al final",

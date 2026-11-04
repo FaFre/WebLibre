@@ -21,11 +21,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/exit_app.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
@@ -40,9 +41,7 @@ class AddonCollectionScreen extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final addonCollectionSetting = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (value) => value.addonCollection,
-      ),
+      storedEngineSettingsProvider.select((value) => value.addonCollection),
     );
 
     final serverURLController = useTextEditingController(
@@ -60,155 +59,161 @@ class AddonCollectionScreen extends HookConsumerWidget {
       keys: [addonCollectionSetting],
     );
 
-    return SettingsCustomScrollScaffold(
-      title: l10n.settings_addonCollectionTitle,
-      actions: [
-        if (addonCollectionSetting != null)
-          IconButton(
-            onPressed: () async {
-              await ref
-                  .read(engineSettingsRepositoryProvider.notifier)
-                  .updateSettings(
-                    (currentSettings) =>
-                        currentSettings.copyWith.addonCollection(null),
-                  );
+    // While hidden a custom collection does not apply (after a restart), so
+    // nothing here is kept usable.
+    return HiddenFeatureScope(
+      feature: FeatureId.extensionsCustomCollection,
+      child: SettingsCustomScrollScaffold(
+        title: l10n.settings_addonCollectionTitle,
+        actions: [
+          if (addonCollectionSetting != null)
+            IconButton(
+              onPressed: () async {
+                await ref
+                    .read(engineSettingsRepositoryProvider.notifier)
+                    .updateSettings(
+                      (currentSettings) =>
+                          currentSettings.copyWith.addonCollection(null),
+                    );
 
-              await exitApp(ref.container);
-            },
-            icon: const Icon(Icons.delete),
-          ),
-      ],
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
-          sliver: SliverToBoxAdapter(
-            child: Form(
-              key: formKey,
-              child: SettingsSectionList(
-                sections: [
-                  SettingsSectionDefinition(
-                    title: l10n.settings_addonCollectionSourceSectionTitle,
-                    entries: [
-                      SettingsEntryDefinition(
-                        title: l10n.settings_addonCollectionConfigTitle,
-                        subtitle: l10n.settings_addonCollectionConfigSubtitle,
-                        keywords: settingsKeywords(
-                          l10n.settings_addonCollectionConfigKeywords,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                controller: serverURLController,
-                                decoration: InputDecoration(
-                                  label: Text(
-                                    l10n.settings_addonCollectionServerUrlLabel,
+                await exitApp(ref.container);
+              },
+              icon: const Icon(Icons.delete),
+            ),
+        ],
+        slivers: [
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 20),
+            sliver: SliverToBoxAdapter(
+              child: Form(
+                key: formKey,
+                child: SettingsSectionList(
+                  sections: [
+                    SettingsSectionDefinition(
+                      title: l10n.settings_addonCollectionSourceSectionTitle,
+                      entries: [
+                        SettingsEntryDefinition(
+                          title: l10n.settings_addonCollectionConfigTitle,
+                          subtitle: l10n.settings_addonCollectionConfigSubtitle,
+                          keywords: settingsKeywords(
+                            l10n.settings_addonCollectionConfigKeywords,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: serverURLController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      l10n.settings_addonCollectionServerUrlLabel,
+                                    ),
+                                    hintText: _defaultServerUrl,
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
                                   ),
-                                  hintText: _defaultServerUrl,
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
+                                  keyboardType: TextInputType.url,
+                                  validator: (value) {
+                                    return validateUrl(
+                                      value,
+                                      onlyHttpProtocol: true,
+                                      eagerParsing: false,
+                                      l10n: l10n,
+                                    );
+                                  },
                                 ),
-                                keyboardType: TextInputType.url,
-                                validator: (value) {
-                                  return validateUrl(
-                                    value,
-                                    onlyHttpProtocol: true,
-                                    eagerParsing: false,
-                                    l10n: l10n,
-                                  );
-                                },
-                              ),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                controller: collectionUserController,
-                                decoration: InputDecoration(
-                                  label: Text(
-                                    l10n.settings_addonCollectionUserLabel,
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: collectionUserController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      l10n.settings_addonCollectionUserLabel,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
                                   ),
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
+                                  validator: (value) =>
+                                      validateRequired(value, l10n: l10n),
                                 ),
-                                validator: (value) =>
-                                    validateRequired(value, l10n: l10n),
-                              ),
-                              const SizedBox(height: 8),
-                              TextFormField(
-                                controller: collectionNameController,
-                                decoration: InputDecoration(
-                                  label: Text(
-                                    l10n.settings_addonCollectionNameLabel,
+                                const SizedBox(height: 8),
+                                TextFormField(
+                                  controller: collectionNameController,
+                                  decoration: InputDecoration(
+                                    label: Text(
+                                      l10n.settings_addonCollectionNameLabel,
+                                    ),
+                                    floatingLabelBehavior:
+                                        FloatingLabelBehavior.always,
                                   ),
-                                  floatingLabelBehavior:
-                                      FloatingLabelBehavior.always,
+                                  validator: (value) =>
+                                      validateRequired(value, l10n: l10n),
                                 ),
-                                validator: (value) =>
-                                    validateRequired(value, l10n: l10n),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  SettingsSectionDefinition(
-                    title: l10n.settings_addonCollectionActionsSectionTitle,
-                    entries: [
-                      SettingsEntryDefinition(
-                        title: l10n.settings_addonCollectionSaveRestartTitle,
-                        subtitle:
-                            l10n.settings_addonCollectionSaveRestartSubtitle,
-                        keywords: settingsKeywords(
-                          l10n.settings_addonCollectionSaveRestartKeywords,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed: () async {
-                                if (formKey.currentState?.validate() == true) {
-                                  await ref
-                                      .read(
-                                        engineSettingsRepositoryProvider
-                                            .notifier,
-                                      )
-                                      .updateSettings(
-                                        (currentSettings) => currentSettings
-                                            .copyWith
-                                            .addonCollection(
-                                              AddonCollection(
-                                                serverURL:
-                                                    serverURLController.text,
-                                                collectionUser:
-                                                    collectionUserController
-                                                        .text,
-                                                collectionName:
-                                                    collectionNameController
-                                                        .text,
+                      ],
+                    ),
+                    SettingsSectionDefinition(
+                      title: l10n.settings_addonCollectionActionsSectionTitle,
+                      entries: [
+                        SettingsEntryDefinition(
+                          title: l10n.settings_addonCollectionSaveRestartTitle,
+                          subtitle:
+                              l10n.settings_addonCollectionSaveRestartSubtitle,
+                          keywords: settingsKeywords(
+                            l10n.settings_addonCollectionSaveRestartKeywords,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                onPressed: () async {
+                                  if (formKey.currentState?.validate() ==
+                                      true) {
+                                    await ref
+                                        .read(
+                                          engineSettingsRepositoryProvider
+                                              .notifier,
+                                        )
+                                        .updateSettings(
+                                          (currentSettings) => currentSettings
+                                              .copyWith
+                                              .addonCollection(
+                                                AddonCollection(
+                                                  serverURL:
+                                                      serverURLController.text,
+                                                  collectionUser:
+                                                      collectionUserController
+                                                          .text,
+                                                  collectionName:
+                                                      collectionNameController
+                                                          .text,
+                                                ),
                                               ),
-                                            ),
-                                      );
+                                        );
 
-                                  await exitApp(ref.container);
-                                }
-                              },
-                              child: Text(
-                                l10n.settings_addonCollectionSaveRestartTitle,
+                                    await exitApp(ref.container);
+                                  }
+                                },
+                                child: Text(
+                                  l10n.settings_addonCollectionSaveRestartTitle,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-                query: '',
+                      ],
+                    ),
+                  ],
+                  query: '',
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

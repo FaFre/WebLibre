@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:nullability/nullability.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/provider_read.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
@@ -339,13 +340,15 @@ void showTabUndoClose(
 /// asking once "Don't ask again" was ticked
 /// ([RememberedPrompt.closeIsolatedTabs]).
 Future<bool> confirmIsolatedTabClose(
-  BuildContext context, {
+  BuildContext context,
+  ProviderRead read, {
   int groupCount = 1,
 }) {
   final l10n = AppLocalizations.of(context);
 
   return confirmUnlessRemembered(
     context,
+    read,
     RememberedPrompt.closeIsolatedTabs,
     title: l10n.uiHelper_closeIsolatedTabsTitle,
     content: l10n.uiHelper_closeIsolatedTabsConfirm(groupCount),

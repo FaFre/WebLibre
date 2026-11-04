@@ -21,11 +21,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> customTrackingProtectionSections(
   BuildContext context,
@@ -93,11 +95,16 @@ class CustomTrackingProtectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return SettingsDetailScaffold(
-      title: l10n.settings_customTrackingProtectionTitle,
-      subtitle: l10n.settings_customTrackingProtectionSubtitle,
-      icon: MdiIcons.shieldEditOutline,
-      sections: customTrackingProtectionSections(context),
+    // The whole editor is Expert. While it is hidden a custom policy does
+    // not apply, so nothing here is kept usable.
+    return HiddenFeatureScope(
+      feature: FeatureId.privacyEtpCustomPolicies,
+      child: SettingsDetailScaffold(
+        title: l10n.settings_customTrackingProtectionTitle,
+        subtitle: l10n.settings_customTrackingProtectionSubtitle,
+        icon: MdiIcons.shieldEditOutline,
+        sections: customTrackingProtectionSections(context),
+      ),
     );
   }
 }
@@ -108,10 +115,10 @@ class _AllowlistSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allowListBaseline = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.allowListBaseline),
+      storedEngineSettingsProvider.select((s) => s.allowListBaseline),
     );
     final allowListConvenience = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.allowListConvenience),
+      storedEngineSettingsProvider.select((s) => s.allowListConvenience),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -150,10 +157,10 @@ class _CookiesSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final blockCookies = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.blockCookies),
+      storedEngineSettingsProvider.select((s) => s.blockCookies),
     );
     final customCookiePolicy = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.customCookiePolicy),
+      storedEngineSettingsProvider.select((s) => s.customCookiePolicy),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -232,10 +239,10 @@ class _TrackingContentSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final blockTrackingContent = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.blockTrackingContent),
+      storedEngineSettingsProvider.select((s) => s.blockTrackingContent),
     );
     final trackingContentScope = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.trackingContentScope),
+      storedEngineSettingsProvider.select((s) => s.trackingContentScope),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -301,16 +308,16 @@ class _TrackersSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final blockCryptominers = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.blockCryptominers),
+      storedEngineSettingsProvider.select((s) => s.blockCryptominers),
     );
     final blockFingerprinters = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.blockFingerprinters),
+      storedEngineSettingsProvider.select((s) => s.blockFingerprinters),
     );
     final blockRedirectTrackers = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.blockRedirectTrackers),
+      storedEngineSettingsProvider.select((s) => s.blockRedirectTrackers),
     );
     final blockAdsAnalyticsSocialTrackers = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
+      storedEngineSettingsProvider.select(
         (s) => s.blockAdsAnalyticsSocialTrackers,
       ),
     );
@@ -373,12 +380,12 @@ class _AdvancedFingerprintingSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final blockSuspectedFingerprinters = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
+      storedEngineSettingsProvider.select(
         (s) => s.blockSuspectedFingerprinters,
       ),
     );
     final suspectedFingerprintersScope = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
+      storedEngineSettingsProvider.select(
         (s) => s.suspectedFingerprintersScope,
       ),
     );

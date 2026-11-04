@@ -97,12 +97,6 @@ List<SettingsSectionDefinition> webContentSettingsSections(
           keywords: settingsKeywords(l10n.settings_enforceReaderModeKeywords),
           child: const _EnforceReaderModeTile(),
         ),
-        SettingsEntryDefinition(
-          title: l10n.settings_onDeviceAiTitle,
-          subtitle: l10n.settings_indexOnDeviceAiSubtitle,
-          keywords: settingsKeywords(l10n.settings_onDeviceAiKeywords),
-          child: const _OnDeviceAiTile(),
-        ),
       ],
     ),
   ];
@@ -131,7 +125,7 @@ class _WebFontsEnabledTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final webFontsEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.webFontsEnabled),
+      storedEngineSettingsProvider.select((s) => s.webFontsEnabled),
     );
 
     return SwitchListTile.adaptive(
@@ -158,9 +152,7 @@ class _AutomaticFontSizeAdjustmentTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final automaticFontSizeAdjustment = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.automaticFontSizeAdjustment,
-      ),
+      storedEngineSettingsProvider.select((s) => s.automaticFontSizeAdjustment),
     );
 
     return SwitchListTile.adaptive(
@@ -187,12 +179,10 @@ class _FontSizeFactorSlider extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final automaticFontSizeAdjustment = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.automaticFontSizeAdjustment,
-      ),
+      storedEngineSettingsProvider.select((s) => s.automaticFontSizeAdjustment),
     );
     final fontSizeFactor = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.fontSizeFactor),
+      storedEngineSettingsProvider.select((s) => s.fontSizeFactor),
     );
     final sliderValue = useKeyedState(fontSizeFactor, [fontSizeFactor]);
 
@@ -268,12 +258,10 @@ class _FontInflationTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final automaticFontSizeAdjustment = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.automaticFontSizeAdjustment,
-      ),
+      storedEngineSettingsProvider.select((s) => s.automaticFontSizeAdjustment),
     );
     final fontInflationEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.fontInflationEnabled),
+      storedEngineSettingsProvider.select((s) => s.fontInflationEnabled),
     );
 
     return SwitchListTile.adaptive(
@@ -306,7 +294,7 @@ class _InputAutoZoomEnabledTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final inputAutoZoomEnabled = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.inputAutoZoomEnabled),
+      storedEngineSettingsProvider.select((s) => s.inputAutoZoomEnabled),
     );
 
     return SwitchListTile.adaptive(
@@ -333,9 +321,7 @@ class _ForceUserScalableContentTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final forceUserScalableContent = ref.watch(
-      engineSettingsWithDefaultsProvider.select(
-        (s) => s.forceUserScalableContent,
-      ),
+      storedEngineSettingsProvider.select((s) => s.forceUserScalableContent),
     );
 
     return SwitchListTile.adaptive(
@@ -362,7 +348,7 @@ class _PdfViewerTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final enablePdfJs = ref.watch(
-      engineSettingsWithDefaultsProvider.select((s) => s.enablePdfJs),
+      storedEngineSettingsProvider.select((s) => s.enablePdfJs),
     );
 
     return SwitchListTile.adaptive(
@@ -388,7 +374,7 @@ class _EnableReaderModeTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
+      storedGeneralSettingsProvider.select((s) => s.enableReadability),
     );
 
     return SwitchListTile.adaptive(
@@ -415,10 +401,10 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final enableReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enableReadability),
+      storedGeneralSettingsProvider.select((s) => s.enableReadability),
     );
     final enforceReadability = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.enforceReadability),
+      storedGeneralSettingsProvider.select((s) => s.enforceReadability),
     );
 
     return SwitchListTile.adaptive(
@@ -436,35 +422,6 @@ class _EnforceReaderModeTile extends HookConsumerWidget {
                   );
             }
           : null,
-    );
-  }
-}
-
-class _OnDeviceAiTile extends HookConsumerWidget {
-  const _OnDeviceAiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final enableLocalAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.enableLocalAiFeatures,
-      ),
-    );
-
-    return SwitchListTile.adaptive(
-      title: Text(l10n.settings_onDeviceAiTitle),
-      subtitle: Text(l10n.settings_onDeviceAiSubtitle),
-      secondary: const Icon(MdiIcons.creation),
-      value: enableLocalAiFeatures,
-      onChanged: (value) async {
-        await ref
-            .read(saveGeneralSettingsControllerProvider.notifier)
-            .save(
-              (currentSettings) =>
-                  currentSettings.copyWith.enableLocalAiFeatures(value),
-            );
-      },
     );
   }
 }

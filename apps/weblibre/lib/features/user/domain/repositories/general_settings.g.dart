@@ -35,7 +35,7 @@ final class GeneralSettingsRepositoryProvider
 }
 
 String _$generalSettingsRepositoryHash() =>
-    r'2f00342d0b7584afe6f77d8e48ab49691c88c990';
+    r'fbbe340abe9a7f5132ac44e4d4da182bd042ad69';
 
 abstract class _$GeneralSettingsRepository
     extends $StreamNotifier<GeneralSettings> {
@@ -56,14 +56,79 @@ abstract class _$GeneralSettingsRepository
   }
 }
 
+/// The general settings as stored, hidden features included.
+///
+/// For the screens that show and edit settings, the onboarding draft and
+/// Feature Control. Behavior reads [generalSettingsWithDefaults].
+
+@ProviderFor(storedGeneralSettings)
+final storedGeneralSettingsProvider = StoredGeneralSettingsProvider._();
+
+/// The general settings as stored, hidden features included.
+///
+/// For the screens that show and edit settings, the onboarding draft and
+/// Feature Control. Behavior reads [generalSettingsWithDefaults].
+
+final class StoredGeneralSettingsProvider
+    extends
+        $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
+    with $Provider<GeneralSettings> {
+  /// The general settings as stored, hidden features included.
+  ///
+  /// For the screens that show and edit settings, the onboarding draft and
+  /// Feature Control. Behavior reads [generalSettingsWithDefaults].
+  StoredGeneralSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'storedGeneralSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$storedGeneralSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeneralSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GeneralSettings create(Ref ref) {
+    return storedGeneralSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeneralSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeneralSettings>(value),
+    );
+  }
+}
+
+String _$storedGeneralSettingsHash() =>
+    r'555fbb61d3ebce799f295e284a8dff663b5c8a72';
+
+/// The general settings as they apply: the settings of hidden features at
+/// their hidden values ([GeneralSettings.effective]).
+
 @ProviderFor(generalSettingsWithDefaults)
 final generalSettingsWithDefaultsProvider =
     GeneralSettingsWithDefaultsProvider._();
+
+/// The general settings as they apply: the settings of hidden features at
+/// their hidden values ([GeneralSettings.effective]).
 
 final class GeneralSettingsWithDefaultsProvider
     extends
         $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
     with $Provider<GeneralSettings> {
+  /// The general settings as they apply: the settings of hidden features at
+  /// their hidden values ([GeneralSettings.effective]).
   GeneralSettingsWithDefaultsProvider._()
     : super(
         from: null,
@@ -98,7 +163,85 @@ final class GeneralSettingsWithDefaultsProvider
 }
 
 String _$generalSettingsWithDefaultsHash() =>
-    r'9da4a00a3500286fbf515ee319fa911bfacab40e';
+    r'2c307a04c985c4d9b8857b8f509de2d99decfc24';
+
+/// The features shown with the current visibility switches.
+///
+/// For widgets that check many features at once (a list of actions, a set of
+/// modules): one watch, and a rebuild only when the set changes rather than
+/// on every settings write. `SetupDraftScope` overrides it, so below the
+/// scope it follows the draft.
+
+@ProviderFor(ShownFeatures)
+final shownFeaturesProvider = ShownFeaturesProvider._();
+
+/// The features shown with the current visibility switches.
+///
+/// For widgets that check many features at once (a list of actions, a set of
+/// modules): one watch, and a rebuild only when the set changes rather than
+/// on every settings write. `SetupDraftScope` overrides it, so below the
+/// scope it follows the draft.
+final class ShownFeaturesProvider
+    extends $NotifierProvider<ShownFeatures, Set<FeatureId>> {
+  /// The features shown with the current visibility switches.
+  ///
+  /// For widgets that check many features at once (a list of actions, a set of
+  /// modules): one watch, and a rebuild only when the set changes rather than
+  /// on every settings write. `SetupDraftScope` overrides it, so below the
+  /// scope it follows the draft.
+  ShownFeaturesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'shownFeaturesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$shownFeaturesHash();
+
+  @$internal
+  @override
+  ShownFeatures create() => ShownFeatures();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<FeatureId> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<FeatureId>>(value),
+    );
+  }
+}
+
+String _$shownFeaturesHash() => r'e57f691a36ff2d283e21cd26dfbdcb2a862c5c04';
+
+/// The features shown with the current visibility switches.
+///
+/// For widgets that check many features at once (a list of actions, a set of
+/// modules): one watch, and a rebuild only when the set changes rather than
+/// on every settings write. `SetupDraftScope` overrides it, so below the
+/// scope it follows the draft.
+
+abstract class _$ShownFeatures extends $Notifier<Set<FeatureId>> {
+  Set<FeatureId> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<Set<FeatureId>, Set<FeatureId>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Set<FeatureId>, Set<FeatureId>>,
+              Set<FeatureId>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
 
 /// The tab bar edge to actually render on, with
 /// [TabBarPositionSetting.auto] already resolved against the current window.

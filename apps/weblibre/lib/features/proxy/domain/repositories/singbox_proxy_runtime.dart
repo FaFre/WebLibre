@@ -667,7 +667,7 @@ class SingboxProxyRuntimeRepository extends _$SingboxProxyRuntimeRepository {
     final logLevel =
         (await ref
                 .read(proxyDiagnosticsSettingsRepositoryProvider.notifier)
-                .fetchSettings())
+                .fetchEffectiveSettings())
             .logLevel
             .singboxLevel;
 

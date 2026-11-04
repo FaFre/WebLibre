@@ -50,6 +50,7 @@ void main() {
           _container('1', contextId: 'ctx-1', isolatedAppLinkSettings: true),
         ],
         isolationContextContainerMap: const {},
+        containerAppLinksShown: true,
       );
       expect(key, isNull);
     });
@@ -59,6 +60,7 @@ void main() {
         liveContextId: 'ctx-1',
         containers: [_container('1', contextId: 'ctx-1')],
         isolationContextContainerMap: const {},
+        containerAppLinksShown: true,
       );
       expect(key, isNull);
     });
@@ -72,6 +74,7 @@ void main() {
             _container('1', contextId: 'ctx-1', isolatedAppLinkSettings: true),
           ],
           isolationContextContainerMap: const {},
+          containerAppLinksShown: true,
         );
         expect(key, 'ctx-1');
       },
@@ -86,6 +89,7 @@ void main() {
         isolationContextContainerMap: const {
           'iso-1': {'1'},
         },
+        containerAppLinksShown: true,
       );
       expect(key, 'ctx-1');
     });
@@ -99,6 +103,7 @@ void main() {
           isolationContextContainerMap: const {
             'iso-1': {'1'},
           },
+          containerAppLinksShown: true,
         );
         expect(key, isNull);
       },
@@ -114,6 +119,7 @@ void main() {
         isolationContextContainerMap: const {
           'iso-1': {'1', '2'},
         },
+        containerAppLinksShown: true,
       );
       expect(key, 'ctx-a');
     });
@@ -130,6 +136,7 @@ void main() {
           isolationContextContainerMap: const {
             'iso-1': {'1', '2'},
           },
+          containerAppLinksShown: true,
         );
         expect(key, 'ctx-b');
       },
@@ -142,6 +149,7 @@ void main() {
           _container('1', contextId: 'ctx-1', isolatedAppLinkSettings: true),
         ],
         isolationContextContainerMap: const {},
+        containerAppLinksShown: true,
       );
       expect(key, isNull);
     });

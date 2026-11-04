@@ -13,7 +13,7 @@
   "uiHelper_newTabOpened": "Tab baru dibuka",
   "uiHelper_actionSwitch": "Beralih",
   "uiHelper_couldNotLaunchUrl": "Tidak dapat membuka URL ({url})",
-  "uiHelper_canNotHandleScheme": "Tidak dapat menangani \"{scheme}\"",
+  "uiHelper_canNotHandleScheme": "Tidak ada aplikasi yang dapat membuka tautan \"{scheme}\"",
   "uiHelper_tabsClosedCount": "{count, plural, =1{Tab ditutup} other{{count} tab ditutup}}",
   "uiHelper_closeIsolatedTabsTitle": "Tutup tab terisolasi?",
   "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{Ini akan menghapus permanen semua data penjelajahan untuk sesi terisolasi ini.} other{Ini akan menghapus permanen data penjelajahan untuk {count} sesi terisolasi.}}"

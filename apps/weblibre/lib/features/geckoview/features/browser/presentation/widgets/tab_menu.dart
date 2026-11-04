@@ -29,6 +29,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -114,6 +115,11 @@ class TabMenu extends HookConsumerWidget {
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
 
     final controller = this.controller ?? useMenuController();
+    final containerWayOut = ref.watch(
+      hiddenContainerWayOutProvider(selectedTabId, enabled: enableContainer),
+    );
+    final tabHasContainer = containerWayOut.inContainer;
+    final tabSiteAssigned = containerWayOut.siteAssigned;
 
     return MenuAnchor(
       controller: controller,
@@ -296,7 +302,7 @@ class TabMenu extends HookConsumerWidget {
                   }
                 },
               ),
-              if (settings.showIsolatedTabUi)
+              if (settings.isolatedTabEntryPointsShown)
                 MenuItemButton(
                   leadingIcon: Icon(
                     MdiIcons.snowflake,
@@ -334,87 +340,97 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.contentDuplicate),
             child: Text(l10n.browser_menuCloneTab),
           ),
-        if (enableContainer && settings.showContainerUi)
+        // While containers are hidden the submenu keeps only its ways out —
+        // unassign the tab or its site — for a tab that has one (P5).
+        if (enableContainer &&
+            (settings.containerEntryPointsShown ||
+                tabHasContainer ||
+                tabSiteAssigned))
           SubmenuButton(
             menuChildren: [
-              MenuItemButton(
-                leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
-                child: Text(l10n.browser_menuAssignContainer),
-                onPressed: () async {
-                  final selection = await const ContainerSelectionRoute()
-                      .push<ContainerSelectionResult?>(context);
+              if (settings.containerEntryPointsShown)
+                MenuItemButton(
+                  leadingIcon: const Icon(MdiIcons.folderArrowUpDownOutline),
+                  child: Text(l10n.browser_menuAssignContainer),
+                  onPressed: () async {
+                    final selection = await const ContainerSelectionRoute()
+                        .push<ContainerSelectionResult?>(context);
 
-                  switch (selection) {
-                    case ContainerSelectionSelected(:final containerId):
-                      final containerData = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .getContainerData(containerId);
+                    switch (selection) {
+                      case ContainerSelectionSelected(:final containerId):
+                        final containerData = await ref
+                            .read(containerRepositoryProvider.notifier)
+                            .getContainerData(containerId);
 
-                      if (containerData != null) {
+                        if (containerData != null) {
+                          final tabState = ref.read(
+                            tabStateProvider(selectedTabId),
+                          )!;
+
+                          await ref
+                              .read(tabDataRepositoryProvider.notifier)
+                              .assignContainer(tabState.id, containerData);
+                        }
+                      case ContainerSelectionUnassigned():
                         final tabState = ref.read(
                           tabStateProvider(selectedTabId),
                         )!;
 
                         await ref
                             .read(tabDataRepositoryProvider.notifier)
-                            .assignContainer(tabState.id, containerData);
-                      }
-                    case ContainerSelectionUnassigned():
-                      final tabState = ref.read(
-                        tabStateProvider(selectedTabId),
-                      )!;
-
-                      await ref
-                          .read(tabDataRepositoryProvider.notifier)
-                          .unassignContainer(tabState.id);
-                    case null:
-                      break;
-                  }
-                },
-              ),
-              ContainerRelationUnassignedVisibility(
-                child: MenuItemButton(
-                  leadingIcon: const Icon(MdiIcons.webPlus),
-                  child: Text(l10n.browser_menuUrlRelation),
-                  onPressed: () async {
-                    final selection = await const ContainerSelectionRoute()
-                        .push<ContainerSelectionResult?>(context);
-
-                    if (selection case ContainerSelectionSelected(
-                      :final containerId,
-                    )) {
-                      final containerData = await ref
-                          .read(containerRepositoryProvider.notifier)
-                          .getContainerData(containerId);
-
-                      if (containerData != null) {
-                        final tabState = ref.read(
-                          tabStateProvider(selectedTabId),
-                        );
-                        final origin = tabState?.url.origin.mapNotNull(
-                          Uri.parse,
-                        );
-
-                        if (origin != null) {
-                          await ref
-                              .read(containerRepositoryProvider.notifier)
-                              .replaceContainer(
-                                containerData.copyWith.metadata(
-                                  containerData.metadata.copyWith.assignedSites(
-                                    [
-                                      ...?containerData.metadata.assignedSites,
-                                      origin,
-                                    ],
-                                  ),
-                                ),
-                              );
-                        }
-                      }
+                            .unassignContainer(tabState.id);
+                      case null:
+                        break;
                     }
                   },
                 ),
-              ),
+              if (settings.containerEntryPointsShown)
+                ContainerRelationUnassignedVisibility(
+                  tabId: selectedTabId,
+                  child: MenuItemButton(
+                    leadingIcon: const Icon(MdiIcons.webPlus),
+                    child: Text(l10n.browser_menuUrlRelation),
+                    onPressed: () async {
+                      final selection = await const ContainerSelectionRoute()
+                          .push<ContainerSelectionResult?>(context);
+
+                      if (selection case ContainerSelectionSelected(
+                        :final containerId,
+                      )) {
+                        final containerData = await ref
+                            .read(containerRepositoryProvider.notifier)
+                            .getContainerData(containerId);
+
+                        if (containerData != null) {
+                          final tabState = ref.read(
+                            tabStateProvider(selectedTabId),
+                          );
+                          final origin = tabState?.url.origin.mapNotNull(
+                            Uri.parse,
+                          );
+
+                          if (origin != null) {
+                            await ref
+                                .read(containerRepositoryProvider.notifier)
+                                .replaceContainer(
+                                  containerData.copyWith.metadata(
+                                    containerData.metadata.copyWith
+                                        .assignedSites([
+                                          ...?containerData
+                                              .metadata
+                                              .assignedSites,
+                                          origin,
+                                        ]),
+                                  ),
+                                );
+                          }
+                        }
+                      }
+                    },
+                  ),
+                ),
               ContainerRelationAssignedVisibility(
+                tabId: selectedTabId,
                 child: MenuItemButton(
                   leadingIcon: const Icon(MdiIcons.webMinus),
                   child: Text(l10n.browser_menuUnassignUrlRelation),
@@ -472,7 +488,9 @@ class TabMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.folder),
             child: Text(l10n.browser_menuContainerSubmenu),
           ),
-        if (enableHierarchy)
+        // Changing or detaching a parent edits the tab tree (`switch.tree_tabs`).
+        if (enableHierarchy &&
+            settings.isFeatureShown(FeatureId.tabsHierarchyDisplay))
           _TabHierarchySubmenu(
             selectedTabId: selectedTabId,
             controller: controller,

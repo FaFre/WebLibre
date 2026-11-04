@@ -27,6 +27,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -47,6 +48,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.dart';
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_editor.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 enum _DialogMode { create, edit }
 
@@ -90,6 +92,13 @@ class ContainerEditScreen extends HookConsumerWidget {
     final colorScheme = theme.colorScheme;
 
     final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
+    // A name suggestion is an AI container suggestion: offered only with
+    // on-device AI on and its feature shown, like the suggestion chips.
+    final containerSuggestionsActive = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.containerSuggestionsActive,
+      ),
+    );
     final proxyOptionsLoading = ref.watch(
       singboxProxyProfilesRepositoryProvider.select(
         (value) => value.isLoading && !value.hasValue,
@@ -409,11 +418,9 @@ class ContainerEditScreen extends HookConsumerWidget {
                               decoration: InputDecoration(
                                 hintText: l10n.tabs_containerNameHint,
                                 border: InputBorder.none,
-                                suffixIcon: _buildMagicWandButton(
-                                  context,
-                                  ref,
-                                  textController,
-                                ),
+                                suffixIcon: containerSuggestionsActive
+                                    ? _buildMagicWandButton(textController)
+                                    : null,
                               ),
                             ),
                           ),
@@ -566,90 +573,118 @@ class ContainerEditScreen extends HookConsumerWidget {
                                 : null,
                           ),
                         ),
-                        const Divider(height: 1, indent: 56),
-                        explainWhenLocked(
-                          ListTile(
-                            leading: const Icon(Icons.route_outlined),
-                            title: Text(l10n.tabs_proxyConnectionLabel),
-                            subtitle: Text(switch (proxyConnectionId.value) {
-                              _ when isolationLocked =>
-                                l10n.tabs_requiresCookieIsolation,
-                              final id? => proxyConnectionTitle(
-                                proxyOptions,
-                                id,
-                                l10n,
-                                isLoading: proxyOptionsLoading,
+                        // Per-container routing is `container.proxy_routing`
+                        // (containers and connections shown). This is a task
+                        // screen reached while browsing, so a hidden option is
+                        // left out rather than grayed out; a route already set
+                        // stays, with its way out (P5).
+                        HiddenFeatureGate.feature(
+                          FeatureId.containerProxyRouting,
+                          inForce: proxyConnectionId.value != null,
+                          omitWhenHidden: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Divider(height: 1, indent: 56),
+                              explainWhenLocked(
+                                ListTile(
+                                  leading: const Icon(Icons.route_outlined),
+                                  title: Text(l10n.tabs_proxyConnectionLabel),
+                                  subtitle: Text(
+                                    switch (proxyConnectionId.value) {
+                                      _ when isolationLocked =>
+                                        l10n.tabs_requiresCookieIsolation,
+                                      final id? => proxyConnectionTitle(
+                                        proxyOptions,
+                                        id,
+                                        l10n,
+                                        isLoading: proxyOptionsLoading,
+                                      ),
+                                      null => l10n.tabs_proxyConnectionNone,
+                                    },
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  enabled: canPickProxy,
+                                  onTap: canPickProxy
+                                      ? () async {
+                                          final createdTemporaryIdentity =
+                                              contextualIdentity.value == null;
+
+                                          if (createdTemporaryIdentity) {
+                                            contextualIdentity.value =
+                                                initialContainer
+                                                    .metadata
+                                                    .contextualIdentity ??
+                                                uuid.v4();
+                                          }
+
+                                          final outcome =
+                                              await showProxyConnectionPicker(
+                                                context,
+                                                selectedProxyConnectionId:
+                                                    proxyConnectionId.value,
+                                              );
+
+                                          switch (outcome) {
+                                            case null:
+                                              // Dismissed without selecting — leave
+                                              // existing value untouched, but undo
+                                              // any temporary identity we created.
+                                              if (createdTemporaryIdentity) {
+                                                contextualIdentity.value = null;
+                                              }
+                                            case ProxyPickerCleared():
+                                              proxyConnectionId.value = null;
+                                              if (createdTemporaryIdentity) {
+                                                contextualIdentity.value = null;
+                                                bypassGlobalProxy.value = false;
+                                              }
+                                            case ProxyPickerSelected(:final id):
+                                              proxyConnectionId.value = id;
+                                              bypassGlobalProxy.value = false;
+                                            case ProxyPickerDirect():
+                                              // Not offered here — this screen has
+                                              // its own bypass switch below — but
+                                              // the mapping is the same one it
+                                              // performs.
+                                              proxyConnectionId.value = null;
+                                              bypassGlobalProxy.value = true;
+                                          }
+                                        }
+                                      : null,
+                                ),
                               ),
-                              null => l10n.tabs_proxyConnectionNone,
-                            }),
-                            trailing: const Icon(Icons.chevron_right),
-                            enabled: canPickProxy,
-                            onTap: canPickProxy
-                                ? () async {
-                                    final createdTemporaryIdentity =
-                                        contextualIdentity.value == null;
-
-                                    if (createdTemporaryIdentity) {
-                                      contextualIdentity.value =
-                                          initialContainer
-                                              .metadata
-                                              .contextualIdentity ??
-                                          uuid.v4();
-                                    }
-
-                                    final outcome =
-                                        await showProxyConnectionPicker(
-                                          context,
-                                          selectedProxyConnectionId:
-                                              proxyConnectionId.value,
-                                        );
-
-                                    switch (outcome) {
-                                      case null:
-                                        // Dismissed without selecting — leave
-                                        // existing value untouched, but undo
-                                        // any temporary identity we created.
-                                        if (createdTemporaryIdentity) {
-                                          contextualIdentity.value = null;
-                                        }
-                                      case ProxyPickerCleared():
-                                        proxyConnectionId.value = null;
-                                        if (createdTemporaryIdentity) {
-                                          contextualIdentity.value = null;
-                                          bypassGlobalProxy.value = false;
-                                        }
-                                      case ProxyPickerSelected(:final id):
-                                        proxyConnectionId.value = id;
-                                        bypassGlobalProxy.value = false;
-                                      case ProxyPickerDirect():
-                                        // Not offered here — this screen has
-                                        // its own bypass switch below — but
-                                        // the mapping is the same one it
-                                        // performs.
-                                        proxyConnectionId.value = null;
-                                        bypassGlobalProxy.value = true;
-                                    }
-                                  }
-                                : null,
+                            ],
                           ),
                         ),
-                        const Divider(height: 1, indent: 56),
-                        explainWhenLocked(
-                          SwitchListTile.adaptive(
-                            value:
-                                canBypassGlobalProxy && bypassGlobalProxy.value,
-                            title: Text(l10n.tabs_bypassGlobalProxy),
-                            subtitle: Text(
-                              isIsolated
-                                  ? l10n.tabs_bypassGlobalProxySubtitle
-                                  : l10n.tabs_requiresCookieIsolation,
-                            ),
-                            secondary: const Icon(Icons.public),
-                            onChanged: canBypassGlobalProxy
-                                ? (value) {
-                                    bypassGlobalProxy.value = value;
-                                  }
-                                : null,
+                        HiddenFeatureGate.feature(
+                          FeatureId.containerBypassGlobalProxy,
+                          inForce: bypassGlobalProxy.value,
+                          omitWhenHidden: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Divider(height: 1, indent: 56),
+                              explainWhenLocked(
+                                SwitchListTile.adaptive(
+                                  value:
+                                      canBypassGlobalProxy &&
+                                      bypassGlobalProxy.value,
+                                  title: Text(l10n.tabs_bypassGlobalProxy),
+                                  subtitle: Text(
+                                    isIsolated
+                                        ? l10n.tabs_bypassGlobalProxySubtitle
+                                        : l10n.tabs_requiresCookieIsolation,
+                                  ),
+                                  secondary: const Icon(Icons.public),
+                                  onChanged: canBypassGlobalProxy
+                                      ? (value) {
+                                          bypassGlobalProxy.value = value;
+                                        }
+                                      : null,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const Divider(height: 1, indent: 56),
@@ -670,78 +705,118 @@ class ContainerEditScreen extends HookConsumerWidget {
                                 : null,
                           ),
                         ),
-                        const Divider(height: 1, indent: 56),
-                        explainWhenLocked(
-                          SwitchListTile.adaptive(
-                            value: isIsolated && strictMode.value,
-                            title: Text(l10n.tabs_strictMode),
-                            subtitle: Text(
-                              isIsolated
-                                  ? l10n.tabs_strictModeSubtitle
-                                  : l10n.tabs_requiresCookieIsolation,
-                            ),
-                            secondary: const Icon(MdiIcons.shieldLockOutline),
-                            onChanged: isIsolated
-                                ? (value) {
-                                    strictMode.value = value;
-                                  }
-                                : null,
-                          ),
-                        ),
-                        const Divider(height: 1, indent: 56),
-                        explainWhenLocked(
-                          SwitchListTile.adaptive(
-                            value: isIsolated && isolatedAppLinkSettings.value,
-                            title: Text(l10n.tabs_isolatedAppLinkSettings),
-                            subtitle: Text(
-                              isIsolated
-                                  ? l10n.tabs_isolatedAppLinkSettingsSubtitle
-                                  : l10n.tabs_requiresCookieIsolation,
-                            ),
-                            secondary: const Icon(MdiIcons.openInApp),
-                            onChanged: isIsolated
-                                ? (value) {
-                                    isolatedAppLinkSettings.value = value;
-                                  }
-                                : null,
-                          ),
-                        ),
-                        // The per-container mode + rules live in GeneralSettings
-                        // (keyed by the persisted contextId) and are edited live,
-                        // like the global app-link settings. Only offered in edit
-                        // mode against the saved, immutable contextId — a create
-                        // draft's contextId can still churn (cookie-isolation
-                        // toggling regenerates it), which would orphan overrides.
-                        if (_mode == _DialogMode.edit &&
-                            initialContainer.metadata.contextualIdentity !=
-                                null &&
-                            isolatedAppLinkSettings.value) ...[
-                          const Divider(height: 1, indent: 56),
-                          ListTile(
-                            leading: const Icon(Icons.tune),
-                            title: Text(l10n.tabs_appLinkBehavior),
-                            subtitle: Text(l10n.tabs_appLinkBehaviorSubtitle),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () async {
-                              await showDialog<void>(
-                                context: context,
-                                anchorPoint: preferredAnchorPoint(
-                                  MediaQuery.of(context),
+                        // Expert options (`container.strict_mode`,
+                        // `container.app_links`): left out while hidden,
+                        // when they do not apply either. The container keeps
+                        // its value for when they are shown again.
+                        HiddenFeatureGate.feature(
+                          FeatureId.containerStrictMode,
+                          omitWhenHidden: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Divider(height: 1, indent: 56),
+                              explainWhenLocked(
+                                SwitchListTile.adaptive(
+                                  value: isIsolated && strictMode.value,
+                                  title: Text(l10n.tabs_strictMode),
+                                  subtitle: Text(
+                                    isIsolated
+                                        ? l10n.tabs_strictModeSubtitle
+                                        : l10n.tabs_requiresCookieIsolation,
+                                  ),
+                                  secondary: const Icon(
+                                    MdiIcons.shieldLockOutline,
+                                  ),
+                                  onChanged: isIsolated
+                                      ? (value) {
+                                          strictMode.value = value;
+                                        }
+                                      : null,
                                 ),
-                                builder: (context) =>
-                                    ContainerAppLinkSettingsDialog(
-                                      contextId: initialContainer
-                                          .metadata
-                                          .contextualIdentity!,
-                                      containerName:
-                                          textController.text.trim().isNotEmpty
-                                          ? textController.text.trim()
-                                          : initialContainer.name,
-                                    ),
-                              );
-                            },
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                        HiddenFeatureGate.feature(
+                          FeatureId.containerAppLinks,
+                          omitWhenHidden: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Divider(height: 1, indent: 56),
+                              explainWhenLocked(
+                                SwitchListTile.adaptive(
+                                  value:
+                                      isIsolated &&
+                                      isolatedAppLinkSettings.value,
+                                  title: Text(
+                                    l10n.tabs_isolatedAppLinkSettings,
+                                  ),
+                                  subtitle: Text(
+                                    isIsolated
+                                        ? l10n.tabs_isolatedAppLinkSettingsSubtitle
+                                        : l10n.tabs_requiresCookieIsolation,
+                                  ),
+                                  secondary: const Icon(MdiIcons.openInApp),
+                                  onChanged: isIsolated
+                                      ? (value) {
+                                          isolatedAppLinkSettings.value = value;
+                                        }
+                                      : null,
+                                ),
+                              ),
+                              // Inside the gate: while it is hidden the
+                              // container's own rules do not apply, so
+                              // editing them would change nothing.
+                              // The per-container mode + rules live in
+                              // GeneralSettings (keyed by the persisted
+                              // contextId) and are edited live, like the
+                              // global app-link settings. Only offered in
+                              // edit mode against the saved, immutable
+                              // contextId — a create draft's contextId can
+                              // still churn (cookie-isolation toggling
+                              // regenerates it), which would orphan
+                              // overrides.
+                              if (_mode == _DialogMode.edit &&
+                                  initialContainer
+                                          .metadata
+                                          .contextualIdentity !=
+                                      null &&
+                                  isolatedAppLinkSettings.value) ...[
+                                const Divider(height: 1, indent: 56),
+                                ListTile(
+                                  leading: const Icon(Icons.tune),
+                                  title: Text(l10n.tabs_appLinkBehavior),
+                                  subtitle: Text(
+                                    l10n.tabs_appLinkBehaviorSubtitle,
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  onTap: () async {
+                                    await showDialog<void>(
+                                      context: context,
+                                      anchorPoint: preferredAnchorPoint(
+                                        MediaQuery.of(context),
+                                      ),
+                                      builder: (context) =>
+                                          ContainerAppLinkSettingsDialog(
+                                            contextId: initialContainer
+                                                .metadata
+                                                .contextualIdentity!,
+                                            containerName:
+                                                textController.text
+                                                    .trim()
+                                                    .isNotEmpty
+                                                ? textController.text.trim()
+                                                : initialContainer.name,
+                                          ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -851,11 +926,7 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
   }
 
-  Widget? _buildMagicWandButton(
-    BuildContext context,
-    WidgetRef ref,
-    TextEditingController textController,
-  ) {
+  Widget? _buildMagicWandButton(TextEditingController textController) {
     final predict = switch (_mode) {
       _DialogMode.edit => switch (initialContainer) {
         ContainerDataWithCount(:final tabCount?) when tabCount > 0 =>

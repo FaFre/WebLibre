@@ -23,7 +23,7 @@ import 'package:weblibre/features/user/domain/presentation/screens/profile_resto
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/obscurable_text_field.dart';
 
-/// The screen the first-run "Restore from Backup" flow opens.
+/// The screen the first-run "Restore from backup" flow opens.
 ///
 /// It used to open without a `forcedOverwriteTarget`, which asked for a *new
 /// user's name* and then built one — leaving the profile the user had just

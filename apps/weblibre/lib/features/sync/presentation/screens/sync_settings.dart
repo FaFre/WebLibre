@@ -27,6 +27,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/format.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -36,6 +37,40 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
+
+/// Whether a sync server override is set. The Expert section that holds
+/// them then stays, on the screen and in the search (P5).
+final syncServerOverrideSet = generalSettingsWithDefaultsProvider.select(
+  (s) =>
+      s.syncServerOverride.isNotEmpty || s.syncTokenServerOverride.isNotEmpty,
+);
+
+/// What the settings search indexes of this screen.
+///
+/// The screen builds its sections from live account state, so they cannot be
+/// indexed ahead of time. Only the Expert server overrides need an entry of
+/// their own: hidden on the screen while Expert settings are off, the search
+/// is how they are found and revealed (S1).
+List<SettingsSectionDefinition> syncSettingsSearchSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.sync_sectionServerOverrides,
+      feature: FeatureId.syncCustomServer,
+      keptWhen: syncServerOverrideSet,
+      entries: [
+        SettingsEntryDefinition.searchOnly(
+          title: l10n.sync_entryServerOverridesTitle,
+          subtitle: l10n.sync_entryServerOverridesSubtitle,
+          keywords: settingsKeywords(l10n.sync_entryServerOverridesKeywords),
+        ),
+      ],
+    ),
+  ];
+}
 
 class SyncSettingsScreen extends HookConsumerWidget {
   const SyncSettingsScreen({super.key});
@@ -312,6 +347,10 @@ class SyncSettingsScreen extends HookConsumerWidget {
       ),
       SettingsSectionDefinition(
         title: l10n.sync_sectionServerOverrides,
+        // Expert (`sync.custom_server`). An override already in place stays
+        // usable, so it can always be checked and cleared.
+        feature: FeatureId.syncCustomServer,
+        keptWhen: syncServerOverrideSet,
         entries: [
           SettingsEntryDefinition(
             title: l10n.sync_entryServerOverridesTitle,
@@ -445,7 +484,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(l10n.common_cancel),
             ),
-            FilledButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(l10n.sync_actionSignOut),
             ),
@@ -480,7 +519,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(l10n.common_cancel),
             ),
-            FilledButton(
+            TextButton(
               onPressed: () async {
                 final newName = controller.text.trim();
                 if (newName.isEmpty) {
@@ -553,7 +592,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
               onPressed: () => Navigator.of(context).pop(),
               child: Text(l10n.common_cancel),
             ),
-            FilledButton(
+            TextButton(
               onPressed: () async {
                 final value = controller.text.trim();
                 if (value.isNotEmpty) {

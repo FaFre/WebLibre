@@ -21,13 +21,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/units_l10n.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
-List<SettingsSectionDefinition> _behaviorSections(BuildContext context) {
+List<SettingsSectionDefinition> gestureBehaviorSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
 
   return [
@@ -76,12 +78,16 @@ class GestureBehaviorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return SettingsDetailScaffold(
-      title: l10n.gestures_behaviorTimingTitle,
-      subtitle: l10n.gestures_behaviorTimingScreenSubtitle,
-      icon: Icons.tune,
-      sections: _behaviorSections(context),
-      actions: const [_ResetBehaviorButton()],
+    return HiddenFeatureScope(
+      feature: FeatureId.inputDrawnGestures,
+      child: SettingsDetailScaffold(
+        title: l10n.gestures_behaviorTimingTitle,
+        subtitle: l10n.gestures_behaviorTimingScreenSubtitle,
+        icon: Icons.tune,
+        sections: gestureBehaviorSections(context),
+        // Resetting writes every timing default: gated like the sliders.
+        actions: const [HiddenFeatureGate(child: _ResetBehaviorButton())],
+      ),
     );
   }
 }
@@ -112,7 +118,7 @@ class _ResetBehaviorButton extends ConsumerWidget {
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(l10n.common_cancel),
               ),
-              FilledButton(
+              TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(l10n.common_reset),
               ),
@@ -143,7 +149,7 @@ class _StrokeLengthSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
 
     return ListTile(
       leading: const Icon(MdiIcons.gestureTap),
@@ -174,7 +180,7 @@ class _TimeoutSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -214,7 +220,7 @@ class _CooldownSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -256,7 +262,7 @@ class _StrokeIntervalSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

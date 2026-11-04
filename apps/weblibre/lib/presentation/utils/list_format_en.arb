@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+
+  "listFormat_separator": ", ",
+  "@listFormat_separator": {
+    "description": "Separator between the items of a short list of UI names, e.g. the visibility switches a feature also needs (\"Containers, Tor, VPN and proxies\"). Never followed by a conjunction such as \"and\". Keep the trailing space if your language uses one."
+  }
+}

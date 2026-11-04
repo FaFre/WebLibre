@@ -767,7 +767,7 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
 ) {
   final enableAiFeatures = ref.watch(
     generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.enableLocalAiFeatures,
+      (settings) => settings.containerSuggestionsActive,
     ),
   );
 
@@ -1452,7 +1452,7 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
   final filterOptions = ref.watch(tabViewFilterControllerProvider);
   final flattenPinned =
       filterOptions.sortPinnedFirst &&
-      (!scope.isTray || !filterOptions.showHierarchicalTabs);
+      (!scope.isTray || !ref.watch(effectiveShowHierarchicalTabsProvider));
   if (!flattenPinned) {
     return EquatableValue(groupedItems);
   }
@@ -1525,7 +1525,9 @@ EquatableValue<List<TabListItemEntity>> visibleTabListItems(
 EquatableValue<List<String>?> sequentialTabNavigationOrder(Ref ref) {
   final crossContainers = ref.watch(
     generalSettingsWithDefaultsProvider.select(
-      (settings) => settings.effectiveSequentialTabNavigationCrossContainers,
+      // Already spans every container while containers are hidden
+      // ([GeneralSettings.effective]).
+      (settings) => settings.sequentialTabNavigationCrossContainers,
     ),
   );
 

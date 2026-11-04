@@ -21,9 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -172,6 +174,15 @@ class _InstallConfigSheet extends HookConsumerWidget {
 
     final nameController = useTextEditingController(text: defaultName);
 
+    // Without the picker (`webapps.storage_picker`, hidden with
+    // `switch.webapp_storage`) the app keeps the source tab's storage, and the
+    // sheet says plainly which one that is.
+    final storagePickerShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.webappsStoragePicker),
+      ),
+    );
+
     // Both come from the tab being installed — not the selected tab, and not
     // the container picked in the tab bar, which the tab need not belong to.
     final tabContextId = tabId != null
@@ -310,21 +321,24 @@ class _InstallConfigSheet extends HookConsumerWidget {
                 ),
               ),
             ),
-            RadioGroup<int>(
-              groupValue: selectedIndex.value,
-              onChanged: (v) {
-                if (v != null) {
-                  userTouched.value = true;
-                  selectedIndex.value = v;
-                }
-              },
-              child: Column(
-                children: [
-                  for (var i = 0; i < options.length; i++)
-                    _StorageTile(option: options[i], value: i),
-                ],
-              ),
-            ),
+            if (storagePickerShown)
+              RadioGroup<int>(
+                groupValue: selectedIndex.value,
+                onChanged: (v) {
+                  if (v != null) {
+                    userTouched.value = true;
+                    selectedIndex.value = v;
+                  }
+                },
+                child: Column(
+                  children: [
+                    for (var i = 0; i < options.length; i++)
+                      _StorageTile(option: options[i], value: i),
+                  ],
+                ),
+              )
+            else
+              _StorageSummary(option: options[selectedIndex.value]),
             const SizedBox(height: 8),
             const Divider(height: 1),
             if (showAppOption)
@@ -349,6 +363,53 @@ class _InstallConfigSheet extends HookConsumerWidget {
   }
 }
 
+(String, String, IconData) _storageOptionTexts(
+  BuildContext context,
+  _StorageOption option,
+) {
+  final l10n = AppLocalizations.of(context);
+  return switch (option) {
+    _StorageDefault() => (
+      l10n.pwa_storageDefaultTitle,
+      l10n.pwa_storageDefaultSubtitle,
+      Icons.public,
+    ),
+    _StorageContainer(:final label) => (
+      l10n.pwa_storageContainerTitle(label),
+      l10n.pwa_storageContainerSubtitle,
+      Icons.folder_outlined,
+    ),
+    _StorageInheritIsolated() => (
+      l10n.pwa_storageInheritIsolatedTitle,
+      l10n.pwa_storageInheritIsolatedSubtitle,
+      Icons.link,
+    ),
+    _StorageNewIsolated() => (
+      l10n.pwa_storageNewIsolatedTitle,
+      l10n.pwa_storageNewIsolatedSubtitle,
+      Icons.shield_outlined,
+    ),
+  };
+}
+
+/// The storage the app will use, when there is no choice to offer.
+class _StorageSummary extends StatelessWidget {
+  final _StorageOption option;
+
+  const _StorageSummary({required this.option});
+
+  @override
+  Widget build(BuildContext context) {
+    final (title, subtitle, icon) = _storageOptionTexts(context, option);
+    return ListTile(
+      dense: true,
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+    );
+  }
+}
+
 class _StorageTile extends StatelessWidget {
   final _StorageOption option;
   final int value;
@@ -357,30 +418,7 @@ class _StorageTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final (title, subtitle, icon) = switch (option) {
-      _StorageDefault() => (
-        l10n.pwa_storageDefaultTitle,
-        l10n.pwa_storageDefaultSubtitle,
-        Icons.public,
-      ),
-      _StorageContainer(:final label) => (
-        l10n.pwa_storageContainerTitle(label),
-        l10n.pwa_storageContainerSubtitle,
-        Icons.folder_outlined,
-      ),
-      _StorageInheritIsolated() => (
-        l10n.pwa_storageInheritIsolatedTitle,
-        l10n.pwa_storageInheritIsolatedSubtitle,
-        Icons.link,
-      ),
-      _StorageNewIsolated() => (
-        l10n.pwa_storageNewIsolatedTitle,
-        l10n.pwa_storageNewIsolatedSubtitle,
-        Icons.shield_outlined,
-      ),
-    };
-
+    final (title, subtitle, icon) = _storageOptionTexts(context, option);
     return RadioListTile<int>(
       value: value,
       dense: true,

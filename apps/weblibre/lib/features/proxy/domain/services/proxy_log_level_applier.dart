@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
@@ -52,27 +51,23 @@ class ProxyLogLevelApplier extends _$ProxyLogLevelApplier {
 
   @override
   void build() {
-    ref.listen(
-      proxyDiagnosticsSettingsRepositoryProvider.select(
-        (value) => value.value?.logLevel,
-      ),
-      (previous, next) {
-        if (next == null) return;
+    // The level in force: hiding detailed logs restarts the runtime at the
+    // default level, and showing them again at the stored one.
+    ref.listen(loadedProxyLogLevelProvider, (previous, next) {
+      if (next == null) return;
 
-        if (!_seeded) {
-          // The value already in force when this started: the runtime, if it is
-          // even up, was started from it.
-          _seeded = true;
-          _applied = next;
-          return;
-        }
-        if (_applied == next) return;
-
+      if (!_seeded) {
+        // The value already in force when this started: the runtime, if it is
+        // even up, was started from it.
+        _seeded = true;
         _applied = next;
-        unawaited(_reload(next));
-      },
-      fireImmediately: true,
-    );
+        return;
+      }
+      if (_applied == next) return;
+
+      _applied = next;
+      unawaited(_reload(next));
+    }, fireImmediately: true);
   }
 
   Future<void> _reload(ProxyLogLevel level) async {

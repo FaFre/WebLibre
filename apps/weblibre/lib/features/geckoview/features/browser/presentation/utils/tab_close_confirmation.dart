@@ -83,6 +83,7 @@ Future<bool> confirmBulkTabCloseIfNeeded(
 
   return await ui_helper.confirmIsolatedTabClose(
     context,
+    ref.read,
     groupCount: groupsToDelete,
   );
 }

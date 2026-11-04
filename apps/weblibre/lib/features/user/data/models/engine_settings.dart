@@ -25,6 +25,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:nullability/nullability.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/user/data/models/ublock_filter_list_settings.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 
@@ -332,7 +333,7 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
     bool? isolatedProcessEnabled,
     bool? appZygoteProcessEnabled,
     bool? extensionsWebAPIEnabled,
-    super.lnaBlocking,
+    bool? lnaBlocking,
     bool? lnaBlockTrackers,
     bool? lnaEnabled,
   }) : ublockFilterListSettings =
@@ -398,6 +399,10 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          isolatedProcessEnabled: isolatedProcessEnabled ?? false,
          appZygoteProcessEnabled: appZygoteProcessEnabled ?? false,
          extensionsWebAPIEnabled: extensionsWebAPIEnabled ?? true,
+         // Blocking is on unless the user turns it off. Profiles created
+         // before this default existed keep `false`, Gecko's default, written
+         // by the user database's v12 migration.
+         lnaBlocking: lnaBlocking ?? true,
          lnaBlockTrackers: lnaBlockTrackers ?? true,
          lnaEnabled: lnaEnabled ?? true,
        );
@@ -428,6 +433,89 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
       _$EngineSettingsFromJson(json);
 
   Map<String, dynamic> toJson() => _$EngineSettingsToJson(this);
+
+  /// These settings as they apply while [isShown] says which features are
+  /// shown (`GeneralSettings.isFeatureShown`): every setting of a hidden
+  /// feature at its hidden value, the value used while nothing is stored.
+  /// The stored values are kept and apply again once the feature is shown.
+  ///
+  /// Exempt, and returned as stored: all of Secure DNS (where data goes),
+  /// and the settings of features that are always shown.
+  EngineSettings effective(bool Function(FeatureId feature) isShown) {
+    final defaults = EngineSettings.withDefaults();
+    var settings = this;
+
+    if (!isShown(FeatureId.privacyBasicSwitches)) {
+      settings = settings.copyWith(
+        httpsOnlyMode: defaults.httpsOnlyMode,
+        globalPrivacyControlEnabled: defaults.globalPrivacyControlEnabled,
+        queryParameterStripping: defaults.queryParameterStripping,
+        bounceTrackingProtectionMode: defaults.bounceTrackingProtectionMode,
+      );
+    }
+    if (!isShown(FeatureId.privacyTrackingProtectionLevel) ||
+        (settings.trackingProtectionPolicy == TrackingProtectionPolicy.custom &&
+            !isShown(FeatureId.privacyEtpCustomPolicies))) {
+      // The custom policy's own fields are kept: they only apply with it.
+      settings = settings.copyWith(
+        trackingProtectionPolicy: defaults.trackingProtectionPolicy,
+      );
+    }
+    if (!isShown(FeatureId.privacySafeBrowsingSwitches)) {
+      settings = settings.copyWith(
+        safeBrowsingMalwareEnabled: defaults.safeBrowsingMalwareEnabled,
+        safeBrowsingPhishingEnabled: defaults.safeBrowsingPhishingEnabled,
+      );
+    }
+    if (!isShown(FeatureId.privacyBrowserLanguages)) {
+      settings = settings.copyWith(locales: defaults.locales);
+    }
+    if (!isShown(FeatureId.privacyLocalNetworkBlockingSwitch)) {
+      settings = settings.copyWith(
+        lnaEnabled: defaults.lnaEnabled,
+        lnaBlocking: defaults.lnaBlocking,
+        lnaBlockTrackers: defaults.lnaBlockTrackers,
+      );
+    }
+    // The granular overrides are Expert; the hardened preset is Advanced and
+    // keeps applying while only the granular overrides are hidden.
+    if (!isShown(FeatureId.privacyFpOverrides) &&
+        !(isShown(FeatureId.privacyFpHardenedDefaults) &&
+            settings.fingerprintingProtectionOverrides ==
+                FingerprintOverrides.hardenedDefaults().toString())) {
+      settings = settings.copyWith(
+        fingerprintingProtectionOverrides:
+            defaults.fingerprintingProtectionOverrides,
+      );
+    }
+    if (!isShown(FeatureId.privacySiteIsolationSwitch)) {
+      settings = settings.copyWith(fissionEnabled: defaults.fissionEnabled);
+    }
+    if (!isShown(FeatureId.advancedJavascriptControl)) {
+      settings = settings.copyWith(
+        javascriptEnabled: defaults.javascriptEnabled,
+      );
+    }
+    if (!isShown(FeatureId.advancedCustomUserAgent)) {
+      settings = settings.copyWith.userAgent(null);
+    }
+    if (!isShown(FeatureId.advancedThirdPartyCa)) {
+      settings = settings.copyWith(
+        enterpriseRootsEnabled: defaults.enterpriseRootsEnabled,
+      );
+    }
+    if (!isShown(FeatureId.advancedExperimentalProcess)) {
+      settings = settings.copyWith(
+        isolatedProcessEnabled: defaults.isolatedProcessEnabled,
+        appZygoteProcessEnabled: defaults.appZygoteProcessEnabled,
+      );
+    }
+    if (!isShown(FeatureId.extensionsCustomCollection)) {
+      settings = settings.copyWith.addonCollection(null);
+    }
+
+    return settings;
+  }
 
   @override
   List<Object?> get hashParameters => [

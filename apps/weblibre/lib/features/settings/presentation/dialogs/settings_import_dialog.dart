@@ -145,7 +145,7 @@ class _SettingsImportDialog extends HookWidget {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(l10n.common_cancel),
         ),
-        FilledButton(
+        TextButton(
           onPressed: selected.value.isEmpty
               ? null
               : () => Navigator.of(context).pop(selected.value),

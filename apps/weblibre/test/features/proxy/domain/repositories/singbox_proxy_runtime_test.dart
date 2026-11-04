@@ -1260,6 +1260,10 @@ class _FakeProxyDiagnosticsSettingsRepository
   @override
   Future<ProxyDiagnosticsSettings> fetchSettings() async => settings;
 
+  /// Detailed logs shown: what is stored applies.
+  @override
+  Future<ProxyDiagnosticsSettings> fetchEffectiveSettings() async => settings;
+
   @override
   Stream<ProxyDiagnosticsSettings> build() => Stream.value(settings);
 }

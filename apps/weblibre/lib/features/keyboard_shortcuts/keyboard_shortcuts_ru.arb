@@ -22,6 +22,7 @@
   "keyboardShortcuts_recorderProblemAlreadyBound": "Это сочетание уже назначено этому действию.",
   "keyboardShortcuts_recorderTakesFromOther": "Сейчас используется действием «{ownerTitle}». При сохранении оно будет перенесено сюда.",
   "keyboardShortcuts_actionCustomize": "Настроить",
+  "keyboardShortcuts_actionShowAll": "Показать все",
   "keyboardShortcuts_actionReassign": "Переназначить",
   "keyboardShortcuts_actionRestore": "Восстановить"
 }

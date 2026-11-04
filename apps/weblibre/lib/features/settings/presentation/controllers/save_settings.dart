@@ -24,6 +24,14 @@ import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'save_settings.g.dart';
 
+/// Implemented by the onboarding draft scope's save controllers: their
+/// saves go to the draft rather than the live settings.
+///
+/// Widgets that reach state the draft does not hold (toolbar button and menu
+/// arrangements, which have their own stores) hide their entry point below
+/// such a controller, so nothing is written before the user taps Done.
+abstract interface class SavesToDraft {}
+
 @Riverpod(keepAlive: true)
 class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
   @override
@@ -31,7 +39,10 @@ class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
     return Future.value();
   }
 
-  Future<void> save(UpdateGeneralSettingsFunc updateSettings) async {
+  /// Writes [updateSettings] and returns whether it landed. A failure (full
+  /// storage, say) is kept in the state rather than thrown, so a caller that
+  /// confirms the change checks the result first.
+  Future<bool> save(UpdateGeneralSettingsFunc updateSettings) async {
     state = const AsyncLoading();
 
     final result = await AsyncValue.guard(
@@ -40,11 +51,8 @@ class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
           .updateSettings(updateSettings),
     );
 
-    if (!ref.mounted) {
-      return;
-    }
-
-    state = result;
+    if (ref.mounted) state = result;
+    return !result.hasError;
   }
 }
 

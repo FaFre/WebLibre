@@ -67,13 +67,31 @@ List<ModuleOrderEntry> mergeModuleOrderWithDefaults(
   );
 }
 
+/// [entries] with one module moved, for a list that shows only the modules in
+/// [shown]; see [moveAmongShown].
+List<ModuleOrderEntry> reorderShownModules(
+  List<ModuleOrderEntry> entries,
+  List<SearchModuleType> shown,
+  int oldIndex,
+  int newIndex,
+) => moveAmongShown(entries, (e) => e.type, shown, oldIndex, newIndex);
+
+/// How a surface's layout is stored: shared by the provider's `persist()` and
+/// the onboarding commit, which writes a layout before the surface is ever
+/// built and has to know the write landed.
+const moduleOrderStorageOptions = StorageOptions(
+  cacheTime: StorageCacheTime.unsafe_forever,
+);
+
+String encodeModuleOrder(List<ModuleOrderEntry> entries) =>
+    jsonEncode(entries.map((e) => e.toJson()).toList());
+
 @Riverpod(keepAlive: true)
 class SearchModuleOrder extends _$SearchModuleOrder {
-  void reorder(int oldIndex, int newIndex) {
-    final list = [...state];
-    final item = list.removeAt(oldIndex);
-    list.insert(newIndex, item);
-    state = list;
+  /// Moves a module within a list that shows only the modules in [shown];
+  /// see [reorderShownModules].
+  void reorderShown(List<SearchModuleType> shown, int oldIndex, int newIndex) {
+    state = reorderShownModules(state, shown, oldIndex, newIndex);
   }
 
   void toggleVisibility(SearchModuleType type) {
@@ -113,8 +131,8 @@ class SearchModuleOrder extends _$SearchModuleOrder {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: surface.key,
-      options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
-      encode: (state) => jsonEncode(state.map((e) => e.toJson()).toList()),
+      options: moduleOrderStorageOptions,
+      encode: encodeModuleOrder,
       decode: (encoded) {
         final decoded = (jsonDecode(encoded) as List<dynamic>)
             .cast<Map<String, dynamic>>()

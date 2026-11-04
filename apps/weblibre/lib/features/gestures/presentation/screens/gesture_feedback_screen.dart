@@ -19,12 +19,14 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
-List<SettingsSectionDefinition> _feedbackSections(BuildContext context) {
+List<SettingsSectionDefinition> gestureFeedbackSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
 
   return [
@@ -59,11 +61,14 @@ class GestureFeedbackScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return SettingsDetailScaffold(
-      title: l10n.gestures_feedbackTitle,
-      subtitle: l10n.gestures_feedbackScreenSubtitle,
-      icon: Icons.bolt_outlined,
-      sections: _feedbackSections(context),
+    return HiddenFeatureScope(
+      feature: FeatureId.inputDrawnGestures,
+      child: SettingsDetailScaffold(
+        title: l10n.gestures_feedbackTitle,
+        subtitle: l10n.gestures_feedbackScreenSubtitle,
+        icon: Icons.bolt_outlined,
+        sections: gestureFeedbackSections(context),
+      ),
     );
   }
 }
@@ -75,7 +80,7 @@ class _LiveFeedbackTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final showFeedback = ref.watch(
-      gestureSettingsWithDefaultsProvider.select((s) => s.showFeedback),
+      storedGestureSettingsProvider.select((s) => s.showFeedback),
     );
 
     return SwitchListTile.adaptive(
@@ -98,7 +103,7 @@ class _SuggestNextTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
 
     return SwitchListTile.adaptive(
       secondary: const Icon(Icons.lightbulb_outline),
@@ -124,7 +129,7 @@ class _SuggestAfterSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(gestureSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGestureSettingsProvider);
     final enabled = settings.showFeedback && settings.suggestNext;
 
     return Column(

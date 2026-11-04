@@ -23,7 +23,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The arrangement lists themselves, without any chrome around them.
@@ -52,33 +54,52 @@ class MenuLayoutSlivers extends ConsumerWidget {
     final sections = ref.watch(menuLayoutProvider);
     final notifier = ref.read(menuLayoutProvider.notifier);
 
+    // Rows and sections the menu leaves out for a hidden feature are left out
+    // here too, so nothing can be switched on that would never be drawn. They
+    // stay in the saved arrangement, among the same neighbours.
+    final shownFeatures = ref.watch(shownFeaturesProvider);
+    final connectionShown = ref.watch(menuConnectionSectionShownProvider(null));
+    bool itemShown(MenuItemEntry entry) => switch (entry.type.feature) {
+      final feature? => shownFeatures.contains(feature),
+      null => true,
+    };
+    List<MenuItemEntry> shownItems(List<MenuItemEntry> items) =>
+        items.where(itemShown).toList();
+    final shownSections = [
+      for (final entry in sections)
+        if (entry.type != MenuSectionType.connection || connectionShown) entry,
+    ];
+
     final (:section, :item) = resolveMenuLayoutFocus(
       sections,
       focusedSection: focusedSection,
       focusedItem: focusedItem,
     );
 
-    final entries = item?.items ?? section?.items;
+    final entries = (item?.items ?? section?.items).mapNotNull(shownItems);
 
     if (entries == null) {
       return SliverReorderableList(
-        itemCount: sections.length,
-        onReorderItem: notifier.reorderSections,
+        itemCount: shownSections.length,
+        onReorderItem: (oldIndex, newIndex) => notifier.reorderShownSections(
+          [for (final entry in shownSections) entry.type],
+          oldIndex,
+          newIndex,
+        ),
         itemBuilder: (context, index) {
-          final entry = sections[index];
+          final entry = shownSections[index];
+          final children = shownItems(entry.items);
 
           return _ReorderRow(
             key: ValueKey(entry.type),
             index: index,
             icon: entry.type.icon,
             label: entry.type.label(context),
-            subtitle: _shownSummary(context, entry.items),
+            subtitle: _shownSummary(context, children),
             visible: entry.visible,
             onToggleVisibility: () =>
                 notifier.toggleSectionVisibility(entry.type),
-            onTap: entry.items.isEmpty
-                ? null
-                : () => onFocusSection(entry.type),
+            onTap: children.isEmpty ? null : () => onFocusSection(entry.type),
           );
         },
       );
@@ -86,10 +107,16 @@ class MenuLayoutSlivers extends ConsumerWidget {
 
     return SliverReorderableList(
       itemCount: entries.length,
-      onReorderItem: (oldIndex, newIndex) =>
-          notifier.reorderItems(section!.type, item?.type, oldIndex, newIndex),
+      onReorderItem: (oldIndex, newIndex) => notifier.reorderShownItems(
+        section!.type,
+        item?.type,
+        [for (final entry in entries) entry.type],
+        oldIndex,
+        newIndex,
+      ),
       itemBuilder: (context, index) {
         final entry = entries[index];
+        final children = shownItems(entry.items);
 
         return _ReorderRow(
           key: ValueKey(entry.type),
@@ -98,7 +125,7 @@ class MenuLayoutSlivers extends ConsumerWidget {
           label: entry.type.label(context),
           subtitle:
               entry.type.description(context) ??
-              _shownSummary(context, entry.items),
+              _shownSummary(context, children),
           visible: entry.visible,
           onToggleVisibility: () => notifier.toggleItemVisibility(
             section!.type,
@@ -109,7 +136,7 @@ class MenuLayoutSlivers extends ConsumerWidget {
           // never drills further even when it opens a list of its own — those
           // lists are live data (the devices under Send To Device, the
           // extensions under Extensions).
-          onTap: entry.items.isEmpty || item != null
+          onTap: children.isEmpty || item != null
               ? null
               : () => onFocusItem(entry.type),
         );

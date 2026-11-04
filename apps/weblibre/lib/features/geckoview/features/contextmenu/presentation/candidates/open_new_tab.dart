@@ -79,7 +79,7 @@ class OpenInNewTab extends HookConsumerWidget {
     final alternativeTypes = <TabType>[
       TabType.regular,
       TabType.private,
-      if (settings.showIsolatedTabUi) TabType.isolated,
+      if (settings.isolatedTabEntryPointsShown) TabType.isolated,
     ]..remove(currentTabMode.toTabType());
 
     return ListTile(

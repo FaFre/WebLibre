@@ -28,7 +28,7 @@
   "contextualToolbar_longPressAddPrivateTab": "Tambah Tab Pribadi",
   "contextualToolbar_longPressAddIsolatedTab": "Tambah Tab Terisolasi",
   "contextualToolbar_longPressOpenSettings": "Buka Pengaturan",
-  "contextualToolbar_longPressHardRefresh": "Muat Ulang Paksa (lewati cache)",
+  "contextualToolbar_longPressHardRefresh": "Muat Ulang Penuh",
   "contextualToolbar_longPressShowTranslationOptions": "Tampilkan Opsi Terjemahan",
   "contextualToolbar_longPressScrollToTop": "Gulir ke Atas",
   "contextualToolbar_longPressScrollToBottom": "Gulir ke Bawah",

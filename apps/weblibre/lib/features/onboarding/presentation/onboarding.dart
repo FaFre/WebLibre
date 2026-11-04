@@ -25,25 +25,27 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:weblibre/core/filesystem.dart';
-import 'package:weblibre/core/providers/router.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
-import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
+import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
-import 'package:weblibre/features/onboarding/presentation/onboarding_defaults.dart';
+import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
+import 'package:weblibre/features/onboarding/domain/providers/setup_follow_ups.dart';
+import 'package:weblibre/features/onboarding/domain/services/setup_commit.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ai_configuration.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/default_search.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/doh_settings.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/basics.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/permissions.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/privacy_hardening.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/toolbar_layout.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/preset.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ublock_opt_in.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/welcome.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/your_setup.dart';
+import 'package:weblibre/features/onboarding/presentation/widgets/setup_draft_scope.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_backup_list.dart';
 import 'package:weblibre/features/user/domain/presentation/screens/profile_restore.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/button_spinner.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class OnboardingScreen extends HookConsumerWidget {
@@ -64,59 +66,116 @@ class OnboardingScreen extends HookConsumerWidget {
 
     final pageController = usePageController();
     final eulaAccepted = ref.watch(eulaAcceptedProvider);
-    final onboardingMode = ref.watch(onboardingModeProvider);
+    final committing = useState(false);
 
+    // A first run: Welcome, Preset, Basics, Your setup, Permissions. Anything
+    // else is a review after an update, which never shows the Preset step and
+    // changes only what the user edits. Revision 1 predates the on-device AI
+    // features and is asked about those alone, as it always was.
     final isFreshOnboarding = currentRevision < 0;
-    final isReturningUser = currentRevision == 2;
-    final showDetailedPages =
-        isReturningUser || onboardingMode == OnboardingMode.detailed;
 
+    // What Done commits. Watched here, from the first page to the commit, so
+    // the draft survives the pages that do not show it and the routes
+    // Customize pushes over this one.
+    final draft = ref.watch(setupDraftControllerProvider);
+
+    // Every first run starts from a fresh draft. Nothing is written before
+    // Done, so a draft left over from an abandoned run must not leak in.
     useEffect(() {
-      if (!isFreshOnboarding || onboardingMode == OnboardingMode.restore) {
-        return null;
+      if (isFreshOnboarding) {
+        unawaited(
+          Future.microtask(
+            () => ref.read(setupDraftControllerProvider.notifier).discard(),
+          ),
+        );
       }
-
-      unawaited(applyOnboardingPrivacyDefaults(ref));
       return null;
-    }, [isFreshOnboarding, onboardingMode]);
+    }, [isFreshOnboarding]);
 
     final pages = useMemoized<List<Widget>>(() {
-      switch (currentRevision) {
-        case 1:
-          return [const AiConfigurationPage()];
-        default:
-          if (onboardingMode == OnboardingMode.restore && !isReturningUser) {
-            return [WelcomePage(isReturningUser: isReturningUser)];
-          }
-          return [
-            WelcomePage(isReturningUser: isReturningUser),
-            const DefaultSearchPage(),
-            if (showDetailedPages) const DohSettingsPage(),
-            if (showDetailedPages) const ToolbarLayoutPage(),
-            const PrivacyHardeningPage(),
-            const AiConfigurationPage(),
-            if (showDetailedPages)
-              UBlockOptInPage(formKey: GlobalKey<FormState>()),
-            PermissionsPage(formKey: GlobalKey<FormState>()),
-          ];
+      if (currentRevision == 1) return const [AiConfigurationPage()];
+      if (!isFreshOnboarding) {
+        return [
+          const WelcomePage(isReturningUser: true),
+          UBlockOptInPage(formKey: GlobalKey<FormState>()),
+          PermissionsPage(formKey: GlobalKey<FormState>()),
+        ];
       }
-    }, [currentRevision, targetRevision, onboardingMode, isReturningUser]);
+      return [
+        WelcomePage(onRestore: () => _restoreIntoThisUser(context, ref)),
+        const PresetPage(),
+        const SetupDraftScope(step: SetupDraftStep.basics, child: BasicsPage()),
+        const SetupDraftScope(
+          step: SetupDraftStep.customize,
+          child: YourSetupPage(),
+        ),
+        PermissionsPage(formKey: GlobalKey<FormState>()),
+      ];
+    }, [currentRevision, targetRevision]);
 
     final lastPage = useRef(pageController.initialPage);
     final currentPage = useState(pageController.initialPage);
+
+    Future<void> goTo(int page) async {
+      if (disableAnimations) {
+        pageController.jumpToPage(page);
+      } else {
+        await pageController.animateToPage(
+          page,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+        );
+      }
+    }
+
+    Future<void> finish() async {
+      if (pages[currentPage.value] case final IFormPage formPage) {
+        formPage.formKey.currentState?.save();
+      }
+
+      if (!isFreshOnboarding) {
+        await ref
+            .read(onboardingRepositoryProvider.notifier)
+            .pushRevision(targetRevision);
+        if (context.mounted) const BrowserRoute().go(context);
+        return;
+      }
+
+      committing.value = true;
+      try {
+        // Read before the commit writes it: the draft over the settings it
+        // is committed onto, which decides which setups are still selected.
+        final applied = ref.read(draftGeneralSettingsProvider);
+        await ref
+            .read(setupCommitServiceProvider.notifier)
+            .commit(draft, targetRevision: targetRevision);
+
+        // The setups a goal asked for open once the browser shows, outside
+        // an onboarding that could still be cancelled.
+        ref
+            .read(pendingGoalSetupsProvider.notifier)
+            .schedule(draft.setupsToOpen(applied));
+        ref.read(setupDraftControllerProvider.notifier).discard();
+        if (context.mounted) const BrowserRoute().go(context);
+      } catch (error, stackTrace) {
+        logger.e(
+          'Committing the onboarding failed',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (context.mounted) {
+          showErrorMessage(context, l10n.onboarding_commitFailed);
+        }
+      } finally {
+        if (context.mounted) committing.value = false;
+      }
+    }
 
     return PopScope(
       canPop: currentPage.value == 0,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        if (disableAnimations) {
-          pageController.jumpToPage(currentPage.value - 1);
-        } else {
-          await pageController.previousPage(
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut,
-          );
-        }
+        await goTo(currentPage.value - 1);
       },
       child: Scaffold(
         body: SafeArea(
@@ -147,16 +206,9 @@ class OnboardingScreen extends HookConsumerWidget {
                     child: Visibility(
                       visible: currentPage.value > 0,
                       child: TextButton.icon(
-                        onPressed: () async {
-                          if (disableAnimations) {
-                            pageController.jumpToPage(currentPage.value - 1);
-                          } else {
-                            await pageController.previousPage(
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
+                        onPressed: committing.value
+                            ? null
+                            : () => goTo(currentPage.value - 1),
                         icon: const Icon(Icons.chevron_left),
                         label: Text(l10n.onboarding_actionPrevious),
                       ),
@@ -180,62 +232,22 @@ class OnboardingScreen extends HookConsumerWidget {
                       child: TextButton.icon(
                         onPressed: currentPage.value == 0 && !eulaAccepted
                             ? null
-                            : () async {
-                                if (disableAnimations) {
-                                  pageController.jumpToPage(
-                                    currentPage.value + 1,
-                                  );
-                                } else {
-                                  await pageController.nextPage(
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.easeInOut,
-                                  );
-                                }
-                              },
+                            : () => goTo(currentPage.value + 1),
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.chevron_right),
                         label: Text(l10n.onboarding_actionNext),
                       ),
                     )
-                  else if (onboardingMode == OnboardingMode.restore &&
-                      !isReturningUser)
-                    Expanded(
-                      child: TextButton.icon(
-                        onPressed: eulaAccepted
-                            ? () => _restoreIntoThisUser(context, ref)
-                            : null,
-                        iconAlignment: IconAlignment.end,
-                        icon: const Icon(Icons.settings_backup_restore),
-                        label: Text(l10n.onboarding_actionRestore),
-                      ),
-                    )
                   else
+                    // The step that commits everything: the one filled
+                    // button of the flow.
                     Expanded(
-                      child: TextButton.icon(
-                        onPressed: () async {
-                          if (pages[currentPage.value]
-                              case final IFormPage formPage) {
-                            formPage.formKey.currentState?.save();
-                          }
-
-                          if (onboardingMode == OnboardingMode.express) {
-                            unawaited(
-                              ref
-                                  .read(browserAddonServiceProvider.notifier)
-                                  .install('uBlock0@raymondhill.net'),
-                            );
-
-                            await applyOnboardingOptimizedUBlockDefaults(ref);
-                          }
-
-                          await ref
-                              .read(onboardingRepositoryProvider.notifier)
-                              .pushRevision(targetRevision);
-
-                          ref.invalidate(routerProvider);
-                        },
+                      child: FilledButton.icon(
+                        onPressed: committing.value ? null : finish,
                         iconAlignment: IconAlignment.end,
-                        icon: const Icon(Icons.done),
+                        icon: committing.value
+                            ? const ButtonSpinner()
+                            : const Icon(Icons.done),
                         label: Text(l10n.common_done),
                       ),
                     ),

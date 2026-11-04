@@ -103,13 +103,14 @@ class _PermissionsList extends HookConsumerWidget {
             (type) => _PermissionEntry(
               icon: type.icon,
               label: type.label(context),
+              description: type.description(context),
               status: permissions.getStatus(type),
               onChanged: (status) =>
                   updatePermission((w) => w.withStatus(type, status)),
             ),
           )
           .toList(),
-      [permissions],
+      [permissions, l10n],
     );
 
     // Filter to only show permissions that have been explicitly set (not noDecision)
@@ -156,6 +157,7 @@ class _PermissionsList extends HookConsumerWidget {
           (entry) => _PermissionTile(
             icon: entry.icon,
             label: entry.label,
+            description: entry.description,
             status: entry.status,
             onChanged: entry.onChanged,
           ),
@@ -192,12 +194,14 @@ class _PermissionsList extends HookConsumerWidget {
 class _PermissionEntry {
   final IconData icon;
   final String label;
+  final String? description;
   final SitePermissionStatus? status;
   final ValueChanged<SitePermissionStatus> onChanged;
 
   _PermissionEntry({
     required this.icon,
     required this.label,
+    required this.description,
     required this.status,
     required this.onChanged,
   });
@@ -206,12 +210,14 @@ class _PermissionEntry {
 class _PermissionTile extends StatelessWidget {
   final IconData icon;
   final String label;
+  final String? description;
   final SitePermissionStatus? status;
   final ValueChanged<SitePermissionStatus> onChanged;
 
   const _PermissionTile({
     required this.icon,
     required this.label,
+    required this.description,
     required this.status,
     required this.onChanged,
   });
@@ -224,6 +230,7 @@ class _PermissionTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
+      subtitle: description == null ? null : Text(description!),
       trailing: DropdownButton<SitePermissionStatus>(
         value: currentStatus,
         underline: const SizedBox(),

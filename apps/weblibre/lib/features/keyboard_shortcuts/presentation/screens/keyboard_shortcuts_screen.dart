@@ -21,13 +21,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
 import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/dialogs/key_chord_recorder_dialog.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 /// Lists every browser action with the key combinations that run it, grouped
 /// by category, and lets the user add, change, remove and reset them.
@@ -43,6 +48,10 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
     );
     final search = useSettingsSearch();
     final colorScheme = Theme.of(context).colorScheme;
+    final general = ref.watch(generalSettingsWithDefaultsProvider);
+    // The built-in shortcuts are always listed (`input.keyboard_shortcuts`);
+    // changing them is `input.keyboard_shortcut_customization`, grayed out
+    // while its switch hides it. Actions of hidden features are left out.
 
     Future<void> record(BrowserAction action, {KeyChord? replacing}) async {
       final chord = await showKeyChordRecorderDialog(
@@ -72,7 +81,7 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(l10n.common_cancel),
             ),
-            FilledButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(l10n.keyboardShortcuts_actionRestore),
             ),
@@ -93,7 +102,10 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
             .any((chord) => chord.label.toLowerCase().contains(query));
 
     final byCategory = <BrowserActionCategory, List<BrowserAction>>{};
-    for (final action in BrowserAction.values.where(matches)) {
+    for (final action in shownBrowserActions(
+      BrowserAction.values,
+      general,
+    ).where(matches)) {
       byCategory.putIfAbsent(action.category, () => []).add(action);
     }
 
@@ -103,10 +115,13 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
       searchHintText: l10n.keyboardShortcuts_searchHint,
       actions: [
         if (settings.enabled && settings.hasCustomizations)
-          IconButton(
-            icon: const Icon(Icons.restart_alt),
-            tooltip: l10n.keyboardShortcuts_restoreDefaultsTooltip,
-            onPressed: restoreDefaults,
+          HiddenFeatureGate.feature(
+            FeatureId.inputKeyboardShortcutCustomization,
+            child: IconButton(
+              icon: const Icon(Icons.restart_alt),
+              tooltip: l10n.keyboardShortcuts_restoreDefaultsTooltip,
+              onPressed: restoreDefaults,
+            ),
           ),
       ],
       slivers: [
@@ -166,16 +181,23 @@ class KeyboardShortcutsScreen extends HookConsumerWidget {
                         title: category.label(context),
                         children: [
                           for (final action in actions)
-                            _ShortcutTile(
-                              action: action,
-                              chords: settings.chordsFor(action),
-                              customized: settings.isCustomized(action),
-                              onAdd: () => record(action),
-                              onChange: (chord) =>
-                                  record(action, replacing: chord),
-                              onRemove: (chord) =>
-                                  repository.removeChord(action, chord),
-                              onReset: () => repository.resetAction(action),
+                            HiddenFeatureGate.feature(
+                              FeatureId.inputKeyboardShortcutCustomization,
+                              hiddenSettings: settings.isCustomized(action)
+                                  ? const [HiddenSetting.keyboardShortcuts]
+                                  : const [],
+                              indicator: true,
+                              child: _ShortcutTile(
+                                action: action,
+                                chords: settings.chordsFor(action),
+                                customized: settings.isCustomized(action),
+                                onAdd: () => record(action),
+                                onChange: (chord) =>
+                                    record(action, replacing: chord),
+                                onRemove: (chord) =>
+                                    repository.removeChord(action, chord),
+                                onReset: () => repository.resetAction(action),
+                              ),
                             ),
                         ],
                       ),

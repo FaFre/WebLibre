@@ -22,6 +22,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'proxy_diagnostics_settings.g.dart';
 
@@ -48,6 +49,16 @@ class ProxyDiagnosticsSettingsRepository
         db.typeMapping,
       ),
     });
+  }
+
+  /// The settings as they apply, read fresh: the stored ones with detailed
+  /// logs at their hidden value while hidden.
+  Future<ProxyDiagnosticsSettings> fetchEffectiveSettings() async {
+    final stored = await fetchSettings();
+    final general = await ref
+        .read(generalSettingsRepositoryProvider.notifier)
+        .fetchSettings();
+    return stored.effective(general.isFeatureShown);
   }
 
   //Eager fetch, when up to date settings are required
@@ -94,11 +105,38 @@ class ProxyDiagnosticsSettingsRepository
   }
 }
 
+/// The diagnostics settings as stored, for the screens that edit them.
 @Riverpod(keepAlive: true)
-ProxyDiagnosticsSettings proxyDiagnosticsSettingsWithDefaults(Ref ref) {
+ProxyDiagnosticsSettings storedProxyDiagnosticsSettings(Ref ref) {
   return ref.watch(
     proxyDiagnosticsSettingsRepositoryProvider.select(
       (value) => value.value ?? ProxyDiagnosticsSettings.withDefaults(),
     ),
   );
+}
+
+/// The diagnostics settings as they apply
+/// ([ProxyDiagnosticsSettings.effective]).
+@Riverpod(keepAlive: true)
+ProxyDiagnosticsSettings proxyDiagnosticsSettingsWithDefaults(Ref ref) {
+  final shown = ref.watch(shownFeaturesProvider);
+  return ref
+      .watch(storedProxyDiagnosticsSettingsProvider)
+      .effective(shown.contains);
+}
+
+/// The log level in force once the diagnostics and general settings have
+/// loaded, null before.
+@Riverpod(keepAlive: true)
+ProxyLogLevel? loadedProxyLogLevel(Ref ref) {
+  final stored = ref.watch(
+    proxyDiagnosticsSettingsRepositoryProvider.select((value) => value.value),
+  );
+  final generalLoaded = ref.watch(
+    generalSettingsRepositoryProvider.select((value) => value.hasValue),
+  );
+  if (stored == null || !generalLoaded) return null;
+
+  final shown = ref.watch(shownFeaturesProvider);
+  return stored.effective(shown.contains).logLevel;
 }

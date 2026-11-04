@@ -20,6 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 
 part 'proxy_diagnostics_settings.g.dart';
 
@@ -64,6 +65,14 @@ class ProxyDiagnosticsSettings with FastEquatable {
       _$ProxyDiagnosticsSettingsFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProxyDiagnosticsSettingsToJson(this);
+
+  /// These settings as they apply while [isShown] says which features are
+  /// shown: the default level while detailed logs are hidden. The stored
+  /// level is kept.
+  ProxyDiagnosticsSettings effective(bool Function(FeatureId feature) isShown) {
+    if (isShown(FeatureId.diagnosticsVerboseLogs)) return this;
+    return copyWith(logLevel: ProxyDiagnosticsSettings.withDefaults().logLevel);
+  }
 
   @override
   List<Object?> get hashParameters => [logLevel];

@@ -22,7 +22,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/menu_row.dart';
@@ -33,6 +35,7 @@ import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/icons/tor_icons.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 enum TorAction { edit, testLatency }
@@ -128,10 +131,16 @@ class TorProfileTile extends ConsumerWidget {
               ),
             ],
           ),
-          RunSwitch(
-            isRunning: isRunning,
-            disabled: isBusy,
-            onTap: () => _toggle(context, ref),
+          // Starting an unused Tor while it is hidden asks to show it;
+          // Tor in use can always be stopped (P5).
+          HiddenFeatureGate.feature(
+            FeatureId.connectionsTorBasic,
+            keptWhen: torInUseProvider,
+            child: RunSwitch(
+              isRunning: isRunning,
+              disabled: isBusy,
+              onTap: () => _toggle(context, ref),
+            ),
           ),
         ],
       ),

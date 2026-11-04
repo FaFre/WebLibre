@@ -51,10 +51,12 @@ class CompactContainerSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final containerUiEnabled = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showContainerUi,
+        (settings) => settings.containerEntryPointsShown,
       ),
     );
-    if (!containerUiEnabled) {
+    // A selected container keeps its way out while the container UI is
+    // hidden (P5): the selector is how the user leaves it.
+    if (!containerUiEnabled && selectedContainer == null) {
       return const SizedBox.shrink();
     }
 
@@ -69,8 +71,12 @@ class CompactContainerSelector extends ConsumerWidget {
       useCustomColor: selectedContainer?.metadata.useCustomColor ?? false,
     );
 
+    // While containers are hidden only the way out is offered: tapping leaves
+    // the container, without the selection screen, which is hidden with them.
+    final exitOnly = !containerUiEnabled;
+
     return GestureDetector(
-      onLongPress: isSelected
+      onLongPress: isSelected && !exitOnly
           ? () async {
               await ContainerEditRoute(
                 containerData: jsonEncode(selectedContainer!.toJson()),
@@ -109,8 +115,10 @@ class CompactContainerSelector extends ConsumerWidget {
         selected: false,
         showCheckmark: false,
         onSelected: (_) async {
-          final selection = await const ContainerSelectionRoute()
-              .push<ContainerSelectionResult?>(context);
+          final selection = exitOnly
+              ? const ContainerSelectionUnassigned()
+              : await const ContainerSelectionRoute()
+                    .push<ContainerSelectionResult?>(context);
           if (selection == null) {
             return;
           }

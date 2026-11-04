@@ -42,7 +42,7 @@ final class OnboardingRepositoryProvider
 }
 
 String _$onboardingRepositoryHash() =>
-    r'5d583af3ae38b351357b16809ef32bb6807f5c05';
+    r'ef1050ec75641b1d2b08dd018fa344be09ccded3';
 
 abstract class _$OnboardingRepository extends $Notifier<void> {
   void build();
@@ -61,3 +61,49 @@ abstract class _$OnboardingRepository extends $Notifier<void> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// The last onboarding revision this profile completed, or null before the
+/// first one. Follows the database, so a completed onboarding is seen by
+/// everything that reads it without anyone refreshing it.
+
+@ProviderFor(completedOnboardingRevision)
+final completedOnboardingRevisionProvider =
+    CompletedOnboardingRevisionProvider._();
+
+/// The last onboarding revision this profile completed, or null before the
+/// first one. Follows the database, so a completed onboarding is seen by
+/// everything that reads it without anyone refreshing it.
+
+final class CompletedOnboardingRevisionProvider
+    extends $FunctionalProvider<AsyncValue<int?>, int?, Stream<int?>>
+    with $FutureModifier<int?>, $StreamProvider<int?> {
+  /// The last onboarding revision this profile completed, or null before the
+  /// first one. Follows the database, so a completed onboarding is seen by
+  /// everything that reads it without anyone refreshing it.
+  CompletedOnboardingRevisionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'completedOnboardingRevisionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$completedOnboardingRevisionHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<int?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int?> create(Ref ref) {
+    return completedOnboardingRevision(ref);
+  }
+}
+
+String _$completedOnboardingRevisionHash() =>
+    r'd75118fb85d1d8504aef8444f4138f03cef181d7';

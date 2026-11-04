@@ -29,6 +29,7 @@ import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -167,6 +168,7 @@ const generalSettingJsonKeys = <String>{
   'desktopModeSites',
   'pinnedBangs',
   'rememberedPrompts',
+  'visibilitySwitches',
 };
 
 @Riverpod(keepAlive: true)
@@ -253,13 +255,41 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   }
 }
 
+/// The general settings as stored, hidden features included.
+///
+/// For the screens that show and edit settings, the onboarding draft and
+/// Feature Control. Behavior reads [generalSettingsWithDefaults].
 @Riverpod(keepAlive: true)
-GeneralSettings generalSettingsWithDefaults(Ref ref) {
+GeneralSettings storedGeneralSettings(Ref ref) {
   return ref.watch(
     generalSettingsRepositoryProvider.select(
       (value) => value.value ?? GeneralSettings.withDefaults(),
     ),
   );
+}
+
+/// The general settings as they apply: the settings of hidden features at
+/// their hidden values ([GeneralSettings.effective]).
+@Riverpod(keepAlive: true)
+GeneralSettings generalSettingsWithDefaults(Ref ref) {
+  return ref.watch(storedGeneralSettingsProvider).effective();
+}
+
+/// The features shown with the current visibility switches.
+///
+/// For widgets that check many features at once (a list of actions, a set of
+/// modules): one watch, and a rebuild only when the set changes rather than
+/// on every settings write. `SetupDraftScope` overrides it, so below the
+/// scope it follows the draft.
+@Riverpod(keepAlive: true)
+class ShownFeatures extends _$ShownFeatures {
+  @override
+  Set<FeatureId> build() =>
+      ref.watch(generalSettingsWithDefaultsProvider).shownFeatures;
+
+  @override
+  bool updateShouldNotify(Set<FeatureId> previous, Set<FeatureId> next) =>
+      !setEquals(previous, next);
 }
 
 /// The tab bar edge to actually render on, with

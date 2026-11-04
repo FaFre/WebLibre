@@ -19,10 +19,12 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/string_list_settings_screen.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/host_rules.dart';
 
 /// Manages the list of sites on which gestures are disabled.
@@ -33,22 +35,27 @@ class GestureExcludedSitesScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final excludedSites = ref.watch(
-      gestureSettingsWithDefaultsProvider.select((s) => s.excludedSites),
+      storedGestureSettingsProvider.select((s) => s.excludedSites),
     );
 
-    return StringListSettingsScreen(
-      title: l10n.gestures_excludedSitesTitle,
-      description: l10n.gestures_excludedSitesDescription,
-      values: excludedSites,
-      hintText: 'example.com',
-      itemIcon: Icons.public_off,
-      emptyLabel: l10n.gestures_noSitesExcludedMessage,
-      normalize: normalizeRuleHost,
-      onChanged: (next) async {
-        await ref
-            .read(gestureSettingsRepositoryProvider.notifier)
-            .updateSettings((current) => current.copyWith.excludedSites(next));
-      },
+    return HiddenFeatureScope(
+      feature: FeatureId.inputDrawnGestures,
+      child: StringListSettingsScreen(
+        title: l10n.gestures_excludedSitesTitle,
+        description: l10n.gestures_excludedSitesDescription,
+        values: excludedSites,
+        hintText: 'example.com',
+        itemIcon: Icons.public_off,
+        emptyLabel: l10n.gestures_noSitesExcludedMessage,
+        normalize: normalizeRuleHost,
+        onChanged: (next) async {
+          await ref
+              .read(gestureSettingsRepositoryProvider.notifier)
+              .updateSettings(
+                (current) => current.copyWith.excludedSites(next),
+              );
+        },
+      ),
     );
   }
 }

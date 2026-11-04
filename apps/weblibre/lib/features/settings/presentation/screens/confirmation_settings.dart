@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -39,6 +40,16 @@ String _sectionTitle(AppLocalizations l10n, RememberedPrompt prompt) {
   };
 }
 
+/// The feature a prompt belongs to: its tile is grayed out while that feature
+/// is hidden, unless an answer is remembered, which stays usable so it can be
+/// undone (P5). A switch, so a new [RememberedPrompt] has to pick one.
+FeatureId? _promptFeature(RememberedPrompt prompt) => switch (prompt) {
+  RememberedPrompt.keepExternalTab || RememberedPrompt.closeAllTabs => null,
+  RememberedPrompt.closeIsolatedTabs => FeatureId.tabsIsolatedUi,
+  RememberedPrompt.startTor => FeatureId.connectionsTorBasic,
+  RememberedPrompt.startProxyConnection => FeatureId.connectionsImportVpnProxy,
+};
+
 List<SettingsSectionDefinition> confirmationSettingsSections(
   BuildContext context,
 ) {
@@ -53,6 +64,10 @@ List<SettingsSectionDefinition> confirmationSettingsSections(
             title: prompt.label(context),
             subtitle: prompt.description(context),
             keywords: settingsKeywords(prompt.keywords(context)),
+            feature: _promptFeature(prompt),
+            keptWhen: storedGeneralSettingsProvider.select(
+              (s) => s.rememberedPrompts.containsKey(prompt),
+            ),
             child: _RememberedPromptTile(prompt),
           ),
         );
@@ -95,9 +110,7 @@ class _RememberedPromptTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final remembered = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.rememberedPrompts[prompt],
-      ),
+      storedGeneralSettingsProvider.select((s) => s.rememberedPrompts[prompt]),
     );
 
     Future<void> remember(Enum? answer) async {

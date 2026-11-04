@@ -41,7 +41,7 @@ final class RouterProvider
   }
 }
 
-String _$routerHash() => r'2803b6c2b8aaf84fe18835d4b27ae3ce0540fe14';
+String _$routerHash() => r'a105c54b9f677d40d85f1d71a40a5aa2b1e462e1';
 
 @ProviderFor(CurrentTopRoute)
 final currentTopRouteProvider = CurrentTopRouteProvider._();

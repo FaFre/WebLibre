@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
@@ -56,7 +57,7 @@ Future<GestureBindingResult?> showGestureBindingEditor(
   );
 }
 
-class _GestureBindingEditor extends HookWidget {
+class _GestureBindingEditor extends HookConsumerWidget {
   final GestureStroke? initialStroke;
   final BrowserAction? initialAction;
   final Map<String, BrowserAction> existingBindings;
@@ -70,7 +71,7 @@ class _GestureBindingEditor extends HookWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final action = useState(initialAction ?? BrowserAction.values.first);
     final startPosition = useState(
@@ -117,7 +118,7 @@ class _GestureBindingEditor extends HookWidget {
                 onPressed: () => Navigator.of(context).pop(false),
                 child: Text(l10n.common_cancel),
               ),
-              FilledButton(
+              TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 child: Text(l10n.gestures_actionReplace),
               ),
@@ -164,6 +165,7 @@ class _GestureBindingEditor extends HookWidget {
                       onTap: () async {
                         final picked = await showGestureActionPicker(
                           context,
+                          ref,
                           selected: action.value,
                         );
                         if (picked != null) action.value = picked;

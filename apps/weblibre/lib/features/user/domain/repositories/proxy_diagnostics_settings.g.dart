@@ -41,7 +41,7 @@ final class ProxyDiagnosticsSettingsRepositoryProvider
 }
 
 String _$proxyDiagnosticsSettingsRepositoryHash() =>
-    r'7c0dd1faab5622cbff89d7094fa868ce73dc2039';
+    r'addc35665da12f86c0c6f3a266252242f5646a45';
 
 abstract class _$ProxyDiagnosticsSettingsRepository
     extends $StreamNotifier<ProxyDiagnosticsSettings> {
@@ -70,9 +70,69 @@ abstract class _$ProxyDiagnosticsSettingsRepository
   }
 }
 
+/// The diagnostics settings as stored, for the screens that edit them.
+
+@ProviderFor(storedProxyDiagnosticsSettings)
+final storedProxyDiagnosticsSettingsProvider =
+    StoredProxyDiagnosticsSettingsProvider._();
+
+/// The diagnostics settings as stored, for the screens that edit them.
+
+final class StoredProxyDiagnosticsSettingsProvider
+    extends
+        $FunctionalProvider<
+          ProxyDiagnosticsSettings,
+          ProxyDiagnosticsSettings,
+          ProxyDiagnosticsSettings
+        >
+    with $Provider<ProxyDiagnosticsSettings> {
+  /// The diagnostics settings as stored, for the screens that edit them.
+  StoredProxyDiagnosticsSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'storedProxyDiagnosticsSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$storedProxyDiagnosticsSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProxyDiagnosticsSettings> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ProxyDiagnosticsSettings create(Ref ref) {
+    return storedProxyDiagnosticsSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProxyDiagnosticsSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProxyDiagnosticsSettings>(value),
+    );
+  }
+}
+
+String _$storedProxyDiagnosticsSettingsHash() =>
+    r'c0f60486472c46d3a62c632051e8e196cc9ac160';
+
+/// The diagnostics settings as they apply
+/// ([ProxyDiagnosticsSettings.effective]).
+
 @ProviderFor(proxyDiagnosticsSettingsWithDefaults)
 final proxyDiagnosticsSettingsWithDefaultsProvider =
     ProxyDiagnosticsSettingsWithDefaultsProvider._();
+
+/// The diagnostics settings as they apply
+/// ([ProxyDiagnosticsSettings.effective]).
 
 final class ProxyDiagnosticsSettingsWithDefaultsProvider
     extends
@@ -82,6 +142,8 @@ final class ProxyDiagnosticsSettingsWithDefaultsProvider
           ProxyDiagnosticsSettings
         >
     with $Provider<ProxyDiagnosticsSettings> {
+  /// The diagnostics settings as they apply
+  /// ([ProxyDiagnosticsSettings.effective]).
   ProxyDiagnosticsSettingsWithDefaultsProvider._()
     : super(
         from: null,
@@ -118,4 +180,54 @@ final class ProxyDiagnosticsSettingsWithDefaultsProvider
 }
 
 String _$proxyDiagnosticsSettingsWithDefaultsHash() =>
-    r'96eac54783d6206557bbbdea35ed27d530dcf258';
+    r'4a30aa315c24d8a612dc77a64d37035328c6fccd';
+
+/// The log level in force once the diagnostics and general settings have
+/// loaded, null before.
+
+@ProviderFor(loadedProxyLogLevel)
+final loadedProxyLogLevelProvider = LoadedProxyLogLevelProvider._();
+
+/// The log level in force once the diagnostics and general settings have
+/// loaded, null before.
+
+final class LoadedProxyLogLevelProvider
+    extends $FunctionalProvider<ProxyLogLevel?, ProxyLogLevel?, ProxyLogLevel?>
+    with $Provider<ProxyLogLevel?> {
+  /// The log level in force once the diagnostics and general settings have
+  /// loaded, null before.
+  LoadedProxyLogLevelProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'loadedProxyLogLevelProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$loadedProxyLogLevelHash();
+
+  @$internal
+  @override
+  $ProviderElement<ProxyLogLevel?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProxyLogLevel? create(Ref ref) {
+    return loadedProxyLogLevel(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProxyLogLevel? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProxyLogLevel?>(value),
+    );
+  }
+}
+
+String _$loadedProxyLogLevelHash() =>
+    r'fb326ebde2dd0e90339201a6ad39ff75ded1e91a';

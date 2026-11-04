@@ -136,7 +136,7 @@ class TabTrayGestures extends HookConsumerWidget {
 
     final containerUiEnabled = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showContainerUi,
+        (settings) => settings.containerEntryPointsShown,
       ),
     );
     final isSyncedScope = ref.watch(
@@ -249,22 +249,26 @@ class TabTrayGestures extends HookConsumerWidget {
         return;
       }
 
-      final currentIndex = _viewModeDensityOrder.indexOf(
-        ref.read(tabsViewModeControllerProvider),
+      // A hidden Tree layout is not part of the cycle, the same as in the
+      // view menu.
+      final order = offeredTabsViewModes(
+        treeShown: ref.read(treeViewModeShownProvider),
+        order: _viewModeDensityOrder,
+      );
+      final currentIndex = order.indexOf(
+        ref.read(effectiveTabsViewModeProvider),
       );
       if (currentIndex < 0) {
         return;
       }
 
       final index = currentIndex + (expand ? 1 : -1);
-      if (index < 0 || index >= _viewModeDensityOrder.length) {
+      if (index < 0 || index >= order.length) {
         return;
       }
 
       unawaited(HapticFeedback.lightImpact());
-      ref
-          .read(tabsViewModeControllerProvider.notifier)
-          .set(_viewModeDensityOrder[index]);
+      ref.read(tabsViewModeControllerProvider.notifier).set(order[index]);
     }
 
     void handleScaleStart(ScaleStartDetails details) {

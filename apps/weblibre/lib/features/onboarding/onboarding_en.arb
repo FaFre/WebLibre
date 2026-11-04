@@ -9,10 +9,6 @@
   "@onboarding_actionNext": {
     "description": "Button at the bottom of the first-run setup that goes to the next page."
   },
-  "onboarding_actionRestore": "Restore",
-  "@onboarding_actionRestore": {
-    "description": "Button at the bottom of the first-run setup's welcome page when \"Restore from Backup\" is chosen; starts restoring a backup file."
-  },
   "onboarding_restoreTargetUnreadable": "This profile could not be read, so nothing can be restored into it.",
   "@onboarding_restoreTargetUnreadable": {
     "description": "Error message when restoring a backup during first-run setup fails because the current profile's data could not be read."
@@ -22,37 +18,17 @@
   "@onboarding_welcomeBackTitle": {
     "description": "Heading of the first-run welcome page when the user has used WebLibre before (e.g. after a major update)."
   },
-  "onboarding_welcomeReadyTitle": "WebLibre is ready",
-  "@onboarding_welcomeReadyTitle": {
+  "onboarding_welcomeTitle": "Welcome to WebLibre",
+  "@onboarding_welcomeTitle": {
     "description": "Heading of the first-run welcome page for a new user. WebLibre is the app name."
   },
-  "onboarding_chooseExperience": "Choose your onboarding experience:",
-  "@onboarding_chooseExperience": {
-    "description": "Label above the choice between quick start, custom setup and restoring a backup on the first-run welcome page."
-  },
-  "onboarding_modeExpressTitle": "Quick Start",
-  "@onboarding_modeExpressTitle": {
-    "description": "First-run setup choice: skip configuration and use recommended settings."
-  },
-  "onboarding_modeExpressSubtitle": "Use recommended defaults and get browsing.",
-  "@onboarding_modeExpressSubtitle": {
-    "description": "Explanation under \"Quick Start\"."
-  },
-  "onboarding_modeDetailedTitle": "Custom Setup",
-  "@onboarding_modeDetailedTitle": {
-    "description": "First-run setup choice: go through configuration pages one by one."
-  },
-  "onboarding_modeDetailedSubtitle": "Configure DNS, toolbar, extensions, and more.",
-  "@onboarding_modeDetailedSubtitle": {
-    "description": "Explanation under \"Custom Setup\" listing what can be configured. DNS is a technical abbreviation."
-  },
-  "onboarding_modeRestoreTitle": "Restore from Backup",
+  "onboarding_modeRestoreTitle": "Restore from backup",
   "@onboarding_modeRestoreTitle": {
-    "description": "First-run setup choice: restore a profile from a backup file made earlier."
+    "description": "Button on the first-run welcome page: replace this new profile with a profile from a backup file made earlier."
   },
   "onboarding_modeRestoreSubtitle": "Import a profile from an encrypted backup file.",
   "@onboarding_modeRestoreSubtitle": {
-    "description": "Explanation under \"Restore from Backup\"."
+    "description": "Explanation under the \"Restore from backup\" button on the welcome page."
   },
   "onboarding_updateNoticeTitle": "A lot has changed!",
   "@onboarding_updateNoticeTitle": {
@@ -82,16 +58,15 @@
   "@onboarding_eulaDocumentTitle": {
     "description": "Title of the page showing the full license agreement."
   },
-
-  "onboarding_aiFeaturesTitle": "AI Features",
+  "onboarding_aiFeaturesTitle": "AI features",
   "@onboarding_aiFeaturesTitle": {
-    "description": "Heading of the first-run setup page about optional AI features."
+    "description": "Heading of the page shown once after an update to people who set WebLibre up before the on-device AI features existed. The page only offers to turn those features on."
   },
-  "onboarding_aiOnDeviceTitle": "On-device AI",
-  "@onboarding_aiOnDeviceTitle": {
-    "description": "Switch that enables AI features that run only on the device, without sending data anywhere."
+  "onboarding_aiUseOnDeviceTitle": "Use on-device AI",
+  "@onboarding_aiUseOnDeviceTitle": {
+    "description": "Switch that turns the on-device AI models on, not only shows their settings. Used in the onboarding's Customize step, right under the visibility switch named \"On-device AI\", and as a goal on the \"Your setup\" step, where it is off in every preset until the user turns it on."
   },
-  "onboarding_aiOnDeviceSubtitle": "Local on-device features including container topic and tab suggestions",
+  "onboarding_aiOnDeviceSubtitle": "Suggests how to group and name your tabs, right on this device",
   "@onboarding_aiOnDeviceSubtitle": {
     "description": "Explanation under the on-device AI switch. Containers are separate browsing identities; the AI suggests topics for them and which tabs belong together."
   },
@@ -99,24 +74,19 @@
   "@onboarding_aiWarningTitle": {
     "description": "Heading of the notice box listing things to know about the AI features."
   },
-  "onboarding_aiWarningPoint1": "WebLibre uses a local AI model to analyze your open tab titles and suggest which containers to group the tabs into and what to name those containers. All processing happens entirely on your device.",
+  "onboarding_aiWarningPoint1": "WebLibre reads the titles of your open tabs and suggests which container each one belongs in and what to call it.",
   "@onboarding_aiWarningPoint1": {
     "description": "Bullet point in the AI notice box."
   },
-  "onboarding_aiWarningPoint2": "AI enhancements operate entirely within your browser, keeping all data on your device. Local AI processing respects your privacy and provides faster suggestions for container groups and names. You can control this behavior at any time in Settings.",
+  "onboarding_aiWarningPoint2": "AI features run entirely on this device, and all data stays on it.",
   "@onboarding_aiWarningPoint2": {
-    "description": "Bullet point in the AI notice box."
+    "description": "Bullet point in the AI notice box. The AI runs entirely on the device and all of its data stays there."
   },
   "onboarding_aiWarningPoint3": "AI can sometimes make mistakes, so please review suggested group names and tab selections.",
   "@onboarding_aiWarningPoint3": {
     "description": "Bullet point in the AI notice box."
   },
-
-  "onboarding_searchTitle": "Search",
-  "@onboarding_searchTitle": {
-    "description": "Heading of the first-run setup page for choosing search engines."
-  },
-  "onboarding_searchDefaultProviderLabel": "Default Search Provider",
+  "onboarding_searchDefaultProviderLabel": "Search engine",
   "@onboarding_searchDefaultProviderLabel": {
     "description": "Label above the choice of default search engine."
   },
@@ -124,7 +94,7 @@
   "@onboarding_searchMore": {
     "description": "Button after the suggested search engines that opens a search across all available engines."
   },
-  "onboarding_searchDefaultAutocompleteLabel": "Default Autocomplete Provider",
+  "onboarding_searchDefaultAutocompleteLabel": "Search suggestions",
   "@onboarding_searchDefaultAutocompleteLabel": {
     "description": "Label above the choice of service that suggests search terms while typing."
   },
@@ -133,9 +103,13 @@
     "description": "Error heading when the list of search engines could not be loaded."
   },
 
-  "onboarding_dohTitle": "DNS over HTTPS",
+  "onboarding_dohTitle": "Secure DNS",
   "@onboarding_dohTitle": {
-    "description": "Heading of the first-run setup page for DNS over HTTPS, which encrypts the lookups that turn website names into addresses. Technical term; usually kept in English."
+    "description": "Title of the setup row that opens the secure DNS (DNS over HTTPS) options, and of the page it opens. Use the plain term people know from their phone or other browsers."
+  },
+  "onboarding_dohSubtitle": "Encrypts website address lookups for more privacy",
+  "@onboarding_dohSubtitle": {
+    "description": "Subtitle of the secure DNS row in setup. Describes encrypted address lookups without promising that browsing is invisible to the network provider."
   },
 
   "onboarding_permissionsTitle": "Permissions",
@@ -150,7 +124,7 @@
   "@onboarding_permissionsNotificationsSubtitle": {
     "description": "Explanation under the notifications permission switch: needed to report progress of downloads."
   },
-  "onboarding_permissionsDefaultBrowserTitle": "Default Browser",
+  "onboarding_permissionsDefaultBrowserTitle": "Default browser",
   "@onboarding_permissionsDefaultBrowserTitle": {
     "description": "Switch that makes WebLibre the device's default browser."
   },
@@ -158,107 +132,315 @@
   "@onboarding_permissionsDefaultBrowserSubtitle": {
     "description": "Explanation under the default browser switch. WebLibre is the app name."
   },
-
-  "onboarding_privacyTitle": "Privacy & Hardening",
-  "@onboarding_privacyTitle": {
-    "description": "Heading of the first-run setup page for privacy and security settings. \"Hardening\" means stricter security settings."
-  },
-  "onboarding_privacyBrowserLanguagesTitle": "Browser Languages",
+  "onboarding_privacyBrowserLanguagesTitle": "Website languages",
   "@onboarding_privacyBrowserLanguagesTitle": {
     "description": "Row that opens the settings for which languages websites are told the user prefers."
   },
-  "onboarding_privacyBrowserLanguagesSubtitle": "Configure language preferences exposed to websites",
+  "onboarding_privacyBrowserLanguagesSubtitle": "Which languages websites should show you",
   "@onboarding_privacyBrowserLanguagesSubtitle": {
-    "description": "Explanation under \"Browser Languages\"."
+    "description": "Explanation under \"Website languages\"."
   },
-  "onboarding_multipleLanguagesDetectedTitle": "Multiple Languages Detected",
-  "@onboarding_multipleLanguagesDetectedTitle": {
-    "description": "Heading of a warning shown when several preferred languages are configured, which makes the browser easier to identify."
-  },
-  "onboarding_multipleLanguagesWarning": "{count, plural, other{Your browser has {count} languages configured ({locales}).}} Websites can use your unique language combination to fingerprint and track you across the web.",
-  "@onboarding_multipleLanguagesWarning": {
-    "description": "Warning body. count is the number of configured languages; locales is a comma-separated list of language codes such as \"en-US, de-DE\". \"Fingerprint\" means to identify a browser by its unique characteristics.",
-    "placeholders": {
-      "count": { "type": "int" },
-      "locales": { "type": "String" }
-    }
-  },
-  "onboarding_multipleLanguagesSuggestion": "Consider reducing your browser languages to a single language to minimize your fingerprint surface.",
-  "@onboarding_multipleLanguagesSuggestion": {
-    "description": "Suggestion in the language warning. \"Fingerprint surface\" means the characteristics that make the browser identifiable."
-  },
-  "onboarding_reviewLanguages": "Review Languages",
-  "@onboarding_reviewLanguages": {
-    "description": "Button in the language warning that opens the language settings."
-  },
-  "onboarding_webEngineHardeningTitle": "Complete Web Engine Hardening",
+  "onboarding_webEngineHardeningTitle": "Stricter security settings",
   "@onboarding_webEngineHardeningTitle": {
     "description": "Switch that applies all recommended security settings to the browser engine (Gecko)."
   },
-  "onboarding_webEngineHardeningSubtitle": "Apply all recommended security hardening preferences to the web engine",
+  "onboarding_webEngineHardeningSubtitle": "Turns on every security setting WebLibre recommends",
   "@onboarding_webEngineHardeningSubtitle": {
     "description": "Explanation under the web engine hardening switch."
   },
-  "onboarding_fingerprintProtectionTitle": "Hardened Fingerprint Protection",
+  "onboarding_fingerprintProtectionTitle": "Make this device harder to recognize",
   "@onboarding_fingerprintProtectionTitle": {
     "description": "Switch that turns on the strict set of protections against browser fingerprinting (identifying a browser by its unique characteristics)."
   },
-  "onboarding_fingerprintProtectionSubtitle": "Load comprehensive fingerprint protection defaults",
+  "onboarding_fingerprintProtectionSubtitle": "Hides details websites use to recognize you without cookies (fingerprinting)",
   "@onboarding_fingerprintProtectionSubtitle": {
-    "description": "Explanation under the fingerprint protection switch."
+    "description": "Subtitle of the switch that turns on strong fingerprinting protection. \"Fingerprinting\" in brackets is the technical term, kept so people can find it in Settings."
   },
-  "onboarding_compatibilityWarningTitle": "Compatibility Warning",
+  "onboarding_compatibilityWarningTitle": "Some websites may break",
   "@onboarding_compatibilityWarningTitle": {
-    "description": "Heading of the warning box shown when strict fingerprint protection is on."
+    "description": "Heading of the notice shown when strong fingerprinting protection is turned on during setup."
   },
-  "onboarding_fingerprintWarningPoint1": "Hardened fingerprint protection enables 60+ protection targets including canvas randomization, navigator spoofing, media device masking, and more.",
+  "onboarding_fingerprintWarningPoint1": "This changes over 60 details websites can read, like how graphics are drawn and which cameras and microphones are connected.",
   "@onboarding_fingerprintWarningPoint1": {
     "description": "Bullet point in the fingerprint protection warning. Canvas, navigator and media devices are names of web technologies that websites read to identify browsers."
   },
-  "onboarding_fingerprintWarningPoint2": "This may cause websites to break or behave unexpectedly. You can fine-tune individual targets in settings.",
+  "onboarding_fingerprintWarningPoint2": "If a website does not work properly, you can adjust individual protections in Settings.",
   "@onboarding_fingerprintWarningPoint2": {
     "description": "Bullet point in the fingerprint protection warning."
   },
-  "onboarding_localNetworkProtectionTitle": "Local Network Protection",
-  "@onboarding_localNetworkProtectionTitle": {
-    "description": "Heading of the settings that stop websites from reaching devices on the user's local network."
-  },
-  "onboarding_localNetworkProtectionSubtitle": "Websites can try to reach your device and other devices on your home network, like routers, printers, or smart home devices. By default, known trackers are automatically blocked from doing this.",
-  "@onboarding_localNetworkProtectionSubtitle": {
-    "description": "Explanation under \"Local Network Protection\"."
-  },
-  "onboarding_blockAllLocalNetworkTitle": "Block All Local Network Requests",
+  "onboarding_blockAllLocalNetworkTitle": "Ask before local connections",
   "@onboarding_blockAllLocalNetworkTitle": {
-    "description": "Switch: require permission for every website that tries to reach local network devices, not only known trackers."
+    "description": "Switch: every website must ask before it connects to apps on this device (localhost) or to devices on the local network, not only known trackers. Apps listening on the device have been used to track people across websites."
   },
-  "onboarding_blockAllLocalNetworkSubtitle": "Ask for permission before any website accesses devices on your home network, not just known trackers",
+  "onboarding_blockAllLocalNetworkSubtitle": "Websites must ask before connecting to apps on this device or devices on your network",
   "@onboarding_blockAllLocalNetworkSubtitle": {
-    "description": "Explanation under the switch that blocks all local network requests."
+    "description": "Explanation under the switch that requires permission for local connections: apps on this device (localhost) and devices on the local network such as routers."
   },
 
-  "onboarding_toolbarLayoutTitle": "Toolbar & Layout",
+  "onboarding_toolbarLayoutTitle": "Toolbar & layout",
   "@onboarding_toolbarLayoutTitle": {
-    "description": "Heading of the first-run setup page for arranging the browser toolbar and screen layout."
+    "description": "Row in the Layout & input group of the onboarding's Customize step that opens the arrangement of the browser toolbar and screen layout, and the title of the page it opens."
   },
 
   "onboarding_ublockTitle": "uBlock Origin",
   "@onboarding_ublockTitle": {
     "description": "Heading of the first-run setup page offering the uBlock Origin ad blocker. Product name; do not translate."
   },
-  "onboarding_ublockDescription": "uBlock Origin (uBO) is a CPU- and memory-efficient **wide-spectrum content blocker** by **Raymond Hill** and is available as a browser extension for WebLibre.\n\nBy default, it blocks ads, trackers, coin miners, pop-ups, annoying anti-blockers, malware sites, and more using **EasyList, EasyPrivacy, Peter Lowe's Blocklist, Online Malicious URL Blocklist, and uBO filter lists**.\n\nMany other lists are available to block additional content.",
+  "onboarding_ublockDescription": "uBlock Origin is a browser extension that blocks ads, trackers, pop-ups and known harmful sites.\n\nIt works automatically after installation. You can add more blocking rules in Settings.\n\nCreated by **Raymond Hill**.",
   "@onboarding_ublockDescription": {
-    "description": "Description of the uBlock Origin extension on its setup page. Uses Markdown: keep the ** markers around bold text. Names of people, products and filter lists stay unchanged."
+    "description": "Plain-language description of the uBlock Origin extension on its setup page. Uses Markdown: keep the ** markers around the creator's name. Product and creator names stay unchanged."
   },
-  "onboarding_ublockInstallTitle": "Install uBlock Origin Extension",
+  "onboarding_ublockInstallTitle": "Install uBlock Origin",
   "@onboarding_ublockInstallTitle": {
     "description": "Switch that installs the uBlock Origin browser extension. Product name; do not translate."
   },
-  "onboarding_ublockApplyDefaultsTitle": "Apply optimized defaults",
+  "onboarding_ublockInstallSubtitle": "Blocks ads, trackers and harmful sites",
+  "@onboarding_ublockInstallSubtitle": {
+    "description": "Subtitle of the setup switch that installs the uBlock Origin extension."
+  },
+  "onboarding_ublockApplyDefaultsTitle": "Use recommended filters",
   "@onboarding_ublockApplyDefaultsTitle": {
     "description": "Switch, available once uBlock Origin is being installed: apply WebLibre's recommended uBlock Origin settings."
   },
-  "onboarding_ublockApplyDefaultsSubtitle": "Enable WebLibre hardening filter lists.",
+  "onboarding_ublockApplyDefaultsSubtitle": "Turns on the filter lists WebLibre recommends for uBlock Origin",
   "@onboarding_ublockApplyDefaultsSubtitle": {
-    "description": "Explanation under \"Apply optimized defaults\": turns on WebLibre's own stricter filter lists in uBlock Origin."
+    "description": "Explanation under \"Use recommended filters\": turns on WebLibre's recommended extra filter lists in uBlock Origin."
+  },
+  "onboarding_presetTitle": "How much should WebLibre show?",
+  "@onboarding_presetTitle": {
+    "description": "Title of the onboarding step where the user picks a setup preset (Just browsing, Tinkerer, Expert)."
+  },
+  "onboarding_presetAverageTitle": "Just browsing",
+  "@onboarding_presetAverageTitle": {
+    "description": "Playful name of the simplest setup preset, for people who just want to browse privately. Keep it short and light."
+  },
+  "onboarding_presetAverageSubtitle": "I want it private, not complicated",
+  "@onboarding_presetAverageSubtitle": {
+    "description": "One-line line under the \"Just browsing\" preset name, written as something the user would say about themselves (first person) so they recognise themselves in it."
+  },
+  "onboarding_presetAveragePoint1": "Tabs, bookmarks, history and Reader Mode",
+  "@onboarding_presetAveragePoint1": {
+    "description": "First thing the \"Just browsing\" preset shows, listed on its card."
+  },
+  "onboarding_presetAveragePoint2": "Blocks ads and trackers with uBlock Origin",
+  "@onboarding_presetAveragePoint2": {
+    "description": "Second thing the \"Just browsing\" preset shows. uBlock Origin is a product name."
+  },
+  "onboarding_presetAveragePoint3": "Search shortcuts, extensions and page translation",
+  "@onboarding_presetAveragePoint3": {
+    "description": "Third thing the \"Just browsing\" preset shows."
+  },
+  "onboarding_presetAveragePoint4": "Firefox Sync with your other devices",
+  "@onboarding_presetAveragePoint4": {
+    "description": "Fourth thing the \"Just browsing\" preset shows. Firefox Sync is a product name."
+  },
+  "onboarding_presetAdvancedTitle": "Tinkerer",
+  "@onboarding_presetAdvancedTitle": {
+    "description": "Playful name of the middle setup preset, for people who enjoy adjusting things. Prefer a gender-neutral word or phrase."
+  },
+  "onboarding_presetAdvancedSubtitle": "I like setting things up my way",
+  "@onboarding_presetAdvancedSubtitle": {
+    "description": "One-line line under the \"Tinkerer\" preset name, written as something the user would say about themselves (first person)."
+  },
+  "onboarding_presetAdvancedPoint1": "Containers and isolated tabs for separate cookies and logins",
+  "@onboarding_presetAdvancedPoint1": {
+    "description": "First thing the \"Tinkerer\" preset adds, listed on its card."
+  },
+  "onboarding_presetAdvancedPoint2": "Tor, VPN and proxy connections",
+  "@onboarding_presetAdvancedPoint2": {
+    "description": "Second thing the \"Tinkerer\" preset adds."
+  },
+  "onboarding_presetAdvancedPoint3": "Tree tabs, gestures and more layout options",
+  "@onboarding_presetAdvancedPoint3": {
+    "description": "Third thing the \"Tinkerer\" preset adds."
+  },
+  "onboarding_presetAdvancedPoint4": "Advanced privacy settings and on-device AI controls",
+  "@onboarding_presetAdvancedPoint4": {
+    "description": "Fourth thing the \"Tinkerer\" preset adds: the advanced privacy settings, and the settings for on-device AI. AI itself stays off until the user turns it on, so this names the controls, not AI turned on."
+  },
+  "onboarding_presetExpertTitle": "Expert",
+  "@onboarding_presetExpertTitle": {
+    "description": "Name of the setup preset that shows everything. Prefer a gender-neutral form."
+  },
+  "onboarding_presetExpertSubtitle": "I want every setting and control",
+  "@onboarding_presetExpertSubtitle": {
+    "description": "One-line summary under the \"Expert\" preset name, written in the first person like the other two presets' lines: this preset shows every setting and advanced control."
+  },
+  "onboarding_presetExpertPoint1": "Engine hardening groups and fingerprinting overrides",
+  "@onboarding_presetExpertPoint1": {
+    "description": "First thing the \"Expert\" preset adds, listed on its card."
+  },
+  "onboarding_presetExpertPoint2": "Per-container routing, DNS override and multiple tunnels",
+  "@onboarding_presetExpertPoint2": {
+    "description": "Second thing the \"Expert\" preset adds."
+  },
+  "onboarding_presetExpertPoint3": "JavaScript, user agent and certificate controls",
+  "@onboarding_presetExpertPoint3": {
+    "description": "Third thing the \"Expert\" preset adds."
+  },
+  "onboarding_basicsTitle": "The basics",
+  "@onboarding_basicsTitle": {
+    "description": "Title of the onboarding step that asks for the default search provider and the tab bar position."
+  },
+  "onboarding_basicsTabBarTitle": "Tab bar position",
+  "@onboarding_basicsTabBarTitle": {
+    "description": "Heading of the tab bar position choice (Automatic, Top, Bottom) in the onboarding basics step."
+  },
+  "onboarding_basicsTabBarAutoHint": "Automatic adapts to the window and keeps the side panel on larger screens",
+  "@onboarding_basicsTabBarAutoHint": {
+    "description": "Hint under the tab bar position choice explaining the Automatic option."
+  },
+  "onboarding_basicsMoreSearchOptions": "More search options",
+  "@onboarding_basicsMoreSearchOptions": {
+    "description": "Expandable row in the onboarding basics step that reveals the autocomplete provider choice."
+  },
+  "onboarding_yourSetupTitle": "Your setup",
+  "@onboarding_yourSetupTitle": {
+    "description": "Title of the onboarding summary step listing what is on and what is hidden."
+  },
+  "onboarding_yourSetupOnTitle": "On from the start",
+  "@onboarding_yourSetupOnTitle": {
+    "description": "Heading of the list of protections and features that are on after setup."
+  },
+  "onboarding_yourSetupProtections": "Tracker blocking and encrypted connections",
+  "@onboarding_yourSetupProtections": {
+    "description": "Row on the setup summary: tracking protection, HTTPS-Only Mode and secure DNS are on, said in plain words."
+  },
+  "onboarding_yourSetupHardening": "Stricter security settings",
+  "@onboarding_yourSetupHardening": {
+    "description": "Summary line: the recommended engine hardening preferences are applied."
+  },
+  "onboarding_yourSetupLocalNetwork": "Permission required for local connections",
+  "@onboarding_yourSetupLocalNetwork": {
+    "description": "Row on the setup summary: websites must ask before connecting to apps on this device or to devices on the local network."
+  },
+  "onboarding_yourSetupContentBlocker": "Ad blocking with uBlock Origin",
+  "@onboarding_yourSetupContentBlocker": {
+    "description": "Summary line: the uBlock Origin extension is installed after setup."
+  },
+  "onboarding_yourSetupHistoryRetention": "History is kept for {days, plural, =1{1 day} other{{days} days}}",
+  "@onboarding_yourSetupHistoryRetention": {
+    "description": "Summary line: how long browsing history is kept before it is deleted automatically.",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "onboarding_yourSetupHiddenForNowTitle": "Hidden for now",
+  "@onboarding_yourSetupHiddenForNowTitle": {
+    "description": "Onboarding \"Your setup\" step: heading above the features the setup hides. Each row opens Customize at the switch that shows it; \"for now\" says this can change later."
+  },
+  "onboarding_presetChangeLater": "You can change this anytime in Settings > Feature Control.",
+  "@onboarding_presetChangeLater": {
+    "description": "Hint under the three preset cards on the onboarding, so the choice does not feel final. \"Settings > Feature Control\" is the path to the settings screen of that name."
+  },
+  "onboarding_presetAdvancedIncludes": "Everything in Just browsing, plus:",
+  "@onboarding_presetAdvancedIncludes": {
+    "description": "Lead-in line on the \"Tinkerer\" preset card, above the list of what it adds. \"Just browsing\" is the name of the first preset (onboarding_presetAverageTitle); use the same translation."
+  },
+  "onboarding_presetExpertIncludes": "Everything in Tinkerer, plus:",
+  "@onboarding_presetExpertIncludes": {
+    "description": "Lead-in line on the \"Expert\" preset card, above the list of what it adds. \"Tinkerer\" is the name of the second preset (onboarding_presetAdvancedTitle); use the same translation."
+  },
+  "onboarding_presetChangeResetCustomize": "Your changes in Customize and Your setup were reset.",
+  "@onboarding_presetChangeResetCustomize": {
+    "description": "Snackbar on the onboarding after another preset was picked: what had been changed on top of the old option, in the \"Customize\" and \"Your setup\" steps (use their translated names), was discarded. Shown with an Undo button."
+  },
+  "onboarding_goalsTitle": "Anything else?",
+  "@onboarding_goalsTitle": {
+    "description": "Heading of the goal switches on the \"Your setup\" step. Each switch turns on what a goal needs without changing the preset."
+  },
+  "onboarding_goalKeepAccountsApart": "Keep accounts apart",
+  "@onboarding_goalKeepAccountsApart": {
+    "description": "Goal switch on the \"Your setup\" step: shows containers."
+  },
+  "onboarding_goalLockBrowser": "Lock the browser",
+  "@onboarding_goalLockBrowser": {
+    "description": "Goal switch on the \"Your setup\" step: when on, the lock setup of this profile opens once setup is done."
+  },
+  "onboarding_goalSetUpConnections": "Set up Tor, a VPN or a proxy",
+  "@onboarding_goalSetUpConnections": {
+    "description": "Goal switch on the \"Your setup\" step: when on, the connection settings (Tor, VPN and proxies) open once setup is done, and those controls are shown. It does not connect anything. Tor and VPN stay untranslated."
+  },
+  "onboarding_goalSyncDevices": "Sync with my other devices",
+  "@onboarding_goalSyncDevices": {
+    "description": "Goal switch on the \"Your setup\" step: when on, Firefox Sync sign-in opens once setup is done. Firefox Sync is a product name."
+  },
+  "onboarding_goalKeepAccountsApartSubtitle": "Use several accounts on the same site, each in its own container",
+  "@onboarding_goalKeepAccountsApartSubtitle": {
+    "description": "Explanation under the \"Keep accounts apart\" switch on the \"Your setup\" step. Turning it on shows containers (separate browsing identities)."
+  },
+  "onboarding_goalLockBrowserSubtitle": "Unlock this profile with the device lock or a password",
+  "@onboarding_goalLockBrowserSubtitle": {
+    "description": "Explanation under the \"Lock the browser\" switch on the \"Your setup\" step. When on, the profile lock setup opens once the onboarding is done."
+  },
+  "onboarding_goalSetUpConnectionsSubtitle": "Opens connection setup when you're done. Nothing connects until you start it.",
+  "@onboarding_goalSetUpConnectionsSubtitle": {
+    "description": "Explanation under the \"Set up Tor, a VPN or a proxy\" switch on the \"Your setup\" step: the connection settings open after setup, and no connection starts until the user starts one there."
+  },
+  "onboarding_goalSyncDevicesSubtitle": "Sign in to Firefox Sync once setup is done",
+  "@onboarding_goalSyncDevicesSubtitle": {
+    "description": "Explanation under the \"Sync with my other devices\" switch on the \"Your setup\" step. Firefox Sync is a product name."
+  },
+  "onboarding_customizeAction": "Customize",
+  "@onboarding_customizeAction": {
+    "description": "Button on the summary step that opens the screen for switching feature groups on or off."
+  },
+  "onboarding_customizeCaption": "Features, privacy, ad blocking and layout",
+  "@onboarding_customizeCaption": {
+    "description": "Caption under the Customize button on the onboarding \"Your setup\" step: what can be changed there."
+  },
+  "onboarding_customizeGroupPrivacy": "Privacy & security",
+  "@onboarding_customizeGroupPrivacy": {
+    "description": "Group heading on the Customize screen."
+  },
+  "onboarding_customizeGroupTabs": "Tabs & profiles",
+  "@onboarding_customizeGroupTabs": {
+    "description": "Group heading on the Customize screen."
+  },
+  "onboarding_customizeGroupConnections": "Connections",
+  "@onboarding_customizeGroupConnections": {
+    "description": "Group heading on the Customize screen."
+  },
+  "onboarding_customizeGroupLayout": "Layout & input",
+  "@onboarding_customizeGroupLayout": {
+    "description": "Group heading on the Customize screen."
+  },
+  "onboarding_customizeSaveFailed": "Could not save which features are shown. Try again.",
+  "@onboarding_customizeSaveFailed": {
+    "description": "Error snackbar on Customize and Settings > Feature Control when showing or hiding features could not be saved (for example, the device storage is full). Nothing changed."
+  },
+  "onboarding_customizeGroupMore": "More",
+  "@onboarding_customizeGroupMore": {
+    "description": "Heading of the last group on the Customize and Feature Control screens: on-device AI, web app storage and Expert settings."
+  },
+  "onboarding_customizeHomeSections": "Home page sections",
+  "@onboarding_customizeHomeSections": {
+    "description": "Row in the Home & new tab group that opens the section arrangement of the home page."
+  },
+  "onboarding_customizeNewTabSections": "New tab sections",
+  "@onboarding_customizeNewTabSections": {
+    "description": "Row in the Home & new tab group that opens the section arrangement of the new-tab page."
+  },
+  "onboarding_commitFailed": "The setup could not be saved. Try again.",
+  "@onboarding_commitFailed": {
+    "description": "Error shown when saving the onboarding choices fails after tapping Done."
+  },
+  "onboarding_restoreRequiresEula": "Accept the EULA and Privacy Policy first.",
+  "@onboarding_restoreRequiresEula": {
+    "description": "Hint shown under the \"Restore from backup\" button while the terms have not been accepted."
+  },
+  "onboarding_setupStepFailedUBlock": "uBlock Origin could not be installed. WebLibre tries again on the next start.",
+  "@onboarding_setupStepFailedUBlock": {
+    "description": "Message after setup when installing the uBlock Origin extension failed."
+  },
+  "onboarding_setupStepFailedFilters": "The recommended uBlock Origin filters could not be turned on. WebLibre tries again on the next start.",
+  "@onboarding_setupStepFailedFilters": {
+    "description": "Message after setup when applying the optimized uBlock Origin filter lists failed."
+  },
+  "onboarding_setupStepFailedHardening": "The stricter security settings could not all be turned on. WebLibre tries again on the next start.",
+  "@onboarding_setupStepFailedHardening": {
+    "description": "Message after setup when the browser engine refused some of the stricter security settings chosen during setup (the 'Stricter security settings' option). The setup still finished; the settings are retried on each start until they apply."
   }
 }

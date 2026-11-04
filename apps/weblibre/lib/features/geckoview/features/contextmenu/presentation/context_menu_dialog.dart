@@ -55,7 +55,7 @@ class ContextMenuDialog extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final showContainerUi = settings.showContainerUi;
+    final showContainerUi = settings.containerEntryPointsShown;
     final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
 
     final effectiveHitResult = useState(hitResult);

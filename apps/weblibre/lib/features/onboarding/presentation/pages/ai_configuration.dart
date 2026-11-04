@@ -19,88 +19,36 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/onboarding/presentation/widgets/customize_setup.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
-class AiConfigurationPage extends HookConsumerWidget {
+/// The one page profiles set up at onboarding revision 1 see after an
+/// update: the on-device AI features came later, and everything else they
+/// already chose. Outside the draft scope, so the switch writes the live
+/// setting, like any page of a review.
+class AiConfigurationPage extends StatelessWidget {
   const AiConfigurationPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-
-    final enableLocalAiFeatures = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.enableLocalAiFeatures,
-      ),
-    );
 
     return BrowserPage(
       child: BrowserPageContent(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 24),
-            Center(
-              child: Text(
-                l10n.onboarding_aiFeaturesTitle,
-                style: theme.textTheme.headlineMedium,
-              ),
+            Icon(MdiIcons.creation, size: 48, color: theme.colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(
+              l10n.onboarding_aiFeaturesTitle,
+              style: theme.textTheme.headlineMedium,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.onboarding_aiOnDeviceTitle),
-              subtitle: Text(l10n.onboarding_aiOnDeviceSubtitle),
-              secondary: const Icon(MdiIcons.creation),
-              value: enableLocalAiFeatures,
-              onChanged: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.enableLocalAiFeatures(value),
-                    );
-              },
-            ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
-              margin: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Text.rich(
-                TextSpan(
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onError,
-                    height: 1.4,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: '${l10n.onboarding_aiWarningTitle}\n\n',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: Theme.of(context).colorScheme.onError,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const TextSpan(text: '• '),
-                    TextSpan(text: '${l10n.onboarding_aiWarningPoint1}\n\n'),
-                    const TextSpan(text: '• '),
-                    TextSpan(text: '${l10n.onboarding_aiWarningPoint2}\n\n'),
-                    const TextSpan(text: '• '),
-                    TextSpan(text: l10n.onboarding_aiWarningPoint3),
-                  ],
-                ),
-              ),
-            ),
+            const LocalAiTile(),
           ],
         ),
       ),

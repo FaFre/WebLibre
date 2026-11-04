@@ -32,7 +32,7 @@ class ToolbarLayoutSettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGeneralSettingsProvider);
     final search = useSettingsSearch();
 
     return SettingsCustomScrollScaffold(

@@ -172,7 +172,7 @@ class TabBarPreviewCard extends HookWidget {
             settings.effectiveTabBarStackingMode(window: window) ==
             TabBarStackingMode.containerTabs,
         url: Uri.parse('https://example.com/news'),
-        color: settings.showContainerUi ? colorScheme.primary : null,
+        color: settings.containerEntryPointsShown ? colorScheme.primary : null,
         avatar: const Icon(MdiIcons.web, size: 20),
       ),
       QuickTabSwitcherItem(
@@ -187,7 +187,7 @@ class TabBarPreviewCard extends HookWidget {
         color: null,
         avatar: const Icon(MdiIcons.web, size: 20),
       ),
-      if (settings.showIsolatedTabUi)
+      if (settings.isolatedTabEntryPointsShown)
         QuickTabSwitcherItem(
           id: 'isolated-preview-tab',
           isActive: false,
@@ -223,7 +223,7 @@ class TabBarPreviewCard extends HookWidget {
         isHistory: false,
         isPinned: false,
         url: Uri.parse('https://example.com/news'),
-        color: settings.showContainerUi ? colorScheme.primary : null,
+        color: settings.containerEntryPointsShown ? colorScheme.primary : null,
         avatar: const Icon(MdiIcons.web, size: 20),
         groupSize: previewQuickItems.where((item) => !item.isHistory).length,
       ),
@@ -235,11 +235,11 @@ class TabBarPreviewCard extends HookWidget {
         isHistory: false,
         isPinned: false,
         url: Uri.parse('https://search.example.com'),
-        color: settings.showContainerUi ? colorScheme.primary : null,
+        color: settings.containerEntryPointsShown ? colorScheme.primary : null,
         avatar: const Icon(MdiIcons.web, size: 20),
       ),
     ];
-    final previewContainerPalette = settings.showContainerUi
+    final previewContainerPalette = settings.containerEntryPointsShown
         ? ContainerColors.palette(context, colorScheme.primary)
         : null;
 
@@ -274,8 +274,8 @@ class TabBarPreviewCard extends HookWidget {
             (axis != Axis.vertical ||
                 BrowserTabBar.isWideRailWidth(railWidth)) &&
             settings.quickTabSwitcherShowTitles,
-        showIsolatedTabUi: settings.showIsolatedTabUi,
-        hierarchyGlyphs: settings.quickTabSwitcherHierarchyGlyphs,
+        showIsolatedTabUi: settings.isolatedTabEntryPointsShown,
+        hierarchyGlyphs: settings.effectiveQuickTabSwitcherHierarchyGlyphs,
         titleMaxWidth: settings.quickTabSwitcherTitleWidth,
         closeButtonMode: settings.quickTabSwitcherCloseButtonMode,
         enablePinTabInMenu: false,

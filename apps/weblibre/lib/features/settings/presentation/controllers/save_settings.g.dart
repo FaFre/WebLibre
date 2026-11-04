@@ -35,7 +35,7 @@ final class SaveGeneralSettingsControllerProvider
 }
 
 String _$saveGeneralSettingsControllerHash() =>
-    r'9a6d663234c1a1750bf90bf29b4664e4d86861c0';
+    r'3a013b533493ad890198d777ebc92dcb4de7d8eb';
 
 abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();

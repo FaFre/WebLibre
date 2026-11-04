@@ -25,6 +25,7 @@ import 'package:weblibre/features/account/data/repositories/account_sync_reposit
 import 'package:weblibre/features/account/domain/services/sync_document_service.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
+import 'package:weblibre/features/user/data/models/legacy_setting_fallbacks.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
@@ -96,6 +97,13 @@ class SettingsSyncService extends _$SettingsSyncService
         'Unsupported settings schema version: $schemaVersion '
         '(this app supports up to $_schemaVersion)',
       );
+    }
+
+    // A snapshot from before user database v12 means "the old fallback" by
+    // leaving these settings out or `null`; without this they would take the
+    // new fallbacks and, for example, turn local network blocking on.
+    if (json['payload'] case final Map<String, dynamic> payload) {
+      restoreLegacySettingFallbacks(payload);
     }
 
     final envelope = SettingsSyncEnvelope.fromJson(json);

@@ -373,4 +373,48 @@ void main() {
       expect(menuItemEntriesFromJson('items'), isEmpty);
     });
   });
+
+  group('menuLayoutIsCustomized', () {
+    test('the shipped menu is not customized', () {
+      expect(
+        menuLayoutIsCustomized(mergeMenuLayoutWithDefaults(null)),
+        isFalse,
+      );
+    });
+
+    test('a hidden section or a hidden row is', () {
+      final defaults = mergeMenuLayoutWithDefaults(null);
+
+      final sectionHidden = [
+        defaults.first.copyWith(visible: !defaults.first.visible),
+        ...defaults.skip(1),
+      ];
+      expect(menuLayoutIsCustomized(sectionHidden), isTrue);
+
+      final withRows = defaults.firstWhere((s) => s.items.isNotEmpty);
+      final rowHidden = [
+        for (final section in defaults)
+          if (section == withRows)
+            section.copyWith(
+              items: [
+                section.items.first.copyWith(
+                  visible: !section.items.first.visible,
+                ),
+                ...section.items.skip(1),
+              ],
+            )
+          else
+            section,
+      ];
+      expect(menuLayoutIsCustomized(rowHidden), isTrue);
+    });
+
+    test('a reordered menu is', () {
+      final defaults = mergeMenuLayoutWithDefaults(null);
+      expect(
+        menuLayoutIsCustomized([...defaults.skip(1), defaults.first]),
+        isTrue,
+      );
+    });
+  });
 }

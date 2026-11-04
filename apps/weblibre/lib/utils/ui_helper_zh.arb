@@ -13,7 +13,7 @@
   "uiHelper_newTabOpened": "已打开新标签页",
   "uiHelper_actionSwitch": "切换",
   "uiHelper_couldNotLaunchUrl": "无法打开网址（{url}）",
-  "uiHelper_canNotHandleScheme": "无法处理“{scheme}”",
+  "uiHelper_canNotHandleScheme": "没有应用可以打开“{scheme}”链接",
   "uiHelper_tabsClosedCount": "{count, plural, =1{已关闭标签页} other{已关闭 {count} 个标签页}}",
   "uiHelper_closeIsolatedTabsTitle": "关闭隔离标签页？",
   "uiHelper_closeIsolatedTabsConfirm": "{count, plural, =1{这将永久清除此隔离会话的所有浏览数据。} other{这将永久清除 {count} 个隔离会话的浏览数据。}}"

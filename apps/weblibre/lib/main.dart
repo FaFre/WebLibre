@@ -77,6 +77,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
+import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_logs.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_autostart.dart';
@@ -84,6 +85,7 @@ import 'package:weblibre/features/proxy/domain/services/proxy_demand.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_log_level_applier.dart';
 import 'package:weblibre/features/proxy/domain/services/singbox_start_retry.dart';
+import 'package:weblibre/features/settings/domain/services/legacy_container_options.dart';
 import 'package:weblibre/features/share_intent/domain/services/sharing_intent.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/database/riverpod_storage.dart';
@@ -349,8 +351,34 @@ class _MainWidget extends HookConsumerWidget {
           : null;
 
       await countryCodes;
-      final engineSettings = await engineSettingsFuture;
-      final generalSettings = await generalSettingsFuture;
+      var storedGeneralSettings = await generalSettingsFuture;
+      // A profile that hid the container UI before visibility switches
+      // existed keeps its strict containers and per-container app links
+      // applying: shown again, before anything reads them. Reads the
+      // containers only for such a profile, and runs at most once.
+      try {
+        if (await ref
+            .read(legacyContainerOptionsProvider.notifier)
+            .keepApplying(storedGeneralSettings)) {
+          storedGeneralSettings = await ref
+              .read(generalSettingsRepositoryProvider.notifier)
+              .fetchSettings();
+        }
+      } catch (e, s) {
+        logger.w(
+          'Failed to keep legacy container options applying',
+          error: e,
+          stackTrace: s,
+        );
+      }
+
+      // As they apply: what the engine starts with (add-on collection,
+      // process options, content blocking, …) leaves out the settings of
+      // hidden features, like everything that follows it at runtime.
+      final generalSettings = storedGeneralSettings.effective();
+      final engineSettings = (await engineSettingsFuture).effective(
+        generalSettings.isFeatureShown,
+      );
 
       try {
         await persistedStatePreload;
@@ -659,6 +687,12 @@ class _MainWidget extends HookConsumerWidget {
         // has forgotten (Places retention, user-initiated clears). Cheap and
         // background; failures are logged and ignored.
         unawaited(ref.read(localIndexPrunerProvider.notifier).prune());
+
+        // Onboarding steps that reach outside the settings (installing
+        // uBlock Origin) and did not finish: retried until they do, and
+        // reported by the browser screen when they fail. Only the onboarding
+        // commit ever schedules one.
+        unawaited(ref.read(setupStepRunnerProvider.notifier).resume());
 
         // The secure-storage claim the account handler depends on completed
         // above, before the UI was allowed to mount.

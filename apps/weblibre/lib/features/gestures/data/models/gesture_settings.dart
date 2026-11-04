@@ -20,6 +20,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -171,6 +172,20 @@ class GestureSettings with FastEquatable {
 
   /// Whether the recognizer should actually run.
   bool get effectiveEnabled => enabled && active;
+
+  /// These settings as they apply while [isShown] says which features are
+  /// shown: drawn gestures off while hidden, and the built-in swipes back to
+  /// their defaults while their remapping is. The stored values are kept.
+  GestureSettings effective(bool Function(FeatureId feature) isShown) {
+    var settings = this;
+    if (!isShown(FeatureId.inputDrawnGestures)) {
+      settings = settings.copyWith(enabled: false);
+    }
+    if (!isShown(FeatureId.inputTabSwipeRemap)) {
+      settings = settings.copyWith(builtInOverrides: const {});
+    }
+    return settings;
+  }
 
   /// Canonical gesture key → action: [defaultGestureBindings] with
   /// [bindingOverrides] applied. Keys follow the grammar documented on

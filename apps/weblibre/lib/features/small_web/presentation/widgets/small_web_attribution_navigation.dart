@@ -18,23 +18,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/providers/provider_read.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 
-Future<void> openSmallWebAttributionUri(BuildContext context, Uri uri) async {
-  final container = ProviderScope.containerOf(context, listen: false);
-  final router = await container.read(routerProvider.future);
+/// Opens [uri] in a new tab from the small web sheet, closing the sheet.
+/// [read] is the sheet's `ref.read`, used before the sheet closes: its
+/// widgets are gone afterwards.
+Future<void> openSmallWebAttributionUri(
+  BuildContext context,
+  ProviderRead read,
+  Uri uri,
+) async {
+  final tabs = read(tabRepositoryProvider.notifier);
+  final router = await read(routerProvider.future);
 
   if (context.mounted) {
     Navigator.of(context).pop();
   }
 
-  await container
-      .read(tabRepositoryProvider.notifier)
-      .addTab(url: uri, tabMode: TabMode.regular, selectTab: true);
+  await tabs.addTab(url: uri, tabMode: TabMode.regular, selectTab: true);
 
   router.go(const BrowserRoute().location);
 }

@@ -23,13 +23,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/utils/open_in_custom_tab.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> unshortenerSettingsSections(
   BuildContext context,
@@ -59,6 +62,7 @@ List<SettingsSectionDefinition> unshortenerSettingsSections(
           keywords: settingsKeywords(
             l10n.openLinkTools_unshortenerEnabledKeywords,
           ),
+          hiddenSettings: const [HiddenSetting.unshortener],
           child: const _UnshortenerEnabledTile(),
         ),
         SettingsEntryDefinition(
@@ -92,11 +96,14 @@ class UnshortenerSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return SettingsDetailScaffold(
-      title: l10n.openLinkTools_unshortenerSettingsTitle,
-      subtitle: l10n.openLinkTools_unshortenerSettingsSubtitle,
-      icon: MdiIcons.linkVariant,
-      sections: unshortenerSettingsSections(context),
+    return HiddenFeatureScope(
+      feature: FeatureId.linksUnshortener,
+      child: SettingsDetailScaffold(
+        title: l10n.openLinkTools_unshortenerSettingsTitle,
+        subtitle: l10n.openLinkTools_unshortenerSettingsSubtitle,
+        icon: MdiIcons.linkVariant,
+        sections: unshortenerSettingsSections(context),
+      ),
     );
   }
 }
@@ -108,7 +115,7 @@ class _UnshortenerEnabledTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.unshortenerEnabled),
+      storedGeneralSettingsProvider.select((s) => s.unshortenerEnabled),
     );
 
     return SwitchListTile.adaptive(
@@ -183,7 +190,7 @@ class _UnshortenerTokenField extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final token = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.unshortenerToken),
+      storedGeneralSettingsProvider.select((s) => s.unshortenerToken),
     );
     final controller = useTextEditingController(text: token);
     final focusNode = useFocusNode();

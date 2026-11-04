@@ -24,6 +24,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
+import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
@@ -63,55 +64,65 @@ class PermissionsPage extends HookConsumerWidget implements IFormPage {
                 ),
               ),
               const SizedBox(height: 24),
-              Skeletonizer(
-                enabled: !notificationPermissionEnabled.hasData,
-                child: FormField(
-                  initialValue: true,
-                  onSaved: (newValue) async {
-                    if (newValue == true &&
-                        notificationPermissionEnabled.data != true) {
-                      await Permission.notification.request();
-                    }
-                  },
-                  builder: (field) => SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: field.value ?? true,
-                    title: Text(l10n.onboarding_permissionsNotificationsTitle),
-                    subtitle: Text(
-                      l10n.onboarding_permissionsNotificationsSubtitle,
+              // Drawn like the other setup pages: a card of switches.
+              SetupSection(
+                children: [
+                  Skeletonizer(
+                    enabled: !notificationPermissionEnabled.hasData,
+                    child: FormField(
+                      initialValue: true,
+                      onSaved: (newValue) async {
+                        if (newValue == true &&
+                            notificationPermissionEnabled.data != true) {
+                          await Permission.notification.request();
+                        }
+                      },
+                      builder: (field) => SwitchListTile.adaptive(
+                        secondary: const Icon(Icons.notifications_outlined),
+                        value: field.value ?? true,
+                        title: Text(
+                          l10n.onboarding_permissionsNotificationsTitle,
+                        ),
+                        subtitle: Text(
+                          l10n.onboarding_permissionsNotificationsSubtitle,
+                        ),
+                        onChanged: (notificationPermissionEnabled.data == true)
+                            ? null
+                            : (value) {
+                                field.didChange(value);
+                              },
+                      ),
                     ),
-                    onChanged: (notificationPermissionEnabled.data == true)
-                        ? null
-                        : (value) {
-                            field.didChange(value);
-                          },
                   ),
-                ),
-              ),
-              Skeletonizer(
-                enabled: !isDefaultBrowser.hasData,
-                child: FormField(
-                  key: ValueKey(isDefaultBrowser.data),
-                  initialValue: isCurrentDefaultBrowser,
-                  onSaved: (newValue) async {
-                    if (newValue == true && isDefaultBrowser.data == false) {
-                      await GeckoBrowserService().requestDefaultBrowser();
-                    }
-                  },
-                  builder: (field) => SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    value: field.value ?? isCurrentDefaultBrowser,
-                    title: Text(l10n.onboarding_permissionsDefaultBrowserTitle),
-                    subtitle: Text(
-                      l10n.onboarding_permissionsDefaultBrowserSubtitle,
+                  Skeletonizer(
+                    enabled: !isDefaultBrowser.hasData,
+                    child: FormField(
+                      key: ValueKey(isDefaultBrowser.data),
+                      initialValue: isCurrentDefaultBrowser,
+                      onSaved: (newValue) async {
+                        if (newValue == true &&
+                            isDefaultBrowser.data == false) {
+                          await GeckoBrowserService().requestDefaultBrowser();
+                        }
+                      },
+                      builder: (field) => SwitchListTile.adaptive(
+                        secondary: const Icon(Icons.open_in_browser),
+                        value: field.value ?? isCurrentDefaultBrowser,
+                        title: Text(
+                          l10n.onboarding_permissionsDefaultBrowserTitle,
+                        ),
+                        subtitle: Text(
+                          l10n.onboarding_permissionsDefaultBrowserSubtitle,
+                        ),
+                        onChanged: isCurrentDefaultBrowser
+                            ? null
+                            : (value) {
+                                field.didChange(value);
+                              },
+                      ),
                     ),
-                    onChanged: isCurrentDefaultBrowser
-                        ? null
-                        : (value) {
-                            field.didChange(value);
-                          },
                   ),
-                ),
+                ],
               ),
             ],
           ),

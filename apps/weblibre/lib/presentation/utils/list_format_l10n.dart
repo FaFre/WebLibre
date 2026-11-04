@@ -17,5 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-enum OnboardingMode { express, detailed, restore }
+/// [items] as one list in the UI language, e.g. "Containers, Profiles" or
+/// "容器、配置文件", so translators choose the separator.
+///
+/// Only for a list that stands on its own, after a colon or as a subtitle:
+/// it never adds a conjunction, so it cannot end a sentence like "X and Y".
+String formatList(AppLocalizations l10n, Iterable<String> items) =>
+    items.join(l10n.listFormat_separator);

@@ -40,12 +40,12 @@ class TabCreationMenu extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final createChildTabsOption = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (value) => value.createChildTabsOption,
+        (value) => value.childTabEntryPointsShown,
       ),
     );
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (value) => value.showIsolatedTabUi,
+        (value) => value.isolatedTabEntryPointsShown,
       ),
     );
 

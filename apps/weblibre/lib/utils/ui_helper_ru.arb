@@ -13,7 +13,7 @@
   "uiHelper_newTabOpened": "Новая вкладка открыта",
   "uiHelper_actionSwitch": "Перейти",
   "uiHelper_couldNotLaunchUrl": "Не удалось открыть URL-адрес ({url})",
-  "uiHelper_canNotHandleScheme": "Невозможно обработать «{scheme}»",
+  "uiHelper_canNotHandleScheme": "Ни одно приложение не может открыть ссылки «{scheme}»",
   "uiHelper_tabsClosedCount": "{count, plural, one{{count} вкладка закрыта} few{{count} вкладки закрыты} many{{count} вкладок закрыто} other{{count} вкладки закрыто}}",
   "uiHelper_closeIsolatedTabsTitle": "Закрыть изолированные вкладки?",
   "uiHelper_closeIsolatedTabsConfirm": "{count, plural, one{Данные просмотра {count} изолированного сеанса будут безвозвратно удалены.} few{Данные просмотра {count} изолированных сеансов будут безвозвратно удалены.} many{Данные просмотра {count} изолированных сеансов будут безвозвратно удалены.} other{Данные просмотра {count} изолированного сеанса будут безвозвратно удалены.}}"

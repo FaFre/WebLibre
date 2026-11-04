@@ -63,7 +63,7 @@ Future<bool> _confirmIsolatedTabCloseIfNeeded(
   if (groupCount > 1) return true;
   if (!context.mounted) return false;
 
-  return await ui_helper.confirmIsolatedTabClose(context);
+  return await ui_helper.confirmIsolatedTabClose(context, ref.read);
 }
 
 class GridTabItemContainer extends StatelessWidget {

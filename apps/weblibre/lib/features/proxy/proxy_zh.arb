@@ -51,6 +51,7 @@
   "proxy_fieldProfileName": "配置名称",
   "proxy_fieldProtocol": "协议",
   "proxy_protocolFixedHelper": "配置创建后协议不可更改。",
+  "proxy_protocolFromImportHelper": "由导入决定。如需手动输入连接，请在“设置 > 功能管理”中显示“{featureName}”。",
   "proxy_customOutboundLabel": "自定义出站",
   "proxy_startAutomaticallyTitle": "自动启动",
   "proxy_startAutomaticallySubtitle": "WebLibre 启动时连接此配置，使用它的标签页无需提示即可就绪",

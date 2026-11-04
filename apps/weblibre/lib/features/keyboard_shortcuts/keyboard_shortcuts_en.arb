@@ -98,6 +98,11 @@
   "@keyboardShortcuts_actionCustomize": {
     "description": "Button in the keyboard shortcuts overview dialog that opens the settings screen for editing shortcuts."
   },
+  "keyboardShortcuts_actionShowAll": "Show all",
+  "@keyboardShortcuts_actionShowAll": {
+    "description": "Button in the keyboard shortcuts overview dialog that opens the keyboard shortcuts settings screen, shown instead of Customize while changing shortcuts is hidden (the screen then only lists them and switches them on or off)."
+  },
+
   "keyboardShortcuts_actionReassign": "Reassign",
   "@keyboardShortcuts_actionReassign": {
     "description": "Save button of the key recording dialog when the combination will be moved from another action to this one."

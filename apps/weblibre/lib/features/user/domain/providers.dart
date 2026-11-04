@@ -24,6 +24,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/entities/fingerprint_overrides.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
@@ -81,6 +82,9 @@ bool incognitoModeEnabled(Ref ref) {
   );
 }
 
+/// The stored per-target fingerprinting overrides, for their editor: while
+/// they are hidden the engine applies the defaults (H1), but the editor shows
+/// what was saved and comes back when they are shown.
 @Riverpod()
 Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
   Ref ref,
@@ -89,7 +93,7 @@ Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
   final fingerprintTargetSet = fingerprintTargets.map((e) => e.name).toSet();
 
   final overrides = ref.watch(
-    engineSettingsWithDefaultsProvider.select(
+    storedEngineSettingsProvider.select(
       (settings) =>
           settings.fingerprintingProtectionOverrides.mapNotNull(
             (settings) =>
@@ -106,6 +110,22 @@ Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
 Future<Profile> selectedProfile(Ref ref) async {
   final profiles = await ref.watch(profileRepositoryProvider.future);
   return profiles.firstWhere((p) => p.uuidValue == filesystem.selectedProfile);
+}
+
+/// Whether the profile switcher has anything to offer: another profile to
+/// switch to, or the multiple-profiles controls shown so one can be added.
+/// Without either, the profile entry opens this profile's own controls.
+@Riverpod()
+bool canSwitchProfiles(Ref ref) {
+  final profileCount = ref.watch(
+    profileRepositoryProvider.select((profiles) => profiles.value?.length ?? 0),
+  );
+  final profilesShown = ref.watch(
+    shownFeaturesProvider.select(
+      (features) => features.contains(FeatureId.profilesMulti),
+    ),
+  );
+  return profileCount > 1 || profilesShown;
 }
 
 @Riverpod()

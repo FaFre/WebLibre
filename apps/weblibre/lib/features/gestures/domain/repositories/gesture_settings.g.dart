@@ -35,7 +35,7 @@ final class GestureSettingsRepositoryProvider
 }
 
 String _$gestureSettingsRepositoryHash() =>
-    r'f4dfb517acd5f2bc1592526c93f0476ee2658004';
+    r'54f399b34a482886add15d1f26f0b446e73910da';
 
 abstract class _$GestureSettingsRepository
     extends $StreamNotifier<GestureSettings> {
@@ -56,14 +56,67 @@ abstract class _$GestureSettingsRepository
   }
 }
 
+/// The gesture settings as stored, for the screens that edit them.
+
+@ProviderFor(storedGestureSettings)
+final storedGestureSettingsProvider = StoredGestureSettingsProvider._();
+
+/// The gesture settings as stored, for the screens that edit them.
+
+final class StoredGestureSettingsProvider
+    extends
+        $FunctionalProvider<GestureSettings, GestureSettings, GestureSettings>
+    with $Provider<GestureSettings> {
+  /// The gesture settings as stored, for the screens that edit them.
+  StoredGestureSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'storedGestureSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$storedGestureSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GestureSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GestureSettings create(Ref ref) {
+    return storedGestureSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GestureSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GestureSettings>(value),
+    );
+  }
+}
+
+String _$storedGestureSettingsHash() =>
+    r'f21b6fa247efe8747e58bbe131b112f386f8bb7c';
+
+/// The gesture settings as they apply ([GestureSettings.effective]).
+
 @ProviderFor(gestureSettingsWithDefaults)
 final gestureSettingsWithDefaultsProvider =
     GestureSettingsWithDefaultsProvider._();
+
+/// The gesture settings as they apply ([GestureSettings.effective]).
 
 final class GestureSettingsWithDefaultsProvider
     extends
         $FunctionalProvider<GestureSettings, GestureSettings, GestureSettings>
     with $Provider<GestureSettings> {
+  /// The gesture settings as they apply ([GestureSettings.effective]).
   GestureSettingsWithDefaultsProvider._()
     : super(
         from: null,
@@ -98,7 +151,7 @@ final class GestureSettingsWithDefaultsProvider
 }
 
 String _$gestureSettingsWithDefaultsHash() =>
-    r'f9f242b81ef9d4d0594ae1700fa11db503583672';
+    r'ccf3b1282c83c1b7d6c6fae89943d75104be8459';
 
 /// What [gesture] currently does, or null when the user switched it off.
 

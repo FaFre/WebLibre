@@ -25,6 +25,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
@@ -460,6 +461,13 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ToolbarButtonDefinition(
     spec: toggleGesturesToolbarButtonSpec,
     icon: MdiIcons.gestureSwipe,
+    // The gestures quick toggle belongs to drawn gestures, hidden with them
+    // (`switch.gestures`); the button's fallback takes its place.
+    isPrimaryAvailable: (scope, ref) => ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.inputDrawnGestures),
+      ),
+    ),
     builder: (scope, context, ref) {
       final l10n = AppLocalizations.of(context);
       final on = ref.watch(
@@ -672,7 +680,10 @@ Future<void> _closeTab(
         .where((s) => s.isolationContextId == tabState.isolationContextId)
         .length;
     if (groupCount <= 1 && context.mounted) {
-      final confirmed = await ui_helper.confirmIsolatedTabClose(context);
+      final confirmed = await ui_helper.confirmIsolatedTabClose(
+        context,
+        ref.read,
+      );
       if (!confirmed) return;
     }
   }

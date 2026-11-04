@@ -40,12 +40,12 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -128,10 +128,8 @@ class ContainerMenu extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final controller = this.controller ?? useMenuController();
 
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showIsolatedTabUi,
-      ),
+    final closeIsolatedShown = ref.watch(
+      closeIsolatedTabsShownProvider(scopeContainerId),
     );
 
     final container = this.container;
@@ -253,7 +251,8 @@ class ContainerMenu extends HookConsumerWidget {
                 onPressed: enabled
                     ? () async {
                         await closeTabs(
-                          confirm: () => showCloseAllTabsDialog(context),
+                          confirm: () =>
+                              showCloseAllTabsDialog(context, ref.read),
                         );
                       }
                     : null,
@@ -279,7 +278,7 @@ class ContainerMenu extends HookConsumerWidget {
                     : null,
                 child: Text(l10n.browser_closeSubmenuPrivateTabs),
               ),
-              if (showIsolatedTabUi)
+              if (closeIsolatedShown)
                 MenuItemButton(
                   leadingIcon: Icon(
                     MdiIcons.snowflake,

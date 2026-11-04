@@ -1561,13 +1561,13 @@ abstract class AppLocalizations {
   /// Row shown only for the uBlock Origin extension: manage its filter lists and WebLibre's extra hardening lists.
   ///
   /// In en, this message translates to:
-  /// **'Filter Lists & Hardenings'**
+  /// **'Filter Lists'**
   String get addons_menuFilterListsTitle;
 
   /// Line under "Filter Lists & Hardenings".
   ///
   /// In en, this message translates to:
-  /// **'Manage filter lists and apply WebLibre hardenings'**
+  /// **'Manage filter lists and turn on WebLibre\'s recommended filters'**
   String get addons_menuFilterListsSubtitle;
 
   /// Heading of the list of permissions, and row opening that list, on the extension screens.
@@ -2551,7 +2551,7 @@ abstract class AppLocalizations {
   /// Explanation under that browser action's name in the action lists: it reloads the page ignoring cached copies.
   ///
   /// In en, this message translates to:
-  /// **'Reload the current page, bypassing the cache'**
+  /// **'Reload the page and download everything again'**
   String get browserActions_hardReloadDescription;
 
   /// Name of the browser action that scrolls to the top of the page, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and as the name of the toolbar button that does the same. Keep it short.
@@ -3400,16 +3400,16 @@ abstract class AppLocalizations {
   /// **'Manage your profiles'**
   String get browserActions_showProfilesDescription;
 
-  /// Name of the browser action that opens the proxy settings, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
+  /// Name of the browser action that opens the connection settings (Tor, VPNs and proxies), named like that settings category, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
   ///
   /// In en, this message translates to:
-  /// **'Proxy'**
+  /// **'Connections'**
   String get browserActions_showProxySettingsTitle;
 
-  /// Explanation under that browser action's name in the action lists: it opens the proxy settings.
+  /// Explanation under that browser action's name in the action lists: it opens the connection settings (Tor, VPNs and proxies).
   ///
   /// In en, this message translates to:
-  /// **'Open proxy settings'**
+  /// **'Open connection settings'**
   String get browserActions_showProxySettingsDescription;
 
   /// Name of the browser action that opens the Tor proxy screen. Tor is a brand name, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and in the Actions section of the search screen. Keep it short.
@@ -3727,7 +3727,7 @@ abstract class AppLocalizations {
   /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'vpn, sing-box, socks, connection, network'**
+  /// **'proxy, tor, vpn, sing-box, socks, connection, network'**
   String get browserActions_showProxySettingsKeywords;
 
   /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
@@ -4957,7 +4957,7 @@ abstract class AppLocalizations {
   /// Explanation under "Site Data".
   ///
   /// In en, this message translates to:
-  /// **'Offline storage, databases, local files'**
+  /// **'Data sites save on this device, for example to work offline'**
   String get browser_dataTypeSiteDataSubtitle;
 
   /// Checkbox in the clear site data options: only cookies.
@@ -5926,22 +5926,28 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get browser_permissionNotification;
 
-  /// Name of a site permission: keep the site's stored data even when space runs low.
+  /// Site permission: the site may keep its stored data even when the device runs low on space (persistent storage).
   ///
   /// In en, this message translates to:
-  /// **'Persistent Storage'**
+  /// **'Protect Saved Site Data'**
   String get browser_permissionPersistentStorage;
 
-  /// Name of a site permission: let embedded content from other sites use its storage (storage access).
+  /// Explanation under the persistent storage site permission. Allowing this protects stored site data from automatic removal when space is low; it does not prevent the user from clearing it.
   ///
   /// In en, this message translates to:
-  /// **'Cross-Origin Storage'**
+  /// **'Keep this site\'s data even when storage space is low.'**
+  String get browser_permissionPersistentStorageDescription;
+
+  /// Site permission: the site may use its cookies while embedded in another site (cross-origin storage access).
+  ///
+  /// In en, this message translates to:
+  /// **'Cookies on Other Sites'**
   String get browser_permissionCrossOriginStorage;
 
-  /// Name of a site permission: play copy-protected (DRM) media. DRM is a technical abbreviation.
+  /// Site permission: the site may play copy-protected video or music. DRM stays as the technical term.
   ///
   /// In en, this message translates to:
-  /// **'Media Key System (DRM)'**
+  /// **'Play Protected Content (DRM)'**
   String get browser_permissionMediaKeySystem;
 
   /// Message when trying to drag a tab while the tab overview is filtered or searched.
@@ -6226,10 +6232,10 @@ abstract class AppLocalizations {
   /// **'Open Settings'**
   String get contextualToolbar_longPressOpenSettings;
 
-  /// Description, in toolbar customization, of what long-pressing the reload button does: reload without using cached copies.
+  /// Long-press action on the reload button: reload the page and download everything again instead of using saved copies (hard refresh).
   ///
   /// In en, this message translates to:
-  /// **'Hard Refresh (bypass cache)'**
+  /// **'Full Reload'**
   String get contextualToolbar_longPressHardRefresh;
 
   /// Description, in toolbar customization, of what long-pressing the translate button does: shows language and translation options.
@@ -6712,6 +6718,12 @@ abstract class AppLocalizations {
   /// **'Tap to switch profile'**
   String get menu_profileTapToSwitch;
 
+  /// Line under the profile name in the browser menu when there is only one profile and the multiple-profiles controls are hidden. Tapping opens the profile's lock, password and backup settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock and back up this profile'**
+  String get menu_profileManageCurrent;
+
   /// Confirmation after a manual Firefox Sync finished.
   ///
   /// In en, this message translates to:
@@ -7132,10 +7144,10 @@ abstract class AppLocalizations {
   /// **'Start {proxyTitle}'**
   String menu_connectionStartProxy(String proxyTitle);
 
-  /// Row in the connection group that opens proxy settings.
+  /// Row in the connection group of the browser menu that opens the connection settings (Tor, VPNs and proxies), named like that settings category.
   ///
   /// In en, this message translates to:
-  /// **'Proxy Settings'**
+  /// **'Connection Settings'**
   String get menu_connectionProxySettings;
 
   /// Line under a proxy in the connection group when no route uses it.
@@ -7951,7 +7963,7 @@ abstract class AppLocalizations {
   /// Body of the confirmation dialog before resetting the URL cleaner: settings return to defaults and the downloaded rule catalog is deleted.
   ///
   /// In en, this message translates to:
-  /// **'This will reset URL cleaner settings and remove the locally stored catalog.'**
+  /// **'This resets the URL Cleaner settings and removes downloaded rules.'**
   String get openLinkTools_restoreDefaultsContent;
 
   /// Confirm button of the dialog that resets the URL cleaner.
@@ -8095,7 +8107,7 @@ abstract class AppLocalizations {
   /// Subtitle of the URL cleaner settings screen listing what it contains. The catalog is the downloadable list of cleaning rules.
   ///
   /// In en, this message translates to:
-  /// **'URL cleanup behavior, rule catalog updates, and attribution.'**
+  /// **'What gets removed from links, rule updates and credits.'**
   String get openLinkTools_urlCleanerSettingsSubtitle;
 
   /// Explanation of the URL cleaner in its settings. "Offline redirections" means resolving known redirect links on the device without contacting the server.
@@ -8119,7 +8131,7 @@ abstract class AppLocalizations {
   /// Explanation under "Enable URL Cleaner".
   ///
   /// In en, this message translates to:
-  /// **'Remove tracking parameters from URLs'**
+  /// **'Remove tracking parts from links'**
   String get openLinkTools_urlCleanerEnabledSubtitle;
 
   /// Switch in the URL cleaner settings: clean links automatically without asking.
@@ -8155,13 +8167,13 @@ abstract class AppLocalizations {
   /// Explanation under "Allow referral marketing".
   ///
   /// In en, this message translates to:
-  /// **'Keep referral and affiliate tracking parameters'**
+  /// **'Keep referral and affiliate codes in links'**
   String get openLinkTools_allowReferralSubtitle;
 
   /// Switch in the URL cleaner settings: download updated cleaning rules automatically.
   ///
   /// In en, this message translates to:
-  /// **'Auto-update catalog'**
+  /// **'Update rules automatically'**
   String get openLinkTools_autoUpdateCatalogTitle;
 
   /// Explanation under "Auto-update catalog".
@@ -8173,7 +8185,7 @@ abstract class AppLocalizations {
   /// Row in the URL cleaner settings that downloads the latest cleaning rules now.
   ///
   /// In en, this message translates to:
-  /// **'Update catalog'**
+  /// **'Update rules'**
   String get openLinkTools_updateCatalogTitle;
 
   /// Line under "Update catalog" when the rules were never updated.
@@ -8203,7 +8215,7 @@ abstract class AppLocalizations {
   /// Confirmation after the URL cleaner rules were updated.
   ///
   /// In en, this message translates to:
-  /// **'Catalog updated'**
+  /// **'Rules updated'**
   String get openLinkTools_catalogUpdatedMessage;
 
   /// Error message when updating the URL cleaner rules failed. error is technical error text, usually English.
@@ -8221,7 +8233,7 @@ abstract class AppLocalizations {
   /// Explanation under "Restore defaults": return to the rule catalog shipped with the app and the default settings.
   ///
   /// In en, this message translates to:
-  /// **'Reset to bundled catalog and default settings'**
+  /// **'Go back to the built-in rules and default settings'**
   String get openLinkTools_restoreDefaultsButtonSubtitle;
 
   /// Credit line in the URL cleaner settings, followed by a link to the ClearURLs rules. ClearURL is a project name.
@@ -8263,7 +8275,7 @@ abstract class AppLocalizations {
   /// Section heading on the URL cleaner settings screen for the downloadable rule list.
   ///
   /// In en, this message translates to:
-  /// **'Catalog'**
+  /// **'Rules'**
   String get openLinkTools_urlCleanerCatalogSectionTitle;
 
   /// Summary of the "Update catalog" setting, shown as a settings search result.
@@ -9135,6 +9147,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'example.com or *.example.com'**
   String get tabs_addSiteHint;
+
+  /// Example placeholder of the add-site field while wildcard assignments are hidden. A domain example; keep it unchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'example.com'**
+  String get tabs_addSiteHintSingle;
 
   /// Help text under the add-site field: "*." matches all subdomains. Keep "*.example.com" unchanged.
   ///
@@ -10312,6 +10330,12 @@ abstract class AppLocalizations {
   /// **'Customize'**
   String get keyboardShortcuts_actionCustomize;
 
+  /// Button in the keyboard shortcuts overview dialog that opens the keyboard shortcuts settings screen, shown instead of Customize while changing shortcuts is hidden (the screen then only lists them and switches them on or off).
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get keyboardShortcuts_actionShowAll;
+
   /// Save button of the key recording dialog when the combination will be moved from another action to this one.
   ///
   /// In en, this message translates to:
@@ -10336,12 +10360,6 @@ abstract class AppLocalizations {
   /// **'Next'**
   String get onboarding_actionNext;
 
-  /// Button at the bottom of the first-run setup's welcome page when "Restore from Backup" is chosen; starts restoring a backup file.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore'**
-  String get onboarding_actionRestore;
-
   /// Error message when restoring a backup during first-run setup fails because the current profile's data could not be read.
   ///
   /// In en, this message translates to:
@@ -10357,46 +10375,16 @@ abstract class AppLocalizations {
   /// Heading of the first-run welcome page for a new user. WebLibre is the app name.
   ///
   /// In en, this message translates to:
-  /// **'WebLibre is ready'**
-  String get onboarding_welcomeReadyTitle;
+  /// **'Welcome to WebLibre'**
+  String get onboarding_welcomeTitle;
 
-  /// Label above the choice between quick start, custom setup and restoring a backup on the first-run welcome page.
+  /// Button on the first-run welcome page: replace this new profile with a profile from a backup file made earlier.
   ///
   /// In en, this message translates to:
-  /// **'Choose your onboarding experience:'**
-  String get onboarding_chooseExperience;
-
-  /// First-run setup choice: skip configuration and use recommended settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Quick Start'**
-  String get onboarding_modeExpressTitle;
-
-  /// Explanation under "Quick Start".
-  ///
-  /// In en, this message translates to:
-  /// **'Use recommended defaults and get browsing.'**
-  String get onboarding_modeExpressSubtitle;
-
-  /// First-run setup choice: go through configuration pages one by one.
-  ///
-  /// In en, this message translates to:
-  /// **'Custom Setup'**
-  String get onboarding_modeDetailedTitle;
-
-  /// Explanation under "Custom Setup" listing what can be configured. DNS is a technical abbreviation.
-  ///
-  /// In en, this message translates to:
-  /// **'Configure DNS, toolbar, extensions, and more.'**
-  String get onboarding_modeDetailedSubtitle;
-
-  /// First-run setup choice: restore a profile from a backup file made earlier.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore from Backup'**
+  /// **'Restore from backup'**
   String get onboarding_modeRestoreTitle;
 
-  /// Explanation under "Restore from Backup".
+  /// Explanation under the "Restore from backup" button on the welcome page.
   ///
   /// In en, this message translates to:
   /// **'Import a profile from an encrypted backup file.'**
@@ -10444,22 +10432,22 @@ abstract class AppLocalizations {
   /// **'End User License Agreement'**
   String get onboarding_eulaDocumentTitle;
 
-  /// Heading of the first-run setup page about optional AI features.
+  /// Heading of the page shown once after an update to people who set WebLibre up before the on-device AI features existed. The page only offers to turn those features on.
   ///
   /// In en, this message translates to:
-  /// **'AI Features'**
+  /// **'AI features'**
   String get onboarding_aiFeaturesTitle;
 
-  /// Switch that enables AI features that run only on the device, without sending data anywhere.
+  /// Switch that turns the on-device AI models on, not only shows their settings. Used in the onboarding's Customize step, right under the visibility switch named "On-device AI", and as a goal on the "Your setup" step, where it is off in every preset until the user turns it on.
   ///
   /// In en, this message translates to:
-  /// **'On-device AI'**
-  String get onboarding_aiOnDeviceTitle;
+  /// **'Use on-device AI'**
+  String get onboarding_aiUseOnDeviceTitle;
 
   /// Explanation under the on-device AI switch. Containers are separate browsing identities; the AI suggests topics for them and which tabs belong together.
   ///
   /// In en, this message translates to:
-  /// **'Local on-device features including container topic and tab suggestions'**
+  /// **'Suggests how to group and name your tabs, right on this device'**
   String get onboarding_aiOnDeviceSubtitle;
 
   /// Heading of the notice box listing things to know about the AI features.
@@ -10471,13 +10459,13 @@ abstract class AppLocalizations {
   /// Bullet point in the AI notice box.
   ///
   /// In en, this message translates to:
-  /// **'WebLibre uses a local AI model to analyze your open tab titles and suggest which containers to group the tabs into and what to name those containers. All processing happens entirely on your device.'**
+  /// **'WebLibre reads the titles of your open tabs and suggests which container each one belongs in and what to call it.'**
   String get onboarding_aiWarningPoint1;
 
-  /// Bullet point in the AI notice box.
+  /// Bullet point in the AI notice box. The AI runs entirely on the device and all of its data stays there.
   ///
   /// In en, this message translates to:
-  /// **'AI enhancements operate entirely within your browser, keeping all data on your device. Local AI processing respects your privacy and provides faster suggestions for container groups and names. You can control this behavior at any time in Settings.'**
+  /// **'AI features run entirely on this device, and all data stays on it.'**
   String get onboarding_aiWarningPoint2;
 
   /// Bullet point in the AI notice box.
@@ -10486,16 +10474,10 @@ abstract class AppLocalizations {
   /// **'AI can sometimes make mistakes, so please review suggested group names and tab selections.'**
   String get onboarding_aiWarningPoint3;
 
-  /// Heading of the first-run setup page for choosing search engines.
-  ///
-  /// In en, this message translates to:
-  /// **'Search'**
-  String get onboarding_searchTitle;
-
   /// Label above the choice of default search engine.
   ///
   /// In en, this message translates to:
-  /// **'Default Search Provider'**
+  /// **'Search engine'**
   String get onboarding_searchDefaultProviderLabel;
 
   /// Button after the suggested search engines that opens a search across all available engines.
@@ -10507,7 +10489,7 @@ abstract class AppLocalizations {
   /// Label above the choice of service that suggests search terms while typing.
   ///
   /// In en, this message translates to:
-  /// **'Default Autocomplete Provider'**
+  /// **'Search suggestions'**
   String get onboarding_searchDefaultAutocompleteLabel;
 
   /// Error heading when the list of search engines could not be loaded.
@@ -10516,11 +10498,17 @@ abstract class AppLocalizations {
   /// **'Could not load search engines'**
   String get onboarding_searchLoadFailedTitle;
 
-  /// Heading of the first-run setup page for DNS over HTTPS, which encrypts the lookups that turn website names into addresses. Technical term; usually kept in English.
+  /// Title of the setup row that opens the secure DNS (DNS over HTTPS) options, and of the page it opens. Use the plain term people know from their phone or other browsers.
   ///
   /// In en, this message translates to:
-  /// **'DNS over HTTPS'**
+  /// **'Secure DNS'**
   String get onboarding_dohTitle;
+
+  /// Subtitle of the secure DNS row in setup. Describes encrypted address lookups without promising that browsing is invisible to the network provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypts website address lookups for more privacy'**
+  String get onboarding_dohSubtitle;
 
   /// Heading of the first-run setup page for Android permissions.
   ///
@@ -10543,7 +10531,7 @@ abstract class AppLocalizations {
   /// Switch that makes WebLibre the device's default browser.
   ///
   /// In en, this message translates to:
-  /// **'Default Browser'**
+  /// **'Default browser'**
   String get onboarding_permissionsDefaultBrowserTitle;
 
   /// Explanation under the default browser switch. WebLibre is the app name.
@@ -10552,118 +10540,76 @@ abstract class AppLocalizations {
   /// **'Set WebLibre as your default browser'**
   String get onboarding_permissionsDefaultBrowserSubtitle;
 
-  /// Heading of the first-run setup page for privacy and security settings. "Hardening" means stricter security settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Privacy & Hardening'**
-  String get onboarding_privacyTitle;
-
   /// Row that opens the settings for which languages websites are told the user prefers.
   ///
   /// In en, this message translates to:
-  /// **'Browser Languages'**
+  /// **'Website languages'**
   String get onboarding_privacyBrowserLanguagesTitle;
 
-  /// Explanation under "Browser Languages".
+  /// Explanation under "Website languages".
   ///
   /// In en, this message translates to:
-  /// **'Configure language preferences exposed to websites'**
+  /// **'Which languages websites should show you'**
   String get onboarding_privacyBrowserLanguagesSubtitle;
-
-  /// Heading of a warning shown when several preferred languages are configured, which makes the browser easier to identify.
-  ///
-  /// In en, this message translates to:
-  /// **'Multiple Languages Detected'**
-  String get onboarding_multipleLanguagesDetectedTitle;
-
-  /// Warning body. count is the number of configured languages; locales is a comma-separated list of language codes such as "en-US, de-DE". "Fingerprint" means to identify a browser by its unique characteristics.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, other{Your browser has {count} languages configured ({locales}).}} Websites can use your unique language combination to fingerprint and track you across the web.'**
-  String onboarding_multipleLanguagesWarning(int count, String locales);
-
-  /// Suggestion in the language warning. "Fingerprint surface" means the characteristics that make the browser identifiable.
-  ///
-  /// In en, this message translates to:
-  /// **'Consider reducing your browser languages to a single language to minimize your fingerprint surface.'**
-  String get onboarding_multipleLanguagesSuggestion;
-
-  /// Button in the language warning that opens the language settings.
-  ///
-  /// In en, this message translates to:
-  /// **'Review Languages'**
-  String get onboarding_reviewLanguages;
 
   /// Switch that applies all recommended security settings to the browser engine (Gecko).
   ///
   /// In en, this message translates to:
-  /// **'Complete Web Engine Hardening'**
+  /// **'Stricter security settings'**
   String get onboarding_webEngineHardeningTitle;
 
   /// Explanation under the web engine hardening switch.
   ///
   /// In en, this message translates to:
-  /// **'Apply all recommended security hardening preferences to the web engine'**
+  /// **'Turns on every security setting WebLibre recommends'**
   String get onboarding_webEngineHardeningSubtitle;
 
   /// Switch that turns on the strict set of protections against browser fingerprinting (identifying a browser by its unique characteristics).
   ///
   /// In en, this message translates to:
-  /// **'Hardened Fingerprint Protection'**
+  /// **'Make this device harder to recognize'**
   String get onboarding_fingerprintProtectionTitle;
 
-  /// Explanation under the fingerprint protection switch.
+  /// Subtitle of the switch that turns on strong fingerprinting protection. "Fingerprinting" in brackets is the technical term, kept so people can find it in Settings.
   ///
   /// In en, this message translates to:
-  /// **'Load comprehensive fingerprint protection defaults'**
+  /// **'Hides details websites use to recognize you without cookies (fingerprinting)'**
   String get onboarding_fingerprintProtectionSubtitle;
 
-  /// Heading of the warning box shown when strict fingerprint protection is on.
+  /// Heading of the notice shown when strong fingerprinting protection is turned on during setup.
   ///
   /// In en, this message translates to:
-  /// **'Compatibility Warning'**
+  /// **'Some websites may break'**
   String get onboarding_compatibilityWarningTitle;
 
   /// Bullet point in the fingerprint protection warning. Canvas, navigator and media devices are names of web technologies that websites read to identify browsers.
   ///
   /// In en, this message translates to:
-  /// **'Hardened fingerprint protection enables 60+ protection targets including canvas randomization, navigator spoofing, media device masking, and more.'**
+  /// **'This changes over 60 details websites can read, like how graphics are drawn and which cameras and microphones are connected.'**
   String get onboarding_fingerprintWarningPoint1;
 
   /// Bullet point in the fingerprint protection warning.
   ///
   /// In en, this message translates to:
-  /// **'This may cause websites to break or behave unexpectedly. You can fine-tune individual targets in settings.'**
+  /// **'If a website does not work properly, you can adjust individual protections in Settings.'**
   String get onboarding_fingerprintWarningPoint2;
 
-  /// Heading of the settings that stop websites from reaching devices on the user's local network.
+  /// Switch: every website must ask before it connects to apps on this device (localhost) or to devices on the local network, not only known trackers. Apps listening on the device have been used to track people across websites.
   ///
   /// In en, this message translates to:
-  /// **'Local Network Protection'**
-  String get onboarding_localNetworkProtectionTitle;
-
-  /// Explanation under "Local Network Protection".
-  ///
-  /// In en, this message translates to:
-  /// **'Websites can try to reach your device and other devices on your home network, like routers, printers, or smart home devices. By default, known trackers are automatically blocked from doing this.'**
-  String get onboarding_localNetworkProtectionSubtitle;
-
-  /// Switch: require permission for every website that tries to reach local network devices, not only known trackers.
-  ///
-  /// In en, this message translates to:
-  /// **'Block All Local Network Requests'**
+  /// **'Ask before local connections'**
   String get onboarding_blockAllLocalNetworkTitle;
 
-  /// Explanation under the switch that blocks all local network requests.
+  /// Explanation under the switch that requires permission for local connections: apps on this device (localhost) and devices on the local network such as routers.
   ///
   /// In en, this message translates to:
-  /// **'Ask for permission before any website accesses devices on your home network, not just known trackers'**
+  /// **'Websites must ask before connecting to apps on this device or devices on your network'**
   String get onboarding_blockAllLocalNetworkSubtitle;
 
-  /// Heading of the first-run setup page for arranging the browser toolbar and screen layout.
+  /// Row in the Layout & input group of the onboarding's Customize step that opens the arrangement of the browser toolbar and screen layout, and the title of the page it opens.
   ///
   /// In en, this message translates to:
-  /// **'Toolbar & Layout'**
+  /// **'Toolbar & layout'**
   String get onboarding_toolbarLayoutTitle;
 
   /// Heading of the first-run setup page offering the uBlock Origin ad blocker. Product name; do not translate.
@@ -10672,29 +10618,383 @@ abstract class AppLocalizations {
   /// **'uBlock Origin'**
   String get onboarding_ublockTitle;
 
-  /// Description of the uBlock Origin extension on its setup page. Uses Markdown: keep the ** markers around bold text. Names of people, products and filter lists stay unchanged.
+  /// Plain-language description of the uBlock Origin extension on its setup page. Uses Markdown: keep the ** markers around the creator's name. Product and creator names stay unchanged.
   ///
   /// In en, this message translates to:
-  /// **'uBlock Origin (uBO) is a CPU- and memory-efficient **wide-spectrum content blocker** by **Raymond Hill** and is available as a browser extension for WebLibre.\n\nBy default, it blocks ads, trackers, coin miners, pop-ups, annoying anti-blockers, malware sites, and more using **EasyList, EasyPrivacy, Peter Lowe\'s Blocklist, Online Malicious URL Blocklist, and uBO filter lists**.\n\nMany other lists are available to block additional content.'**
+  /// **'uBlock Origin is a browser extension that blocks ads, trackers, pop-ups and known harmful sites.\n\nIt works automatically after installation. You can add more blocking rules in Settings.\n\nCreated by **Raymond Hill**.'**
   String get onboarding_ublockDescription;
 
   /// Switch that installs the uBlock Origin browser extension. Product name; do not translate.
   ///
   /// In en, this message translates to:
-  /// **'Install uBlock Origin Extension'**
+  /// **'Install uBlock Origin'**
   String get onboarding_ublockInstallTitle;
+
+  /// Subtitle of the setup switch that installs the uBlock Origin extension.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks ads, trackers and harmful sites'**
+  String get onboarding_ublockInstallSubtitle;
 
   /// Switch, available once uBlock Origin is being installed: apply WebLibre's recommended uBlock Origin settings.
   ///
   /// In en, this message translates to:
-  /// **'Apply optimized defaults'**
+  /// **'Use recommended filters'**
   String get onboarding_ublockApplyDefaultsTitle;
 
-  /// Explanation under "Apply optimized defaults": turns on WebLibre's own stricter filter lists in uBlock Origin.
+  /// Explanation under "Use recommended filters": turns on WebLibre's recommended extra filter lists in uBlock Origin.
   ///
   /// In en, this message translates to:
-  /// **'Enable WebLibre hardening filter lists.'**
+  /// **'Turns on the filter lists WebLibre recommends for uBlock Origin'**
   String get onboarding_ublockApplyDefaultsSubtitle;
+
+  /// Title of the onboarding step where the user picks a setup preset (Just browsing, Tinkerer, Expert).
+  ///
+  /// In en, this message translates to:
+  /// **'How much should WebLibre show?'**
+  String get onboarding_presetTitle;
+
+  /// Playful name of the simplest setup preset, for people who just want to browse privately. Keep it short and light.
+  ///
+  /// In en, this message translates to:
+  /// **'Just browsing'**
+  String get onboarding_presetAverageTitle;
+
+  /// One-line line under the "Just browsing" preset name, written as something the user would say about themselves (first person) so they recognise themselves in it.
+  ///
+  /// In en, this message translates to:
+  /// **'I want it private, not complicated'**
+  String get onboarding_presetAverageSubtitle;
+
+  /// First thing the "Just browsing" preset shows, listed on its card.
+  ///
+  /// In en, this message translates to:
+  /// **'Tabs, bookmarks, history and Reader Mode'**
+  String get onboarding_presetAveragePoint1;
+
+  /// Second thing the "Just browsing" preset shows. uBlock Origin is a product name.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks ads and trackers with uBlock Origin'**
+  String get onboarding_presetAveragePoint2;
+
+  /// Third thing the "Just browsing" preset shows.
+  ///
+  /// In en, this message translates to:
+  /// **'Search shortcuts, extensions and page translation'**
+  String get onboarding_presetAveragePoint3;
+
+  /// Fourth thing the "Just browsing" preset shows. Firefox Sync is a product name.
+  ///
+  /// In en, this message translates to:
+  /// **'Firefox Sync with your other devices'**
+  String get onboarding_presetAveragePoint4;
+
+  /// Playful name of the middle setup preset, for people who enjoy adjusting things. Prefer a gender-neutral word or phrase.
+  ///
+  /// In en, this message translates to:
+  /// **'Tinkerer'**
+  String get onboarding_presetAdvancedTitle;
+
+  /// One-line line under the "Tinkerer" preset name, written as something the user would say about themselves (first person).
+  ///
+  /// In en, this message translates to:
+  /// **'I like setting things up my way'**
+  String get onboarding_presetAdvancedSubtitle;
+
+  /// First thing the "Tinkerer" preset adds, listed on its card.
+  ///
+  /// In en, this message translates to:
+  /// **'Containers and isolated tabs for separate cookies and logins'**
+  String get onboarding_presetAdvancedPoint1;
+
+  /// Second thing the "Tinkerer" preset adds.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor, VPN and proxy connections'**
+  String get onboarding_presetAdvancedPoint2;
+
+  /// Third thing the "Tinkerer" preset adds.
+  ///
+  /// In en, this message translates to:
+  /// **'Tree tabs, gestures and more layout options'**
+  String get onboarding_presetAdvancedPoint3;
+
+  /// Fourth thing the "Tinkerer" preset adds: the advanced privacy settings, and the settings for on-device AI. AI itself stays off until the user turns it on, so this names the controls, not AI turned on.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced privacy settings and on-device AI controls'**
+  String get onboarding_presetAdvancedPoint4;
+
+  /// Name of the setup preset that shows everything. Prefer a gender-neutral form.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert'**
+  String get onboarding_presetExpertTitle;
+
+  /// One-line summary under the "Expert" preset name, written in the first person like the other two presets' lines: this preset shows every setting and advanced control.
+  ///
+  /// In en, this message translates to:
+  /// **'I want every setting and control'**
+  String get onboarding_presetExpertSubtitle;
+
+  /// First thing the "Expert" preset adds, listed on its card.
+  ///
+  /// In en, this message translates to:
+  /// **'Engine hardening groups and fingerprinting overrides'**
+  String get onboarding_presetExpertPoint1;
+
+  /// Second thing the "Expert" preset adds.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-container routing, DNS override and multiple tunnels'**
+  String get onboarding_presetExpertPoint2;
+
+  /// Third thing the "Expert" preset adds.
+  ///
+  /// In en, this message translates to:
+  /// **'JavaScript, user agent and certificate controls'**
+  String get onboarding_presetExpertPoint3;
+
+  /// Title of the onboarding step that asks for the default search provider and the tab bar position.
+  ///
+  /// In en, this message translates to:
+  /// **'The basics'**
+  String get onboarding_basicsTitle;
+
+  /// Heading of the tab bar position choice (Automatic, Top, Bottom) in the onboarding basics step.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab bar position'**
+  String get onboarding_basicsTabBarTitle;
+
+  /// Hint under the tab bar position choice explaining the Automatic option.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic adapts to the window and keeps the side panel on larger screens'**
+  String get onboarding_basicsTabBarAutoHint;
+
+  /// Expandable row in the onboarding basics step that reveals the autocomplete provider choice.
+  ///
+  /// In en, this message translates to:
+  /// **'More search options'**
+  String get onboarding_basicsMoreSearchOptions;
+
+  /// Title of the onboarding summary step listing what is on and what is hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Your setup'**
+  String get onboarding_yourSetupTitle;
+
+  /// Heading of the list of protections and features that are on after setup.
+  ///
+  /// In en, this message translates to:
+  /// **'On from the start'**
+  String get onboarding_yourSetupOnTitle;
+
+  /// Row on the setup summary: tracking protection, HTTPS-Only Mode and secure DNS are on, said in plain words.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracker blocking and encrypted connections'**
+  String get onboarding_yourSetupProtections;
+
+  /// Summary line: the recommended engine hardening preferences are applied.
+  ///
+  /// In en, this message translates to:
+  /// **'Stricter security settings'**
+  String get onboarding_yourSetupHardening;
+
+  /// Row on the setup summary: websites must ask before connecting to apps on this device or to devices on the local network.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission required for local connections'**
+  String get onboarding_yourSetupLocalNetwork;
+
+  /// Summary line: the uBlock Origin extension is installed after setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad blocking with uBlock Origin'**
+  String get onboarding_yourSetupContentBlocker;
+
+  /// Summary line: how long browsing history is kept before it is deleted automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'History is kept for {days, plural, =1{1 day} other{{days} days}}'**
+  String onboarding_yourSetupHistoryRetention(int days);
+
+  /// Onboarding "Your setup" step: heading above the features the setup hides. Each row opens Customize at the switch that shows it; "for now" says this can change later.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden for now'**
+  String get onboarding_yourSetupHiddenForNowTitle;
+
+  /// Hint under the three preset cards on the onboarding, so the choice does not feel final. "Settings > Feature Control" is the path to the settings screen of that name.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this anytime in Settings > Feature Control.'**
+  String get onboarding_presetChangeLater;
+
+  /// Lead-in line on the "Tinkerer" preset card, above the list of what it adds. "Just browsing" is the name of the first preset (onboarding_presetAverageTitle); use the same translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Just browsing, plus:'**
+  String get onboarding_presetAdvancedIncludes;
+
+  /// Lead-in line on the "Expert" preset card, above the list of what it adds. "Tinkerer" is the name of the second preset (onboarding_presetAdvancedTitle); use the same translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in Tinkerer, plus:'**
+  String get onboarding_presetExpertIncludes;
+
+  /// Snackbar on the onboarding after another preset was picked: what had been changed on top of the old option, in the "Customize" and "Your setup" steps (use their translated names), was discarded. Shown with an Undo button.
+  ///
+  /// In en, this message translates to:
+  /// **'Your changes in Customize and Your setup were reset.'**
+  String get onboarding_presetChangeResetCustomize;
+
+  /// Heading of the goal switches on the "Your setup" step. Each switch turns on what a goal needs without changing the preset.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything else?'**
+  String get onboarding_goalsTitle;
+
+  /// Goal switch on the "Your setup" step: shows containers.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep accounts apart'**
+  String get onboarding_goalKeepAccountsApart;
+
+  /// Goal switch on the "Your setup" step: when on, the lock setup of this profile opens once setup is done.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the browser'**
+  String get onboarding_goalLockBrowser;
+
+  /// Goal switch on the "Your setup" step: when on, the connection settings (Tor, VPN and proxies) open once setup is done, and those controls are shown. It does not connect anything. Tor and VPN stay untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up Tor, a VPN or a proxy'**
+  String get onboarding_goalSetUpConnections;
+
+  /// Goal switch on the "Your setup" step: when on, Firefox Sync sign-in opens once setup is done. Firefox Sync is a product name.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync with my other devices'**
+  String get onboarding_goalSyncDevices;
+
+  /// Explanation under the "Keep accounts apart" switch on the "Your setup" step. Turning it on shows containers (separate browsing identities).
+  ///
+  /// In en, this message translates to:
+  /// **'Use several accounts on the same site, each in its own container'**
+  String get onboarding_goalKeepAccountsApartSubtitle;
+
+  /// Explanation under the "Lock the browser" switch on the "Your setup" step. When on, the profile lock setup opens once the onboarding is done.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock this profile with the device lock or a password'**
+  String get onboarding_goalLockBrowserSubtitle;
+
+  /// Explanation under the "Set up Tor, a VPN or a proxy" switch on the "Your setup" step: the connection settings open after setup, and no connection starts until the user starts one there.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens connection setup when you\'re done. Nothing connects until you start it.'**
+  String get onboarding_goalSetUpConnectionsSubtitle;
+
+  /// Explanation under the "Sync with my other devices" switch on the "Your setup" step. Firefox Sync is a product name.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Firefox Sync once setup is done'**
+  String get onboarding_goalSyncDevicesSubtitle;
+
+  /// Button on the summary step that opens the screen for switching feature groups on or off.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize'**
+  String get onboarding_customizeAction;
+
+  /// Caption under the Customize button on the onboarding "Your setup" step: what can be changed there.
+  ///
+  /// In en, this message translates to:
+  /// **'Features, privacy, ad blocking and layout'**
+  String get onboarding_customizeCaption;
+
+  /// Group heading on the Customize screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & security'**
+  String get onboarding_customizeGroupPrivacy;
+
+  /// Group heading on the Customize screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Tabs & profiles'**
+  String get onboarding_customizeGroupTabs;
+
+  /// Group heading on the Customize screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections'**
+  String get onboarding_customizeGroupConnections;
+
+  /// Group heading on the Customize screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout & input'**
+  String get onboarding_customizeGroupLayout;
+
+  /// Error snackbar on Customize and Settings > Feature Control when showing or hiding features could not be saved (for example, the device storage is full). Nothing changed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save which features are shown. Try again.'**
+  String get onboarding_customizeSaveFailed;
+
+  /// Heading of the last group on the Customize and Feature Control screens: on-device AI, web app storage and Expert settings.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get onboarding_customizeGroupMore;
+
+  /// Row in the Home & new tab group that opens the section arrangement of the home page.
+  ///
+  /// In en, this message translates to:
+  /// **'Home page sections'**
+  String get onboarding_customizeHomeSections;
+
+  /// Row in the Home & new tab group that opens the section arrangement of the new-tab page.
+  ///
+  /// In en, this message translates to:
+  /// **'New tab sections'**
+  String get onboarding_customizeNewTabSections;
+
+  /// Error shown when saving the onboarding choices fails after tapping Done.
+  ///
+  /// In en, this message translates to:
+  /// **'The setup could not be saved. Try again.'**
+  String get onboarding_commitFailed;
+
+  /// Hint shown under the "Restore from backup" button while the terms have not been accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept the EULA and Privacy Policy first.'**
+  String get onboarding_restoreRequiresEula;
+
+  /// Message after setup when installing the uBlock Origin extension failed.
+  ///
+  /// In en, this message translates to:
+  /// **'uBlock Origin could not be installed. WebLibre tries again on the next start.'**
+  String get onboarding_setupStepFailedUBlock;
+
+  /// Message after setup when applying the optimized uBlock Origin filter lists failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The recommended uBlock Origin filters could not be turned on. WebLibre tries again on the next start.'**
+  String get onboarding_setupStepFailedFilters;
+
+  /// Message after setup when the browser engine refused some of the stricter security settings chosen during setup (the 'Stricter security settings' option). The setup still finished; the settings are retried on each start until they apply.
+  ///
+  /// In en, this message translates to:
+  /// **'The stricter security settings could not all be turned on. WebLibre tries again on the next start.'**
+  String get onboarding_setupStepFailedHardening;
 
   /// Button next to the current log level on the proxy logs screen; opens the log level sheet.
   ///
@@ -11055,6 +11355,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Protocol is fixed once a profile is created.'**
   String get proxy_protocolFixedHelper;
+
+  /// Help text under the protocol field of a connection being imported (from a link, QR code or file) while manual connection setup is hidden. The protocol comes from what was imported and cannot be switched. featureName is the name of the hidden feature that allows manual setup (for example "Expert settings"), quoted as a UI name; 'Settings > Feature Control' is the settings screen where features are shown and hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Set by the import. To enter a connection by hand, show “{featureName}” in Settings > Feature Control.'**
+  String proxy_protocolFromImportHelper(String featureName);
 
   /// Protocol option in the proxy editor: enter a raw sing-box outbound configuration in JSON. "Outbound" is a sing-box term.
   ///
@@ -12695,7 +13001,7 @@ abstract class AppLocalizations {
   /// Explanation under "Icon Cache": saved website icons (favicons).
   ///
   /// In en, this message translates to:
-  /// **'Stored favicons'**
+  /// **'Stored site icons'**
   String get settings_iconCacheSubtitle;
 
   /// Label in front of the size of the icon cache; the value is shown in MB.
@@ -13190,42 +13496,6 @@ abstract class AppLocalizations {
   /// **'Display a button to create a child tab under the current tab (tree view only)'**
   String get settings_createChildTabsSubtitle;
 
-  /// Switch: show container features in the interface (a container is a separate browsing identity).
-  ///
-  /// In en, this message translates to:
-  /// **'Show Container UI'**
-  String get settings_showContainerUiTitle;
-
-  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
-  ///
-  /// In en, this message translates to:
-  /// **'containers'**
-  String get settings_showContainerUiKeywords;
-
-  /// Explanation under that switch.
-  ///
-  /// In en, this message translates to:
-  /// **'Show container selectors, menus, and management'**
-  String get settings_showContainerUiSubtitle;
-
-  /// Switch: show options for creating isolated tabs (tabs with their own temporary cookies and site data).
-  ///
-  /// In en, this message translates to:
-  /// **'Show Isolated Tab UI'**
-  String get settings_showIsolatedTabUiTitle;
-
-  /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
-  ///
-  /// In en, this message translates to:
-  /// **'isolated tabs'**
-  String get settings_showIsolatedTabUiKeywords;
-
-  /// Explanation under that switch.
-  ///
-  /// In en, this message translates to:
-  /// **'Show isolated-tab creation options in the UI'**
-  String get settings_showIsolatedTabUiSubtitle;
-
   /// Setting for what happens when an action opens a tab in the background.
   ///
   /// In en, this message translates to:
@@ -13601,7 +13871,7 @@ abstract class AppLocalizations {
   /// Explanation under that switch. PWA (progressive web app) is a technical abbreviation.
   ///
   /// In en, this message translates to:
-  /// **'Allow installing websites without a PWA manifest as standalone apps'**
+  /// **'Allow installing any website as an app, even ones not made to be installed'**
   String get settings_allowNonManifestPwaInstallSubtitle;
 
   /// Row that opens the URL cleaner settings (removes tracking parameters from links).
@@ -13619,7 +13889,7 @@ abstract class AppLocalizations {
   /// Explanation under "URL Cleaner".
   ///
   /// In en, this message translates to:
-  /// **'Tracking removal rules and catalog updates'**
+  /// **'Remove tracking parts from links'**
   String get settings_urlCleanerSubtitle;
 
   /// Row that opens the unshortener settings (resolves shortened links).
@@ -13946,16 +14216,16 @@ abstract class AppLocalizations {
   /// **'No sites added.'**
   String get settings_desktopModeSitesEmptyLabel;
 
-  /// Title of the DNS over HTTPS settings screen (encrypted lookups of website addresses). Technical term; usually kept in English.
+  /// Title of the secure DNS settings screen. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers.
   ///
   /// In en, this message translates to:
-  /// **'DNS over HTTPS'**
+  /// **'Secure DNS'**
   String get settings_dohTitle;
 
   /// Subtitle of that screen listing what it contains.
   ///
   /// In en, this message translates to:
-  /// **'Encrypted DNS protection level and resolver selection.'**
+  /// **'How site lookups are encrypted, and by whom'**
   String get settings_dohSubtitle;
 
   /// Confirmation after copying the error logs.
@@ -14171,7 +14441,7 @@ abstract class AppLocalizations {
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'privacy'**
+  /// **'privacy, Make this device harder to recognize'**
   String get settings_fingerprintProtectionKeywords;
 
   /// Placeholder of the search field on the fingerprint protection screen.
@@ -14197,6 +14467,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Override Targets'**
   String get settings_fingerprintOverrideTargetsSection;
+
+  /// Heading above the two fingerprint protection presets (load defaults, load hardened defaults), shown while the individual fingerprint protections are hidden by Feature Control.
+  ///
+  /// In en, this message translates to:
+  /// **'Presets'**
+  String get settings_fingerprintPresetsSection;
 
   /// Error title on the fingerprint protection screen: the stored override list cannot be read.
   ///
@@ -14324,70 +14600,70 @@ abstract class AppLocalizations {
   /// **'Choose and order what the new tab page shows'**
   String get settings_customizeNewTabSectionsSubtitle;
 
-  /// Title of the screen and row for the languages websites are told the user prefers (not the app's own language).
+  /// Title of the screen, and of its settings entry, where the user picks the languages websites are asked to show (the Accept-Language list websites can read).
   ///
   /// In en, this message translates to:
-  /// **'Browser Languages'**
+  /// **'Website Languages'**
   String get settings_browserLanguagesTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'locale'**
+  /// **'browser languages, locale, accept language'**
   String get settings_browserLanguagesKeywords;
 
   /// Placeholder of the search field on the browser languages screen. A locale tag is a code like "en-US".
   ///
   /// In en, this message translates to:
-  /// **'Search locales by tag'**
+  /// **'Search languages'**
   String get settings_browserLanguagesSearchHint;
 
   /// Section heading above the list of selectable languages and regions.
   ///
   /// In en, this message translates to:
-  /// **'Language & Region Settings'**
+  /// **'Languages'**
   String get settings_languageRegionSettingsSection;
 
   /// Line under each language code in that list.
   ///
   /// In en, this message translates to:
-  /// **'Browser language preference'**
+  /// **'Language websites can show you'**
   String get settings_browserLanguagePreferenceLabel;
 
   /// Section heading for adding a language code that is not in the list.
   ///
   /// In en, this message translates to:
-  /// **'Custom Locale'**
+  /// **'Other Language'**
   String get settings_customLocaleSection;
 
   /// Title of the entry for adding a custom language code.
   ///
   /// In en, this message translates to:
-  /// **'Add custom locale'**
+  /// **'Add another language'**
   String get settings_addCustomLocaleTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'locale tag'**
+  /// **'locale tag, language code'**
   String get settings_addCustomLocaleKeywords;
 
   /// Explanation of that entry. "en-US" is an example code; keep it unchanged.
   ///
   /// In en, this message translates to:
-  /// **'Enter a locale tag such as en-US'**
+  /// **'Enter a language code such as en-US'**
   String get settings_addCustomLocaleSubtitle;
 
   /// Label of the field for a custom language code.
   ///
   /// In en, this message translates to:
-  /// **'Custom Locale'**
+  /// **'Language code'**
   String get settings_customLocaleFieldLabel;
 
   /// Validation error when the entered language code is not valid.
   ///
   /// In en, this message translates to:
-  /// **'Invalid locale identifier'**
+  /// **'This is not a valid language code'**
   String get settings_invalidLocaleError;
 
   /// Option for what the Home button and new windows show: the app's home page.
@@ -14591,13 +14867,13 @@ abstract class AppLocalizations {
   /// Switch: dim the screen behind dialogs and sheets. "Modal barrier" is the darkened layer behind them.
   ///
   /// In en, this message translates to:
-  /// **'Show Modal Barrier'**
+  /// **'Dim Behind Dialogs'**
   String get settings_showModalBarrierTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'dialogs, bottom sheets, overlay'**
+  /// **'dialogs, bottom sheets, overlay, modal barrier'**
   String get settings_showModalBarrierKeywords;
 
   /// Explanation under that switch.
@@ -15091,7 +15367,7 @@ abstract class AppLocalizations {
   /// Summary of the install-sites-as-apps setting, shown as a settings search result. A manifest is the file that describes a web app.
   ///
   /// In en, this message translates to:
-  /// **'Allow websites without a manifest to be installed as apps'**
+  /// **'Install any website as an app'**
   String get settings_indexAllowNonManifestPwaInstallSubtitle;
 
   /// Section heading on the browsing settings screen for links coming from other apps.
@@ -15115,25 +15391,25 @@ abstract class AppLocalizations {
   /// Section heading on the DNS over HTTPS screen.
   ///
   /// In en, this message translates to:
-  /// **'Resolver Settings'**
+  /// **'Provider Settings'**
   String get settings_resolverSettingsSectionTitle;
 
-  /// Title of the DNS over HTTPS entry, shown as a settings search result. Technical term; usually kept in English.
+  /// Title of the secure DNS entry, shown as a settings search result. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers.
   ///
   /// In en, this message translates to:
-  /// **'DNS over HTTPS'**
+  /// **'Secure DNS'**
   String get settings_indexDnsOverHttpsResolverTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'doh, resolver, dns provider, custom resolver'**
+  /// **'dns over https, doh, resolver, dns provider, custom resolver'**
   String get settings_indexDnsOverHttpsResolverKeywords;
 
   /// Summary of that entry, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Protection level, provider choice, and saved custom resolvers'**
+  /// **'Protection level, provider and your own providers'**
   String get settings_indexDnsOverHttpsResolverSubtitle;
 
   /// Section heading on the experimental settings screen.
@@ -15508,16 +15784,16 @@ abstract class AppLocalizations {
   /// **'Search bar'**
   String get settings_homeSearchBarRowTitle;
 
-  /// Title of the proxy settings screen and category.
+  /// Title of the connection settings screen: Tor, VPNs and proxies, and which tabs use them. Use the same word as the "Connections" group of the setup's Customize step (onboarding_customizeGroupConnections).
   ///
   /// In en, this message translates to:
-  /// **'Proxy'**
+  /// **'Connections'**
   String get settings_proxyTitle;
 
   /// Subtitle of that screen.
   ///
   /// In en, this message translates to:
-  /// **'Manage proxy connections and choose which tabs use them.'**
+  /// **'Manage Tor, VPN and proxy connections and choose which tabs use them.'**
   String get settings_proxySubtitle;
 
   /// Row that opens the list of proxy connections.
@@ -15589,7 +15865,7 @@ abstract class AppLocalizations {
   /// Subtitle under the header of the Privacy & Security settings screen, summarizing everything on it. The shorter line on the settings home tile is settings_categoryPrivacySecuritySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Tracking protection, fingerprinting, browsing data, and network hardening.'**
+  /// **'Tracking protection, browsing data and security.'**
   String get settings_privacySecuritySubtitle;
 
   /// Title of the list of sites where tracking protection is turned off, and of its row.
@@ -15868,16 +16144,16 @@ abstract class AppLocalizations {
   /// **'Private tabs can be screenshotted and recorded, and appear in the app switcher preview.'**
   String get settings_allowPrivateTabScreenshotsSubtitle;
 
-  /// Setting for only loading pages over encrypted HTTPS connections.
+  /// Title of the HTTPS-Only Mode choice: warn before opening a site over an unencrypted (HTTP) connection.
   ///
   /// In en, this message translates to:
-  /// **'Block insecure HTTP connections'**
+  /// **'Secure Connections Only (HTTPS)'**
   String get settings_httpsOnlyModeTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'https only'**
+  /// **'https only, block insecure http'**
   String get settings_httpsOnlyModeKeywords;
 
   /// HTTPS-only option: off. One of three segments sharing a single row on a phone: keep it to one or two short words.
@@ -15898,10 +16174,10 @@ abstract class AppLocalizations {
   /// **'Private mode only'**
   String get settings_httpsOnlyModePrivateOnlyLabel;
 
-  /// Row that opens the DNS over HTTPS settings. Technical term; usually kept in English.
+  /// Row that opens the secure DNS settings. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers.
   ///
   /// In en, this message translates to:
-  /// **'DNS over HTTPS'**
+  /// **'Secure DNS'**
   String get settings_dnsOverHttpsTileTitle;
 
   /// Heading of the choice of tracker blocking level. "Enhanced Tracking Protection" is Mozilla's feature name; use Firefox's translation if available.
@@ -16033,19 +16309,19 @@ abstract class AppLocalizations {
   /// Row that opens the filter list settings of the uBlock Origin extension. uBlock is a product name.
   ///
   /// In en, this message translates to:
-  /// **'uBlock Filter Lists & Hardenings'**
+  /// **'uBlock Origin Filter Lists'**
   String get settings_uBlockFilterListsTileTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'ublock, filters'**
+  /// **'ublock, filters, hardenings'**
   String get settings_uBlockFilterListsTileKeywords;
 
   /// Explanation under that row. WebLibre is the app name.
   ///
   /// In en, this message translates to:
-  /// **'Manage filter lists and apply WebLibre hardenings'**
+  /// **'Manage filter lists and turn on WebLibre\'s recommended filters'**
   String get settings_uBlockFilterListsTileSubtitle;
 
   /// Switch for site isolation (each website in its own process). "Fission" is Mozilla's project name.
@@ -16174,16 +16450,16 @@ abstract class AppLocalizations {
   /// **'Block'**
   String get settings_managedAppActionBlock;
 
-  /// Row that opens the browser languages settings (languages websites are told you prefer).
+  /// Row that opens the website languages screen.
   ///
   /// In en, this message translates to:
-  /// **'Browser Languages'**
+  /// **'Website Languages'**
   String get settings_browserLanguagesTileTitle;
 
   /// Explanation under that row.
   ///
   /// In en, this message translates to:
-  /// **'Configure language preferences exposed to websites'**
+  /// **'Which languages websites should show you'**
   String get settings_browserLanguagesTileSubtitle;
 
   /// Row that opens the fingerprint protection settings.
@@ -16216,58 +16492,58 @@ abstract class AppLocalizations {
   /// **'Advanced fingerprinting protection hardening'**
   String get settings_resistFingerprintingTileSubtitle;
 
-  /// Switch that turns on protection against websites reaching devices on the local network. "Local Network Access" is the feature name.
+  /// Title of the switch for local connection protection. Local connections: websites reaching apps on this device (localhost) or devices on the local network. Apps listening on the device have been used to track people across websites.
   ///
   /// In en, this message translates to:
-  /// **'Local Network Access'**
+  /// **'Protect Local Apps and Devices'**
   String get settings_lnaEnabledTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'lan'**
+  /// **'lan, local network access, localhost, local connections'**
   String get settings_lnaEnabledKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Enable local network and device access blocking'**
+  /// **'Control whether websites can connect to apps on this device or to devices on your network'**
   String get settings_lnaEnabledSubtitle;
 
-  /// Switch: block all web page requests to local network addresses.
+  /// Switch: every website must ask before a local connection. Local connections: websites reaching apps on this device (localhost) or devices on the local network. Apps listening on the device have been used to track people across websites.
   ///
   /// In en, this message translates to:
-  /// **'Block Local Network Requests'**
+  /// **'Ask Before Local Connections'**
   String get settings_lnaBlockingTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'lan'**
+  /// **'lan, local network, localhost, block local connections'**
   String get settings_lnaBlockingKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Block web page requests to local network addresses'**
+  /// **'Websites must ask before connecting to apps on this device or to devices on your network'**
   String get settings_lnaBlockingSubtitle;
 
-  /// Switch: block trackers from reaching local network addresses.
+  /// Switch: known trackers may not make local connections. Local connections: websites reaching apps on this device (localhost) or devices on the local network. Apps listening on the device have been used to track people across websites.
   ///
   /// In en, this message translates to:
-  /// **'Block Local Network Trackers'**
+  /// **'Block Local Connections from Trackers'**
   String get settings_lnaBlockTrackersTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'lan'**
+  /// **'lan, local network trackers, localhost'**
   String get settings_lnaBlockTrackersKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Block trackers from accessing local network resources'**
+  /// **'Known trackers can\'t connect to apps on this device or to devices on your network'**
   String get settings_lnaBlockTrackersSubtitle;
 
   /// Title of the screen for exporting and importing settings.
@@ -16426,10 +16702,10 @@ abstract class AppLocalizations {
   /// **'Appearance, browsing, tabs, privacy, {torBrand} and web engine settings'**
   String settings_transferSectionAppSettingsDescription(String torBrand);
 
-  /// Name of the export section holding the browser engine preferences (Gecko is the engine's name), shown as a checkbox on the export screen and in the import dialog.
+  /// Section of the settings export: preferences of the web engine (Gecko) itself.
   ///
   /// In en, this message translates to:
-  /// **'Gecko preferences'**
+  /// **'Web engine preferences'**
   String get settings_transferSectionGeckoPrefsTitle;
 
   /// Line under "Gecko preferences" explaining what that section holds.
@@ -16539,7 +16815,7 @@ abstract class AppLocalizations {
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'hardening'**
+  /// **'hardening, Stricter security settings'**
   String get settings_webEngineHardeningKeywords;
 
   /// Placeholder of the search field on that screen.
@@ -16653,25 +16929,25 @@ abstract class AppLocalizations {
   /// Heading of the choice of default search engine.
   ///
   /// In en, this message translates to:
-  /// **'Default Search Provider'**
+  /// **'Search Engine'**
   String get settings_defaultSearchProviderTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'search engine'**
+  /// **'search engine, default search provider'**
   String get settings_defaultSearchProviderKeywords;
 
   /// Heading of the choice of service that suggests search terms while typing.
   ///
   /// In en, this message translates to:
-  /// **'Default Autocomplete Provider'**
+  /// **'Search Suggestions'**
   String get settings_defaultAutocompleteProviderTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'suggestions'**
+  /// **'suggestions, autocomplete provider'**
   String get settings_defaultAutocompleteProviderKeywords;
 
   /// Row that opens the list of user-created search engines (user bangs).
@@ -16833,61 +17109,61 @@ abstract class AppLocalizations {
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Complete typed text with well-known domains when your history and bookmarks have no match'**
+  /// **'Complete what you type with well-known sites when your history and bookmarks have no match'**
   String get settings_popularSitesAutocompleteSubtitle;
 
   /// Switch: store the text of visited pages on the device so it can be searched.
   ///
   /// In en, this message translates to:
-  /// **'Enable local search index'**
+  /// **'Search inside visited pages'**
   String get settings_localIndexEnabledTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'page text, history'**
+  /// **'page text, history, local search index'**
   String get settings_localIndexEnabledKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Index visited pages locally so the browser can search their content. Visit metadata stays in the engine; only page text is stored on-device.'**
+  /// **'Saves the text of pages you visit on this device, so search can find words inside them.'**
   String get settings_localIndexEnabledSubtitle;
 
   /// Switch: also store the text of pages visited in private tabs.
   ///
   /// In en, this message translates to:
-  /// **'Index private tabs'**
+  /// **'Save text from private tabs'**
   String get settings_indexPrivateTabsTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'incognito'**
+  /// **'incognito, index private tabs'**
   String get settings_indexPrivateTabsKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Include pages opened in private tabs in the local index. Off by default.'**
+  /// **'Also save the text of pages opened in private tabs. Off by default.'**
   String get settings_indexPrivateTabsSubtitle;
 
   /// Title of the confirmation dialog before deleting the local page index.
   ///
   /// In en, this message translates to:
-  /// **'Clear local search index?'**
+  /// **'Delete saved page text?'**
   String get settings_clearLocalIndexDialogTitle;
 
   /// Body of that dialog.
   ///
   /// In en, this message translates to:
-  /// **'This removes all locally indexed page content. Engine history (visit metadata) is not affected.'**
+  /// **'Deletes the page text saved for searching. Your browsing history is kept.'**
   String get settings_clearLocalIndexDialogContent;
 
-  /// Row showing how many pages are stored in the local index, with a clear button.
+  /// Row showing how many pages have text saved for searching, with a clear button. These are not complete pages saved for offline reading.
   ///
   /// In en, this message translates to:
-  /// **'Indexed pages'**
+  /// **'Saved page text'**
   String get settings_localIndexStatsTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
@@ -16896,10 +17172,10 @@ abstract class AppLocalizations {
   /// **'clear index, stats'**
   String get settings_localIndexStatsKeywords;
 
-  /// Line under "Indexed pages". count is the number of pages.
+  /// Line under "Saved page text". count is the number of pages whose text is saved for searching.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 page indexed} other{{count} pages indexed}}'**
+  /// **'{count, plural, =1{Text saved from 1 page} other{Text saved from {count} pages}}'**
   String settings_localIndexPagesIndexed(int count);
 
   /// Section heading on the search settings screen for search engines.
@@ -16935,7 +17211,7 @@ abstract class AppLocalizations {
   /// Section heading on the search settings screen for the on-device page index.
   ///
   /// In en, this message translates to:
-  /// **'Local Search Index'**
+  /// **'Search Inside Visited Pages'**
   String get settings_searchSectionLocalIndexTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
@@ -16953,7 +17229,7 @@ abstract class AppLocalizations {
   /// Summary of the autocomplete provider setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Choose the provider for search suggestions'**
+  /// **'Choose where search suggestions come from'**
   String get settings_indexDefaultAutocompleteProviderSubtitle;
 
   /// Summary of the "Autocomplete on enter" setting, shown as a settings search result.
@@ -16977,25 +17253,25 @@ abstract class AppLocalizations {
   /// Summary of the popular site suggestions setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Complete typed text with well-known domains'**
+  /// **'Complete what you type with well-known sites'**
   String get settings_indexPopularSitesAutocompleteSubtitle;
 
   /// Summary of the local search index setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Index visited pages locally for content search'**
+  /// **'Save page text on this device so search can find it'**
   String get settings_indexLocalIndexEnabledSubtitle;
 
-  /// Summary of the "Index private tabs" setting, shown as a settings search result.
+  /// Summary of the "Save text from private tabs" setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Include private tabs in the local index'**
+  /// **'Also save text from private tabs'**
   String get settings_indexIndexPrivateTabsSubtitle;
 
   /// Summary of the indexed pages entry, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'View and clear the local index'**
+  /// **'See and delete the saved page text'**
   String get settings_indexLocalIndexStatsSubtitle;
 
   /// Title of the web content settings screen and category.
@@ -17073,37 +17349,37 @@ abstract class AppLocalizations {
   /// Switch that enlarges text on pages not designed for phones. "Font inflation" is the browser engine's term.
   ///
   /// In en, this message translates to:
-  /// **'Font Inflation'**
+  /// **'Enlarge Small Text'**
   String get settings_fontInflationTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'readability'**
+  /// **'readability, font inflation'**
   String get settings_fontInflationKeywords;
 
   /// Explanation under that switch. "Viewport meta tag" is a web technical term.
   ///
   /// In en, this message translates to:
-  /// **'Enlarge text on pages that lack a mobile viewport meta tag'**
+  /// **'Make text readable on pages that weren\'t made for phones'**
   String get settings_fontInflationSubtitle;
 
   /// Switch: zoom in automatically when a text field on a page is tapped.
   ///
   /// In en, this message translates to:
-  /// **'Input Auto Zoom'**
+  /// **'Zoom In on Text Fields'**
   String get settings_inputAutoZoomTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'forms'**
+  /// **'forms, input auto zoom'**
   String get settings_inputAutoZoomKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Automatically zoom in when focusing text inputs'**
+  /// **'Zoom in when you tap a text field'**
   String get settings_inputAutoZoomSubtitle;
 
   /// Switch: allow pinch-to-zoom on every website, even ones that block it.
@@ -17163,19 +17439,19 @@ abstract class AppLocalizations {
   /// Switch: offer reader mode on every page, even ones it may not work on.
   ///
   /// In en, this message translates to:
-  /// **'Enforce Reader Mode'**
+  /// **'Always Offer Reader Mode'**
   String get settings_enforceReaderModeTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'reader'**
+  /// **'reader, enforce reader mode'**
   String get settings_enforceReaderModeKeywords;
 
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Ignore a site\'s readability score and always show Reader Mode, even on sites that may not support it.'**
+  /// **'Offer Reader Mode on every page, even where it may not work well.'**
   String get settings_enforceReaderModeSubtitle;
 
   /// Switch for AI features that run only on the device.
@@ -17217,13 +17493,13 @@ abstract class AppLocalizations {
   /// Summary of the font inflation setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Enlarge text on pages without a mobile viewport'**
+  /// **'Enlarge text on pages not made for phones'**
   String get settings_indexFontInflationSubtitle;
 
   /// Summary of the input auto zoom setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Automatically zoom when focusing text inputs'**
+  /// **'Zoom in when you tap a text field'**
   String get settings_indexInputAutoZoomSubtitle;
 
   /// Summary of the PDF viewer setting, shown as a settings search result.
@@ -17235,13 +17511,13 @@ abstract class AppLocalizations {
   /// Summary of the reader mode setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Extract and simplify pages for readability'**
+  /// **'Show articles in a clean, easy-to-read layout'**
   String get settings_indexEnableReaderModeSubtitle;
 
   /// Summary of the enforce reader mode setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Always show Reader Mode capabilities'**
+  /// **'Offer Reader Mode on every page'**
   String get settings_indexEnforceReaderModeSubtitle;
 
   /// Summary of the on-device AI setting, shown as a settings search result.
@@ -17307,13 +17583,13 @@ abstract class AppLocalizations {
   /// Title of the confirmation dialog before enabling WebLibre's recommended extra filter lists. WebLibre is the app name.
   ///
   /// In en, this message translates to:
-  /// **'Apply WebLibre Hardenings?'**
+  /// **'Turn On Recommended Filters?'**
   String get settings_ublockApplyHardeningsDialogTitle;
 
   /// Body of that dialog.
   ///
   /// In en, this message translates to:
-  /// **'This will enable a curated set of additional filter lists and add a legitimate URL shortener list as an external list.'**
+  /// **'This turns on extra filter lists chosen by WebLibre and adds a list that removes tracking parts from links.'**
   String get settings_ublockApplyHardeningsDialogMessage;
 
   /// Note above the filter lists: changes need an app restart.
@@ -17343,7 +17619,7 @@ abstract class AppLocalizations {
   /// Row that enables WebLibre's recommended extra filter lists (asks for confirmation).
   ///
   /// In en, this message translates to:
-  /// **'Apply WebLibre Hardenings'**
+  /// **'Turn On Recommended Filters'**
   String get settings_ublockQuickApplyHardeningsTitle;
 
   /// Explanation under that row.
@@ -17625,7 +17901,7 @@ abstract class AppLocalizations {
   /// Summary under the "Web Content" category.
   ///
   /// In en, this message translates to:
-  /// **'Page display, PDF, reader mode, AI'**
+  /// **'Page display, PDF, reader mode'**
   String get settings_categoryWebContentSubtitle;
 
   /// Category on the main settings screen, for website push notifications.
@@ -17643,7 +17919,7 @@ abstract class AppLocalizations {
   /// Summary under the "Notifications" category. A distributor is the app that delivers push messages.
   ///
   /// In en, this message translates to:
-  /// **'Web push delivery, distributor, site subscriptions'**
+  /// **'Website notifications and the app that delivers them'**
   String get settings_categoryNotificationsSubtitle;
 
   /// Category on the main settings screen.
@@ -17682,10 +17958,10 @@ abstract class AppLocalizations {
   /// **'Tracking protection, data clearing'**
   String get settings_categoryPrivacySecuritySubtitle;
 
-  /// Category on the main settings screen.
+  /// Category on the main settings screen that opens the connection settings: Tor, VPNs and proxies. Use the same word as the "Connections" group of the setup's Customize step (onboarding_customizeGroupConnections).
   ///
   /// In en, this message translates to:
-  /// **'Proxy'**
+  /// **'Connections'**
   String get settings_categoryProxyTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
@@ -17694,10 +17970,10 @@ abstract class AppLocalizations {
   /// **'proxy, sing-box, socks, vpn, wireguard, routing, tor, container'**
   String get settings_categoryProxyKeywords;
 
-  /// Summary under the "Proxy" category.
+  /// Summary under the "Connections" category. Tor and VPN stay untranslated.
   ///
   /// In en, this message translates to:
-  /// **'Connections and routing'**
+  /// **'Tor, VPN, proxies and routing'**
   String get settings_categoryProxySubtitle;
 
   /// Category on the main settings screen.
@@ -17841,25 +18117,25 @@ abstract class AppLocalizations {
   /// Summary of the HTTPS-only setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Prefer HTTPS and block insecure connections'**
+  /// **'Warn before opening a site that isn\'t encrypted'**
   String get settings_indexHttpsOnlyModeSubtitle;
 
-  /// Title of the DNS over HTTPS entry on the privacy & security screen. Technical term.
+  /// Title of the secure DNS entry on the privacy & security screen. Secure DNS is DNS over HTTPS: encrypted lookups of website addresses. Use the plain term people know from their phone or other browsers.
   ///
   /// In en, this message translates to:
-  /// **'DNS over HTTPS'**
+  /// **'Secure DNS'**
   String get settings_indexDnsOverHttpsTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'doh'**
+  /// **'dns over https, doh, encrypted dns'**
   String get settings_indexDnsOverHttpsKeywords;
 
   /// Summary of that entry. DNS is a technical abbreviation.
   ///
   /// In en, this message translates to:
-  /// **'Encrypt DNS lookups'**
+  /// **'Encrypt site lookups'**
   String get settings_indexDnsOverHttpsSubtitle;
 
   /// Section heading on the privacy & security screen for local network protection.
@@ -17871,13 +18147,13 @@ abstract class AppLocalizations {
   /// Summary of the block local network requests setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Block requests to local network devices and services'**
+  /// **'Websites must ask before connecting to local apps and devices'**
   String get settings_indexLnaBlockingSubtitle;
 
   /// Summary of the block local network trackers setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Block tracker-like local network requests'**
+  /// **'Stop known trackers from reaching local apps and devices'**
   String get settings_indexLnaBlockTrackersSubtitle;
 
   /// Section heading on the privacy & security screen.
@@ -18057,7 +18333,7 @@ abstract class AppLocalizations {
   /// Explanation under that heading. DNS and HTTPS are technical abbreviations.
   ///
   /// In en, this message translates to:
-  /// **'Domain Name System (DNS) over HTTPS sends domain-name requests through an encrypted connection, protecting them and making it harder for others to see which websites you’re about to visit.'**
+  /// **'Before a site opens, the browser looks up its address. Secure DNS encrypts that lookup, so it is harder for your network provider and others to see which sites you visit.'**
   String get settings_protectionLevelDescription;
 
   /// DNS over HTTPS level option: the browser engine's default behavior.
@@ -18066,10 +18342,10 @@ abstract class AppLocalizations {
   /// **'Default Protection'**
   String get settings_defaultProtectionTitle;
 
-  /// Explanation under the "Default Protection" DNS over HTTPS option. DoH is short for DNS over HTTPS.
+  /// Explanation under the "Default Protection" secure DNS option.
   ///
   /// In en, this message translates to:
-  /// **'DoH used only when default DNS fails'**
+  /// **'Uses secure DNS only when your network\'s DNS fails'**
   String get settings_defaultProtectionSubtitle;
 
   /// DNS over HTTPS level option: use encrypted DNS when possible.
@@ -18078,10 +18354,10 @@ abstract class AppLocalizations {
   /// **'Increased Protection'**
   String get settings_increasedProtectionTitle;
 
-  /// Explanation under "Increased Protection". DoH is short for DNS over HTTPS.
+  /// Explanation under "Increased Protection".
   ///
   /// In en, this message translates to:
-  /// **'DoH preferred, default DNS as fallback'**
+  /// **'Uses secure DNS first, and your network\'s DNS if that fails'**
   String get settings_increasedProtectionSubtitle;
 
   /// DNS over HTTPS level option: always use encrypted DNS.
@@ -18090,10 +18366,10 @@ abstract class AppLocalizations {
   /// **'Max Protection'**
   String get settings_maxProtectionTitle;
 
-  /// Explanation under "Max Protection". DoH is short for DNS over HTTPS.
+  /// Explanation under "Max Protection".
   ///
   /// In en, this message translates to:
-  /// **'DoH only, no fallback'**
+  /// **'Always uses secure DNS. Sites don\'t load when it fails'**
   String get settings_maxProtectionSubtitle;
 
   /// DNS over HTTPS level option: off.
@@ -18105,37 +18381,37 @@ abstract class AppLocalizations {
   /// Explanation under "Off": the device's normal DNS server is used.
   ///
   /// In en, this message translates to:
-  /// **'Use your default DNS resolver'**
+  /// **'Uses your network\'s DNS'**
   String get settings_protectionOffSubtitle;
 
-  /// Heading above the list of DNS over HTTPS servers to choose from. DoH is short for DNS over HTTPS.
+  /// Heading above the list of secure DNS (DNS over HTTPS) servers to choose from.
   ///
   /// In en, this message translates to:
-  /// **'DoH Provider'**
+  /// **'Provider'**
   String get settings_dohProviderTitle;
 
   /// Heading above the DNS over HTTPS servers the user added.
   ///
   /// In en, this message translates to:
-  /// **'Your resolvers'**
+  /// **'Your providers'**
   String get settings_yourResolvers;
 
   /// Button that adds a DNS over HTTPS server by address; also the title of the dialog it opens.
   ///
   /// In en, this message translates to:
-  /// **'Add custom resolver'**
+  /// **'Add your own provider'**
   String get settings_addCustomResolver;
 
   /// Title of the dialog for editing a user-added DNS over HTTPS server.
   ///
   /// In en, this message translates to:
-  /// **'Edit custom resolver'**
+  /// **'Edit provider'**
   String get settings_editCustomResolverTitle;
 
   /// Label of the field for the DNS over HTTPS server address.
   ///
   /// In en, this message translates to:
-  /// **'Resolver URL'**
+  /// **'Provider URL'**
   String get settings_resolverUrlLabel;
 
   /// Validation error when the entered server is already in the built-in list.
@@ -18303,7 +18579,7 @@ abstract class AppLocalizations {
   /// Explanation under "With Title". A breadcrumb is the shortened path of the address.
   ///
   /// In en, this message translates to:
-  /// **'Shows page title and URL breadcrumb'**
+  /// **'Shows the page title and the address'**
   String get settings_withTitleDescription;
 
   /// Tab bar style option: compact, address only. Keep it short.
@@ -18315,7 +18591,7 @@ abstract class AppLocalizations {
   /// Explanation under "Compact". A pill is a rounded box.
   ///
   /// In en, this message translates to:
-  /// **'Centered URL pill without page title'**
+  /// **'Only the address, centered'**
   String get settings_compactDescription;
 
   /// Switch that shows an extra toolbar at the bottom with navigation and action buttons.
@@ -18693,7 +18969,7 @@ abstract class AppLocalizations {
   /// Switch: long pressing the address bar copies the page address.
   ///
   /// In en, this message translates to:
-  /// **'Long Press URL to Copy'**
+  /// **'Long Press Address to Copy'**
   String get settings_longPressUrlCopyTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
@@ -18705,19 +18981,19 @@ abstract class AppLocalizations {
   /// Explanation under that switch.
   ///
   /// In en, this message translates to:
-  /// **'Copy the page URL to clipboard when long pressing the address bar'**
+  /// **'Long press the address bar to copy the page address'**
   String get settings_longPressUrlCopySubtitle;
 
   /// Switch: the tab overview's list layout shows site icons instead of page thumbnails.
   ///
   /// In en, this message translates to:
-  /// **'Show Favicons in List View'**
+  /// **'Show Site Icons in List View'**
   String get settings_showFaviconsTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'icons'**
+  /// **'icons, favicons'**
   String get settings_showFaviconsKeywords;
 
   /// Explanation under that switch.
@@ -18927,7 +19203,7 @@ abstract class AppLocalizations {
   /// Summary of the long-press-to-copy setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Copy the current URL from the tab bar'**
+  /// **'Copy the page address from the tab bar'**
   String get settings_indexLongPressUrlCopySubtitle;
 
   /// Summary of the contextual toolbar setting, shown as a settings search result.
@@ -19097,6 +19373,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load tracker statistics.'**
   String get settings_trackerStatisticsLoadFailed;
+
+  /// Settings category and screen title. Lists the features WebLibre can show or hide (each with a switch) and the presets that set them all at once; the same switches as Customize in the first-run setup.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature Control'**
+  String get settings_categoryFeatureControlTitle;
+
+  /// Subtitle of the Feature Control settings category.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which features WebLibre shows'**
+  String get settings_categoryFeatureControlSubtitle;
+
+  /// Comma-separated search terms for the Feature Control settings category. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'feature control, features, visibility, show, hide, hidden, preset, apply preset, just browsing, tinkerer, expert, simple, advanced, customize, setup, onboarding'**
+  String get settings_categoryFeatureControlKeywords;
+
+  /// Intro at the top of Settings > Feature Control: why to hide features, and what hiding one does and does not do.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide features you don\'t use to keep WebLibre simple. While a feature is hidden, its settings use their defaults. Your changes are kept and apply again when you show it. Connections and anything you created keep working.'**
+  String get settings_featureControlIntro;
+
+  /// Snackbar after hiding a feature that is in use, for example connections while a VPN runs, or containers that exist: it keeps working.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature hidden. Anything you already set up keeps working.'**
+  String get settings_featureControlHiddenInUse;
+
+  /// Line in the confirmation for hiding a feature or applying a preset on Settings > Feature Control, shown when something hidden is already set up and in use (a running connection, containers): it keeps working while hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Anything you already set up keeps working.'**
+  String get settings_featureControlKeepsWorking;
+
+  /// Snackbar on Settings > Feature Control after a feature was shown again whose settings the user had changed: those changes apply again. Shown with an Undo button that hides the feature again.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature shown. Your earlier changes apply again.'**
+  String get settings_featureControlShownApplyingAgain;
+
+  /// Heading on Settings > Feature Control above one row per preset chosen at first start (Just browsing, Tinkerer, Expert). Tapping a row shows and hides features the way that preset does, after a confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply preset'**
+  String get settings_featureControlApplyPresetTitle;
+
+  /// Line under the "Apply preset" heading: only which features are shown changes, no setting does.
+  ///
+  /// In en, this message translates to:
+  /// **'Show and hide features the way a preset does.'**
+  String get settings_featureControlApplyPresetSubtitle;
+
+  /// Title of the confirmation after tapping a preset under "Apply preset". preset is the preset's name (Just browsing, Tinkerer or Expert), quoted as a UI name.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply “{preset}”?'**
+  String settings_featureControlApplyPresetDialogTitle(String preset);
+
+  /// Text of the "Apply preset" confirmation, above the lists of features to show and to hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Only these features change.'**
+  String get settings_featureControlApplyPresetDialogContent;
+
+  /// Heading in the "Apply preset" confirmation above the features that applying it shows.
+  ///
+  /// In en, this message translates to:
+  /// **'Features to show'**
+  String get settings_featureControlFeaturesToShow;
+
+  /// Heading in the "Apply preset" confirmation above the features that applying it hides.
+  ///
+  /// In en, this message translates to:
+  /// **'Features to hide'**
+  String get settings_featureControlFeaturesToHide;
+
+  /// Confirm button of the "Apply preset" confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get settings_featureControlApplyPresetConfirm;
+
+  /// Snackbar after tapping a preset under "Apply preset" when the features shown already match it, so nothing changes. preset is the preset's name, quoted as a UI name.
+  ///
+  /// In en, this message translates to:
+  /// **'The features shown already match “{preset}”.'**
+  String settings_featureControlApplyPresetUnchanged(String preset);
+
+  /// Section title used by settings search for the feature switches on the Feature Control screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get settings_featureControlSectionTitle;
 
   /// Title of the Small Web panel. The "small web" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout.
   ///
@@ -21494,22 +21866,22 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get webPush_screenTitle;
 
-  /// Subtitle of the web push settings screen. UnifiedPush is the name of an open notification delivery system and must not be translated.
+  /// Subtitle of the website notification settings screen. Notifications arrive through a separate compatible app.
   ///
   /// In en, this message translates to:
-  /// **'Website notifications delivered through UnifiedPush'**
+  /// **'Receive website notifications through a separate app'**
   String get webPush_screenSubtitle;
 
-  /// Title of the setting for the UnifiedPush distributor: a separate app (such as ntfy) that receives push messages from the internet and passes them to WebLibre. UnifiedPush is a product name.
+  /// Title of the row for the app that delivers website notifications to WebLibre (a UnifiedPush distributor such as ntfy).
   ///
   /// In en, this message translates to:
-  /// **'UnifiedPush Distributor'**
+  /// **'Notification Delivery App'**
   String get webPush_distributorTileTitle;
 
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'notifications, push, unifiedpush, ntfy'**
+  /// **'notifications, push, unifiedpush, distributor, ntfy'**
   String get webPush_distributorTileKeywords;
 
   /// Status text while the app checks the push distributor or the notification permission.
@@ -21551,13 +21923,13 @@ abstract class AppLocalizations {
   /// Button that turns web push off by removing the chosen distributor.
   ///
   /// In en, this message translates to:
-  /// **'Disable web push'**
+  /// **'Turn off website notifications'**
   String get webPush_disableWebPush;
 
   /// Short status of the push distributor: no distributor app is installed on the device. Shown after the distributor's name or alone.
   ///
   /// In en, this message translates to:
-  /// **'No distributor available'**
+  /// **'No compatible notification app installed'**
   String get webPush_statusNoneAvailable;
 
   /// Short status of the push distributor: distributor apps are installed but none is chosen.
@@ -21581,73 +21953,73 @@ abstract class AppLocalizations {
   /// Short status of the push distributor: the chosen distributor app can no longer be reached.
   ///
   /// In en, this message translates to:
-  /// **'Distributor unavailable'**
+  /// **'Notification app unavailable'**
   String get webPush_statusUnavailable;
 
   /// Explanation under the distributor setting when no distributor app is installed. ntfy is an app name.
   ///
   /// In en, this message translates to:
-  /// **'Install a UnifiedPush distributor app, such as ntfy, to receive website notifications.'**
+  /// **'To receive website notifications, install ntfy or another app that supports UnifiedPush.'**
   String get webPush_statusDescNoneAvailable;
 
   /// Explanation under the distributor setting when distributor apps are installed but none is chosen.
   ///
   /// In en, this message translates to:
-  /// **'Choose a distributor below to enable website notifications.'**
+  /// **'Choose a notification app below to turn on website notifications.'**
   String get webPush_statusDescNotSelected;
 
   /// Explanation under the distributor setting while waiting for the distributor app to confirm registration.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for the distributor to acknowledge registration.'**
+  /// **'Waiting for the notification app to finish setting up.'**
   String get webPush_statusDescPending;
 
   /// Explanation under the distributor setting when push notifications are working.
   ///
   /// In en, this message translates to:
-  /// **'Website notifications are delivered through this distributor.'**
+  /// **'Website notifications are delivered through this app.'**
   String get webPush_statusDescReady;
 
   /// Explanation under the distributor setting when the previously chosen distributor app was uninstalled.
   ///
   /// In en, this message translates to:
-  /// **'The chosen distributor is no longer installed. Website notifications will not be delivered until you choose another one.'**
+  /// **'The chosen notification app is no longer installed. Website notifications will not arrive until you choose another one.'**
   String get webPush_statusDescUnavailable;
 
   /// Error message when the user tries to choose a distributor but no UnifiedPush distributor app is installed. ntfy is an app name.
   ///
   /// In en, this message translates to:
-  /// **'No UnifiedPush distributor is installed. Install one, such as ntfy, and try again.'**
+  /// **'No compatible notification app is installed. Install ntfy or another app that supports UnifiedPush, then try again.'**
   String get webPush_noDistributorInstalled;
 
   /// Title of the dialog listing installed UnifiedPush distributor apps to choose from.
   ///
   /// In en, this message translates to:
-  /// **'Choose distributor'**
+  /// **'Choose notification delivery app'**
   String get webPush_chooseDistributorTitle;
 
   /// Confirmation after a push distributor was chosen successfully.
   ///
   /// In en, this message translates to:
-  /// **'UnifiedPush distributor configured.'**
+  /// **'Notification app set up.'**
   String get webPush_distributorConfigured;
 
   /// Error message when setting the chosen push distributor failed. error is technical error text, usually English.
   ///
   /// In en, this message translates to:
-  /// **'Could not configure distributor: {error}'**
+  /// **'Could not set up the notification app: {error}'**
   String webPush_couldNotConfigureDistributor(String error);
 
   /// Confirmation after web push was turned off.
   ///
   /// In en, this message translates to:
-  /// **'Web push disabled.'**
+  /// **'Website notifications turned off.'**
   String get webPush_webPushDisabled;
 
   /// Error message when turning web push off failed. error is technical error text, usually English.
   ///
   /// In en, this message translates to:
-  /// **'Could not disable web push: {error}'**
+  /// **'Could not turn off website notifications: {error}'**
   String webPush_couldNotDisableWebPush(String error);
 
   /// Title of the setting showing whether WebLibre has the Android permission to show notifications.
@@ -21725,13 +22097,13 @@ abstract class AppLocalizations {
   /// Status under a website in the push subscription list: the delivery address ("endpoint") is set up, but notifications are held back until the distributor app works again.
   ///
   /// In en, this message translates to:
-  /// **'Endpoint saved; delivery is paused until the distributor is ready'**
+  /// **'Subscribed; notifications can arrive once the notification app is ready'**
   String get webPush_subscriptionDelayedDelivery;
 
   /// Status under a website in the push subscription list: the distributor app has not yet provided the delivery address ("endpoint") for it.
   ///
   /// In en, this message translates to:
-  /// **'Waiting for the distributor to assign an endpoint'**
+  /// **'Waiting for the notification app to finish the subscription'**
   String get webPush_subscriptionWaitingForEndpoint;
 
   /// Hint under the push subscription list explaining how to stop a website's notifications: via that site's permissions.
@@ -21749,7 +22121,7 @@ abstract class AppLocalizations {
   /// Short explanation of the UnifiedPush distributor setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'The app that delivers website push notifications'**
+  /// **'The app that delivers website notifications, such as ntfy (UnifiedPush)'**
   String get webPush_indexDistributorSubtitle;
 
   /// Short explanation of the notification permission setting, shown as a settings search result.
@@ -21779,7 +22151,7 @@ abstract class AppLocalizations {
   /// Short explanation of the site subscriptions list, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Websites subscribed to push notifications'**
+  /// **'Websites allowed to send you notifications'**
   String get webPush_indexSiteSubscriptionsSubtitle;
 
   /// Title of the dialog for choosing how to fetch a web search result page through the privacy-preserving server (as a text preview, full copy, PDF or image).
@@ -22991,6 +23363,12 @@ abstract class AppLocalizations {
   /// **'Done.'**
   String get startup_maintenanceUnknownDescribeDone;
 
+  /// Separator between the items of a short list of UI names, e.g. the visibility switches a feature also needs ("Containers, Tor, VPN and proxies"). Never followed by a conjunction such as "and". Keep the trailing space if your language uses one.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get listFormat_separator;
+
   /// A file or storage size in bytes, e.g. "512 B". value is the already formatted number. Use your language's usual unit symbol.
   ///
   /// In en, this message translates to:
@@ -23014,6 +23392,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value} ms'**
   String units_milliseconds(String value);
+
+  /// Name of a visibility switch in Customize and Settings > Feature Control. When on, the browser shows the controls for creating and configuring containers (separate cookie and login spaces).
+  ///
+  /// In en, this message translates to:
+  /// **'Containers'**
+  String get visibilitySwitch_containersLabel;
+
+  /// Subtitle of the Containers visibility switch: what turning it on shows.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep cookies and logins in separate spaces, like work and personal'**
+  String get visibilitySwitch_containersDescription;
+
+  /// Name of the visibility switch that shows the controls for creating isolated tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'Isolated tabs'**
+  String get visibilitySwitch_isolatedTabsLabel;
+
+  /// Subtitle of the Isolated tabs visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tabs with their own cookies and logins that, unlike private tabs, stay after quitting'**
+  String get visibilitySwitch_isolatedTabsDescription;
+
+  /// Name of the visibility switch that shows the Tor, VPN and proxy connection settings and controls.
+  ///
+  /// In en, this message translates to:
+  /// **'Tor, VPN and proxies'**
+  String get visibilitySwitch_connectionsLabel;
+
+  /// Subtitle of the connections visibility switch. Tor, WireGuard, VLESS and SOCKS are protocol and brand names and stay untranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse through Tor, a VPN or a proxy'**
+  String get visibilitySwitch_connectionsDescription;
+
+  /// Name of the visibility switch that shows the controls for creating and switching between several browser profiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple profiles'**
+  String get visibilitySwitch_profilesLabel;
+
+  /// Subtitle of the multiple profiles visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Create and switch between separate profiles'**
+  String get visibilitySwitch_profilesDescription;
+
+  /// Name of the visibility switch that shows the tree view of tabs, the tab hierarchy and the child tab option.
+  ///
+  /// In en, this message translates to:
+  /// **'Tree tabs'**
+  String get visibilitySwitch_treeTabsLabel;
+
+  /// Subtitle of the tree tabs visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Show tabs opened from a page under the tab they came from'**
+  String get visibilitySwitch_treeTabsDescription;
+
+  /// Name of the visibility switch that shows advanced tab bar stacking modes, toolbar button customization and menu arrangement.
+  ///
+  /// In en, this message translates to:
+  /// **'More layout options'**
+  String get visibilitySwitch_layoutAdvancedLabel;
+
+  /// Subtitle of the more layout options visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose toolbar buttons, the menu order and how the tab bar groups tabs'**
+  String get visibilitySwitch_layoutAdvancedDescription;
+
+  /// Name of the visibility switch that shows drawn gestures and custom swipe actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures'**
+  String get visibilitySwitch_gesturesLabel;
+
+  /// Subtitle of the gestures visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe or draw shapes to run actions'**
+  String get visibilitySwitch_gesturesDescription;
+
+  /// Name of the visibility switch that shows the editor for keyboard shortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom keyboard shortcuts'**
+  String get visibilitySwitch_keyboardCustomizationLabel;
+
+  /// Subtitle of the custom keyboard shortcuts visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which keys run which action'**
+  String get visibilitySwitch_keyboardCustomizationDescription;
+
+  /// Name of the visibility switch that shows the detailed privacy settings (tracking protection level, DNS provider, hardening and fingerprinting switches, browser languages). A noun phrase like the other switch names: it is also listed as a plain row and inside sentences such as "Turn on “…”".
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced privacy settings'**
+  String get visibilitySwitch_privacyAdvancedLabel;
+
+  /// Subtitle of the privacy controls visibility switch. The protections themselves stay on when it is off.
+  ///
+  /// In en, this message translates to:
+  /// **'Fine-tune tracking protection, secure DNS, the stricter security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.'**
+  String get visibilitySwitch_privacyAdvancedDescription;
+
+  /// Name of the visibility switch that shows the storage choice when installing a site as an app.
+  ///
+  /// In en, this message translates to:
+  /// **'Web app storage'**
+  String get visibilitySwitch_webappStorageLabel;
+
+  /// Subtitle of the web app storage visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which cookies and logins an app added to the home screen uses'**
+  String get visibilitySwitch_webappStorageDescription;
+
+  /// Name of the visibility switch that shows the on-device AI settings and tools.
+  ///
+  /// In en, this message translates to:
+  /// **'On-device AI'**
+  String get visibilitySwitch_aiLabel;
+
+  /// Subtitle of the on-device AI visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Get suggestions for grouping tabs from AI that runs only on this device'**
+  String get visibilitySwitch_aiDescription;
+
+  /// Name of the visibility switch that shows expert-level settings across all screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert settings'**
+  String get visibilitySwitch_expertDetailsLabel;
+
+  /// Subtitle of the expert settings visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Control engine hardening groups, per-container routing, JavaScript, the user agent, certificates and more'**
+  String get visibilitySwitch_expertDetailsDescription;
+
+  /// Line under a visibility switch naming the other switches that some of its features also need before they are shown. {switches} is a comma-separated list of those switch names, e.g. "Containers, Tor, VPN and proxies".
+  ///
+  /// In en, this message translates to:
+  /// **'Parts of this feature also need: {switches}'**
+  String visibilitySwitch_alsoNeeds(String switches);
+
+  /// Title of the dialog shown when the user deliberately uses something (a gesture, keyboard shortcut, toolbar long press, settings search result or grayed-out setting) that belongs to a hidden feature. count is how many hidden features it needs; the dialog lists them.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Show hidden feature?} other{Show hidden features?}}'**
+  String visibilitySwitch_revealTitle(int count);
+
+  /// Text of the "Show hidden feature?" dialog, above the hidden feature (or features), each listed with its name and description. "This" is what the user just used. count is the number of features listed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This belongs to a feature that is hidden right now:} other{This needs features that are hidden right now:}}'**
+  String visibilitySwitch_revealIntro(int count);
+
+  /// Text at the end of the "Show hidden feature?" dialog: what "Show" does. It shows the feature; no setting changes, and the action that needed it is not run. Any of the user's changes that apply again are listed above it. count is the number of features listed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Showing it brings back its buttons and settings. Nothing else changes.} other{Showing them brings back their buttons and settings. Nothing else changes.}}'**
+  String visibilitySwitch_revealOutcome(int count);
+
+  /// Text above the list of the user's own changes that showing a hidden feature makes apply again: in the "Show hidden feature?" dialog, the "Show {feature}?" confirmation of Settings > Feature Control, and the "Apply preset" confirmation. Hidden features use their default settings; the user's changes are kept. Only shown when there are such changes. count is the number of features being shown.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{While it is hidden, these settings use their defaults. Your changes are kept and apply again when you show it:} other{While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them:}}'**
+  String visibilitySwitch_revealResumesIntro(int count);
+
+  /// Line under a setting in the lists of changes that stop applying or apply again when a feature is hidden or shown: the browser engine reads this setting only when it starts, so the change takes effect after the app restarts.
+  ///
+  /// In en, this message translates to:
+  /// **'Takes effect after a restart'**
+  String get visibilitySwitch_takesEffectAfterRestart;
+
+  /// Button in the dialog asking whether to show a hidden feature. Turns its visibility switch on.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get visibilitySwitch_revealConfirm;
+
+  /// Short message shown when the user triggers a hidden feature again after having declined to show it.
+  ///
+  /// In en, this message translates to:
+  /// **'This belongs to a hidden feature. You can show it in Settings > Feature Control.'**
+  String get visibilitySwitch_stillHiddenNote;
+
+  /// Screen reader hint on a settings control that is grayed out because its feature is hidden. Activating it asks whether to show the feature; it does not change the setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of a hidden feature. Activate to show the feature'**
+  String get visibilitySwitch_hiddenControlHint;
+
+  /// Status line under a settings search result whose feature is hidden. switchLabel is the name of the visibility switch that hides it, quoted as a UI name.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of the hidden feature “{switchLabel}”'**
+  String visibilitySwitch_hiddenStatus(String switchLabel);
+
+  /// Status line under a settings search result whose feature is hidden by more than one visibility switch. switchLabels is the list of those switch names, e.g. "Containers, On-device AI", joined with the list separator.
+  ///
+  /// In en, this message translates to:
+  /// **'Part of hidden features: {switchLabels}'**
+  String visibilitySwitch_hiddenStatusSeveral(String switchLabels);
+
+  /// Shown in Settings under a grayed-out setting of a hidden feature whose value the user changed: while the feature is hidden, the default applies instead. The change is kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Not applied while hidden'**
+  String get visibilitySwitch_notAppliedWhileHidden;
+
+  /// Title of the confirmation shown when the user turns off a visibility switch in Settings > Feature Control while some of its settings are changed from their defaults. {feature} is the switch name, e.g. "More layout options".
+  ///
+  /// In en, this message translates to:
+  /// **'Hide {feature}?'**
+  String visibilitySwitch_hideWarningTitle(String feature);
+
+  /// Body of the hide confirmation, above the list of changed settings: in the "Hide {feature}?" confirmation of Settings > Feature Control (one feature) and the "Apply preset" confirmation (one or more). Hidden features use their default settings; the user's changes are kept and apply again when the feature is shown. count is the number of features being hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{While it is hidden, these settings use their defaults. Your changes are kept and apply again when you show it.} other{While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them.}}'**
+  String visibilitySwitch_hideWarningContent(int count);
+
+  /// Button of the hide confirmation that hides the feature.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get visibilitySwitch_hideWarningConfirm;
+
+  /// Heading in the "Apply preset" confirmation, above the list of changed settings that stop applying because the preset hides their feature.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes that stop applying'**
+  String get visibilitySwitch_stopsApplyingTitle;
+
+  /// Heading in the "Apply preset" confirmation, above the list of changed settings that apply again because the preset shows their feature.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes that apply again'**
+  String get visibilitySwitch_appliesAgainTitle;
+
+  /// Name of a setting in the list of changes that stop applying when a feature is hidden: whether the URL Cleaner applies cleaned links automatically instead of asking.
+  ///
+  /// In en, this message translates to:
+  /// **'URL Cleaner auto-apply'**
+  String get visibilitySwitch_hiddenSettingUrlCleanerAutoApply;
+
+  /// Name of a setting in the list of changes that stop applying when a feature is hidden: where the URL Cleaner gets its rules and whether it updates them automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'URL Cleaner rules'**
+  String get visibilitySwitch_hiddenSettingUrlCleanerRules;
+
+  /// Name of a setting in the list of changes that stop applying when a feature is hidden: what toolbar buttons show when unavailable, and what a long press on them does.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolbar button fallbacks and long press'**
+  String get visibilitySwitch_hiddenSettingToolbarButtons;
 
   /// Generic heading of an error panel shown in place of content that failed to load, when the caller gives no specific title. The error details appear below it.
   ///
@@ -23258,7 +23900,7 @@ abstract class AppLocalizations {
   /// Error message when a link uses a protocol no installed app can open. scheme is the protocol prefix of the link, e.g. "tel" or "market".
   ///
   /// In en, this message translates to:
-  /// **'Cannot handle \"{scheme}\"'**
+  /// **'No app can open \"{scheme}\" links'**
   String uiHelper_canNotHandleScheme(String scheme);
 
   /// Short message at the bottom of the screen after closing tabs, with an Undo button. count is the number of closed tabs.

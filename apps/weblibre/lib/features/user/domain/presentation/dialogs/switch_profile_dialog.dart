@@ -63,7 +63,7 @@ Future<bool?> showSwitchProfileDialog(
             },
             child: Text(l10n.user_actionNotNow),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () {
               context.pop(true);
             },

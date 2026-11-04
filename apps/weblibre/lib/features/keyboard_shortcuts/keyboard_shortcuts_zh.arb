@@ -22,6 +22,7 @@
   "keyboardShortcuts_recorderProblemAlreadyBound": "这已经是此操作的快捷键。",
   "keyboardShortcuts_recorderTakesFromOther": "当前已被“{ownerTitle}”使用。保存后将移至此处。",
   "keyboardShortcuts_actionCustomize": "自定义",
+  "keyboardShortcuts_actionShowAll": "显示全部",
   "keyboardShortcuts_actionReassign": "重新分配",
   "keyboardShortcuts_actionRestore": "恢复"
 }

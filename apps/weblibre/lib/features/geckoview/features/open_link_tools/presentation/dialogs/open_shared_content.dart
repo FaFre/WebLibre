@@ -452,7 +452,7 @@ class OpenSharedContent extends HookConsumerWidget {
                       selected: selectedTabType.value,
                       onChanged: (value) => selectedTabType.value = value,
                       showIsolatedOption:
-                          settings.showIsolatedTabUi ||
+                          settings.isolatedTabEntryPointsShown ||
                           carriedIsolatedContextId != null,
                       selectedBackgroundColor: switch (selectedTabType.value) {
                         TabType.regular => null,
@@ -462,7 +462,10 @@ class OpenSharedContent extends HookConsumerWidget {
                       },
                     );
 
-                    if (!settings.showContainerUi) {
+                    // A selected container keeps its way out while
+                    // containers are hidden (P5).
+                    if (!settings.containerEntryPointsShown &&
+                        selectedContainer.value == null) {
                       return Center(child: tabTypeSwitcher);
                     }
 

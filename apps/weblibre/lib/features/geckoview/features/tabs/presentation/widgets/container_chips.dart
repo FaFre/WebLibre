@@ -221,7 +221,7 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
     );
     final enableAiFeatures = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.enableLocalAiFeatures,
+        (settings) => settings.containerSuggestionsActive,
       ),
     );
 
@@ -330,7 +330,11 @@ class ContainerChips extends HookConsumerWidget {
   /// The unassigned pseudo-chip lives in the non-draggable prefix region, so it
   /// gets the same drop target and context menu as the real chips, but always
   /// in the arena-claiming variant — there is no reorder drag to defer to.
-  Widget _buildUnassignedChip({required Widget child}) {
+  Widget _buildUnassignedChip({
+    required Widget child,
+    required bool enableContextMenu,
+    required bool enableDragAndDrop,
+  }) {
     var wrapped = child;
 
     if (enableContextMenu) {
@@ -352,12 +356,24 @@ class ContainerChips extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final containerUiEnabled = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.showContainerUi,
+        (settings) => settings.containerEntryPointsShown,
       ),
     );
-    if (!containerUiEnabled) {
-      return const SizedBox.shrink();
-    }
+    // While containers are hidden the chips only navigate (P5): existing
+    // container tabs stay reachable and a selected container keeps its way
+    // out, but nothing creates, edits, reorders or moves tabs into one. Only
+    // containers that still hold tabs, or the selected one, are listed.
+    final navigationOnly = !containerUiEnabled;
+    final enableContextMenu = this.enableContextMenu && !navigationOnly;
+    final enableDragAndDrop = this.enableDragAndDrop && !navigationOnly;
+    final showGroupSuggestions = this.showGroupSuggestions && !navigationOnly;
+    final displayMenu = this.displayMenu && !navigationOnly;
+    final containerFilter = navigationOnly
+        ? (ContainerDataWithCount container) =>
+              (this.containerFilter?.call(container) ?? true) &&
+              ((container.tabCount ?? 0) > 0 ||
+                  container.id == selectedContainer?.id)
+        : this.containerFilter;
 
     final searchText = useListenableSelector(
       searchTextListenable,
@@ -452,7 +468,8 @@ class ContainerChips extends HookConsumerWidget {
 
         if (selectedContainer == null &&
             availableContainers.isEmpty &&
-            !displayMenu) {
+            !displayMenu &&
+            (!navigationOnly || !showSyncedChip)) {
           return const SizedBox.shrink();
         }
 
@@ -565,6 +582,8 @@ class ContainerChips extends HookConsumerWidget {
                             ),
                           if (showUnassignedChip)
                             _buildUnassignedChip(
+                              enableContextMenu: enableContextMenu,
+                              enableDragAndDrop: enableDragAndDrop,
                               child: _UnassignedContainerChip(
                                 containerBadgeCount: () =>
                                     containerBadgeCount?.call(null),

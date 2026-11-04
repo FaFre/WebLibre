@@ -371,6 +371,10 @@ bool _looksLikeWireguardConf(String text) {
       (text.contains('PrivateKey') || text.contains('Address'));
 }
 
+/// Whether [raw] would be read as sing-box JSON, which only the manual
+/// configuration importer (`connections.manual_proxy_config`) handles.
+bool isSingboxJsonInput(String raw) => _looksLikeJsonObject(raw.trim());
+
 bool _looksLikeJsonObject(String text) {
   return text.startsWith('{') && text.endsWith('}');
 }

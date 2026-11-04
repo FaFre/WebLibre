@@ -25,9 +25,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -59,7 +61,19 @@ class TabDropTarget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!enabled) {
+    // Each choice follows its feature; with both hidden, a drop does nothing.
+    final containerShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.tabsDragToContainer),
+      ),
+    );
+    final parentShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.tabsHierarchyDisplay),
+      ),
+    );
+
+    if (!enabled || (!containerShown && !parentShown)) {
       return child;
     }
 
@@ -75,7 +89,10 @@ class TabDropTarget extends HookConsumerWidget {
           context: context,
           anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
           showDragHandle: true,
-          builder: (context) => const _TabDropActionSheet(),
+          builder: (context) => _TabDropActionSheet(
+            containerShown: containerShown,
+            parentShown: parentShown,
+          ),
         );
 
         if (action == null || !context.mounted) return;
@@ -169,7 +186,13 @@ class TabDropTarget extends HookConsumerWidget {
 }
 
 class _TabDropActionSheet extends StatelessWidget {
-  const _TabDropActionSheet();
+  const _TabDropActionSheet({
+    required this.containerShown,
+    required this.parentShown,
+  });
+
+  final bool containerShown;
+  final bool parentShown;
 
   @override
   Widget build(BuildContext context) {
@@ -183,19 +206,22 @@ class _TabDropActionSheet extends StatelessWidget {
             title: Text(l10n.browser_dropTabOntoTabTitle),
             subtitle: Text(l10n.browser_chooseHowTabsRelated),
           ),
-          ListTile(
-            leading: const Icon(MdiIcons.folderPlus),
-            title: Text(l10n.browser_createContainerOption),
-            subtitle: Text(l10n.browser_createContainerOptionSubtitle),
-            onTap: () =>
-                Navigator.of(context).pop(_TabDropAction.createContainer),
-          ),
-          ListTile(
-            leading: const Icon(MdiIcons.fileTree),
-            title: Text(l10n.browser_assignNewParentOption),
-            subtitle: Text(l10n.browser_assignNewParentOptionSubtitle),
-            onTap: () => Navigator.of(context).pop(_TabDropAction.assignParent),
-          ),
+          if (containerShown)
+            ListTile(
+              leading: const Icon(MdiIcons.folderPlus),
+              title: Text(l10n.browser_createContainerOption),
+              subtitle: Text(l10n.browser_createContainerOptionSubtitle),
+              onTap: () =>
+                  Navigator.of(context).pop(_TabDropAction.createContainer),
+            ),
+          if (parentShown)
+            ListTile(
+              leading: const Icon(MdiIcons.fileTree),
+              title: Text(l10n.browser_assignNewParentOption),
+              subtitle: Text(l10n.browser_assignNewParentOptionSubtitle),
+              onTap: () =>
+                  Navigator.of(context).pop(_TabDropAction.assignParent),
+            ),
         ],
       ),
     );

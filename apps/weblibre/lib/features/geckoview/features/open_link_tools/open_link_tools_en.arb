@@ -124,7 +124,7 @@
   "@openLinkTools_restoreDefaultsTitle": {
     "description": "Title of the confirmation dialog before resetting the URL cleaner."
   },
-  "openLinkTools_restoreDefaultsContent": "This will reset URL cleaner settings and remove the locally stored catalog.",
+  "openLinkTools_restoreDefaultsContent": "This resets the URL Cleaner settings and removes downloaded rules.",
   "@openLinkTools_restoreDefaultsContent": {
     "description": "Body of the confirmation dialog before resetting the URL cleaner: settings return to defaults and the downloaded rule catalog is deleted."
   },
@@ -231,7 +231,7 @@
   "@openLinkTools_urlCleanerSettingsTitle": {
     "description": "Title of the settings screen for the URL cleaner, which removes tracking parameters from links."
   },
-  "openLinkTools_urlCleanerSettingsSubtitle": "URL cleanup behavior, rule catalog updates, and attribution.",
+  "openLinkTools_urlCleanerSettingsSubtitle": "What gets removed from links, rule updates and credits.",
   "@openLinkTools_urlCleanerSettingsSubtitle": {
     "description": "Subtitle of the URL cleaner settings screen listing what it contains. The catalog is the downloadable list of cleaning rules."
   },
@@ -247,7 +247,7 @@
   "@openLinkTools_urlCleanerEnabledKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "openLinkTools_urlCleanerEnabledSubtitle": "Remove tracking parameters from URLs",
+  "openLinkTools_urlCleanerEnabledSubtitle": "Remove tracking parts from links",
   "@openLinkTools_urlCleanerEnabledSubtitle": {
     "description": "Explanation under \"Enable URL Cleaner\"."
   },
@@ -271,11 +271,11 @@
   "@openLinkTools_allowReferralKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "openLinkTools_allowReferralSubtitle": "Keep referral and affiliate tracking parameters",
+  "openLinkTools_allowReferralSubtitle": "Keep referral and affiliate codes in links",
   "@openLinkTools_allowReferralSubtitle": {
     "description": "Explanation under \"Allow referral marketing\"."
   },
-  "openLinkTools_autoUpdateCatalogTitle": "Auto-update catalog",
+  "openLinkTools_autoUpdateCatalogTitle": "Update rules automatically",
   "@openLinkTools_autoUpdateCatalogTitle": {
     "description": "Switch in the URL cleaner settings: download updated cleaning rules automatically."
   },
@@ -283,7 +283,7 @@
   "@openLinkTools_autoUpdateCatalogSubtitle": {
     "description": "Explanation under \"Auto-update catalog\"."
   },
-  "openLinkTools_updateCatalogTitle": "Update catalog",
+  "openLinkTools_updateCatalogTitle": "Update rules",
   "@openLinkTools_updateCatalogTitle": {
     "description": "Row in the URL cleaner settings that downloads the latest cleaning rules now."
   },
@@ -306,7 +306,7 @@
     "description": "Line under \"Update catalog\". date is when the app last checked for new rules.",
     "placeholders": { "date": { "type": "String" } }
   },
-  "openLinkTools_catalogUpdatedMessage": "Catalog updated",
+  "openLinkTools_catalogUpdatedMessage": "Rules updated",
   "@openLinkTools_catalogUpdatedMessage": {
     "description": "Confirmation after the URL cleaner rules were updated."
   },
@@ -319,7 +319,7 @@
   "@openLinkTools_restoreDefaultsButtonTitle": {
     "description": "Row in the URL cleaner settings that resets it (asks for confirmation)."
   },
-  "openLinkTools_restoreDefaultsButtonSubtitle": "Reset to bundled catalog and default settings",
+  "openLinkTools_restoreDefaultsButtonSubtitle": "Go back to the built-in rules and default settings",
   "@openLinkTools_restoreDefaultsButtonSubtitle": {
     "description": "Explanation under \"Restore defaults\": return to the rule catalog shipped with the app and the default settings."
   },
@@ -348,7 +348,7 @@
   "@openLinkTools_urlCleanerBehaviorSectionTitle": {
     "description": "Section heading on the URL cleaner settings screen for how cleaning works."
   },
-  "openLinkTools_urlCleanerCatalogSectionTitle": "Catalog",
+  "openLinkTools_urlCleanerCatalogSectionTitle": "Rules",
   "@openLinkTools_urlCleanerCatalogSectionTitle": {
     "description": "Section heading on the URL cleaner settings screen for the downloadable rule list."
   },

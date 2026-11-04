@@ -1,0 +1,224 @@
+{
+  "@@locale": "en",
+  "visibilitySwitch_containersLabel": "Containers",
+  "@visibilitySwitch_containersLabel": {
+    "description": "Name of a visibility switch in Customize and Settings > Feature Control. When on, the browser shows the controls for creating and configuring containers (separate cookie and login spaces)."
+  },
+  "visibilitySwitch_containersDescription": "Keep cookies and logins in separate spaces, like work and personal",
+  "@visibilitySwitch_containersDescription": {
+    "description": "Subtitle of the Containers visibility switch: what turning it on shows."
+  },
+  "visibilitySwitch_isolatedTabsLabel": "Isolated tabs",
+  "@visibilitySwitch_isolatedTabsLabel": {
+    "description": "Name of the visibility switch that shows the controls for creating isolated tabs."
+  },
+  "visibilitySwitch_isolatedTabsDescription": "Open tabs with their own cookies and logins that, unlike private tabs, stay after quitting",
+  "@visibilitySwitch_isolatedTabsDescription": {
+    "description": "Subtitle of the Isolated tabs visibility switch."
+  },
+  "visibilitySwitch_connectionsLabel": "Tor, VPN and proxies",
+  "@visibilitySwitch_connectionsLabel": {
+    "description": "Name of the visibility switch that shows the Tor, VPN and proxy connection settings and controls."
+  },
+  "visibilitySwitch_connectionsDescription": "Browse through Tor, a VPN or a proxy",
+  "@visibilitySwitch_connectionsDescription": {
+    "description": "Subtitle of the connections visibility switch. Tor, WireGuard, VLESS and SOCKS are protocol and brand names and stay untranslated."
+  },
+  "visibilitySwitch_profilesLabel": "Multiple profiles",
+  "@visibilitySwitch_profilesLabel": {
+    "description": "Name of the visibility switch that shows the controls for creating and switching between several browser profiles."
+  },
+  "visibilitySwitch_profilesDescription": "Create and switch between separate profiles",
+  "@visibilitySwitch_profilesDescription": {
+    "description": "Subtitle of the multiple profiles visibility switch."
+  },
+  "visibilitySwitch_treeTabsLabel": "Tree tabs",
+  "@visibilitySwitch_treeTabsLabel": {
+    "description": "Name of the visibility switch that shows the tree view of tabs, the tab hierarchy and the child tab option."
+  },
+  "visibilitySwitch_treeTabsDescription": "Show tabs opened from a page under the tab they came from",
+  "@visibilitySwitch_treeTabsDescription": {
+    "description": "Subtitle of the tree tabs visibility switch."
+  },
+  "visibilitySwitch_layoutAdvancedLabel": "More layout options",
+  "@visibilitySwitch_layoutAdvancedLabel": {
+    "description": "Name of the visibility switch that shows advanced tab bar stacking modes, toolbar button customization and menu arrangement."
+  },
+  "visibilitySwitch_layoutAdvancedDescription": "Choose toolbar buttons, the menu order and how the tab bar groups tabs",
+  "@visibilitySwitch_layoutAdvancedDescription": {
+    "description": "Subtitle of the more layout options visibility switch."
+  },
+  "visibilitySwitch_gesturesLabel": "Gestures",
+  "@visibilitySwitch_gesturesLabel": {
+    "description": "Name of the visibility switch that shows drawn gestures and custom swipe actions."
+  },
+  "visibilitySwitch_gesturesDescription": "Swipe or draw shapes to run actions",
+  "@visibilitySwitch_gesturesDescription": {
+    "description": "Subtitle of the gestures visibility switch."
+  },
+  "visibilitySwitch_keyboardCustomizationLabel": "Custom keyboard shortcuts",
+  "@visibilitySwitch_keyboardCustomizationLabel": {
+    "description": "Name of the visibility switch that shows the editor for keyboard shortcuts."
+  },
+  "visibilitySwitch_keyboardCustomizationDescription": "Choose which keys run which action",
+  "@visibilitySwitch_keyboardCustomizationDescription": {
+    "description": "Subtitle of the custom keyboard shortcuts visibility switch."
+  },
+  "visibilitySwitch_privacyAdvancedLabel": "Advanced privacy settings",
+  "@visibilitySwitch_privacyAdvancedLabel": {
+    "description": "Name of the visibility switch that shows the detailed privacy settings (tracking protection level, DNS provider, hardening and fingerprinting switches, browser languages). A noun phrase like the other switch names: it is also listed as a plain row and inside sentences such as \"Turn on “…”\"."
+  },
+  "visibilitySwitch_privacyAdvancedDescription": "Fine-tune tracking protection, secure DNS, the stricter security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.",
+  "@visibilitySwitch_privacyAdvancedDescription": {
+    "description": "Subtitle of the privacy controls visibility switch. The protections themselves stay on when it is off."
+  },
+  "visibilitySwitch_webappStorageLabel": "Web app storage",
+  "@visibilitySwitch_webappStorageLabel": {
+    "description": "Name of the visibility switch that shows the storage choice when installing a site as an app."
+  },
+  "visibilitySwitch_webappStorageDescription": "Choose which cookies and logins an app added to the home screen uses",
+  "@visibilitySwitch_webappStorageDescription": {
+    "description": "Subtitle of the web app storage visibility switch."
+  },
+  "visibilitySwitch_aiLabel": "On-device AI",
+  "@visibilitySwitch_aiLabel": {
+    "description": "Name of the visibility switch that shows the on-device AI settings and tools."
+  },
+  "visibilitySwitch_aiDescription": "Get suggestions for grouping tabs from AI that runs only on this device",
+  "@visibilitySwitch_aiDescription": {
+    "description": "Subtitle of the on-device AI visibility switch."
+  },
+  "visibilitySwitch_expertDetailsLabel": "Expert settings",
+  "@visibilitySwitch_expertDetailsLabel": {
+    "description": "Name of the visibility switch that shows expert-level settings across all screens."
+  },
+  "visibilitySwitch_expertDetailsDescription": "Control engine hardening groups, per-container routing, JavaScript, the user agent, certificates and more",
+  "@visibilitySwitch_expertDetailsDescription": {
+    "description": "Subtitle of the expert settings visibility switch."
+  },
+  "visibilitySwitch_alsoNeeds": "Parts of this feature also need: {switches}",
+  "@visibilitySwitch_alsoNeeds": {
+    "description": "Line under a visibility switch naming the other switches that some of its features also need before they are shown. {switches} is a comma-separated list of those switch names, e.g. \"Containers, Tor, VPN and proxies\".",
+    "placeholders": {
+      "switches": {
+        "type": "String"
+      }
+    }
+  },
+  "visibilitySwitch_revealTitle": "{count, plural, =1{Show hidden feature?} other{Show hidden features?}}",
+  "@visibilitySwitch_revealTitle": {
+    "description": "Title of the dialog shown when the user deliberately uses something (a gesture, keyboard shortcut, toolbar long press, settings search result or grayed-out setting) that belongs to a hidden feature. count is how many hidden features it needs; the dialog lists them.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visibilitySwitch_revealIntro": "{count, plural, =1{This belongs to a feature that is hidden right now:} other{This needs features that are hidden right now:}}",
+  "@visibilitySwitch_revealIntro": {
+    "description": "Text of the \"Show hidden feature?\" dialog, above the hidden feature (or features), each listed with its name and description. \"This\" is what the user just used. count is the number of features listed.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visibilitySwitch_revealOutcome": "{count, plural, =1{Showing it brings back its buttons and settings. Nothing else changes.} other{Showing them brings back their buttons and settings. Nothing else changes.}}",
+  "@visibilitySwitch_revealOutcome": {
+    "description": "Text at the end of the \"Show hidden feature?\" dialog: what \"Show\" does. It shows the feature; no setting changes, and the action that needed it is not run. Any of the user's changes that apply again are listed above it. count is the number of features listed.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visibilitySwitch_revealResumesIntro": "{count, plural, =1{While it is hidden, these settings use their defaults. Your changes are kept and apply again when you show it:} other{While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them:}}",
+  "@visibilitySwitch_revealResumesIntro": {
+    "description": "Text above the list of the user's own changes that showing a hidden feature makes apply again: in the \"Show hidden feature?\" dialog, the \"Show {feature}?\" confirmation of Settings > Feature Control, and the \"Apply preset\" confirmation. Hidden features use their default settings; the user's changes are kept. Only shown when there are such changes. count is the number of features being shown.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visibilitySwitch_takesEffectAfterRestart": "Takes effect after a restart",
+  "@visibilitySwitch_takesEffectAfterRestart": {
+    "description": "Line under a setting in the lists of changes that stop applying or apply again when a feature is hidden or shown: the browser engine reads this setting only when it starts, so the change takes effect after the app restarts."
+  },
+  "visibilitySwitch_revealConfirm": "Show",
+  "@visibilitySwitch_revealConfirm": {
+    "description": "Button in the dialog asking whether to show a hidden feature. Turns its visibility switch on."
+  },
+  "visibilitySwitch_stillHiddenNote": "This belongs to a hidden feature. You can show it in Settings > Feature Control.",
+  "@visibilitySwitch_stillHiddenNote": {
+    "description": "Short message shown when the user triggers a hidden feature again after having declined to show it."
+  },
+  "visibilitySwitch_hiddenControlHint": "Part of a hidden feature. Activate to show the feature",
+  "@visibilitySwitch_hiddenControlHint": {
+    "description": "Screen reader hint on a settings control that is grayed out because its feature is hidden. Activating it asks whether to show the feature; it does not change the setting."
+  },
+  "visibilitySwitch_hiddenStatus": "Part of the hidden feature “{switchLabel}”",
+  "@visibilitySwitch_hiddenStatus": {
+    "description": "Status line under a settings search result whose feature is hidden. switchLabel is the name of the visibility switch that hides it, quoted as a UI name.",
+    "placeholders": {
+      "switchLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "visibilitySwitch_hiddenStatusSeveral": "Part of hidden features: {switchLabels}",
+  "@visibilitySwitch_hiddenStatusSeveral": {
+    "description": "Status line under a settings search result whose feature is hidden by more than one visibility switch. switchLabels is the list of those switch names, e.g. \"Containers, On-device AI\", joined with the list separator.",
+    "placeholders": {
+      "switchLabels": {
+        "type": "String"
+      }
+    }
+  },
+  "visibilitySwitch_notAppliedWhileHidden": "Not applied while hidden",
+  "@visibilitySwitch_notAppliedWhileHidden": {
+    "description": "Shown in Settings under a grayed-out setting of a hidden feature whose value the user changed: while the feature is hidden, the default applies instead. The change is kept."
+  },
+  "visibilitySwitch_hideWarningTitle": "Hide {feature}?",
+  "@visibilitySwitch_hideWarningTitle": {
+    "description": "Title of the confirmation shown when the user turns off a visibility switch in Settings > Feature Control while some of its settings are changed from their defaults. {feature} is the switch name, e.g. \"More layout options\".",
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "visibilitySwitch_hideWarningContent": "{count, plural, =1{While it is hidden, these settings use their defaults. Your changes are kept and apply again when you show it.} other{While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them.}}",
+  "@visibilitySwitch_hideWarningContent": {
+    "description": "Body of the hide confirmation, above the list of changed settings: in the \"Hide {feature}?\" confirmation of Settings > Feature Control (one feature) and the \"Apply preset\" confirmation (one or more). Hidden features use their default settings; the user's changes are kept and apply again when the feature is shown. count is the number of features being hidden.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "visibilitySwitch_hideWarningConfirm": "Hide",
+  "@visibilitySwitch_hideWarningConfirm": {
+    "description": "Button of the hide confirmation that hides the feature."
+  },
+  "visibilitySwitch_stopsApplyingTitle": "Changes that stop applying",
+  "@visibilitySwitch_stopsApplyingTitle": {
+    "description": "Heading in the \"Apply preset\" confirmation, above the list of changed settings that stop applying because the preset hides their feature."
+  },
+  "visibilitySwitch_appliesAgainTitle": "Changes that apply again",
+  "@visibilitySwitch_appliesAgainTitle": {
+    "description": "Heading in the \"Apply preset\" confirmation, above the list of changed settings that apply again because the preset shows their feature."
+  },
+  "visibilitySwitch_hiddenSettingUrlCleanerAutoApply": "URL Cleaner auto-apply",
+  "@visibilitySwitch_hiddenSettingUrlCleanerAutoApply": {
+    "description": "Name of a setting in the list of changes that stop applying when a feature is hidden: whether the URL Cleaner applies cleaned links automatically instead of asking."
+  },
+  "visibilitySwitch_hiddenSettingUrlCleanerRules": "URL Cleaner rules",
+  "@visibilitySwitch_hiddenSettingUrlCleanerRules": {
+    "description": "Name of a setting in the list of changes that stop applying when a feature is hidden: where the URL Cleaner gets its rules and whether it updates them automatically."
+  },
+  "visibilitySwitch_hiddenSettingToolbarButtons": "Toolbar button fallbacks and long press",
+  "@visibilitySwitch_hiddenSettingToolbarButtons": {
+    "description": "Name of a setting in the list of changes that stop applying when a feature is hidden: what toolbar buttons show when unavailable, and what a long press on them does."
+  }
+}

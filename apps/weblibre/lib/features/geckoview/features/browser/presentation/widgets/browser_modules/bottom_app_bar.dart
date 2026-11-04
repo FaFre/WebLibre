@@ -1333,7 +1333,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
     );
     final hierarchyGlyphs = ref.watch(
       generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherHierarchyGlyphs,
+        (s) => s.effectiveQuickTabSwitcherHierarchyGlyphs,
       ),
     );
     final showHierarchicalTabs = hierarchyGlyphs > 0;

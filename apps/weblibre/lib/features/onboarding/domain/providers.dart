@@ -18,20 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/onboarding/domain/entities/onboarding_mode.dart';
 
 part 'providers.g.dart';
-
-@Riverpod()
-class OnboardingModeNotifier extends _$OnboardingModeNotifier {
-  @override
-  OnboardingMode build() => OnboardingMode.detailed;
-
-  // ignore: use_setters_to_change_properties
-  void select(OnboardingMode mode) {
-    state = mode;
-  }
-}
 
 @Riverpod()
 class EulaAcceptedNotifier extends _$EulaAcceptedNotifier {

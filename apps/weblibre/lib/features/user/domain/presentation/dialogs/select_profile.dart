@@ -25,8 +25,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_labels.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/profile_switch_handler.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
@@ -37,6 +39,13 @@ class SelectProfileDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Adding profiles is `profiles.multi`; switching between the ones that
+    // exist always stays (P5).
+    final canAddProfiles = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.profilesMulti),
+      ),
+    );
     final usersAsync = ref.watch(profileRepositoryProvider);
     final l10n = AppLocalizations.of(context);
 
@@ -83,11 +92,12 @@ class SelectProfileDialog extends HookConsumerWidget {
                         },
                       ),
                     ),
-                    _AddProfileAvatar(
-                      onTap: () async {
-                        await CreateProfileRoute().push(context);
-                      },
-                    ),
+                    if (canAddProfiles)
+                      _AddProfileAvatar(
+                        onTap: () async {
+                          await CreateProfileRoute().push(context);
+                        },
+                      ),
                   ],
                 );
               },

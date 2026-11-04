@@ -19,25 +19,28 @@
  */
 import 'dart:async';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
@@ -72,26 +75,18 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
         ),
         SettingsEntryDefinition(
           title: l10n.settings_childTabPlacementTitle,
+          feature: FeatureId.tabsChildTabCreation,
           subtitle: l10n.settings_indexChildTabPlacementSubtitle,
           keywords: settingsKeywords(l10n.settings_childTabPlacementKeywords),
+          hiddenSettings: const [HiddenSetting.childTabPlacement],
           child: const _ChildTabPlacementSection(),
         ),
         SettingsEntryDefinition(
-          title: l10n.settings_showContainerUiTitle,
-          subtitle: l10n.settings_showContainerUiSubtitle,
-          keywords: settingsKeywords(l10n.settings_showContainerUiKeywords),
-          child: const _ShowContainerUiTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_showIsolatedTabUiTitle,
-          subtitle: l10n.settings_showIsolatedTabUiSubtitle,
-          keywords: settingsKeywords(l10n.settings_showIsolatedTabUiKeywords),
-          child: const _ShowIsolatedTabUiTile(),
-        ),
-        SettingsEntryDefinition(
           title: l10n.settings_createChildTabsTitle,
+          feature: FeatureId.tabsChildTabCreation,
           subtitle: l10n.settings_indexCreateChildTabsSubtitle,
           keywords: settingsKeywords(l10n.settings_createChildTabsKeywords),
+          hiddenSettings: const [HiddenSetting.childTabs],
           child: const _CreateChildTabsTile(),
         ),
         SettingsEntryDefinition(
@@ -101,6 +96,16 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
             l10n.settings_backgroundTabBehaviorKeywords,
           ),
           child: const _BackgroundTabOpenSection(),
+        ),
+        // It suggests which container each tab belongs in, so it sits with
+        // the tab settings.
+        SettingsEntryDefinition(
+          title: l10n.settings_onDeviceAiTitle,
+          feature: FeatureId.aiLocalAi,
+          subtitle: l10n.settings_indexOnDeviceAiSubtitle,
+          keywords: settingsKeywords(l10n.settings_onDeviceAiKeywords),
+          hiddenSettings: const [HiddenSetting.localAi],
+          child: const _OnDeviceAiTile(),
         ),
       ],
     ),
@@ -129,8 +134,11 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
         ),
         SettingsEntryDefinition(
           title: l10n.settings_tabBarSwipesTitle,
+          feature: FeatureId.inputTabSwipeRemap,
           subtitle: l10n.settings_indexTabBarSwipesSubtitle,
           keywords: settingsKeywords(l10n.settings_tabBarSwipesKeywords),
+          opensScreen: true,
+          hiddenSettings: const [HiddenSetting.tabSwipes],
           child: const _TabBarSwipesLinkTile(),
         ),
         SettingsEntryDefinition(
@@ -204,8 +212,11 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
         ),
         SettingsEntryDefinition(
           title: l10n.settings_unshortenerTitle,
+          feature: FeatureId.linksUnshortener,
           subtitle: l10n.settings_unshortenerSubtitle,
           keywords: settingsKeywords(l10n.settings_unshortenerKeywords),
+          opensScreen: true,
+          hiddenSettings: const [HiddenSetting.unshortener],
           child: const _UnshortenerSettingsTile(),
         ),
       ],
@@ -248,9 +259,21 @@ class _NewTabDefaultSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final defaultCreateTabType = settings.effectiveDefaultCreateTabType;
+    final settings = ref.watch(storedGeneralSettingsProvider);
+    final defaultCreateTabType = settings.storedDefaultCreateTabType;
     final l10n = AppLocalizations.of(context);
+    // Isolated tabs hidden: the option stays, grayed out, and picking it asks
+    // to show them. Already the choice, it does not apply (regular tabs do),
+    // and the note below says so.
+    final isolatedHiddenBy = ref
+        .watch(
+          generalSettingsWithDefaultsProvider.select(
+            (s) =>
+                EquatableValue(s.hiddenSwitchesFor(FeatureId.tabsIsolatedUi)),
+          ),
+        )
+        .value;
+    final isolatedGrayed = isolatedHiddenBy.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -283,20 +306,29 @@ class _NewTabDefaultSection extends HookConsumerWidget {
                         : appColors.privateTabPurple,
                   ),
                 ),
-                if (settings.showIsolatedTabUi)
-                  ButtonSegment(
-                    value: TabType.isolated,
-                    label: Text(l10n.settings_tabTypeIsolatedLabel),
-                    icon: Icon(
+                ButtonSegment(
+                  value: TabType.isolated,
+                  label: Opacity(
+                    opacity: isolatedGrayed ? hiddenFeatureOpacity : 1,
+                    child: Text(l10n.settings_tabTypeIsolatedLabel),
+                  ),
+                  icon: Opacity(
+                    opacity: isolatedGrayed ? hiddenFeatureOpacity : 1,
+                    child: Icon(
                       MdiIcons.snowflake,
                       color: defaultCreateTabType == TabType.isolated
                           ? null
                           : appColors.isolatedTabTeal,
                     ),
                   ),
+                ),
               ],
               selected: {defaultCreateTabType},
               onSelectionChanged: (value) async {
+                if (value.first == TabType.isolated && isolatedGrayed) {
+                  await revealHiddenSwitches(context, ref, isolatedHiddenBy);
+                  return;
+                }
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
@@ -316,6 +348,7 @@ class _NewTabDefaultSection extends HookConsumerWidget {
               },
             ),
           ),
+          const NotAppliedWhileHiddenNote([HiddenSetting.newTabDefault]),
         ],
       ),
     );
@@ -328,9 +361,19 @@ class _SmallWebTabDefaultSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appColors = AppColors.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final smallWebTabType = settings.effectiveSmallWebTabType;
+    final settings = ref.watch(storedGeneralSettingsProvider);
+    final smallWebTabType = settings.smallWebTabType;
     final l10n = AppLocalizations.of(context);
+    // Like the new tab default above; private tabs apply instead.
+    final isolatedHiddenBy = ref
+        .watch(
+          generalSettingsWithDefaultsProvider.select(
+            (s) =>
+                EquatableValue(s.hiddenSwitchesFor(FeatureId.tabsIsolatedUi)),
+          ),
+        )
+        .value;
+    final isolatedGrayed = isolatedHiddenBy.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -363,20 +406,29 @@ class _SmallWebTabDefaultSection extends HookConsumerWidget {
                         : appColors.privateTabPurple,
                   ),
                 ),
-                if (settings.showIsolatedTabUi)
-                  ButtonSegment(
-                    value: TabType.isolated,
-                    label: Text(l10n.settings_tabTypeIsolatedLabel),
-                    icon: Icon(
+                ButtonSegment(
+                  value: TabType.isolated,
+                  label: Opacity(
+                    opacity: isolatedGrayed ? hiddenFeatureOpacity : 1,
+                    child: Text(l10n.settings_tabTypeIsolatedLabel),
+                  ),
+                  icon: Opacity(
+                    opacity: isolatedGrayed ? hiddenFeatureOpacity : 1,
+                    child: Icon(
                       MdiIcons.snowflake,
                       color: smallWebTabType == TabType.isolated
                           ? null
                           : appColors.isolatedTabTeal,
                     ),
                   ),
+                ),
               ],
               selected: {smallWebTabType},
               onSelectionChanged: (value) async {
+                if (value.first == TabType.isolated && isolatedGrayed) {
+                  await revealHiddenSwitches(context, ref, isolatedHiddenBy);
+                  return;
+                }
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
                     .save(
@@ -396,6 +448,7 @@ class _SmallWebTabDefaultSection extends HookConsumerWidget {
               },
             ),
           ),
+          const NotAppliedWhileHiddenNote([HiddenSetting.smallWebTabDefault]),
         ],
       ),
     );
@@ -407,7 +460,7 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGeneralSettingsProvider);
     final tabIntentOpenSetting = settings.tabIntentOpenSetting;
     final l10n = AppLocalizations.of(context);
 
@@ -426,6 +479,16 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
           RadioGroup(
             groupValue: tabIntentOpenSetting,
             onChanged: (value) async {
+              // The group also selects with the arrow keys, past the gate
+              // around a hidden option.
+              if (value == TabIntentOpenSetting.isolated &&
+                  !await mayPickHiddenOption(
+                    context,
+                    ref,
+                    FeatureId.tabsIsolatedUi,
+                  )) {
+                return;
+              }
               if (value != null) {
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
@@ -458,8 +521,11 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                     color: AppColors.of(context).privateTabPurple,
                   ),
                 ),
-                if (settings.showIsolatedTabUi)
-                  RadioListTile.adaptive(
+                HiddenFeatureGate.feature(
+                  FeatureId.tabsIsolatedUi,
+                  hiddenSettings: const [HiddenSetting.externalLinks],
+                  indicator: true,
+                  child: RadioListTile.adaptive(
                     value: TabIntentOpenSetting.isolated,
                     title: Text(l10n.settings_tabTypeIsolatedLabel),
                     subtitle: Text(l10n.settings_externalLinkIsolatedSubtitle),
@@ -468,6 +534,7 @@ class _ExternalLinkHandlingSection extends HookConsumerWidget {
                       color: AppColors.of(context).isolatedTabTeal,
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -482,8 +549,12 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final bookmarkOpenSetting = settings.effectiveBookmarkOpenSetting;
+    // The stored choice, also while isolated tabs are hidden: the gated
+    // isolated option shows it, with its note, and picking another one
+    // replaces it.
+    final bookmarkOpenSetting = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.bookmarkOpenSetting),
+    );
     final l10n = AppLocalizations.of(context);
 
     return Padding(
@@ -501,6 +572,16 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
           RadioGroup(
             groupValue: bookmarkOpenSetting,
             onChanged: (value) async {
+              // The group also selects with the arrow keys, past the gate
+              // around a hidden option.
+              if (value == BookmarkOpenSetting.isolated &&
+                  !await mayPickHiddenOption(
+                    context,
+                    ref,
+                    FeatureId.tabsIsolatedUi,
+                  )) {
+                return;
+              }
               if (value != null) {
                 await ref
                     .read(saveGeneralSettingsControllerProvider.notifier)
@@ -539,8 +620,11 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
                   subtitle: Text(l10n.settings_bookmarkOpenCustomTabSubtitle),
                   secondary: const Icon(MdiIcons.applicationOutline),
                 ),
-                if (settings.showIsolatedTabUi)
-                  RadioListTile.adaptive(
+                HiddenFeatureGate.feature(
+                  FeatureId.tabsIsolatedUi,
+                  hiddenSettings: const [HiddenSetting.bookmarkOpenBehavior],
+                  indicator: true,
+                  child: RadioListTile.adaptive(
                     value: BookmarkOpenSetting.isolated,
                     title: Text(l10n.settings_tabTypeIsolatedLabel),
                     subtitle: Text(l10n.settings_bookmarkOpenIsolatedSubtitle),
@@ -549,6 +633,7 @@ class _BookmarkOpenBehaviorSection extends HookConsumerWidget {
                       color: AppColors.of(context).isolatedTabTeal,
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -564,7 +649,7 @@ class _TabListDirectionSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final direction = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabListDirection),
+      storedGeneralSettingsProvider.select((s) => s.tabListDirection),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -618,7 +703,7 @@ class _TabBarDirectionSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final direction = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarDirection),
+      storedGeneralSettingsProvider.select((s) => s.tabBarDirection),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -672,7 +757,7 @@ class _ChildTabPlacementSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final placement = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.childTabPlacement),
+      storedGeneralSettingsProvider.select((s) => s.childTabPlacement),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -726,9 +811,7 @@ class _CreateChildTabsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final createChildTabsOption = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.createChildTabsOption,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.createChildTabsOption),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -749,108 +832,13 @@ class _CreateChildTabsTile extends HookConsumerWidget {
   }
 }
 
-class _ShowContainerUiTile extends HookConsumerWidget {
-  const _ShowContainerUiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-    );
-    final l10n = AppLocalizations.of(context);
-
-    return SwitchListTile.adaptive(
-      title: Text(l10n.settings_showContainerUiTitle),
-      subtitle: Text(l10n.settings_showContainerUiSubtitle),
-      secondary: const Icon(MdiIcons.folder),
-      value: showContainerUi,
-      onChanged: (value) async {
-        await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
-          currentSettings,
-        ) {
-          var updated = currentSettings.copyWith.showContainerUi(value);
-          if (!value &&
-              const {
-                TabBarStackingMode.containerTabs,
-                TabBarStackingMode.accordion,
-                TabBarStackingMode.twoLevel,
-                TabBarStackingMode.tabGroups,
-              }.contains(updated.tabBarStackingMode)) {
-            updated = updated.copyWith.tabBarStackingMode(
-              TabBarStackingMode.lastUsedTabs,
-            );
-          }
-          return updated;
-        });
-
-        if (!value) {
-          ref.read(selectedContainerProvider.notifier).clearContainer();
-        }
-      },
-    );
-  }
-}
-
-class _ShowIsolatedTabUiTile extends HookConsumerWidget {
-  const _ShowIsolatedTabUiTile();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final showIsolatedTabUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showIsolatedTabUi),
-    );
-    final l10n = AppLocalizations.of(context);
-
-    return SwitchListTile.adaptive(
-      title: Text(l10n.settings_showIsolatedTabUiTitle),
-      subtitle: Text(l10n.settings_showIsolatedTabUiSubtitle),
-      secondary: Icon(
-        MdiIcons.snowflake,
-        color: AppColors.of(context).isolatedTabTeal,
-      ),
-      value: showIsolatedTabUi,
-      onChanged: (value) async {
-        await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
-          currentSettings,
-        ) {
-          var updated = currentSettings.copyWith.showIsolatedTabUi(value);
-          if (!value &&
-              updated.storedDefaultCreateTabType == TabType.isolated) {
-            updated = updated.copyWith.storedDefaultCreateTabType(
-              TabType.regular,
-            );
-          }
-          if (!value &&
-              updated.tabIntentOpenSetting == TabIntentOpenSetting.isolated) {
-            updated = updated.copyWith.tabIntentOpenSetting(
-              TabIntentOpenSetting.ask,
-            );
-          }
-          if (!value && updated.smallWebTabType == TabType.isolated) {
-            updated = updated.copyWith.smallWebTabType(TabType.private);
-          }
-          if (!value &&
-              updated.bookmarkOpenSetting == BookmarkOpenSetting.isolated) {
-            updated = updated.copyWith.bookmarkOpenSetting(
-              BookmarkOpenSetting.ask,
-            );
-          }
-          return updated;
-        });
-      },
-    );
-  }
-}
-
 class _BackgroundTabOpenSection extends HookConsumerWidget {
   const _BackgroundTabOpenSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final backgroundTabOpenAction = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.backgroundTabOpenAction,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.backgroundTabOpenAction),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -924,17 +912,14 @@ class _SequentialTabNavigationSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final crossContainers = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.sequentialTabNavigationCrossContainers,
       ),
     );
     final loop = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.sequentialTabNavigationLoop,
       ),
-    );
-    final showContainerUi = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -950,8 +935,11 @@ class _SequentialTabNavigationSection extends HookConsumerWidget {
             leading: const Icon(MdiIcons.swapHorizontal),
             contentPadding: EdgeInsets.zero,
           ),
-          if (showContainerUi)
-            SwitchListTile.adaptive(
+          HiddenFeatureGate.feature(
+            FeatureId.containerCore,
+            hiddenSettings: const [HiddenSetting.sequentialTabNavigation],
+            indicator: true,
+            child: SwitchListTile.adaptive(
               title: Text(l10n.settings_continueIntoNextContainerTitle),
               subtitle: Text(l10n.settings_continueIntoNextContainerSubtitle),
               secondary: const Icon(MdiIcons.folderMultipleOutline),
@@ -966,6 +954,7 @@ class _SequentialTabNavigationSection extends HookConsumerWidget {
                     );
               },
             ),
+          ),
           SwitchListTile.adaptive(
             title: Text(l10n.settings_loopAroundTitle),
             subtitle: Text(l10n.settings_loopAroundSubtitle),
@@ -993,25 +982,21 @@ class _AppLinksModeSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appLinksMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.appLinksMode),
+      storedGeneralSettingsProvider.select((s) => s.appLinksMode),
     );
     final marketplaceFallback = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.appLinkMarketplaceFallback,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.appLinkMarketplaceFallback),
     );
     final authExceptionsEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.appLinkAuthExceptionsEnabled,
       ),
     );
     final blockWhilePrompting = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.appLinkBlockWhilePrompting,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.appLinkBlockWhilePrompting),
     );
     final rules = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.appLinkRules),
+      storedGeneralSettingsProvider.select((s) => s.appLinkRules),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1121,6 +1106,9 @@ class _AppLinksModeSection extends HookConsumerWidget {
 /// container quietly set to "always" was invisible from the screen that claims to
 /// govern app links. Listing them here says which containers are not covered by
 /// the settings above, and opens the same editor.
+///
+/// While per-container app links are hidden the settings above cover these
+/// containers too (H1): the list stays, grayed out, saying so.
 class _ContainerAppLinkOverridesSubsection extends ConsumerWidget {
   const _ContainerAppLinkOverridesSubsection();
 
@@ -1141,9 +1129,7 @@ class _ContainerAppLinkOverridesSubsection extends ConsumerWidget {
     final containers =
         ref.watch(watchContainersWithCountProvider).value ?? const [];
     final overrides = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.appLinkContextOverrides,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.appLinkContextOverrides),
     );
 
     final isolated =
@@ -1163,48 +1149,52 @@ class _ContainerAppLinkOverridesSubsection extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 16, bottom: 4),
-          child: Text(l10n.settings_appLinkContainerOverridesHeader),
-        ),
-        for (final container in isolated)
-          Builder(
-            builder: (context) {
-              final contextId = container.metadata.contextualIdentity!;
-              final policy =
-                  overrides[contextId] ?? ContextAppLinkPolicy.blank();
-              final ruleCount = policy.rules.length;
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                dense: true,
-                leading: const Icon(MdiIcons.circleOutline),
-                title: Text(_containerLabel(container, l10n)),
-                subtitle: Text(
-                  ruleCount == 0
-                      ? _modeLabel(policy.mode, l10n)
-                      : l10n.settings_appLinkOverrideSummaryWithRules(
-                          _modeLabel(policy.mode, l10n),
-                          ruleCount,
-                        ),
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => unawaited(
-                  showDialog<void>(
-                    context: context,
-                    builder: (_) => ContainerAppLinkSettingsDialog(
-                      contextId: contextId,
-                      containerName: container.name,
+    return HiddenFeatureGate.feature(
+      FeatureId.containerAppLinks,
+      hiddenSettings: const [HiddenSetting.containerAppLinks],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 16, bottom: 4),
+            child: Text(l10n.settings_appLinkContainerOverridesHeader),
+          ),
+          for (final container in isolated)
+            Builder(
+              builder: (context) {
+                final contextId = container.metadata.contextualIdentity!;
+                final policy =
+                    overrides[contextId] ?? ContextAppLinkPolicy.blank();
+                final ruleCount = policy.rules.length;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  leading: const Icon(MdiIcons.circleOutline),
+                  title: Text(_containerLabel(container, l10n)),
+                  subtitle: Text(
+                    ruleCount == 0
+                        ? _modeLabel(policy.mode, l10n)
+                        : l10n.settings_appLinkOverrideSummaryWithRules(
+                            _modeLabel(policy.mode, l10n),
+                            ruleCount,
+                          ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => unawaited(
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => ContainerAppLinkSettingsDialog(
+                        contextId: contextId,
+                        containerName: container.name,
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-      ],
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 }
@@ -1274,7 +1264,7 @@ class _GlobalDesktopModeTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final globalDesktopMode = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.globalDesktopMode),
+      storedGeneralSettingsProvider.select((s) => s.globalDesktopMode),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1320,7 +1310,7 @@ class _PullToRefreshTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pullToRefreshEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
+      storedGeneralSettingsProvider.select((s) => s.pullToRefreshEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1348,10 +1338,10 @@ class _PullToRefreshDistanceTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final pullToRefreshEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.pullToRefreshEnabled),
+      storedGeneralSettingsProvider.select((s) => s.pullToRefreshEnabled),
     );
     final distance = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.pullToRefreshTriggerDistance,
       ),
     );
@@ -1381,7 +1371,7 @@ class _CustomTabsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final customTabsEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.customTabsEnabled),
+      storedGeneralSettingsProvider.select((s) => s.customTabsEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1408,7 +1398,7 @@ class _DoubleBackCloseTabTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final doubleBackCloseTab = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.doubleBackCloseTab),
+      storedGeneralSettingsProvider.select((s) => s.doubleBackCloseTab),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1435,9 +1425,7 @@ class _AllowNonManifestPwaInstallTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allowNonManifestPwaInstall = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.allowNonManifestPwaInstall,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.allowNonManifestPwaInstall),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -1491,6 +1479,33 @@ class _UnshortenerSettingsTile extends StatelessWidget {
       trailing: const Icon(Icons.chevron_right),
       onTap: () async {
         await UnshortenerSettingsRoute().push(context);
+      },
+    );
+  }
+}
+
+class _OnDeviceAiTile extends HookConsumerWidget {
+  const _OnDeviceAiTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final enableLocalAiFeatures = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.enableLocalAiFeatures),
+    );
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_onDeviceAiTitle),
+      subtitle: Text(l10n.settings_onDeviceAiSubtitle),
+      secondary: const Icon(MdiIcons.creation),
+      value: enableLocalAiFeatures,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.enableLocalAiFeatures(value),
+            );
       },
     );
   }

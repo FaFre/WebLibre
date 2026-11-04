@@ -33,7 +33,7 @@ class DesktopModeSitesScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final desktopModeSites = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.desktopModeSites),
+      storedGeneralSettingsProvider.select((s) => s.desktopModeSites),
     );
     final l10n = AppLocalizations.of(context);
 

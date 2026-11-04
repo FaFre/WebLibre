@@ -360,7 +360,7 @@ class _SignedInTile extends ConsumerWidget {
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(l10n.common_cancel),
             ),
-            FilledButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(true),
               child: Text(l10n.account_actionSignOut),
             ),
@@ -455,7 +455,7 @@ class _ResetSyncKeyTile extends ConsumerWidget {
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l10n.common_cancel),
                 ),
-                FilledButton(
+                TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
                   child: Text(l10n.common_reset),
                 ),

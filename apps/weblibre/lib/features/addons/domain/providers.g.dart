@@ -50,7 +50,7 @@ final class AddonDetailsProvider
   }
 }
 
-String _$addonDetailsHash() => r'bbf2efff3f2f7737cf53b7856fb85aefda298751';
+String _$addonDetailsHash() => r'78f7a05a5176f124dcb1be85d6339cce8f4ad2e0';
 
 final class AddonDetailsFamily extends $Family
     with
@@ -658,7 +658,7 @@ final class AddonUpdateCheckProvider
   }
 }
 
-String _$addonUpdateCheckHash() => r'496cf9756101c9c36fa4b90f1fd92627aee92177';
+String _$addonUpdateCheckHash() => r'2b50bd2d0546bf234ad0ddd64f47f089ffe17dd1';
 
 final class AddonUpdateCheckFamily extends $Family
     with

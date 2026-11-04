@@ -207,7 +207,7 @@ class _AutocompleteProviderSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final defaultSearchSuggestionsProvider = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.defaultSearchSuggestionsProvider,
       ),
     );
@@ -322,9 +322,7 @@ class _MaxSearchHistoryEntriesSection extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final maxSearchHistoryEntries = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.maxSearchHistoryEntries,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.maxSearchHistoryEntries),
     );
 
     return Padding(
@@ -388,7 +386,7 @@ class _AllowClipboardAccessTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final allowClipboardAccess = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.allowClipboardAccess),
+      storedGeneralSettingsProvider.select((s) => s.allowClipboardAccess),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -415,9 +413,7 @@ class _AcceptSuggestionOnSubmitTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final acceptSuggestionOnSubmit = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.acceptSuggestionOnSubmit,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.acceptSuggestionOnSubmit),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -444,9 +440,7 @@ class _HistorySuggestionsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historySuggestionsEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.historySuggestionsEnabled,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.historySuggestionsEnabled),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -473,7 +467,7 @@ class _PrivateSearchSuggestionsTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final privateSearchSuggestionsEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.privateSearchSuggestionsEnabled,
       ),
     );
@@ -502,7 +496,7 @@ class _PopularSitesAutocompleteTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final popularSitesAutocompleteEnabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      storedGeneralSettingsProvider.select(
         (s) => s.popularSitesAutocompleteEnabled,
       ),
     );
@@ -531,9 +525,7 @@ class _LocalIndexEnabledTile extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final enabled = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.enableLocalSearchIndex,
-      ),
+      storedGeneralSettingsProvider.select((s) => s.enableLocalSearchIndex),
     );
     final l10n = AppLocalizations.of(context);
 
@@ -559,7 +551,7 @@ class _IndexPrivateTabsTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final settings = ref.watch(storedGeneralSettingsProvider);
     final enabled = settings.enableLocalSearchIndex;
     final indexPrivate = settings.indexPrivateTabs;
     final l10n = AppLocalizations.of(context);
@@ -600,7 +592,7 @@ class _LocalIndexStatsTile extends HookConsumerWidget {
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(l10n.common_cancel),
           ),
-          FilledButton(
+          TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: Text(l10n.common_clear),
           ),

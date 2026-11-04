@@ -64,7 +64,7 @@
     "description": "Error message when a link could not be handed to another app. url is the full web address.",
     "placeholders": { "url": { "type": "String" } }
   },
-  "uiHelper_canNotHandleScheme": "Cannot handle \"{scheme}\"",
+  "uiHelper_canNotHandleScheme": "No app can open \"{scheme}\" links",
   "@uiHelper_canNotHandleScheme": {
     "description": "Error message when a link uses a protocol no installed app can open. scheme is the protocol prefix of the link, e.g. \"tel\" or \"market\".",
     "placeholders": { "scheme": { "type": "String" } }

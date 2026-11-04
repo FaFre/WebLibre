@@ -22,6 +22,7 @@
   "keyboardShortcuts_recorderProblemAlreadyBound": "Ya es un atajo de esta acción.",
   "keyboardShortcuts_recorderTakesFromOther": "Actualmente la usa «{ownerTitle}». Al guardar, se mueve aquí.",
   "keyboardShortcuts_actionCustomize": "Personalizar",
+  "keyboardShortcuts_actionShowAll": "Mostrar todos",
   "keyboardShortcuts_actionReassign": "Reasignar",
   "keyboardShortcuts_actionRestore": "Restaurar"
 }

@@ -37,25 +37,25 @@ part of 'routes.dart';
       path: 'context_menu',
     ),
     TypedGoRoute<ContainerDraftRoute>(
-      name: 'ContainerDraftRoute',
+      name: ContainerDraftRoute.name,
       path: 'container_draft',
     ),
     TypedGoRoute<ContainerListRoute>(
-      name: 'ContainerListRoute',
+      name: ContainerListRoute.name,
       path: 'containers',
       routes: [
         TypedGoRoute<ContainerCreateRoute>(
-          name: 'ContainerCreateRoute',
+          name: ContainerCreateRoute.name,
           path: 'create/:containerData',
         ),
         TypedGoRoute<ContainerEditRoute>(
-          name: 'ContainerEditRoute',
+          name: ContainerEditRoute.name,
           path: 'edit/:containerData',
         ),
       ],
     ),
     TypedGoRoute<ContainerSelectionRoute>(
-      name: 'ContainerSelectionRoute',
+      name: ContainerSelectionRoute.name,
       path: 'select_container',
     ),
     TypedGoRoute<TabTreeRoute>(
@@ -124,24 +124,22 @@ class SearchRoute extends GoRouteData with $SearchRoute {
   }
 }
 
-bool _isContainerUiEnabled(BuildContext context) {
-  final settings = ProviderScope.containerOf(
-    context,
-    listen: false,
-  ).read(generalSettingsWithDefaultsProvider);
-
-  return settings.showContainerUi;
-}
+/// The container screens, reachable only while containers are shown. The
+/// router's top-level redirect sends them to the browser otherwise: it has
+/// the router's `ref`, where a route's own redirect would need
+/// `ProviderScope.containerOf`.
+const containerRouteNames = {
+  ContainerDraftRoute.name,
+  ContainerListRoute.name,
+  ContainerSelectionRoute.name,
+  ContainerEditRoute.name,
+  ContainerCreateRoute.name,
+};
 
 class ContainerDraftRoute extends GoRouteData with $ContainerDraftRoute {
-  const ContainerDraftRoute();
+  static const name = 'ContainerDraftRoute';
 
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return _isContainerUiEnabled(context)
-        ? null
-        : const BrowserRoute().location;
-  }
+  const ContainerDraftRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -150,14 +148,9 @@ class ContainerDraftRoute extends GoRouteData with $ContainerDraftRoute {
 }
 
 class ContainerListRoute extends GoRouteData with $ContainerListRoute {
-  const ContainerListRoute();
+  static const name = 'ContainerListRoute';
 
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return _isContainerUiEnabled(context)
-        ? null
-        : const BrowserRoute().location;
-  }
+  const ContainerListRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -167,14 +160,9 @@ class ContainerListRoute extends GoRouteData with $ContainerListRoute {
 
 class ContainerSelectionRoute extends GoRouteData
     with $ContainerSelectionRoute {
-  const ContainerSelectionRoute();
+  static const name = 'ContainerSelectionRoute';
 
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return _isContainerUiEnabled(context)
-        ? null
-        : const BrowserRoute().location;
-  }
+  const ContainerSelectionRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -183,16 +171,11 @@ class ContainerSelectionRoute extends GoRouteData
 }
 
 class ContainerEditRoute extends GoRouteData with $ContainerEditRoute {
+  static const name = 'ContainerEditRoute';
+
   final String containerData;
 
   const ContainerEditRoute({required this.containerData});
-
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return _isContainerUiEnabled(context)
-        ? null
-        : const BrowserRoute().location;
-  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -205,17 +188,12 @@ class ContainerEditRoute extends GoRouteData with $ContainerEditRoute {
 }
 
 class ContainerCreateRoute extends GoRouteData with $ContainerCreateRoute {
+  static const name = 'ContainerCreateRoute';
+
   final String containerData;
   final String tabIds;
 
   ContainerCreateRoute({required this.containerData, this.tabIds = '[]'});
-
-  @override
-  String? redirect(BuildContext context, GoRouterState state) {
-    return _isContainerUiEnabled(context)
-        ? null
-        : const BrowserRoute().location;
-  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

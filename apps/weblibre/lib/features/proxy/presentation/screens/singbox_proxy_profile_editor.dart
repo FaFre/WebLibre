@@ -18,13 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 import 'package:weblibre/core/branding/proxy_brands.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/proxy/data/forms/singbox_form_specs.dart';
 import 'package:weblibre/features/proxy/data/models/proxy_profile_seed.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/proxy_profile_draft_controller.dart';
@@ -35,8 +36,13 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/cust
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_dns_override_section.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_editor_section.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/structured_profile_form.dart';
+import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/list_format_l10n.dart';
+import 'package:weblibre/presentation/utils/visibility_switch_l10n.dart';
 import 'package:weblibre/presentation/widgets/button_spinner.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class SingboxProxyProfileEditorScreen extends ConsumerWidget {
@@ -97,6 +103,11 @@ class _Editor extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final manualConfigShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (s) => s.isFeatureShown(FeatureId.connectionsManualProxyConfig),
+      ),
+    );
 
     Future<void> handleSave() async {
       final outcome = await ref.read(draftProvider.notifier).save();
@@ -122,95 +133,133 @@ class _Editor extends ConsumerWidget {
 
     final scheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-          child: FilledButton.icon(
-            onPressed: draft.isSaving ? null : handleSave,
-            icon: draft.isSaving
-                ? const ButtonSpinner()
-                : const Icon(Icons.check),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+    // `connections.import_vpn_proxy`, grayed out while hidden; while a
+    // connection is in use everything stays usable (P5).
+    return HiddenFeatureScope(
+      feature: FeatureId.connectionsImportVpnProxy,
+      keptWhen: connectionsInUseProvider,
+      child: Scaffold(
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: HiddenFeatureGate(
+              child: FilledButton.icon(
+                onPressed: draft.isSaving ? null : handleSave,
+                icon: draft.isSaving
+                    ? const ButtonSpinner()
+                    : const Icon(Icons.check),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                label: Text(
+                  draft.isEditing
+                      ? l10n.proxy_saveChanges
+                      : l10n.proxy_createProfile,
+                ),
               ),
-            ),
-            label: Text(
-              draft.isEditing
-                  ? l10n.proxy_saveChanges
-                  : l10n.proxy_createProfile,
             ),
           ),
         ),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: FadingScroll(
-          fadingSize: 25,
-          builder: (context, controller) {
-            return CustomScrollView(
-              controller: controller,
-              slivers: [
-                SliverAppBar.large(
-                  centerTitle: false,
-                  title: Text(
-                    draft.isEditing
-                        ? l10n.proxy_editProfileTitle
-                        : l10n.proxy_newProfileTitle,
+        body: SafeArea(
+          bottom: false,
+          child: FadingScroll(
+            fadingSize: 25,
+            builder: (context, controller) {
+              return CustomScrollView(
+                controller: controller,
+                slivers: [
+                  SliverAppBar.large(
+                    centerTitle: false,
+                    title: Text(
+                      draft.isEditing
+                          ? l10n.proxy_editProfileTitle
+                          : l10n.proxy_newProfileTitle,
+                    ),
                   ),
-                ),
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate.fixed([
-                      for (final note in importNotes) ...[
-                        _ImportNoteCard(note: note),
-                        const SizedBox(height: 12),
-                      ],
-                      ProfileEditorSection(
-                        title: l10n.proxy_sectionGeneral,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _GeneralSection(
-                            draftProvider: draftProvider,
-                            draft: draft,
-                          ),
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                    sliver: SliverToBoxAdapter(
+                      child: HiddenFeatureGate(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final note in importNotes) ...[
+                              _ImportNoteCard(note: note),
+                              const SizedBox(height: 12),
+                            ],
+                            ProfileEditorSection(
+                              title: l10n.proxy_sectionGeneral,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: _GeneralSection(
+                                  draftProvider: draftProvider,
+                                  draft: draft,
+                                  // An imported draft keeps its protocol while the
+                                  // manual configuration is hidden: switching it
+                                  // would be writing a connection by hand.
+                                  importLocksProtocol:
+                                      !draft.isEditing && !manualConfigShown,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            _ProtocolForm(
+                              draftProvider: draftProvider,
+                              draft: draft,
+                            ),
+                            const SizedBox(height: 24),
+                            // `connections.dns_override` (Expert), grayed out while
+                            // hidden. An override the connection already has stays
+                            // usable, to be checked or cleared (P5).
+                            ProfileEditorSection(
+                              title: l10n.proxy_sectionDnsOverride,
+                              child: HiddenFeatureGate.feature(
+                                FeatureId.connectionsDnsOverride,
+                                inForce: draft.dnsOverrideJson != null,
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    12,
+                                    16,
+                                    16,
+                                  ),
+                                  child: ProfileDnsOverrideSection(
+                                    draftProvider: draftProvider,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            if (!draft.isEditing)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                child: Text(
+                                  l10n.proxy_addMenuTip,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ),
+                            if (draft.type ==
+                                SingboxProxyProfileType.wireguard) ...[
+                              const SizedBox(height: 12),
+                              const _WireGuardDisclaimer(),
+                            ],
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      _ProtocolForm(draftProvider: draftProvider, draft: draft),
-                      const SizedBox(height: 24),
-                      ProfileEditorSection(
-                        title: l10n.proxy_sectionDnsOverride,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-                          child: ProfileDnsOverrideSection(
-                            draftProvider: draftProvider,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      if (!draft.isEditing)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            l10n.proxy_addMenuTip,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: scheme.onSurfaceVariant),
-                          ),
-                        ),
-                      if (draft.type == SingboxProxyProfileType.wireguard) ...[
-                        const SizedBox(height: 12),
-                        const _WireGuardDisclaimer(),
-                      ],
-                    ]),
+                    ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -240,11 +289,32 @@ class _GeneralSection extends HookConsumerWidget {
   final ProxyProfileDraftProvider draftProvider;
   final ProxyProfileDraftState draft;
 
-  const _GeneralSection({required this.draftProvider, required this.draft});
+  /// Whether the protocol of a new, imported draft is fixed: while the
+  /// manual configuration is hidden (`connections.manual_proxy_config`).
+  final bool importLocksProtocol;
+
+  const _GeneralSection({
+    required this.draftProvider,
+    required this.draft,
+    required this.importLocksProtocol,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // What to show for manual setup, named in the locked protocol's help.
+    final manualConfigHiddenSwitches = ref
+        .watch(
+          generalSettingsWithDefaultsProvider.select(
+            (s) => EquatableValue(
+              s.hiddenSwitchesFor(FeatureId.connectionsManualProxyConfig),
+            ),
+          ),
+        )
+        .value;
+    final manualConfigHiddenBy = importLocksProtocol
+        ? manualConfigHiddenSwitches
+        : const <VisibilitySwitch>[];
     final nameController = useTextEditingController(text: draft.name);
     useEffect(() {
       if (nameController.text != draft.name) {
@@ -266,7 +336,7 @@ class _GeneralSection extends HookConsumerWidget {
           onChanged: ref.read(draftProvider.notifier).setName,
         ),
         const SizedBox(height: 16),
-        if (draft.isEditing)
+        if (draft.isEditing || importLocksProtocol)
           // Protocol is locked after creation: each type stores a different
           // config/secret JSON shape, so switching mid-edit would silently
           // rewrite the profile under a foreign schema. To change protocol,
@@ -275,7 +345,14 @@ class _GeneralSection extends HookConsumerWidget {
             decoration: InputDecoration(
               labelText: l10n.proxy_fieldProtocol,
               border: const OutlineInputBorder(),
-              helperText: l10n.proxy_protocolFixedHelper,
+              helperText: draft.isEditing
+                  ? l10n.proxy_protocolFixedHelper
+                  : l10n.proxy_protocolFromImportHelper(
+                      formatList(
+                        l10n,
+                        manualConfigHiddenBy.map((s) => s.label(context)),
+                      ),
+                    ),
             ),
             child: Text(draft.type.label(context)),
           )
