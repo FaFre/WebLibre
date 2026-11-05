@@ -112,7 +112,12 @@ class WebExtensionPromptFeature(
             promptRequest = promptRequest,
             permissions = promptRequest.permissions,
             origins = promptRequest.origins,
-            dataCollectionPermissions = promptRequest.dataCollectionPermissions,
+            // AC's dialog turns this optional permission into an opt-out box
+            // that starts ticked. Left out, the dialog lists only the data the
+            // add-on requires, and the install declines it (see
+            // [handlePermissions]).
+            dataCollectionPermissions = promptRequest.dataCollectionPermissions
+                .filter { it != TECHNICAL_AND_INTERACTION_DATA },
         )
     }
 
@@ -131,7 +136,6 @@ class WebExtensionPromptFeature(
                 promptRequest = promptRequest,
                 granted = true,
                 privateBrowsingAllowed = false,
-                technicalAndInteractionDataGranted = false,
             )
             return
         }
@@ -188,12 +192,11 @@ class WebExtensionPromptFeature(
                 origins = origins,
                 dataCollectionPermissions = dataCollectionPermissions,
                 forOptionalPermissions = forOptionalPermissions,
-                onPositiveButtonClicked = { _, privateBrowsingAllowed, technicalAndInteractionDataGranted ->
+                onPositiveButtonClicked = { _, privateBrowsingAllowed, _ ->
                     handlePermissions(
                         promptRequest,
                         granted = true,
                         privateBrowsingAllowed = privateBrowsingAllowed,
-                        technicalAndInteractionDataGranted = technicalAndInteractionDataGranted,
                     )
                 },
                 onNegativeButtonClicked = {
@@ -201,7 +204,6 @@ class WebExtensionPromptFeature(
                         promptRequest = promptRequest,
                         granted = false,
                         privateBrowsingAllowed = false,
-                        technicalAndInteractionDataGranted = false,
                     )
                 },
             )
@@ -214,7 +216,7 @@ class WebExtensionPromptFeature(
 
     private fun tryToReAttachButtonHandlersToPreviousDialog() {
         findPreviousDialogFragment()?.let { dialog ->
-            dialog.onPositiveButtonClicked = { addon, privateBrowsingAllowed, technicalAndInteractionDataGranted ->
+            dialog.onPositiveButtonClicked = { addon, privateBrowsingAllowed, _ ->
                 store.state.webExtensionPromptRequest?.let { promptRequest ->
                     if (promptRequest is WebExtensionPromptRequest.AfterInstallation.Permissions &&
                         addon.id == promptRequest.extension.id
@@ -223,7 +225,6 @@ class WebExtensionPromptFeature(
                             promptRequest,
                             granted = true,
                             privateBrowsingAllowed = privateBrowsingAllowed,
-                            technicalAndInteractionDataGranted = technicalAndInteractionDataGranted,
                         )
                     }
                 }
@@ -235,7 +236,6 @@ class WebExtensionPromptFeature(
                             promptRequest,
                             granted = false,
                             privateBrowsingAllowed = false,
-                            technicalAndInteractionDataGranted = false,
                         )
                     }
                 }
@@ -255,11 +255,17 @@ class WebExtensionPromptFeature(
         }
     }
 
+    /**
+     * Answers a permission prompt. The optional technical and interaction data
+     * consent is always declined at install: Mozilla's prompt grants it unless
+     * the user opts out, and WebLibre asks for opt-in instead. An add-on that
+     * wants it can still ask at runtime (`permissions.request`), which shows the
+     * optional prompt where the user allows it explicitly.
+     */
     private fun handlePermissions(
         promptRequest: WebExtensionPromptRequest.AfterInstallation.Permissions,
         granted: Boolean,
         privateBrowsingAllowed: Boolean,
-        technicalAndInteractionDataGranted: Boolean,
     ) {
         when (promptRequest) {
             is WebExtensionPromptRequest.AfterInstallation.Permissions.Optional -> {
@@ -270,7 +276,7 @@ class WebExtensionPromptFeature(
                 val response = PermissionPromptResponse(
                     isPermissionsGranted = granted,
                     isPrivateModeGranted = privateBrowsingAllowed,
-                    isTechnicalAndInteractionDataGranted = technicalAndInteractionDataGranted,
+                    isTechnicalAndInteractionDataGranted = false,
                 )
                 promptRequest.onConfirm(response)
             }
@@ -402,6 +408,8 @@ class WebExtensionPromptFeature(
     }
 
     companion object {
+        /** The one optional data-collection permission, granted only on request. */
+        private const val TECHNICAL_AND_INTERACTION_DATA = "technicalAndInteraction"
         private const val PERMISSIONS_DIALOG_FRAGMENT_TAG = "ADDONS_PERMISSIONS_DIALOG_FRAGMENT"
         private const val POST_INSTALLATION_DIALOG_FRAGMENT_TAG =
             "ADDONS_INSTALLATION_DIALOG_FRAGMENT"
