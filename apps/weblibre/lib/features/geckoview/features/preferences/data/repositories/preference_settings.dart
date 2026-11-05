@@ -22,6 +22,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -36,7 +37,7 @@ part 'preference_settings.g.dart';
 
 const _preferenceMigrationVersionKey = 'preferenceMigrationVersion';
 const _preferenceMigrationPartitionKey = 'preferenceMigration';
-const _preferenceMigrationSchemaVersion = 3;
+const _preferenceMigrationSchemaVersion = 4;
 const _mainProcessDisableJitPref =
     'javascript.options.main_process_disable_jit';
 
@@ -55,6 +56,56 @@ const _retiredPrefs = [
   'browser.sessionstore.privacy_level',
 ];
 
+/// Preferences nothing in Gecko 159 reads any more, dropped from
+/// `settings.json` together. Same reasoning as [_retiredPrefs]; a separate
+/// list because that step has already run on existing profiles.
+const _retiredGecko159Prefs = [
+  // SpiderMonkey removed asm.js; the pref has no reader.
+  'javascript.options.asmjs',
+  // The network predictor was removed from necko.
+  'network.predictor.enabled',
+  // No reader left in Gecko 159.
+  'privacy.partition.network_state.ocsp_cache',
+  'privacy.partition.network_state.ocsp_cache.pbmode',
+  'dom.private-attribution.submission.enabled',
+  'network.trr.confirmation_telemetry_enabled',
+  'extensions.telemetry.EnvironmentAddonBuilder',
+  'toolkit.coverage.enabled',
+  'toolkit.coverage.endpoint.base',
+  'toolkit.telemetry.collectInterval',
+  'toolkit.telemetry.dap_enabled',
+  'toolkit.telemetry.dap_task1_enabled',
+  'toolkit.telemetry.dap_task1_taskid',
+  'toolkit.telemetry.dap_visit_counting_enabled',
+  'toolkit.telemetry.dap_visit_counting_experiment_list',
+  // Read only by desktop Firefox, Fenix or Marionette, never by GeckoView.
+  'browser.crashReports.crashPull',
+  'browser.tabs.crashReporting.sendReport',
+  'general.useragent.updates.enabled',
+  // Linux GIO only.
+  'network.gio.supported-protocols',
+];
+
+/// Preferences we set and now leave at Gecko's default on purpose.
+const _restoredGeckoDefaults = [
+  // We set it to false to keep add-ons from being granted the optional
+  // technical and interaction data consent. Turned off, Gecko skips the
+  // data-collection checks altogether, so `permissions.contains()` answers
+  // true for that consent. Kept on, the install prompt
+  // (`WebExtensionPromptFeature`) declines it instead.
+  'extensions.dataCollectionPermissions.enabled',
+];
+
+/// Every preference a migration resets because `settings.json` dropped it.
+/// A test keeps them out of `settings.json`: bringing one back takes a new
+/// migration step, not just the entry, or it would reach new profiles only.
+@visibleForTesting
+const retiredPreferences = [
+  ..._retiredPrefs,
+  ..._retiredGecko159Prefs,
+  ..._restoredGeckoDefaults,
+];
+
 @Riverpod(keepAlive: true)
 class StartupPreferenceEnforcementService
     extends _$StartupPreferenceEnforcementService {
@@ -66,6 +117,10 @@ class StartupPreferenceEnforcementService
       0: () => _prefManager.resetPrefs([_mainProcessDisableJitPref]),
       1: _removeFxaProfileDomainFromLocalDnsBlocks,
       2: () => _prefManager.resetPrefs(_retiredPrefs),
+      3: () => _prefManager.resetPrefs([
+        ..._retiredGecko159Prefs,
+        ..._restoredGeckoDefaults,
+      ]),
     },
   );
 

@@ -189,11 +189,6 @@
                     "title": "Disable CAPTCHA detection logging",
                     "enforceOnStartup": true
                 },
-                "extensions.dataCollectionPermissions.enabled": {
-                    "value": false,
-                    "title": "Disable extension data collection",
-                    "locked": true
-                },
                 "extensions.gleanPingAddons.daily.interval": {
                     "value": 2147483647,
                     "title": "Disable add-on daily Glean scheduler",
@@ -216,17 +211,6 @@
                     "value": false,
                     "title": "Disable add-on update testing telemetry",
                     "locked": true,
-                    "enforceOnStartup": true
-                },
-                "extensions.telemetry.EnvironmentAddonBuilder": {
-                    "value": false,
-                    "title": "Disable add-on environment telemetry builder",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "network.trr.confirmation_telemetry_enabled": {
-                    "value": false,
-                    "title": "Disable DoH confirmation telemetry",
                     "enforceOnStartup": true
                 },
                 "network.traffic_analyzer.enabled": {
@@ -272,18 +256,6 @@
                     "locked": true,
                     "enforceOnStartup": true
                 },
-                "toolkit.coverage.enabled": {
-                    "value": false,
-                    "title": "Disable coverage ping",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "toolkit.coverage.endpoint.base": {
-                    "value": "",
-                    "title": "Clear coverage endpoint",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
                 "toolkit.telemetry.bhrPing.enabled": {
                     "value": false,
                     "title": "Disable background hang report ping",
@@ -294,19 +266,6 @@
                 "toolkit.telemetry.cachedProfileGroupID": {
                     "value": "decafdec-afde-cafd-ecaf-decafdecafde",
                     "title": "Spoof telemetry profile group ID",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "toolkit.telemetry.collectInterval": {
-                    "value": 2147483647,
-                    "title": "Disable telemetry collection interval",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "toolkit.telemetry.dap_enabled": {
-                    "value": false,
-                    "title": "Disable Distributed Aggregation Protocol",
-                    "description": "Prevents DAP-based telemetry collection",
                     "locked": true,
                     "enforceOnStartup": true
                 },
@@ -337,30 +296,6 @@
                 "toolkit.telemetry.dap.logLevel": {
                     "value": "Off",
                     "title": "Disable DAP logging",
-                    "enforceOnStartup": true
-                },
-                "toolkit.telemetry.dap_task1_enabled": {
-                    "value": false,
-                    "title": "Disable DAP task 1",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "toolkit.telemetry.dap_task1_taskid": {
-                    "value": "",
-                    "title": "Clear DAP task 1 identifier",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "toolkit.telemetry.dap_visit_counting_enabled": {
-                    "value": false,
-                    "title": "Disable DAP visit counting",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
-                "toolkit.telemetry.dap_visit_counting_experiment_list": {
-                    "value": "[]",
-                    "title": "Clear DAP visit-counting experiments",
-                    "locked": true,
                     "enforceOnStartup": true
                 },
                 "toolkit.telemetry.debugSlowSql": {
@@ -576,13 +511,6 @@
                     "locked": true,
                     "enforceOnStartup": true
                 },
-                "browser.crashReports.crashPull": {
-                    "value": false,
-                    "title": "Disable remote crash report requests",
-                    "description": "Prevents remote settings from requesting background-process crash reports",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
                 "browser.crashReports.onDemand": {
                     "value": false,
                     "title": "Disable on-demand crash report requests",
@@ -594,11 +522,6 @@
                     "title": "Never prompt for background crash reports",
                     "locked": true,
                     "enforceOnStartup": true
-                },
-                "browser.tabs.crashReporting.sendReport": {
-                    "value": false,
-                    "title": "Disable crashed-tab report sending",
-                    "locked": true
                 },
                 "browser.crashReports.unsubmittedCheck.autoSubmit2": {
                     "value": false,
@@ -636,12 +559,6 @@
                 "network.dns.disablePrefetchFromHTTPS": {
                     "value": true,
                     "title": "Disable HTTPS DNS prefetching"
-                },
-                "network.predictor.enabled": {
-                    "value": false,
-                    "title": "Disable prefetching predictor",
-                    "locked": true,
-                    "enforceOnStartup": true
                 },
                 "network.http.speculative-parallel-limit": {
                     "value": 0,
@@ -704,10 +621,6 @@
                     "title": "Disable using UNC (Uniform Naming Convention) paths",
                     "description": "Warning: Can break extensions for profiles on network shares",
                     "requireUserOptIn": true
-                },
-                "network.gio.supported-protocols": {
-                    "value": "",
-                    "title": "Disable GIO as a potential proxy bypass vector"
                 },
                 "network.dns.localDomains": {
                     "value": "250analytics.com,a.omappapi.com,activity-stream-icons.services.mozilla.com,ads.allizom.org,ads.mozilla.org,ads.nonprod.webservices.mozgcp.net,ads.prod.webservices.mozgcp.net,ads-img.mozilla.org,analytics.getpocket.com,analytics.google.com,analytics.withgoogle.com,anf1.fuzzing.mozilla.org,anonymco.com,api.divviup.org,asan-nightly-frontend-elb-1348905149.us-east-2.elb.amazonaws.com,braze.com,contile.services.mozilla.com,contile-images.services.mozilla.com,classify-client.nonprod.webservices.mozgcp.net,classify-client.prod.webservices.mozgcp.net,classify-client.services.mozilla.com,crash-reports.allizom.org,crash-reports.mozilla.com,crash-reports-xpsp2.mozilla.com,crash-stacks.mozilla.com,crash-stats.allizom.org,crash-stats.mozilla.com,crash-stats.mozilla.org,dap.services.mozilla.com,dap.nonprod.webservices.mozgcp.net,dap.prod.webservices.mozgcp.net,dap-09-3.api.divviup.org,data.mozilla.com,data-ingestion.prod.dataops.mozgcp.net,dataops.mozgcp.net,dataservices.mozgcp.net,debug-ping-preview.firebaseapp.com,discovery.addons.allizom.org,discovery.addons.mozilla.org,discovery.addons-dev.allizom.org,divviup.org,download-stats.mozilla.org,download-stats.r53-2.services.mozilla.com,experimenter.services.mozilla.com,experimenter.nonprod.webservices.mozgcp.net,experimenter.prod.webservices.mozgcp.net,fhr.data.mozilla.com,fhr.r53-2.services.mozilla.com,firefox-android-home-recommendations.getpocket.com,firefox-dns-perf-test.net,fuzzing.mozilla.org,google-analytics.com,google-analytics-cn.com,googleanalytics.com,googlesyndication.com,googlesyndication-cn.com,googletagmanager.com,googletagmanager-cn.com,googletagservices.com,googletagservices-cn.com,improving.duckduckgo.com,incoming.glean.example.com,incoming.telemetry.mozilla.org,incoming.thunderbird.net,incoming-telemetry.thunderbird.net,ingestion-edge.prod.dataops.mozgcp.net,location.services.mozilla.com,locprod1-elb-eu-west-1.prod.mozaws.net,locprod2-elb-us-west-2.prod.mozaws.net,metrics-content.duckduckgo.com,new-sentry.gitlab.net,nonprod.classify-client.nonprod.webservices.mozgcp.net,normandy.cdn.mozilla.net,normandy.nonprod.cloudops.mozgcp.net,normandy.prod.cloudops.mozgcp.net,normandy-cdn.services.mozilla.com,omappapi.com,pipeline-incoming-prod-elb-149169523.us-west-2.elb.amazonaws.com,prod.ads.prod.webservices.mozgcp.net,prod.classify-client.prod.webservices.mozgcp.net,prod.dap.prod.webservices.mozgcp.net,prod.data-ingestion.prod.dataops.mozgcp.net,prod.dataops.mozgcp.net,prod.experimenter.prod.webservices.mozgcp.net,prod.ingestion-edge.prod.dataops.mozgcp.net,prod.sentry.prod.cloudops.mozgcp.net,prod-classifyclient.normandy.prod.cloudops.mozgcp.net,sdk.iad-05.braze.com,search.r53-2.services.mozilla.com,search.services.mozilla.com,self-repair.mozilla.org,self-repair.r53-2.services.mozilla.com,sentry.gitlab.net,sentry.io,sentry.nonprod.cloudops.mozgcp.net,sentry.prod.cloudops.mozgcp.net,sentry.prod.mozaws.net,sitereview.zscaler.com,snippets.allizom.org,snippets.cdn.mozilla.net,snippets.mozilla.com,snippets-prod.frankfurt.moz.works,snippets-prod.moz.works,snippets-prod.oregon-b.moz.works,snippets-stage.moz.works,snippets-stage.oregon-b.moz.works,snowplow.trx.gitlab.net,snowplowalb-1011729428.us-east-1.elb.amazonaws.com,snowplowprd.trx.gitlab.net,snowplowprdnlb-1490493263.us-east-2.elb.amazonaws.com,socorro.nonprod.webservices.mozgcp.net,socorro.prod.webservices.mozgcp.net,socorro-collector.services.mozilla.com,socorro-webapp-allizom.stage.mozaws.net,socorro-webapp.services.mozilla.com,spocs.getpocket.com,spocs.getpocket.dev,spocs.mozilla.net,ssl.google-analytics.com,ssl-google-analytics.l.google.com,stage.sentry.nonprod.cloudops.mozgcp.net,start.fedoraproject.org,start.thunderbird.net,start.ubuntu.com,start-stage.thunderbird.net,survey.mozilla.com,tagmanager.google.com,talkback.mozilla.org,talkback-public.mozilla.org,talkback-reports.mozilla.org,telemetry-coverage.mozilla.org,telemetry-coverage.r53-2.services.mozilla.com,telemetry-experiment.cdn.mozilla.net,telemetry-incoming.r53-2.services.mozilla.com,telemetry-incoming-a.r53-2.services.mozilla.com,telemetry-incoming-b.r53-2.services.mozilla.com,telemetry-prod-1054754349.us-east-1.elb.amazonaws.com,tiles-cdn.prod.ads.prod.webservices.mozgcp.net,updates.thunderbird.net,updates-stage.thunderbird.net,use-application-dns.net,vf.startpage.com,widgets.getpocket.com,www.250analytics.com,www.anonymco.com,www.google-analytics.com,www.google-analytics-cn.com,www.googleanalytics.com,www.googlesyndication.com,www.googlesyndication-cn.com,www.googletagmanager.com,www.googletagmanager-cn.com,www.googletagservices.com,www.googletagservices-cn.com,www.sentry.io,www-google-analytics.l.google.com,www-googletagmanager.l.google.com",
@@ -867,18 +780,6 @@
                     "title": "Enforce strict referrer policy on top-level navigation",
                     "enforceOnStartup": true
                 },
-                "general.useragent.updates.enabled": {
-                    "value": false,
-                    "title": "Disable User-Agent string updates",
-                    "description": "Prevents the browser from automatically updating its User-Agent identifier"
-                },
-                "dom.private-attribution.submission.enabled": {
-                    "value": false,
-                    "title": "Disable Privacy-Preserving Attribution",
-                    "description": "Mozilla's ad measurement API that allows privacy-preserving conversion tracking",
-                    "locked": true,
-                    "enforceOnStartup": true
-                },
                 "privacy.trackingprotection.enabled": {
                     "value": true,
                     "title": "Enable Tracking Protection"
@@ -953,16 +854,6 @@
                     "title": "Reduce timer precision",
                     "enforceOnStartup": true,
                     "locked": true
-                },
-                "privacy.partition.network_state.ocsp_cache": {
-                    "value": true,
-                    "title": "Partition the OCSP cache",
-                    "enforceOnStartup": true
-                },
-                "privacy.partition.network_state.ocsp_cache.pbmode": {
-                    "value": true,
-                    "title": "Partition the OCSP cache in Private Browsing",
-                    "enforceOnStartup": true
                 },
                 "gfx.bundled-fonts.activate": {
                     "value": 1,
@@ -1100,11 +991,6 @@
                     "value": false,
                     "title": "Disable JIT for privileged code"
                 },
-                "javascript.options.asmjs": {
-                    "value": false,
-                    "title": "Disable asm.js",
-                    "locked": true
-                },
                 "accessibility.force_disabled": {
                     "value": 1,
                     "title": "Disable accessibility service integration",
@@ -1188,7 +1074,7 @@
                 "geo.provider.network.url": {
                     "value": "https://api.beacondb.net/v1/geolocate",
                     "title": "Use BeaconDB for network geolocation",
-                    "description": "Replaces Google's geolocation service with the privacy-respecting BeaconDB"
+                    "description": "Only used by Gecko's network location provider. GeckoView on Android currently takes every location from the Android system instead"
                 },
                 "browser.region.network.url": {
                     "value": "",

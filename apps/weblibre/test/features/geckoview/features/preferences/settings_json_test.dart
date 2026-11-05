@@ -22,14 +22,17 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/models/preference_setting.dart';
+import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
 
 Future<Map<String, PreferenceSettingGroup>> _load(
   PreferencePartition partition,
 ) async {
-  final content = jsonDecode(
-    await rootBundle.loadString('assets/preferences/settings.json'),
-  ) as Map<String, dynamic>;
+  final content =
+      jsonDecode(
+            await rootBundle.loadString('assets/preferences/settings.json'),
+          )
+          as Map<String, dynamic>;
   return deserializePreferenceSettingGroups(partition, content);
 }
 
@@ -62,5 +65,14 @@ void main() {
     final system = _names(await _load(PreferencePartition.system));
 
     expect(user.intersection(system), isEmpty);
+  });
+
+  test('retired preferences stay out', () async {
+    final all = {
+      ..._names(await _load(PreferencePartition.user)),
+      ..._names(await _load(PreferencePartition.system)),
+    };
+
+    expect(all.intersection(retiredPreferences.toSet()), isEmpty);
   });
 }
