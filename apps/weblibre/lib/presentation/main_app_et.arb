@@ -1,0 +1,103 @@
+{
+    "mainApp_initializationErrorTitle": "Valmenduse viga",
+    "@mainApp_initializationErrorTitle": {
+        "description": "Title bar of the error screen shown when the app fails to start."
+    },
+    "mainApp_initializationErrorMessage": "Rakenduse tööks valmendamine ei õnnestunud",
+    "@mainApp_initializationErrorMessage": {
+        "description": "Heading on the error screen shown when the app fails to start; technical error details and a Retry button follow."
+    },
+    "mainApp_initStageLoadingFormats": "Laadin vorminguid…",
+    "@mainApp_initStageLoadingFormats": {
+        "description": "Startup progress line under the spinner: loading date and number formats."
+    },
+    "mainApp_initStageLoadingPackageInfo": "Laadin rakenduse teavet…",
+    "@mainApp_initStageLoadingPackageInfo": {
+        "description": "Startup progress line under the spinner: reading the app's version information."
+    },
+    "mainApp_initStageSyncingBangs": "Sünkroonin otsingute lühikäske…",
+    "@mainApp_initStageSyncingBangs": {
+        "description": "Startup progress line under the spinner: importing the bundled bang shortcuts (search shortcuts such as !w)."
+    },
+    "mainApp_downloadCompleted": "Allalaadimine on lõppenud",
+    "@mainApp_downloadCompleted": {
+        "description": "Short message shown at the bottom of the screen when a file download finishes, next to an Open button."
+    },
+    "mainApp_downloadOpenFailed": "Allalaaditud faili avamine ei õnnestunud",
+    "@mainApp_downloadOpenFailed": {
+        "description": "Error message when the user taps Open on a finished download and no app can open the file."
+    },
+    "mainApp_downloadFailed": "Allalaadimine ei õnnestunud: {name}",
+    "@mainApp_downloadFailed": {
+        "description": "Error message when a file download fails. name is the file name, or the download URL when the name is unknown.",
+        "placeholders": {
+            "name": {
+                "type": "String"
+            }
+        }
+    },
+    "mainApp_containerBlockedWithHost": "{host} pole konteineriga seotud",
+    "@mainApp_containerBlockedWithHost": {
+        "description": "Message when a page was blocked from loading in the current container because the site is assigned to a different container (a container is a separate browsing identity). host is the website domain, e.g. example.com.",
+        "placeholders": {
+            "host": {
+                "type": "String"
+            }
+        }
+    },
+    "mainApp_containerBlockedNoHost": "See sait pole antud konteineriga seotud",
+    "@mainApp_containerBlockedNoHost": {
+        "description": "Message when a page was blocked from loading in the current container because the site is assigned to a different container. Used when the domain cannot be determined."
+    },
+    "mainApp_syncFailed": "Sünkroonimine ei õnnestunud",
+    "@mainApp_syncFailed": {
+        "description": "Error message when Firefox Sync of bookmarks, history or tabs fails and no more specific error is available."
+    },
+    "mainApp_sandboxDetailUnknownError": "tundmatu viga",
+    "@mainApp_sandboxDetailUnknownError": {
+        "description": "Fallback reason inserted into page-capture error messages (\"Capture failed: {detail}\") when the server gave no reason. Lowercase fragment, not a sentence."
+    },
+    "mainApp_sandboxCaptureFailed": "Hõive ei õnnestunud: {detail}",
+    "@mainApp_sandboxCaptureFailed": {
+        "description": "Error message when the server failed to capture a web page for a privacy-preserving preview. detail is the reason given by the server (may be English) or the fragment \"unknown error\".",
+        "placeholders": {
+            "detail": {
+                "type": "String"
+            }
+        }
+    },
+    "mainApp_sandboxDetailNotAllowed": "pole lubatud",
+    "@mainApp_sandboxDetailNotAllowed": {
+        "description": "Fallback reason inserted into \"Capture blocked by fetch policy: {detail}\" when the server gave no reason. Lowercase fragment, not a sentence."
+    },
+    "mainApp_sandboxDownloadFailed": "Hõive tulemuse allalaadimine ei õnnestunud.",
+    "@mainApp_sandboxDownloadFailed": {
+        "description": "Error message when a web page was captured on the server for a privacy-preserving preview but the result could not be downloaded to the device."
+    },
+    "mainApp_sandboxTokenIssuanceFailed": "Uute otsingu tunnuslubade väljastamine ei õnnestunud. Palun kontrolli, kas sinu seadme internetiühendus toimib ja proovi siis uuesti.",
+    "@mainApp_sandboxTokenIssuanceFailed": {
+        "description": "Error message when the app could not obtain new anonymous search tokens from the server for a privacy-preserving page capture."
+    },
+    "mainApp_sandboxFetchPolicyRejected": "Hõive on blokeeritud laadimisreeglite alusel: {detail}",
+    "@mainApp_sandboxFetchPolicyRejected": {
+        "description": "Error message when a privacy-preserving page capture was refused by the server's rules for which pages may be fetched. detail is the reason given by the server (may be English) or the fragment \"not allowed\".",
+        "placeholders": {
+            "detail": {
+                "type": "String"
+            }
+        }
+    },
+    "mainApp_sandboxUnknownError": "Hõive viga aedikkäituses: {detail}",
+    "@mainApp_sandboxUnknownError": {
+        "description": "Error message for an unexpected failure of a privacy-preserving page capture. detail is the reason given by the server (may be English) or the fragment \"unknown error\".",
+        "placeholders": {
+            "detail": {
+                "type": "String"
+            }
+        }
+    },
+    "mainApp_sandboxNoCredits": "Sul pole enam otsingulube alles. Jätkamiseks osta neid juurde.",
+    "@mainApp_sandboxNoCredits": {
+        "description": "Error message when a privacy-preserving page capture from a web search cannot run because the user's prepaid search credits are used up."
+    }
+}
