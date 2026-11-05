@@ -46,7 +46,7 @@ const setupCommitJournalKey = 'SetupCommitJournal';
 /// writes, each with its own checkpoint.
 ///
 /// Only the commit schedules them. Nothing else ever installs uBlock Origin,
-/// so an opt-out in Customize, or removing it afterwards, is final (acceptance
+/// so an opt-out in the onboarding, or removing it afterwards, is final (acceptance
 /// scenario 9): a removal also drops an install still waiting for its retry
 /// ([SetupStepRunner.uBlockRemoved]).
 enum SetupStep {
@@ -216,7 +216,7 @@ class SetupStepRunner extends _$SetupStepRunner {
           await _drop({step});
         case SetupStepOutcome.declined:
           // The user said no (the add-on permission prompt): final, like an
-          // opt-out in Customize. Dropped with the steps that need it, and not
+          // opt-out in the onboarding. Dropped with the steps that need it, and not
           // reported, or every start would ask again.
           final dropped = {step, ..._dependents(step)};
           remaining = remaining.difference(dropped);

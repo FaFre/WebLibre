@@ -68,7 +68,7 @@ final class NoSettingPresetBinding extends PresetBinding {
   final String reason;
 }
 
-/// Handled by a dedicated part of the onboarding draft: a Basics answer, the
+/// Handled by a dedicated part of the onboarding draft: an answer, the
 /// hardening baseline, an external step, a module layout or a visibility
 /// switch.
 final class DraftPresetBinding extends PresetBinding {
@@ -78,8 +78,8 @@ final class DraftPresetBinding extends PresetBinding {
 }
 
 enum DraftPart {
-  /// Asked in Basics (`user_choice`).
-  basics,
+  /// Asked in the onboarding's Search and Layout steps (`user_choice`).
+  answers,
 
   /// The engine hardening preference groups.
   hardeningBaseline,
@@ -110,7 +110,7 @@ bool _enabled(FeatureId feature, PolicyToken token) => switch (token) {
 final Map<FeatureId, PresetBinding> presetBindings = {
   FeatureId.coreBrowsing: const NoSettingPresetBinding('always active'),
   FeatureId.coreTabs: const NoSettingPresetBinding('always active'),
-  FeatureId.searchDefaultProvider: const DraftPresetBinding(DraftPart.basics),
+  FeatureId.searchDefaultProvider: const DraftPresetBinding(DraftPart.answers),
   FeatureId.searchLocalResults: CodeDefaultPresetBinding(
     (token) =>
         GeneralSettings.withDefaults().enableLocalSearchIndex ==
@@ -125,7 +125,7 @@ final Map<FeatureId, PresetBinding> presetBindings = {
     },
   ),
   FeatureId.homeLayoutNewTab: const DraftPresetBinding(DraftPart.moduleLayout),
-  FeatureId.layoutBasic: const DraftPresetBinding(DraftPart.basics),
+  FeatureId.layoutBasic: const DraftPresetBinding(DraftPart.answers),
   FeatureId.inputKeyboardShortcuts: CodeDefaultPresetBinding(
     // KeyboardShortcutSettings.enabled defaults to true; checked by the test
     // against the model, which lives in another feature.

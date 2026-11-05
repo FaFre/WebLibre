@@ -6043,15 +6043,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_updateNoticeBody =>
-      'This update includes significant changes that require you to review your settings. Please go through the following pages to check your configuration.';
+      'This update changes a lot. The next pages walk you through your settings.';
 
   @override
   String get onboarding_updateNoticeExtensions =>
-      'Please re-check your extensions after this update due to known migration issues.';
+      'Some extensions may need a second look after this update.';
 
   @override
   String get onboarding_updateNoticeSettingsPreserved =>
-      'Your existing settings will not be overridden unless you explicitly change them during this setup.';
+      'Your settings stay as they are unless you change them here.';
 
   @override
   String get onboarding_eulaAcceptance =>
@@ -6092,7 +6092,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboarding_searchDefaultProviderLabel => 'Search engine';
 
   @override
-  String get onboarding_searchMore => 'Search more';
+  String get onboarding_searchMore => 'All search engines';
 
   @override
   String get onboarding_searchDefaultAutocompleteLabel => 'Search suggestions';
@@ -6105,10 +6105,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboarding_dohTitle => 'Secure DNS';
 
   @override
-  String get onboarding_dohSubtitle =>
-      'Encrypts website address lookups for more privacy';
-
-  @override
   String get onboarding_permissionsTitle => 'Permissions';
 
   @override
@@ -6116,7 +6112,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_permissionsNotificationsSubtitle =>
-      'Required to notify you about downloads';
+      'Lets WebLibre show the progress of downloads';
 
   @override
   String get onboarding_permissionsDefaultBrowserTitle => 'Default browser';
@@ -6133,7 +6129,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Which languages websites should show you';
 
   @override
-  String get onboarding_webEngineHardeningTitle => 'Stricter security settings';
+  String get onboarding_severalLanguagesTitle => 'Several languages set';
+
+  @override
+  String onboarding_multipleLanguagesWarning(int count, String locales) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your browser is set to $count languages ($locales).',
+    );
+    return '$_temp0 Websites can use this combination to recognize you.';
+  }
+
+  @override
+  String get onboarding_multipleLanguagesSuggestion =>
+      'Keeping only one language makes you harder to tell apart.';
+
+  @override
+  String get onboarding_reviewLanguages => 'Review languages';
+
+  @override
+  String get onboarding_webEngineHardeningTitle =>
+      'Recommended security settings';
 
   @override
   String get onboarding_webEngineHardeningSubtitle =>
@@ -6141,11 +6158,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_fingerprintProtectionTitle =>
-      'Make this device harder to recognize';
+      'Hide details that identify this device';
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      'Hides details websites use to recognize you without cookies (fingerprinting)';
+      'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)';
 
   @override
   String get onboarding_compatibilityWarningTitle => 'Some websites may break';
@@ -6188,7 +6205,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      'Turns on the filter lists WebLibre recommends for uBlock Origin';
+      'Also hides cookie banners, social media buttons and other annoyances';
 
   @override
   String get onboarding_presetTitle => 'How much should WebLibre show?';
@@ -6202,7 +6219,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_presetAveragePoint1 =>
-      'Tabs, bookmarks, history and Reader Mode';
+      'Tabs, bookmarks, history and reader mode';
 
   @override
   String get onboarding_presetAveragePoint2 =>
@@ -6233,7 +6250,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_presetAdvancedPoint3 =>
-      'Tree tabs, gestures and more layout options';
+      'Tree tabs, gestures and toolbar & menu customization';
 
   @override
   String get onboarding_presetAdvancedPoint4 =>
@@ -6259,38 +6276,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'JavaScript, user agent and certificate controls';
 
   @override
-  String get onboarding_basicsTitle => 'The basics';
-
-  @override
-  String get onboarding_basicsTabBarTitle => 'Tab bar position';
-
-  @override
-  String get onboarding_basicsTabBarAutoHint =>
-      'Automatic adapts to the window and keeps the side panel on larger screens';
-
-  @override
-  String get onboarding_basicsMoreSearchOptions => 'More search options';
-
-  @override
   String get onboarding_yourSetupTitle => 'Your setup';
-
-  @override
-  String get onboarding_yourSetupOnTitle => 'On from the start';
 
   @override
   String get onboarding_yourSetupProtections =>
       'Tracker blocking and encrypted connections';
 
   @override
-  String get onboarding_yourSetupHardening => 'Stricter security settings';
-
-  @override
   String get onboarding_yourSetupLocalNetwork =>
-      'Permission required for local connections';
-
-  @override
-  String get onboarding_yourSetupContentBlocker =>
-      'Ad blocking with uBlock Origin';
+      'Websites ask before local connections';
 
   @override
   String onboarding_yourSetupHistoryRetention(int days) {
@@ -6308,7 +6302,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeLater =>
-      'You can change this anytime in Settings > Feature Control.';
+      'You can show or hide features anytime in Settings > Feature Control.';
 
   @override
   String get onboarding_presetAdvancedIncludes =>
@@ -6316,13 +6310,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_presetExpertIncludes => 'Everything in Tinkerer, plus:';
-
-  @override
-  String get onboarding_presetChangeResetCustomize =>
-      'Your changes in Customize and Your setup were reset.';
-
-  @override
-  String get onboarding_goalsTitle => 'Anything else?';
 
   @override
   String get onboarding_goalKeepAccountsApart => 'Keep accounts apart';
@@ -6342,22 +6329,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_goalLockBrowserSubtitle =>
-      'Unlock this profile with the device lock or a password';
+      'Set up a device lock or password when you tap Done';
 
   @override
   String get onboarding_goalSetUpConnectionsSubtitle =>
-      'Opens connection setup when you\'re done. Nothing connects until you start it.';
+      'Opens connection setup when you tap Done. Nothing connects until you start it.';
 
   @override
   String get onboarding_goalSyncDevicesSubtitle =>
-      'Sign in to Firefox Sync once setup is done';
-
-  @override
-  String get onboarding_customizeAction => 'Customize';
-
-  @override
-  String get onboarding_customizeCaption =>
-      'Features, privacy, ad blocking and layout';
+      'Sign in to Firefox Sync when you tap Done';
 
   @override
   String get onboarding_customizeGroupPrivacy => 'Privacy & security';
@@ -6376,7 +6356,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not save which features are shown. Try again.';
 
   @override
-  String get onboarding_customizeGroupMore => 'More';
+  String get onboarding_customizeGroupOther => 'Other features';
 
   @override
   String get onboarding_customizeHomeSections => 'Home page sections';
@@ -6402,7 +6382,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboarding_setupStepFailedHardening =>
-      'The stricter security settings could not all be turned on. WebLibre tries again on the next start.';
+      'Some of the recommended security settings could not be turned on. WebLibre tries again on the next start.';
+
+  @override
+  String get onboarding_searchStepTitle => 'Search';
+
+  @override
+  String get onboarding_layoutStepTitle => 'Layout';
+
+  @override
+  String get onboarding_layoutCustomizeFurtherTitle => 'Customize further';
+
+  @override
+  String get onboarding_layoutReassurance =>
+      'Automatic works for most devices. You can change all of this later in Settings.';
+
+  @override
+  String get onboarding_toolbarLayoutSubtitle =>
+      'Buttons, menu, tab bar and auto-hide';
+
+  @override
+  String get onboarding_yourChoicesTitle => 'Your choices';
+
+  @override
+  String get onboarding_tabBarPositionTitle => 'Tab bar position';
+
+  @override
+  String get onboarding_yourChoicesSuggestionsOff => 'Off';
+
+  @override
+  String get onboarding_yourSetupOnDoneTitle => 'Turned on when you tap Done';
+
+  @override
+  String get onboarding_ublockInstallOnDoneSubtitle =>
+      'Installed when you tap Done; asks for its permissions';
+
+  @override
+  String get onboarding_privacySecurityRowSubtitle =>
+      'Local connections, fingerprinting, Secure DNS and website languages';
+
+  @override
+  String get onboarding_addToSetupTitle => 'Add to your setup';
+
+  @override
+  String get onboarding_showHideFeaturesAction => 'Show or hide features';
+
+  @override
+  String get onboarding_showHideFeaturesCaption =>
+      'While a feature is hidden, its settings use their defaults. Your changes come back when you show it.';
+
+  @override
+  String onboarding_dohCurrentSubtitle(String mode, String provider) {
+    return '$mode with $provider';
+  }
+
+  @override
+  String get onboarding_presetChangeResetVisibility =>
+      'Your show and hide changes were replaced by this choice\'s defaults.';
+
+  @override
+  String onboarding_presetChangeStopsApplyingTitle(String preset) {
+    return 'Switch to “$preset”?';
+  }
+
+  @override
+  String get onboarding_presetChangeStopsApplyingContent =>
+      'This choice hides features whose settings you changed. While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them.';
+
+  @override
+  String get onboarding_presetChangeConfirm => 'Switch';
 
   @override
   String get proxy_actionChange => 'Change';
@@ -10000,7 +10048,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_webEngineHardeningKeywords =>
-      'hardening, Stricter security settings';
+      'hardening, Stricter security settings, recommended security settings';
 
   @override
   String get settings_webEngineHardeningSearchHint => 'Search hardening groups';
@@ -10857,7 +10905,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_indexFissionEnabledSubtitle =>
-      'Use stronger site isolation between origins';
+      'Run each site in its own process';
 
   @override
   String get settings_indexExtensionsWebAPIEnabledSubtitle =>
@@ -11324,7 +11372,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
 
   @override
-  String get settings_previewDeviceTablet => 'Tablet';
+  String get settings_previewDeviceLargeScreen => 'Large screen';
 
   @override
   String settings_previewOtherDeviceHint(String device) {
@@ -11333,8 +11381,8 @@ class AppLocalizationsEn extends AppLocalizations {
           'Showing a phone. Automatic settings apply as they would on a phone.',
       'phoneLandscape':
           'Showing a phone in landscape. Automatic settings apply as they would there.',
-      'tablet':
-          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'largeScreen':
+          'Showing a large screen. Automatic settings apply as they would on a large screen.',
       'other': 'Showing another window size.',
     });
     return '$_temp0';
@@ -14197,7 +14245,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show tabs opened from a page under the tab they came from';
 
   @override
-  String get visibilitySwitch_layoutAdvancedLabel => 'More layout options';
+  String get visibilitySwitch_layoutAdvancedLabel =>
+      'Toolbar & menu customization';
 
   @override
   String get visibilitySwitch_layoutAdvancedDescription =>
@@ -14224,7 +14273,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get visibilitySwitch_privacyAdvancedDescription =>
-      'Fine-tune tracking protection, secure DNS, the stricter security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.';
+      'Fine-tune tracking protection, secure DNS, the recommended security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.';
 
   @override
   String get visibilitySwitch_webappStorageLabel => 'Web app storage';

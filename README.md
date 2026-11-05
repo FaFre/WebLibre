@@ -81,7 +81,7 @@ Keep everyday browsing on your normal internet connection while private tabs, is
 
 ### An Interface You Can Shape
 
-WebLibre adapts from one-handed browsing on a phone to a keyboard and mouse on a larger screen. Automatic layout uses bottom controls on phones and side panels on tablets, foldables, and larger Android windows.
+WebLibre adapts from one-handed browsing on a phone to a keyboard and mouse on a larger screen. Automatic layout uses bottom controls on phones and side panels on large screens, from foldables to Chromebooks and desktop windows.
 
 Follow relationships between pages in a [tree of tabs](https://docs.weblibre.eu/tabs/tree-view.html), or use list and grid views with grouping, pinning, and filtering.
 

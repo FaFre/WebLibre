@@ -5684,14 +5684,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_updateNoticeBody =>
-      '此次更新包含重大变更，需要你检查自己的设置。请浏览以下页面，确认你的配置。';
+      'This update changes a lot. The next pages walk you through your settings.';
 
   @override
-  String get onboarding_updateNoticeExtensions => '由于已知的迁移问题，更新后请重新检查你的扩展。';
+  String get onboarding_updateNoticeExtensions =>
+      'Some extensions may need a second look after this update.';
 
   @override
   String get onboarding_updateNoticeSettingsPreserved =>
-      '除非你在此设置过程中主动更改，否则现有设置不会被覆盖。';
+      'Your settings stay as they are unless you change them here.';
 
   @override
   String get onboarding_eulaAcceptance =>
@@ -5729,7 +5730,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_searchDefaultProviderLabel => '搜索引擎';
 
   @override
-  String get onboarding_searchMore => '搜索更多';
+  String get onboarding_searchMore => '所有搜索引擎';
 
   @override
   String get onboarding_searchDefaultAutocompleteLabel => '搜索建议';
@@ -5741,16 +5742,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_dohTitle => '安全 DNS';
 
   @override
-  String get onboarding_dohSubtitle => '加密网站地址查询，增强隐私保护';
-
-  @override
   String get onboarding_permissionsTitle => '权限';
 
   @override
   String get onboarding_permissionsNotificationsTitle => '通知';
 
   @override
-  String get onboarding_permissionsNotificationsSubtitle => '用于向你发送下载相关的通知';
+  String get onboarding_permissionsNotificationsSubtitle =>
+      'Lets WebLibre show the progress of downloads';
 
   @override
   String get onboarding_permissionsDefaultBrowserTitle => '默认浏览器';
@@ -5766,17 +5765,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_privacyBrowserLanguagesSubtitle => '希望网站用哪些语言显示';
 
   @override
-  String get onboarding_webEngineHardeningTitle => '更严格的安全设置';
+  String get onboarding_severalLanguagesTitle => 'Several languages set';
+
+  @override
+  String onboarding_multipleLanguagesWarning(int count, String locales) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your browser is set to $count languages ($locales).',
+    );
+    return '$_temp0 Websites can use this combination to recognize you.';
+  }
+
+  @override
+  String get onboarding_multipleLanguagesSuggestion =>
+      'Keeping only one language makes you harder to tell apart.';
+
+  @override
+  String get onboarding_reviewLanguages => '检查语言';
+
+  @override
+  String get onboarding_webEngineHardeningTitle => '推荐的安全设置';
 
   @override
   String get onboarding_webEngineHardeningSubtitle => '开启 WebLibre 推荐的所有安全设置';
 
   @override
-  String get onboarding_fingerprintProtectionTitle => '让此设备更难被识别';
+  String get onboarding_fingerprintProtectionTitle => '隐藏可识别此设备的信息';
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      '隐藏网站无需 Cookie 也能识别你的细节信息（指纹识别）';
+      'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)';
 
   @override
   String get onboarding_compatibilityWarningTitle => '部分网站可能无法正常工作';
@@ -5817,7 +5836,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      '开启 WebLibre 为 uBlock Origin 推荐的过滤列表';
+      'Also hides cookie banners, social media buttons and other annoyances';
 
   @override
   String get onboarding_presetTitle => 'WebLibre 应该显示多少功能？';
@@ -5853,7 +5872,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_presetAdvancedPoint2 => 'Tor、VPN 和代理连接';
 
   @override
-  String get onboarding_presetAdvancedPoint3 => '树状标签页、手势和更多布局选项';
+  String get onboarding_presetAdvancedPoint3 => '树状标签页、手势以及工具栏和菜单自定义';
 
   @override
   String get onboarding_presetAdvancedPoint4 => '高级隐私设置和设备端 AI 控制选项';
@@ -5874,34 +5893,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_presetExpertPoint3 => 'JavaScript、User Agent 和证书控制';
 
   @override
-  String get onboarding_basicsTitle => '基础设置';
-
-  @override
-  String get onboarding_basicsTabBarTitle => '标签栏位置';
-
-  @override
-  String get onboarding_basicsTabBarAutoHint => '“自动”会适应窗口大小，并在较大屏幕上保留侧边栏';
-
-  @override
-  String get onboarding_basicsMoreSearchOptions => '更多搜索选项';
-
-  @override
   String get onboarding_yourSetupTitle => '你的设置';
-
-  @override
-  String get onboarding_yourSetupOnTitle => '从一开始就开启';
 
   @override
   String get onboarding_yourSetupProtections => '拦截跟踪器并使用加密连接';
 
   @override
-  String get onboarding_yourSetupHardening => '更严格的安全设置';
-
-  @override
-  String get onboarding_yourSetupLocalNetwork => '本地连接需要许可';
-
-  @override
-  String get onboarding_yourSetupContentBlocker => '使用 uBlock Origin 拦截广告';
+  String get onboarding_yourSetupLocalNetwork =>
+      'Websites ask before local connections';
 
   @override
   String onboarding_yourSetupHistoryRetention(int days) {
@@ -5917,19 +5916,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_yourSetupHiddenForNowTitle => '暂时隐藏';
 
   @override
-  String get onboarding_presetChangeLater => '你可以随时在“设置 > 功能管理”中更改。';
+  String get onboarding_presetChangeLater =>
+      'You can show or hide features anytime in Settings > Feature Control.';
 
   @override
   String get onboarding_presetAdvancedIncludes => '包含“随便逛逛”的全部内容，另外还有：';
 
   @override
   String get onboarding_presetExpertIncludes => '包含“爱折腾”的全部内容，另外还有：';
-
-  @override
-  String get onboarding_presetChangeResetCustomize => '“自定义”和“你的设置”中的更改已重置。';
-
-  @override
-  String get onboarding_goalsTitle => '还有其他需要吗？';
 
   @override
   String get onboarding_goalKeepAccountsApart => '分开不同账号';
@@ -5948,20 +5942,16 @@ class AppLocalizationsZh extends AppLocalizations {
       '在同一网站上使用多个账号，每个账号放在自己的容器中';
 
   @override
-  String get onboarding_goalLockBrowserSubtitle => '用设备锁或密码解锁此配置文件';
+  String get onboarding_goalLockBrowserSubtitle =>
+      'Set up a device lock or password when you tap Done';
 
   @override
   String get onboarding_goalSetUpConnectionsSubtitle =>
-      '完成后打开连接设置。在你启动之前不会建立任何连接。';
+      'Opens connection setup when you tap Done. Nothing connects until you start it.';
 
   @override
-  String get onboarding_goalSyncDevicesSubtitle => '设置完成后登录 Firefox Sync';
-
-  @override
-  String get onboarding_customizeAction => '自定义';
-
-  @override
-  String get onboarding_customizeCaption => '功能、隐私、广告拦截和布局';
+  String get onboarding_goalSyncDevicesSubtitle =>
+      'Sign in to Firefox Sync when you tap Done';
 
   @override
   String get onboarding_customizeGroupPrivacy => '隐私与安全';
@@ -5979,7 +5969,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_customizeSaveFailed => '无法保存要显示的功能。请重试。';
 
   @override
-  String get onboarding_customizeGroupMore => '更多';
+  String get onboarding_customizeGroupOther => 'Other features';
 
   @override
   String get onboarding_customizeHomeSections => '主页板块';
@@ -6003,7 +5993,71 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_setupStepFailedHardening =>
-      '无法完整开启更严格的安全设置。WebLibre 会在下次启动时重试。';
+      '部分推荐的安全设置无法开启。WebLibre 会在下次启动时重试。';
+
+  @override
+  String get onboarding_searchStepTitle => '搜索';
+
+  @override
+  String get onboarding_layoutStepTitle => '布局';
+
+  @override
+  String get onboarding_layoutCustomizeFurtherTitle => '进一步自定义';
+
+  @override
+  String get onboarding_layoutReassurance => '“自动”适合大多数设备。所有这些稍后都可以在设置中更改。';
+
+  @override
+  String get onboarding_toolbarLayoutSubtitle => '按钮、菜单、标签栏和自动隐藏';
+
+  @override
+  String get onboarding_yourChoicesTitle => '你的选择';
+
+  @override
+  String get onboarding_tabBarPositionTitle => '标签栏位置';
+
+  @override
+  String get onboarding_yourChoicesSuggestionsOff => '关闭';
+
+  @override
+  String get onboarding_yourSetupOnDoneTitle => 'Turned on when you tap Done';
+
+  @override
+  String get onboarding_ublockInstallOnDoneSubtitle => '点击“完成”时安装，并会请求所需权限';
+
+  @override
+  String get onboarding_privacySecurityRowSubtitle => '本地连接、指纹识别、安全 DNS 和网站语言';
+
+  @override
+  String get onboarding_addToSetupTitle => '添加到你的设置';
+
+  @override
+  String get onboarding_showHideFeaturesAction => '显示或隐藏功能';
+
+  @override
+  String get onboarding_showHideFeaturesCaption =>
+      '功能隐藏期间，其设置使用默认值。再次显示后，你的更改会恢复。';
+
+  @override
+  String onboarding_dohCurrentSubtitle(String mode, String provider) {
+    return '$mode，使用 $provider';
+  }
+
+  @override
+  String get onboarding_presetChangeResetVisibility =>
+      'Your show and hide changes were replaced by this choice\'s defaults.';
+
+  @override
+  String onboarding_presetChangeStopsApplyingTitle(String preset) {
+    return '要切换到“$preset”吗？';
+  }
+
+  @override
+  String get onboarding_presetChangeStopsApplyingContent =>
+      '此选择会隐藏你更改过设置的功能。隐藏期间，这些设置使用默认值。你的更改会保留，再次显示这些功能后会重新生效。';
+
+  @override
+  String get onboarding_presetChangeConfirm => '切换';
 
   @override
   String get proxy_actionChange => '更改';
@@ -9322,7 +9376,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_webEngineHardeningTitle => '网页引擎加固';
 
   @override
-  String get settings_webEngineHardeningKeywords => '加固,安全,hardening,更严格的安全设置';
+  String get settings_webEngineHardeningKeywords =>
+      '加固,安全,hardening,更严格的安全设置,推荐的安全设置';
 
   @override
   String get settings_webEngineHardeningSearchHint => '搜索加固分组';
@@ -10078,7 +10133,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_indexWebEngineHardeningSubtitle => '加固浏览器引擎的行为和默认设置';
 
   @override
-  String get settings_indexFissionEnabledSubtitle => '在不同源之间使用更强的站点隔离';
+  String get settings_indexFissionEnabledSubtitle => '让每个网站在独立进程中运行';
 
   @override
   String get settings_indexExtensionsWebAPIEnabledSubtitle =>
@@ -10510,7 +10565,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
 
   @override
-  String get settings_previewDeviceTablet => 'Tablet';
+  String get settings_previewDeviceLargeScreen => 'Large screen';
 
   @override
   String settings_previewOtherDeviceHint(String device) {
@@ -10519,8 +10574,8 @@ class AppLocalizationsZh extends AppLocalizations {
           'Showing a phone. Automatic settings apply as they would on a phone.',
       'phoneLandscape':
           'Showing a phone in landscape. Automatic settings apply as they would there.',
-      'tablet':
-          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'largeScreen':
+          'Showing a large screen. Automatic settings apply as they would on a large screen.',
       'other': 'Showing another window size.',
     });
     return '$_temp0';
@@ -13210,7 +13265,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get visibilitySwitch_treeTabsDescription => '把从某个页面打开的标签页显示在其来源标签页下方';
 
   @override
-  String get visibilitySwitch_layoutAdvancedLabel => '更多布局选项';
+  String get visibilitySwitch_layoutAdvancedLabel => '自定义工具栏和菜单';
 
   @override
   String get visibilitySwitch_layoutAdvancedDescription =>
@@ -13234,7 +13289,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get visibilitySwitch_privacyAdvancedDescription =>
-      '细调跟踪保护、安全 DNS、更严格的安全设置，以及让此设备更难被识别的保护。隐藏这些设置不会关闭保护。';
+      '细调跟踪保护、安全 DNS、推荐的安全设置，以及防止此设备被识别的保护。隐藏这些设置不会关闭保护。';
 
   @override
   String get visibilitySwitch_webappStorageLabel => '网页应用存储';

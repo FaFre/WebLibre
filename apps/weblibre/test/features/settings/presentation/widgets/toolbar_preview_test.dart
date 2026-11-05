@@ -147,15 +147,15 @@ void main() {
     });
 
     test('scales a window with a side rail as a whole', () {
-      const tablet = Size(1280, 800);
+      const largeScreen = Size(1280, 800);
       final geometry = previewGeometry(
-        device: tablet,
+        device: largeScreen,
         available: const Size(848, 400),
         chromeExtent: 0,
         isRail: true,
       );
 
-      expect(geometry.layoutSize, tablet);
+      expect(geometry.layoutSize, largeScreen);
       expect(geometry.scale, 400 / 800);
     });
   });
@@ -187,13 +187,13 @@ void main() {
         PreviewStateBlocker.needsSidePanel,
       );
 
-      final tablet = previewChromeLayout(
+      final largeScreen = previewChromeLayout(
         settings,
         window: _window(const Size(1280, 800)),
         state: PreviewSampleState.page,
       );
       expect(
-        previewStateBlocker(PreviewSampleState.sidePanelCollapsed, tablet),
+        previewStateBlocker(PreviewSampleState.sidePanelCollapsed, largeScreen),
         isNull,
       );
     });
@@ -218,7 +218,7 @@ void main() {
     for (final device in [
       PreviewDevice.phone,
       PreviewDevice.phoneLandscape,
-      PreviewDevice.tablet,
+      PreviewDevice.largeScreen,
     ]) {
       for (final position in TabBarPositionSetting.values) {
         for (final contextual in [true, false]) {
@@ -249,7 +249,7 @@ void main() {
       for (final state in PreviewSampleState.values) {
         final errors = await _pumpPreview(
           tester,
-          device: PreviewDevice.tablet,
+          device: PreviewDevice.largeScreen,
           state: state,
           settings: GeneralSettings.withDefaults(
             tabBarPosition: TabBarPositionSetting.left,
@@ -325,7 +325,7 @@ void main() {
     ) async {
       await _pumpPreview(
         tester,
-        device: PreviewDevice.tablet,
+        device: PreviewDevice.largeScreen,
         available: const Size(640, 400),
         settings: GeneralSettings.withDefaults(
           tabBarPosition: TabBarPositionSetting.left,
@@ -358,7 +358,7 @@ void main() {
               PreviewSampleState.sidePanelCollapsed,
               previewChromeLayout(
                 settings,
-                window: _window(PreviewDevice.tablet.fixedSize!),
+                window: _window(PreviewDevice.largeScreen.fixedSize!),
                 state: PreviewSampleState.page,
               ),
             ),
@@ -390,7 +390,7 @@ void main() {
                       width: 368,
                       height: 640,
                       child: LayoutPreview(
-                        device: PreviewDevice.tablet,
+                        device: PreviewDevice.largeScreen,
                         state: PreviewSampleState.sidePanelCollapsed,
                         mode: PreviewMode.select,
                         selectedPart: part,

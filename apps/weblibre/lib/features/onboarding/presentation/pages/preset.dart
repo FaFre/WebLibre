@@ -23,15 +23,24 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/onboarding/presentation/utils/setup_preset_l10n.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
+import 'package:weblibre/features/settings/presentation/dialogs/hide_feature_dialog.dart';
+import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// "How much should WebLibre show?": the three preset cards. Choosing one only
-/// changes the draft; Custom is not a fourth card but Customize, later.
+/// changes the draft; Custom is not a fourth card but "Show or hide
+/// features", later.
 ///
-/// Choosing another preset drops what was changed in Customize on top of the
-/// old one; when there was something, a snackbar offers to undo the change.
+/// Choosing another preset drops the features shown or hidden on top of the
+/// old one, and nothing else ([SetupDraft.withPreset]); when there were
+/// some, a snackbar offers to undo the change. Changed settings stay, but a
+/// preset that hides their feature stops them from applying: that is
+/// confirmed first, like hiding the feature with its own switch.
 class PresetPage extends ConsumerWidget {
   const PresetPage({super.key});
 
@@ -42,6 +51,10 @@ class PresetPage extends ConsumerWidget {
     final selected = ref.watch(
       setupDraftControllerProvider.select((draft) => draft?.preset),
     );
+    // What a preset change is checked against ([_settingsStopping]), loaded
+    // before a card is tapped. Listened rather than watched: kept alive
+    // without rebuilding the cards on every draft edit.
+    ref.listen(storedSettingsSnapshotProvider, (_, _) {});
 
     return BrowserPage(
       child: BrowserPageContent(
@@ -89,16 +102,94 @@ Future<void> _select(
   final previous = ref.read(setupDraftControllerProvider);
   if (previous == null || preset == previous.preset) return;
 
+  final stopping = _settingsStopping(ref, previous, preset);
+  if (stopping.isNotEmpty) {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) =>
+          _PresetStopsApplyingDialog(preset: preset, settings: stopping),
+    );
+    if (confirmed != true || !context.mounted) return;
+    // Changed meanwhile (the dialog does not block the draft): start over.
+    if (!identical(ref.read(setupDraftControllerProvider), previous)) return;
+  }
+
   controller.selectPreset(preset);
-  if (!previous.hasCustomizeChanges) return;
+  if (!previous.hasVisibilityChanges) return;
 
   final changed = ref.read(setupDraftControllerProvider);
   if (changed == null) return;
   final undo = await showUndoMessage(
     context,
-    AppLocalizations.of(context).onboarding_presetChangeResetCustomize,
+    AppLocalizations.of(context).onboarding_presetChangeResetVisibility,
   );
   if (undo) controller.undo(changed: changed, previous: previous);
+}
+
+/// The changed settings that stop applying when [draft] starts again from
+/// [preset]: kept by the preset change, but hidden with their feature. Read
+/// from the whole of what the commit would write, the engine settings
+/// included, so a value the old preset set itself is not mistaken for one
+/// the user changed.
+List<HiddenSetting> _settingsStopping(
+  WidgetRef ref,
+  SetupDraft draft,
+  SetupPreset preset,
+) {
+  final stored = ref.read(storedSettingsSnapshotProvider);
+  final candidate = draft.withPreset(preset);
+  return settingsStoppingBetween(
+    stored,
+    stored.withGeneral(
+      candidate.applyGeneral(ref.read(profileGeneralSettingsProvider)),
+      engine: candidate.applyEngine(ref.read(profileEngineSettingsProvider)),
+    ),
+  );
+}
+
+/// Asks before a preset change that stops changed [settings] from applying,
+/// naming them.
+class _PresetStopsApplyingDialog extends StatelessWidget {
+  const _PresetStopsApplyingDialog({
+    required this.preset,
+    required this.settings,
+  });
+
+  final SetupPreset preset;
+  final List<HiddenSetting> settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return AlertDialog(
+      // A long list, landscape or large text can outgrow the window.
+      scrollable: true,
+      icon: Icon(preset.icon),
+      title: Text(
+        l10n.onboarding_presetChangeStopsApplyingTitle(preset.label(context)),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l10n.onboarding_presetChangeStopsApplyingContent),
+          const SizedBox(height: 8),
+          HiddenSettingsList(settings: settings),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.common_cancel),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.onboarding_presetChangeConfirm),
+        ),
+      ],
+    );
+  }
 }
 
 class _PresetCard extends StatelessWidget {

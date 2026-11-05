@@ -324,7 +324,7 @@ void main() {
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          // Your setup, then Customize, then Toolbar & layout.
+          // Your setup, then the Layout step, then Toolbar & layout.
           home: page('summary', next: page('customize', next: page('toolbar'))),
         ),
       ),
@@ -394,7 +394,6 @@ void main() {
     container
         .read(setupDraftControllerProvider.notifier)
         .editGeneral(
-          SetupDraftStep.customize,
           (s) => s.copyWith(
             tabBarPosition: TabBarPositionSetting.bottom,
             tabBarShowContextualBar: true,
@@ -600,8 +599,7 @@ void main() {
     addTearDown(container.dispose);
     container
         .read(setupDraftControllerProvider.notifier)
-        .editGeneral(
-          SetupDraftStep.customize,
+        .editVisibility(
           (s) => s.withVisibilitySwitch(
             VisibilitySwitch.layoutAdvanced,
             enabled: true,

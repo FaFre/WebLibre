@@ -19,6 +19,28 @@
  */
 import 'package:flutter/material.dart';
 
-abstract class IFormPage {
-  GlobalKey<FormState> get formKey;
+/// The steps of the onboarding, each one page. The page list is built from
+/// them, keyed by step, so a step that appears or goes (Privacy & security
+/// follows the Advanced privacy switch) moves the other pages rather than
+/// rebuilding them.
+enum OnboardingStep {
+  welcome,
+  preset,
+  search,
+  layout,
+  privacySecurity,
+  yourSetup,
+  permissions,
+
+  /// A review after an update: uBlock Origin on its own.
+  uBlock,
+
+  /// The revision-1 review: on-device AI alone.
+  aiConfiguration;
+
+  /// The key of this step's page in the onboarding's page list.
+  ValueKey<OnboardingStep> get pageKey => ValueKey(this);
 }
+
+/// Opens [step] in the onboarding, for a row that leads back to a step.
+typedef OpenOnboardingStep = void Function(OnboardingStep step);

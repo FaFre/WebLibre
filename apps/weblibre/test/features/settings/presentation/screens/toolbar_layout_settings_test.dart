@@ -995,11 +995,11 @@ void main() {
       await tester.pumpAndSettle();
       expect(region(LayoutPart.tabBar), findsNothing);
 
-      // The tablet puts the automatic tab bar in a side rail, which never
-      // hides with the page.
-      await tester.tap(find.text('This window'));
+      // A large screen puts the automatic tab bar in a side rail, which never
+      // hides with the page. On a phone the device menu shows its icon alone.
+      await tester.tap(find.byTooltip('This window'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Tablet').last);
+      await tester.tap(find.text('Large screen').last);
       await tester.pumpAndSettle();
 
       expect(region(LayoutPart.tabBar), findsOneWidget);

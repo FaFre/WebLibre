@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -26,9 +27,7 @@ import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
-import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
-import 'package:weblibre/features/settings/presentation/utils/tab_bar_position_setting_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -40,14 +39,13 @@ import 'package:weblibre/presentation/widgets/url_icon.dart';
 
 const defaultBangs = ['ddg', 'brave', 'startpage', 'qwant'];
 
-/// The questions every preset asks (`user_choice` in the policy): the default
-/// search provider, with the autocomplete provider behind "More", and the tab
-/// bar position.
+/// The search question every preset asks (`user_choice` in the policy): the
+/// default search provider, then the suggestion provider.
 ///
-/// Reads the draft's settings (the displayed layer) and files its own
-/// answers in the draft as Basics answers.
-class BasicsPage extends HookConsumerWidget {
-  const BasicsPage({super.key});
+/// Reads the draft's settings (the displayed layer) and files its answers
+/// in the draft as settings edits, which a preset change keeps.
+class SearchStepPage extends HookConsumerWidget {
+  const SearchStepPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -64,15 +62,9 @@ class BasicsPage extends HookConsumerWidget {
         (value) => value.defaultSearchSuggestionsProvider,
       ),
     );
-    final tabBarPosition = ref.watch(
-      displayedGeneralSettingsProvider.select((s) => s.tabBarPosition),
-    );
-
-    // Onboarding code: Basics files its answers in the draft itself, apart
-    // from the Customize changes a preset change drops.
-    Future<void> save(UpdateGeneralSettingsFunc update) async => ref
-        .read(setupDraftControllerProvider.notifier)
-        .editGeneral(SetupDraftStep.basics, update);
+    // Onboarding code: the step files its answers in the draft itself.
+    Future<void> save(UpdateGeneralSettingsFunc update) async =>
+        ref.read(setupDraftControllerProvider.notifier).editGeneral(update);
 
     Future<void> updateSearchProvider(BangKey key) =>
         save((current) => current.copyWith.defaultSearchProvider(key));
@@ -85,13 +77,16 @@ class BasicsPage extends HookConsumerWidget {
             const SizedBox(height: 24),
             Center(
               child: Text(
-                l10n.onboarding_basicsTitle,
+                l10n.onboarding_searchStepTitle,
                 style: theme.textTheme.headlineMedium,
               ),
             ),
             const SizedBox(height: 24),
-            SetupSectionTitle(l10n.onboarding_searchDefaultProviderLabel),
-            const SizedBox(height: 12),
+            ListTile(
+              title: Text(l10n.onboarding_searchDefaultProviderLabel),
+              leading: const Icon(MdiIcons.cloudSearch),
+              contentPadding: EdgeInsets.zero,
+            ),
             bangs.when(
               skipLoadingOnReload: true,
               data: (availableBangs) => Wrap(
@@ -164,81 +159,40 @@ class BasicsPage extends HookConsumerWidget {
                 ),
               ),
             ),
-            Theme(
-              data: theme.copyWith(dividerColor: Colors.transparent),
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(bottom: 8),
-                title: Text(l10n.onboarding_basicsMoreSearchOptions),
-                children: [
-                  DropdownMenu<SearchSuggestionProviders>(
-                    label: Text(l10n.onboarding_searchDefaultAutocompleteLabel),
-                    initialSelection: activeAutosuggest,
-                    inputDecorationTheme: InputDecorationTheme(
-                      prefixIconConstraints: BoxConstraints.tight(
-                        const Size.square(24),
-                      ),
-                    ),
-                    width: double.infinity,
-                    leadingIcon: activeAutosuggest.relatedBang.mapNotNull(
-                      (trigger) => BangIcon(trigger: trigger),
-                    ),
-                    dropdownMenuEntries: SearchSuggestionProviders.values.map((
-                      provider,
-                    ) {
-                      return DropdownMenuEntry(
-                        value: provider,
-                        label: provider.label(context),
-                        leadingIcon: provider.relatedBang.mapNotNull(
-                          (trigger) => BangIcon(trigger: trigger),
-                        ),
-                      );
-                    }).toList(),
-                    onSelected: (value) async {
-                      if (value != null) {
-                        await save(
-                          (current) => current.copyWith
-                              .defaultSearchSuggestionsProvider(value),
-                        );
-                      }
-                    },
-                  ),
-                ],
+            const SizedBox(height: 24),
+            // The field's own label, so TalkBack names it, rather than a
+            // heading row above that nothing ties to it.
+            DropdownMenu<SearchSuggestionProviders>(
+              label: Text(l10n.onboarding_searchDefaultAutocompleteLabel),
+              initialSelection: activeAutosuggest,
+              inputDecorationTheme: InputDecorationTheme(
+                prefixIconConstraints: BoxConstraints.tight(
+                  const Size.square(24),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            SetupSectionTitle(l10n.onboarding_basicsTabBarTitle),
-            const SizedBox(height: 12),
-            SizedBox(
               width: double.infinity,
-              child: SegmentedButton<TabBarPositionSetting>(
-                segments: [
-                  for (final position in const [
-                    TabBarPositionSetting.auto,
-                    TabBarPositionSetting.top,
-                    TabBarPositionSetting.bottom,
-                  ])
-                    ButtonSegment(
-                      value: position,
-                      label: Text(position.label(context)),
-                    ),
-                ],
-                selected: {tabBarPosition},
-                onSelectionChanged: (selection) => save(
-                  (current) =>
-                      current.copyWith.tabBarPosition(selection.single),
-                ),
+              leadingIcon: activeAutosuggest.relatedBang.mapNotNull(
+                (trigger) => BangIcon(trigger: trigger),
               ),
-            ),
-            // Supporting text below the control, as for a text field.
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Text(
-                l10n.onboarding_basicsTabBarAutoHint,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
+              dropdownMenuEntries: SearchSuggestionProviders.values.map((
+                provider,
+              ) {
+                return DropdownMenuEntry(
+                  value: provider,
+                  label: provider.label(context),
+                  leadingIcon: provider.relatedBang.mapNotNull(
+                    (trigger) => BangIcon(trigger: trigger),
+                  ),
+                );
+              }).toList(),
+              onSelected: (value) async {
+                if (value != null) {
+                  await save(
+                    (current) => current.copyWith
+                        .defaultSearchSuggestionsProvider(value),
+                  );
+                }
+              },
             ),
           ],
         ),

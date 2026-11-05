@@ -34,17 +34,17 @@
   "@onboarding_updateNoticeTitle": {
     "description": "Heading of a notice on the welcome page shown to existing users after a major update."
   },
-  "onboarding_updateNoticeBody": "This update includes significant changes that require you to review your settings. Please go through the following pages to check your configuration.",
+  "onboarding_updateNoticeBody": "This update changes a lot. The next pages walk you through your settings.",
   "@onboarding_updateNoticeBody": {
     "description": "Body of the notice shown to existing users after a major update, asking them to go through the setup pages again."
   },
-  "onboarding_updateNoticeExtensions": "Please re-check your extensions after this update due to known migration issues.",
+  "onboarding_updateNoticeExtensions": "Some extensions may need a second look after this update.",
   "@onboarding_updateNoticeExtensions": {
-    "description": "Point in the update notice: browser extensions may need to be checked because of known problems carrying them over to the new version."
+    "description": "Point in the update notice: some browser extensions may need to be checked, because carrying them over to the new version has known problems."
   },
-  "onboarding_updateNoticeSettingsPreserved": "Your existing settings will not be overridden unless you explicitly change them during this setup.",
+  "onboarding_updateNoticeSettingsPreserved": "Your settings stay as they are unless you change them here.",
   "@onboarding_updateNoticeSettingsPreserved": {
-    "description": "Point in the update notice: going through setup does not reset existing settings."
+    "description": "Point in the update notice: going through setup does not change existing settings; only what the user changes on these pages changes."
   },
   "onboarding_eulaAcceptance": "I have read and accept the <eula>EULA</eula> and <privacy>Privacy Policy</privacy>.",
   "@onboarding_eulaAcceptance": {
@@ -90,13 +90,13 @@
   "@onboarding_searchDefaultProviderLabel": {
     "description": "Label above the choice of default search engine."
   },
-  "onboarding_searchMore": "Search more",
+  "onboarding_searchMore": "All search engines",
   "@onboarding_searchMore": {
-    "description": "Button after the suggested search engines that opens a search across all available engines."
+    "description": "Button after the suggested search engines on the onboarding basics step that opens a search across all available search engines, to pick one that is not suggested."
   },
   "onboarding_searchDefaultAutocompleteLabel": "Search suggestions",
   "@onboarding_searchDefaultAutocompleteLabel": {
-    "description": "Label above the choice of service that suggests search terms while typing."
+    "description": "Label of the dropdown on the onboarding Search step that chooses the service suggesting search terms while typing."
   },
   "onboarding_searchLoadFailedTitle": "Could not load search engines",
   "@onboarding_searchLoadFailedTitle": {
@@ -107,10 +107,6 @@
   "@onboarding_dohTitle": {
     "description": "Title of the setup row that opens the secure DNS (DNS over HTTPS) options, and of the page it opens. Use the plain term people know from their phone or other browsers."
   },
-  "onboarding_dohSubtitle": "Encrypts website address lookups for more privacy",
-  "@onboarding_dohSubtitle": {
-    "description": "Subtitle of the secure DNS row in setup. Describes encrypted address lookups without promising that browsing is invisible to the network provider."
-  },
 
   "onboarding_permissionsTitle": "Permissions",
   "@onboarding_permissionsTitle": {
@@ -120,9 +116,9 @@
   "@onboarding_permissionsNotificationsTitle": {
     "description": "Switch that asks Android for permission to show notifications."
   },
-  "onboarding_permissionsNotificationsSubtitle": "Required to notify you about downloads",
+  "onboarding_permissionsNotificationsSubtitle": "Lets WebLibre show the progress of downloads",
   "@onboarding_permissionsNotificationsSubtitle": {
-    "description": "Explanation under the notifications permission switch: needed to report progress of downloads."
+    "description": "Explanation under the notifications permission switch: lets the browser show the progress of downloads. Not required; do not say it is."
   },
   "onboarding_permissionsDefaultBrowserTitle": "Default browser",
   "@onboarding_permissionsDefaultBrowserTitle": {
@@ -140,21 +136,41 @@
   "@onboarding_privacyBrowserLanguagesSubtitle": {
     "description": "Explanation under \"Website languages\"."
   },
-  "onboarding_webEngineHardeningTitle": "Stricter security settings",
+  "onboarding_severalLanguagesTitle": "Several languages set",
+  "@onboarding_severalLanguagesTitle": {
+    "description": "Heading of a warning shown when several preferred languages are set, which makes the browser easier to recognize."
+  },
+  "onboarding_multipleLanguagesWarning": "{count, plural, other{Your browser is set to {count} languages ({locales}).}} Websites can use this combination to recognize you.",
+  "@onboarding_multipleLanguagesWarning": {
+    "description": "Warning body. count is the number of configured languages; locales is a comma-separated list of language names in the UI language, such as \"English (United States), German (Germany)\". Avoid the technical term \"fingerprinting\": say plainly that websites can recognize the user.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "locales": { "type": "String" }
+    }
+  },
+  "onboarding_multipleLanguagesSuggestion": "Keeping only one language makes you harder to tell apart.",
+  "@onboarding_multipleLanguagesSuggestion": {
+    "description": "Suggestion in the language warning: one language makes the browser harder to tell apart from others. Plain wording, no technical terms."
+  },
+  "onboarding_reviewLanguages": "Review languages",
+  "@onboarding_reviewLanguages": {
+    "description": "Button in the language warning that opens the language settings."
+  },
+  "onboarding_webEngineHardeningTitle": "Recommended security settings",
   "@onboarding_webEngineHardeningTitle": {
-    "description": "Switch that applies all recommended security settings to the browser engine (Gecko)."
+    "description": "Switch that applies WebLibre's recommended security settings to the browser engine (Gecko). Name the settings by who recommends them, not by comparison (\"stricter\" than what?)."
   },
   "onboarding_webEngineHardeningSubtitle": "Turns on every security setting WebLibre recommends",
   "@onboarding_webEngineHardeningSubtitle": {
     "description": "Explanation under the web engine hardening switch."
   },
-  "onboarding_fingerprintProtectionTitle": "Make this device harder to recognize",
+  "onboarding_fingerprintProtectionTitle": "Hide details that identify this device",
   "@onboarding_fingerprintProtectionTitle": {
     "description": "Switch that turns on the strict set of protections against browser fingerprinting (identifying a browser by its unique characteristics)."
   },
-  "onboarding_fingerprintProtectionSubtitle": "Hides details websites use to recognize you without cookies (fingerprinting)",
+  "onboarding_fingerprintProtectionSubtitle": "Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)",
   "@onboarding_fingerprintProtectionSubtitle": {
-    "description": "Subtitle of the switch that turns on strong fingerprinting protection. \"Fingerprinting\" in brackets is the technical term, kept so people can find it in Settings."
+    "description": "Subtitle of the switch that turns on strong fingerprinting protection: websites get common values instead of this device's own, so it is harder to recognize. \"Fingerprinting\" in brackets is the technical term, kept so people can find it in Settings."
   },
   "onboarding_compatibilityWarningTitle": "Some websites may break",
   "@onboarding_compatibilityWarningTitle": {
@@ -202,9 +218,9 @@
   "@onboarding_ublockApplyDefaultsTitle": {
     "description": "Switch, available once uBlock Origin is being installed: apply WebLibre's recommended uBlock Origin settings."
   },
-  "onboarding_ublockApplyDefaultsSubtitle": "Turns on the filter lists WebLibre recommends for uBlock Origin",
+  "onboarding_ublockApplyDefaultsSubtitle": "Also hides cookie banners, social media buttons and other annoyances",
   "@onboarding_ublockApplyDefaultsSubtitle": {
-    "description": "Explanation under \"Use recommended filters\": turns on WebLibre's recommended extra filter lists in uBlock Origin."
+    "description": "Explanation under \"Use recommended filters\": the extra uBlock Origin filter lists WebLibre recommends also hide cookie notices, social media widgets and other annoyances."
   },
   "onboarding_presetTitle": "How much should WebLibre show?",
   "@onboarding_presetTitle": {
@@ -218,7 +234,7 @@
   "@onboarding_presetAverageSubtitle": {
     "description": "One-line line under the \"Just browsing\" preset name, written as something the user would say about themselves (first person) so they recognise themselves in it."
   },
-  "onboarding_presetAveragePoint1": "Tabs, bookmarks, history and Reader Mode",
+  "onboarding_presetAveragePoint1": "Tabs, bookmarks, history and reader mode",
   "@onboarding_presetAveragePoint1": {
     "description": "First thing the \"Just browsing\" preset shows, listed on its card."
   },
@@ -250,7 +266,7 @@
   "@onboarding_presetAdvancedPoint2": {
     "description": "Second thing the \"Tinkerer\" preset adds."
   },
-  "onboarding_presetAdvancedPoint3": "Tree tabs, gestures and more layout options",
+  "onboarding_presetAdvancedPoint3": "Tree tabs, gestures and toolbar & menu customization",
   "@onboarding_presetAdvancedPoint3": {
     "description": "Third thing the \"Tinkerer\" preset adds."
   },
@@ -278,45 +294,17 @@
   "@onboarding_presetExpertPoint3": {
     "description": "Third thing the \"Expert\" preset adds."
   },
-  "onboarding_basicsTitle": "The basics",
-  "@onboarding_basicsTitle": {
-    "description": "Title of the onboarding step that asks for the default search provider and the tab bar position."
-  },
-  "onboarding_basicsTabBarTitle": "Tab bar position",
-  "@onboarding_basicsTabBarTitle": {
-    "description": "Heading of the tab bar position choice (Automatic, Top, Bottom) in the onboarding basics step."
-  },
-  "onboarding_basicsTabBarAutoHint": "Automatic adapts to the window and keeps the side panel on larger screens",
-  "@onboarding_basicsTabBarAutoHint": {
-    "description": "Hint under the tab bar position choice explaining the Automatic option."
-  },
-  "onboarding_basicsMoreSearchOptions": "More search options",
-  "@onboarding_basicsMoreSearchOptions": {
-    "description": "Expandable row in the onboarding basics step that reveals the autocomplete provider choice."
-  },
   "onboarding_yourSetupTitle": "Your setup",
   "@onboarding_yourSetupTitle": {
     "description": "Title of the onboarding summary step listing what is on and what is hidden."
-  },
-  "onboarding_yourSetupOnTitle": "On from the start",
-  "@onboarding_yourSetupOnTitle": {
-    "description": "Heading of the list of protections and features that are on after setup."
   },
   "onboarding_yourSetupProtections": "Tracker blocking and encrypted connections",
   "@onboarding_yourSetupProtections": {
     "description": "Row on the setup summary: tracking protection, HTTPS-Only Mode and secure DNS are on, said in plain words."
   },
-  "onboarding_yourSetupHardening": "Stricter security settings",
-  "@onboarding_yourSetupHardening": {
-    "description": "Summary line: the recommended engine hardening preferences are applied."
-  },
-  "onboarding_yourSetupLocalNetwork": "Permission required for local connections",
+  "onboarding_yourSetupLocalNetwork": "Websites ask before local connections",
   "@onboarding_yourSetupLocalNetwork": {
-    "description": "Row on the setup summary: websites must ask before connecting to apps on this device or to devices on the local network."
-  },
-  "onboarding_yourSetupContentBlocker": "Ad blocking with uBlock Origin",
-  "@onboarding_yourSetupContentBlocker": {
-    "description": "Summary line: the uBlock Origin extension is installed after setup."
+    "description": "Row on the setup summary: websites ask before connecting to apps on this device or to devices on the local network. Same idea as onboarding_blockAllLocalNetworkTitle."
   },
   "onboarding_yourSetupHistoryRetention": "History is kept for {days, plural, =1{1 day} other{{days} days}}",
   "@onboarding_yourSetupHistoryRetention": {
@@ -331,9 +319,9 @@
   "@onboarding_yourSetupHiddenForNowTitle": {
     "description": "Onboarding \"Your setup\" step: heading above the features the setup hides. Each row opens Customize at the switch that shows it; \"for now\" says this can change later."
   },
-  "onboarding_presetChangeLater": "You can change this anytime in Settings > Feature Control.",
+  "onboarding_presetChangeLater": "You can show or hide features anytime in Settings > Feature Control.",
   "@onboarding_presetChangeLater": {
-    "description": "Hint under the three preset cards on the onboarding, so the choice does not feel final. \"Settings > Feature Control\" is the path to the settings screen of that name."
+    "description": "Hint under the three preset cards on the onboarding, so the choice does not feel final. \"Settings > Feature Control\" is the path to the settings screen of that name (settings_categoryFeatureControlTitle); use the same names."
   },
   "onboarding_presetAdvancedIncludes": "Everything in Just browsing, plus:",
   "@onboarding_presetAdvancedIncludes": {
@@ -342,14 +330,6 @@
   "onboarding_presetExpertIncludes": "Everything in Tinkerer, plus:",
   "@onboarding_presetExpertIncludes": {
     "description": "Lead-in line on the \"Expert\" preset card, above the list of what it adds. \"Tinkerer\" is the name of the second preset (onboarding_presetAdvancedTitle); use the same translation."
-  },
-  "onboarding_presetChangeResetCustomize": "Your changes in Customize and Your setup were reset.",
-  "@onboarding_presetChangeResetCustomize": {
-    "description": "Snackbar on the onboarding after another preset was picked: what had been changed on top of the old option, in the \"Customize\" and \"Your setup\" steps (use their translated names), was discarded. Shown with an Undo button."
-  },
-  "onboarding_goalsTitle": "Anything else?",
-  "@onboarding_goalsTitle": {
-    "description": "Heading of the goal switches on the \"Your setup\" step. Each switch turns on what a goal needs without changing the preset."
   },
   "onboarding_goalKeepAccountsApart": "Keep accounts apart",
   "@onboarding_goalKeepAccountsApart": {
@@ -371,25 +351,17 @@
   "@onboarding_goalKeepAccountsApartSubtitle": {
     "description": "Explanation under the \"Keep accounts apart\" switch on the \"Your setup\" step. Turning it on shows containers (separate browsing identities)."
   },
-  "onboarding_goalLockBrowserSubtitle": "Unlock this profile with the device lock or a password",
+  "onboarding_goalLockBrowserSubtitle": "Set up a device lock or password when you tap Done",
   "@onboarding_goalLockBrowserSubtitle": {
-    "description": "Explanation under the \"Lock the browser\" switch on the \"Your setup\" step. When on, the profile lock setup opens once the onboarding is done."
+    "description": "Explanation under the \"Lock the browser\" switch on the \"Your setup\" step. When on, the profile lock setup opens once the user taps Done (\"Done\" is the button label, common_done)."
   },
-  "onboarding_goalSetUpConnectionsSubtitle": "Opens connection setup when you're done. Nothing connects until you start it.",
+  "onboarding_goalSetUpConnectionsSubtitle": "Opens connection setup when you tap Done. Nothing connects until you start it.",
   "@onboarding_goalSetUpConnectionsSubtitle": {
-    "description": "Explanation under the \"Set up Tor, a VPN or a proxy\" switch on the \"Your setup\" step: the connection settings open after setup, and no connection starts until the user starts one there."
+    "description": "Explanation under the \"Set up Tor, a VPN or a proxy\" switch on the \"Your setup\" step: the connection settings open when the user taps Done (common_done), and no connection starts until the user starts one there."
   },
-  "onboarding_goalSyncDevicesSubtitle": "Sign in to Firefox Sync once setup is done",
+  "onboarding_goalSyncDevicesSubtitle": "Sign in to Firefox Sync when you tap Done",
   "@onboarding_goalSyncDevicesSubtitle": {
-    "description": "Explanation under the \"Sync with my other devices\" switch on the \"Your setup\" step. Firefox Sync is a product name."
-  },
-  "onboarding_customizeAction": "Customize",
-  "@onboarding_customizeAction": {
-    "description": "Button on the summary step that opens the screen for switching feature groups on or off."
-  },
-  "onboarding_customizeCaption": "Features, privacy, ad blocking and layout",
-  "@onboarding_customizeCaption": {
-    "description": "Caption under the Customize button on the onboarding \"Your setup\" step: what can be changed there."
+    "description": "Explanation under the \"Sync with my other devices\" switch on the \"Your setup\" step: sign-in opens when the user taps Done (common_done). Firefox Sync is a product name."
   },
   "onboarding_customizeGroupPrivacy": "Privacy & security",
   "@onboarding_customizeGroupPrivacy": {
@@ -411,8 +383,8 @@
   "@onboarding_customizeSaveFailed": {
     "description": "Error snackbar on Customize and Settings > Feature Control when showing or hiding features could not be saved (for example, the device storage is full). Nothing changed."
   },
-  "onboarding_customizeGroupMore": "More",
-  "@onboarding_customizeGroupMore": {
+  "onboarding_customizeGroupOther": "Other features",
+  "@onboarding_customizeGroupOther": {
     "description": "Heading of the last group on the Customize and Feature Control screens: on-device AI, web app storage and Expert settings."
   },
   "onboarding_customizeHomeSections": "Home page sections",
@@ -439,8 +411,97 @@
   "@onboarding_setupStepFailedFilters": {
     "description": "Message after setup when applying the optimized uBlock Origin filter lists failed."
   },
-  "onboarding_setupStepFailedHardening": "The stricter security settings could not all be turned on. WebLibre tries again on the next start.",
+  "onboarding_setupStepFailedHardening": "Some of the recommended security settings could not be turned on. WebLibre tries again on the next start.",
   "@onboarding_setupStepFailedHardening": {
-    "description": "Message after setup when the browser engine refused some of the stricter security settings chosen during setup (the 'Stricter security settings' option). The setup still finished; the settings are retried on each start until they apply."
+    "description": "Message after setup when the browser engine refused some of the recommended security settings chosen during setup (the \"Recommended security settings\" option, onboarding_webEngineHardeningTitle). The setup still finished; the settings are retried on each start until they apply."
+  },
+  "onboarding_searchStepTitle": "Search",
+  "@onboarding_searchStepTitle": {
+    "description": "Title of the onboarding step that asks for the default search engine and the search suggestion provider."
+  },
+  "onboarding_layoutStepTitle": "Layout",
+  "@onboarding_layoutStepTitle": {
+    "description": "Title of the onboarding step that shows a picture of the browser and asks where the tab bar goes, with optional links to the toolbar, home page and new tab layout screens."
+  },
+  "onboarding_layoutCustomizeFurtherTitle": "Customize further",
+  "@onboarding_layoutCustomizeFurtherTitle": {
+    "description": "Heading on the onboarding Layout step above links to further layout screens (toolbar & layout, home page sections, new tab sections). Invites the user to customize more than the tab bar position chosen above."
+  },
+  "onboarding_layoutReassurance": "Automatic works for most devices. You can change all of this later in Settings.",
+  "@onboarding_layoutReassurance": {
+    "description": "Reassurance under the tab bar position choice on the onboarding Layout step. \"Automatic\" is the name of the first tab bar position option (settings_tabBarPositionAutoLabel); use the same translation."
+  },
+  "onboarding_toolbarLayoutSubtitle": "Buttons, menu, tab bar and auto-hide",
+  "@onboarding_toolbarLayoutSubtitle": {
+    "description": "Subtitle of the \"Toolbar & layout\" link on the onboarding Layout step: what that screen lets you change."
+  },
+  "onboarding_yourChoicesTitle": "Your choices",
+  "@onboarding_yourChoicesTitle": {
+    "description": "Heading on the onboarding \"Your setup\" step above a summary of what was chosen on earlier steps (search engine, search suggestions, tab bar position). Each row opens its step again."
+  },
+  "onboarding_tabBarPositionTitle": "Tab bar position",
+  "@onboarding_tabBarPositionTitle": {
+    "description": "Heading of the tab bar position choice on the onboarding Layout step, and row title in the \"Your choices\" summary of the \"Your setup\" step, where the chosen position is shown below it."
+  },
+  "onboarding_yourChoicesSuggestionsOff": "Off",
+  "@onboarding_yourChoicesSuggestionsOff": {
+    "description": "Value under the \"Search suggestions\" row of the \"Your choices\" summary when no suggestion provider is chosen."
+  },
+  "onboarding_yourSetupOnDoneTitle": "Turned on when you tap Done",
+  "@onboarding_yourSetupOnDoneTitle": {
+    "description": "Heading of the protections on the onboarding \"Your setup\" step. Nothing applies before the user taps Done, so the heading says they turn on then. \"Done\" is the button label (common_done); use the same translation."
+  },
+  "onboarding_ublockInstallOnDoneSubtitle": "Installed when you tap Done; asks for its permissions",
+  "@onboarding_ublockInstallOnDoneSubtitle": {
+    "description": "Subtitle of the \"Install uBlock Origin\" switch on the onboarding \"Your setup\" step. \"Done\" is the button that finishes the onboarding (common_done); use the same translation."
+  },
+  "onboarding_privacySecurityRowSubtitle": "Local connections, fingerprinting, Secure DNS and website languages",
+  "@onboarding_privacySecurityRowSubtitle": {
+    "description": "Subtitle of the \"Privacy & security\" row on the onboarding \"Your setup\" step (shown when the chosen preset skips that step but Advanced privacy was shown afterwards): what the page it opens holds."
+  },
+  "onboarding_addToSetupTitle": "Add to your setup",
+  "@onboarding_addToSetupTitle": {
+    "description": "Heading of the goal switches on the onboarding \"Your setup\" step (keep accounts apart, lock the browser, connections, on-device AI, sync). Each one adds something to the setup, and several open a setup screen once Done is tapped. \"Your setup\" is the step's title (onboarding_yourSetupTitle); use the same term."
+  },
+  "onboarding_showHideFeaturesAction": "Show or hide features",
+  "@onboarding_showHideFeaturesAction": {
+    "description": "Button on the onboarding \"Your setup\" step, and title of the screen it opens, with one switch per group of features that can be shown or hidden."
+  },
+  "onboarding_showHideFeaturesCaption": "While a feature is hidden, its settings use their defaults. Your changes come back when you show it.",
+  "@onboarding_showHideFeaturesCaption": {
+    "description": "Caption under the \"Show or hide features\" button: while a feature is hidden, its settings apply at their default values. Changed settings are not reset: they are kept and apply again when the feature is shown."
+  },
+  "onboarding_dohCurrentSubtitle": "{mode} with {provider}",
+  "@onboarding_dohCurrentSubtitle": {
+    "description": "Subtitle of the Secure DNS row on the onboarding \"Privacy & security\" step: the current protection level (for example \"Increased Protection\") and the DNS resolver it uses (for example \"Quad9\").",
+    "placeholders": {
+      "mode": {
+        "type": "String"
+      },
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "onboarding_presetChangeResetVisibility": "Your show and hide changes were replaced by this choice's defaults.",
+  "@onboarding_presetChangeResetVisibility": {
+    "description": "Snackbar on the onboarding after another preset was picked: features the user had shown or hidden on top of the old preset follow the new one again. Other settings and choices are kept. Shown with an Undo button."
+  },
+  "onboarding_presetChangeStopsApplyingTitle": "Switch to “{preset}”?",
+  "@onboarding_presetChangeStopsApplyingTitle": {
+    "description": "Title of the dialog shown on the onboarding preset step before switching to another preset that hides features whose settings the user changed. {preset} is the name of the preset chosen (for example \"Just browsing\").",
+    "placeholders": {
+      "preset": {
+        "type": "String"
+      }
+    }
+  },
+  "onboarding_presetChangeStopsApplyingContent": "This choice hides features whose settings you changed. While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them.",
+  "@onboarding_presetChangeStopsApplyingContent": {
+    "description": "Text of that dialog, above the list of changed settings that stop applying. The changes are not lost: they apply again once their features are shown."
+  },
+  "onboarding_presetChangeConfirm": "Switch",
+  "@onboarding_presetChangeConfirm": {
+    "description": "Button of that dialog that switches to the chosen preset."
   }
 }

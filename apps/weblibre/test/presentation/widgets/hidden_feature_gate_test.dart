@@ -57,6 +57,10 @@ class _Save extends SaveGeneralSettingsController {
     ref.read(_settings.notifier).apply(updateSettings);
     return true;
   }
+
+  @override
+  Future<bool> saveVisibility(UpdateGeneralSettingsFunc updateSettings) =>
+      save(updateSettings);
 }
 
 /// A [KeptWhen] the tests have hold.

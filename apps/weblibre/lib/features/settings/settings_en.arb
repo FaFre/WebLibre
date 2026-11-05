@@ -2817,7 +2817,7 @@
   "@settings_webEngineHardeningTitle": {
     "description": "Title of the screen, and its row, for extra security settings of the browser engine (\"hardening\" means stricter security)."
   },
-  "settings_webEngineHardeningKeywords": "hardening, Stricter security settings",
+  "settings_webEngineHardeningKeywords": "hardening, Stricter security settings, recommended security settings",
   "@settings_webEngineHardeningKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
@@ -3788,7 +3788,7 @@
   "@settings_indexWebEngineHardeningSubtitle": {
     "description": "Summary of the web engine hardening entry, shown as a settings search result."
   },
-  "settings_indexFissionEnabledSubtitle": "Use stronger site isolation between origins",
+  "settings_indexFissionEnabledSubtitle": "Run each site in its own process",
   "@settings_indexFissionEnabledSubtitle": {
     "description": "Summary of the site isolation setting, shown as a settings search result."
   },
@@ -4350,11 +4350,11 @@
   "@settings_previewDevicePhoneLandscape": {
     "description": "Choice in the Toolbar & Layout preview: show the layout as it would look on a phone turned sideways."
   },
-  "settings_previewDeviceTablet": "Tablet",
-  "@settings_previewDeviceTablet": {
-    "description": "Choice in the Toolbar & Layout preview: show the layout as it would look on a tablet or a large window."
+  "settings_previewDeviceLargeScreen": "Large screen",
+  "@settings_previewDeviceLargeScreen": {
+    "description": "Choice in the Toolbar & Layout preview: show the layout as it would look on a large screen in landscape, such as a tablet, a Chromebook or a desktop window. Avoid naming a single device type."
   },
-  "settings_previewOtherDeviceHint": "{device, select, phone{Showing a phone. Automatic settings apply as they would on a phone.} phoneLandscape{Showing a phone in landscape. Automatic settings apply as they would there.} tablet{Showing a tablet. Automatic settings apply as they would on a tablet.} other{Showing another window size.}}",
+  "settings_previewOtherDeviceHint": "{device, select, phone{Showing a phone. Automatic settings apply as they would on a phone.} phoneLandscape{Showing a phone in landscape. Automatic settings apply as they would there.} largeScreen{Showing a large screen. Automatic settings apply as they would on a large screen.} other{Showing another window size.}}",
   "@settings_previewOtherDeviceHint": {
     "description": "Line above the Toolbar & Layout preview while it shows a device other than the current window. Automatic settings such as the tab bar position resolve differently per window size.",
     "placeholders": {
@@ -4703,7 +4703,7 @@
   },
   "settings_featureControlApplyPresetSubtitle": "Show and hide features the way a preset does.",
   "@settings_featureControlApplyPresetSubtitle": {
-    "description": "Line under the \"Apply preset\" heading: only which features are shown changes, no setting does."
+    "description": "Supporting line under the \"Apply preset\" heading, above the preset rows: only which features are shown changes, no setting does."
   },
   "settings_featureControlApplyPresetDialogTitle": "Apply “{preset}”?",
   "@settings_featureControlApplyPresetDialogTitle": {

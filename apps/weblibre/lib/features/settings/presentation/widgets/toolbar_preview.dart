@@ -60,7 +60,9 @@ enum PreviewDevice {
   thisWindow(null),
   phone(Size(392, 850)),
   phoneLandscape(Size(850, 392)),
-  tablet(Size(1280, 800));
+
+  /// A large screen in landscape: a tablet, a Chromebook, a desktop window.
+  largeScreen(Size(1280, 800));
 
   const PreviewDevice(this.fixedSize);
 

@@ -37,10 +37,21 @@ import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 
 part 'setup_draft.g.dart';
 
-/// Which onboarding step a settings edit came from. A preset change keeps the
-/// Basics answers and discards the Customize changes made on top of the old
-/// preset.
-enum SetupDraftStep { basics, customize }
+/// What a general settings edit of the onboarding changes. A preset change
+/// keeps the [setting] edits and drops the [visibility] ones: the preset
+/// decides what is shown, and nothing else.
+enum SetupEditKind {
+  /// A settings write: the Search and Layout answers, and everything the
+  /// settings screens save (`SaveGeneralSettingsController.save`).
+  setting,
+
+  /// A visibility switch change: "Show or hide features", the goals that
+  /// show features, and showing a hidden feature from a grayed control.
+  visibility,
+}
+
+/// One general settings edit of the onboarding, kept in the order made.
+typedef SetupEdit = ({SetupEditKind kind, UpdateGeneralSettingsFunc edit});
 
 /// Everything the onboarding will write, held until Done.
 ///
@@ -53,8 +64,7 @@ final class SetupDraft {
   const SetupDraft({
     required this.preset,
     this.goals = const {},
-    this.basicsEdits = const [],
-    this.customizeEdits = const [],
+    this.edits = const [],
     this.engineEdits = const [],
     this.layouts = const {},
     this.toolbarButtons = const {},
@@ -71,21 +81,21 @@ final class SetupDraft {
   /// they are the settings they name ([goalSelected]).
   final Set<SetupGoal> goals;
 
-  /// Edits from Basics (search provider, tab bar position), in order.
-  final List<UpdateGeneralSettingsFunc> basicsEdits;
-
-  /// Edits from Customize and the settings screens it opens, in order.
-  final List<UpdateGeneralSettingsFunc> customizeEdits;
+  /// Every general settings edit, in the order made: applied in that order,
+  /// so the latest explicit choice wins whichever screen made it (the Layout
+  /// step's tab bar position and the Toolbar & layout editor's, say).
+  final List<SetupEdit> edits;
   final List<UpdateEngineSettingsFunc> engineEdits;
 
-  /// Module layouts rearranged in Customize, by surface.
+  /// Module layouts rearranged in the onboarding, by surface.
   final Map<ModuleSurface, List<ModuleOrderEntry>> layouts;
 
-  /// Toolbar buttons changed in Customize, the whole set of each toolbar
-  /// changed. A toolbar not in here keeps the profile's buttons.
+  /// Toolbar buttons changed in the onboarding, the whole set of each
+  /// toolbar changed. A toolbar not in here keeps the profile's buttons.
   final Map<ToolbarConfigLocation, List<ToolbarButtonConfig>> toolbarButtons;
 
-  /// The browser menu as arranged in Customize; null keeps the profile's.
+  /// The browser menu as arranged in the onboarding; null keeps the
+  /// profile's.
   final List<MenuSectionEntry>? menuLayout;
 
   /// Overrides for the parts that are not plain settings; null takes the
@@ -123,26 +133,19 @@ final class SetupDraft {
             PolicyToken.recommend,
           ));
 
-  /// Whether a preset change would drop something: Customize changes, goals
-  /// that show features, rearranged layouts, toolbar buttons or menu, the
-  /// hardening or uBlock Origin choices. The Basics answers and the goals that open after the commit
-  /// stay.
-  bool get hasCustomizeChanges =>
-      customizeEdits.isNotEmpty ||
-      engineEdits.isNotEmpty ||
-      layouts.isNotEmpty ||
-      toolbarButtons.isNotEmpty ||
-      menuLayout != null ||
-      hardeningBaseline != null ||
-      installUBlock != null ||
-      optimizedUBlockFilters != null;
+  /// Whether a preset change would drop something: a feature shown or
+  /// hidden, by a switch or a goal that shows features. Everything else, the
+  /// goals that open after the commit included, stays
+  /// ([SetupDraftController.selectPreset]).
+  bool get hasVisibilityChanges =>
+      edits.any((edit) => edit.kind == SetupEditKind.visibility);
 
   /// Whether [goal] is on, given [applied], this draft applied
   /// ([applyGeneral]). Read from the settings, so it never disagrees with
-  /// Customize: a goal that shows features is on while all of them are
+  /// the visibility switches: a goal that shows features is on while all of them are
   /// shown, on-device AI while it is shown and turned on. A requested setup
-  /// is on while it is asked for and what it needs is shown; hidden again in
-  /// Customize, it is off and does not open.
+  /// is on while it is asked for and what it needs is shown; hidden again
+  /// with its switch, it is off and does not open.
   bool goalSelected(SetupGoal goal, GeneralSettings applied) {
     final shown = goal.switches.every(applied.isVisibilitySwitchShown);
     if (goal.opensAfterCommit) return goals.contains(goal) && shown;
@@ -157,26 +160,24 @@ final class SetupDraft {
       if (goal.opensAfterCommit && goalSelected(goal, applied)) goal,
   ];
 
-  /// [settings] with the preset, the Basics answers, what the requested
-  /// setups need shown, and the Customize changes (goals that show features
-  /// included) applied, in that order. Idempotent: applying it to its own
-  /// result changes nothing.
+  /// [settings] with the preset, what the requested setups need shown, and
+  /// then every edit ([edits]) in the order made. Idempotent: applying it to
+  /// its own result changes nothing.
   ///
-  /// A requested setup's switches are applied on their own rather than as a
-  /// Customize change, so they follow the request: they stay shown when the
-  /// preset changes, and go when the request is withdrawn unless the preset
-  /// or Customize shows them too.
+  /// A requested setup's switches are applied on their own rather than as an
+  /// edit, so they follow the request: they stay shown when the preset
+  /// changes, and go when the request is withdrawn unless the preset or an
+  /// edit shows them too. They come before the edits, so a later explicit
+  /// hide still wins ([SetupDraftController.setGoal] shows them again with
+  /// an edit when the setup is asked for after that).
   GeneralSettings applyGeneral(GeneralSettings settings) {
     var updated = applyGeneralPreset(settings, preset);
-    for (final edit in basicsEdits) {
-      updated = edit(updated);
-    }
     for (final goal in goals) {
       for (final visibilitySwitch in goal.switches) {
         updated = updated.withVisibilitySwitch(visibilitySwitch, enabled: true);
       }
     }
-    for (final edit in customizeEdits) {
+    for (final (kind: _, :edit) in edits) {
       updated = edit(updated);
     }
     return updated;
@@ -190,9 +191,33 @@ final class SetupDraft {
     return updated;
   }
 
+  /// This draft started again from [preset], which decides what is shown and
+  /// nothing else: the visibility edits (switches, goals that show features
+  /// or turn on AI) were relative to the old preset and are dropped
+  /// ([hasVisibilityChanges]). Every settings edit, the engine edits, the
+  /// arrangements and the hardening and uBlock Origin choices stay: a
+  /// setting the new preset hides stops applying and comes back when it is
+  /// shown (H1), which the preset step warns about first. So do the setups
+  /// asked for after the commit, and what they need shown ([applyGeneral]);
+  /// a setup whose switches were hidden was turned off there, and stays off.
+  SetupDraft withPreset(SetupPreset preset) {
+    final applied = applyGeneral(GeneralSettings.withDefaults());
+    return copyWith(
+      preset: preset,
+      goals: {
+        for (final goal in goals)
+          if (goalSelected(goal, applied)) goal,
+      },
+      edits: [
+        for (final edit in edits)
+          if (edit.kind == SetupEditKind.setting) edit,
+      ],
+    );
+  }
+
   /// The layout the commit writes for [surface], or null to leave it alone
   /// (rule 2: only where the preset differs from the code default, or the
-  /// user rearranged it in Customize).
+  /// user rearranged it in the onboarding).
   List<ModuleOrderEntry>? layoutFor(ModuleSurface surface) {
     if (layouts[surface] case final layout?) return layout;
     if (surface != ModuleSurface.newTab) return null;
@@ -241,38 +266,36 @@ class SetupDraftController extends _$SetupDraftController {
     };
   }
 
-  /// Starts again from [preset]. Basics answers and the setups asked for
-  /// after the commit stay, and so does what those setups need shown
-  /// ([SetupDraft.applyGeneral]); everything changed in Customize, goals that
-  /// show features or turn on AI included, was relative to the old preset
-  /// and is dropped ([SetupDraft.hasCustomizeChanges]). A setup whose
-  /// switches were hidden in Customize was turned off there, and stays off.
+  /// Starts again from [preset] ([SetupDraft.withPreset]).
   void selectPreset(SetupPreset preset) {
     final draft = state;
     if (draft == null || preset == draft.preset) return;
-    final applied = draft.applyGeneral(GeneralSettings.withDefaults());
-    state = SetupDraft(
-      preset: preset,
-      goals: {
-        for (final goal in draft.goals)
-          if (draft.goalSelected(goal, applied)) goal,
-      },
-      basicsEdits: draft.basicsEdits,
-    );
+    state = draft.withPreset(preset);
   }
 
-  void editGeneral(SetupDraftStep step, UpdateGeneralSettingsFunc edit) {
-    final draft = state;
-    if (draft == null) return;
-    state = switch (step) {
-      SetupDraftStep.basics => draft.copyWith(
-        basicsEdits: [...draft.basicsEdits, edit],
-      ),
-      SetupDraftStep.customize => draft.copyWith(
-        customizeEdits: [...draft.customizeEdits, edit],
-      ),
-    };
-  }
+  /// Files a settings write ([SetupEditKind.setting]).
+  void editGeneral(UpdateGeneralSettingsFunc edit) =>
+      _edit(SetupEditKind.setting, edit);
+
+  /// Files a visibility switch change ([SetupEditKind.visibility]): an edit
+  /// that only shows or hides features, and that a preset change drops.
+  void editVisibility(UpdateGeneralSettingsFunc edit) =>
+      _edit(SetupEditKind.visibility, edit);
+
+  /// Shows or hides [visibilitySwitch], as "Show or hide features" does
+  /// ([GeneralSettings.withVisibilitySwitch]).
+  void setVisibilitySwitch(
+    VisibilitySwitch visibilitySwitch, {
+    required bool enabled,
+  }) => editVisibility(
+    (current) =>
+        current.withVisibilitySwitch(visibilitySwitch, enabled: enabled),
+  );
+
+  void _edit(SetupEditKind kind, UpdateGeneralSettingsFunc edit) => _update(
+    (draft) =>
+        draft.copyWith(edits: [...draft.edits, (kind: kind, edit: edit)]),
+  );
 
   void editEngine(UpdateEngineSettingsFunc edit) => _update(
     (draft) => draft.copyWith(engineEdits: [...draft.engineEdits, edit]),
@@ -287,7 +310,7 @@ class SetupDraftController extends _$SetupDraftController {
   }
 
   /// A goal that shows features sets their visibility switches, like
-  /// Customize does. On-device AI is turned on or off; turning it off keeps
+  /// "Show or hide features" does. On-device AI is turned on or off; turning it off keeps
   /// its controls shown. A setup that opens after the commit is remembered
   /// for then, and shows what it needs ([SetupDraft.applyGeneral]);
   /// withdrawing it only cancels the setup.
@@ -302,7 +325,7 @@ class SetupDraftController extends _$SetupDraftController {
             : ({...draft.goals}..remove(goal)),
       );
       state = updated;
-      // A Customize change made before can still hide what the setup needs:
+      // A visibility edit made before can still hide what the setup needs:
       // asking for it now is the later, explicit choice.
       if (selected && !_draftShows(updated, goal.switches)) {
         _showSwitches(goal.switches);
@@ -311,14 +334,15 @@ class SetupDraftController extends _$SetupDraftController {
     }
 
     if (goal.turnsOnLocalAi) {
-      editGeneral(SetupDraftStep.customize, (current) {
+      // One edit: AI turned on is shown, and a preset change drops both.
+      editVisibility((current) {
         final updated = current.copyWith(enableLocalAiFeatures: selected);
         return selected ? _withShown(updated, goal.switches) : updated;
       });
       return;
     }
 
-    editGeneral(SetupDraftStep.customize, (current) {
+    editVisibility((current) {
       var updated = current;
       for (final visibilitySwitch in goal.switches) {
         updated = updated.withVisibilitySwitch(
@@ -339,10 +363,8 @@ class SetupDraftController extends _$SetupDraftController {
     return switches.every(applied.isVisibilitySwitchShown);
   }
 
-  void _showSwitches(List<VisibilitySwitch> switches) => editGeneral(
-    SetupDraftStep.customize,
-    (current) => _withShown(current, switches),
-  );
+  void _showSwitches(List<VisibilitySwitch> switches) =>
+      editVisibility((current) => _withShown(current, switches));
 
   static GeneralSettings _withShown(
     GeneralSettings settings,

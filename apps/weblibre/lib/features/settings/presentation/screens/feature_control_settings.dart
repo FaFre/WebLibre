@@ -20,14 +20,12 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/onboarding/domain/services/preset_bindings.dart';
 import 'package:weblibre/features/onboarding/presentation/utils/setup_preset_l10n.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/customize_setup.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
-import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
-import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
+import 'package:weblibre/features/settings/domain/providers/feature_control_inputs.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/hide_feature_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
@@ -37,8 +35,8 @@ import 'package:weblibre/presentation/utils/visibility_switch_l10n.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// What the settings search indexes for Feature Control: one entry per
-/// visibility switch. The screen itself is the onboarding's Customize
-/// component.
+/// visibility switch. The screen itself is the onboarding's "Show or hide
+/// features" component.
 List<SettingsSectionDefinition> featureControlSettingsSections(
   BuildContext context,
 ) {
@@ -113,19 +111,10 @@ GeneralSettings revertVisibilityChange(
   );
 }
 
-/// What Feature Control decides a change with, as the screen last built:
-/// the stored settings, to tell which changed settings stop or start
-/// applying, and what the user has set up behind a switch ([_setUpBehind]).
-typedef _FeatureControlInputs = ({
-  SettingsSnapshot stored,
-  bool connectionsInUse,
-  bool hasContainers,
-});
-
 /// Whether hiding [visibilitySwitch] hides something the user already set
 /// up, which keeps working and stays within reach (P5): worth saying so.
 bool _setUpBehind(
-  _FeatureControlInputs inputs,
+  FeatureControlInputs inputs,
   VisibilitySwitch visibilitySwitch,
 ) => switch (visibilitySwitch) {
   VisibilitySwitch.connections => inputs.connectionsInUse,
@@ -135,7 +124,7 @@ bool _setUpBehind(
 
 void _sayWhatKeepsWorking(
   BuildContext context,
-  _FeatureControlInputs inputs,
+  FeatureControlInputs inputs,
   Iterable<VisibilitySwitch> hidden,
 ) {
   if (!hidden.any((s) => _setUpBehind(inputs, s))) return;
@@ -145,21 +134,27 @@ void _sayWhatKeepsWorking(
   );
 }
 
-/// Before one switch changes. Hiding a feature whose changed settings would
-/// stop applying asks first, and that confirmation also says what keeps
-/// working; without one, a snackbar says it afterwards. Showing one never
-/// asks: the changes that apply again are the user's own, so a snackbar
-/// names them with an Undo. A restart is offered instead when one of them is
-/// read only at engine start, so two prompts never stack.
-Future<Future<void> Function(BuildContext context)?> _prepareSwitchChange(
+/// Before one switch changes, in Feature Control and in the onboarding's
+/// "Show or hide features" alike ([VisibilitySwitchChange]). Hiding a
+/// feature whose changed settings would stop applying asks first, and that
+/// confirmation also says what keeps working; without one, a snackbar says
+/// it afterwards. Showing one never asks: the changes that apply again are
+/// the user's own, so a snackbar names them with an Undo. A restart is
+/// offered instead when one of them is read only at engine start, so two
+/// prompts never stack.
+///
+/// In the onboarding nothing is applied before Done, so no restart is
+/// offered there ([settingsEditsAreLiveProvider]).
+Future<Future<void> Function(BuildContext context)?> prepareSwitchChange(
   BuildContext context,
   WidgetRef ref,
-  _FeatureControlInputs inputs,
+  FeatureControlInputs inputs,
   VisibilitySwitch visibilitySwitch, {
   required bool enabled,
 }) async {
   // The callback below runs after the save, from the switch's own context.
   final container = ref.container;
+  final live = ref.read(settingsEditsAreLiveProvider);
   final stored = inputs.stored;
   final next = stored.general.withVisibilitySwitch(
     visibilitySwitch,
@@ -169,7 +164,7 @@ Future<Future<void> Function(BuildContext context)?> _prepareSwitchChange(
   if (enabled) {
     final applyingAgain = settingsApplyingAgain(stored, next);
     return (BuildContext context) async {
-      if (applyingAgain.any((setting) => setting.appliesOnRestart)) {
+      if (live && applyingAgain.any((setting) => setting.appliesOnRestart)) {
         await offerRestartForStartupSettings(context, container, applyingAgain);
         return;
       }
@@ -182,7 +177,7 @@ Future<Future<void> Function(BuildContext context)?> _prepareSwitchChange(
         AppLocalizations.of(context).settings_featureControlShownApplyingAgain,
       );
       if (!undo) return;
-      final saved = await save.save(
+      final saved = await save.saveVisibility(
         (current) => revertVisibilityChange(
           current,
           before: stored.general,
@@ -213,8 +208,9 @@ Future<Future<void> Function(BuildContext context)?> _prepareSwitchChange(
   )) {
     return null;
   }
-  return (BuildContext context) =>
-      offerRestartForStartupSettings(context, container, stopping);
+  return (BuildContext context) => live
+      ? offerRestartForStartupSettings(context, container, stopping)
+      : Future<void>.value();
 }
 
 /// Settings > Feature Control: the current visibility switches, changed
@@ -229,20 +225,8 @@ class FeatureControlSettingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
 
-    // What a switch or preset change is decided with ([_FeatureControlInputs]),
-    // loaded before anything is tapped.
-    final stored = ref.watch(storedSettingsSnapshotProvider);
-    final connectionsInUse = ref.watch(connectionsInUseProvider);
-    final hasContainers = ref.watch(
-      watchContainersProvider.select(
-        (value) => value.value?.isNotEmpty ?? false,
-      ),
-    );
-    final _FeatureControlInputs inputs = (
-      stored: stored,
-      connectionsInUse: connectionsInUse,
-      hasContainers: hasContainers,
-    );
+    // Loaded before anything is tapped ([featureControlInputsProvider]).
+    final inputs = ref.watch(featureControlInputsProvider);
 
     return SettingsCustomScrollScaffold(
       title: l10n.settings_categoryFeatureControlTitle,
@@ -263,10 +247,9 @@ class FeatureControlSettingsScreen extends ConsumerWidget {
                 _ApplyPreset(inputs: inputs),
                 const SizedBox(height: 24),
                 CustomizeSetupView(
-                  mode: CustomizeSetupMode.settings,
                   onChange:
                       (context, ref, visibilitySwitch, {required enabled}) =>
-                          _prepareSwitchChange(
+                          prepareSwitchChange(
                             context,
                             ref,
                             inputs,
@@ -288,25 +271,16 @@ class FeatureControlSettingsScreen extends ConsumerWidget {
 class _ApplyPreset extends ConsumerWidget {
   const _ApplyPreset({required this.inputs});
 
-  final _FeatureControlInputs inputs;
+  final FeatureControlInputs inputs;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
 
     return SetupSection(
       title: l10n.settings_featureControlApplyPresetTitle,
+      supportingText: l10n.settings_featureControlApplyPresetSubtitle,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            l10n.settings_featureControlApplyPresetSubtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ),
         for (final preset in SetupPreset.values)
           ListTile(
             leading: Icon(preset.icon),
@@ -322,7 +296,7 @@ class _ApplyPreset extends ConsumerWidget {
 Future<void> _applyPreset(
   BuildContext context,
   WidgetRef ref,
-  _FeatureControlInputs inputs,
+  FeatureControlInputs inputs,
   SetupPreset preset,
 ) async {
   final l10n = AppLocalizations.of(context);
@@ -364,7 +338,7 @@ Future<void> _applyPreset(
 
   final saved = await ref
       .read(saveGeneralSettingsControllerProvider.notifier)
-      .save((current) => withPresetVisibility(current, preset));
+      .saveVisibility((current) => withPresetVisibility(current, preset));
   if (!context.mounted) return;
   if (!saved) {
     showErrorMessage(context, l10n.onboarding_customizeSaveFailed);

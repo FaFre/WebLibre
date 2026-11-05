@@ -269,6 +269,18 @@ void main() {
       );
       expect(fullWidth.width, featureCard.width);
 
+      // The explanation sits under the heading, outside the card, which
+      // holds only the preset rows.
+      final supporting = find.descendant(
+        of: card,
+        matching: find.text(l10n.settings_featureControlApplyPresetSubtitle),
+      );
+      expect(supporting, findsOne);
+      expect(
+        find.ancestor(of: supporting, matching: find.byType(Card)),
+        findsNothing,
+      );
+
       for (final preset in SetupPreset.values) {
         expect(
           find.descendant(

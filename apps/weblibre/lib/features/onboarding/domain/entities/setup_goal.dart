@@ -24,11 +24,11 @@ import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 ///
 /// A goal never changes the preset. It is one of:
 /// - the visibility switches in [switches], on exactly while they are all
-///   shown in the draft, so it always agrees with Customize;
+///   shown in the draft, so it always agrees with the switches;
 /// - with [opensAfterCommit], a setup the user asked for, opening after the
 ///   commit, outside an onboarding that could still be cancelled. Its
 ///   [switches] are what that setup needs shown: selecting it shows them,
-///   but showing them (a preset, Customize) does not select it;
+///   but showing them (a preset, a switch) does not select it;
 /// - with [turnsOnLocalAi], on-device AI turned on, not only shown.
 enum SetupGoal {
   /// Shows containers. Cookie Isolation is explained when the first container

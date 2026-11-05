@@ -65,24 +65,27 @@ String _$settingsEditsAreLiveHash() =>
     r'e2ec0242f7d79a7ac23a7bcccf6d8e8cb4211380';
 
 /// How the settings screens save general settings: into the profile, or in
-/// the onboarding into its draft, as a Customize change (Basics files its own
-/// answers). Only settings UI writes through here; the browser writes the
-/// repository, so nothing it does lands in a draft.
+/// the onboarding into its draft, as a settings edit ([save]) or a visibility
+/// edit ([saveVisibility]), which a preset change drops. Only settings UI
+/// writes through here; the browser writes the repository, so nothing it
+/// does lands in a draft.
 
 @ProviderFor(SaveGeneralSettingsController)
 final saveGeneralSettingsControllerProvider =
     SaveGeneralSettingsControllerProvider._();
 
 /// How the settings screens save general settings: into the profile, or in
-/// the onboarding into its draft, as a Customize change (Basics files its own
-/// answers). Only settings UI writes through here; the browser writes the
-/// repository, so nothing it does lands in a draft.
+/// the onboarding into its draft, as a settings edit ([save]) or a visibility
+/// edit ([saveVisibility]), which a preset change drops. Only settings UI
+/// writes through here; the browser writes the repository, so nothing it
+/// does lands in a draft.
 final class SaveGeneralSettingsControllerProvider
     extends $AsyncNotifierProvider<SaveGeneralSettingsController, void> {
   /// How the settings screens save general settings: into the profile, or in
-  /// the onboarding into its draft, as a Customize change (Basics files its own
-  /// answers). Only settings UI writes through here; the browser writes the
-  /// repository, so nothing it does lands in a draft.
+  /// the onboarding into its draft, as a settings edit ([save]) or a visibility
+  /// edit ([saveVisibility]), which a preset change drops. Only settings UI
+  /// writes through here; the browser writes the repository, so nothing it
+  /// does lands in a draft.
   SaveGeneralSettingsControllerProvider._()
     : super(
         from: null,
@@ -103,12 +106,13 @@ final class SaveGeneralSettingsControllerProvider
 }
 
 String _$saveGeneralSettingsControllerHash() =>
-    r'8409af64c0a63948080243743a4e6f0f162153bd';
+    r'aa295055e3d38e52b854221798c802f0f6df7df0';
 
 /// How the settings screens save general settings: into the profile, or in
-/// the onboarding into its draft, as a Customize change (Basics files its own
-/// answers). Only settings UI writes through here; the browser writes the
-/// repository, so nothing it does lands in a draft.
+/// the onboarding into its draft, as a settings edit ([save]) or a visibility
+/// edit ([saveVisibility]), which a preset change drops. Only settings UI
+/// writes through here; the browser writes the repository, so nothing it
+/// does lands in a draft.
 
 abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();

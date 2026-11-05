@@ -40,7 +40,7 @@
   "@visibilitySwitch_treeTabsDescription": {
     "description": "Subtitle of the tree tabs visibility switch."
   },
-  "visibilitySwitch_layoutAdvancedLabel": "More layout options",
+  "visibilitySwitch_layoutAdvancedLabel": "Toolbar & menu customization",
   "@visibilitySwitch_layoutAdvancedLabel": {
     "description": "Name of the visibility switch that shows advanced tab bar stacking modes, toolbar button customization and menu arrangement."
   },
@@ -68,7 +68,7 @@
   "@visibilitySwitch_privacyAdvancedLabel": {
     "description": "Name of the visibility switch that shows the detailed privacy settings (tracking protection level, DNS provider, hardening and fingerprinting switches, browser languages). A noun phrase like the other switch names: it is also listed as a plain row and inside sentences such as \"Turn on “…”\"."
   },
-  "visibilitySwitch_privacyAdvancedDescription": "Fine-tune tracking protection, secure DNS, the stricter security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.",
+  "visibilitySwitch_privacyAdvancedDescription": "Fine-tune tracking protection, secure DNS, the recommended security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.",
   "@visibilitySwitch_privacyAdvancedDescription": {
     "description": "Subtitle of the privacy controls visibility switch. The protections themselves stay on when it is off."
   },

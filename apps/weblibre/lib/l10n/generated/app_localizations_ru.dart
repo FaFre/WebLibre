@@ -6199,15 +6199,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_updateNoticeBody =>
-      'Это обновление содержит существенные изменения, поэтому нужно проверить настройки. Пройдите следующие страницы, чтобы проверить конфигурацию.';
+      'This update changes a lot. The next pages walk you through your settings.';
 
   @override
   String get onboarding_updateNoticeExtensions =>
-      'После этого обновления перепроверьте расширения: известны проблемы при их переносе.';
+      'Some extensions may need a second look after this update.';
 
   @override
   String get onboarding_updateNoticeSettingsPreserved =>
-      'Существующие настройки не будут перезаписаны, если вы явно не измените их во время этой настройки.';
+      'Your settings stay as they are unless you change them here.';
 
   @override
   String get onboarding_eulaAcceptance =>
@@ -6249,7 +6249,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboarding_searchDefaultProviderLabel => 'Поисковая система';
 
   @override
-  String get onboarding_searchMore => 'Другие системы';
+  String get onboarding_searchMore => 'Все поисковые системы';
 
   @override
   String get onboarding_searchDefaultAutocompleteLabel => 'Поисковые подсказки';
@@ -6262,10 +6262,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboarding_dohTitle => 'Безопасный DNS';
 
   @override
-  String get onboarding_dohSubtitle =>
-      'Шифрует запросы адресов сайтов для большей приватности';
-
-  @override
   String get onboarding_permissionsTitle => 'Разрешения';
 
   @override
@@ -6273,7 +6269,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_permissionsNotificationsSubtitle =>
-      'Нужны для уведомлений о загрузках';
+      'Lets WebLibre show the progress of downloads';
 
   @override
   String get onboarding_permissionsDefaultBrowserTitle =>
@@ -6291,8 +6287,28 @@ class AppLocalizationsRu extends AppLocalizations {
       'На каких языках сайтам показывать содержимое';
 
   @override
+  String get onboarding_severalLanguagesTitle => 'Several languages set';
+
+  @override
+  String onboarding_multipleLanguagesWarning(int count, String locales) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your browser is set to $count languages ($locales).',
+    );
+    return '$_temp0 Websites can use this combination to recognize you.';
+  }
+
+  @override
+  String get onboarding_multipleLanguagesSuggestion =>
+      'Keeping only one language makes you harder to tell apart.';
+
+  @override
+  String get onboarding_reviewLanguages => 'Проверить языки';
+
+  @override
   String get onboarding_webEngineHardeningTitle =>
-      'Более строгие настройки безопасности';
+      'Рекомендуемые настройки безопасности';
 
   @override
   String get onboarding_webEngineHardeningSubtitle =>
@@ -6300,11 +6316,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_fingerprintProtectionTitle =>
-      'Затруднить распознавание этого устройства';
+      'Скрыть данные, по которым узнают это устройство';
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      'Скрывает сведения, по которым сайты узнают вас без куки (цифровые отпечатки)';
+      'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)';
 
   @override
   String get onboarding_compatibilityWarningTitle =>
@@ -6349,7 +6365,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      'Включает списки фильтров, которые WebLibre рекомендует для uBlock Origin';
+      'Also hides cookie banners, social media buttons and other annoyances';
 
   @override
   String get onboarding_presetTitle => 'Сколько всего показывать в WebLibre?';
@@ -6394,7 +6410,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_presetAdvancedPoint3 =>
-      'Дерево вкладок, жесты и другие варианты расположения';
+      'Дерево вкладок, жесты и настройка панели инструментов и меню';
 
   @override
   String get onboarding_presetAdvancedPoint4 =>
@@ -6420,39 +6436,15 @@ class AppLocalizationsRu extends AppLocalizations {
       'Настройки JavaScript, user agent и сертификатов';
 
   @override
-  String get onboarding_basicsTitle => 'Основное';
-
-  @override
-  String get onboarding_basicsTabBarTitle => 'Положение панели вкладок';
-
-  @override
-  String get onboarding_basicsTabBarAutoHint =>
-      '«Автоматически» подстраивается под окно и сохраняет боковую панель на больших экранах';
-
-  @override
-  String get onboarding_basicsMoreSearchOptions => 'Другие параметры поиска';
-
-  @override
   String get onboarding_yourSetupTitle => 'Ваши настройки';
-
-  @override
-  String get onboarding_yourSetupOnTitle => 'Включено с самого начала';
 
   @override
   String get onboarding_yourSetupProtections =>
       'Блокировка трекеров и зашифрованные соединения';
 
   @override
-  String get onboarding_yourSetupHardening =>
-      'Более строгие настройки безопасности';
-
-  @override
   String get onboarding_yourSetupLocalNetwork =>
-      'Для локальных подключений требуется разрешение';
-
-  @override
-  String get onboarding_yourSetupContentBlocker =>
-      'Блокировка рекламы с uBlock Origin';
+      'Websites ask before local connections';
 
   @override
   String onboarding_yourSetupHistoryRetention(int days) {
@@ -6472,7 +6464,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeLater =>
-      'Это можно изменить в любой момент в разделе «Настройки > Управление функциями».';
+      'You can show or hide features anytime in Settings > Feature Control.';
 
   @override
   String get onboarding_presetAdvancedIncludes =>
@@ -6481,13 +6473,6 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get onboarding_presetExpertIncludes =>
       'Всё из режима «Мастерская», а также:';
-
-  @override
-  String get onboarding_presetChangeResetCustomize =>
-      'Изменения в разделах «Настроить» и «Ваши настройки» сброшены.';
-
-  @override
-  String get onboarding_goalsTitle => 'Что-нибудь ещё?';
 
   @override
   String get onboarding_goalKeepAccountsApart => 'Разделять аккаунты';
@@ -6508,22 +6493,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_goalLockBrowserSubtitle =>
-      'Разблокировка этого профиля блокировкой устройства или паролем';
+      'Set up a device lock or password when you tap Done';
 
   @override
   String get onboarding_goalSetUpConnectionsSubtitle =>
-      'После завершения откроются настройки подключений. Ничего не подключится, пока вы сами его не запустите.';
+      'Opens connection setup when you tap Done. Nothing connects until you start it.';
 
   @override
   String get onboarding_goalSyncDevicesSubtitle =>
-      'Войти в Firefox Sync после завершения настройки';
-
-  @override
-  String get onboarding_customizeAction => 'Настроить';
-
-  @override
-  String get onboarding_customizeCaption =>
-      'Функции, приватность, блокировка рекламы и оформление';
+      'Sign in to Firefox Sync when you tap Done';
 
   @override
   String get onboarding_customizeGroupPrivacy => 'Приватность и безопасность';
@@ -6542,7 +6520,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось сохранить, какие функции показываются. Попробуйте ещё раз.';
 
   @override
-  String get onboarding_customizeGroupMore => 'Другое';
+  String get onboarding_customizeGroupOther => 'Other features';
 
   @override
   String get onboarding_customizeHomeSections => 'Разделы главной страницы';
@@ -6568,7 +6546,76 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_setupStepFailedHardening =>
-      'Не удалось полностью включить более строгие настройки безопасности. WebLibre попробует ещё раз при следующем запуске.';
+      'Не удалось включить некоторые рекомендуемые настройки безопасности. WebLibre попробует ещё раз при следующем запуске.';
+
+  @override
+  String get onboarding_searchStepTitle => 'Поиск';
+
+  @override
+  String get onboarding_layoutStepTitle => 'Макет';
+
+  @override
+  String get onboarding_layoutCustomizeFurtherTitle =>
+      'Дополнительная настройка';
+
+  @override
+  String get onboarding_layoutReassurance =>
+      '«Авто» подходит для большинства устройств. Всё это можно изменить позже в настройках.';
+
+  @override
+  String get onboarding_toolbarLayoutSubtitle =>
+      'Кнопки, меню, панель вкладок и автоскрытие';
+
+  @override
+  String get onboarding_yourChoicesTitle => 'Ваш выбор';
+
+  @override
+  String get onboarding_tabBarPositionTitle => 'Положение панели вкладок';
+
+  @override
+  String get onboarding_yourChoicesSuggestionsOff => 'Выключены';
+
+  @override
+  String get onboarding_yourSetupOnDoneTitle => 'Turned on when you tap Done';
+
+  @override
+  String get onboarding_ublockInstallOnDoneSubtitle =>
+      'Устанавливается при нажатии «Готово» и запрашивает свои разрешения';
+
+  @override
+  String get onboarding_privacySecurityRowSubtitle =>
+      'Локальные подключения, цифровые отпечатки, безопасный DNS и языки для сайтов';
+
+  @override
+  String get onboarding_addToSetupTitle => 'Добавить к вашим настройкам';
+
+  @override
+  String get onboarding_showHideFeaturesAction => 'Показать или скрыть функции';
+
+  @override
+  String get onboarding_showHideFeaturesCaption =>
+      'Пока функция скрыта, её настройки используют значения по умолчанию. Ваши изменения вернутся, когда вы её покажете.';
+
+  @override
+  String onboarding_dohCurrentSubtitle(String mode, String provider) {
+    return '$mode: $provider';
+  }
+
+  @override
+  String get onboarding_presetChangeResetVisibility =>
+      'Your show and hide changes were replaced by this choice\'s defaults.';
+
+  @override
+  String onboarding_presetChangeStopsApplyingTitle(String preset) {
+    return 'Переключиться на «$preset»?';
+  }
+
+  @override
+  String get onboarding_presetChangeStopsApplyingContent =>
+      'При этом выборе скрываются функции, настройки которых вы изменили. Пока они скрыты, эти настройки используют значения по умолчанию. Ваши изменения сохраняются и снова применятся, когда вы их покажете.';
+
+  @override
+  String get onboarding_presetChangeConfirm => 'Переключить';
 
   @override
   String get proxy_actionChange => 'Изменить';
@@ -10275,7 +10322,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_webEngineHardeningKeywords =>
-      'усиление защиты, hardening, безопасность, Более строгие настройки безопасности';
+      'усиление защиты, hardening, безопасность, Более строгие настройки безопасности, Рекомендуемые настройки безопасности';
 
   @override
   String get settings_webEngineHardeningSearchHint =>
@@ -11156,7 +11203,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settings_indexFissionEnabledSubtitle =>
-      'Более строгая изоляция сайтов друг от друга';
+      'Запускать каждый сайт в отдельном процессе';
 
   @override
   String get settings_indexExtensionsWebAPIEnabledSubtitle =>
@@ -11636,7 +11683,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
 
   @override
-  String get settings_previewDeviceTablet => 'Tablet';
+  String get settings_previewDeviceLargeScreen => 'Large screen';
 
   @override
   String settings_previewOtherDeviceHint(String device) {
@@ -11645,8 +11692,8 @@ class AppLocalizationsRu extends AppLocalizations {
           'Showing a phone. Automatic settings apply as they would on a phone.',
       'phoneLandscape':
           'Showing a phone in landscape. Automatic settings apply as they would there.',
-      'tablet':
-          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'largeScreen':
+          'Showing a large screen. Automatic settings apply as they would on a large screen.',
       'other': 'Showing another window size.',
     });
     return '$_temp0';
@@ -14572,7 +14619,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel =>
-      'Другие варианты расположения';
+      'Настройка панели инструментов и меню';
 
   @override
   String get visibilitySwitch_layoutAdvancedDescription =>
@@ -14599,7 +14646,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get visibilitySwitch_privacyAdvancedDescription =>
-      'Точная настройка защиты от отслеживания, безопасного DNS, более строгих настроек безопасности и защиты от распознавания устройства. Скрытие этих настроек не отключает защиту.';
+      'Точная настройка защиты от отслеживания, безопасного DNS, рекомендуемых настроек безопасности и защиты от распознавания устройства. Скрытие этих настроек не отключает защиту.';
 
   @override
   String get visibilitySwitch_webappStorageLabel => 'Хранилище веб-приложений';

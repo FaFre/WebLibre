@@ -23,9 +23,19 @@ import 'package:flutter/material.dart';
 /// primary color above a filled card, the tiles separated by dividers. The
 /// card always spans the full width, whatever its content.
 class SetupSection extends StatelessWidget {
-  const SetupSection({super.key, this.title, required this.children});
+  const SetupSection({
+    super.key,
+    this.title,
+    this.supportingText,
+    required this.children,
+  });
 
   final String? title;
+
+  /// A line under [title] that explains the group, outside the card: the
+  /// card holds only its rows (Material 3 lists).
+  final String? supportingText;
+
   final List<Widget> children;
 
   @override
@@ -40,6 +50,15 @@ class SetupSection extends StatelessWidget {
         children: [
           if (title case final title?) ...[
             SetupSectionTitle(title),
+            SizedBox(height: supportingText == null ? 12 : 4),
+          ],
+          if (supportingText case final supportingText?) ...[
+            Text(
+              supportingText,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 12),
           ],
           Card.filled(
@@ -84,3 +103,102 @@ class SetupSectionTitle extends StatelessWidget {
     );
   }
 }
+
+/// A row that opens another screen over the onboarding, which edits the
+/// draft through the edit layer.
+class SetupLinkTile extends StatelessWidget {
+  const SetupLinkTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.open,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final Future<void> Function(BuildContext context) open;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle!) : null,
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => open(context),
+    );
+  }
+}
+
+/// What to know about the switch above it, drawn as part of that row: it
+/// starts at the row's text (past the 16 padding, 24 icon and 16 gap of the
+/// list tile) and ends with its 24 end padding, so it reads as the row's
+/// own detail rather than a panel of its own.
+class SetupNotice extends StatelessWidget {
+  const SetupNotice({
+    super.key,
+    required this.color,
+    required this.onColor,
+    required this.title,
+    required this.points,
+    this.margin = const EdgeInsetsDirectional.fromSTEB(56, 0, 24, 16),
+    this.action,
+  });
+
+  final Color color;
+  final Color onColor;
+  final String title;
+  final List<String> points;
+
+  /// Defaults to the row-detail inset above; a notice about the whole page
+  /// passes its own.
+  final EdgeInsetsGeometry margin;
+
+  /// A button under the points, at the end.
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      width: double.infinity,
+      margin: margin,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: onColor,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          for (final point in points) ...[
+            const SizedBox(height: 8),
+            Text(
+              '• $point',
+              style: theme.textTheme.bodySmall?.copyWith(color: onColor),
+            ),
+          ],
+          if (action case final action?) ...[
+            const SizedBox(height: 12),
+            Align(alignment: AlignmentDirectional.centerEnd, child: action),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Opens [screen] over the onboarding. A plain route: the screens edit the
+/// draft through the edit layer wherever they are built.
+Future<void> pushSetupScreen(BuildContext context, Widget screen) =>
+    Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => screen));

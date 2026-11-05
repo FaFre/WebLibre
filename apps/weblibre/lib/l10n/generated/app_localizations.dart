@@ -10399,19 +10399,19 @@ abstract class AppLocalizations {
   /// Body of the notice shown to existing users after a major update, asking them to go through the setup pages again.
   ///
   /// In en, this message translates to:
-  /// **'This update includes significant changes that require you to review your settings. Please go through the following pages to check your configuration.'**
+  /// **'This update changes a lot. The next pages walk you through your settings.'**
   String get onboarding_updateNoticeBody;
 
-  /// Point in the update notice: browser extensions may need to be checked because of known problems carrying them over to the new version.
+  /// Point in the update notice: some browser extensions may need to be checked, because carrying them over to the new version has known problems.
   ///
   /// In en, this message translates to:
-  /// **'Please re-check your extensions after this update due to known migration issues.'**
+  /// **'Some extensions may need a second look after this update.'**
   String get onboarding_updateNoticeExtensions;
 
-  /// Point in the update notice: going through setup does not reset existing settings.
+  /// Point in the update notice: going through setup does not change existing settings; only what the user changes on these pages changes.
   ///
   /// In en, this message translates to:
-  /// **'Your existing settings will not be overridden unless you explicitly change them during this setup.'**
+  /// **'Your settings stay as they are unless you change them here.'**
   String get onboarding_updateNoticeSettingsPreserved;
 
   /// Checkbox on the welcome page that must be ticked to continue. The text between <eula>…</eula> and <privacy>…</privacy> becomes a tappable link to the license agreement and the privacy policy; keep both tag pairs and translate the text inside them. EULA is short for End User License Agreement.
@@ -10480,13 +10480,13 @@ abstract class AppLocalizations {
   /// **'Search engine'**
   String get onboarding_searchDefaultProviderLabel;
 
-  /// Button after the suggested search engines that opens a search across all available engines.
+  /// Button after the suggested search engines on the onboarding basics step that opens a search across all available search engines, to pick one that is not suggested.
   ///
   /// In en, this message translates to:
-  /// **'Search more'**
+  /// **'All search engines'**
   String get onboarding_searchMore;
 
-  /// Label above the choice of service that suggests search terms while typing.
+  /// Label of the dropdown on the onboarding Search step that chooses the service suggesting search terms while typing.
   ///
   /// In en, this message translates to:
   /// **'Search suggestions'**
@@ -10504,12 +10504,6 @@ abstract class AppLocalizations {
   /// **'Secure DNS'**
   String get onboarding_dohTitle;
 
-  /// Subtitle of the secure DNS row in setup. Describes encrypted address lookups without promising that browsing is invisible to the network provider.
-  ///
-  /// In en, this message translates to:
-  /// **'Encrypts website address lookups for more privacy'**
-  String get onboarding_dohSubtitle;
-
   /// Heading of the first-run setup page for Android permissions.
   ///
   /// In en, this message translates to:
@@ -10522,10 +10516,10 @@ abstract class AppLocalizations {
   /// **'Notifications'**
   String get onboarding_permissionsNotificationsTitle;
 
-  /// Explanation under the notifications permission switch: needed to report progress of downloads.
+  /// Explanation under the notifications permission switch: lets the browser show the progress of downloads. Not required; do not say it is.
   ///
   /// In en, this message translates to:
-  /// **'Required to notify you about downloads'**
+  /// **'Lets WebLibre show the progress of downloads'**
   String get onboarding_permissionsNotificationsSubtitle;
 
   /// Switch that makes WebLibre the device's default browser.
@@ -10552,10 +10546,34 @@ abstract class AppLocalizations {
   /// **'Which languages websites should show you'**
   String get onboarding_privacyBrowserLanguagesSubtitle;
 
-  /// Switch that applies all recommended security settings to the browser engine (Gecko).
+  /// Heading of a warning shown when several preferred languages are set, which makes the browser easier to recognize.
   ///
   /// In en, this message translates to:
-  /// **'Stricter security settings'**
+  /// **'Several languages set'**
+  String get onboarding_severalLanguagesTitle;
+
+  /// Warning body. count is the number of configured languages; locales is a comma-separated list of language names in the UI language, such as "English (United States), German (Germany)". Avoid the technical term "fingerprinting": say plainly that websites can recognize the user.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{Your browser is set to {count} languages ({locales}).}} Websites can use this combination to recognize you.'**
+  String onboarding_multipleLanguagesWarning(int count, String locales);
+
+  /// Suggestion in the language warning: one language makes the browser harder to tell apart from others. Plain wording, no technical terms.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping only one language makes you harder to tell apart.'**
+  String get onboarding_multipleLanguagesSuggestion;
+
+  /// Button in the language warning that opens the language settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Review languages'**
+  String get onboarding_reviewLanguages;
+
+  /// Switch that applies WebLibre's recommended security settings to the browser engine (Gecko). Name the settings by who recommends them, not by comparison ("stricter" than what?).
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended security settings'**
   String get onboarding_webEngineHardeningTitle;
 
   /// Explanation under the web engine hardening switch.
@@ -10567,13 +10585,13 @@ abstract class AppLocalizations {
   /// Switch that turns on the strict set of protections against browser fingerprinting (identifying a browser by its unique characteristics).
   ///
   /// In en, this message translates to:
-  /// **'Make this device harder to recognize'**
+  /// **'Hide details that identify this device'**
   String get onboarding_fingerprintProtectionTitle;
 
-  /// Subtitle of the switch that turns on strong fingerprinting protection. "Fingerprinting" in brackets is the technical term, kept so people can find it in Settings.
+  /// Subtitle of the switch that turns on strong fingerprinting protection: websites get common values instead of this device's own, so it is harder to recognize. "Fingerprinting" in brackets is the technical term, kept so people can find it in Settings.
   ///
   /// In en, this message translates to:
-  /// **'Hides details websites use to recognize you without cookies (fingerprinting)'**
+  /// **'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)'**
   String get onboarding_fingerprintProtectionSubtitle;
 
   /// Heading of the notice shown when strong fingerprinting protection is turned on during setup.
@@ -10642,10 +10660,10 @@ abstract class AppLocalizations {
   /// **'Use recommended filters'**
   String get onboarding_ublockApplyDefaultsTitle;
 
-  /// Explanation under "Use recommended filters": turns on WebLibre's recommended extra filter lists in uBlock Origin.
+  /// Explanation under "Use recommended filters": the extra uBlock Origin filter lists WebLibre recommends also hide cookie notices, social media widgets and other annoyances.
   ///
   /// In en, this message translates to:
-  /// **'Turns on the filter lists WebLibre recommends for uBlock Origin'**
+  /// **'Also hides cookie banners, social media buttons and other annoyances'**
   String get onboarding_ublockApplyDefaultsSubtitle;
 
   /// Title of the onboarding step where the user picks a setup preset (Just browsing, Tinkerer, Expert).
@@ -10669,7 +10687,7 @@ abstract class AppLocalizations {
   /// First thing the "Just browsing" preset shows, listed on its card.
   ///
   /// In en, this message translates to:
-  /// **'Tabs, bookmarks, history and Reader Mode'**
+  /// **'Tabs, bookmarks, history and reader mode'**
   String get onboarding_presetAveragePoint1;
 
   /// Second thing the "Just browsing" preset shows. uBlock Origin is a product name.
@@ -10717,7 +10735,7 @@ abstract class AppLocalizations {
   /// Third thing the "Tinkerer" preset adds.
   ///
   /// In en, this message translates to:
-  /// **'Tree tabs, gestures and more layout options'**
+  /// **'Tree tabs, gestures and toolbar & menu customization'**
   String get onboarding_presetAdvancedPoint3;
 
   /// Fourth thing the "Tinkerer" preset adds: the advanced privacy settings, and the settings for on-device AI. AI itself stays off until the user turns it on, so this names the controls, not AI turned on.
@@ -10756,41 +10774,11 @@ abstract class AppLocalizations {
   /// **'JavaScript, user agent and certificate controls'**
   String get onboarding_presetExpertPoint3;
 
-  /// Title of the onboarding step that asks for the default search provider and the tab bar position.
-  ///
-  /// In en, this message translates to:
-  /// **'The basics'**
-  String get onboarding_basicsTitle;
-
-  /// Heading of the tab bar position choice (Automatic, Top, Bottom) in the onboarding basics step.
-  ///
-  /// In en, this message translates to:
-  /// **'Tab bar position'**
-  String get onboarding_basicsTabBarTitle;
-
-  /// Hint under the tab bar position choice explaining the Automatic option.
-  ///
-  /// In en, this message translates to:
-  /// **'Automatic adapts to the window and keeps the side panel on larger screens'**
-  String get onboarding_basicsTabBarAutoHint;
-
-  /// Expandable row in the onboarding basics step that reveals the autocomplete provider choice.
-  ///
-  /// In en, this message translates to:
-  /// **'More search options'**
-  String get onboarding_basicsMoreSearchOptions;
-
   /// Title of the onboarding summary step listing what is on and what is hidden.
   ///
   /// In en, this message translates to:
   /// **'Your setup'**
   String get onboarding_yourSetupTitle;
-
-  /// Heading of the list of protections and features that are on after setup.
-  ///
-  /// In en, this message translates to:
-  /// **'On from the start'**
-  String get onboarding_yourSetupOnTitle;
 
   /// Row on the setup summary: tracking protection, HTTPS-Only Mode and secure DNS are on, said in plain words.
   ///
@@ -10798,23 +10786,11 @@ abstract class AppLocalizations {
   /// **'Tracker blocking and encrypted connections'**
   String get onboarding_yourSetupProtections;
 
-  /// Summary line: the recommended engine hardening preferences are applied.
+  /// Row on the setup summary: websites ask before connecting to apps on this device or to devices on the local network. Same idea as onboarding_blockAllLocalNetworkTitle.
   ///
   /// In en, this message translates to:
-  /// **'Stricter security settings'**
-  String get onboarding_yourSetupHardening;
-
-  /// Row on the setup summary: websites must ask before connecting to apps on this device or to devices on the local network.
-  ///
-  /// In en, this message translates to:
-  /// **'Permission required for local connections'**
+  /// **'Websites ask before local connections'**
   String get onboarding_yourSetupLocalNetwork;
-
-  /// Summary line: the uBlock Origin extension is installed after setup.
-  ///
-  /// In en, this message translates to:
-  /// **'Ad blocking with uBlock Origin'**
-  String get onboarding_yourSetupContentBlocker;
 
   /// Summary line: how long browsing history is kept before it is deleted automatically.
   ///
@@ -10828,10 +10804,10 @@ abstract class AppLocalizations {
   /// **'Hidden for now'**
   String get onboarding_yourSetupHiddenForNowTitle;
 
-  /// Hint under the three preset cards on the onboarding, so the choice does not feel final. "Settings > Feature Control" is the path to the settings screen of that name.
+  /// Hint under the three preset cards on the onboarding, so the choice does not feel final. "Settings > Feature Control" is the path to the settings screen of that name (settings_categoryFeatureControlTitle); use the same names.
   ///
   /// In en, this message translates to:
-  /// **'You can change this anytime in Settings > Feature Control.'**
+  /// **'You can show or hide features anytime in Settings > Feature Control.'**
   String get onboarding_presetChangeLater;
 
   /// Lead-in line on the "Tinkerer" preset card, above the list of what it adds. "Just browsing" is the name of the first preset (onboarding_presetAverageTitle); use the same translation.
@@ -10845,18 +10821,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Everything in Tinkerer, plus:'**
   String get onboarding_presetExpertIncludes;
-
-  /// Snackbar on the onboarding after another preset was picked: what had been changed on top of the old option, in the "Customize" and "Your setup" steps (use their translated names), was discarded. Shown with an Undo button.
-  ///
-  /// In en, this message translates to:
-  /// **'Your changes in Customize and Your setup were reset.'**
-  String get onboarding_presetChangeResetCustomize;
-
-  /// Heading of the goal switches on the "Your setup" step. Each switch turns on what a goal needs without changing the preset.
-  ///
-  /// In en, this message translates to:
-  /// **'Anything else?'**
-  String get onboarding_goalsTitle;
 
   /// Goal switch on the "Your setup" step: shows containers.
   ///
@@ -10888,35 +10852,23 @@ abstract class AppLocalizations {
   /// **'Use several accounts on the same site, each in its own container'**
   String get onboarding_goalKeepAccountsApartSubtitle;
 
-  /// Explanation under the "Lock the browser" switch on the "Your setup" step. When on, the profile lock setup opens once the onboarding is done.
+  /// Explanation under the "Lock the browser" switch on the "Your setup" step. When on, the profile lock setup opens once the user taps Done ("Done" is the button label, common_done).
   ///
   /// In en, this message translates to:
-  /// **'Unlock this profile with the device lock or a password'**
+  /// **'Set up a device lock or password when you tap Done'**
   String get onboarding_goalLockBrowserSubtitle;
 
-  /// Explanation under the "Set up Tor, a VPN or a proxy" switch on the "Your setup" step: the connection settings open after setup, and no connection starts until the user starts one there.
+  /// Explanation under the "Set up Tor, a VPN or a proxy" switch on the "Your setup" step: the connection settings open when the user taps Done (common_done), and no connection starts until the user starts one there.
   ///
   /// In en, this message translates to:
-  /// **'Opens connection setup when you\'re done. Nothing connects until you start it.'**
+  /// **'Opens connection setup when you tap Done. Nothing connects until you start it.'**
   String get onboarding_goalSetUpConnectionsSubtitle;
 
-  /// Explanation under the "Sync with my other devices" switch on the "Your setup" step. Firefox Sync is a product name.
+  /// Explanation under the "Sync with my other devices" switch on the "Your setup" step: sign-in opens when the user taps Done (common_done). Firefox Sync is a product name.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to Firefox Sync once setup is done'**
+  /// **'Sign in to Firefox Sync when you tap Done'**
   String get onboarding_goalSyncDevicesSubtitle;
-
-  /// Button on the summary step that opens the screen for switching feature groups on or off.
-  ///
-  /// In en, this message translates to:
-  /// **'Customize'**
-  String get onboarding_customizeAction;
-
-  /// Caption under the Customize button on the onboarding "Your setup" step: what can be changed there.
-  ///
-  /// In en, this message translates to:
-  /// **'Features, privacy, ad blocking and layout'**
-  String get onboarding_customizeCaption;
 
   /// Group heading on the Customize screen.
   ///
@@ -10951,8 +10903,8 @@ abstract class AppLocalizations {
   /// Heading of the last group on the Customize and Feature Control screens: on-device AI, web app storage and Expert settings.
   ///
   /// In en, this message translates to:
-  /// **'More'**
-  String get onboarding_customizeGroupMore;
+  /// **'Other features'**
+  String get onboarding_customizeGroupOther;
 
   /// Row in the Home & new tab group that opens the section arrangement of the home page.
   ///
@@ -10990,11 +10942,125 @@ abstract class AppLocalizations {
   /// **'The recommended uBlock Origin filters could not be turned on. WebLibre tries again on the next start.'**
   String get onboarding_setupStepFailedFilters;
 
-  /// Message after setup when the browser engine refused some of the stricter security settings chosen during setup (the 'Stricter security settings' option). The setup still finished; the settings are retried on each start until they apply.
+  /// Message after setup when the browser engine refused some of the recommended security settings chosen during setup (the "Recommended security settings" option, onboarding_webEngineHardeningTitle). The setup still finished; the settings are retried on each start until they apply.
   ///
   /// In en, this message translates to:
-  /// **'The stricter security settings could not all be turned on. WebLibre tries again on the next start.'**
+  /// **'Some of the recommended security settings could not be turned on. WebLibre tries again on the next start.'**
   String get onboarding_setupStepFailedHardening;
+
+  /// Title of the onboarding step that asks for the default search engine and the search suggestion provider.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get onboarding_searchStepTitle;
+
+  /// Title of the onboarding step that shows a picture of the browser and asks where the tab bar goes, with optional links to the toolbar, home page and new tab layout screens.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get onboarding_layoutStepTitle;
+
+  /// Heading on the onboarding Layout step above links to further layout screens (toolbar & layout, home page sections, new tab sections). Invites the user to customize more than the tab bar position chosen above.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize further'**
+  String get onboarding_layoutCustomizeFurtherTitle;
+
+  /// Reassurance under the tab bar position choice on the onboarding Layout step. "Automatic" is the name of the first tab bar position option (settings_tabBarPositionAutoLabel); use the same translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic works for most devices. You can change all of this later in Settings.'**
+  String get onboarding_layoutReassurance;
+
+  /// Subtitle of the "Toolbar & layout" link on the onboarding Layout step: what that screen lets you change.
+  ///
+  /// In en, this message translates to:
+  /// **'Buttons, menu, tab bar and auto-hide'**
+  String get onboarding_toolbarLayoutSubtitle;
+
+  /// Heading on the onboarding "Your setup" step above a summary of what was chosen on earlier steps (search engine, search suggestions, tab bar position). Each row opens its step again.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choices'**
+  String get onboarding_yourChoicesTitle;
+
+  /// Heading of the tab bar position choice on the onboarding Layout step, and row title in the "Your choices" summary of the "Your setup" step, where the chosen position is shown below it.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab bar position'**
+  String get onboarding_tabBarPositionTitle;
+
+  /// Value under the "Search suggestions" row of the "Your choices" summary when no suggestion provider is chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get onboarding_yourChoicesSuggestionsOff;
+
+  /// Heading of the protections on the onboarding "Your setup" step. Nothing applies before the user taps Done, so the heading says they turn on then. "Done" is the button label (common_done); use the same translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Turned on when you tap Done'**
+  String get onboarding_yourSetupOnDoneTitle;
+
+  /// Subtitle of the "Install uBlock Origin" switch on the onboarding "Your setup" step. "Done" is the button that finishes the onboarding (common_done); use the same translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed when you tap Done; asks for its permissions'**
+  String get onboarding_ublockInstallOnDoneSubtitle;
+
+  /// Subtitle of the "Privacy & security" row on the onboarding "Your setup" step (shown when the chosen preset skips that step but Advanced privacy was shown afterwards): what the page it opens holds.
+  ///
+  /// In en, this message translates to:
+  /// **'Local connections, fingerprinting, Secure DNS and website languages'**
+  String get onboarding_privacySecurityRowSubtitle;
+
+  /// Heading of the goal switches on the onboarding "Your setup" step (keep accounts apart, lock the browser, connections, on-device AI, sync). Each one adds something to the setup, and several open a setup screen once Done is tapped. "Your setup" is the step's title (onboarding_yourSetupTitle); use the same term.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to your setup'**
+  String get onboarding_addToSetupTitle;
+
+  /// Button on the onboarding "Your setup" step, and title of the screen it opens, with one switch per group of features that can be shown or hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide features'**
+  String get onboarding_showHideFeaturesAction;
+
+  /// Caption under the "Show or hide features" button: while a feature is hidden, its settings apply at their default values. Changed settings are not reset: they are kept and apply again when the feature is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'While a feature is hidden, its settings use their defaults. Your changes come back when you show it.'**
+  String get onboarding_showHideFeaturesCaption;
+
+  /// Subtitle of the Secure DNS row on the onboarding "Privacy & security" step: the current protection level (for example "Increased Protection") and the DNS resolver it uses (for example "Quad9").
+  ///
+  /// In en, this message translates to:
+  /// **'{mode} with {provider}'**
+  String onboarding_dohCurrentSubtitle(String mode, String provider);
+
+  /// Snackbar on the onboarding after another preset was picked: features the user had shown or hidden on top of the old preset follow the new one again. Other settings and choices are kept. Shown with an Undo button.
+  ///
+  /// In en, this message translates to:
+  /// **'Your show and hide changes were replaced by this choice\'s defaults.'**
+  String get onboarding_presetChangeResetVisibility;
+
+  /// Title of the dialog shown on the onboarding preset step before switching to another preset that hides features whose settings the user changed. {preset} is the name of the preset chosen (for example "Just browsing").
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to “{preset}”?'**
+  String onboarding_presetChangeStopsApplyingTitle(String preset);
+
+  /// Text of that dialog, above the list of changed settings that stop applying. The changes are not lost: they apply again once their features are shown.
+  ///
+  /// In en, this message translates to:
+  /// **'This choice hides features whose settings you changed. While they are hidden, these settings use their defaults. Your changes are kept and apply again when you show them.'**
+  String get onboarding_presetChangeStopsApplyingContent;
+
+  /// Button of that dialog that switches to the chosen preset.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get onboarding_presetChangeConfirm;
 
   /// Button next to the current log level on the proxy logs screen; opens the log level sheet.
   ///
@@ -16833,7 +16899,7 @@ abstract class AppLocalizations {
   /// Comma-separated search terms for this setting. Not displayed; include synonyms users might type.
   ///
   /// In en, this message translates to:
-  /// **'hardening, Stricter security settings'**
+  /// **'hardening, Stricter security settings, recommended security settings'**
   String get settings_webEngineHardeningKeywords;
 
   /// Placeholder of the search field on that screen.
@@ -18267,7 +18333,7 @@ abstract class AppLocalizations {
   /// Summary of the site isolation setting, shown as a settings search result.
   ///
   /// In en, this message translates to:
-  /// **'Use stronger site isolation between origins'**
+  /// **'Run each site in its own process'**
   String get settings_indexFissionEnabledSubtitle;
 
   /// Summary of the extensions web API setting, shown as a settings search result.
@@ -19080,16 +19146,16 @@ abstract class AppLocalizations {
   /// **'Phone in landscape'**
   String get settings_previewDevicePhoneLandscape;
 
-  /// Choice in the Toolbar & Layout preview: show the layout as it would look on a tablet or a large window.
+  /// Choice in the Toolbar & Layout preview: show the layout as it would look on a large screen in landscape, such as a tablet, a Chromebook or a desktop window. Avoid naming a single device type.
   ///
   /// In en, this message translates to:
-  /// **'Tablet'**
-  String get settings_previewDeviceTablet;
+  /// **'Large screen'**
+  String get settings_previewDeviceLargeScreen;
 
   /// Line above the Toolbar & Layout preview while it shows a device other than the current window. Automatic settings such as the tab bar position resolve differently per window size.
   ///
   /// In en, this message translates to:
-  /// **'{device, select, phone{Showing a phone. Automatic settings apply as they would on a phone.} phoneLandscape{Showing a phone in landscape. Automatic settings apply as they would there.} tablet{Showing a tablet. Automatic settings apply as they would on a tablet.} other{Showing another window size.}}'**
+  /// **'{device, select, phone{Showing a phone. Automatic settings apply as they would on a phone.} phoneLandscape{Showing a phone in landscape. Automatic settings apply as they would there.} largeScreen{Showing a large screen. Automatic settings apply as they would on a large screen.} other{Showing another window size.}}'**
   String settings_previewOtherDeviceHint(String device);
 
   /// Choice in the Toolbar & Layout preview: show the browser with a web page open.
@@ -19566,7 +19632,7 @@ abstract class AppLocalizations {
   /// **'Apply preset'**
   String get settings_featureControlApplyPresetTitle;
 
-  /// Line under the "Apply preset" heading: only which features are shown changes, no setting does.
+  /// Supporting line under the "Apply preset" heading, above the preset rows: only which features are shown changes, no setting does.
   ///
   /// In en, this message translates to:
   /// **'Show and hide features the way a preset does.'**
@@ -23600,7 +23666,7 @@ abstract class AppLocalizations {
   /// Name of the visibility switch that shows advanced tab bar stacking modes, toolbar button customization and menu arrangement.
   ///
   /// In en, this message translates to:
-  /// **'More layout options'**
+  /// **'Toolbar & menu customization'**
   String get visibilitySwitch_layoutAdvancedLabel;
 
   /// Subtitle of the more layout options visibility switch.
@@ -23642,7 +23708,7 @@ abstract class AppLocalizations {
   /// Subtitle of the privacy controls visibility switch. The protections themselves stay on when it is off.
   ///
   /// In en, this message translates to:
-  /// **'Fine-tune tracking protection, secure DNS, the stricter security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.'**
+  /// **'Fine-tune tracking protection, secure DNS, the recommended security settings and how hard this device is to recognize. Hiding these settings does not turn off protection.'**
   String get visibilitySwitch_privacyAdvancedDescription;
 
   /// Name of the visibility switch that shows the storage choice when installing a site as an app.

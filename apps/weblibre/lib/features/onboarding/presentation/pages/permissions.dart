@@ -23,14 +23,13 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:skeletonizer/skeletonizer.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
-class PermissionsPage extends HookConsumerWidget implements IFormPage {
-  @override
+class PermissionsPage extends HookConsumerWidget {
+  /// Saved by the onboarding on Next and Done (`formKeyOf`).
   final GlobalKey<FormState> formKey;
 
   const PermissionsPage({super.key, required this.formKey});

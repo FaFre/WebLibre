@@ -83,7 +83,8 @@ part 'feature_policy_registry.dart';
 /// onboarding commit writes once.
 enum SetupPreset { average, advanced, expert }
 
-/// What Customize may do with a feature.
+/// What showing or hiding features (Feature Control, the onboarding's
+/// "Show or hide features") may do with a feature.
 enum FeatureAvailability {
   /// Average tier: never hidden. Its runtime settings still work as usual.
   locked,
@@ -114,7 +115,7 @@ enum PolicyToken {
   recommendInstall,
   recommend,
 
-  /// Asked in the onboarding's Basics step.
+  /// Asked in the onboarding's Search and Layout steps.
   userChoice,
   days90,
 

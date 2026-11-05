@@ -220,23 +220,104 @@ void main() {
       expect(state().appliesHardeningBaseline, isTrue);
     });
 
-    test('a preset change keeps Basics and drops Customize changes', () {
+    test('a preset change keeps settings and drops visibility edits', () {
       draft()
         ..editGeneral(
-          SetupDraftStep.basics,
           (s) => s.copyWith(tabBarPosition: TabBarPositionSetting.top),
         )
-        ..editGeneral(
-          SetupDraftStep.customize,
-          (s) => s.copyWith(pureBlack: true),
+        ..editGeneral((s) => s.copyWith(pureBlack: true))
+        ..editEngine((s) => s.copyWith.fontSizeFactor(2))
+        ..setLayout(ModuleSurface.home, const [])
+        ..setMenuLayout([...defaultMenuLayout.reversed])
+        ..setToolbarButtons(
+          ToolbarConfigLocation.contextual,
+          defaultToolbarButtonConfigsFor(
+            ToolbarConfigLocation.contextual,
+          ).value.reversed.toList(),
         )
-        ..setInstallUBlock(false)
-        ..selectPreset(SetupPreset.expert);
+        ..setHardeningBaseline(false)
+        ..setInstallUBlock(true)
+        ..setOptimizedUBlockFilters(false)
+        ..setVisibilitySwitch(VisibilitySwitch.treeTabs, enabled: true);
+      final previous = state();
+      expect(previous.hasVisibilityChanges, isTrue);
 
-      final applied = state().applyGeneral(GeneralSettings.withDefaults());
+      draft().selectPreset(SetupPreset.expert);
+      final changed = state();
+      final applied = changed.applyGeneral(GeneralSettings.withDefaults());
       expect(applied.tabBarPosition, TabBarPositionSetting.top);
-      expect(applied.pureBlack, isFalse);
-      expect(state().installsUBlock, isTrue);
+      expect(applied.pureBlack, isTrue);
+      expect(
+        changed.applyEngine(EngineSettings.withDefaults()).fontSizeFactor,
+        2,
+      );
+      expect(changed.layouts, previous.layouts);
+      expect(changed.menuLayout, previous.menuLayout);
+      expect(changed.toolbarButtons, previous.toolbarButtons);
+      expect(changed.appliesHardeningBaseline, isFalse);
+      expect(changed.installsUBlock, isTrue);
+      expect(changed.appliesOptimizedUBlockFilters, isFalse);
+      // Only the visibility edit is gone.
+      expect(changed.edits, hasLength(2));
+      expect(changed.hasVisibilityChanges, isFalse);
+
+      // Back at Average, tree tabs follow the preset again: hidden.
+      draft().selectPreset(SetupPreset.average);
+      expect(
+        state()
+            .applyGeneral(GeneralSettings.withDefaults())
+            .isVisibilitySwitchShown(VisibilitySwitch.treeTabs),
+        isFalse,
+      );
+    });
+
+    group('the latest choice wins', () {
+      TabBarPositionSetting position() =>
+          state().applyGeneral(GeneralSettings.withDefaults()).tabBarPosition;
+
+      // The Layout step's answer and the Toolbar & layout editor's write
+      // the same setting; both are settings edits now.
+      void layoutStep(TabBarPositionSetting value) =>
+          draft().editGeneral((s) => s.copyWith(tabBarPosition: value));
+      void editor(TabBarPositionSetting value) =>
+          draft().editGeneral((s) => s.copyWith.tabBarPosition(value));
+
+      for (final presetChange in [false, true]) {
+        final suffix = presetChange ? ', then a preset change' : '';
+
+        test('Layout, then the editor, then Layout$suffix', () {
+          layoutStep(TabBarPositionSetting.bottom);
+          editor(TabBarPositionSetting.left);
+          layoutStep(TabBarPositionSetting.top);
+          if (presetChange) draft().selectPreset(SetupPreset.expert);
+          expect(position(), TabBarPositionSetting.top);
+        });
+
+        test('the editor, then Layout, then the editor$suffix', () {
+          editor(TabBarPositionSetting.right);
+          layoutStep(TabBarPositionSetting.bottom);
+          editor(TabBarPositionSetting.left);
+          if (presetChange) draft().selectPreset(SetupPreset.advanced);
+          expect(position(), TabBarPositionSetting.left);
+        });
+      }
+
+      test('a hide after a goal wins, and a later goal shows again', () {
+        GeneralSettings applied() =>
+            state().applyGeneral(GeneralSettings.withDefaults());
+        draft()
+          ..setGoal(SetupGoal.keepAccountsApart, selected: true)
+          ..setVisibilitySwitch(VisibilitySwitch.containers, enabled: false);
+        expect(
+          applied().isVisibilitySwitchShown(VisibilitySwitch.containers),
+          isFalse,
+        );
+        draft().setGoal(SetupGoal.keepAccountsApart, selected: true);
+        expect(
+          applied().isVisibilitySwitchShown(VisibilitySwitch.containers),
+          isTrue,
+        );
+      });
     });
 
     test('goals turn on exactly their switches', () {
@@ -267,12 +348,8 @@ void main() {
       draft().setGoal(SetupGoal.keepAccountsApart, selected: true);
       expect(selected(SetupGoal.keepAccountsApart), isTrue);
 
-      // Hiding containers in Customize turns the goal off with them.
-      draft().editGeneral(
-        SetupDraftStep.customize,
-        (s) =>
-            s.withVisibilitySwitch(VisibilitySwitch.containers, enabled: false),
-      );
+      // Hiding containers turns the goal off with them.
+      draft().setVisibilitySwitch(VisibilitySwitch.containers, enabled: false);
       expect(selected(SetupGoal.keepAccountsApart), isFalse);
 
       draft().selectPreset(SetupPreset.advanced);
@@ -337,16 +414,10 @@ void main() {
         expect(state().setupsToOpen(applied()), isEmpty);
       });
 
-      test('Customize can hide what it needs, which turns it off', () {
+      test('hiding what it needs turns it off', () {
         draft()
           ..setGoal(SetupGoal.setUpConnections, selected: true)
-          ..editGeneral(
-            SetupDraftStep.customize,
-            (s) => s.withVisibilitySwitch(
-              VisibilitySwitch.connections,
-              enabled: false,
-            ),
-          );
+          ..setVisibilitySwitch(VisibilitySwitch.connections, enabled: false);
         expect(selected(), isFalse);
         expect(state().setupsToOpen(applied()), isEmpty);
 
@@ -388,7 +459,7 @@ void main() {
         }
       });
 
-      test('is turned on by its goal alone, in step with Customize', () {
+      test('is turned on by its goal, in step with its own switch', () {
         draft().setGoal(SetupGoal.useOnDeviceAi, selected: true);
         expect(applied().enableLocalAiFeatures, isTrue);
         expect(applied().isFeatureShown(FeatureId.aiLocalAi), isTrue);
@@ -400,31 +471,30 @@ void main() {
         expect(applied().isVisibilitySwitchShown(VisibilitySwitch.ai), isTrue);
         expect(selected(), isFalse);
 
-        // Customize's own switch is the same setting.
-        draft().editGeneral(
-          SetupDraftStep.customize,
-          (s) => s.copyWith(enableLocalAiFeatures: true),
-        );
+        // The settings switch (Settings > AI) is the same setting.
+        draft().editGeneral((s) => s.copyWith(enableLocalAiFeatures: true));
         expect(selected(), isTrue);
       });
     });
 
-    test('a preset change after Customize changes can be undone', () {
+    test('a preset change after visibility edits can be undone', () {
       draft().selectPreset(SetupPreset.advanced);
-      expect(state().hasCustomizeChanges, isFalse);
+      expect(state().hasVisibilityChanges, isFalse);
 
       draft()
-        ..editGeneral(
-          SetupDraftStep.customize,
-          (s) => s.copyWith(pureBlack: true),
-        )
+        ..editGeneral((s) => s.copyWith(pureBlack: true))
         ..setGoal(SetupGoal.lockBrowser, selected: true);
+      // Settings edits and requested setups survive a preset change.
+      expect(state().hasVisibilityChanges, isFalse);
+
+      draft().setGoal(SetupGoal.keepAccountsApart, selected: true);
       final previous = state();
-      expect(previous.hasCustomizeChanges, isTrue);
+      expect(previous.hasVisibilityChanges, isTrue);
 
       draft().selectPreset(SetupPreset.expert);
       final changed = state();
-      expect(changed.customizeEdits, isEmpty);
+      expect(changed.edits, hasLength(1));
+      expect(changed.hasVisibilityChanges, isFalse);
       expect(changed.goals, {SetupGoal.lockBrowser});
 
       draft().undo(changed: changed, previous: previous);
@@ -437,35 +507,21 @@ void main() {
       expect(state(), same(later));
     });
 
-    test('an arranged menu is a Customize change', () {
-      final arranged = [...defaultMenuLayout.reversed];
-      draft().setMenuLayout(arranged);
-      final previous = state();
-      expect(previous.hasCustomizeChanges, isTrue);
-
-      draft().selectPreset(SetupPreset.expert);
-      expect(state().menuLayout, isNull);
-
-      draft().undo(changed: state(), previous: previous);
-      expect(state().menuLayout, arranged);
-    });
-
-    test('changed toolbar buttons are a Customize change', () {
-      draft().setToolbarButtons(
-        ToolbarConfigLocation.contextual,
-        defaultToolbarButtonConfigsFor(
+    test('arrangements are not visibility changes', () {
+      draft()
+        ..setMenuLayout([...defaultMenuLayout.reversed])
+        ..setLayout(ModuleSurface.newTab, const [])
+        ..setToolbarButtons(
           ToolbarConfigLocation.contextual,
-        ).value.reversed.toList(),
-      );
-      final previous = state();
-      expect(previous.hasCustomizeChanges, isTrue);
-
-      // Relative to the old preset, like the rest of Customize.
-      draft().selectPreset(SetupPreset.expert);
-      expect(state().toolbarButtons, isEmpty);
-
-      draft().undo(changed: state(), previous: previous);
-      expect(state().toolbarButtons, previous.toolbarButtons);
+          defaultToolbarButtonConfigsFor(
+            ToolbarConfigLocation.contextual,
+          ).value.reversed.toList(),
+        )
+        ..setHardeningBaseline(false)
+        ..setInstallUBlock(false)
+        ..setOptimizedUBlockFilters(false)
+        ..editEngine((s) => s.copyWith.fontSizeFactor(2));
+      expect(state().hasVisibilityChanges, isFalse);
     });
 
     test('Lock and Sync goals change no setting', () {
@@ -536,7 +592,7 @@ void main() {
       );
       for (final feature in FeatureId.values) {
         // Switch entries are guarded but need no switch: they are the
-        // switches, always listed in Customize.
+        // switches, always listed in Show or hide features.
         expect(
           allOff.isFeatureShown(feature),
           feature.policy.switches.isEmpty,

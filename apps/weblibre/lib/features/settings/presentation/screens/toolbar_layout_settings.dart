@@ -316,7 +316,9 @@ class _PreviewPane extends ConsumerWidget {
   /// and its controls too when even less is left, rather than scroll.
   final ToolbarLayoutEditorViewState view;
 
-  /// Whether the mode switch has room for its labels, or shows icons only.
+  /// Whether the controls have room for their labels, or show icons only:
+  /// the device and state menus then name their choice in a tooltip and in
+  /// the menu they open, so all three fit one row on a phone.
   final bool labelledModes;
   final ValueChanged<ToolbarLayoutEditorViewState> onViewChanged;
   final ValueChanged<PreviewTryAction> onTryAction;
@@ -369,6 +371,7 @@ class _PreviewPane extends ConsumerWidget {
                 values: PreviewDevice.values,
                 selected: device,
                 highlighted: device != PreviewDevice.thisWindow,
+                showLabel: labelledModes,
                 label: (value) => value.label(context),
                 icon: (value) => value.icon,
                 onSelected: (value) =>
@@ -378,6 +381,7 @@ class _PreviewPane extends ConsumerWidget {
                 values: PreviewSampleState.values,
                 selected: effectiveState,
                 highlighted: effectiveState != PreviewSampleState.page,
+                showLabel: labelledModes,
                 label: (value) => value.label(context),
                 icon: (value) => value.icon,
                 disabledReason: (value) =>
@@ -933,6 +937,7 @@ class _MenuChip<T> extends StatelessWidget {
     required this.values,
     required this.selected,
     required this.highlighted,
+    required this.showLabel,
     required this.label,
     required this.icon,
     required this.onSelected,
@@ -944,6 +949,10 @@ class _MenuChip<T> extends StatelessWidget {
 
   /// Whether the chip shows as selected: the choice differs from the default.
   final bool highlighted;
+
+  /// Whether the chip names its choice, or shows its icon alone with the name
+  /// in a tooltip.
+  final bool showLabel;
   final String Function(T value) label;
   final IconData Function(T value) icon;
   final ValueChanged<T> onSelected;
@@ -962,13 +971,19 @@ class _MenuChip<T> extends StatelessWidget {
       ],
       builder: (context, controller, child) => FilterChip(
         avatar: Icon(icon(selected)),
+        tooltip: showLabel ? null : label(selected),
+        labelPadding: showLabel
+            ? null
+            : const EdgeInsetsDirectional.only(start: 4, end: 2),
         label: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Flexible(
-              child: Text(label(selected), overflow: TextOverflow.ellipsis),
-            ),
-            const SizedBox(width: 4),
+            if (showLabel) ...[
+              Flexible(
+                child: Text(label(selected), overflow: TextOverflow.ellipsis),
+              ),
+              const SizedBox(width: 4),
+            ],
             Icon(
               controller.isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
               size: 18,

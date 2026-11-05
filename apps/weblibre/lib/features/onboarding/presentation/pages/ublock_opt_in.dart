@@ -25,12 +25,11 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
 
-class UBlockOptInPage extends HookConsumerWidget implements IFormPage {
-  @override
+class UBlockOptInPage extends HookConsumerWidget {
+  /// Saved by the onboarding on Next and Done (`formKeyOf`).
   final GlobalKey<FormState> formKey;
 
   const UBlockOptInPage({super.key, required this.formKey});

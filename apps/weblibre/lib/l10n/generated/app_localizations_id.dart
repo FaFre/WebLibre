@@ -6111,15 +6111,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_updateNoticeBody =>
-      'Pembaruan ini membawa perubahan besar yang mengharuskan Anda meninjau pengaturan. Silakan telusuri halaman-halaman berikut untuk memeriksa konfigurasi Anda.';
+      'This update changes a lot. The next pages walk you through your settings.';
 
   @override
   String get onboarding_updateNoticeExtensions =>
-      'Harap periksa kembali ekstensi Anda setelah pembaruan ini karena ada masalah migrasi yang diketahui.';
+      'Some extensions may need a second look after this update.';
 
   @override
   String get onboarding_updateNoticeSettingsPreserved =>
-      'Pengaturan Anda yang ada tidak akan ditimpa kecuali Anda sengaja mengubahnya selama penyiapan ini.';
+      'Your settings stay as they are unless you change them here.';
 
   @override
   String get onboarding_eulaAcceptance =>
@@ -6161,7 +6161,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get onboarding_searchDefaultProviderLabel => 'Mesin pencari';
 
   @override
-  String get onboarding_searchMore => 'Cari lainnya';
+  String get onboarding_searchMore => 'Semua mesin pencari';
 
   @override
   String get onboarding_searchDefaultAutocompleteLabel => 'Saran pencarian';
@@ -6174,10 +6174,6 @@ class AppLocalizationsId extends AppLocalizations {
   String get onboarding_dohTitle => 'DNS Aman';
 
   @override
-  String get onboarding_dohSubtitle =>
-      'Mengenkripsi pencarian alamat situs web untuk privasi yang lebih baik';
-
-  @override
   String get onboarding_permissionsTitle => 'Izin';
 
   @override
@@ -6185,7 +6181,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_permissionsNotificationsSubtitle =>
-      'Diperlukan untuk memberi tahu Anda tentang unduhan';
+      'Lets WebLibre show the progress of downloads';
 
   @override
   String get onboarding_permissionsDefaultBrowserTitle => 'Peramban Bawaan';
@@ -6202,8 +6198,28 @@ class AppLocalizationsId extends AppLocalizations {
       'Bahasa yang sebaiknya digunakan situs web untuk Anda';
 
   @override
+  String get onboarding_severalLanguagesTitle => 'Several languages set';
+
+  @override
+  String onboarding_multipleLanguagesWarning(int count, String locales) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your browser is set to $count languages ($locales).',
+    );
+    return '$_temp0 Websites can use this combination to recognize you.';
+  }
+
+  @override
+  String get onboarding_multipleLanguagesSuggestion =>
+      'Keeping only one language makes you harder to tell apart.';
+
+  @override
+  String get onboarding_reviewLanguages => 'Tinjau Bahasa';
+
+  @override
   String get onboarding_webEngineHardeningTitle =>
-      'Pengaturan keamanan yang lebih ketat';
+      'Pengaturan keamanan yang disarankan';
 
   @override
   String get onboarding_webEngineHardeningSubtitle =>
@@ -6211,11 +6227,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_fingerprintProtectionTitle =>
-      'Buat perangkat ini lebih sulit dikenali';
+      'Sembunyikan detail yang mengidentifikasi perangkat ini';
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      'Menyembunyikan detail yang dipakai situs untuk mengenali Anda tanpa kuki (sidik jari)';
+      'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)';
 
   @override
   String get onboarding_compatibilityWarningTitle =>
@@ -6260,7 +6276,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      'Mengaktifkan daftar filter yang direkomendasikan WebLibre untuk uBlock Origin';
+      'Also hides cookie banners, social media buttons and other annoyances';
 
   @override
   String get onboarding_presetTitle =>
@@ -6305,7 +6321,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_presetAdvancedPoint3 =>
-      'Tab pohon, gestur, dan opsi tata letak lainnya';
+      'Tab pohon, gestur, dan kustomisasi bilah alat & menu';
 
   @override
   String get onboarding_presetAdvancedPoint4 =>
@@ -6331,39 +6347,15 @@ class AppLocalizationsId extends AppLocalizations {
       'Kontrol JavaScript, user agent, dan sertifikat';
 
   @override
-  String get onboarding_basicsTitle => 'Dasar-dasar';
-
-  @override
-  String get onboarding_basicsTabBarTitle => 'Posisi bilah tab';
-
-  @override
-  String get onboarding_basicsTabBarAutoHint =>
-      'Otomatis menyesuaikan dengan jendela dan mempertahankan panel samping di layar yang lebih besar';
-
-  @override
-  String get onboarding_basicsMoreSearchOptions => 'Opsi pencarian lainnya';
-
-  @override
   String get onboarding_yourSetupTitle => 'Pengaturan Anda';
-
-  @override
-  String get onboarding_yourSetupOnTitle => 'Aktif sejak awal';
 
   @override
   String get onboarding_yourSetupProtections =>
       'Pemblokiran pelacak dan koneksi terenkripsi';
 
   @override
-  String get onboarding_yourSetupHardening =>
-      'Pengaturan keamanan yang lebih ketat';
-
-  @override
   String get onboarding_yourSetupLocalNetwork =>
-      'Koneksi lokal memerlukan izin';
-
-  @override
-  String get onboarding_yourSetupContentBlocker =>
-      'Pemblokiran iklan dengan uBlock Origin';
+      'Websites ask before local connections';
 
   @override
   String onboarding_yourSetupHistoryRetention(int days) {
@@ -6381,7 +6373,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeLater =>
-      'Anda dapat mengubahnya kapan saja di Pengaturan > Kontrol Fitur.';
+      'You can show or hide features anytime in Settings > Feature Control.';
 
   @override
   String get onboarding_presetAdvancedIncludes =>
@@ -6390,13 +6382,6 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get onboarding_presetExpertIncludes =>
       'Semua yang ada di Suka utak-atik, ditambah:';
-
-  @override
-  String get onboarding_presetChangeResetCustomize =>
-      'Perubahan di Sesuaikan dan Pengaturan Anda telah diatur ulang.';
-
-  @override
-  String get onboarding_goalsTitle => 'Ada lagi?';
 
   @override
   String get onboarding_goalKeepAccountsApart => 'Pisahkan akun';
@@ -6417,22 +6402,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_goalLockBrowserSubtitle =>
-      'Buka kunci profil ini dengan kunci perangkat atau kata sandi';
+      'Set up a device lock or password when you tap Done';
 
   @override
   String get onboarding_goalSetUpConnectionsSubtitle =>
-      'Membuka pengaturan koneksi setelah selesai. Tidak ada yang tersambung sampai Anda memulainya.';
+      'Opens connection setup when you tap Done. Nothing connects until you start it.';
 
   @override
   String get onboarding_goalSyncDevicesSubtitle =>
-      'Masuk ke Firefox Sync setelah pengaturan selesai';
-
-  @override
-  String get onboarding_customizeAction => 'Sesuaikan';
-
-  @override
-  String get onboarding_customizeCaption =>
-      'Fitur, privasi, pemblokiran iklan, dan tata letak';
+      'Sign in to Firefox Sync when you tap Done';
 
   @override
   String get onboarding_customizeGroupPrivacy => 'Privasi & keamanan';
@@ -6451,7 +6429,7 @@ class AppLocalizationsId extends AppLocalizations {
       'Tidak dapat menyimpan fitur yang ditampilkan. Coba lagi.';
 
   @override
-  String get onboarding_customizeGroupMore => 'Lainnya';
+  String get onboarding_customizeGroupOther => 'Other features';
 
   @override
   String get onboarding_customizeHomeSections => 'Bagian beranda';
@@ -6477,7 +6455,76 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get onboarding_setupStepFailedHardening =>
-      'Pengaturan keamanan yang lebih ketat tidak dapat diaktifkan sepenuhnya. WebLibre akan mencoba lagi saat dimulai berikutnya.';
+      'Sebagian pengaturan keamanan yang disarankan tidak dapat diaktifkan. WebLibre akan mencoba lagi saat dimulai berikutnya.';
+
+  @override
+  String get onboarding_searchStepTitle => 'Pencarian';
+
+  @override
+  String get onboarding_layoutStepTitle => 'Tata letak';
+
+  @override
+  String get onboarding_layoutCustomizeFurtherTitle => 'Sesuaikan lebih lanjut';
+
+  @override
+  String get onboarding_layoutReassurance =>
+      'Otomatis cocok untuk sebagian besar perangkat. Anda dapat mengubah semua ini nanti di Pengaturan.';
+
+  @override
+  String get onboarding_toolbarLayoutSubtitle =>
+      'Tombol, menu, bilah tab, dan sembunyi otomatis';
+
+  @override
+  String get onboarding_yourChoicesTitle => 'Pilihan Anda';
+
+  @override
+  String get onboarding_tabBarPositionTitle => 'Posisi bilah tab';
+
+  @override
+  String get onboarding_yourChoicesSuggestionsOff => 'Nonaktif';
+
+  @override
+  String get onboarding_yourSetupOnDoneTitle => 'Turned on when you tap Done';
+
+  @override
+  String get onboarding_ublockInstallOnDoneSubtitle =>
+      'Dipasang saat Anda mengetuk Selesai dan meminta izinnya';
+
+  @override
+  String get onboarding_privacySecurityRowSubtitle =>
+      'Koneksi lokal, sidik jari, DNS Aman, dan bahasa situs web';
+
+  @override
+  String get onboarding_addToSetupTitle => 'Tambahkan ke pengaturan Anda';
+
+  @override
+  String get onboarding_showHideFeaturesAction =>
+      'Tampilkan atau sembunyikan fitur';
+
+  @override
+  String get onboarding_showHideFeaturesCaption =>
+      'Selama fitur disembunyikan, pengaturannya memakai nilai bawaan. Perubahan Anda kembali saat Anda menampilkannya.';
+
+  @override
+  String onboarding_dohCurrentSubtitle(String mode, String provider) {
+    return '$mode dengan $provider';
+  }
+
+  @override
+  String get onboarding_presetChangeResetVisibility =>
+      'Your show and hide changes were replaced by this choice\'s defaults.';
+
+  @override
+  String onboarding_presetChangeStopsApplyingTitle(String preset) {
+    return 'Beralih ke \"$preset\"?';
+  }
+
+  @override
+  String get onboarding_presetChangeStopsApplyingContent =>
+      'Pilihan ini menyembunyikan fitur yang pengaturannya Anda ubah. Selama disembunyikan, pengaturan tersebut memakai nilai bawaan. Perubahan Anda tetap disimpan dan berlaku lagi saat Anda menampilkannya.';
+
+  @override
+  String get onboarding_presetChangeConfirm => 'Beralih';
 
   @override
   String get proxy_actionChange => 'Ubah';
@@ -10138,7 +10185,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_webEngineHardeningKeywords =>
-      'pengerasan, keamanan, hardening, Pengaturan keamanan yang lebih ketat';
+      'pengerasan, keamanan, hardening, Pengaturan keamanan yang lebih ketat, Pengaturan keamanan yang disarankan';
 
   @override
   String get settings_webEngineHardeningSearchHint => 'Cari grup pengerasan';
@@ -11014,7 +11061,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_indexFissionEnabledSubtitle =>
-      'Gunakan isolasi situs yang lebih kuat antar-asal';
+      'Jalankan setiap situs dalam prosesnya sendiri';
 
   @override
   String get settings_indexExtensionsWebAPIEnabledSubtitle =>
@@ -11494,7 +11541,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
 
   @override
-  String get settings_previewDeviceTablet => 'Tablet';
+  String get settings_previewDeviceLargeScreen => 'Large screen';
 
   @override
   String settings_previewOtherDeviceHint(String device) {
@@ -11503,8 +11550,8 @@ class AppLocalizationsId extends AppLocalizations {
           'Showing a phone. Automatic settings apply as they would on a phone.',
       'phoneLandscape':
           'Showing a phone in landscape. Automatic settings apply as they would there.',
-      'tablet':
-          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'largeScreen':
+          'Showing a large screen. Automatic settings apply as they would on a large screen.',
       'other': 'Showing another window size.',
     });
     return '$_temp0';
@@ -14397,7 +14444,8 @@ class AppLocalizationsId extends AppLocalizations {
       'Tampilkan tab yang dibuka dari sebuah halaman di bawah tab asalnya';
 
   @override
-  String get visibilitySwitch_layoutAdvancedLabel => 'Opsi tata letak lainnya';
+  String get visibilitySwitch_layoutAdvancedLabel =>
+      'Kustomisasi bilah alat & menu';
 
   @override
   String get visibilitySwitch_layoutAdvancedDescription =>
@@ -14424,7 +14472,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get visibilitySwitch_privacyAdvancedDescription =>
-      'Sesuaikan perlindungan pelacakan, DNS aman, pengaturan keamanan yang lebih ketat, dan seberapa sulit perangkat ini dikenali. Menyembunyikan pengaturan ini tidak menonaktifkan perlindungan.';
+      'Sesuaikan perlindungan pelacakan, DNS aman, pengaturan keamanan yang disarankan, dan seberapa sulit perangkat ini dikenali. Menyembunyikan pengaturan ini tidak menonaktifkan perlindungan.';
 
   @override
   String get visibilitySwitch_webappStorageLabel => 'Penyimpanan aplikasi web';

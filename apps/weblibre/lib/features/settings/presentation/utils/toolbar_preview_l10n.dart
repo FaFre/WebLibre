@@ -29,7 +29,7 @@ extension PreviewDeviceL10n on PreviewDevice {
       PreviewDevice.thisWindow => l10n.settings_previewDeviceThisWindow,
       PreviewDevice.phone => l10n.settings_previewDevicePhone,
       PreviewDevice.phoneLandscape => l10n.settings_previewDevicePhoneLandscape,
-      PreviewDevice.tablet => l10n.settings_previewDeviceTablet,
+      PreviewDevice.largeScreen => l10n.settings_previewDeviceLargeScreen,
     };
   }
 
@@ -37,7 +37,7 @@ extension PreviewDeviceL10n on PreviewDevice {
     PreviewDevice.thisWindow => Icons.fit_screen_outlined,
     PreviewDevice.phone => Icons.smartphone,
     PreviewDevice.phoneLandscape => Icons.stay_current_landscape,
-    PreviewDevice.tablet => Icons.tablet,
+    PreviewDevice.largeScreen => Icons.desktop_windows_outlined,
   };
 }
 

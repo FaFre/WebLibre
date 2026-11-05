@@ -66,10 +66,15 @@ class SettingsSnapshot {
   final bool appLinkContainers;
 
   /// This snapshot with [general] in place of its general settings: what
-  /// changing the visibility switches to [general]'s would make of it.
-  SettingsSnapshot withGeneral(GeneralSettings general) => SettingsSnapshot(
+  /// changing the visibility switches to [general]'s would make of it. With
+  /// [engine], the engine settings too: what a change of both (an onboarding
+  /// preset change) would make of it.
+  SettingsSnapshot withGeneral(
+    GeneralSettings general, {
+    EngineSettings? engine,
+  }) => SettingsSnapshot(
     general: general,
-    engine: engine,
+    engine: engine ?? this.engine,
     gestures: gestures,
     keyboardShortcuts: keyboardShortcuts,
     proxyDiagnostics: proxyDiagnostics,
@@ -154,9 +159,17 @@ class SettingsSnapshot {
 List<HiddenSetting> settingsStoppingToApply(
   SettingsSnapshot stored,
   GeneralSettings next,
+) => settingsStoppingBetween(stored, stored.withGeneral(next));
+
+/// The changes suspended in [next] that are not in [stored], in
+/// [HiddenSetting] order: [settingsStoppingToApply] for a change of more
+/// than the general settings.
+List<HiddenSetting> settingsStoppingBetween(
+  SettingsSnapshot stored,
+  SettingsSnapshot next,
 ) {
   final before = stored.suspended;
-  final after = stored.withGeneral(next).suspended;
+  final after = next.suspended;
   return [
     for (final setting in HiddenSetting.values)
       if (after.contains(setting) && !before.contains(setting)) setting,

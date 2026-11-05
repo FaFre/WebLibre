@@ -11,9 +11,7 @@ abstract class _$SetupDraftCWProxy {
 
   SetupDraft goals(Set<SetupGoal> goals);
 
-  SetupDraft basicsEdits(List<UpdateGeneralSettingsFunc> basicsEdits);
-
-  SetupDraft customizeEdits(List<UpdateGeneralSettingsFunc> customizeEdits);
+  SetupDraft edits(List<SetupEdit> edits);
 
   SetupDraft engineEdits(List<UpdateEngineSettingsFunc> engineEdits);
 
@@ -42,8 +40,7 @@ abstract class _$SetupDraftCWProxy {
   SetupDraft call({
     SetupPreset preset,
     Set<SetupGoal> goals,
-    List<UpdateGeneralSettingsFunc> basicsEdits,
-    List<UpdateGeneralSettingsFunc> customizeEdits,
+    List<SetupEdit> edits,
     List<UpdateEngineSettingsFunc> engineEdits,
     Map<ModuleSurface, List<ModuleOrderEntry>> layouts,
     Map<ToolbarConfigLocation, List<ToolbarButtonConfig>> toolbarButtons,
@@ -68,12 +65,7 @@ class _$SetupDraftCWProxyImpl implements _$SetupDraftCWProxy {
   SetupDraft goals(Set<SetupGoal> goals) => call(goals: goals);
 
   @override
-  SetupDraft basicsEdits(List<UpdateGeneralSettingsFunc> basicsEdits) =>
-      call(basicsEdits: basicsEdits);
-
-  @override
-  SetupDraft customizeEdits(List<UpdateGeneralSettingsFunc> customizeEdits) =>
-      call(customizeEdits: customizeEdits);
+  SetupDraft edits(List<SetupEdit> edits) => call(edits: edits);
 
   @override
   SetupDraft engineEdits(List<UpdateEngineSettingsFunc> engineEdits) =>
@@ -116,8 +108,7 @@ class _$SetupDraftCWProxyImpl implements _$SetupDraftCWProxy {
   SetupDraft call({
     Object? preset = const $CopyWithPlaceholder(),
     Object? goals = const $CopyWithPlaceholder(),
-    Object? basicsEdits = const $CopyWithPlaceholder(),
-    Object? customizeEdits = const $CopyWithPlaceholder(),
+    Object? edits = const $CopyWithPlaceholder(),
     Object? engineEdits = const $CopyWithPlaceholder(),
     Object? layouts = const $CopyWithPlaceholder(),
     Object? toolbarButtons = const $CopyWithPlaceholder(),
@@ -135,17 +126,10 @@ class _$SetupDraftCWProxyImpl implements _$SetupDraftCWProxy {
           ? _value.goals
           // ignore: cast_nullable_to_non_nullable
           : goals as Set<SetupGoal>,
-      basicsEdits:
-          basicsEdits == const $CopyWithPlaceholder() || basicsEdits == null
-          ? _value.basicsEdits
+      edits: edits == const $CopyWithPlaceholder() || edits == null
+          ? _value.edits
           // ignore: cast_nullable_to_non_nullable
-          : basicsEdits as List<UpdateGeneralSettingsFunc>,
-      customizeEdits:
-          customizeEdits == const $CopyWithPlaceholder() ||
-              customizeEdits == null
-          ? _value.customizeEdits
-          // ignore: cast_nullable_to_non_nullable
-          : customizeEdits as List<UpdateGeneralSettingsFunc>,
+          : edits as List<SetupEdit>,
       engineEdits:
           engineEdits == const $CopyWithPlaceholder() || engineEdits == null
           ? _value.engineEdits
@@ -284,7 +268,7 @@ final class SetupDraftControllerProvider
 }
 
 String _$setupDraftControllerHash() =>
-    r'768c5e9fc7cf8105491a5ea80576ab589a26aff9';
+    r'c303f118efe81756022e10f346728a5fc0811bc5';
 
 /// The onboarding's draft: open while a fresh onboarding is owed, null
 /// otherwise.

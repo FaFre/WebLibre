@@ -358,8 +358,9 @@ class HiddenSwitchesBuilder extends ConsumerWidget {
 /// every time.
 ///
 /// Writes through the settings save controller, so in the onboarding into
-/// its draft: nothing is suspended there, so the dialog lists nothing, and
-/// no restart is offered and no decline forgotten until the commit.
+/// its draft, as a visibility edit a preset change drops: nothing is
+/// suspended there, so the dialog lists nothing, and no restart is offered
+/// and no decline forgotten until the commit.
 Future<void> revealHiddenSwitches(
   BuildContext context,
   WidgetRef ref,
@@ -384,7 +385,9 @@ Future<void> revealHiddenSwitches(
     context,
     ref.container,
     missing,
-    write: ref.read(saveGeneralSettingsControllerProvider.notifier).save,
+    write: ref
+        .read(saveGeneralSettingsControllerProvider.notifier)
+        .saveVisibility,
     applyingAgain: applyingAgain,
     committed: committed,
   );

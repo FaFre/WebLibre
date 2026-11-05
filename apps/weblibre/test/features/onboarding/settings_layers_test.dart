@@ -152,10 +152,7 @@ void main() {
       // Nothing to file into.
       container
           .read(setupDraftControllerProvider.notifier)
-          .editGeneral(
-            SetupDraftStep.customize,
-            (s) => s.copyWith(enableLocalAiFeatures: false),
-          );
+          .editGeneral((s) => s.copyWith(enableLocalAiFeatures: false));
       expect(container.read(setupDraftControllerProvider), isNull);
 
       await container
@@ -219,8 +216,7 @@ void main() {
       await _settle();
       container.read(setupDraftControllerProvider.notifier)
         ..selectPreset(SetupPreset.expert)
-        ..editGeneral(
-          SetupDraftStep.customize,
+        ..editVisibility(
           (s) => s.withVisibilitySwitch(VisibilitySwitch.ai, enabled: false),
         )
         ..editEngine((s) => s.copyWith.fontSizeFactor(2))

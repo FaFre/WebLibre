@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -27,15 +28,19 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/onboarding/domain/providers.dart';
 import 'package:weblibre/features/onboarding/domain/providers/setup_follow_ups.dart';
+import 'package:weblibre/features/onboarding/domain/services/preset_bindings.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_commit.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/abstract/i_form_page.dart';
+import 'package:weblibre/features/onboarding/presentation/onboarding_step.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ai_configuration.dart';
-import 'package:weblibre/features/onboarding/presentation/pages/basics.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/layout.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/permissions.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/preset.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/privacy_security.dart';
+import 'package:weblibre/features/onboarding/presentation/pages/search.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/ublock_opt_in.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/welcome.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/your_setup.dart';
@@ -68,7 +73,8 @@ class OnboardingScreen extends HookConsumerWidget {
     final eulaAccepted = ref.watch(eulaAcceptedProvider);
     final committing = useState(false);
 
-    // A first run: Welcome, Preset, Basics, Your setup, Permissions. Anything
+    // A first run: Welcome, Preset, Search, Layout, Privacy & security (for a
+    // preset that shows Advanced privacy), Your setup, Permissions. Anything
     // else is a review after an update, which never shows the Preset step and
     // changes only what the user edits. Revision 1 predates the on-device AI
     // features and is asked about those alone, as it always was.
@@ -87,26 +93,58 @@ class OnboardingScreen extends HookConsumerWidget {
     final unfinishedCommit =
         useRef<({SetupDraft draft, GeneralSettings applied})?>(null);
 
-    final pages = useMemoized<List<Widget>>(() {
-      if (currentRevision == 1) return const [AiConfigurationPage()];
-      if (!isFreshOnboarding) {
-        return [
-          const WelcomePage(isReturningUser: true),
-          UBlockOptInPage(formKey: GlobalKey<FormState>()),
-          PermissionsPage(formKey: GlobalKey<FormState>()),
-        ];
-      }
-      return [
-        WelcomePage(onRestore: () => _restoreIntoThisUser(context, ref)),
-        const PresetPage(),
-        const BasicsPage(),
-        const YourSetupPage(),
-        PermissionsPage(formKey: GlobalKey<FormState>()),
-      ];
-    }, [currentRevision, targetRevision]);
+    // Privacy & security is a step for a preset that shows Advanced privacy
+    // (Tinkerer and Expert), which guards most of it. The preset changes
+    // only on the Preset step, before it, so the steps never change behind
+    // the user; Advanced privacy turned on later opens the page from Your
+    // setup instead. The last preset holds while the draft is closed (by a
+    // commit that failed after closing it).
+    final lastPreset = useRef(draft?.preset);
+    if (draft != null) lastPreset.value = draft.preset;
+    final privacyStepShown = switch (lastPreset.value) {
+      final preset? => presetSwitchValue(
+        VisibilitySwitch.privacyAdvanced,
+        preset,
+      ),
+      null => false,
+    };
 
-    final lastPage = useRef(pageController.initialPage);
-    final currentPage = useState(pageController.initialPage);
+    final List<OnboardingStep> steps;
+    if (currentRevision == 1) {
+      steps = const [OnboardingStep.aiConfiguration];
+    } else if (!isFreshOnboarding) {
+      steps = const [
+        OnboardingStep.welcome,
+        OnboardingStep.uBlock,
+        OnboardingStep.permissions,
+      ];
+    } else {
+      steps = [
+        OnboardingStep.welcome,
+        OnboardingStep.preset,
+        OnboardingStep.search,
+        OnboardingStep.layout,
+        if (privacyStepShown) OnboardingStep.privacySecurity,
+        OnboardingStep.yourSetup,
+        OnboardingStep.permissions,
+      ];
+    }
+
+    // Created once, so a page keeps its form across rebuilds of the list.
+    final uBlockFormKey = useMemoized(GlobalKey<FormState>.new);
+    final permissionsFormKey = useMemoized(GlobalKey<FormState>.new);
+    GlobalKey<FormState>? formKeyOf(OnboardingStep step) => switch (step) {
+      OnboardingStep.uBlock => uBlockFormKey,
+      OnboardingStep.permissions => permissionsFormKey,
+      _ => null,
+    };
+    void saveForm(OnboardingStep step) => formKeyOf(step)?.currentState?.save();
+
+    // Pages are tracked by step, not index: choosing a preset adds or
+    // removes Privacy & security after the Preset step.
+    final currentStep = useState(steps.first);
+    final lastStep = useRef(steps.first);
+    final currentPage = math.max(0, steps.indexOf(currentStep.value));
 
     Future<void> goTo(int page) async {
       if (disableAnimations) {
@@ -120,10 +158,33 @@ class OnboardingScreen extends HookConsumerWidget {
       }
     }
 
+    void openStep(OnboardingStep step) {
+      final page = steps.indexOf(step);
+      if (page >= 0) unawaited(goTo(page));
+    }
+
+    Widget pageFor(OnboardingStep step) => switch (step) {
+      OnboardingStep.welcome =>
+        isFreshOnboarding
+            ? WelcomePage(onRestore: () => _restoreIntoThisUser(context, ref))
+            : const WelcomePage(isReturningUser: true),
+      OnboardingStep.preset => const PresetPage(),
+      OnboardingStep.search => const SearchStepPage(),
+      OnboardingStep.layout => const LayoutStepPage(),
+      OnboardingStep.privacySecurity => const PrivacySecurityStepPage(),
+      OnboardingStep.yourSetup => YourSetupPage(
+        onOpenStep: openStep,
+        privacyStepShown: privacyStepShown,
+      ),
+      OnboardingStep.permissions => PermissionsPage(
+        formKey: permissionsFormKey,
+      ),
+      OnboardingStep.uBlock => UBlockOptInPage(formKey: uBlockFormKey),
+      OnboardingStep.aiConfiguration => const AiConfigurationPage(),
+    };
+
     Future<void> finish() async {
-      if (pages[currentPage.value] case final IFormPage formPage) {
-        formPage.formKey.currentState?.save();
-      }
+      saveForm(currentStep.value);
 
       if (!isFreshOnboarding) {
         await ref
@@ -190,31 +251,38 @@ class OnboardingScreen extends HookConsumerWidget {
     }
 
     return PopScope(
-      canPop: currentPage.value == 0,
+      canPop: currentPage == 0,
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
-        await goTo(currentPage.value - 1);
+        await goTo(currentPage - 1);
       },
       child: Scaffold(
         body: SafeArea(
           child: Column(
             children: [
               Expanded(
-                child: PageView(
+                child: PageView.custom(
                   controller: pageController,
-                  physics: currentPage.value == 0 && !eulaAccepted
+                  physics: currentPage == 0 && !eulaAccepted
                       ? const NeverScrollableScrollPhysics()
                       : null,
-                  children: pages,
+                  // Keyed by step: the list delegate finds a page by its
+                  // key, so Privacy & security coming or going after the
+                  // Preset step moves the other pages' state with them
+                  // rather than rebuilding them.
+                  childrenDelegate: SliverChildListDelegate([
+                    for (final step in steps)
+                      KeyedSubtree(key: step.pageKey, child: pageFor(step)),
+                  ]),
                   onPageChanged: (value) {
-                    if (value > lastPage.value) {
-                      if (pages[lastPage.value] case final IFormPage formPage) {
-                        formPage.formKey.currentState?.save();
-                      }
-                    }
+                    final step = steps[value];
+                    // Moving on saves the form of the step left, compared
+                    // by step: an index can belong to another step by now.
+                    final left = lastStep.value;
+                    if (steps.indexOf(left) < value) saveForm(left);
 
-                    lastPage.value = value;
-                    currentPage.value = value;
+                    lastStep.value = step;
+                    currentStep.value = step;
                   },
                 ),
               ),
@@ -222,11 +290,11 @@ class OnboardingScreen extends HookConsumerWidget {
                 children: [
                   Expanded(
                     child: Visibility(
-                      visible: currentPage.value > 0,
+                      visible: currentPage > 0,
                       child: TextButton.icon(
                         onPressed: committing.value
                             ? null
-                            : () => goTo(currentPage.value - 1),
+                            : () => goTo(currentPage - 1),
                         icon: const Icon(Icons.chevron_left),
                         label: Text(l10n.onboarding_actionPrevious),
                       ),
@@ -236,7 +304,7 @@ class OnboardingScreen extends HookConsumerWidget {
                     child: Center(
                       child: SmoothPageIndicator(
                         controller: pageController,
-                        count: pages.length,
+                        count: steps.length,
                         effect: WormEffect(
                           activeDotColor: theme.colorScheme.primary,
                           dotHeight: 10.0,
@@ -245,12 +313,12 @@ class OnboardingScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  if (currentPage.value < pages.length - 1)
+                  if (currentPage < steps.length - 1)
                     Expanded(
                       child: TextButton.icon(
-                        onPressed: currentPage.value == 0 && !eulaAccepted
+                        onPressed: currentPage == 0 && !eulaAccepted
                             ? null
-                            : () => goTo(currentPage.value + 1),
+                            : () => goTo(currentPage + 1),
                         iconAlignment: IconAlignment.end,
                         icon: const Icon(Icons.chevron_right),
                         label: Text(l10n.onboarding_actionNext),

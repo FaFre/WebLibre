@@ -27,9 +27,9 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/quick_tab_switcher_placement_l10n.dart';
-import 'package:weblibre/features/settings/presentation/utils/tab_bar_position_setting_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/tab_bar_position_radio_group.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -324,19 +324,12 @@ class _CustomizeMenuTile extends StatelessWidget {
   }
 }
 
-class _TabBarPositionSection extends HookConsumerWidget {
+class _TabBarPositionSection extends StatelessWidget {
   const _TabBarPositionSection();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // The raw setting drives the radio group -- this is the one screen that
-    // must show what was *chosen*, including "decide for me". Everywhere else
-    // reads displayedTabBarPositionProvider.
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final tabBarPosition = ref.watch(
-      storedGeneralSettingsProvider.select((s) => s.tabBarPosition),
-    );
-    final resolved = ref.watch(displayedTabBarPositionProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -349,38 +342,7 @@ class _TabBarPositionSection extends HookConsumerWidget {
             leading: const Icon(MdiIcons.dockWindow),
             contentPadding: EdgeInsets.zero,
           ),
-          RadioGroup(
-            groupValue: tabBarPosition,
-            onChanged: (TabBarPositionSetting? value) async {
-              if (value != null) {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.tabBarPosition(value),
-                    );
-              }
-            },
-            child: Column(
-              children: [
-                for (final position in TabBarPositionSetting.values)
-                  RadioListTile.adaptive(
-                    value: position,
-                    title: Text(position.label(context)),
-                    // Automatic says what it currently resolves to on this
-                    // screen; the fixed choices already describe themselves.
-                    subtitle: Text(
-                      position == TabBarPositionSetting.auto
-                          ? l10n.settings_currentlyResolvesTo(
-                              position.description(context),
-                              resolved.label(context),
-                            )
-                          : position.description(context),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          const TabBarPositionRadioGroup(),
         ],
       ),
     );

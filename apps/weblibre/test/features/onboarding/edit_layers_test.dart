@@ -356,7 +356,7 @@ void main() {
         );
         // Saved into the draft, not the profile.
         expect(
-          container.read(setupDraftControllerProvider)!.customizeEdits,
+          container.read(setupDraftControllerProvider)!.edits,
           hasLength(1),
         );
         expect(container.read(settingsEditsAreLiveProvider), isFalse);
