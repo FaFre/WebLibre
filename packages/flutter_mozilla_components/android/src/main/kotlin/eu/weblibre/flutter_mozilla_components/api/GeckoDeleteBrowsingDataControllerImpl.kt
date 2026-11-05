@@ -31,6 +31,13 @@ import mozilla.components.concept.engine.translate.OperationLevel
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
+/**
+ * GeckoView's history clear flag (`HISTORY` in `GeckoViewStorageController.sys.mjs`,
+ * mapped to `nsIClearDataService.CLEAR_HISTORY`), which neither GeckoView's Java API
+ * nor [Engine.BrowsingData] names.
+ */
+private const val GECKO_CLEAR_HISTORY = 1 shl 3
+
 class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController {
     private val components by lazy {
         requireNotNull(GlobalComponents.components) { "Components not initialized" }
@@ -69,6 +76,25 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                 onError = { continuation.resumeWithException(it) },
             )
         }
+    }
+
+    /**
+     * Clears Gecko's network history: the Alt-Svc mappings (persisted in the
+     * profile, so a site can recognise a returning browser across sessions
+     * after its cookies are gone), the connection history and the list of hosts
+     * that failed over DNS-over-HTTPS.
+     *
+     * Only Gecko's `browser:purge-session-history` notification drops Alt-Svc,
+     * and GeckoView sends it only for its history clear flag. That flag (`1 << 3`)
+     * is mapped in `GeckoViewStorageController.sys.mjs` but not exposed by
+     * `StorageController.ClearFlags` or [Engine.BrowsingData], so it is passed
+     * raw. It also forgets which sites without stored data the user interacted
+     * with (storage-access heuristics), and runs Gecko's Places history cleaner,
+     * which GeckoView does not ship; GeckoView reports success whatever single
+     * cleaners do.
+     */
+    private suspend fun clearNetworkHistory() {
+        clearData(Engine.BrowsingData.select(GECKO_CLEAR_HISTORY))
     }
 
     /**
@@ -146,6 +172,7 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                 core.recentlyClosedFilterMiddleware,
                 core.orderedRecentlyClosedStorage,
             )
+            clearNetworkHistory()
             // Last, as the one step that fails on an engine error: it must not
             // keep the rest of the history.
             clearTrackingProtectionData()
@@ -163,6 +190,8 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
                 ),
             )
             clearData(Engine.BrowsingData.select(Engine.BrowsingData.DOM_STORAGES))
+            // Alt-Svc mappings recognise a returning browser like a cookie does.
+            clearNetworkHistory()
         }
     }
 
