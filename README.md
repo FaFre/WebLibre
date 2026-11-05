@@ -24,11 +24,23 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="https://matrix.to/#/#weblibre:unredacted.org">
+    <img alt="Chat on Matrix" src="https://img.shields.io/badge/Matrix-%23weblibre-0DBD8B?logo=matrix&logoColor=white">
+  </a>
+  <a href="https://fosstodon.org/@WebLibre">
+    <img alt="Follow on Mastodon" src="https://img.shields.io/badge/Mastodon-%40WebLibre-6364FF?logo=mastodon&logoColor=white">
+  </a>
+  <a href="https://feedback.weblibre.eu/">
+    <img alt="Suggest and vote on features" src="https://img.shields.io/badge/Feedback-Suggest%20%26%20vote-F59E0B">
+  </a>
+</p>
+
 WebLibre is an independent, privacy-focused Android browser built on [Mozilla's Gecko engine](https://wiki.mozilla.org/Gecko), the engine used by Firefox. It brings browsing and web apps together in one place, with separate spaces for different accounts and activities, built-in Tor, WireGuard VPN, and proxy support, and full-text search of the pages you've visited that never leaves your device.
 
 Give a website its own app window and login, or let it share logins with related tabs. Shape the same environment for one-handed browsing on a phone or a keyboard and mouse on a larger Android screen.
 
-[Explore](#your-web-environment) · [Install](#install-weblibre) · [Documentation & community](#documentation-and-community)
+[Explore](#your-web-environment) · [Install](#install-weblibre) · [Documentation](#documentation) · [Community](#community)
 
 > [!IMPORTANT]
 > **Early Access** - WebLibre is under active development. Features and settings can change, and updates may introduce bugs.
@@ -150,7 +162,7 @@ Check an APK's signing certificate with `apksigner verify --print-certs path/to/
 
 On first launch, choose **Quick Start**, **Custom Setup**, or **Restore from Backup**. The [First Launch Guide](https://docs.weblibre.eu/getting-started.html) explains each option.
 
-## Documentation and Community
+## Documentation
 
 Full user documentation is available at **[docs.weblibre.eu](https://docs.weblibre.eu/)**.
 
@@ -159,9 +171,17 @@ Full user documentation is available at **[docs.weblibre.eu](https://docs.weblib
 - **[Switching Browsers](https://docs.weblibre.eu/migration.html)** - Import bookmarks or use [Firefox Sync](https://docs.weblibre.eu/firefox-sync.html) for tabs, bookmarks, and history.
 - **[Common Workflows](https://docs.weblibre.eu/workflows.html)** - Everyday tasks and advanced features.
 - **[Troubleshooting](https://docs.weblibre.eu/troubleshooting.html)** - Fix common problems and learn what to include in a bug report.
-- **[Feedback Platform](https://feedback.weblibre.eu/)** - Suggest and vote on features.
-- **[Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org)** - Ask questions and talk with the community.
-- **[GitHub Issues](https://github.com/FaFre/WebLibre/issues)** - Report reproducible bugs and follow development.
+
+## Community
+
+Have an idea, a question, or want to follow along? Join us:
+
+| | Where | What for |
+|---|---|---|
+| 💡 | **[Feedback Platform](https://feedback.weblibre.eu/)** | Suggest and vote on features. |
+| 💬 | **[Matrix Chat](https://matrix.to/#/#weblibre:unredacted.org)** | Ask questions and talk with the community. |
+| 🐘 | **[Mastodon](https://fosstodon.org/@WebLibre)** | Follow release announcements and project news. |
+| 🐛 | **[GitHub Issues](https://github.com/FaFre/WebLibre/issues)** | Report reproducible bugs and follow development. |
 
 ## Support the Project
 
