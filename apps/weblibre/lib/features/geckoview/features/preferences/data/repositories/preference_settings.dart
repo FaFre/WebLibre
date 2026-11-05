@@ -69,6 +69,35 @@ class StartupPreferenceEnforcementService
     },
   );
 
+  /// The `system` partition of `settings.json`: engine baseline values no
+  /// setting toggles. They go to Gecko's default branch on every start, so
+  /// they reach existing profiles without a migration, leave nothing behind
+  /// once dropped, and yield to a user-branch value of the same preference.
+  Future<void> _applyEngineBaseline(Map<String, dynamic> content) async {
+    final prefs = {
+      for (final group in deserializePreferenceSettingGroups(
+        PreferencePartition.system,
+        content,
+      ).values)
+        for (final entry in group.settings.entries)
+          entry.key: entry.value.value,
+    };
+
+    if (prefs.isEmpty) {
+      return;
+    }
+
+    try {
+      await _prefManager.applyDefaultPrefs(prefs);
+    } catch (e, s) {
+      logger.w(
+        'Failed to apply the engine baseline, will retry on next launch',
+        error: e,
+        stackTrace: s,
+      );
+    }
+  }
+
   Future<void> _removeFxaProfileDomainFromLocalDnsBlocks() async {
     const dnsLocalDomainsPref = 'network.dns.localDomains';
     const fxaProfileDomain = 'profile.accounts.firefox.com';
@@ -126,6 +155,9 @@ class StartupPreferenceEnforcementService
   }
 
   Future<void> apply() async {
+    final content = await ref.read(_preferenceSettingContentProvider.future);
+    await _applyEngineBaseline(content);
+
     try {
       await _runMigrations();
     } catch (e, s) {
@@ -136,7 +168,6 @@ class StartupPreferenceEnforcementService
       );
     }
 
-    final content = await ref.read(_preferenceSettingContentProvider.future);
     final groups = deserializePreferenceSettingGroups(
       PreferencePartition.user,
       content,

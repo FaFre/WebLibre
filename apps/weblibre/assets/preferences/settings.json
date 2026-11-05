@@ -1312,5 +1312,40 @@
                 }
             }
         }
+    },
+    "system": {
+        "Telemetry": {
+            "description": "Engine telemetry switches no setting exposes",
+            "preferences": {
+                "telemetry.fog.enable_store_submitted_pings": {
+                    "value": false,
+                    "title": "Do not keep copies of submitted telemetry pings"
+                },
+                "toolkit.telemetry.site_categories": {
+                    "value": "{}",
+                    "title": "Drop the site category list used by telemetry"
+                }
+            }
+        },
+        "Local Network Access": {
+            "description": "Protect apps on this device and devices on the local network from websites",
+            "preferences": {
+                "network.lna.block_insecure_contexts": {
+                    "value": true,
+                    "title": "Block local network requests from insecure pages",
+                    "description": "A page loaded over plain HTTP can no longer reach this device or the local network; a site the user explicitly allowed still can"
+                }
+            }
+        },
+        "Safe Browsing": {
+            "description": "Google Safe Browsing warns users about dangerous websites and downloads.",
+            "preferences": {
+                "browser.safebrowsing.only_top_level": {
+                    "value": false,
+                    "title": "Check every request, not only the page itself",
+                    "description": "Safe Browsing also classifies frames, scripts and other subresources, so a malicious embed on a safe page is caught"
+                }
+            }
+        }
     }
 }

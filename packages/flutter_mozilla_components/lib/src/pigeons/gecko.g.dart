@@ -11255,6 +11255,35 @@ class GeckoPrefApi {
         .cast<String, GeckoPref>();
   }
 
+  /// Writes [prefs] to Gecko's default branch instead of the user branch.
+  ///
+  /// Default values are not persisted, so they must be written on every
+  /// start, and dropping one leaves nothing behind. A user-branch value of the
+  /// same preference still wins over it.
+  Future<Map<String, GeckoPref>> applyDefaultPrefs(
+    Map<String, Object> prefs,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.applyDefaultPrefs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[prefs],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
+    return (pigeonVar_replyValue! as Map<Object?, Object?>)
+        .cast<String, GeckoPref>();
+  }
+
   Future<void> resetPrefs(List<String> preferenceNames) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.resetPrefs$pigeonVar_messageChannelSuffix';

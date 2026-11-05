@@ -10598,6 +10598,14 @@ interface GeckoIconsApi {
 interface GeckoPrefApi {
   suspend fun getPrefs(preferenceFilter: List<String>): Map<String, GeckoPref>
   suspend fun applyPrefs(prefs: Map<String, Any>): Map<String, GeckoPref>
+  /**
+   * Writes [prefs] to Gecko's default branch instead of the user branch.
+   *
+   * Default values are not persisted, so they must be written on every
+   * start, and dropping one leaves nothing behind. A user-branch value of the
+   * same preference still wins over it.
+   */
+  suspend fun applyDefaultPrefs(prefs: Map<String, Any>): Map<String, GeckoPref>
   suspend fun resetPrefs(preferenceNames: List<String>)
   fun startObserveChanges()
   fun stopObserveChanges()
@@ -10641,6 +10649,25 @@ interface GeckoPrefApi {
             CoroutineScope(Dispatchers.Main).launch {
               val wrapped: List<Any?> = try {
                 listOf(api.applyPrefs(prefsArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoPrefApi.applyDefaultPrefs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val prefsArg = args[0] as Map<String, Any>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.applyDefaultPrefs(prefsArg))
               } catch (exception: Throwable) {
                 GeckoPigeonUtils.wrapError(exception)
               }

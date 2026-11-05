@@ -45,21 +45,30 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
             )
         }
 
-    @OptIn(ExperimentalAndroidComponentsApi::class)
-    override suspend fun applyPrefs(prefs: Map<String, Any>): Map<String, GeckoPref> {
+    override suspend fun applyPrefs(prefs: Map<String, Any>): Map<String, GeckoPref> =
+        applyPrefs(prefs, Branch.USER)
+
+    /**
+     * Gecko keeps default-branch values in memory only: nothing is written to
+     * the profile's `prefs.js`, so the caller writes them again on every start.
+     */
+    override suspend fun applyDefaultPrefs(prefs: Map<String, Any>): Map<String, GeckoPref> =
+        applyPrefs(prefs, Branch.DEFAULT)
+
+    private suspend fun applyPrefs(prefs: Map<String, Any>, branch: Branch): Map<String, GeckoPref> {
         if (prefs.isEmpty()) {
             return emptyMap()
         }
 
         for ((name, value) in prefs) {
-            setPref(name, value)
+            setPref(name, value, branch)
         }
 
         return getPrefs(prefs.keys.toList())
     }
 
     @OptIn(ExperimentalAndroidComponentsApi::class)
-    private suspend fun setPref(name: String, value: Any) {
+    private suspend fun setPref(name: String, value: Any, branch: Branch) {
         suspendCancellableCoroutine<Unit> { continuation ->
             val onSuccess = { continuation.resume(Unit) }
             val onError = { e: Throwable ->
@@ -70,7 +79,7 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
                 is String -> components.core.engine.setBrowserPref(
                     name,
                     value,
-                    Branch.USER,
+                    branch,
                     onSuccess = onSuccess,
                     onError = onError
                 )
@@ -78,7 +87,7 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
                 is Boolean -> components.core.engine.setBrowserPref(
                     name,
                     value,
-                    Branch.USER,
+                    branch,
                     onSuccess = onSuccess,
                     onError = onError
                 )
@@ -86,7 +95,7 @@ class GeckoPrefApiImpl : GeckoPrefApi, BrowserPrefObserverDelegate {
                 is Long -> components.core.engine.setBrowserPref(
                     name,
                     value.toInt(),
-                    Branch.USER,
+                    branch,
                     onSuccess = onSuccess,
                     onError = onError
                 )

@@ -17,6 +17,11 @@ class GeckoPrefService {
     return _apiInstance.applyPrefs(prefs);
   }
 
+  /// See [GeckoPrefApi.applyDefaultPrefs].
+  Future<Map<String, GeckoPref>> applyDefaultPrefs(Map<String, Object> prefs) {
+    return _apiInstance.applyDefaultPrefs(prefs);
+  }
+
   Future<void> resetPrefs(List<String> prefs) {
     return _apiInstance.resetPrefs(prefs);
   }

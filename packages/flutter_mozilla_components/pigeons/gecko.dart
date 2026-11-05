@@ -1981,6 +1981,14 @@ abstract class GeckoPrefApi {
   Map<String, GeckoPref> getPrefs(List<String> preferenceFilter);
   @async
   Map<String, GeckoPref> applyPrefs(Map<String, Object> prefs);
+
+  /// Writes [prefs] to Gecko's default branch instead of the user branch.
+  ///
+  /// Default values are not persisted, so they must be written on every
+  /// start, and dropping one leaves nothing behind. A user-branch value of the
+  /// same preference still wins over it.
+  @async
+  Map<String, GeckoPref> applyDefaultPrefs(Map<String, Object> prefs);
   @async
   void resetPrefs(List<String> preferenceNames);
 
