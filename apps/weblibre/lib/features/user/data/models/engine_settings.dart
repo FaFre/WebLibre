@@ -365,8 +365,13 @@ class EngineSettings extends GeckoEngineSettings with FastEquatable {
          httpsOnlyMode: httpsOnlyMode ?? HttpsOnlyMode.enabled,
          globalPrivacyControlEnabled: globalPrivacyControlEnabled ?? true,
          enterpriseRootsEnabled: enterpriseRootsEnabled ?? false,
+         // Upgraded on every load rather than rewritten once: stored presets
+         // from before Gecko 159 become today's, and targets Gecko removed
+         // are dropped so the string still parses.
          fingerprintingProtectionOverrides:
-             fingerprintingProtectionOverrides ??
+             fingerprintingProtectionOverrides.mapNotNull(
+               FingerprintOverrides.upgradeStored,
+             ) ??
              FingerprintOverrides.defaults().toString(),
          locales:
              locales ??

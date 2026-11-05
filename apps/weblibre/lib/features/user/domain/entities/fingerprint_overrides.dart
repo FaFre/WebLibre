@@ -33,16 +33,28 @@ class FingerprintOverrides with FastEquatable {
 
   FingerprintOverrides(this.allTargets, this.targets);
 
-  //Monitor https://searchfox.org/firefox-main/source/toolkit/components/resistfingerprinting/RFPTargetsDefault.inc
+  /// Gecko's release Android defaults
+  /// (`toolkit/components/resistfingerprinting/RFPTargetsDefault.inc`), with
+  /// one deliberate difference: no `EfficientCanvasRandomization`.
+  ///
+  /// When that target is on, Gecko picks its cheaper extraction mode
+  /// (`dom/canvas/CanvasUtils.cpp`), and only `toDataURL`/`toBlob` honour it: `getImageData`, WebGL `readPixels`/`getBufferSubData`,
+  /// ImageBitmap and OffscreenCanvas all check for the full `Randomize` mode
+  /// and return unnoised pixels. Without it, `CanvasRandomization` noises every
+  /// readback.
+  ///
+  /// The list is explicit (it starts with `-AllTargets`) because the editor
+  /// can only show a target as on when it is listed. A test pins it to the
+  /// Gecko default set, so update both when Gecko adds a default.
   FingerprintOverrides.defaults()
     : this(false, {
         'CanvasRandomization': true,
-        'EfficientCanvasRandomization': true,
         'FontVisibilityLangPack': true,
         'JSMathFdlibm': true,
         'ScreenAvailToResolution': true,
         'NavigatorHWConcurrencyTiered': true,
         'MaxTouchPointsCollapse': true,
+        'IMEStyle': true,
       });
 
   FingerprintOverrides.hardenedDefaults()
@@ -63,7 +75,7 @@ class FingerprintOverrides with FastEquatable {
         'NavigatorOscpu': true,
         'NavigatorPlatform': true,
         'NavigatorUserAgent': true,
-        'PointerId': true,
+        'PdfjsSpoof': true,
         'StreamVideoFacingMode': true,
         'JSDateTimeUTC': true,
         'JSMathFdlibm': true,
@@ -117,7 +129,75 @@ class FingerprintOverrides with FastEquatable {
         'MaxTouchPoints': true,
         'MaxTouchPointsCollapse': true,
         'NavigatorHWConcurrencyTiered': true,
+        'IMEStyle': true,
       });
+
+  /// Targets Gecko has removed. A stored string that still names one would
+  /// fail [parse] as a whole, so [upgradeStored] drops them.
+  ///
+  /// `PointerId` (id 20) is gone since Gecko 159; the id now belongs to
+  /// `PdfjsSpoof`.
+  static const retiredTargets = {'PointerId'};
+
+  /// [defaults] and [hardenedDefaults] as every release before Gecko 159
+  /// stored them. They never changed between those releases.
+  static const _legacyDefaults =
+      '-AllTargets,+CanvasRandomization,+EfficientCanvasRandomization,'
+      '+FontVisibilityLangPack,+JSMathFdlibm,+ScreenAvailToResolution,'
+      '+NavigatorHWConcurrencyTiered,+MaxTouchPointsCollapse';
+  static const _legacyHardenedDefaults =
+      '-AllTargets,+TouchEvents,+PointerEvents,+KeyboardEvents,'
+      '+ScreenOrientation,+SpeechSynthesis,+CSSPrefersReducedMotion,'
+      '+CSSPrefersContrast,+CanvasRandomization,'
+      '+CanvasExtractionFromThirdPartiesIsBlocked,+JSLocale,'
+      '+NavigatorAppVersion,+NavigatorBuildID,+NavigatorHWConcurrency,'
+      '+NavigatorOscpu,+NavigatorPlatform,+NavigatorUserAgent,+PointerId,'
+      '+StreamVideoFacingMode,+JSDateTimeUTC,+JSMathFdlibm,+Gamepad,'
+      '+HttpUserAgent,+WindowOuterSize,+WindowScreenXY,+WindowInnerScreenXY,'
+      '+ScreenPixelDepth,+ScreenRect,+ScreenAvailRect,+VideoElementMozFrames,'
+      '+VideoElementMozFrameDelay,+VideoElementPlaybackQuality,'
+      '+ReduceTimerPrecision,+WidgetEvents,+MediaDevices,+MediaCapabilities,'
+      '+AudioSampleRate,+NetworkConnection,+WindowDevicePixelRatio,'
+      '+MouseEventScreenPoint,+FontVisibilityBaseSystem,'
+      '+FontVisibilityLangPack,+DeviceSensors,+RoundWindowSize,'
+      '+UseStandinsForNativeColors,+AudioContext,+MediaError,'
+      '+DOMStyleOsxFontSmoothing,+CSSDeviceSize,+CSSColorInfo,+CSSResolution,'
+      '+CSSPrefersReducedTransparency,+CSSInvertedColors,'
+      '+CSSVideoDynamicRange,+CSSPointerCapabilities,+WebGLRenderCapability,'
+      '+WebGLRenderInfo,+SiteSpecificZoom,+FontVisibilityRestrictGenerics,'
+      '+WebVTT,+WebGPULimits,+WebGPUIsFallbackAdapter,+WebGPUSubgroupSizes,'
+      '+JSLocalePrompt,+ScreenAvailToResolution,+UseHardcodedFontSubstitutes,'
+      '+DiskStorageLimit,+WebCodecs,+MaxTouchPoints,+MaxTouchPointsCollapse,'
+      '+NavigatorHWConcurrencyTiered';
+
+  /// Brings a stored override string up to date. Idempotent, so it runs on
+  /// every load.
+  ///
+  /// A string that is exactly an earlier preset becomes today's preset: the
+  /// presets are recognised by string equality (the onboarding tiles,
+  /// `EngineSettings.effective`), so a stale copy would stop counting as one.
+  /// Anything else is the user's own list and keeps every choice in it; only
+  /// targets Gecko no longer has are dropped.
+  static String upgradeStored(String stored) {
+    if (stored == _legacyDefaults) {
+      return FingerprintOverrides.defaults().toString();
+    }
+    if (stored == _legacyHardenedDefaults) {
+      return FingerprintOverrides.hardenedDefaults().toString();
+    }
+
+    if (!retiredTargets.any(stored.contains)) {
+      return stored;
+    }
+
+    return stored
+        .split(',')
+        .where((word) {
+          final match = pattern.firstMatch(word.trim());
+          return match == null || !retiredTargets.contains(match.group(2));
+        })
+        .join(',');
+  }
 
   static Result<FingerprintOverrides> parse(
     String input,

@@ -328,19 +328,18 @@
         ]
     },
     {
-        "name": "PointerId",
+        "name": "PdfjsSpoof",
         "id": 20,
+        "description": "Reports the built-in PDF viewer as available even when it is turned off, so the setting does not stand out",
         "keywords": [
-            "pointer id",
-            "input tracking",
-            "touch identifier",
-            "multitouch",
-            "event tracking",
-            "pointer events",
-            "unique identifier",
-            "input device",
-            "gesture recognition",
-            "interaction tracking"
+            "pdf",
+            "pdf viewer",
+            "pdfjs",
+            "plugins",
+            "mime types",
+            "pdfViewerEnabled",
+            "navigator",
+            "feature detection"
         ]
     },
     {
@@ -1241,7 +1240,7 @@
     {
         "name": "EfficientCanvasRandomization",
         "id": 76,
-        "description": "See also CanvasRandomization = 9 above",
+        "description": "Cheaper canvas noise that only covers toDataURL and toBlob. While it is on, getImageData and WebGL readbacks return unnoised pixels even with CanvasRandomization",
         "keywords": [
             "canvas randomization",
             "efficient noise",
@@ -1253,6 +1252,67 @@
             "pixel manipulation",
             "canvas privacy",
             "low overhead"
+        ]
+    },
+    {
+        "name": "WebGLVendorSanitize",
+        "id": 77,
+        "description": "Reduces the unmasked WebGL vendor to a GPU family",
+        "keywords": [
+            "webgl",
+            "gpu vendor",
+            "graphics",
+            "unmasked vendor",
+            "gpu fingerprinting"
+        ]
+    },
+    {
+        "name": "WebGLVendorConstant",
+        "id": 78,
+        "description": "Reports a constant unmasked WebGL vendor",
+        "keywords": [
+            "webgl",
+            "gpu vendor",
+            "graphics",
+            "unmasked vendor",
+            "gpu fingerprinting"
+        ]
+    },
+    {
+        "name": "WebGLVendorRandomize",
+        "id": 79,
+        "description": "Reports a random unmasked WebGL vendor",
+        "keywords": [
+            "webgl",
+            "gpu vendor",
+            "graphics",
+            "unmasked vendor",
+            "randomization"
+        ]
+    },
+    {
+        "name": "WebGLRendererConstant",
+        "id": 80,
+        "description": "Reports a constant WebGL renderer",
+        "keywords": [
+            "webgl",
+            "gpu renderer",
+            "graphics",
+            "unmasked renderer",
+            "gpu fingerprinting"
+        ]
+    },
+    {
+        "name": "IMEStyle",
+        "id": 81,
+        "description": "Hides how the keyboard app styles text being composed (EditContext)",
+        "keywords": [
+            "ime",
+            "keyboard",
+            "input method",
+            "composition",
+            "editcontext",
+            "typing"
         ]
     }
 ]
