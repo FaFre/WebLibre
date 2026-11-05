@@ -21,14 +21,19 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/onboarding/domain/entities/setup_goal.dart';
 import 'package:weblibre/features/onboarding/domain/services/preset_bindings.dart';
+import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+    show ToolbarButtonConfig;
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 
 part 'setup_draft.g.dart';
 
@@ -52,6 +57,8 @@ final class SetupDraft {
     this.customizeEdits = const [],
     this.engineEdits = const [],
     this.layouts = const {},
+    this.toolbarButtons = const {},
+    this.menuLayout,
     this.hardeningBaseline,
     this.installUBlock,
     this.optimizedUBlockFilters,
@@ -73,6 +80,13 @@ final class SetupDraft {
 
   /// Module layouts rearranged in Customize, by surface.
   final Map<ModuleSurface, List<ModuleOrderEntry>> layouts;
+
+  /// Toolbar buttons changed in Customize, the whole set of each toolbar
+  /// changed. A toolbar not in here keeps the profile's buttons.
+  final Map<ToolbarConfigLocation, List<ToolbarButtonConfig>> toolbarButtons;
+
+  /// The browser menu as arranged in Customize; null keeps the profile's.
+  final List<MenuSectionEntry>? menuLayout;
 
   /// Overrides for the parts that are not plain settings; null takes the
   /// preset's value.
@@ -110,13 +124,15 @@ final class SetupDraft {
           ));
 
   /// Whether a preset change would drop something: Customize changes, goals
-  /// that show features, rearranged layouts, the hardening or uBlock Origin
-  /// choices. The Basics answers and the goals that open after the commit
+  /// that show features, rearranged layouts, toolbar buttons or menu, the
+  /// hardening or uBlock Origin choices. The Basics answers and the goals that open after the commit
   /// stay.
   bool get hasCustomizeChanges =>
       customizeEdits.isNotEmpty ||
       engineEdits.isNotEmpty ||
       layouts.isNotEmpty ||
+      toolbarButtons.isNotEmpty ||
+      menuLayout != null ||
       hardeningBaseline != null ||
       installUBlock != null ||
       optimizedUBlockFilters != null;
@@ -191,14 +207,39 @@ final class SetupDraft {
   }
 }
 
-/// The onboarding's draft. The onboarding screen watches it while it is
-/// mounted, which includes every route Customize pushes over it, so it ends
-/// with the onboarding; [discard] ends it right after the commit, and a fresh
-/// onboarding starts a fresh one.
-@Riverpod()
+/// The onboarding's draft: open while a fresh onboarding is owed, null
+/// otherwise.
+///
+/// It opens and closes by itself, from the profile's onboarding revision
+/// rather than from a route or widget: a profile that never completed an
+/// onboarding gets a fresh draft, and the commit's `pushRevision` closes it.
+/// A review after an update has a revision, so it never gets one and its
+/// edits land in the profile directly. Kept alive because the edit layer's
+/// kept-alive providers (`storedGeneralSettings` and the save controllers)
+/// follow it.
+///
+/// [build] must watch nothing but that one answer, and keeps the open draft
+/// across its rebuilds: while the revision is unknown (reloading, failed) the
+/// draft stays as it is, open or closed, rather than dropping the user's
+/// choices and every edit made until it is known again.
+///
+/// Only the edit and displayed layers may read it, never the live layer
+/// services behave by: nothing reaches the browser before Done.
+@Riverpod(keepAlive: true)
 class SetupDraftController extends _$SetupDraftController {
   @override
-  SetupDraft build() => const SetupDraft(preset: SetupPreset.average);
+  SetupDraft? build() {
+    final owed = ref.watch(
+      completedOnboardingRevisionProvider.select(
+        (revision) => revision.hasValue ? revision.value == null : null,
+      ),
+    );
+    return switch (owed) {
+      true => stateOrNull ?? const SetupDraft(preset: SetupPreset.average),
+      false => null,
+      null => stateOrNull,
+    };
+  }
 
   /// Starts again from [preset]. Basics answers and the setups asked for
   /// after the commit stay, and so does what those setups need shown
@@ -207,32 +248,35 @@ class SetupDraftController extends _$SetupDraftController {
   /// and is dropped ([SetupDraft.hasCustomizeChanges]). A setup whose
   /// switches were hidden in Customize was turned off there, and stays off.
   void selectPreset(SetupPreset preset) {
-    if (preset == state.preset) return;
-    final applied = state.applyGeneral(GeneralSettings.withDefaults());
+    final draft = state;
+    if (draft == null || preset == draft.preset) return;
+    final applied = draft.applyGeneral(GeneralSettings.withDefaults());
     state = SetupDraft(
       preset: preset,
       goals: {
-        for (final goal in state.goals)
-          if (state.goalSelected(goal, applied)) goal,
+        for (final goal in draft.goals)
+          if (draft.goalSelected(goal, applied)) goal,
       },
-      basicsEdits: state.basicsEdits,
+      basicsEdits: draft.basicsEdits,
     );
   }
 
   void editGeneral(SetupDraftStep step, UpdateGeneralSettingsFunc edit) {
+    final draft = state;
+    if (draft == null) return;
     state = switch (step) {
-      SetupDraftStep.basics => state.copyWith(
-        basicsEdits: [...state.basicsEdits, edit],
+      SetupDraftStep.basics => draft.copyWith(
+        basicsEdits: [...draft.basicsEdits, edit],
       ),
-      SetupDraftStep.customize => state.copyWith(
-        customizeEdits: [...state.customizeEdits, edit],
+      SetupDraftStep.customize => draft.copyWith(
+        customizeEdits: [...draft.customizeEdits, edit],
       ),
     };
   }
 
-  void editEngine(UpdateEngineSettingsFunc edit) {
-    state = state.copyWith(engineEdits: [...state.engineEdits, edit]);
-  }
+  void editEngine(UpdateEngineSettingsFunc edit) => _update(
+    (draft) => draft.copyWith(engineEdits: [...draft.engineEdits, edit]),
+  );
 
   /// Puts [previous] back, for an Undo of the change that left [changed]:
   /// only while nothing else has changed the draft since, so a late Undo
@@ -248,15 +292,19 @@ class SetupDraftController extends _$SetupDraftController {
   /// for then, and shows what it needs ([SetupDraft.applyGeneral]);
   /// withdrawing it only cancels the setup.
   void setGoal(SetupGoal goal, {required bool selected}) {
+    final draft = state;
+    if (draft == null) return;
+
     if (goal.opensAfterCommit) {
-      state = state.copyWith(
+      final updated = draft.copyWith(
         goals: selected
-            ? {...state.goals, goal}
-            : ({...state.goals}..remove(goal)),
+            ? {...draft.goals, goal}
+            : ({...draft.goals}..remove(goal)),
       );
+      state = updated;
       // A Customize change made before can still hide what the setup needs:
       // asking for it now is the later, explicit choice.
-      if (selected && !_draftShows(goal.switches)) {
+      if (selected && !_draftShows(updated, goal.switches)) {
         _showSwitches(goal.switches);
       }
       return;
@@ -282,12 +330,12 @@ class SetupDraftController extends _$SetupDraftController {
     });
   }
 
-  /// Whether the draft shows [switches]. The preset writes every visibility
+  /// Whether [draft] shows [switches]. The preset writes every visibility
   /// switch, so the settings it is applied over do not change the answer,
   /// apart from the legacy settings two switches inherit, which only ever
   /// hide more: the defaults show everything.
-  bool _draftShows(List<VisibilitySwitch> switches) {
-    final applied = state.applyGeneral(GeneralSettings.withDefaults());
+  static bool _draftShows(SetupDraft draft, List<VisibilitySwitch> switches) {
+    final applied = draft.applyGeneral(GeneralSettings.withDefaults());
     return switches.every(applied.isVisibilitySwitchShown);
   }
 
@@ -305,55 +353,53 @@ class SetupDraftController extends _$SetupDraftController {
         updated.withVisibilitySwitch(visibilitySwitch, enabled: true),
   );
 
-  void setLayout(ModuleSurface surface, List<ModuleOrderEntry> layout) {
-    state = state.copyWith(layouts: {...state.layouts, surface: layout});
-  }
+  void setLayout(ModuleSurface surface, List<ModuleOrderEntry> layout) =>
+      _update(
+        (draft) => draft.copyWith(layouts: {...draft.layouts, surface: layout}),
+      );
 
-  void setHardeningBaseline(bool value) {
-    state = state.copyWith(hardeningBaseline: value);
-  }
+  void setToolbarButtons(
+    ToolbarConfigLocation location,
+    List<ToolbarButtonConfig> configs,
+  ) => _update(
+    (draft) => draft.copyWith(
+      toolbarButtons: {...draft.toolbarButtons, location: configs},
+    ),
+  );
 
-  void setInstallUBlock(bool value) {
-    state = state.copyWith(installUBlock: value);
-  }
+  void setMenuLayout(List<MenuSectionEntry> layout) =>
+      _update((draft) => draft.copyWith(menuLayout: layout));
 
-  void setOptimizedUBlockFilters(bool value) {
-    state = state.copyWith(optimizedUBlockFilters: value);
-  }
+  void setHardeningBaseline(bool value) =>
+      _update((draft) => draft.copyWith(hardeningBaseline: value));
 
-  void discard() => ref.invalidateSelf();
+  void setInstallUBlock(bool value) =>
+      _update((draft) => draft.copyWith(installUBlock: value));
+
+  void setOptimizedUBlockFilters(bool value) =>
+      _update((draft) => draft.copyWith(optimizedUBlockFilters: value));
+
+  /// Applies [change] to the open draft; nothing while none is open.
+  void _update(SetupDraft Function(SetupDraft draft) change) {
+    final draft = state;
+    if (draft != null) state = change(draft);
+  }
 }
 
-/// The general settings as they will be after the commit: the live settings
-/// with the draft applied. What the onboarding's settings widgets show.
-///
-/// Reads the repository, never `storedGeneralSettingsProvider` or
-/// `generalSettingsWithDefaultsProvider`: the draft scope overrides those
-/// with this provider, and Riverpod detects
-/// cycles by provider rather than by container. Watching it here would make
-/// every rebuild after the first one throw a CircularDependencyError, although
-/// the root and the scoped element are different.
-@Riverpod()
+/// The general settings as they will be after the commit: the profile's
+/// with the draft applied, or the profile's while no draft is open. What the
+/// onboarding's settings widgets show.
+@Riverpod(keepAlive: true)
 GeneralSettings draftGeneralSettings(Ref ref) {
   final draft = ref.watch(setupDraftControllerProvider);
-  final live = ref.watch(
-    generalSettingsRepositoryProvider.select(
-      (value) => value.value ?? GeneralSettings.withDefaults(),
-    ),
-  );
-  return draft.applyGeneral(live);
+  final profile = ref.watch(profileGeneralSettingsProvider);
+  return draft?.applyGeneral(profile) ?? profile;
 }
 
-/// Like [draftGeneralSettings], for the engine settings, and for the same
-/// reason reading the repository rather than `storedEngineSettingsProvider`
-/// or `engineSettingsWithDefaultsProvider`.
-@Riverpod()
+/// Like [draftGeneralSettings], for the engine settings.
+@Riverpod(keepAlive: true)
 EngineSettings draftEngineSettings(Ref ref) {
   final draft = ref.watch(setupDraftControllerProvider);
-  final live = ref.watch(
-    engineSettingsRepositoryProvider.select(
-      (value) => value.value ?? EngineSettings.withDefaults(),
-    ),
-  );
-  return draft.applyEngine(live);
+  final profile = ref.watch(profileEngineSettingsProvider);
+  return draft?.applyEngine(profile) ?? profile;
 }

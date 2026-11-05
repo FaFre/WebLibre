@@ -400,7 +400,7 @@ final class CanSwitchProfilesProvider
   }
 }
 
-String _$canSwitchProfilesHash() => r'a7413df75bffd871ca4565099070202aadac7449';
+String _$canSwitchProfilesHash() => r'8e8ef6c980d557096aa412560c8364ba8f2d29e6';
 
 @ProviderFor(backupList)
 final backupListProvider = BackupListProvider._();

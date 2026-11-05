@@ -29,7 +29,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_runtime.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_input_consumer.dart';
@@ -40,7 +39,6 @@ import 'package:weblibre/features/proxy/presentation/widgets/add_proxy_method_sh
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/profile_tile.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/status_header.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/tor_tile.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
@@ -83,7 +81,7 @@ class SingboxProxyProfilesScreen extends HookConsumerWidget {
     // (P5).
     return HiddenFeatureScope(
       feature: FeatureId.connectionsImportVpnProxy,
-      keptWhen: connectionsInUseProvider,
+      keptWhen: KeptWhen.connectionsInUse,
       child: Scaffold(
         // Adding is creation: it asks while the feature is hidden even when
         // connections already exist and the list stays usable.
@@ -384,7 +382,7 @@ class _ProfileListBody extends ConsumerWidget {
                 children: [
                   HiddenFeatureGate.feature(
                     FeatureId.connectionsTorBasic,
-                    keptWhen: torInUseProvider,
+                    keptWhen: KeptWhen.torInUse,
                     opensScreen: true,
                     indicator: true,
                     child: TorProfileTile(

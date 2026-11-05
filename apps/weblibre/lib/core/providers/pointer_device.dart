@@ -65,3 +65,11 @@ class CursorInUse extends _$CursorInUse {
     return false;
   }
 }
+
+/// [CursorInUse] for a screen that only cares while [enabled]: false, and
+/// nothing to rebuild for, when it is not. The auto-hiding side rail reads
+/// it, so that a mouse taking over from touch rebuilds the browser screen
+/// only where the rail can slide in.
+@Riverpod()
+bool cursorInUseWhen(Ref ref, {required bool enabled}) =>
+    enabled && ref.watch(cursorInUseProvider);

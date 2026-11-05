@@ -26,7 +26,6 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
-import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/tor/domain/extensions/tor_status_x.dart';
@@ -43,15 +42,6 @@ import 'package:weblibre/utils/ui_helper.dart';
 // Manual transports and country restrictions are `connections.tor_manual`
 // (Expert). One that is configured keeps its entry, to be checked or undone
 // (P5).
-final _manualTransportInUse = torSettingsWithDefaultsProvider.select(
-  (s) =>
-      s.config == TorConnectionConfig.obfs4 ||
-      s.config == TorConnectionConfig.snowflake,
-);
-final _countriesInUse = torSettingsWithDefaultsProvider.select(
-  (s) => s.entryNodeCountry != null || s.exitNodeCountry != null,
-);
-
 List<SettingsSectionDefinition> torProxySettingsSections(
   AppLocalizations l10n,
 ) => [
@@ -92,7 +82,7 @@ List<SettingsSectionDefinition> torProxySettingsSections(
       SettingsEntryDefinition(
         title: l10n.tor_transportTitle,
         feature: FeatureId.connectionsTorManual,
-        keptWhen: _manualTransportInUse,
+        keptWhen: KeptWhen.torManualTransportInUse,
         subtitle: l10n.tor_transportSectionSubtitle(torBrand),
         keywords: settingsKeywords(l10n.tor_transportKeywords),
         child: const _TransportSection(),
@@ -102,7 +92,7 @@ List<SettingsSectionDefinition> torProxySettingsSections(
   SettingsSectionDefinition(
     title: l10n.tor_sectionCountryRestrictions,
     feature: FeatureId.connectionsTorManual,
-    keptWhen: _countriesInUse,
+    keptWhen: KeptWhen.torCountriesInUse,
     keywords: settingsKeywords(l10n.tor_sectionCountryRestrictionsKeywords),
     entries: [
       SettingsEntryDefinition(
@@ -171,7 +161,7 @@ class TorProxyScreen extends HookConsumerWidget {
     // Tor in use stays usable, so it can be checked and stopped (P5).
     return HiddenFeatureScope(
       feature: FeatureId.connectionsTorBasic,
-      keptWhen: torInUseProvider,
+      keptWhen: KeptWhen.torInUse,
       child: SettingsDetailScaffold(
         title: l10n.tor_proxyLabel(torBrand),
         subtitle: l10n.tor_screenSubtitle,

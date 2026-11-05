@@ -105,7 +105,12 @@ void main() {
 
   void show(SearchModuleType module) => container
       .read(searchModuleOrderProvider(ModuleSurface.home).notifier)
-      .toggleVisibility(module);
+      .replace(
+        toggleModuleVisibility(
+          container.read(searchModuleOrderProvider(ModuleSurface.home)),
+          module,
+        ),
+      );
 
   test('waits for every visible module and ignores hidden ones', () async {
     expect(settled(), isFalse);

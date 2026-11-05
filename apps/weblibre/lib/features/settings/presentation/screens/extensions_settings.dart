@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -74,9 +75,7 @@ List<SettingsSectionDefinition> extensionsSettingsSections(
         SettingsEntryDefinition(
           title: l10n.settings_allowUnsignedExtensionsTitle,
           feature: FeatureId.extensionsAllowUnsigned,
-          keptWhen: allowUnsignedExtensionsProvider.select(
-            (s) => s.value ?? false,
-          ),
+          keptWhen: KeptWhen.unsignedExtensionsAllowed,
           subtitle: l10n.settings_allowUnsignedExtensionsSubtitle,
           keywords: settingsKeywords(
             l10n.settings_allowUnsignedExtensionsKeywords,

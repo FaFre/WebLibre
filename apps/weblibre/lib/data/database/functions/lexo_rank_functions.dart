@@ -19,57 +19,41 @@
  */
 import 'package:lexo_rank/lexo_rank.dart';
 import 'package:lexo_rank/lexo_rank/lexo_rank_bucket.dart';
-import 'package:nullability/nullability.dart';
 import 'package:sqlite3/common.dart';
 
-String _nextRankOrMiddle(List<Object?> args) {
-  final parsedBucket = LexoRankBucket.resolve(args[0]! as int);
+/// A rank between [before] and [after], either of which may be absent: the
+/// middle of [bucket] when both are, otherwise next to the one given.
+///
+/// The one place rank neighbours are worked out, for the SQL functions below
+/// and for code that orders rows in Dart (the toolbar button editor).
+String lexoRankBetween(String? before, String? after, {int bucket = 0}) =>
+    switch ((before, after)) {
+      (null, null) => LexoRank.middle(
+        bucket: LexoRankBucket.resolve(bucket),
+      ).value,
+      (null, final after?) => LexoRank.parse(after).genPrev().value,
+      (final before?, null) => LexoRank.parse(before).genNext().value,
+      (final before?, final after?) => LexoRank.parse(
+        before,
+      ).genBetween(LexoRank.parse(after)).value,
+    };
 
-  if (args[1] != null) {
-    final parsedRank = LexoRank.parse(args[1]! as String);
+String _nextRankOrMiddle(List<Object?> args) =>
+    lexoRankBetween(args[1] as String?, null, bucket: args[0]! as int);
 
-    return parsedRank.genNext().value;
-  } else {
-    return LexoRank.middle(bucket: parsedBucket).value;
-  }
-}
-
-String _previousRankOrMiddle(List<Object?> args) {
-  final parsedBucket = LexoRankBucket.resolve(args[0]! as int);
-
-  if (args[1] != null) {
-    final parsedRank = LexoRank.parse(args[1]! as String);
-
-    return parsedRank.genPrev().value;
-  } else {
-    return LexoRank.middle(bucket: parsedBucket).value;
-  }
-}
+String _previousRankOrMiddle(List<Object?> args) =>
+    lexoRankBetween(null, args[1] as String?, bucket: args[0]! as int);
 
 String _reorderAfter(List<Object?> args) {
-  final first = args[0].mapNotNull((arg) => LexoRank.parse(arg as String));
-  final last = args[1].mapNotNull((arg) => LexoRank.parse(arg as String));
-
-  if (first == null) {
-    throw Exception('Tab not found');
-  } else if (last == null) {
-    return first.genNext().value;
-  } else {
-    return first.genBetween(last).value;
-  }
+  final first = args[0] as String?;
+  if (first == null) throw Exception('Tab not found');
+  return lexoRankBetween(first, args[1] as String?);
 }
 
 String _reorderBefore(List<Object?> args) {
-  final first = args[0].mapNotNull((arg) => LexoRank.parse(arg as String));
-  final last = args[1].mapNotNull((arg) => LexoRank.parse(arg as String));
-
-  if (first == null) {
-    throw Exception('Tab not found');
-  } else if (last == null) {
-    return first.genPrev().value;
-  } else {
-    return last.genBetween(first).value;
-  }
+  final first = args[0] as String?;
+  if (first == null) throw Exception('Tab not found');
+  return lexoRankBetween(args[1] as String?, first);
 }
 
 void registerLexorankFunctions(CommonDatabase database) {

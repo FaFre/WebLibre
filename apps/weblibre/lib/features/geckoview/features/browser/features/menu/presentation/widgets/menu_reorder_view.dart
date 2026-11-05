@@ -39,7 +39,7 @@ class MenuReorderView extends ConsumerWidget {
     final reorderNotifier = ref.read(menuReorderModeProvider.notifier);
 
     final (:section, :item) = resolveMenuLayoutFocus(
-      ref.watch(menuLayoutProvider),
+      ref.watch(editedMenuLayoutProvider),
       focusedSection: reorderMode.focusedSection,
       focusedItem: reorderMode.focusedItem,
     );
@@ -73,7 +73,7 @@ class MenuReorderHeader extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     final (:section, :item) = resolveMenuLayoutFocus(
-      ref.watch(menuLayoutProvider),
+      ref.watch(editedMenuLayoutProvider),
       focusedSection: reorderMode.focusedSection,
       focusedItem: reorderMode.focusedItem,
     );
@@ -91,7 +91,7 @@ class MenuReorderHeader extends ConsumerWidget {
       onBack: section == null ? null : reorderNotifier.stepBack,
       onDone: reorderNotifier.deactivate,
       onReset: section == null
-          ? ref.read(menuLayoutProvider.notifier).resetToDefaults
+          ? ref.read(editedMenuLayoutProvider.notifier).resetToDefaults
           : null,
     );
   }

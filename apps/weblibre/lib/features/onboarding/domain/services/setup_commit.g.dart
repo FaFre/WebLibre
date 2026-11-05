@@ -11,7 +11,22 @@ SetupCommitJournal _$SetupCommitJournalFromJson(Map<String, dynamic> json) =>
       general: json['general'] as Map<String, dynamic>,
       engine: json['engine'] as Map<String, dynamic>,
       hardeningBaseline: json['hardeningBaseline'] as bool,
-      layouts: Map<String, String>.from(json['layouts'] as Map),
+      layouts: _layoutsFromJson(json['layouts'] as Map<String, dynamic>),
+      toolbarButtons:
+          (json['toolbarButtons'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              (e as List<dynamic>)
+                  .map(
+                    (e) => const _ToolbarButtonConfigConverter().fromJson(
+                      e as Map<String, dynamic>,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ) ??
+          const {},
+      menuLayout: _menuLayoutFromJson(json['menuLayout']),
       steps: (json['steps'] as List<dynamic>)
           .map((e) => $enumDecode(_$SetupStepEnumMap, e))
           .toSet(),
@@ -23,7 +38,14 @@ Map<String, dynamic> _$SetupCommitJournalToJson(SetupCommitJournal instance) =>
       'general': instance.general,
       'engine': instance.engine,
       'hardeningBaseline': instance.hardeningBaseline,
-      'layouts': instance.layouts,
+      'layouts': _layoutsToJson(instance.layouts),
+      'toolbarButtons': instance.toolbarButtons.map(
+        (k, e) => MapEntry(
+          k,
+          e.map(const _ToolbarButtonConfigConverter().toJson).toList(),
+        ),
+      ),
+      'menuLayout': _menuLayoutToJson(instance.menuLayout),
       'steps': instance.steps.map((e) => _$SetupStepEnumMap[e]!).toList(),
       'targetRevision': instance.targetRevision,
     };
@@ -44,8 +66,9 @@ const _$SetupStepEnumMap = {
 ///
 /// 1. The draft is resolved against the current settings into a
 ///    [SetupCommitJournal], which is written durably.
-/// 2. The journal is applied: settings, hardening, module layouts. Each write
-///    is "set this to that", so applying it again changes nothing. Hardening
+/// 2. The journal is applied: settings, hardening, module layouts, toolbar
+///    buttons, the menu. Each write is "set this to that", so applying it
+///    again changes nothing. Hardening
 ///    the engine refuses does not stop the commit: it becomes an external
 ///    step ([SetupStep.hardeningBaseline]).
 /// 3. The onboarding revision is pushed: from here on onboarding never shows
@@ -70,8 +93,9 @@ final setupCommitServiceProvider = SetupCommitServiceProvider._();
 ///
 /// 1. The draft is resolved against the current settings into a
 ///    [SetupCommitJournal], which is written durably.
-/// 2. The journal is applied: settings, hardening, module layouts. Each write
-///    is "set this to that", so applying it again changes nothing. Hardening
+/// 2. The journal is applied: settings, hardening, module layouts, toolbar
+///    buttons, the menu. Each write is "set this to that", so applying it
+///    again changes nothing. Hardening
 ///    the engine refuses does not stop the commit: it becomes an external
 ///    step ([SetupStep.hardeningBaseline]).
 /// 3. The onboarding revision is pushed: from here on onboarding never shows
@@ -94,8 +118,9 @@ final class SetupCommitServiceProvider
   ///
   /// 1. The draft is resolved against the current settings into a
   ///    [SetupCommitJournal], which is written durably.
-  /// 2. The journal is applied: settings, hardening, module layouts. Each write
-  ///    is "set this to that", so applying it again changes nothing. Hardening
+  /// 2. The journal is applied: settings, hardening, module layouts, toolbar
+  ///    buttons, the menu. Each write is "set this to that", so applying it
+  ///    again changes nothing. Hardening
   ///    the engine refuses does not stop the commit: it becomes an external
   ///    step ([SetupStep.hardeningBaseline]).
   /// 3. The onboarding revision is pushed: from here on onboarding never shows
@@ -140,14 +165,15 @@ final class SetupCommitServiceProvider
 }
 
 String _$setupCommitServiceHash() =>
-    r'df1f0cd09e76870d245322bbe1bff5c57646f100';
+    r'a3cca118aed61499cbb9de0aca8d6b48ab336a2c';
 
 /// Applies an onboarding draft, once, and finishes an interrupted one.
 ///
 /// 1. The draft is resolved against the current settings into a
 ///    [SetupCommitJournal], which is written durably.
-/// 2. The journal is applied: settings, hardening, module layouts. Each write
-///    is "set this to that", so applying it again changes nothing. Hardening
+/// 2. The journal is applied: settings, hardening, module layouts, toolbar
+///    buttons, the menu. Each write is "set this to that", so applying it
+///    again changes nothing. Hardening
 ///    the engine refuses does not stop the commit: it becomes an external
 ///    step ([SetupStep.hardeningBaseline]).
 /// 3. The onboarding revision is pushed: from here on onboarding never shows

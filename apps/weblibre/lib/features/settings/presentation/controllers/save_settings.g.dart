@@ -8,13 +8,81 @@ part of 'save_settings.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Whether what the settings screens save lands in the profile at once:
+/// false in the onboarding, whose draft is committed only at Done. Effects
+/// that only make sense for a live change (a restart offer, forgetting a
+/// declined reveal) wait while it is false.
+
+@ProviderFor(settingsEditsAreLive)
+final settingsEditsAreLiveProvider = SettingsEditsAreLiveProvider._();
+
+/// Whether what the settings screens save lands in the profile at once:
+/// false in the onboarding, whose draft is committed only at Done. Effects
+/// that only make sense for a live change (a restart offer, forgetting a
+/// declined reveal) wait while it is false.
+
+final class SettingsEditsAreLiveProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether what the settings screens save lands in the profile at once:
+  /// false in the onboarding, whose draft is committed only at Done. Effects
+  /// that only make sense for a live change (a restart offer, forgetting a
+  /// declined reveal) wait while it is false.
+  SettingsEditsAreLiveProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'settingsEditsAreLiveProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$settingsEditsAreLiveHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return settingsEditsAreLive(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$settingsEditsAreLiveHash() =>
+    r'e2ec0242f7d79a7ac23a7bcccf6d8e8cb4211380';
+
+/// How the settings screens save general settings: into the profile, or in
+/// the onboarding into its draft, as a Customize change (Basics files its own
+/// answers). Only settings UI writes through here; the browser writes the
+/// repository, so nothing it does lands in a draft.
 
 @ProviderFor(SaveGeneralSettingsController)
 final saveGeneralSettingsControllerProvider =
     SaveGeneralSettingsControllerProvider._();
 
+/// How the settings screens save general settings: into the profile, or in
+/// the onboarding into its draft, as a Customize change (Basics files its own
+/// answers). Only settings UI writes through here; the browser writes the
+/// repository, so nothing it does lands in a draft.
 final class SaveGeneralSettingsControllerProvider
     extends $AsyncNotifierProvider<SaveGeneralSettingsController, void> {
+  /// How the settings screens save general settings: into the profile, or in
+  /// the onboarding into its draft, as a Customize change (Basics files its own
+  /// answers). Only settings UI writes through here; the browser writes the
+  /// repository, so nothing it does lands in a draft.
   SaveGeneralSettingsControllerProvider._()
     : super(
         from: null,
@@ -35,7 +103,12 @@ final class SaveGeneralSettingsControllerProvider
 }
 
 String _$saveGeneralSettingsControllerHash() =>
-    r'3a013b533493ad890198d777ebc92dcb4de7d8eb';
+    r'8409af64c0a63948080243743a4e6f0f162153bd';
+
+/// How the settings screens save general settings: into the profile, or in
+/// the onboarding into its draft, as a Customize change (Basics files its own
+/// answers). Only settings UI writes through here; the browser writes the
+/// repository, so nothing it does lands in a draft.
 
 abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();
@@ -55,12 +128,16 @@ abstract class _$SaveGeneralSettingsController extends $AsyncNotifier<void> {
   }
 }
 
+/// Like [SaveGeneralSettingsController], for the engine settings.
+
 @ProviderFor(SaveEngineSettingsController)
 final saveEngineSettingsControllerProvider =
     SaveEngineSettingsControllerProvider._();
 
+/// Like [SaveGeneralSettingsController], for the engine settings.
 final class SaveEngineSettingsControllerProvider
     extends $AsyncNotifierProvider<SaveEngineSettingsController, void> {
+  /// Like [SaveGeneralSettingsController], for the engine settings.
   SaveEngineSettingsControllerProvider._()
     : super(
         from: null,
@@ -81,7 +158,9 @@ final class SaveEngineSettingsControllerProvider
 }
 
 String _$saveEngineSettingsControllerHash() =>
-    r'fbe89c8f9772e50fc8ada3d41a233ba5650a7982';
+    r'8c885eb8130b03b10e54f4abd0b98d14b6b83273';
+
+/// Like [SaveGeneralSettingsController], for the engine settings.
 
 abstract class _$SaveEngineSettingsController extends $AsyncNotifier<void> {
   FutureOr<void> build();

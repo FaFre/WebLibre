@@ -32,6 +32,9 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/resolved_toolbar_button.dart';
 
+/// Wraps one toolbar button; see [ContextualToolbar.wrapButton].
+typedef ToolbarButtonWrapper = Widget Function(String buttonId, Widget button);
+
 class ContextualToolbar extends HookConsumerWidget {
   const ContextualToolbar({
     super.key,
@@ -41,7 +44,22 @@ class ContextualToolbar extends HookConsumerWidget {
     this.wrap = false,
     this.showConfiguredButtons = true,
     this.trailing = const [],
+    this.isPreview = false,
+    this.previewTab,
+    this.wrapButton,
   });
+
+  /// Draws the buttons as previews that act on nothing, for the Toolbar &
+  /// Layout preview. [selectedTabId] is then null.
+  final bool isPreview;
+
+  /// With [isPreview], the sample tab the buttons resolve against.
+  final ToolbarPreviewTab? previewTab;
+
+  /// Wraps each button, by the id of the button actually shown (a fallback's,
+  /// when the configured one is unavailable). The preview marks the buttons
+  /// that are parts of its own with it.
+  final ToolbarButtonWrapper? wrapButton;
 
   final String? selectedTabId;
   final Sheet? displayedSheet;
@@ -63,18 +81,25 @@ class ContextualToolbar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final historyState = ref.watch(tabHistoryStateProvider(selectedTabId));
+    final previewTab = isPreview ? this.previewTab : null;
+    final tabState =
+        previewTab?.tabState ?? ref.watch(tabStateProvider(selectedTabId));
+    final historyState =
+        previewTab?.historyState ??
+        ref.watch(tabHistoryStateProvider(selectedTabId));
     final configs = ref.watch(
-      effectiveToolbarButtonConfigsProvider(ToolbarConfigLocation.contextual),
+      toolbarButtonConfigsShownBy(
+        ToolbarConfigLocation.contextual,
+        isPreview: isPreview,
+      ),
     );
 
     final scope = ContextualToolbarScope(
-      selectedTabId: selectedTabId,
+      selectedTabId: previewTab?.id ?? selectedTabId,
       displayedSheet: displayedSheet,
       tabState: tabState,
       historyState: historyState,
-      isPreview: false,
+      isPreview: isPreview,
     );
 
     // Resolved on every build, not memoized: isPrimaryAvailable watches
@@ -94,17 +119,16 @@ class ContextualToolbar extends HookConsumerWidget {
     );
 
     final buttons = showConfiguredButtons
-        ? resolvedButtons
-              .map(
-                (button) => buildResolvedToolbarButton(
-                  scope,
-                  context,
-                  ref,
-                  button,
-                  configById,
-                ),
-              )
-              .toList()
+        ? resolvedButtons.map((button) {
+            final built = buildResolvedToolbarButton(
+              scope,
+              context,
+              ref,
+              button,
+              configById,
+            );
+            return wrapButton?.call(button.buttonId, built) ?? built;
+          }).toList()
         : <Widget>[];
 
     return ContextualToolbarView(

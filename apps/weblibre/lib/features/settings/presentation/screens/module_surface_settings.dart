@@ -50,13 +50,13 @@ class ModuleSurfaceSettingsScreen extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     // Modules that follow a hidden feature are left out, not switched off:
     // the drawn surface skips them anyway, so a switch here would do nothing.
-    final shownFeatures = ref.watch(shownFeaturesProvider);
-    final order = ref.watch(searchModuleOrderProvider(surface));
+    final shownFeatures = ref.watch(displayedShownFeaturesProvider);
+    final order = ref.watch(editedModuleOrderProvider(surface));
     final entries = [
       for (final entry in order)
         if (isSearchModuleFeatureShown(entry.type, shownFeatures)) entry,
     ];
-    final notifier = ref.read(searchModuleOrderProvider(surface).notifier);
+    final notifier = ref.read(editedModuleOrderProvider(surface).notifier);
     final colorScheme = Theme.of(context).colorScheme;
 
     return SettingsCustomScrollScaffold(
@@ -158,7 +158,7 @@ class _HomeSearchBarRow extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(storedGeneralSettingsProvider);
     final stored = settings.homeSearchBarPlacement;
-    final resolved = ref.watch(effectiveHomeSearchBarPlacementProvider);
+    final resolved = ref.watch(displayedHomeSearchBarPlacementProvider);
 
     return MenuAnchor(
       menuChildren: [
@@ -206,7 +206,7 @@ class _SearchFieldRow extends ConsumerWidget {
     final stored = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.searchFieldPlacement),
     );
-    final resolved = ref.watch(effectiveSearchFieldPlacementProvider);
+    final resolved = ref.watch(displayedSearchFieldPlacementProvider);
 
     return MenuAnchor(
       menuChildren: [

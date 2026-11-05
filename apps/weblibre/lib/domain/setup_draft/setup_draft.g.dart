@@ -19,6 +19,12 @@ abstract class _$SetupDraftCWProxy {
 
   SetupDraft layouts(Map<ModuleSurface, List<ModuleOrderEntry>> layouts);
 
+  SetupDraft toolbarButtons(
+    Map<ToolbarConfigLocation, List<ToolbarButtonConfig>> toolbarButtons,
+  );
+
+  SetupDraft menuLayout(List<MenuSectionEntry>? menuLayout);
+
   SetupDraft hardeningBaseline(bool? hardeningBaseline);
 
   SetupDraft installUBlock(bool? installUBlock);
@@ -40,6 +46,8 @@ abstract class _$SetupDraftCWProxy {
     List<UpdateGeneralSettingsFunc> customizeEdits,
     List<UpdateEngineSettingsFunc> engineEdits,
     Map<ModuleSurface, List<ModuleOrderEntry>> layouts,
+    Map<ToolbarConfigLocation, List<ToolbarButtonConfig>> toolbarButtons,
+    List<MenuSectionEntry>? menuLayout,
     bool? hardeningBaseline,
     bool? installUBlock,
     bool? optimizedUBlockFilters,
@@ -76,6 +84,15 @@ class _$SetupDraftCWProxyImpl implements _$SetupDraftCWProxy {
       call(layouts: layouts);
 
   @override
+  SetupDraft toolbarButtons(
+    Map<ToolbarConfigLocation, List<ToolbarButtonConfig>> toolbarButtons,
+  ) => call(toolbarButtons: toolbarButtons);
+
+  @override
+  SetupDraft menuLayout(List<MenuSectionEntry>? menuLayout) =>
+      call(menuLayout: menuLayout);
+
+  @override
   SetupDraft hardeningBaseline(bool? hardeningBaseline) =>
       call(hardeningBaseline: hardeningBaseline);
 
@@ -103,6 +120,8 @@ class _$SetupDraftCWProxyImpl implements _$SetupDraftCWProxy {
     Object? customizeEdits = const $CopyWithPlaceholder(),
     Object? engineEdits = const $CopyWithPlaceholder(),
     Object? layouts = const $CopyWithPlaceholder(),
+    Object? toolbarButtons = const $CopyWithPlaceholder(),
+    Object? menuLayout = const $CopyWithPlaceholder(),
     Object? hardeningBaseline = const $CopyWithPlaceholder(),
     Object? installUBlock = const $CopyWithPlaceholder(),
     Object? optimizedUBlockFilters = const $CopyWithPlaceholder(),
@@ -136,6 +155,17 @@ class _$SetupDraftCWProxyImpl implements _$SetupDraftCWProxy {
           ? _value.layouts
           // ignore: cast_nullable_to_non_nullable
           : layouts as Map<ModuleSurface, List<ModuleOrderEntry>>,
+      toolbarButtons:
+          toolbarButtons == const $CopyWithPlaceholder() ||
+              toolbarButtons == null
+          ? _value.toolbarButtons
+          // ignore: cast_nullable_to_non_nullable
+          : toolbarButtons
+                as Map<ToolbarConfigLocation, List<ToolbarButtonConfig>>,
+      menuLayout: menuLayout == const $CopyWithPlaceholder()
+          ? _value.menuLayout
+          // ignore: cast_nullable_to_non_nullable
+          : menuLayout as List<MenuSectionEntry>?,
       hardeningBaseline: hardeningBaseline == const $CopyWithPlaceholder()
           ? _value.hardeningBaseline
           // ignore: cast_nullable_to_non_nullable
@@ -166,31 +196,73 @@ extension $SetupDraftCopyWith on SetupDraft {
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// The onboarding's draft. The onboarding screen watches it while it is
-/// mounted, which includes every route Customize pushes over it, so it ends
-/// with the onboarding; [discard] ends it right after the commit, and a fresh
-/// onboarding starts a fresh one.
+/// The onboarding's draft: open while a fresh onboarding is owed, null
+/// otherwise.
+///
+/// It opens and closes by itself, from the profile's onboarding revision
+/// rather than from a route or widget: a profile that never completed an
+/// onboarding gets a fresh draft, and the commit's `pushRevision` closes it.
+/// A review after an update has a revision, so it never gets one and its
+/// edits land in the profile directly. Kept alive because the edit layer's
+/// kept-alive providers (`storedGeneralSettings` and the save controllers)
+/// follow it.
+///
+/// [build] must watch nothing but that one answer, and keeps the open draft
+/// across its rebuilds: while the revision is unknown (reloading, failed) the
+/// draft stays as it is, open or closed, rather than dropping the user's
+/// choices and every edit made until it is known again.
+///
+/// Only the edit and displayed layers may read it, never the live layer
+/// services behave by: nothing reaches the browser before Done.
 
 @ProviderFor(SetupDraftController)
 final setupDraftControllerProvider = SetupDraftControllerProvider._();
 
-/// The onboarding's draft. The onboarding screen watches it while it is
-/// mounted, which includes every route Customize pushes over it, so it ends
-/// with the onboarding; [discard] ends it right after the commit, and a fresh
-/// onboarding starts a fresh one.
+/// The onboarding's draft: open while a fresh onboarding is owed, null
+/// otherwise.
+///
+/// It opens and closes by itself, from the profile's onboarding revision
+/// rather than from a route or widget: a profile that never completed an
+/// onboarding gets a fresh draft, and the commit's `pushRevision` closes it.
+/// A review after an update has a revision, so it never gets one and its
+/// edits land in the profile directly. Kept alive because the edit layer's
+/// kept-alive providers (`storedGeneralSettings` and the save controllers)
+/// follow it.
+///
+/// [build] must watch nothing but that one answer, and keeps the open draft
+/// across its rebuilds: while the revision is unknown (reloading, failed) the
+/// draft stays as it is, open or closed, rather than dropping the user's
+/// choices and every edit made until it is known again.
+///
+/// Only the edit and displayed layers may read it, never the live layer
+/// services behave by: nothing reaches the browser before Done.
 final class SetupDraftControllerProvider
-    extends $NotifierProvider<SetupDraftController, SetupDraft> {
-  /// The onboarding's draft. The onboarding screen watches it while it is
-  /// mounted, which includes every route Customize pushes over it, so it ends
-  /// with the onboarding; [discard] ends it right after the commit, and a fresh
-  /// onboarding starts a fresh one.
+    extends $NotifierProvider<SetupDraftController, SetupDraft?> {
+  /// The onboarding's draft: open while a fresh onboarding is owed, null
+  /// otherwise.
+  ///
+  /// It opens and closes by itself, from the profile's onboarding revision
+  /// rather than from a route or widget: a profile that never completed an
+  /// onboarding gets a fresh draft, and the commit's `pushRevision` closes it.
+  /// A review after an update has a revision, so it never gets one and its
+  /// edits land in the profile directly. Kept alive because the edit layer's
+  /// kept-alive providers (`storedGeneralSettings` and the save controllers)
+  /// follow it.
+  ///
+  /// [build] must watch nothing but that one answer, and keeps the open draft
+  /// across its rebuilds: while the revision is unknown (reloading, failed) the
+  /// draft stays as it is, open or closed, rather than dropping the user's
+  /// choices and every edit made until it is known again.
+  ///
+  /// Only the edit and displayed layers may read it, never the live layer
+  /// services behave by: nothing reaches the browser before Done.
   SetupDraftControllerProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'setupDraftControllerProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -203,33 +275,47 @@ final class SetupDraftControllerProvider
   SetupDraftController create() => SetupDraftController();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(SetupDraft value) {
+  Override overrideWithValue(SetupDraft? value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<SetupDraft>(value),
+      providerOverride: $SyncValueProvider<SetupDraft?>(value),
     );
   }
 }
 
 String _$setupDraftControllerHash() =>
-    r'92cbe1c8e447bdc5e2f8ea3063637e34c572c850';
+    r'768c5e9fc7cf8105491a5ea80576ab589a26aff9';
 
-/// The onboarding's draft. The onboarding screen watches it while it is
-/// mounted, which includes every route Customize pushes over it, so it ends
-/// with the onboarding; [discard] ends it right after the commit, and a fresh
-/// onboarding starts a fresh one.
+/// The onboarding's draft: open while a fresh onboarding is owed, null
+/// otherwise.
+///
+/// It opens and closes by itself, from the profile's onboarding revision
+/// rather than from a route or widget: a profile that never completed an
+/// onboarding gets a fresh draft, and the commit's `pushRevision` closes it.
+/// A review after an update has a revision, so it never gets one and its
+/// edits land in the profile directly. Kept alive because the edit layer's
+/// kept-alive providers (`storedGeneralSettings` and the save controllers)
+/// follow it.
+///
+/// [build] must watch nothing but that one answer, and keeps the open draft
+/// across its rebuilds: while the revision is unknown (reloading, failed) the
+/// draft stays as it is, open or closed, rather than dropping the user's
+/// choices and every edit made until it is known again.
+///
+/// Only the edit and displayed layers may read it, never the live layer
+/// services behave by: nothing reaches the browser before Done.
 
-abstract class _$SetupDraftController extends $Notifier<SetupDraft> {
-  SetupDraft build();
+abstract class _$SetupDraftController extends $Notifier<SetupDraft?> {
+  SetupDraft? build();
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
-    final ref = this.ref as $Ref<SetupDraft, SetupDraft>;
+    final ref = this.ref as $Ref<SetupDraft?, SetupDraft?>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<SetupDraft, SetupDraft>,
-              SetupDraft,
+              AnyNotifier<SetupDraft?, SetupDraft?>,
+              SetupDraft?,
               Object?,
               Object?
             >;
@@ -237,49 +323,31 @@ abstract class _$SetupDraftController extends $Notifier<SetupDraft> {
   }
 }
 
-/// The general settings as they will be after the commit: the live settings
-/// with the draft applied. What the onboarding's settings widgets show.
-///
-/// Reads the repository, never `storedGeneralSettingsProvider` or
-/// `generalSettingsWithDefaultsProvider`: the draft scope overrides those
-/// with this provider, and Riverpod detects
-/// cycles by provider rather than by container. Watching it here would make
-/// every rebuild after the first one throw a CircularDependencyError, although
-/// the root and the scoped element are different.
+/// The general settings as they will be after the commit: the profile's
+/// with the draft applied, or the profile's while no draft is open. What the
+/// onboarding's settings widgets show.
 
 @ProviderFor(draftGeneralSettings)
 final draftGeneralSettingsProvider = DraftGeneralSettingsProvider._();
 
-/// The general settings as they will be after the commit: the live settings
-/// with the draft applied. What the onboarding's settings widgets show.
-///
-/// Reads the repository, never `storedGeneralSettingsProvider` or
-/// `generalSettingsWithDefaultsProvider`: the draft scope overrides those
-/// with this provider, and Riverpod detects
-/// cycles by provider rather than by container. Watching it here would make
-/// every rebuild after the first one throw a CircularDependencyError, although
-/// the root and the scoped element are different.
+/// The general settings as they will be after the commit: the profile's
+/// with the draft applied, or the profile's while no draft is open. What the
+/// onboarding's settings widgets show.
 
 final class DraftGeneralSettingsProvider
     extends
         $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
     with $Provider<GeneralSettings> {
-  /// The general settings as they will be after the commit: the live settings
-  /// with the draft applied. What the onboarding's settings widgets show.
-  ///
-  /// Reads the repository, never `storedGeneralSettingsProvider` or
-  /// `generalSettingsWithDefaultsProvider`: the draft scope overrides those
-  /// with this provider, and Riverpod detects
-  /// cycles by provider rather than by container. Watching it here would make
-  /// every rebuild after the first one throw a CircularDependencyError, although
-  /// the root and the scoped element are different.
+  /// The general settings as they will be after the commit: the profile's
+  /// with the draft applied, or the profile's while no draft is open. What the
+  /// onboarding's settings widgets show.
   DraftGeneralSettingsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'draftGeneralSettingsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -307,32 +375,26 @@ final class DraftGeneralSettingsProvider
 }
 
 String _$draftGeneralSettingsHash() =>
-    r'212e4f8b6d90b7ef80d6f360def8c3e588b55d95';
+    r'e33d0a19d8fc25c6fdefcb2301acbcd20651c124';
 
-/// Like [draftGeneralSettings], for the engine settings, and for the same
-/// reason reading the repository rather than `storedEngineSettingsProvider`
-/// or `engineSettingsWithDefaultsProvider`.
+/// Like [draftGeneralSettings], for the engine settings.
 
 @ProviderFor(draftEngineSettings)
 final draftEngineSettingsProvider = DraftEngineSettingsProvider._();
 
-/// Like [draftGeneralSettings], for the engine settings, and for the same
-/// reason reading the repository rather than `storedEngineSettingsProvider`
-/// or `engineSettingsWithDefaultsProvider`.
+/// Like [draftGeneralSettings], for the engine settings.
 
 final class DraftEngineSettingsProvider
     extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
     with $Provider<EngineSettings> {
-  /// Like [draftGeneralSettings], for the engine settings, and for the same
-  /// reason reading the repository rather than `storedEngineSettingsProvider`
-  /// or `engineSettingsWithDefaultsProvider`.
+  /// Like [draftGeneralSettings], for the engine settings.
   DraftEngineSettingsProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'draftEngineSettingsProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -360,4 +422,4 @@ final class DraftEngineSettingsProvider
 }
 
 String _$draftEngineSettingsHash() =>
-    r'9cd8e1079d66b0717fb1f2d1fb67ab345a751e18';
+    r'57fc1f2b2fc581aa4f45e8abde3047df4913f839';

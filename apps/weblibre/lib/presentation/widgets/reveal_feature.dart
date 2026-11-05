@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
@@ -68,15 +69,12 @@ class DeclinedVisibilityReveals extends _$DeclinedVisibilityReveals {
 /// Showing hidden features again, for deliberate actions only — a gesture,
 /// shortcut or long press bound to the feature, or picking it in the settings
 /// search. Automatic behavior never reveals anything. The dialog is
-/// [askToRevealFeature]'s; this holds what it decides on.
+/// [askToRevealFeature]'s; this holds what it decides on, always against the
+/// profile: such a reveal is a live change, never an onboarding draft's.
 @Riverpod(keepAlive: true)
 class FeatureReveal extends _$FeatureReveal {
   @override
   void build() {}
-
-  /// The container this lives in, for the restart [revealAndOfferRestart]
-  /// may offer.
-  ProviderContainer get container => ref.container;
 
   /// The visibility switches that hide [feature], empty while it is shown.
   List<VisibilitySwitch> missingSwitches(FeatureId feature) =>
@@ -91,53 +89,84 @@ class FeatureReveal extends _$FeatureReveal {
 
   /// The user's changes that apply again once [switches] are shown
   /// ([changesApplyingAgainOnShow]), for the dialog to list before "Show".
-  List<HiddenSetting> applyingAgain(List<VisibilitySwitch> switches) =>
-      changesApplyingAgainOnShow(
-        // One-off reads that hold nothing open; the settings behind them are
-        // kept alive.
-        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-        suspended: ref.read(suspendedSettingsProvider),
-        // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
-        stored: () => ref.read(storedSettingsSnapshotProvider),
-        switches: switches,
-      );
+  ///
+  /// Waits for the toolbars and containers to load: nothing on screen may be
+  /// watching them yet when a gesture or shortcut asks, and read before they
+  /// load they would count as unchanged.
+  Future<List<HiddenSetting>> applyingAgain(
+    List<VisibilitySwitch> switches,
+  ) async {
+    final snapshot = await readLoadedSettingsSnapshot(ref);
+    return changesApplyingAgainOnShow(
+      suspended: snapshot.suspended,
+      stored: () => snapshot,
+      switches: switches,
+    );
+  }
 
-  /// Turns [switches] on, and nothing else. Returns the changes that apply
-  /// again ([applyingAgain], read before saving): [revealAndOfferRestart]
-  /// offers a restart for the ones read at engine start.
-  Future<List<HiddenSetting>> reveal(List<VisibilitySwitch> switches) async {
-    final resumed = applyingAgain(switches);
-    await ref
-        .read(generalSettingsRepositoryProvider.notifier)
-        .updateSettings((current) => withSwitchesShown(current, switches));
-    ref.read(declinedVisibilityRevealsProvider.notifier).forget(switches);
-    return resumed;
+  /// Applies [update] to the profile's settings; see [showSwitches]. Returns
+  /// whether it was saved, like the settings save controllers: a failure is
+  /// logged, and the caller tells the user.
+  Future<bool> write(UpdateGeneralSettingsFunc update) async {
+    try {
+      await ref
+          .read(generalSettingsRepositoryProvider.notifier)
+          .updateSettings(update);
+      return true;
+    } catch (error, stackTrace) {
+      logger.e(
+        'Failed to show hidden features',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
   }
 }
 
-/// [FeatureReveal.reveal], then the restart the settings rows offer when a
-/// setting that applies again is read only at engine start.
-Future<void> revealAndOfferRestart(
-  BuildContext context,
-  FeatureReveal reveal,
-  List<VisibilitySwitch> switches,
-) async {
-  final applyingAgain = await reveal.reveal(switches);
-  if (context.mounted) {
-    await offerRestartForStartupSettings(
-      context,
-      reveal.container,
-      applyingAgain,
-    );
+/// What "Show" does, however it was asked for: turns [switches] on through
+/// [write], and nothing else. Returns whether the write landed.
+///
+/// With [committed] the write is a live change: the switches are no longer
+/// declined ([DeclinedVisibilityReveals]), and a restart is offered for the
+/// changes in [applyingAgain] the engine reads only at start. In the
+/// onboarding the write goes into a draft that can still be discarded, so
+/// neither happens there.
+///
+/// [container] is the caller's (`ref.container`), for the restart.
+Future<bool> showSwitches(
+  BuildContext? context,
+  ProviderContainer container,
+  List<VisibilitySwitch> switches, {
+  required Future<bool> Function(UpdateGeneralSettingsFunc update) write,
+  required List<HiddenSetting> applyingAgain,
+  required bool committed,
+}) async {
+  final saved = await write((current) => withSwitchesShown(current, switches));
+  // A failed write leaves the switches hidden, so a decline still stands:
+  // forgetting it would bring the full dialog back on the next binding.
+  if (!committed || !saved) return saved;
+
+  // A switch turned on here is no longer a declined one. Only touched when
+  // there is something to forget.
+  final declined = container.read(declinedVisibilityRevealsProvider);
+  if (switches.any(declined.contains)) {
+    container.read(declinedVisibilityRevealsProvider.notifier).forget(switches);
   }
+
+  if (saved && context != null && context.mounted) {
+    await offerRestartForStartupSettings(context, container, applyingAgain);
+  }
+  return saved;
 }
 
 /// Asks whether to show the hidden [feature], and shows it on "Show": every
 /// visibility switch it needs is turned on, nothing else changes. Returns
-/// whether the feature is shown afterwards.
+/// whether the feature is shown afterwards. Always the profile
+/// ([FeatureReveal]).
 ///
-/// [reveal] is `ref.read(featureRevealProvider.notifier)`, from a widget or a
-/// service alike.
+/// [container] is the caller's (`ref.container`), from a widget or a service
+/// alike.
 ///
 /// With [askOnce] (bindings), a switch the user declined with "Cancel" before
 /// is not asked about again: a short note points to Feature Control and
@@ -146,10 +175,11 @@ Future<void> revealAndOfferRestart(
 /// request to see the feature pass false.
 Future<bool> askToRevealFeature(
   BuildContext context,
-  FeatureReveal reveal,
+  ProviderContainer container,
   FeatureId feature, {
   bool askOnce = true,
 }) async {
+  final reveal = container.read(featureRevealProvider.notifier);
   final missing = reveal.missingSwitches(feature);
   if (missing.isEmpty) return true;
 
@@ -162,16 +192,19 @@ Future<bool> askToRevealFeature(
       // so nothing happens the user did not see coming.
       action: SnackBarAction(
         label: l10n.visibilitySwitch_revealConfirm,
-        onPressed: () => unawaited(_revealFromNote(context, reveal, missing)),
+        onPressed: () =>
+            unawaited(_revealFromNote(context, container, reveal, missing)),
       ),
     );
     return false;
   }
 
+  final applyingAgain = await reveal.applyingAgain(missing);
+  if (!context.mounted) return false;
   final show = await showRevealDialog(
     context,
     missing,
-    applyingAgain: reveal.applyingAgain(missing),
+    applyingAgain: applyingAgain,
   );
   if (show != true) {
     // Only an explicit "Cancel" is a decline worth remembering.
@@ -179,12 +212,13 @@ Future<bool> askToRevealFeature(
     return false;
   }
 
-  if (context.mounted) {
-    await revealAndOfferRestart(context, reveal, missing);
-  } else {
-    await reveal.reveal(missing);
-  }
-  return true;
+  return await _showSwitchesOrReport(
+    context.mounted ? context : null,
+    container,
+    reveal,
+    missing,
+    applyingAgain,
+  );
 }
 
 /// The "Show" of the still-hidden note. A plain tap there shows nothing
@@ -193,10 +227,11 @@ Future<bool> askToRevealFeature(
 /// Never a decline, and the action that needed the feature is not replayed.
 Future<void> _revealFromNote(
   BuildContext context,
+  ProviderContainer container,
   FeatureReveal reveal,
   List<VisibilitySwitch> missing,
 ) async {
-  final applyingAgain = reveal.applyingAgain(missing);
+  final applyingAgain = await reveal.applyingAgain(missing);
   if (applyingAgain.isNotEmpty) {
     if (!context.mounted) return;
     final show = await showRevealDialog(
@@ -206,11 +241,43 @@ Future<void> _revealFromNote(
     );
     if (show != true) return;
   }
-  if (context.mounted) {
-    await revealAndOfferRestart(context, reveal, missing);
-  } else {
-    await reveal.reveal(missing);
+  await _showSwitchesOrReport(
+    context.mounted ? context : null,
+    container,
+    reveal,
+    missing,
+    applyingAgain,
+  );
+}
+
+/// [showSwitches] against the profile, telling the user when the write
+/// failed and the feature stays hidden. Returns whether it is shown.
+/// [context] is null once the caller's is gone; nothing is shown then.
+Future<bool> _showSwitchesOrReport(
+  BuildContext? context,
+  ProviderContainer container,
+  FeatureReveal reveal,
+  List<VisibilitySwitch> missing,
+  List<HiddenSetting> applyingAgain,
+) async {
+  // Resolved before the write: the restart offer may await in between.
+  void Function()? reportFailure;
+  if (context != null) {
+    final showError = errorMessengerFor(context);
+    final message = AppLocalizations.of(context).visibilitySwitch_showFailed;
+    reportFailure = () => showError(message);
   }
+
+  final shown = await showSwitches(
+    context,
+    container,
+    missing,
+    write: reveal.write,
+    applyingAgain: applyingAgain,
+    committed: true,
+  );
+  if (!shown) reportFailure?.call();
+  return shown;
 }
 
 /// Asks whether to turn [missing] on: true for "Show", false for "Cancel",

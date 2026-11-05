@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/services/toolbar_button_resolution.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/resolved_toolbar_button.dart';
 
 /// The switcher bar's cross-axis extent (height when horizontal, width on the
@@ -54,7 +55,22 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
     required this.displayedSheet,
     this.axis = Axis.horizontal,
     this.wrap = false,
+    this.isPreview = false,
+    this.previewTab,
+    this.wrapButton,
   });
+
+  /// Draws the buttons as previews that act on nothing, for the Toolbar &
+  /// Layout preview. [selectedTabId] is then null.
+  final bool isPreview;
+
+  /// With [isPreview], the sample tab the buttons resolve against.
+  final ToolbarPreviewTab? previewTab;
+
+  /// Wraps each button, by the id of the button actually shown (a fallback's,
+  /// when the configured one is unavailable). The preview marks the buttons
+  /// that are parts of its own with it.
+  final ToolbarButtonWrapper? wrapButton;
 
   final String? selectedTabId;
   final Sheet? displayedSheet;
@@ -68,20 +84,25 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tabState = ref.watch(tabStateProvider(selectedTabId));
-    final historyState = ref.watch(tabHistoryStateProvider(selectedTabId));
+    final previewTab = isPreview ? this.previewTab : null;
+    final tabState =
+        previewTab?.tabState ?? ref.watch(tabStateProvider(selectedTabId));
+    final historyState =
+        previewTab?.historyState ??
+        ref.watch(tabHistoryStateProvider(selectedTabId));
     final configs = ref.watch(
-      effectiveToolbarButtonConfigsProvider(
+      toolbarButtonConfigsShownBy(
         ToolbarConfigLocation.quickSwitcher,
+        isPreview: isPreview,
       ),
     );
 
     final scope = ContextualToolbarScope(
-      selectedTabId: selectedTabId,
+      selectedTabId: previewTab?.id ?? selectedTabId,
       displayedSheet: displayedSheet,
       tabState: tabState,
       historyState: historyState,
-      isPreview: false,
+      isPreview: isPreview,
       location: ToolbarConfigLocation.quickSwitcher,
     );
 
@@ -107,17 +128,16 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
 
     final isVertical = axis == Axis.vertical;
 
-    final buttons = resolvedButtons
-        .map(
-          (button) => buildResolvedToolbarButton(
-            scope,
-            context,
-            ref,
-            button,
-            configById,
-          ),
-        )
-        .toList();
+    final buttons = resolvedButtons.map((button) {
+      final built = buildResolvedToolbarButton(
+        scope,
+        context,
+        ref,
+        button,
+        configById,
+      );
+      return wrapButton?.call(button.buttonId, built) ?? built;
+    }).toList();
 
     if (wrap) {
       return Wrap(

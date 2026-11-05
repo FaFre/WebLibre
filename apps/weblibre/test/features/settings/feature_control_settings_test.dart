@@ -34,12 +34,13 @@ import 'package:weblibre/features/onboarding/presentation/widgets/customize_setu
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/screens/feature_control_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
@@ -98,6 +99,63 @@ void main() {
     }
   });
 
+  group('revertVisibilityChange', () {
+    // Everything hidden, the legacy settings included, so turning any switch
+    // on can turn others on with it.
+    final hidden = GeneralSettings.withDefaults().copyWith(
+      visibilitySwitches: {
+        for (final visibilitySwitch in VisibilitySwitch.values)
+          visibilitySwitch: false,
+      },
+      showContainerUi: false,
+      showIsolatedTabUi: false,
+    );
+
+    test('undoes everything showing a switch turned on', () {
+      // The Undo after showing a feature used to turn off only the switch
+      // tapped. Showing containers also turns their legacy setting on, which
+      // container indicators read alone, and that stayed on.
+      for (final visibilitySwitch in VisibilitySwitch.values) {
+        final shown = hidden.withVisibilitySwitch(
+          visibilitySwitch,
+          enabled: true,
+        );
+        final reverted = revertVisibilityChange(
+          shown,
+          before: hidden,
+          after: shown,
+        );
+        expect(
+          reverted.visibilitySwitches,
+          hidden.visibilitySwitches,
+          reason: visibilitySwitch.name,
+        );
+        expect(reverted.showContainerUi, isFalse);
+        expect(reverted.showIsolatedTabUi, isFalse);
+      }
+
+      final containersShown = hidden.withVisibilitySwitch(
+        VisibilitySwitch.containers,
+        enabled: true,
+      );
+      expect(containersShown.showContainerUi, isTrue);
+    });
+
+    test('keeps what changed since', () {
+      final shown = hidden.withVisibilitySwitch(
+        VisibilitySwitch.containers,
+        enabled: true,
+      );
+      final reverted = revertVisibilityChange(
+        shown.copyWith(pureBlack: true),
+        before: hidden,
+        after: shown,
+      );
+      expect(reverted.pureBlack, isTrue);
+      expect(reverted.showContainerUi, isFalse);
+    });
+  });
+
   test('every group holds a switch', () {
     // Settings shows only the switches: a group without one would be an
     // empty heading there.
@@ -132,9 +190,13 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            // No onboarding owed: no draft, the displayed layer is the live one.
+            completedOnboardingRevisionProvider.overrideWithValue(
+              const AsyncData(OnboardingRepository.targetRevision),
+            ),
             generalSettingsRepositoryProvider.overrideWith(() => repository),
             connectionsInUseProvider.overrideWithValue(connectionsInUse),
-            watchContainersWithCountProvider.overrideWith(
+            watchContainersProvider.overrideWith(
               (ref) => Stream.value(containers),
             ),
             // The live general settings with every other store at its

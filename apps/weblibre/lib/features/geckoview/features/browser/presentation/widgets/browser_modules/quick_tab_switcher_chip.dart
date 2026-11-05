@@ -237,18 +237,35 @@ Widget buildQuickTabSwitcherChipLabel(
   required bool showIsolatedTabUi,
   required int hierarchyGlyphs,
   required double titleMaxWidth,
-  // On the narrow vertical rail the leading depth pill has no room beside the
-  // favicon (it clips the icon), so nesting is shown as a compact corner badge
-  // overlaid on the favicon instead.
+  // On the narrow vertical rail nothing fits beside the favicon: the chip is
+  // one icon wide. Nesting is shown as a compact corner badge overlaid on the
+  // favicon instead of the leading depth pill, and the trailing markers
+  // (private, isolated, sandbox, pinned, history) as one badge in the other
+  // corner. A history chip drops its title there for the same reason.
   bool isVertical = false,
 }) {
   final appColors = AppColors.of(context);
-  final hasTitle = item.isHistory || showTitles;
+  final hasTitle = !isVertical && (item.isHistory || showTitles);
   final isNested = item.depth > 0 && hierarchyGlyphs > 0;
   final showInlineDepth = isNested && !isVertical;
-  final avatar = (isNested && isVertical)
+  final showInlineMarkers = !isVertical;
+  Widget avatar = (isNested && isVertical)
       ? _RailDepthAvatar(depth: item.depth, child: item.avatar)
       : item.avatar;
+  if (isVertical) {
+    final marker = _railMarker(
+      context,
+      item,
+      showIsolatedTabUi: showIsolatedTabUi,
+    );
+    if (marker != null) {
+      avatar = _RailMarkerAvatar(
+        icon: marker.icon,
+        color: marker.color,
+        child: avatar,
+      );
+    }
+  }
   final row = Row(
     mainAxisSize: MainAxisSize.min,
     children: [
@@ -272,7 +289,9 @@ Widget buildQuickTabSwitcherChipLabel(
           constraints: BoxConstraints(maxWidth: titleMaxWidth),
           child: Text(item.title),
         ),
-      if (showIsolatedTabUi && item.tabMode is IsolatedTabMode)
+      if (showInlineMarkers &&
+          showIsolatedTabUi &&
+          item.tabMode is IsolatedTabMode)
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Icon(
@@ -281,7 +300,7 @@ Widget buildQuickTabSwitcherChipLabel(
             size: 20,
           ),
         )
-      else if (item.tabMode is PrivateTabMode)
+      else if (showInlineMarkers && item.tabMode is PrivateTabMode)
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Icon(
@@ -290,7 +309,7 @@ Widget buildQuickTabSwitcherChipLabel(
             size: 20,
           ),
         ),
-      if (item.isSandbox)
+      if (showInlineMarkers && item.isSandbox)
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Icon(
@@ -299,7 +318,7 @@ Widget buildQuickTabSwitcherChipLabel(
             size: 20,
           ),
         ),
-      if (item.isPinned)
+      if (showInlineMarkers && item.isPinned)
         Padding(
           padding: const EdgeInsets.only(left: 8.0),
           child: Icon(
@@ -308,7 +327,7 @@ Widget buildQuickTabSwitcherChipLabel(
             size: 20,
           ),
         ),
-      if (item.isHistory)
+      if (showInlineMarkers && item.isHistory)
         const Padding(
           padding: EdgeInsets.only(left: 8.0),
           child: Icon(MdiIcons.history, size: 20),
@@ -347,6 +366,78 @@ Widget buildQuickTabSwitcherChipLabel(
 /// used on the vertical side rail where the inline [TabDepthIndicator] pill
 /// would clip the favicon. The badge shows a subdirectory-arrow glyph for a
 /// direct child and the depth number for deeper nesting.
+/// The one marker a chip on the narrow rail shows in its favicon's corner,
+/// most telling first, or null for a plain tab.
+({IconData icon, Color color})? _railMarker(
+  BuildContext context,
+  QuickTabSwitcherItem item, {
+  required bool showIsolatedTabUi,
+}) {
+  final appColors = AppColors.of(context);
+  final scheme = Theme.of(context).colorScheme;
+
+  if (showIsolatedTabUi && item.tabMode is IsolatedTabMode) {
+    return (icon: MdiIcons.snowflake, color: appColors.isolatedTabTeal);
+  }
+  if (item.tabMode is PrivateTabMode) {
+    return (icon: MdiIcons.dominoMask, color: appColors.privateTabPurple);
+  }
+  if (item.isSandbox) {
+    return (icon: MdiIcons.archiveLockOutline, color: scheme.tertiary);
+  }
+  if (item.isPinned) return (icon: MdiIcons.pin, color: scheme.primary);
+  if (item.isHistory) {
+    return (icon: MdiIcons.history, color: scheme.onSurfaceVariant);
+  }
+  return null;
+}
+
+/// A favicon with a marker badge in its top corner, for the narrow rail.
+///
+/// Keeps the favicon's 20px footprint like [_RailDepthAvatar], whose badge
+/// takes the bottom corner, so the two can stack on one favicon.
+class _RailMarkerAvatar extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final Widget child;
+
+  const _RailMarkerAvatar({
+    required this.icon,
+    required this.color,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: child),
+          Positioned(
+            right: -3,
+            top: -5,
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+                border: Border.all(color: scheme.surfaceContainer),
+              ),
+              child: Icon(icon, size: 9, color: color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RailDepthAvatar extends StatelessWidget {
   final int depth;
   final Widget child;

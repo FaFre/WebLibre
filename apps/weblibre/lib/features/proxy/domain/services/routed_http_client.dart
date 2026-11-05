@@ -211,6 +211,43 @@ Future<AppRoutingPolicy> resolveAppRoutingPolicy(
   }
 }
 
+/// Waits until routing for [contextId] is decided and its proxy is not still
+/// coming up ([ContainerRoutingSnapshot.awaitingProxyIds]), or [timeout] has
+/// passed.
+///
+/// For work that is retried only on the next start, such as an onboarding
+/// add-on install: run while startup is still bringing up the proxy, its
+/// request is refused for want of an endpoint that exists a moment later.
+/// Decides nothing about the route: the request still resolves its policy
+/// afresh ([resolveAppRoutingPolicy]), and a proxy that failed to start is
+/// refused as before.
+Future<void> awaitAppRoutingSettled(
+  Ref ref,
+  String contextId, {
+  required Duration timeout,
+}) async {
+  bool settled(ContainerRoutingSnapshot? snapshot) {
+    if (snapshot == null) return false;
+    final proxyIds = effectiveRelationFor(snapshot, contextId);
+    return proxyIds.isEmpty ||
+        !snapshot.awaitingProxyIds.contains(proxyIds.first);
+  }
+
+  final done = Completer<void>();
+  final subscription = ref.listen(containerRoutingSnapshotProvider, (
+    previous,
+    next,
+  ) {
+    if (settled(next) && !done.isCompleted) done.complete();
+  }, fireImmediately: true);
+
+  try {
+    await done.future.timeout(timeout, onTimeout: () {});
+  } finally {
+    subscription.close();
+  }
+}
+
 /// The client for app-originated requests that belong to no particular tab —
 /// add-on metadata, proxy subscriptions, catalog downloads, account handoff.
 ///

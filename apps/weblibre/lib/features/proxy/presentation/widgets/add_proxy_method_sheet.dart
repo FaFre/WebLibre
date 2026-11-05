@@ -386,7 +386,7 @@ Future<AddProxyAction?> _consumeRawText(
           .isFeatureShown(FeatureId.connectionsManualProxyConfig) &&
       !await askToRevealFeature(
         context,
-        ref.read(featureRevealProvider.notifier),
+        ref.container,
         FeatureId.connectionsManualProxyConfig,
         // A deliberate import, like tapping a grayed-out setting: "Cancel"
         // asks again next time.

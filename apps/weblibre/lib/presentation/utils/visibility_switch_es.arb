@@ -32,6 +32,7 @@
   "visibilitySwitch_takesEffectAfterRestart": "Surte efecto tras reiniciar",
   "visibilitySwitch_revealConfirm": "Mostrar",
   "visibilitySwitch_stillHiddenNote": "Esto pertenece a una función oculta. Puedes mostrarla en Ajustes > Control de funciones.",
+  "visibilitySwitch_showFailed": "No se pudo mostrar la función. Inténtalo de nuevo.",
   "visibilitySwitch_hiddenControlHint": "Parte de una función oculta. Actívalo para mostrar la función",
   "visibilitySwitch_hiddenStatus": "Parte de la función oculta «{switchLabel}»",
   "visibilitySwitch_hiddenStatusSeveral": "Parte de funciones ocultas: {switchLabels}",

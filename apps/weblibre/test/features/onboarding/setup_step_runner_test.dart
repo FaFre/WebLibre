@@ -39,8 +39,20 @@ class _FakeAddons extends BrowserAddonService {
   // ignore: riverpod_lint/avoid_public_notifier_properties
   Completer<void>? hold;
 
+  // Whether uBlock Origin is installed already, by hand.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
+  bool installed = false;
+
+  // How many installs ran.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
+  int installs = 0;
+
+  @override
+  Future<bool> isInstalled(String addonGuid) async => installed;
+
   @override
   Future<AddonInstallOutcome> install(String addonGuid) async {
+    installs++;
     await hold?.future;
     return outcome;
   }
@@ -172,6 +184,67 @@ void main() {
     await runner.resume();
 
     expect(await runner.pending(), {SetupStep.installUBlock});
+  });
+
+  test('an install done by hand since is not run again', () async {
+    // Installing again would only ask for its permissions again.
+    final addons = _FakeAddons(AddonInstallOutcome.failed)..installed = true;
+    final container = _runner(AddonInstallOutcome.failed, addons: addons);
+    final runner = container.read(setupStepRunnerProvider.notifier);
+
+    await runner.schedule({SetupStep.installUBlock});
+    await runner.resume();
+
+    expect(addons.installs, 0);
+    expect(await runner.pending(), isEmpty);
+    expect(container.read(setupStepRunnerProvider), isEmpty);
+  });
+
+  test('removing uBlock by hand drops its retry and filters', () async {
+    // The onboarding install failed offline; the user then installed uBlock
+    // by hand and removed it again. The next start must not put it back.
+    final addons = _FakeAddons(AddonInstallOutcome.installed);
+    final container = _runner(AddonInstallOutcome.installed, addons: addons);
+    final runner = container.read(setupStepRunnerProvider.notifier);
+
+    await runner.schedule(uBlockSteps);
+    await runner.uBlockRemoved();
+    await runner.resume();
+
+    expect(addons.installs, 0);
+    expect(await runner.pending(), isEmpty);
+  });
+
+  test('a commit during a run keeps what it scheduled', () async {
+    // A retry from the last onboarding is still waiting on its install
+    // when a new onboarding commits: the run must neither write its own
+    // copy of the schedule over the new one nor leave the new steps for the
+    // next start.
+    final addons = _FakeAddons(AddonInstallOutcome.installed)
+      ..hold = Completer();
+    final engine = _FakeEngine()..refuses = false;
+    final container = _runner(
+      AddonInstallOutcome.installed,
+      addons: addons,
+      engine: engine,
+    );
+    final runner = container.read(setupStepRunnerProvider.notifier);
+
+    await runner.schedule({SetupStep.installUBlock});
+    final run = runner.resume();
+    await pumpEventQueue();
+    expect(addons.installs, 1);
+
+    await runner.schedule({
+      SetupStep.installUBlock,
+      SetupStep.hardeningBaseline,
+    });
+    final joined = runner.resume();
+    addons.hold!.complete();
+    await Future.wait([run, joined]);
+
+    expect(engine.applied, 1);
+    expect(await runner.pending(), isEmpty);
   });
 
   test('cancelling waits out a baseline being applied', () async {

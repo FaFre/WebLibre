@@ -19,7 +19,6 @@
  */
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_spec.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.dart';
@@ -33,6 +32,7 @@ part 'quick_switcher_toolbar_config_repository.g.dart';
 /// by the separate `quick_switcher_button_configs` table and mapping its row
 /// type to the shared [ToolbarButtonConfig] transport type.
 class QuickSwitcherToolbarConfigRepository
+    with SerializedSaveAll
     implements ToolbarButtonConfigRepository {
   QuickSwitcherToolbarConfigRepository(this._dao);
 
@@ -61,58 +61,8 @@ class QuickSwitcherToolbarConfigRepository
       _dao.watchAll().map((rows) => rows.map(_toShared).toList());
 
   @override
-  Future<void> replaceAll(List<ToolbarButtonConfig> configs) {
-    return _dao.replaceAll(configs.map(_fromShared).toList());
-  }
-
-  @override
-  Future<void> assignOrderKey(String buttonId, {required String orderKey}) {
-    return _dao.assignOrderKey(buttonId, orderKey: orderKey);
-  }
-
-  @override
-  Future<void> assignVisibility(String buttonId, {required bool visible}) {
-    return _dao.assignVisibility(buttonId, visible: visible);
-  }
-
-  @override
-  Future<void> assignFallback(String buttonId, String? fallbackId) {
-    return _dao.assignFallback(buttonId, fallbackId);
-  }
-
-  @override
-  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) {
-    return _dao.assignLongPressAction(buttonId, action);
-  }
-
-  @override
-  Future<String> generateLeadingOrderKey({required bool isVisible}) {
-    return _dao.generateLeadingOrderKey(isVisible: isVisible).getSingle();
-  }
-
-  @override
-  Future<String> generateTrailingOrderKey({required bool isVisible}) {
-    return _dao.generateTrailingOrderKey(isVisible: isVisible).getSingle();
-  }
-
-  @override
-  Future<String?> generateOrderKeyAfterButtonId(
-    String buttonId, {
-    required bool isVisible,
-  }) {
-    return _dao
-        .generateOrderKeyAfterButtonId(buttonId, isVisible: isVisible)
-        .getSingleOrNull();
-  }
-
-  @override
-  Future<String> generateOrderKeyBeforeButtonId(
-    String buttonId, {
-    required bool isVisible,
-  }) {
-    return _dao
-        .generateOrderKeyBeforeButtonId(buttonId, isVisible: isVisible)
-        .getSingle();
+  Future<void> writeChanged(List<ToolbarButtonConfig> configs) {
+    return _dao.writeChanged(configs.map(_fromShared).toList());
   }
 
   @override

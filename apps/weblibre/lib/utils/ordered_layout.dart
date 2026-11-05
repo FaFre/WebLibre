@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:convert';
 
 /// Reconciles a persisted, user-arranged list with the list the app currently
 /// offers.
@@ -101,4 +102,39 @@ List<E> moveAmongShown<E, K>(
       : list.indexWhere((e) => entryKey(e) == rest.last) + 1;
   list.insert(insertAt, entry);
   return list;
+}
+
+/// [entries] as a persisted arrangement stores them: a JSON list of their
+/// JSON objects.
+String encodeLayoutEntries<E>(
+  List<E> entries,
+  Map<String, dynamic> Function(E entry) toJson,
+) => jsonEncode([for (final entry in entries) toJson(entry)]);
+
+/// [encoded] (see [encodeLayoutEntries]) decoded entry by entry; see
+/// [layoutEntriesFromJson].
+List<E> decodeLayoutEntries<E>(
+  String encoded,
+  E Function(Map<String, dynamic> json) fromJson,
+) => layoutEntriesFromJson(jsonDecode(encoded), fromJson);
+
+/// The entries of a decoded JSON list. An entry this version cannot read (an
+/// element since removed, say) is skipped rather than failing the whole
+/// arrangement: [mergeOrderedLayout] puts back whatever it is missing.
+List<E> layoutEntriesFromJson<E>(
+  Object? json,
+  E Function(Map<String, dynamic> json) fromJson,
+) => [
+  for (final entry in json! as List<dynamic>) ?_tryFromJson(entry, fromJson),
+];
+
+E? _tryFromJson<E>(
+  Object? entry,
+  E Function(Map<String, dynamic> json) fromJson,
+) {
+  try {
+    return fromJson(entry! as Map<String, dynamic>);
+  } catch (_) {
+    return null;
+  }
 }

@@ -18,14 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/user/data/database/daos/quick_switcher_button_config.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 
 /// Mirror of [ToolbarButtonConfigDao] against the separate
-/// `quick_switcher_button_configs` table. See that DAO for the rationale behind
-/// each visibility-partitioned order-key operation.
+/// `quick_switcher_button_configs` table.
 @DriftAccessor()
 class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
     with $QuickSwitcherButtonConfigDaoMixin {
@@ -39,52 +37,30 @@ class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
 
   Future<List<QuickSwitcherButtonConfig>> getAll() => selectAll().get();
 
-  Future<void> upsert(QuickSwitcherButtonConfig config) =>
-      into(db.quickSwitcherButtonConfigs).insertOnConflictUpdate(config);
-
-  Future<void> assignOrderKey(String buttonId, {required String orderKey}) =>
-      (update(
-        db.quickSwitcherButtonConfigs,
-      )..where((t) => t.buttonId.equals(buttonId))).write(
-        QuickSwitcherButtonConfigsCompanion(orderKey: Value(orderKey)),
-      );
-
-  Future<void> assignVisibility(String buttonId, {required bool visible}) =>
+  /// Stores [configs]; see [ToolbarButtonConfigDao.writeChanged].
+  Future<void> writeChanged(List<QuickSwitcherButtonConfig> configs) =>
       transaction(() async {
-        // Land the toggled button at the trailing edge of its *new* section so
-        // its order_key always stays inside the visibility partition.
-        final orderKey = await generateTrailingOrderKey(
-          isVisible: visible,
-        ).getSingle();
-
-        await (update(
-          db.quickSwitcherButtonConfigs,
-        )..where((t) => t.buttonId.equals(buttonId))).write(
-          QuickSwitcherButtonConfigsCompanion(
-            isVisible: Value(visible),
-            orderKey: Value(orderKey),
-          ),
-        );
-      });
-
-  Future<void> assignFallback(String buttonId, String? fallbackId) =>
-      (update(
-        db.quickSwitcherButtonConfigs,
-      )..where((t) => t.buttonId.equals(buttonId))).write(
-        QuickSwitcherButtonConfigsCompanion(fallbackId: Value(fallbackId)),
-      );
-
-  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) =>
-      (update(
-        db.quickSwitcherButtonConfigs,
-      )..where((t) => t.buttonId.equals(buttonId))).write(
-        QuickSwitcherButtonConfigsCompanion(longPressAction: Value(action)),
-      );
-
-  Future<void> replaceAll(List<QuickSwitcherButtonConfig> configs) =>
-      transaction(() async {
-        await delete(db.quickSwitcherButtonConfigs).go();
-        await _insertWithDeferredFallbacks(configs);
+        final existing = {for (final row in await getAll()) row.buttonId: row};
+        final changed = [
+          for (final config in configs)
+            if (existing[config.buttonId] != config) config,
+        ];
+        for (final config in changed) {
+          await into(db.quickSwitcherButtonConfigs).insertOnConflictUpdate(
+            QuickSwitcherButtonConfigsCompanion(
+              buttonId: Value(config.buttonId),
+              orderKey: Value(config.orderKey),
+              isVisible: Value(config.isVisible),
+              longPressAction: Value(config.longPressAction),
+            ),
+          );
+        }
+        for (final config in changed) {
+          if (existing[config.buttonId]?.fallbackId == config.fallbackId) {
+            continue;
+          }
+          await _assignFallback(config.buttonId, config.fallbackId);
+        }
       });
 
   Future<void> seedMissing(
@@ -126,14 +102,6 @@ class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
     });
   }
 
-  SingleSelectable<String> generateLeadingOrderKey({
-    int bucket = 0,
-    required bool isVisible,
-  }) => db.definitionsDrift.quickSwitcherLeadingOrderKey(
-    bucket: bucket,
-    isVisible: isVisible,
-  );
-
   SingleSelectable<String> generateTrailingOrderKey({
     int bucket = 0,
     required bool isVisible,
@@ -142,43 +110,17 @@ class QuickSwitcherButtonConfigDao extends DatabaseAccessor<UserDatabase>
     isVisible: isVisible,
   );
 
-  SingleOrNullSelectable<String> generateOrderKeyAfterButtonId(
-    String buttonId, {
-    required bool isVisible,
-  }) => db.definitionsDrift.quickSwitcherOrderKeyAfterButton(
-    buttonId: buttonId,
-    isVisible: isVisible,
-  );
-
-  SingleSelectable<String> generateOrderKeyBeforeButtonId(
-    String buttonId, {
-    required bool isVisible,
-  }) => db.definitionsDrift.quickSwitcherOrderKeyBeforeButton(
-    buttonId: buttonId,
-    isVisible: isVisible,
-  );
-
-  Future<void> _insertWithDeferredFallbacks(
-    List<QuickSwitcherButtonConfig> configs,
-  ) async {
-    for (final config in configs) {
-      await into(db.quickSwitcherButtonConfigs).insert(
-        QuickSwitcherButtonConfig(
-          buttonId: config.buttonId,
-          orderKey: config.orderKey,
-          isVisible: config.isVisible,
-          longPressAction: config.longPressAction,
-        ),
-      );
-    }
-
-    await _assignFallbacks(configs);
-  }
-
   Future<void> _assignFallbacks(List<QuickSwitcherButtonConfig> configs) async {
     for (final config in configs) {
       if (config.fallbackId == null) continue;
-      await assignFallback(config.buttonId, config.fallbackId);
+      await _assignFallback(config.buttonId, config.fallbackId);
     }
   }
+
+  Future<void> _assignFallback(String buttonId, String? fallbackId) =>
+      (update(
+        db.quickSwitcherButtonConfigs,
+      )..where((t) => t.buttonId.equals(buttonId))).write(
+        QuickSwitcherButtonConfigsCompanion(fallbackId: Value(fallbackId)),
+      );
 }

@@ -32,6 +32,7 @@ import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
@@ -64,6 +65,10 @@ void main() {
     return tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // No onboarding owed: no draft, the displayed layer is the live one.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(OnboardingRepository.targetRevision),
+          ),
           userDatabaseProvider.overrideWith((ref) => db),
           selectedTabStateProvider.overrideWithValue(tab),
           selectedTabTypeProvider.overrideWithValue(TabType.regular),

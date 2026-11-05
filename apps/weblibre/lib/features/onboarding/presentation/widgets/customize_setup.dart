@@ -21,9 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
-import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
-import 'package:weblibre/features/onboarding/presentation/widgets/setup_draft_scope.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/screens/doh_settings.dart';
@@ -44,7 +43,7 @@ import 'package:weblibre/utils/ui_helper.dart';
 /// Where the [CustomizeSetupView] is shown. The same component is the
 /// onboarding's Customize step and Settings > Feature Control.
 enum CustomizeSetupMode {
-  /// Inside the onboarding's draft scope: every change goes into the draft,
+  /// In the onboarding: every change goes into the draft,
   /// and the parts that are not plain settings (hardening, uBlock Origin) are
   /// offered too.
   onboarding,
@@ -126,7 +125,7 @@ class CustomizeSetupView extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final settings = ref.watch(generalSettingsWithDefaultsProvider);
+    final settings = ref.watch(displayedGeneralSettingsProvider);
     final onboarding = mode == CustomizeSetupMode.onboarding;
 
     // Each switch, followed in the onboarding by what it shows there, then
@@ -169,6 +168,11 @@ class CustomizeSetupView extends HookConsumerWidget {
   }
 }
 
+/// Opens [screen] over the onboarding. A plain route: the screens edit the
+/// draft through the edit layer wherever they are built.
+Future<void> pushSetupScreen(BuildContext context, Widget screen) =>
+    Navigator.of(context).push<void>(MaterialPageRoute(builder: (_) => screen));
+
 /// What the onboarding's Customize step offers besides the switches: the
 /// setup steps that are not plain settings (hardening, uBlock Origin) and the
 /// configuration a new install starts from. Settings > Feature Control is
@@ -198,17 +202,15 @@ List<Widget> _onboardingTilesAfter(
           subtitle: l10n.onboarding_dohSubtitle,
           // The Settings screen itself, editing the draft.
           open: (context) =>
-              pushInSetupDraftScope<void>(context, const DohSettingsScreen()),
+              pushSetupScreen(context, const DohSettingsScreen()),
         ),
       if (settings.isFeatureShown(FeatureId.privacyBrowserLanguages))
         _MoreSettingsTile(
           icon: Icons.translate,
           title: l10n.onboarding_privacyBrowserLanguagesTitle,
           subtitle: l10n.onboarding_privacyBrowserLanguagesSubtitle,
-          open: (context) => pushInSetupDraftScope<void>(
-            context,
-            const LocaleSettingsScreen(),
-          ),
+          open: (context) =>
+              pushSetupScreen(context, const LocaleSettingsScreen()),
         ),
     ],
     VisibilitySwitch.ai => [
@@ -233,15 +235,13 @@ List<Widget> _onboardingGroupTiles(BuildContext context, CustomizeGroup group) {
         title: l10n.onboarding_toolbarLayoutTitle,
         // The Settings screen itself, editing the draft; its rows that only
         // work on the live settings leave themselves out.
-        open: (context) => pushInSetupDraftScope<void>(
-          context,
-          const ToolbarLayoutSettingsScreen(),
-        ),
+        open: (context) =>
+            pushSetupScreen(context, const ToolbarLayoutSettingsScreen()),
       ),
       _MoreSettingsTile(
         icon: Icons.home_outlined,
         title: l10n.onboarding_customizeHomeSections,
-        open: (context) => pushInSetupDraftScope<void>(
+        open: (context) => pushSetupScreen(
           context,
           ModuleSurfaceSettingsScreen(
             title: l10n.onboarding_customizeHomeSections,
@@ -251,7 +251,7 @@ List<Widget> _onboardingGroupTiles(BuildContext context, CustomizeGroup group) {
       _MoreSettingsTile(
         icon: MdiIcons.tabPlus,
         title: l10n.onboarding_customizeNewTabSections,
-        open: (context) => pushInSetupDraftScope<void>(
+        open: (context) => pushSetupScreen(
           context,
           ModuleSurfaceSettingsScreen(
             surface: ModuleSurface.newTab,
@@ -365,7 +365,9 @@ class _HardeningBaselineTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final value = ref.watch(
-      setupDraftControllerProvider.select((d) => d.appliesHardeningBaseline),
+      setupDraftControllerProvider.select(
+        (d) => d?.appliesHardeningBaseline ?? false,
+      ),
     );
 
     return SwitchListTile.adaptive(
@@ -510,7 +512,7 @@ class _UBlockInstallTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final value = ref.watch(
-      setupDraftControllerProvider.select((d) => d.installsUBlock),
+      setupDraftControllerProvider.select((d) => d?.installsUBlock ?? false),
     );
 
     return SwitchListTile.adaptive(
@@ -537,8 +539,8 @@ class _UBlockFiltersTile extends ConsumerWidget {
       secondary: const Icon(MdiIcons.filterOutline),
       title: Text(l10n.onboarding_ublockApplyDefaultsTitle),
       subtitle: Text(l10n.onboarding_ublockApplyDefaultsSubtitle),
-      value: draft.appliesOptimizedUBlockFilters,
-      onChanged: draft.installsUBlock
+      value: draft?.appliesOptimizedUBlockFilters ?? false,
+      onChanged: draft?.installsUBlock ?? false
           ? (value) => ref
                 .read(setupDraftControllerProvider.notifier)
                 .setOptimizedUBlockFilters(value)

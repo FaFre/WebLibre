@@ -13928,12 +13928,6 @@ abstract class AppLocalizations {
   /// **'Customize Switcher Buttons'**
   String get settings_contextualToolbarTitleQuickSwitcher;
 
-  /// Menu item that restores the default toolbar buttons.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset to Defaults'**
-  String get settings_contextualToolbarResetToDefaults;
-
   /// Heading above the toolbar buttons that are shown.
   ///
   /// In en, this message translates to:
@@ -13963,6 +13957,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All buttons are enabled.'**
   String get settings_contextualToolbarAllButtonsEnabled;
+
+  /// Error snackbar in the toolbar and quick switcher button editors when a change (showing, hiding, moving, fallback, long press or reset) could not be saved. The editor goes back to what is stored.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the buttons. Try again.'**
+  String get settings_contextualToolbarSaveFailed;
 
   /// Shown when no hidden toolbar button matches the search. query is the search text.
   ///
@@ -15735,6 +15735,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset to Defaults'**
   String get settings_actionResetToDefaults;
+
+  /// Menu item, next to Reset to Defaults, that opens the toolbar button or menu editor shown under the layout preview on a screen of its own, where it has more room.
+  ///
+  /// In en, this message translates to:
+  /// **'Open full screen'**
+  String get settings_actionOpenFullScreen;
+
+  /// Screen-reader label of the drag handle of the settings sheet under the layout preview, when tapping it gives the sheet more room.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand settings'**
+  String get settings_previewSheetExpand;
+
+  /// Screen-reader label of the drag handle of the settings sheet under the layout preview, when it is fully pulled up and tapping it gives the room back to the preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Shrink settings'**
+  String get settings_previewSheetCollapse;
 
   /// Title of the screen for arranging the browser menu.
   ///
@@ -19002,12 +19020,6 @@ abstract class AppLocalizations {
   /// **'Display website icons instead of page thumbnails in tab list view'**
   String get settings_showFaviconsSubtitle;
 
-  /// Placeholder text in the page area of the toolbar preview.
-  ///
-  /// In en, this message translates to:
-  /// **'Page Content'**
-  String get settings_previewPageContent;
-
   /// Title of the sample page shown in the toolbar preview. WebLibre is the app name.
   ///
   /// In en, this message translates to:
@@ -19038,17 +19050,149 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get settings_previewTabSearch;
 
-  /// Heading of the toolbar preview on the toolbar & layout screen.
+  /// Tab on the Toolbar & Layout screen that shows a preview of the browser with the current layout.
   ///
   /// In en, this message translates to:
-  /// **'Live Preview'**
-  String get settings_livePreviewTitle;
+  /// **'Preview'**
+  String get settings_layoutEditorPreviewTab;
 
-  /// Line under that heading.
+  /// Tab on the Toolbar & Layout screen that shows the full list of toolbar and layout settings.
   ///
   /// In en, this message translates to:
-  /// **'Reflects your current toolbar and layout settings'**
-  String get settings_livePreviewSubtitle;
+  /// **'Settings'**
+  String get settings_layoutEditorSettingsTab;
+
+  /// Choice in the Toolbar & Layout preview: show the layout for the window the app is running in right now.
+  ///
+  /// In en, this message translates to:
+  /// **'This window'**
+  String get settings_previewDeviceThisWindow;
+
+  /// Choice in the Toolbar & Layout preview: show the layout as it would look on a phone held upright.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get settings_previewDevicePhone;
+
+  /// Choice in the Toolbar & Layout preview: show the layout as it would look on a phone turned sideways.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone in landscape'**
+  String get settings_previewDevicePhoneLandscape;
+
+  /// Choice in the Toolbar & Layout preview: show the layout as it would look on a tablet or a large window.
+  ///
+  /// In en, this message translates to:
+  /// **'Tablet'**
+  String get settings_previewDeviceTablet;
+
+  /// Line above the Toolbar & Layout preview while it shows a device other than the current window. Automatic settings such as the tab bar position resolve differently per window size.
+  ///
+  /// In en, this message translates to:
+  /// **'{device, select, phone{Showing a phone. Automatic settings apply as they would on a phone.} phoneLandscape{Showing a phone in landscape. Automatic settings apply as they would there.} tablet{Showing a tablet. Automatic settings apply as they would on a tablet.} other{Showing another window size.}}'**
+  String settings_previewOtherDeviceHint(String device);
+
+  /// Choice in the Toolbar & Layout preview: show the browser with a web page open.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get settings_previewStatePage;
+
+  /// Choice in the Toolbar & Layout preview: show the browser's own home page, where the toolbar can look different.
+  ///
+  /// In en, this message translates to:
+  /// **'Home page'**
+  String get settings_previewStateHome;
+
+  /// Choice in the Toolbar & Layout preview: show the side panel narrowed to a column of icons.
+  ///
+  /// In en, this message translates to:
+  /// **'Side panel collapsed'**
+  String get settings_previewStateSidePanelCollapsed;
+
+  /// Shown under a disabled preview choice: only a side panel in a large window can be collapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a side panel in a large window'**
+  String get settings_previewStateNeedsSidePanel;
+
+  /// Spoken by screen readers for the toolbar layout preview, which is a picture and not interactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview of the browser with this toolbar layout'**
+  String get settings_layoutPreviewSemantics;
+
+  /// Name of the tab chips inside the quick tab switcher, as a part of the toolbar preview that can be selected to change its settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab Chips'**
+  String get settings_layoutPartTabChips;
+
+  /// Mode of the toolbar layout preview: tapping a part of the toolbar selects it and opens its settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get settings_previewModeSelect;
+
+  /// Mode of the toolbar layout preview: the preview behaves like the browser, so the layout can be tried out.
+  ///
+  /// In en, this message translates to:
+  /// **'Try'**
+  String get settings_previewModeTry;
+
+  /// Line above the toolbar layout preview while it is in Select mode.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a part of the toolbar to change its settings.'**
+  String get settings_previewSelectHint;
+
+  /// Line above the toolbar layout preview while it is in Try mode.
+  ///
+  /// In en, this message translates to:
+  /// **'The preview works like the browser: scroll the page and tap the buttons.'**
+  String get settings_previewTryHint;
+
+  /// Button in the settings pane next to the toolbar preview that leaves the selected part and shows the full list of toolbar and layout settings.
+  ///
+  /// In en, this message translates to:
+  /// **'All settings'**
+  String get settings_previewAllSettings;
+
+  /// Read by screen readers for the row naming the selected part of the toolbar and the parts that contain it, e.g. Tab Bar, then Quick Tab Switcher.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected part'**
+  String get settings_previewSelectionPath;
+
+  /// Message after the toolbar hid in the Try mode of the toolbar preview. Auto Hide Distance is the name of the setting that controls it; distance is its value as a percentage, e.g. 100%.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolbar hidden while scrolling · Auto Hide Distance {distance}'**
+  String settings_tryToolbarHidden(String distance);
+
+  /// Message after the auto-hiding side panel (the tab bar docked to the left or right) hid in the Try mode of the toolbar preview. In the preview a tap on the window edge brings it back; in the browser the panel only hides and returns while a mouse or trackpad is used.
+  ///
+  /// In en, this message translates to:
+  /// **'Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad'**
+  String get settings_trySidePanelHidden;
+
+  /// Message in the Try mode of the toolbar preview after tapping the tab count button.
+  ///
+  /// In en, this message translates to:
+  /// **'This opens the tab view'**
+  String get settings_tryOpensTabView;
+
+  /// Message in the Try mode of the toolbar preview after tapping the menu button.
+  ///
+  /// In en, this message translates to:
+  /// **'This opens the menu'**
+  String get settings_tryOpensMenu;
+
+  /// Action on a message in the Try mode of the toolbar preview: opens the settings of the part that just acted.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get settings_tryAdjust;
 
   /// Title of the confirmation dialog before removing all tracking protection exceptions.
   ///
@@ -23584,6 +23728,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This belongs to a hidden feature. You can show it in Settings > Feature Control.'**
   String get visibilitySwitch_stillHiddenNote;
+
+  /// Error snackbar when the user chose Show for a hidden feature (from a gesture, shortcut or the still-hidden note) but the setting could not be saved, so the feature stays hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not show the feature. Try again.'**
+  String get visibilitySwitch_showFailed;
 
   /// Screen reader hint on a settings control that is grayed out because its feature is hidden. Activating it asks whether to show the feature; it does not change the setting.
   ///

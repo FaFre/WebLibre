@@ -25,8 +25,8 @@ import 'package:weblibre/presentation/widgets/browser_page.dart';
 
 /// The one page profiles set up at onboarding revision 1 see after an
 /// update: the on-device AI features came later, and everything else they
-/// already chose. Outside the draft scope, so the switch writes the live
-/// setting, like any page of a review.
+/// already chose. A review opens no draft, so the switch writes the
+/// live setting, like any page of a review.
 class AiConfigurationPage extends StatelessWidget {
   const AiConfigurationPage({super.key});
 

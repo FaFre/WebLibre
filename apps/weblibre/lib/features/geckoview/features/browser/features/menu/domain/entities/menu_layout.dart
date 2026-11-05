@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:collection/collection.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -353,8 +354,10 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
   ),
 ];
 
+@CopyWith()
 @JsonSerializable()
 class MenuItemEntry with FastEquatable {
+  @CopyWithField(immutable: true)
   final MenuItemType type;
   final bool visible;
 
@@ -374,13 +377,6 @@ class MenuItemEntry with FastEquatable {
 
   Map<String, dynamic> toJson() => _$MenuItemEntryToJson(this);
 
-  MenuItemEntry copyWith({bool? visible, List<MenuItemEntry>? items}) =>
-      MenuItemEntry(
-        type: type,
-        visible: visible ?? this.visible,
-        items: items ?? this.items,
-      );
-
   /// The rows under this one that the user kept, in their order.
   List<MenuItemEntry> get visibleItems => [
     for (final item in items)
@@ -391,8 +387,10 @@ class MenuItemEntry with FastEquatable {
   List<Object?> get hashParameters => [type, visible, items];
 }
 
+@CopyWith()
 @JsonSerializable()
 class MenuSectionEntry with FastEquatable {
+  @CopyWithField(immutable: true)
   final MenuSectionType type;
   final bool visible;
 
@@ -410,13 +408,6 @@ class MenuSectionEntry with FastEquatable {
       _$MenuSectionEntryFromJson(json);
 
   Map<String, dynamic> toJson() => _$MenuSectionEntryToJson(this);
-
-  MenuSectionEntry copyWith({bool? visible, List<MenuItemEntry>? items}) =>
-      MenuSectionEntry(
-        type: type,
-        visible: visible ?? this.visible,
-        items: items ?? this.items,
-      );
 
   /// The rows the user kept, in their order.
   List<MenuItemEntry> get visibleItems => [

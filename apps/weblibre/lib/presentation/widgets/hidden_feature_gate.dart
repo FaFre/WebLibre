@@ -17,29 +17,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:fast_equatable/fast_equatable.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/dialogs/hide_feature_dialog.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/reveal_feature.dart';
 
-/// What hides a gated control: [feature] while its visibility switches are
-/// off, unless [keptWhen] says what it configures is already in place. Only
-/// for what keeps applying while hidden (H1: where data goes, what the user
-/// created): a connection in use can always be checked and stopped (P5). A
-/// hidden setting that does not apply is grayed out with its note instead
-/// ([HiddenFeatureGate.hiddenSettings]).
-typedef HiddenFeatureCondition = ({
-  FeatureId feature,
-  ProviderListenable<bool>? keptWhen,
-});
+export 'package:weblibre/features/settings/domain/providers/kept_when.dart'
+    show HiddenFeatureCondition, KeptWhen;
 
 /// Marks everything below it as configuring [feature]: every
 /// [HiddenFeatureGate] inside, including the ones the settings section list
@@ -56,7 +47,7 @@ class HiddenFeatureScope extends StatelessWidget {
   });
 
   final FeatureId feature;
-  final ProviderListenable<bool>? keptWhen;
+  final KeptWhen? keptWhen;
   final Widget child;
 
   /// The conditions of every scope around [context], outermost first.
@@ -86,21 +77,10 @@ class _HiddenFeatureScopeData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_HiddenFeatureScopeData oldWidget) =>
-      !_sameConditions(conditions, oldWidget.conditions);
-}
-
-bool _sameConditions(
-  List<HiddenFeatureCondition> a,
-  List<HiddenFeatureCondition> b,
-) {
-  if (a.length != b.length) return false;
-  for (var i = 0; i < a.length; i++) {
-    if (a[i].feature != b[i].feature ||
-        !identical(a[i].keptWhen, b[i].keptWhen)) {
-      return false;
-    }
-  }
-  return true;
+      !const ListEquality<HiddenFeatureCondition>().equals(
+        conditions,
+        oldWidget.conditions,
+      );
 }
 
 /// A settings control that stays in place while its feature is hidden:
@@ -128,9 +108,9 @@ bool _sameConditions(
 /// an eye-off icon at full strength: grayed out alone, it would read as
 /// disabled, and nobody taps a disabled control.
 ///
-/// Reads the settings through `generalSettingsWithDefaultsProvider` and saves
-/// through `saveGeneralSettingsControllerProvider`, so inside the onboarding's
-/// draft scope it gates and reveals the draft, never the live settings.
+/// Reads the settings through `displayedGeneralSettingsProvider` and saves
+/// through `saveGeneralSettingsControllerProvider`, so in the onboarding it
+/// gates and reveals the draft, never the live settings.
 class HiddenFeatureGate extends ConsumerWidget {
   const HiddenFeatureGate({
     super.key,
@@ -150,7 +130,7 @@ class HiddenFeatureGate extends ConsumerWidget {
   HiddenFeatureGate.feature(
     FeatureId feature, {
     super.key,
-    ProviderListenable<bool>? keptWhen,
+    KeptWhen? keptWhen,
     this.opensScreen = false,
     this.omitWhenHidden = false,
     this.inForce = false,
@@ -272,7 +252,7 @@ class NotAppliedWhileHiddenNote extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Nothing can be suspended while every feature is shown.
     final somethingHidden = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      displayedGeneralSettingsProvider.select(
         (s) => !VisibilitySwitch.values.every(s.isVisibilitySwitchShown),
       ),
     );
@@ -334,24 +314,24 @@ Future<bool> mayPickHiddenOption(
   BuildContext context,
   WidgetRef ref,
   FeatureId feature, {
-  ProviderListenable<bool>? keptWhen,
+  KeptWhen? keptWhen,
 }) async {
   final missing = ref
-      .read(generalSettingsWithDefaultsProvider)
+      .read(displayedGeneralSettingsProvider)
       .hiddenSwitchesFor(feature);
   if (missing.isEmpty) return true;
-  if (keptWhen != null && ref.read(keptWhen)) return true;
+  if (keptWhen != null && ref.read(keptWhenHoldsProvider(keptWhen))) {
+    return true;
+  }
 
   await revealHiddenSwitches(context, ref, missing);
   return false;
 }
 
 /// Builds with the visibility switches that hide something gated by
-/// [conditions], in [VisibilitySwitch] order, empty while it is shown.
-///
-/// Follows the settings, and the `keptWhen` of every condition that is
-/// hidden: each one is watched by a widget of its own, so it is read where
-/// this builder sits, inside the onboarding's draft scope too.
+/// [conditions], in [VisibilitySwitch] order, empty while it is shown
+/// ([missingSwitches]): one watch, of the displayed settings and the
+/// [KeptWhen] of every condition that is hidden.
 class HiddenSwitchesBuilder extends ConsumerWidget {
   const HiddenSwitchesBuilder({
     super.key,
@@ -365,88 +345,33 @@ class HiddenSwitchesBuilder extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final hiddenBy = ref
-        .watch(
-          generalSettingsWithDefaultsProvider.select(
-            (s) => EquatableValue([
-              for (final (:feature, keptWhen: _) in conditions)
-                s.hiddenSwitchesFor(feature),
-            ]),
-          ),
-        )
-        .value;
-
-    // What can keep a hidden condition usable, by condition.
-    final keptWhen = {
-      for (final (index, (feature: _, :keptWhen)) in conditions.indexed)
-        if (keptWhen != null && hiddenBy[index].isNotEmpty) index: keptWhen,
-    };
-
-    List<VisibilitySwitch> missing(Set<int> kept) {
-      final hidden = {
-        for (final (index, switches) in hiddenBy.indexed)
-          if (!kept.contains(index)) ...switches,
-      };
-      return [
-        for (final visibilitySwitch in VisibilitySwitch.values)
-          if (hidden.contains(visibilitySwitch)) visibilitySwitch,
-      ];
-    }
-
-    if (keptWhen.isEmpty) return builder(context, missing(const {}));
-
-    return _KeptWhenResolver(
-      keptWhen: keptWhen.entries.toList(),
-      kept: const {},
-      builder: (kept) => builder(context, missing(kept)),
+    final missing = ref.watch(
+      missingSwitchesProvider(HiddenFeatureConditions(conditions)),
     );
-  }
-}
-
-/// Watches the first of [keptWhen] and hands the rest to another resolver,
-/// so each is watched at the top of a build of its own. Builds with the
-/// conditions whose `keptWhen` holds, [kept] included.
-class _KeptWhenResolver extends ConsumerWidget {
-  const _KeptWhenResolver({
-    required this.keptWhen,
-    required this.kept,
-    required this.builder,
-  });
-
-  final List<MapEntry<int, ProviderListenable<bool>>> keptWhen;
-  final Set<int> kept;
-  final Widget Function(Set<int> kept) builder;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final MapEntry(key: condition, value: listenable) = keptWhen.first;
-    final holds = ref.watch(listenable);
-
-    final nextKept = holds ? {...kept, condition} : kept;
-    final rest = keptWhen.sublist(1);
-    if (rest.isEmpty) return builder(nextKept);
-
-    return _KeptWhenResolver(keptWhen: rest, kept: nextKept, builder: builder);
+    return builder(context, missing.value);
   }
 }
 
 /// Asks to show [missing], listing the changes that would apply again, and
-/// on "Show" turns them on and nothing else. Never remembered as declined:
-/// tapping a hidden control is a deliberate request every time. Offers a
-/// restart when a setting that applies again is read only at engine start.
+/// on "Show" turns them on and nothing else ([showSwitches]). Never
+/// remembered as declined: tapping a hidden control is a deliberate request
+/// every time.
+///
+/// Writes through the settings save controller, so in the onboarding into
+/// its draft: nothing is suspended there, so the dialog lists nothing, and
+/// no restart is offered and no decline forgotten until the commit.
 Future<void> revealHiddenSwitches(
   BuildContext context,
   WidgetRef ref,
   List<VisibilitySwitch> missing,
 ) async {
-  // Read before asking, and so before saving. Nothing is suspended inside
-  // the onboarding draft, which therefore lists nothing and never offers a
-  // restart.
+  // Read before asking, and so before saving.
   final applyingAgain = changesApplyingAgainOnShow(
     suspended: ref.read(suspendedSettingsProvider),
     stored: () => ref.read(storedSettingsSnapshotProvider),
     switches: missing,
   );
+  final committed = ref.read(settingsEditsAreLiveProvider);
 
   final show = await showRevealDialog(
     context,
@@ -455,21 +380,14 @@ Future<void> revealHiddenSwitches(
   );
   if (show != true || !context.mounted) return;
 
-  final saved = await ref
-      .read(saveGeneralSettingsControllerProvider.notifier)
-      .save((current) => withSwitchesShown(current, missing));
-
-  // A switch turned on here is no longer a declined one. Only touched when
-  // there is something to forget: inside the onboarding draft nothing outside
-  // the draft may be written.
-  final declined = ref.read(declinedVisibilityRevealsProvider);
-  if (missing.any(declined.contains)) {
-    ref.read(declinedVisibilityRevealsProvider.notifier).forget(missing);
-  }
-
-  if (saved && context.mounted) {
-    await offerRestartForStartupSettings(context, ref.container, applyingAgain);
-  }
+  await showSwitches(
+    context,
+    ref.container,
+    missing,
+    write: ref.read(saveGeneralSettingsControllerProvider.notifier).save,
+    applyingAgain: applyingAgain,
+    committed: committed,
+  );
 }
 
 /// The eye that ends a hidden row ([HiddenFeatureGate.indicator]). Not

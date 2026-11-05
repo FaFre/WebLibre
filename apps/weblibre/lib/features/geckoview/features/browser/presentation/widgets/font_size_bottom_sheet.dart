@@ -23,7 +23,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -148,16 +147,16 @@ class FontSizeBottomSheet extends ConsumerWidget {
     if (rounded == current) return;
 
     await ref
-        .read(saveEngineSettingsControllerProvider.notifier)
-        .save(
+        .read(engineSettingsRepositoryProvider.notifier)
+        .updateSettings(
           (currentSettings) => currentSettings.copyWith.fontSizeFactor(rounded),
         );
   }
 
   Future<void> _resetFontSize(WidgetRef ref) async {
     await ref
-        .read(saveEngineSettingsControllerProvider.notifier)
-        .save(
+        .read(engineSettingsRepositoryProvider.notifier)
+        .updateSettings(
           (currentSettings) =>
               currentSettings.copyWith.fontSizeFactor(fontSizeDefault),
         );

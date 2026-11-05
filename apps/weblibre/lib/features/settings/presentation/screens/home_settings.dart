@@ -247,7 +247,7 @@ class _HomeSearchBarPlacementTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(storedGeneralSettingsProvider);
-    final resolved = ref.watch(effectiveHomeSearchBarPlacementProvider);
+    final resolved = ref.watch(displayedHomeSearchBarPlacementProvider);
     final l10n = AppLocalizations.of(context);
 
     return RadioGroup<HomeSearchBarPlacement>(
@@ -291,7 +291,7 @@ class _SearchFieldPlacementTile extends ConsumerWidget {
     final stored = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.searchFieldPlacement),
     );
-    final resolved = ref.watch(effectiveSearchFieldPlacementProvider);
+    final resolved = ref.watch(displayedSearchFieldPlacementProvider);
     final l10n = AppLocalizations.of(context);
 
     return RadioGroup<SearchFieldPlacement>(

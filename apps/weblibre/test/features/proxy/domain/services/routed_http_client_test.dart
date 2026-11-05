@@ -170,6 +170,71 @@ void main() {
       );
     },
   );
+
+  group('awaitAppRoutingSettled', () {
+    ContainerRoutingSnapshot snapshot({List<String> awaiting = const []}) =>
+        ContainerRoutingSnapshot(
+          proxies: const [],
+          relations: const {
+            generalContextId: ['tor'],
+          },
+          directScopes: const {},
+          siteAssignments: const {},
+          strictContexts: const {},
+          awaitingProxyIds: awaiting,
+        );
+
+    (ProviderContainer, StreamController<ContainerRoutingSnapshot?>) routing() {
+      final controller = StreamController<ContainerRoutingSnapshot?>();
+      addTearDown(controller.close);
+      final source = StreamProvider<ContainerRoutingSnapshot?>(
+        (ref) => controller.stream,
+      );
+      final container = ProviderContainer(
+        overrides: [
+          containerRoutingSnapshotProvider.overrideWith(
+            (ref) => ref.watch(source).value,
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      addTearDown(container.listen(_refHolderProvider, (_, _) {}).close);
+      return (container, controller);
+    }
+
+    /// The onboarding's uBlock retry ran before proxy autostart had brought
+    /// the general route's proxy up, and its AMO lookup was refused.
+    test("waits while the route's proxy is still coming up", () async {
+      final (container, controller) = routing();
+      var settled = false;
+      final wait = awaitAppRoutingSettled(
+        container.read(_refHolderProvider),
+        generalContextId,
+        timeout: const Duration(minutes: 1),
+      ).then((_) => settled = true);
+
+      controller.add(snapshot(awaiting: ['tor']));
+      await pumpEventQueue();
+      expect(settled, isFalse);
+
+      // Autostart gave up on it: no longer coming, so the request goes ahead
+      // and is refused as before.
+      controller.add(snapshot());
+      await wait;
+      expect(settled, isTrue);
+    });
+
+    test('gives up waiting after the timeout', () async {
+      final (container, controller) = routing();
+      controller.add(snapshot(awaiting: ['tor']));
+
+      await awaitAppRoutingSettled(
+        container.read(_refHolderProvider),
+        generalContextId,
+        timeout: const Duration(milliseconds: 10),
+      );
+    });
+  });
 }
 
 /// Stands in for any provider that resolves routing for a request it is about

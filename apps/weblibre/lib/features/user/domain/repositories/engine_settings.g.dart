@@ -55,41 +55,100 @@ abstract class _$EngineSettingsRepository
   }
 }
 
-/// The engine settings as stored, hidden features included.
+/// The engine settings of the profile as stored, hidden features included.
+/// Never the onboarding draft.
 ///
-/// For the screens that show and edit settings, the onboarding draft and
-/// Feature Control. Behavior reads [engineSettingsWithDefaults].
+/// The profile layer, like `profileGeneralSettings`: what
+/// [engineSettingsWithDefaults] applies. Kept alive: it is a pure projection
+/// of the keep-alive repository, so caching it costs a single derived value
+/// and lets keep-alive consumers read it without pinning an auto-disposed
+/// provider.
+
+@ProviderFor(profileEngineSettings)
+final profileEngineSettingsProvider = ProfileEngineSettingsProvider._();
+
+/// The engine settings of the profile as stored, hidden features included.
+/// Never the onboarding draft.
 ///
-/// Kept alive like its `storedGeneralSettings` counterpart: it is a pure
-/// projection of the keep-alive repository, so caching it costs a single
-/// derived value and lets keep-alive consumers read it without pinning an
-/// auto-disposed provider.
+/// The profile layer, like `profileGeneralSettings`: what
+/// [engineSettingsWithDefaults] applies. Kept alive: it is a pure projection
+/// of the keep-alive repository, so caching it costs a single derived value
+/// and lets keep-alive consumers read it without pinning an auto-disposed
+/// provider.
+
+final class ProfileEngineSettingsProvider
+    extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
+    with $Provider<EngineSettings> {
+  /// The engine settings of the profile as stored, hidden features included.
+  /// Never the onboarding draft.
+  ///
+  /// The profile layer, like `profileGeneralSettings`: what
+  /// [engineSettingsWithDefaults] applies. Kept alive: it is a pure projection
+  /// of the keep-alive repository, so caching it costs a single derived value
+  /// and lets keep-alive consumers read it without pinning an auto-disposed
+  /// provider.
+  ProfileEngineSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profileEngineSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileEngineSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EngineSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  EngineSettings create(Ref ref) {
+    return profileEngineSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EngineSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EngineSettings>(value),
+    );
+  }
+}
+
+String _$profileEngineSettingsHash() =>
+    r'9e8a0345d0231a188ce07bffc9bf684c72d05a88';
+
+/// The engine settings as stored, hidden features included, for the screens
+/// that show and edit them: in the onboarding the draft's
+/// (`draftEngineSettings`), otherwise the profile's
+/// ([profileEngineSettings]).
+///
+/// The edit layer. Behavior reads [engineSettingsWithDefaults].
 
 @ProviderFor(storedEngineSettings)
 final storedEngineSettingsProvider = StoredEngineSettingsProvider._();
 
-/// The engine settings as stored, hidden features included.
+/// The engine settings as stored, hidden features included, for the screens
+/// that show and edit them: in the onboarding the draft's
+/// (`draftEngineSettings`), otherwise the profile's
+/// ([profileEngineSettings]).
 ///
-/// For the screens that show and edit settings, the onboarding draft and
-/// Feature Control. Behavior reads [engineSettingsWithDefaults].
-///
-/// Kept alive like its `storedGeneralSettings` counterpart: it is a pure
-/// projection of the keep-alive repository, so caching it costs a single
-/// derived value and lets keep-alive consumers read it without pinning an
-/// auto-disposed provider.
+/// The edit layer. Behavior reads [engineSettingsWithDefaults].
 
 final class StoredEngineSettingsProvider
     extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
     with $Provider<EngineSettings> {
-  /// The engine settings as stored, hidden features included.
+  /// The engine settings as stored, hidden features included, for the screens
+  /// that show and edit them: in the onboarding the draft's
+  /// (`draftEngineSettings`), otherwise the profile's
+  /// ([profileEngineSettings]).
   ///
-  /// For the screens that show and edit settings, the onboarding draft and
-  /// Feature Control. Behavior reads [engineSettingsWithDefaults].
-  ///
-  /// Kept alive like its `storedGeneralSettings` counterpart: it is a pure
-  /// projection of the keep-alive repository, so caching it costs a single
-  /// derived value and lets keep-alive consumers read it without pinning an
-  /// auto-disposed provider.
+  /// The edit layer. Behavior reads [engineSettingsWithDefaults].
   StoredEngineSettingsProvider._()
     : super(
         from: null,
@@ -124,23 +183,29 @@ final class StoredEngineSettingsProvider
 }
 
 String _$storedEngineSettingsHash() =>
-    r'7141e96af4012556971396d6ecacb602d5982352';
+    r'119d7d82f6578c3314d3d2c08e23dd7a2a4950c5';
 
-/// The engine settings as they apply: the settings of hidden features at
-/// their hidden values ([EngineSettings.effective]).
+/// The engine settings as they apply: the profile's settings with those of
+/// hidden features at their hidden values ([EngineSettings.effective]).
+///
+/// The live layer. It follows the profile, never the onboarding draft.
 
 @ProviderFor(engineSettingsWithDefaults)
 final engineSettingsWithDefaultsProvider =
     EngineSettingsWithDefaultsProvider._();
 
-/// The engine settings as they apply: the settings of hidden features at
-/// their hidden values ([EngineSettings.effective]).
+/// The engine settings as they apply: the profile's settings with those of
+/// hidden features at their hidden values ([EngineSettings.effective]).
+///
+/// The live layer. It follows the profile, never the onboarding draft.
 
 final class EngineSettingsWithDefaultsProvider
     extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
     with $Provider<EngineSettings> {
-  /// The engine settings as they apply: the settings of hidden features at
-  /// their hidden values ([EngineSettings.effective]).
+  /// The engine settings as they apply: the profile's settings with those of
+  /// hidden features at their hidden values ([EngineSettings.effective]).
+  ///
+  /// The live layer. It follows the profile, never the onboarding draft.
   EngineSettingsWithDefaultsProvider._()
     : super(
         from: null,
@@ -175,7 +240,7 @@ final class EngineSettingsWithDefaultsProvider
 }
 
 String _$engineSettingsWithDefaultsHash() =>
-    r'996d289176331b134588a6d6fb4aa3d020067920';
+    r'b2225c4e5ee6afcddba0f1fb8b46002b1d9f4ad0';
 
 /// [engineSettingsWithDefaults] once both the engine and the general settings
 /// have loaded, null before: what the engine is told. The placeholder
@@ -233,3 +298,59 @@ final class LoadedEngineSettingsProvider
 
 String _$loadedEngineSettingsHash() =>
     r'731c8e90eb7ad24853ea8de7d39994f4e9f9b2e0';
+
+/// The engine settings as the widgets that render settings draw them: in the
+/// onboarding the draft's as they would apply, otherwise the live ones
+/// ([engineSettingsWithDefaults]). The displayed layer, like
+/// `displayedGeneralSettings`.
+
+@ProviderFor(displayedEngineSettings)
+final displayedEngineSettingsProvider = DisplayedEngineSettingsProvider._();
+
+/// The engine settings as the widgets that render settings draw them: in the
+/// onboarding the draft's as they would apply, otherwise the live ones
+/// ([engineSettingsWithDefaults]). The displayed layer, like
+/// `displayedGeneralSettings`.
+
+final class DisplayedEngineSettingsProvider
+    extends $FunctionalProvider<EngineSettings, EngineSettings, EngineSettings>
+    with $Provider<EngineSettings> {
+  /// The engine settings as the widgets that render settings draw them: in the
+  /// onboarding the draft's as they would apply, otherwise the live ones
+  /// ([engineSettingsWithDefaults]). The displayed layer, like
+  /// `displayedGeneralSettings`.
+  DisplayedEngineSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedEngineSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedEngineSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EngineSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  EngineSettings create(Ref ref) {
+    return displayedEngineSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EngineSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EngineSettings>(value),
+    );
+  }
+}
+
+String _$displayedEngineSettingsHash() =>
+    r'e4f03d0417a8e4fd5739886f3290ed93ae8e0add';

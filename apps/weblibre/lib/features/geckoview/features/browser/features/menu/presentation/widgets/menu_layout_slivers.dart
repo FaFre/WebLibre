@@ -51,13 +51,13 @@ class MenuLayoutSlivers extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sections = ref.watch(menuLayoutProvider);
-    final notifier = ref.read(menuLayoutProvider.notifier);
+    final sections = ref.watch(editedMenuLayoutProvider);
+    final notifier = ref.read(editedMenuLayoutProvider.notifier);
 
     // Rows and sections the menu leaves out for a hidden feature are left out
     // here too, so nothing can be switched on that would never be drawn. They
     // stay in the saved arrangement, among the same neighbours.
-    final shownFeatures = ref.watch(shownFeaturesProvider);
+    final shownFeatures = ref.watch(displayedShownFeaturesProvider);
     final connectionShown = ref.watch(menuConnectionSectionShownProvider(null));
     bool itemShown(MenuItemEntry entry) => switch (entry.type.feature) {
       final feature? => shownFeatures.contains(feature),

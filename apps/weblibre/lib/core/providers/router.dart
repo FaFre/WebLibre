@@ -19,7 +19,9 @@
  */
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_state.dart';
@@ -78,6 +80,19 @@ Future<GoRouter> router(Ref ref) async {
 
   final profileAuthRefreshListenable = ref.watch(profileAuthProvider);
 
+  // Runs the redirect again when containers are hidden, so a container
+  // screen already open goes too, not only the next one navigated to.
+  final containersShown = ValueNotifier(
+    ref.read(generalSettingsWithDefaultsProvider).containerEntryPointsShown,
+  );
+  ref.onDispose(containersShown.dispose);
+  ref.listen(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.containerEntryPointsShown,
+    ),
+    (previous, next) => containersShown.value = next,
+  );
+
   return GoRouter(
     debugLogDiagnostics: true,
     routes: $appRoutes,
@@ -86,7 +101,10 @@ Future<GoRouter> router(Ref ref) async {
     // belongs. Starting *at* onboarding instead is what let a locked profile be
     // walked through onboarding without ever unlocking.
     initialLocation: const LockRoute().location,
-    refreshListenable: profileAuthRefreshListenable,
+    refreshListenable: Listenable.merge([
+      profileAuthRefreshListenable,
+      containersShown,
+    ]),
     redirect: (context, state) {
       final authenticated = ref.read(profileAuthStateProvider);
       final currentTopRouteName = state.topRoute?.name;

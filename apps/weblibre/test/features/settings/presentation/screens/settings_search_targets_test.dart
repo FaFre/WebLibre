@@ -21,9 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
@@ -103,11 +105,20 @@ void main() {
     bool keptWith(GeneralSettings settings) {
       final container = ProviderContainer(
         overrides: [
+          // No onboarding owed: no draft, the displayed layer is the live one.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(OnboardingRepository.targetRevision),
+          ),
           generalSettingsWithDefaultsProvider.overrideWith((ref) => settings),
         ],
       );
-      addTearDown(container.dispose);
-      return container.read(target.keptWhen!);
+      // Disposed right away: the auto-disposed provider read here would
+      // otherwise leave its disposal timer pending past the test.
+      try {
+        return container.read(keptWhenHoldsProvider(target.keptWhen!));
+      } finally {
+        container.dispose();
+      }
     }
 
     expect(keptWith(GeneralSettings.withDefaults()), isFalse);

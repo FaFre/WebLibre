@@ -19,7 +19,6 @@
  */
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/quick_switcher_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
@@ -37,33 +36,32 @@ part 'toolbar_button_config_repository.g.dart';
 abstract interface class ToolbarButtonConfigRepository {
   Stream<List<ToolbarButtonConfig>> watchAll();
 
-  Future<void> replaceAll(List<ToolbarButtonConfig> configs);
-
-  Future<void> assignOrderKey(String buttonId, {required String orderKey});
-
-  Future<void> assignVisibility(String buttonId, {required bool visible});
-
-  Future<void> assignFallback(String buttonId, String? fallbackId);
-
-  /// Replaces [buttonId]'s own long press with [action]; null restores the
-  /// button's built-in long press.
-  Future<void> assignLongPressAction(String buttonId, BrowserAction? action);
-
-  Future<String> generateLeadingOrderKey({required bool isVisible});
-
-  Future<String> generateTrailingOrderKey({required bool isVisible});
-
-  Future<String?> generateOrderKeyAfterButtonId(
-    String buttonId, {
-    required bool isVisible,
-  });
-
-  Future<String> generateOrderKeyBeforeButtonId(
-    String buttonId, {
-    required bool isVisible,
-  });
+  /// Stores [configs], writing only the buttons whose configuration differs
+  /// from what is stored. Buttons not in [configs] keep their rows, those of
+  /// buttons this version does not know included.
+  Future<void> saveAll(List<ToolbarButtonConfig> configs);
 
   Future<void> seedMissingDefaults();
+}
+
+/// [ToolbarButtonConfigRepository.saveAll] one write after another, in the
+/// order they were asked for. Lives with the kept-alive repository, so the
+/// order holds even when the editor that asked is gone before its write
+/// lands.
+mixin SerializedSaveAll implements ToolbarButtonConfigRepository {
+  Future<void> _lastWrite = Future.value();
+
+  /// Stores [configs], the actual write (see [saveAll]).
+  Future<void> writeChanged(List<ToolbarButtonConfig> configs);
+
+  @override
+  Future<void> saveAll(List<ToolbarButtonConfig> configs) {
+    final write = _lastWrite.then((_) => writeChanged(configs));
+    // A failed write does not stop the ones after it; its caller sees the
+    // failure.
+    _lastWrite = write.then<void>((_) {}, onError: (_) {});
+    return write;
+  }
 }
 
 @Riverpod(keepAlive: true)

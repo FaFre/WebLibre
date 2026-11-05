@@ -90,6 +90,10 @@ void main() {
           riverpodDatabaseStorageProvider.overrideWith((ref) => storage),
           generalSettingsRepositoryProvider.overrideWith(() => settings),
           onboardingRepositoryProvider.overrideWith(() => onboarding),
+          // What the router read before it showed the review.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(1),
+          ),
         ],
         child: MaterialApp.router(
           localizationsDelegates: AppLocalizations.localizationsDelegates,

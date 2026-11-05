@@ -21,6 +21,7 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/data/models/tor_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -50,6 +51,10 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // No onboarding owed: no draft, the displayed layer is the live one.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(OnboardingRepository.targetRevision),
+          ),
           // Tor's routes, read by `torInUse` for the list: none.
           watchContainersWithCountProvider.overrideWith(
             (ref) => Stream.value(const []),
@@ -113,6 +118,10 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
+            // No onboarding owed: no draft, the displayed layer is the live one.
+            completedOnboardingRevisionProvider.overrideWithValue(
+              const AsyncData(OnboardingRepository.targetRevision),
+            ),
             // Tor's routes, read by `torInUse` for the list: none.
             watchContainersWithCountProvider.overrideWith(
               (ref) => Stream.value(const []),
@@ -231,6 +240,10 @@ void main() {
         ProviderScope(
           key: UniqueKey(),
           overrides: [
+            // No onboarding owed: no draft, the displayed layer is the live one.
+            completedOnboardingRevisionProvider.overrideWithValue(
+              const AsyncData(OnboardingRepository.targetRevision),
+            ),
             generalSettingsWithDefaultsProvider.overrideWithValue(settings),
             singboxProxyProfilesRepositoryProvider.overrideWith(
               () => _FakeProfilesRepository([_profile(id: 'p', name: 'Kept')]),
@@ -329,6 +342,10 @@ Future<void> _pumpEditor(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        // No onboarding owed: no draft, the displayed layer is the live one.
+        completedOnboardingRevisionProvider.overrideWithValue(
+          const AsyncData(OnboardingRepository.targetRevision),
+        ),
         singboxProxyProfilesRepositoryProvider.overrideWith(
           () => profilesRepository,
         ),

@@ -24,6 +24,7 @@ import 'package:drift/drift.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -284,17 +285,16 @@ class EngineSettingsRepository extends _$EngineSettingsRepository {
   }
 }
 
-/// The engine settings as stored, hidden features included.
+/// The engine settings of the profile as stored, hidden features included.
+/// Never the onboarding draft.
 ///
-/// For the screens that show and edit settings, the onboarding draft and
-/// Feature Control. Behavior reads [engineSettingsWithDefaults].
-///
-/// Kept alive like its `storedGeneralSettings` counterpart: it is a pure
-/// projection of the keep-alive repository, so caching it costs a single
-/// derived value and lets keep-alive consumers read it without pinning an
-/// auto-disposed provider.
+/// The profile layer, like `profileGeneralSettings`: what
+/// [engineSettingsWithDefaults] applies. Kept alive: it is a pure projection
+/// of the keep-alive repository, so caching it costs a single derived value
+/// and lets keep-alive consumers read it without pinning an auto-disposed
+/// provider.
 @Riverpod(keepAlive: true)
-EngineSettings storedEngineSettings(Ref ref) {
+EngineSettings profileEngineSettings(Ref ref) {
   return ref.watch(
     engineSettingsRepositoryProvider.select(
       (value) => value.value ?? EngineSettings.withDefaults(),
@@ -302,12 +302,25 @@ EngineSettings storedEngineSettings(Ref ref) {
   );
 }
 
-/// The engine settings as they apply: the settings of hidden features at
-/// their hidden values ([EngineSettings.effective]).
+/// The engine settings as stored, hidden features included, for the screens
+/// that show and edit them: in the onboarding the draft's
+/// (`draftEngineSettings`), otherwise the profile's
+/// ([profileEngineSettings]).
+///
+/// The edit layer. Behavior reads [engineSettingsWithDefaults].
+@Riverpod(keepAlive: true)
+EngineSettings storedEngineSettings(Ref ref) {
+  return ref.watch(draftEngineSettingsProvider);
+}
+
+/// The engine settings as they apply: the profile's settings with those of
+/// hidden features at their hidden values ([EngineSettings.effective]).
+///
+/// The live layer. It follows the profile, never the onboarding draft.
 @Riverpod(keepAlive: true)
 EngineSettings engineSettingsWithDefaults(Ref ref) {
   final shown = ref.watch(shownFeaturesProvider);
-  return ref.watch(storedEngineSettingsProvider).effective(shown.contains);
+  return ref.watch(profileEngineSettingsProvider).effective(shown.contains);
 }
 
 /// [engineSettingsWithDefaults] once both the engine and the general settings
@@ -326,4 +339,18 @@ EngineSettings? loadedEngineSettings(Ref ref) {
 
   final shown = ref.watch(shownFeaturesProvider);
   return stored.effective(shown.contains);
+}
+
+/// The engine settings as the widgets that render settings draw them: in the
+/// onboarding the draft's as they would apply, otherwise the live ones
+/// ([engineSettingsWithDefaults]). The displayed layer, like
+/// `displayedGeneralSettings`.
+@Riverpod(keepAlive: true)
+EngineSettings displayedEngineSettings(Ref ref) {
+  final drafting = ref.watch(
+    setupDraftControllerProvider.select((draft) => draft != null),
+  );
+  if (!drafting) return ref.watch(engineSettingsWithDefaultsProvider);
+  final shown = ref.watch(displayedShownFeaturesProvider);
+  return ref.watch(draftEngineSettingsProvider).effective(shown.contains);
 }

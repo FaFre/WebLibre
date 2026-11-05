@@ -19,21 +19,27 @@
  */
 import 'dart:convert';
 
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/data/models/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/onboarding/domain/entities/setup_goal.dart';
-import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
 import 'package:weblibre/features/onboarding/domain/services/preset_bindings.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_commit.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -192,15 +198,20 @@ void main() {
     late ProviderContainer container;
 
     setUp(() {
-      container = ProviderContainer();
-      // The onboarding screen holds the auto-disposed draft; so does the test.
-      container.listen(setupDraftControllerProvider, (_, _) {});
+      // A profile that never completed an onboarding: the draft is open.
+      container = ProviderContainer(
+        overrides: [
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(null),
+          ),
+        ],
+      );
     });
     tearDown(() => container.dispose());
 
     SetupDraftController draft() =>
         container.read(setupDraftControllerProvider.notifier);
-    SetupDraft state() => container.read(setupDraftControllerProvider);
+    SetupDraft state() => container.read(setupDraftControllerProvider)!;
 
     test('starts at Average with nothing changed', () {
       expect(state().preset, SetupPreset.average);
@@ -424,6 +435,37 @@ void main() {
       final later = state();
       draft().undo(changed: changed, previous: previous);
       expect(state(), same(later));
+    });
+
+    test('an arranged menu is a Customize change', () {
+      final arranged = [...defaultMenuLayout.reversed];
+      draft().setMenuLayout(arranged);
+      final previous = state();
+      expect(previous.hasCustomizeChanges, isTrue);
+
+      draft().selectPreset(SetupPreset.expert);
+      expect(state().menuLayout, isNull);
+
+      draft().undo(changed: state(), previous: previous);
+      expect(state().menuLayout, arranged);
+    });
+
+    test('changed toolbar buttons are a Customize change', () {
+      draft().setToolbarButtons(
+        ToolbarConfigLocation.contextual,
+        defaultToolbarButtonConfigsFor(
+          ToolbarConfigLocation.contextual,
+        ).value.reversed.toList(),
+      );
+      final previous = state();
+      expect(previous.hasCustomizeChanges, isTrue);
+
+      // Relative to the old preset, like the rest of Customize.
+      draft().selectPreset(SetupPreset.expert);
+      expect(state().toolbarButtons, isEmpty);
+
+      draft().undo(changed: state(), previous: previous);
+      expect(state().toolbarButtons, previous.toolbarButtons);
     });
 
     test('Lock and Sync goals change no setting', () {
@@ -652,6 +694,82 @@ void main() {
       );
       final once = journal.applyGeneral(general);
       expect(plain(journal.applyGeneral(once).toJson()), plain(once.toJson()));
+    });
+
+    test('changed toolbar buttons round-trip through the journal', () {
+      final defaults = defaultToolbarButtonConfigsFor(
+        ToolbarConfigLocation.quickSwitcher,
+      ).value;
+      final buttons = [
+        defaults.first.copyWith(
+          isVisible: true,
+          longPressAction: Value(BrowserAction.values.last),
+        ),
+        ...defaults.skip(1),
+      ];
+      final journal = persisted(
+        SetupCommitJournal.resolve(
+          SetupDraft(
+            preset: SetupPreset.average,
+            toolbarButtons: {ToolbarConfigLocation.quickSwitcher: buttons},
+          ),
+          general: GeneralSettings.withDefaults(),
+          engine: EngineSettings.withDefaults(),
+          targetRevision: 3,
+        ),
+      );
+
+      // Only the toolbar the draft changed is written.
+      expect(journal.toolbarButtons.keys, ['quickSwitcher']);
+      expect(journal.toolbarButtons['quickSwitcher'], buttons);
+    });
+
+    test('an arranged menu round-trips through the journal', () {
+      final arranged = [
+        defaultMenuLayout.first.copyWith(
+          visible: !defaultMenuLayout.first.visible,
+        ),
+        ...defaultMenuLayout.skip(1),
+      ];
+      SetupCommitJournal resolve(SetupDraft draft) => persisted(
+        SetupCommitJournal.resolve(
+          draft,
+          general: GeneralSettings.withDefaults(),
+          engine: EngineSettings.withDefaults(),
+          targetRevision: 3,
+        ),
+      );
+
+      expect(
+        resolve(const SetupDraft(preset: SetupPreset.average)).menuLayout,
+        isNull,
+      );
+      expect(
+        resolve(
+          SetupDraft(preset: SetupPreset.average, menuLayout: arranged),
+        ).menuLayout,
+        arranged,
+      );
+    });
+
+    test('a journal written before toolbar buttons were journaled reads', () {
+      final json =
+          jsonDecode(
+                  jsonEncode(
+                    SetupCommitJournal.resolve(
+                      const SetupDraft(preset: SetupPreset.average),
+                      general: GeneralSettings.withDefaults(),
+                      engine: EngineSettings.withDefaults(),
+                      targetRevision: 3,
+                    ).toJson(),
+                  ),
+                )
+                as Map<String, dynamic>
+            ..remove('toolbarButtons')
+            ..remove('menuLayout');
+      final journal = SetupCommitJournal.fromJson(json);
+      expect(journal.toolbarButtons, isEmpty);
+      expect(journal.menuLayout, isNull);
     });
 
     test('an opted-out uBlock Origin is not scheduled', () {

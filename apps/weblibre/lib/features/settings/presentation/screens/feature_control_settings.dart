@@ -27,9 +27,9 @@ import 'package:weblibre/features/onboarding/presentation/widgets/customize_setu
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/hide_feature_dialog.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -80,6 +80,37 @@ GeneralSettings withPresetVisibility(
     }
   }
   return updated;
+}
+
+/// [current] with what a switch change from [before] to [after] wrote put
+/// back: every visibility switch it changed, the ones a shown feature needed
+/// included, and the legacy settings it turned on
+/// ([GeneralSettings.withVisibilitySwitch]). Everything else in [current]
+/// stays as it is now.
+GeneralSettings revertVisibilityChange(
+  GeneralSettings current, {
+  required GeneralSettings before,
+  required GeneralSettings after,
+}) {
+  final switches = {...current.visibilitySwitches};
+  for (final visibilitySwitch in VisibilitySwitch.values) {
+    final prior = before.visibilitySwitches[visibilitySwitch];
+    if (prior == after.visibilitySwitches[visibilitySwitch]) continue;
+    if (prior == null) {
+      switches.remove(visibilitySwitch);
+    } else {
+      switches[visibilitySwitch] = prior;
+    }
+  }
+  return current.copyWith(
+    visibilitySwitches: switches,
+    showContainerUi: before.showContainerUi != after.showContainerUi
+        ? before.showContainerUi
+        : current.showContainerUi,
+    showIsolatedTabUi: before.showIsolatedTabUi != after.showIsolatedTabUi
+        ? before.showIsolatedTabUi
+        : current.showIsolatedTabUi,
+  );
 }
 
 /// What Feature Control decides a change with, as the screen last built:
@@ -152,8 +183,11 @@ Future<Future<void> Function(BuildContext context)?> _prepareSwitchChange(
       );
       if (!undo) return;
       final saved = await save.save(
-        (current) =>
-            current.withVisibilitySwitch(visibilitySwitch, enabled: false),
+        (current) => revertVisibilityChange(
+          current,
+          before: stored.general,
+          after: next,
+        ),
       );
       if (!saved && context.mounted) {
         showErrorMessage(
@@ -200,7 +234,7 @@ class FeatureControlSettingsScreen extends ConsumerWidget {
     final stored = ref.watch(storedSettingsSnapshotProvider);
     final connectionsInUse = ref.watch(connectionsInUseProvider);
     final hasContainers = ref.watch(
-      watchContainersWithCountProvider.select(
+      watchContainersProvider.select(
         (value) => value.value?.isNotEmpty ?? false,
       ),
     );

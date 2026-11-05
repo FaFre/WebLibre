@@ -24,7 +24,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
-import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_health.dart';
 import 'package:weblibre/features/proxy/domain/services/proxy_latency_tester.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_list/menu_row.dart';
@@ -135,7 +134,7 @@ class TorProfileTile extends ConsumerWidget {
           // Tor in use can always be stopped (P5).
           HiddenFeatureGate.feature(
             FeatureId.connectionsTorBasic,
-            keptWhen: torInUseProvider,
+            keptWhen: KeptWhen.torInUse,
             child: RunSwitch(
               isRunning: isRunning,
               disabled: isBusy,

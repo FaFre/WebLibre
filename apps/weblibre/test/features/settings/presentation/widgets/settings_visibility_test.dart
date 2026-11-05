@@ -22,16 +22,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 
-SettingsEntryDefinition _entry(
-  String title, {
-  FeatureId? feature,
-  bool liveOnly = false,
-}) => SettingsEntryDefinition(
-  title: title,
-  feature: feature,
-  liveOnly: liveOnly,
-  child: const SizedBox(),
-);
+SettingsEntryDefinition _entry(String title, {FeatureId? feature}) =>
+    SettingsEntryDefinition(
+      title: title,
+      feature: feature,
+      child: const SizedBox(),
+    );
 
 List<String> _titles(List<SettingsSectionDefinition> sections) => [
   for (final section in sections)
@@ -89,19 +85,5 @@ void main() {
       _titles(filterSettingsSections(sections: sections, query: 'search')),
       ['search only'],
     );
-  });
-
-  test('a live-only entry is left out while editing a draft', () {
-    final sections = [
-      SettingsSectionDefinition(
-        title: 'Section',
-        entries: [_entry('draft'), _entry('live', liveOnly: true)],
-      ),
-    ];
-
-    expect(_titles(visibleSettingsSections(sections)), ['draft', 'live']);
-    expect(_titles(visibleSettingsSections(sections, draftMode: true)), [
-      'draft',
-    ]);
   });
 }

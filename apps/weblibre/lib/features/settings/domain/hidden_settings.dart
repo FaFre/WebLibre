@@ -279,7 +279,8 @@ enum HiddenSetting {
   /// Whether the engine reads this only when it starts: a change, a feature
   /// hidden or shown included, applies after a restart.
   bool get appliesOnRestart => switch (this) {
-    queryParameterStripping ||
+    // Query parameter stripping is not here: the engine settings push it to
+    // the running engine with the rest of content blocking.
     bounceTrackingProtection ||
     siteIsolation ||
     isolatedProcess ||

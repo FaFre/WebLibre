@@ -35,8 +35,8 @@ class SearchModuleReorderView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     // Modules that follow a hidden feature are left out, like on the drawn
     // surface (`home.module_feature_filter`).
-    final shownFeatures = ref.watch(shownFeaturesProvider);
-    final order = ref.watch(searchModuleOrderProvider(surface));
+    final shownFeatures = ref.watch(displayedShownFeaturesProvider);
+    final order = ref.watch(editedModuleOrderProvider(surface));
     final entries = [
       for (final entry in order)
         if (isSearchModuleFeatureShown(entry.type, shownFeatures)) entry,
@@ -67,7 +67,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                     MenuItemButton(
                       leadingIcon: const Icon(Icons.restore),
                       onPressed: ref
-                          .read(searchModuleOrderProvider(surface).notifier)
+                          .read(editedModuleOrderProvider(surface).notifier)
                           .resetToDefaults,
                       child: Text(l10n.search_resetToDefaults),
                     ),
@@ -93,7 +93,7 @@ class SearchModuleReorderView extends ConsumerWidget {
           itemCount: entries.length,
           onReorderItem: (oldIndex, newIndex) {
             ref
-                .read(searchModuleOrderProvider(surface).notifier)
+                .read(editedModuleOrderProvider(surface).notifier)
                 .reorderShown(
                   [for (final entry in entries) entry.type],
                   oldIndex,
@@ -114,7 +114,7 @@ class SearchModuleReorderView extends ConsumerWidget {
                         : colorScheme.onSurfaceVariant,
                   ),
                   onPressed: () => ref
-                      .read(searchModuleOrderProvider(surface).notifier)
+                      .read(editedModuleOrderProvider(surface).notifier)
                       .toggleVisibility(entry.type),
                 ),
                 title: Text(

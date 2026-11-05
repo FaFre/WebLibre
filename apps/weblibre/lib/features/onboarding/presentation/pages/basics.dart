@@ -22,12 +22,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/widgets/bang_label.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/search/domain/entities/abstract/i_search_suggestion_provider.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/tab_bar_position_setting_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/bang_icon.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -44,8 +44,8 @@ const defaultBangs = ['ddg', 'brave', 'startpage', 'qwant'];
 /// search provider, with the autocomplete provider behind "More", and the tab
 /// bar position.
 ///
-/// Lives inside a `SetupDraftScope`, so the settings it reads and saves are
-/// the draft's, filed as Basics answers.
+/// Reads the draft's settings (the displayed layer) and files its own
+/// answers in the draft as Basics answers.
 class BasicsPage extends HookConsumerWidget {
   const BasicsPage({super.key});
 
@@ -57,19 +57,22 @@ class BasicsPage extends HookConsumerWidget {
     final bangs = ref.watch(bangListProvider(triggers: defaultBangs));
 
     final activeBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.value),
+      displayedDefaultSearchBangDataProvider.select((value) => value.value),
     );
     final activeAutosuggest = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
+      displayedGeneralSettingsProvider.select(
         (value) => value.defaultSearchSuggestionsProvider,
       ),
     );
     final tabBarPosition = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.tabBarPosition),
+      displayedGeneralSettingsProvider.select((s) => s.tabBarPosition),
     );
 
-    Future<void> save(UpdateGeneralSettingsFunc update) =>
-        ref.read(saveGeneralSettingsControllerProvider.notifier).save(update);
+    // Onboarding code: Basics files its answers in the draft itself, apart
+    // from the Customize changes a preset change drops.
+    Future<void> save(UpdateGeneralSettingsFunc update) async => ref
+        .read(setupDraftControllerProvider.notifier)
+        .editGeneral(SetupDraftStep.basics, update);
 
     Future<void> updateSearchProvider(BangKey key) =>
         save((current) => current.copyWith.defaultSearchProvider(key));

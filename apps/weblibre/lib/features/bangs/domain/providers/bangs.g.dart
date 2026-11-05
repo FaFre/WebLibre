@@ -44,6 +44,53 @@ final class DefaultSearchBangDataProvider
 String _$defaultSearchBangDataHash() =>
     r'5f43b8989219cf3cb2f5ca65df351b6cb100427f';
 
+/// [defaultSearchBangData] for the displayed layer
+/// (`displayedGeneralSettings`): in the onboarding the draft's search
+/// provider.
+
+@ProviderFor(displayedDefaultSearchBangData)
+final displayedDefaultSearchBangDataProvider =
+    DisplayedDefaultSearchBangDataProvider._();
+
+/// [defaultSearchBangData] for the displayed layer
+/// (`displayedGeneralSettings`): in the onboarding the draft's search
+/// provider.
+
+final class DisplayedDefaultSearchBangDataProvider
+    extends
+        $FunctionalProvider<AsyncValue<BangData?>, BangData?, Stream<BangData?>>
+    with $FutureModifier<BangData?>, $StreamProvider<BangData?> {
+  /// [defaultSearchBangData] for the displayed layer
+  /// (`displayedGeneralSettings`): in the onboarding the draft's search
+  /// provider.
+  DisplayedDefaultSearchBangDataProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedDefaultSearchBangDataProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedDefaultSearchBangDataHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<BangData?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<BangData?> create(Ref ref) {
+    return displayedDefaultSearchBangData(ref);
+  }
+}
+
+String _$displayedDefaultSearchBangDataHash() =>
+    r'd0436b98c24bceccfa3134b38294688b5bdb4d97';
+
 @ProviderFor(defaultSearchBang)
 final defaultSearchBangProvider = DefaultSearchBangProvider._();
 

@@ -23,6 +23,7 @@ import 'dart:convert';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/storage_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_settings.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/setting_groups_serializer.dart';
@@ -46,7 +47,8 @@ const setupCommitJournalKey = 'SetupCommitJournal';
 ///
 /// Only the commit schedules them. Nothing else ever installs uBlock Origin,
 /// so an opt-out in Customize, or removing it afterwards, is final (acceptance
-/// scenario 9).
+/// scenario 9): a removal also drops an install still waiting for its retry
+/// ([SetupStepRunner.uBlockRemoved]).
 enum SetupStep {
   /// The engine hardening baseline. The commit applies it inline and
   /// schedules this step only when that fails, so a refused preference write
@@ -76,9 +78,6 @@ enum SetupStepOutcome {
 @Riverpod(keepAlive: true)
 class SetupStepRunner extends _$SetupStepRunner {
   static const storageKey = 'PendingSetupSteps';
-  static const _options = StorageOptions(
-    cacheTime: StorageCacheTime.unsafe_forever,
-  );
 
   Future<void>? _running;
 
@@ -135,6 +134,14 @@ class SetupStepRunner extends _$SetupStepRunner {
     if (ref.mounted && state.contains(step)) state = {...state}..remove(step);
   }
 
+  /// The user removed uBlock Origin themselves. A retry of the install would
+  /// put it back, and the filter lists would configure a blocker they no
+  /// longer have: both are dropped, like a decline.
+  Future<void> uBlockRemoved() async {
+    await cancel(SetupStep.installUBlock);
+    await cancel(SetupStep.optimizedUBlockFilters);
+  }
+
   Future<void> _write(Set<SetupStep> steps) async {
     if (steps.isEmpty) {
       await _storage.delete(storageKey);
@@ -143,15 +150,43 @@ class SetupStepRunner extends _$SetupStepRunner {
     await _storage.write(
       storageKey,
       jsonEncode([for (final step in steps) step.name]),
-      _options,
+      foreverStorageOptions,
     );
   }
 
+  /// Takes [steps] off the schedule as it is stored now, not as the run
+  /// read it: a commit that scheduled steps while the run was under way
+  /// keeps them.
+  Future<void> _drop(Set<SetupStep> steps) async {
+    final scheduled = await pending();
+    if (scheduled.intersection(steps).isEmpty) return;
+    await _write(scheduled.difference(steps));
+  }
+
+  /// Whether [resume] was called while a run was under way. That run read
+  /// the schedule when it started, so it runs once more for what was
+  /// scheduled since.
+  var _resumeAgain = false;
+
   /// Runs whatever is still scheduled, once at a time. Called right after the
-  /// commit, and on every start until nothing is left.
-  Future<void> resume() => _running ??= _run().whenComplete(() {
-    _running = null;
-  });
+  /// commit, and on every start until nothing is left. A call while a run is
+  /// under way returns that run, which then runs again.
+  Future<void> resume() {
+    if (_running case final running?) {
+      _resumeAgain = true;
+      return running;
+    }
+    return _running = _runUntilCaughtUp().whenComplete(() {
+      _running = null;
+    });
+  }
+
+  Future<void> _runUntilCaughtUp() async {
+    do {
+      _resumeAgain = false;
+      await _run();
+    } while (_resumeAgain && ref.mounted);
+  }
 
   Future<void> _run() async {
     // Steps belong to a finished onboarding: while its commit is still open
@@ -178,15 +213,14 @@ class SetupStepRunner extends _$SetupStepRunner {
       switch (outcome) {
         case SetupStepOutcome.done:
           remaining = {...remaining}..remove(step);
-          await _write(remaining.difference(_cancelled));
+          await _drop({step});
         case SetupStepOutcome.declined:
           // The user said no (the add-on permission prompt): final, like an
           // opt-out in Customize. Dropped with the steps that need it, and not
           // reported, or every start would ask again.
-          remaining = {...remaining}
-            ..remove(step)
-            ..removeAll(_dependents(step));
-          await _write(remaining.difference(_cancelled));
+          final dropped = {step, ..._dependents(step)};
+          remaining = remaining.difference(dropped);
+          await _drop(dropped);
         case SetupStepOutcome.failed:
           failed.add(step);
       }
@@ -232,9 +266,13 @@ class SetupStepRunner extends _$SetupStepRunner {
               .apply();
           return SetupStepOutcome.done;
         case SetupStep.installUBlock:
-          final outcome = await ref
-              .read(browserAddonServiceProvider.notifier)
-              .install(ublockAddonId);
+          final addons = ref.read(browserAddonServiceProvider.notifier);
+          // Installed by hand since the step was scheduled: nothing left to
+          // do, and installing again would only ask for permissions again.
+          if (await addons.isInstalled(ublockAddonId)) {
+            return SetupStepOutcome.done;
+          }
+          final outcome = await addons.install(ublockAddonId);
           return switch (outcome) {
             AddonInstallOutcome.installed => SetupStepOutcome.done,
             AddonInstallOutcome.cancelled => SetupStepOutcome.declined,

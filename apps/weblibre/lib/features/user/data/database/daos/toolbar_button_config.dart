@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:drift/drift.dart';
-import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/user/data/database/daos/toolbar_button_config.drift.dart';
 import 'package:weblibre/features/user/data/database/database.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
@@ -36,48 +35,36 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
 
   Future<List<ToolbarButtonConfig>> getAll() => selectAll().get();
 
-  Future<void> upsert(ToolbarButtonConfig config) =>
-      into(db.toolbarButtonConfigs).insertOnConflictUpdate(config);
-
-  Future<void> assignOrderKey(String buttonId, {required String orderKey}) =>
-      (update(db.toolbarButtonConfigs)
-            ..where((t) => t.buttonId.equals(buttonId)))
-          .write(ToolbarButtonConfigsCompanion(orderKey: Value(orderKey)));
-
-  Future<void> assignVisibility(String buttonId, {required bool visible}) =>
+  /// Stores [configs]: each listed button whose row differs is written, and
+  /// nothing else. Rows of buttons not listed stay, among them those of
+  /// buttons this version does not know (written by a newer one), and the
+  /// fallbacks pointing at them.
+  ///
+  /// Fallbacks reference other rows, so they are assigned once every listed
+  /// row exists.
+  Future<void> writeChanged(List<ToolbarButtonConfig> configs) =>
       transaction(() async {
-        // Land the toggled button at the trailing edge of its *new* section
-        // so its order_key always stays inside the visibility partition.
-        // Without this, a button keeps the key it was assigned in the other
-        // section and lands at an arbitrary position after the toggle.
-        final orderKey = await generateTrailingOrderKey(
-          isVisible: visible,
-        ).getSingle();
-
-        await (update(
-          db.toolbarButtonConfigs,
-        )..where((t) => t.buttonId.equals(buttonId))).write(
-          ToolbarButtonConfigsCompanion(
-            isVisible: Value(visible),
-            orderKey: Value(orderKey),
-          ),
-        );
-      });
-
-  Future<void> assignFallback(String buttonId, String? fallbackId) =>
-      (update(db.toolbarButtonConfigs)
-            ..where((t) => t.buttonId.equals(buttonId)))
-          .write(ToolbarButtonConfigsCompanion(fallbackId: Value(fallbackId)));
-
-  Future<void> assignLongPressAction(String buttonId, BrowserAction? action) =>
-      (update(db.toolbarButtonConfigs)
-            ..where((t) => t.buttonId.equals(buttonId)))
-          .write(ToolbarButtonConfigsCompanion(longPressAction: Value(action)));
-
-  Future<void> replaceAll(List<ToolbarButtonConfig> configs) =>
-      transaction(() async {
-        await delete(db.toolbarButtonConfigs).go();
-        await _insertWithDeferredFallbacks(configs);
+        final existing = {for (final row in await getAll()) row.buttonId: row};
+        final changed = [
+          for (final config in configs)
+            if (existing[config.buttonId] != config) config,
+        ];
+        for (final config in changed) {
+          await into(db.toolbarButtonConfigs).insertOnConflictUpdate(
+            ToolbarButtonConfigsCompanion(
+              buttonId: Value(config.buttonId),
+              orderKey: Value(config.orderKey),
+              isVisible: Value(config.isVisible),
+              longPressAction: Value(config.longPressAction),
+            ),
+          );
+        }
+        for (final config in changed) {
+          if (existing[config.buttonId]?.fallbackId == config.fallbackId) {
+            continue;
+          }
+          await _assignFallback(config.buttonId, config.fallbackId);
+        }
       });
 
   Future<void> seedMissing(
@@ -119,14 +106,6 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
     });
   }
 
-  SingleSelectable<String> generateLeadingOrderKey({
-    int bucket = 0,
-    required bool isVisible,
-  }) => db.definitionsDrift.toolbarLeadingOrderKey(
-    bucket: bucket,
-    isVisible: isVisible,
-  );
-
   SingleSelectable<String> generateTrailingOrderKey({
     int bucket = 0,
     required bool isVisible,
@@ -135,43 +114,15 @@ class ToolbarButtonConfigDao extends DatabaseAccessor<UserDatabase>
     isVisible: isVisible,
   );
 
-  SingleOrNullSelectable<String> generateOrderKeyAfterButtonId(
-    String buttonId, {
-    required bool isVisible,
-  }) => db.definitionsDrift.toolbarOrderKeyAfterButton(
-    buttonId: buttonId,
-    isVisible: isVisible,
-  );
-
-  SingleSelectable<String> generateOrderKeyBeforeButtonId(
-    String buttonId, {
-    required bool isVisible,
-  }) => db.definitionsDrift.toolbarOrderKeyBeforeButton(
-    buttonId: buttonId,
-    isVisible: isVisible,
-  );
-
-  Future<void> _insertWithDeferredFallbacks(
-    List<ToolbarButtonConfig> configs,
-  ) async {
-    for (final config in configs) {
-      await into(db.toolbarButtonConfigs).insert(
-        ToolbarButtonConfig(
-          buttonId: config.buttonId,
-          orderKey: config.orderKey,
-          isVisible: config.isVisible,
-          longPressAction: config.longPressAction,
-        ),
-      );
-    }
-
-    await _assignFallbacks(configs);
-  }
-
   Future<void> _assignFallbacks(List<ToolbarButtonConfig> configs) async {
     for (final config in configs) {
       if (config.fallbackId == null) continue;
-      await assignFallback(config.buttonId, config.fallbackId);
+      await _assignFallback(config.buttonId, config.fallbackId);
     }
   }
+
+  Future<void> _assignFallback(String buttonId, String? fallbackId) =>
+      (update(db.toolbarButtonConfigs)
+            ..where((t) => t.buttonId.equals(buttonId)))
+          .write(ToolbarButtonConfigsCompanion(fallbackId: Value(fallbackId)));
 }

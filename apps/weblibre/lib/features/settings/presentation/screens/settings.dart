@@ -22,7 +22,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -30,7 +29,6 @@ import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_behavior_screen.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_feedback_screen.dart';
-import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/proxy/presentation/screens/proxy_routing_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
 import 'package:weblibre/features/settings/presentation/screens/advanced_settings.dart';
@@ -277,7 +275,7 @@ _CategoryGroups _buildCategories(BuildContext context) {
     _SettingsCategoryDefinition(
       title: l10n.settings_categoryProxyTitle,
       feature: FeatureId.connectionsImportVpnProxy,
-      keptWhen: connectionsInUseProvider,
+      keptWhen: KeptWhen.connectionsInUse,
       subtitle: l10n.settings_categoryProxySubtitle,
       icon: MdiIcons.lanConnect,
       keywords: settingsKeywords(l10n.settings_categoryProxyKeywords),
@@ -289,14 +287,14 @@ _CategoryGroups _buildCategories(BuildContext context) {
           sections: proxyRoutingSettingsSections(context),
           open: (context) => const ProxyRoutingSettingsRoute().push(context),
           feature: FeatureId.connectionsGlobalRouting,
-          keptWhen: globalRouteInUse,
+          keptWhen: KeptWhen.globalRouteInUse,
         ),
         _SettingsSubscreen(
           title: l10n.tor_proxyLabel(torBrand),
           sections: torProxySettingsSections(l10n),
           open: (context) => const TorProxyRoute().push(context),
           feature: FeatureId.connectionsTorBasic,
-          keptWhen: torInUseProvider,
+          keptWhen: KeptWhen.torInUse,
         ),
       ],
     ),
@@ -450,7 +448,7 @@ List<SettingsSectionDefinition> _buildSearchSections(
 
 /// What keeps [entry] shown while its feature is hidden: its own condition,
 /// or — for an entry that takes the category's feature — the category's.
-ProviderListenable<bool>? _entryKeptWhen(
+KeptWhen? _entryKeptWhen(
   _SettingsCategoryDefinition category,
   SettingsSectionDefinition section,
   SettingsEntryDefinition entry,
@@ -489,7 +487,7 @@ class _SettingsCategoryDefinition {
   /// While true, [feature] does not hide the category (P5); see
   /// [SettingsEntryDefinition.keptWhen]. Its settings that name no feature of
   /// their own follow it, as they follow [feature].
-  final ProviderListenable<bool>? keptWhen;
+  final KeptWhen? keptWhen;
 
   /// Screens opened from this one whose settings the search finds too.
   final List<_SettingsSubscreen> subscreens;
@@ -519,7 +517,7 @@ class _SettingsSubscreen {
   /// name none of their own, and when what it configures is in place
   /// ([SettingsEntryDefinition.keptWhen]).
   final FeatureId? feature;
-  final ProviderListenable<bool>? keptWhen;
+  final KeptWhen? keptWhen;
 
   const _SettingsSubscreen({
     required this.title,
@@ -666,7 +664,7 @@ class SettingsSearchTarget {
 
   /// See [SettingsEntryDefinition.keptWhen]: while true, [feature] does not
   /// hide the target.
-  final ProviderListenable<bool>? keptWhen;
+  final KeptWhen? keptWhen;
 
   /// Pushes the settings screen. For a single setting, the caller first hands
   /// [title] to `PendingSettingsHighlight` so the screen scrolls to it.

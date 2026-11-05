@@ -37,6 +37,10 @@ void main() {
             generalSettingsWithDefaultsProvider.overrideWithValue(
               GeneralSettings.withDefaults(),
             ),
+            // "Don't ask again" writes through it, never the real database.
+            generalSettingsRepositoryProvider.overrideWith(
+              _FakeGeneralSettingsRepository.new,
+            ),
             singboxProxyRuntimeRepositoryProvider.overrideWith(
               () => runtimeRepository,
             ),
@@ -102,6 +106,10 @@ void main() {
             generalSettingsWithDefaultsProvider.overrideWithValue(
               GeneralSettings.withDefaults(),
             ),
+            // "Don't ask again" writes through it, never the real database.
+            generalSettingsRepositoryProvider.overrideWith(
+              _FakeGeneralSettingsRepository.new,
+            ),
             singboxProxyRuntimeRepositoryProvider.overrideWith(
               () => runtimeRepository,
             ),
@@ -159,6 +167,10 @@ void main() {
           // Nothing remembered, so every start asks.
           generalSettingsWithDefaultsProvider.overrideWithValue(
             GeneralSettings.withDefaults(),
+          ),
+          // "Don't ask again" writes through it, never the real database.
+          generalSettingsRepositoryProvider.overrideWith(
+            _FakeGeneralSettingsRepository.new,
           ),
           singboxProxyRuntimeRepositoryProvider.overrideWith(
             () => runtimeRepository,
@@ -290,4 +302,14 @@ class _LoadingProfilesRepository extends SingboxProxyProfilesRepository {
     }
     return null;
   }
+}
+
+class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
+  @override
+  Stream<GeneralSettings> build() =>
+      Stream.value(GeneralSettings.withDefaults());
+
+  @override
+  Future<void> updateSettings(UpdateGeneralSettingsFunc updateWithCurrent) =>
+      Future.value();
 }

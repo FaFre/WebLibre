@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/side_rail.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/layout/browser_chrome_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/side_rail_resize_handle.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -237,6 +238,7 @@ void main() {
 
   group('BrowserTabBar.isWideRail', () {
     BrowserTabBar barWith(double railWidth) => BrowserTabBar(
+      position: TabBarPosition.left,
       showMainToolbar: true,
       displayedSheet: null,
       showContextualToolbar: false,
@@ -259,6 +261,7 @@ void main() {
 
     test('defaults to the compact rail, so horizontal bars are never wide', () {
       const horizontalBar = BrowserTabBar(
+        position: TabBarPosition.bottom,
         showMainToolbar: true,
         displayedSheet: null,
         showContextualToolbar: false,
@@ -350,10 +353,14 @@ void main() {
         BrowserTabBar.maxExpandedRailWidth,
       ]) {
         final rail = BrowserSideRail(
-          showContextualToolbar: false,
-          quickTabSwitcherRowCount: 1,
-          isSmallWebMode: false,
-          position: TabBarPosition.left,
+          bar: BrowserBarSpec(
+            position: TabBarPosition.left,
+            showMainToolbar: true,
+            showContextualToolbar: false,
+            quickTabSwitcherRowCount: 1,
+            suppressMainToolbar: false,
+            hideMainToolbarButtonsDuplicatedInContextualToolbar: false,
+          ),
           railWidth: width,
         );
 

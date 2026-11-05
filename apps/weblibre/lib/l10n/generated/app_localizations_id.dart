@@ -8350,10 +8350,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Sesuaikan Tombol Pengalih';
 
   @override
-  String get settings_contextualToolbarResetToDefaults =>
-      'Atur Ulang ke Bawaan';
-
-  @override
   String get settings_contextualToolbarEnabledSection => 'Aktif';
 
   @override
@@ -8371,6 +8367,10 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get settings_contextualToolbarAllButtonsEnabled =>
       'Semua tombol aktif.';
+
+  @override
+  String get settings_contextualToolbarSaveFailed =>
+      'Tidak dapat menyimpan tombol. Coba lagi.';
 
   @override
   String settings_contextualToolbarNoDisabledButtonsMatch(String query) {
@@ -9445,6 +9445,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_actionResetToDefaults => 'Atur Ulang ke Bawaan';
+
+  @override
+  String get settings_actionOpenFullScreen => 'Open full screen';
+
+  @override
+  String get settings_previewSheetExpand => 'Expand settings';
+
+  @override
+  String get settings_previewSheetCollapse => 'Shrink settings';
 
   @override
   String get settings_menuLayoutTitle => 'Sesuaikan Menu';
@@ -11455,9 +11464,6 @@ class AppLocalizationsId extends AppLocalizations {
       'Tampilkan ikon situs web alih-alih gambar mini halaman di tampilan daftar tab';
 
   @override
-  String get settings_previewPageContent => 'Konten Halaman';
-
-  @override
   String get settings_previewPageTitle => 'Pratinjau WebLibre';
 
   @override
@@ -11473,11 +11479,94 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_previewTabSearch => 'Cari';
 
   @override
-  String get settings_livePreviewTitle => 'Pratinjau Langsung';
+  String get settings_layoutEditorPreviewTab => 'Preview';
 
   @override
-  String get settings_livePreviewSubtitle =>
-      'Mencerminkan pengaturan bilah alat dan tata letak Anda saat ini';
+  String get settings_layoutEditorSettingsTab => 'Settings';
+
+  @override
+  String get settings_previewDeviceThisWindow => 'This window';
+
+  @override
+  String get settings_previewDevicePhone => 'Phone';
+
+  @override
+  String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
+
+  @override
+  String get settings_previewDeviceTablet => 'Tablet';
+
+  @override
+  String settings_previewOtherDeviceHint(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone':
+          'Showing a phone. Automatic settings apply as they would on a phone.',
+      'phoneLandscape':
+          'Showing a phone in landscape. Automatic settings apply as they would there.',
+      'tablet':
+          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'other': 'Showing another window size.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_previewStatePage => 'Page';
+
+  @override
+  String get settings_previewStateHome => 'Home page';
+
+  @override
+  String get settings_previewStateSidePanelCollapsed => 'Side panel collapsed';
+
+  @override
+  String get settings_previewStateNeedsSidePanel =>
+      'Needs a side panel in a large window';
+
+  @override
+  String get settings_layoutPreviewSemantics =>
+      'Preview of the browser with this toolbar layout';
+
+  @override
+  String get settings_layoutPartTabChips => 'Tab Chips';
+
+  @override
+  String get settings_previewModeSelect => 'Select';
+
+  @override
+  String get settings_previewModeTry => 'Try';
+
+  @override
+  String get settings_previewSelectHint =>
+      'Tap a part of the toolbar to change its settings.';
+
+  @override
+  String get settings_previewTryHint =>
+      'The preview works like the browser: scroll the page and tap the buttons.';
+
+  @override
+  String get settings_previewAllSettings => 'All settings';
+
+  @override
+  String get settings_previewSelectionPath => 'Selected part';
+
+  @override
+  String settings_tryToolbarHidden(String distance) {
+    return 'Toolbar hidden while scrolling · Auto Hide Distance $distance';
+  }
+
+  @override
+  String get settings_trySidePanelHidden =>
+      'Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad';
+
+  @override
+  String get settings_tryOpensTabView => 'This opens the tab view';
+
+  @override
+  String get settings_tryOpensMenu => 'This opens the menu';
+
+  @override
+  String get settings_tryAdjust => 'Adjust';
 
   @override
   String get settings_deleteAllExceptionsTitle => 'Hapus Semua Pengecualian?';
@@ -14416,6 +14505,10 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get visibilitySwitch_stillHiddenNote =>
       'Ini bagian dari fitur tersembunyi. Anda dapat menampilkannya di Pengaturan > Kontrol Fitur.';
+
+  @override
+  String get visibilitySwitch_showFailed =>
+      'Tidak dapat menampilkan fitur. Coba lagi.';
 
   @override
   String get visibilitySwitch_hiddenControlHint =>

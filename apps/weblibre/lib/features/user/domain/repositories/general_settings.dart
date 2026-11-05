@@ -30,6 +30,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/extensions/locale.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -255,12 +256,14 @@ class GeneralSettingsRepository extends _$GeneralSettingsRepository {
   }
 }
 
-/// The general settings as stored, hidden features included.
+/// The general settings of the profile as stored, hidden features included.
+/// Never the onboarding draft.
 ///
-/// For the screens that show and edit settings, the onboarding draft and
-/// Feature Control. Behavior reads [generalSettingsWithDefaults].
+/// The profile layer: what [generalSettingsWithDefaults] applies, and what the
+/// onboarding's commit writes over. Screens that edit settings read
+/// [storedGeneralSettings] instead.
 @Riverpod(keepAlive: true)
-GeneralSettings storedGeneralSettings(Ref ref) {
+GeneralSettings profileGeneralSettings(Ref ref) {
   return ref.watch(
     generalSettingsRepositoryProvider.select(
       (value) => value.value ?? GeneralSettings.withDefaults(),
@@ -268,19 +271,33 @@ GeneralSettings storedGeneralSettings(Ref ref) {
   );
 }
 
-/// The general settings as they apply: the settings of hidden features at
-/// their hidden values ([GeneralSettings.effective]).
+/// The general settings as stored, hidden features included, for the screens
+/// that show and edit them: in the onboarding the draft's
+/// (`draftGeneralSettings`), otherwise the profile's
+/// ([profileGeneralSettings]).
+///
+/// The edit layer. Behavior reads [generalSettingsWithDefaults].
+@Riverpod(keepAlive: true)
+GeneralSettings storedGeneralSettings(Ref ref) {
+  return ref.watch(draftGeneralSettingsProvider);
+}
+
+/// The general settings as they apply: the profile's settings with those of
+/// hidden features at their hidden values ([GeneralSettings.effective]).
+///
+/// The live layer, which services and the browser behave by. It follows the
+/// profile, never the onboarding draft.
 @Riverpod(keepAlive: true)
 GeneralSettings generalSettingsWithDefaults(Ref ref) {
-  return ref.watch(storedGeneralSettingsProvider).effective();
+  return ref.watch(profileGeneralSettingsProvider).effective();
 }
 
 /// The features shown with the current visibility switches.
 ///
 /// For widgets that check many features at once (a list of actions, a set of
 /// modules): one watch, and a rebuild only when the set changes rather than
-/// on every settings write. `SetupDraftScope` overrides it, so below the
-/// scope it follows the draft.
+/// on every settings write. The live layer: widgets that render settings read
+/// [DisplayedShownFeatures].
 @Riverpod(keepAlive: true)
 class ShownFeatures extends _$ShownFeatures {
   @override
@@ -439,6 +456,97 @@ HomeSearchBarPlacement effectiveHomeSearchBarPlacement(Ref ref) {
 
   return ref.watch(
     generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.effectiveHomeSearchBarPlacement(window: window),
+    ),
+  );
+}
+
+/// The general settings as the widgets that render settings draw them: in
+/// the onboarding the draft's as they would apply, otherwise the live ones
+/// ([generalSettingsWithDefaults]).
+///
+/// The displayed layer, for the layout preview, `HiddenFeatureGate`, the
+/// module and menu views and the onboarding's pages. Never for behavior:
+/// services read [generalSettingsWithDefaults].
+@Riverpod(keepAlive: true)
+GeneralSettings displayedGeneralSettings(Ref ref) {
+  final drafting = ref.watch(
+    setupDraftControllerProvider.select((draft) => draft != null),
+  );
+  if (!drafting) return ref.watch(generalSettingsWithDefaultsProvider);
+  return ref.watch(draftGeneralSettingsProvider).effective();
+}
+
+/// The general settings a widget drawn both in the browser and in the
+/// Toolbar & Layout preview shows: the live ones in the browser, the
+/// displayed ones ([displayedGeneralSettings], in the onboarding the draft's)
+/// in the preview. Behavior (what a tap does) always reads
+/// [generalSettingsWithDefaults].
+ProviderListenable<GeneralSettings> generalSettingsShownBy({
+  required bool isPreview,
+}) => isPreview
+    ? displayedGeneralSettingsProvider
+    : generalSettingsWithDefaultsProvider;
+
+/// [ShownFeatures] for the displayed layer ([displayedGeneralSettings]).
+@Riverpod(keepAlive: true)
+class DisplayedShownFeatures extends _$DisplayedShownFeatures {
+  @override
+  Set<FeatureId> build() =>
+      ref.watch(displayedGeneralSettingsProvider).shownFeatures;
+
+  @override
+  bool updateShouldNotify(Set<FeatureId> previous, Set<FeatureId> next) =>
+      !setEquals(previous, next);
+}
+
+/// [effectiveTabBarPosition] for the displayed layer.
+@Riverpod(keepAlive: true)
+TabBarPosition displayedTabBarPosition(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    displayedGeneralSettingsProvider.select(
+      (settings) => settings.effectiveTabBarPosition(window: window),
+    ),
+  );
+}
+
+/// [effectiveTabBarStackingMode] for the displayed layer.
+@Riverpod(keepAlive: true)
+TabBarStackingMode displayedTabBarStackingMode(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+  final sideRailDragWidth = ref.watch(sideRailDragWidthProvider);
+
+  return ref.watch(
+    displayedGeneralSettingsProvider.select(
+      (settings) => settings.effectiveTabBarStackingMode(
+        window: window,
+        sideRailWidthOverride: sideRailDragWidth,
+      ),
+    ),
+  );
+}
+
+/// [effectiveSearchFieldPlacement] for the displayed layer.
+@Riverpod(keepAlive: true)
+SearchFieldPlacement displayedSearchFieldPlacement(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    displayedGeneralSettingsProvider.select(
+      (settings) => settings.effectiveSearchFieldPlacement(window: window),
+    ),
+  );
+}
+
+/// [effectiveHomeSearchBarPlacement] for the displayed layer.
+@Riverpod(keepAlive: true)
+HomeSearchBarPlacement displayedHomeSearchBarPlacement(Ref ref) {
+  final window = ref.watch(windowSizeClassControllerProvider);
+
+  return ref.watch(
+    displayedGeneralSettingsProvider.select(
       (settings) => settings.effectiveHomeSearchBarPlacement(window: window),
     ),
   );

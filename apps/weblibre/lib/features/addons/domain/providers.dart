@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -25,6 +26,7 @@ import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/addons/utils/addon_html.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
 part 'providers.g.dart';
@@ -81,6 +83,14 @@ String _resolveAvailableVersion(AddonInfo addon, AddonStoreInfo? storeInfo) {
   return (latest != null && latest.isNotEmpty) ? latest : addon.version;
 }
 
+/// After the user removed [addonId]: an onboarding install of it still
+/// waiting for its retry would put it back ([SetupStepRunner.uBlockRemoved]).
+/// Not awaited: dropping the step waits out a retry under way, which may
+/// itself be waiting for its proxy, and the uninstall is done already.
+void _forgetSetupSteps(SetupStepRunner setupSteps, String addonId) {
+  if (addonId == ublockAddonId) unawaited(setupSteps.uBlockRemoved());
+}
+
 @Riverpod()
 class AddonDetails extends _$AddonDetails {
   GeckoAddonService get _service => ref.read(addonServiceProvider);
@@ -115,8 +125,12 @@ class AddonDetails extends _$AddonDetails {
   }
 
   Future<void> uninstall() async {
+    // Read up front: the details screen may be gone once the uninstall
+    // returns.
+    final setupSteps = ref.read(setupStepRunnerProvider.notifier);
     await _run(() async {
       await _service.uninstallAddon(addonId);
+      _forgetSetupSteps(setupSteps, addonId);
       return null;
     });
   }
@@ -347,10 +361,12 @@ class AddonList extends _$AddonList {
 
   Future<void> uninstall(AddonInfo addon) async {
     final busyIds = ref.read(addonBusyIdsProvider.notifier);
+    final setupSteps = ref.read(setupStepRunnerProvider.notifier);
     busyIds.add(addon.id);
 
     try {
       await _service.uninstallAddon(addon.id);
+      _forgetSetupSteps(setupSteps, addon.id);
 
       if (!ref.mounted) {
         return;

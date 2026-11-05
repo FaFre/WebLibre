@@ -25,6 +25,7 @@ import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_layout_content.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 const _phone = WindowSizeClass.compact;
@@ -43,7 +44,11 @@ Future<void> _pumpStackingSetting(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
-        storedGeneralSettingsProvider.overrideWith(
+        // No onboarding owed: no draft, the displayed layer is the live one.
+        completedOnboardingRevisionProvider.overrideWithValue(
+          const AsyncData(OnboardingRepository.targetRevision),
+        ),
+        profileGeneralSettingsProvider.overrideWith(
           (ref) => GeneralSettings.withDefaults(
             tabBarPosition: TabBarPositionSetting.bottom,
             tabBarStackingMode: stacking,

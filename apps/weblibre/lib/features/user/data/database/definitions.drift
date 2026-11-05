@@ -74,23 +74,10 @@ CREATE TABLE search_tokens (
 CREATE INDEX idx_search_tokens_inserted_at ON search_tokens(inserted_at);
 CREATE INDEX idx_search_tokens_reserved_at ON search_tokens(reserved_at);
 
--- All four queries are scoped to a visibility partition (`is_visible`) so the
--- generated key falls strictly within the targeted section. The Customize
--- Toolbar UI renders Enabled and Disabled as two independent reorderable
--- lists; without the partition, leading/trailing keys would cross the section
--- boundary and surface as buttons "jumping" after a visibility toggle.
-toolbarLeadingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
-  SELECT lexo_rank_previous(
-    :bucket,
-    (
-      SELECT order_key
-      FROM toolbar_button_configs
-      WHERE is_visible = :is_visible
-      ORDER BY order_key
-      LIMIT 1
-    )
-  );
-
+-- The key after the last button of one visibility partition (`is_visible`),
+-- for seeding a newly shipped button at the end of its section. Keys are
+-- ordered within a partition: the button editor lists Enabled and Disabled as
+-- two independent reorderable lists (see `moveToolbarButton`).
 toolbarTrailingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
   SELECT lexo_rank_next(
     :bucket,
@@ -103,46 +90,8 @@ toolbarTrailingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
     )
   );
 
-toolbarOrderKeyAfterButton(:button_id AS TEXT, :is_visible AS BOOL):
-  WITH ordered_table AS (
-    SELECT
-      button_id,
-      order_key,
-      LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
-    FROM toolbar_button_configs
-    WHERE is_visible = :is_visible
-  )
-  SELECT lexo_rank_reorder_after(order_key, next_order_key)
-  FROM ordered_table
-  WHERE button_id = :button_id;
-
-toolbarOrderKeyBeforeButton(:button_id AS TEXT, :is_visible AS BOOL):
-  WITH ordered_table AS (
-    SELECT
-      button_id,
-      order_key,
-      LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
-    FROM toolbar_button_configs
-    WHERE is_visible = :is_visible
-  )
-  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
-  FROM ordered_table
-  WHERE button_id = :button_id;
-
--- Quick-switcher variants of the order-key helpers above, scoped to the
--- quick_switcher_button_configs table (see the toolbar* queries for rationale).
-quickSwitcherLeadingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
-  SELECT lexo_rank_previous(
-    :bucket,
-    (
-      SELECT order_key
-      FROM quick_switcher_button_configs
-      WHERE is_visible = :is_visible
-      ORDER BY order_key
-      LIMIT 1
-    )
-  );
-
+-- Quick-switcher variant of the order-key helper above, scoped to the
+-- quick_switcher_button_configs table.
 quickSwitcherTrailingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
   SELECT lexo_rank_next(
     :bucket,
@@ -154,32 +103,6 @@ quickSwitcherTrailingOrderKey(:bucket AS INTEGER, :is_visible AS BOOL):
       LIMIT 1
     )
   );
-
-quickSwitcherOrderKeyAfterButton(:button_id AS TEXT, :is_visible AS BOOL):
-  WITH ordered_table AS (
-    SELECT
-      button_id,
-      order_key,
-      LEAD(order_key) OVER (ORDER BY order_key) AS next_order_key
-    FROM quick_switcher_button_configs
-    WHERE is_visible = :is_visible
-  )
-  SELECT lexo_rank_reorder_after(order_key, next_order_key)
-  FROM ordered_table
-  WHERE button_id = :button_id;
-
-quickSwitcherOrderKeyBeforeButton(:button_id AS TEXT, :is_visible AS BOOL):
-  WITH ordered_table AS (
-    SELECT
-      button_id,
-      order_key,
-      LAG(order_key) OVER (ORDER BY order_key) AS prev_order_key
-    FROM quick_switcher_button_configs
-    WHERE is_visible = :is_visible
-  )
-  SELECT lexo_rank_reorder_before(order_key, prev_order_key)
-  FROM ordered_table
-  WHERE button_id = :button_id;
 
 evictCacheEntries:
   DELETE FROM icon_cache 

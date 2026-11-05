@@ -32,6 +32,7 @@
   "visibilitySwitch_takesEffectAfterRestart": "Wirkt erst nach einem Neustart",
   "visibilitySwitch_revealConfirm": "Anzeigen",
   "visibilitySwitch_stillHiddenNote": "Das gehört zu einer ausgeblendeten Funktion. Sie lässt sich unter Einstellungen > Funktionsauswahl anzeigen.",
+  "visibilitySwitch_showFailed": "Die Funktion konnte nicht angezeigt werden. Erneut versuchen.",
   "visibilitySwitch_hiddenControlHint": "Teil einer ausgeblendeten Funktion. Aktivieren, um die Funktion anzuzeigen",
   "visibilitySwitch_hiddenStatus": "Teil der ausgeblendeten Funktion „{switchLabel}“",
   "visibilitySwitch_hiddenStatusSeveral": "Teil ausgeblendeter Funktionen: {switchLabels}",

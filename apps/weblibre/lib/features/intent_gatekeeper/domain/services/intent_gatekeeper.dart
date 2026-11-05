@@ -24,7 +24,6 @@ import 'package:weblibre/features/about/domain/providers.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/pending_intent_decision.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
@@ -115,8 +114,8 @@ class IntentGatekeeper extends _$IntentGatekeeper {
 
     if (persist && packageName != null) {
       await ref
-          .read(saveGeneralSettingsControllerProvider.notifier)
-          .save(
+          .read(generalSettingsRepositoryProvider.notifier)
+          .updateSettings(
             (current) => current.copyWith.externalAppIntentPolicies({
               ...current.externalAppIntentPolicies,
               packageName: decision,

@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'dart:convert';
-
+import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/storage_options.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/utils/ordered_layout.dart';
@@ -76,32 +77,41 @@ List<ModuleOrderEntry> reorderShownModules(
   int newIndex,
 ) => moveAmongShown(entries, (e) => e.type, shown, oldIndex, newIndex);
 
-/// How a surface's layout is stored: shared by the provider's `persist()` and
-/// the onboarding commit, which writes a layout before the surface is ever
-/// built and has to know the write landed.
-const moduleOrderStorageOptions = StorageOptions(
-  cacheTime: StorageCacheTime.unsafe_forever,
+String encodeModuleOrder(List<ModuleOrderEntry> entries) =>
+    encodeLayoutEntries(entries, (e) => e.toJson());
+
+/// [encoded] (see [encodeModuleOrder]) as [SearchModuleOrder] restores
+/// [surface]'s layout: merged with its defaults, to pick up newly added or
+/// remove deleted modules.
+List<ModuleOrderEntry> decodeModuleOrder(
+  String encoded,
+  ModuleSurface surface,
+) => mergeModuleOrderWithDefaults(
+  decodeLayoutEntries(encoded, ModuleOrderEntry.fromJson),
+  surface.defaultModules,
 );
 
-String encodeModuleOrder(List<ModuleOrderEntry> entries) =>
-    jsonEncode(entries.map((e) => e.toJson()).toList());
+/// [entries] with [type] shown if it was hidden and hidden if it was shown.
+List<ModuleOrderEntry> toggleModuleVisibility(
+  List<ModuleOrderEntry> entries,
+  SearchModuleType type,
+) => [
+  for (final e in entries)
+    if (e.type == type)
+      ModuleOrderEntry(type: e.type, visible: !e.visible)
+    else
+      e,
+];
 
 @Riverpod(keepAlive: true)
 class SearchModuleOrder extends _$SearchModuleOrder {
-  /// Moves a module within a list that shows only the modules in [shown];
-  /// see [reorderShownModules].
-  void reorderShown(List<SearchModuleType> shown, int oldIndex, int newIndex) {
-    state = reorderShownModules(state, shown, oldIndex, newIndex);
-  }
-
-  void toggleVisibility(SearchModuleType type) {
-    state = [
-      for (final e in state)
-        if (e.type == type)
-          ModuleOrderEntry(type: e.type, visible: !e.visible)
-        else
-          e,
-    ];
+  /// Replaces the whole layout with [layout], as the onboarding's commit
+  /// does. Invalidating this provider would not do: `persist` reads the store
+  /// only on the first build, so a rebuild keeps the layout it had.
+  // A setter is not allowed on a notifier (avoid_public_notifier_properties).
+  // ignore: use_setters_to_change_properties
+  void replace(List<ModuleOrderEntry> layout) {
+    state = layout;
   }
 
   /// Discards the user's layout for this surface and returns to its defaults.
@@ -131,26 +141,67 @@ class SearchModuleOrder extends _$SearchModuleOrder {
     persist(
       ref.watch(riverpodDatabaseStorageProvider),
       key: surface.key,
-      options: moduleOrderStorageOptions,
+      options: foreverStorageOptions,
       encode: encodeModuleOrder,
-      decode: (encoded) {
-        final decoded = (jsonDecode(encoded) as List<dynamic>)
-            .cast<Map<String, dynamic>>()
-            .map((e) {
-              try {
-                return ModuleOrderEntry.fromJson(e);
-              } catch (_) {
-                return null;
-              }
-            })
-            .whereType<ModuleOrderEntry>()
-            .toList();
-        // Merge with defaults to pick up newly added or remove deleted modules
-        return mergeModuleOrderWithDefaults(decoded, surface.defaultModules);
-      },
+      decode: (encoded) => decodeModuleOrder(encoded, surface),
     );
 
     return stateOrNull ??
         mergeModuleOrderWithDefaults(null, surface.defaultModules);
+  }
+}
+
+/// The layout of [surface] as the screens that arrange it show and change
+/// it: in the onboarding the draft's (what the commit would write), otherwise
+/// the profile's ([SearchModuleOrder]).
+///
+/// The edit layer. A change goes into the draft while one is open, and into
+/// [SearchModuleOrder] otherwise. [SearchModuleOrder] never sees the draft:
+/// its `persist()` stores whatever it holds.
+@Riverpod()
+class EditedModuleOrder extends _$EditedModuleOrder {
+  @override
+  List<ModuleOrderEntry> build(ModuleSurface surface) {
+    final drafted = ref.watch(
+      setupDraftControllerProvider.select((draft) => draft?.layoutFor(surface)),
+    );
+    return drafted ?? ref.watch(searchModuleOrderProvider(surface));
+  }
+
+  // The preset's new-tab layout is built afresh on every read of the
+  // draft: only a different layout is a change.
+  @override
+  bool updateShouldNotify(
+    List<ModuleOrderEntry> previous,
+    List<ModuleOrderEntry> next,
+  ) => !const ListEquality<ModuleOrderEntry>().equals(previous, next);
+
+  /// Moves a module within a list that shows only the modules in [shown];
+  /// see [reorderShownModules].
+  void reorderShown(List<SearchModuleType> shown, int oldIndex, int newIndex) =>
+      _set(reorderShownModules(state, shown, oldIndex, newIndex));
+
+  void toggleVisibility(SearchModuleType type) =>
+      _set(toggleModuleVisibility(state, type));
+
+  /// Returns to the surface's default layout. In the onboarding the
+  /// sections' expanded or collapsed state stays: that is the profile's, and
+  /// nothing reaches the profile before the commit.
+  void resetToDefaults() {
+    if (ref.read(setupDraftControllerProvider) == null) {
+      ref.read(searchModuleOrderProvider(surface).notifier).resetToDefaults();
+    } else {
+      _set(mergeModuleOrderWithDefaults(null, surface.defaultModules));
+    }
+  }
+
+  void _set(List<ModuleOrderEntry> layout) {
+    if (ref.read(setupDraftControllerProvider) == null) {
+      ref.read(searchModuleOrderProvider(surface).notifier).replace(layout);
+    } else {
+      ref
+          .read(setupDraftControllerProvider.notifier)
+          .setLayout(surface, layout);
+    }
   }
 }

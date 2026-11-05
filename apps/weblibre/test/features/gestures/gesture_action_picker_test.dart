@@ -24,6 +24,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 const UnsetActionOption _greyOut = (
@@ -42,6 +43,10 @@ Future<void> _openPicker(
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
+        // No onboarding owed: no draft, the displayed layer is the live one.
+        completedOnboardingRevisionProvider.overrideWithValue(
+          const AsyncData(OnboardingRepository.targetRevision),
+        ),
         // The visibility switches are read from the settings; without this a
         // real settings database opens and outlives the test.
         generalSettingsWithDefaultsProvider.overrideWithValue(

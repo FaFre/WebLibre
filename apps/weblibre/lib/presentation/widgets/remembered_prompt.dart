@@ -150,7 +150,8 @@ Future<RememberablePromptResult<T>?> showRememberablePromptDialog<
 
 /// Answers [prompt] with what was remembered for it, or asks with the
 /// [RememberablePromptDialog] that [builder] returns and remembers the answer
-/// when "Don't ask again" was ticked. [read] is the caller's `ref.read`.
+/// when "Don't ask again" was ticked. [read] is the caller's `ref.read`; it is
+/// only used before the dialog opens.
 ///
 /// [T] is the prompt's answer type, one of [RememberedPrompt.answers]. Returns
 /// null when the dialog was cancelled or dismissed.
@@ -165,6 +166,12 @@ Future<T?> askUnlessRemembered<T extends Enum>(
   ).rememberedAnswer<T>(prompt);
   if (remembered != null) return remembered;
 
+  // Taken before the dialog opens: callers are often short-lived (menu
+  // items, tab tiles, chips) and gone by the time it closes, and their
+  // `ref.read` throws then. The repository is keepAlive and already built by
+  // the read above, so holding it costs nothing.
+  final repository = read(generalSettingsRepositoryProvider.notifier);
+
   final result = await showRememberablePromptDialog<T>(
     context,
     builder: builder,
@@ -173,14 +180,9 @@ Future<T?> askUnlessRemembered<T extends Enum>(
 
   if (result.remember) {
     try {
-      // Read only now, and only to remember: the repository is not created
-      // for a prompt that stores nothing.
-      await read(
-        generalSettingsRepositoryProvider.notifier,
-      ).setRememberedAnswer(prompt, result.answer);
+      await repository.setRememberedAnswer(prompt, result.answer);
     } catch (error, stackTrace) {
-      // The answer still stands for this time; it is only asked again. Also
-      // where a caller that went away while the dialog was open ends up.
+      // The answer still stands for this time; it is only asked again.
       logger.e(
         'Failed to remember the answer to ${prompt.name}',
         error: error,

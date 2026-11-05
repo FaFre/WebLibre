@@ -117,15 +117,23 @@ Future<Profile> selectedProfile(Ref ref) async {
 /// Without either, the profile entry opens this profile's own controls.
 @Riverpod()
 bool canSwitchProfiles(Ref ref) {
-  final profileCount = ref.watch(
-    profileRepositoryProvider.select((profiles) => profiles.value?.length ?? 0),
+  // Still loading counts as more than one: the switcher works with any
+  // number of profiles, while this profile's own controls would leave a user
+  // with several unable to switch (P5).
+  final severalProfiles = ref.watch(
+    profileRepositoryProvider.select(
+      (profiles) => switch (profiles.value) {
+        final list? => list.length > 1,
+        null => true,
+      },
+    ),
   );
   final profilesShown = ref.watch(
     shownFeaturesProvider.select(
       (features) => features.contains(FeatureId.profilesMulti),
     ),
   );
-  return profileCount > 1 || profilesShown;
+  return severalProfiles || profilesShown;
 }
 
 @Riverpod()

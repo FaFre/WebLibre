@@ -132,3 +132,104 @@ abstract class _$CursorInUse extends $Notifier<bool> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// [CursorInUse] for a screen that only cares while [enabled]: false, and
+/// nothing to rebuild for, when it is not. The auto-hiding side rail reads
+/// it, so that a mouse taking over from touch rebuilds the browser screen
+/// only where the rail can slide in.
+
+@ProviderFor(cursorInUseWhen)
+final cursorInUseWhenProvider = CursorInUseWhenFamily._();
+
+/// [CursorInUse] for a screen that only cares while [enabled]: false, and
+/// nothing to rebuild for, when it is not. The auto-hiding side rail reads
+/// it, so that a mouse taking over from touch rebuilds the browser screen
+/// only where the rail can slide in.
+
+final class CursorInUseWhenProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// [CursorInUse] for a screen that only cares while [enabled]: false, and
+  /// nothing to rebuild for, when it is not. The auto-hiding side rail reads
+  /// it, so that a mouse taking over from touch rebuilds the browser screen
+  /// only where the rail can slide in.
+  CursorInUseWhenProvider._({
+    required CursorInUseWhenFamily super.from,
+    required bool super.argument,
+  }) : super(
+         retry: null,
+         name: r'cursorInUseWhenProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$cursorInUseWhenHash();
+
+  @override
+  String toString() {
+    return r'cursorInUseWhenProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as bool;
+    return cursorInUseWhen(ref, enabled: argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CursorInUseWhenProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$cursorInUseWhenHash() => r'095d91f50287b2c35ab37780c0df923da9fedc5d';
+
+/// [CursorInUse] for a screen that only cares while [enabled]: false, and
+/// nothing to rebuild for, when it is not. The auto-hiding side rail reads
+/// it, so that a mouse taking over from touch rebuilds the browser screen
+/// only where the rail can slide in.
+
+final class CursorInUseWhenFamily extends $Family
+    with $FunctionalFamilyOverride<bool, bool> {
+  CursorInUseWhenFamily._()
+    : super(
+        retry: null,
+        name: r'cursorInUseWhenProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// [CursorInUse] for a screen that only cares while [enabled]: false, and
+  /// nothing to rebuild for, when it is not. The auto-hiding side rail reads
+  /// it, so that a mouse taking over from touch rebuilds the browser screen
+  /// only where the rail can slide in.
+
+  CursorInUseWhenProvider call({required bool enabled}) =>
+      CursorInUseWhenProvider._(argument: enabled, from: this);
+
+  @override
+  String toString() => r'cursorInUseWhenProvider';
+}

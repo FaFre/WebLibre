@@ -24,7 +24,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -85,8 +84,8 @@ class SideRailResizeHandle extends HookConsumerWidget {
 
     Future<void> save(double width) {
       return ref
-          .read(saveGeneralSettingsControllerProvider.notifier)
-          .save((settings) => settings.copyWith.sideRailWidth(width));
+          .read(generalSettingsRepositoryProvider.notifier)
+          .updateSettings((settings) => settings.copyWith.sideRailWidth(width));
     }
 
     Future<void> finish() async {

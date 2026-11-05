@@ -26,6 +26,7 @@ import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/bangs/presentation/screens/edit.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 void main() {
@@ -35,6 +36,10 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // No onboarding owed: no draft, the displayed layer is the live one.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(OnboardingRepository.targetRevision),
+          ),
           // Expert details hidden: the format flags are hidden.
           generalSettingsWithDefaultsProvider.overrideWithValue(
             GeneralSettings.withDefaults().withVisibilitySwitch(

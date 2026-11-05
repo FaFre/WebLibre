@@ -38,9 +38,8 @@ import 'package:weblibre/presentation/widgets/sheet_drag_handle.dart';
 /// built-in swipes, a toolbar button's long press and its replacement — so an
 /// action is found under the same name and in the same place each time.
 ///
-/// [ref] is the caller's: under the onboarding's draft scope it reads the
-/// draft's visibility switches, which the sheet, built above that scope in
-/// the navigator's overlay, could not.
+/// [ref] is the caller's; it reads the displayed visibility switches, in the
+/// onboarding the draft's.
 Future<BrowserAction?> showGestureActionPicker(
   BuildContext context,
   WidgetRef ref, {
@@ -91,7 +90,7 @@ Future<({BrowserAction? action})?> _showPicker(
   // stays listed so the picker still shows what it is set to.
   final offered = shownBrowserActions(
     actions,
-    ref.read(generalSettingsWithDefaultsProvider),
+    ref.read(displayedGeneralSettingsProvider),
     selected: selected,
   );
 

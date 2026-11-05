@@ -24,7 +24,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -54,7 +53,7 @@ class ContainerAppLinkSettingsDialog extends ConsumerWidget {
     WidgetRef ref,
     ContextAppLinkPolicy Function(ContextAppLinkPolicy current) update,
   ) async {
-    await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
+    await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
       current,
     ) {
       final existing =

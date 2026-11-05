@@ -42,6 +42,21 @@ Stream<BangData?> defaultSearchBangData(Ref ref) {
   return repository.watchBang(key);
 }
 
+/// [defaultSearchBangData] for the displayed layer
+/// (`displayedGeneralSettings`): in the onboarding the draft's search
+/// provider.
+@Riverpod(keepAlive: true)
+Stream<BangData?> displayedDefaultSearchBangData(Ref ref) {
+  final key = ref.watch(
+    displayedGeneralSettingsProvider.select(
+      (value) => value.defaultSearchProvider,
+    ),
+  );
+
+  final repository = ref.watch(bangDataRepositoryProvider.notifier);
+  return repository.watchBang(key);
+}
+
 @Riverpod(keepAlive: true)
 Future<BangData?> defaultSearchBang(Ref ref) {
   final key = ref.watch(

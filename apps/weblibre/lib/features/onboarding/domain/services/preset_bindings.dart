@@ -364,13 +364,11 @@ GeneralSettings applyGeneralPreset(
   GeneralSettings settings,
   SetupPreset preset,
 ) {
-  var updated = settings;
-  for (final MapEntry(key: feature, value: binding) in presetBindings.entries) {
-    if (binding is! GeneralPresetBinding) continue;
-    final token = feature.policy.resolvedValue(preset);
-    if (token == PolicyToken.unchangedAppDefault) continue;
-    updated = binding.apply(updated, token);
-  }
+  final updated = _applyBindings(
+    settings,
+    preset,
+    (binding) => binding is GeneralPresetBinding ? binding.apply : null,
+  );
 
   // Written directly rather than through withVisibilitySwitch: these are the
   // preset's own values, so nothing is turned on that the preset left off and
@@ -385,13 +383,29 @@ GeneralSettings applyGeneralPreset(
 }
 
 /// [preset]'s initial engine settings on top of [settings].
-EngineSettings applyEnginePreset(EngineSettings settings, SetupPreset preset) {
+EngineSettings applyEnginePreset(EngineSettings settings, SetupPreset preset) =>
+    _applyBindings(
+      settings,
+      preset,
+      (binding) => binding is EnginePresetBinding ? binding.apply : null,
+    );
+
+/// [settings] with [preset]'s value written by every binding [applierOf]
+/// gives an applier for, in [presetBindings] order. Features that keep the
+/// app default are skipped.
+S _applyBindings<S>(
+  S settings,
+  SetupPreset preset,
+  S Function(S settings, PolicyToken token)? Function(PresetBinding binding)
+  applierOf,
+) {
   var updated = settings;
   for (final MapEntry(key: feature, value: binding) in presetBindings.entries) {
-    if (binding is! EnginePresetBinding) continue;
+    final apply = applierOf(binding);
+    if (apply == null) continue;
     final token = feature.policy.resolvedValue(preset);
     if (token == PolicyToken.unchangedAppDefault) continue;
-    updated = binding.apply(updated, token);
+    updated = apply(updated, token);
   }
   return updated;
 }

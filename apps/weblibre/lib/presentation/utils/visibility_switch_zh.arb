@@ -32,6 +32,7 @@
   "visibilitySwitch_takesEffectAfterRestart": "重启后生效",
   "visibilitySwitch_revealConfirm": "显示",
   "visibilitySwitch_stillHiddenNote": "此项属于一项隐藏的功能。你可以在“设置 > 功能管理”中显示它。",
+  "visibilitySwitch_showFailed": "无法显示该功能。请重试。",
   "visibilitySwitch_hiddenControlHint": "属于隐藏的功能。激活以显示该功能",
   "visibilitySwitch_hiddenStatus": "属于隐藏的功能“{switchLabel}”",
   "visibilitySwitch_hiddenStatusSeveral": "属于以下隐藏的功能：{switchLabels}",

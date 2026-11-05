@@ -29,6 +29,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
@@ -37,13 +38,6 @@ import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
-
-/// Whether a sync server override is set. The Expert section that holds
-/// them then stays, on the screen and in the search (P5).
-final syncServerOverrideSet = generalSettingsWithDefaultsProvider.select(
-  (s) =>
-      s.syncServerOverride.isNotEmpty || s.syncTokenServerOverride.isNotEmpty,
-);
 
 /// What the settings search indexes of this screen.
 ///
@@ -60,7 +54,7 @@ List<SettingsSectionDefinition> syncSettingsSearchSections(
     SettingsSectionDefinition(
       title: l10n.sync_sectionServerOverrides,
       feature: FeatureId.syncCustomServer,
-      keptWhen: syncServerOverrideSet,
+      keptWhen: KeptWhen.syncServerOverrideSet,
       entries: [
         SettingsEntryDefinition.searchOnly(
           title: l10n.sync_entryServerOverridesTitle,
@@ -350,7 +344,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
         // Expert (`sync.custom_server`). An override already in place stays
         // usable, so it can always be checked and cleared.
         feature: FeatureId.syncCustomServer,
-        keptWhen: syncServerOverrideSet,
+        keptWhen: KeptWhen.syncServerOverrideSet,
         entries: [
           SettingsEntryDefinition(
             title: l10n.sync_entryServerOverridesTitle,

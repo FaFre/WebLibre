@@ -175,7 +175,8 @@ void main() {
           if (setting.appliesOnRestart) setting,
       },
       {
-        HiddenSetting.queryParameterStripping,
+        // Not query parameter stripping: content blocking reaches the running
+        // engine, and its own row offers no restart.
         HiddenSetting.bounceTrackingProtection,
         HiddenSetting.siteIsolation,
         HiddenSetting.isolatedProcess,

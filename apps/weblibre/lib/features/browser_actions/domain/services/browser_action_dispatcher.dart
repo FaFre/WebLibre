@@ -66,8 +66,7 @@ import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_o
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
 import 'package:weblibre/features/qr_scanner/presentation/dialogs/qr_scanner_dialog.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/quit_browser.dart';
@@ -117,9 +116,12 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         .read(gestureSettingsWithDefaultsProvider)
         .effectiveEnabled;
 
-    if (!await _ensureShown(action)) return;
-
     try {
+      // Inside the try: gestures and shortcuts never await run(), so an
+      // error asking to show the feature would go unhandled. Asking reports
+      // a failed save itself; the action then does not run.
+      if (!await _ensureShown(action)) return;
+
       await _execute(action, tabId, turnGesturesOn: turnGesturesOn);
     } catch (error, stackTrace) {
       logger.e(
@@ -139,7 +141,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     if (context == null || !context.mounted) return false;
     return await askToRevealFeature(
       context,
-      ref.read(featureRevealProvider.notifier),
+      ref.container,
       action.owningFeature,
     );
   }
@@ -903,8 +905,8 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     if (rounded == settings.fontSizeFactor) return;
 
     await ref
-        .read(saveEngineSettingsControllerProvider.notifier)
-        .save(
+        .read(engineSettingsRepositoryProvider.notifier)
+        .updateSettings(
           (currentSettings) => currentSettings.copyWith.fontSizeFactor(rounded),
         );
   }

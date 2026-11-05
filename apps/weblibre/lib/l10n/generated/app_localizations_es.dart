@@ -8460,10 +8460,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Personalizar los botones del selector';
 
   @override
-  String get settings_contextualToolbarResetToDefaults =>
-      'Restablecer valores predeterminados';
-
-  @override
   String get settings_contextualToolbarEnabledSection => 'Activados';
 
   @override
@@ -8481,6 +8477,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_contextualToolbarAllButtonsEnabled =>
       'Todos los botones están activados.';
+
+  @override
+  String get settings_contextualToolbarSaveFailed =>
+      'No se pudieron guardar los botones. Inténtalo de nuevo.';
 
   @override
   String settings_contextualToolbarNoDisabledButtonsMatch(String query) {
@@ -9571,6 +9571,15 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get settings_actionResetToDefaults =>
       'Restablecer valores predeterminados';
+
+  @override
+  String get settings_actionOpenFullScreen => 'Open full screen';
+
+  @override
+  String get settings_previewSheetExpand => 'Expand settings';
+
+  @override
+  String get settings_previewSheetCollapse => 'Shrink settings';
 
   @override
   String get settings_menuLayoutTitle => 'Personalizar menú';
@@ -11599,9 +11608,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mostrar los iconos de los sitios web en lugar de miniaturas de página en la vista de lista de pestañas';
 
   @override
-  String get settings_previewPageContent => 'Contenido de la página';
-
-  @override
   String get settings_previewPageTitle => 'Vista previa de WebLibre';
 
   @override
@@ -11617,11 +11623,94 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_previewTabSearch => 'Búsqueda';
 
   @override
-  String get settings_livePreviewTitle => 'Vista previa en directo';
+  String get settings_layoutEditorPreviewTab => 'Preview';
 
   @override
-  String get settings_livePreviewSubtitle =>
-      'Refleja tus ajustes actuales de barra de herramientas y diseño';
+  String get settings_layoutEditorSettingsTab => 'Settings';
+
+  @override
+  String get settings_previewDeviceThisWindow => 'This window';
+
+  @override
+  String get settings_previewDevicePhone => 'Phone';
+
+  @override
+  String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
+
+  @override
+  String get settings_previewDeviceTablet => 'Tablet';
+
+  @override
+  String settings_previewOtherDeviceHint(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone':
+          'Showing a phone. Automatic settings apply as they would on a phone.',
+      'phoneLandscape':
+          'Showing a phone in landscape. Automatic settings apply as they would there.',
+      'tablet':
+          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'other': 'Showing another window size.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_previewStatePage => 'Page';
+
+  @override
+  String get settings_previewStateHome => 'Home page';
+
+  @override
+  String get settings_previewStateSidePanelCollapsed => 'Side panel collapsed';
+
+  @override
+  String get settings_previewStateNeedsSidePanel =>
+      'Needs a side panel in a large window';
+
+  @override
+  String get settings_layoutPreviewSemantics =>
+      'Preview of the browser with this toolbar layout';
+
+  @override
+  String get settings_layoutPartTabChips => 'Tab Chips';
+
+  @override
+  String get settings_previewModeSelect => 'Select';
+
+  @override
+  String get settings_previewModeTry => 'Try';
+
+  @override
+  String get settings_previewSelectHint =>
+      'Tap a part of the toolbar to change its settings.';
+
+  @override
+  String get settings_previewTryHint =>
+      'The preview works like the browser: scroll the page and tap the buttons.';
+
+  @override
+  String get settings_previewAllSettings => 'All settings';
+
+  @override
+  String get settings_previewSelectionPath => 'Selected part';
+
+  @override
+  String settings_tryToolbarHidden(String distance) {
+    return 'Toolbar hidden while scrolling · Auto Hide Distance $distance';
+  }
+
+  @override
+  String get settings_trySidePanelHidden =>
+      'Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad';
+
+  @override
+  String get settings_tryOpensTabView => 'This opens the tab view';
+
+  @override
+  String get settings_tryOpensMenu => 'This opens the menu';
+
+  @override
+  String get settings_tryAdjust => 'Adjust';
 
   @override
   String get settings_deleteAllExceptionsTitle =>
@@ -14590,6 +14679,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get visibilitySwitch_stillHiddenNote =>
       'Esto pertenece a una función oculta. Puedes mostrarla en Ajustes > Control de funciones.';
+
+  @override
+  String get visibilitySwitch_showFailed =>
+      'No se pudo mostrar la función. Inténtalo de nuevo.';
 
   @override
   String get visibilitySwitch_hiddenControlHint =>

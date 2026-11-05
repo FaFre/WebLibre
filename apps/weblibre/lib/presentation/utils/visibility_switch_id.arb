@@ -32,6 +32,7 @@
   "visibilitySwitch_takesEffectAfterRestart": "Berlaku setelah memulai ulang",
   "visibilitySwitch_revealConfirm": "Tampilkan",
   "visibilitySwitch_stillHiddenNote": "Ini bagian dari fitur tersembunyi. Anda dapat menampilkannya di Pengaturan > Kontrol Fitur.",
+  "visibilitySwitch_showFailed": "Tidak dapat menampilkan fitur. Coba lagi.",
   "visibilitySwitch_hiddenControlHint": "Bagian dari fitur tersembunyi. Aktifkan untuk menampilkan fitur",
   "visibilitySwitch_hiddenStatus": "Bagian dari fitur tersembunyi \"{switchLabel}\"",
   "visibilitySwitch_hiddenStatusSeveral": "Bagian dari fitur tersembunyi: {switchLabels}",

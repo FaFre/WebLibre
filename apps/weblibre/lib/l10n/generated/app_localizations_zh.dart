@@ -7738,9 +7738,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_contextualToolbarTitleQuickSwitcher => '自定义切换栏按钮';
 
   @override
-  String get settings_contextualToolbarResetToDefaults => '恢复默认';
-
-  @override
   String get settings_contextualToolbarEnabledSection => '已启用';
 
   @override
@@ -7757,6 +7754,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_contextualToolbarAllButtonsEnabled => '所有按钮均已启用。';
+
+  @override
+  String get settings_contextualToolbarSaveFailed => '无法保存按钮。请重试。';
 
   @override
   String settings_contextualToolbarNoDisabledButtonsMatch(String query) {
@@ -8699,6 +8699,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_actionResetToDefaults => '恢复默认';
+
+  @override
+  String get settings_actionOpenFullScreen => 'Open full screen';
+
+  @override
+  String get settings_previewSheetExpand => 'Expand settings';
+
+  @override
+  String get settings_previewSheetCollapse => 'Shrink settings';
 
   @override
   String get settings_menuLayoutTitle => '自定义菜单';
@@ -10471,9 +10480,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_showFaviconsSubtitle => '在标签页列表视图中显示网站图标而非页面缩略图';
 
   @override
-  String get settings_previewPageContent => '页面内容';
-
-  @override
   String get settings_previewPageTitle => 'WebLibre 预览';
 
   @override
@@ -10489,10 +10495,94 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_previewTabSearch => '搜索';
 
   @override
-  String get settings_livePreviewTitle => '实时预览';
+  String get settings_layoutEditorPreviewTab => 'Preview';
 
   @override
-  String get settings_livePreviewSubtitle => '反映你当前的工具栏和布局设置';
+  String get settings_layoutEditorSettingsTab => 'Settings';
+
+  @override
+  String get settings_previewDeviceThisWindow => 'This window';
+
+  @override
+  String get settings_previewDevicePhone => 'Phone';
+
+  @override
+  String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
+
+  @override
+  String get settings_previewDeviceTablet => 'Tablet';
+
+  @override
+  String settings_previewOtherDeviceHint(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone':
+          'Showing a phone. Automatic settings apply as they would on a phone.',
+      'phoneLandscape':
+          'Showing a phone in landscape. Automatic settings apply as they would there.',
+      'tablet':
+          'Showing a tablet. Automatic settings apply as they would on a tablet.',
+      'other': 'Showing another window size.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_previewStatePage => 'Page';
+
+  @override
+  String get settings_previewStateHome => 'Home page';
+
+  @override
+  String get settings_previewStateSidePanelCollapsed => 'Side panel collapsed';
+
+  @override
+  String get settings_previewStateNeedsSidePanel =>
+      'Needs a side panel in a large window';
+
+  @override
+  String get settings_layoutPreviewSemantics =>
+      'Preview of the browser with this toolbar layout';
+
+  @override
+  String get settings_layoutPartTabChips => 'Tab Chips';
+
+  @override
+  String get settings_previewModeSelect => 'Select';
+
+  @override
+  String get settings_previewModeTry => 'Try';
+
+  @override
+  String get settings_previewSelectHint =>
+      'Tap a part of the toolbar to change its settings.';
+
+  @override
+  String get settings_previewTryHint =>
+      'The preview works like the browser: scroll the page and tap the buttons.';
+
+  @override
+  String get settings_previewAllSettings => 'All settings';
+
+  @override
+  String get settings_previewSelectionPath => 'Selected part';
+
+  @override
+  String settings_tryToolbarHidden(String distance) {
+    return 'Toolbar hidden while scrolling · Auto Hide Distance $distance';
+  }
+
+  @override
+  String get settings_trySidePanelHidden =>
+      'Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad';
+
+  @override
+  String get settings_tryOpensTabView => 'This opens the tab view';
+
+  @override
+  String get settings_tryOpensMenu => 'This opens the menu';
+
+  @override
+  String get settings_tryAdjust => 'Adjust';
 
   @override
   String get settings_deleteAllExceptionsTitle => '删除所有例外？';
@@ -13221,6 +13311,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get visibilitySwitch_stillHiddenNote =>
       '此项属于一项隐藏的功能。你可以在“设置 > 功能管理”中显示它。';
+
+  @override
+  String get visibilitySwitch_showFailed => '无法显示该功能。请重试。';
 
   @override
   String get visibilitySwitch_hiddenControlHint => '属于隐藏的功能。激活以显示该功能';

@@ -25,11 +25,13 @@ import 'package:riverpod/experimental/persist.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/presentation/widgets/reveal_feature.dart';
@@ -57,7 +59,8 @@ class _Save extends SaveGeneralSettingsController {
   }
 }
 
-final _inPlace = Provider((ref) => true);
+/// A [KeptWhen] the tests have hold.
+const _inPlace = KeptWhen.syncServerOverrideSet;
 
 /// What a gate grays out.
 final _grayed = find.byWidgetPredicate(
@@ -77,6 +80,11 @@ void main() {
           (ref) => ref.watch(_settings),
         ),
         saveGeneralSettingsControllerProvider.overrideWith(_Save.new),
+        keptWhenHoldsProvider(_inPlace).overrideWithValue(true),
+        // No onboarding open: the gates show the live settings.
+        completedOnboardingRevisionProvider.overrideWithValue(
+          const AsyncData(OnboardingRepository.targetRevision),
+        ),
       ],
     );
   });

@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
-import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/onboarding/presentation/utils/setup_preset_l10n.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/browser_page.dart';
@@ -40,7 +40,7 @@ class PresetPage extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     final selected = ref.watch(
-      setupDraftControllerProvider.select((draft) => draft.preset),
+      setupDraftControllerProvider.select((draft) => draft?.preset),
     );
 
     return BrowserPage(
@@ -87,12 +87,13 @@ Future<void> _select(
   // snackbar closes, while the draft lives on with the onboarding.
   final controller = ref.read(setupDraftControllerProvider.notifier);
   final previous = ref.read(setupDraftControllerProvider);
-  if (preset == previous.preset) return;
+  if (previous == null || preset == previous.preset) return;
 
   controller.selectPreset(preset);
   if (!previous.hasCustomizeChanges) return;
 
   final changed = ref.read(setupDraftControllerProvider);
+  if (changed == null) return;
   final undo = await showUndoMessage(
     context,
     AppLocalizations.of(context).onboarding_presetChangeResetCustomize,

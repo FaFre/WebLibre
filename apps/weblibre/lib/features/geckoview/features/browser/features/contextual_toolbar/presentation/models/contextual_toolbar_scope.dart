@@ -59,3 +59,20 @@ class ContextualToolbarScope with FastEquatable {
     location,
   ];
 }
+
+/// The sample tab a preview toolbar resolves its buttons against.
+///
+/// A preview has no open tab, and the buttons decide whether they are
+/// available from the tab: without one, every page action would show
+/// disabled or fall back, which is not what the toolbar looks like on a page.
+class ToolbarPreviewTab {
+  final String id;
+  final TabState tabState;
+  final HistoryState historyState;
+
+  const ToolbarPreviewTab({
+    required this.id,
+    required this.tabState,
+    required this.historyState,
+  });
+}

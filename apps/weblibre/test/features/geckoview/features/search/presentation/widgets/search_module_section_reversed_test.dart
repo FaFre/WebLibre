@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/module_surface_scope.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class _FixedOrder extends SearchModuleOrder {
@@ -63,6 +64,10 @@ void main() {
     return tester.pumpWidget(
       ProviderScope(
         overrides: [
+          // No onboarding owed: no draft, the displayed layer is the live one.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(OnboardingRepository.targetRevision),
+          ),
           searchModuleOrderProvider(
             ModuleSurface.search,
           ).overrideWith(_FixedOrder.new),

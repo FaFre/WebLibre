@@ -33,7 +33,7 @@ final class IntentGatekeeperProvider
   IntentGatekeeper create() => IntentGatekeeper();
 }
 
-String _$intentGatekeeperHash() => r'b271df57c7e3d9208b825d6aa767d64e2f8e42c5';
+String _$intentGatekeeperHash() => r'522175b74549cc77c1a3b4e256623ba95e7b46fc';
 
 abstract class _$IntentGatekeeper
     extends $StreamNotifier<PendingIntentDecision> {

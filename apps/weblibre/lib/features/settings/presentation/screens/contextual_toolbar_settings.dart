@@ -23,28 +23,29 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_id_l10n.dart';
-import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/configured_toolbar_buttons_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
+import 'package:weblibre/features/settings/presentation/widgets/reset_to_defaults_menu.dart';
 import 'package:weblibre/features/settings/presentation/widgets/setting_value_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
+import 'package:weblibre/utils/ui_helper.dart';
 
 class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   const ContextualToolbarSettingsScreen({
@@ -62,10 +63,70 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final configs = ref.watch(storedToolbarButtonConfigsProvider(location));
-    final repository = ref.watch(toolbarConfigRepositoryProvider(location));
+    final configs = ref.watch(toolbarButtonLayoutProvider(location));
     final search = useSettingsSearch();
-    final query = search.normalizedQuery;
+
+    return SettingsCustomScrollScaffold(
+      title: title,
+      searchController: search.controller,
+      searchHintText: l10n.settings_contextualToolbarSearchHint,
+      actions: [
+        ResetToDefaultsMenu(
+          onReset: () => unawaited(
+            reportFailedToolbarEdit(
+              context,
+              ref
+                  .read(toolbarButtonLayoutProvider(location).notifier)
+                  .resetToDefaults(),
+            ),
+          ),
+        ),
+      ],
+      slivers: [
+        const SliverToBoxAdapter(child: SizedBox(height: 16)),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _ToolbarPreviewDelegate(
+            configs: configs.value,
+            location: location,
+          ),
+        ),
+        ToolbarButtonConfigEditor(
+          location: location,
+          query: search.normalizedQuery,
+          rawQuery: search.rawQuery,
+        ),
+      ],
+    );
+  }
+}
+
+/// The buttons of the toolbar at [location]: the enabled ones in their order,
+/// then the disabled ones, each reorderable and configurable.
+///
+/// A sliver, so it can sit in the button settings screen and in the Toolbar &
+/// Layout editor's sheet alike.
+class ToolbarButtonConfigEditor extends HookConsumerWidget {
+  const ToolbarButtonConfigEditor({
+    super.key,
+    required this.location,
+    this.query = '',
+    this.rawQuery = '',
+  });
+
+  /// Which independently-configured toolbar this edits.
+  final ToolbarConfigLocation location;
+
+  /// The normalized search query, empty to list every button.
+  final String query;
+
+  /// The query as typed, for the "nothing matches" messages.
+  final String rawQuery;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final configs = ref.watch(toolbarButtonLayoutProvider(location));
 
     final settings = ref.watch(storedGeneralSettingsProvider);
 
@@ -104,40 +165,8 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
       [configs, query, settings],
     );
 
-    return SettingsCustomScrollScaffold(
-      title: title,
-      searchController: search.controller,
-      searchHintText: l10n.settings_contextualToolbarSearchHint,
-      actions: [
-        MenuAnchor(
-          builder: (context, controller, child) => IconButton(
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-            icon: const Icon(Icons.more_vert),
-          ),
-          menuChildren: [
-            MenuItemButton(
-              leadingIcon: const Icon(Icons.restore),
-              onPressed: () => _resetToDefaults(ref, location),
-              child: Text(l10n.settings_contextualToolbarResetToDefaults),
-            ),
-          ],
-        ),
-      ],
+    return SliverMainAxisGroup(
       slivers: [
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _ToolbarPreviewDelegate(
-            configs: configs.value,
-            location: location,
-          ),
-        ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
           sliver: SliverToBoxAdapter(
@@ -154,7 +183,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
                 query.isEmpty
                     ? l10n.settings_contextualToolbarNoEnabledButtons
                     : l10n.settings_contextualToolbarNoEnabledButtonsMatch(
-                        search.rawQuery,
+                        rawQuery,
                       ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -165,20 +194,14 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
         else
           SliverReorderableList(
             itemCount: visibleConfigs.length,
-            onReorderItem: (oldIndex, newIndex) => _onReorder(
-              visibleConfigs,
-              oldIndex,
-              newIndex,
-              repository,
-              isVisible: true,
-            ),
+            onReorderItem: (oldIndex, newIndex) =>
+                _onReorder(context, ref, visibleConfigs, oldIndex, newIndex),
             itemBuilder: (context, index) {
               final config = visibleConfigs[index];
               return _ToolbarButtonConfigTile(
                 key: ValueKey(config.buttonId),
                 index: index,
                 config: config,
-                repository: repository,
                 location: location,
               );
             },
@@ -199,7 +222,7 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
                 query.isEmpty
                     ? l10n.settings_contextualToolbarAllButtonsEnabled
                     : l10n.settings_contextualToolbarNoDisabledButtonsMatch(
-                        search.rawQuery,
+                        rawQuery,
                       ),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -210,20 +233,14 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
         else
           SliverReorderableList(
             itemCount: hiddenConfigs.length,
-            onReorderItem: (oldIndex, newIndex) => _onReorder(
-              hiddenConfigs,
-              oldIndex,
-              newIndex,
-              repository,
-              isVisible: false,
-            ),
+            onReorderItem: (oldIndex, newIndex) =>
+                _onReorder(context, ref, hiddenConfigs, oldIndex, newIndex),
             itemBuilder: (context, index) {
               final config = hiddenConfigs[index];
               return _ToolbarButtonConfigTile(
                 key: ValueKey(config.buttonId),
                 index: index,
                 config: config,
-                repository: repository,
                 location: location,
               );
             },
@@ -233,80 +250,50 @@ class ContextualToolbarSettingsScreen extends HookConsumerWidget {
     );
   }
 
-  ({String movedId, int targetIndex}) _resolveToolbarReorder(
+  /// [configs] is the list as shown, search and offered filter applied;
+  /// [newIndex] counts after the moved button's removal.
+  void _onReorder(
+    BuildContext context,
+    WidgetRef ref,
     List<ToolbarButtonConfig> configs,
     int oldIndex,
     int newIndex,
   ) {
-    final targetIndex = newIndex.clamp(0, configs.length - 1);
-    return (movedId: configs[oldIndex].buttonId, targetIndex: targetIndex);
-  }
-
-  void _onReorder(
-    List<ToolbarButtonConfig> configs,
-    int oldIndex,
-    int newIndex,
-    ToolbarButtonConfigRepository repository, {
-    required bool isVisible,
-  }) {
     if (oldIndex == newIndex) return;
-    final reorder = _resolveToolbarReorder(configs, oldIndex, newIndex);
-    if (reorder.targetIndex == oldIndex) return;
     unawaited(
-      _reorderViaDb(
-        repository,
-        configs,
-        oldIndex,
-        reorder.targetIndex,
-        reorder.movedId,
-        isVisible: isVisible,
+      reportFailedToolbarEdit(
+        context,
+        ref
+            .read(toolbarButtonLayoutProvider(location).notifier)
+            .move([for (final c in configs) c.buttonId], oldIndex, newIndex),
       ),
     );
   }
+}
 
-  Future<void> _reorderViaDb(
-    ToolbarButtonConfigRepository repository,
-    List<ToolbarButtonConfig> configs,
-    int oldIndex,
-    int targetIndex,
-    String movedId, {
-    required bool isVisible,
-  }) async {
-    // [configs] still contains the moved item. [targetIndex] is the
-    // post-removal destination index, clamped to [0, configs.length - 1].
-    // Because of the clamp, `>= configs.length - 1` only fires when the user
-    // dropped past the very last surviving item; `configs[targetIndex + 1]`
-    // is otherwise always a valid neighbour in the original list (since the
-    // moved item sits at oldIndex < targetIndex + 1 in the else branch).
-    final String orderKey;
-    if (targetIndex <= 0) {
-      orderKey = await repository.generateLeadingOrderKey(isVisible: isVisible);
-    } else if (targetIndex >= configs.length - 1) {
-      orderKey = await repository.generateTrailingOrderKey(
-        isVisible: isVisible,
-      );
-    } else if (targetIndex < oldIndex) {
-      orderKey =
-          await repository.generateOrderKeyAfterButtonId(
-            configs[targetIndex - 1].buttonId,
-            isVisible: isVisible,
-          ) ??
-          await repository.generateLeadingOrderKey(isVisible: isVisible);
-    } else {
-      orderKey = await repository.generateOrderKeyBeforeButtonId(
-        configs[targetIndex + 1].buttonId,
-        isVisible: isVisible,
-      );
-    }
-    await repository.assignOrderKey(movedId, orderKey: orderKey);
-  }
-
-  Future<void> _resetToDefaults(
-    WidgetRef ref,
-    ToolbarConfigLocation location,
-  ) async {
-    final repository = ref.read(toolbarConfigRepositoryProvider(location));
-    await repository.replaceAll(defaultToolbarButtonConfigsFor(location).value);
+/// Waits for [edit], a change made through [ToolbarButtonLayout], and tells
+/// the user when it could not be saved. The editor has already gone back to
+/// what is stored by then.
+///
+/// [context] is resolved before the wait: the widget that made the change is
+/// often gone once it fails (a tile shown or hidden moves to the other list).
+Future<void> reportFailedToolbarEdit(
+  BuildContext context,
+  Future<void> edit,
+) async {
+  final showError = errorMessengerFor(context);
+  final message = AppLocalizations.of(
+    context,
+  ).settings_contextualToolbarSaveFailed;
+  try {
+    await edit;
+  } catch (error, stackTrace) {
+    logger.e(
+      'Failed to save the toolbar buttons',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    showError(message);
   }
 }
 
@@ -335,19 +322,21 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
     super.key,
     required this.index,
     required this.config,
-    required this.repository,
     required this.location,
   });
 
   final int index;
   final ToolbarButtonConfig config;
-  final ToolbarButtonConfigRepository repository;
   final ToolbarConfigLocation location;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final def = toolbarButtonRegistryById[config.buttonId];
     if (def == null) return const SizedBox.shrink();
+    ToolbarButtonLayout layout() =>
+        ref.read(toolbarButtonLayoutProvider(location).notifier);
+    void save(Future<void> edit) =>
+        unawaited(reportFailedToolbarEdit(context, edit));
 
     final isVisible = config.isVisible;
     final hasStatefulFallback =
@@ -413,9 +402,8 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                     ),
                     Switch.adaptive(
                       value: isVisible,
-                      onChanged: (v) => repository.assignVisibility(
-                        config.buttonId,
-                        visible: v,
+                      onChanged: (v) => save(
+                        layout().setVisibility(config.buttonId, visible: v),
                       ),
                     ),
                     ReorderableDragStartListener(
@@ -448,11 +436,12 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                               config.fallbackId,
                             ),
                             options: fallbackOptions,
-                            onChanged: (newFallback) =>
-                                repository.assignFallback(
-                                  config.buttonId,
-                                  newFallback.toStoredFallbackId(),
-                                ),
+                            onChanged: (newFallback) => save(
+                              layout().setFallback(
+                                config.buttonId,
+                                newFallback.toStoredFallbackId(),
+                              ),
+                            ),
                           ),
                         ),
                       HiddenFeatureGate.feature(
@@ -463,8 +452,9 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                         child: _LongPressPicker(
                           builtInActions: longPressActions,
                           current: config.longPressAction,
-                          onChanged: (action) => repository
-                              .assignLongPressAction(config.buttonId, action),
+                          onChanged: (action) => save(
+                            layout().setLongPress(config.buttonId, action),
+                          ),
                         ),
                       ),
                     ],
@@ -627,7 +617,10 @@ class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
       height: maxExtent,
       child: ColoredBox(
         color: Theme.of(context).colorScheme.surfaceContainer,
-        child: _ToolbarPreview(configs: configs, location: location),
+        child: ConfiguredToolbarButtonsPreview(
+          configs: configs,
+          location: location,
+        ),
       ),
     );
   }
@@ -635,32 +628,4 @@ class _ToolbarPreviewDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(_ToolbarPreviewDelegate old) =>
       old.configs != configs || old.location != location;
-}
-
-class _ToolbarPreview extends ConsumerWidget {
-  const _ToolbarPreview({required this.configs, required this.location});
-
-  final List<ToolbarButtonConfig> configs;
-  final ToolbarConfigLocation location;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final visibleConfigs = configs.where((c) => c.isVisible).toList();
-
-    final scope = ContextualToolbarScope(
-      selectedTabId: null,
-      displayedSheet: null,
-      tabState: null,
-      isPreview: true,
-      location: location,
-    );
-
-    final buttons = visibleConfigs.map((config) {
-      final def = toolbarButtonRegistryById[config.buttonId];
-      if (def == null) return const SizedBox.shrink();
-      return def.builder(scope, context, ref);
-    }).toList();
-
-    return ContextualToolbarView(buttons: buttons);
-  }
 }

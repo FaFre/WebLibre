@@ -8410,10 +8410,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schaltflächen des Wechslers anpassen';
 
   @override
-  String get settings_contextualToolbarResetToDefaults =>
-      'Auf Standard zurücksetzen';
-
-  @override
   String get settings_contextualToolbarEnabledSection => 'Aktiviert';
 
   @override
@@ -8431,6 +8427,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get settings_contextualToolbarAllButtonsEnabled =>
       'Alle Schaltflächen sind aktiviert.';
+
+  @override
+  String get settings_contextualToolbarSaveFailed =>
+      'Die Schaltflächen konnten nicht gespeichert werden. Erneut versuchen.';
 
   @override
   String settings_contextualToolbarNoDisabledButtonsMatch(String query) {
@@ -9504,6 +9504,15 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_actionResetToDefaults => 'Auf Standard zurücksetzen';
+
+  @override
+  String get settings_actionOpenFullScreen => 'Im Vollbild öffnen';
+
+  @override
+  String get settings_previewSheetExpand => 'Einstellungen vergrößern';
+
+  @override
+  String get settings_previewSheetCollapse => 'Einstellungen verkleinern';
 
   @override
   String get settings_menuLayoutTitle => 'Menü anpassen';
@@ -11508,9 +11517,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'In der Tab-Liste Website-Symbole statt Seitenvorschauen anzeigen';
 
   @override
-  String get settings_previewPageContent => 'Seiteninhalt';
-
-  @override
   String get settings_previewPageTitle => 'WebLibre-Vorschau';
 
   @override
@@ -11526,11 +11532,95 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings_previewTabSearch => 'Suche';
 
   @override
-  String get settings_livePreviewTitle => 'Live-Vorschau';
+  String get settings_layoutEditorPreviewTab => 'Vorschau';
 
   @override
-  String get settings_livePreviewSubtitle =>
-      'Spiegelt die aktuellen Einstellungen für Symbolleiste und Layout wider';
+  String get settings_layoutEditorSettingsTab => 'Einstellungen';
+
+  @override
+  String get settings_previewDeviceThisWindow => 'Dieses Fenster';
+
+  @override
+  String get settings_previewDevicePhone => 'Smartphone';
+
+  @override
+  String get settings_previewDevicePhoneLandscape => 'Smartphone im Querformat';
+
+  @override
+  String get settings_previewDeviceTablet => 'Tablet';
+
+  @override
+  String settings_previewOtherDeviceHint(String device) {
+    String _temp0 = intl.Intl.selectLogic(device, {
+      'phone':
+          'Zeigt ein Smartphone. Automatische Einstellungen gelten wie auf einem Smartphone.',
+      'phoneLandscape':
+          'Zeigt ein Smartphone im Querformat. Automatische Einstellungen gelten wie dort.',
+      'tablet':
+          'Zeigt ein Tablet. Automatische Einstellungen gelten wie auf einem Tablet.',
+      'other': 'Zeigt eine andere Fenstergröße.',
+    });
+    return '$_temp0';
+  }
+
+  @override
+  String get settings_previewStatePage => 'Seite';
+
+  @override
+  String get settings_previewStateHome => 'Startseite';
+
+  @override
+  String get settings_previewStateSidePanelCollapsed =>
+      'Seitenleiste eingeklappt';
+
+  @override
+  String get settings_previewStateNeedsSidePanel =>
+      'Erfordert eine Seitenleiste in einem großen Fenster';
+
+  @override
+  String get settings_layoutPreviewSemantics =>
+      'Vorschau des Browsers mit diesem Symbolleisten-Layout';
+
+  @override
+  String get settings_layoutPartTabChips => 'Tab-Chips';
+
+  @override
+  String get settings_previewModeSelect => 'Auswählen';
+
+  @override
+  String get settings_previewModeTry => 'Ausprobieren';
+
+  @override
+  String get settings_previewSelectHint =>
+      'Tippe auf einen Teil der Symbolleiste, um seine Einstellungen zu ändern.';
+
+  @override
+  String get settings_previewTryHint =>
+      'Die Vorschau verhält sich wie der Browser: Seite scrollen und Schaltflächen antippen.';
+
+  @override
+  String get settings_previewAllSettings => 'Alle Einstellungen';
+
+  @override
+  String get settings_previewSelectionPath => 'Ausgewählter Teil';
+
+  @override
+  String settings_tryToolbarHidden(String distance) {
+    return 'Symbolleiste beim Scrollen ausgeblendet · Scrollweg zum Ausblenden $distance';
+  }
+
+  @override
+  String get settings_trySidePanelHidden =>
+      'Seitenleiste ausgeblendet · Zum Zurückholen auf den Rand zeigen oder tippen. Im Browser nur mit Maus oder Trackpad';
+
+  @override
+  String get settings_tryOpensTabView => 'Öffnet die Tab-Übersicht';
+
+  @override
+  String get settings_tryOpensMenu => 'Öffnet das Menü';
+
+  @override
+  String get settings_tryAdjust => 'Anpassen';
 
   @override
   String get settings_deleteAllExceptionsTitle => 'Alle Ausnahmen löschen?';
@@ -14493,6 +14583,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get visibilitySwitch_stillHiddenNote =>
       'Das gehört zu einer ausgeblendeten Funktion. Sie lässt sich unter Einstellungen > Funktionsauswahl anzeigen.';
+
+  @override
+  String get visibilitySwitch_showFailed =>
+      'Die Funktion konnte nicht angezeigt werden. Erneut versuchen.';
 
   @override
   String get visibilitySwitch_hiddenControlHint =>

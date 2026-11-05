@@ -705,10 +705,6 @@
   "@settings_contextualToolbarTitleQuickSwitcher": {
     "description": "Title of the screen for choosing buttons shown in the quick tab switcher bar."
   },
-  "settings_contextualToolbarResetToDefaults": "Reset to Defaults",
-  "@settings_contextualToolbarResetToDefaults": {
-    "description": "Menu item that restores the default toolbar buttons."
-  },
   "settings_contextualToolbarEnabledSection": "Enabled",
   "@settings_contextualToolbarEnabledSection": {
     "description": "Heading above the toolbar buttons that are shown."
@@ -733,6 +729,10 @@
   "settings_contextualToolbarAllButtonsEnabled": "All buttons are enabled.",
   "@settings_contextualToolbarAllButtonsEnabled": {
     "description": "Shown in the hidden-buttons section when every button is enabled."
+  },
+  "settings_contextualToolbarSaveFailed": "Could not save the buttons. Try again.",
+  "@settings_contextualToolbarSaveFailed": {
+    "description": "Error snackbar in the toolbar and quick switcher button editors when a change (showing, hiding, moving, fallback, long press or reset) could not be saved. The editor goes back to what is stored."
   },
   "settings_contextualToolbarNoDisabledButtonsMatch": "No disabled buttons match \"{query}\".",
   "@settings_contextualToolbarNoDisabledButtonsMatch": {
@@ -1968,6 +1968,18 @@
   "settings_actionResetToDefaults": "Reset to Defaults",
   "@settings_actionResetToDefaults": {
     "description": "Menu item that restores the default layout (home/new tab sections or browser menu)."
+  },
+  "settings_actionOpenFullScreen": "Open full screen",
+  "@settings_actionOpenFullScreen": {
+    "description": "Menu item, next to Reset to Defaults, that opens the toolbar button or menu editor shown under the layout preview on a screen of its own, where it has more room."
+  },
+  "settings_previewSheetExpand": "Expand settings",
+  "@settings_previewSheetExpand": {
+    "description": "Screen-reader label of the drag handle of the settings sheet under the layout preview, when tapping it gives the sheet more room."
+  },
+  "settings_previewSheetCollapse": "Shrink settings",
+  "@settings_previewSheetCollapse": {
+    "description": "Screen-reader label of the drag handle of the settings sheet under the layout preview, when it is fully pulled up and tapping it gives the room back to the preview."
   },
   "settings_menuLayoutTitle": "Customize Menu",
   "@settings_menuLayoutTitle": {
@@ -4298,10 +4310,6 @@
   "@settings_showFaviconsSubtitle": {
     "description": "Explanation under that switch."
   },
-  "settings_previewPageContent": "Page Content",
-  "@settings_previewPageContent": {
-    "description": "Placeholder text in the page area of the toolbar preview."
-  },
   "settings_previewPageTitle": "WebLibre Preview",
   "@settings_previewPageTitle": {
     "description": "Title of the sample page shown in the toolbar preview. WebLibre is the app name."
@@ -4322,13 +4330,111 @@
   "@settings_previewTabSearch": {
     "description": "Title of a sample history suggestion in the toolbar preview."
   },
-  "settings_livePreviewTitle": "Live Preview",
-  "@settings_livePreviewTitle": {
-    "description": "Heading of the toolbar preview on the toolbar & layout screen."
+  "settings_layoutEditorPreviewTab": "Preview",
+  "@settings_layoutEditorPreviewTab": {
+    "description": "Tab on the Toolbar & Layout screen that shows a preview of the browser with the current layout."
   },
-  "settings_livePreviewSubtitle": "Reflects your current toolbar and layout settings",
-  "@settings_livePreviewSubtitle": {
-    "description": "Line under that heading."
+  "settings_layoutEditorSettingsTab": "Settings",
+  "@settings_layoutEditorSettingsTab": {
+    "description": "Tab on the Toolbar & Layout screen that shows the full list of toolbar and layout settings."
+  },
+  "settings_previewDeviceThisWindow": "This window",
+  "@settings_previewDeviceThisWindow": {
+    "description": "Choice in the Toolbar & Layout preview: show the layout for the window the app is running in right now."
+  },
+  "settings_previewDevicePhone": "Phone",
+  "@settings_previewDevicePhone": {
+    "description": "Choice in the Toolbar & Layout preview: show the layout as it would look on a phone held upright."
+  },
+  "settings_previewDevicePhoneLandscape": "Phone in landscape",
+  "@settings_previewDevicePhoneLandscape": {
+    "description": "Choice in the Toolbar & Layout preview: show the layout as it would look on a phone turned sideways."
+  },
+  "settings_previewDeviceTablet": "Tablet",
+  "@settings_previewDeviceTablet": {
+    "description": "Choice in the Toolbar & Layout preview: show the layout as it would look on a tablet or a large window."
+  },
+  "settings_previewOtherDeviceHint": "{device, select, phone{Showing a phone. Automatic settings apply as they would on a phone.} phoneLandscape{Showing a phone in landscape. Automatic settings apply as they would there.} tablet{Showing a tablet. Automatic settings apply as they would on a tablet.} other{Showing another window size.}}",
+  "@settings_previewOtherDeviceHint": {
+    "description": "Line above the Toolbar & Layout preview while it shows a device other than the current window. Automatic settings such as the tab bar position resolve differently per window size.",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_previewStatePage": "Page",
+  "@settings_previewStatePage": {
+    "description": "Choice in the Toolbar & Layout preview: show the browser with a web page open."
+  },
+  "settings_previewStateHome": "Home page",
+  "@settings_previewStateHome": {
+    "description": "Choice in the Toolbar & Layout preview: show the browser's own home page, where the toolbar can look different."
+  },
+  "settings_previewStateSidePanelCollapsed": "Side panel collapsed",
+  "@settings_previewStateSidePanelCollapsed": {
+    "description": "Choice in the Toolbar & Layout preview: show the side panel narrowed to a column of icons."
+  },
+  "settings_previewStateNeedsSidePanel": "Needs a side panel in a large window",
+  "@settings_previewStateNeedsSidePanel": {
+    "description": "Shown under a disabled preview choice: only a side panel in a large window can be collapsed."
+  },
+  "settings_layoutPreviewSemantics": "Preview of the browser with this toolbar layout",
+  "@settings_layoutPreviewSemantics": {
+    "description": "Spoken by screen readers for the toolbar layout preview, which is a picture and not interactive."
+  },
+  "settings_layoutPartTabChips": "Tab Chips",
+  "@settings_layoutPartTabChips": {
+    "description": "Name of the tab chips inside the quick tab switcher, as a part of the toolbar preview that can be selected to change its settings."
+  },
+  "settings_previewModeSelect": "Select",
+  "@settings_previewModeSelect": {
+    "description": "Mode of the toolbar layout preview: tapping a part of the toolbar selects it and opens its settings."
+  },
+  "settings_previewModeTry": "Try",
+  "@settings_previewModeTry": {
+    "description": "Mode of the toolbar layout preview: the preview behaves like the browser, so the layout can be tried out."
+  },
+  "settings_previewSelectHint": "Tap a part of the toolbar to change its settings.",
+  "@settings_previewSelectHint": {
+    "description": "Line above the toolbar layout preview while it is in Select mode."
+  },
+  "settings_previewTryHint": "The preview works like the browser: scroll the page and tap the buttons.",
+  "@settings_previewTryHint": {
+    "description": "Line above the toolbar layout preview while it is in Try mode."
+  },
+  "settings_previewAllSettings": "All settings",
+  "@settings_previewAllSettings": {
+    "description": "Button in the settings pane next to the toolbar preview that leaves the selected part and shows the full list of toolbar and layout settings."
+  },
+  "settings_previewSelectionPath": "Selected part",
+  "@settings_previewSelectionPath": {
+    "description": "Read by screen readers for the row naming the selected part of the toolbar and the parts that contain it, e.g. Tab Bar, then Quick Tab Switcher."
+  },
+  "settings_tryToolbarHidden": "Toolbar hidden while scrolling · Auto Hide Distance {distance}",
+  "@settings_tryToolbarHidden": {
+    "description": "Message after the toolbar hid in the Try mode of the toolbar preview. Auto Hide Distance is the name of the setting that controls it; distance is its value as a percentage, e.g. 100%.",
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "settings_trySidePanelHidden": "Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad",
+  "@settings_trySidePanelHidden": {
+    "description": "Message after the auto-hiding side panel (the tab bar docked to the left or right) hid in the Try mode of the toolbar preview. In the preview a tap on the window edge brings it back; in the browser the panel only hides and returns while a mouse or trackpad is used."
+  },
+  "settings_tryOpensTabView": "This opens the tab view",
+  "@settings_tryOpensTabView": {
+    "description": "Message in the Try mode of the toolbar preview after tapping the tab count button."
+  },
+  "settings_tryOpensMenu": "This opens the menu",
+  "@settings_tryOpensMenu": {
+    "description": "Message in the Try mode of the toolbar preview after tapping the menu button."
+  },
+  "settings_tryAdjust": "Adjust",
+  "@settings_tryAdjust": {
+    "description": "Action on a message in the Try mode of the toolbar preview: opens the settings of the part that just acted."
   },
   "settings_deleteAllExceptionsTitle": "Delete All Exceptions?",
   "@settings_deleteAllExceptionsTitle": {

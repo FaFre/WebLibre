@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/utils/quick_tab_switcher_placement_l10n.dart';
@@ -35,184 +36,224 @@ import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
+/// The parts of the toolbar the Toolbar & Layout screen groups its settings
+/// by. Each is a section of the full list, and each is a part of the preview
+/// that opens just its own settings.
+enum ToolbarLayoutSection {
+  tabBar,
+  contextualToolbar,
+  quickTabSwitcher,
+
+  /// The tab chips inside the quick tab switcher. Part of the switcher's
+  /// section in the full list.
+  tabChips,
+  tabView,
+}
+
 List<SettingsSectionDefinition> toolbarLayoutSettingsSections(
   BuildContext context,
 ) {
   final l10n = AppLocalizations.of(context);
 
   return [
-    SettingsSectionDefinition(
-      title: l10n.settings_tabBarSectionTitle,
-      entries: [
-        SettingsEntryDefinition(
-          title: l10n.settings_tabBarPositionTitle,
-          subtitle: l10n.settings_indexTabBarPositionSubtitle,
-          keywords: settingsKeywords(l10n.settings_tabBarPositionKeywords),
-          child: const _TabBarPositionSection(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_tabBarStyleTitle,
-          subtitle: l10n.settings_indexTabBarStyleSubtitle,
-          keywords: settingsKeywords(l10n.settings_tabBarStyleKeywords),
-          child: const _TabBarLayoutModeSection(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_autoHideTabBarTitle,
-          subtitle: l10n.settings_indexAutoHideTabBarSubtitle,
-          keywords: settingsKeywords(l10n.settings_autoHideTabBarKeywords),
-          child: const _AutoHideTabBarTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_autoHideTabBarDistanceTitle,
-          subtitle: l10n.settings_autoHideTabBarDistanceSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_autoHideTabBarDistanceKeywords,
-          ),
-          child: const _AutoHideTabBarDistanceTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_autoHideSidePanelTitle,
-          subtitle: l10n.settings_indexAutoHideSidePanelSubtitle,
-          keywords: settingsKeywords(l10n.settings_autoHideSidePanelKeywords),
-          child: const _SideRailAutoHideTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_longPressUrlCopyTitle,
-          subtitle: l10n.settings_indexLongPressUrlCopySubtitle,
-          keywords: settingsKeywords(l10n.settings_longPressUrlCopyKeywords),
-          child: const _TabBarLongPressUrlCopyTile(),
-        ),
-      ],
-    ),
-    SettingsSectionDefinition(
-      title: l10n.settings_contextualToolbarSectionTitle,
-      entries: [
-        SettingsEntryDefinition(
-          title: l10n.settings_showContextualToolbarTitle,
-          subtitle: l10n.settings_indexShowContextualToolbarSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_showContextualToolbarKeywords,
-          ),
-          child: const _ShowContextualTabBarTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_customizeToolbarButtons,
-          subtitle: l10n.settings_indexCustomizeToolbarButtonsSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_customizeToolbarButtonsKeywords,
-          ),
-          // Ordinary buttons are basic layout (`layout.basic`); only their
-          // fallbacks and long-press actions are advanced, hidden inside.
-          liveOnly: true,
-          child: const _CustomizeToolbarButtonsTile(),
-        ),
-      ],
-    ),
+    toolbarLayoutSection(context, ToolbarLayoutSection.tabBar),
+    toolbarLayoutSection(context, ToolbarLayoutSection.contextualToolbar),
+    // One section in the list: the chips are what the switcher shows.
     SettingsSectionDefinition(
       title: l10n.settings_quickTabSwitcherSectionTitle,
-      entries: [
-        SettingsEntryDefinition(
-          title: l10n.settings_tabStackingTitle,
-          subtitle: l10n.settings_indexTabStackingSubtitle,
-          keywords: settingsKeywords(l10n.settings_tabStackingKeywords),
-          child: const _TabBarStackingModeSection(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_containersByRecentUseTitle,
-          feature: FeatureId.layoutStackingContainerModes,
-          subtitle: l10n.settings_containersByRecentUseSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_containersByRecentUseKeywords,
-          ),
-          child: const _QuickTabSwitcherContainersByRecentUseTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_switcherPlacementTitle,
-          subtitle: l10n.settings_switcherPlacementSubtitle,
-          keywords: settingsKeywords(l10n.settings_switcherPlacementKeywords),
-          child: const _QuickTabSwitcherPlacementSection(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_customizeSwitcherButtons,
-          subtitle: l10n.settings_indexCustomizeSwitcherButtonsSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_customizeSwitcherButtonsKeywords,
-          ),
-          // Ordinary buttons are basic layout (`layout.basic`); only their
-          // fallbacks and long-press actions are advanced, hidden inside.
-          liveOnly: true,
-          child: const _CustomizeQuickSwitcherButtonsTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_closeButtonsTitle,
-          subtitle: l10n.settings_closeButtonsSubtitle,
-          keywords: settingsKeywords(l10n.settings_closeButtonsKeywords),
-          child: const _QuickTabSwitcherCloseButtonsSection(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_historyFallbackTitle,
-          subtitle: l10n.settings_indexHistoryFallbackSubtitle,
-          keywords: settingsKeywords(l10n.settings_historyFallbackKeywords),
-          child: const _QuickTabSwitcherHistorySuggestionsTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_showTitlesTitle,
-          subtitle: l10n.settings_indexShowTitlesSubtitle,
-          keywords: settingsKeywords(l10n.settings_showTitlesKeywords),
-          child: const _QuickTabSwitcherShowTitlesTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_titleWidthTitle,
-          subtitle: l10n.settings_titleWidthSubtitle,
-          keywords: settingsKeywords(l10n.settings_titleWidthKeywords),
-          child: const _QuickTabSwitcherTitleWidthTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_hierarchyDepthTitle,
-          feature: FeatureId.tabsHierarchyDisplay,
-          hiddenSettings: const [HiddenSetting.hierarchyGlyphs],
-          subtitle: l10n.settings_indexHierarchyDepthSubtitle,
-          keywords: settingsKeywords(l10n.settings_hierarchyDepthKeywords),
-          child: const _QuickTabSwitcherHierarchyGlyphsTile(),
-        ),
-      ],
+      entries: [..._quickTabSwitcherEntries(l10n), ..._tabChipEntries(l10n)],
     ),
-    SettingsSectionDefinition(
-      title: l10n.settings_tabViewSectionTitle,
-      entries: [
-        SettingsEntryDefinition(
-          title: l10n.settings_bottomSheetTabViewTitle,
-          subtitle: l10n.settings_indexBottomSheetTabViewSubtitle,
-          keywords: settingsKeywords(l10n.settings_bottomSheetTabViewKeywords),
-          child: const _BottomSheetTabViewTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_tabViewActionsAtBottomTitle,
-          subtitle: l10n.settings_tabViewActionsAtBottomSubtitle,
-          keywords: settingsKeywords(
-            l10n.settings_tabViewActionsAtBottomKeywords,
-          ),
-          child: const _TabViewActionsAtBottomTile(),
-        ),
-        SettingsEntryDefinition(
-          title: l10n.settings_showFaviconsTitle,
-          subtitle: l10n.settings_indexShowFaviconsSubtitle,
-          keywords: settingsKeywords(l10n.settings_showFaviconsKeywords),
-          child: const _TabListShowFaviconsTile(),
-        ),
-      ],
-    ),
+    toolbarLayoutSection(context, ToolbarLayoutSection.tabView),
   ];
 }
 
-/// The browser menu's own arrangement entry.
+/// The settings of one [section], as the preview opens them.
+SettingsSectionDefinition toolbarLayoutSection(
+  BuildContext context,
+  ToolbarLayoutSection section,
+) {
+  final l10n = AppLocalizations.of(context);
+
+  return switch (section) {
+    ToolbarLayoutSection.tabBar => SettingsSectionDefinition(
+      title: l10n.settings_tabBarSectionTitle,
+      entries: _tabBarEntries(l10n),
+    ),
+    ToolbarLayoutSection.contextualToolbar => SettingsSectionDefinition(
+      title: l10n.settings_contextualToolbarSectionTitle,
+      entries: _contextualToolbarEntries(l10n),
+    ),
+    ToolbarLayoutSection.quickTabSwitcher => SettingsSectionDefinition(
+      title: l10n.settings_quickTabSwitcherSectionTitle,
+      entries: _quickTabSwitcherEntries(l10n),
+    ),
+    ToolbarLayoutSection.tabChips => SettingsSectionDefinition(
+      title: l10n.settings_layoutPartTabChips,
+      entries: _tabChipEntries(l10n),
+    ),
+    ToolbarLayoutSection.tabView => SettingsSectionDefinition(
+      title: l10n.settings_tabViewSectionTitle,
+      entries: _tabViewEntries(l10n),
+    ),
+  };
+}
+
+List<SettingsEntryDefinition> _tabBarEntries(AppLocalizations l10n) => [
+  SettingsEntryDefinition(
+    title: l10n.settings_tabBarPositionTitle,
+    subtitle: l10n.settings_indexTabBarPositionSubtitle,
+    keywords: settingsKeywords(l10n.settings_tabBarPositionKeywords),
+    child: const _TabBarPositionSection(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_tabBarStyleTitle,
+    subtitle: l10n.settings_indexTabBarStyleSubtitle,
+    keywords: settingsKeywords(l10n.settings_tabBarStyleKeywords),
+    child: const _TabBarLayoutModeSection(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_autoHideTabBarTitle,
+    subtitle: l10n.settings_indexAutoHideTabBarSubtitle,
+    keywords: settingsKeywords(l10n.settings_autoHideTabBarKeywords),
+    child: const _AutoHideTabBarTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_autoHideTabBarDistanceTitle,
+    subtitle: l10n.settings_autoHideTabBarDistanceSubtitle,
+    keywords: settingsKeywords(l10n.settings_autoHideTabBarDistanceKeywords),
+    child: const _AutoHideTabBarDistanceTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_autoHideSidePanelTitle,
+    subtitle: l10n.settings_indexAutoHideSidePanelSubtitle,
+    keywords: settingsKeywords(l10n.settings_autoHideSidePanelKeywords),
+    child: const _SideRailAutoHideTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_longPressUrlCopyTitle,
+    subtitle: l10n.settings_indexLongPressUrlCopySubtitle,
+    keywords: settingsKeywords(l10n.settings_longPressUrlCopyKeywords),
+    child: const _TabBarLongPressUrlCopyTile(),
+  ),
+];
+
+List<SettingsEntryDefinition> _contextualToolbarEntries(
+  AppLocalizations l10n,
+) => [
+  SettingsEntryDefinition(
+    title: l10n.settings_showContextualToolbarTitle,
+    subtitle: l10n.settings_indexShowContextualToolbarSubtitle,
+    keywords: settingsKeywords(l10n.settings_showContextualToolbarKeywords),
+    child: const _ShowContextualTabBarTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_customizeToolbarButtons,
+    subtitle: l10n.settings_indexCustomizeToolbarButtonsSubtitle,
+    keywords: settingsKeywords(l10n.settings_customizeToolbarButtonsKeywords),
+    // Ordinary buttons are basic layout (`layout.basic`); only their
+    // fallbacks and long-press actions are advanced, hidden inside.
+    id: ToolbarLayoutEditor.contextualButtons,
+    child: const _CustomizeToolbarButtonsTile(),
+  ),
+];
+
+List<SettingsEntryDefinition> _quickTabSwitcherEntries(
+  AppLocalizations l10n,
+) => [
+  SettingsEntryDefinition(
+    title: l10n.settings_tabStackingTitle,
+    subtitle: l10n.settings_indexTabStackingSubtitle,
+    keywords: settingsKeywords(l10n.settings_tabStackingKeywords),
+    child: const _TabBarStackingModeSection(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_containersByRecentUseTitle,
+    feature: FeatureId.layoutStackingContainerModes,
+    subtitle: l10n.settings_containersByRecentUseSubtitle,
+    keywords: settingsKeywords(l10n.settings_containersByRecentUseKeywords),
+    child: const _QuickTabSwitcherContainersByRecentUseTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_switcherPlacementTitle,
+    subtitle: l10n.settings_switcherPlacementSubtitle,
+    keywords: settingsKeywords(l10n.settings_switcherPlacementKeywords),
+    child: const _QuickTabSwitcherPlacementSection(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_customizeSwitcherButtons,
+    subtitle: l10n.settings_indexCustomizeSwitcherButtonsSubtitle,
+    keywords: settingsKeywords(l10n.settings_customizeSwitcherButtonsKeywords),
+    // Ordinary buttons are basic layout (`layout.basic`); only their
+    // fallbacks and long-press actions are advanced, hidden inside.
+    id: ToolbarLayoutEditor.switcherButtons,
+    child: const _CustomizeQuickSwitcherButtonsTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_historyFallbackTitle,
+    subtitle: l10n.settings_indexHistoryFallbackSubtitle,
+    keywords: settingsKeywords(l10n.settings_historyFallbackKeywords),
+    child: const _QuickTabSwitcherHistorySuggestionsTile(),
+  ),
+];
+
+List<SettingsEntryDefinition> _tabChipEntries(AppLocalizations l10n) => [
+  SettingsEntryDefinition(
+    title: l10n.settings_closeButtonsTitle,
+    subtitle: l10n.settings_closeButtonsSubtitle,
+    keywords: settingsKeywords(l10n.settings_closeButtonsKeywords),
+    child: const _QuickTabSwitcherCloseButtonsSection(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_showTitlesTitle,
+    subtitle: l10n.settings_indexShowTitlesSubtitle,
+    keywords: settingsKeywords(l10n.settings_showTitlesKeywords),
+    child: const _QuickTabSwitcherShowTitlesTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_titleWidthTitle,
+    subtitle: l10n.settings_titleWidthSubtitle,
+    keywords: settingsKeywords(l10n.settings_titleWidthKeywords),
+    child: const _QuickTabSwitcherTitleWidthTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_hierarchyDepthTitle,
+    feature: FeatureId.tabsHierarchyDisplay,
+    hiddenSettings: const [HiddenSetting.hierarchyGlyphs],
+    subtitle: l10n.settings_indexHierarchyDepthSubtitle,
+    keywords: settingsKeywords(l10n.settings_hierarchyDepthKeywords),
+    child: const _QuickTabSwitcherHierarchyGlyphsTile(),
+  ),
+];
+
+List<SettingsEntryDefinition> _tabViewEntries(AppLocalizations l10n) => [
+  SettingsEntryDefinition(
+    title: l10n.settings_bottomSheetTabViewTitle,
+    subtitle: l10n.settings_indexBottomSheetTabViewSubtitle,
+    keywords: settingsKeywords(l10n.settings_bottomSheetTabViewKeywords),
+    child: const _BottomSheetTabViewTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_tabViewActionsAtBottomTitle,
+    subtitle: l10n.settings_tabViewActionsAtBottomSubtitle,
+    keywords: settingsKeywords(l10n.settings_tabViewActionsAtBottomKeywords),
+    child: const _TabViewActionsAtBottomTile(),
+  ),
+  SettingsEntryDefinition(
+    title: l10n.settings_showFaviconsTitle,
+    subtitle: l10n.settings_indexShowFaviconsSubtitle,
+    keywords: settingsKeywords(l10n.settings_showFaviconsKeywords),
+    child: const _TabListShowFaviconsTile(),
+  ),
+];
+
+/// The browser menu's own arrangement entry, the Menu part's settings.
 ///
-/// Kept out of [toolbarLayoutSettingsSections] because onboarding renders those
-/// too, and arranging the menu is not a first-run decision. Offered to the
-/// settings screen as [ToolbarLayoutContent.extraSections] so it takes part in
-/// the same filtering — a row rendered beside the filtered list would survive a
-/// query that empties the list, leaving a match sitting above "No settings
-/// match".
+/// Not one of the [ToolbarLayoutSection]s: the toolbar's sections are those.
+/// Offered to the settings screen as [ToolbarLayoutContent.extraSections] so
+/// it takes part in the same filtering — a row rendered beside the filtered
+/// list would survive a query that empties the list, leaving a match sitting
+/// above "No settings match". Onboarding shows it too: its draft holds the
+/// arrangement.
 List<SettingsSectionDefinition> menuLayoutSettingsSections(
   BuildContext context,
 ) {
@@ -229,7 +270,7 @@ List<SettingsSectionDefinition> menuLayoutSettingsSections(
           keywords: settingsKeywords(l10n.settings_customizeMenuKeywords),
           feature: FeatureId.layoutMenuCustomization,
           hiddenSettings: const [HiddenSetting.menuLayout],
-          liveOnly: true,
+          id: ToolbarLayoutEditor.menu,
           // The arrangement screen is an editor as a whole, so a hidden one
           // asks before it opens.
           child: const _CustomizeMenuTile(),
@@ -274,9 +315,11 @@ class _CustomizeMenuTile extends StatelessWidget {
       title: Text(l10n.settings_customizeMenu),
       subtitle: Text(l10n.settings_customizeMenuSubtitle),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () async {
-        await const MenuLayoutSettingsRoute().push(context);
-      },
+      onTap: () => ToolbarLayoutEditorOpener.open(
+        context,
+        ToolbarLayoutEditor.menu,
+        route: () => const MenuLayoutSettingsRoute().push(context),
+      ),
     );
   }
 }
@@ -288,12 +331,12 @@ class _TabBarPositionSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // The raw setting drives the radio group -- this is the one screen that
     // must show what was *chosen*, including "decide for me". Everywhere else
-    // reads effectiveTabBarPositionProvider.
+    // reads displayedTabBarPositionProvider.
     final l10n = AppLocalizations.of(context);
     final tabBarPosition = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.tabBarPosition),
     );
-    final resolved = ref.watch(effectiveTabBarPositionProvider);
+    final resolved = ref.watch(displayedTabBarPositionProvider);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
@@ -425,6 +468,74 @@ class _ShowContextualTabBarTile extends HookConsumerWidget {
   }
 }
 
+/// An editor of its own that a "Customize …" row of Toolbar & Layout opens.
+/// Also the row's [SettingsEntryDefinition.id], so a part that shows the
+/// editor inline can leave the row out.
+enum ToolbarLayoutEditor {
+  contextualButtons(ToolbarConfigLocation.contextual),
+  switcherButtons(ToolbarConfigLocation.quickSwitcher),
+  menu(null);
+
+  const ToolbarLayoutEditor(this.buttonLocation);
+
+  /// The toolbar whose buttons it edits; null for [menu].
+  final ToolbarConfigLocation? buttonLocation;
+}
+
+/// Opens a [ToolbarLayoutEditor] where the Toolbar & Layout screen shows it:
+/// inline, beside the preview, so the change can be watched. The screen puts
+/// one around its settings list; the "Customize …" rows open their editor's
+/// own screen only without one.
+///
+/// An ancestor's ephemeral action, handed down as widget data: what opening
+/// an editor does depends on the screen around the row.
+class ToolbarLayoutEditorOpener extends InheritedWidget {
+  const ToolbarLayoutEditorOpener({
+    super.key,
+    required this.onOpen,
+    required super.child,
+  });
+
+  /// Shows [editor]. [context] is the row's.
+  final void Function(BuildContext context, ToolbarLayoutEditor editor) onOpen;
+
+  /// The opener around [context], if any. Not a dependency: it is only
+  /// called from taps.
+  static ToolbarLayoutEditorOpener? maybeOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<ToolbarLayoutEditorOpener>();
+
+  /// Opens [editor] through the [ToolbarLayoutEditorOpener] around [context],
+  /// or by [route] without one.
+  static Future<void> open(
+    BuildContext context,
+    ToolbarLayoutEditor editor, {
+    required Future<void> Function() route,
+  }) async {
+    final opener = maybeOf(context);
+    if (opener == null) return await route();
+    opener.onOpen(context, editor);
+  }
+
+  @override
+  bool updateShouldNotify(ToolbarLayoutEditorOpener oldWidget) => false;
+}
+
+/// Opens [editor] on its own screen, for "Open full screen" in the ⋮ of the
+/// editor shown inline beside the preview. In the onboarding too: the screen
+/// edits the draft wherever it is built.
+Future<void> openToolbarLayoutEditorScreen(
+  BuildContext context,
+  ToolbarLayoutEditor editor,
+) => switch (editor) {
+  ToolbarLayoutEditor.contextualButtons =>
+    const ContextualToolbarSettingsRoute().push<void>(context),
+  ToolbarLayoutEditor.switcherButtons =>
+    const QuickSwitcherToolbarSettingsRoute().push<void>(context),
+  ToolbarLayoutEditor.menu => const MenuLayoutSettingsRoute().push<void>(
+    context,
+  ),
+};
+
 class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
   const _CustomizeToolbarButtonsTile();
 
@@ -440,9 +551,11 @@ class _CustomizeToolbarButtonsTile extends HookConsumerWidget {
       title: Text(l10n.settings_customizeToolbarButtons),
       trailing: const Icon(Icons.chevron_right),
       enabled: tabBarShowContextualBar,
-      onTap: () async {
-        await const ContextualToolbarSettingsRoute().push(context);
-      },
+      onTap: () => ToolbarLayoutEditorOpener.open(
+        context,
+        ToolbarLayoutEditor.contextualButtons,
+        route: () => const ContextualToolbarSettingsRoute().push(context),
+      ),
     );
   }
 }
@@ -454,7 +567,7 @@ class _CustomizeQuickSwitcherButtonsTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );
@@ -465,9 +578,11 @@ class _CustomizeQuickSwitcherButtonsTile extends HookConsumerWidget {
       subtitle: Text(l10n.settings_customizeSwitcherButtonsSubtitle),
       trailing: const Icon(Icons.chevron_right),
       enabled: switcherEnabled,
-      onTap: () async {
-        await const QuickSwitcherToolbarSettingsRoute().push(context);
-      },
+      onTap: () => ToolbarLayoutEditorOpener.open(
+        context,
+        ToolbarLayoutEditor.switcherButtons,
+        route: () => const QuickSwitcherToolbarSettingsRoute().push(context),
+      ),
     );
   }
 }
@@ -479,10 +594,10 @@ class _TabBarStackingModeSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(storedGeneralSettingsProvider);
-    final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
+    final stackingMode = ref.watch(displayedTabBarStackingModeProvider);
     final window = ref.watch(windowSizeClassControllerProvider);
     final railIsNarrow =
-        ref.watch(effectiveTabBarPositionProvider).isVertical &&
+        ref.watch(displayedTabBarPositionProvider).isVertical &&
         !window.allowsWideRail;
 
     // Two stacked rows don't fit the *narrow* vertical side rail, which no
@@ -668,7 +783,7 @@ class _QuickTabSwitcherCloseButtonsSection extends HookConsumerWidget {
       ),
     );
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );
@@ -736,13 +851,13 @@ class _QuickTabSwitcherPlacementSection extends HookConsumerWidget {
       storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherPlacement),
     );
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );
     // The side rail keeps its own order and ignores this setting.
     final isHorizontalBar = ref.watch(
-      effectiveTabBarPositionProvider.select((p) => p.isHorizontal),
+      displayedTabBarPositionProvider.select((p) => p.isHorizontal),
     );
     final enabled = switcherEnabled && isHorizontalBar;
 
@@ -807,7 +922,7 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
       storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherShowTitles),
     );
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );
@@ -889,7 +1004,7 @@ class _QuickTabSwitcherHistorySuggestionsTile extends HookConsumerWidget {
       ),
     );
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );
@@ -926,7 +1041,7 @@ class _QuickTabSwitcherContainersByRecentUseTile extends HookConsumerWidget {
     );
     // Only the accordion lists containers, so only it has an order to change.
     final isAccordion = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode == TabBarStackingMode.accordion,
       ),
     );
@@ -960,7 +1075,7 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
       storedGeneralSettingsProvider.select((s) => s.quickTabSwitcherShowTitles),
     );
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );
@@ -999,7 +1114,7 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
       ),
     );
     final switcherEnabled = ref.watch(
-      effectiveTabBarStackingModeProvider.select(
+      displayedTabBarStackingModeProvider.select(
         (mode) => mode != TabBarStackingMode.disabled,
       ),
     );

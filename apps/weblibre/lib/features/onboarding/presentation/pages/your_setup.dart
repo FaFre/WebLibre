@@ -21,10 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/onboarding/domain/entities/setup_goal.dart';
-import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/customize_setup.dart';
-import 'package:weblibre/features/onboarding/presentation/widgets/setup_draft_scope.dart';
 import 'package:weblibre/features/onboarding/presentation/widgets/setup_section.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -36,8 +35,7 @@ import 'package:weblibre/presentation/widgets/browser_page.dart';
 /// into Customize. The goals are its only switches: a hidden feature links to
 /// its switch in Customize, which explains it.
 ///
-/// Lives inside a `SetupDraftScope`, so what it reads is the draft as the
-/// commit will write it.
+/// Reads the draft as the commit will write it (the displayed layer).
 class YourSetupPage extends ConsumerWidget {
   const YourSetupPage({super.key});
 
@@ -47,8 +45,8 @@ class YourSetupPage extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     final draft = ref.watch(setupDraftControllerProvider);
-    final general = ref.watch(generalSettingsWithDefaultsProvider);
-    final engine = ref.watch(engineSettingsWithDefaultsProvider);
+    final general = ref.watch(displayedGeneralSettingsProvider);
+    final engine = ref.watch(displayedEngineSettingsProvider);
 
     // A switch a goal stands for is already offered there, under the
     // goal's name, so it is not listed again. Connections and on-device AI
@@ -88,7 +86,7 @@ class YourSetupPage extends ConsumerWidget {
                   leading: const Icon(MdiIcons.shieldCheckOutline),
                   title: Text(l10n.onboarding_yourSetupProtections),
                 ),
-                if (draft.appliesHardeningBaseline)
+                if (draft?.appliesHardeningBaseline ?? false)
                   ListTile(
                     leading: const Icon(MdiIcons.shieldLock),
                     title: Text(l10n.onboarding_yourSetupHardening),
@@ -98,7 +96,7 @@ class YourSetupPage extends ConsumerWidget {
                     leading: const Icon(MdiIcons.lanPending),
                     title: Text(l10n.onboarding_yourSetupLocalNetwork),
                   ),
-                if (draft.installsUBlock)
+                if (draft?.installsUBlock ?? false)
                   ListTile(
                     leading: const Icon(MdiIcons.advertisementsOff),
                     title: Text(l10n.onboarding_yourSetupContentBlocker),
@@ -155,7 +153,7 @@ class YourSetupPage extends ConsumerWidget {
                           SetupGoal.syncDevices =>
                             l10n.onboarding_goalSyncDevicesSubtitle,
                         }),
-                        value: draft.goalSelected(goal, general),
+                        value: draft?.goalSelected(goal, general) ?? false,
                         onChanged: (selected) => ref
                             .read(setupDraftControllerProvider.notifier)
                             .setGoal(goal, selected: selected),
@@ -181,7 +179,7 @@ class YourSetupPage extends ConsumerWidget {
                       leading: Icon(visibilitySwitch.icon),
                       title: Text(visibilitySwitch.label(context)),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () => pushInSetupDraftScope<void>(
+                      onTap: () => pushSetupScreen(
                         context,
                         CustomizeSetupScreen(focus: visibilitySwitch),
                       ),
@@ -195,10 +193,8 @@ class YourSetupPage extends ConsumerWidget {
               child: FilledButton.tonalIcon(
                 icon: const Icon(Icons.tune),
                 label: Text(l10n.onboarding_customizeAction),
-                onPressed: () => pushInSetupDraftScope<void>(
-                  context,
-                  const CustomizeSetupScreen(),
-                ),
+                onPressed: () =>
+                    pushSetupScreen(context, const CustomizeSetupScreen()),
               ),
             ),
             const SizedBox(height: 8),
@@ -219,9 +215,8 @@ class YourSetupPage extends ConsumerWidget {
   }
 }
 
-/// The onboarding's Customize step, pushed from [YourSetupPage] inside the
-/// same draft scope. Back returns to the summary with every change kept in
-/// the draft.
+/// The onboarding's Customize step, pushed from [YourSetupPage]. Back
+/// returns to the summary with every change kept in the draft.
 class CustomizeSetupScreen extends StatelessWidget {
   const CustomizeSetupScreen({super.key, this.focus});
 

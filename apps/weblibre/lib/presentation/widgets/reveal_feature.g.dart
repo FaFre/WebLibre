@@ -80,7 +80,8 @@ abstract class _$DeclinedVisibilityReveals
 /// Showing hidden features again, for deliberate actions only — a gesture,
 /// shortcut or long press bound to the feature, or picking it in the settings
 /// search. Automatic behavior never reveals anything. The dialog is
-/// [askToRevealFeature]'s; this holds what it decides on.
+/// [askToRevealFeature]'s; this holds what it decides on, always against the
+/// profile: such a reveal is a live change, never an onboarding draft's.
 
 @ProviderFor(FeatureReveal)
 final featureRevealProvider = FeatureRevealProvider._();
@@ -88,13 +89,15 @@ final featureRevealProvider = FeatureRevealProvider._();
 /// Showing hidden features again, for deliberate actions only — a gesture,
 /// shortcut or long press bound to the feature, or picking it in the settings
 /// search. Automatic behavior never reveals anything. The dialog is
-/// [askToRevealFeature]'s; this holds what it decides on.
+/// [askToRevealFeature]'s; this holds what it decides on, always against the
+/// profile: such a reveal is a live change, never an onboarding draft's.
 final class FeatureRevealProvider
     extends $NotifierProvider<FeatureReveal, void> {
   /// Showing hidden features again, for deliberate actions only — a gesture,
   /// shortcut or long press bound to the feature, or picking it in the settings
   /// search. Automatic behavior never reveals anything. The dialog is
-  /// [askToRevealFeature]'s; this holds what it decides on.
+  /// [askToRevealFeature]'s; this holds what it decides on, always against the
+  /// profile: such a reveal is a live change, never an onboarding draft's.
   FeatureRevealProvider._()
     : super(
         from: null,
@@ -122,12 +125,13 @@ final class FeatureRevealProvider
   }
 }
 
-String _$featureRevealHash() => r'beeec84af41c3b36fa5d7fdd461180de883ed758';
+String _$featureRevealHash() => r'0e48f5686f7c4a87136420eeed864ff4f40d23de';
 
 /// Showing hidden features again, for deliberate actions only — a gesture,
 /// shortcut or long press bound to the feature, or picking it in the settings
 /// search. Automatic behavior never reveals anything. The dialog is
-/// [askToRevealFeature]'s; this holds what it decides on.
+/// [askToRevealFeature]'s; this holds what it decides on, always against the
+/// profile: such a reveal is a live change, never an onboarding draft's.
 
 abstract class _$FeatureReveal extends $Notifier<void> {
   void build();

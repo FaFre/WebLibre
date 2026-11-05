@@ -47,11 +47,13 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/services/auto_hide_scroll_tracker.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/proxy_settings_replication.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/side_rail.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/layout/browser_chrome_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
@@ -149,56 +151,22 @@ class _AnimatedToolbar extends HookWidget {
 }
 
 /// Manages scroll-based auto-hide logic and returns the toolbar widget.
-/// Whether the main toolbar row should be dropped for the browser home surface.
 ///
-/// Never dropped under [HomeSearchBarPlacement.tabBar]: there the row's own
-/// (empty) address field *is* the home surface's search entry, and the pill is
-/// the thing that stands down instead. The two are mutually exclusive by
-/// construction rather than by two independent settings, because the home
-/// surface has no other way into search — a state where both are off is not
-/// one the user should be able to reach.
-///
-/// Under [HomeSearchBarPlacement.top] the row is still held back when there is
-/// no contextual toolbar: the tab count and the navigation menu relocate there
-/// when it exists, and the main row is their only other home — dropping it
-/// without one would leave no way to reach the menu. That leaves the row's
-/// address field showing beside the pill, which is redundant but harmless;
-/// blanking only the title would strand the pinned add-ons at the right of an
-/// empty strip and still reserve [kToolbarHeight].
-///
-/// A function rather than an inline condition because it is evaluated in two
-/// places — where the bar is built and where its height is measured for the
-/// browser viewport inset. If those two disagree the browser is inset for a row
-/// that is not drawn. For the same reason the placement is passed in already
-/// resolved: [BrowserTabBar.getToolbarHeight] runs from the wrappers'
-/// constructors, outside the widget tree, where no provider can be read.
-bool _suppressMainToolbarForHome({
-  required bool showBrowserHome,
-  required bool showContextualToolbar,
-  required HomeSearchBarPlacement placement,
-}) =>
-    showBrowserHome &&
-    showContextualToolbar &&
-    placement != HomeSearchBarPlacement.tabBar;
-
-/// Animation is handled by the parent _AnimatedToolbar wrapper.
+/// Only the horizontal bars: the side rail is drawn by [_SideRailToolbarLayer]
+/// and never auto-hides. Animation is handled by the parent _AnimatedToolbar
+/// wrapper.
 class _TabBar extends HookConsumerWidget {
-  final bool showMainToolbar;
-  final bool showContextualToolbar;
-  final int quickTabSwitcherRowCount;
+  /// What the bar holds, from the screen's [BrowserChromeLayout].
+  final BrowserBarSpec bar;
   final Stream<Offset>? pointerMoveEvents;
+
+  /// [TabBarPosition.top] or [TabBarPosition.bottom].
   final TabBarPosition tabBarPosition;
-  final bool isSmallWebMode;
-  final bool enableGestures;
 
   const _TabBar({
-    required this.showMainToolbar,
-    required this.showContextualToolbar,
-    required this.quickTabSwitcherRowCount,
+    required this.bar,
     required this.tabBarPosition,
     required this.pointerMoveEvents,
-    required this.isSmallWebMode,
-    this.enableGestures = true,
   });
 
   @override
@@ -207,11 +175,11 @@ class _TabBar extends HookConsumerWidget {
     final displayedSheet = ref.watch(bottomSheetControllerProvider);
 
     // Auto-hide scroll detection hooks (run unconditionally per hook rules)
-    final diffAcc = useRef(0.0);
+    final tracker = useMemoized(AutoHideScrollTracker.new);
 
     // Reset scroll accumulator on tab switch
     useEffect(() {
-      diffAcc.value = 0.0;
+      tracker.reset();
       return null;
     }, [tabId]);
 
@@ -219,11 +187,11 @@ class _TabBar extends HookConsumerWidget {
     // (covers: loading start, navigation, showToolbarAsExpanded, forceShow)
     ref.listen(toolbarVisibilityControllerProvider(tabId), (previous, next) {
       if (next == ToolbarVisibility.visible && previous != next) {
-        diffAcc.value = 0.0;
+        tracker.reset();
       }
     });
 
-    void resetHiddenState() {
+    void showToolbar() {
       ref
           .read(
             toolbarVisibilityControllerProvider(
@@ -231,13 +199,13 @@ class _TabBar extends HookConsumerWidget {
             ).notifier,
           )
           .show();
-      diffAcc.value = 0.0;
     }
 
     useOnAppLifecycleStateChange((previous, current) {
       if (!ref.read(generalSettingsWithDefaultsProvider).autoHideTabBar) return;
       if (current == AppLifecycleState.resumed) {
-        resetHiddenState();
+        showToolbar();
+        tracker.reset();
       }
     });
 
@@ -247,18 +215,11 @@ class _TabBar extends HookConsumerWidget {
         final settings = ref.read(generalSettingsWithDefaultsProvider);
         if (!settings.autoHideTabBar) return;
 
-        final hideDistance = settings.autoHideTabBarDistance.clamp(
-          minAutoHideTabBarDistance,
-          maxAutoHideTabBarDistance,
-        );
-
-        final diff = event.dy;
-        if (diff < 0) {
-          if (diffAcc.value > 0) {
-            diffAcc.value = 0.0;
-          }
-          diffAcc.value += diff;
-          if (diffAcc.value.abs() > hideDistance) {
+        switch (tracker.add(
+          event.dy,
+          hideDistance: settings.autoHideTabBarDistance,
+        )) {
+          case AutoHideAction.hide:
             ref
                 .read(
                   toolbarVisibilityControllerProvider(
@@ -266,75 +227,25 @@ class _TabBar extends HookConsumerWidget {
                   ).notifier,
                 )
                 .requestHide();
-          }
-        } else if (diff > 0) {
-          if (diffAcc.value < 0) {
-            diffAcc.value = 0.0;
-          }
-          diffAcc.value += diff;
-          if (diffAcc.value.abs() > hideDistance * autoHideTabBarShowFraction) {
-            resetHiddenState();
-          }
+          case AutoHideAction.show:
+            showToolbar();
+          case AutoHideAction.none:
         }
       },
     );
 
-    final suppressMainToolbar = _suppressMainToolbarForHome(
-      showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
-      showContextualToolbar: showContextualToolbar,
-      placement: ref.watch(effectiveHomeSearchBarPlacementProvider),
-    );
-
-    final quickTabSwitcherPlacement = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (s) => s.quickTabSwitcherPlacement,
-      ),
-    );
-
     // Return the toolbar widget - parent handles animation.
-    // Rail positions are rendered by a dedicated Stack layer, not _TabBar, but
-    // are handled here for exhaustiveness/correctness.
     return switch (tabBarPosition) {
       TabBarPosition.top => BrowserTopAppBar(
+        bar: bar,
         displayedSheet: displayedSheet,
-        showMainToolbar: showMainToolbar,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        quickTabSwitcherPlacement: quickTabSwitcherPlacement,
-        isSmallWebMode: isSmallWebMode,
-        enableGestures: enableGestures,
-        suppressMainToolbar: suppressMainToolbar,
       ),
       TabBarPosition.bottom => BrowserBottomAppBar(
+        bar: bar,
         displayedSheet: displayedSheet,
-        showMainToolbar: showMainToolbar,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        quickTabSwitcherPlacement: quickTabSwitcherPlacement,
-        isSmallWebMode: isSmallWebMode,
-        suppressMainToolbar: suppressMainToolbar,
       ),
-      TabBarPosition.left || TabBarPosition.right => BrowserSideRail(
-        position: tabBarPosition,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        isSmallWebMode: isSmallWebMode,
-        railWidth: BrowserTabBar.railWidthFor(
-          ref.watch(windowSizeClassControllerProvider),
-          hasTabList:
-              ref.watch(effectiveTabBarStackingModeProvider) !=
-              TabBarStackingMode.disabled,
-          preferredWidth:
-              ref.watch(sideRailDragWidthProvider) ??
-              ref.watch(
-                generalSettingsWithDefaultsProvider.select(
-                  (s) => s.sideRailWidth,
-                ),
-              ),
-          windowWidth: MediaQuery.sizeOf(context).width,
-          devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
-        ),
-        suppressMainToolbar: suppressMainToolbar,
+      TabBarPosition.left || TabBarPosition.right => throw StateError(
+        'The side rail is drawn by _SideRailToolbarLayer, not _TabBar',
       ),
     };
   }
@@ -648,26 +559,25 @@ class _BrowserContentPositioned extends ConsumerWidget {
 /// Layer 2: bottom toolbar (or the small-web discovery overlay in its place).
 class _BottomToolbarLayer extends StatelessWidget {
   final bool tabInFullScreen;
-  final bool isSmallWebActive;
+
+  /// Null in small web, which draws its own overlay here.
+  final BrowserBarSpec? bar;
   final TabBarPosition tabBarPosition;
-  final bool showContextualToolbar;
-  final int quickTabSwitcherRowCount;
   final String? selectedTabId;
   final StreamController<Offset> pointerMoveEventsController;
 
   const _BottomToolbarLayer({
     required this.tabInFullScreen,
-    required this.isSmallWebActive,
+    required this.bar,
     required this.tabBarPosition,
-    required this.showContextualToolbar,
-    required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
     required this.pointerMoveEventsController,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (isSmallWebActive) {
+    final bar = this.bar;
+    if (bar == null) {
       return _AnimatedToolbar(
         position: TabBarPosition.bottom,
         visible: !tabInFullScreen,
@@ -687,10 +597,7 @@ class _BottomToolbarLayer extends StatelessWidget {
       tabInFullScreen: tabInFullScreen,
       child: _TabBar(
         tabBarPosition: TabBarPosition.bottom,
-        showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        isSmallWebMode: false,
+        bar: bar,
         pointerMoveEvents: tabBarPosition == TabBarPosition.bottom
             ? pointerMoveEventsController.stream
             : null,
@@ -702,17 +609,13 @@ class _BottomToolbarLayer extends StatelessWidget {
 /// Layer 3: top toolbar (only rendered when the tab bar position is top).
 class _TopToolbarLayer extends StatelessWidget {
   final bool tabInFullScreen;
-  final bool isSmallWebActive;
-  final bool showContextualToolbar;
-  final int quickTabSwitcherRowCount;
+  final BrowserBarSpec bar;
   final String? selectedTabId;
   final StreamController<Offset> pointerMoveEventsController;
 
   const _TopToolbarLayer({
     required this.tabInFullScreen,
-    required this.isSmallWebActive,
-    required this.showContextualToolbar,
-    required this.quickTabSwitcherRowCount,
+    required this.bar,
     required this.selectedTabId,
     required this.pointerMoveEventsController,
   });
@@ -725,12 +628,8 @@ class _TopToolbarLayer extends StatelessWidget {
       tabInFullScreen: tabInFullScreen,
       child: _TabBar(
         tabBarPosition: TabBarPosition.top,
-        showMainToolbar: true,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        isSmallWebMode: isSmallWebActive,
-        enableGestures: !isSmallWebActive,
-        pointerMoveEvents: isSmallWebActive
+        bar: bar,
+        pointerMoveEvents: bar.isSmallWebMode
             ? null
             : pointerMoveEventsController.stream,
       ),
@@ -743,17 +642,13 @@ class _SideRailToolbarLayer extends StatelessWidget {
   final bool tabInFullScreen;
   final TabBarPosition tabBarPosition;
 
-  /// Resolved by [BrowserScreen] so the rail is drawn at exactly the width the
-  /// browser content was inset for.
-  final double railWidth;
-  final bool showContextualToolbar;
-  final int quickTabSwitcherRowCount;
-  final String? selectedTabId;
+  /// What the rail holds, from the screen's [BrowserChromeLayout].
+  final BrowserBarSpec bar;
 
-  /// Resolved by the caller, as for the horizontal bars: the rail is built here
-  /// rather than by [_TabBar], so without this the home surface would keep the
-  /// main toolbar row only in the rail positions.
-  final bool suppressMainToolbar;
+  /// Resolved by [BrowserChromeLayout] so the rail is drawn at exactly the
+  /// width the browser content was inset for.
+  final double railWidth;
+  final String? selectedTabId;
 
   /// Whether the rail shows its resize handle.
   final bool resizable;
@@ -764,24 +659,18 @@ class _SideRailToolbarLayer extends StatelessWidget {
   const _SideRailToolbarLayer({
     required this.tabInFullScreen,
     required this.tabBarPosition,
+    required this.bar,
     required this.railWidth,
     required this.resizable,
     required this.overlay,
-    required this.showContextualToolbar,
-    required this.quickTabSwitcherRowCount,
     required this.selectedTabId,
-    required this.suppressMainToolbar,
   });
 
   @override
   Widget build(BuildContext context) {
     final rail = BrowserSideRail(
-      position: tabBarPosition,
-      showContextualToolbar: showContextualToolbar,
-      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-      isSmallWebMode: false,
+      bar: bar,
       railWidth: railWidth,
-      suppressMainToolbar: suppressMainToolbar,
       resizable: resizable,
     );
 
@@ -1608,77 +1497,78 @@ class BrowserScreen extends HookConsumerWidget {
       smallWebModeControllerProvider.select((value) => value != null),
     );
 
-    final tabBarPosition = isSmallWebActive
-        ? TabBarPosition.top
-        : ref.watch(effectiveTabBarPositionProvider);
-
-    final showContextualToolbar =
-        !isSmallWebActive &&
-        ref.watch(
-          generalSettingsWithDefaultsProvider.select(
-            (value) => value.tabBarShowContextualBar,
-          ),
-        );
-
-    final quickTabSwitcherRowCount = isSmallWebActive
-        ? 0
-        : ref.watch(quickTabSwitcherRowCountProvider).value ?? 0;
-    // Must match what _TabBar resolves, or the browser is inset for a
-    // switcher row drawn in the other bar.
+    final tabBarPositionSetting = ref.watch(effectiveTabBarPositionProvider);
+    final sideRailAutoHideSetting = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.sideRailAutoHide),
+    );
+    final window = ref.watch(windowSizeClassControllerProvider);
+    final contextualToolbarEnabled = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.tabBarShowContextualBar,
+      ),
+    );
+    final quickTabSwitcherRows = ref.watch(quickTabSwitcherRowCountProvider);
+    final tabBarStackingMode = ref.watch(effectiveTabBarStackingModeProvider);
     final quickTabSwitcherPlacement = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (s) => s.quickTabSwitcherPlacement,
       ),
     );
+    final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+    final homeSearchBarPlacement = ref.watch(
+      effectiveHomeSearchBarPlacementProvider,
+    );
+    final autoHideTabBarSetting = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.autoHideTabBar,
+      ),
+    );
+    final sideRailWidth = ref.watch(
+      generalSettingsWithDefaultsProvider.select((s) => s.sideRailWidth),
+    );
+    final sideRailDragWidth = ref.watch(sideRailDragWidthProvider);
 
-    // Vertical side rail (left/right). Auto-hide is not supported on the rail;
-    // it is reserved via a plain content offset and dismissed only by gesture.
-    final isRail = tabBarPosition.isVertical;
-
-    // Resolved once here and threaded down, rather than read again inside the
-    // rail: this same number insets the browser content, and a rail drawn at a
-    // different width than the one reserved would either overlap the page or
-    // leave a gap beside it.
-    final window = ref.watch(windowSizeClassControllerProvider);
-    final hasTabList =
-        ref.watch(effectiveTabBarStackingModeProvider) !=
-        TabBarStackingMode.disabled;
-    final canResizeRail =
-        isRail && BrowserTabBar.canResizeRail(window, hasTabList: hasTabList);
-    final railWidth = BrowserTabBar.railWidthFor(
-      window,
-      hasTabList: hasTabList,
-      // A resize in progress wins over the saved width, so the panel and the
-      // page follow the handle while it moves.
-      preferredWidth:
-          ref.watch(sideRailDragWidthProvider) ??
-          ref.watch(
-            generalSettingsWithDefaultsProvider.select((s) => s.sideRailWidth),
-          ),
+    // Where the chrome goes, resolved once here and threaded down: the same
+    // layout insets the page and draws the bars, so a bar can never be drawn
+    // at a size the page was not inset for.
+    final resolvedPosition = isSmallWebActive
+        ? TabBarPosition.top
+        : tabBarPositionSetting;
+    final sideRailAutoHide =
+        resolvedPosition.isVertical && sideRailAutoHideSetting;
+    // Gated in the provider, so the screen does not rebuild for a cursor that
+    // changes nothing.
+    final cursorInUse = ref.watch(
+      cursorInUseWhenProvider(enabled: sideRailAutoHide),
+    );
+    final layout = BrowserChromeLayout.resolve(
+      position: resolvedPosition,
+      isSmallWeb: isSmallWebActive,
+      window: window,
       windowWidth: MediaQuery.sizeOf(context).width,
       devicePixelRatio: MediaQuery.devicePixelRatioOf(context),
+      contextualToolbarEnabled: contextualToolbarEnabled,
+      quickTabSwitcherRowCount: isSmallWebActive
+          ? 0
+          : quickTabSwitcherRows.value ?? 0,
+      hasTabList: tabBarStackingMode != TabBarStackingMode.disabled,
+      quickTabSwitcherPlacement: quickTabSwitcherPlacement,
+      showBrowserHome: showBrowserHome,
+      homeSearchBarPlacement: homeSearchBarPlacement,
+      autoHideTabBar:
+          !isSmallWebActive &&
+          resolvedPosition.isHorizontal &&
+          autoHideTabBarSetting,
+      sideRailAutoHide: sideRailAutoHide,
+      cursorInUse: cursorInUse,
+      sideRailWidth: sideRailWidth,
+      sideRailDragWidth: sideRailDragWidth,
     );
 
-    // The auto-hiding rail slides in over the page instead of sitting beside
-    // it, so the page keeps its full width and never reflows on reveal. Gated
-    // on the cursor being the input in use: only the cursor can reveal it, so
-    // the moment the user touches the screen the rail goes back beside the
-    // page, where touch can reach it.
-    final railOverlay =
-        isRail &&
-        ref.watch(
-          generalSettingsWithDefaultsProvider.select((s) => s.sideRailAutoHide),
-        ) &&
-        ref.watch(cursorInUseProvider);
-
-    final autoHideTabBar =
-        !isSmallWebActive &&
-        tabBarPosition.isHorizontal &&
-        ref.watch(
-          generalSettingsWithDefaultsProvider.select(
-            (value) => value.autoHideTabBar,
-          ),
-        );
+    final tabBarPosition = layout.position;
+    final isRail = layout.isRail;
+    final railOverlay = layout.railOverlay;
+    final autoHideTabBar = layout.autoHide;
 
     ref.listen(overlayControllerProvider, (previous, next) {
       if (next != null) {
@@ -1766,37 +1656,12 @@ class BrowserScreen extends HookConsumerWidget {
 
     final bottomSafeArea = MediaQuery.paddingOf(context).bottom;
 
-    // Must match what _TabBar resolves, or the browser is inset for a toolbar
-    // row that is not drawn.
-    final suppressMainToolbarForHome = _suppressMainToolbarForHome(
-      showBrowserHome: ref.watch(shouldShowBrowserHomeProvider),
-      showContextualToolbar: showContextualToolbar,
-      placement: ref.watch(effectiveHomeSearchBarPlacementProvider),
-    );
-
-    // Calculate bottom toolbar size for the page inset and the FAB. A sheet
-    // covers the bars and never changes their size, so the page's viewport
-    // stays put while one opens: resizing the Gecko viewport would cost a page
-    // reflow plus, under hybrid composition, a native surface recreation, all
-    // in the same frame as the sheet's slide-in.
-    final Size bottomAppBarContentSize;
-    if (isSmallWebActive) {
-      bottomAppBarContentSize = const Size.fromHeight(
-        SmallWebBrowserOverlay.barHeight,
-      );
-    } else if (isRail) {
-      // The rail occupies a side, not the bottom; no bottom bar is rendered.
-      bottomAppBarContentSize = Size.zero;
-    } else {
-      bottomAppBarContentSize = BrowserBottomAppBar(
-        showMainToolbar: tabBarPosition == TabBarPosition.bottom,
-        showContextualToolbar: showContextualToolbar,
-        quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-        quickTabSwitcherPlacement: quickTabSwitcherPlacement,
-        isSmallWebMode: false,
-        suppressMainToolbar: suppressMainToolbarForHome,
-      ).preferredSize;
-    }
+    // The bottom bar's size, for the page inset and the FAB. A sheet covers
+    // the bars and never changes their size, so the page's viewport stays put
+    // while one opens: resizing the Gecko viewport would cost a page reflow
+    // plus, under hybrid composition, a native surface recreation, all in the
+    // same frame as the sheet's slide-in.
+    final bottomAppBarContentSize = Size.fromHeight(layout.bottomBarHeight);
     // Total height includes safe area padding
     final bottomAppBarTotalHeight =
         bottomAppBarContentSize.height + bottomSafeArea;
@@ -1809,22 +1674,13 @@ class BrowserScreen extends HookConsumerWidget {
       TabBarPosition.right => MediaQuery.paddingOf(context).right,
       _ => 0.0,
     };
-    final sideRailTotalWidth = isRail && !railOverlay
-        ? railWidth + horizontalSafeArea
+    final sideRailTotalWidth = layout.sideRailReservedWidth > 0
+        ? layout.sideRailReservedWidth + horizontalSafeArea
         : 0.0;
 
-    // Calculate top toolbar size for browser offset and progress indicator
+    // Top toolbar size for browser offset and progress indicator
     final topSafeArea = MediaQuery.paddingOf(context).top;
-    final topAppBarContentSize = BrowserTopAppBar(
-      showMainToolbar: tabBarPosition == TabBarPosition.top,
-      showContextualToolbar: showContextualToolbar,
-      quickTabSwitcherRowCount: quickTabSwitcherRowCount,
-      quickTabSwitcherPlacement: quickTabSwitcherPlacement,
-      isSmallWebMode: isSmallWebActive,
-      enableGestures: !isSmallWebActive,
-      suppressMainToolbar: suppressMainToolbarForHome,
-    ).preferredSize;
-    final topAppBarTotalHeight = topAppBarContentSize.height + topSafeArea;
+    final topAppBarTotalHeight = layout.topBarHeight + topSafeArea;
 
     // Get pixel ratio for converting logical pixels to physical pixels
     final pixelRatio = MediaQuery.devicePixelRatioOf(context);
@@ -2102,10 +1958,8 @@ class BrowserScreen extends HookConsumerWidget {
                   bottom: 0,
                   child: _BottomToolbarLayer(
                     tabInFullScreen: tabInFullScreen,
-                    isSmallWebActive: isSmallWebActive,
+                    bar: layout.bottomBar,
                     tabBarPosition: tabBarPosition,
-                    showContextualToolbar: showContextualToolbar,
-                    quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
                     pointerMoveEventsController: pointerMoveEventsController,
                   ),
@@ -2119,9 +1973,7 @@ class BrowserScreen extends HookConsumerWidget {
                   top: 0,
                   child: _TopToolbarLayer(
                     tabInFullScreen: tabInFullScreen,
-                    isSmallWebActive: isSmallWebActive,
-                    showContextualToolbar: showContextualToolbar,
-                    quickTabSwitcherRowCount: quickTabSwitcherRowCount,
+                    bar: layout.topBar!,
                     selectedTabId: selectedTabId,
                     pointerMoveEventsController: pointerMoveEventsController,
                   ),
@@ -2138,13 +1990,11 @@ class BrowserScreen extends HookConsumerWidget {
                   child: _SideRailToolbarLayer(
                     tabInFullScreen: tabInFullScreen,
                     tabBarPosition: tabBarPosition,
-                    railWidth: railWidth,
-                    resizable: canResizeRail,
+                    bar: layout.rail!,
+                    railWidth: layout.railWidth,
+                    resizable: layout.railResizable,
                     overlay: railOverlay,
-                    showContextualToolbar: showContextualToolbar,
-                    quickTabSwitcherRowCount: quickTabSwitcherRowCount,
                     selectedTabId: selectedTabId,
-                    suppressMainToolbar: suppressMainToolbarForHome,
                   ),
                 ),
 

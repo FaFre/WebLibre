@@ -56,27 +56,96 @@ abstract class _$GeneralSettingsRepository
   }
 }
 
-/// The general settings as stored, hidden features included.
+/// The general settings of the profile as stored, hidden features included.
+/// Never the onboarding draft.
 ///
-/// For the screens that show and edit settings, the onboarding draft and
-/// Feature Control. Behavior reads [generalSettingsWithDefaults].
+/// The profile layer: what [generalSettingsWithDefaults] applies, and what the
+/// onboarding's commit writes over. Screens that edit settings read
+/// [storedGeneralSettings] instead.
+
+@ProviderFor(profileGeneralSettings)
+final profileGeneralSettingsProvider = ProfileGeneralSettingsProvider._();
+
+/// The general settings of the profile as stored, hidden features included.
+/// Never the onboarding draft.
+///
+/// The profile layer: what [generalSettingsWithDefaults] applies, and what the
+/// onboarding's commit writes over. Screens that edit settings read
+/// [storedGeneralSettings] instead.
+
+final class ProfileGeneralSettingsProvider
+    extends
+        $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
+    with $Provider<GeneralSettings> {
+  /// The general settings of the profile as stored, hidden features included.
+  /// Never the onboarding draft.
+  ///
+  /// The profile layer: what [generalSettingsWithDefaults] applies, and what the
+  /// onboarding's commit writes over. Screens that edit settings read
+  /// [storedGeneralSettings] instead.
+  ProfileGeneralSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'profileGeneralSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileGeneralSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeneralSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GeneralSettings create(Ref ref) {
+    return profileGeneralSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeneralSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeneralSettings>(value),
+    );
+  }
+}
+
+String _$profileGeneralSettingsHash() =>
+    r'cb9c58b6368358b136001c02d9808845ce9c9928';
+
+/// The general settings as stored, hidden features included, for the screens
+/// that show and edit them: in the onboarding the draft's
+/// (`draftGeneralSettings`), otherwise the profile's
+/// ([profileGeneralSettings]).
+///
+/// The edit layer. Behavior reads [generalSettingsWithDefaults].
 
 @ProviderFor(storedGeneralSettings)
 final storedGeneralSettingsProvider = StoredGeneralSettingsProvider._();
 
-/// The general settings as stored, hidden features included.
+/// The general settings as stored, hidden features included, for the screens
+/// that show and edit them: in the onboarding the draft's
+/// (`draftGeneralSettings`), otherwise the profile's
+/// ([profileGeneralSettings]).
 ///
-/// For the screens that show and edit settings, the onboarding draft and
-/// Feature Control. Behavior reads [generalSettingsWithDefaults].
+/// The edit layer. Behavior reads [generalSettingsWithDefaults].
 
 final class StoredGeneralSettingsProvider
     extends
         $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
     with $Provider<GeneralSettings> {
-  /// The general settings as stored, hidden features included.
+  /// The general settings as stored, hidden features included, for the screens
+  /// that show and edit them: in the onboarding the draft's
+  /// (`draftGeneralSettings`), otherwise the profile's
+  /// ([profileGeneralSettings]).
   ///
-  /// For the screens that show and edit settings, the onboarding draft and
-  /// Feature Control. Behavior reads [generalSettingsWithDefaults].
+  /// The edit layer. Behavior reads [generalSettingsWithDefaults].
   StoredGeneralSettingsProvider._()
     : super(
         from: null,
@@ -111,24 +180,33 @@ final class StoredGeneralSettingsProvider
 }
 
 String _$storedGeneralSettingsHash() =>
-    r'555fbb61d3ebce799f295e284a8dff663b5c8a72';
+    r'cd8abfab5673d2dcbca97dc16b6a3d690c6c18ce';
 
-/// The general settings as they apply: the settings of hidden features at
-/// their hidden values ([GeneralSettings.effective]).
+/// The general settings as they apply: the profile's settings with those of
+/// hidden features at their hidden values ([GeneralSettings.effective]).
+///
+/// The live layer, which services and the browser behave by. It follows the
+/// profile, never the onboarding draft.
 
 @ProviderFor(generalSettingsWithDefaults)
 final generalSettingsWithDefaultsProvider =
     GeneralSettingsWithDefaultsProvider._();
 
-/// The general settings as they apply: the settings of hidden features at
-/// their hidden values ([GeneralSettings.effective]).
+/// The general settings as they apply: the profile's settings with those of
+/// hidden features at their hidden values ([GeneralSettings.effective]).
+///
+/// The live layer, which services and the browser behave by. It follows the
+/// profile, never the onboarding draft.
 
 final class GeneralSettingsWithDefaultsProvider
     extends
         $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
     with $Provider<GeneralSettings> {
-  /// The general settings as they apply: the settings of hidden features at
-  /// their hidden values ([GeneralSettings.effective]).
+  /// The general settings as they apply: the profile's settings with those of
+  /// hidden features at their hidden values ([GeneralSettings.effective]).
+  ///
+  /// The live layer, which services and the browser behave by. It follows the
+  /// profile, never the onboarding draft.
   GeneralSettingsWithDefaultsProvider._()
     : super(
         from: null,
@@ -163,14 +241,14 @@ final class GeneralSettingsWithDefaultsProvider
 }
 
 String _$generalSettingsWithDefaultsHash() =>
-    r'2c307a04c985c4d9b8857b8f509de2d99decfc24';
+    r'481ba69247a8d82fd79df630156f8f28d118b092';
 
 /// The features shown with the current visibility switches.
 ///
 /// For widgets that check many features at once (a list of actions, a set of
 /// modules): one watch, and a rebuild only when the set changes rather than
-/// on every settings write. `SetupDraftScope` overrides it, so below the
-/// scope it follows the draft.
+/// on every settings write. The live layer: widgets that render settings read
+/// [DisplayedShownFeatures].
 
 @ProviderFor(ShownFeatures)
 final shownFeaturesProvider = ShownFeaturesProvider._();
@@ -179,16 +257,16 @@ final shownFeaturesProvider = ShownFeaturesProvider._();
 ///
 /// For widgets that check many features at once (a list of actions, a set of
 /// modules): one watch, and a rebuild only when the set changes rather than
-/// on every settings write. `SetupDraftScope` overrides it, so below the
-/// scope it follows the draft.
+/// on every settings write. The live layer: widgets that render settings read
+/// [DisplayedShownFeatures].
 final class ShownFeaturesProvider
     extends $NotifierProvider<ShownFeatures, Set<FeatureId>> {
   /// The features shown with the current visibility switches.
   ///
   /// For widgets that check many features at once (a list of actions, a set of
   /// modules): one watch, and a rebuild only when the set changes rather than
-  /// on every settings write. `SetupDraftScope` overrides it, so below the
-  /// scope it follows the draft.
+  /// on every settings write. The live layer: widgets that render settings read
+  /// [DisplayedShownFeatures].
   ShownFeaturesProvider._()
     : super(
         from: null,
@@ -222,8 +300,8 @@ String _$shownFeaturesHash() => r'e57f691a36ff2d283e21cd26dfbdcb2a862c5c04';
 ///
 /// For widgets that check many features at once (a list of actions, a set of
 /// modules): one watch, and a rebuild only when the set changes rather than
-/// on every settings write. `SetupDraftScope` overrides it, so below the
-/// scope it follows the draft.
+/// on every settings write. The live layer: widgets that render settings read
+/// [DisplayedShownFeatures].
 
 abstract class _$ShownFeatures extends $Notifier<Set<FeatureId>> {
   Set<FeatureId> build();
@@ -657,3 +735,337 @@ final class EffectiveHomeSearchBarPlacementProvider
 
 String _$effectiveHomeSearchBarPlacementHash() =>
     r'73f1d11f26d6fb322f109470bd71828677181ab9';
+
+/// The general settings as the widgets that render settings draw them: in
+/// the onboarding the draft's as they would apply, otherwise the live ones
+/// ([generalSettingsWithDefaults]).
+///
+/// The displayed layer, for the layout preview, `HiddenFeatureGate`, the
+/// module and menu views and the onboarding's pages. Never for behavior:
+/// services read [generalSettingsWithDefaults].
+
+@ProviderFor(displayedGeneralSettings)
+final displayedGeneralSettingsProvider = DisplayedGeneralSettingsProvider._();
+
+/// The general settings as the widgets that render settings draw them: in
+/// the onboarding the draft's as they would apply, otherwise the live ones
+/// ([generalSettingsWithDefaults]).
+///
+/// The displayed layer, for the layout preview, `HiddenFeatureGate`, the
+/// module and menu views and the onboarding's pages. Never for behavior:
+/// services read [generalSettingsWithDefaults].
+
+final class DisplayedGeneralSettingsProvider
+    extends
+        $FunctionalProvider<GeneralSettings, GeneralSettings, GeneralSettings>
+    with $Provider<GeneralSettings> {
+  /// The general settings as the widgets that render settings draw them: in
+  /// the onboarding the draft's as they would apply, otherwise the live ones
+  /// ([generalSettingsWithDefaults]).
+  ///
+  /// The displayed layer, for the layout preview, `HiddenFeatureGate`, the
+  /// module and menu views and the onboarding's pages. Never for behavior:
+  /// services read [generalSettingsWithDefaults].
+  DisplayedGeneralSettingsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedGeneralSettingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedGeneralSettingsHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeneralSettings> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  GeneralSettings create(Ref ref) {
+    return displayedGeneralSettings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeneralSettings value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeneralSettings>(value),
+    );
+  }
+}
+
+String _$displayedGeneralSettingsHash() =>
+    r'75222d1286e1ee9b999b85315f208a3483c7b432';
+
+/// [ShownFeatures] for the displayed layer ([displayedGeneralSettings]).
+
+@ProviderFor(DisplayedShownFeatures)
+final displayedShownFeaturesProvider = DisplayedShownFeaturesProvider._();
+
+/// [ShownFeatures] for the displayed layer ([displayedGeneralSettings]).
+final class DisplayedShownFeaturesProvider
+    extends $NotifierProvider<DisplayedShownFeatures, Set<FeatureId>> {
+  /// [ShownFeatures] for the displayed layer ([displayedGeneralSettings]).
+  DisplayedShownFeaturesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedShownFeaturesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedShownFeaturesHash();
+
+  @$internal
+  @override
+  DisplayedShownFeatures create() => DisplayedShownFeatures();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Set<FeatureId> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Set<FeatureId>>(value),
+    );
+  }
+}
+
+String _$displayedShownFeaturesHash() =>
+    r'514287f5dabe0d84a1ae5b5031ac36861321d486';
+
+/// [ShownFeatures] for the displayed layer ([displayedGeneralSettings]).
+
+abstract class _$DisplayedShownFeatures extends $Notifier<Set<FeatureId>> {
+  Set<FeatureId> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<Set<FeatureId>, Set<FeatureId>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Set<FeatureId>, Set<FeatureId>>,
+              Set<FeatureId>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// [effectiveTabBarPosition] for the displayed layer.
+
+@ProviderFor(displayedTabBarPosition)
+final displayedTabBarPositionProvider = DisplayedTabBarPositionProvider._();
+
+/// [effectiveTabBarPosition] for the displayed layer.
+
+final class DisplayedTabBarPositionProvider
+    extends $FunctionalProvider<TabBarPosition, TabBarPosition, TabBarPosition>
+    with $Provider<TabBarPosition> {
+  /// [effectiveTabBarPosition] for the displayed layer.
+  DisplayedTabBarPositionProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedTabBarPositionProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedTabBarPositionHash();
+
+  @$internal
+  @override
+  $ProviderElement<TabBarPosition> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  TabBarPosition create(Ref ref) {
+    return displayedTabBarPosition(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabBarPosition value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabBarPosition>(value),
+    );
+  }
+}
+
+String _$displayedTabBarPositionHash() =>
+    r'16147c6acb7e6c74c8292ca53d21ee16c62736ef';
+
+/// [effectiveTabBarStackingMode] for the displayed layer.
+
+@ProviderFor(displayedTabBarStackingMode)
+final displayedTabBarStackingModeProvider =
+    DisplayedTabBarStackingModeProvider._();
+
+/// [effectiveTabBarStackingMode] for the displayed layer.
+
+final class DisplayedTabBarStackingModeProvider
+    extends
+        $FunctionalProvider<
+          TabBarStackingMode,
+          TabBarStackingMode,
+          TabBarStackingMode
+        >
+    with $Provider<TabBarStackingMode> {
+  /// [effectiveTabBarStackingMode] for the displayed layer.
+  DisplayedTabBarStackingModeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedTabBarStackingModeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedTabBarStackingModeHash();
+
+  @$internal
+  @override
+  $ProviderElement<TabBarStackingMode> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TabBarStackingMode create(Ref ref) {
+    return displayedTabBarStackingMode(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabBarStackingMode value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabBarStackingMode>(value),
+    );
+  }
+}
+
+String _$displayedTabBarStackingModeHash() =>
+    r'c1bbfbb4dfd8cc0a41ee14199bb8d3a7a504e6f2';
+
+/// [effectiveSearchFieldPlacement] for the displayed layer.
+
+@ProviderFor(displayedSearchFieldPlacement)
+final displayedSearchFieldPlacementProvider =
+    DisplayedSearchFieldPlacementProvider._();
+
+/// [effectiveSearchFieldPlacement] for the displayed layer.
+
+final class DisplayedSearchFieldPlacementProvider
+    extends
+        $FunctionalProvider<
+          SearchFieldPlacement,
+          SearchFieldPlacement,
+          SearchFieldPlacement
+        >
+    with $Provider<SearchFieldPlacement> {
+  /// [effectiveSearchFieldPlacement] for the displayed layer.
+  DisplayedSearchFieldPlacementProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedSearchFieldPlacementProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedSearchFieldPlacementHash();
+
+  @$internal
+  @override
+  $ProviderElement<SearchFieldPlacement> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SearchFieldPlacement create(Ref ref) {
+    return displayedSearchFieldPlacement(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SearchFieldPlacement value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SearchFieldPlacement>(value),
+    );
+  }
+}
+
+String _$displayedSearchFieldPlacementHash() =>
+    r'e36c24ca3ec209d38912cd8dc27d6999386098b7';
+
+/// [effectiveHomeSearchBarPlacement] for the displayed layer.
+
+@ProviderFor(displayedHomeSearchBarPlacement)
+final displayedHomeSearchBarPlacementProvider =
+    DisplayedHomeSearchBarPlacementProvider._();
+
+/// [effectiveHomeSearchBarPlacement] for the displayed layer.
+
+final class DisplayedHomeSearchBarPlacementProvider
+    extends
+        $FunctionalProvider<
+          HomeSearchBarPlacement,
+          HomeSearchBarPlacement,
+          HomeSearchBarPlacement
+        >
+    with $Provider<HomeSearchBarPlacement> {
+  /// [effectiveHomeSearchBarPlacement] for the displayed layer.
+  DisplayedHomeSearchBarPlacementProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'displayedHomeSearchBarPlacementProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$displayedHomeSearchBarPlacementHash();
+
+  @$internal
+  @override
+  $ProviderElement<HomeSearchBarPlacement> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  HomeSearchBarPlacement create(Ref ref) {
+    return displayedHomeSearchBarPlacement(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(HomeSearchBarPlacement value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<HomeSearchBarPlacement>(value),
+    );
+  }
+}
+
+String _$displayedHomeSearchBarPlacementHash() =>
+    r'3870cb2623c5f2c4b9f0b09b1f4825e16f0045c7';

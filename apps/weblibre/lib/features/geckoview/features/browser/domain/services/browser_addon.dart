@@ -27,6 +27,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
+import 'package:weblibre/features/proxy/domain/services/container_routing_snapshot.dart';
 import 'package:weblibre/features/proxy/domain/services/routed_http_client.dart';
 
 part 'browser_addon.g.dart';
@@ -123,8 +124,38 @@ class BrowserAddonService extends _$BrowserAddonService {
     }
   }
 
+  /// Whether [addonGuid] is installed, enabled or not.
+  ///
+  /// `getAddonById` also answers with a catalog entry when nothing installed
+  /// matches, so only its flag tells. The installed lookup is always live;
+  /// the cache applies to that catalog fallback only, which a cold start
+  /// would otherwise fetch before the route is up. A failed lookup counts as
+  /// not installed: installing then decides.
+  Future<bool> isInstalled(String addonGuid) async {
+    try {
+      final addon = await ref
+          .read(addonServiceProvider)
+          .getAddonById(addonGuid);
+      return addon?.isInstalled ?? false;
+    } catch (e, s) {
+      logger.w('Looking up $addonGuid failed', error: e, stackTrace: s);
+      return false;
+    }
+  }
+
   Future<AddonInstallOutcome> install(String addonGuid) async {
     try {
+      // On a cold start the general route's proxy may still be coming up:
+      // the AMO lookup would be refused for want of an endpoint a moment
+      // before it exists, and nothing retries an install until the next
+      // start.
+      await awaitAppRoutingSettled(
+        ref,
+        generalContextId,
+        timeout: _routingSettleTimeout,
+      );
+      if (!ref.mounted) return AddonInstallOutcome.failed;
+
       final xpiUrl = await getAddonXpiUrl(addonGuid);
       if (!ref.mounted) return AddonInstallOutcome.failed;
 
@@ -142,6 +173,11 @@ class BrowserAddonService extends _$BrowserAddonService {
       return AddonInstallOutcome.failed;
     }
   }
+
+  /// How long [install] waits for the general route's proxy to come up. A
+  /// Tor bootstrap can take a while; past this, the install is tried anyway
+  /// and fails as it would have.
+  static const _routingSettleTimeout = Duration(minutes: 3);
 
   /// The Pigeon error code of a declined permission prompt: the class name of
   /// Android Components' `WebExtensionInstallException.UserCancelled`.

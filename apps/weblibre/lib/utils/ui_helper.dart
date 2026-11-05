@@ -69,19 +69,38 @@ void showErrorMessage(
   Duration duration = const Duration(seconds: 4),
   bool persist = false,
 }) {
-  final snackBar = _createFloatingSnackBar(
-    content: Text(
-      _truncateForSnackBar(message),
-      maxLines: _kSnackBarMaxLines,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(color: Theme.of(context).colorScheme.error),
-    ),
-    backgroundColor: Theme.of(context).colorScheme.onError,
-    duration: duration,
-    persist: persist,
-  );
+  errorMessengerFor(context, duration: duration, persist: persist)(message);
+}
 
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+/// [showErrorMessage] for an outcome known only after an await, when
+/// [context] may be gone by then (a list tile that moved to another list, a
+/// menu that closed): resolves the messenger and colors from [context] now,
+/// and shows the message whenever the returned function is called, as long
+/// as the messenger is still there.
+void Function(String message) errorMessengerFor(
+  BuildContext context, {
+  Duration duration = const Duration(seconds: 4),
+  bool persist = false,
+}) {
+  final messenger = ScaffoldMessenger.of(context);
+  final colorScheme = Theme.of(context).colorScheme;
+
+  return (message) {
+    if (!messenger.mounted) return;
+    messenger.showSnackBar(
+      _createFloatingSnackBar(
+        content: Text(
+          _truncateForSnackBar(message),
+          maxLines: _kSnackBarMaxLines,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: colorScheme.error),
+        ),
+        backgroundColor: colorScheme.onError,
+        duration: duration,
+        persist: persist,
+      ),
+    );
+  };
 }
 
 void showInfoMessage(

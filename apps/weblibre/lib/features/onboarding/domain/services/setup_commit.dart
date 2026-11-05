@@ -24,16 +24,25 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/storage_options.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/toolbar_button_config_repository.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_module_order.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
-import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
+import 'package:weblibre/features/user/data/database/definitions.drift.dart'
+    show ToolbarButtonConfig;
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
+import 'package:weblibre/utils/ordered_layout.dart';
 
 part 'setup_commit.g.dart';
 
@@ -51,6 +60,8 @@ final class SetupCommitJournal {
     required this.engine,
     required this.hardeningBaseline,
     required this.layouts,
+    this.toolbarButtons = const {},
+    this.menuLayout,
     required this.steps,
     required this.targetRevision,
   });
@@ -62,8 +73,21 @@ final class SetupCommitJournal {
   final Map<String, Object?> engine;
   final bool hardeningBaseline;
 
-  /// Encoded module layouts by [ModuleSurface.name].
-  final Map<String, String> layouts;
+  /// The module layouts the commit writes, by surface. A surface this
+  /// version does not know is skipped.
+  @JsonKey(fromJson: _layoutsFromJson, toJson: _layoutsToJson)
+  final Map<ModuleSurface, List<ModuleOrderEntry>> layouts;
+
+  /// The whole button set of each toolbar the draft changed, by
+  /// [ToolbarConfigLocation.name]. Absent from a journal an older version
+  /// wrote.
+  @_ToolbarButtonConfigConverter()
+  final Map<String, List<ToolbarButtonConfig>> toolbarButtons;
+
+  /// The menu arrangement, or null to leave the profile's. Absent from a
+  /// journal an older version wrote.
+  @JsonKey(fromJson: _menuLayoutFromJson, toJson: _menuLayoutToJson)
+  final List<MenuSectionEntry>? menuLayout;
   final Set<SetupStep> steps;
   final int targetRevision;
 
@@ -85,9 +109,14 @@ final class SetupCommitJournal {
     hardeningBaseline: draft.appliesHardeningBaseline,
     layouts: {
       for (final surface in ModuleSurface.values)
-        if (draft.layoutFor(surface) case final layout?)
-          surface.name: encodeModuleOrder(layout),
+        surface: ?draft.layoutFor(surface),
     },
+    toolbarButtons: {
+      for (final MapEntry(key: location, value: configs)
+          in draft.toolbarButtons.entries)
+        location.name: configs,
+    },
+    menuLayout: draft.menuLayout,
     steps: {
       if (draft.installsUBlock) SetupStep.installUBlock,
       if (draft.appliesOptimizedUBlockFilters) SetupStep.optimizedUBlockFilters,
@@ -109,6 +138,75 @@ final class SetupCommitJournal {
   Map<String, dynamic> toJson() => _$SetupCommitJournalToJson(this);
 }
 
+/// A journal value that is a list, or — as a journal written before the
+/// layouts were typed stored it — that list as JSON text. Such a journal can
+/// be cut short after the onboarding was marked complete, and dropping it
+/// then would lose the steps it still has to schedule.
+Object? _jsonList(Object? json) => json is String ? jsonDecode(json) : json;
+
+Map<ModuleSurface, List<ModuleOrderEntry>> _layoutsFromJson(
+  Map<String, dynamic> json,
+) {
+  return {
+    for (final surface in ModuleSurface.values)
+      if (json[surface.name] case final Object value)
+        surface: mergeModuleOrderWithDefaults(
+          layoutEntriesFromJson(_jsonList(value), ModuleOrderEntry.fromJson),
+          surface.defaultModules,
+        ),
+  };
+}
+
+Map<String, Object?> _layoutsToJson(
+  Map<ModuleSurface, List<ModuleOrderEntry>> layouts,
+) => {
+  for (final MapEntry(key: surface, value: layout) in layouts.entries)
+    surface.name: [for (final entry in layout) entry.toJson()],
+};
+
+List<MenuSectionEntry>? _menuLayoutFromJson(Object? json) => switch (json) {
+  null => null,
+  _ => mergeMenuLayoutWithDefaults(
+    layoutEntriesFromJson(_jsonList(json), MenuSectionEntry.fromJson),
+  ),
+};
+
+List<Object?>? _menuLayoutToJson(List<MenuSectionEntry>? layout) =>
+    switch (layout) {
+      null => null,
+      final layout => [for (final section in layout) section.toJson()],
+    };
+
+/// A button as the journal stores it. Its long-press action goes by name, as
+/// every persisted [BrowserAction] binding does; an action this version does
+/// not know is dropped, which leaves the button's own long press.
+final class _ToolbarButtonConfigConverter
+    implements JsonConverter<ToolbarButtonConfig, Map<String, dynamic>> {
+  const _ToolbarButtonConfigConverter();
+
+  @override
+  ToolbarButtonConfig fromJson(Map<String, dynamic> json) =>
+      ToolbarButtonConfig(
+        buttonId: json['buttonId'] as String,
+        orderKey: json['orderKey'] as String,
+        isVisible: json['isVisible'] as bool,
+        fallbackId: json['fallbackId'] as String?,
+        longPressAction: switch (json['longPressAction']) {
+          final String name => BrowserAction.values.asNameMap()[name],
+          _ => null,
+        },
+      );
+
+  @override
+  Map<String, dynamic> toJson(ToolbarButtonConfig config) => {
+    'buttonId': config.buttonId,
+    'orderKey': config.orderKey,
+    'isVisible': config.isVisible,
+    'fallbackId': config.fallbackId,
+    'longPressAction': config.longPressAction?.name,
+  };
+}
+
 /// [json] as plain JSON values (maps, lists, scalars), the way the settings
 /// store them: nested models are encoded through their own `toJson`.
 Map<String, Object?> _plainJson(Map<String, dynamic> json) =>
@@ -127,8 +225,9 @@ Map<String, Object?> _changedKeys(
 ///
 /// 1. The draft is resolved against the current settings into a
 ///    [SetupCommitJournal], which is written durably.
-/// 2. The journal is applied: settings, hardening, module layouts. Each write
-///    is "set this to that", so applying it again changes nothing. Hardening
+/// 2. The journal is applied: settings, hardening, module layouts, toolbar
+///    buttons, the menu. Each write is "set this to that", so applying it
+///    again changes nothing. Hardening
 ///    the engine refuses does not stop the commit: it becomes an external
 ///    step ([SetupStep.hardeningBaseline]).
 /// 3. The onboarding revision is pushed: from here on onboarding never shows
@@ -147,10 +246,6 @@ Map<String, Object?> _changedKeys(
 /// (P1).
 @Riverpod(keepAlive: true)
 class SetupCommitService extends _$SetupCommitService {
-  static const _journalOptions = StorageOptions(
-    cacheTime: StorageCacheTime.unsafe_forever,
-  );
-
   @override
   void build() {}
 
@@ -174,7 +269,7 @@ class SetupCommitService extends _$SetupCommitService {
     await _storage.write(
       setupCommitJournalKey,
       jsonEncode(journal.toJson()),
-      _journalOptions,
+      foreverStorageOptions,
     );
     await _apply(journal);
 
@@ -183,8 +278,11 @@ class SetupCommitService extends _$SetupCommitService {
 
   /// Finishes a commit an earlier process started but did not complete.
   /// Returns whether there was one. A journal that cannot be read is dropped
-  /// (logged): the onboarding then shows again and its commit overwrites
-  /// whatever the broken one had written.
+  /// (logged). Cut short before the revision was pushed, the onboarding then
+  /// shows again and its commit overwrites whatever the broken one had
+  /// written; cut short after it, the onboarding counts as done and the steps
+  /// the journal still had to schedule are lost. Journals written before the
+  /// layouts were typed are read too ([_jsonList]) for that reason.
   Future<bool> resumeInterrupted() async {
     final data = await _storage.read(setupCommitJournalKey);
     if (data == null) return false;
@@ -228,12 +326,33 @@ class SetupCommitService extends _$SetupCommitService {
         await runner.runOnce(SetupStep.hardeningBaseline) !=
             SetupStepOutcome.done;
 
-    final surfaces = ModuleSurface.values.asNameMap();
-    for (final MapEntry(key: name, value: encoded) in journal.layouts.entries) {
-      final surface = surfaces[name];
-      if (surface == null) continue;
-      await _storage.write(surface.key, encoded, moduleOrderStorageOptions);
-      ref.invalidate(searchModuleOrderProvider(surface));
+    for (final MapEntry(key: surface, value: layout)
+        in journal.layouts.entries) {
+      await _writeThrough(
+        surface.key,
+        encodeModuleOrder(layout),
+        () => ref
+            .read(searchModuleOrderProvider(surface).notifier)
+            .replace(layout),
+      );
+    }
+
+    final locations = ToolbarConfigLocation.values.asNameMap();
+    for (final MapEntry(key: name, value: configs)
+        in journal.toolbarButtons.entries) {
+      final location = locations[name];
+      if (location == null) continue;
+      await ref
+          .read(toolbarConfigRepositoryProvider(location))
+          .saveAll(configs);
+    }
+
+    if (journal.menuLayout case final layout?) {
+      await _writeThrough(
+        menuLayoutStorageKey,
+        encodeMenuLayout(layout),
+        () => ref.read(menuLayoutProvider.notifier).replace(layout),
+      );
     }
 
     await ref
@@ -245,5 +364,19 @@ class SetupCommitService extends _$SetupCommitService {
       if (hardeningFailed) SetupStep.hardeningBaseline,
     });
     await _storage.delete(setupCommitJournalKey);
+  }
+
+  /// Stores [encoded] under [key] first, so a commit cut short is resumed
+  /// from it, then hands it to the provider that persists there ([replace]):
+  /// `persist` reads the store only on a provider's first build, and the
+  /// provider may be built already (an invalidation would rebuild it with
+  /// what it had).
+  Future<void> _writeThrough(
+    String key,
+    String encoded,
+    void Function() replace,
+  ) async {
+    await _storage.write(key, encoded, foreverStorageOptions);
+    replace();
   }
 }

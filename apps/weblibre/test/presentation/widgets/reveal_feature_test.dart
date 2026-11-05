@@ -44,6 +44,10 @@ class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
   // ignore: riverpod_lint/avoid_public_notifier_properties
   GeneralSettings settings;
 
+  /// Fails every write, as a full disk would.
+  // ignore: riverpod_lint/avoid_public_notifier_properties
+  bool failWrites = false;
+
   @override
   Stream<GeneralSettings> build() => Stream.value(settings);
 
@@ -52,6 +56,7 @@ class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
 
   @override
   Future<void> updateSettings(UpdateGeneralSettingsFunc updateWithCurrent) {
+    if (failWrites) return Future.error(StateError('disk full'));
     settings = updateWithCurrent(settings);
     state = AsyncData(settings);
     return Future.value();
@@ -63,6 +68,8 @@ void main() {
 
   late ProviderContainer container;
   late _FakeGeneralSettingsRepository repository;
+  // What the last trigger's askToRevealFeature returned.
+  bool? revealed;
 
   // Manual connection setup needs Connections and Expert settings. [engine]
   // is what is stored: changes that Expert settings, hidden, stop applying.
@@ -72,6 +79,7 @@ void main() {
     EngineSettings? engine,
   }) async {
     final Storage<String, String> storage = Storage.inMemory();
+    revealed = null;
     repository = _FakeGeneralSettingsRepository(
       GeneralSettings.withDefaults()
           .withVisibilitySwitch(
@@ -84,7 +92,7 @@ void main() {
       overrides: [
         riverpodDatabaseStorageProvider.overrideWith((ref) => storage),
         generalSettingsRepositoryProvider.overrideWith(() => repository),
-        storedSettingsSnapshotProvider.overrideWith(
+        profileSettingsSnapshotProvider.overrideWith(
           (ref) => SettingsSnapshot(
             general: repository.settings,
             engine: engine ?? EngineSettings.withDefaults(),
@@ -116,11 +124,13 @@ void main() {
               ref.watch(generalSettingsWithDefaultsProvider);
               return Scaffold(
                 body: TextButton(
-                  onPressed: () => askToRevealFeature(
-                    context,
-                    container.read(featureRevealProvider.notifier),
-                    FeatureId.connectionsManualProxyConfig,
-                  ),
+                  onPressed: () async {
+                    revealed = await askToRevealFeature(
+                      context,
+                      container,
+                      FeatureId.connectionsManualProxyConfig,
+                    );
+                  },
                   child: const Text('trigger'),
                 ),
               );
@@ -158,6 +168,23 @@ void main() {
       VisibilitySwitch.connections,
       VisibilitySwitch.expertDetails,
     });
+  });
+
+  testWidgets('a "Show" that cannot be saved says so and stays hidden', (
+    tester,
+  ) async {
+    await pumpTrigger(tester, connectionsShown: true);
+    repository.failWrites = true;
+
+    await tester.tap(find.text('trigger'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.visibilitySwitch_revealConfirm));
+    await tester.pumpAndSettle();
+
+    // The binding's action must not run with its feature still hidden.
+    expect(revealed, isFalse);
+    expect(shown(VisibilitySwitch.expertDetails), isFalse);
+    expect(find.text(l10n.visibilitySwitch_showFailed), findsOne);
   });
 
   testWidgets('dismissing the dialog is no answer and asks again', (
@@ -221,6 +248,39 @@ void main() {
     expect(shown(VisibilitySwitch.connections), isTrue);
     expect(shown(VisibilitySwitch.expertDetails), isTrue);
     expect(container.read(declinedVisibilityRevealsProvider), isEmpty);
+  });
+
+  testWidgets("a note's Show that cannot be saved keeps the decline", (
+    tester,
+  ) async {
+    await pumpTrigger(tester);
+
+    await tester.tap(find.text('trigger'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.common_cancel));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('trigger'));
+    await tester.pumpAndSettle();
+    repository.failWrites = true;
+    await tester.tap(
+      find.widgetWithText(SnackBarAction, l10n.visibilitySwitch_revealConfirm),
+    );
+    await tester.pumpAndSettle();
+
+    expect(shown(VisibilitySwitch.connections), isFalse);
+    expect(shown(VisibilitySwitch.expertDetails), isFalse);
+    expect(find.text(l10n.visibilitySwitch_showFailed), findsOne);
+    // Still hidden, still declined: the next binding gets the note again,
+    // not the full dialog.
+    expect(container.read(declinedVisibilityRevealsProvider), {
+      VisibilitySwitch.connections,
+      VisibilitySwitch.expertDetails,
+    });
+
+    await tester.tap(find.text('trigger'));
+    await tester.pumpAndSettle();
+    expect(find.text(l10n.visibilitySwitch_revealTitle(2)), findsNothing);
   });
 
   group('changes that apply again are listed before Show', () {

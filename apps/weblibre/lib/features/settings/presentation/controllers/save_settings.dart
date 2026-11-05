@@ -17,21 +17,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/tor_settings.dart';
 
 part 'save_settings.g.dart';
 
-/// Implemented by the onboarding draft scope's save controllers: their
-/// saves go to the draft rather than the live settings.
-///
-/// Widgets that reach state the draft does not hold (toolbar button and menu
-/// arrangements, which have their own stores) hide their entry point below
-/// such a controller, so nothing is written before the user taps Done.
-abstract interface class SavesToDraft {}
+/// Whether what the settings screens save lands in the profile at once:
+/// false in the onboarding, whose draft is committed only at Done. Effects
+/// that only make sense for a live change (a restart offer, forgetting a
+/// declined reveal) wait while it is false.
+@Riverpod(keepAlive: true)
+bool settingsEditsAreLive(Ref ref) =>
+    ref.watch(setupDraftControllerProvider.select((draft) => draft == null));
 
+/// How the settings screens save general settings: into the profile, or in
+/// the onboarding into its draft, as a Customize change (Basics files its own
+/// answers). Only settings UI writes through here; the browser writes the
+/// repository, so nothing it does lands in a draft.
 @Riverpod(keepAlive: true)
 class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
   @override
@@ -43,6 +49,13 @@ class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
   /// storage, say) is kept in the state rather than thrown, so a caller that
   /// confirms the change checks the result first.
   Future<bool> save(UpdateGeneralSettingsFunc updateSettings) async {
+    if (ref.read(setupDraftControllerProvider) != null) {
+      ref
+          .read(setupDraftControllerProvider.notifier)
+          .editGeneral(SetupDraftStep.customize, updateSettings);
+      return true;
+    }
+
     state = const AsyncLoading();
 
     final result = await AsyncValue.guard(
@@ -56,6 +69,7 @@ class SaveGeneralSettingsController extends _$SaveGeneralSettingsController {
   }
 }
 
+/// Like [SaveGeneralSettingsController], for the engine settings.
 @Riverpod(keepAlive: true)
 class SaveEngineSettingsController extends _$SaveEngineSettingsController {
   @override
@@ -64,6 +78,13 @@ class SaveEngineSettingsController extends _$SaveEngineSettingsController {
   }
 
   Future<void> save(UpdateEngineSettingsFunc updateSettings) async {
+    if (ref.read(setupDraftControllerProvider) != null) {
+      ref
+          .read(setupDraftControllerProvider.notifier)
+          .editEngine(updateSettings);
+      return;
+    }
+
     state = const AsyncLoading();
 
     final result = await AsyncValue.guard(

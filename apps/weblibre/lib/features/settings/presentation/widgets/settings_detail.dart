@@ -17,19 +17,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:hooks_riverpod/misc.dart' show ProviderListenable;
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/presentation/widgets/highlight_pulse.dart';
+
+part 'settings_detail.g.dart';
 
 /// Default total-entry count at or below which [SettingsDetailScaffold] hides
 /// its search field — searching three toggles is just visual noise.
@@ -60,7 +61,7 @@ class SettingsEntryDefinition {
   /// hidden, so it can be checked and undone (P5), and the search lists it
   /// without a hidden status. Only for what keeps applying while hidden
   /// (H1); a setting that does not apply takes [hiddenSettings].
-  final ProviderListenable<bool>? keptWhen;
+  final KeptWhen? keptWhen;
 
   /// Like a [keptWhen] that holds, for a condition the screen already knows:
   /// the entry stays usable whatever hides it, a [HiddenFeatureScope] around
@@ -77,14 +78,16 @@ class SettingsEntryDefinition {
   /// hidden; see [HiddenFeatureGate.hiddenSettings].
   final List<HiddenSetting> hiddenSettings;
 
-  /// Whether the entry writes outside the settings the onboarding draft holds
-  /// (it opens another store's editor). Left out while editing a draft.
-  final bool liveOnly;
-
   /// Only for the settings search: never drawn on a screen. For screens whose
   /// content is not a static list (built from live state, or from data such
   /// as the fingerprint targets), so a hidden part can still be found.
   final bool searchOnly;
+
+  /// Names the entry for code that rearranges its section, which must not go
+  /// by the translated [title]. Toolbar & Layout tags each "Customize
+  /// buttons" row with the toolbar whose editor it opens, so a part that
+  /// edits those buttons in place can leave the row out.
+  final Object? id;
 
   const SettingsEntryDefinition({
     required this.title,
@@ -96,8 +99,8 @@ class SettingsEntryDefinition {
     this.opensScreen = false,
     this.inForce = false,
     this.hiddenSettings = const [],
-    this.liveOnly = false,
     this.searchOnly = false,
+    this.id,
   });
 
   /// A [searchOnly] entry, which needs no widget.
@@ -107,14 +110,15 @@ class SettingsEntryDefinition {
     this.keywords = const [],
     this.feature,
     this.keptWhen,
+    this.id,
   }) : child = const SizedBox.shrink(),
        opensScreen = false,
        inForce = false,
        hiddenSettings = const [],
-       liveOnly = false,
        searchOnly = true;
 }
 
+@CopyWith()
 class SettingsSectionDefinition {
   final String title;
   final List<String> keywords;
@@ -124,7 +128,7 @@ class SettingsSectionDefinition {
   final FeatureId? feature;
 
   /// Like [SettingsEntryDefinition.keptWhen], for a whole section.
-  final ProviderListenable<bool>? keptWhen;
+  final KeptWhen? keptWhen;
 
   const SettingsSectionDefinition({
     required this.title,
@@ -133,18 +137,6 @@ class SettingsSectionDefinition {
     this.feature,
     this.keptWhen,
   });
-
-  SettingsSectionDefinition copyWith({
-    List<SettingsEntryDefinition>? entries,
-    FeatureId? feature,
-    ProviderListenable<bool>? keptWhen,
-  }) => SettingsSectionDefinition(
-    title: title,
-    keywords: keywords,
-    feature: feature ?? this.feature,
-    keptWhen: keptWhen ?? this.keptWhen,
-    entries: entries ?? this.entries,
-  );
 }
 
 /// The feature an [entry] of [section] belongs to, if any: its own, or the
@@ -157,7 +149,7 @@ FeatureId? settingsEntryFeature(
 /// The [SettingsEntryDefinition.keptWhen] that goes with
 /// [settingsEntryFeature]: the entry's for its own feature, else the
 /// section's.
-ProviderListenable<bool>? settingsEntryKeptWhen(
+KeptWhen? settingsEntryKeptWhen(
   SettingsSectionDefinition section,
   SettingsEntryDefinition entry,
 ) => entry.feature != null ? entry.keptWhen : section.keptWhen;
@@ -174,18 +166,17 @@ List<HiddenFeatureCondition> settingsEntryConditions(
     (feature: feature, keptWhen: entry.keptWhen),
 ];
 
-/// [sections] as a screen draws them: without the search-only entries, and
-/// without the live-only ones while [draftMode]. Sections left empty are
-/// dropped. Hidden entries stay; [buildSettingsSectionWidgets] grays them out.
+/// [sections] as a screen draws them: without the search-only entries.
+/// Sections left empty are dropped. Hidden entries stay;
+/// [buildSettingsSectionWidgets] grays them out.
 List<SettingsSectionDefinition> visibleSettingsSections(
-  List<SettingsSectionDefinition> sections, {
-  bool draftMode = false,
-}) {
+  List<SettingsSectionDefinition> sections,
+) {
   final visible = <SettingsSectionDefinition>[];
   for (final section in sections) {
     final entries = [
       for (final entry in section.entries)
-        if (!entry.searchOnly && !(draftMode && entry.liveOnly)) entry,
+        if (!entry.searchOnly) entry,
     ];
     if (entries.isEmpty) continue;
 
@@ -443,7 +434,7 @@ class SettingsSearchField extends StatelessWidget {
   }
 }
 
-class SettingsSectionList extends ConsumerWidget {
+class SettingsSectionList extends StatelessWidget {
   final List<SettingsSectionDefinition> unfilteredSections;
   final String query;
 
@@ -456,14 +447,8 @@ class SettingsSectionList extends ConsumerWidget {
   }) : unfilteredSections = sections;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final saveController = ref.watch(
-      saveGeneralSettingsControllerProvider.notifier,
-    );
-    final sections = visibleSettingsSections(
-      unfilteredSections,
-      draftMode: saveController is SavesToDraft,
-    );
+  Widget build(BuildContext context) {
+    final sections = visibleSettingsSections(unfilteredSections);
 
     if (sections.isEmpty) {
       final l10n = AppLocalizations.of(context);

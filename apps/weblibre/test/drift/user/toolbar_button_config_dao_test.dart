@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/data/database/functions/lexo_rank_functions.dart';
@@ -50,10 +51,10 @@ void main() {
     );
 
     test(
-      'replaceAll persists default toolbar fallbacks without FK failures',
+      'writeChanged persists default toolbar fallbacks without FK failures',
       () async {
         await expectLater(
-          db.toolbarButtonConfigDao.replaceAll(
+          db.toolbarButtonConfigDao.writeChanged(
             defaultToolbarButtonConfigsFor(
               ToolbarConfigLocation.contextual,
             ).value,
@@ -71,45 +72,59 @@ void main() {
       },
     );
 
-    test('assignLongPressAction stores and clears a binding', () async {
+    test('writeChanged stores and clears a long press binding', () async {
       final dao = db.toolbarButtonConfigDao;
-      await dao.seedMissing([
-        (buttonId: 'back', defaultVisible: true, defaultFallback: null),
-      ]);
-
-      await dao.assignLongPressAction('back', BrowserAction.newPrivateTab);
-      expect(
-        (await dao.getAll()).single.longPressAction,
-        BrowserAction.newPrivateTab,
+      const back = ToolbarButtonConfig(
+        buttonId: 'back',
+        orderKey: '0|hzzzzz:',
+        isVisible: true,
       );
-
-      await dao.assignLongPressAction('back', null);
-      expect((await dao.getAll()).single.longPressAction, isNull);
-    });
-
-    test('replaceAll keeps long press bindings', () async {
-      final dao = db.toolbarButtonConfigDao;
-      await dao.replaceAll([
-        ToolbarButtonConfig(
-          buttonId: 'back',
-          orderKey: '0|hzzzzz:',
-          isVisible: true,
-          longPressAction: BrowserAction.showHistory,
-        ),
+      await dao.writeChanged([
+        back.copyWith(longPressAction: const Value(BrowserAction.showHistory)),
       ]);
-
       expect(
         (await dao.getAll()).single.longPressAction,
         BrowserAction.showHistory,
       );
+
+      await dao.writeChanged([back]);
+      expect((await dao.getAll()).single.longPressAction, isNull);
+    });
+
+    // A newer version's button, say, kept after a downgrade: an edit of the
+    // known buttons must neither delete it nor fail on the fallback that
+    // points at it.
+    test('writeChanged keeps rows and fallbacks of unlisted buttons', () async {
+      final dao = db.toolbarButtonConfigDao;
+      await dao.seedMissing([
+        (buttonId: 'future', defaultVisible: false, defaultFallback: null),
+        (buttonId: 'back', defaultVisible: true, defaultFallback: 'future'),
+        (buttonId: 'forward', defaultVisible: true, defaultFallback: null),
+      ]);
+      final known = [
+        for (final config in await dao.getAll())
+          if (config.buttonId != 'future') config,
+      ];
+
+      await dao.writeChanged([
+        for (final config in known)
+          config.buttonId == 'forward'
+              ? config.copyWith(isVisible: false)
+              : config,
+      ]);
+
+      final byId = {for (final c in await dao.getAll()) c.buttonId: c};
+      expect(byId.keys, containsAll(['future', 'back', 'forward']));
+      expect(byId['back']?.fallbackId, 'future');
+      expect(byId['forward']?.isVisible, isFalse);
     });
   });
 
   group('QuickSwitcherButtonConfigDao', () {
-    test('replaceAll keeps long press bindings', () async {
+    test('writeChanged keeps long press bindings', () async {
       final dao = db.quickSwitcherButtonConfigDao;
-      await dao.replaceAll([
-        QuickSwitcherButtonConfig(
+      await dao.writeChanged([
+        const QuickSwitcherButtonConfig(
           buttonId: 'back',
           orderKey: '0|hzzzzz:',
           isVisible: true,

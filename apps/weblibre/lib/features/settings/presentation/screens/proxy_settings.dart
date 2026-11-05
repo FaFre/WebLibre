@@ -20,53 +20,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
-import 'package:weblibre/features/proxy/domain/providers/connection_activity.dart';
-import 'package:weblibre/features/proxy/domain/repositories/singbox_proxy_profiles.dart';
 import 'package:weblibre/features/proxy/presentation/utils/proxy_log_level_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/data/models/proxy_diagnostics_settings.dart';
-import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_diagnostics_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
-
-part 'proxy_settings.g.dart';
-
-/// Whether a global route is set: all regular tabs, or the private tabs,
-/// through a connection. Routing them is `connections.global_routing`;
-/// a route already in place keeps its entries, which is how it is
-/// seen and undone (P5).
-final globalRouteInUse = proxyRoutingSettingsWithDefaultsProvider.select(
-  (s) =>
-      s.regularTabsMode == ProxyRegularTabRoutingMode.all ||
-      s.privateTabsProxyConnectionId != null,
-);
-
-/// Whether there are connections to come back to: a saved profile, a global
-/// route, one running, or Tor set up in any way ([torInUse] — autostart that
-/// failed and container or isolated-group routes included). The Proxy
-/// category then stays in Settings even while connections are hidden, so the
-/// existing ones keep their status, repair and stop controls (P5); the list
-/// itself hides adding new ones.
-@Riverpod()
-bool connectionsInUse(Ref ref) {
-  // All watched up front, not behind `||`, so none is dropped and reloaded
-  // as another one changes.
-  final hasProfiles = ref.watch(
-    singboxProxyProfilesRepositoryProvider.select(
-      (profiles) => profiles.value?.isNotEmpty ?? false,
-    ),
-  );
-  final globalRoute = ref.watch(globalRouteInUse);
-  final active = ref.watch(anyConnectionActiveProvider);
-  final tor = ref.watch(torInUseProvider);
-
-  return hasProfiles || globalRoute || active || tor;
-}
 
 List<SettingsSectionDefinition> proxySettingsSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
@@ -85,7 +46,7 @@ List<SettingsSectionDefinition> proxySettingsSections(BuildContext context) {
         SettingsEntryDefinition(
           title: l10n.settings_proxyRoutingTitle,
           feature: FeatureId.connectionsGlobalRouting,
-          keptWhen: globalRouteInUse,
+          keptWhen: KeptWhen.globalRouteInUse,
           subtitle: l10n.settings_proxyRoutingSubtitle,
           keywords: settingsKeywords(l10n.settings_proxyRoutingKeywords),
           opensScreen: true,
@@ -114,7 +75,7 @@ class ProxySettingsScreen extends StatelessWidget {
     // be checked and stopped (P5).
     return HiddenFeatureScope(
       feature: FeatureId.connectionsImportVpnProxy,
-      keptWhen: connectionsInUseProvider,
+      keptWhen: KeptWhen.connectionsInUse,
       child: SettingsDetailScaffold(
         title: l10n.settings_proxyTitle,
         subtitle: l10n.settings_proxySubtitle,

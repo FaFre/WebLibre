@@ -21,14 +21,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
-import 'package:weblibre/features/onboarding/domain/providers/setup_draft.dart';
+import 'package:weblibre/domain/setup_draft/setup_draft.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/preset.dart';
 import 'package:weblibre/features/onboarding/presentation/pages/your_setup.dart';
-import 'package:weblibre/features/onboarding/presentation/widgets/setup_draft_scope.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/highlight_pulse.dart';
 
@@ -56,16 +56,18 @@ void main() {
         engineSettingsRepositoryProvider.overrideWith(
           _EngineSettingsRepository.new,
         ),
+        // A fresh onboarding: the draft is open.
+        completedOnboardingRevisionProvider.overrideWithValue(
+          const AsyncData(null),
+        ),
       ],
     );
-    // The onboarding screen holds the draft while it is open.
-    container.listen(setupDraftControllerProvider, (_, _) {});
   });
   tearDown(() => container.dispose());
 
   SetupDraftController draft() =>
       container.read(setupDraftControllerProvider.notifier);
-  SetupDraft state() => container.read(setupDraftControllerProvider);
+  SetupDraft state() => container.read(setupDraftControllerProvider)!;
 
   Future<void> pump(
     WidgetTester tester,
@@ -134,14 +136,8 @@ void main() {
 
   group('your setup', () {
     // Tall enough for the whole summary, so every row can be tapped.
-    Future<void> pumpYourSetup(WidgetTester tester) => pump(
-      tester,
-      const SetupDraftScope(
-        step: SetupDraftStep.customize,
-        child: YourSetupPage(),
-      ),
-      height: 6000,
-    );
+    Future<void> pumpYourSetup(WidgetTester tester) =>
+        pump(tester, const YourSetupPage(), height: 6000);
 
     bool switchValue(WidgetTester tester, String title) => tester
         .widget<SwitchListTile>(find.widgetWithText(SwitchListTile, title))

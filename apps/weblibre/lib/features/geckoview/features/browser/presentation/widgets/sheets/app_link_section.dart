@@ -26,8 +26,8 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
 import 'package:weblibre/features/app_links/domain/entities/context_app_link_policy.dart';
 import 'package:weblibre/features/app_links/domain/services/effective_app_link_policy.dart';
-import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 final _appLinkTargetProvider = FutureProvider.autoDispose
@@ -209,7 +209,7 @@ class _SiteRuleTile extends ConsumerWidget {
     }
 
     final overrideKey = policy.overrideKey;
-    await ref.read(saveGeneralSettingsControllerProvider.notifier).save((
+    await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
       current,
     ) {
       if (overrideKey == null) {

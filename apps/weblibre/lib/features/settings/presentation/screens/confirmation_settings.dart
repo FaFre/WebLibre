@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/settings/domain/providers/kept_when.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -50,6 +51,16 @@ FeatureId? _promptFeature(RememberedPrompt prompt) => switch (prompt) {
   RememberedPrompt.startProxyConnection => FeatureId.connectionsImportVpnProxy,
 };
 
+/// What keeps a prompt's tile usable while its feature is hidden: a
+/// remembered answer ([_promptFeature]).
+KeptWhen? _promptKeptWhen(RememberedPrompt prompt) => switch (prompt) {
+  RememberedPrompt.keepExternalTab || RememberedPrompt.closeAllTabs => null,
+  RememberedPrompt.closeIsolatedTabs => KeptWhen.closeIsolatedTabsRemembered,
+  RememberedPrompt.startTor => KeptWhen.startTorRemembered,
+  RememberedPrompt.startProxyConnection =>
+    KeptWhen.startProxyConnectionRemembered,
+};
+
 List<SettingsSectionDefinition> confirmationSettingsSections(
   BuildContext context,
 ) {
@@ -65,9 +76,7 @@ List<SettingsSectionDefinition> confirmationSettingsSections(
             subtitle: prompt.description(context),
             keywords: settingsKeywords(prompt.keywords(context)),
             feature: _promptFeature(prompt),
-            keptWhen: storedGeneralSettingsProvider.select(
-              (s) => s.rememberedPrompts.containsKey(prompt),
-            ),
+            keptWhen: _promptKeptWhen(prompt),
             child: _RememberedPromptTile(prompt),
           ),
         );

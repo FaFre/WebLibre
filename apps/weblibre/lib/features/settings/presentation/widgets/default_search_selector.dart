@@ -36,7 +36,7 @@ class DefaultSearchSelector extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     final activeBang = ref.watch(
-      defaultSearchBangDataProvider.select((value) => value.value),
+      displayedDefaultSearchBangDataProvider.select((value) => value.value),
     );
 
     Future<void> updateSearchProvider(BangKey key) async {

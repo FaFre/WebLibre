@@ -153,6 +153,10 @@
   "@visibilitySwitch_stillHiddenNote": {
     "description": "Short message shown when the user triggers a hidden feature again after having declined to show it."
   },
+  "visibilitySwitch_showFailed": "Could not show the feature. Try again.",
+  "@visibilitySwitch_showFailed": {
+    "description": "Error snackbar when the user chose Show for a hidden feature (from a gesture, shortcut or the still-hidden note) but the setting could not be saved, so the feature stays hidden."
+  },
   "visibilitySwitch_hiddenControlHint": "Part of a hidden feature. Activate to show the feature",
   "@visibilitySwitch_hiddenControlHint": {
     "description": "Screen reader hint on a settings control that is grayed out because its feature is hidden. Activating it asks whether to show the feature; it does not change the setting."

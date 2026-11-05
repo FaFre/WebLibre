@@ -124,6 +124,76 @@ void main() {
     expect(lastResult, isTrue);
   });
 
+  testWidgets('remembers the answer when the asking widget is gone', (
+    tester,
+  ) async {
+    repository = _FakeGeneralSettingsRepository(GeneralSettings.withDefaults());
+    lastResult = null;
+    final showAsker = ValueNotifier(true);
+    addTearDown(showAsker.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          generalSettingsRepositoryProvider.overrideWith(() => repository),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Consumer(
+            builder: (context, ref, _) {
+              ref.watch(generalSettingsWithDefaultsProvider);
+              return Scaffold(
+                body: ValueListenableBuilder(
+                  valueListenable: showAsker,
+                  builder: (context, show, _) => show
+                      // Like a menu item: its own ref, gone once the dialog
+                      // closes the menu.
+                      ? Consumer(
+                          builder: (context, ref, _) => TextButton(
+                            onPressed: () async {
+                              lastResult = await confirmUnlessRemembered(
+                                context,
+                                ref.read,
+                                RememberedPrompt.closeAllTabs,
+                                title: 'Close all tabs?',
+                                content: 'Body',
+                                confirmLabel: 'Close',
+                              );
+                            },
+                            child: const Text('ask'),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('ask'));
+    await tester.pumpAndSettle();
+    showAsker.value = false;
+    await tester.pump();
+    expect(find.text('ask'), findsNothing);
+
+    await tester.tap(find.text("Don't ask again"));
+    await tester.pump();
+    await tester.tap(find.text('Close'));
+    await tester.pumpAndSettle();
+
+    expect(lastResult, isTrue);
+    expect(
+      repository.settings.rememberedAnswer<PromptConfirmation>(
+        RememberedPrompt.closeAllTabs,
+      ),
+      PromptConfirmation.confirmed,
+    );
+  });
+
   testWidgets('cancelling with the box ticked remembers nothing', (
     tester,
   ) async {

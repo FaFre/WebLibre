@@ -36,7 +36,6 @@ import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/cust
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_dns_override_section.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/profile_editor_section.dart';
 import 'package:weblibre/features/proxy/presentation/widgets/profile_editor/structured_profile_form.dart';
-import 'package:weblibre/features/settings/presentation/screens/proxy_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/list_format_l10n.dart';
@@ -137,7 +136,7 @@ class _Editor extends ConsumerWidget {
     // connection is in use everything stays usable (P5).
     return HiddenFeatureScope(
       feature: FeatureId.connectionsImportVpnProxy,
-      keptWhen: connectionsInUseProvider,
+      keptWhen: KeptWhen.connectionsInUse,
       child: Scaffold(
         bottomNavigationBar: SafeArea(
           child: Padding(
