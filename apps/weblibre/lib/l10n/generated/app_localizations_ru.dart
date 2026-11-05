@@ -6199,15 +6199,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_updateNoticeBody =>
-      'This update changes a lot. The next pages walk you through your settings.';
+      'В этом обновлении многое изменилось. Следующие страницы проведут вас по настройкам.';
 
   @override
   String get onboarding_updateNoticeExtensions =>
-      'Some extensions may need a second look after this update.';
+      'Некоторые расширения после этого обновления стоит проверить ещё раз.';
 
   @override
   String get onboarding_updateNoticeSettingsPreserved =>
-      'Your settings stay as they are unless you change them here.';
+      'Ваши настройки останутся прежними, если вы не измените их здесь.';
 
   @override
   String get onboarding_eulaAcceptance =>
@@ -6269,7 +6269,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_permissionsNotificationsSubtitle =>
-      'Lets WebLibre show the progress of downloads';
+      'Позволяет WebLibre показывать ход загрузок';
 
   @override
   String get onboarding_permissionsDefaultBrowserTitle =>
@@ -6287,21 +6287,24 @@ class AppLocalizationsRu extends AppLocalizations {
       'На каких языках сайтам показывать содержимое';
 
   @override
-  String get onboarding_severalLanguagesTitle => 'Several languages set';
+  String get onboarding_severalLanguagesTitle => 'Выбрано несколько языков';
 
   @override
   String onboarding_multipleLanguagesWarning(int count, String locales) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Your browser is set to $count languages ($locales).',
+      other: 'В браузере выбрано $count языка ($locales).',
+      many: 'В браузере выбрано $count языков ($locales).',
+      few: 'В браузере выбрано $count языка ($locales).',
+      one: 'В браузере выбран $count язык ($locales).',
     );
-    return '$_temp0 Websites can use this combination to recognize you.';
+    return '$_temp0 Сайты могут узнавать вас по этому сочетанию.';
   }
 
   @override
   String get onboarding_multipleLanguagesSuggestion =>
-      'Keeping only one language makes you harder to tell apart.';
+      'С одним языком вас сложнее отличить от других.';
 
   @override
   String get onboarding_reviewLanguages => 'Проверить языки';
@@ -6320,7 +6323,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)';
+      'Сайты будут видеть распространённые значения, и без куки вас будет сложнее узнать (цифровые отпечатки)';
 
   @override
   String get onboarding_compatibilityWarningTitle =>
@@ -6365,7 +6368,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      'Also hides cookie banners, social media buttons and other annoyances';
+      'Также скрывает баннеры о куки, кнопки соцсетей и другие раздражители';
 
   @override
   String get onboarding_presetTitle => 'Сколько всего показывать в WebLibre?';
@@ -6444,7 +6447,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_yourSetupLocalNetwork =>
-      'Websites ask before local connections';
+      'Сайты спрашивают перед локальными подключениями';
 
   @override
   String onboarding_yourSetupHistoryRetention(int days) {
@@ -6464,7 +6467,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeLater =>
-      'You can show or hide features anytime in Settings > Feature Control.';
+      'Показать или скрыть функции можно в любой момент в разделе «Настройки > Управление функциями».';
 
   @override
   String get onboarding_presetAdvancedIncludes =>
@@ -6493,15 +6496,15 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_goalLockBrowserSubtitle =>
-      'Set up a device lock or password when you tap Done';
+      'Настроить блокировку устройства или пароль после нажатия «Готово»';
 
   @override
   String get onboarding_goalSetUpConnectionsSubtitle =>
-      'Opens connection setup when you tap Done. Nothing connects until you start it.';
+      'После нажатия «Готово» откроется настройка подключений. Ничего не подключится, пока вы сами не запустите подключение.';
 
   @override
   String get onboarding_goalSyncDevicesSubtitle =>
-      'Sign in to Firefox Sync when you tap Done';
+      'Войти в Firefox Sync после нажатия «Готово»';
 
   @override
   String get onboarding_customizeGroupPrivacy => 'Приватность и безопасность';
@@ -6520,7 +6523,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось сохранить, какие функции показываются. Попробуйте ещё раз.';
 
   @override
-  String get onboarding_customizeGroupOther => 'Other features';
+  String get onboarding_customizeGroupOther => 'Другие функции';
 
   @override
   String get onboarding_customizeHomeSections => 'Разделы главной страницы';
@@ -6576,7 +6579,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboarding_yourChoicesSuggestionsOff => 'Выключены';
 
   @override
-  String get onboarding_yourSetupOnDoneTitle => 'Turned on when you tap Done';
+  String get onboarding_yourSetupOnDoneTitle =>
+      'Включится после нажатия «Готово»';
 
   @override
   String get onboarding_ublockInstallOnDoneSubtitle =>
@@ -6603,7 +6607,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeResetVisibility =>
-      'Your show and hide changes were replaced by this choice\'s defaults.';
+      'Ваши изменения видимости функций заменены значениями этого варианта.';
 
   @override
   String onboarding_presetChangeStopsApplyingTitle(String preset) {
@@ -9632,13 +9636,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_actionResetToDefaults => 'Сбросить по умолчанию';
 
   @override
-  String get settings_actionOpenFullScreen => 'Open full screen';
+  String get settings_actionOpenFullScreen => 'Открыть на весь экран';
 
   @override
-  String get settings_previewSheetExpand => 'Expand settings';
+  String get settings_previewSheetExpand => 'Развернуть настройки';
 
   @override
-  String get settings_previewSheetCollapse => 'Shrink settings';
+  String get settings_previewSheetCollapse => 'Свернуть настройки';
 
   @override
   String get settings_menuLayoutTitle => 'Настройка меню';
@@ -11668,94 +11672,95 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_previewTabSearch => 'Поиск';
 
   @override
-  String get settings_layoutEditorPreviewTab => 'Preview';
+  String get settings_layoutEditorPreviewTab => 'Предпросмотр';
 
   @override
-  String get settings_layoutEditorSettingsTab => 'Settings';
+  String get settings_layoutEditorSettingsTab => 'Настройки';
 
   @override
-  String get settings_previewDeviceThisWindow => 'This window';
+  String get settings_previewDeviceThisWindow => 'Это окно';
 
   @override
-  String get settings_previewDevicePhone => 'Phone';
+  String get settings_previewDevicePhone => 'Телефон';
 
   @override
-  String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
+  String get settings_previewDevicePhoneLandscape => 'Телефон горизонтально';
 
   @override
-  String get settings_previewDeviceLargeScreen => 'Large screen';
+  String get settings_previewDeviceLargeScreen => 'Большой экран';
 
   @override
   String settings_previewOtherDeviceHint(String device) {
     String _temp0 = intl.Intl.selectLogic(device, {
       'phone':
-          'Showing a phone. Automatic settings apply as they would on a phone.',
+          'Показан телефон. Автоматические настройки применяются так же, как на телефоне.',
       'phoneLandscape':
-          'Showing a phone in landscape. Automatic settings apply as they would there.',
+          'Показан телефон в горизонтальной ориентации. Автоматические настройки применяются так же, как на нём.',
       'largeScreen':
-          'Showing a large screen. Automatic settings apply as they would on a large screen.',
-      'other': 'Showing another window size.',
+          'Показан большой экран. Автоматические настройки применяются так же, как на большом экране.',
+      'other': 'Показан другой размер окна.',
     });
     return '$_temp0';
   }
 
   @override
-  String get settings_previewStatePage => 'Page';
+  String get settings_previewStatePage => 'Страница';
 
   @override
-  String get settings_previewStateHome => 'Home page';
+  String get settings_previewStateHome => 'Домашняя страница';
 
   @override
-  String get settings_previewStateSidePanelCollapsed => 'Side panel collapsed';
+  String get settings_previewStateSidePanelCollapsed =>
+      'Боковая панель свёрнута';
 
   @override
   String get settings_previewStateNeedsSidePanel =>
-      'Needs a side panel in a large window';
+      'Нужна боковая панель в большом окне';
 
   @override
   String get settings_layoutPreviewSemantics =>
-      'Preview of the browser with this toolbar layout';
+      'Предпросмотр браузера с этим расположением панели инструментов';
 
   @override
-  String get settings_layoutPartTabChips => 'Tab Chips';
+  String get settings_layoutPartTabChips => 'Чипы вкладок';
 
   @override
-  String get settings_previewModeSelect => 'Select';
+  String get settings_previewModeSelect => 'Выбор';
 
   @override
-  String get settings_previewModeTry => 'Try';
+  String get settings_previewModeTry => 'Проба';
 
   @override
   String get settings_previewSelectHint =>
-      'Tap a part of the toolbar to change its settings.';
+      'Нажмите на часть панели инструментов, чтобы изменить её настройки.';
 
   @override
   String get settings_previewTryHint =>
-      'The preview works like the browser: scroll the page and tap the buttons.';
+      'Предпросмотр работает как браузер: прокручивайте страницу и нажимайте кнопки.';
 
   @override
-  String get settings_previewAllSettings => 'All settings';
+  String get settings_previewAllSettings => 'Все настройки';
 
   @override
-  String get settings_previewSelectionPath => 'Selected part';
+  String get settings_previewSelectionPath => 'Выбранная часть';
 
   @override
   String settings_tryToolbarHidden(String distance) {
-    return 'Toolbar hidden while scrolling · Auto Hide Distance $distance';
+    return 'Панель инструментов скрыта при прокрутке · Расстояние для автоскрытия $distance';
   }
 
   @override
   String get settings_trySidePanelHidden =>
-      'Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad';
+      'Боковая панель скрыта · Наведите указатель на край или нажмите на него, чтобы вернуть её. В браузере — только с мышью или тачпадом';
 
   @override
-  String get settings_tryOpensTabView => 'This opens the tab view';
+  String get settings_tryOpensTabView => 'Так открывается обзор вкладок';
 
   @override
-  String get settings_tryOpensMenu => 'This opens the menu';
+  String get settings_tryOpensMenu => 'Так открывается меню';
 
   @override
-  String get settings_tryAdjust => 'Adjust';
+  String get settings_tryAdjust => 'Настроить';
 
   @override
   String get settings_deleteAllExceptionsTitle => 'Удалить все исключения?';

@@ -6569,7 +6569,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeResetVisibility =>
-      'Ein- und Ausblendungen folgen jetzt der neuen Auswahl.';
+      'Eigene Ein- und Ausblendungen wurden durch die Vorgaben dieser Auswahl ersetzt.';
 
   @override
   String onboarding_presetChangeStopsApplyingTitle(String preset) {
@@ -9024,11 +9024,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Bewegung reduzieren und App-Animationen ausschalten';
 
   @override
-  String get settings_showModalBarrierTitle => 'Hintergrund abdunkeln';
+  String get settings_showModalBarrierTitle => 'Hinter Dialogen abdunkeln';
 
   @override
   String get settings_showModalBarrierKeywords =>
-      'Dialoge, Bottom Sheets, Overlay, Modal';
+      'Dialoge, Bottom Sheets, Overlay, Modal, Modal Barrier, Hintergrund abdunkeln';
 
   @override
   String get settings_showModalBarrierSubtitle =>
@@ -11641,7 +11641,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get settings_previewSelectHint =>
-      'Tippe auf einen Teil der Symbolleiste, um seine Einstellungen zu ändern.';
+      'Einen Teil der Symbolleiste antippen, um seine Einstellungen zu ändern.';
 
   @override
   String get settings_previewTryHint =>

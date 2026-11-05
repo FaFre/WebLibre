@@ -29,6 +29,7 @@
   "tabs_siteAssignmentsTitle": "网站分配",
   "tabs_addSiteLabel": "添加网站",
   "tabs_addSiteHint": "example.com 或 *.example.com",
+  "tabs_addSiteHintSingle": "example.com",
   "tabs_addSiteHelperText": "匹配单个网站，或使用 *.example.com 匹配其所有子域名",
   "tabs_urlMustBeProvided": "必须提供网址",
   "tabs_invalidUrl": "网址无效",

@@ -29,6 +29,7 @@
   "tabs_siteAssignmentsTitle": "Привязка сайтов",
   "tabs_addSiteLabel": "Добавить сайт",
   "tabs_addSiteHint": "example.com или *.example.com",
+  "tabs_addSiteHintSingle": "example.com",
   "tabs_addSiteHelperText": "Укажите один сайт или используйте *.example.com, чтобы охватить все его поддомены",
   "tabs_urlMustBeProvided": "Необходимо указать URL-адрес",
   "tabs_invalidUrl": "Недопустимый URL-адрес",

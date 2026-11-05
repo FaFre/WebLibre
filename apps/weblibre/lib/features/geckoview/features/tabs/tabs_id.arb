@@ -29,6 +29,7 @@
   "tabs_siteAssignmentsTitle": "Penetapan Situs",
   "tabs_addSiteLabel": "Tambah situs",
   "tabs_addSiteHint": "example.com atau *.example.com",
+  "tabs_addSiteHintSingle": "example.com",
   "tabs_addSiteHelperText": "Cocokkan satu situs, atau gunakan *.example.com untuk mencocokkan semua subdomainnya",
   "tabs_urlMustBeProvided": "URL wajib diisi",
   "tabs_invalidUrl": "URL tidak valid",

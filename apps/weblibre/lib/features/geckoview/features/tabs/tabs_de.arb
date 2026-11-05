@@ -29,6 +29,7 @@
   "tabs_siteAssignmentsTitle": "Website-Zuordnungen",
   "tabs_addSiteLabel": "Website hinzufügen",
   "tabs_addSiteHint": "example.com oder *.example.com",
+  "tabs_addSiteHintSingle": "example.com",
   "tabs_addSiteHelperText": "Eine einzelne Website angeben oder mit *.example.com alle ihre Subdomains erfassen",
   "tabs_urlMustBeProvided": "Eine URL muss angegeben werden",
   "tabs_invalidUrl": "Ungültige URL",

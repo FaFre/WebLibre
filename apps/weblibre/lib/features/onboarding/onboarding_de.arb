@@ -115,7 +115,7 @@
   "onboarding_showHideFeaturesAction": "Funktionen ein- oder ausblenden",
   "onboarding_showHideFeaturesCaption": "Solange eine Funktion ausgeblendet ist, gelten ihre Standardeinstellungen. Eigene Änderungen gelten wieder, sobald sie eingeblendet wird.",
   "onboarding_dohCurrentSubtitle": "{mode} mit {provider}",
-  "onboarding_presetChangeResetVisibility": "Ein- und Ausblendungen folgen jetzt der neuen Auswahl.",
+  "onboarding_presetChangeResetVisibility": "Eigene Ein- und Ausblendungen wurden durch die Vorgaben dieser Auswahl ersetzt.",
   "onboarding_presetChangeStopsApplyingTitle": "Zu „{preset}“ wechseln?",
   "onboarding_presetChangeStopsApplyingContent": "Diese Auswahl blendet Funktionen aus, deren Einstellungen geändert wurden. Solange sie ausgeblendet sind, gelten für diese Einstellungen die Standardwerte. Die Änderungen bleiben erhalten und gelten wieder, sobald die Funktionen eingeblendet werden.",
   "onboarding_presetChangeConfirm": "Wechseln"

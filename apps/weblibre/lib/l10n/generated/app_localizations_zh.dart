@@ -5683,16 +5683,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_updateNoticeTitle => '变化很大！';
 
   @override
-  String get onboarding_updateNoticeBody =>
-      'This update changes a lot. The next pages walk you through your settings.';
+  String get onboarding_updateNoticeBody => '此次更新改动很大。接下来的页面会带你逐一查看设置。';
 
   @override
-  String get onboarding_updateNoticeExtensions =>
-      'Some extensions may need a second look after this update.';
+  String get onboarding_updateNoticeExtensions => '此次更新后，部分扩展可能需要再检查一下。';
 
   @override
   String get onboarding_updateNoticeSettingsPreserved =>
-      'Your settings stay as they are unless you change them here.';
+      '除非你在这里更改，否则你的设置会保持不变。';
 
   @override
   String get onboarding_eulaAcceptance =>
@@ -5748,8 +5746,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_permissionsNotificationsTitle => '通知';
 
   @override
-  String get onboarding_permissionsNotificationsSubtitle =>
-      'Lets WebLibre show the progress of downloads';
+  String get onboarding_permissionsNotificationsSubtitle => '让 WebLibre 显示下载进度';
 
   @override
   String get onboarding_permissionsDefaultBrowserTitle => '默认浏览器';
@@ -5765,21 +5762,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_privacyBrowserLanguagesSubtitle => '希望网站用哪些语言显示';
 
   @override
-  String get onboarding_severalLanguagesTitle => 'Several languages set';
+  String get onboarding_severalLanguagesTitle => '已设置多种语言';
 
   @override
   String onboarding_multipleLanguagesWarning(int count, String locales) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Your browser is set to $count languages ($locales).',
+      other: '你的浏览器设置了 $count 种语言（$locales）。',
     );
-    return '$_temp0 Websites can use this combination to recognize you.';
+    return '$_temp0网站可以利用这种组合识别你。';
   }
 
   @override
-  String get onboarding_multipleLanguagesSuggestion =>
-      'Keeping only one language makes you harder to tell apart.';
+  String get onboarding_multipleLanguagesSuggestion => '只保留一种语言会让你更难被区分出来。';
 
   @override
   String get onboarding_reviewLanguages => '检查语言';
@@ -5795,7 +5791,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_fingerprintProtectionSubtitle =>
-      'Websites then see common values, which makes you harder to recognize without cookies (fingerprinting)';
+      '网站将看到常见的数值，让你在没有 Cookie 时也更难被识别（指纹识别）';
 
   @override
   String get onboarding_compatibilityWarningTitle => '部分网站可能无法正常工作';
@@ -5836,7 +5832,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_ublockApplyDefaultsSubtitle =>
-      'Also hides cookie banners, social media buttons and other annoyances';
+      '还会隐藏 Cookie 横幅、社交媒体按钮和其他烦人元素';
 
   @override
   String get onboarding_presetTitle => 'WebLibre 应该显示多少功能？';
@@ -5899,8 +5895,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_yourSetupProtections => '拦截跟踪器并使用加密连接';
 
   @override
-  String get onboarding_yourSetupLocalNetwork =>
-      'Websites ask before local connections';
+  String get onboarding_yourSetupLocalNetwork => '网站在本地连接前会先询问';
 
   @override
   String onboarding_yourSetupHistoryRetention(int days) {
@@ -5916,8 +5911,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_yourSetupHiddenForNowTitle => '暂时隐藏';
 
   @override
-  String get onboarding_presetChangeLater =>
-      'You can show or hide features anytime in Settings > Feature Control.';
+  String get onboarding_presetChangeLater => '你可以随时在“设置 > 功能管理”中显示或隐藏功能。';
 
   @override
   String get onboarding_presetAdvancedIncludes => '包含“随便逛逛”的全部内容，另外还有：';
@@ -5942,16 +5936,14 @@ class AppLocalizationsZh extends AppLocalizations {
       '在同一网站上使用多个账号，每个账号放在自己的容器中';
 
   @override
-  String get onboarding_goalLockBrowserSubtitle =>
-      'Set up a device lock or password when you tap Done';
+  String get onboarding_goalLockBrowserSubtitle => '点击“完成”时设置设备锁或密码';
 
   @override
   String get onboarding_goalSetUpConnectionsSubtitle =>
-      'Opens connection setup when you tap Done. Nothing connects until you start it.';
+      '点击“完成”时打开连接设置。在你启动连接之前，不会建立任何连接。';
 
   @override
-  String get onboarding_goalSyncDevicesSubtitle =>
-      'Sign in to Firefox Sync when you tap Done';
+  String get onboarding_goalSyncDevicesSubtitle => '点击“完成”时登录 Firefox Sync';
 
   @override
   String get onboarding_customizeGroupPrivacy => '隐私与安全';
@@ -5969,7 +5961,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_customizeSaveFailed => '无法保存要显示的功能。请重试。';
 
   @override
-  String get onboarding_customizeGroupOther => 'Other features';
+  String get onboarding_customizeGroupOther => '其他功能';
 
   @override
   String get onboarding_customizeHomeSections => '主页板块';
@@ -6020,7 +6012,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboarding_yourChoicesSuggestionsOff => '关闭';
 
   @override
-  String get onboarding_yourSetupOnDoneTitle => 'Turned on when you tap Done';
+  String get onboarding_yourSetupOnDoneTitle => '点击“完成”时开启';
 
   @override
   String get onboarding_ublockInstallOnDoneSubtitle => '点击“完成”时安装，并会请求所需权限';
@@ -6045,7 +6037,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboarding_presetChangeResetVisibility =>
-      'Your show and hide changes were replaced by this choice\'s defaults.';
+      '你对功能显示和隐藏的更改已被此选项的默认设置取代。';
 
   @override
   String onboarding_presetChangeStopsApplyingTitle(String preset) {
@@ -8755,13 +8747,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_actionResetToDefaults => '恢复默认';
 
   @override
-  String get settings_actionOpenFullScreen => 'Open full screen';
+  String get settings_actionOpenFullScreen => '全屏打开';
 
   @override
-  String get settings_previewSheetExpand => 'Expand settings';
+  String get settings_previewSheetExpand => '展开设置';
 
   @override
-  String get settings_previewSheetCollapse => 'Shrink settings';
+  String get settings_previewSheetCollapse => '收起设置';
 
   @override
   String get settings_menuLayoutTitle => '自定义菜单';
@@ -10550,94 +10542,87 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_previewTabSearch => '搜索';
 
   @override
-  String get settings_layoutEditorPreviewTab => 'Preview';
+  String get settings_layoutEditorPreviewTab => '预览';
 
   @override
-  String get settings_layoutEditorSettingsTab => 'Settings';
+  String get settings_layoutEditorSettingsTab => '设置';
 
   @override
-  String get settings_previewDeviceThisWindow => 'This window';
+  String get settings_previewDeviceThisWindow => '此窗口';
 
   @override
-  String get settings_previewDevicePhone => 'Phone';
+  String get settings_previewDevicePhone => '手机';
 
   @override
-  String get settings_previewDevicePhoneLandscape => 'Phone in landscape';
+  String get settings_previewDevicePhoneLandscape => '横屏手机';
 
   @override
-  String get settings_previewDeviceLargeScreen => 'Large screen';
+  String get settings_previewDeviceLargeScreen => '大屏幕';
 
   @override
   String settings_previewOtherDeviceHint(String device) {
     String _temp0 = intl.Intl.selectLogic(device, {
-      'phone':
-          'Showing a phone. Automatic settings apply as they would on a phone.',
-      'phoneLandscape':
-          'Showing a phone in landscape. Automatic settings apply as they would there.',
-      'largeScreen':
-          'Showing a large screen. Automatic settings apply as they would on a large screen.',
-      'other': 'Showing another window size.',
+      'phone': '正在显示手机。自动设置按手机上的方式生效。',
+      'phoneLandscape': '正在显示横屏手机。自动设置按横屏手机上的方式生效。',
+      'largeScreen': '正在显示大屏幕。自动设置按大屏幕上的方式生效。',
+      'other': '正在显示其他窗口尺寸。',
     });
     return '$_temp0';
   }
 
   @override
-  String get settings_previewStatePage => 'Page';
+  String get settings_previewStatePage => '页面';
 
   @override
-  String get settings_previewStateHome => 'Home page';
+  String get settings_previewStateHome => '主页';
 
   @override
-  String get settings_previewStateSidePanelCollapsed => 'Side panel collapsed';
+  String get settings_previewStateSidePanelCollapsed => '侧边面板已收起';
 
   @override
-  String get settings_previewStateNeedsSidePanel =>
-      'Needs a side panel in a large window';
+  String get settings_previewStateNeedsSidePanel => '需要大窗口中的侧边面板';
 
   @override
-  String get settings_layoutPreviewSemantics =>
-      'Preview of the browser with this toolbar layout';
+  String get settings_layoutPreviewSemantics => '使用此工具栏布局的浏览器预览';
 
   @override
-  String get settings_layoutPartTabChips => 'Tab Chips';
+  String get settings_layoutPartTabChips => '标签块';
 
   @override
-  String get settings_previewModeSelect => 'Select';
+  String get settings_previewModeSelect => '选择';
 
   @override
-  String get settings_previewModeTry => 'Try';
+  String get settings_previewModeTry => '试用';
 
   @override
-  String get settings_previewSelectHint =>
-      'Tap a part of the toolbar to change its settings.';
+  String get settings_previewSelectHint => '点按工具栏的某个部分即可更改其设置。';
 
   @override
-  String get settings_previewTryHint =>
-      'The preview works like the browser: scroll the page and tap the buttons.';
+  String get settings_previewTryHint => '预览的操作方式与浏览器相同：滚动页面并点按按钮。';
 
   @override
-  String get settings_previewAllSettings => 'All settings';
+  String get settings_previewAllSettings => '所有设置';
 
   @override
-  String get settings_previewSelectionPath => 'Selected part';
+  String get settings_previewSelectionPath => '已选部分';
 
   @override
   String settings_tryToolbarHidden(String distance) {
-    return 'Toolbar hidden while scrolling · Auto Hide Distance $distance';
+    return '滚动时已隐藏工具栏 · 自动隐藏距离 $distance';
   }
 
   @override
   String get settings_trySidePanelHidden =>
-      'Side panel hidden · Point at or tap the edge to bring it back. In the browser, only with a mouse or trackpad';
+      '侧边面板已隐藏 · 指向或点按边缘即可让它回来。在浏览器中仅适用于鼠标或触控板';
 
   @override
-  String get settings_tryOpensTabView => 'This opens the tab view';
+  String get settings_tryOpensTabView => '这会打开标签页视图';
 
   @override
-  String get settings_tryOpensMenu => 'This opens the menu';
+  String get settings_tryOpensMenu => '这会打开菜单';
 
   @override
-  String get settings_tryAdjust => 'Adjust';
+  String get settings_tryAdjust => '调整';
 
   @override
   String get settings_deleteAllExceptionsTitle => '删除所有例外？';
