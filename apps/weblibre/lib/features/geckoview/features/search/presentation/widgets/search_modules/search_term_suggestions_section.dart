@@ -53,13 +53,9 @@ class SearchTermSuggestionsSection extends HookConsumerWidget {
       searchTextController,
       () => searchTextController.text,
     );
-    final searchSuggestions = fetchRemoteSuggestions
-        ? ref.watch(
-            searchSuggestionsProvider().select(
-              (value) => value.value ?? const <String>[],
-            ),
-          )
-        : const <String>[];
+    final searchSuggestions = ref.watch(
+      remoteSearchSuggestionsProvider(enabled: fetchRemoteSuggestions),
+    );
 
     // Seeded on mount too — this section appears with the first keystroke
     // already in the field, which therefore never arrives as a change event.

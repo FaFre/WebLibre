@@ -331,6 +331,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final storedSettings = ref.watch(storedGeneralSettingsProvider);
     final def = toolbarButtonRegistryById[config.buttonId];
     if (def == null) return const SizedBox.shrink();
     ToolbarButtonLayout layout() =>
@@ -359,7 +360,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
 
     final longPressActions = def.spec.id.longPressActions(
       context,
-      ref.watch(storedGeneralSettingsProvider),
+      storedSettings,
     );
 
     final theme = Theme.of(context);

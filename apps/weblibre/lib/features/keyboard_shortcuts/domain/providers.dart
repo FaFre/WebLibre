@@ -22,6 +22,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/providers/pointer_device.dart';
 import 'package:weblibre/core/providers/window_size_class.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/keyboard_shortcuts/data/models/key_chord.dart';
+import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 
 part 'providers.g.dart';
 
@@ -37,6 +40,22 @@ bool showKeyboardShortcutHints(Ref ref) {
   return ref.watch(
     windowSizeClassControllerProvider.select(
       (sizeClass) => sizeClass.width == WindowWidthClass.expanded,
+    ),
+  );
+}
+
+/// The chord a menu row names beside [action]: its first binding while
+/// hints are shown ([showKeyboardShortcutHints]), null otherwise. The
+/// bindings are only read while hints show, so a phone never loads them for
+/// its menus.
+@riverpod
+KeyChord? keyboardShortcutHintChord(Ref ref, BrowserAction action) {
+  final showHints = ref.watch(showKeyboardShortcutHintsProvider);
+  if (!showHints) return null;
+
+  return ref.watch(
+    effectiveKeyboardShortcutsProvider.select(
+      (bindings) => bindings[action]?.firstOrNull,
     ),
   );
 }

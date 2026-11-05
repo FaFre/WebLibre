@@ -42,6 +42,9 @@ class CertificateTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final tabState = ref.watch(selectedTabStateProvider);
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState?.id),
+    );
 
     // Re-read on every security change: the engine only reports a certificate
     // for verified connections and sites loaded through a security exception.
@@ -77,9 +80,6 @@ class CertificateTile extends HookConsumerWidget {
         ? const Icon(Icons.chevron_right)
         : null;
 
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabState.id),
-    );
     if (sandboxSourceUri != null) {
       // Sandbox-captured page is served from a loopback server; the cert
       // chain shown would be for localhost, not the canonical site.

@@ -18,12 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'search_credits_status.g.dart';
+
+@JsonSerializable(createToJson: false, fieldRename: FieldRename.snake)
 class SearchCreditsStatus with FastEquatable {
+  @JsonKey(defaultValue: 0)
   final int availableCredits;
+  @JsonKey(defaultValue: 0)
   final int monthlyAllowance;
+  @JsonKey(fromJson: _lenientDateTime)
   final DateTime? lastResetAt;
+  @JsonKey(fromJson: _lenientDateTime)
   final DateTime? lastIssuanceAt;
+  @JsonKey(fromJson: _lenientDateTime)
   final DateTime? currentPeriodEnd;
 
   SearchCreditsStatus({
@@ -34,22 +43,19 @@ class SearchCreditsStatus with FastEquatable {
     this.currentPeriodEnd,
   });
 
-  factory SearchCreditsStatus.fromJson(Map<String, dynamic> json) {
-    DateTime? parse(Object? v) => (v is String) ? DateTime.parse(v) : null;
-    return SearchCreditsStatus(
-      availableCredits: (json['available_credits'] as num?)?.toInt() ?? 0,
-      monthlyAllowance: (json['monthly_allowance'] as num?)?.toInt() ?? 0,
-      lastResetAt: parse(json['last_reset_at']),
-      lastIssuanceAt: parse(json['last_issuance_at']),
-      currentPeriodEnd: parse(json['current_period_end']),
-    );
-  }
+  factory SearchCreditsStatus.fromJson(Map<String, dynamic> json) =>
+      _$SearchCreditsStatusFromJson(json);
 
   // Not `const` because `FastEquatable` carries a cached-hash field that
   // disallows const construction. Value-equality from the mixin means
   // `SearchCreditsStatus(availableCredits: 0) == SearchCreditsStatus.empty`
   // still holds, which is what Riverpod's `select` dedupe cares about.
   static final empty = SearchCreditsStatus(availableCredits: 0);
+
+  /// A timestamp the backend sends as anything but a string is treated as
+  /// missing rather than failing the whole status.
+  static DateTime? _lenientDateTime(Object? value) =>
+      value is String ? DateTime.parse(value) : null;
 
   @override
   List<Object?> get hashParameters => [

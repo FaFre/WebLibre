@@ -19,8 +19,10 @@
  */
 import 'dart:typed_data';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/engine_suggestions.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/hidden_history_suggestions.dart';
@@ -75,14 +77,25 @@ enum CombinedHistorySource { engine, local }
 /// when the search text changes; this one just reacts.
 @Riverpod()
 List<CombinedHistoryItem> combinedHistorySuggestions(Ref ref) {
-  final engineAsync = ref.watch(engineSuggestionsProvider);
-  final localAsync = ref.watch(historySearchRepositoryProvider);
+  final engineResults = ref
+      .watch(
+        engineSuggestionsProvider.select(
+          (value) => EquatableValue(value.value),
+        ),
+      )
+      .value;
+  final localQueryResults = ref
+      .watch(
+        historySearchRepositoryProvider.select(
+          (value) => EquatableValue(value.value?.results),
+        ),
+      )
+      .value;
   // Deleted rows count as emitted, so neither source brings them back.
   final emitted = {...ref.watch(hiddenHistorySuggestionsProvider)};
 
-  final engineSuggestions = engineAsync.value ?? const <GeckoSuggestion>[];
-  final localResults =
-      localAsync.value?.results ?? const <HistoryQueryResult>[];
+  final engineSuggestions = engineResults ?? const <GeckoSuggestion>[];
+  final localResults = localQueryResults ?? const <HistoryQueryResult>[];
 
   // Index the local rows by canonical URL so engine items can pick up
   // snippet/title-highlight without an N×M scan.

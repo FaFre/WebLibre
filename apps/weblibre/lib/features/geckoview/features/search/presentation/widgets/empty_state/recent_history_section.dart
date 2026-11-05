@@ -34,7 +34,9 @@ class RecentHistorySection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final visits = ref.watch(
-      searchEmptyRecentHistoryProvider().select((value) => value.value ?? []),
+      searchEmptyRecentHistoryProvider().select(
+        (value) => value.value ?? const [],
+      ),
     );
 
     if (visits.isEmpty) {

@@ -30,9 +30,9 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/accordion_expansion.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/accordion_group_tabs.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/accordion_drop.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
@@ -43,7 +43,6 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -139,18 +138,14 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       ).select((value) => value.value ?? 0),
     );
 
-    // A side panel has the height to show several groups open at once; a
-    // single row or a narrow rail does not.
-    final expandedIds = ref
-        .watch(accordionExpansionControllerProvider)
-        .displayed(multiple: isWideRail);
     final pinnedTabIds = ref.watch(
       watchPinnedTabIdsProvider.select(
         (value) => value.value ?? const <String>{},
       ),
     );
     final sandboxCaptureMap =
-        ref.watch(sandboxCaptureMapProvider).value ?? const {};
+        ref.watch(sandboxCaptureMapProvider.select((value) => value.value)) ??
+        const {};
     final restoreComplete = ref.watch(browserRestoreCompleteProvider);
     final nativeTabIds = ref
         .watch(
@@ -172,28 +167,25 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       tabViewFilterControllerProvider.select((v) => v.sortPinnedFirst),
     );
 
-    /// The tabs of an expanded group. Only called for groups shown open, so
-    /// collapsed containers subscribe to nothing.
-    List<QuickTabSwitcherItem> itemsFor(String? containerId) {
-      final tabStates = ref.watch(
-        containerTabStatesWithContainerProvider(containerId),
-      );
-      final tabDepthById = ref
-          .watch(
-            groupedTabListItemsProvider(
-              containerId: containerId,
-              scope: TabListScope.presentation,
-            ).select((value) {
-              return EquatableValue(<String, int>{
-                if (hierarchyGlyphs > 0)
-                  for (final item in value.value)
-                    if (item is TabListChildItem) item.tabId: item.depth,
-              });
-            }),
-          )
-          .value;
+    // The tabs of the groups shown open; collapsed containers subscribe to
+    // nothing. A side panel has the height to show several groups open at
+    // once; a single row or a narrow rail does not.
+    final groupTabs = ref.watch(
+      accordionGroupTabsProvider(
+        multiple: isWideRail,
+        withDepths: hierarchyGlyphs > 0,
+      ),
+    );
+    // The open groups are exactly the keys of [groupTabs], so a group drawn
+    // expanded always has its tabs.
+    final expandedIds = groupTabs.keys.toSet();
 
-      return tabStates.value
+    List<QuickTabSwitcherItem> itemsFor(String? containerId) {
+      final tabs = groupTabs[containerId];
+      if (tabs == null) return const [];
+      final tabDepthById = tabs.tabDepthById;
+
+      return tabs.tabStates
           .map(
             (state) => QuickTabSwitcherItem.tab(
               state,

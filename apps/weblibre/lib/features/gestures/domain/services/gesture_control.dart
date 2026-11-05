@@ -20,6 +20,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -107,9 +108,13 @@ class GestureControlService extends _$GestureControlService {
 /// on the user's exclusion list.
 @Riverpod(keepAlive: true)
 bool gestureSiteExcluded(Ref ref) {
-  final excludedSites = ref.watch(
-    gestureSettingsWithDefaultsProvider.select((s) => s.excludedSites),
-  );
+  final excludedSites = ref
+      .watch(
+        gestureSettingsWithDefaultsProvider.select(
+          (s) => EquatableValue(s.excludedSites),
+        ),
+      )
+      .value;
   if (excludedSites.isEmpty) return false;
 
   final tabId = ref.watch(selectedTabProvider);
@@ -156,4 +161,15 @@ GestureConfig gestureNativeConfig(Ref ref) {
 @riverpod
 Stream<String?> gestureProgress(Ref ref) {
   return ref.watch(gestureServiceProvider).gestureProgress;
+}
+
+/// The stroke [gestureProgress] reports while feedback is shown; null while
+/// it is off, without following the progress events.
+@riverpod
+String? gestureFeedbackProgress(Ref ref) {
+  final showFeedback = ref.watch(
+    gestureSettingsWithDefaultsProvider.select((s) => s.showFeedback),
+  );
+  if (!showFeedback) return null;
+  return ref.watch(gestureProgressProvider).asData?.value;
 }

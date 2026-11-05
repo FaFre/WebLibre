@@ -143,7 +143,7 @@ final class GestureSiteExcludedProvider
 }
 
 String _$gestureSiteExcludedHash() =>
-    r'c7c9f8128a7262b858c954b7217d6a00f1d062e4';
+    r'ffb1c8c798a5bb5ffe029164a6335d1dcbe22068';
 
 /// The effective native recognizer configuration: the user's settings with the
 /// recognizer disabled while the current site is excluded.
@@ -244,3 +244,53 @@ final class GestureProgressProvider
 }
 
 String _$gestureProgressHash() => r'2f3ed4a8db41d317869db2e5aa71e737afb5364b';
+
+/// The stroke [gestureProgress] reports while feedback is shown; null while
+/// it is off, without following the progress events.
+
+@ProviderFor(gestureFeedbackProgress)
+final gestureFeedbackProgressProvider = GestureFeedbackProgressProvider._();
+
+/// The stroke [gestureProgress] reports while feedback is shown; null while
+/// it is off, without following the progress events.
+
+final class GestureFeedbackProgressProvider
+    extends $FunctionalProvider<String?, String?, String?>
+    with $Provider<String?> {
+  /// The stroke [gestureProgress] reports while feedback is shown; null while
+  /// it is off, without following the progress events.
+  GestureFeedbackProgressProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'gestureFeedbackProgressProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$gestureFeedbackProgressHash();
+
+  @$internal
+  @override
+  $ProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  String? create(Ref ref) {
+    return gestureFeedbackProgress(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$gestureFeedbackProgressHash() =>
+    r'769958ce44920a940e7c4c07a05cd533c03d2ea5';

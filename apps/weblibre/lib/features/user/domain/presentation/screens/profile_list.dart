@@ -41,7 +41,9 @@ class ProfileListScreen extends HookConsumerWidget {
     // Adding profiles is `profiles.multi`, grayed out while hidden; managing
     // the existing ones, and this profile's lock and backup, always stay (P5).
     final usersAsync = ref.watch(profileRepositoryProvider);
-    final profilePromptSetting = ref.watch(profilePromptSettingProvider);
+    final profilePromptSetting = ref.watch(
+      profilePromptSettingProvider.select((value) => value.value),
+    );
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
@@ -67,7 +69,7 @@ class ProfileListScreen extends HookConsumerWidget {
             // grayed out with multiple profiles hidden, unless more than one
             // exists or it is on, so it can be turned off again (P5).
             final promptOn =
-                profilePromptSetting.value == ProfilePromptMode.browserOnly;
+                profilePromptSetting == ProfilePromptMode.browserOnly;
 
             return ListView.builder(
               // One extra row for the startup prompt switch, kept in the same

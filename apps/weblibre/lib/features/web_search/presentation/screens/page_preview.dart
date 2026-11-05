@@ -43,15 +43,15 @@ class PagePreviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     // The preview screen only depends on the document for this one URL and
-    // the matching result row. Selecting both via a record means unrelated
+    // the matching result row. Selecting just those means unrelated
     // controller updates (favicons, image streams, other URLs' fetches)
     // don't rebuild the (potentially-large) Markdown body below.
-    final (document, result) = ref.watch(
+    final document = ref.watch(
+      metaSearchControllerProvider.select((s) => s.documentsByUrl[uri]),
+    );
+    final result = ref.watch(
       metaSearchControllerProvider.select(
-        (s) => (
-          s.documentsByUrl[uri],
-          s.results.where((item) => item.url == uri).firstOrNull,
-        ),
+        (s) => s.results.where((item) => item.url == uri).firstOrNull,
       ),
     );
     final title = result?.title ?? document?.metadata.title ?? uri.authority;

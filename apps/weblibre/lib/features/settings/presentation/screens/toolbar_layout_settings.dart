@@ -337,6 +337,7 @@ class _PreviewPane extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final settings = ref.watch(displayedGeneralSettingsProvider);
+    final liveWindow = ref.watch(windowSizeClassControllerProvider);
     final ToolbarLayoutEditorViewState(
       :device,
       sampleState: state,
@@ -346,7 +347,7 @@ class _PreviewPane extends ConsumerWidget {
     ) = view;
     final pageLayout = previewChromeLayout(
       settings,
-      window: resolvePreviewWindow(context, ref, device),
+      window: resolvePreviewWindow(context, liveWindow, device),
       state: PreviewSampleState.page,
     );
     final effectiveState = previewStateBlocker(state, pageLayout) == null
@@ -601,7 +602,12 @@ class _PreviewWithSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = useDraggableScrollableController();
     final settings = ref.watch(displayedGeneralSettingsProvider);
-    final previewWindow = resolvePreviewWindow(context, ref, view.device);
+    final liveWindow = ref.watch(windowSizeClassControllerProvider);
+    final previewWindow = resolvePreviewWindow(
+      context,
+      liveWindow,
+      view.device,
+    );
     final menuShown = ref.watch(menuCustomizationShown);
     final part = view.shownPart;
     final revealEditor = view.revealShownEditor;

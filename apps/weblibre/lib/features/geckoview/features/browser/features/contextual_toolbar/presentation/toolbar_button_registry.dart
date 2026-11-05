@@ -1098,13 +1098,13 @@ class _ReaderModeToolbarButton extends ConsumerWidget {
   }
 }
 
-class _DesktopModeToolbarButton extends ConsumerWidget {
+class _DesktopModeToolbarButton extends StatelessWidget {
   final String? selectedTabId;
 
   const _DesktopModeToolbarButton({required this.selectedTabId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     if (selectedTabId == null) {
       return const IconButton(
         onPressed: null,
@@ -1112,11 +1112,22 @@ class _DesktopModeToolbarButton extends ConsumerWidget {
       );
     }
 
-    final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId!));
+    return _DesktopModeToggleButton(tabId: selectedTabId!);
+  }
+}
+
+class _DesktopModeToggleButton extends ConsumerWidget {
+  final String tabId;
+
+  const _DesktopModeToggleButton({required this.tabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final desktopEnabled = ref.watch(desktopModeProvider(tabId));
 
     return IconButton(
       onPressed: () {
-        ref.read(desktopModeProvider(selectedTabId!).notifier).toggle();
+        ref.read(desktopModeProvider(tabId).notifier).toggle();
       },
       icon: Icon(
         desktopEnabled ? Icons.desktop_windows : Icons.desktop_windows_outlined,

@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:nullability/nullability.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weblibre/core/logger.dart';
@@ -221,4 +222,22 @@ Stream<int?> unreadFeedArticleCount(Ref ref, Uri feedId) {
 @Riverpod()
 Future<FeedParseResult> fetchWebFeed(Ref ref, Uri url) {
   return ref.read(feedReaderProvider.notifier).parseFeed(url);
+}
+
+/// What the feed editor starts from: [feedId] fetched from the web for a new
+/// feed ([fetch]), as stored otherwise. Only the source in use is read.
+@Riverpod()
+AsyncValue<FeedData?> feedEditorInitialFeed(
+  Ref ref,
+  Uri feedId, {
+  required bool fetch,
+}) {
+  if (fetch) {
+    return ref.watch(
+      fetchWebFeedProvider(
+        feedId,
+      ).select((value) => value.whenData((result) => result.feedData)),
+    );
+  }
+  return ref.watch(feedDataProvider(feedId));
 }

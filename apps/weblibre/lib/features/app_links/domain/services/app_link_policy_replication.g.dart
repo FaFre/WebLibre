@@ -61,7 +61,7 @@ final class AppLinkProtectionProvider
   }
 }
 
-String _$appLinkProtectionHash() => r'6aab203c9b7d2f2c8a73684ea0b624e09fe6179f';
+String _$appLinkProtectionHash() => r'579f9f650af04654e08c49fc65bc89402dcb024c';
 
 /// The complete policy snapshot to push, or null until the real persisted
 /// settings have loaded (the `...WithDefaults` loading placeholder is not valid
@@ -120,7 +120,7 @@ final class AppLinkPolicySnapshotProvider
 }
 
 String _$appLinkPolicySnapshotHash() =>
-    r'c07b9e369c96e65571186a8a1f8cb2ff80a7193f';
+    r'08d7a27ba87669f9fb6ede37921eccf1deb86b6f';
 
 /// Single serialised writer that mirrors the Dart-owned app-link policy to the
 /// native profile-scoped store (§2.8), the sole policy source consulted by the

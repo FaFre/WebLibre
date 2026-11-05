@@ -46,9 +46,7 @@ class GestureFeedbackOverlay extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(gestureSettingsWithDefaultsProvider);
-    final partialKey = settings.showFeedback
-        ? ref.watch(gestureProgressProvider).asData?.value
-        : null;
+    final partialKey = ref.watch(gestureFeedbackProgressProvider);
 
     final suggestions = partialKey == null
         ? const <_Suggestion>[]

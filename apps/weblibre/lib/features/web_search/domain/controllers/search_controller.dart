@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:search_client/search_client.dart';
@@ -43,8 +44,7 @@ part 'search_controller.g.dart';
 
 enum WebSearchStatus { idle, needsCredits, submitting, ready, error }
 
-const _unset = Object();
-
+@CopyWith()
 class MetaSearchState {
   final WebSearchStatus status;
   final String query;
@@ -125,44 +125,6 @@ class MetaSearchState {
       return isFetched(url);
     }
     return capturedPage(url, method)?.status == CapturedPageStatus.ready;
-  }
-
-  MetaSearchState copyWith({
-    WebSearchStatus? status,
-    String? query,
-    List<CompactInfobox>? infos,
-    List<CompactSearchResult>? results,
-    Map<String, Uint8List>? imagesByUrl,
-    Map<Uri, FetchedDocument>? documentsByUrl,
-    Set<Uri>? fetchingUrls,
-    Map<Uri, Set<FetchMethodChoice>>? capturingByUrl,
-    Map<Uri, Map<FetchMethodChoice, CapturedPageState>>? capturedPagesByUrl,
-    Map<Uri, String>? fetchErrorByUrl,
-    Object? errorMessage = _unset,
-    bool? hasOpenSession,
-    int? currentPage,
-    bool? hasMore,
-    bool? isLoadingMore,
-  }) {
-    return MetaSearchState(
-      status: status ?? this.status,
-      query: query ?? this.query,
-      infos: infos ?? this.infos,
-      results: results ?? this.results,
-      imagesByUrl: imagesByUrl ?? this.imagesByUrl,
-      documentsByUrl: documentsByUrl ?? this.documentsByUrl,
-      fetchingUrls: fetchingUrls ?? this.fetchingUrls,
-      capturingByUrl: capturingByUrl ?? this.capturingByUrl,
-      capturedPagesByUrl: capturedPagesByUrl ?? this.capturedPagesByUrl,
-      fetchErrorByUrl: fetchErrorByUrl ?? this.fetchErrorByUrl,
-      errorMessage: errorMessage == _unset
-          ? this.errorMessage
-          : errorMessage as String?,
-      hasOpenSession: hasOpenSession ?? this.hasOpenSession,
-      currentPage: currentPage ?? this.currentPage,
-      hasMore: hasMore ?? this.hasMore,
-      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-    );
   }
 }
 

@@ -155,12 +155,14 @@ class ModuleSurfaceSliverList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (ref.watch(searchReorderModeProvider(surface))) {
+    final reorderMode = ref.watch(searchReorderModeProvider(surface));
+    final order = ref.watch(editedModuleOrderProvider(surface));
+    final shownFeatures = ref.watch(displayedShownFeaturesProvider);
+
+    if (reorderMode) {
       return SearchModuleReorderView(surface: surface);
     }
 
-    final order = ref.watch(editedModuleOrderProvider(surface));
-    final shownFeatures = ref.watch(displayedShownFeaturesProvider);
     final builders = buildSurfaceModuleBuilders(
       surface: surface,
       callbacks: callbacks,

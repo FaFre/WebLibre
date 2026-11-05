@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -40,9 +41,13 @@ class DesktopModeSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final desktopModeSites = ref.watch(
-      generalSettingsWithDefaultsProvider.select((s) => s.desktopModeSites),
-    );
+    final desktopModeSites = ref
+        .watch(
+          generalSettingsWithDefaultsProvider.select(
+            (s) => EquatableValue(s.desktopModeSites),
+          ),
+        )
+        .value;
 
     final host = normalizeRuleHost(url.toString());
     final isRuled = hostMatchesRule(url, desktopModeSites);

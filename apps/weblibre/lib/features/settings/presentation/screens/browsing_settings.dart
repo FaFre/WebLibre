@@ -995,9 +995,13 @@ class _AppLinksModeSection extends HookConsumerWidget {
     final blockWhilePrompting = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.appLinkBlockWhilePrompting),
     );
-    final rules = ref.watch(
-      storedGeneralSettingsProvider.select((s) => s.appLinkRules),
-    );
+    final rules = ref
+        .watch(
+          storedGeneralSettingsProvider.select(
+            (s) => EquatableValue(s.appLinkRules),
+          ),
+        )
+        .value;
     final l10n = AppLocalizations.of(context);
 
     return Padding(
@@ -1127,10 +1131,17 @@ class _ContainerAppLinkOverridesSubsection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final containers =
-        ref.watch(watchContainersWithCountProvider).value ?? const [];
-    final overrides = ref.watch(
-      storedGeneralSettingsProvider.select((s) => s.appLinkContextOverrides),
-    );
+        ref.watch(
+          watchContainersWithCountProvider.select((value) => value.value),
+        ) ??
+        const [];
+    final overrides = ref
+        .watch(
+          storedGeneralSettingsProvider.select(
+            (s) => EquatableValue(s.appLinkContextOverrides),
+          ),
+        )
+        .value;
 
     final isolated =
         containers

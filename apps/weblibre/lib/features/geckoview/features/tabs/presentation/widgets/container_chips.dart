@@ -31,7 +31,6 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -141,14 +140,11 @@ class _UnassignedContainerChip extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final int tabCount =
-        containerBadgeCount?.call() ??
-        ref.watch(
-          containerTabCountProvider(
-            // ignore: provider_parameters
-            ContainerFilterById(containerId: null),
-          ).select((value) => value.value ?? 0),
-        );
+    final badgeCount = containerBadgeCount?.call();
+    final unassignedTabCount = ref.watch(
+      unassignedTabCountProvider(enabled: badgeCount == null),
+    );
+    final int tabCount = badgeCount ?? unassignedTabCount;
 
     return FilterChip(
       avatar: const Icon(MdiIcons.folderHidden),
@@ -229,6 +225,17 @@ class _ContainerSuggestionsChip extends ConsumerWidget {
       return const SizedBox.shrink();
     }
 
+    // Clustering runs the on-device model: only built while suggestions are
+    // on.
+    return const _ContainerSuggestionsCountChip();
+  }
+}
+
+class _ContainerSuggestionsCountChip extends ConsumerWidget {
+  const _ContainerSuggestionsCountChip();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final suggestions = ref.watch(suggestClustersProvider);
 
     return suggestions.when(

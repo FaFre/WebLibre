@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
@@ -32,9 +33,13 @@ class DesktopModeSitesScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final desktopModeSites = ref.watch(
-      storedGeneralSettingsProvider.select((s) => s.desktopModeSites),
-    );
+    final desktopModeSites = ref
+        .watch(
+          storedGeneralSettingsProvider.select(
+            (s) => EquatableValue(s.desktopModeSites),
+          ),
+        )
+        .value;
     final l10n = AppLocalizations.of(context);
 
     return StringListSettingsScreen(

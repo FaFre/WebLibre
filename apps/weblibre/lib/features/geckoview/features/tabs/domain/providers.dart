@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
@@ -36,19 +37,65 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 part 'providers.g.dart';
 
+/// Drift re-runs a watched query on every write to the tables it reads, and
+/// emits a new collection each time even when the rows are unchanged. Riverpod
+/// compares collections by identity, so without this every such write (the
+/// tab table is written on each debounced tab update) would notify every
+/// consumer of these streams.
+bool _sameContent(Object? previous, Object? next) =>
+    const DeepCollectionEquality().equals(previous, next);
+
+/// [_sameContent] for drift's query result classes, which have no `==`.
+bool _sameTabsWithRootAndDepth(
+  List<TabsWithRootAndDepthResult> previous,
+  List<TabsWithRootAndDepthResult> next,
+) {
+  if (previous.length != next.length) return false;
+  for (var i = 0; i < previous.length; i++) {
+    final a = previous[i];
+    final b = next[i];
+    if (a.id != b.id ||
+        a.parentId != b.parentId ||
+        a.orderKey != b.orderKey ||
+        a.rootId != b.rootId ||
+        a.depth != b.depth) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// [_sameContent] for drift's query result classes, which have no `==`.
+bool _sameTabTrees(List<TabTreesResult> previous, List<TabTreesResult> next) {
+  if (previous.length != next.length) return false;
+  for (var i = 0; i < previous.length; i++) {
+    final a = previous[i];
+    final b = next[i];
+    if (a.rootTabId != b.rootTabId ||
+        a.latestTabId != b.latestTabId ||
+        a.latestTimestamp != b.latestTimestamp ||
+        a.totalTabs != b.totalTabs) {
+      return false;
+    }
+  }
+  return true;
+}
+
 @Riverpod(keepAlive: true)
 Stream<List<ContainerDataWithCount>> watchContainersWithCount(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.definitionsDrift.containersWithCount().watch();
+  return db.definitionsDrift.containersWithCount().watch().distinct(
+    _sameContent,
+  );
 }
 
 /// The containers without their tab counts. Unlike [watchContainersWithCount],
-/// it does not emit again on every write to a tab, so it suits work too costly
-/// to repeat that often.
+/// its query does not re-run on every write to a tab, so it suits work too
+/// costly to repeat that often.
 @Riverpod()
 Stream<List<ContainerData>> watchContainers(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.allContainers().watch();
+  return db.containerDao.allContainers().watch().distinct(_sameContent);
 }
 
 /// When each container was last used, keyed by container id. See
@@ -60,7 +107,11 @@ Stream<List<ContainerData>> watchContainers(Ref ref) {
 @Riverpod(keepAlive: true)
 Stream<Map<String, DateTime>> watchContainerLastUsed(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.getContainerLastUsed().watch().map(Map.fromEntries);
+  return db.containerDao
+      .getContainerLastUsed()
+      .watch()
+      .map(Map.fromEntries)
+      .distinct(_sameContent);
 }
 
 /// Which container each closed tab ran in, for the recently closed list.
@@ -116,9 +167,12 @@ Stream<List<String>> watchContainerTabIds(
 
   switch (containerFilter) {
     case ContainerFilterById(:final containerId):
-      return db.containerDao.getContainerTabIds(containerId).watch();
+      return db.containerDao
+          .getContainerTabIds(containerId)
+          .watch()
+          .distinct(_sameContent);
     case ContainerFilterDisabled():
-      return db.tabDao.getAllTabIds().watch();
+      return db.tabDao.getAllTabIds().watch().distinct(_sameContent);
   }
 }
 
@@ -126,7 +180,7 @@ Stream<List<String>> watchContainerTabIds(
 Stream<List<TabSummary>> watchTabsFifo(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
 
-  return db.tabDao.getTabsFifo().watch();
+  return db.tabDao.getTabsFifo().watch().distinct(_sameContent);
 }
 
 @Riverpod()
@@ -149,11 +203,13 @@ Stream<List<TabTreesResult>> watchTabTrees(
     ContainerFilterById(:final containerId) =>
       db.definitionsDrift
           .tabTrees(containerId: containerId, skipContainerCheck: false)
-          .watch(),
+          .watch()
+          .distinct(_sameTabTrees),
     ContainerFilterDisabled() =>
       db.definitionsDrift
           .tabTrees(containerId: null, skipContainerCheck: true)
-          .watch(),
+          .watch()
+          .distinct(_sameTabTrees),
   };
 }
 
@@ -165,7 +221,8 @@ Stream<List<TabsWithRootAndDepthResult>> watchTabsWithRootAndDepth(
   final db = ref.watch(tabDatabaseProvider);
   return db.definitionsDrift
       .tabsWithRootAndDepth(containerId: containerId)
-      .watch();
+      .watch()
+      .distinct(_sameTabsWithRootAndDepth);
 }
 
 /// One tab's row, watched — without its page text.
@@ -183,19 +240,24 @@ Stream<TabSummary?> watchTabDbData(Ref ref, String tabId) {
 @Riverpod()
 Stream<Map<String, String?>> watchTabDescendants(Ref ref, String tabId) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.definitionsDrift.unorderedTabDescendants(tabId: tabId).watch().map((
-    results,
-  ) {
-    return Map.fromEntries(
-      results.map((pair) => MapEntry(pair.id, pair.parentId)),
-    );
-  });
+  return db.definitionsDrift
+      .unorderedTabDescendants(tabId: tabId)
+      .watch()
+      .map((results) {
+        return Map.fromEntries(
+          results.map((pair) => MapEntry(pair.id, pair.parentId)),
+        );
+      })
+      .distinct(_sameContent);
 }
 
 @Riverpod()
 Stream<List<TabSummary>> watchContainerTabsData(Ref ref, String? containerId) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.getContainerTabsData(containerId).watch();
+  return db.containerDao
+      .getContainerTabsData(containerId)
+      .watch()
+      .distinct(_sameContent);
 }
 
 /// Whether a container menu for [containerId] offers closing its isolated
@@ -257,19 +319,31 @@ bool closeIsolatedTabsShown(Ref ref, String? containerId) {
 @Riverpod(keepAlive: true)
 Stream<Set<String>> watchPinnedTabIds(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.getPinnedTabIds().watch().map((ids) => ids.toSet());
+  return db.tabDao
+      .getPinnedTabIds()
+      .watch()
+      .map((ids) => ids.toSet())
+      .distinct(_sameContent);
 }
 
 @Riverpod()
 Stream<Map<String, DateTime>> watchTabTimestamps(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.getTabTimestamps().watch().map(Map.fromEntries);
+  return db.tabDao
+      .getTabTimestamps()
+      .watch()
+      .map(Map.fromEntries)
+      .distinct(_sameContent);
 }
 
 @Riverpod(keepAlive: true)
 Stream<Map<String, String>> watchTabOrderKeys(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.getTabOrderKeys().watch().map(Map.fromEntries);
+  return db.tabDao
+      .getTabOrderKeys()
+      .watch()
+      .map(Map.fromEntries)
+      .distinct(_sameContent);
 }
 
 @Riverpod()
@@ -303,13 +377,14 @@ Stream<Map<String, String?>> watchTabsContainerId(
   return db.tabDao
       .getTabsContainerId(tabIds.value)
       .watch()
-      .map(Map.fromEntries);
+      .map(Map.fromEntries)
+      .distinct(_sameContent);
 }
 
 @Riverpod(keepAlive: true)
 Stream<List<SiteAssignment>> watchAllAssignedSites(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.allAssignedSites().watch();
+  return db.containerDao.allAssignedSites().watch().distinct(_sameContent);
 }
 
 /// Strict-mode enforcement map: each Gecko cookie-store context that must be
@@ -331,23 +406,27 @@ Stream<Map<String, List<String>>> watchStrictContextAssignments(Ref ref) {
   if (!strictModeShown) return Stream.value(const {});
 
   final db = ref.watch(tabDatabaseProvider);
-  return db.containerDao.strictContextAssignments().watch().map((rows) {
-    final assignments = <String, Set<String>>{};
-    for (final row in rows) {
-      final contextId = row.contextId;
-      final assignmentContextId = row.assignmentContextId;
-      if (contextId == null || assignmentContextId == null) continue;
+  return db.containerDao
+      .strictContextAssignments()
+      .watch()
+      .map((rows) {
+        final assignments = <String, Set<String>>{};
+        for (final row in rows) {
+          final contextId = row.contextId;
+          final assignmentContextId = row.assignmentContextId;
+          if (contextId == null || assignmentContextId == null) continue;
 
-      assignments
-          .putIfAbsent(contextId, () => <String>{})
-          .add(assignmentContextId);
-    }
+          assignments
+              .putIfAbsent(contextId, () => <String>{})
+              .add(assignmentContextId);
+        }
 
-    return {
-      for (final entry in assignments.entries)
-        entry.key: entry.value.toList()..sort(),
-    };
-  });
+        return {
+          for (final entry in assignments.entries)
+            entry.key: entry.value.toList()..sort(),
+        };
+      })
+      .distinct(_sameContent);
 }
 
 /// Watches distinct (isolationContextId, containerId) pairs for isolated tabs
@@ -360,13 +439,17 @@ Stream<Map<String, List<String>>> watchStrictContextAssignments(Ref ref) {
 @Riverpod(keepAlive: true)
 Stream<Map<String, Set<String>>> watchIsolatedContextContainerMap(Ref ref) {
   final db = ref.watch(tabDatabaseProvider);
-  return db.tabDao.isolatedContextContainerPairs().watch().map((pairs) {
-    final map = <String, Set<String>>{};
-    for (final p in pairs) {
-      map.putIfAbsent(p.isolationContextId!, () => {}).add(p.containerId!);
-    }
-    return map;
-  });
+  return db.tabDao
+      .isolatedContextContainerPairs()
+      .watch()
+      .map((pairs) {
+        final map = <String, Set<String>>{};
+        for (final p in pairs) {
+          map.putIfAbsent(p.isolationContextId!, () => {}).add(p.containerId!);
+        }
+        return map;
+      })
+      .distinct(_sameContent);
 }
 
 /// Whether the site [tabId] shows is assigned to a container. Keyed by tab, so
@@ -385,4 +468,38 @@ Stream<bool> watchIsSiteAssignedToContainer(Ref ref, String tabId) {
       (a) => siteAssignmentMatches(a.assignedSite, currentUri),
     );
   });
+}
+
+/// The tabs of the container [tabId] is in. Loading until [tabId] itself is
+/// read, so they are never those of another container.
+@Riverpod()
+AsyncValue<List<TabSummary>> watchTabContainerTabsData(Ref ref, String tabId) {
+  final tab = ref.watch(watchTabDbDataProvider(tabId));
+  if (!tab.hasValue) return const AsyncLoading();
+
+  return ref.watch(watchContainerTabsDataProvider(tab.value?.containerId));
+}
+
+/// Whether a tab preview draws the pin badge on [tabId]: where it shows one
+/// at all ([enabled]) and the tab is pinned. Previews without the badge do
+/// not follow the pinned tabs.
+@Riverpod()
+bool tabPinBadgeShown(Ref ref, String tabId, {required bool enabled}) {
+  if (!enabled) return false;
+  return ref.watch(
+    watchPinnedTabIdsProvider.select((v) => v.value?.contains(tabId) ?? false),
+  );
+}
+
+/// How many tabs are in no container, for a chip that counts them itself
+/// ([enabled]); 0 without reading them for one given its count.
+@Riverpod()
+int unassignedTabCount(Ref ref, {required bool enabled}) {
+  if (!enabled) return 0;
+  return ref.watch(
+    containerTabCountProvider(
+      // ignore: provider_parameters
+      ContainerFilterById(containerId: null),
+    ).select((value) => value.value ?? 0),
+  );
 }

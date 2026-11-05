@@ -3,6 +3,95 @@
 part of 'proxy_health.dart';
 
 // **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+abstract class _$ProxyTrafficEvidenceCWProxy {
+  ProxyTrafficEvidence failedLoads(List<ProxyFailedLoad> failedLoads);
+
+  ProxyTrafficEvidence testFailed(bool testFailed);
+
+  ProxyTrafficEvidence peerUnanswered(bool peerUnanswered);
+
+  /// Creates a new instance with the provided field values.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ProxyTrafficEvidence(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// ProxyTrafficEvidence(...).copyWith(id: 12, name: "My name")
+  /// ```
+  ProxyTrafficEvidence call({
+    List<ProxyFailedLoad> failedLoads,
+    bool testFailed,
+    bool peerUnanswered,
+  });
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfProxyTrafficEvidence.copyWith(...)` or call `instanceOfProxyTrafficEvidence.copyWith.fieldName(value)` for a single field.
+class _$ProxyTrafficEvidenceCWProxyImpl
+    implements _$ProxyTrafficEvidenceCWProxy {
+  const _$ProxyTrafficEvidenceCWProxyImpl(this._value);
+
+  final ProxyTrafficEvidence _value;
+
+  @override
+  ProxyTrafficEvidence failedLoads(List<ProxyFailedLoad> failedLoads) =>
+      call(failedLoads: failedLoads);
+
+  @override
+  ProxyTrafficEvidence testFailed(bool testFailed) =>
+      call(testFailed: testFailed);
+
+  @override
+  ProxyTrafficEvidence peerUnanswered(bool peerUnanswered) =>
+      call(peerUnanswered: peerUnanswered);
+
+  /// Creates a new instance with the provided field values.
+  /// Omitted fields keep their values; explicit `null` clears nullable fields.
+  /// The public API rejects `null` for non-nullable fields. To update a single field use `ProxyTrafficEvidence(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// ProxyTrafficEvidence(...).copyWith(id: 12, name: "My name")
+  /// ```
+  @override
+  ProxyTrafficEvidence call({
+    Object? failedLoads = const $CopyWithPlaceholder(),
+    Object? testFailed = const $CopyWithPlaceholder(),
+    Object? peerUnanswered = const $CopyWithPlaceholder(),
+  }) {
+    return ProxyTrafficEvidence(
+      failedLoads:
+          failedLoads == const $CopyWithPlaceholder() || failedLoads == null
+          ? _value.failedLoads
+          // ignore: cast_nullable_to_non_nullable
+          : failedLoads as List<ProxyFailedLoad>,
+      testFailed:
+          testFailed == const $CopyWithPlaceholder() || testFailed == null
+          ? _value.testFailed
+          // ignore: cast_nullable_to_non_nullable
+          : testFailed as bool,
+      peerUnanswered:
+          peerUnanswered == const $CopyWithPlaceholder() ||
+              peerUnanswered == null
+          ? _value.peerUnanswered
+          // ignore: cast_nullable_to_non_nullable
+          : peerUnanswered as bool,
+    );
+  }
+}
+
+extension $ProxyTrafficEvidenceCopyWith on ProxyTrafficEvidence {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfProxyTrafficEvidence.copyWith(...)` or `instanceOfProxyTrafficEvidence.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ProxyTrafficEvidenceCWProxy get copyWith =>
+      _$ProxyTrafficEvidenceCWProxyImpl(this);
+}
+
+// **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 

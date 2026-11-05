@@ -152,18 +152,4 @@ class ImportBookmarkStats {
     this.separatorCount = 0,
     this.skippedUrlCount = 0,
   });
-
-  ImportBookmarkStats copyWith({
-    int? bookmarkCount,
-    int? folderCount,
-    int? separatorCount,
-    int? skippedUrlCount,
-  }) {
-    return ImportBookmarkStats(
-      bookmarkCount: bookmarkCount ?? this.bookmarkCount,
-      folderCount: folderCount ?? this.folderCount,
-      separatorCount: separatorCount ?? this.separatorCount,
-      skippedUrlCount: skippedUrlCount ?? this.skippedUrlCount,
-    );
-  }
 }

@@ -57,14 +57,9 @@ class FeedEditScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final initialFeedAsync = switch (_mode) {
-      _DialogMode.create => ref.watch(
-        fetchWebFeedProvider(
-          feedId,
-        ).select((value) => value.whenData((result) => result.feedData)),
-      ),
-      _DialogMode.edit => ref.watch(feedDataProvider(feedId)),
-    };
+    final initialFeedAsync = ref.watch(
+      feedEditorInitialFeedProvider(feedId, fetch: _mode == _DialogMode.create),
+    );
 
     return initialFeedAsync.when(
       skipLoadingOnReload: true,

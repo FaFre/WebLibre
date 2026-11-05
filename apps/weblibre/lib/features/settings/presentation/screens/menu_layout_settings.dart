@@ -132,9 +132,10 @@ class MenuLayoutEditor extends HookConsumerWidget {
     final theme = Theme.of(context);
     final focusedSection = useState<MenuSectionType?>(null);
     final focusedItem = useState<MenuItemType?>(null);
+    final menuLayout = ref.watch(editedMenuLayoutProvider);
 
     final (:section, :item) = resolveMenuLayoutFocus(
-      ref.watch(editedMenuLayoutProvider),
+      menuLayout,
       focusedSection: focusedSection.value,
       focusedItem: focusedItem.value,
     );

@@ -71,14 +71,7 @@ class SmartBangSelector extends HookConsumerWidget {
     final isEditMode = domain != null;
 
     // Watch site-specific bangs (only in edit mode)
-    final siteBangs = isEditMode
-        ? ref.watch(
-            bangListProvider(
-              domain: domain,
-              orderMostFrequentFirst: true,
-            ).select((value) => value.value ?? const []),
-          )
-        : const <BangData>[];
+    final siteBangs = ref.watch(siteBangsProvider(domain));
 
     // Watch global bangs via seamless provider (supports search)
     // When search text is empty: shows frequentBangListProvider
@@ -121,10 +114,11 @@ class SmartBangSelector extends HookConsumerWidget {
     // Determine if we should show tabs
     final showTabs = isEditMode && siteBangs.isNotEmpty;
 
-    // Watch both selection providers to determine the active bang
-    final siteSelectedBang = isEditMode
-        ? ref.watch(selectedBangDataProvider(domain: domain))
-        : null;
+    // Watch both selection providers to determine the active bang. Outside
+    // edit mode there is no site, and the site selection is the global one.
+    final siteSelectedBang = ref.watch(
+      selectedBangDataProvider(domain: domain),
+    );
     final globalSelectedBang = ref.watch(selectedBangDataProvider());
 
     // The active bang is whichever one is set (only one should be set at a time)

@@ -82,11 +82,13 @@ class ContextualToolbar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final previewTab = isPreview ? this.previewTab : null;
-    final tabState =
-        previewTab?.tabState ?? ref.watch(tabStateProvider(selectedTabId));
-    final historyState =
-        previewTab?.historyState ??
-        ref.watch(tabHistoryStateProvider(selectedTabId));
+    // A preview brings its own sample tab; the live one is only followed
+    // without it.
+    final liveTabId = previewTab == null ? selectedTabId : null;
+    final liveTabState = ref.watch(tabStateProvider(liveTabId));
+    final liveHistoryState = ref.watch(tabHistoryStateProvider(liveTabId));
+    final tabState = previewTab?.tabState ?? liveTabState;
+    final historyState = previewTab?.historyState ?? liveHistoryState;
     final configs = ref.watch(
       toolbarButtonConfigsShownBy(
         ToolbarConfigLocation.contextual,

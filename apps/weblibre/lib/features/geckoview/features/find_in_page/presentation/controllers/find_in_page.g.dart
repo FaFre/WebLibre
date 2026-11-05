@@ -106,3 +106,89 @@ abstract class _$FindInPageController extends $Notifier<FindInPageState> {
     return element.handleCreate(ref, () => build(_$args));
   }
 }
+
+/// Whether find in page shows for [tabId]; never without a tab.
+
+@ProviderFor(findInPageVisible)
+final findInPageVisibleProvider = FindInPageVisibleFamily._();
+
+/// Whether find in page shows for [tabId]; never without a tab.
+
+final class FindInPageVisibleProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether find in page shows for [tabId]; never without a tab.
+  FindInPageVisibleProvider._({
+    required FindInPageVisibleFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'findInPageVisibleProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$findInPageVisibleHash();
+
+  @override
+  String toString() {
+    return r'findInPageVisibleProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return findInPageVisible(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FindInPageVisibleProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$findInPageVisibleHash() => r'5b574d7a195125886535c92460a84caeed11f693';
+
+/// Whether find in page shows for [tabId]; never without a tab.
+
+final class FindInPageVisibleFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  FindInPageVisibleFamily._()
+    : super(
+        retry: null,
+        name: r'findInPageVisibleProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether find in page shows for [tabId]; never without a tab.
+
+  FindInPageVisibleProvider call(String? tabId) =>
+      FindInPageVisibleProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'findInPageVisibleProvider';
+}

@@ -20,7 +20,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -31,14 +30,13 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_type_filter_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_enums_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
@@ -177,49 +175,6 @@ class _SyncedDeviceSelector extends ConsumerWidget {
 /// Height of [_TabTypeFilterBar], which the header grows by while it shows.
 const tabTypeFilterBarHeight = 48.0;
 
-/// Whether the tray's header shows [_TabTypeFilterBar].
-///
-/// Only once there is a choice to make: while tabs of more than one kind are
-/// open, or while the filter is set — the filter persists, and must never hide
-/// tabs out of sight. Not in the tree view, which ignores the filter, nor for
-/// synced tabs, which have no kind.
-bool watchTabTypeFilterBarVisible(WidgetRef ref, TabsViewMode tabsViewMode) {
-  if (tabsViewMode == TabsViewMode.tree) return false;
-
-  final isSyncedScope = ref.watch(
-    effectiveTabsTrayScopeProvider.select(
-      (scope) => scope == TabsTrayScope.synced,
-    ),
-  );
-  if (isSyncedScope) return false;
-
-  final selected = ref.watch(
-    tabViewFilterControllerProvider.select((options) => options.tabTypeFilter),
-  );
-  if (selected != TabTypeFilter.all) return true;
-
-  return _watchOpenTabTypes(ref).length > 1;
-}
-
-/// The kinds of tab open right now, as the filters that would list them.
-Set<TabTypeFilter> _watchOpenTabTypes(WidgetRef ref) {
-  return ref
-      .watch(
-        tabSortKeysProvider.select(
-          (keys) => EquatableValue({
-            for (final key in keys.value.values) _filterFor(key.tabMode),
-          }),
-        ),
-      )
-      .value;
-}
-
-TabTypeFilter _filterFor(TabMode tabMode) => switch (tabMode) {
-  RegularTabMode() => TabTypeFilter.regularOnly,
-  PrivateTabMode() => TabTypeFilter.privateOnly,
-  IsolatedTabMode() => TabTypeFilter.isolatedOnly,
-};
-
 /// One tap to list all tabs or only regular, private or isolated ones, which
 /// the filter menu used to keep two levels deep.
 class _TabTypeFilterBar extends ConsumerWidget {
@@ -233,7 +188,7 @@ class _TabTypeFilterBar extends ConsumerWidget {
         (options) => options.tabTypeFilter,
       ),
     );
-    final openTypes = _watchOpenTabTypes(ref);
+    final openTypes = ref.watch(openTabTypesProvider).value;
     final showIsolatedTabUi = ref.watch(
       generalSettingsWithDefaultsProvider.select(
         (settings) => settings.isolatedTabEntryPointsShown,
@@ -340,6 +295,9 @@ class TabViewHeader extends HookConsumerWidget {
       ),
     );
     final canManualTabReorder = ref.watch(canManualTabReorderProvider);
+    final tabTypeFilterBarVisible = ref.watch(
+      tabTypeFilterBarVisibleProvider(tabsViewMode),
+    );
 
     final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
@@ -472,8 +430,7 @@ class TabViewHeader extends HookConsumerWidget {
                 _TabViewActionRow(tabsViewMode: tabsViewMode),
               // Under the search field only, as in an M3 search view.
               if (searchMode) const Divider(),
-              if (watchTabTypeFilterBarVisible(ref, tabsViewMode))
-                const _TabTypeFilterBar(),
+              if (tabTypeFilterBarVisible) const _TabTypeFilterBar(),
               // Always: the Synced chip and the way back to local tabs live
               // here too, and while containers are hidden ContainerChips
               // reduces itself to navigation, or to nothing (P5).

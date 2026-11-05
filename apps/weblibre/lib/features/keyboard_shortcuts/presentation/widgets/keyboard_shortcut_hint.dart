@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/keyboard_shortcuts/domain/providers.dart';
-import 'package:weblibre/features/keyboard_shortcuts/domain/repositories/keyboard_shortcut_settings.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/key_chord_label.dart';
 
 /// The first key combination that runs [action], as a small keycap beside a
@@ -36,15 +35,7 @@ class KeyboardShortcutHint extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(showKeyboardShortcutHintsProvider)) {
-      return const SizedBox.shrink();
-    }
-
-    final chord = ref.watch(
-      effectiveKeyboardShortcutsProvider.select(
-        (bindings) => bindings[action]?.firstOrNull,
-      ),
-    );
+    final chord = ref.watch(keyboardShortcutHintChordProvider(action));
     if (chord == null) return const SizedBox.shrink();
 
     return KeyChordLabel(chord, dense: true);

@@ -41,7 +41,7 @@ class RecentFeedArticlesSection extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final articles = ref.watch(
       searchEmptyRecentFeedArticlesProvider().select(
-        (value) => value.value ?? [],
+        (value) => value.value ?? const [],
       ),
     );
 

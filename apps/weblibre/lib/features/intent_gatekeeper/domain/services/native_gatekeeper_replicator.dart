@@ -19,7 +19,6 @@
  */
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -117,28 +116,18 @@ class NativeIntentGatekeeperReplicator
   void build() {
     unawaited(syncPendingAllows());
 
+    // The record compares field by field, so the map is wrapped to compare
+    // by content: the listener fires only when one of the three changes.
     ref.listen(
       generalSettingsWithDefaultsProvider.select(
-        (settings) => EquatableValue((
+        (settings) => (
           enabled: settings.blockExternalAppsEnabled,
-          policies: settings.externalAppIntentPolicies,
+          policies: EquatableValue(settings.externalAppIntentPolicies),
           customTabsEnabled: settings.customTabsEnabled,
-        )),
+        ),
       ),
       fireImmediately: true,
-      (p, n) {
-        final previous = p?.value;
-        final next = n.value;
-
-        if (previous != null &&
-            previous.enabled == next.enabled &&
-            previous.customTabsEnabled == next.customTabsEnabled &&
-            const DeepCollectionEquality.unordered().equals(
-              previous.policies,
-              next.policies,
-            )) {
-          return;
-        }
+      (_, _) {
         unawaited(() async {
           await syncPendingAllows();
           final settings = await ref

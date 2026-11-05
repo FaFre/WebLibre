@@ -68,10 +68,8 @@ class LayoutPartSettings extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final editor = layoutPartEditor(
-      part,
-      menuShown: ref.watch(menuCustomizationShown),
-    );
+    final menuShown = ref.watch(menuCustomizationShown);
+    final editor = layoutPartEditor(part, menuShown: menuShown);
     final sections = layoutPartSections(context, part, editor: editor);
     // The menu's only row is the one its editor replaces: no "No settings
     // available" above the editor.

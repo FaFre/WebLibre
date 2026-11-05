@@ -146,7 +146,7 @@ Future<GoRouter> router(Ref ref) async {
 class CurrentTopRoute extends _$CurrentTopRoute {
   @override
   RouteBase? build() {
-    final router = ref.watch(routerProvider).value;
+    final router = ref.watch(routerProvider.select((value) => value.value));
     if (router == null) return null;
 
     GoRoute? getCurrentRoute() {

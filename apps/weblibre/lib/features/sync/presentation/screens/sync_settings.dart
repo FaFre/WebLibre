@@ -77,6 +77,7 @@ class SyncSettingsScreen extends HookConsumerWidget {
     );
 
     final generalSettings = ref.watch(generalSettingsWithDefaultsProvider);
+    final deviceName = ref.watch(syncDeviceNameProvider);
 
     final lastSyncEvent = ref.watch(
       syncEventProvider.select((value) => value.value?.$1),
@@ -232,13 +233,11 @@ class SyncSettingsScreen extends HookConsumerWidget {
                   ListTile(
                     leading: const Icon(Icons.devices),
                     title: Text(l10n.sync_deviceNameTitle),
-                    subtitle: ref
-                        .watch(syncDeviceNameProvider)
-                        .when(
-                          data: (name) => Text(name ?? l10n.sync_unknown),
-                          loading: () => Text(l10n.common_loading),
-                          error: (_, _) => Text(l10n.sync_unknown),
-                        ),
+                    subtitle: deviceName.when(
+                      data: (name) => Text(name ?? l10n.sync_unknown),
+                      loading: () => Text(l10n.common_loading),
+                      error: (_, _) => Text(l10n.sync_unknown),
+                    ),
                     trailing: const Icon(Icons.edit_outlined),
                     onTap: isSyncing
                         ? null

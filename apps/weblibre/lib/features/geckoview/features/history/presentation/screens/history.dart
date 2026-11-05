@@ -42,7 +42,6 @@ import 'package:weblibre/features/geckoview/features/history/domain/entities/his
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/recently_closed_tabs.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_file.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/dialogs/delete_time_range.dart';
 import 'package:weblibre/features/geckoview/features/history/presentation/utils/history_day_l10n.dart';
@@ -463,12 +462,15 @@ class HistoryScreen extends HookConsumerWidget {
     final menuController = useMenuController();
     final deleteMenuController = useMenuController();
 
-    final historyFilter = isDownloadsMode
-        ? ref.watch(historyDownloadsFilterProvider)
-        : ref.watch(historyVisitsFilterProvider);
-    final historyEntries = isDownloadsMode
-        ? ref.watch(browsingDownloadsProvider)
-        : ref.watch(browsingHistoryProvider);
+    final downloadsFilter = ref.watch(historyDownloadsFilterProvider);
+    final visitsFilter = ref.watch(historyVisitsFilterProvider);
+    final historyFilter = isDownloadsMode ? downloadsFilter : visitsFilter;
+    final historyEntries = ref.watch(
+      historyScreenEntriesProvider(downloads: isDownloadsMode),
+    );
+    final recentlyClosedCount = ref.watch(
+      historyScreenRecentlyClosedCountProvider(downloads: isDownloadsMode),
+    );
 
     final containers = ref.watch(
       watchContainersWithCountProvider.select((value) => value.value),
@@ -490,14 +492,6 @@ class HistoryScreen extends HookConsumerWidget {
             for (final entry in historyEntries.value ?? const <HistoryEntry>[])
               if (selectedIds.value.contains(entry.id)) entry,
           ];
-    // The mode never changes for a screen, so neither does this watch.
-    final recentlyClosedCount = isDownloadsMode
-        ? 0
-        : ref.watch(
-            recentlyClosedTabsRepositoryProvider.select(
-              (value) => value.value?.length ?? 0,
-            ),
-          );
     final defaultDownloadsFilter = HistoryFilterOptions(
       dateRange: null,
       visitTypes: const {VisitType.download},

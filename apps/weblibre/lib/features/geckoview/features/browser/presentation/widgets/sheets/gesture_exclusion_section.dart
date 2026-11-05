@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
@@ -40,9 +41,13 @@ class GestureExclusionSection extends HookConsumerWidget {
     final masterEnabled = ref.watch(
       gestureSettingsWithDefaultsProvider.select((s) => s.enabled),
     );
-    final excludedSites = ref.watch(
-      gestureSettingsWithDefaultsProvider.select((s) => s.excludedSites),
-    );
+    final excludedSites = ref
+        .watch(
+          gestureSettingsWithDefaultsProvider.select(
+            (s) => EquatableValue(s.excludedSites),
+          ),
+        )
+        .value;
 
     final host = normalizeRuleHost(url.toString());
     final isExcluded = hostMatchesRule(url, excludedSites);

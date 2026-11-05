@@ -125,7 +125,7 @@ final class FeatureRevealProvider
   }
 }
 
-String _$featureRevealHash() => r'0e48f5686f7c4a87136420eeed864ff4f40d23de';
+String _$featureRevealHash() => r'f2b977bc9fc214f55c920ad3544881892254bc78';
 
 /// Showing hidden features again, for deliberate actions only — a gesture,
 /// shortcut or long press bound to the feature, or picking it in the settings

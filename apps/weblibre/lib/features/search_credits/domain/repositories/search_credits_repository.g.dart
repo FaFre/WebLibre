@@ -35,7 +35,7 @@ final class SearchCreditsRepositoryProvider
 }
 
 String _$searchCreditsRepositoryHash() =>
-    r'e351ac000fa2da31e513f5a9817ac81897199df5';
+    r'b75e8e87f48655a620239d3e528e2a992734646a';
 
 abstract class _$SearchCreditsRepository
     extends $AsyncNotifier<SearchCreditsStatus> {

@@ -535,7 +535,10 @@ class _SettingsSubscreen {
             if (section.feature != null)
               section
             else
-              section.copyWith(feature: feature, keptWhen: keptWhen),
+              section.copyWith(
+                feature: feature,
+                keptWhen: keptWhen ?? section.keptWhen,
+              ),
         ];
 }
 

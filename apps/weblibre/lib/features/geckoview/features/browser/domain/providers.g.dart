@@ -678,7 +678,7 @@ final class ContainerTabStatesWithContainerProvider
 }
 
 String _$containerTabStatesWithContainerHash() =>
-    r'3597f8f35c75eb2ac62ef1cb737d97e112b890d6';
+    r'2993370e3fd529ba691c0b8fee07939adfa29352';
 
 /// The tabs of [containerId] (null for unassigned tabs) with their container
 /// data, in the order every non-tray surface shares.
@@ -1195,7 +1195,7 @@ final class TwoLevelQuickTabSwitcherRowsProvider
 }
 
 String _$twoLevelQuickTabSwitcherRowsHash() =>
-    r'66ea398c2e868df46ee93a1c8d377e55584b05a5';
+    r'34ba29186d597030b806fc716000dafd16476ceb';
 
 /// Which of its two rows the tab groups switcher bar renders: the row of
 /// groups, and the tabs of the selected tab's group.
@@ -1271,7 +1271,342 @@ final class TabGroupsQuickTabSwitcherRowsProvider
 }
 
 String _$tabGroupsQuickTabSwitcherRowsHash() =>
-    r'5382be266161ab151c298705d4881fe165f0635d';
+    r'd216b1a25466419de726671366dcf19f79afab16';
+
+/// [quickTabSwitcherHistorySuggestions] for a bar that falls back to them
+/// ([enabled]); none for one that never does, without querying history.
+
+@ProviderFor(quickTabSwitcherHistoryFallback)
+final quickTabSwitcherHistoryFallbackProvider =
+    QuickTabSwitcherHistoryFallbackFamily._();
+
+/// [quickTabSwitcherHistorySuggestions] for a bar that falls back to them
+/// ([enabled]); none for one that never does, without querying history.
+
+final class QuickTabSwitcherHistoryFallbackProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<VisitInfo>>,
+          AsyncValue<List<VisitInfo>>,
+          AsyncValue<List<VisitInfo>>
+        >
+    with $Provider<AsyncValue<List<VisitInfo>>> {
+  /// [quickTabSwitcherHistorySuggestions] for a bar that falls back to them
+  /// ([enabled]); none for one that never does, without querying history.
+  QuickTabSwitcherHistoryFallbackProvider._({
+    required QuickTabSwitcherHistoryFallbackFamily super.from,
+    required (QuickTabSwitcherMode, {bool enabled}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'quickTabSwitcherHistoryFallbackProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$quickTabSwitcherHistoryFallbackHash();
+
+  @override
+  String toString() {
+    return r'quickTabSwitcherHistoryFallbackProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<List<VisitInfo>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<List<VisitInfo>> create(Ref ref) {
+    final argument = this.argument as (QuickTabSwitcherMode, {bool enabled});
+    return quickTabSwitcherHistoryFallback(
+      ref,
+      argument.$1,
+      enabled: argument.enabled,
+    );
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<List<VisitInfo>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<List<VisitInfo>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is QuickTabSwitcherHistoryFallbackProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$quickTabSwitcherHistoryFallbackHash() =>
+    r'61574f04e43a6cb8fc9474aee7d4d24e53d231df';
+
+/// [quickTabSwitcherHistorySuggestions] for a bar that falls back to them
+/// ([enabled]); none for one that never does, without querying history.
+
+final class QuickTabSwitcherHistoryFallbackFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          AsyncValue<List<VisitInfo>>,
+          (QuickTabSwitcherMode, {bool enabled})
+        > {
+  QuickTabSwitcherHistoryFallbackFamily._()
+    : super(
+        retry: null,
+        name: r'quickTabSwitcherHistoryFallbackProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// [quickTabSwitcherHistorySuggestions] for a bar that falls back to them
+  /// ([enabled]); none for one that never does, without querying history.
+
+  QuickTabSwitcherHistoryFallbackProvider call(
+    QuickTabSwitcherMode mode, {
+    required bool enabled,
+  }) => QuickTabSwitcherHistoryFallbackProvider._(
+    argument: (mode, enabled: enabled),
+    from: this,
+  );
+
+  @override
+  String toString() => r'quickTabSwitcherHistoryFallbackProvider';
+}
+
+/// The selected container's tab groups by root tab, for a bar in [mode]:
+/// only the tab groups row lists groups, every other bar gets none.
+
+@ProviderFor(quickTabSwitcherTabGroupsByRoot)
+final quickTabSwitcherTabGroupsByRootProvider =
+    QuickTabSwitcherTabGroupsByRootFamily._();
+
+/// The selected container's tab groups by root tab, for a bar in [mode]:
+/// only the tab groups row lists groups, every other bar gets none.
+
+final class QuickTabSwitcherTabGroupsByRootProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Map<String, QuickTabSwitcherTabGroup>>,
+          EquatableValue<Map<String, QuickTabSwitcherTabGroup>>,
+          EquatableValue<Map<String, QuickTabSwitcherTabGroup>>
+        >
+    with $Provider<EquatableValue<Map<String, QuickTabSwitcherTabGroup>>> {
+  /// The selected container's tab groups by root tab, for a bar in [mode]:
+  /// only the tab groups row lists groups, every other bar gets none.
+  QuickTabSwitcherTabGroupsByRootProvider._({
+    required QuickTabSwitcherTabGroupsByRootFamily super.from,
+    required QuickTabSwitcherMode super.argument,
+  }) : super(
+         retry: null,
+         name: r'quickTabSwitcherTabGroupsByRootProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$quickTabSwitcherTabGroupsByRootHash();
+
+  @override
+  String toString() {
+    return r'quickTabSwitcherTabGroupsByRootProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Map<String, QuickTabSwitcherTabGroup>>>
+  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Map<String, QuickTabSwitcherTabGroup>> create(Ref ref) {
+    final argument = this.argument as QuickTabSwitcherMode;
+    return quickTabSwitcherTabGroupsByRoot(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    EquatableValue<Map<String, QuickTabSwitcherTabGroup>> value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<
+            EquatableValue<Map<String, QuickTabSwitcherTabGroup>>
+          >(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is QuickTabSwitcherTabGroupsByRootProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$quickTabSwitcherTabGroupsByRootHash() =>
+    r'5c74a8fe4be5e75cba42827e2aefecd6f12fbc19';
+
+/// The selected container's tab groups by root tab, for a bar in [mode]:
+/// only the tab groups row lists groups, every other bar gets none.
+
+final class QuickTabSwitcherTabGroupsByRootFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<Map<String, QuickTabSwitcherTabGroup>>,
+          QuickTabSwitcherMode
+        > {
+  QuickTabSwitcherTabGroupsByRootFamily._()
+    : super(
+        retry: null,
+        name: r'quickTabSwitcherTabGroupsByRootProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The selected container's tab groups by root tab, for a bar in [mode]:
+  /// only the tab groups row lists groups, every other bar gets none.
+
+  QuickTabSwitcherTabGroupsByRootProvider call(QuickTabSwitcherMode mode) =>
+      QuickTabSwitcherTabGroupsByRootProvider._(argument: mode, from: this);
+
+  @override
+  String toString() => r'quickTabSwitcherTabGroupsByRootProvider';
+}
+
+/// The rows a stacked tab bar draws beyond its tab list: those of
+/// [twoLevelQuickTabSwitcherRows] in [TabBarStackingMode.twoLevel], those of
+/// [tabGroupsQuickTabSwitcherRows] in [TabBarStackingMode.tabGroups], none
+/// otherwise. Only the rows of the stacking mode in use are watched.
+
+@ProviderFor(stackedQuickTabSwitcherRows)
+final stackedQuickTabSwitcherRowsProvider =
+    StackedQuickTabSwitcherRowsProvider._();
+
+/// The rows a stacked tab bar draws beyond its tab list: those of
+/// [twoLevelQuickTabSwitcherRows] in [TabBarStackingMode.twoLevel], those of
+/// [tabGroupsQuickTabSwitcherRows] in [TabBarStackingMode.tabGroups], none
+/// otherwise. Only the rows of the stacking mode in use are watched.
+
+final class StackedQuickTabSwitcherRowsProvider
+    extends
+        $FunctionalProvider<
+          ({
+            bool activeTabGroupRow,
+            bool tabGroupRow,
+            bool twoLevelContainerRow,
+            bool twoLevelMruRow,
+          }),
+          ({
+            bool activeTabGroupRow,
+            bool tabGroupRow,
+            bool twoLevelContainerRow,
+            bool twoLevelMruRow,
+          }),
+          ({
+            bool activeTabGroupRow,
+            bool tabGroupRow,
+            bool twoLevelContainerRow,
+            bool twoLevelMruRow,
+          })
+        >
+    with
+        $Provider<
+          ({
+            bool activeTabGroupRow,
+            bool tabGroupRow,
+            bool twoLevelContainerRow,
+            bool twoLevelMruRow,
+          })
+        > {
+  /// The rows a stacked tab bar draws beyond its tab list: those of
+  /// [twoLevelQuickTabSwitcherRows] in [TabBarStackingMode.twoLevel], those of
+  /// [tabGroupsQuickTabSwitcherRows] in [TabBarStackingMode.tabGroups], none
+  /// otherwise. Only the rows of the stacking mode in use are watched.
+  StackedQuickTabSwitcherRowsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'stackedQuickTabSwitcherRowsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$stackedQuickTabSwitcherRowsHash();
+
+  @$internal
+  @override
+  $ProviderElement<
+    ({
+      bool activeTabGroupRow,
+      bool tabGroupRow,
+      bool twoLevelContainerRow,
+      bool twoLevelMruRow,
+    })
+  >
+  $createElement($ProviderPointer pointer) => $ProviderElement(pointer);
+
+  @override
+  ({
+    bool activeTabGroupRow,
+    bool tabGroupRow,
+    bool twoLevelContainerRow,
+    bool twoLevelMruRow,
+  })
+  create(Ref ref) {
+    return stackedQuickTabSwitcherRows(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(
+    ({
+      bool activeTabGroupRow,
+      bool tabGroupRow,
+      bool twoLevelContainerRow,
+      bool twoLevelMruRow,
+    })
+    value,
+  ) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<
+            ({
+              bool activeTabGroupRow,
+              bool tabGroupRow,
+              bool twoLevelContainerRow,
+              bool twoLevelMruRow,
+            })
+          >(value),
+    );
+  }
+}
+
+String _$stackedQuickTabSwitcherRowsHash() =>
+    r'fe4d9ff15ae7ffe3679b1e1c3fc4a5740462f2fc';
 
 /// The containers the accordion shows as group headers, in display order.
 /// Null until they have loaded.
@@ -1468,7 +1803,7 @@ final class SuggestedTabEntitiesProvider
 }
 
 String _$suggestedTabEntitiesHash() =>
-    r'c29f4864a5f3d736adb1c2fae7d6bc37bfc20908';
+    r'fef772e273ee1294f56806df06ec2c6ab8b3d26f';
 
 final class SuggestedTabEntitiesFamily extends $Family
     with $FunctionalFamilyOverride<EquatableValue<List<TabEntity>>, String?> {
@@ -1676,7 +2011,7 @@ final class FilteredTabPreviewsProvider
 }
 
 String _$filteredTabPreviewsHash() =>
-    r'e291cdb7848c9607d388f8fdfb640f25265fca03';
+    r'3162f9b15fcfda30543aee112da43b11fb11c898';
 
 final class FilteredTabPreviewsFamily extends $Family
     with

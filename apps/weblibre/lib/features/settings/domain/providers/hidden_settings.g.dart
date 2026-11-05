@@ -194,7 +194,7 @@ final class ProfileSettingsSnapshotLoadedProvider
 }
 
 String _$profileSettingsSnapshotLoadedHash() =>
-    r'f07c30af25446f7cc5c38abda82b18d9ac76f838';
+    r'ed5ea027feba36f38889a71fe8eed3c64efdd726';
 
 /// The changes that are not applied while their feature is hidden
 /// ([SettingsSnapshot.suspended]): what Settings marks "Not applied while

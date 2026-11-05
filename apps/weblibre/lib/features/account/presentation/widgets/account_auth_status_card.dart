@@ -62,7 +62,9 @@ class _SignedOutSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final unclaimed = ref.watch(unclaimedAccountRecordProvider).value;
+    final unclaimed = ref.watch(
+      unclaimedAccountRecordProvider.select((value) => value.value),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,

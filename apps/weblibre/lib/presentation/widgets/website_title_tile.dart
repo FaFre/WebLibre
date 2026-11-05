@@ -58,6 +58,18 @@ class WebsiteTitleTile extends HookConsumerWidget {
       );
     }
 
+    return _PageInfoTile(initialTabState);
+  }
+}
+
+/// The tile for a page the page info is fetched for.
+class _PageInfoTile extends ConsumerWidget {
+  final TabState initialTabState;
+
+  const _PageInfoTile(this.initialTabState);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final pageInfoAsync = ref.watch(completePageInfoProvider(initialTabState));
 
     return Skeletonizer(

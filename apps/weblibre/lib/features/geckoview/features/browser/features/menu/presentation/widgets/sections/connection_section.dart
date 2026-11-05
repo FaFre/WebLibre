@@ -86,11 +86,16 @@ class ConnectionSection extends ConsumerWidget {
     final routing = ref.watch(effectiveTabRoutingProvider(selectedTabId));
     final routingSettings = ref.watch(proxyRoutingSettingsWithDefaultsProvider);
     final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
-    final container = ref
-        .watch(watchTabContainerDataProvider(selectedTabId))
-        .value;
+    final container = ref.watch(
+      watchTabContainerDataProvider(
+        selectedTabId,
+      ).select((value) => value.value),
+    );
     final containers =
-        ref.watch(watchContainersWithCountProvider).value ?? const [];
+        ref.watch(
+          watchContainersWithCountProvider.select((value) => value.value),
+        ) ??
+        const [];
 
     final isTorActive = ref.watch(
       torProxyServiceProvider.select((value) => value.value?.isRunning == true),
@@ -98,7 +103,10 @@ class ConnectionSection extends ConsumerWidget {
     final isTorBusy = ref.watch(startProxyControllerProvider);
 
     final profiles =
-        ref.watch(singboxProxyProfilesRepositoryProvider).value ?? const [];
+        ref.watch(
+          singboxProxyProfilesRepositoryProvider.select((value) => value.value),
+        ) ??
+        const [];
     // Profiles on their way up — every start or stop reloads all of them, and
     // for the duration none has an endpoint — so their rows read as starting
     // rather than flick to stopped (and to blocked, for a used one).

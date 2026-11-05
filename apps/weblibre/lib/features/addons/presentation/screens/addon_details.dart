@@ -249,14 +249,15 @@ class _ManagementSection extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
 
     final addonAsync = ref.watch(addonDetailsProvider(addonId));
+    final globalAutoUpdate = ref.watch(addonAutoUpdateProvider);
+    final isPinned = ref.watch(
+      pinnedAddonIdsProvider.select((ids) => ids.contains(addonId)),
+    );
     final addon = addonAsync.value;
 
     if (addon == null) return const SizedBox.shrink();
 
-    final globalAutoUpdate = ref.watch(addonAutoUpdateProvider);
     final isLocalFileInstalled = addon.isLocalFileInstalled;
-
-    final isPinned = ref.watch(pinnedAddonIdsProvider).contains(addonId);
 
     final (
       globalAutoUpdateEnabled,
@@ -434,14 +435,17 @@ class _UpdatesSection extends ConsumerWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
 
-    final addon = ref.watch(addonDetailsProvider(addonId)).value;
-    if (addon == null) return const SizedBox.shrink();
-
-    final storeInfo = ref.watch(addonStoreInfoProvider(addonId)).value;
-    final updateAttempt = ref
-        .watch(lastAddonUpdateAttemptProvider(addonId))
-        .value;
+    final addon = ref.watch(
+      addonDetailsProvider(addonId).select((value) => value.value),
+    );
+    final storeInfo = ref.watch(
+      addonStoreInfoProvider(addonId).select((value) => value.value),
+    );
+    final updateAttempt = ref.watch(
+      lastAddonUpdateAttemptProvider(addonId).select((value) => value.value),
+    );
     final checking = ref.watch(addonUpdateCheckProvider(addonId)).isLoading;
+    if (addon == null) return const SizedBox.shrink();
 
     final availableVersion = _displayAvailableVersion(addon, storeInfo);
     final hasAvailableUpdate =
@@ -531,9 +535,13 @@ class _PendingUpdatePermissionsCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     // Also while "Not now" is on its way: an update tapped then would find
     // nothing left to accept.
-    final busy =
-        ref.watch(addonUpdateCheckProvider(addonId)).isLoading ||
-        ref.watch(addonDetailsProvider(addonId)).isLoading;
+    final checkingForUpdate = ref.watch(
+      addonUpdateCheckProvider(addonId).select((value) => value.isLoading),
+    );
+    final addonLoading = ref.watch(
+      addonDetailsProvider(addonId).select((value) => value.isLoading),
+    );
+    final busy = checkingForUpdate || addonLoading;
 
     Widget permissionLine(String text, IconData icon) => Padding(
       padding: const EdgeInsets.only(top: 8),

@@ -19,6 +19,7 @@
  */
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
@@ -90,8 +91,11 @@ Future<HistoryExclusionSnapshot> readHistoryExclusionSnapshot(
 @Riverpod(keepAlive: true)
 Map<String, String?> tabContainerIds(Ref ref) {
   return ref
-          .watch(watchHistoryExclusionSnapshotProvider)
-          .value
+          .watch(
+            watchHistoryExclusionSnapshotProvider.select(
+              (value) => value.value,
+            ),
+          )
           ?.tabContainerIds ??
       const {};
 }

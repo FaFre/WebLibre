@@ -23,6 +23,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/sort_field.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
 import 'package:weblibre/features/bangs/data/models/bang_key.dart';
@@ -304,9 +305,7 @@ EquatableValue<List<TabStateWithContainer>> containerTabStatesWithContainer(
               containerId: tab.containerId,
             ),
         ]
-      : ref.watch(
-          containerTabEntitiesProvider(filter).select((value) => value.value),
-        );
+      : ref.watch(containerTabEntitiesProvider(filter)).value;
   final tabDataById = placeholdersActive
       ? {for (final tab in selectedContainerTabsData) tab.id: tab}
       : const <String, TabSummary>{};
@@ -600,12 +599,14 @@ AsyncValue<({bool containerRow, bool mruRow})> twoLevelQuickTabSwitcherRows(
     ),
   );
   final mruRow = ref.watch(
-    quickTabSwitcherRowHasResultsProvider(QuickTabSwitcherMode.lastUsedTabs),
+    quickTabSwitcherRowHasResultsProvider(
+      QuickTabSwitcherMode.lastUsedTabs,
+    ).select((value) => value.value),
   );
 
   return containerRow.whenData(
     (hasContainerTabs) =>
-        (containerRow: hasContainerTabs, mruRow: mruRow.value ?? false),
+        (containerRow: hasContainerTabs, mruRow: mruRow ?? false),
   );
 }
 
@@ -626,13 +627,84 @@ tabGroupsQuickTabSwitcherRows(Ref ref) {
     quickTabSwitcherRowHasResultsProvider(
       QuickTabSwitcherMode.activeTabGroup,
       enableHistoryFallback: false,
-    ),
+    ).select((value) => value.value),
   );
 
   return groupRow.whenData(
     (hasGroups) =>
-        (groupRow: hasGroups, activeGroupRow: activeGroupRow.value ?? false),
+        (groupRow: hasGroups, activeGroupRow: activeGroupRow ?? false),
   );
+}
+
+/// [quickTabSwitcherHistorySuggestions] for a bar that falls back to them
+/// ([enabled]); none for one that never does, without querying history.
+@Riverpod()
+AsyncValue<List<VisitInfo>> quickTabSwitcherHistoryFallback(
+  Ref ref,
+  QuickTabSwitcherMode mode, {
+  required bool enabled,
+}) {
+  if (!enabled) return const AsyncData([]);
+  return ref.watch(quickTabSwitcherHistorySuggestionsProvider(mode));
+}
+
+/// The selected container's tab groups by root tab, for a bar in [mode]:
+/// only the tab groups row lists groups, every other bar gets none.
+@Riverpod()
+EquatableValue<Map<String, QuickTabSwitcherTabGroup>>
+quickTabSwitcherTabGroupsByRoot(Ref ref, QuickTabSwitcherMode mode) {
+  if (mode != QuickTabSwitcherMode.tabGroups) return EquatableValue(const {});
+  final groups = ref.watch(selectedContainerTabGroupsProvider).value;
+  return EquatableValue({for (final group in groups) group.rootId: group});
+}
+
+/// The rows a stacked tab bar draws beyond its tab list: those of
+/// [twoLevelQuickTabSwitcherRows] in [TabBarStackingMode.twoLevel], those of
+/// [tabGroupsQuickTabSwitcherRows] in [TabBarStackingMode.tabGroups], none
+/// otherwise. Only the rows of the stacking mode in use are watched.
+@Riverpod()
+({
+  bool twoLevelContainerRow,
+  bool twoLevelMruRow,
+  bool tabGroupRow,
+  bool activeTabGroupRow,
+})
+stackedQuickTabSwitcherRows(Ref ref) {
+  const none = (
+    twoLevelContainerRow: false,
+    twoLevelMruRow: false,
+    tabGroupRow: false,
+    activeTabGroupRow: false,
+  );
+
+  final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
+  switch (stackingMode) {
+    case TabBarStackingMode.twoLevel:
+      final rows = ref.watch(
+        twoLevelQuickTabSwitcherRowsProvider.select((value) => value.value),
+      );
+      return (
+        twoLevelContainerRow: rows?.containerRow ?? false,
+        twoLevelMruRow: rows?.mruRow ?? false,
+        tabGroupRow: false,
+        activeTabGroupRow: false,
+      );
+    case TabBarStackingMode.tabGroups:
+      final rows = ref.watch(
+        tabGroupsQuickTabSwitcherRowsProvider.select((value) => value.value),
+      );
+      return (
+        twoLevelContainerRow: false,
+        twoLevelMruRow: false,
+        tabGroupRow: rows?.groupRow ?? false,
+        activeTabGroupRow: rows?.activeGroupRow ?? false,
+      );
+    case TabBarStackingMode.disabled ||
+        TabBarStackingMode.lastUsedTabs ||
+        TabBarStackingMode.containerTabs ||
+        TabBarStackingMode.accordion:
+      return none;
+  }
 }
 
 /// [containers] (in manual order) reordered for
@@ -770,8 +842,12 @@ EquatableValue<List<TabEntity>> suggestedTabEntities(
       (settings) => settings.containerSuggestionsActive,
     ),
   );
+  // The tab tray's own suggestions toggle.
+  final tabSuggestionsEnabled = ref.watch(
+    persistedBoolProvider(PersistedBoolKey.tabSuggestions),
+  );
 
-  if (!enableAiFeatures) {
+  if (!enableAiFeatures || !tabSuggestionsEnabled) {
     return EquatableValue([]);
   }
 
@@ -1058,13 +1134,16 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
   TabSearchPartition searchPartition,
   ContainerFilter containerFilter,
 ) {
-  final tabSearchResults = ref
-      .watch(
-        tabSearchRepositoryProvider(
-          searchPartition,
-        ).select((value) => EquatableValue(value.value)),
-      )
-      .value;
+  // The record compares field by field: the results are wrapped so an equal
+  // search does not count as a change.
+  final tabSearchResults = ref.watch(
+    tabSearchRepositoryProvider(searchPartition).select(
+      (value) => value.value.mapNotNull(
+        (search) =>
+            (query: search.query, results: EquatableValue(search.results)),
+      ),
+    ),
+  );
 
   final availableTabStates = ref.watch(
     containerTabStatesProvider(containerFilter),
@@ -1077,7 +1156,7 @@ EquatableValue<List<TabPreview>> filteredTabPreviews(
   final sandboxSourceUris = ref.watch(sandboxSourceUrisProvider).value;
 
   return EquatableValue(
-    tabSearchResults.results
+    tabSearchResults.results.value
         .where((tab) => availableTabStates.value.containsKey(tab.id))
         .map((tab) {
           final tabState = availableTabStates.value[tab.id]!;

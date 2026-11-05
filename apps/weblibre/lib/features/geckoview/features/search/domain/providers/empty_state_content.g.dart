@@ -317,7 +317,7 @@ final class SearchEmptyRecentTabsProvider
 }
 
 String _$searchEmptyRecentTabsHash() =>
-    r'6000970dd261f243326900555967956508b84660';
+    r'e4cc510750eef175c69bd57fb107f20f5527343c';
 
 final class SearchEmptyRecentTabsFamily extends $Family
     with $FunctionalFamilyOverride<List<TabStateWithContainer>, int> {

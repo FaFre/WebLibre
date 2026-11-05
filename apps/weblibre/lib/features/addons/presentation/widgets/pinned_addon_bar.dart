@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -36,13 +37,14 @@ class PinnedAddonBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pinnedIds = ref.watch(pinnedAddonIdsProvider);
+    final extensions = ref
+        .watch(
+          webExtensionsStateProvider(
+            WebExtensionActionType.browser,
+          ).select((value) => EquatableValue(value.values.toList())),
+        )
+        .value;
     if (pinnedIds.isEmpty) return const SizedBox.shrink();
-
-    final extensions = ref.watch(
-      webExtensionsStateProvider(
-        WebExtensionActionType.browser,
-      ).select((value) => value.values.toList()),
-    );
 
     final pinned = extensions
         .where((e) => e.enabled && pinnedIds.contains(e.extensionId))

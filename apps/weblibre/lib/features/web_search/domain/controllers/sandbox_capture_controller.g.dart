@@ -168,7 +168,7 @@ final class SandboxCaptureForTabProvider
 }
 
 String _$sandboxCaptureForTabHash() =>
-    r'1d64f68c85d40dbd7d5b220ee54a5436f1c1eaeb';
+    r'cbfbca7254171d4eee71899adb3cc22e466be751';
 
 final class SandboxCaptureForTabFamily extends $Family
     with $FunctionalFamilyOverride<CaptureTabData?, String?> {
@@ -261,7 +261,7 @@ final class SandboxSourceUrisProvider
   }
 }
 
-String _$sandboxSourceUrisHash() => r'54f2cef01e85f4fb0230c7b6bf04f3335e42de32';
+String _$sandboxSourceUrisHash() => r'693d0e11b2e21384721161844c8fb2e2217e35db';
 
 /// The canonical source URL of a sandbox-captured tab, or `null` when the
 /// tab is not a sandbox capture (the regular `tabState.url` should be used in

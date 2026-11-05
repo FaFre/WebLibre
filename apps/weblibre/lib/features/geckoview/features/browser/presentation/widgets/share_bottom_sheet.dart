@@ -71,7 +71,9 @@ class ShareBottomSheet extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
+    final catalogRules = ref.watch(
+      urlCleanerCatalogServiceProvider.select((value) => value.value),
+    );
 
     final rawTabUrl = ref.watch(
       tabStateProvider(selectedTabId).select((v) => v?.url),
@@ -86,7 +88,7 @@ class ShareBottomSheet extends HookConsumerWidget {
     final cleanedUrl = useState<Uri?>(null);
     final cleaner = useUrlCleanerController(
       sourceUrl: (cleanedUrl.value ?? tabUrl)?.toString(),
-      rules: catalogAsync.value,
+      rules: catalogRules,
       cleanerEnabled: settings.urlCleanerEnabled,
       allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
       autoApply: settings.urlCleanerAutoApply,

@@ -103,3 +103,12 @@ class FindInPageController extends _$FindInPageController {
     return FindInPageState.hidden();
   }
 }
+
+/// Whether find in page shows for [tabId]; never without a tab.
+@Riverpod()
+bool findInPageVisible(Ref ref, String? tabId) {
+  if (tabId == null) return false;
+  return ref.watch(
+    findInPageControllerProvider(tabId).select((state) => state.visible),
+  );
+}

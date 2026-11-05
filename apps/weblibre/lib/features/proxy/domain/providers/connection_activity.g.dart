@@ -134,4 +134,4 @@ final class TorInUseProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$torInUseHash() => r'086627ef3258f8223c596c9754fe1c2a0e121114';
+String _$torInUseHash() => r'0c9c00596a8f515b780981778f3f8399680dd91a';

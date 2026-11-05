@@ -56,7 +56,9 @@ class RouteThroughTorToggle extends HookConsumerWidget {
       webSearchSettingsControllerProvider.select((s) => s.routeThroughTor),
     );
 
-    final torStatus = ref.watch(torProxyServiceProvider).value;
+    final torStatus = ref.watch(
+      torProxyServiceProvider.select((value) => value.value),
+    );
     final activePort = ref.watch(searchProxyPortProvider);
 
     final showSpinner =
@@ -145,7 +147,7 @@ class RouteThroughTorToggle extends HookConsumerWidget {
 /// toggle while Tor is bootstrapping. Mirrors the bar on the Tor settings
 /// screen so users get the same visual feedback regardless of where they
 /// turned Tor on. Returns a zero-height widget when not relevant.
-class WebSearchTorBootstrapProgress extends HookConsumerWidget {
+class WebSearchTorBootstrapProgress extends ConsumerWidget {
   const WebSearchTorBootstrapProgress({super.key});
 
   @override
@@ -155,6 +157,18 @@ class WebSearchTorBootstrapProgress extends HookConsumerWidget {
     );
 
     if (!routeThroughTor) return const SizedBox.shrink();
+    return const _TorBootstrapProgressBar();
+  }
+}
+
+class _TorBootstrapProgressBar extends HookConsumerWidget {
+  const _TorBootstrapProgressBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final status = ref.watch(
+      torProxyServiceProvider.select((value) => value.value),
+    );
 
     // Push the latest native status into the stream on first build so the
     // bar reflects real progress even when the user lands on the search
@@ -164,8 +178,6 @@ class WebSearchTorBootstrapProgress extends HookConsumerWidget {
       await ref.read(torProxyServiceProvider.notifier).requestSync();
     });
 
-    final torAsync = ref.watch(torProxyServiceProvider);
-    final status = torAsync.value;
     final bootstrapProgress = status?.bootstrapProgress ?? 0;
 
     // Hide once Tor is fully running and bootstrapped — otherwise, mirror

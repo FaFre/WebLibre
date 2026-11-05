@@ -56,12 +56,13 @@ class SingboxProxyProfilesScreen extends HookConsumerWidget {
     final profilesAsync = ref.watch(singboxProxyProfilesRepositoryProvider);
     final runtimeState = ref.watch(singboxProxyRuntimeRepositoryProvider);
     final torState = ref.watch(torProxyServiceProvider);
+    final startingConnections = ref.watch(
+      singboxProxyStartingConnectionsProvider,
+    );
     final deletingProfileIds = useState(<String>{});
 
     final activeProfileIds = runtimeState.runningProfileIds;
-    final startingProfileIds = _startingProfileIds(
-      ref.watch(singboxProxyStartingConnectionsProvider),
-    );
+    final startingProfileIds = _startingProfileIds(startingConnections);
     final runtimeBusy = runtimeState.isLoading;
     final torIsRunning = torState.value?.isRunning ?? false;
     final torIsBusy = torState.isBusy;

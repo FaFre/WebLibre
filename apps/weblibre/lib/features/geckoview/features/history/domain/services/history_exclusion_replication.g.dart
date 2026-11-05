@@ -61,7 +61,7 @@ final class TabContainerIdsProvider
   }
 }
 
-String _$tabContainerIdsHash() => r'210ec2be7ae857667fba43c892667089f6084051';
+String _$tabContainerIdsHash() => r'89c5471fe57c1b573792299363aab5efa56891cb';
 
 /// The single subscription to the tab↔container projection; both the native
 /// snapshot and [tabContainerIds] are derived from it.

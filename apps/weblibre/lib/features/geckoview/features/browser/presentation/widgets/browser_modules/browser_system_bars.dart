@@ -21,10 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/navigation_bar.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/browser_bar_tint.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 
 /// The color the browser chrome fills the system bar insets with: the active
@@ -34,35 +32,15 @@ import 'package:weblibre/presentation/widgets/browser_system_bars_style.dart';
 /// The tab bar computes the same color for its background, so everything that
 /// borders it — the [BrowserSystemBars] strips, the bottom bar's safe-area
 /// padding, the side rail's outer fill — reads it from here to stay seamless.
-Color watchBrowserBarTintColor(BuildContext context, WidgetRef ref) {
-  final selectedTabId = ref.watch(selectedTabProvider);
-
-  final showContainerUi = ref.watch(
-    generalSettingsWithDefaultsProvider.select((s) => s.showContainerUi),
-  );
-  final containerColor = ref.watch(
-    watchTabContainerDataProvider(
-      selectedTabId,
-    ).select((data) => data.value?.color),
-  );
-  final useCustomColor = ref.watch(
-    watchTabContainerDataProvider(
-      selectedTabId,
-    ).select((data) => data.value?.metadata.useCustomColor ?? false),
-  );
-
-  final effectiveContainerColor = (showContainerUi && containerColor != null)
-      ? containerColor
-      : null;
-
-  return effectiveContainerColor != null
-      ? ContainerColors.palette(
-          context,
-          effectiveContainerColor,
-          useCustomColor: useCustomColor,
-        ).surfaceColor
-      : Theme.of(context).colorScheme.surfaceContainer;
-}
+/// [tint] is [browserBarTintProvider].
+Color browserBarTintColor(BuildContext context, BrowserBarTint? tint) =>
+    tint != null
+    ? ContainerColors.palette(
+        context,
+        tint.color,
+        useCustomColor: tint.useCustomColor,
+      ).surfaceColor
+    : Theme.of(context).colorScheme.surfaceContainer;
 
 /// Tints the status-bar (top) and navigation-bar (bottom) inset regions with
 /// the active container's surface color, mirroring how the tab bar
@@ -95,7 +73,8 @@ class BrowserSystemBars extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tintColor = watchBrowserBarTintColor(context, ref);
+    final tint = ref.watch(browserBarTintProvider);
+    final tintColor = browserBarTintColor(context, tint);
 
     // Where the navigation bar lies outside the Flutter UI, the strip below
     // can't reach it (see [browserSystemBarsStyle]). The bottom strip is

@@ -36,9 +36,9 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 
 /// The segmented Desktop / Reader / Gestures bar at the top of the sheet.
 ///
-/// Only the toggles the user kept are built, so a hidden toggle costs nothing:
-/// the reader and desktop state it would otherwise watch is never subscribed
-/// to. Renders nothing at all when none of its toggles apply, so the sheet is
+/// Only the toggles the user kept are built, and each watches its own state,
+/// so a toggle left out of the layout costs nothing: the reader, desktop and
+/// gesture state it would otherwise watch is never subscribed to. Renders nothing at all when none of its toggles apply, so the sheet is
 /// not left with a gap where the bar would have been.
 class QuickTogglesSection extends ConsumerWidget {
   final String selectedTabId;
@@ -52,11 +52,46 @@ class QuickTogglesSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final toggles = <MenuItemType, _QuickToggle>{};
+    // Only whether gestures are on decides if their toggle exists; the
+    // segment itself watches the rest.
+    final gesturesEnabled = ref.watch(
+      gestureSettingsWithDefaultsProvider.select((value) => value.enabled),
+    );
 
-    if (items.contains(MenuItemType.desktopMode)) {
-      final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId));
-      toggles[MenuItemType.desktopMode] = _QuickToggle(
+    // Each segment watches its own state, so a toggle left out of the layout
+    // subscribes to nothing.
+    final segments = [
+      for (final item in items)
+        ?switch (item) {
+          MenuItemType.desktopMode => _DesktopModeToggle(
+            selectedTabId: selectedTabId,
+          ),
+          MenuItemType.readerMode => const _ReaderModeToggle(),
+          MenuItemType.gestures when gesturesEnabled => const _GesturesToggle(),
+          _ => null,
+        },
+    ];
+
+    if (segments.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: menuSectionSpacing),
+      child: _QuickToggleBar(segments: segments),
+    );
+  }
+}
+
+class _DesktopModeToggle extends ConsumerWidget {
+  final String selectedTabId;
+
+  const _DesktopModeToggle({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final desktopEnabled = ref.watch(desktopModeProvider(selectedTabId));
+
+    return _QuickToggleSegment(
+      toggle: _QuickToggle(
         icon: MdiIcons.monitor,
         label: MenuItemType.desktopMode.label(context),
         active: desktopEnabled,
@@ -65,35 +100,43 @@ class QuickTogglesSection extends ConsumerWidget {
               .read(desktopModeProvider(selectedTabId).notifier)
               .enabled(!desktopEnabled);
         },
-      );
-    }
+      ),
+    );
+  }
+}
 
-    if (items.contains(MenuItemType.readerMode)) {
-      final isReaderLoading = ref
-          .watch(readerableScreenControllerProvider)
-          .isLoading;
-      final readerabilityState = ref.watch(
-        selectedTabStateProvider.select(
-          (state) => state?.readerableState ?? ReaderableState.$default(),
-        ),
-      );
-      final isReaderActive = readerabilityState.active;
-      final enableReadability = ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.enableReadability,
-        ),
-      );
-      final enforceReadability = ref.watch(
-        generalSettingsWithDefaultsProvider.select(
-          (value) => value.enforceReadability,
-        ),
-      );
-      final readerVisible =
-          (readerabilityState.readerable &&
-              (enableReadability || readerabilityState.active)) ||
-          (enforceReadability && enableReadability);
+class _ReaderModeToggle extends ConsumerWidget {
+  const _ReaderModeToggle();
 
-      toggles[MenuItemType.readerMode] = _QuickToggle(
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isReaderLoading = ref.watch(
+      readerableScreenControllerProvider.select((value) => value.isLoading),
+    );
+    final readerabilityState = ref.watch(
+      selectedTabStateProvider.select(
+        (state) => state?.readerableState ?? ReaderableState.$default(),
+      ),
+    );
+    final enableReadability = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.enableReadability,
+      ),
+    );
+    final enforceReadability = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (value) => value.enforceReadability,
+      ),
+    );
+
+    final isReaderActive = readerabilityState.active;
+    final readerVisible =
+        (readerabilityState.readerable &&
+            (enableReadability || readerabilityState.active)) ||
+        (enforceReadability && enableReadability);
+
+    return _QuickToggleSegment(
+      toggle: _QuickToggle(
         icon: (readerVisible && isReaderActive)
             ? MdiIcons.bookOpen
             : MdiIcons.bookOpenOutline,
@@ -105,39 +148,35 @@ class QuickTogglesSection extends ConsumerWidget {
               .read(readerableScreenControllerProvider.notifier)
               .toggleReaderView(!isReaderActive);
         },
-      );
-    }
+      ),
+    );
+  }
+}
 
-    if (items.contains(MenuItemType.gestures)) {
-      final gestureSettings = ref.watch(gestureSettingsWithDefaultsProvider);
+class _GesturesToggle extends ConsumerWidget {
+  const _GesturesToggle();
 
-      if (gestureSettings.enabled) {
-        toggles[MenuItemType.gestures] = _QuickToggle(
-          icon: MdiIcons.gestureSwipe,
-          label: MenuItemType.gestures.label(context),
-          active: gestureSettings.active,
-          onTap: () async {
-            await ref
-                .read(gestureSettingsRepositoryProvider.notifier)
-                .updateSettings(
-                  (s) => s.copyWith(active: !gestureSettings.active),
-                );
-          },
-          onLongPress: () {
-            Navigator.pop(context);
-            unawaited(GestureSettingsRoute().push(context));
-          },
-        );
-      }
-    }
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final gesturesActive = ref.watch(
+      gestureSettingsWithDefaultsProvider.select((value) => value.active),
+    );
 
-    final ordered = [for (final item in items) ?toggles[item]];
-
-    if (ordered.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: menuSectionSpacing),
-      child: _QuickToggleBar(toggles: ordered),
+    return _QuickToggleSegment(
+      toggle: _QuickToggle(
+        icon: MdiIcons.gestureSwipe,
+        label: MenuItemType.gestures.label(context),
+        active: gesturesActive,
+        onTap: () async {
+          await ref
+              .read(gestureSettingsRepositoryProvider.notifier)
+              .updateSettings((s) => s.copyWith(active: !gesturesActive));
+        },
+        onLongPress: () {
+          Navigator.pop(context);
+          unawaited(GestureSettingsRoute().push(context));
+        },
+      ),
     );
   }
 }
@@ -166,20 +205,20 @@ class _QuickToggle {
 /// toggles. Segments are split across rows of at most [_maxPerRow] so the bar
 /// stays compact and resizes to however many toggles are present.
 class _QuickToggleBar extends StatelessWidget {
-  final List<_QuickToggle> toggles;
+  final List<Widget> segments;
 
   static const int _maxPerRow = 4;
 
-  const _QuickToggleBar({required this.toggles});
+  const _QuickToggleBar({required this.segments});
 
   @override
   Widget build(BuildContext context) {
-    final rows = <List<_QuickToggle>>[];
-    for (var i = 0; i < toggles.length; i += _maxPerRow) {
-      final end = i + _maxPerRow <= toggles.length
+    final rows = <List<Widget>>[];
+    for (var i = 0; i < segments.length; i += _maxPerRow) {
+      final end = i + _maxPerRow <= segments.length
           ? i + _maxPerRow
-          : toggles.length;
-      rows.add(toggles.sublist(i, end));
+          : segments.length;
+      rows.add(segments.sublist(i, end));
     }
 
     return Column(
@@ -192,7 +231,7 @@ class _QuickToggleBar extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(BuildContext context, List<_QuickToggle> items) {
+  Widget _buildRow(BuildContext context, List<Widget> items) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
@@ -209,7 +248,7 @@ class _QuickToggleBar extends StatelessWidget {
                   thickness: 1,
                   color: colorScheme.outlineVariant,
                 ),
-              Expanded(child: _QuickToggleSegment(toggle: items[i])),
+              Expanded(child: items[i]),
             ],
           ],
         ),

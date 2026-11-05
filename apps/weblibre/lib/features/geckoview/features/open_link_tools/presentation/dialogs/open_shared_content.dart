@@ -112,8 +112,12 @@ class OpenSharedContent extends HookConsumerWidget {
     }
 
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
-    final supportedShortenerHosts = ref.watch(urlUnshortenerServiceProvider);
+    final catalogRules = ref.watch(
+      urlCleanerCatalogServiceProvider.select((value) => value.value),
+    );
+    final supportedShortenerHosts = ref.watch(
+      urlUnshortenerServiceProvider.select((value) => value.value),
+    );
 
     final currentUrl = useValueListenable(textController).text;
 
@@ -202,7 +206,7 @@ class OpenSharedContent extends HookConsumerWidget {
             .read(urlUnshortenerServiceProvider.notifier)
             .isSupportedShortenerUrl(
               debouncedUrl.value,
-              supportedShortenerHosts.value ?? const <String>{},
+              supportedShortenerHosts ?? const <String>{},
             );
 
     final unshortenState = ref.watch(
@@ -211,7 +215,7 @@ class OpenSharedContent extends HookConsumerWidget {
     final cleaner = useUrlCleanerController(
       // Avoid expensive matching work on every keystroke.
       sourceUrl: debouncedUrl.value,
-      rules: catalogAsync.value,
+      rules: catalogRules,
       cleanerEnabled: settings.urlCleanerEnabled,
       allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
       autoApply: settings.urlCleanerAutoApply,

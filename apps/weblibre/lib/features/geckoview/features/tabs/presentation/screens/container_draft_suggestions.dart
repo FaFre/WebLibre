@@ -218,7 +218,7 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
 /// `HookConsumer` in `itemLabel`) so its hook state is bound to a stable
 /// element identity per container, and the heavy `tabsTopicProvider` watch
 /// is scoped to just this chip.
-class _SuggestedContainerLabel extends HookConsumerWidget {
+class _SuggestedContainerLabel extends HookWidget {
   final SuggestedContainer container;
   final ValueNotifier<Map<SuggestedContainer, Set<String>>>
   selectedContainerTabs;
@@ -230,16 +230,35 @@ class _SuggestedContainerLabel extends HookConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final items = useListenableSelector(
       selectedContainerTabs,
       () => selectedContainerTabs.value[container],
     );
 
-    final topic = items.isNotEmpty
-        ? ref.watch(tabsTopicProvider(EquatableValue(items!)))
-        : AsyncValue.data(container.topic);
+    if (!items.isNotEmpty) {
+      return Text(container.topic ?? l10n.tabs_untitledContainer);
+    }
+
+    return _PredictedContainerTopic(container: container, tabIds: items!);
+  }
+}
+
+/// The topic predicted for [tabIds], the tabs picked for [container].
+class _PredictedContainerTopic extends ConsumerWidget {
+  final SuggestedContainer container;
+  final Set<String> tabIds;
+
+  const _PredictedContainerTopic({
+    required this.container,
+    required this.tabIds,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final topic = ref.watch(tabsTopicProvider(EquatableValue(tabIds)));
 
     return topic.when(
       skipLoadingOnReload: true,

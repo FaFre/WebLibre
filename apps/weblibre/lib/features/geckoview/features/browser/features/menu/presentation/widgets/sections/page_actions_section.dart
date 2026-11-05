@@ -27,15 +27,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/page_action_availability.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
-import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -62,12 +61,23 @@ class PageActionsSection extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final tabUrl = ref.watch(
+      tabStateProvider(selectedTabId).select((s) => s?.url),
+    );
+    final availability = ref.watch(
+      pageActionAvailabilityProvider(
+        selectedTabId,
+        translateInLayout: items.contains(MenuItemType.translatePage),
+        addToHomeScreenInLayout: items.contains(MenuItemType.addToHomeScreen),
+      ),
+    );
+    final isInstallable = availability.installable;
+    final isShortcutable = availability.shortcutable;
+
     // Resolving an app link is a native round trip, so it is only started when
     // the row that shows the result is actually part of the layout. The hook
     // itself stays unconditional; it is the work it schedules that is skipped.
-    final appLinkUrl = items.contains(MenuItemType.openInApp)
-        ? ref.watch(tabStateProvider(selectedTabId).select((s) => s?.url))
-        : null;
+    final appLinkUrl = items.contains(MenuItemType.openInApp) ? tabUrl : null;
     final appLink = useCachedFuture(
       () => appLinkUrl != null
           ? _appLinksService.resolveAppLink(appLinkUrl)
@@ -118,22 +128,11 @@ class PageActionsSection extends HookConsumerWidget {
           );
 
         case MenuItemType.translatePage:
-          final engineState = ref.watch(translationEngineStateProvider);
-          final readerActive = ref.watch(
-            tabStateProvider(
-              selectedTabId,
-            ).select((s) => s?.readerableState.active ?? false),
-          );
-
-          // Hidden while reader mode is active (Fenix-aligned).
-          if (readerActive || engineState?.isEngineSupported != true) continue;
+          if (!availability.translate) continue;
 
           tiles[item] = _TranslatePageTile(selectedTabId: selectedTabId);
 
         case MenuItemType.addToHomeScreen:
-          final isInstallable = ref.watch(isCurrentTabInstallableProvider);
-          final isShortcutable = ref.watch(isCurrentTabShortcutableProvider);
-
           if (!isInstallable && !isShortcutable) continue;
 
           tiles[item] = ListTile(

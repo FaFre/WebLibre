@@ -22,7 +22,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:search_protocol/search_protocol.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
 import 'package:weblibre/features/web_search/domain/controllers/search_controller.dart';
@@ -60,9 +59,9 @@ class WebSearchResultCard extends HookConsumerWidget {
         ? result.thumbnail
         : null;
 
-    final imageBytes = imageUrl.mapNotNull(
-      (imageUrl) => ref.watch(
-        metaSearchControllerProvider.select((s) => s.imagesByUrl[imageUrl]),
+    final imageBytes = ref.watch(
+      metaSearchControllerProvider.select(
+        (s) => imageUrl == null ? null : s.imagesByUrl[imageUrl],
       ),
     );
 

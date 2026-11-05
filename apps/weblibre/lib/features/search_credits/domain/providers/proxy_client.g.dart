@@ -61,7 +61,7 @@ final class SearchProxyPortProvider
   }
 }
 
-String _$searchProxyPortHash() => r'1ca1d6f08f9eeabf2f70ce2e27b71242e0808dc0';
+String _$searchProxyPortHash() => r'2d46b6b6877efafcd8a398391f6da8c2d7c1dfe1';
 
 /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)
 /// and HTTP-based search clients. SOCKS5-routed when Tor toggle is on, plain

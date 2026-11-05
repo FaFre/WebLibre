@@ -716,8 +716,9 @@ class _TabHierarchySubmenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final movingTab = ref.watch(watchTabDbDataProvider(selectedTabId));
-    final tabData = movingTab.value;
+    final tabData = ref.watch(
+      watchTabDbDataProvider(selectedTabId).select((value) => value.value),
+    );
     final hasParent = tabData?.parentId != null;
 
     return SubmenuButton(

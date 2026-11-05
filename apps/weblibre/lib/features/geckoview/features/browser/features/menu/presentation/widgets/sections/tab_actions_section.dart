@@ -357,7 +357,9 @@ class _ShareExpansion extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(generalSettingsWithDefaultsProvider);
-    final catalogAsync = ref.watch(urlCleanerCatalogServiceProvider);
+    final catalogRules = ref.watch(
+      urlCleanerCatalogServiceProvider.select((value) => value.value),
+    );
     final tabState = ref.watch(tabStateProvider(selectedTabId));
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: selectedTabId),
@@ -369,7 +371,7 @@ class _ShareExpansion extends HookConsumerWidget {
     final cleanedUrl = useState<Uri?>(null);
     final cleaner = useUrlCleanerController(
       sourceUrl: (cleanedUrl.value ?? tabUrl)?.toString(),
-      rules: catalogAsync.value,
+      rules: catalogRules,
       cleanerEnabled: settings.urlCleanerEnabled,
       allowReferralMarketing: settings.urlCleanerAllowReferralMarketing,
       autoApply: settings.urlCleanerAutoApply,
@@ -947,13 +949,13 @@ class _PinTopSiteTile extends HookConsumerWidget {
   }
 }
 
-class _FetchFeedsTile extends HookConsumerWidget {
+class _FetchFeedsTile extends HookWidget {
   final String selectedTabId;
 
   const _FetchFeedsTile({required this.selectedTabId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final showFeeds = useState(false);
 
@@ -967,6 +969,19 @@ class _FetchFeedsTile extends HookConsumerWidget {
       );
     }
 
+    // Fetching the feeds is a request to the site: only once asked for.
+    return _FetchedFeedsTile(selectedTabId: selectedTabId);
+  }
+}
+
+class _FetchedFeedsTile extends ConsumerWidget {
+  final String selectedTabId;
+
+  const _FetchedFeedsTile({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final feedsAsync = ref.watch(websiteFeedProviderProvider(selectedTabId));
 
     return feedsAsync.when(

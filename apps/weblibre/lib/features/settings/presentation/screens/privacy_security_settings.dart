@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -374,9 +375,13 @@ class _AutoDeleteBrowsingDataSection extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final autoDeleteBrowsingData = ref.watch(
-      storedGeneralSettingsProvider.select((s) => s.autoDeleteBrowsingData),
-    );
+    final autoDeleteBrowsingData = ref
+        .watch(
+          storedGeneralSettingsProvider.select(
+            (s) => EquatableValue(s.autoDeleteBrowsingData),
+          ),
+        )
+        .value;
     final deleteOnStart = ref.watch(
       storedGeneralSettingsProvider.select(
         (s) => s.autoDeleteBrowsingDataOnStart,
@@ -1383,9 +1388,13 @@ class _AppOpeningProtectionSection extends HookConsumerWidget {
     final enabled = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.blockExternalAppsEnabled),
     );
-    final policies = ref.watch(
-      storedGeneralSettingsProvider.select((s) => s.externalAppIntentPolicies),
-    );
+    final policies = ref
+        .watch(
+          storedGeneralSettingsProvider.select(
+            (s) => EquatableValue(s.externalAppIntentPolicies),
+          ),
+        )
+        .value;
     final l10n = AppLocalizations.of(context);
 
     return Column(

@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_localizations.dart';
@@ -85,7 +86,9 @@ TabRouting effectiveTabRouting(Ref ref, String? tabId) {
           isPrivate: tabState.tabMode is PrivateTabMode,
         );
 
-  final container = ref.watch(watchTabContainerDataProvider(tabId)).value;
+  final container = ref.watch(
+    watchTabContainerDataProvider(tabId).select((value) => value.value),
+  );
 
   final options = ref.watch(proxyConnectionOptionsProvider);
   final l10n = ref.watch(appLocalizationsProvider);
@@ -105,7 +108,10 @@ TabRouting effectiveTabRouting(Ref ref, String? tabId) {
     // "pending" for the first frame of every sheet would flicker a scary state
     // on a healthy browser.
     routingInstalled:
-        ref.watch(containerRoutingInstalledProvider).value ?? true,
+        ref.watch(
+          containerRoutingInstalledProvider.select((value) => value.value),
+        ) ??
+        true,
     contextId: contextId,
     containerName: container?.name,
     proxyTitle: (id) =>

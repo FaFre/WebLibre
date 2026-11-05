@@ -71,7 +71,11 @@ bool torInUse(Ref ref) {
   final routed = !proxyConnectionUsage(
     id: const TorProxyConnectionId(),
     routingSettings: ref.watch(proxyRoutingSettingsWithDefaultsProvider),
-    containers: ref.watch(watchContainersWithCountProvider).value ?? const [],
+    containers:
+        ref.watch(
+          watchContainersWithCountProvider.select((value) => value.value),
+        ) ??
+        const [],
   ).isUnused;
 
   return torActive ||

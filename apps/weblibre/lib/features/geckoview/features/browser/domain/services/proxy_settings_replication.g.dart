@@ -116,7 +116,7 @@ final class ContainerRoutingSnapshotProvider
 }
 
 String _$containerRoutingSnapshotHash() =>
-    r'930b19ced203abd6fc7d2649e4c6b04df81f50c2';
+    r'3878a817b56d62793fceaac69a83412f2eed7b14';
 
 /// Single serialised writer that installs [containerRoutingSnapshotProvider]
 /// into Gecko's proxy extension.

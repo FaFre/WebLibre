@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/repositories/search_suggestions.dart';
@@ -71,7 +72,7 @@ class SearchSuggestions extends _$SearchSuggestions {
     _addQueryBinding = (value) {
       if (ref.exists(searchSuggestionsRepositoryProvider(resolvedProvider))) {
         ref
-            .watch(
+            .read(
               searchSuggestionsRepositoryProvider(resolvedProvider).notifier,
             )
             .addQuery(value);
@@ -80,4 +81,20 @@ class SearchSuggestions extends _$SearchSuggestions {
 
     return ref.watch(searchSuggestionsRepositoryProvider(resolvedProvider));
   }
+}
+
+/// The default provider's search suggestions where remote suggestions are
+/// fetched ([enabled]); none otherwise, without setting up the provider.
+@Riverpod()
+List<String> remoteSearchSuggestions(Ref ref, {required bool enabled}) {
+  if (!enabled) return const [];
+  // Wrapped so an equal answer to a new query keeps the previous list, and
+  // with it this provider, unchanged.
+  return ref
+      .watch(
+        searchSuggestionsProvider().select(
+          (value) => EquatableValue(value.value ?? const <String>[]),
+        ),
+      )
+      .value;
 }

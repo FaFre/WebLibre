@@ -221,6 +221,108 @@ final class IconCacheRevisionFamily extends $Family
   String toString() => r'iconCacheRevisionProvider';
 }
 
+/// [iconCacheRevision] of each of [origins], in order; 0 until one is
+/// reported.
+
+@ProviderFor(iconCacheRevisions)
+final iconCacheRevisionsProvider = IconCacheRevisionsFamily._();
+
+/// [iconCacheRevision] of each of [origins], in order; 0 until one is
+/// reported.
+
+final class IconCacheRevisionsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<int>>,
+          EquatableValue<List<int>>,
+          EquatableValue<List<int>>
+        >
+    with $Provider<EquatableValue<List<int>>> {
+  /// [iconCacheRevision] of each of [origins], in order; 0 until one is
+  /// reported.
+  IconCacheRevisionsProvider._({
+    required IconCacheRevisionsFamily super.from,
+    required EquatableValue<List<String>> super.argument,
+  }) : super(
+         retry: null,
+         name: r'iconCacheRevisionsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$iconCacheRevisionsHash();
+
+  @override
+  String toString() {
+    return r'iconCacheRevisionsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<int>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<int>> create(Ref ref) {
+    final argument = this.argument as EquatableValue<List<String>>;
+    return iconCacheRevisions(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<int>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<List<int>>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IconCacheRevisionsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$iconCacheRevisionsHash() =>
+    r'8284d4fe0ad12999c98beb71b7ea9f637f751bbd';
+
+/// [iconCacheRevision] of each of [origins], in order; 0 until one is
+/// reported.
+
+final class IconCacheRevisionsFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          EquatableValue<List<int>>,
+          EquatableValue<List<String>>
+        > {
+  IconCacheRevisionsFamily._()
+    : super(
+        retry: null,
+        name: r'iconCacheRevisionsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// [iconCacheRevision] of each of [origins], in order; 0 until one is
+  /// reported.
+
+  IconCacheRevisionsProvider call(EquatableValue<List<String>> origins) =>
+      IconCacheRevisionsProvider._(argument: origins, from: this);
+
+  @override
+  String toString() => r'iconCacheRevisionsProvider';
+}
+
 @ProviderFor(incognitoModeEnabled)
 final incognitoModeEnabledProvider = IncognitoModeEnabledProvider._();
 
@@ -315,7 +417,7 @@ final class FingerprintOverrideSettingsProvider
 }
 
 String _$fingerprintOverrideSettingsHash() =>
-    r'2a909c4fbd0f0a1fd71b7513d460dc2df052cd44';
+    r'6cfe58cdbcc3090067c3d2cf1568d93d78e04af8';
 
 @ProviderFor(selectedProfile)
 final selectedProfileProvider = SelectedProfileProvider._();

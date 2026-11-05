@@ -20,6 +20,7 @@
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     show AppLinksMode;
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_links/domain/entities/app_link_rule.dart';
@@ -119,10 +120,12 @@ class EffectiveAppLinkPolicy with FastEquatable {
 @Riverpod()
 EffectiveAppLinkPolicy? effectiveAppLinkPolicy(Ref ref, String? liveContextId) {
   final settings = ref.watch(generalSettingsWithDefaultsProvider);
-  final containers = ref.watch(watchContainersWithCountProvider).value;
-  final isolationMap = ref
-      .watch(watchIsolatedContextContainerMapProvider)
-      .value;
+  final containers = ref.watch(
+    watchContainersWithCountProvider.select((value) => value.value),
+  );
+  final isolationMap = ref.watch(
+    watchIsolatedContextContainerMapProvider.select((value) => value.value),
+  );
   if (containers == null || isolationMap == null) return null;
 
   final overrideKey = resolveAppLinkOverrideKey(

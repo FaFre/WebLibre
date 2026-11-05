@@ -22,6 +22,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_type_filter_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
@@ -86,6 +87,9 @@ class TabTrayNewTabFab extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    final tabTypeFilterBarVisible = ref.watch(
+      tabTypeFilterBarVisibleProvider(tabsViewMode),
+    );
     final isVisible = useScrollVisibility(
       scrollController,
       sheetController: sheetController,
@@ -108,9 +112,7 @@ class TabTrayNewTabFab extends HookConsumerWidget {
             // sheet slides under it, and grows by its height.
             top:
                 TabViewHeader.headerSize +
-                (watchTabTypeFilterBarVisible(ref, tabsViewMode)
-                    ? tabTypeFilterBarHeight
-                    : 0) +
+                (tabTypeFilterBarVisible ? tabTypeFilterBarHeight : 0) +
                 MediaQuery.paddingOf(context).top +
                 4,
             right: 4,

@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -51,13 +52,19 @@ class AddonBrowseView extends HookConsumerWidget {
       searchAddonListingsProvider(query.value, app),
     );
 
-    final installed = ref.watch(
-      addonListProvider.select(
-        (value) =>
-            value.value?.where((a) => a.isInstalled).map((a) => a.id).toSet() ??
-            const <String>{},
-      ),
-    );
+    final installed = ref
+        .watch(
+          addonListProvider.select(
+            (value) => EquatableValue(
+              value.value
+                      ?.where((a) => a.isInstalled)
+                      .map((a) => a.id)
+                      .toSet() ??
+                  const <String>{},
+            ),
+          ),
+        )
+        .value;
 
     return Column(
       children: [

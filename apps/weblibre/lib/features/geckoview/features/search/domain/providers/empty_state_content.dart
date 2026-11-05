@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -89,9 +90,14 @@ AsyncValue<List<FeedArticleSummary>> searchEmptyRecentFeedArticles(
 
 @Riverpod()
 List<TabStateWithContainer> searchEmptyRecentTabs(Ref ref, {int count = 25}) {
-  final tabs = ref.watch(fifoTabStatesProvider).value;
-
-  return tabs.take(count).toList();
+  // Only the first [count]: a change further down the list leaves them equal.
+  return ref
+      .watch(
+        fifoTabStatesProvider.select(
+          (tabs) => EquatableValue(tabs.value.take(count).toList()),
+        ),
+      )
+      .value;
 }
 
 bool _isPending(AsyncValue<Object?> value) =>

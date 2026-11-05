@@ -56,7 +56,7 @@ class MainApp extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final initializationResult = ref.watch(appInitializationServiceProvider);
-    final router = ref.watch(routerProvider);
+    final router = ref.watch(routerProvider.select((value) => value.value));
 
     // The provider reads the system locale list only when it builds, and has
     // no binding of its own to hear that the list changed.
@@ -128,7 +128,7 @@ class MainApp extends HookConsumerWidget {
           localeListResolutionCallback: resolveAppLocale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          routerConfig: router.value,
+          routerConfig: router,
           builder: (context, child) {
             return _AppMediaQueryOverrides(
               uiScaleFactor: uiScaleFactor,

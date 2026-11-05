@@ -40,7 +40,9 @@ int? searchProxyPort(Ref ref) {
     webSearchSettingsControllerProvider.select((s) => s.routeThroughTor),
   );
   if (!route) return null;
-  return ref.watch(torProxyServiceProvider).value?.usableSocksPort;
+  return ref
+      .watch(torProxyServiceProvider.select((value) => value.value))
+      ?.usableSocksPort;
 }
 
 /// HttpClient used by both WebSocket (via `IOWebSocketChannel.customClient`)

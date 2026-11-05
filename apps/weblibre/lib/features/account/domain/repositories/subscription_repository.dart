@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/account/data/models/subscription_status.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
@@ -27,7 +28,9 @@ part 'subscription_repository.g.dart';
 class SubscriptionRepository extends _$SubscriptionRepository {
   @override
   Future<SubscriptionStatus> build() async {
-    final authState = ref.watch(accountAuthRepositoryProvider).value;
+    final authState = ref.watch(
+      accountAuthRepositoryProvider.select((value) => value.value),
+    );
     if (authState == null || !authState.isSignedIn) {
       // Signed-out is not an error; it's a known "no subscription" state.
       return SubscriptionStatus.inactive;

@@ -136,6 +136,8 @@ class _GlobalRoutingProxySection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final settings = ref.watch(proxyRoutingSettingsWithDefaultsProvider);
+    final options = ref.watch(proxyConnectionOptionsProvider);
+    final optionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
     if (settings.regularTabsMode != ProxyRegularTabRoutingMode.all) {
       return ListTile(
         leading: const Icon(Icons.info_outline),
@@ -144,8 +146,6 @@ class _GlobalRoutingProxySection extends ConsumerWidget {
       );
     }
 
-    final options = ref.watch(proxyConnectionOptionsProvider);
-    final optionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
     return _ProxyConnectionPicker(
       options: options,
       optionsLoaded: optionsState.hasValue,

@@ -60,11 +60,13 @@ class WebSearchInfoboxCard extends HookConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
 
     final imageUrl = info.imgSrc;
-    final imageBytes = (imageUrl == null || imageUrl.isEmpty)
-        ? null
-        : ref.watch(
-            metaSearchControllerProvider.select((s) => s.imagesByUrl[imageUrl]),
-          );
+    final imageBytes = ref.watch(
+      metaSearchControllerProvider.select(
+        (s) => (imageUrl == null || imageUrl.isEmpty)
+            ? null
+            : s.imagesByUrl[imageUrl],
+      ),
+    );
 
     final heading = _heading(info);
     final attributes = _meaningfulAttributes(info);

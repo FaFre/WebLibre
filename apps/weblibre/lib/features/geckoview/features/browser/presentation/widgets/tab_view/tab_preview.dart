@@ -189,14 +189,9 @@ class GridTabPreview extends HookConsumerWidget {
 
     final extendedDeleteMenuController = useMenuController();
 
-    // ignore: avoid_bool_literals_in_conditional_expressions
-    final isPinned = showPinBadge
-        ? ref.watch(
-            watchPinnedTabIdsProvider.select(
-              (v) => v.value?.contains(tabId) ?? false,
-            ),
-          )
-        : false;
+    final isPinned = ref.watch(
+      tabPinBadgeShownProvider(tabId, enabled: showPinBadge),
+    );
 
     final modeTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
@@ -494,21 +489,17 @@ class ListTabPreview extends HookConsumerWidget {
     );
 
     // Only the leading tile renders the thumbnail, and only when favicons are
-    // off — don't subscribe to screenshot churn otherwise.
-    final thumbnail = tabListShowFavicons
-        ? null
-        : ref.watch(tabThumbnailProvider(tabId));
+    // off — don't subscribe to screenshot churn otherwise (no tab, no
+    // thumbnail).
+    final thumbnail = ref.watch(
+      tabThumbnailProvider(tabListShowFavicons ? null : tabId),
+    );
 
     final extendedDeleteMenuController = useMenuController();
 
-    // ignore: avoid_bool_literals_in_conditional_expressions
-    final isPinned = showPinBadge
-        ? ref.watch(
-            watchPinnedTabIdsProvider.select(
-              (v) => v.value?.contains(tabId) ?? false,
-            ),
-          )
-        : false;
+    final isPinned = ref.watch(
+      tabPinBadgeShownProvider(tabId, enabled: showPinBadge),
+    );
 
     final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
       (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(

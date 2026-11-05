@@ -35,7 +35,7 @@ class HistoryHighlightsSection extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final highlights = ref.watch(
       searchEmptyHistoryHighlightsProvider().select(
-        (value) => value.value ?? [],
+        (value) => value.value ?? const [],
       ),
     );
 

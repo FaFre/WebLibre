@@ -451,7 +451,7 @@ final class PinnedBangListProvider
   }
 }
 
-String _$pinnedBangListHash() => r'75cc4728c27948884372d7ef299db1a216740279';
+String _$pinnedBangListHash() => r'0e4a53d668a3a971390c2394257e9d14ec1e553d';
 
 /// Adds and removes pins. Pinning is idempotent, so a chip and a details screen
 /// can both drive it without having to agree on the current state first.
@@ -692,4 +692,95 @@ final class BangCountOfGroupFamily extends $Family
 
   @override
   String toString() => r'bangCountOfGroupProvider';
+}
+
+/// The bangs for [domain], most frequent first; none without a domain, rather
+/// than every bang.
+
+@ProviderFor(siteBangs)
+final siteBangsProvider = SiteBangsFamily._();
+
+/// The bangs for [domain], most frequent first; none without a domain, rather
+/// than every bang.
+
+final class SiteBangsProvider
+    extends $FunctionalProvider<List<BangData>, List<BangData>, List<BangData>>
+    with $Provider<List<BangData>> {
+  /// The bangs for [domain], most frequent first; none without a domain, rather
+  /// than every bang.
+  SiteBangsProvider._({
+    required SiteBangsFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'siteBangsProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$siteBangsHash();
+
+  @override
+  String toString() {
+    return r'siteBangsProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<List<BangData>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  List<BangData> create(Ref ref) {
+    final argument = this.argument as String?;
+    return siteBangs(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<BangData> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<BangData>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SiteBangsProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$siteBangsHash() => r'1b475c46a7850f5a38209ba2bc9143574a834508';
+
+/// The bangs for [domain], most frequent first; none without a domain, rather
+/// than every bang.
+
+final class SiteBangsFamily extends $Family
+    with $FunctionalFamilyOverride<List<BangData>, String?> {
+  SiteBangsFamily._()
+    : super(
+        retry: null,
+        name: r'siteBangsProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The bangs for [domain], most frequent first; none without a domain, rather
+  /// than every bang.
+
+  SiteBangsProvider call(String? domain) =>
+      SiteBangsProvider._(argument: domain, from: this);
+
+  @override
+  String toString() => r'siteBangsProvider';
 }

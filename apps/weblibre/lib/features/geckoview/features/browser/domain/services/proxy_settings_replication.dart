@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
@@ -127,13 +128,18 @@ ContainerRoutingSnapshot? containerRoutingSnapshot(Ref ref) {
   }
 
   final singboxProfiles =
-      ref.watch(singboxProxyProfilesRepositoryProvider).value ?? const [];
+      ref.watch(
+        singboxProxyProfilesRepositoryProvider.select((value) => value.value),
+      ) ??
+      const [];
 
   final resolvedRoutingSettings = ref.watch(
     proxyRoutingSettingsWithDefaultsProvider,
   );
 
-  final singboxRuntime = ref.watch(singboxProxyRuntimeRepositoryProvider).value;
+  final singboxRuntime = ref.watch(
+    singboxProxyRuntimeRepositoryProvider.select((value) => value.value),
+  );
 
   return computeContainerRoutingSnapshot(
     // `usableSocksPort`, not the raw port: Tor publishes one long before its

@@ -166,9 +166,10 @@ class SearchScreen extends HookConsumerWidget {
 
     // When editing an existing tab, get its state
     // If tab no longer exists (null), fall back to new tab mode
-    final existingTabState = tabId != null
-        ? ref.watch(tabStateProvider(tabId))
-        : null;
+    final existingTabState = ref.watch(tabStateProvider(tabId));
+    final selectedTabIsolationContextId = ref.watch(
+      selectedTabStateProvider.select((state) => state?.isolationContextId),
+    );
 
     // Determine if we're in edit mode (tabId provided AND tab still exists)
     final isEditMode = tabId != null && existingTabState != null;
@@ -182,8 +183,7 @@ class SearchScreen extends HookConsumerWidget {
             TabType.child => switch (currentTabTabType) {
               TabType.private => TabMode.private,
               TabType.isolated => TabMode.isolated(
-                ref.watch(selectedTabStateProvider)?.isolationContextId ??
-                    newIsolatedContextId(),
+                selectedTabIsolationContextId ?? newIsolatedContextId(),
               ),
               _ => TabMode.regular,
             },
@@ -437,10 +437,13 @@ class SearchScreen extends HookConsumerWidget {
     );
 
     // Watch both selection providers - only one should be set at a time
-    // due to mutual exclusion in SmartBangSelector
-    final siteSelectedBang = isEditMode
-        ? ref.watch(selectedBangDataProvider(domain: existingTabState.url.host))
-        : null;
+    // due to mutual exclusion in SmartBangSelector. Outside edit mode there is
+    // no site, and the site selection is the global one.
+    final siteSelectedBang = ref.watch(
+      selectedBangDataProvider(
+        domain: isEditMode ? existingTabState.url.host : null,
+      ),
+    );
     final globalSelectedBang = ref.watch(selectedBangDataProvider());
 
     // The active selection is whichever one is set (site takes priority if both somehow set)
@@ -664,13 +667,13 @@ class SearchScreen extends HookConsumerWidget {
       return null;
     }, [autoSubmitSearch, initialSearchText, activeBang]);
 
+    final metaSearchActive = ref.watch(
+      metaSearchControllerProvider.select(
+        (s) => s.status != WebSearchStatus.idle || s.query.isNotEmpty,
+      ),
+    );
     final showWebSearchResults =
-        isWebSearchBang(activeBang) &&
-        ref.watch(
-          metaSearchControllerProvider.select(
-            (s) => s.status != WebSearchStatus.idle || s.query.isNotEmpty,
-          ),
-        );
+        isWebSearchBang(activeBang) && metaSearchActive;
 
     // By default the field follows the tab bar, so the input opens where the
     // user just tapped (see [SearchFieldPlacement]). At the bottom, the list

@@ -57,6 +57,9 @@ class TorProfileTile extends ConsumerWidget {
         ? scheme.primary.withValues(alpha: 0.15)
         : scheme.surfaceContainerHighest;
     final foreground = isRunning ? scheme.primary : scheme.onSurfaceVariant;
+    final torCondition = ref.watch(
+      proxyConnectionConditionProvider(const TorProxyConnectionId()),
+    );
     final latencyResult = ref.watch(
       proxyLatencyResultsProvider.select(
         (map) => map[const TorProxyConnectionId()],
@@ -91,9 +94,7 @@ class TorProfileTile extends ConsumerWidget {
         typeLabel: l10n.proxy_onionRoutingLabel,
         latency: latencyResult,
         autostart: autostart,
-        condition: ref.watch(
-          proxyConnectionConditionProvider(const TorProxyConnectionId()),
-        ),
+        condition: torCondition,
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

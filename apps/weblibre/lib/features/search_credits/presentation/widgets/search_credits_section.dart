@@ -42,7 +42,9 @@ class SearchCreditsSection extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final creditsAsync = ref.watch(searchCreditsRepositoryProvider);
-    final stashAsync = ref.watch(searchTokenStashCountProvider);
+    final stashCount = ref.watch(
+      searchTokenStashCountProvider.select((value) => value.value),
+    );
     final issuance = ref.watch(searchTokenIssuanceControllerProvider);
 
     // Refresh the credits balance whenever the app returns to the
@@ -60,7 +62,7 @@ class SearchCreditsSection extends HookConsumerWidget {
     final creditsError = creditsAsync.hasError && !creditsAsync.isLoading;
     final credits = creditsValue?.availableCredits ?? 0;
     final monthlyAllowance = creditsValue?.monthlyAllowance ?? 0;
-    final stash = stashAsync.value ?? 0;
+    final stash = stashCount ?? 0;
     final lastIssuanceAt = creditsValue?.lastIssuanceAt;
     final currentPeriodEnd = creditsValue?.currentPeriodEnd;
 

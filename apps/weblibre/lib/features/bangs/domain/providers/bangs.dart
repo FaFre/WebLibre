@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/bangs/data/models/bang_data.dart';
@@ -115,9 +116,13 @@ Stream<List<BangData>> frequentBangList(Ref ref) {
 /// gaps — a repository resync or a deleted user bang can strand a key.
 @Riverpod()
 Stream<List<BangData>> pinnedBangList(Ref ref) {
-  final keys = ref.watch(
-    generalSettingsWithDefaultsProvider.select((value) => value.pinnedBangs),
-  );
+  final keys = ref
+      .watch(
+        generalSettingsWithDefaultsProvider.select(
+          (value) => EquatableValue(value.pinnedBangs),
+        ),
+      )
+      .value;
 
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchPinnedBangs(keys);
@@ -166,4 +171,21 @@ Stream<DateTime?> lastSyncOfGroup(Ref ref, BangGroup group) {
 Stream<int> bangCountOfGroup(Ref ref, BangGroup group) {
   final repository = ref.watch(bangDataRepositoryProvider.notifier);
   return repository.watchBangCount(group);
+}
+
+/// The bangs for [domain], most frequent first; none without a domain, rather
+/// than every bang.
+@Riverpod()
+List<BangData> siteBangs(Ref ref, String? domain) {
+  if (domain == null) return const [];
+  // The bang table is written whenever a bang is used, and every write
+  // re-emits the list; wrapped so an unchanged list stays the same.
+  return ref
+      .watch(
+        bangListProvider(
+          domain: domain,
+          orderMostFrequentFirst: true,
+        ).select((value) => EquatableValue(value.value ?? const <BangData>[])),
+      )
+      .value;
 }

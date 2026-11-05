@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
@@ -43,9 +44,13 @@ class DohSettingsContent extends HookConsumerWidget {
     );
     // Already includes a resolver that predates saved resolvers — the model
     // adopts it out of `dohProviderUrl` on deserialization.
-    final resolvers = ref.watch(
-      storedEngineSettingsProvider.select((value) => value.customDohProviders),
-    );
+    final resolvers = ref
+        .watch(
+          storedEngineSettingsProvider.select(
+            (value) => EquatableValue(value.customDohProviders),
+          ),
+        )
+        .value;
 
     Future<void> save(UpdateEngineSettingsFunc updateSettings) {
       return ref

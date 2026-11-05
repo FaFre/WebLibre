@@ -395,7 +395,7 @@ class _SubscriptionList extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final subscriptions = ref.watch(pushSubscriptionsProvider);
     final distributorReady =
-        ref.watch(pushStatusProvider).value?.status ==
+        ref.watch(pushStatusProvider.select((value) => value.value))?.status ==
         PushDistributorStatus.ready;
 
     return subscriptions.when(

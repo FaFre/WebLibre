@@ -21,6 +21,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:convert/convert.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -39,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/b
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_list_ui_state.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/bookmark_sort_type.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/entities/import_bookmark_node.dart';
+import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmark_list_rows.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmark_list_ui_state.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
@@ -116,6 +118,14 @@ class BookmarkListScreen extends HookConsumerWidget {
     // Folders the user has opened. Keyed by guid so expansion survives sort and
     // filter changes.
     final expandedGuids = useState(<String>{});
+    final treeRows = ref.watch(
+      bookmarkListRowsProvider(
+        entryGuid,
+        hideEmptyRoots: hideEmptyRoots.value,
+        expandedGuids: EquatableValue(expandedGuids.value),
+        enabled: !isSearching,
+      ),
+    );
 
     // Storage can only match bookmarks, never folders, so "Folders Only" and a
     // search query have no overlap to show.
@@ -129,13 +139,7 @@ class BookmarkListScreen extends HookConsumerWidget {
             if (!searchSuppressedByFilter)
               for (final result in searchResults) BookmarkRow(result, 0),
           ]
-        : _buildRows(
-            ref,
-            folderAsync.value,
-            uiState,
-            expandedGuids.value,
-            depth: 0,
-          );
+        : treeRows;
 
     return PopScope(
       canPop: !uiState.selectionMode,
@@ -204,64 +208,6 @@ class BookmarkListScreen extends HookConsumerWidget {
           ),
         ),
       ),
-    );
-  }
-
-  /// Flattens the entry folder and every expanded folder beneath it into rows.
-  ///
-  /// A folder's children are only requested once it is expanded, so a collapsed
-  /// subtree costs nothing — this is what keeps the screen openable after a
-  /// large import or sync. Watching the child providers here means expanding
-  /// starts the load and the row list rebuilds when it lands.
-  List<BookmarkRow> _buildRows(
-    WidgetRef ref,
-    BookmarkFolder? folder,
-    BookmarkListUiState uiState,
-    Set<String> expandedGuids, {
-    required int depth,
-  }) {
-    final rows = <BookmarkRow>[];
-
-    for (final item in _visibleChildren(folder, uiState, depth: depth)) {
-      rows.add(BookmarkRow(item, depth));
-
-      if (item is! BookmarkFolder || !expandedGuids.contains(item.guid)) {
-        continue;
-      }
-
-      final child = ref.watch(bookmarkFolderProvider(item.guid));
-      if (child.value == null) {
-        rows.add(BookmarkRow(item, depth + 1, isPlaceholder: true));
-        continue;
-      }
-
-      rows.addAll(
-        _buildRows(ref, child.value, uiState, expandedGuids, depth: depth + 1),
-      );
-    }
-
-    return rows;
-  }
-
-  /// The children of [folder] in display order, with the folders-only filter
-  /// applied.
-  List<BookmarkItem> _visibleChildren(
-    BookmarkFolder? folder,
-    BookmarkListUiState uiState, {
-    required int depth,
-  }) {
-    var children = folder?.children ?? const <BookmarkItem>[];
-
-    if (uiState.foldersOnly) {
-      children = children.whereType<BookmarkFolder>().toList();
-    }
-
-    return sortBookmarkChildren(
-      children,
-      uiState.sortType,
-      // Only the entry level can be the tree root, and only there do the
-      // built-in folders need pinning.
-      isRoot: depth == 0 && entryGuid == BookmarkRoot.root.id,
     );
   }
 

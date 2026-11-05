@@ -39,8 +39,11 @@ class SmallWebModeChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final countsAsync = ref.watch(smallWebAllModeItemCountsProvider);
-    final counts = countsAsync.value ?? {};
+    final counts =
+        ref.watch(
+          smallWebAllModeItemCountsProvider.select((value) => value.value),
+        ) ??
+        {};
     final colorScheme = Theme.of(context).colorScheme;
 
     return SizedBox(

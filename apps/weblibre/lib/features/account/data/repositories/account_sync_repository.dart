@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase/supabase.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
@@ -88,7 +89,9 @@ class SyncDocumentResult {
 class AccountSyncRepository extends _$AccountSyncRepository {
   @override
   SupabaseClient? build() {
-    final authState = ref.watch(accountAuthRepositoryProvider).value;
+    final authState = ref.watch(
+      accountAuthRepositoryProvider.select((value) => value.value),
+    );
     if (authState == null || !authState.isSignedIn) return null;
     return authState.client;
   }

@@ -123,7 +123,7 @@ class TopSitesSection extends HookConsumerWidget {
     final topSites = ref.watch(
       topSiteListProvider(
         limit: searchEmptyTopSitesLimit,
-      ).select((value) => value.value ?? []),
+      ).select((value) => value.value ?? const []),
     );
 
     final reorderMode = useState(false);

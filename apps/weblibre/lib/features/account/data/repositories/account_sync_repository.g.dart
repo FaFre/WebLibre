@@ -63,7 +63,7 @@ final class AccountSyncRepositoryProvider
 }
 
 String _$accountSyncRepositoryHash() =>
-    r'ce558b699974edce2ca06b3990cf09c245d09126';
+    r'7a09bd58fef5cce1593a2a07a6237a3f9206bacc';
 
 /// All write methods on this repository require the user to be signed in.
 /// Callers MUST gate on `ref.watch(accountSyncRepositoryProvider) != null`

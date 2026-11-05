@@ -41,9 +41,10 @@ class HomeWallpaperBackdrop extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tabBarPosition = ref.watch(effectiveTabBarPositionProvider);
+    final wallpaper = ref.watch(resolvedHomeWallpaperProvider);
 
     return WallpaperBackdrop(
-      wallpaper: ref.watch(resolvedHomeWallpaperProvider),
+      wallpaper: wallpaper,
       // The home surface's box is not the screen: `browser.dart` positions the
       // browser with offsets that appear and disappear with the toolbar, so
       // showing or hiding the tab bar resizes this box and moves one of its

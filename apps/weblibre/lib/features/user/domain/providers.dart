@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:exceptions/exceptions.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -73,6 +74,20 @@ Stream<int> iconCacheRevision(Ref ref, String origin) {
       .map((event) => event.revision);
 }
 
+/// [iconCacheRevision] of each of [origins], in order; 0 until one is
+/// reported.
+@Riverpod()
+EquatableValue<List<int>> iconCacheRevisions(
+  Ref ref,
+  EquatableValue<List<String>> origins,
+) => EquatableValue([
+  for (final origin in origins.value)
+    ref.watch(
+          iconCacheRevisionProvider(origin).select((value) => value.value),
+        ) ??
+        0,
+]);
+
 @Riverpod()
 bool incognitoModeEnabled(Ref ref) {
   return ref.watch(
@@ -92,18 +107,19 @@ Future<Result<FingerprintOverrides>> fingerprintOverrideSettings(
   final fingerprintTargets = await ref.watch(fingerprintTargetsProvider.future);
   final fingerprintTargetSet = fingerprintTargets.map((e) => e.name).toSet();
 
-  final overrides = ref.watch(
+  // Selects the stored string, not the parsed result: a parse returns a new
+  // Result each time, which would never compare equal.
+  final storedOverrides = ref.watch(
     storedEngineSettingsProvider.select(
-      (settings) =>
-          settings.fingerprintingProtectionOverrides.mapNotNull(
-            (settings) =>
-                FingerprintOverrides.parse(settings, fingerprintTargetSet),
-          ) ??
-          Result.success(FingerprintOverrides.defaults()),
+      (settings) => settings.fingerprintingProtectionOverrides,
     ),
   );
 
-  return overrides;
+  return storedOverrides.mapNotNull<Result<FingerprintOverrides>>(
+        (settings) =>
+            FingerprintOverrides.parse(settings, fingerprintTargetSet),
+      ) ??
+      Result.success(FingerprintOverrides.defaults());
 }
 
 @Riverpod(keepAlive: true)

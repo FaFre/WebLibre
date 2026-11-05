@@ -185,9 +185,9 @@ class _InstallConfigSheet extends HookConsumerWidget {
 
     // Both come from the tab being installed — not the selected tab, and not
     // the container picked in the tab bar, which the tab need not belong to.
-    final tabContextId = tabId != null
-        ? ref.watch(tabStateProvider(tabId))?.contextId
-        : null;
+    final tabContextId = ref.watch(
+      tabStateProvider(tabId).select((state) => state?.contextId),
+    );
     final containerData = ref
         .watch(watchTabContainerDataProvider(tabId))
         .asData

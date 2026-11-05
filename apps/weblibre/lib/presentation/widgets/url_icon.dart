@@ -37,7 +37,7 @@ const _bundledIconByOrigin = {
   'https://weblibre.eu': 'assets/icon/bang_icon.png',
 };
 
-class UrlIcon extends HookConsumerWidget {
+class UrlIcon extends StatelessWidget {
   final double iconSize;
   final List<Uri> urlList;
   final bool cacheOnly;
@@ -50,7 +50,7 @@ class UrlIcon extends HookConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final eligibleUrls = urlList
         .where((u) => u.isScheme('http') || u.isScheme('https'))
         .toList();
@@ -72,13 +72,42 @@ class UrlIcon extends HookConsumerWidget {
       }
     }
 
+    return _ResolvedUrlIcon(
+      urlList,
+      eligibleUrls: eligibleUrls,
+      iconSize: iconSize,
+      cacheOnly: cacheOnly,
+    );
+  }
+}
+
+/// [UrlIcon] for URLs without a bundled icon: resolved from the icon cache,
+/// or fetched unless [cacheOnly].
+class _ResolvedUrlIcon extends HookConsumerWidget {
+  final double iconSize;
+  final List<Uri> urlList;
+  final List<Uri> eligibleUrls;
+  final bool cacheOnly;
+
+  const _ResolvedUrlIcon(
+    this.urlList, {
+    required this.eligibleUrls,
+    required this.iconSize,
+    required this.cacheOnly,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     // Only a change signal, not the icon bytes: the lookup below is served
     // from an in-memory cache whenever it can be, and this rebuilds the row on
     // the rare occasion that the origin's stored favicon is replaced.
-    final cacheRevisions = [
-      for (final url in eligibleUrls)
-        ref.watch(iconCacheRevisionProvider(url.origin)).value ?? 0,
-    ];
+    final cacheRevisions = ref
+        .watch(
+          iconCacheRevisionsProvider(
+            EquatableValue([for (final url in eligibleUrls) url.origin]),
+          ),
+        )
+        .value;
 
     final icon = useCachedFuture(() => _resolveIcon(ref), [
       EquatableValue(urlList),

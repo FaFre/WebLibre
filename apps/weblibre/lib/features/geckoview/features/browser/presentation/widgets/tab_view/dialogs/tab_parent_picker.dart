@@ -89,6 +89,7 @@ class _TabParentPickerSheet extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final movingTabAsync = ref.watch(watchTabDbDataProvider(tabId));
     final descendantsAsync = ref.watch(watchTabDescendantsProvider(tabId));
+    final candidatesAsync = ref.watch(watchTabContainerTabsDataProvider(tabId));
 
     return PointerScrollableSheet(
       expand: false,
@@ -120,10 +121,6 @@ class _TabParentPickerSheet extends HookConsumerWidget {
                       ),
                       data: (descendants) {
                         final excluded = descendants.keys.toSet()..add(tabId);
-                        final containerId = movingTab.containerId;
-                        final candidatesAsync = ref.watch(
-                          watchContainerTabsDataProvider(containerId),
-                        );
                         return candidatesAsync.when(
                           loading: () =>
                               const Center(child: CircularProgressIndicator()),

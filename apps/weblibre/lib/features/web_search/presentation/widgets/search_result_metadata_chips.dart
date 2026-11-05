@@ -556,7 +556,27 @@ class _ResolvedLanguageLabel extends ConsumerWidget {
     final locale = intl.Locale.tryParse(languageTag);
 
     if (locale == null) return Text(languageTag, style: style);
+    return _LanguageName(
+      locale: locale,
+      languageTag: languageTag,
+      style: style,
+    );
+  }
+}
 
+class _LanguageName extends ConsumerWidget {
+  final intl.Locale locale;
+  final String languageTag;
+  final TextStyle? style;
+
+  const _LanguageName({
+    required this.locale,
+    required this.languageTag,
+    this.style,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final resolved = ref.watch(
       resolveLocaleProvider(
         locale,

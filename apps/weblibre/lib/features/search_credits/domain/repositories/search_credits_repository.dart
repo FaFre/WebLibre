@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/account/domain/repositories/account_auth.dart';
 import 'package:weblibre/features/search_credits/data/models/search_credits_status.dart';
@@ -27,7 +28,9 @@ part 'search_credits_repository.g.dart';
 class SearchCreditsRepository extends _$SearchCreditsRepository {
   @override
   Future<SearchCreditsStatus> build() async {
-    final authState = ref.watch(accountAuthRepositoryProvider).value;
+    final authState = ref.watch(
+      accountAuthRepositoryProvider.select((value) => value.value),
+    );
     if (authState == null || !authState.isSignedIn) {
       // Signed-out is not an error; it's a known zero-credit state.
       return SearchCreditsStatus.empty;

@@ -37,7 +37,6 @@ import 'package:weblibre/features/geckoview/domain/providers/restore_complete.da
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/quick_tab_switcher_tab_group.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -47,6 +46,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/quick_switcher_button_row.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/browser_bar_tint.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/layout/browser_chrome_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
@@ -139,13 +139,14 @@ class BrowserBottomAppBar extends ConsumerWidget {
         (layout) => layout.outsideFlutter,
       ),
     );
+    final tint = ref.watch(browserBarTintProvider);
 
     return Material(
       shadowColor: Colors.transparent,
       surfaceTintColor: Colors.transparent,
       color: navigationBarOutsideFlutter
           ? Colors.transparent
-          : watchBrowserBarTintColor(context, ref),
+          : browserBarTintColor(context, tint),
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomPadding),
         child: SizedBox(
@@ -195,7 +196,8 @@ class BrowserSideRail extends ConsumerWidget {
     // strips (status/nav bar, docked-edge notch) blend with the rail instead
     // of showing a neutral surfaceContainer gap. Falls back to surfaceContainer
     // when no container is active.
-    final tintColor = watchBrowserBarTintColor(context, ref);
+    final tint = ref.watch(browserBarTintProvider);
+    final tintColor = browserBarTintColor(context, tint);
 
     return ColoredBox(
       color: tintColor,
@@ -579,16 +581,8 @@ class BrowserTabBar extends HookConsumerWidget {
     final showMainToolbarNavigationButton =
         !isSmallWebMode && !inContextual.navigationMenu;
 
-    final containerColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.color),
-    );
-    final containerUseCustomColor = ref.watch(
-      watchTabContainerDataProvider(
-        selectedTabId,
-      ).select((data) => data.value?.metadata.useCustomColor ?? false),
-    );
+    // The same tint the strips around the bar read, so they stay seamless.
+    final tint = ref.watch(browserBarTintProvider);
 
     final stackingMode = ref.watch(effectiveTabBarStackingModeProvider);
 
@@ -597,19 +591,16 @@ class BrowserTabBar extends HookConsumerWidget {
     // what reserved this bar's height — reading it here is what keeps the
     // rows drawn and the slots reserved for them identical, so an empty row
     // is not a blank band (#628).
-    final twoLevelRows = stackingMode == TabBarStackingMode.twoLevel
-        ? ref.watch(twoLevelQuickTabSwitcherRowsProvider).value
-        : null;
-    final showTwoLevelContainerRow = twoLevelRows?.containerRow ?? false;
-    final showTwoLevelMruRow = twoLevelRows?.mruRow ?? false;
-
     // Tab groups follow the same rule, for the same reason.
-    final tabGroupsRows = stackingMode == TabBarStackingMode.tabGroups
-        ? ref.watch(tabGroupsQuickTabSwitcherRowsProvider).value
-        : null;
-    final showTabGroupRow = tabGroupsRows?.groupRow ?? false;
-    final showActiveTabGroupRow = tabGroupsRows?.activeGroupRow ?? false;
+    final stackedRows = ref.watch(stackedQuickTabSwitcherRowsProvider);
+    final showTwoLevelContainerRow = stackedRows.twoLevelContainerRow;
+    final showTwoLevelMruRow = stackedRows.twoLevelMruRow;
+    final showTabGroupRow = stackedRows.tabGroupRow;
+    final showActiveTabGroupRow = stackedRows.activeTabGroupRow;
 
+    final hasPinnedAddons = ref.watch(
+      pinnedAddonIdsProvider.select((ids) => ids.isNotEmpty),
+    );
     final isVertical = position.isVertical;
     // Only a vertical rail has a width to be wide; the horizontal bars leave
     // railWidth at its compact default and never take these branches.
@@ -642,12 +633,8 @@ class BrowserTabBar extends HookConsumerWidget {
       await runSwipe(gesture);
     }
 
-    final effectiveContainerColor =
-        (settings.showContainerUi && containerColor != null)
-        ? containerColor
-        : null;
-    final effectiveUseCustomColor =
-        effectiveContainerColor != null && containerUseCustomColor;
+    final effectiveContainerColor = tint?.color;
+    final effectiveUseCustomColor = tint?.useCustomColor ?? false;
     final effectiveContainerPalette = effectiveContainerColor != null
         ? ContainerColors.palette(
             context,
@@ -660,7 +647,7 @@ class BrowserTabBar extends HookConsumerWidget {
       // A panel lays its actions out in rows, so its add-ons go in a row too.
       // It also spaces them evenly, where the empty box this renders with
       // nothing pinned would still take a share of the gaps.
-      if (!wideRail || ref.watch(pinnedAddonIdsProvider).isNotEmpty)
+      if (!wideRail || hasPinnedAddons)
         PinnedAddonBar(axis: wideRail ? Axis.horizontal : switcherAxis),
       if (isSmallWebMode)
         ReaderButton(
@@ -1305,15 +1292,12 @@ class QuickTabSwitcher extends HookConsumerWidget {
       quickTabSwitcherTabStatesProvider(quickTabSwitcherMode),
     );
     final selectedTabId = ref.watch(selectedTabProvider);
-    final historySuggestions = enableHistoryFallback
-        ? ref
-              .watch(
-                quickTabSwitcherHistorySuggestionsProvider(
-                  quickTabSwitcherMode,
-                ),
-              )
-              .value
-        : null;
+    final historySuggestions = ref.watch(
+      quickTabSwitcherHistoryFallbackProvider(
+        quickTabSwitcherMode,
+        enabled: enableHistoryFallback,
+      ).select((value) => value.value),
+    );
     final sandboxSourceUris = ref.watch(sandboxSourceUrisProvider).value;
     // Reorder is only meaningful when the bar renders the user's actual tab
     // order (containerTabs). Other modes (lastUsedTabs / MRU) sort by recency,
@@ -1337,14 +1321,9 @@ class QuickTabSwitcher extends HookConsumerWidget {
 
     // The tab groups row lists each group by its root tab; the group supplies
     // the chip's count, its active state and the tab a tap returns to.
-    final tabGroupByRoot =
-        quickTabSwitcherMode == QuickTabSwitcherMode.tabGroups
-        ? {
-            for (final group
-                in ref.watch(selectedContainerTabGroupsProvider).value)
-              group.rootId: group,
-          }
-        : const <String, QuickTabSwitcherTabGroup>{};
+    final tabGroupByRoot = ref
+        .watch(quickTabSwitcherTabGroupsByRootProvider(quickTabSwitcherMode))
+        .value;
 
     final tabDepthById = ref
         .watch(

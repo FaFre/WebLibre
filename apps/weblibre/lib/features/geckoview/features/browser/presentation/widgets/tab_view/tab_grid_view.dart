@@ -27,11 +27,10 @@ import 'package:flutter_reorderable_grid_view/widgets/reorderable_builder.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_tray_rows.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
@@ -45,13 +44,11 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// Top-left expand/collapse toggle for grid cells. Returns null for any
@@ -209,66 +206,11 @@ class _TabGridView extends HookConsumerWidget {
       ).select((value) => value.value ?? const []),
     );
 
-    final hasActiveSearch = ref.watch(
-      tabSearchRepositoryProvider(
-        TabSearchPartition.preview,
-      ).select((value) => (value.value?.query ?? '').isNotEmpty),
+    final hasActiveSearch = ref.watch(tabTraySearchActiveProvider);
+    final primaryRows = ref.watch(tabTrayRowsProvider(containerId));
+    final suggestedTabEntities = ref.watch(
+      suggestedTabEntitiesProvider(containerId),
     );
-
-    List<TabViewItem> primaryRows;
-    if (hasActiveSearch) {
-      final flat = ref.watch(
-        seamlessFilteredTabEntitiesProvider(
-          searchPartition: TabSearchPartition.preview,
-          // ignore: document_ignores using fast equatable
-          // ignore: provider_parameters
-          containerFilter: ContainerFilterById(containerId: containerId),
-          groupTrees: false,
-        ),
-      );
-      primaryRows = [
-        for (final entity in flat.value)
-          TabViewItem.search(
-            tabId: entity.tabId,
-            sourceSearchQuery: switch (entity) {
-              DefaultTabEntity _ => null,
-              final SearchResultTabEntity e => e.searchQuery,
-              TabTreeEntity _ => null,
-            },
-          ),
-      ];
-    } else {
-      final visibleItems = ref.watch(
-        visibleTabListItemsProvider(
-          containerId: containerId,
-          scope: TabListScope.tray,
-        ),
-      );
-      primaryRows = [
-        for (final item in visibleItems.value)
-          switch (item) {
-            TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
-              tabId: tabId,
-            ),
-            final TabListParentGroup g =>
-              showHierarchicalTabs
-                  ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
-                  : TabViewItem.standalone(tabId: g.tabId),
-            final TabListChildItem c =>
-              showHierarchicalTabs
-                  ? TabViewItem.child(tabId: c.tabId, childItem: c)
-                  : TabViewItem.standalone(tabId: c.tabId),
-          },
-      ];
-    }
-
-    final tabSuggestionsEnabled = ref.watch(
-      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
-    );
-
-    final suggestedTabEntities = tabSuggestionsEnabled
-        ? ref.watch(suggestedTabEntitiesProvider(containerId))
-        : EquatableValue(<TabEntity>[]);
 
     final itemCount =
         primaryRows.length +

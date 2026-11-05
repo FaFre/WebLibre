@@ -76,7 +76,7 @@ class TabsActionButtonView extends StatelessWidget {
   }
 }
 
-class TabsActionButton extends HookConsumerWidget {
+class TabsActionButton extends StatelessWidget {
   final bool isActive;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
@@ -91,33 +91,103 @@ class TabsActionButton extends HookConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final tabCount = isActive
-        // ignore: provider_parameters
-        ? ref.watch(containerTabCountProvider(ContainerFilterDisabled()))
-        : ref.watch(selectedContainerTabCountProvider);
+  Widget build(BuildContext context) {
+    // Each variant watches only the count it shows: every tab while active,
+    // the selected container's tabs otherwise.
+    return isActive
+        ? _AllTabsActionButton(
+            onTap: onTap,
+            onDoubleTap: onDoubleTap,
+            onLongPress: onLongPress,
+          )
+        : _ContainerTabsActionButton(
+            onTap: onTap,
+            onDoubleTap: onDoubleTap,
+            onLongPress: onLongPress,
+          );
+  }
+}
 
-    final tabCountText = tabCount.when(
-      skipLoadingOnReload: true,
-      data: (count) => count.toString(),
-      loading: () => tabCount.hasValue ? tabCount.value.toString() : '0',
-      error: (error, stackTrace) {
-        logger.e(
-          'Could not determine tab count',
-          error: error,
-          stackTrace: stackTrace,
-        );
-        return '-1';
-      },
+class _AllTabsActionButton extends ConsumerWidget {
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
+
+  const _AllTabsActionButton({
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabCount = ref.watch(
+      // ignore: provider_parameters
+      containerTabCountProvider(ContainerFilterDisabled()),
     );
 
-    return TabsActionButtonView(
-      isActive: isActive,
-      tabCountText: tabCountText,
-      showSkeleton: tabCount.isLoading && !tabCount.hasValue,
+    return _buildTabsActionButtonView(
+      tabCount,
+      isActive: true,
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       onLongPress: onLongPress,
     );
   }
+}
+
+class _ContainerTabsActionButton extends ConsumerWidget {
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
+
+  const _ContainerTabsActionButton({
+    required this.onTap,
+    required this.onDoubleTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tabCount = ref.watch(selectedContainerTabCountProvider);
+
+    return _buildTabsActionButtonView(
+      tabCount,
+      isActive: false,
+      onTap: onTap,
+      onDoubleTap: onDoubleTap,
+      onLongPress: onLongPress,
+    );
+  }
+}
+
+Widget _buildTabsActionButtonView(
+  AsyncValue<int> tabCount, {
+  required bool isActive,
+  required VoidCallback? onTap,
+  required VoidCallback? onDoubleTap,
+  required VoidCallback? onLongPress,
+}) {
+  final tabCountText = tabCount.when(
+    skipLoadingOnReload: true,
+    data: (count) => count.toString(),
+    loading: () => tabCount.hasValue ? tabCount.value.toString() : '0',
+    error: (error, stackTrace) {
+      logger.e(
+        'Could not determine tab count',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return '-1';
+    },
+  );
+
+  return TabsActionButtonView(
+    isActive: isActive,
+    tabCountText: tabCountText,
+    showSkeleton: tabCount.isLoading && !tabCount.hasValue,
+    onTap: onTap,
+    onDoubleTap: onDoubleTap,
+    onLongPress: onLongPress,
+  );
 }

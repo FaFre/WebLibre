@@ -84,20 +84,18 @@ const kMinPreviewPageHeight = 80.0;
 
 /// The window [device] stands for: its size and size class.
 ///
-/// For [PreviewDevice.thisWindow] the real window, read the way the browser
-/// reads it, so the preview resolves exactly as the browser behind it does.
+/// For [PreviewDevice.thisWindow] the real window, [liveWindow] as the
+/// browser reads it (`windowSizeClassControllerProvider`), so the preview
+/// resolves exactly as the browser behind it does.
 ({Size size, WindowSizeClass window}) resolvePreviewWindow(
   BuildContext context,
-  WidgetRef ref,
+  WindowSizeClass liveWindow,
   PreviewDevice device,
 ) {
   if (device.fixedSize case final size?) {
     return (size: size, window: WindowSizeClass.fromSize(size));
   }
-  return (
-    size: MediaQuery.sizeOf(context),
-    window: ref.watch(windowSizeClassControllerProvider),
-  );
+  return (size: MediaQuery.sizeOf(context), window: liveWindow);
 }
 
 /// How many switcher rows the sample tabs fill in [mode].
@@ -332,7 +330,8 @@ class LayoutPreview extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final settings = ref.watch(displayedGeneralSettingsProvider);
-    final window = resolvePreviewWindow(context, ref, device);
+    final liveWindow = ref.watch(windowSizeClassControllerProvider);
+    final window = resolvePreviewWindow(context, liveWindow, device);
 
     final windowKey = useMemoized(GlobalKey.new);
     final hovered = useState<LayoutPart?>(null);
@@ -804,6 +803,9 @@ class PreviewBar extends HookConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     final settings = ref.watch(displayedGeneralSettingsProvider);
+    final contextualConfigs = ref.watch(
+      displayedToolbarButtonConfigsProvider(ToolbarConfigLocation.contextual),
+    );
     final quickTabsController = useScrollController();
     final quickTabsSecondRowController = useScrollController();
 
@@ -815,13 +817,7 @@ class PreviewBar extends HookConsumerWidget {
     // The address row leaves out what the contextual toolbar already
     // carries, by the real bar's rule.
     final inContextual = BrowserTabBar.mainButtonsInContextual(
-      ref
-          .watch(
-            displayedToolbarButtonConfigsProvider(
-              ToolbarConfigLocation.contextual,
-            ),
-          )
-          .value,
+      contextualConfigs.value,
       hideDuplicates: bar.hideMainToolbarButtonsDuplicatedInContextualToolbar,
     );
 

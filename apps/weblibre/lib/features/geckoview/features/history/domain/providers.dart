@@ -20,12 +20,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/experimental/json_persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_entry.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/entities/history_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/recently_closed_tabs.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 
@@ -139,4 +141,26 @@ Future<List<HistoryEntry>> browsingDownloads(Ref ref) async {
   return visits
       .map((visit) => HistoryEntry(visit: visit, containerIds: const []))
       .toList(growable: false);
+}
+
+/// The entries a history screen lists: [browsingDownloads] on the downloads
+/// screen, [browsingHistory] otherwise. Only the one shown is queried.
+@Riverpod()
+AsyncValue<List<HistoryEntry>> historyScreenEntries(
+  Ref ref, {
+  required bool downloads,
+}) => downloads
+    ? ref.watch(browsingDownloadsProvider)
+    : ref.watch(browsingHistoryProvider);
+
+/// How many recently closed tabs the history screen offers to reopen; the
+/// downloads screen offers none, and does not read them.
+@Riverpod()
+int historyScreenRecentlyClosedCount(Ref ref, {required bool downloads}) {
+  if (downloads) return 0;
+  return ref.watch(
+    recentlyClosedTabsRepositoryProvider.select(
+      (value) => value.value?.length ?? 0,
+    ),
+  );
 }

@@ -19,19 +19,17 @@
  */
 import 'dart:math' as math;
 
-import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_reorderable_grid_view/widgets/custom_draggable.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
-import 'package:weblibre/core/providers/persisted_bool.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_tray_rows.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
@@ -44,13 +42,10 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_scroll_to_active.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_entity.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -170,7 +165,7 @@ class _TabDraggable extends HookConsumerWidget {
   }
 }
 
-class _TabListView extends HookConsumerWidget {
+class _TabListView extends ConsumerWidget {
   final ScrollController scrollController;
   final bool tabsReorderable;
   final VoidCallback onClose;
@@ -181,19 +176,30 @@ class _TabListView extends HookConsumerWidget {
     required this.onClose,
   });
 
-  static const _itemHeight = 86.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scope = ref.watch(effectiveTabsTrayScopeProvider);
 
     return switch (scope) {
-      TabsTrayScope.synced => _buildSyncedTabsView(context, ref),
-      _ => _buildLocalTabsView(context, ref),
+      TabsTrayScope.synced => _SyncedTabsView(
+        scrollController: scrollController,
+      ),
+      _ => _LocalTabsView(
+        scrollController: scrollController,
+        tabsReorderable: tabsReorderable,
+        onClose: onClose,
+      ),
     };
   }
+}
 
-  Widget _buildSyncedTabsView(BuildContext context, WidgetRef ref) {
+class _SyncedTabsView extends ConsumerWidget {
+  final ScrollController scrollController;
+
+  const _SyncedTabsView({required this.scrollController});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final syncedTabs = ref.watch(syncedTabsForSelectedDeviceProvider);
 
     final l10n = AppLocalizations.of(context);
@@ -247,8 +253,23 @@ class _TabListView extends HookConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _buildLocalTabsView(BuildContext context, WidgetRef ref) {
+class _LocalTabsView extends HookConsumerWidget {
+  final ScrollController scrollController;
+  final bool tabsReorderable;
+  final VoidCallback onClose;
+
+  const _LocalTabsView({
+    required this.scrollController,
+    required this.tabsReorderable,
+    required this.onClose,
+  });
+
+  static const _itemHeight = 86.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final disableAnimations = MediaQuery.disableAnimationsOf(context);
     final containerId = ref.watch(selectedContainerProvider);
     final canManualReorder = ref.watch(canManualTabReorderProvider);
@@ -272,66 +293,11 @@ class _TabListView extends HookConsumerWidget {
       ).select((value) => value.value ?? const []),
     );
 
-    final hasActiveSearch = ref.watch(
-      tabSearchRepositoryProvider(
-        TabSearchPartition.preview,
-      ).select((value) => (value.value?.query ?? '').isNotEmpty),
+    final hasActiveSearch = ref.watch(tabTraySearchActiveProvider);
+    final primaryRows = ref.watch(tabTrayRowsProvider(containerId));
+    final suggestedTabEntities = ref.watch(
+      suggestedTabEntitiesProvider(containerId),
     );
-
-    List<TabViewItem> primaryRows;
-    if (hasActiveSearch) {
-      final flat = ref.watch(
-        seamlessFilteredTabEntitiesProvider(
-          searchPartition: TabSearchPartition.preview,
-          // ignore: document_ignores using fast equatable
-          // ignore: provider_parameters
-          containerFilter: ContainerFilterById(containerId: containerId),
-          groupTrees: false,
-        ),
-      );
-      primaryRows = [
-        for (final entity in flat.value)
-          TabViewItem.search(
-            tabId: entity.tabId,
-            sourceSearchQuery: switch (entity) {
-              DefaultTabEntity _ => null,
-              final SearchResultTabEntity e => e.searchQuery,
-              TabTreeEntity _ => null,
-            },
-          ),
-      ];
-    } else {
-      final visibleItems = ref.watch(
-        visibleTabListItemsProvider(
-          containerId: containerId,
-          scope: TabListScope.tray,
-        ),
-      );
-      primaryRows = [
-        for (final item in visibleItems.value)
-          switch (item) {
-            TabListStandaloneItem(:final tabId) => TabViewItem.standalone(
-              tabId: tabId,
-            ),
-            final TabListParentGroup g =>
-              showHierarchicalTabs
-                  ? TabViewItem.parent(tabId: g.tabId, parentGroup: g)
-                  : TabViewItem.standalone(tabId: g.tabId),
-            final TabListChildItem c =>
-              showHierarchicalTabs
-                  ? TabViewItem.child(tabId: c.tabId, childItem: c)
-                  : TabViewItem.standalone(tabId: c.tabId),
-          },
-      ];
-    }
-
-    final tabSuggestionsEnabled = ref.watch(
-      persistedBoolProvider(PersistedBoolKey.tabSuggestions),
-    );
-
-    final suggestedTabEntities = tabSuggestionsEnabled
-        ? ref.watch(suggestedTabEntitiesProvider(containerId))
-        : EquatableValue(<TabEntity>[]);
 
     final itemCount =
         primaryRows.length +

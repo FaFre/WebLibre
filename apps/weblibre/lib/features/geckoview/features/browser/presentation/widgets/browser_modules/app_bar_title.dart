@@ -69,6 +69,12 @@ class CompactAppBarTitle extends ConsumerWidget {
     );
 
     final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+    final homeSearchBarPlacement = ref.watch(
+      effectiveHomeSearchBarPlacementProvider,
+    );
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState?.id),
+    );
 
     // No tab to address, or one the home surface is covering. Home is a layer
     // over the selected tab rather than a tab of its own, so the selection
@@ -90,14 +96,9 @@ class CompactAppBarTitle extends ConsumerWidget {
         // buttons beside it and no width to spare.
         showSearchTools:
             showBrowserHome &&
-            ref.watch(effectiveHomeSearchBarPlacementProvider) ==
-                HomeSearchBarPlacement.tabBar,
+            homeSearchBarPlacement == HomeSearchBarPlacement.tabBar,
       );
     }
-
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabState.id),
-    );
 
     return CompactAppBarTitleView(
       tabState: tabState,
@@ -308,6 +309,12 @@ class AppBarTitle extends ConsumerWidget {
     );
 
     final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+    final homeSearchBarPlacement = ref.watch(
+      effectiveHomeSearchBarPlacementProvider,
+    );
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState?.id),
+    );
 
     // No tab to address, or one the home surface is covering. Home is a layer
     // over the selected tab rather than a tab of its own, so the selection
@@ -329,14 +336,9 @@ class AppBarTitle extends ConsumerWidget {
         // buttons beside it and no width to spare.
         showSearchTools:
             showBrowserHome &&
-            ref.watch(effectiveHomeSearchBarPlacementProvider) ==
-                HomeSearchBarPlacement.tabBar,
+            homeSearchBarPlacement == HomeSearchBarPlacement.tabBar,
       );
     }
-
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabState.id),
-    );
 
     return AppBarTitleView(
       tabState: tabState,
@@ -586,6 +588,9 @@ class RailAppBarTitle extends ConsumerWidget {
     // Same rule as the horizontal title above: the home surface covers the
     // selected tab without replacing it, so its address is not this screen's.
     final showBrowserHome = ref.watch(shouldShowBrowserHomeProvider);
+    final sandboxSourceUri = ref.watch(
+      sandboxSourceUriForTabProvider(tabId: tabState?.id),
+    );
 
     if (tabState == null || showBrowserHome) {
       return _EmptyRailAddressField(
@@ -599,10 +604,6 @@ class RailAppBarTitle extends ConsumerWidget {
         },
       );
     }
-
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabState.id),
-    );
 
     return RailAppBarTitleView(
       tabState: tabState,

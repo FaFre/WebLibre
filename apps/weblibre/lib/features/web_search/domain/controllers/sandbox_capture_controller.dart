@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
     as fmc;
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:search_client/search_client.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -93,7 +94,9 @@ Stream<Map<String, CaptureTabData>> sandboxCaptureMap(Ref ref) {
 @Riverpod()
 CaptureTabData? sandboxCaptureForTab(Ref ref, {required String? tabId}) {
   if (tabId == null) return null;
-  final map = ref.watch(sandboxCaptureMapProvider).value;
+  final map = ref.watch(
+    sandboxCaptureMapProvider.select((value) => value.value),
+  );
   return map?[tabId];
 }
 
@@ -107,7 +110,9 @@ CaptureTabData? sandboxCaptureForTab(Ref ref, {required String? tabId}) {
 /// always-visible quick tab switcher or the tab-preview list.
 @Riverpod(keepAlive: true)
 EquatableValue<Map<String, Uri>> sandboxSourceUris(Ref ref) {
-  final rows = ref.watch(sandboxCaptureMapProvider).value ?? const {};
+  final rows =
+      ref.watch(sandboxCaptureMapProvider.select((value) => value.value)) ??
+      const {};
 
   // Equatable result, so a re-emit that doesn't change any source URL stops
   // here instead of propagating.

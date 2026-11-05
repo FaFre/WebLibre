@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
+import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter_singbox_proxy/flutter_singbox_proxy.dart';
 import 'package:riverpod/riverpod.dart';
@@ -52,6 +53,7 @@ const proxyRestartGracePeriod = Duration(seconds: 5);
 typedef ProxyFailedLoad = ({String host, DateTime at});
 
 /// What page loads and connection tests have shown about a running proxy.
+@CopyWith()
 class ProxyTrafficEvidence with FastEquatable {
   /// Loads that failed through it within [proxyFailedLoadWindow], oldest
   /// first.
@@ -81,18 +83,6 @@ class ProxyTrafficEvidence with FastEquatable {
           proxyFailedHostsForNotResponding;
 
   bool get isEmpty => failedLoads.isEmpty && !testFailed && !peerUnanswered;
-
-  ProxyTrafficEvidence copyWith({
-    List<ProxyFailedLoad>? failedLoads,
-    bool? testFailed,
-    bool? peerUnanswered,
-  }) {
-    return ProxyTrafficEvidence(
-      failedLoads: failedLoads ?? this.failedLoads,
-      testFailed: testFailed ?? this.testFailed,
-      peerUnanswered: peerUnanswered ?? this.peerUnanswered,
-    );
-  }
 
   @override
   List<Object?> get hashParameters => [failedLoads, testFailed, peerUnanswered];

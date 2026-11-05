@@ -167,13 +167,11 @@ class LanguageSelector extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final deviceLanguage = _deviceLocale(context).languageCode;
     final options =
-        ref
-            .watch(
-              localizedLanguageOptionsProvider(
-                Localizations.localeOf(context).toIntlLocale(),
-              ),
-            )
-            .value ??
+        ref.watch(
+          localizedLanguageOptionsProvider(
+            Localizations.localeOf(context).toIntlLocale(),
+          ).select((value) => value.value),
+        ) ??
         supportedLanguages;
 
     final selected = ref.watch(
@@ -244,13 +242,11 @@ class CountrySelector extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final deviceCountry = _deviceLocale(context).countryCode;
     final options =
-        ref
-            .watch(
-              localizedCountryOptionsProvider(
-                Localizations.localeOf(context).toIntlLocale(),
-              ),
-            )
-            .value ??
+        ref.watch(
+          localizedCountryOptionsProvider(
+            Localizations.localeOf(context).toIntlLocale(),
+          ).select((value) => value.value),
+        ) ??
         supportedCountries;
 
     final selected = ref.watch(

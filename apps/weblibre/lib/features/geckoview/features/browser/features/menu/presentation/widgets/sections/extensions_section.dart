@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -45,16 +46,20 @@ class ExtensionsSection extends HookConsumerWidget {
     final extensionsExpanded = ref.watch(
       persistedBoolProvider(PersistedBoolKey.extensionsExpanded),
     );
-    final pageExtensions = ref.watch(
-      webExtensionsStateProvider(
-        WebExtensionActionType.page,
-      ).select((value) => value.values.toList()),
-    );
-    final browserExtensions = ref.watch(
-      webExtensionsStateProvider(
-        WebExtensionActionType.browser,
-      ).select((value) => value.values.toList()),
-    );
+    final pageExtensions = ref
+        .watch(
+          webExtensionsStateProvider(
+            WebExtensionActionType.page,
+          ).select((value) => EquatableValue(value.values.toList())),
+        )
+        .value;
+    final browserExtensions = ref
+        .watch(
+          webExtensionsStateProvider(
+            WebExtensionActionType.browser,
+          ).select((value) => EquatableValue(value.values.toList())),
+        )
+        .value;
     final rootContext = Navigator.of(context, rootNavigator: true).context;
     Future<void> openExtensionSettings(String extensionId) async {
       Navigator.pop(context);

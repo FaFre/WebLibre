@@ -99,7 +99,8 @@ class ProfileRestoreScreen extends HookConsumerWidget {
     );
     final overwriteTarget = useState<Profile?>(forcedOverwriteTarget);
     final profiles =
-        ref.watch(profileRepositoryProvider).value ?? const <Profile>[];
+        ref.watch(profileRepositoryProvider.select((value) => value.value)) ??
+        const <Profile>[];
 
     // The archive's own file name, which is the only thing about it that can be
     // read without the password. It carries a *name*, and names are not

@@ -373,24 +373,34 @@ class CopyAddressMenuItemButton extends HookConsumerWidget {
   }
 }
 
-class SendTabToDeviceMenuItemButton extends HookConsumerWidget {
+class SendTabToDeviceMenuItemButton extends ConsumerWidget {
   final String? selectedTabId;
 
   const SendTabToDeviceMenuItemButton({super.key, required this.selectedTabId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (selectedTabId == null) {
-      return const SizedBox.shrink();
-    }
-
-    final l10n = AppLocalizations.of(context);
     final isAuthenticated = ref.watch(syncIsAuthenticatedProvider);
-    final devices = ref.watch(syncDevicesProvider);
 
-    if (!isAuthenticated) {
+    final tabId = selectedTabId;
+    if (tabId == null || !isAuthenticated) {
       return const SizedBox.shrink();
     }
+
+    // The device list is only loaded while there is a tab to send.
+    return _SendTabToDeviceSubmenu(selectedTabId: tabId);
+  }
+}
+
+class _SendTabToDeviceSubmenu extends ConsumerWidget {
+  final String selectedTabId;
+
+  const _SendTabToDeviceSubmenu({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final devices = ref.watch(syncDevicesProvider);
 
     return Skeletonizer(
       enabled: devices.isLoading && devices.value == null,

@@ -355,9 +355,13 @@ class _BrowserScaffoldTheme extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final toolbarVisibility = ref.watch(
+      toolbarVisibilityControllerProvider(selectedTabId),
+    );
+    final windowSizeClass = ref.watch(windowSizeClassControllerProvider);
     final toolbarState = isSmallWebActive
         ? ToolbarVisibility.visible
-        : ref.watch(toolbarVisibilityControllerProvider(selectedTabId));
+        : toolbarVisibility;
     // A sheet covers the bottom bar and the find bar, so a snackbar over the
     // sheet keeps clear of the window's bottom edge only.
     final bottomToolbarVisible =
@@ -383,7 +387,7 @@ class _BrowserScaffoldTheme extends ConsumerWidget {
         math.max(padding.left * 2, padding.right * 2);
     final sheetMaxWidth = math.min(
       safeAreaWidth,
-      ref.watch(windowSizeClassControllerProvider).sheetMaxWidth,
+      windowSizeClass.sheetMaxWidth,
     );
 
     return Theme(
@@ -941,9 +945,10 @@ class _ProgressIndicatorBar extends ConsumerWidget {
     final isLoading = ref.watch(
       tabStateProvider(tabId).select((state) => state?.isLoading == true),
     );
+    final progress = ref.watch(tabProgressProvider(tabId));
 
     //When not loading we assumed finished
-    final value = isLoading ? ref.watch(tabProgressProvider(tabId)) : 100;
+    final value = isLoading ? progress : 100;
 
     return Visibility(
       visible: value < 100,
@@ -1087,7 +1092,8 @@ class _StartupLaunchCoverLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(startupLaunchCoverProvider)) {
+    final launchCoverRaised = ref.watch(startupLaunchCoverProvider);
+    if (!launchCoverRaised) {
       return const SizedBox.shrink();
     }
 
@@ -1507,7 +1513,9 @@ class BrowserScreen extends HookConsumerWidget {
         (value) => value.tabBarShowContextualBar,
       ),
     );
-    final quickTabSwitcherRows = ref.watch(quickTabSwitcherRowCountProvider);
+    final quickTabSwitcherRows = ref.watch(
+      quickTabSwitcherRowCountProvider.select((value) => value.value),
+    );
     final tabBarStackingMode = ref.watch(effectiveTabBarStackingModeProvider);
     final quickTabSwitcherPlacement = ref.watch(
       generalSettingsWithDefaultsProvider.select(
@@ -1550,7 +1558,7 @@ class BrowserScreen extends HookConsumerWidget {
       contextualToolbarEnabled: contextualToolbarEnabled,
       quickTabSwitcherRowCount: isSmallWebActive
           ? 0
-          : quickTabSwitcherRows.value ?? 0,
+          : quickTabSwitcherRows ?? 0,
       hasTabList: tabBarStackingMode != TabBarStackingMode.disabled,
       quickTabSwitcherPlacement: quickTabSwitcherPlacement,
       showBrowserHome: showBrowserHome,
@@ -1688,13 +1696,9 @@ class BrowserScreen extends HookConsumerWidget {
         (MediaQuery.viewPaddingOf(context).bottom * pixelRatio).round();
 
     // Watch find-in-page visibility for the selected tab
-    final findInPageVisible =
-        selectedTabId != null &&
-        ref.watch(
-          findInPageControllerProvider(
-            selectedTabId,
-          ).select((state) => state.visible),
-        );
+    final findInPageVisible = ref.watch(
+      findInPageVisibleProvider(selectedTabId),
+    );
 
     // Find in page widget height from the widget constant
     final findInPageHeight = findInPageVisible

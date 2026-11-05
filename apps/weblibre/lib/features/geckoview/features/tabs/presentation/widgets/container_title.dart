@@ -29,14 +29,13 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart'
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/gecko_inference.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-class ContainerTitle extends HookConsumerWidget {
+class ContainerTitle extends StatelessWidget {
   final ContainerData container;
 
   const ContainerTitle({super.key, required this.container});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
+  Widget build(BuildContext context) {
     if (container.name.isNotEmpty) {
       return Text(
         container.name!,
@@ -45,6 +44,20 @@ class ContainerTitle extends HookConsumerWidget {
       );
     }
 
+    // Predicting a topic runs the on-device model: only for unnamed
+    // containers.
+    return _UnnamedContainerTitle(container: container);
+  }
+}
+
+class _UnnamedContainerTitle extends ConsumerWidget {
+  final ContainerData container;
+
+  const _UnnamedContainerTitle({required this.container});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final topicAsync = ref.watch(containerTopicProvider(container.id));
     final containerHasTabs = ref.watch(
       containerTabCountProvider(

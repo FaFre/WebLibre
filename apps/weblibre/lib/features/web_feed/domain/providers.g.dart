@@ -783,3 +783,104 @@ final class FetchWebFeedFamily extends $Family
   @override
   String toString() => r'fetchWebFeedProvider';
 }
+
+/// What the feed editor starts from: [feedId] fetched from the web for a new
+/// feed ([fetch]), as stored otherwise. Only the source in use is read.
+
+@ProviderFor(feedEditorInitialFeed)
+final feedEditorInitialFeedProvider = FeedEditorInitialFeedFamily._();
+
+/// What the feed editor starts from: [feedId] fetched from the web for a new
+/// feed ([fetch]), as stored otherwise. Only the source in use is read.
+
+final class FeedEditorInitialFeedProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<FeedData?>,
+          AsyncValue<FeedData?>,
+          AsyncValue<FeedData?>
+        >
+    with $Provider<AsyncValue<FeedData?>> {
+  /// What the feed editor starts from: [feedId] fetched from the web for a new
+  /// feed ([fetch]), as stored otherwise. Only the source in use is read.
+  FeedEditorInitialFeedProvider._({
+    required FeedEditorInitialFeedFamily super.from,
+    required (Uri, {bool fetch}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'feedEditorInitialFeedProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$feedEditorInitialFeedHash();
+
+  @override
+  String toString() {
+    return r'feedEditorInitialFeedProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<AsyncValue<FeedData?>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AsyncValue<FeedData?> create(Ref ref) {
+    final argument = this.argument as (Uri, {bool fetch});
+    return feedEditorInitialFeed(ref, argument.$1, fetch: argument.fetch);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AsyncValue<FeedData?> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AsyncValue<FeedData?>>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeedEditorInitialFeedProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$feedEditorInitialFeedHash() =>
+    r'896ea56e2707a1727102b8719a1de5e4c9ce37cf';
+
+/// What the feed editor starts from: [feedId] fetched from the web for a new
+/// feed ([fetch]), as stored otherwise. Only the source in use is read.
+
+final class FeedEditorInitialFeedFamily extends $Family
+    with $FunctionalFamilyOverride<AsyncValue<FeedData?>, (Uri, {bool fetch})> {
+  FeedEditorInitialFeedFamily._()
+    : super(
+        retry: null,
+        name: r'feedEditorInitialFeedProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// What the feed editor starts from: [feedId] fetched from the web for a new
+  /// feed ([fetch]), as stored otherwise. Only the source in use is read.
+
+  FeedEditorInitialFeedProvider call(Uri feedId, {required bool fetch}) =>
+      FeedEditorInitialFeedProvider._(
+        argument: (feedId, fetch: fetch),
+        from: this,
+      );
+
+  @override
+  String toString() => r'feedEditorInitialFeedProvider';
+}

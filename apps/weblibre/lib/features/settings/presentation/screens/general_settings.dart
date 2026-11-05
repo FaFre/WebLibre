@@ -812,18 +812,16 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
     );
     // With WebLibre remembered as the download manager, the chooser is skipped
     // and WebLibre downloads the file itself, into this folder.
+    final useExternalDownloadManagerSetting = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.useExternalDownloadManager),
+    );
+    final thisAppIsPreferredDownloadManager = ref.watch(
+      preferredDownloadManagerChoiceProvider.select(
+        (choice) => choice.value?.isThisApp ?? false,
+      ),
+    );
     final useExternalDownloadManager =
-        ref.watch(
-          storedGeneralSettingsProvider.select(
-            (s) => s.useExternalDownloadManager,
-          ),
-        ) &&
-        ref.watch(
-              preferredDownloadManagerChoiceProvider.select(
-                (choice) => choice.value?.isThisApp,
-              ),
-            ) !=
-            true;
+        useExternalDownloadManagerSetting && !thisAppIsPreferredDownloadManager;
 
     // Resolving the folder is also how the grant is checked: access can be
     // revoked in the system settings, or the card it lives on unmounted, and
@@ -937,7 +935,9 @@ class PreferredDownloadManagerTile extends HookConsumerWidget {
     final useExternalDownloadManager = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.useExternalDownloadManager),
     );
-    final choice = ref.watch(preferredDownloadManagerChoiceProvider).value;
+    final choice = ref.watch(
+      preferredDownloadManagerChoiceProvider.select((value) => value.value),
+    );
     final l10n = AppLocalizations.of(context);
 
     final subtitle = switch (choice) {

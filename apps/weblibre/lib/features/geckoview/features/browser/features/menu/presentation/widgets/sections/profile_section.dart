@@ -48,7 +48,9 @@ class ProfileSection extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    final profile = ref.watch(selectedProfileProvider);
+    final profile = ref.watch(
+      selectedProfileProvider.select((value) => value.value),
+    );
     // With a single profile and Profiles hidden there is nothing to switch
     // to, but this profile's lock, password and backup are never hidden: the
     // entry then opens the profile list, which keeps them and hides only
@@ -68,7 +70,7 @@ class ProfileSection extends HookConsumerWidget {
                 color: theme.colorScheme.onPrimaryContainer,
               ),
             ),
-            title: Text(profile.value?.name ?? item.label(context)),
+            title: Text(profile?.name ?? item.label(context)),
             subtitle: Text(
               canSwitch
                   ? l10n.menu_profileTapToSwitch

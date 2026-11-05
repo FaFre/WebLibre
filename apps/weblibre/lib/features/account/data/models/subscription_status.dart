@@ -18,12 +18,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'subscription_status.g.dart';
+
+@JsonSerializable(createToJson: false, fieldRename: FieldRename.snake)
 class SubscriptionStatus with FastEquatable {
+  @JsonKey(defaultValue: false)
   final bool hasActiveSubscription;
   final DateTime? entitledUntil;
+  @JsonKey(defaultValue: 'inactive')
   final String status;
   final String? subscriptionStatus;
+  @JsonKey(defaultValue: false)
   final bool cancelAtPeriodEnd;
   final DateTime? currentPeriodEnd;
   final String? planLabel;
@@ -38,21 +45,8 @@ class SubscriptionStatus with FastEquatable {
     this.planLabel,
   });
 
-  factory SubscriptionStatus.fromJson(Map<String, dynamic> json) {
-    return SubscriptionStatus(
-      hasActiveSubscription: json['has_active_subscription'] as bool? ?? false,
-      entitledUntil: json['entitled_until'] != null
-          ? DateTime.parse(json['entitled_until'] as String)
-          : null,
-      status: json['status'] as String? ?? 'inactive',
-      subscriptionStatus: json['subscription_status'] as String?,
-      cancelAtPeriodEnd: json['cancel_at_period_end'] as bool? ?? false,
-      currentPeriodEnd: json['current_period_end'] != null
-          ? DateTime.parse(json['current_period_end'] as String)
-          : null,
-      planLabel: json['plan_label'] as String?,
-    );
-  }
+  factory SubscriptionStatus.fromJson(Map<String, dynamic> json) =>
+      _$SubscriptionStatusFromJson(json);
 
   bool get isActive => hasActiveSubscription;
   bool get isPaused => subscriptionStatus == 'paused';
