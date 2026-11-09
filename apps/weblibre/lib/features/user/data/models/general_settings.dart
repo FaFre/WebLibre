@@ -1213,12 +1213,17 @@ class GeneralSettings with FastEquatable {
   /// Whether [visibilitySwitch] is on.
   ///
   /// A switch nobody has written yet takes the policy's value for existing
-  /// installs: `enabled` for UI that was always visible, or a copy of
-  /// the legacy setting users could already hide it with. Fresh installs never
-  /// reach the fallback, because the onboarding commit writes every switch.
+  /// installs: `enabled` for UI that was always visible, a copy of the legacy
+  /// setting users could already hide it with, or the value of the switch
+  /// that guarded its features before ([VisibilitySwitch.startsLike]). Fresh
+  /// installs never reach the fallback, because the onboarding commit writes
+  /// every switch.
   bool isVisibilitySwitchEnabled(VisibilitySwitch visibilitySwitch) {
     if (visibilitySwitches[visibilitySwitch] case final stored?) return stored;
 
+    if (visibilitySwitch.startsLike case final previous?) {
+      return isVisibilitySwitchEnabled(previous);
+    }
     return switch (visibilitySwitch.inherits) {
       final setting? => legacyVisibilitySetting(setting),
       null => true,

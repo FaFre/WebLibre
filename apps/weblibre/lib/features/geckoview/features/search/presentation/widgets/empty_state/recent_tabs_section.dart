@@ -19,25 +19,35 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_url_list_tile.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/empty_state_content.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
-import 'package:weblibre/presentation/widgets/url_list_tile.dart';
 
 class RecentTabsSection extends ConsumerWidget {
   final void Function(String tabId) onTabSelected;
 
-  const RecentTabsSection({super.key, required this.onTabSelected});
+  /// Tabs left out of the list (the split view picker's source and the tabs
+  /// that could not be shown beside it).
+  final Set<String> excludedTabIds;
+
+  const RecentTabsSection({
+    super.key,
+    required this.onTabSelected,
+    this.excludedTabIds = const {},
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final tabs = ref.watch(searchEmptyRecentTabsProvider());
+    final allTabs = ref.watch(searchEmptyRecentTabsProvider());
+    final tabs = excludedTabIds.isEmpty
+        ? allTabs
+        : [
+            for (final entry in allTabs)
+              if (!excludedTabIds.contains(entry.$1.id)) entry,
+          ];
 
     if (tabs.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -54,7 +64,7 @@ class RecentTabsSection extends ConsumerWidget {
                 itemCount: visibleCount,
                 itemBuilder: (context, index) {
                   final (tabState, containerData) = tabs[index];
-                  return _RecentTabTile(
+                  return TabUrlListTile(
                     tabState: tabState,
                     containerData: containerData,
                     onTap: () => onTabSelected(tabState.id),
@@ -62,39 +72,6 @@ class RecentTabsSection extends ConsumerWidget {
                 },
               ),
           ],
-    );
-  }
-}
-
-class _RecentTabTile extends ConsumerWidget {
-  final TabState tabState;
-  final ContainerData? containerData;
-  final VoidCallback onTap;
-
-  const _RecentTabTile({
-    required this.tabState,
-    required this.containerData,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sandboxSourceUri = ref.watch(
-      sandboxSourceUriForTabProvider(tabId: tabState.id),
-    );
-    final displayUrl = sandboxSourceUri ?? tabState.url;
-    final displayTitle = sandboxSourceUri != null && tabState.title.isEmpty
-        ? sandboxSourceUri.authority
-        : tabState.titleOrAuthority;
-
-    return UrlListTile(
-      title: displayTitle,
-      uri: displayUrl,
-      leading: TabIcon(tabState: tabState, iconSize: UrlListTile.iconSize),
-      containerColor: containerData?.color,
-      containerIcon: containerData?.metadata.iconData,
-      useCustomColor: containerData?.metadata.useCustomColor ?? false,
-      onTap: onTap,
     );
   }
 }

@@ -21,6 +21,10 @@
   "@contextmenu_newIsolatedTab": {
     "description": "Choice in the link long-press menu's tab-kind list: open the link in an isolated tab, which has its own temporary cookies and site data."
   },
+  "contextmenu_openInSplitView": "Open in split view",
+  "@contextmenu_openInSplitView": {
+    "description": "Item in the menu shown when long-pressing a link on a web page; opens the link in a new tab shown next to the current page (split view). The current page keeps focus."
+  },
   "contextmenu_openImageInNewTab": "Open image in new tab",
   "@contextmenu_openImageInNewTab": {
     "description": "Item in the menu shown when long-pressing an image on a web page; opens the image by itself in a new tab."

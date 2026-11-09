@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_reorder_semantics.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_pick.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_scroll_to_active.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
@@ -467,6 +468,8 @@ class ViewTabGridWidget extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scrolledUnder = useValueNotifier(false);
+    // Shown as a picker: a tap picks, and the tray's actions are left out.
+    final picking = TabTrayPick.maybeOf(context) != null;
 
     return Column(
       children: [
@@ -506,12 +509,17 @@ class ViewTabGridWidget extends HookConsumerWidget {
                     removeTop: true,
                     removeBottom: true,
                     child: LayoutBuilder(
-                      builder: (context, constraints) => _TabGridView(
-                        availableWidth: constraints.maxWidth,
-                        scrollController: scrollController,
-                        tabsReorderable: tabsReorderable,
-                        onClose: onClose,
-                      ),
+                      builder: (context, constraints) => picking
+                          ? TabPickerGridView(
+                              availableWidth: constraints.maxWidth,
+                              scrollController: scrollController,
+                            )
+                          : _TabGridView(
+                              availableWidth: constraints.maxWidth,
+                              scrollController: scrollController,
+                              tabsReorderable: tabsReorderable,
+                              onClose: onClose,
+                            ),
                     ),
                   ),
                 ),
@@ -526,7 +534,10 @@ class ViewTabGridWidget extends HookConsumerWidget {
             ],
           ),
         ),
-        const TabViewActionBar(tabsViewMode: TabsViewMode.grid),
+        if (picking)
+          const TabPickerBottomInset()
+        else
+          const TabViewActionBar(tabsViewMode: TabsViewMode.grid),
       ],
     );
   }

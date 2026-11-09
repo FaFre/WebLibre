@@ -53,6 +53,40 @@ void main() {
 
       expect(resolved, isNull);
     });
+
+    group('preferred (a tab opened from a split pane)', () {
+      final paneContainer = _container('pane', 'pane-context');
+
+      test('site assignment still wins', () {
+        final resolved = resolveAssignedContainerForTabOpen(
+          containerSelection: TabContainerSelection.preferred(paneContainer),
+          requestedContainer: paneContainer,
+          siteAssignedContainer: siteAssignedContainer,
+        );
+
+        expect(resolved, siteAssignedContainer);
+      });
+
+      test('otherwise the given container', () {
+        final resolved = resolveAssignedContainerForTabOpen(
+          containerSelection: TabContainerSelection.preferred(paneContainer),
+          requestedContainer: paneContainer,
+          siteAssignedContainer: null,
+        );
+
+        expect(resolved, paneContainer);
+      });
+
+      test('a page outside any container opens unassigned', () {
+        final resolved = resolveAssignedContainerForTabOpen(
+          containerSelection: const TabContainerSelection.preferred(null),
+          requestedContainer: null,
+          siteAssignedContainer: null,
+        );
+
+        expect(resolved, isNull);
+      });
+    });
   });
 }
 

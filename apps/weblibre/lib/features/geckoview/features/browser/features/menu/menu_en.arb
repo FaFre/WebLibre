@@ -631,5 +631,9 @@
   "menu_connectionUsageBlocked": "Blocked",
   "@menu_connectionUsageBlocked": {
     "description": "First word of a proxy's usage line when tabs using it are blocked because it is off."
+  },
+  "menu_itemSplitView": "Split",
+  "@menu_itemSplitView": {
+    "description": "Browser menu toggle and its name in menu customization: show the current tab and the previously used one side by side (split view), or end that. Keep it short (shown under an icon, beside Desktop and Reader)."
   }
 }

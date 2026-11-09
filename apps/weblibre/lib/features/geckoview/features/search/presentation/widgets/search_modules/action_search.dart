@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/action_search_sources.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/keyboard_shortcut_hint.dart';
 import 'package:weblibre/features/settings/presentation/screens/settings.dart';
@@ -126,6 +127,11 @@ class ActionSearch extends HookConsumerWidget {
       tabStateProvider(pageTabId).select((state) => state?.readerableState),
     );
     final shownFeatures = ref.watch(shownFeaturesProvider);
+    final inSplit = ref.watch(
+      splitViewControllerProvider.select(
+        (pair) => pageTabId != null && (pair?.contains(pageTabId!) ?? false),
+      ),
+    );
     final automaticFontSize = ref.watch(
       engineSettingsWithDefaultsProvider.select(
         (s) => s.automaticFontSizeAdjustment,
@@ -154,6 +160,7 @@ class ActionSearch extends HookConsumerWidget {
         BrowserAction.increaseFontSize ||
         BrowserAction.decreaseFontSize ||
         BrowserAction.resetFontSize => !automaticFontSize,
+        BrowserAction.endSplitView => inSplit,
         _ => true,
       };
     }

@@ -39,4 +39,7 @@ enum BrowserActionFeedback {
   homeScreenUnavailable,
   readerViewUnavailable,
   noClosedTabs,
+
+  /// A split view action ran while no split view is shown.
+  noSplitView,
 }

@@ -114,6 +114,13 @@ extension BrowserActionPolicy on BrowserAction {
     BrowserAction.showProxySettings => FeatureId.connectionsImportVpnProxy,
     BrowserAction.newProxyProfile => FeatureId.connectionsManualProxyConfig,
     BrowserAction.showErrorLogs => FeatureId.diagnosticsBasic,
+    BrowserAction.splitView ||
+    BrowserAction.splitWithAnotherTab ||
+    BrowserAction.toggleSplitSinglePage ||
+    BrowserAction.showSplitControls ||
+    BrowserAction.focusOtherSplitPane ||
+    BrowserAction.swapSplitPanes ||
+    BrowserAction.endSplitView => FeatureId.tabsSplitView,
   };
 
   /// Whether pickers offer this action and bindings run it without asking:

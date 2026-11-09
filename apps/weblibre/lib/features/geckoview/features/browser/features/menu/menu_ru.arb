@@ -150,5 +150,6 @@
   "menu_connectionUnused": "Не используется ни одним маршрутом",
   "menu_connectionUsageContainerCount": "{count, plural, one{{count} контейнер} few{{count} контейнера} many{{count} контейнеров} other{{count} контейнера}}",
   "menu_connectionUsageIsolatedTabCount": "{count, plural, one{{count} изолированная вкладка} few{{count} изолированные вкладки} many{{count} изолированных вкладок} other{{count} изолированных вкладок}}",
-  "menu_connectionUsageBlocked": "Заблокировано"
+  "menu_connectionUsageBlocked": "Заблокировано",
+  "menu_itemSplitView": "Разделить"
 }

@@ -81,6 +81,30 @@ enum BrowserAction {
     BrowserActionCategory.tabs,
   ),
 
+  /// The split view toggle, as the menu's quick toggle does it: in a split,
+  /// ends it, or shows both pages again while only one is shown; otherwise
+  /// shows the tab beside its last partner or the tab used before it, and
+  /// asks for a page only when there is none. On a tab card for another tab:
+  /// that tab beside the current one.
+  splitView(MdiIcons.viewSplitVertical, BrowserActionCategory.tabs),
+
+  /// Asks for the page to show beside the current one, or, in a split, for
+  /// the page to replace the other one with.
+  splitWithAnotherTab(
+    MdiIcons.tableColumnPlusAfter,
+    BrowserActionCategory.tabs,
+  ),
+
+  /// "Show only this page" in the split view controls, as a toggle.
+  toggleSplitSinglePage(Icons.fullscreen, BrowserActionCategory.tabs),
+  showSplitControls(MdiIcons.applicationCogOutline, BrowserActionCategory.tabs),
+  focusOtherSplitPane(
+    MdiIcons.cursorDefaultClickOutline,
+    BrowserActionCategory.tabs,
+  ),
+  swapSplitPanes(MdiIcons.swapHorizontal, BrowserActionCategory.tabs),
+  endSplitView(MdiIcons.closeBoxMultipleOutline, BrowserActionCategory.tabs),
+
   // Page tools
   toggleReaderMode(MdiIcons.bookOpenOutline, BrowserActionCategory.page),
   toggleDesktopMode(Icons.desktop_windows, BrowserActionCategory.page),

@@ -68,6 +68,8 @@ enum BuiltInGesture {
     BrowserAction.duplicateTab,
     BrowserAction.moveTabToStart,
     BrowserAction.moveTabToEnd,
+    // The card's tab beside the current one; the toggle on the current one.
+    BrowserAction.splitView,
   ];
 
   /// The actions this gesture can be bound to.

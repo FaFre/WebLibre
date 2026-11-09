@@ -12,12 +12,16 @@ import android.view.ViewGroup
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportEvents
+import mozilla.components.concept.engine.EngineView
 import org.mozilla.gecko.util.ThreadUtils.runOnUiThread
 
 /**
  * Feature that filters browser touch input and reports whether GeckoView is handling scroll input.
  *
  * Checks InputResultDetail while active and only emits on state changes.
+ *
+ * Watches every pane of the main browser. A stroke reports from the pane it
+ * started in, which pointer-down activation has just made the focused one.
  */
 class BrowserHandlingScrollFeature(
     private val flutterEvents: GeckoViewportEvents,
@@ -25,8 +29,8 @@ class BrowserHandlingScrollFeature(
     private var running = false
     private var touchSessionActive = false
     private var lastValue: Boolean? = null
-    private var touchListener: View.OnTouchListener? = null
-    private var touchTargetView: View? = null
+    private val touchTargets = mutableMapOf<View, EngineView>()
+    private var strokeEngineView: EngineView? = null
     private var multiTouchSequenceActive = false
     private var suppressUntilAllPointersUp = false
     private var syntheticCancelDispatched = false
@@ -51,25 +55,30 @@ class BrowserHandlingScrollFeature(
         lastValue = null
     }
 
+    /** Attaches to panes created since [start], e.g. the second split pane. */
+    fun refreshTargets() {
+        if (running) attachTouchListenerIfPossible()
+    }
+
     private fun attachTouchListenerIfPossible() {
-        val engineViewRoot = GlobalComponents.components?.mainBrowserEngineView?.asView()
-        if (engineViewRoot == null) return
+        val engineViews = GlobalComponents.components?.browserPanes?.allEngineViews.orEmpty()
+        for (engineView in engineViews) {
+            val targetView = resolveTouchTargetView(engineView.asView())
+            if (targetView in touchTargets) continue
 
-        if (touchListener != null) return
+            targetView.setOnTouchListener { _, event ->
+                if (!running) return@setOnTouchListener false
 
-        val targetView = resolveTouchTargetView(engineViewRoot)
+                if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                    strokeEngineView = engineView
+                }
+                val consumeEvent = handlePinchGesture(targetView, event)
+                updateScrollDetection(event)
 
-        touchListener = View.OnTouchListener { _, event ->
-            if (!running) return@OnTouchListener false
-
-            val consumeEvent = handlePinchGesture(targetView, event)
-            updateScrollDetection(event)
-
-            consumeEvent
+                consumeEvent
+            }
+            touchTargets[targetView] = engineView
         }
-
-        targetView.setOnTouchListener(touchListener)
-        touchTargetView = targetView
     }
 
     private fun updateScrollDetection(event: MotionEvent) {
@@ -172,11 +181,9 @@ class BrowserHandlingScrollFeature(
     }
 
     private fun detachTouchListenerIfPossible() {
-        if (touchTargetView != null && touchListener != null) {
-            touchTargetView?.setOnTouchListener(null)
-        }
-        touchListener = null
-        touchTargetView = null
+        touchTargets.keys.forEach { it.setOnTouchListener(null) }
+        touchTargets.clear()
+        strokeEngineView = null
     }
 
     private fun resolveTouchTargetView(root: View): View {
@@ -192,7 +199,8 @@ class BrowserHandlingScrollFeature(
 
     private fun emitCurrentStateIfChanged() {
         val isHandling = try {
-            val engineView = GlobalComponents.components?.mainBrowserEngineView
+            val engineView = strokeEngineView
+                ?: GlobalComponents.components?.browserPanes?.focusedEngineView
             if (engineView == null) {
                 false
             } else {

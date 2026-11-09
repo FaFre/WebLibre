@@ -67,6 +67,7 @@ extension MenuItemTypeL10n on MenuItemType {
       MenuItemType.sendToDevice => l10n.menu_itemSendToDevice,
       MenuItemType.showQrCode => l10n.menu_itemShowQrCode,
       MenuItemType.moreDisclosure => l10n.menu_itemMoreDisclosure,
+      MenuItemType.splitView => l10n.menu_itemSplitView,
       MenuItemType.cloneTab => l10n.menu_itemCloneTab,
       MenuItemType.cloneRegularTab => l10n.menu_itemCloneRegularTab,
       MenuItemType.clonePrivateTab => l10n.menu_itemClonePrivateTab,

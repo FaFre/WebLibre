@@ -2662,6 +2662,90 @@ abstract class AppLocalizations {
   /// **'Open a copy of the current tab'**
   String get browserActions_duplicateTabDescription;
 
+  /// Name of the browser action that toggles split view like the browser menu's split toggle: it shows the current tab beside the tab last shown with it (or the tab used before it), shows both pages again while only one is shown, and otherwise ends the split. On a tab card for another tab it shows that tab beside the current one. Shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Split View'**
+  String get browserActions_splitViewTitle;
+
+  /// Explanation under that browser action's name in the action lists: shows two tabs at once, or ends the split so one page is shown again.
+  ///
+  /// In en, this message translates to:
+  /// **'Show two pages at once, or go back to one'**
+  String get browserActions_splitViewDescription;
+
+  /// Name of the browser action that asks for a page to show beside the current one in split view (in a split: the page to replace the other one with), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Split With Another Tab'**
+  String get browserActions_splitWithAnotherTabTitle;
+
+  /// Explanation under that browser action's name in the action lists: opens the tab picker for the second page of a split view.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the page to show beside the current one'**
+  String get browserActions_splitWithAnotherTabDescription;
+
+  /// Name of the browser action that switches "Show only this page" in split view on or off: the focused page fills the browser while the other stays loaded, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Show One / Both Split Pages'**
+  String get browserActions_toggleSplitSinglePageTitle;
+
+  /// Explanation under that browser action's name in the action lists: hides the other page of a split view, or shows it again.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the other page of the split view, or bring it back'**
+  String get browserActions_toggleSplitSinglePageDescription;
+
+  /// Name of the browser action that opens the split view controls sheet (layout, sizes, swapping and replacing the pages, ending the split), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Split View Controls'**
+  String get browserActions_showSplitControlsTitle;
+
+  /// Explanation under that browser action's name in the action lists: opens the split view controls.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust the layout, sizes and pages of the split view'**
+  String get browserActions_showSplitControlsDescription;
+
+  /// Name of the browser action that moves focus to the other page of the split view, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Other Split Page'**
+  String get browserActions_focusOtherSplitPaneTitle;
+
+  /// Explanation under that browser action's name in the action lists: toolbar and keyboard then act on the other page of the split view.
+  ///
+  /// In en, this message translates to:
+  /// **'Move focus to the other page of the split view'**
+  String get browserActions_focusOtherSplitPaneDescription;
+
+  /// Name of the browser action that exchanges the positions of the two pages in split view, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Split Pages'**
+  String get browserActions_swapSplitPanesTitle;
+
+  /// Explanation under that browser action's name in the action lists: the two pages of the split view exchange places.
+  ///
+  /// In en, this message translates to:
+  /// **'Exchange the positions of the two pages'**
+  String get browserActions_swapSplitPanesDescription;
+
+  /// Name of the browser action that ends split view, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'End Split View'**
+  String get browserActions_endSplitViewTitle;
+
+  /// Explanation under that browser action's name in the action lists: shows one page again, and both tabs stay open.
+  ///
+  /// In en, this message translates to:
+  /// **'Show one page again; both tabs stay open'**
+  String get browserActions_endSplitViewDescription;
+
   /// Name of the browser action that switches to the next tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
   ///
   /// In en, this message translates to:
@@ -3663,6 +3747,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'clone tab, copy tab'**
   String get browserActions_duplicateTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'split screen, side by side, two pages, multitasking'**
+  String get browserActions_splitViewKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'page beside, pick tab, replace other page'**
+  String get browserActions_splitWithAnotherTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'only this page, both pages, hide other page, full screen'**
+  String get browserActions_toggleSplitSinglePageKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'layout, options, size, divider'**
+  String get browserActions_showSplitControlsKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'switch pane, other side, split focus'**
+  String get browserActions_focusOtherSplitPaneKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'swap sides, switch sides'**
+  String get browserActions_swapSplitPanesKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'close split, single page, unsplit'**
+  String get browserActions_endSplitViewKeywords;
 
   /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
   ///
@@ -6064,6 +6190,12 @@ abstract class AppLocalizations {
   /// **'Move tab right'**
   String get browser_moveTabRight;
 
+  /// Shown in the tab tray while it is used to choose a tab (for example the page to show in split view), when the selected container or filter has no tab that can be chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'No tabs to choose here'**
+  String get browser_tabPickerNothingHere;
+
   /// Tooltip of the toolbar button that opens the home page.
   ///
   /// In en, this message translates to:
@@ -7174,6 +7306,12 @@ abstract class AppLocalizations {
   /// **'Blocked'**
   String get menu_connectionUsageBlocked;
 
+  /// Browser menu toggle and its name in menu customization: show the current tab and the previously used one side by side (split view), or end that. Keep it short (shown under an icon, beside Desktop and Reader).
+  ///
+  /// In en, this message translates to:
+  /// **'Split'**
+  String get menu_itemSplitView;
+
   /// Item in the menu shown when long-pressing a link on a web page; opens the link in a new tab of the current kind.
   ///
   /// In en, this message translates to:
@@ -7203,6 +7341,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New isolated tab'**
   String get contextmenu_newIsolatedTab;
+
+  /// Item in the menu shown when long-pressing a link on a web page; opens the link in a new tab shown next to the current page (split view). The current page keeps focus.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in split view'**
+  String get contextmenu_openInSplitView;
 
   /// Item in the menu shown when long-pressing an image on a web page; opens the image by itself in a new tab.
   ///
@@ -8973,6 +9117,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deleted {site} from history'**
   String search_deletedFromHistory(String site);
+
+  /// Name of the split view feature, which shows two tabs at once side by side or one above the other. Title of the split view controls sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Split view'**
+  String get splitView_title;
+
+  /// Tab menu item: choose a second page to show next to this tab in split view. Opens the search screen as a picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Split with another tab…'**
+  String get splitView_splitWithAnotherTab;
+
+  /// Tab menu item on a tab that is not the current one: shows this tab and the current tab together in split view.
+  ///
+  /// In en, this message translates to:
+  /// **'Show beside current tab'**
+  String get splitView_showBesideCurrentTab;
+
+  /// Action that stops showing two tabs at once. Both tabs stay open; only the split presentation ends.
+  ///
+  /// In en, this message translates to:
+  /// **'End split view'**
+  String get splitView_end;
+
+  /// Subtitle under "End split view" in the split view controls, so ending the split is not mistaken for closing a tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Both tabs stay open'**
+  String get splitView_endSubtitle;
+
+  /// Heading of the layout choice in the split view controls (automatic, side by side, stacked).
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get splitView_layout;
+
+  /// Split view layout choice: side by side when the browser is wider than tall, one above the other otherwise.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get splitView_layoutAutomatic;
+
+  /// Split view layout choice: the two pages left and right of each other.
+  ///
+  /// In en, this message translates to:
+  /// **'Side by side'**
+  String get splitView_layoutSideBySide;
+
+  /// Split view layout choice: the two pages one above the other.
+  ///
+  /// In en, this message translates to:
+  /// **'Stacked'**
+  String get splitView_layoutStacked;
+
+  /// Switch in the split view controls: while on, the focused page fills the browser and the other stays loaded in the background.
+  ///
+  /// In en, this message translates to:
+  /// **'Show only this page'**
+  String get splitView_showOnlyThisPage;
+
+  /// Short label (a quick toggle in the browser menu has about 65dp for it, keep it as short as possible) and snackbar button: shows both pages of a split view again after only one of them was being shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Show both'**
+  String get splitView_showBothPages;
+
+  /// Snackbar after the user dragged the split view divider to the screen edge: the other page is hidden but stays loaded. Followed by a "Show both" button.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing only this page'**
+  String get splitView_showingOnlyThisPage;
+
+  /// Split view control and action: exchanges the positions of the two pages.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap sides'**
+  String get splitView_swapSides;
+
+  /// Split view control: gives both pages the same size.
+  ///
+  /// In en, this message translates to:
+  /// **'Equal sizes'**
+  String get splitView_equalSizes;
+
+  /// Split view control: choose a different page to show next to the focused one. Opens the tab tray to choose an open tab, or a new tab from there.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace other page…'**
+  String get splitView_replaceOtherPage;
+
+  /// Accessibility description of the divider between the two pages of a split view. Screen reader users can move it.
+  ///
+  /// In en, this message translates to:
+  /// **'Split view divider'**
+  String get splitView_dividerDescription;
+
+  /// Accessibility action on the split view divider that opens the split view controls.
+  ///
+  /// In en, this message translates to:
+  /// **'Split view options'**
+  String get splitView_dividerOptions;
+
+  /// Shown in place of a web page whose content process crashed and could not be restored automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'This page crashed'**
+  String get splitView_crashedTitle;
+
+  /// Button under "This page crashed" that loads the crashed page again.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload'**
+  String get splitView_crashedReload;
+
+  /// Snackbar when two pages could not be shown together, e.g. because the first tab was closed in the meantime. The chosen page opens normally instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open split view'**
+  String get splitView_couldNotOpen;
+
+  /// Snackbar when the user tries to show a private tab next to a non-private one in split view.
+  ///
+  /// In en, this message translates to:
+  /// **'Private and non-private tabs can\'t be shown together'**
+  String get splitView_mixedPrivacy;
+
+  /// Snackbar when a split view page belongs to a container whose proxy connection is still starting.
+  ///
+  /// In en, this message translates to:
+  /// **'This container\'s connection isn\'t ready yet'**
+  String get splitView_routingNotReady;
+
+  /// Feedback when a split view action (swap, focus the other page, show one or both pages, open the split view controls, end) is used while no split view is shown.
+  ///
+  /// In en, this message translates to:
+  /// **'No split view'**
+  String get splitView_noSplitView;
+
+  /// Hint in the search screen while it is used to choose the second page of a split view.
+  ///
+  /// In en, this message translates to:
+  /// **'Show beside'**
+  String get splitView_pickerTitle;
+
+  /// Screen reader label of the small split glyph on a tab in the tab list or tab switcher: this tab is one of the two pages shown together in split view.
+  ///
+  /// In en, this message translates to:
+  /// **'In split view'**
+  String get splitView_memberMark;
+
+  /// Title of the tab tray while it is used to choose the page shown next to the focused one in split view (after 'Replace other page…'). Its new-tab button opens a new page there instead.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace other page'**
+  String get splitView_replaceTitle;
 
   /// Button that picks an item: a container in the container list, or the chosen color in the color picker.
   ///
@@ -23662,6 +23962,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show tabs opened from a page under the tab they came from'**
   String get visibilitySwitch_treeTabsDescription;
+
+  /// Name of the visibility switch that shows split view: two tabs on screen at once, with its menu toggle, tab menu entries and link menu entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Split view'**
+  String get visibilitySwitch_splitViewLabel;
+
+  /// Subtitle of the split view visibility switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Show two tabs side by side or stacked'**
+  String get visibilitySwitch_splitViewDescription;
 
   /// Name of the visibility switch that shows advanced tab bar stacking modes, toolbar button customization and menu arrangement.
   ///

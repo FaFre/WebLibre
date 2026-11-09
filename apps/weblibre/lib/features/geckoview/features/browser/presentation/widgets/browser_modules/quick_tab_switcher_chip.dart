@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/providers.da
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_member_mark.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -326,6 +327,12 @@ Widget buildQuickTabSwitcherChipLabel(
             color: Theme.of(context).colorScheme.primary,
             size: 20,
           ),
+        ),
+      if (showInlineMarkers && !item.isPlaceholder)
+        SplitMemberMark(
+          tabId: item.id,
+          size: 20,
+          padding: const EdgeInsets.only(left: 8.0),
         ),
       if (showInlineMarkers && item.isHistory)
         const Padding(

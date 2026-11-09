@@ -150,5 +150,6 @@
   "menu_connectionUnused": "未被任何路由使用",
   "menu_connectionUsageContainerCount": "{count, plural, other{{count} 个容器}}",
   "menu_connectionUsageIsolatedTabCount": "{count, plural, other{{count} 个隔离标签页}}",
-  "menu_connectionUsageBlocked": "已阻止"
+  "menu_connectionUsageBlocked": "已阻止",
+  "menu_itemSplitView": "分屏"
 }

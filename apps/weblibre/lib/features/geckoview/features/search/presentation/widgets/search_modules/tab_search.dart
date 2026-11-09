@@ -54,7 +54,20 @@ class TabSearch extends HookConsumerWidget {
 
   final ValueListenable<TextEditingValue> searchTextListenable;
 
-  const TabSearch({super.key, required this.searchTextListenable});
+  /// Tabs left out of the results: the source tab while the search screen
+  /// picks the page to show beside it in split view.
+  final Set<String> excludedTabIds;
+
+  /// Shows the chosen tab. Defaults to selecting it; the split picker pairs
+  /// it with the source first.
+  final Future<void> Function(String tabId)? selectTab;
+
+  const TabSearch({
+    super.key,
+    required this.searchTextListenable,
+    this.excludedTabIds = const {},
+    this.selectTab,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -90,8 +103,13 @@ class TabSearch extends HookConsumerWidget {
     final filteredTabs = useMemoized(
       () => tabSearchResults.value
           .where((result) => result.containerId == selectedContainer.value?.id)
+          .where((result) => !excludedTabIds.contains(result.id))
           .toList(),
-      [tabSearchResults, selectedContainer.value?.id],
+      [
+        tabSearchResults,
+        selectedContainer.value?.id,
+        Object.hashAllUnordered(excludedTabIds),
+      ],
     );
 
     unawaited(
@@ -248,9 +266,14 @@ class TabSearch extends HookConsumerWidget {
                           )
                         : UriBreadcrumb(uri: result.url, showHttpScheme: false),
                     onTap: () async {
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .selectTab(result.id);
+                      final select = selectTab;
+                      if (select != null) {
+                        await select(result.id);
+                      } else {
+                        await ref
+                            .read(tabRepositoryProvider.notifier)
+                            .selectTab(result.id);
+                      }
 
                       // Offer to locate the match within the page instead of
                       // opening Find in Page unprompted (see #421).

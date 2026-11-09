@@ -44,6 +44,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPublicSuffixListApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSitePermissionsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoGestureEvents
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSplitViewApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSplitViewEvents
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.startup.EngineWarmupSession
@@ -499,6 +501,14 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         GeckoGestureApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             GeckoGestureApiImpl()
+        )
+
+        // Split view: state from Dart, chrome interactions back to it.
+        GlobalComponents.splitViewEvents =
+            GeckoSplitViewEvents(_flutterPluginBinding.binaryMessenger)
+        GeckoSplitViewApi.setUp(
+            _flutterPluginBinding.binaryMessenger,
+            GeckoSplitViewApiImpl()
         )
 
         // UnifiedPush distributor management. The event sink was installed above, before

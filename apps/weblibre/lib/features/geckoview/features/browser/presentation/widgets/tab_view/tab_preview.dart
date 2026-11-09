@@ -33,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_swipe_actions.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_member_mark.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -295,6 +296,15 @@ class GridTabPreview extends HookConsumerWidget {
                         left: 6.0,
                         child: TabDepthIndicator(depth: depth),
                       ),
+                    Positioned(
+                      bottom: 6.0,
+                      right: 6.0,
+                      child: SplitMemberMark(
+                        tabId: tabId,
+                        size: 16,
+                        withBackground: true,
+                      ),
+                    ),
                     if (trailingChild != null ||
                         isPinned ||
                         groupToggle != null)
@@ -598,6 +608,10 @@ class ListTabPreview extends HookConsumerWidget {
                               ),
                               const SizedBox(width: 4),
                             ],
+                            SplitMemberMark(
+                              tabId: tabId,
+                              padding: const EdgeInsets.only(right: 4),
+                            ),
                             if (modeBadgeIcon != null) ...[
                               Icon(
                                 modeBadgeIcon,

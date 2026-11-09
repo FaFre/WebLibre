@@ -1865,6 +1865,12 @@ abstract class GeckoTabsApi {
     /// history. Applied before the tab starts loading, so the first visit can't
     /// outrun the exclusion snapshot Dart pushes once the tab is persisted.
     required bool excludeFromHistory,
+
+    /// Whether the parent tab's page is the load's referrer, so it loads as if
+    /// that page had linked to it (its principal and referrer policy). False
+    /// for pages the browser itself opens beside the parent, such as
+    /// about:certificate, which web content may not link to.
+    required bool parentIsReferrer,
   });
 
   List<String> addMultipleTabs({
@@ -3993,6 +3999,185 @@ abstract class GeckoGestureEvents {
   /// [active] Whether a text selection is currently on screen.
   @asyncCallback
   void onTextSelectionActiveChange(int sequence, bool active);
+}
+
+/// How the two pages of a split pair are arranged, as resolved by Dart for the
+/// current content size.
+enum SplitPaneMode {
+  /// Left and right of a vertical divider.
+  sideBySide,
+
+  /// Above and below a horizontal divider.
+  stacked,
+
+  /// Only the focused page is shown; the other stays bound but hidden.
+  focusedOnly,
+}
+
+/// The axis a divider ratio belongs to. Each axis keeps its own ratio.
+enum SplitAxis { sideBySide, stacked }
+
+/// The one split pair, with its presentation already resolved by Dart.
+///
+/// Carried even while neither member is selected, so native can show the pair
+/// the moment a member is selected natively (from the tab tray) without a
+/// round trip.
+class SplitPairState {
+  /// Changes whenever a new pair is formed, so stale events can be recognized.
+  final String pairId;
+
+  /// The tab in the left or top slot.
+  final String firstTabId;
+
+  /// The tab in the right or bottom slot.
+  final String secondTabId;
+
+  final SplitPaneMode mode;
+
+  /// The first pane's share of the space on [mode]'s axis, 0..1.
+  final double ratio;
+
+  /// Gap between the panes: the standard divider, or a hinge's thickness.
+  final double dividerDp;
+
+  /// False when the divider sits on a hinge.
+  final bool draggable;
+
+  /// Focus outline color for each slot (the tab's identity color).
+  final int firstAccentArgb;
+  final int secondAccentArgb;
+
+  SplitPairState({
+    required this.pairId,
+    required this.firstTabId,
+    required this.secondTabId,
+    required this.mode,
+    required this.ratio,
+    required this.dividerDp,
+    required this.draggable,
+    required this.firstAccentArgb,
+    required this.secondAccentArgb,
+  });
+}
+
+/// Localized strings native draws itself, so the app-language override applies
+/// and the plugin needs no string resources.
+class SplitViewLabels {
+  /// Accessibility description of the divider.
+  final String dividerDescription;
+
+  /// Accessibility action on the divider that opens the split view controls.
+  final String dividerOptionsAction;
+
+  /// Title of the placeholder shown in place of a crashed page.
+  final String crashedTitle;
+
+  /// Button on that placeholder that restores the page.
+  final String crashedReload;
+
+  SplitViewLabels({
+    required this.dividerDescription,
+    required this.dividerOptionsAction,
+    required this.crashedTitle,
+    required this.crashedReload,
+  });
+}
+
+/// Everything native needs to present split view.
+class SplitViewState {
+  /// One per Dart producer instance. Native accepts any new epoch, and within
+  /// an epoch only a higher [revision], so a restarted Dart half takes over
+  /// with its first push instead of being rejected as stale.
+  final String epoch;
+
+  /// Strictly increasing within [epoch].
+  final int revision;
+
+  /// Null while there is no pair or the feature is hidden.
+  final SplitPairState? pair;
+
+  /// The smallest panes the split is shown with at all; below them only the
+  /// focused page is shown.
+  final double minPaneWidthDp;
+  final double minPaneHeightDp;
+
+  /// How small a pane may be dragged once the split is shown. A release past
+  /// this toward the edge collapses that pane instead
+  /// ([GeckoSplitViewEvents.onDividerCollapsed]).
+  final double dragMinPaneWidthDp;
+  final double dragMinPaneHeightDp;
+  final int dividerColorArgb;
+  final int gripColorArgb;
+  final int dragPreviewColorArgb;
+
+  /// Background of the crashed-page placeholder and its text color.
+  final int placeholderColorArgb;
+  final int onPlaceholderColorArgb;
+  final SplitViewLabels labels;
+
+  SplitViewState({
+    required this.epoch,
+    required this.revision,
+    this.pair,
+    required this.minPaneWidthDp,
+    required this.minPaneHeightDp,
+    required this.dragMinPaneWidthDp,
+    required this.dragMinPaneHeightDp,
+    required this.dividerColorArgb,
+    required this.gripColorArgb,
+    required this.dragPreviewColorArgb,
+    required this.placeholderColorArgb,
+    required this.onPlaceholderColorArgb,
+    required this.labels,
+  });
+}
+
+/// Dart → Kotlin. Pushes the split view state.
+@HostApi()
+abstract class GeckoSplitViewApi {
+  /// Completes once the main thread has applied [state] and laid the panes out
+  /// for it, so a caller that selects a tab afterwards reaches native after
+  /// the pair does.
+  @async
+  void setSplitState(SplitViewState state);
+}
+
+/// Kotlin → Dart. Interactions with the native split view chrome.
+@FlutterApi()
+abstract class GeckoSplitViewEvents {
+  /// The divider was released at [ratio] on [axis].
+  @asyncCallback
+  void onRatioCommitted(
+    int sequence,
+    String epoch,
+    String pairId,
+    SplitAxis axis,
+    double ratio,
+  );
+
+  /// The divider was released at the edge, past the drag minimum: the pane
+  /// it squeezed is put away and [keptTabId]'s pane is shown alone. Native
+  /// has already selected [keptTabId] (reported through [onPaneActivated]);
+  /// no ratio is committed, so showing both again restores the last one.
+  @asyncCallback
+  void onDividerCollapsed(
+    int sequence,
+    String epoch,
+    String pairId,
+    String keptTabId,
+  );
+
+  /// The divider grip was tapped (or its accessibility action was used).
+  @asyncCallback
+  void onHandleTapped(int sequence, String epoch, String pairId);
+
+  /// A pane was touched or received input focus and its tab was selected.
+  ///
+  /// Sent at once, bypassing the debounce of
+  /// [GeckoStateEvents.onSelectedTabChange], so a Flutter action right after a
+  /// pane touch targets that pane.
+  @asyncCallback
+  void onPaneActivated(int sequence, String epoch, String tabId);
 }
 
 /// Lifecycle state of the selected UnifiedPush distributor.

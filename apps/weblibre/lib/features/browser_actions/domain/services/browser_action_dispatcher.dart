@@ -55,6 +55,9 @@ import 'package:weblibre/features/geckoview/features/history/domain/repositories
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
@@ -115,6 +118,11 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     final turnGesturesOn = !ref
         .read(gestureSettingsWithDefaultsProvider)
         .effectiveEnabled;
+    // The same for split view: a pair kept while it was hidden comes back on
+    // screen once it is shown, but the user saw one page and asked to split.
+    final splitBefore = splitToggleStateOf(
+      tabId == null ? null : _shownSplitPairWith(tabId),
+    );
 
     try {
       // Inside the try: gestures and shortcuts never await run(), so an
@@ -122,7 +130,12 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       // a failed save itself; the action then does not run.
       if (!await _ensureShown(action)) return;
 
-      await _execute(action, tabId, turnGesturesOn: turnGesturesOn);
+      await _execute(
+        action,
+        tabId,
+        turnGesturesOn: turnGesturesOn,
+        splitBefore: splitBefore,
+      );
     } catch (error, stackTrace) {
       logger.e(
         'Error executing browser action ${action.name}',
@@ -223,11 +236,13 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   /// through.
   ///
   /// [turnGesturesOn] is what [BrowserAction.toggleGestures] does, decided
-  /// before the feature was shown.
+  /// before the feature was shown; [splitBefore] is the split toggle's state
+  /// as the user saw it then, for the split view toggles.
   Future<void> _execute(
     BrowserAction action,
     String? tabId, {
     required bool turnGesturesOn,
+    required SplitToggleState splitBefore,
   }) async {
     final tabRepository = ref.read(tabRepositoryProvider.notifier);
     // Only evaluated by the page actions, which [run] never lets through
@@ -474,6 +489,56 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         await _openInPrivateTab(pageTabId);
       case BrowserAction.moveTabToContainer:
         await _moveTabToContainer(pageTabId);
+      case BrowserAction.splitView:
+        await _toggleSplitView(pageTabId, splitBefore);
+      case BrowserAction.splitWithAnotherTab:
+        final context = await _navigatorContext();
+        if (context != null && context.mounted) {
+          await showSplitPartnerPicker(
+            context,
+            ref.read,
+            sourceTabId: pageTabId,
+            pair: _splitPairWith(pageTabId),
+          );
+        }
+      case BrowserAction.toggleSplitSinglePage:
+        if (_splitPairWith(pageTabId) == null) {
+          await _showFeedback(BrowserActionFeedback.noSplitView);
+        } else {
+          // Decided by what was on screen: only with both pages shown does it
+          // hide one. A kept pair that showing split view just brought back
+          // was one page to the user, so it shows both.
+          ref
+              .read(splitViewControllerProvider.notifier)
+              .setFocusedOnly(splitBefore == SplitToggleState.shown);
+        }
+      case BrowserAction.showSplitControls:
+        if (_splitPairWith(pageTabId) == null) {
+          await _showFeedback(BrowserActionFeedback.noSplitView);
+        } else {
+          ref
+              .read(bottomSheetControllerProvider.notifier)
+              .show(SplitViewSheet());
+        }
+      case BrowserAction.focusOtherSplitPane:
+        final partner = _splitPairWith(pageTabId)?.partnerOf(pageTabId);
+        if (partner == null) {
+          await _showFeedback(BrowserActionFeedback.noSplitView);
+        } else {
+          await tabRepository.selectTab(partner);
+        }
+      case BrowserAction.swapSplitPanes:
+        if (_splitPairWith(pageTabId) == null) {
+          await _showFeedback(BrowserActionFeedback.noSplitView);
+        } else {
+          ref.read(splitViewControllerProvider.notifier).swap();
+        }
+      case BrowserAction.endSplitView:
+        if (_splitPairWith(pageTabId) == null) {
+          await _showFeedback(BrowserActionFeedback.noSplitView);
+        } else {
+          ref.read(splitViewControllerProvider.notifier).end();
+        }
       case BrowserAction.copyLink:
         await Clipboard.setData(
           ClipboardData(text: _pageUrl(pageTabId).toString()),
@@ -860,6 +925,47 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           ? BrowserActionFeedback.bookmarkAdded
           : BrowserActionFeedback.bookmarkRemoved,
     );
+  }
+
+  /// [BrowserAction.splitView]: the split toggle for the selected tab
+  /// ([toggleSplitView]), with the picker when there is no tab to show beside
+  /// it. Aimed at another tab (a swipe on its card), it shows that tab beside
+  /// the current one, as the tab menu's "Show beside current tab" does.
+  ///
+  /// [state] is the toggle's state from before split view was shown, if it
+  /// had to be ([splitBefore] in [_execute]).
+  Future<void> _toggleSplitView(String tabId, SplitToggleState state) async {
+    final selected = ref.read(selectedTabProvider);
+    final context = await _navigatorContext();
+    if (context == null || !context.mounted) return;
+
+    if (selected != null && tabId != selected) {
+      await showBesideCurrentTab(context, ref.read, tabId);
+      return;
+    }
+
+    final done = await toggleSplitView(
+      ref.read,
+      tabId: tabId,
+      state: state,
+      onError: splitErrorReporter(context),
+    );
+    if (!done && context.mounted) {
+      await showSplitPartnerPicker(context, ref.read, sourceTabId: tabId);
+    }
+  }
+
+  /// The pair [tabId] is shown in, if any; null while split view is hidden.
+  SplitPair? _shownSplitPairWith(String tabId) {
+    final pair = ref.read(splitPairShownProvider);
+    return pair != null && pair.contains(tabId) ? pair : null;
+  }
+
+  /// The split pair while it contains [tabId], i.e. while it is on screen
+  /// with that page. Actions only run while split view is shown.
+  SplitPair? _splitPairWith(String tabId) {
+    final pair = ref.read(splitViewControllerProvider);
+    return pair != null && pair.contains(tabId) ? pair : null;
   }
 
   /// Tells the user [feedback] in a snackbar.

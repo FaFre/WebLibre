@@ -213,6 +213,12 @@ abstract class _$ForceBrowserHome extends $Notifier<bool> {
 /// Condition (2) also implicitly covers the case where the selected
 /// container has zero tabs: if the container has no tabs, the selected tab
 /// (if any) necessarily belongs to a different container.
+///
+/// While the selected tab is in a split pair, (2) holds only when the selected
+/// container matches *neither* member. Focusing the other pane selects a tab
+/// whose container can differ, and the selected container follows the
+/// selection asynchronously; without this the home would flash over the pair
+/// in between. An explicit switch to a third container still shows home.
 
 @ProviderFor(shouldShowBrowserHome)
 final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
@@ -231,6 +237,12 @@ final shouldShowBrowserHomeProvider = ShouldShowBrowserHomeProvider._();
 /// Condition (2) also implicitly covers the case where the selected
 /// container has zero tabs: if the container has no tabs, the selected tab
 /// (if any) necessarily belongs to a different container.
+///
+/// While the selected tab is in a split pair, (2) holds only when the selected
+/// container matches *neither* member. Focusing the other pane selects a tab
+/// whose container can differ, and the selected container follows the
+/// selection asynchronously; without this the home would flash over the pair
+/// in between. An explicit switch to a third container still shows home.
 
 final class ShouldShowBrowserHomeProvider
     extends $FunctionalProvider<bool, bool, bool>
@@ -249,6 +261,12 @@ final class ShouldShowBrowserHomeProvider
   /// Condition (2) also implicitly covers the case where the selected
   /// container has zero tabs: if the container has no tabs, the selected tab
   /// (if any) necessarily belongs to a different container.
+  ///
+  /// While the selected tab is in a split pair, (2) holds only when the selected
+  /// container matches *neither* member. Focusing the other pane selects a tab
+  /// whose container can differ, and the selected container follows the
+  /// selection asynchronously; without this the home would flash over the pair
+  /// in between. An explicit switch to a third container still shows home.
   ShouldShowBrowserHomeProvider._()
     : super(
         from: null,
@@ -283,7 +301,7 @@ final class ShouldShowBrowserHomeProvider
 }
 
 String _$shouldShowBrowserHomeHash() =>
-    r'a2f6c3acac8a640b3a4d9a9468a729802fb6c4f5';
+    r'3fb1c4163ed10a1aaa85bd6966f889ef29e6b2c4';
 
 @ProviderFor(selectedContainerTabCount)
 final selectedContainerTabCountProvider = SelectedContainerTabCountProvider._();

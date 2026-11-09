@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/features/contextmenu/presentation/ca
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/launch_external.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_image_new_tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_in_container.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_in_split_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_new_tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/save_file.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/save_image.dart';
@@ -49,7 +50,14 @@ import 'package:weblibre/utils/ui_helper.dart';
 class ContextMenuDialog extends HookConsumerWidget {
   final HitResult hitResult;
 
-  const ContextMenuDialog({super.key, required this.hitResult});
+  /// The tab the long press happened in, when known.
+  final String sourceTabId;
+
+  const ContextMenuDialog({
+    super.key,
+    required this.hitResult,
+    required this.sourceTabId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -112,19 +120,25 @@ class ContextMenuDialog extends HookConsumerWidget {
             onApplySelectedRemovals: applySelectedTrackingRemovals,
           ),
         if (OpenInNewTab.isSupported(effective))
-          OpenInNewTab(hitResult: effective),
+          OpenInNewTab(hitResult: effective, sourceTabId: sourceTabId),
+        if (OpenInSplitView.isSupported(effective))
+          OpenInSplitView(hitResult: effective, sourceTabId: sourceTabId),
         if (showContainerUi && OpenInContainer.isSupported(effective))
-          OpenInContainer(hitResult: effective),
+          OpenInContainer(hitResult: effective, sourceTabId: sourceTabId),
         if (CopyLink.isSupported(effective)) CopyLink(hitResult: effective),
         if (CopyLinkText.isSupported(effective))
           CopyLinkText(hitResult: effective),
-        if (SaveFile.isSupported(effective)) SaveFile(hitResult: effective),
+        if (SaveFile.isSupported(effective))
+          SaveFile(hitResult: effective, sourceTabId: sourceTabId),
         if (ShareLink.isSupported(effective)) ShareLink(hitResult: effective),
-        if (ShareImage.isSupported(effective)) ShareImage(hitResult: effective),
+        if (ShareImage.isSupported(effective))
+          ShareImage(hitResult: effective, sourceTabId: sourceTabId),
         if (OpenImageInNewTab.isSupported(effective))
-          OpenImageInNewTab(hitResult: effective),
-        if (CopyImage.isSupported(effective)) CopyImage(hitResult: effective),
-        if (SaveImage.isSupported(effective)) SaveImage(hitResult: effective),
+          OpenImageInNewTab(hitResult: effective, sourceTabId: sourceTabId),
+        if (CopyImage.isSupported(effective))
+          CopyImage(hitResult: effective, sourceTabId: sourceTabId),
+        if (SaveImage.isSupported(effective))
+          SaveImage(hitResult: effective, sourceTabId: sourceTabId),
         if (CopyImageLocation.isSupported(effective))
           CopyImageLocation(hitResult: effective),
         if (ShareEmail.isSupported(effective)) ShareEmail(hitResult: effective),

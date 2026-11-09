@@ -10,6 +10,8 @@
   "visibilitySwitch_profilesDescription": "Создание отдельных профилей и переключение между ними",
   "visibilitySwitch_treeTabsLabel": "Дерево вкладок",
   "visibilitySwitch_treeTabsDescription": "Показ вкладок, открытых со страницы, под вкладкой, из которой они открыты",
+  "visibilitySwitch_splitViewLabel": "Разделённый экран",
+  "visibilitySwitch_splitViewDescription": "Показ двух вкладок рядом или одна над другой",
   "visibilitySwitch_layoutAdvancedLabel": "Настройка панели инструментов и меню",
   "visibilitySwitch_layoutAdvancedDescription": "Кнопки панели инструментов, порядок меню и группировка вкладок на панели вкладок",
   "visibilitySwitch_gesturesLabel": "Жесты",

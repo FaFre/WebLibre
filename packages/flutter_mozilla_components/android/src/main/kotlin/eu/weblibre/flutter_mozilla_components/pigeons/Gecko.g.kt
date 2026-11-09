@@ -880,6 +880,37 @@ enum class AppLinkDecision(val raw: Int) {
   }
 }
 
+/**
+ * How the two pages of a split pair are arranged, as resolved by Dart for the
+ * current content size.
+ */
+enum class SplitPaneMode(val raw: Int) {
+  /** Left and right of a vertical divider. */
+  SIDE_BY_SIDE(0),
+  /** Above and below a horizontal divider. */
+  STACKED(1),
+  /** Only the focused page is shown; the other stays bound but hidden. */
+  FOCUSED_ONLY(2);
+
+  companion object {
+    fun ofRaw(raw: Int): SplitPaneMode? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** The axis a divider ratio belongs to. Each axis keeps its own ratio. */
+enum class SplitAxis(val raw: Int) {
+  SIDE_BY_SIDE(0),
+  STACKED(1);
+
+  companion object {
+    fun ofRaw(raw: Int): SplitAxis? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Lifecycle state of the selected UnifiedPush distributor. */
 enum class PushDistributorStatus(val raw: Int) {
   /** No distributor app is installed on the device. */
@@ -7300,6 +7331,254 @@ data class GestureConfig (
   }
 }
 
+/**
+ * The one split pair, with its presentation already resolved by Dart.
+ *
+ * Carried even while neither member is selected, so native can show the pair
+ * the moment a member is selected natively (from the tab tray) without a
+ * round trip.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SplitPairState (
+  /** Changes whenever a new pair is formed, so stale events can be recognized. */
+  val pairId: String,
+  /** The tab in the left or top slot. */
+  val firstTabId: String,
+  /** The tab in the right or bottom slot. */
+  val secondTabId: String,
+  val mode: SplitPaneMode,
+  /** The first pane's share of the space on [mode]'s axis, 0..1. */
+  val ratio: Double,
+  /** Gap between the panes: the standard divider, or a hinge's thickness. */
+  val dividerDp: Double,
+  /** False when the divider sits on a hinge. */
+  val draggable: Boolean,
+  /** Focus outline color for each slot (the tab's identity color). */
+  val firstAccentArgb: Long,
+  val secondAccentArgb: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SplitPairState {
+      val pairId = pigeonVar_list[0] as String
+      val firstTabId = pigeonVar_list[1] as String
+      val secondTabId = pigeonVar_list[2] as String
+      val mode = pigeonVar_list[3] as SplitPaneMode
+      val ratio = pigeonVar_list[4] as Double
+      val dividerDp = pigeonVar_list[5] as Double
+      val draggable = pigeonVar_list[6] as Boolean
+      val firstAccentArgb = pigeonVar_list[7] as Long
+      val secondAccentArgb = pigeonVar_list[8] as Long
+      return SplitPairState(pairId, firstTabId, secondTabId, mode, ratio, dividerDp, draggable, firstAccentArgb, secondAccentArgb)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      pairId,
+      firstTabId,
+      secondTabId,
+      mode,
+      ratio,
+      dividerDp,
+      draggable,
+      firstAccentArgb,
+      secondAccentArgb,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SplitPairState
+    return GeckoPigeonUtils.deepEquals(this.pairId, other.pairId) && GeckoPigeonUtils.deepEquals(this.firstTabId, other.firstTabId) && GeckoPigeonUtils.deepEquals(this.secondTabId, other.secondTabId) && GeckoPigeonUtils.deepEquals(this.mode, other.mode) && GeckoPigeonUtils.deepEquals(this.ratio, other.ratio) && GeckoPigeonUtils.deepEquals(this.dividerDp, other.dividerDp) && GeckoPigeonUtils.deepEquals(this.draggable, other.draggable) && GeckoPigeonUtils.deepEquals(this.firstAccentArgb, other.firstAccentArgb) && GeckoPigeonUtils.deepEquals(this.secondAccentArgb, other.secondAccentArgb)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.pairId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.firstTabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.secondTabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.mode)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ratio)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dividerDp)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.draggable)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.firstAccentArgb)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.secondAccentArgb)
+    return result
+  }
+  override fun toString(): String {
+    return "SplitPairState(pairId=$pairId, firstTabId=$firstTabId, secondTabId=$secondTabId, mode=$mode, ratio=$ratio, dividerDp=$dividerDp, draggable=$draggable, firstAccentArgb=$firstAccentArgb, secondAccentArgb=$secondAccentArgb)"
+  }
+}
+
+/**
+ * Localized strings native draws itself, so the app-language override applies
+ * and the plugin needs no string resources.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SplitViewLabels (
+  /** Accessibility description of the divider. */
+  val dividerDescription: String,
+  /** Accessibility action on the divider that opens the split view controls. */
+  val dividerOptionsAction: String,
+  /** Title of the placeholder shown in place of a crashed page. */
+  val crashedTitle: String,
+  /** Button on that placeholder that restores the page. */
+  val crashedReload: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SplitViewLabels {
+      val dividerDescription = pigeonVar_list[0] as String
+      val dividerOptionsAction = pigeonVar_list[1] as String
+      val crashedTitle = pigeonVar_list[2] as String
+      val crashedReload = pigeonVar_list[3] as String
+      return SplitViewLabels(dividerDescription, dividerOptionsAction, crashedTitle, crashedReload)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      dividerDescription,
+      dividerOptionsAction,
+      crashedTitle,
+      crashedReload,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SplitViewLabels
+    return GeckoPigeonUtils.deepEquals(this.dividerDescription, other.dividerDescription) && GeckoPigeonUtils.deepEquals(this.dividerOptionsAction, other.dividerOptionsAction) && GeckoPigeonUtils.deepEquals(this.crashedTitle, other.crashedTitle) && GeckoPigeonUtils.deepEquals(this.crashedReload, other.crashedReload)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dividerDescription)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dividerOptionsAction)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.crashedTitle)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.crashedReload)
+    return result
+  }
+  override fun toString(): String {
+    return "SplitViewLabels(dividerDescription=$dividerDescription, dividerOptionsAction=$dividerOptionsAction, crashedTitle=$crashedTitle, crashedReload=$crashedReload)"
+  }
+}
+
+/**
+ * Everything native needs to present split view.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SplitViewState (
+  /**
+   * One per Dart producer instance. Native accepts any new epoch, and within
+   * an epoch only a higher [revision], so a restarted Dart half takes over
+   * with its first push instead of being rejected as stale.
+   */
+  val epoch: String,
+  /** Strictly increasing within [epoch]. */
+  val revision: Long,
+  /** Null while there is no pair or the feature is hidden. */
+  val pair: SplitPairState? = null,
+  /**
+   * The smallest panes the split is shown with at all; below them only the
+   * focused page is shown.
+   */
+  val minPaneWidthDp: Double,
+  val minPaneHeightDp: Double,
+  /**
+   * How small a pane may be dragged once the split is shown. A release past
+   * this toward the edge collapses that pane instead
+   * ([GeckoSplitViewEvents.onDividerCollapsed]).
+   */
+  val dragMinPaneWidthDp: Double,
+  val dragMinPaneHeightDp: Double,
+  val dividerColorArgb: Long,
+  val gripColorArgb: Long,
+  val dragPreviewColorArgb: Long,
+  /** Background of the crashed-page placeholder and its text color. */
+  val placeholderColorArgb: Long,
+  val onPlaceholderColorArgb: Long,
+  val labels: SplitViewLabels
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SplitViewState {
+      val epoch = pigeonVar_list[0] as String
+      val revision = pigeonVar_list[1] as Long
+      val pair = pigeonVar_list[2] as SplitPairState?
+      val minPaneWidthDp = pigeonVar_list[3] as Double
+      val minPaneHeightDp = pigeonVar_list[4] as Double
+      val dragMinPaneWidthDp = pigeonVar_list[5] as Double
+      val dragMinPaneHeightDp = pigeonVar_list[6] as Double
+      val dividerColorArgb = pigeonVar_list[7] as Long
+      val gripColorArgb = pigeonVar_list[8] as Long
+      val dragPreviewColorArgb = pigeonVar_list[9] as Long
+      val placeholderColorArgb = pigeonVar_list[10] as Long
+      val onPlaceholderColorArgb = pigeonVar_list[11] as Long
+      val labels = pigeonVar_list[12] as SplitViewLabels
+      return SplitViewState(epoch, revision, pair, minPaneWidthDp, minPaneHeightDp, dragMinPaneWidthDp, dragMinPaneHeightDp, dividerColorArgb, gripColorArgb, dragPreviewColorArgb, placeholderColorArgb, onPlaceholderColorArgb, labels)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      epoch,
+      revision,
+      pair,
+      minPaneWidthDp,
+      minPaneHeightDp,
+      dragMinPaneWidthDp,
+      dragMinPaneHeightDp,
+      dividerColorArgb,
+      gripColorArgb,
+      dragPreviewColorArgb,
+      placeholderColorArgb,
+      onPlaceholderColorArgb,
+      labels,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as SplitViewState
+    return GeckoPigeonUtils.deepEquals(this.epoch, other.epoch) && GeckoPigeonUtils.deepEquals(this.revision, other.revision) && GeckoPigeonUtils.deepEquals(this.pair, other.pair) && GeckoPigeonUtils.deepEquals(this.minPaneWidthDp, other.minPaneWidthDp) && GeckoPigeonUtils.deepEquals(this.minPaneHeightDp, other.minPaneHeightDp) && GeckoPigeonUtils.deepEquals(this.dragMinPaneWidthDp, other.dragMinPaneWidthDp) && GeckoPigeonUtils.deepEquals(this.dragMinPaneHeightDp, other.dragMinPaneHeightDp) && GeckoPigeonUtils.deepEquals(this.dividerColorArgb, other.dividerColorArgb) && GeckoPigeonUtils.deepEquals(this.gripColorArgb, other.gripColorArgb) && GeckoPigeonUtils.deepEquals(this.dragPreviewColorArgb, other.dragPreviewColorArgb) && GeckoPigeonUtils.deepEquals(this.placeholderColorArgb, other.placeholderColorArgb) && GeckoPigeonUtils.deepEquals(this.onPlaceholderColorArgb, other.onPlaceholderColorArgb) && GeckoPigeonUtils.deepEquals(this.labels, other.labels)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.epoch)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.revision)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.pair)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.minPaneWidthDp)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.minPaneHeightDp)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dragMinPaneWidthDp)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dragMinPaneHeightDp)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dividerColorArgb)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.gripColorArgb)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dragPreviewColorArgb)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.placeholderColorArgb)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.onPlaceholderColorArgb)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.labels)
+    return result
+  }
+  override fun toString(): String {
+    return "SplitViewState(epoch=$epoch, revision=$revision, pair=$pair, minPaneWidthDp=$minPaneWidthDp, minPaneHeightDp=$minPaneHeightDp, dragMinPaneWidthDp=$dragMinPaneWidthDp, dragMinPaneHeightDp=$dragMinPaneHeightDp, dividerColorArgb=$dividerColorArgb, gripColorArgb=$gripColorArgb, dragPreviewColorArgb=$dragPreviewColorArgb, placeholderColorArgb=$placeholderColorArgb, onPlaceholderColorArgb=$onPlaceholderColorArgb, labels=$labels)"
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class PushDistributor (
   val packageName: String,
@@ -7468,56 +7747,66 @@ private data class GeckoPigeonInternalCodecOverflow (
         
     when (type.toInt()) {
       0 ->
-        return BookmarkImportNode.fromList(wrapped as List<Any?>)
+        return GeckoFetchResponse.fromList(wrapped as List<Any?>)
       1 ->
-        return BookmarkInsertTreeResult.fromList(wrapped as List<Any?>)
+        return BookmarkNode.fromList(wrapped as List<Any?>)
       2 ->
-        return BookmarkInfo.fromList(wrapped as List<Any?>)
+        return BookmarkImportNode.fromList(wrapped as List<Any?>)
       3 ->
-        return SitePermissions.fromList(wrapped as List<Any?>)
+        return BookmarkInsertTreeResult.fromList(wrapped as List<Any?>)
       4 ->
-        return TrackingProtectionException.fromList(wrapped as List<Any?>)
+        return BookmarkInfo.fromList(wrapped as List<Any?>)
       5 ->
-        return TrackerLogEntry.fromList(wrapped as List<Any?>)
+        return SitePermissions.fromList(wrapped as List<Any?>)
       6 ->
-        return TrackingStatisticsRecord.fromList(wrapped as List<Any?>)
+        return TrackingProtectionException.fromList(wrapped as List<Any?>)
       7 ->
-        return TrackingStatistics.fromList(wrapped as List<Any?>)
+        return TrackerLogEntry.fromList(wrapped as List<Any?>)
       8 ->
-        return AppLinkTarget.fromList(wrapped as List<Any?>)
+        return TrackingStatisticsRecord.fromList(wrapped as List<Any?>)
       9 ->
-        return ProtectedTargetPattern.fromList(wrapped as List<Any?>)
+        return TrackingStatistics.fromList(wrapped as List<Any?>)
       10 ->
-        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
+        return AppLinkTarget.fromList(wrapped as List<Any?>)
       11 ->
-        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
+        return ProtectedTargetPattern.fromList(wrapped as List<Any?>)
       12 ->
-        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
+        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
       13 ->
-        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
+        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
       14 ->
-        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
       15 ->
-        return PwaIcon.fromList(wrapped as List<Any?>)
+        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
       16 ->
-        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
       17 ->
-        return ShareTargetParams.fromList(wrapped as List<Any?>)
+        return PwaIcon.fromList(wrapped as List<Any?>)
       18 ->
-        return ShareTarget.fromList(wrapped as List<Any?>)
+        return ShareTargetFiles.fromList(wrapped as List<Any?>)
       19 ->
-        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+        return ShareTargetParams.fromList(wrapped as List<Any?>)
       20 ->
-        return PwaManifest.fromList(wrapped as List<Any?>)
+        return ShareTarget.fromList(wrapped as List<Any?>)
       21 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
       22 ->
-        return GestureConfig.fromList(wrapped as List<Any?>)
+        return PwaManifest.fromList(wrapped as List<Any?>)
       23 ->
-        return PushDistributor.fromList(wrapped as List<Any?>)
+        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
       24 ->
-        return PushStatus.fromList(wrapped as List<Any?>)
+        return GestureConfig.fromList(wrapped as List<Any?>)
       25 ->
+        return SplitPairState.fromList(wrapped as List<Any?>)
+      26 ->
+        return SplitViewLabels.fromList(wrapped as List<Any?>)
+      27 ->
+        return SplitViewState.fromList(wrapped as List<Any?>)
+      28 ->
+        return PushDistributor.fromList(wrapped as List<Any?>)
+      29 ->
+        return PushStatus.fromList(wrapped as List<Any?>)
+      30 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7743,417 +8032,417 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       172.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          PushDistributorStatus.ofRaw(it.toInt())
+          SplitPaneMode.ofRaw(it.toInt())
         }
       }
       173.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationOptions.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          SplitAxis.ofRaw(it.toInt())
         }
       }
       174.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationLanguage.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          PushDistributorStatus.ofRaw(it.toInt())
         }
       }
       175.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationDetectedLanguages.fromList(it)
+          TranslationOptions.fromList(it)
         }
       }
       176.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationPair.fromList(it)
+          TranslationLanguage.fromList(it)
         }
       }
       177.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationEngineStateData.fromList(it)
+          TranslationDetectedLanguages.fromList(it)
         }
       }
       178.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabTranslationStateData.fromList(it)
+          TranslationPair.fromList(it)
         }
       }
       179.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ReaderState.fromList(it)
+          TranslationEngineStateData.fromList(it)
         }
       }
       180.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddTabParams.fromList(it)
+          TabTranslationStateData.fromList(it)
         }
       }
       181.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          LastMediaAccessState.fromList(it)
+          ReaderState.fromList(it)
         }
       }
       182.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryMetadataKey.fromList(it)
+          AddTabParams.fromList(it)
         }
       }
       183.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PackageCategoryValue.fromList(it)
+          LastMediaAccessState.fromList(it)
         }
       }
       184.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ExternalPackage.fromList(it)
+          HistoryMetadataKey.fromList(it)
         }
       }
       185.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          LoadUrlFlagsValue.fromList(it)
+          PackageCategoryValue.fromList(it)
         }
       }
       186.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SourceValue.fromList(it)
+          ExternalPackage.fromList(it)
         }
       }
       187.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabState.fromList(it)
+          LoadUrlFlagsValue.fromList(it)
         }
       }
       188.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecoverableTab.fromList(it)
+          SourceValue.fromList(it)
         }
       }
       189.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          IconRequest.fromList(it)
+          TabState.fromList(it)
         }
       }
       190.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ResourceSize.fromList(it)
+          RecoverableTab.fromList(it)
         }
       }
       191.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Resource.fromList(it)
+          IconRequest.fromList(it)
         }
       }
       192.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          IconResult.fromList(it)
+          ResourceSize.fromList(it)
         }
       }
       193.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CookiePartitionKey.fromList(it)
+          Resource.fromList(it)
         }
       }
       194.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Cookie.fromList(it)
+          IconResult.fromList(it)
         }
       }
       195.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VisitInfo.fromList(it)
+          CookiePartitionKey.fromList(it)
         }
       }
       196.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryHighlightWeights.fromList(it)
+          Cookie.fromList(it)
         }
       }
       197.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryHighlight.fromList(it)
+          VisitInfo.fromList(it)
         }
       }
       198.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopFrecentSiteInfo.fromList(it)
+          HistoryHighlightWeights.fromList(it)
         }
       }
       199.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryMetadata.fromList(it)
+          HistoryHighlight.fromList(it)
         }
       }
       200.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistorySuggestion.fromList(it)
+          TopFrecentSiteInfo.fromList(it)
         }
       }
       201.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PageObservation.fromList(it)
+          HistoryMetadata.fromList(it)
         }
       }
       202.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryItem.fromList(it)
+          HistorySuggestion.fromList(it)
         }
       }
       203.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryState.fromList(it)
+          PageObservation.fromList(it)
         }
       }
       204.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ReaderableState.fromList(it)
+          HistoryItem.fromList(it)
         }
       }
       205.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SecurityInfoState.fromList(it)
+          HistoryState.fromList(it)
         }
       }
       206.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabContentState.fromList(it)
+          ReaderableState.fromList(it)
         }
       }
       207.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          FindResultState.fromList(it)
+          SecurityInfoState.fromList(it)
         }
       }
       208.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CustomSelectionAction.fromList(it)
+          TabContentState.fromList(it)
         }
       }
       209.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          WebExtensionData.fromList(it)
+          FindResultState.fromList(it)
         }
       }
       210.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonUpdatePermissionRequest.fromList(it)
+          CustomSelectionAction.fromList(it)
         }
       }
       211.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonInfo.fromList(it)
+          WebExtensionData.fromList(it)
         }
       }
       212.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonListingPreview.fromList(it)
+          AddonUpdatePermissionRequest.fromList(it)
         }
       }
       213.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonListing.fromList(it)
+          AddonInfo.fromList(it)
         }
       }
       214.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonStoreInfo.fromList(it)
+          AddonListingPreview.fromList(it)
         }
       }
       215.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonUpdateAttemptInfo.fromList(it)
+          AddonListing.fromList(it)
         }
       }
       216.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoSuggestion.fromList(it)
+          AddonStoreInfo.fromList(it)
         }
       }
       217.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabContent.fromList(it)
+          AddonUpdateAttemptInfo.fromList(it)
         }
       }
       218.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContentBlocking.fromList(it)
+          GeckoSuggestion.fromList(it)
         }
       }
       219.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DohSettings.fromList(it)
+          TabContent.fromList(it)
         }
       }
       220.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoEngineSettings.fromList(it)
+          ContentBlocking.fromList(it)
         }
       }
       221.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AutocompleteResult.fromList(it)
+          DohSettings.fromList(it)
         }
       }
       222.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          UnknownHitResult.fromList(it)
+          GeckoEngineSettings.fromList(it)
         }
       }
       223.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageHitResult.fromList(it)
+          AutocompleteResult.fromList(it)
         }
       }
       224.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoHitResult.fromList(it)
+          UnknownHitResult.fromList(it)
         }
       }
       225.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioHitResult.fromList(it)
+          ImageHitResult.fromList(it)
         }
       }
       226.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageSrcHitResult.fromList(it)
+          VideoHitResult.fromList(it)
         }
       }
       227.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PhoneHitResult.fromList(it)
+          AudioHitResult.fromList(it)
         }
       }
       228.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          EmailHitResult.fromList(it)
+          ImageSrcHitResult.fromList(it)
         }
       }
       229.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeoHitResult.fromList(it)
+          PhoneHitResult.fromList(it)
         }
       }
       230.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DownloadState.fromList(it)
+          EmailHitResult.fromList(it)
         }
       }
       231.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareInternetResourceState.fromList(it)
+          GeoHitResult.fromList(it)
         }
       }
       232.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonCollection.fromList(it)
+          DownloadState.fromList(it)
         }
       }
       233.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoComponentVersions.fromList(it)
+          ShareInternetResourceState.fromList(it)
         }
       }
       234.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncEngineStatus.fromList(it)
+          AddonCollection.fromList(it)
         }
       }
       235.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncAccountInfo.fromList(it)
+          GeckoComponentVersions.fromList(it)
         }
       }
       236.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncDevice.fromList(it)
+          SyncEngineStatus.fromList(it)
         }
       }
       237.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncIncomingTab.fromList(it)
+          SyncAccountInfo.fromList(it)
         }
       }
       238.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncRemoteTab.fromList(it)
+          SyncDevice.fromList(it)
         }
       }
       239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncDeviceTabs.fromList(it)
+          SyncIncomingTab.fromList(it)
         }
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PreferredDownloadManager.fromList(it)
+          SyncRemoteTab.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PullToRefreshSettings.fromList(it)
+          SyncDeviceTabs.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecentlyClosedTab.fromList(it)
+          PreferredDownloadManager.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPref.fromList(it)
+          PullToRefreshSettings.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MlProgressData.fromList(it)
+          RecentlyClosedTab.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxySettings.fromList(it)
+          GeckoPref.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxyRoutingSnapshot.fromList(it)
+          MlProgressData.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoRoutingDemand.fromList(it)
+          GeckoProxySettings.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxyRoutingStatus.fromList(it)
+          GeckoProxyRoutingSnapshot.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          GeckoRoutingDemand.fromList(it)
         }
       }
       250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProxyLoadError.fromList(it)
+          GeckoProxyRoutingStatus.fromList(it)
         }
       }
       251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          ContainerSiteAssignment.fromList(it)
         }
       }
       252.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          ProxyLoadError.fromList(it)
         }
       }
       253.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchResponse.fromList(it)
+          GeckoHeader.fromList(it)
         }
       }
       254.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          BookmarkNode.fromList(it)
+          GeckoFetchRequest.fromList(it)
         }
       }
       255.toByte() -> {
@@ -8338,465 +8627,490 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(171)
         writeValue(stream, value.raw.toLong())
       }
-      is PushDistributorStatus -> {
+      is SplitPaneMode -> {
         stream.write(172)
         writeValue(stream, value.raw.toLong())
       }
-      is TranslationOptions -> {
+      is SplitAxis -> {
         stream.write(173)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationLanguage -> {
+      is PushDistributorStatus -> {
         stream.write(174)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationDetectedLanguages -> {
+      is TranslationOptions -> {
         stream.write(175)
         writeValue(stream, value.toList())
       }
-      is TranslationPair -> {
+      is TranslationLanguage -> {
         stream.write(176)
         writeValue(stream, value.toList())
       }
-      is TranslationEngineStateData -> {
+      is TranslationDetectedLanguages -> {
         stream.write(177)
         writeValue(stream, value.toList())
       }
-      is TabTranslationStateData -> {
+      is TranslationPair -> {
         stream.write(178)
         writeValue(stream, value.toList())
       }
-      is ReaderState -> {
+      is TranslationEngineStateData -> {
         stream.write(179)
         writeValue(stream, value.toList())
       }
-      is AddTabParams -> {
+      is TabTranslationStateData -> {
         stream.write(180)
         writeValue(stream, value.toList())
       }
-      is LastMediaAccessState -> {
+      is ReaderState -> {
         stream.write(181)
         writeValue(stream, value.toList())
       }
-      is HistoryMetadataKey -> {
+      is AddTabParams -> {
         stream.write(182)
         writeValue(stream, value.toList())
       }
-      is PackageCategoryValue -> {
+      is LastMediaAccessState -> {
         stream.write(183)
         writeValue(stream, value.toList())
       }
-      is ExternalPackage -> {
+      is HistoryMetadataKey -> {
         stream.write(184)
         writeValue(stream, value.toList())
       }
-      is LoadUrlFlagsValue -> {
+      is PackageCategoryValue -> {
         stream.write(185)
         writeValue(stream, value.toList())
       }
-      is SourceValue -> {
+      is ExternalPackage -> {
         stream.write(186)
         writeValue(stream, value.toList())
       }
-      is TabState -> {
+      is LoadUrlFlagsValue -> {
         stream.write(187)
         writeValue(stream, value.toList())
       }
-      is RecoverableTab -> {
+      is SourceValue -> {
         stream.write(188)
         writeValue(stream, value.toList())
       }
-      is IconRequest -> {
+      is TabState -> {
         stream.write(189)
         writeValue(stream, value.toList())
       }
-      is ResourceSize -> {
+      is RecoverableTab -> {
         stream.write(190)
         writeValue(stream, value.toList())
       }
-      is Resource -> {
+      is IconRequest -> {
         stream.write(191)
         writeValue(stream, value.toList())
       }
-      is IconResult -> {
+      is ResourceSize -> {
         stream.write(192)
         writeValue(stream, value.toList())
       }
-      is CookiePartitionKey -> {
+      is Resource -> {
         stream.write(193)
         writeValue(stream, value.toList())
       }
-      is Cookie -> {
+      is IconResult -> {
         stream.write(194)
         writeValue(stream, value.toList())
       }
-      is VisitInfo -> {
+      is CookiePartitionKey -> {
         stream.write(195)
         writeValue(stream, value.toList())
       }
-      is HistoryHighlightWeights -> {
+      is Cookie -> {
         stream.write(196)
         writeValue(stream, value.toList())
       }
-      is HistoryHighlight -> {
+      is VisitInfo -> {
         stream.write(197)
         writeValue(stream, value.toList())
       }
-      is TopFrecentSiteInfo -> {
+      is HistoryHighlightWeights -> {
         stream.write(198)
         writeValue(stream, value.toList())
       }
-      is HistoryMetadata -> {
+      is HistoryHighlight -> {
         stream.write(199)
         writeValue(stream, value.toList())
       }
-      is HistorySuggestion -> {
+      is TopFrecentSiteInfo -> {
         stream.write(200)
         writeValue(stream, value.toList())
       }
-      is PageObservation -> {
+      is HistoryMetadata -> {
         stream.write(201)
         writeValue(stream, value.toList())
       }
-      is HistoryItem -> {
+      is HistorySuggestion -> {
         stream.write(202)
         writeValue(stream, value.toList())
       }
-      is HistoryState -> {
+      is PageObservation -> {
         stream.write(203)
         writeValue(stream, value.toList())
       }
-      is ReaderableState -> {
+      is HistoryItem -> {
         stream.write(204)
         writeValue(stream, value.toList())
       }
-      is SecurityInfoState -> {
+      is HistoryState -> {
         stream.write(205)
         writeValue(stream, value.toList())
       }
-      is TabContentState -> {
+      is ReaderableState -> {
         stream.write(206)
         writeValue(stream, value.toList())
       }
-      is FindResultState -> {
+      is SecurityInfoState -> {
         stream.write(207)
         writeValue(stream, value.toList())
       }
-      is CustomSelectionAction -> {
+      is TabContentState -> {
         stream.write(208)
         writeValue(stream, value.toList())
       }
-      is WebExtensionData -> {
+      is FindResultState -> {
         stream.write(209)
         writeValue(stream, value.toList())
       }
-      is AddonUpdatePermissionRequest -> {
+      is CustomSelectionAction -> {
         stream.write(210)
         writeValue(stream, value.toList())
       }
-      is AddonInfo -> {
+      is WebExtensionData -> {
         stream.write(211)
         writeValue(stream, value.toList())
       }
-      is AddonListingPreview -> {
+      is AddonUpdatePermissionRequest -> {
         stream.write(212)
         writeValue(stream, value.toList())
       }
-      is AddonListing -> {
+      is AddonInfo -> {
         stream.write(213)
         writeValue(stream, value.toList())
       }
-      is AddonStoreInfo -> {
+      is AddonListingPreview -> {
         stream.write(214)
         writeValue(stream, value.toList())
       }
-      is AddonUpdateAttemptInfo -> {
+      is AddonListing -> {
         stream.write(215)
         writeValue(stream, value.toList())
       }
-      is GeckoSuggestion -> {
+      is AddonStoreInfo -> {
         stream.write(216)
         writeValue(stream, value.toList())
       }
-      is TabContent -> {
+      is AddonUpdateAttemptInfo -> {
         stream.write(217)
         writeValue(stream, value.toList())
       }
-      is ContentBlocking -> {
+      is GeckoSuggestion -> {
         stream.write(218)
         writeValue(stream, value.toList())
       }
-      is DohSettings -> {
+      is TabContent -> {
         stream.write(219)
         writeValue(stream, value.toList())
       }
-      is GeckoEngineSettings -> {
+      is ContentBlocking -> {
         stream.write(220)
         writeValue(stream, value.toList())
       }
-      is AutocompleteResult -> {
+      is DohSettings -> {
         stream.write(221)
         writeValue(stream, value.toList())
       }
-      is UnknownHitResult -> {
+      is GeckoEngineSettings -> {
         stream.write(222)
         writeValue(stream, value.toList())
       }
-      is ImageHitResult -> {
+      is AutocompleteResult -> {
         stream.write(223)
         writeValue(stream, value.toList())
       }
-      is VideoHitResult -> {
+      is UnknownHitResult -> {
         stream.write(224)
         writeValue(stream, value.toList())
       }
-      is AudioHitResult -> {
+      is ImageHitResult -> {
         stream.write(225)
         writeValue(stream, value.toList())
       }
-      is ImageSrcHitResult -> {
+      is VideoHitResult -> {
         stream.write(226)
         writeValue(stream, value.toList())
       }
-      is PhoneHitResult -> {
+      is AudioHitResult -> {
         stream.write(227)
         writeValue(stream, value.toList())
       }
-      is EmailHitResult -> {
+      is ImageSrcHitResult -> {
         stream.write(228)
         writeValue(stream, value.toList())
       }
-      is GeoHitResult -> {
+      is PhoneHitResult -> {
         stream.write(229)
         writeValue(stream, value.toList())
       }
-      is DownloadState -> {
+      is EmailHitResult -> {
         stream.write(230)
         writeValue(stream, value.toList())
       }
-      is ShareInternetResourceState -> {
+      is GeoHitResult -> {
         stream.write(231)
         writeValue(stream, value.toList())
       }
-      is AddonCollection -> {
+      is DownloadState -> {
         stream.write(232)
         writeValue(stream, value.toList())
       }
-      is GeckoComponentVersions -> {
+      is ShareInternetResourceState -> {
         stream.write(233)
         writeValue(stream, value.toList())
       }
-      is SyncEngineStatus -> {
+      is AddonCollection -> {
         stream.write(234)
         writeValue(stream, value.toList())
       }
-      is SyncAccountInfo -> {
+      is GeckoComponentVersions -> {
         stream.write(235)
         writeValue(stream, value.toList())
       }
-      is SyncDevice -> {
+      is SyncEngineStatus -> {
         stream.write(236)
         writeValue(stream, value.toList())
       }
-      is SyncIncomingTab -> {
+      is SyncAccountInfo -> {
         stream.write(237)
         writeValue(stream, value.toList())
       }
-      is SyncRemoteTab -> {
+      is SyncDevice -> {
         stream.write(238)
         writeValue(stream, value.toList())
       }
-      is SyncDeviceTabs -> {
+      is SyncIncomingTab -> {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is PreferredDownloadManager -> {
+      is SyncRemoteTab -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is PullToRefreshSettings -> {
+      is SyncDeviceTabs -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is RecentlyClosedTab -> {
+      is PreferredDownloadManager -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is GeckoPref -> {
+      is PullToRefreshSettings -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is MlProgressData -> {
+      is RecentlyClosedTab -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is GeckoProxySettings -> {
+      is GeckoPref -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is GeckoProxyRoutingSnapshot -> {
+      is MlProgressData -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is GeckoRoutingDemand -> {
+      is GeckoProxySettings -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is GeckoProxyRoutingStatus -> {
+      is GeckoProxyRoutingSnapshot -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is GeckoRoutingDemand -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is ProxyLoadError -> {
+      is GeckoProxyRoutingStatus -> {
         stream.write(250)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is ContainerSiteAssignment -> {
         stream.write(251)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is ProxyLoadError -> {
         stream.write(252)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is GeckoHeader -> {
         stream.write(253)
         writeValue(stream, value.toList())
       }
-      is BookmarkNode -> {
+      is GeckoFetchRequest -> {
         stream.write(254)
         writeValue(stream, value.toList())
       }
-      is BookmarkImportNode -> {
+      is GeckoFetchResponse -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is BookmarkInsertTreeResult -> {
+      is BookmarkNode -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 1, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is BookmarkInfo -> {
+      is BookmarkImportNode -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 2, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SitePermissions -> {
+      is BookmarkInsertTreeResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 3, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingProtectionException -> {
+      is BookmarkInfo -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 4, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackerLogEntry -> {
+      is SitePermissions -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 5, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingStatisticsRecord -> {
+      is TrackingProtectionException -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 6, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingStatistics -> {
+      is TrackerLogEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 7, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkTarget -> {
+      is TrackingStatisticsRecord -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ProtectedTargetPattern -> {
+      is TrackingStatistics -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is NativeAppLinkRule -> {
+      is AppLinkTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is ProtectedTargetPattern -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is NativeAppLinkRule -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPromptRequest -> {
+      is NativeContextAppLinkPolicy -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 13, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkResolutionResult -> {
+      is AppLinkPolicySnapshot -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 14, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaIcon -> {
+      is AppLinkPromptRequest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 15, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetFiles -> {
+      is AppLinkResolutionResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 16, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetParams -> {
+      is PwaIcon -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 17, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTarget -> {
+      is ShareTargetFiles -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 18, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ExternalApplicationResource -> {
+      is ShareTargetParams -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 19, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaManifest -> {
+      is ShareTarget -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 20, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is ExternalApplicationResource -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 21, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is PwaManifest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 22, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is SandboxCaptureEntry -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 23, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
+      is GestureConfig -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 24, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushSubscription -> {
+      is SplitPairState -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 25, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is SplitViewLabels -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 26, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is SplitViewState -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 27, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushDistributor -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 28, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushStatus -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 29, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushSubscription -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 30, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -10079,7 +10393,7 @@ interface GeckoTabsApi {
   fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
   fun selectTab(tabId: String)
   fun removeTab(tabId: String)
-  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean): String
+  fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean, parentIsReferrer: Boolean): String
   fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?, excludeFromHistory: Boolean): List<String>
   fun removeAllTabs(recoverable: Boolean)
   fun removeTabs(ids: List<String>)
@@ -10235,8 +10549,9 @@ interface GeckoTabsApi {
             val historyMetadataArg = args[8] as HistoryMetadataKey?
             val additionalHeadersArg = args[9] as Map<String, String>?
             val excludeFromHistoryArg = args[10] as Boolean
+            val parentIsReferrerArg = args[11] as Boolean
             val wrapped: List<Any?> = try {
-              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg))
+              listOf(api.addTab(urlArg, selectTabArg, startLoadingArg, parentIdArg, flagsArg, contextIdArg, sourceArg, privateArg, historyMetadataArg, additionalHeadersArg, excludeFromHistoryArg, parentIsReferrerArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -14873,6 +15188,147 @@ class GeckoGestureEvents(private val binaryMessenger: BinaryMessenger, private v
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoGestureEvents.onTextSelectionActiveChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, activeArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+}
+/**
+ * Dart → Kotlin. Pushes the split view state.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoSplitViewApi {
+  /**
+   * Completes once the main thread has applied [state] and laid the panes out
+   * for it, so a caller that selects a tab afterwards reaches native after
+   * the pair does.
+   */
+  suspend fun setSplitState(state: SplitViewState)
+
+  companion object {
+    /** The codec used by GeckoSplitViewApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoSplitViewApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoSplitViewApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoSplitViewApi.setSplitState$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val stateArg = args[0] as SplitViewState
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                api.setSplitState(stateArg)
+                listOf(null)
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * Kotlin → Dart. Interactions with the native split view chrome.
+ *
+ * Generated class from Pigeon that represents Flutter messages that can be called from Kotlin.
+ */
+class GeckoSplitViewEvents(private val binaryMessenger: BinaryMessenger, private val messageChannelSuffix: String = "") {
+  companion object {
+    /** The codec used by GeckoSplitViewEvents. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+  }
+  /** The divider was released at [ratio] on [axis]. */
+  fun onRatioCommitted(sequenceArg: Long, epochArg: String, pairIdArg: String, axisArg: SplitAxis, ratioArg: Double, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSplitViewEvents.onRatioCommitted$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, epochArg, pairIdArg, axisArg, ratioArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * The divider was released at the edge, past the drag minimum: the pane
+   * it squeezed is put away and [keptTabId]'s pane is shown alone. Native
+   * has already selected [keptTabId] (reported through [onPaneActivated]);
+   * no ratio is committed, so showing both again restores the last one.
+   */
+  fun onDividerCollapsed(sequenceArg: Long, epochArg: String, pairIdArg: String, keptTabIdArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSplitViewEvents.onDividerCollapsed$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, epochArg, pairIdArg, keptTabIdArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /** The divider grip was tapped (or its accessibility action was used). */
+  fun onHandleTapped(sequenceArg: Long, epochArg: String, pairIdArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSplitViewEvents.onHandleTapped$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, epochArg, pairIdArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * A pane was touched or received input focus and its tab was selected.
+   *
+   * Sent at once, bypassing the debounce of
+   * [GeckoStateEvents.onSelectedTabChange], so a Flutter action right after a
+   * pane touch targets that pane.
+   */
+  fun onPaneActivated(sequenceArg: Long, epochArg: String, tabIdArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoSplitViewEvents.onPaneActivated$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, epochArg, tabIdArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

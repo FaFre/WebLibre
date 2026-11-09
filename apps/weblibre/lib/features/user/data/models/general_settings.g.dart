@@ -2042,6 +2042,7 @@ const _$VisibilitySwitchEnumMap = {
   VisibilitySwitch.connections: 'connections',
   VisibilitySwitch.profiles: 'profiles',
   VisibilitySwitch.treeTabs: 'treeTabs',
+  VisibilitySwitch.splitView: 'splitView',
   VisibilitySwitch.layoutAdvanced: 'layoutAdvanced',
   VisibilitySwitch.gestures: 'gestures',
   VisibilitySwitch.keyboardCustomization: 'keyboardCustomization',

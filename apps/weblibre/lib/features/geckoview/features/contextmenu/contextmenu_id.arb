@@ -21,5 +21,6 @@
   "contextmenu_shareImage": "Bagikan gambar",
   "contextmenu_shareEmailAddress": "Bagikan alamat email",
   "contextmenu_urlCleanedMessage": "URL dibersihkan",
-  "contextmenu_urlPreviewAppliedMessage": "Pratinjau URL diterapkan"
+  "contextmenu_urlPreviewAppliedMessage": "Pratinjau URL diterapkan",
+  "contextmenu_openInSplitView": "Buka di tampilan terpisah"
 }

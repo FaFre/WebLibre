@@ -102,12 +102,17 @@ class SearchRoute extends GoRouteData with $SearchRoute {
   /// site-specific bangs instead of the tab type selector.
   final String? tabId;
 
+  /// When provided, the search screen picks the page shown beside this tab in
+  /// split view: a chosen open tab or a submitted URL is paired with it.
+  final String? splitWithTabId;
+
   const SearchRoute({
     required this.tabType,
     this.searchText = SearchRoute.emptySearchText,
     this.launchedFromIntent = false,
     this.autoSubmitSearch = false,
     this.tabId,
+    this.splitWithTabId,
   });
 
   @override
@@ -120,6 +125,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
       launchedFromIntent: launchedFromIntent,
       autoSubmitSearch: autoSubmitSearch,
       tabId: tabId,
+      splitWithTabId: splitWithTabId,
     );
   }
 }
@@ -212,13 +218,19 @@ class ContainerCreateRoute extends GoRouteData with $ContainerCreateRoute {
 class ContextMenuRoute extends GoRouteData with $ContextMenuRoute {
   final String hitResult;
 
-  const ContextMenuRoute({required this.hitResult});
+  /// The tab the long press happened in, which in split view is not
+  /// necessarily the one the address bar shows.
+  final String tabId;
+
+  const ContextMenuRoute({required this.hitResult, required this.tabId});
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return DialogPage(
-      builder: (_) =>
-          ContextMenuDialog(hitResult: HitResultJson.fromJson(hitResult)),
+      builder: (_) => ContextMenuDialog(
+        hitResult: HitResultJson.fromJson(hitResult),
+        sourceTabId: tabId,
+      ),
     );
   }
 }

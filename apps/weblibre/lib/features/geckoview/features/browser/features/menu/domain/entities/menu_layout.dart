@@ -109,6 +109,9 @@ enum MenuItemType {
   sendToDevice,
   showQrCode,
 
+  /// Split view: pick a page to show beside this one, or the split controls.
+  splitView,
+
   /// Not a row of its own: the point in Tab Actions where the rest folds away
   /// behind a "More" row. Switch it off to show the whole section flat, or
   /// drag it to choose how much stays visible.
@@ -163,6 +166,7 @@ enum MenuItemType {
     assignContainer ||
     assignUrlToContainer => FeatureId.containerCore,
     cloneIsolatedTab => FeatureId.tabsIsolatedUi,
+    splitView => FeatureId.tabsSplitView,
     profileSwitch => FeatureId.profilesCurrentProfileControls,
     _ => null,
   };
@@ -194,6 +198,7 @@ enum MenuItemType {
     shareLink => Icons.share,
     sendToDevice => Icons.send_outlined,
     showQrCode => Icons.qr_code,
+    splitView => MdiIcons.viewSplitVertical,
     moreDisclosure => Icons.more_horiz,
     cloneTab => MdiIcons.contentDuplicate,
     cloneRegularTab => MdiIcons.tab,
@@ -266,6 +271,7 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
     items: [
       MenuItemDefault(MenuItemType.desktopMode),
       MenuItemDefault(MenuItemType.readerMode),
+      MenuItemDefault(MenuItemType.splitView),
       MenuItemDefault(MenuItemType.gestures),
     ],
   ),

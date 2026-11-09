@@ -1074,6 +1074,8 @@ class BookmarkListScreen extends HookConsumerWidget {
           parentId: currentTab?.id,
           selectTab: selectTab,
           tabMode: tabMode,
+          // A bookmark, not a link from the current page.
+          parentIsReferrer: false,
         );
 
     if (selectTab) {

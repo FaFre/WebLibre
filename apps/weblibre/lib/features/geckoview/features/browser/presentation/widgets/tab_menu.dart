@@ -34,6 +34,7 @@ import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -48,6 +49,9 @@ import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/pwa/presentation/widgets/pwa_install_button.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/widgets/reader_button.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
@@ -84,6 +88,7 @@ class TabMenu extends HookConsumerWidget {
   final bool enableNavigationButtons;
   final bool enableHierarchy;
   final bool enableReorder;
+  final bool enableSplitView;
 
   const TabMenu({
     super.key,
@@ -106,6 +111,7 @@ class TabMenu extends HookConsumerWidget {
     this.enableNavigationButtons = true,
     this.enableHierarchy = true,
     this.enableReorder = true,
+    this.enableSplitView = true,
   });
 
   @override
@@ -598,6 +604,19 @@ class TabMenu extends HookConsumerWidget {
           controller: controller,
         ),
         if (enablePinTab) _PinTabMenuItem(selectedTabId: selectedTabId),
+        // The actions run with this widget's context and ref: a menu item's
+        // onPressed fires after the menu closed and unmounted the item.
+        if (enableSplitView)
+          _SplitViewMenuItem(
+            tabId: selectedTabId,
+            onEnd: () => ref.read(splitViewControllerProvider.notifier).end(),
+            onSplitWithAnother: () async {
+              await openSplitPicker(context, ref.read, selectedTabId);
+            },
+            onShowBeside: () async {
+              await showBesideCurrentTab(context, ref.read, selectedTabId);
+            },
+          ),
         if (enableCloseTab)
           MenuItemButton(
             onPressed: () =>
@@ -626,6 +645,71 @@ class TabMenu extends HookConsumerWidget {
           ),
       ],
     );
+  }
+}
+
+/// Split view for the tab this menu is for: end the split it is in, split the
+/// current tab with another one, or show this tab beside the current one.
+///
+/// Only decides which entry applies; [TabMenu] runs it, since this widget is
+/// gone by the time a menu item's onPressed fires.
+class _SplitViewMenuItem extends ConsumerWidget {
+  final String tabId;
+  final VoidCallback onEnd;
+  final VoidCallback onSplitWithAnother;
+  final VoidCallback onShowBeside;
+
+  const _SplitViewMenuItem({
+    required this.tabId,
+    required this.onEnd,
+    required this.onSplitWithAnother,
+    required this.onShowBeside,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final shown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.isFeatureShown(FeatureId.tabsSplitView),
+      ),
+    );
+    final isMember = ref.watch(isSplitMemberProvider(tabId));
+    final currentTabId = ref.watch(selectedTabProvider);
+    final thisMode = ref.watch(
+      tabStateProvider(tabId).select((s) => s?.tabMode),
+    );
+    final currentMode = ref.watch(
+      selectedTabStateProvider.select((s) => s?.tabMode),
+    );
+
+    if (!shown) return const SizedBox.shrink();
+
+    if (isMember) {
+      return MenuItemButton(
+        onPressed: onEnd,
+        leadingIcon: const Icon(MdiIcons.closeBoxMultipleOutline),
+        child: Text(l10n.splitView_end),
+      );
+    }
+
+    if (tabId == currentTabId) {
+      return MenuItemButton(
+        onPressed: onSplitWithAnother,
+        leadingIcon: const Icon(MdiIcons.viewSplitVertical),
+        child: Text(l10n.splitView_splitWithAnotherTab),
+      );
+    }
+
+    if (currentTabId != null && canShareSplit(thisMode, currentMode)) {
+      return MenuItemButton(
+        onPressed: onShowBeside,
+        leadingIcon: const Icon(MdiIcons.viewSplitVertical),
+        child: Text(l10n.splitView_showBesideCurrentTab),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
 

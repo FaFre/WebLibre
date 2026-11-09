@@ -78,6 +78,14 @@ class BackGestureFilterFrameLayout(
      */
     private var gestureSuppressedBySelection = false
 
+    /**
+     * Whether the touch stream in flight started on the split view divider.
+     * A divider drag is a resize, never a drawn gesture, so the recognizer
+     * sits out the whole stream. Latched on ACTION_DOWN like the selection
+     * latch above.
+     */
+    private var gestureSuppressedByDivider = false
+
     init {
         // A new direction arrow was registered: restart the idle-timeout (the
         // reference add-on restarts only on a new arrow, not on every move) and
@@ -157,6 +165,19 @@ class BackGestureFilterFrameLayout(
     private fun feedGestureRecognizer(ev: MotionEvent) {
         val config = GlobalComponents.gestureConfig
         gestureRecognizer.config = config
+
+        if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
+            gestureSuppressedByDivider = GlobalComponents.components?.browserPanes
+                ?.isDividerHitOnScreen(ev.rawX, ev.rawY) == true
+        }
+        if (gestureSuppressedByDivider) {
+            if (ev.actionMasked == MotionEvent.ACTION_UP ||
+                ev.actionMasked == MotionEvent.ACTION_CANCEL
+            ) {
+                gestureSuppressedByDivider = false
+            }
+            return
+        }
 
         when (ev.actionMasked) {
             MotionEvent.ACTION_DOWN -> {

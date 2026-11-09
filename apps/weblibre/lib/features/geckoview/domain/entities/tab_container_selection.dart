@@ -31,6 +31,13 @@ sealed class TabContainerSelection {
 
   const factory TabContainerSelection.specific(ContainerData container) =
       SpecificContainerTabSelection;
+
+  /// [container] (null: unassigned) unless the URL's site is assigned to a
+  /// container, which wins, exactly as it does over the selected container.
+  /// For tabs opened from a page that is not necessarily the selected one (a
+  /// split pane), so they land in that page's container.
+  const factory TabContainerSelection.preferred(ContainerData? container) =
+      PreferredContainerTabSelection;
 }
 
 final class UseSelectedContainerTabSelection extends TabContainerSelection {
@@ -45,4 +52,10 @@ final class SpecificContainerTabSelection extends TabContainerSelection {
   final ContainerData container;
 
   const SpecificContainerTabSelection(this.container);
+}
+
+final class PreferredContainerTabSelection extends TabContainerSelection {
+  final ContainerData? container;
+
+  const PreferredContainerTabSelection(this.container);
 }

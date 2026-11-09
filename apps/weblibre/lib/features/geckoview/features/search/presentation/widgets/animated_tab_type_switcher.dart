@@ -29,6 +29,10 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
   final ValueChanged<TabType> onChanged;
   final bool showChildOption;
   final bool showIsolatedOption;
+
+  /// When set, only these types are offered (the selected one always stays
+  /// visible, so the switcher says what the tab will be).
+  final Set<TabType>? allowedTypes;
   final Color? selectedBackgroundColor;
 
   const AnimatedTabTypeSwitcher({
@@ -37,6 +41,7 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
     required this.onChanged,
     this.showChildOption = false,
     this.showIsolatedOption = true,
+    this.allowedTypes,
     this.selectedBackgroundColor,
   });
 
@@ -46,6 +51,40 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final borderColor = colorScheme.outline;
+
+    bool offered(TabType type, {bool shown = true}) =>
+        type == selected || (shown && (allowedTypes?.contains(type) ?? true));
+
+    _Segment segment(TabType type, IconData icon, String label) => _Segment(
+      tabType: type,
+      icon: icon,
+      label: label,
+      isSelected: selected == type,
+      selectedBackgroundColor: selectedBackgroundColor,
+      onTap: () => onChanged(type),
+    );
+
+    final segments = [
+      if (offered(TabType.regular))
+        segment(TabType.regular, MdiIcons.tab, l10n.search_tabTypeRegular),
+      if (offered(TabType.child, shown: showChildOption))
+        segment(TabType.child, MdiIcons.fileTree, l10n.search_tabTypeChild),
+      if (offered(TabType.private))
+        segment(
+          TabType.private,
+          MdiIcons.dominoMask,
+          l10n.search_tabTypePrivate,
+        ),
+      // An isolated selection stays visible while isolated tabs are hidden,
+      // e.g. searching from an isolated tab (P5): the switcher must say what
+      // the tab will be.
+      if (offered(TabType.isolated, shown: showIsolatedOption))
+        segment(
+          TabType.isolated,
+          MdiIcons.snowflake,
+          l10n.search_tabTypeIsolated,
+        ),
+    ];
 
     return Container(
       decoration: BoxDecoration(
@@ -58,47 +97,9 @@ class AnimatedTabTypeSwitcher extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _Segment(
-                tabType: TabType.regular,
-                icon: MdiIcons.tab,
-                label: l10n.search_tabTypeRegular,
-                isSelected: selected == TabType.regular,
-                selectedBackgroundColor: selectedBackgroundColor,
-                onTap: () => onChanged(TabType.regular),
-              ),
-              if (showChildOption || selected == TabType.child) ...[
-                _divider(borderColor),
-                _Segment(
-                  tabType: TabType.child,
-                  icon: MdiIcons.fileTree,
-                  label: l10n.search_tabTypeChild,
-                  isSelected: selected == TabType.child,
-                  selectedBackgroundColor: selectedBackgroundColor,
-                  onTap: () => onChanged(TabType.child),
-                ),
-              ],
-              _divider(borderColor),
-              _Segment(
-                tabType: TabType.private,
-                icon: MdiIcons.dominoMask,
-                label: l10n.search_tabTypePrivate,
-                isSelected: selected == TabType.private,
-                selectedBackgroundColor: selectedBackgroundColor,
-                onTap: () => onChanged(TabType.private),
-              ),
-              // An isolated selection stays visible while isolated tabs are
-              // hidden, e.g. searching from an isolated tab (P5): the
-              // switcher must say what the tab will be.
-              if (showIsolatedOption || selected == TabType.isolated) ...[
-                _divider(borderColor),
-                _Segment(
-                  tabType: TabType.isolated,
-                  icon: MdiIcons.snowflake,
-                  label: l10n.search_tabTypeIsolated,
-                  isSelected: selected == TabType.isolated,
-                  selectedBackgroundColor: selectedBackgroundColor,
-                  onTap: () => onChanged(TabType.isolated),
-                ),
+              for (final (index, segment) in segments.indexed) ...[
+                if (index > 0) _divider(borderColor),
+                segment,
               ],
             ],
           ),

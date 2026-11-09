@@ -21,5 +21,6 @@
   "contextmenu_shareImage": "Compartir imagen",
   "contextmenu_shareEmailAddress": "Compartir dirección de correo",
   "contextmenu_urlCleanedMessage": "URL limpiada",
-  "contextmenu_urlPreviewAppliedMessage": "Vista previa de la URL aplicada"
+  "contextmenu_urlPreviewAppliedMessage": "Vista previa de la URL aplicada",
+  "contextmenu_openInSplitView": "Abrir en vista dividida"
 }

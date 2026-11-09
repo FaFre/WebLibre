@@ -173,6 +173,7 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.shareLink: 'shareLink',
   MenuItemType.sendToDevice: 'sendToDevice',
   MenuItemType.showQrCode: 'showQrCode',
+  MenuItemType.splitView: 'splitView',
   MenuItemType.moreDisclosure: 'moreDisclosure',
   MenuItemType.cloneTab: 'cloneTab',
   MenuItemType.cloneRegularTab: 'cloneRegularTab',

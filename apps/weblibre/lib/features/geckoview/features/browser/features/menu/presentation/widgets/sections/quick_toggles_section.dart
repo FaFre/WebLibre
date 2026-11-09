@@ -23,6 +23,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -30,11 +32,15 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/domai
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
 
-/// The segmented Desktop / Reader / Gestures bar at the top of the sheet.
+/// The segmented Desktop / Reader / Split / Gestures bar at the top of the
+/// sheet.
 ///
 /// Only the toggles the user kept are built, and each watches its own state,
 /// so a toggle left out of the layout costs nothing: the reader, desktop and
@@ -67,6 +73,9 @@ class QuickTogglesSection extends ConsumerWidget {
             selectedTabId: selectedTabId,
           ),
           MenuItemType.readerMode => const _ReaderModeToggle(),
+          MenuItemType.splitView => _SplitViewToggle(
+            selectedTabId: selectedTabId,
+          ),
           MenuItemType.gestures when gesturesEnabled => const _GesturesToggle(),
           _ => null,
         },
@@ -147,6 +156,67 @@ class _ReaderModeToggle extends ConsumerWidget {
           await ref
               .read(readerableScreenControllerProvider.notifier)
               .toggleReaderView(!isReaderActive);
+        },
+      ),
+    );
+  }
+}
+
+/// Split view as a toggle ([toggleSplitView]). On shows this tab beside its
+/// last partner, as that split was arranged, or else beside the tab used
+/// before it; with no such tab it lets the user pick one. Off ends the split:
+/// both tabs stay open. While "Show only this page" hides the other page the
+/// toggle reads "Show both" and brings it back, rather than ending a split
+/// the user cannot see. A long press opens the split controls, or, without a
+/// split, the picker.
+class _SplitViewToggle extends ConsumerWidget {
+  final String selectedTabId;
+
+  const _SplitViewToggle({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final split = ref.watch(activeSplitPairProvider.select(splitToggleStateOf));
+
+    /// Closes the menu, then lets the user pick the page beside this one.
+    void pickPartner() {
+      Navigator.pop(context);
+      unawaited(
+        showSplitPartnerPicker(context, ref.read, sourceTabId: selectedTabId),
+      );
+    }
+
+    return _QuickToggleSegment(
+      toggle: _QuickToggle(
+        icon: MdiIcons.viewSplitVertical,
+        label: split == SplitToggleState.collapsed
+            ? AppLocalizations.of(context).splitView_showBothPages
+            : MenuItemType.splitView.label(context),
+        // Not highlighted while collapsed: a highlighted toggle reads as one
+        // a tap turns off, and this one turns the split back on screen.
+        active: split == SplitToggleState.shown,
+        onTap: () async {
+          final done = await toggleSplitView(
+            ref.read,
+            tabId: selectedTabId,
+            state: split,
+            onError: splitErrorReporter(context),
+          );
+          if (!done && context.mounted) pickPartner();
+        },
+        // The same actions as the toolbar button's long press.
+        onLongPress: () {
+          Navigator.pop(context);
+          unawaited(
+            ref
+                .read(browserActionDispatcherProvider.notifier)
+                .run(
+                  split == SplitToggleState.off
+                      ? BrowserAction.splitWithAnotherTab
+                      : BrowserAction.showSplitControls,
+                  tabId: selectedTabId,
+                ),
+          );
         },
       ),
     );
@@ -286,14 +356,19 @@ class _QuickToggleSegment extends StatelessWidget {
             children: [
               Icon(toggle.icon, color: foregroundColor, size: 22),
               const SizedBox(height: 6),
-              Text(
-                toggle.label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: foregroundColor,
-                  fontWeight: FontWeight.w500,
+              // Four toggles leave a phone about 65dp per label, which
+              // some languages' labels exceed by a few dp ("Leseansicht"):
+              // such a label shrinks a little rather than losing its end.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  toggle.label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: foregroundColor,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ],

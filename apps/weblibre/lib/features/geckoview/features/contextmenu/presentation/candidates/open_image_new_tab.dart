@@ -22,9 +22,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/utils/context_menu_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -33,7 +33,14 @@ import 'package:weblibre/l10n/generated/app_localizations.dart';
 class OpenImageInNewTab extends HookConsumerWidget {
   final HitResult hitResult;
 
-  const OpenImageInNewTab({super.key, required this.hitResult});
+  /// The tab the long press happened in.
+  final String sourceTabId;
+
+  const OpenImageInNewTab({
+    super.key,
+    required this.hitResult,
+    required this.sourceTabId,
+  });
 
   static bool isSupported(HitResult hitResult) {
     return hitResult.isImage();
@@ -47,7 +54,10 @@ class OpenImageInNewTab extends HookConsumerWidget {
       leading: const Icon(MdiIcons.tabPlus),
       title: Text(l10n.contextmenu_openImageInNewTab),
       onTap: () async {
-        final currentTab = ref.read(selectedTabStateProvider);
+        // Everything from ref before the first await: the dialog can be
+        // dismissed while the container lookup runs, which unmounts this
+        // widget.
+        final currentTab = readContextMenuSourceTab(ref, sourceTabId);
         final tabMode =
             currentTab?.tabMode ??
             TabMode.fromTabType(
@@ -55,15 +65,19 @@ class OpenImageInNewTab extends HookConsumerWidget {
                   .read(generalSettingsWithDefaultsProvider)
                   .effectiveDefaultCreateTabType,
             );
+        final tabs = ref.read(tabRepositoryProvider.notifier);
+        final containerSelection = await contextMenuContainerSelection(
+          ref,
+          sourceTabId,
+        );
 
-        final tabId = await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: hitResult.tryGetSource(),
-              parentId: currentTab?.id,
-              selectTab: false,
-              tabMode: tabMode,
-            );
+        final tabId = await tabs.addTab(
+          url: hitResult.tryGetSource(),
+          parentId: currentTab?.id,
+          selectTab: false,
+          tabMode: tabMode,
+          containerSelection: containerSelection,
+        );
 
         if (context.mounted) {
           handleBackgroundTabOpened(context, ref, tabId);

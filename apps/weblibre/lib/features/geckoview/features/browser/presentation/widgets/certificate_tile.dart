@@ -70,6 +70,9 @@ class CertificateTile extends HookConsumerWidget {
             parentId: tabState.id,
             selectTab: true,
             tabMode: tabState.tabMode,
+            // The viewer is the browser's page, not one the site links to;
+            // Gecko refuses about:certificate from web content.
+            parentIsReferrer: false,
           );
     }
 

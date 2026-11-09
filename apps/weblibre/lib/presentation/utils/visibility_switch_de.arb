@@ -10,6 +10,8 @@
   "visibilitySwitch_profilesDescription": "Getrennte Profile anlegen und zwischen ihnen wechseln",
   "visibilitySwitch_treeTabsLabel": "Tab-Baum",
   "visibilitySwitch_treeTabsDescription": "Tabs, die aus einer Seite geöffnet wurden, unter ihrem Ursprungstab anzeigen",
+  "visibilitySwitch_splitViewLabel": "Geteilte Ansicht",
+  "visibilitySwitch_splitViewDescription": "Zwei Tabs nebeneinander oder übereinander anzeigen",
   "visibilitySwitch_layoutAdvancedLabel": "Symbolleiste & Menü anpassen",
   "visibilitySwitch_layoutAdvancedDescription": "Schaltflächen der Symbolleiste, Menüreihenfolge und Gruppierung in der Tableiste festlegen",
   "visibilitySwitch_gesturesLabel": "Gesten",

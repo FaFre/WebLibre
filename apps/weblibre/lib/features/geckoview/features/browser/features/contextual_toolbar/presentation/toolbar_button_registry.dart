@@ -25,7 +25,9 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
@@ -53,11 +55,14 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/translation_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/presentation/utils/quit_browser.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -453,15 +458,22 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     },
   ),
   ToolbarButtonDefinition(
+    spec: splitViewToolbarButtonSpec,
+    icon: MdiIcons.viewSplitVertical,
+    // Hidden with split view through its action ([hiddenToolbarButtonIds]).
+    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    builder: (scope, context, ref) => scope.isPreview
+        ? IconButton(
+            onPressed: () {},
+            icon: const Icon(MdiIcons.viewSplitVertical),
+          )
+        : const _SplitViewToolbarButton(),
+  ),
+  ToolbarButtonDefinition(
     spec: toggleGesturesToolbarButtonSpec,
     icon: MdiIcons.gestureSwipe,
     // The gestures quick toggle belongs to drawn gestures, hidden with them
-    // (`switch.gestures`); the button's fallback takes its place.
-    isPrimaryAvailable: (scope, ref) => ref.watch(
-      generalSettingsShownBy(
-        isPreview: scope.isPreview,
-      ).select((s) => s.isFeatureShown(FeatureId.inputDrawnGestures)),
-    ),
+    // (`switch.gestures`) through its action ([hiddenToolbarButtonIds]).
     builder: (scope, context, ref) {
       final l10n = AppLocalizations.of(context);
       final on = ref.watch(
@@ -644,6 +656,18 @@ final Map<String, ToolbarButtonDefinition> toolbarButtonRegistryById = {
   for (final def in toolbarButtonRegistry) def.spec.id.name: def,
 };
 
+/// The buttons a toolbar leaves out under [settings]: those whose action
+/// ([ToolbarButtonId.action]) belongs to a hidden feature, the same rule the
+/// toolbar settings and the action pickers follow. Their slot goes to their
+/// fallback, or is left out, rather than greying them out the way
+/// [ToolbarButtonDefinition.isPrimaryAvailable] does for a button that is
+/// only unusable for now. Their configuration is kept, so they are back in
+/// place once the feature is shown again.
+Set<String> hiddenToolbarButtonIds(GeneralSettings settings) => {
+  for (final id in ToolbarButtonId.values)
+    if (id.action case final action? when !action.isShownIn(settings)) id.name,
+};
+
 /// Runs [action] on the selected tab's session, and nothing in a preview.
 VoidCallback _withTabSession(
   ContextualToolbarScope scope,
@@ -711,6 +735,39 @@ class _ExtensionShortcutToolbarButton extends HookConsumerWidget {
         },
         icon: const Icon(MdiIcons.puzzle),
       ),
+    );
+  }
+}
+
+/// The split view toggle, as in the browser menu ([toggleSplitView]): a long
+/// press opens the split controls, or, without a split, the picker. Both go
+/// through the dispatcher, so the button means what its action means.
+class _SplitViewToolbarButton extends ConsumerWidget {
+  const _SplitViewToolbarButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final split = ref.watch(activeSplitPairProvider.select(splitToggleStateOf));
+    final l10n = AppLocalizations.of(context);
+
+    void run(BrowserAction action) => unawaited(
+      ref.read(browserActionDispatcherProvider.notifier).run(action),
+    );
+
+    return IconButton(
+      isSelected: split == SplitToggleState.shown,
+      tooltip: switch (split) {
+        SplitToggleState.off => ToolbarButtonId.splitView.label(context),
+        SplitToggleState.shown => l10n.splitView_end,
+        SplitToggleState.collapsed => l10n.splitView_showBothPages,
+      },
+      onPressed: () => run(BrowserAction.splitView),
+      onLongPress: () => run(
+        split == SplitToggleState.off
+            ? BrowserAction.splitWithAnotherTab
+            : BrowserAction.showSplitControls,
+      ),
+      icon: const Icon(MdiIcons.viewSplitVertical),
     );
   }
 }

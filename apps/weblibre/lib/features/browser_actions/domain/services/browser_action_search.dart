@@ -58,6 +58,8 @@ const searchableBrowserActions = <BrowserAction>{
   BrowserAction.togglePinTab,
   BrowserAction.closeTab,
   BrowserAction.reopenClosedTab,
+  BrowserAction.splitWithAnotherTab,
+  BrowserAction.endSplitView,
   // Open
   BrowserAction.showHistory,
   BrowserAction.showBookmarks,

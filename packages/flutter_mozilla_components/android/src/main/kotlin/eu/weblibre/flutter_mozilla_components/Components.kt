@@ -24,6 +24,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSyncStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabContentEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.ReaderViewController
+import eu.weblibre.flutter_mozilla_components.split.BrowserPanes
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.concept.engine.selection.SelectionActionDelegate
 import mozilla.components.feature.downloads.DefaultFileSizeFormatter
@@ -85,7 +86,12 @@ class Components(val profileApplicationContext: ProfileContext,
     internal val existingPush: Push?
         get() = pushDelegate.takeIf { it.isInitialized() }?.value
 
-    var mainBrowserEngineView: EngineView? = null
+    /**
+     * The main browser's engine views (one, or two in split view), while the
+     * browser fragment's view exists. Custom Tabs and PWAs keep their own
+     * [externalAppEngineView].
+     */
+    var browserPanes: BrowserPanes? = null
     var externalAppEngineView: EngineView? = null
 
     var activeEngineView: EngineView? = null

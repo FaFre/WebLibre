@@ -17,12 +17,14 @@ import mozilla.components.support.base.feature.UserInteractionHandler
  * Fragment used for browsing the web within the main app.
  */
 class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
+    /** The main browser presents its tabs in split panes (one, or two). */
+    override val usesSplitPanes: Boolean = true
+
+    /** Called once per pane: the first on setup, the second on the first split. */
     override fun createEngine(components: Components): EngineView {
         //We cannot introduce here our wrapped context since a activity type is required to make features work correctly like context menu
         return components.core.engine.createView(requireContext()).apply {
            selectionActionDelegate = components.selectionAction
-        }.also { engineView ->
-            components.mainBrowserEngineView = engineView
         }
     }
 
@@ -43,13 +45,6 @@ class BrowserFragment() : BaseBrowserFragment(), UserInteractionHandler {
 
     override fun onBackPressed(): Boolean =
         super.readerViewFeature.onBackPressed() || super.onBackPressed()
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        // Same reason as the base cleanup: this can run before components
-        // ever existed.
-        GlobalComponents.components?.mainBrowserEngineView = null
-    }
 
     companion object {
         fun create(sessionId: String? = null) = BrowserFragment().apply {

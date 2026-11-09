@@ -295,5 +295,6 @@
   "browser_moveTabUp": "Tab nach oben verschieben",
   "browser_moveTabDown": "Tab nach unten verschieben",
   "browser_moveTabLeft": "Tab nach links verschieben",
-  "browser_moveTabRight": "Tab nach rechts verschieben"
+  "browser_moveTabRight": "Tab nach rechts verschieben",
+  "browser_tabPickerNothingHere": "Hier gibt es keine Tabs zur Auswahl"
 }

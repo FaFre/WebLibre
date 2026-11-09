@@ -544,7 +544,8 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         private: Boolean,
         historyMetadata: PigeonHistoryMetadataKey?,
         additionalHeaders: Map<String, String>?,
-        excludeFromHistory: Boolean
+        excludeFromHistory: Boolean,
+        parentIsReferrer: Boolean
     ): String {
         try {
             val loadFlags = EngineSession.LoadUrlFlags.select(flags.value.toInt())
@@ -590,7 +591,10 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                         url = url,
                         flags = loadFlags,
                         additionalHeaders = additionalHeaders,
-                        includeParent = true
+                        // With the parent included, Gecko loads the page with
+                        // the parent page as triggering principal; content may
+                        // not link to privileged about: pages that way.
+                        includeParent = parentIsReferrer
                     )
                 )
             }

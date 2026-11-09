@@ -53,6 +53,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/sta
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_home.dart';
 import 'package:weblibre/features/geckoview/features/history/domain/repositories/history.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_view_host.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -455,99 +456,108 @@ class _BrowserViewState extends ConsumerState<BrowserView>
               // Keys the page should get would otherwise be taken by the
               // app's default shortcuts; see [WebContentKeyPassthrough].
               child: WebContentKeyPassthrough(
-                child: GeckoView(
-                  // Reports when the native container enters the window, which
-                  // under the [Offstage] above is not until the home surface is
-                  // dismissed. [GeckoView] attaches the browser fragment on every
-                  // such report, so an engine kept alive but unpainted for the
-                  // whole of startup still gets its fragment the moment it is
-                  // shown. See https://github.com/FaFre/WebLibre/issues/557.
-                  viewReadyEvents: ref
-                      .read(eventServiceProvider)
-                      .viewReadyStateEvents,
-                  isPainted: isEnginePainted,
-                  postInitializationStep: () async {
-                    await widget.postInitializationStep?.call();
+                // Measures the platform view for split view and connects the
+                // native split chrome.
+                child: SplitViewHost(
+                  child: GeckoView(
+                    // Reports when the native container enters the window, which
+                    // under the [Offstage] above is not until the home surface is
+                    // dismissed. [GeckoView] attaches the browser fragment on every
+                    // such report, so an engine kept alive but unpainted for the
+                    // whole of startup still gets its fragment the moment it is
+                    // shown. See https://github.com/FaFre/WebLibre/issues/557.
+                    viewReadyEvents: ref
+                        .read(eventServiceProvider)
+                        .viewReadyStateEvents,
+                    isPainted: isEnginePainted,
+                    postInitializationStep: () async {
+                      await widget.postInitializationStep?.call();
 
-                    if (!_initializationCompleter.isCompleted) {
-                      _initializationCompleter.complete();
+                      if (!_initializationCompleter.isCompleted) {
+                        _initializationCompleter.complete();
 
-                      const quickActions = QuickActions();
+                        const quickActions = QuickActions();
 
-                      //Debounce: https://github.com/flutter/flutter/issues/131121
-                      DateTime? lastAction;
-                      await quickActions.initialize((type) async {
-                        if (lastAction == null ||
-                            DateTime.now().difference(lastAction!) >
-                                const Duration(seconds: 5)) {
-                          if (type == 'new_tab') {
-                            lastAction = DateTime.now();
+                        //Debounce: https://github.com/flutter/flutter/issues/131121
+                        DateTime? lastAction;
+                        await quickActions.initialize((type) async {
+                          if (lastAction == null ||
+                              DateTime.now().difference(lastAction!) >
+                                  const Duration(seconds: 5)) {
+                            if (type == 'new_tab') {
+                              lastAction = DateTime.now();
 
-                            final router = await ref.read(
-                              routerProvider.future,
-                            );
-                            const route = SearchRoute(tabType: TabType.regular);
+                              final router = await ref.read(
+                                routerProvider.future,
+                              );
+                              const route = SearchRoute(
+                                tabType: TabType.regular,
+                              );
 
-                            await router.push(route.location);
-                          } else if (type == 'new_private_tab') {
-                            lastAction = DateTime.now();
+                              await router.push(route.location);
+                            } else if (type == 'new_private_tab') {
+                              lastAction = DateTime.now();
 
-                            final router = await ref.read(
-                              routerProvider.future,
-                            );
-                            const route = SearchRoute(tabType: TabType.private);
+                              final router = await ref.read(
+                                routerProvider.future,
+                              );
+                              const route = SearchRoute(
+                                tabType: TabType.private,
+                              );
 
-                            await router.push(route.location);
-                          } else if (type == 'new_isolated_tab') {
-                            final settings = ref.read(
-                              generalSettingsWithDefaultsProvider,
-                            );
-                            if (!settings.isolatedTabEntryPointsShown) {
-                              return;
+                              await router.push(route.location);
+                            } else if (type == 'new_isolated_tab') {
+                              final settings = ref.read(
+                                generalSettingsWithDefaultsProvider,
+                              );
+                              if (!settings.isolatedTabEntryPointsShown) {
+                                return;
+                              }
+
+                              lastAction = DateTime.now();
+
+                              final router = await ref.read(
+                                routerProvider.future,
+                              );
+                              const route = SearchRoute(
+                                tabType: TabType.isolated,
+                              );
+
+                              await router.push(route.location);
+                            } else {
+                              throw UnimplementedError(
+                                'Unknown quick action shortcut type',
+                              );
                             }
-
-                            lastAction = DateTime.now();
-
-                            final router = await ref.read(
-                              routerProvider.future,
-                            );
-                            const route = SearchRoute(
-                              tabType: TabType.isolated,
-                            );
-
-                            await router.push(route.location);
-                          } else {
-                            throw UnimplementedError(
-                              'Unknown quick action shortcut type',
-                            );
                           }
-                        }
-                      });
+                        });
 
-                      final settings = ref.read(
-                        generalSettingsWithDefaultsProvider,
-                      );
-                      await quickActions.setShortcutItems([
-                        ShortcutItem(
-                          type: 'new_tab',
-                          localizedTitle: l10n.browser_quickActionNewTab,
-                          icon: 'mdi_icon_tab',
-                        ),
-                        ShortcutItem(
-                          type: 'new_private_tab',
-                          localizedTitle: l10n.browser_quickActionNewPrivateTab,
-                          icon: 'mdi_icon_domino_mask',
-                        ),
-                        if (settings.isolatedTabEntryPointsShown)
+                        final settings = ref.read(
+                          generalSettingsWithDefaultsProvider,
+                        );
+                        await quickActions.setShortcutItems([
                           ShortcutItem(
-                            type: 'new_isolated_tab',
-                            localizedTitle:
-                                l10n.browser_quickActionNewIsolatedTab,
-                            icon: 'mdi_icon_snowflake',
+                            type: 'new_tab',
+                            localizedTitle: l10n.browser_quickActionNewTab,
+                            icon: 'mdi_icon_tab',
                           ),
-                      ]);
-                    }
-                  },
+                          ShortcutItem(
+                            type: 'new_private_tab',
+                            localizedTitle:
+                                l10n.browser_quickActionNewPrivateTab,
+                            icon: 'mdi_icon_domino_mask',
+                          ),
+                          if (settings.isolatedTabEntryPointsShown)
+                            ShortcutItem(
+                              type: 'new_isolated_tab',
+                              localizedTitle:
+                                  l10n.browser_quickActionNewIsolatedTab,
+                              icon: 'mdi_icon_snowflake',
+                            ),
+                        ]);
+                      }
+                    },
+                  ),
                 ),
               ),
             ),

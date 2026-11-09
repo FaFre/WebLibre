@@ -1261,5 +1261,9 @@
   "browser_moveTabRight": "Move tab right",
   "@browser_moveTabRight": {
     "description": "Screen reader action on a tab in the tab tray's grid: moves it one place to the right, instead of dragging it."
+  },
+  "browser_tabPickerNothingHere": "No tabs to choose here",
+  "@browser_tabPickerNothingHere": {
+    "description": "Shown in the tab tray while it is used to choose a tab (for example the page to show in split view), when the selected container or filter has no tab that can be chosen."
   }
 }

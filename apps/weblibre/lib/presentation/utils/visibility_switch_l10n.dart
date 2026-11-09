@@ -31,6 +31,7 @@ extension VisibilitySwitchL10n on VisibilitySwitch {
       VisibilitySwitch.connections => l10n.visibilitySwitch_connectionsLabel,
       VisibilitySwitch.profiles => l10n.visibilitySwitch_profilesLabel,
       VisibilitySwitch.treeTabs => l10n.visibilitySwitch_treeTabsLabel,
+      VisibilitySwitch.splitView => l10n.visibilitySwitch_splitViewLabel,
       VisibilitySwitch.layoutAdvanced =>
         l10n.visibilitySwitch_layoutAdvancedLabel,
       VisibilitySwitch.gestures => l10n.visibilitySwitch_gesturesLabel,
@@ -57,6 +58,7 @@ extension VisibilitySwitchL10n on VisibilitySwitch {
         l10n.visibilitySwitch_connectionsDescription,
       VisibilitySwitch.profiles => l10n.visibilitySwitch_profilesDescription,
       VisibilitySwitch.treeTabs => l10n.visibilitySwitch_treeTabsDescription,
+      VisibilitySwitch.splitView => l10n.visibilitySwitch_splitViewDescription,
       VisibilitySwitch.layoutAdvanced =>
         l10n.visibilitySwitch_layoutAdvancedDescription,
       VisibilitySwitch.gestures => l10n.visibilitySwitch_gesturesDescription,
@@ -78,6 +80,7 @@ extension VisibilitySwitchL10n on VisibilitySwitch {
     VisibilitySwitch.connections => MdiIcons.lanConnect,
     VisibilitySwitch.profiles => Icons.people_outline,
     VisibilitySwitch.treeTabs => MdiIcons.fileTreeOutline,
+    VisibilitySwitch.splitView => MdiIcons.viewSplitVertical,
     VisibilitySwitch.layoutAdvanced => MdiIcons.viewDashboardEditOutline,
     VisibilitySwitch.gestures => MdiIcons.gestureSwipe,
     VisibilitySwitch.keyboardCustomization => MdiIcons.keyboardOutline,

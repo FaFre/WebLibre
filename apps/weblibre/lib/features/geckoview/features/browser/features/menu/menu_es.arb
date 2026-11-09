@@ -150,5 +150,6 @@
   "menu_connectionUnused": "No lo usa ninguna ruta",
   "menu_connectionUsageContainerCount": "{count, plural, =1{1 contenedor} other{{count} contenedores}}",
   "menu_connectionUsageIsolatedTabCount": "{count, plural, =1{1 pestaña aislada} other{{count} pestañas aisladas}}",
-  "menu_connectionUsageBlocked": "Bloqueado"
+  "menu_connectionUsageBlocked": "Bloqueado",
+  "menu_itemSplitView": "Dividir"
 }

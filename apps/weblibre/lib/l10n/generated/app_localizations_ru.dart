@@ -1563,6 +1563,59 @@ class AppLocalizationsRu extends AppLocalizations {
       'Открыть копию текущей вкладки';
 
   @override
+  String get browserActions_splitViewTitle => 'Разделённый экран';
+
+  @override
+  String get browserActions_splitViewDescription =>
+      'Показать две страницы сразу или вернуться к одной';
+
+  @override
+  String get browserActions_splitWithAnotherTabTitle =>
+      'Разделить с другой вкладкой';
+
+  @override
+  String get browserActions_splitWithAnotherTabDescription =>
+      'Выбрать страницу, которая будет показана рядом с текущей';
+
+  @override
+  String get browserActions_toggleSplitSinglePageTitle =>
+      'Одна / обе страницы экрана';
+
+  @override
+  String get browserActions_toggleSplitSinglePageDescription =>
+      'Скрыть другую страницу разделённого экрана или вернуть её';
+
+  @override
+  String get browserActions_showSplitControlsTitle =>
+      'Настройки разделённого экрана';
+
+  @override
+  String get browserActions_showSplitControlsDescription =>
+      'Изменить макет, размеры и страницы разделённого экрана';
+
+  @override
+  String get browserActions_focusOtherSplitPaneTitle =>
+      'Перейти к другой странице';
+
+  @override
+  String get browserActions_focusOtherSplitPaneDescription =>
+      'Переместить фокус на другую страницу разделённого экрана';
+
+  @override
+  String get browserActions_swapSplitPanesTitle => 'Поменять страницы местами';
+
+  @override
+  String get browserActions_swapSplitPanesDescription =>
+      'Поменять местами две страницы';
+
+  @override
+  String get browserActions_endSplitViewTitle => 'Выйти из разделённого экрана';
+
+  @override
+  String get browserActions_endSplitViewDescription =>
+      'Снова показывать одну страницу; обе вкладки останутся открытыми';
+
+  @override
   String get browserActions_nextTabTitle => 'Следующая вкладка';
 
   @override
@@ -2149,6 +2202,34 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get browserActions_duplicateTabKeywords =>
       'клонировать вкладку, копировать вкладку';
+
+  @override
+  String get browserActions_splitViewKeywords =>
+      'разделить экран, рядом, две страницы, многозадачность, split screen, split view';
+
+  @override
+  String get browserActions_splitWithAnotherTabKeywords =>
+      'страница рядом, выбрать вкладку, заменить страницу, split';
+
+  @override
+  String get browserActions_toggleSplitSinglePageKeywords =>
+      'только эта страница, обе страницы, скрыть, во весь экран';
+
+  @override
+  String get browserActions_showSplitControlsKeywords =>
+      'макет, настройки, размер, разделитель';
+
+  @override
+  String get browserActions_focusOtherSplitPaneKeywords =>
+      'другая панель, другая сторона, фокус, split';
+
+  @override
+  String get browserActions_swapSplitPanesKeywords =>
+      'поменять местами, поменять стороны, swap';
+
+  @override
+  String get browserActions_endSplitViewKeywords =>
+      'закрыть разделение, одна страница, выйти, unsplit';
 
   @override
   String get browserActions_togglePinTabKeywords =>
@@ -3624,6 +3705,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browser_moveTabRight => 'Переместить вкладку вправо';
 
   @override
+  String get browser_tabPickerNothingHere => 'Здесь нет вкладок для выбора';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Домой';
 
   @override
@@ -4244,6 +4328,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menu_connectionUsageBlocked => 'Заблокировано';
 
   @override
+  String get menu_itemSplitView => 'Разделить';
+
+  @override
   String get contextmenu_openInNewTab => 'Открыть в новой вкладке';
 
   @override
@@ -4258,6 +4345,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get contextmenu_newIsolatedTab => 'Новая изолированная вкладка';
+
+  @override
+  String get contextmenu_openInSplitView => 'Открыть в разделённом экране';
 
   @override
   String get contextmenu_openImageInNewTab =>
@@ -5352,6 +5442,87 @@ class AppLocalizationsRu extends AppLocalizations {
   String search_deletedFromHistory(String site) {
     return 'Удалено из истории: $site';
   }
+
+  @override
+  String get splitView_title => 'Разделённый экран';
+
+  @override
+  String get splitView_splitWithAnotherTab => 'Разделить с другой вкладкой…';
+
+  @override
+  String get splitView_showBesideCurrentTab =>
+      'Показать рядом с текущей вкладкой';
+
+  @override
+  String get splitView_end => 'Выйти из разделённого экрана';
+
+  @override
+  String get splitView_endSubtitle => 'Обе вкладки останутся открытыми';
+
+  @override
+  String get splitView_layout => 'Расположение';
+
+  @override
+  String get splitView_layoutAutomatic => 'Автоматически';
+
+  @override
+  String get splitView_layoutSideBySide => 'Рядом';
+
+  @override
+  String get splitView_layoutStacked => 'Стопкой';
+
+  @override
+  String get splitView_showOnlyThisPage => 'Показывать только эту страницу';
+
+  @override
+  String get splitView_showBothPages => 'Показать обе';
+
+  @override
+  String get splitView_showingOnlyThisPage => 'Показана только эта страница';
+
+  @override
+  String get splitView_swapSides => 'Поменять местами';
+
+  @override
+  String get splitView_equalSizes => 'Одинаковый размер';
+
+  @override
+  String get splitView_replaceOtherPage => 'Заменить другую страницу…';
+
+  @override
+  String get splitView_dividerDescription => 'Разделитель экрана';
+
+  @override
+  String get splitView_dividerOptions => 'Параметры разделённого экрана';
+
+  @override
+  String get splitView_crashedTitle => 'Произошёл сбой страницы';
+
+  @override
+  String get splitView_crashedReload => 'Перезагрузить';
+
+  @override
+  String get splitView_couldNotOpen => 'Не удалось разделить экран';
+
+  @override
+  String get splitView_mixedPrivacy =>
+      'Приватные и обычные вкладки нельзя показывать вместе';
+
+  @override
+  String get splitView_routingNotReady =>
+      'Подключение этого контейнера ещё не готово';
+
+  @override
+  String get splitView_noSplitView => 'Экран не разделён';
+
+  @override
+  String get splitView_pickerTitle => 'Показать рядом';
+
+  @override
+  String get splitView_memberMark => 'В разделённом экране';
+
+  @override
+  String get splitView_replaceTitle => 'Заменить другую страницу';
 
   @override
   String get tabs_actionSelect => 'Выбрать';
@@ -14621,6 +14792,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get visibilitySwitch_treeTabsDescription =>
       'Показ вкладок, открытых со страницы, под вкладкой, из которой они открыты';
+
+  @override
+  String get visibilitySwitch_splitViewLabel => 'Разделённый экран';
+
+  @override
+  String get visibilitySwitch_splitViewDescription =>
+      'Показ двух вкладок рядом или одна над другой';
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel =>

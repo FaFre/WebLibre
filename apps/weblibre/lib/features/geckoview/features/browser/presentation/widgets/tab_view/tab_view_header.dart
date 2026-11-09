@@ -37,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_enums_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/container_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/enable_ai_tab_suggestions_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_pick.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_chips.dart';
@@ -50,10 +51,35 @@ import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Widget for tab filters (container chips with synced option)
-class _TabFilters extends ConsumerWidget {
+class _TabFilters extends StatelessWidget {
   final TabsViewMode tabsViewMode;
 
   const _TabFilters({required this.tabsViewMode});
+
+  @override
+  Widget build(BuildContext context) {
+    // While picking, the chips choose the picker's own container: nothing
+    // else is offered, and the browser's container stays as it is.
+    final pick = TabTrayPick.maybeOf(context);
+    if (pick != null) {
+      return ContainerChips(
+        selectedContainer: pick.container,
+        onSelected: pick.selectContainer,
+        onDeleted: (_) => pick.selectContainer(null),
+        displayMenu: false,
+        enableDragAndDrop: false,
+      );
+    }
+
+    return _BrowserTabFilters(tabsViewMode: tabsViewMode);
+  }
+}
+
+/// The tray's own filters: the browser's container chips and the synced chip.
+class _BrowserTabFilters extends ConsumerWidget {
+  final TabsViewMode tabsViewMode;
+
+  const _BrowserTabFilters({required this.tabsViewMode});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -195,16 +221,25 @@ class _TabTypeFilterBar extends ConsumerWidget {
       ),
     );
 
+    // While picking, the picker's own filter, over the kinds it offers.
+    final pick = TabTrayPick.maybeOf(context);
+    final current = pick?.typeFilter ?? selected;
     final types = [
-      TabTypeFilter.all,
-      TabTypeFilter.regularOnly,
-      TabTypeFilter.privateOnly,
-      // Hidden with the rest of the isolated tab UI, unless there is something
-      // to show or it is the filter in force.
-      if (showIsolatedTabUi ||
-          openTypes.contains(TabTypeFilter.isolatedOnly) ||
-          selected == TabTypeFilter.isolatedOnly)
-        TabTypeFilter.isolatedOnly,
+      for (final type
+          in pick?.typeFilters ??
+              const [
+                TabTypeFilter.all,
+                TabTypeFilter.regularOnly,
+                TabTypeFilter.privateOnly,
+                TabTypeFilter.isolatedOnly,
+              ])
+        // Isolated is hidden with the rest of the isolated tab UI, unless
+        // there is something to show or it is the filter in force.
+        if (type != TabTypeFilter.isolatedOnly ||
+            showIsolatedTabUi ||
+            openTypes.contains(TabTypeFilter.isolatedOnly) ||
+            current == TabTypeFilter.isolatedOnly)
+          type,
     ];
 
     return SizedBox(
@@ -231,10 +266,16 @@ class _TabTypeFilterBar extends ConsumerWidget {
                   },
                   showCheckmark: false,
                   label: Text(type.label(context)),
-                  selected: selected == type,
-                  onSelected: (_) => ref
-                      .read(tabViewFilterControllerProvider.notifier)
-                      .setTabTypeFilter(type),
+                  selected: current == type,
+                  onSelected: (_) {
+                    if (pick != null) {
+                      pick.selectTypeFilter(type);
+                    } else {
+                      ref
+                          .read(tabViewFilterControllerProvider.notifier)
+                          .setTabTypeFilter(type);
+                    }
+                  },
                 ),
               ),
             ),
@@ -288,6 +329,7 @@ class TabViewHeader extends HookConsumerWidget {
     );
 
     final scrolledUnder = useValueListenable(this.scrolledUnder);
+    final pick = TabTrayPick.maybeOf(context);
 
     final isSyncedScope = ref.watch(
       effectiveTabsTrayScopeProvider.select(
@@ -426,11 +468,16 @@ class TabViewHeader extends HookConsumerWidget {
                     ),
                   ),
                 )
+              else if (pick != null)
+                _TabPickTitleRow(title: pick.request.title, onClose: onClose)
               else if (!actionsAtBottom)
                 _TabViewActionRow(tabsViewMode: tabsViewMode),
               // Under the search field only, as in an M3 search view.
               if (searchMode) const Divider(),
-              if (tabTypeFilterBarVisible) const _TabTypeFilterBar(),
+              if (pick != null
+                  ? pick.typeFilters.isNotEmpty
+                  : tabTypeFilterBarVisible)
+                const _TabTypeFilterBar(),
               // Always: the Synced chip and the way back to local tabs live
               // here too, and while containers are hidden ContainerChips
               // reduces itself to navigation, or to nothing (P5).
@@ -440,6 +487,47 @@ class TabViewHeader extends HookConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The top row of the tray while it picks a tab: what the pick is for, a
+/// way out, and the tray's search. The tray's actions (filters, sort, view
+/// mode, closing tabs) belong to the tray itself and are left out.
+class _TabPickTitleRow extends ConsumerWidget {
+  final String title;
+  final VoidCallback onClose;
+
+  const _TabPickTitleRow({required this.title, required this.onClose});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+
+    return Row(
+      children: [
+        IconButton(
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          onPressed: onClose,
+          icon: const Icon(Icons.close),
+        ),
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        IconButton(
+          icon: const Icon(MdiIcons.tabSearch),
+          tooltip: l10n.browser_tooltipSearchInsideTabs,
+          onPressed: () {
+            ref.read(tabViewSearchModeControllerProvider.notifier).show();
+          },
+        ),
+      ],
     );
   }
 }

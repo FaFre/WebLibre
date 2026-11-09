@@ -4,6 +4,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_server.dart';
@@ -16,14 +17,31 @@ import 'package:weblibre/features/web_search/domain/services/capture_server.dart
 /// selected* tab's mode/container instead, ignoring the search UI.
 class WebSearchOpenTarget {
   final TabMode tabMode;
-  final TabContainerSelection containerSelection;
+
+  /// Null only for a split partner with no container picked: it goes to its
+  /// source tab's container ([SplitPickerDestination.containerSelection]),
+  /// read when the tab is opened.
+  final TabContainerSelection? containerSelection;
   final String? parentId;
+
+  /// When set, the result is shown beside this tab in split view instead of
+  /// alone (the search screen is picking a split view page).
+  final String? splitWithTabId;
 
   const WebSearchOpenTarget({
     required this.tabMode,
-    required this.containerSelection,
+    required TabContainerSelection this.containerSelection,
     this.parentId,
-  });
+  }) : splitWithTabId = null;
+
+  /// A result shown beside [sourceTabId]: in [containerSelection] when the
+  /// user picked a container, otherwise in the source tab's.
+  const WebSearchOpenTarget.splitPartner({
+    required this.tabMode,
+    required String sourceTabId,
+    this.containerSelection,
+    this.parentId,
+  }) : splitWithTabId = sourceTabId;
 }
 
 abstract interface class WebSearchTabOpener {
@@ -60,7 +78,8 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
     Uri uri, {
     required WebSearchOpenTarget target,
   }) async {
-    await ref
+    final split = _splitDestination(context, ref, target);
+    final tabId = await ref
         .read(tabRepositoryProvider.notifier)
         .addTab(
           url: uri,
@@ -69,15 +88,21 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
           onBackBehavior: ReturnToSearchTabBackBehavior(
             tabType: target.tabMode.toTabType(),
           ),
-          selectTab: true,
-          containerSelection: target.containerSelection,
+          selectTab: split == null,
+          containerSelection:
+              await split?.containerSelection() ?? target.containerSelection!,
+          // A result picked in the search screen, not a link from the
+          // parent's page.
+          parentIsReferrer: false,
         );
 
-    // Push (not go/replace) so the SearchRoute stays underneath. Pressing
-    // back from the freshly opened tab pops back to the search results
-    // instead of closing the tab. metaSearchControllerProvider is
-    // keepAlive, so results survive the navigation either way.
-    if (context.mounted) {
+    if (split != null) {
+      await split.present(tabId);
+    } else if (context.mounted) {
+      // Push (not go/replace) so the SearchRoute stays underneath. Pressing
+      // back from the freshly opened tab pops back to the search results
+      // instead of closing the tab. metaSearchControllerProvider is
+      // keepAlive, so results survive the navigation either way.
       const BrowserRoute().go(context);
     }
   }
@@ -97,6 +122,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
     // (e.g. github.com triggers the "Open in GitHub app?" dialog) fires
     // before our interceptor can redirect, and a cancel falls back to
     // loading the live site. Load the loopback capture URL directly.
+    final split = _splitDestination(context, ref, target);
     final captureUrl = await ref.read(captureServerProvider).publish(captureId);
 
     final tabId = await ref
@@ -105,11 +131,12 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
           url: captureUrl,
           tabMode: target.tabMode,
           parentId: target.parentId,
-          containerSelection: target.containerSelection,
+          containerSelection:
+              await split?.containerSelection() ?? target.containerSelection!,
           onBackBehavior: ReturnToSearchTabBackBehavior(
             tabType: target.tabMode.toTabType(),
           ),
-          selectTab: true,
+          selectTab: split == null,
           startLoading: false,
         );
 
@@ -135,8 +162,27 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
         .read(tabSessionProvider(tabId: tabId).notifier)
         .loadUrl(url: captureUrl);
 
-    if (context.mounted) {
+    if (split != null) {
+      await split.present(tabId);
+    } else if (context.mounted) {
       const BrowserRoute().go(context);
     }
   }
+}
+
+/// Where a result shown beside a source tab goes, read while the search
+/// screen is still there; null when [target] is not a split partner.
+SplitPickerDestination? _splitDestination(
+  BuildContext context,
+  WidgetRef ref,
+  WebSearchOpenTarget target,
+) {
+  final source = target.splitWithTabId;
+  if (source == null) return null;
+  return SplitPickerDestination.capture(
+    context,
+    ref.read,
+    sourceTabId: source,
+    pickedContainer: target.containerSelection,
+  );
 }

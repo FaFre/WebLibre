@@ -295,5 +295,6 @@
   "browser_moveTabUp": "Переместить вкладку вверх",
   "browser_moveTabDown": "Переместить вкладку вниз",
   "browser_moveTabLeft": "Переместить вкладку влево",
-  "browser_moveTabRight": "Переместить вкладку вправо"
+  "browser_moveTabRight": "Переместить вкладку вправо",
+  "browser_tabPickerNothingHere": "Здесь нет вкладок для выбора"
 }

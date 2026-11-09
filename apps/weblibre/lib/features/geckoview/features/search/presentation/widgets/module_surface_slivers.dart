@@ -68,6 +68,10 @@ class ModuleSurfaceCallbacks {
   final VoidCallback? onViewTabs;
   final VoidCallback? onResumeLastTab;
 
+  /// Open tabs the surface must not offer: in the split view picker, the
+  /// source and the tabs of the other privacy class.
+  final Set<String> excludedTabIds;
+
   const ModuleSurfaceCallbacks({
     required this.onUriSelected,
     required this.onTabSelected,
@@ -80,6 +84,7 @@ class ModuleSurfaceCallbacks {
     this.onNewTab,
     this.onViewTabs,
     this.onResumeLastTab,
+    this.excludedTabIds = const {},
   });
 }
 
@@ -104,8 +109,10 @@ Map<SearchModuleType, Widget Function()> buildSurfaceModuleBuilders({
     SearchModuleType.recentArticles: () => RecentFeedArticlesSection(
       onArticleSelected: callbacks.onArticleSelected,
     ),
-    SearchModuleType.recentTabs: () =>
-        RecentTabsSection(onTabSelected: callbacks.onTabSelected),
+    SearchModuleType.recentTabs: () => RecentTabsSection(
+      onTabSelected: callbacks.onTabSelected,
+      excludedTabIds: callbacks.excludedTabIds,
+    ),
     SearchModuleType.recentHistory: () =>
         RecentHistorySection(onUriSelected: callbacks.onUriSelected),
     SearchModuleType.historyHighlights: () =>

@@ -245,6 +245,10 @@ class TabStates extends _$TabStates {
     _closedTabSweeps.add(timer);
   }
 
+  /// Whether [tabId] is closed and only retained here for a while: its
+  /// state still answers [awaitContentState], but the tab is gone.
+  bool isClosed(String tabId) => _closedTabs.containsKey(tabId);
+
   void _dropClosedTabs(Set<String> tabIds) {
     if (tabIds.isEmpty || !ref.mounted) {
       return;

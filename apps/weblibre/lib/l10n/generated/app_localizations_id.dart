@@ -1553,6 +1553,58 @@ class AppLocalizationsId extends AppLocalizations {
       'Buka salinan tab saat ini';
 
   @override
+  String get browserActions_splitViewTitle => 'Tampilan Terpisah';
+
+  @override
+  String get browserActions_splitViewDescription =>
+      'Tampilkan dua halaman sekaligus, atau kembali ke satu';
+
+  @override
+  String get browserActions_splitWithAnotherTabTitle => 'Pisah dengan Tab Lain';
+
+  @override
+  String get browserActions_splitWithAnotherTabDescription =>
+      'Pilih halaman yang ditampilkan di samping halaman saat ini';
+
+  @override
+  String get browserActions_toggleSplitSinglePageTitle =>
+      'Tampilkan Satu / Kedua Halaman';
+
+  @override
+  String get browserActions_toggleSplitSinglePageDescription =>
+      'Sembunyikan halaman lain dalam tampilan terpisah, atau tampilkan lagi';
+
+  @override
+  String get browserActions_showSplitControlsTitle =>
+      'Kontrol Tampilan Terpisah';
+
+  @override
+  String get browserActions_showSplitControlsDescription =>
+      'Atur tata letak, ukuran, dan halaman tampilan terpisah';
+
+  @override
+  String get browserActions_focusOtherSplitPaneTitle =>
+      'Fokus Halaman Terpisah Lain';
+
+  @override
+  String get browserActions_focusOtherSplitPaneDescription =>
+      'Pindahkan fokus ke halaman lain dalam tampilan terpisah';
+
+  @override
+  String get browserActions_swapSplitPanesTitle => 'Tukar Halaman Terpisah';
+
+  @override
+  String get browserActions_swapSplitPanesDescription =>
+      'Tukar posisi kedua halaman';
+
+  @override
+  String get browserActions_endSplitViewTitle => 'Akhiri Tampilan Terpisah';
+
+  @override
+  String get browserActions_endSplitViewDescription =>
+      'Tampilkan satu halaman lagi; kedua tab tetap terbuka';
+
+  @override
   String get browserActions_nextTabTitle => 'Tab Berikutnya';
 
   @override
@@ -2128,6 +2180,34 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get browserActions_duplicateTabKeywords =>
       'gandakan tab, salin tab, clone tab, duplicate';
+
+  @override
+  String get browserActions_splitViewKeywords =>
+      'layar terpisah, berdampingan, dua halaman, multitugas, split screen, split view';
+
+  @override
+  String get browserActions_splitWithAnotherTabKeywords =>
+      'halaman di samping, pilih tab, ganti halaman, split';
+
+  @override
+  String get browserActions_toggleSplitSinglePageKeywords =>
+      'hanya halaman ini, kedua halaman, sembunyikan, layar penuh';
+
+  @override
+  String get browserActions_showSplitControlsKeywords =>
+      'tata letak, pengaturan, ukuran, pembatas';
+
+  @override
+  String get browserActions_focusOtherSplitPaneKeywords =>
+      'pindah panel, sisi lain, fokus, split';
+
+  @override
+  String get browserActions_swapSplitPanesKeywords =>
+      'tukar sisi, ganti sisi, swap';
+
+  @override
+  String get browserActions_endSplitViewKeywords =>
+      'tutup pemisahan, satu halaman, akhiri, unsplit';
 
   @override
   String get browserActions_togglePinTabKeywords =>
@@ -3572,6 +3652,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get browser_moveTabRight => 'Pindahkan tab ke kanan';
 
   @override
+  String get browser_tabPickerNothingHere =>
+      'Tidak ada tab untuk dipilih di sini';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Beranda';
 
   @override
@@ -4187,6 +4271,9 @@ class AppLocalizationsId extends AppLocalizations {
   String get menu_connectionUsageBlocked => 'Diblokir';
 
   @override
+  String get menu_itemSplitView => 'Pisah';
+
+  @override
   String get contextmenu_openInNewTab => 'Buka di tab baru';
 
   @override
@@ -4201,6 +4288,9 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get contextmenu_newIsolatedTab => 'Tab terisolasi baru';
+
+  @override
+  String get contextmenu_openInSplitView => 'Buka di tampilan terpisah';
 
   @override
   String get contextmenu_openImageInNewTab => 'Buka gambar di tab baru';
@@ -5269,6 +5359,87 @@ class AppLocalizationsId extends AppLocalizations {
   String search_deletedFromHistory(String site) {
     return '$site dihapus dari riwayat';
   }
+
+  @override
+  String get splitView_title => 'Tampilan terpisah';
+
+  @override
+  String get splitView_splitWithAnotherTab => 'Pisah dengan tab lain…';
+
+  @override
+  String get splitView_showBesideCurrentTab =>
+      'Tampilkan di samping tab saat ini';
+
+  @override
+  String get splitView_end => 'Akhiri tampilan terpisah';
+
+  @override
+  String get splitView_endSubtitle => 'Kedua tab tetap terbuka';
+
+  @override
+  String get splitView_layout => 'Tata letak';
+
+  @override
+  String get splitView_layoutAutomatic => 'Otomatis';
+
+  @override
+  String get splitView_layoutSideBySide => 'Berdampingan';
+
+  @override
+  String get splitView_layoutStacked => 'Bertumpuk';
+
+  @override
+  String get splitView_showOnlyThisPage => 'Tampilkan halaman ini saja';
+
+  @override
+  String get splitView_showBothPages => 'Lihat keduanya';
+
+  @override
+  String get splitView_showingOnlyThisPage =>
+      'Hanya halaman ini yang ditampilkan';
+
+  @override
+  String get splitView_swapSides => 'Tukar sisi';
+
+  @override
+  String get splitView_equalSizes => 'Ukuran sama';
+
+  @override
+  String get splitView_replaceOtherPage => 'Ganti halaman lainnya…';
+
+  @override
+  String get splitView_dividerDescription => 'Pemisah tampilan terpisah';
+
+  @override
+  String get splitView_dividerOptions => 'Opsi tampilan terpisah';
+
+  @override
+  String get splitView_crashedTitle => 'Halaman ini mogok';
+
+  @override
+  String get splitView_crashedReload => 'Muat ulang';
+
+  @override
+  String get splitView_couldNotOpen => 'Tidak dapat membuka tampilan terpisah';
+
+  @override
+  String get splitView_mixedPrivacy =>
+      'Tab pribadi dan non-pribadi tidak dapat ditampilkan bersama';
+
+  @override
+  String get splitView_routingNotReady => 'Koneksi kontainer ini belum siap';
+
+  @override
+  String get splitView_noSplitView => 'Tidak ada tampilan terpisah';
+
+  @override
+  String get splitView_pickerTitle => 'Tampilkan di samping';
+
+  @override
+  String get splitView_memberMark => 'Dalam tampilan terpisah';
+
+  @override
+  String get splitView_replaceTitle => 'Ganti halaman lainnya';
 
   @override
   String get tabs_actionSelect => 'Pilih';
@@ -14445,6 +14616,13 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get visibilitySwitch_treeTabsDescription =>
       'Tampilkan tab yang dibuka dari sebuah halaman di bawah tab asalnya';
+
+  @override
+  String get visibilitySwitch_splitViewLabel => 'Tampilan terpisah';
+
+  @override
+  String get visibilitySwitch_splitViewDescription =>
+      'Tampilkan dua tab berdampingan atau bertumpuk';
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel =>

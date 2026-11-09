@@ -31,10 +31,19 @@ class ContextualToolbarButtonResolution {
   final bool isEnabled;
 }
 
+/// The buttons a toolbar draws for [configs], in order, each slot resolved by
+/// [resolveContextualToolbarButton].
+///
+/// [isHidden] names the buttons whose feature is hidden. Such a button is not
+/// merely unavailable for now: its slot goes to its fallback, and without one
+/// the slot is left out instead of drawing a greyed-out button for a feature
+/// the user chose not to see. The stored configuration is not touched, so the
+/// button is back where it was once the feature is shown again.
 List<ContextualToolbarButtonResolution> resolveVisibleContextualToolbarButtons({
   required List<ToolbarButtonConfig> configs,
   required Set<String> knownButtonIds,
   required bool Function(String buttonId) isPrimaryAvailable,
+  bool Function(String buttonId) isHidden = _nothingHidden,
 }) {
   final configById = {for (final config in configs) config.buttonId: config};
   final resolvedButtons = <ContextualToolbarButtonResolution>[];
@@ -46,6 +55,7 @@ List<ContextualToolbarButtonResolution> resolveVisibleContextualToolbarButtons({
       configById: configById,
       knownButtonIds: knownButtonIds,
       isPrimaryAvailable: isPrimaryAvailable,
+      isHidden: isHidden,
     );
     if (resolvedButton == null) {
       continue;
@@ -58,11 +68,17 @@ List<ContextualToolbarButtonResolution> resolveVisibleContextualToolbarButtons({
   return resolvedButtons;
 }
 
+bool _nothingHidden(String buttonId) => false;
+
+/// What [config]'s slot shows: the button itself while it is available, else
+/// its fallback, else the button greyed out. A button that [isHidden] says is
+/// hidden never shows: the fallback, or nothing (null).
 ContextualToolbarButtonResolution? resolveContextualToolbarButton({
   required ToolbarButtonConfig config,
   required Map<String, ToolbarButtonConfig> configById,
   required Set<String> knownButtonIds,
   required bool Function(String buttonId) isPrimaryAvailable,
+  bool Function(String buttonId) isHidden = _nothingHidden,
   Set<String> visited = const {},
 }) {
   if (visited.contains(config.buttonId)) {
@@ -76,41 +92,50 @@ ContextualToolbarButtonResolution? resolveContextualToolbarButton({
     );
   }
 
-  if (isPrimaryAvailable(config.buttonId)) {
+  final hidden = isHidden(config.buttonId);
+  if (!hidden && isPrimaryAvailable(config.buttonId)) {
     return ContextualToolbarButtonResolution(
       buttonId: config.buttonId,
       isEnabled: true,
     );
   }
 
+  // Nothing to fall back to: a hidden button leaves its slot empty, an
+  // unavailable one stays where it is, greyed out.
+  final unresolved = hidden
+      ? null
+      : ContextualToolbarButtonResolution(
+          buttonId: config.buttonId,
+          isEnabled: false,
+        );
+
   final fallbackId = ToolbarFallbackChoice.fromStored(
     config.fallbackId,
   ).resolveRuntimeFallbackId();
   if (fallbackId == null) {
-    return ContextualToolbarButtonResolution(
-      buttonId: config.buttonId,
-      isEnabled: false,
-    );
+    return unresolved;
   }
 
   final fallbackConfig = configById[fallbackId];
   if (fallbackConfig == null) {
-    return knownButtonIds.contains(fallbackId)
+    return knownButtonIds.contains(fallbackId) && !isHidden(fallbackId)
         ? ContextualToolbarButtonResolution(
             buttonId: fallbackId,
             isEnabled: true,
           )
-        : ContextualToolbarButtonResolution(
-            buttonId: config.buttonId,
-            isEnabled: false,
-          );
+        : unresolved;
   }
 
-  return resolveContextualToolbarButton(
+  final resolvedFallback = resolveContextualToolbarButton(
     config: fallbackConfig,
     configById: configById,
     knownButtonIds: knownButtonIds,
     isPrimaryAvailable: isPrimaryAvailable,
+    isHidden: isHidden,
     visited: {...visited, config.buttonId},
   );
+  // A fallback that is hidden itself, with nothing behind it, leaves this
+  // slot as if it had none. (A fallback cycle still leaves it out.)
+  if (resolvedFallback == null && isHidden(fallbackId)) return unresolved;
+  return resolvedFallback;
 }

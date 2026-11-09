@@ -42,6 +42,8 @@ import 'package:weblibre/features/geckoview/features/browser/domain/controllers/
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/startup_browsing_data_cleanup.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
@@ -67,11 +69,27 @@ ContainerData? resolveAssignedContainerForTabOpen({
   required ContainerData? siteAssignedContainer,
 }) {
   return switch (containerSelection) {
-    UseSelectedContainerTabSelection() =>
+    UseSelectedContainerTabSelection() || PreferredContainerTabSelection() =>
       siteAssignedContainer ?? requestedContainer,
     UnassignedContainerTabSelection() ||
     SpecificContainerTabSelection() => requestedContainer,
   };
+}
+
+/// The tab to select after the selected [closedTabId] closes, when it is in
+/// the split [pair]: its partner, which is on screen already. Null when there
+/// is no pair, or the partner closes too ([excludedTabIds]) or is gone, and
+/// the usual order (opener, previous, neighbor) decides.
+@visibleForTesting
+String? splitPartnerAfterClose({
+  required SplitPair? pair,
+  required String closedTabId,
+  required Set<String> excludedTabIds,
+  required Iterable<String> openTabIds,
+}) {
+  final partner = pair?.partnerOf(closedTabId);
+  if (partner == null || excludedTabIds.contains(partner)) return null;
+  return openTabIds.contains(partner) ? partner : null;
 }
 
 /// The tab one step from [currentTabId] in [order], or `null` when there is no
@@ -216,6 +234,11 @@ class TabRepository extends _$TabRepository {
   /// [onCreated] is called with that id as soon as the engine has created the
   /// tab, before its row is written and, for a selected tab, before the
   /// selected container follows it.
+  ///
+  /// With [parentIsReferrer] (the default) the page loads as if the parent's
+  /// page had linked to it. Pass false for pages the browser opens itself
+  /// beside the parent: Gecko refuses privileged about: pages that a web page
+  /// links to.
   Future<String> addTab({
     required TabMode tabMode,
     Uri? url,
@@ -231,6 +254,7 @@ class TabRepository extends _$TabRepository {
     bool launchedFromIntent = false,
     TabBackBehavior? onBackBehavior,
     void Function(String tabId)? onCreated,
+    bool parentIsReferrer = true,
   }) async {
     // The startup cleanup deletes the previous session's cookies, cache and
     // site data; a page opened before it finished would lose its own with them.
@@ -244,6 +268,7 @@ class TabRepository extends _$TabRepository {
         await ref.read(selectedContainerProvider.notifier).fetchData(),
       UnassignedContainerTabSelection() => null,
       SpecificContainerTabSelection(:final container) => container,
+      PreferredContainerTabSelection(:final container) => container,
     };
 
     if (tabMode is RegularTabMode &&
@@ -290,6 +315,7 @@ class TabRepository extends _$TabRepository {
           // loads; the replicated snapshot only follows once its row is written.
           excludeFromHistory:
               assignedContainer?.metadata.excludeFromHistory ?? false,
+          parentIsReferrer: parentIsReferrer,
         );
         onCreated?.call(tabId);
         return tabId;
@@ -362,6 +388,7 @@ class TabRepository extends _$TabRepository {
         await ref.read(selectedContainerProvider.notifier).fetchData(),
       UnassignedContainerTabSelection() => null,
       SpecificContainerTabSelection(:final container) => container,
+      PreferredContainerTabSelection(:final container) => container,
     };
     // Read once for the whole batch rather than per tab: the setting cannot
     // change while these rows are being written.
@@ -665,33 +692,34 @@ class TabRepository extends _$TabRepository {
       return true;
     }
 
+    // Started before the tab's own check so both run concurrently.
+    final partnerCheck = _startSplitPartnerRoutingCheck(tabId);
+
     final containerData = await ref
         .read(tabDataRepositoryProvider.notifier)
         .getTabContainerData(tabId);
 
-    if (!ref.mounted) return false;
+    if (!ref.mounted ||
+        !await _routingReadyFor(tabId, containerData) ||
+        !ref.mounted) {
+      partnerCheck?.result.ignore();
+      return false;
+    }
 
-    if (containerData != null) {
-      if (containerData.metadata.proxyConnectionId != null) {
-        // Routing has to be *installed*, not merely answering: an extension
-        // that responds but holds no snapshot blocks this container's traffic,
-        // so opening the tab would only show a broken page.
-        //
-        // Waited on rather than sampled, because the install window is a normal
-        // part of a cold start and a tap that lands inside it should open the
-        // tab a moment later instead of doing nothing at all.
-        final routingReady = await ref
-            .read(containerProxyRepositoryProvider.notifier)
-            .waitUntilRoutingReady();
-
+    if (partnerCheck != null) {
+      // A proxied tab has just waited for the one routing install every
+      // container shares, so the partner's check settles at its next probe.
+      // A direct tab waited for nothing and is not held back for its partner.
+      if (_isProxied(containerData)) {
+        await partnerCheck.result;
         if (!ref.mounted) return false;
-
-        if (!routingReady) {
-          logger.w(
-            'Tried to open proxied tab $tabId before container routing was installed',
-          );
-          return false;
-        }
+      }
+      if (!partnerCheck.isReadyNow) {
+        _showAloneUntilPartnerRouted(
+          pairId: partnerCheck.pairId,
+          tabId: tabId,
+          partnerCheck: partnerCheck.result,
+        );
       }
     }
 
@@ -719,6 +747,104 @@ class TabRepository extends _$TabRepository {
 
     await _tabsService.selectTab(tabId: tabId);
     return true;
+  }
+
+  /// Whether [tabId] may be shown as far as its container's proxy routing is
+  /// concerned: always for a direct container, and for a proxied one only once
+  /// its routing is installed.
+  Future<bool> ensureRoutingReady(String tabId) async {
+    final containerData = await ref
+        .read(tabDataRepositoryProvider.notifier)
+        .getTabContainerData(tabId);
+    if (!ref.mounted) return false;
+    return await _routingReadyFor(tabId, containerData);
+  }
+
+  /// Starts checking the routing of the split partner that selecting [tabId]
+  /// brings on screen. A split member brings its partner on screen, so the
+  /// partner's routing has to be installed too. Rather than refusing the tab
+  /// the user asked for, or holding it back, it is shown alone until the
+  /// partner can be shown.
+  ///
+  /// Null when [tabId] has no partner in the shown pair, or the pair is
+  /// already on screen: focus moving between the panes waits for nothing,
+  /// just as a tap on a pane does not.
+  _SplitPartnerRoutingCheck? _startSplitPartnerRoutingCheck(String tabId) {
+    final pair = ref.read(splitPairShownProvider);
+    final partner = pair?.partnerOf(tabId);
+    final selectedBefore = ref.read(selectedTabProvider);
+    if (pair == null || partner == null) return null;
+
+    final pairOnScreen = selectedBefore == tabId || selectedBefore == partner;
+    if (pairOnScreen) return null;
+
+    return _SplitPartnerRoutingCheck(
+      pairId: pair.pairId,
+      routingReady: ensureRoutingReady(partner),
+    );
+  }
+
+  /// Shows [tabId] alone in its pair [pairId] while its partner's routing
+  /// is not installed, and both pages again once [partnerCheck] finds it is.
+  /// A pair already showing one page is left as it is.
+  ///
+  /// Both pages come back only while the pair is still exactly what this
+  /// collapse made it: anything done to it since (showing both and hiding
+  /// one again, a swap, a new partner) is a newer choice, and wins.
+  void _showAloneUntilPartnerRouted({
+    required String pairId,
+    required String tabId,
+    required Future<bool> partnerCheck,
+  }) {
+    final split = ref.read(splitViewControllerProvider.notifier);
+    if (ref.read(splitViewControllerProvider)?.focusedOnly ?? true) return;
+    if (!split.collapseTo(pairId, tabId)) return;
+    final collapsed = ref.read(splitViewControllerProvider);
+
+    unawaited(
+      partnerCheck.then((ready) {
+        if (!ref.mounted) return;
+        if (ready) {
+          if (identical(ref.read(splitViewControllerProvider), collapsed)) {
+            split.showBothPages(pairId);
+          }
+        } else {
+          logger.w('Split partner of $tabId has no routing; showing it alone');
+        }
+      }),
+    );
+  }
+
+  bool _isProxied(ContainerData? containerData) =>
+      containerData?.metadata.proxyConnectionId != null;
+
+  Future<bool> _routingReadyFor(
+    String tabId,
+    ContainerData? containerData,
+  ) async {
+    if (!_isProxied(containerData)) {
+      return true;
+    }
+
+    // Routing has to be *installed*, not merely answering: an extension
+    // that responds but holds no snapshot blocks this container's traffic,
+    // so opening the tab would only show a broken page.
+    //
+    // Waited on rather than sampled, because the install window is a normal
+    // part of a cold start and a tap that lands inside it should open the
+    // tab a moment later instead of doing nothing at all.
+    final routingReady = await ref
+        .read(containerProxyRepositoryProvider.notifier)
+        .waitUntilRoutingReady();
+
+    if (!ref.mounted) return false;
+
+    if (!routingReady) {
+      logger.w(
+        'Tried to open proxied tab $tabId before container routing was installed',
+      );
+    }
+    return routingReady;
   }
 
   /// Cancels a pending "stay on home", because something is about to be shown.
@@ -893,6 +1019,17 @@ class TabRepository extends _$TabRepository {
         );
 
     if (!ref.mounted) return;
+
+    // Priority 0: the other page of a split pair, which is on screen already.
+    final splitPartner = splitPartnerAfterClose(
+      pair: ref.read(splitPairShownProvider),
+      closedTabId: tabId,
+      excludedTabIds: excludedTabIds,
+      openTabIds: ref.read(tabListProvider).value,
+    );
+    if (splitPartner != null) {
+      return await _selectTabAfterClose(splitPartner);
+    }
 
     // Priority 1: hand the user back to whoever opened this tab, across
     // containers if that is where the opener lives.
@@ -1465,23 +1602,40 @@ class TabRepository extends _$TabRepository {
           currentTabState.url == TabState.defaultUrl && historyIsEmpty;
 
       if (event.blocked || tabIsEmpty) {
-        final newTabId = await addTab(
+        final splitView = ref.read(splitViewControllerProvider.notifier);
+        // The unfocused page of a split pair never takes focus by itself: its
+        // replacement (or the tab it opens) stays in the background.
+        final staysUnfocused = splitView.isUnfocusedMember(currentTabState.id);
+
+        Future<String> openInAssignedContainer() => addTab(
           url: uri,
           tabMode: currentTabState.tabMode,
           containerSelection: TabContainerSelection.specific(containerData),
           parentId: currentTabState.id,
-          selectTab: true,
+          selectTab: !staysUnfocused,
         );
 
-        // Past the point of no return. The replacement tab exists, so the swap
-        // is finished even if a newer navigation has claimed this tab since —
-        // abandoning it here would leave the new tab created but unselected.
-        if (historyIsEmpty && ref.mounted) {
-          // The replacement stands in for it, so it was never closed.
-          await closeTab(currentTabState.id, keepOffRecentlyClosed: true);
-          if (ref.mounted) {
-            await selectTab(newTabId);
-          }
+        if (historyIsEmpty) {
+          // A replacement: the new tab takes the old one's place, in a split
+          // pair too.
+          await splitView.carryOver(currentTabState.id, () async {
+            final newTabId = await openInAssignedContainer();
+
+            // Past the point of no return. The replacement tab exists, so the
+            // swap is finished even if a newer navigation has claimed this tab
+            // since — abandoning it here would leave the new tab created but
+            // unselected.
+            if (ref.mounted) {
+              // The replacement stands in for it, so it was never closed.
+              await closeTab(currentTabState.id, keepOffRecentlyClosed: true);
+              if (ref.mounted && !staysUnfocused) {
+                await selectTab(newTabId);
+              }
+            }
+            return newTabId;
+          });
+        } else {
+          await openInAssignedContainer();
         }
       } else {
         final latestTabState = ref.read(tabStatesProvider)[tabId];
@@ -1792,4 +1946,27 @@ class TabRepository extends _$TabRepository {
 /// The tab to reopen was taken off the recently closed list meanwhile.
 class _NoLongerClosed implements Exception {
   const _NoLongerClosed();
+}
+
+/// The routing check for the split partner a selection brings on screen,
+/// running alongside the selected tab's own.
+class _SplitPartnerRoutingCheck {
+  _SplitPartnerRoutingCheck({
+    required this.pairId,
+    required Future<bool> routingReady,
+  }) {
+    result = routingReady.then((ready) => _ready = ready);
+  }
+
+  /// The pair the partner belongs to.
+  final String pairId;
+
+  /// Completes with whether the partner's routing is installed.
+  late final Future<bool> result;
+
+  bool? _ready;
+
+  /// Whether [result] has already found the partner's routing installed;
+  /// false while the check is still running.
+  bool get isReadyNow => _ready == true;
 }

@@ -21,5 +21,6 @@
   "contextmenu_shareImage": "分享图片",
   "contextmenu_shareEmailAddress": "分享电子邮件地址",
   "contextmenu_urlCleanedMessage": "网址已清理",
-  "contextmenu_urlPreviewAppliedMessage": "已应用网址预览"
+  "contextmenu_urlPreviewAppliedMessage": "已应用网址预览",
+  "contextmenu_openInSplitView": "在分屏视图中打开"
 }

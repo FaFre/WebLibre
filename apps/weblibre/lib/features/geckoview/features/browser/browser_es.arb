@@ -295,5 +295,6 @@
   "browser_moveTabUp": "Mover pestaña arriba",
   "browser_moveTabDown": "Mover pestaña abajo",
   "browser_moveTabLeft": "Mover pestaña a la izquierda",
-  "browser_moveTabRight": "Mover pestaña a la derecha"
+  "browser_moveTabRight": "Mover pestaña a la derecha",
+  "browser_tabPickerNothingHere": "No hay pestañas para elegir aquí"
 }

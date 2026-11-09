@@ -761,6 +761,14 @@ enum FeatureId {
     ], initial: PresetValues.all(PolicyToken.disabled)),
   ),
 
+  /// Split view: two tabs shown side by side or stacked, with a native
+  /// divider. Hidden means no split presentation and no entry points; an
+  /// in-memory pair is kept (H1) and shows again once the feature is shown.
+  tabsSplitView(
+    'tabs.split_view',
+    FeaturePolicy.guarded([VisibilitySwitch.splitView]),
+  ),
+
   /// Quick tab switcher: Recently Used Tabs or disabled
   layoutStackingSimple(
     'layout.stacking_simple',
@@ -1107,6 +1115,19 @@ enum FeatureId {
     ),
   ),
 
+  /// Visibility switch: Split view, with its menu toggle, tab menu and link
+  /// menu entries and actions
+  switchSplitView(
+    'switch.split_view',
+    FeaturePolicy.visibilitySwitch(
+      PresetValues(
+        average: PolicyToken.disabled,
+        advanced: PolicyToken.enabled,
+        expert: PolicyToken.enabled,
+      ),
+    ),
+  ),
+
   /// Visibility switch: Container stacking modes, Tab Groups, toolbar
   /// fallbacks and long-press setup, menu customization
   switchLayoutAdvanced(
@@ -1218,6 +1239,11 @@ enum VisibilitySwitch {
   connections(FeatureId.switchConnections),
   profiles(FeatureId.switchProfiles),
   treeTabs(FeatureId.switchTreeTabs),
+
+  /// Split view was guarded by [layoutAdvanced] before it had a switch of its
+  /// own, so an existing install starts where that switch is: Average stays
+  /// without it.
+  splitView(FeatureId.switchSplitView, startsLike: layoutAdvanced),
   layoutAdvanced(FeatureId.switchLayoutAdvanced),
   gestures(FeatureId.switchGestures),
   keyboardCustomization(FeatureId.switchKeyboardCustomization),
@@ -1226,7 +1252,7 @@ enum VisibilitySwitch {
   ai(FeatureId.switchAi),
   expertDetails(FeatureId.switchExpertDetails);
 
-  const VisibilitySwitch(this.featureId, {this.inherits});
+  const VisibilitySwitch(this.featureId, {this.inherits, this.startsLike});
 
   /// The switch's own entry, holding its initial values.
   final FeatureId featureId;
@@ -1236,6 +1262,12 @@ enum VisibilitySwitch {
   /// an existing install sees the switch on: the UI it guards was always
   /// visible.
   final LegacyVisibilitySetting? inherits;
+
+  /// The switch an existing install copies while this one is unwritten, for
+  /// a switch that took over features another switch guarded before. It is
+  /// read only as that fallback: writing either switch later leaves the other
+  /// alone.
+  final VisibilitySwitch? startsLike;
 
   FeaturePolicy get policy => featureId.policy;
 }

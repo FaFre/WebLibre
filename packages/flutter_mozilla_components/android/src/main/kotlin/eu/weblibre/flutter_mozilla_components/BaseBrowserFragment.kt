@@ -36,6 +36,8 @@ import eu.weblibre.flutter_mozilla_components.feature.BrowserHandlingScrollFeatu
 import eu.weblibre.flutter_mozilla_components.feature.DownloadAppChooser
 import eu.weblibre.flutter_mozilla_components.feature.GestureAwareSwipeRefreshFeature
 import eu.weblibre.flutter_mozilla_components.feature.KeyboardVisibilityFeature
+import eu.weblibre.flutter_mozilla_components.feature.PaneThumbnailsFeature
+import eu.weblibre.flutter_mozilla_components.feature.SplitAwareWindowFeature
 import eu.weblibre.flutter_mozilla_components.feature.PromptSheet
 import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.integration.ReaderViewIntegration
@@ -44,6 +46,9 @@ import eu.weblibre.flutter_mozilla_components.services.DownloadService
 import eu.weblibre.flutter_mozilla_components.applinks.AppLinkRuntime
 import eu.weblibre.flutter_mozilla_components.applinks.NativeAppLinkPromptFeature
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
+import eu.weblibre.flutter_mozilla_components.split.PaneView
+import eu.weblibre.flutter_mozilla_components.split.SplitPaneCoordinator
+import eu.weblibre.flutter_mozilla_components.widget.ZoomAwareSwipeRefreshLayout
 import io.flutter.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChangedBy
@@ -114,6 +119,25 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     private val windowFeature = ViewBoundFeatureWrapper<WindowFeature>()
     private val thumbnailsFeature = ViewBoundFeatureWrapper<BrowserThumbnails>()
+
+    // The main browser's replacements for the single-view features above:
+    // the split coordinator takes `SessionFeature`'s and `swipeRefreshFeature`'s
+    // place, and the two below follow the pane rather than the one view.
+    private val splitCoordinator = ViewBoundFeatureWrapper<SplitPaneCoordinator>()
+    private val splitWindowFeature = ViewBoundFeatureWrapper<SplitAwareWindowFeature>()
+    private val paneThumbnailsFeature = ViewBoundFeatureWrapper<PaneThumbnailsFeature>()
+
+    /**
+     * Held directly as well: the wrapper drops its feature when the view
+     * lifecycle ends, which is before [onDestroyView] cleans up after it.
+     */
+    private var paneCoordinator: SplitPaneCoordinator? = null
+
+    /**
+     * Whether this fragment presents the main browser's tabs in split panes.
+     * Custom Tabs and PWAs show one fixed session and keep AC's features.
+     */
+    protected open val usesSplitPanes: Boolean = false
     val readerViewFeature = ViewBoundFeatureWrapper<ReaderViewIntegration>()
     private val readabilityExtractFeature = ViewBoundFeatureWrapper<ReadabilityExtractFeature>()
     // The web extension toolbar feature and popup observer are deliberately
@@ -169,6 +193,7 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
     private val backButtonHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
         fullScreenFeature,
         sessionFeature,
+        splitCoordinator,
     )
 
     private val activityResultHandler: List<ViewBoundFeatureWrapper<*>> = listOf(
@@ -366,36 +391,40 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
             engineView.setActivityContext(originalContext)
 
-            binding.swipeToRefresh.addView(engineNativeView)
-
             components.activeEngineView = engineView
 
-            sessionFeature.set(
-                feature = SessionFeature(
-                    components.core.store,
-                    components.useCases.sessionUseCases.goBack,
-                    components.useCases.sessionUseCases.goForward,
-                    engineView,
-                    sessionId,
-                ),
-                owner = this,
-                view = view,
-            )
+            if (usesSplitPanes) {
+                setUpSplitPanes(view, engineView, originalContext)
+            } else {
+                binding.swipeToRefresh.addView(engineNativeView)
 
-            swipeRefreshFeature.set(
-                feature = GestureAwareSwipeRefreshFeature(
-                    components.core.store,
-                    components.useCases.sessionUseCases.reload,
-                    binding.swipeToRefresh,
-                    // Without this a pull in a Custom Tab or PWA window resolves
-                    // to the *selected* tab — it would reload a background
-                    // browser tab and sync the throbber to that tab's loading
-                    // state. Same argument the SessionFeature above gets.
-                    tabId = sessionId,
-                ),
-                owner = this,
-                view = view,
-            )
+                sessionFeature.set(
+                    feature = SessionFeature(
+                        components.core.store,
+                        components.useCases.sessionUseCases.goBack,
+                        components.useCases.sessionUseCases.goForward,
+                        engineView,
+                        sessionId,
+                    ),
+                    owner = this,
+                    view = view,
+                )
+
+                swipeRefreshFeature.set(
+                    feature = GestureAwareSwipeRefreshFeature(
+                        components.core.store,
+                        components.useCases.sessionUseCases.reload,
+                        binding.swipeToRefresh,
+                        // Without this a pull in a Custom Tab or PWA window resolves
+                        // to the *selected* tab — it would reload a background
+                        // browser tab and sync the throbber to that tab's loading
+                        // state. Same argument the SessionFeature above gets.
+                        tabId = sessionId,
+                    ),
+                    owner = this,
+                    view = view,
+                )
+            }
 
             // Apply pull-to-refresh settings
             applyPullToRefreshTheme()
@@ -652,21 +681,45 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 view = view,
             )
 
-            windowFeature.set(
-                feature = WindowFeature(components.core.store, components.useCases.tabsUseCases),
-                owner = this,
-                view = view,
-            )
+            if (usesSplitPanes) {
+                splitWindowFeature.set(
+                    feature = SplitAwareWindowFeature(
+                        components.core.store,
+                        components.useCases.tabsUseCases,
+                        visibleTabIds = {
+                            GlobalComponents.components?.browserPanes?.visibleTabIds.orEmpty()
+                        },
+                    ),
+                    owner = this,
+                    view = view,
+                )
 
-            thumbnailsFeature.set(
-                feature = BrowserThumbnails(
-                    profileContext,
-                    engineView,
-                    components.core.store
-                ),
-                owner = this,
-                view = view,
-            )
+                paneThumbnailsFeature.set(
+                    feature = PaneThumbnailsFeature(
+                        profileContext,
+                        panes = { GlobalComponents.components?.browserPanes },
+                        store = components.core.store,
+                    ),
+                    owner = this,
+                    view = view,
+                )
+            } else {
+                windowFeature.set(
+                    feature = WindowFeature(components.core.store, components.useCases.tabsUseCases),
+                    owner = this,
+                    view = view,
+                )
+
+                thumbnailsFeature.set(
+                    feature = BrowserThumbnails(
+                        profileContext,
+                        engineView,
+                        components.core.store
+                    ),
+                    owner = this,
+                    view = view,
+                )
+            }
 
             components.core.historyStorage.registerStorageMaintenanceWorker()
 
@@ -703,6 +756,63 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             context?.let { restartApp(it) }
             return false
         }
+    }
+
+    /**
+     * Installs the split pane host: [firstEngineView] in pane 0, a second pane
+     * created on the first split, and the coordinator that binds tabs to them.
+     */
+    private fun setUpSplitPanes(view: View, firstEngineView: EngineView, activityContext: Context) {
+        binding.swipeToRefresh.visibility = View.GONE
+        binding.splitPanes.visibility = View.VISIBLE
+
+        val coordinator = SplitPaneCoordinator(
+            store = components.core.store,
+            tabsUseCases = components.useCases.tabsUseCases,
+            sessionUseCases = components.useCases.sessionUseCases,
+            layout = binding.splitPanes,
+            firstPane = createPaneView(firstEngineView),
+            createPane = {
+                val engineView = createEngine(components)
+                engineView.setActivityContext(activityContext)
+                createPaneView(engineView)
+            },
+            events = { GlobalComponents.splitViewEvents },
+            onFocusedEngineView = { engineView ->
+                fragmentEngineView = engineView
+                if (isResumed) {
+                    components.activeEngineView = engineView
+                }
+            },
+            onPaneCreated = { pane ->
+                applyPullToRefreshTheme(pane.swipeRefresh)
+                updatePullToRefresh()
+                GlobalComponents.viewportApi?.applyToNewEngineView(pane.engineView)
+                browserHandlingScrollFeature?.refreshTargets()
+            },
+        )
+        paneCoordinator = coordinator
+        components.browserPanes = coordinator
+        splitCoordinator.set(feature = coordinator, owner = this, view = view)
+    }
+
+    private fun createPaneView(engineView: EngineView): PaneView =
+        PaneView(requireContext(), engineView).also { pane ->
+            pane.features = listOf(
+                GestureAwareSwipeRefreshFeature(
+                    components.core.store,
+                    components.useCases.sessionUseCases.reload,
+                    pane.swipeRefresh,
+                    paneTabId = pane.boundTabIdFlow,
+                ),
+            )
+        }
+
+    /** The pull-to-refresh layouts this fragment shows pages in. */
+    private fun swipeRefreshLayouts(): List<ZoomAwareSwipeRefreshLayout> {
+        val binding = _binding ?: return emptyList()
+        return paneCoordinator?.paneViews?.map { it.swipeRefresh }
+            ?: listOf(binding.swipeToRefresh)
     }
 
     /**
@@ -763,10 +873,11 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
             ?.core?.store?.state
             ?.findTabOrCustomTabOrSelectedTab(sessionId)?.content?.fullScreen == true,
     ) {
-        val layout = _binding?.swipeToRefresh ?: return
         val settings = GlobalComponents.pullToRefreshSettings()
-        layout.isEnabled = shouldPullToRefreshBeEnabled(settings, inFullScreen)
-        layout.setTriggerDistanceDp(settings.triggerDistanceDp)
+        swipeRefreshLayouts().forEach { layout ->
+            layout.isEnabled = shouldPullToRefreshBeEnabled(settings, inFullScreen)
+            layout.setTriggerDistanceDp(settings.triggerDistanceDp)
+        }
     }
 
     /**
@@ -775,7 +886,10 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
      * arrow colour — over every page, including dark and AMOLED content.
      */
     private fun applyPullToRefreshTheme() {
-        val layout = _binding?.swipeToRefresh ?: return
+        swipeRefreshLayouts().forEach(::applyPullToRefreshTheme)
+    }
+
+    private fun applyPullToRefreshTheme(layout: ZoomAwareSwipeRefreshLayout) {
         layout.setColorSchemeColors(
             MaterialColors.getColor(
                 layout,
@@ -876,7 +990,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
     /** Ends a text selection: its floating toolbar is a window above the page. */
     protected fun clearEngineSelection() {
-        fragmentEngineView?.clearSelection()
+        val panes = paneCoordinator?.allEngineViews
+        if (panes != null) {
+            panes.forEach { it.clearSelection() }
+        } else {
+            fragmentEngineView?.clearSelection()
+        }
     }
 
     @CallSuper
@@ -920,14 +1039,19 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
 
         GlobalComponents.removePullToRefreshListener(pullToRefreshSettingListener)
         GlobalComponents.removeSecureWindowSettingsListener(secureWindowSettingsListener)
-        val engineView = fragmentEngineView
-        engineView?.setActivityContext(null)
+        val coordinator = paneCoordinator
+        paneCoordinator = null
+        val engineViews = coordinator?.allEngineViews ?: listOfNotNull(fragmentEngineView)
+        engineViews.forEach { it.setActivityContext(null) }
         // Read through `GlobalComponents` rather than the `components` lazy:
         // a window that gave up waiting is destroyed without components ever
         // existing, and the lazy throws "Components not initialized" there.
         GlobalComponents.components?.let { components ->
-            if (components.activeEngineView == engineView) {
+            if (components.activeEngineView in engineViews) {
                 components.activeEngineView = null
+            }
+            if (coordinator != null && components.browserPanes === coordinator) {
+                components.browserPanes = null
             }
         }
         _binding = null

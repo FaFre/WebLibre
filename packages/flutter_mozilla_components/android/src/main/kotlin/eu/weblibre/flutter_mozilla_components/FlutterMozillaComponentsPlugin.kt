@@ -15,8 +15,10 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSplitViewApi
 import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
+import eu.weblibre.flutter_mozilla_components.split.SplitStateMirror
 import eu.weblibre.flutter_mozilla_components.startup.DartStartupProgress
 
 import io.flutter.embedding.engine.FlutterEngine
@@ -150,6 +152,12 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     // the old messenger across an engine restart. Progress is advisory, so
     // dropping the sink only costs the percentage, never the import itself.
     GlobalComponents.bookmarksEvents = null
+    // The split pair lives in the detaching engine's memory. Kept here it
+    // would be a pair nobody controls, so native drops to single presentation
+    // until the next engine pushes its own state.
+    GeckoSplitViewApi.setUp(binding.binaryMessenger, null)
+    GlobalComponents.splitViewEvents = null
+    SplitStateMirror.clear()
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {

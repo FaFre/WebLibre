@@ -41,8 +41,8 @@ part 'settings_sync_service.g.dart';
 /// document up front, with a message that says why.
 ///
 /// Bump this whenever a new value is added to an enum that settings sync
-/// carries.
-const _schemaVersion = 6;
+/// carries. 7: the split view browser actions.
+const _schemaVersion = 7;
 
 @Riverpod(keepAlive: true)
 class SettingsSyncService extends _$SettingsSyncService

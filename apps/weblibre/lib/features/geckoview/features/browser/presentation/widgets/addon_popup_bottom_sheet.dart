@@ -103,6 +103,9 @@ class _AddonPopupPlatformView extends StatelessWidget {
             layoutDirection: TextDirection.ltr,
             creationParams: <String, Object?>{'extensionId': extensionId},
             creationParamsCodec: const StandardMessageCodec(),
+            // Moves Flutter focus onto the view when the page takes native
+            // focus, so hardware keys reach it (see GeckoView).
+            onFocus: () => params.onFocusChanged(true),
           );
           controller.addOnPlatformViewCreatedListener(
             params.onPlatformViewCreated,

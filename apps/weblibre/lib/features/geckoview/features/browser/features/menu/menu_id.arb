@@ -150,5 +150,6 @@
   "menu_connectionUnused": "Tidak digunakan oleh rute mana pun",
   "menu_connectionUsageContainerCount": "{count, plural, =1{1 kontainer} other{{count} kontainer}}",
   "menu_connectionUsageIsolatedTabCount": "{count, plural, =1{1 tab terisolasi} other{{count} tab terisolasi}}",
-  "menu_connectionUsageBlocked": "Diblokir"
+  "menu_connectionUsageBlocked": "Diblokir",
+  "menu_itemSplitView": "Pisah"
 }

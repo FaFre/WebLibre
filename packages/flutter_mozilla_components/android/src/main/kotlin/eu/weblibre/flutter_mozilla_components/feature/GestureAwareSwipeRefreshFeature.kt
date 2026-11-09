@@ -14,9 +14,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import mozilla.components.browser.state.action.ContentAction.UpdateRefreshCanceledStateAction
+import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
+import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineView
 import mozilla.components.feature.session.SessionUseCases
@@ -47,13 +51,22 @@ import mozilla.components.support.ktx.kotlinx.coroutines.flow.ifAnyChanged
  * layout's own up-handling runs [onRefresh]), so the flag is reliably set by the
  * time we consult it here.
  *
+ * In split view every pane has its own layout and feature, bound through
+ * [paneTabId] to the tab that pane shows, so the pull and the throbber apply
+ * to the pane that is pulled rather than to the selected tab.
+ *
  * Derived from android-components `SwipeRefreshFeature` (MPL-2.0).
+ *
+ * @param tabId A custom tab's id, or null for the selected tab.
+ * @param paneTabId When set, the tab of a split pane; it overrides [tabId],
+ * and null means the pane shows nothing.
  */
 class GestureAwareSwipeRefreshFeature(
     private val store: BrowserStore,
     private val reloadUrlUseCase: SessionUseCases.ReloadUrlUseCase,
     private val swipeRefreshLayout: ZoomAwareSwipeRefreshLayout,
     private val tabId: String? = null,
+    private val paneTabId: StateFlow<String?>? = null,
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) : LifecycleAwareFeature,
     SwipeRefreshLayout.OnChildScrollUpCallback,
@@ -67,9 +80,14 @@ class GestureAwareSwipeRefreshFeature(
 
     override fun start() {
         scope = store.flowScoped(dispatcher = mainDispatcher) { flow ->
-            flow.map { state -> state.findTabOrCustomTabOrSelectedTab(tabId) }
+            val tabs = if (paneTabId != null) {
+                combine(flow, paneTabId) { state, id -> id?.let { state.findTab(it) } }
+            } else {
+                flow.map { state -> state.findTabOrCustomTabOrSelectedTab(tabId) }
+            }
+            tabs
                 .ifAnyChanged {
-                    arrayOf(it?.content?.loading, it?.content?.refreshCanceled)
+                    arrayOf(it?.id, it?.content?.loading, it?.content?.refreshCanceled)
                 }
                 .collect { tab ->
                     tab?.let {
@@ -116,8 +134,15 @@ class GestureAwareSwipeRefreshFeature(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             swipeRefreshLayout.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
         }
-        store.state.findTabOrCustomTabOrSelectedTab(tabId)?.let { tab ->
+        currentTab()?.let { tab ->
             reloadUrlUseCase(tab.id)
         }
     }
+
+    private fun currentTab(): SessionState? =
+        if (paneTabId != null) {
+            paneTabId.value?.let { store.state.findTab(it) }
+        } else {
+            store.state.findTabOrCustomTabOrSelectedTab(tabId)
+        }
 }

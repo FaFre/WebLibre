@@ -156,6 +156,62 @@
   "@browserActions_duplicateTabDescription": {
     "description": "Explanation under that browser action's name in the action lists: it copies the current tab into a new tab."
   },
+  "browserActions_splitViewTitle": "Split View",
+  "@browserActions_splitViewTitle": {
+    "description": "Name of the browser action that toggles split view like the browser menu's split toggle: it shows the current tab beside the tab last shown with it (or the tab used before it), shows both pages again while only one is shown, and otherwise ends the split. On a tab card for another tab it shows that tab beside the current one. Shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_splitViewDescription": "Show two pages at once, or go back to one",
+  "@browserActions_splitViewDescription": {
+    "description": "Explanation under that browser action's name in the action lists: shows two tabs at once, or ends the split so one page is shown again."
+  },
+  "browserActions_splitWithAnotherTabTitle": "Split With Another Tab",
+  "@browserActions_splitWithAnotherTabTitle": {
+    "description": "Name of the browser action that asks for a page to show beside the current one in split view (in a split: the page to replace the other one with), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_splitWithAnotherTabDescription": "Choose the page to show beside the current one",
+  "@browserActions_splitWithAnotherTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: opens the tab picker for the second page of a split view."
+  },
+  "browserActions_toggleSplitSinglePageTitle": "Show One / Both Split Pages",
+  "@browserActions_toggleSplitSinglePageTitle": {
+    "description": "Name of the browser action that switches \"Show only this page\" in split view on or off: the focused page fills the browser while the other stays loaded, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_toggleSplitSinglePageDescription": "Hide the other page of the split view, or bring it back",
+  "@browserActions_toggleSplitSinglePageDescription": {
+    "description": "Explanation under that browser action's name in the action lists: hides the other page of a split view, or shows it again."
+  },
+  "browserActions_showSplitControlsTitle": "Split View Controls",
+  "@browserActions_showSplitControlsTitle": {
+    "description": "Name of the browser action that opens the split view controls sheet (layout, sizes, swapping and replacing the pages, ending the split), shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_showSplitControlsDescription": "Adjust the layout, sizes and pages of the split view",
+  "@browserActions_showSplitControlsDescription": {
+    "description": "Explanation under that browser action's name in the action lists: opens the split view controls."
+  },
+  "browserActions_focusOtherSplitPaneTitle": "Focus Other Split Page",
+  "@browserActions_focusOtherSplitPaneTitle": {
+    "description": "Name of the browser action that moves focus to the other page of the split view, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_focusOtherSplitPaneDescription": "Move focus to the other page of the split view",
+  "@browserActions_focusOtherSplitPaneDescription": {
+    "description": "Explanation under that browser action's name in the action lists: toolbar and keyboard then act on the other page of the split view."
+  },
+  "browserActions_swapSplitPanesTitle": "Swap Split Pages",
+  "@browserActions_swapSplitPanesTitle": {
+    "description": "Name of the browser action that exchanges the positions of the two pages in split view, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_swapSplitPanesDescription": "Exchange the positions of the two pages",
+  "@browserActions_swapSplitPanesDescription": {
+    "description": "Explanation under that browser action's name in the action lists: the two pages of the split view exchange places."
+  },
+  "browserActions_endSplitViewTitle": "End Split View",
+  "@browserActions_endSplitViewTitle": {
+    "description": "Name of the browser action that ends split view, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions, and on the toolbar button that does the same. Keep it short."
+  },
+  "browserActions_endSplitViewDescription": "Show one page again; both tabs stay open",
+  "@browserActions_endSplitViewDescription": {
+    "description": "Explanation under that browser action's name in the action lists: shows one page again, and both tabs stay open."
+  },
   "browserActions_nextTabTitle": "Next Tab",
   "@browserActions_nextTabTitle": {
     "description": "Name of the browser action that switches to the next tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
@@ -827,6 +883,34 @@
   },
   "browserActions_duplicateTabKeywords": "clone tab, copy tab",
   "@browserActions_duplicateTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_splitViewKeywords": "split screen, side by side, two pages, multitasking",
+  "@browserActions_splitViewKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_splitWithAnotherTabKeywords": "page beside, pick tab, replace other page",
+  "@browserActions_splitWithAnotherTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_toggleSplitSinglePageKeywords": "only this page, both pages, hide other page, full screen",
+  "@browserActions_toggleSplitSinglePageKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_showSplitControlsKeywords": "layout, options, size, divider",
+  "@browserActions_showSplitControlsKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_focusOtherSplitPaneKeywords": "switch pane, other side, split focus",
+  "@browserActions_focusOtherSplitPaneKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_swapSplitPanesKeywords": "swap sides, switch sides",
+  "@browserActions_swapSplitPanesKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_endSplitViewKeywords": "close split, single page, unsplit",
+  "@browserActions_endSplitViewKeywords": {
     "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
   },
   "browserActions_togglePinTabKeywords": "pin tab, unpin, sticky",

@@ -14,7 +14,9 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import java.lang.ref.WeakReference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import mozilla.components.browser.state.action.AppLifecycleAction
+import mozilla.components.browser.state.selector.findTab
 import mozilla.components.browser.state.selector.findTabOrCustomTabOrSelectedTab
+import mozilla.components.browser.state.state.SessionState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession.SessionPriority
 import mozilla.components.support.base.log.logger.Logger
@@ -133,13 +135,23 @@ object AppLifecycleFeature : DefaultLifecycleObserver {
         // Resolves a custom tab / PWA by id, and falls back to the tab selection
         // for the main browser.
         val visible = store.state.findTabOrCustomTabOrSelectedTab(visibleSessionId)
-        val engineSession = visible?.engineState?.engineSession
-        if (engineSession == null) {
-            return
-        }
+        prioritize(visible)
 
+        // In split view the main browser shows a second page next to the
+        // selected one, and the user comes back to both. The presented set,
+        // not the visible one: the fragment stopped before this delayed
+        // process pause and released its pages.
+        if (visibleSessionId == null) {
+            GlobalComponents.components?.browserPanes?.lastPresentedTabIds
+                ?.filter { it != visible?.id }
+                ?.forEach { tabId -> prioritize(store.state.findTab(tabId)) }
+        }
+    }
+
+    private fun prioritize(tab: SessionState?) {
+        val engineSession = tab?.engineState?.engineSession ?: return
         engineSession.updateSessionPriority(SessionPriority.HIGH)
-        logger.debug("Re-applied HIGH session priority to ${visible.id} for background")
+        logger.debug("Re-applied HIGH session priority to ${tab.id} for background")
     }
 
     override fun onResume(owner: LifecycleOwner) {

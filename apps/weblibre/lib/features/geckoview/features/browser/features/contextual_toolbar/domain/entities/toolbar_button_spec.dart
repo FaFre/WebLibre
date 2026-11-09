@@ -201,6 +201,14 @@ const quitToolbarButtonSpec = ToolbarButtonSpec(
   canBeFallbackTarget: false,
 );
 
+/// A toggle that is only there while split view is shown, so nothing to
+/// fall back to.
+const splitViewToolbarButtonSpec = ToolbarButtonSpec(
+  id: ToolbarButtonId.splitView,
+  defaultVisible: false,
+  canBeFallbackTarget: false,
+);
+
 const toggleGesturesToolbarButtonSpec = ToolbarButtonSpec(
   id: ToolbarButtonId.toggleGestures,
   defaultVisible: false,
@@ -239,6 +247,7 @@ const toolbarButtonSpecs = [
   qrScanToolbarButtonSpec,
   voiceSearchToolbarButtonSpec,
   duplicateTabToolbarButtonSpec,
+  splitViewToolbarButtonSpec,
   increaseFontToolbarButtonSpec,
   decreaseFontToolbarButtonSpec,
   moveToBackgroundToolbarButtonSpec,

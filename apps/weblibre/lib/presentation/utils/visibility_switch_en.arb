@@ -40,6 +40,14 @@
   "@visibilitySwitch_treeTabsDescription": {
     "description": "Subtitle of the tree tabs visibility switch."
   },
+  "visibilitySwitch_splitViewLabel": "Split view",
+  "@visibilitySwitch_splitViewLabel": {
+    "description": "Name of the visibility switch that shows split view: two tabs on screen at once, with its menu toggle, tab menu entries and link menu entry."
+  },
+  "visibilitySwitch_splitViewDescription": "Show two tabs side by side or stacked",
+  "@visibilitySwitch_splitViewDescription": {
+    "description": "Subtitle of the split view visibility switch."
+  },
   "visibilitySwitch_layoutAdvancedLabel": "Toolbar & menu customization",
   "@visibilitySwitch_layoutAdvancedLabel": {
     "description": "Name of the visibility switch that shows advanced tab bar stacking modes, toolbar button customization and menu arrangement."

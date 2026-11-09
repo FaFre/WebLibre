@@ -1570,6 +1570,60 @@ class AppLocalizationsEs extends AppLocalizations {
       'Abrir una copia de la pestaña actual';
 
   @override
+  String get browserActions_splitViewTitle => 'Vista dividida';
+
+  @override
+  String get browserActions_splitViewDescription =>
+      'Mostrar dos páginas a la vez o volver a una';
+
+  @override
+  String get browserActions_splitWithAnotherTabTitle =>
+      'Dividir con otra pestaña';
+
+  @override
+  String get browserActions_splitWithAnotherTabDescription =>
+      'Elegir la página que se muestra junto a la actual';
+
+  @override
+  String get browserActions_toggleSplitSinglePageTitle =>
+      'Mostrar una / ambas páginas';
+
+  @override
+  String get browserActions_toggleSplitSinglePageDescription =>
+      'Ocultar la otra página de la vista dividida o volver a mostrarla';
+
+  @override
+  String get browserActions_showSplitControlsTitle =>
+      'Controles de la vista dividida';
+
+  @override
+  String get browserActions_showSplitControlsDescription =>
+      'Ajustar el diseño, los tamaños y las páginas de la vista dividida';
+
+  @override
+  String get browserActions_focusOtherSplitPaneTitle =>
+      'Cambiar de página dividida';
+
+  @override
+  String get browserActions_focusOtherSplitPaneDescription =>
+      'Pasar el foco a la otra página de la vista dividida';
+
+  @override
+  String get browserActions_swapSplitPanesTitle =>
+      'Intercambiar páginas divididas';
+
+  @override
+  String get browserActions_swapSplitPanesDescription =>
+      'Intercambiar la posición de las dos páginas';
+
+  @override
+  String get browserActions_endSplitViewTitle => 'Terminar vista dividida';
+
+  @override
+  String get browserActions_endSplitViewDescription =>
+      'Volver a mostrar una sola página; ambas pestañas siguen abiertas';
+
+  @override
   String get browserActions_nextTabTitle => 'Pestaña siguiente';
 
   @override
@@ -2156,6 +2210,34 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get browserActions_duplicateTabKeywords =>
       'clonar pestaña, copiar pestaña';
+
+  @override
+  String get browserActions_splitViewKeywords =>
+      'pantalla dividida, lado a lado, dos páginas, multitarea, split screen, split view';
+
+  @override
+  String get browserActions_splitWithAnotherTabKeywords =>
+      'página al lado, elegir pestaña, reemplazar página, split';
+
+  @override
+  String get browserActions_toggleSplitSinglePageKeywords =>
+      'solo esta página, ambas páginas, ocultar, pantalla completa';
+
+  @override
+  String get browserActions_showSplitControlsKeywords =>
+      'diseño, opciones, tamaño, divisor';
+
+  @override
+  String get browserActions_focusOtherSplitPaneKeywords =>
+      'cambiar panel, otro lado, foco, split';
+
+  @override
+  String get browserActions_swapSplitPanesKeywords =>
+      'intercambiar lados, cambiar lados, swap';
+
+  @override
+  String get browserActions_endSplitViewKeywords =>
+      'cerrar división, una página, terminar, unsplit';
 
   @override
   String get browserActions_togglePinTabKeywords =>
@@ -3625,6 +3707,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browser_moveTabRight => 'Mover pestaña a la derecha';
 
   @override
+  String get browser_tabPickerNothingHere => 'No hay pestañas para elegir aquí';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Inicio';
 
   @override
@@ -4240,6 +4325,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menu_connectionUsageBlocked => 'Bloqueado';
 
   @override
+  String get menu_itemSplitView => 'Dividir';
+
+  @override
   String get contextmenu_openInNewTab => 'Abrir en una pestaña nueva';
 
   @override
@@ -4254,6 +4342,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get contextmenu_newIsolatedTab => 'Nueva pestaña aislada';
+
+  @override
+  String get contextmenu_openInSplitView => 'Abrir en vista dividida';
 
   @override
   String get contextmenu_openImageInNewTab =>
@@ -5335,6 +5426,87 @@ class AppLocalizationsEs extends AppLocalizations {
   String search_deletedFromHistory(String site) {
     return 'Se eliminó $site del historial';
   }
+
+  @override
+  String get splitView_title => 'Vista dividida';
+
+  @override
+  String get splitView_splitWithAnotherTab => 'Dividir con otra pestaña…';
+
+  @override
+  String get splitView_showBesideCurrentTab =>
+      'Mostrar junto a la pestaña actual';
+
+  @override
+  String get splitView_end => 'Terminar vista dividida';
+
+  @override
+  String get splitView_endSubtitle => 'Ambas pestañas siguen abiertas';
+
+  @override
+  String get splitView_layout => 'Disposición';
+
+  @override
+  String get splitView_layoutAutomatic => 'Automática';
+
+  @override
+  String get splitView_layoutSideBySide => 'Lado a lado';
+
+  @override
+  String get splitView_layoutStacked => 'Apiladas';
+
+  @override
+  String get splitView_showOnlyThisPage => 'Mostrar solo esta página';
+
+  @override
+  String get splitView_showBothPages => 'Mostrar ambas';
+
+  @override
+  String get splitView_showingOnlyThisPage => 'Solo se muestra esta página';
+
+  @override
+  String get splitView_swapSides => 'Intercambiar lados';
+
+  @override
+  String get splitView_equalSizes => 'Mismo tamaño';
+
+  @override
+  String get splitView_replaceOtherPage => 'Reemplazar la otra página…';
+
+  @override
+  String get splitView_dividerDescription => 'Divisor de la vista dividida';
+
+  @override
+  String get splitView_dividerOptions => 'Opciones de la vista dividida';
+
+  @override
+  String get splitView_crashedTitle => 'Esta página dejó de funcionar';
+
+  @override
+  String get splitView_crashedReload => 'Recargar';
+
+  @override
+  String get splitView_couldNotOpen => 'No se pudo abrir la vista dividida';
+
+  @override
+  String get splitView_mixedPrivacy =>
+      'Las pestañas privadas y no privadas no se pueden mostrar juntas';
+
+  @override
+  String get splitView_routingNotReady =>
+      'La conexión de este contenedor aún no está lista';
+
+  @override
+  String get splitView_noSplitView => 'No hay vista dividida';
+
+  @override
+  String get splitView_pickerTitle => 'Mostrar junto a';
+
+  @override
+  String get splitView_memberMark => 'En vista dividida';
+
+  @override
+  String get splitView_replaceTitle => 'Reemplazar la otra página';
 
   @override
   String get tabs_actionSelect => 'Seleccionar';
@@ -14613,6 +14785,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get visibilitySwitch_treeTabsDescription =>
       'Muestra las pestañas abiertas desde una página debajo de la pestaña de la que salieron';
+
+  @override
+  String get visibilitySwitch_splitViewLabel => 'Vista dividida';
+
+  @override
+  String get visibilitySwitch_splitViewDescription =>
+      'Muestra dos pestañas una al lado de la otra o una encima de la otra';
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel =>

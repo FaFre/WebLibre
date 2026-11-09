@@ -10,6 +10,8 @@
   "visibilitySwitch_profilesDescription": "Buat profil terpisah dan beralih di antaranya",
   "visibilitySwitch_treeTabsLabel": "Tab pohon",
   "visibilitySwitch_treeTabsDescription": "Tampilkan tab yang dibuka dari sebuah halaman di bawah tab asalnya",
+  "visibilitySwitch_splitViewLabel": "Tampilan terpisah",
+  "visibilitySwitch_splitViewDescription": "Tampilkan dua tab berdampingan atau bertumpuk",
   "visibilitySwitch_layoutAdvancedLabel": "Kustomisasi bilah alat & menu",
   "visibilitySwitch_layoutAdvancedDescription": "Pilih tombol bilah alat, urutan menu, dan cara bilah tab mengelompokkan tab",
   "visibilitySwitch_gesturesLabel": "Gestur",

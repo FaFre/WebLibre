@@ -42,6 +42,7 @@ CustomizeGroup customizeGroupOf(VisibilitySwitch visibilitySwitch) =>
       VisibilitySwitch.containers ||
       VisibilitySwitch.isolatedTabs ||
       VisibilitySwitch.treeTabs ||
+      VisibilitySwitch.splitView ||
       VisibilitySwitch.profiles => CustomizeGroup.tabs,
       VisibilitySwitch.connections => CustomizeGroup.connections,
       VisibilitySwitch.layoutAdvanced ||

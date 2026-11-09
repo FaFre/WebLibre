@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/definitions.drift.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -102,14 +103,7 @@ class TabDataRepository extends _$TabDataRepository {
             ? (await getTabDataById(tabId))?.parentId
             : tabId;
 
-        if (closeOldTab) {
-          // The replacement stands in for it, so it was never closed.
-          await ref
-              .read(tabRepositoryProvider.notifier)
-              .closeTab(tabId, keepOffRecentlyClosed: true);
-        }
-
-        await ref
+        Future<String> openInTarget() => ref
             .read(tabRepositoryProvider.notifier)
             .addTab(
               url: replacementUrl ?? tabState.url,
@@ -124,6 +118,23 @@ class TabDataRepository extends _$TabDataRepository {
               // covers the redirect loop the old delegate bypass used to guard.
               flags: LoadUrlFlags.NONE,
             );
+
+        if (closeOldTab) {
+          // A replacement, which takes the old tab's slot in a split pair.
+          await ref.read(splitViewControllerProvider.notifier).carryOver(
+            tabId,
+            () async {
+              // The replacement stands in for it, so it was never closed.
+              await ref
+                  .read(tabRepositoryProvider.notifier)
+                  .closeTab(tabId, keepOffRecentlyClosed: true);
+              return await openInTarget();
+            },
+          );
+        } else {
+          // Another tab next to the original; a pair keeps the original.
+          await openInTarget();
+        }
       }
     }
   }
@@ -154,19 +165,25 @@ class TabDataRepository extends _$TabDataRepository {
         // its place in the hierarchy — read before the row disappears.
         final parentId = (await getTabDataById(tabId))?.parentId;
 
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .closeTab(tabId, keepOffRecentlyClosed: true);
+        // A replacement, which takes the old tab's slot in a split pair.
+        await ref.read(splitViewControllerProvider.notifier).carryOver(
+          tabId,
+          () async {
+            await ref
+                .read(tabRepositoryProvider.notifier)
+                .closeTab(tabId, keepOffRecentlyClosed: true);
 
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: tabState.url,
-              tabMode: tabState.tabMode,
-              containerSelection: const TabContainerSelection.unassigned(),
-              parentId: parentId,
-              selectTab: selectedTabId == tabState.id,
-            );
+            return await ref
+                .read(tabRepositoryProvider.notifier)
+                .addTab(
+                  url: tabState.url,
+                  tabMode: tabState.tabMode,
+                  containerSelection: const TabContainerSelection.unassigned(),
+                  parentId: parentId,
+                  selectTab: selectedTabId == tabState.id,
+                );
+          },
+        );
       }
     }
   }

@@ -31,11 +31,13 @@ import eu.weblibre.flutter_mozilla_components.middleware.AppLinkNavigationMiddle
 import eu.weblibre.flutter_mozilla_components.middleware.CrashRecoveryMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.FlutterEventMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.PresentedPanePriorityMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.OrderedRecentlyClosedStorage
 import eu.weblibre.flutter_mozilla_components.middleware.RecentlyClosedFilterMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.SplitSurvivorMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.TabUploadsMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
@@ -306,6 +308,9 @@ class Core(
                 // Android Components deliberately parks a crashed tab until the
                 // app asks for it back; nothing else here ever would.
                 CrashRecoveryMiddleware(),
+                // Keeps the other page of a split pair on screen when the
+                // selected one is closed by something other than Dart.
+                SplitSurvivorMiddleware(),
                 flutterEventMiddleware,
                 DownloadMiddleware(
                     applicationContext = context,
@@ -329,6 +334,9 @@ class Core(
                 ),
                 UndoMiddleware(),
                 LastAccessMiddleware(),
+                // Before AC's prioritization, which lowers a split page that
+                // is still on screen; see the middleware.
+                PresentedPanePriorityMiddleware(),
                 SessionPrioritizationMiddleware(),
                 RecordingDevicesMiddleware(context, components.notificationsDelegate),
                 PromptMiddleware(),

@@ -306,6 +306,10 @@ object GlobalComponents {
     // GestureRecognizer on the UI thread.
     var gestureEvents: GeckoGestureEvents? = null
 
+    // Native -> Dart split view chrome interactions (divider, pane activation).
+    // Cleared when the Flutter engine detaches, together with the split mirror.
+    var splitViewEvents: eu.weblibre.flutter_mozilla_components.pigeons.GeckoSplitViewEvents? = null
+
     // Native -> Dart history visit notifications, consumed by Core's history
     // delegate to forward the visit's WebLibre container. Null on the headless
     // path (no Flutter engine); the delegate still hard-excludes persisted

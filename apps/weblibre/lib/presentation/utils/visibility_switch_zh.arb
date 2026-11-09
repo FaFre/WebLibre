@@ -10,6 +10,8 @@
   "visibilitySwitch_profilesDescription": "创建独立的配置文件并在它们之间切换",
   "visibilitySwitch_treeTabsLabel": "树状标签页",
   "visibilitySwitch_treeTabsDescription": "把从某个页面打开的标签页显示在其来源标签页下方",
+  "visibilitySwitch_splitViewLabel": "分屏视图",
+  "visibilitySwitch_splitViewDescription": "并排或上下显示两个标签页",
   "visibilitySwitch_layoutAdvancedLabel": "自定义工具栏和菜单",
   "visibilitySwitch_layoutAdvancedDescription": "选择工具栏按钮、菜单顺序以及标签栏如何分组标签页",
   "visibilitySwitch_gesturesLabel": "手势",

@@ -8,17 +8,19 @@ package eu.weblibre.flutter_mozilla_components.api
 
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoViewportApi
+import mozilla.components.concept.engine.EngineView
 
 /**
  * Implementation of GeckoViewportApi that controls GeckoView's viewport behavior
  * for dynamic toolbar and keyboard handling.
  *
- * Toolbar height and vertical clipping target the main browser's EngineView specifically,
- * not the active/foreground EngineView. This prevents toolbar settings from leaking
- * to PWA/Custom Tab EngineViews.
+ * Toolbar height and vertical clipping target the main browser's EngineViews specifically
+ * (every split pane), not the active/foreground EngineView. This prevents toolbar settings
+ * from leaking to PWA/Custom Tab EngineViews.
  *
- * If the main browser EngineView is not yet available when setDynamicToolbarMaxHeight
- * is called, the value is stored and applied when the EngineView becomes available.
+ * If no main browser EngineView is available yet when setDynamicToolbarMaxHeight
+ * is called, the value is stored and applied when one becomes available. A pane
+ * created later gets the current values through [applyToNewEngineView].
  */
 class GeckoViewportApiImpl : GeckoViewportApi {
     private val components by lazy {
@@ -39,25 +41,34 @@ class GeckoViewportApiImpl : GeckoViewportApi {
         GlobalComponents.dynamicToolbarMaxHeightPx = height
         GlobalComponents.notifyBottomViewportInsetChanged()
 
-        val engineView = components.mainBrowserEngineView
-        if (engineView == null) {
+        val engineViews = components.browserPanes?.allEngineViews.orEmpty()
+        if (engineViews.isEmpty()) {
             pendingToolbarHeight = height
             return
         }
 
         pendingToolbarHeight = null
-        engineView.setDynamicToolbarMaxHeight(height)
+        engineViews.forEach { it.setDynamicToolbarMaxHeight(height) }
     }
 
     /**
      * Applies any pending toolbar height to the main browser EngineView.
-     * Called when mainBrowserEngineView becomes available.
+     * Called when the main browser's panes become available.
      */
     fun applyPendingToolbarHeight() {
         val pending = pendingToolbarHeight ?: return
-        val engineView = components.mainBrowserEngineView ?: return
+        val engineViews = components.browserPanes?.allEngineViews.orEmpty()
+        if (engineViews.isEmpty()) return
         pendingToolbarHeight = null
-        engineView.setDynamicToolbarMaxHeight(pending)
+        engineViews.forEach { it.setDynamicToolbarMaxHeight(pending) }
+    }
+
+    /** Gives a split pane created after the fact the values its sibling has. */
+    fun applyToNewEngineView(engineView: EngineView) {
+        engineView.setDynamicToolbarMaxHeight(
+            pendingToolbarHeight ?: GlobalComponents.dynamicToolbarMaxHeightPx,
+        )
+        engineView.setVerticalClipping(GlobalComponents.verticalClippingPx)
     }
 
     /**
@@ -70,11 +81,6 @@ class GeckoViewportApiImpl : GeckoViewportApi {
         GlobalComponents.verticalClippingPx = clipping
         GlobalComponents.notifyBottomViewportInsetChanged()
 
-        val engineView = components.mainBrowserEngineView
-        if (engineView == null) {
-            return
-        }
-
-        engineView.setVerticalClipping(clipping)
+        components.browserPanes?.allEngineViews?.forEach { it.setVerticalClipping(clipping) }
     }
 }

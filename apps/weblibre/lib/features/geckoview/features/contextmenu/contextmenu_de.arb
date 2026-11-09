@@ -5,6 +5,7 @@
   "contextmenu_newRegularTab": "Neuer normaler Tab",
   "contextmenu_newPrivateTab": "Neuer privater Tab",
   "contextmenu_newIsolatedTab": "Neuer isolierter Tab",
+  "contextmenu_openInSplitView": "In geteilter Ansicht öffnen",
   "contextmenu_openImageInNewTab": "Bild in neuem Tab öffnen",
   "contextmenu_openInContainer": "In Container öffnen",
   "contextmenu_selectContainerTitle": "Container auswählen",

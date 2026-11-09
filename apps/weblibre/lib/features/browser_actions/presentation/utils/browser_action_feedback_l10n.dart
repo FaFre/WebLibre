@@ -47,6 +47,7 @@ extension BrowserActionFeedbackL10n on BrowserActionFeedback {
         l10n.browserActions_readerViewUnavailableMessage,
       BrowserActionFeedback.noClosedTabs =>
         l10n.browserActions_noClosedTabsMessage,
+      BrowserActionFeedback.noSplitView => l10n.splitView_noSplitView,
     };
   }
 }

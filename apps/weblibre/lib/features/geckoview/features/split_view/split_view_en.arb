@@ -1,0 +1,107 @@
+{
+  "@@locale": "en",
+  "splitView_title": "Split view",
+  "@splitView_title": {
+    "description": "Name of the split view feature, which shows two tabs at once side by side or one above the other. Title of the split view controls sheet."
+  },
+  "splitView_splitWithAnotherTab": "Split with another tab…",
+  "@splitView_splitWithAnotherTab": {
+    "description": "Tab menu item: choose a second page to show next to this tab in split view. Opens the search screen as a picker."
+  },
+  "splitView_showBesideCurrentTab": "Show beside current tab",
+  "@splitView_showBesideCurrentTab": {
+    "description": "Tab menu item on a tab that is not the current one: shows this tab and the current tab together in split view."
+  },
+  "splitView_end": "End split view",
+  "@splitView_end": {
+    "description": "Action that stops showing two tabs at once. Both tabs stay open; only the split presentation ends."
+  },
+  "splitView_endSubtitle": "Both tabs stay open",
+  "@splitView_endSubtitle": {
+    "description": "Subtitle under \"End split view\" in the split view controls, so ending the split is not mistaken for closing a tab."
+  },
+  "splitView_layout": "Layout",
+  "@splitView_layout": {
+    "description": "Heading of the layout choice in the split view controls (automatic, side by side, stacked)."
+  },
+  "splitView_layoutAutomatic": "Automatic",
+  "@splitView_layoutAutomatic": {
+    "description": "Split view layout choice: side by side when the browser is wider than tall, one above the other otherwise."
+  },
+  "splitView_layoutSideBySide": "Side by side",
+  "@splitView_layoutSideBySide": {
+    "description": "Split view layout choice: the two pages left and right of each other."
+  },
+  "splitView_layoutStacked": "Stacked",
+  "@splitView_layoutStacked": {
+    "description": "Split view layout choice: the two pages one above the other."
+  },
+  "splitView_showOnlyThisPage": "Show only this page",
+  "@splitView_showOnlyThisPage": {
+    "description": "Switch in the split view controls: while on, the focused page fills the browser and the other stays loaded in the background."
+  },
+  "splitView_showBothPages": "Show both",
+  "@splitView_showBothPages": {
+    "description": "Short label (a quick toggle in the browser menu has about 65dp for it, keep it as short as possible) and snackbar button: shows both pages of a split view again after only one of them was being shown."
+  },
+  "splitView_showingOnlyThisPage": "Showing only this page",
+  "@splitView_showingOnlyThisPage": {
+    "description": "Snackbar after the user dragged the split view divider to the screen edge: the other page is hidden but stays loaded. Followed by a \"Show both\" button."
+  },
+  "splitView_swapSides": "Swap sides",
+  "@splitView_swapSides": {
+    "description": "Split view control and action: exchanges the positions of the two pages."
+  },
+  "splitView_equalSizes": "Equal sizes",
+  "@splitView_equalSizes": {
+    "description": "Split view control: gives both pages the same size."
+  },
+  "splitView_replaceOtherPage": "Replace other page…",
+  "@splitView_replaceOtherPage": {
+    "description": "Split view control: choose a different page to show next to the focused one. Opens the tab tray to choose an open tab, or a new tab from there."
+  },
+  "splitView_dividerDescription": "Split view divider",
+  "@splitView_dividerDescription": {
+    "description": "Accessibility description of the divider between the two pages of a split view. Screen reader users can move it."
+  },
+  "splitView_dividerOptions": "Split view options",
+  "@splitView_dividerOptions": {
+    "description": "Accessibility action on the split view divider that opens the split view controls."
+  },
+  "splitView_crashedTitle": "This page crashed",
+  "@splitView_crashedTitle": {
+    "description": "Shown in place of a web page whose content process crashed and could not be restored automatically."
+  },
+  "splitView_crashedReload": "Reload",
+  "@splitView_crashedReload": {
+    "description": "Button under \"This page crashed\" that loads the crashed page again."
+  },
+  "splitView_couldNotOpen": "Couldn't open split view",
+  "@splitView_couldNotOpen": {
+    "description": "Snackbar when two pages could not be shown together, e.g. because the first tab was closed in the meantime. The chosen page opens normally instead."
+  },
+  "splitView_mixedPrivacy": "Private and non-private tabs can't be shown together",
+  "@splitView_mixedPrivacy": {
+    "description": "Snackbar when the user tries to show a private tab next to a non-private one in split view."
+  },
+  "splitView_routingNotReady": "This container's connection isn't ready yet",
+  "@splitView_routingNotReady": {
+    "description": "Snackbar when a split view page belongs to a container whose proxy connection is still starting."
+  },
+  "splitView_noSplitView": "No split view",
+  "@splitView_noSplitView": {
+    "description": "Feedback when a split view action (swap, focus the other page, show one or both pages, open the split view controls, end) is used while no split view is shown."
+  },
+  "splitView_pickerTitle": "Show beside",
+  "@splitView_pickerTitle": {
+    "description": "Hint in the search screen while it is used to choose the second page of a split view."
+  },
+  "splitView_memberMark": "In split view",
+  "@splitView_memberMark": {
+    "description": "Screen reader label of the small split glyph on a tab in the tab list or tab switcher: this tab is one of the two pages shown together in split view."
+  },
+  "splitView_replaceTitle": "Replace other page",
+  "@splitView_replaceTitle": {
+    "description": "Title of the tab tray while it is used to choose the page shown next to the focused one in split view (after 'Replace other page…'). Its new-tab button opens a new page there instead."
+  }
+}

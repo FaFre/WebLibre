@@ -24,6 +24,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_type_filter_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_pick.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -98,6 +99,12 @@ class TabTrayNewTabFab extends HookConsumerWidget {
     final duration = disableAnimations
         ? Duration.zero
         : const Duration(milliseconds: 200);
+    // While picking, a new tab is what the pick is for (the request decides
+    // what to open), under the picker's own filter bar.
+    final pick = TabTrayPick.maybeOf(context);
+    final filterBarVisible = pick != null
+        ? pick.typeFilters.isNotEmpty
+        : tabTypeFilterBarVisible;
 
     return AnimatedSlide(
       duration: duration,
@@ -112,13 +119,17 @@ class TabTrayNewTabFab extends HookConsumerWidget {
             // sheet slides under it, and grows by its height.
             top:
                 TabViewHeader.headerSize +
-                (tabTypeFilterBarVisible ? tabTypeFilterBarHeight : 0) +
+                (filterBarVisible ? tabTypeFilterBarHeight : 0) +
                 MediaQuery.paddingOf(context).top +
                 4,
             right: 4,
           ),
           child: FloatingActionButton.small(
             onPressed: () async {
+              if (pick != null) {
+                pick.request.onNewTab();
+                return;
+              }
               await SearchRoute(tabType: trayNewTabType(ref)).push(context);
 
               // A search usually closes the tray, and this button with it.

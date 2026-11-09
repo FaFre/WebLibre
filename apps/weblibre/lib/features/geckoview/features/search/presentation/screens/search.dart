@@ -20,6 +20,7 @@
 import 'dart:async';
 
 import 'package:fading_scroll/fading_scroll.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -64,10 +65,14 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_providers_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_term_suggestions_section.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/tab_search.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
@@ -121,6 +126,9 @@ class SearchScreen extends HookConsumerWidget {
   /// When null, a new tab will be created.
   final String? tabId;
 
+  /// Picker mode: the result is shown beside this tab in split view.
+  final String? splitWithTabId;
+
   const SearchScreen({
     super.key,
     required this.initialSearchText,
@@ -128,6 +136,7 @@ class SearchScreen extends HookConsumerWidget {
     this.launchedFromIntent = false,
     this.autoSubmitSearch = false,
     this.tabId,
+    this.splitWithTabId,
   });
 
   @override
@@ -163,6 +172,15 @@ class SearchScreen extends HookConsumerWidget {
     final selectedContainer = ref.watch(
       selectedContainerDataProvider.select((value) => value.value),
     );
+    // Picker mode has a container of its own: the source tab's, until one
+    // is picked in the selector. Picking never switches the browser's
+    // container, which would bring home up over the page the pick is for.
+    final splitSourceContainer = ref.watch(
+      watchTabContainerDataProvider(
+        splitWithTabId,
+      ).select((value) => value.value),
+    );
+    final pickedContainer = useState<({ContainerData? container})?>(null);
 
     // When editing an existing tab, get its state
     // If tab no longer exists (null), fall back to new tab mode
@@ -173,6 +191,70 @@ class SearchScreen extends HookConsumerWidget {
 
     // Determine if we're in edit mode (tabId provided AND tab still exists)
     final isEditMode = tabId != null && existingTabState != null;
+
+    // Picker mode for split view; never combined with editing a tab.
+    final splitSourceId = isEditMode ? null : splitWithTabId;
+
+    // The container the selector shows, and new pages go to.
+    final shownContainer = splitSourceId == null
+        ? selectedContainer
+        : pickedContainer.value != null
+        ? pickedContainer.value!.container
+        : splitSourceContainer;
+
+    /// A new page in [container], or unassigned when null.
+    TabContainerSelection containerSelectionFor(ContainerData? container) =>
+        container == null
+        ? const TabContainerSelection.unassigned()
+        : TabContainerSelection.specific(container);
+
+    // In picker mode, the container picked in the selector; null while none
+    // was, and the page goes to the source's container (site assignment
+    // still wins), read when it opens.
+    final pickedContainerSelection = pickedContainer.value == null
+        ? null
+        : containerSelectionFor(pickedContainer.value!.container);
+
+    Future<void> pickContainer(ContainerSelectionResult selection) async {
+      final ContainerData? container;
+      switch (selection) {
+        case ContainerSelectionSelected(:final containerId):
+          container = await ref
+              .read(containerRepositoryProvider.notifier)
+              .getContainerData(containerId);
+          if (container == null) return;
+        case ContainerSelectionUnassigned():
+          container = null;
+      }
+      if (context.mounted) {
+        pickedContainer.value = (container: container);
+      }
+    }
+
+    final splitSourcePrivate = ref.watch(
+      tabStateProvider(
+        splitSourceId,
+      ).select((state) => state?.tabMode is PrivateTabMode),
+    );
+
+    // In picker mode the open-tab results leave out the source and every tab
+    // of the other privacy class, which could not be shown beside it.
+    final splitExcludedTabIds = ref
+        .watch(
+          tabSortKeysProvider.select(
+            (keys) => EquatableValue(
+              splitSourceId == null
+                  ? <String>{}
+                  : splitPickerExcludedTabIds(
+                      sourceTabId: splitSourceId,
+                      modes: keys.value.map(
+                        (id, sortKeys) => MapEntry(id, sortKeys.tabMode),
+                      ),
+                    ),
+            ),
+          ),
+        )
+        .value;
 
     final effectiveTabMode = isEditMode
         ? existingTabState.tabMode
@@ -511,12 +593,33 @@ class SearchScreen extends HookConsumerWidget {
     }, [showBangIcon]);
 
     Future<void> openUriInTab(Uri uri, {String? findInPageQuery}) async {
+      // Picker mode leaves for the browser as soon as the tab exists and
+      // pairs from there, so everything it needs afterwards is read now.
+      final picker = splitSourceId == null
+          ? null
+          : SplitPickerDestination.capture(
+              context,
+              ref.read,
+              sourceTabId: splitSourceId,
+              pickedContainer: pickedContainerSelection,
+            );
+      final sheets = ref.read(bottomSheetControllerProvider.notifier);
+
+      Future<void> highlight(String openedTabId) async {
+        if (findInPageQuery != null && findInPageQuery.isNotEmpty) {
+          await ref
+              .read(findInPageControllerProvider(openedTabId).notifier)
+              .findAll(text: findInPageQuery);
+        }
+      }
+
       final String targetTabId;
       if (isEditMode) {
         targetTabId = tabId!;
         await ref
             .read(tabSessionProvider(tabId: targetTabId).notifier)
             .loadUrl(url: uri);
+        await highlight(targetTabId);
       } else {
         final parentId = (selectedTabType.value == TabType.child)
             ? ref.read(selectedTabProvider)
@@ -529,21 +632,31 @@ class SearchScreen extends HookConsumerWidget {
               tabMode: effectiveTabMode,
               parentId: parentId,
               launchedFromIntent: launchedFromIntent,
-              selectTab: true,
-              containerSelection: selectedContainer == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(selectedContainer),
+              // In picker mode the new page is selected only once it is
+              // paired, so the split appears at once.
+              selectTab: splitSourceId == null,
+              containerSelection: picker != null
+                  ? await picker.containerSelection()
+                  : containerSelectionFor(selectedContainer),
               onBackBehavior: resolveSearchTabBackBehavior(
                 launchedFromIntent: launchedFromIntent,
                 parentId: parentId,
               ),
+              // Typed by the user, not linked from the parent's page.
+              parentIsReferrer: false,
             );
-      }
 
-      if (findInPageQuery != null && findInPageQuery.isNotEmpty) {
-        await ref
-            .read(findInPageControllerProvider(targetTabId).notifier)
-            .findAll(text: findInPageQuery);
+        // Before picker mode leaves this screen, after which [ref] is gone.
+        await highlight(targetTabId);
+
+        if (picker != null) {
+          // Back to the browser first: pairing waits for the new page to
+          // report its first state (and for its routing), and the picker
+          // must not stay up meanwhile. The pair appears once it is formed.
+          sheets.requestDismiss();
+          await picker.present(targetTabId);
+          return;
+        }
       }
 
       if (context.mounted) {
@@ -731,6 +844,20 @@ class SearchScreen extends HookConsumerWidget {
 
     final reorderActive = ref.watch(searchReorderModeProvider(activeSurface));
 
+    /// Shows an open tab picked here: beside the source in picker mode,
+    /// otherwise on its own.
+    Future<void> selectChosenTab(String tabId) async {
+      if (splitSourceId != null && splitSourceId != tabId) {
+        await SplitPickerDestination.capture(
+          context,
+          ref.read,
+          sourceTabId: splitSourceId,
+        ).pair(tabId);
+        return;
+      }
+      await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+    }
+
     final moduleCallbacks = ModuleSurfaceCallbacks(
       onUriSelected: openUriInTab,
       searchTextController: searchTextController,
@@ -741,7 +868,7 @@ class SearchScreen extends HookConsumerWidget {
         FeedArticleRoute(articleId: article.id).pushReplacement(context);
       },
       onTabSelected: (tabId) async {
-        await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);
+        await selectChosenTab(tabId);
 
         if (context.mounted) {
           ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
@@ -749,6 +876,7 @@ class SearchScreen extends HookConsumerWidget {
         }
       },
       onContainerSelected: selectContainer,
+      excludedTabIds: splitExcludedTabIds,
     );
 
     final searchWidgets = <SearchModuleType, Widget>{
@@ -766,7 +894,11 @@ class SearchScreen extends HookConsumerWidget {
         submitSearch: submitSearch,
         fetchRemoteSuggestions: sourcePolicy.remoteSuggestions,
       ),
-      SearchModuleType.tabs: TabSearch(searchTextListenable: sampledQueryText),
+      SearchModuleType.tabs: TabSearch(
+        searchTextListenable: sampledQueryText,
+        excludedTabIds: splitExcludedTabIds,
+        selectTab: splitSourceId == null ? null : selectChosenTab,
+      ),
       SearchModuleType.actions: ActionSearch(
         searchTextListenable: sampledQueryText,
         pageTabId: isEditMode ? tabId : null,
@@ -801,8 +933,23 @@ class SearchScreen extends HookConsumerWidget {
       searchModuleOrderProvider(ModuleSurface.search),
     );
 
+    // The split view picker only offers what opens a web page beside the
+    // source: feed articles open in the reader screen, actions act on the
+    // browser.
+    bool splitPickerOffersModule(SearchModuleType type) => switch (type) {
+      SearchModuleType.articles ||
+      SearchModuleType.recentArticles ||
+      SearchModuleType.actions ||
+      SearchModuleType.quickActions => false,
+      _ => true,
+    };
+
     bool canShowSearchModule(SearchModuleType type) {
       if (!sourcePolicy.allowsModule(type)) {
+        return false;
+      }
+
+      if (splitSourceId != null && !splitPickerOffersModule(type)) {
         return false;
       }
 
@@ -859,6 +1006,14 @@ class SearchScreen extends HookConsumerWidget {
                       });
                     },
                     showChildOption: createChildTabsOption,
+                    // The picker offers only tab types of the source's
+                    // privacy class; a child follows the selected tab.
+                    allowedTypes: splitSourceId == null
+                        ? null
+                        : splitPickerTabTypes(
+                            sourcePrivate: splitSourcePrivate,
+                            selectedTabType: currentTabTabType,
+                          ),
                     showIsolatedOption: settings.isolatedTabEntryPointsShown,
                     selectedBackgroundColor: switch (selectedTabType.value) {
                       TabType.regular => null,
@@ -876,7 +1031,7 @@ class SearchScreen extends HookConsumerWidget {
                 // A selected container keeps its way out while containers
                 // are hidden (P5): the selector then only leaves it.
                 if (!settings.containerEntryPointsShown &&
-                    selectedContainer == null) {
+                    shownContainer == null) {
                   return Center(
                     child: Transform.scale(scale: 1.08, child: tabTypeSwitcher),
                   );
@@ -897,8 +1052,11 @@ class SearchScreen extends HookConsumerWidget {
                       child: Align(
                         alignment: Alignment.centerRight,
                         child: CompactContainerSelector(
-                          selectedContainer: selectedContainer,
+                          selectedContainer: shownContainer,
                           emphasizeSelection: false,
+                          onSelectionChanged: splitSourceId == null
+                              ? null
+                              : pickContainer,
                         ),
                       ),
                     ),
@@ -1044,20 +1202,33 @@ class SearchScreen extends HookConsumerWidget {
           // providers belong to the normal search page, not the
           // results view.
           WebSearchResultsSection(
-            resolveOpenTarget: () => WebSearchOpenTarget(
-              tabMode: effectiveTabMode,
-              containerSelection: selectedContainer == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(selectedContainer),
-              parentId: (selectedTabType.value == TabType.child)
+            resolveOpenTarget: () {
+              final parentId = (selectedTabType.value == TabType.child)
                   ? ref.read(selectedTabProvider)
-                  : null,
-            ),
+                  : null;
+              return splitSourceId != null
+                  ? WebSearchOpenTarget.splitPartner(
+                      tabMode: effectiveTabMode,
+                      sourceTabId: splitSourceId,
+                      containerSelection: pickedContainerSelection,
+                      parentId: parentId,
+                    )
+                  : WebSearchOpenTarget(
+                      tabMode: effectiveTabMode,
+                      containerSelection: containerSelectionFor(
+                        selectedContainer,
+                      ),
+                      parentId: parentId,
+                    );
+            },
           ),
         ] else if (showNoInputSections)
           ModuleSurfaceSliverList(
             surface: ModuleSurface.newTab,
             callbacks: moduleCallbacks,
+            moduleFilter: splitSourceId == null
+                ? null
+                : splitPickerOffersModule,
           )
         else ...[
           for (final entry in searchOrder)

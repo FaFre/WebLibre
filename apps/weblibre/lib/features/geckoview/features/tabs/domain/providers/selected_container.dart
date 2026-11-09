@@ -21,11 +21,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:riverpod/experimental/persist.dart';
+import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
@@ -238,6 +240,12 @@ class ForceBrowserHome extends _$ForceBrowserHome {
 /// Condition (2) also implicitly covers the case where the selected
 /// container has zero tabs: if the container has no tabs, the selected tab
 /// (if any) necessarily belongs to a different container.
+///
+/// While the selected tab is in a split pair, (2) holds only when the selected
+/// container matches *neither* member. Focusing the other pane selects a tab
+/// whose container can differ, and the selected container follows the
+/// selection asynchronously; without this the home would flash over the pair
+/// in between. An explicit switch to a third container still shows home.
 @Riverpod()
 bool shouldShowBrowserHome(Ref ref) {
   if (ref.watch(forceBrowserHomeProvider)) return true;
@@ -249,10 +257,19 @@ bool shouldShowBrowserHome(Ref ref) {
 
   final selectedContainer = ref.watch(selectedContainerProvider);
   final tabContainerId = ref.watch(selectedTabContainerIdProvider);
+  final splitActive = ref.watch(
+    activeSplitPairProvider.select((pair) => pair != null),
+  );
+  final selectedContainerInSplit = ref.watch(
+    splitPairContainerIdsProvider.select(
+      (value) => value.value?.contains(selectedContainer) ?? false,
+    ),
+  );
 
   // Once we know the tab's container, compare with the selected container.
   return switch (tabContainerId) {
-    AsyncData(:final value) => value != selectedContainer,
+    AsyncData(:final value) =>
+      value != selectedContainer && !(splitActive && selectedContainerInSplit),
     // While loading, keep the current view to avoid flashing.
     _ => false,
   };

@@ -19,6 +19,7 @@
  */
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_pick_request.dart';
 
 sealed class Sheet with FastEquatable {}
 
@@ -34,4 +35,21 @@ final class SiteSettingsSheet extends Sheet {
 
   @override
   List<Object?> get hashParameters => [tabState];
+}
+
+/// The split view controls (layout, swap, end).
+final class SplitViewSheet extends Sheet {
+  @override
+  List<Object?> get hashParameters => [null];
+}
+
+/// The tab tray as a picker: a tap picks a tab for [request] instead of
+/// selecting it.
+final class TabPickerSheet extends Sheet {
+  final TabPickRequest request;
+
+  TabPickerSheet(this.request);
+
+  @override
+  List<Object?> get hashParameters => [request];
 }

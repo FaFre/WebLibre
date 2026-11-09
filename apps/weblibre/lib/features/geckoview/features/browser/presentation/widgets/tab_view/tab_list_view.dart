@@ -39,6 +39,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_reorder_semantics.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_pick.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_scroll_to_active.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_view_item.dart';
@@ -484,6 +485,8 @@ class ViewTabListWidget extends HookConsumerWidget {
       ),
     );
     final scrolledUnder = useValueNotifier(false);
+    // Shown as a picker: a tap picks, and the tray's actions are left out.
+    final picking = TabTrayPick.maybeOf(context) != null;
 
     return Column(
       children: [
@@ -522,15 +525,17 @@ class ViewTabListWidget extends HookConsumerWidget {
                     context: context,
                     removeTop: true,
                     removeBottom: true,
-                    child: _TabListView(
-                      scrollController: scrollController,
-                      tabsReorderable: tabsReorderable,
-                      onClose: onClose,
-                    ),
+                    child: picking
+                        ? TabPickerListView(scrollController: scrollController)
+                        : _TabListView(
+                            scrollController: scrollController,
+                            tabsReorderable: tabsReorderable,
+                            onClose: onClose,
+                          ),
                   ),
                 ),
               ),
-              if (showNewTabFab && !isSyncedScope)
+              if (showNewTabFab && (picking || !isSyncedScope))
                 TabTrayNewTabFab(
                   scrollController: scrollController,
                   sheetController: draggableScrollableController,
@@ -540,7 +545,10 @@ class ViewTabListWidget extends HookConsumerWidget {
             ],
           ),
         ),
-        const TabViewActionBar(tabsViewMode: TabsViewMode.list),
+        if (picking)
+          const TabPickerBottomInset()
+        else
+          const TabViewActionBar(tabsViewMode: TabsViewMode.list),
       ],
     );
   }

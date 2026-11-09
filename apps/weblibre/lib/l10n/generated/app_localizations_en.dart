@@ -1526,6 +1526,58 @@ class AppLocalizationsEn extends AppLocalizations {
       'Open a copy of the current tab';
 
   @override
+  String get browserActions_splitViewTitle => 'Split View';
+
+  @override
+  String get browserActions_splitViewDescription =>
+      'Show two pages at once, or go back to one';
+
+  @override
+  String get browserActions_splitWithAnotherTabTitle =>
+      'Split With Another Tab';
+
+  @override
+  String get browserActions_splitWithAnotherTabDescription =>
+      'Choose the page to show beside the current one';
+
+  @override
+  String get browserActions_toggleSplitSinglePageTitle =>
+      'Show One / Both Split Pages';
+
+  @override
+  String get browserActions_toggleSplitSinglePageDescription =>
+      'Hide the other page of the split view, or bring it back';
+
+  @override
+  String get browserActions_showSplitControlsTitle => 'Split View Controls';
+
+  @override
+  String get browserActions_showSplitControlsDescription =>
+      'Adjust the layout, sizes and pages of the split view';
+
+  @override
+  String get browserActions_focusOtherSplitPaneTitle =>
+      'Focus Other Split Page';
+
+  @override
+  String get browserActions_focusOtherSplitPaneDescription =>
+      'Move focus to the other page of the split view';
+
+  @override
+  String get browserActions_swapSplitPanesTitle => 'Swap Split Pages';
+
+  @override
+  String get browserActions_swapSplitPanesDescription =>
+      'Exchange the positions of the two pages';
+
+  @override
+  String get browserActions_endSplitViewTitle => 'End Split View';
+
+  @override
+  String get browserActions_endSplitViewDescription =>
+      'Show one page again; both tabs stay open';
+
+  @override
   String get browserActions_nextTabTitle => 'Next Tab';
 
   @override
@@ -2093,6 +2145,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get browserActions_duplicateTabKeywords => 'clone tab, copy tab';
+
+  @override
+  String get browserActions_splitViewKeywords =>
+      'split screen, side by side, two pages, multitasking';
+
+  @override
+  String get browserActions_splitWithAnotherTabKeywords =>
+      'page beside, pick tab, replace other page';
+
+  @override
+  String get browserActions_toggleSplitSinglePageKeywords =>
+      'only this page, both pages, hide other page, full screen';
+
+  @override
+  String get browserActions_showSplitControlsKeywords =>
+      'layout, options, size, divider';
+
+  @override
+  String get browserActions_focusOtherSplitPaneKeywords =>
+      'switch pane, other side, split focus';
+
+  @override
+  String get browserActions_swapSplitPanesKeywords =>
+      'swap sides, switch sides';
+
+  @override
+  String get browserActions_endSplitViewKeywords =>
+      'close split, single page, unsplit';
 
   @override
   String get browserActions_togglePinTabKeywords => 'pin tab, unpin, sticky';
@@ -3534,6 +3614,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get browser_moveTabRight => 'Move tab right';
 
   @override
+  String get browser_tabPickerNothingHere => 'No tabs to choose here';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Home';
 
   @override
@@ -4146,6 +4229,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get menu_connectionUsageBlocked => 'Blocked';
 
   @override
+  String get menu_itemSplitView => 'Split';
+
+  @override
   String get contextmenu_openInNewTab => 'Open in new tab';
 
   @override
@@ -4160,6 +4246,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get contextmenu_newIsolatedTab => 'New isolated tab';
+
+  @override
+  String get contextmenu_openInSplitView => 'Open in split view';
 
   @override
   String get contextmenu_openImageInNewTab => 'Open image in new tab';
@@ -5211,6 +5300,86 @@ class AppLocalizationsEn extends AppLocalizations {
   String search_deletedFromHistory(String site) {
     return 'Deleted $site from history';
   }
+
+  @override
+  String get splitView_title => 'Split view';
+
+  @override
+  String get splitView_splitWithAnotherTab => 'Split with another tab…';
+
+  @override
+  String get splitView_showBesideCurrentTab => 'Show beside current tab';
+
+  @override
+  String get splitView_end => 'End split view';
+
+  @override
+  String get splitView_endSubtitle => 'Both tabs stay open';
+
+  @override
+  String get splitView_layout => 'Layout';
+
+  @override
+  String get splitView_layoutAutomatic => 'Automatic';
+
+  @override
+  String get splitView_layoutSideBySide => 'Side by side';
+
+  @override
+  String get splitView_layoutStacked => 'Stacked';
+
+  @override
+  String get splitView_showOnlyThisPage => 'Show only this page';
+
+  @override
+  String get splitView_showBothPages => 'Show both';
+
+  @override
+  String get splitView_showingOnlyThisPage => 'Showing only this page';
+
+  @override
+  String get splitView_swapSides => 'Swap sides';
+
+  @override
+  String get splitView_equalSizes => 'Equal sizes';
+
+  @override
+  String get splitView_replaceOtherPage => 'Replace other page…';
+
+  @override
+  String get splitView_dividerDescription => 'Split view divider';
+
+  @override
+  String get splitView_dividerOptions => 'Split view options';
+
+  @override
+  String get splitView_crashedTitle => 'This page crashed';
+
+  @override
+  String get splitView_crashedReload => 'Reload';
+
+  @override
+  String get splitView_couldNotOpen => 'Couldn\'t open split view';
+
+  @override
+  String get splitView_mixedPrivacy =>
+      'Private and non-private tabs can\'t be shown together';
+
+  @override
+  String get splitView_routingNotReady =>
+      'This container\'s connection isn\'t ready yet';
+
+  @override
+  String get splitView_noSplitView => 'No split view';
+
+  @override
+  String get splitView_pickerTitle => 'Show beside';
+
+  @override
+  String get splitView_memberMark => 'In split view';
+
+  @override
+  String get splitView_replaceTitle => 'Replace other page';
 
   @override
   String get tabs_actionSelect => 'Select';
@@ -14243,6 +14412,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get visibilitySwitch_treeTabsDescription =>
       'Show tabs opened from a page under the tab they came from';
+
+  @override
+  String get visibilitySwitch_splitViewLabel => 'Split view';
+
+  @override
+  String get visibilitySwitch_splitViewDescription =>
+      'Show two tabs side by side or stacked';
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel =>

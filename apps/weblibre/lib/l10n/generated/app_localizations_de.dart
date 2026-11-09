@@ -1560,6 +1560,59 @@ class AppLocalizationsDe extends AppLocalizations {
       'Eine Kopie des aktuellen Tabs öffnen';
 
   @override
+  String get browserActions_splitViewTitle => 'Geteilte Ansicht';
+
+  @override
+  String get browserActions_splitViewDescription =>
+      'Zwei Seiten gleichzeitig anzeigen oder zu einer zurückkehren';
+
+  @override
+  String get browserActions_splitWithAnotherTabTitle =>
+      'Mit anderem Tab teilen';
+
+  @override
+  String get browserActions_splitWithAnotherTabDescription =>
+      'Die Seite wählen, die neben der aktuellen angezeigt wird';
+
+  @override
+  String get browserActions_toggleSplitSinglePageTitle =>
+      'Eine / beide Seiten zeigen';
+
+  @override
+  String get browserActions_toggleSplitSinglePageDescription =>
+      'Die andere Seite der geteilten Ansicht ausblenden oder zurückholen';
+
+  @override
+  String get browserActions_showSplitControlsTitle =>
+      'Optionen der geteilten Ansicht';
+
+  @override
+  String get browserActions_showSplitControlsDescription =>
+      'Layout, Größen und Seiten der geteilten Ansicht anpassen';
+
+  @override
+  String get browserActions_focusOtherSplitPaneTitle =>
+      'Andere geteilte Seite fokussieren';
+
+  @override
+  String get browserActions_focusOtherSplitPaneDescription =>
+      'Fokus auf die andere Seite der geteilten Ansicht legen';
+
+  @override
+  String get browserActions_swapSplitPanesTitle => 'Geteilte Seiten tauschen';
+
+  @override
+  String get browserActions_swapSplitPanesDescription =>
+      'Die Positionen der beiden Seiten tauschen';
+
+  @override
+  String get browserActions_endSplitViewTitle => 'Geteilte Ansicht beenden';
+
+  @override
+  String get browserActions_endSplitViewDescription =>
+      'Wieder eine Seite anzeigen; beide Tabs bleiben geöffnet';
+
+  @override
   String get browserActions_nextTabTitle => 'Nächster Tab';
 
   @override
@@ -2140,6 +2193,34 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get browserActions_duplicateTabKeywords => 'Tab klonen, Tab kopieren';
+
+  @override
+  String get browserActions_splitViewKeywords =>
+      'geteilter Bildschirm, Splitscreen, nebeneinander, zwei Seiten, Multitasking';
+
+  @override
+  String get browserActions_splitWithAnotherTabKeywords =>
+      'Seite daneben, Tab auswählen, andere Seite ersetzen';
+
+  @override
+  String get browserActions_toggleSplitSinglePageKeywords =>
+      'nur diese Seite, beide Seiten, ausblenden, Vollbild';
+
+  @override
+  String get browserActions_showSplitControlsKeywords =>
+      'Layout, Einstellungen, Größe, Trennlinie';
+
+  @override
+  String get browserActions_focusOtherSplitPaneKeywords =>
+      'Bereich wechseln, andere Seite';
+
+  @override
+  String get browserActions_swapSplitPanesKeywords =>
+      'Seiten tauschen, Seiten wechseln';
+
+  @override
+  String get browserActions_endSplitViewKeywords =>
+      'Teilung aufheben, eine Seite';
 
   @override
   String get browserActions_togglePinTabKeywords =>
@@ -3603,6 +3684,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get browser_moveTabRight => 'Tab nach rechts verschieben';
 
   @override
+  String get browser_tabPickerNothingHere =>
+      'Hier gibt es keine Tabs zur Auswahl';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Startseite';
 
   @override
@@ -4224,6 +4309,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get menu_connectionUsageBlocked => 'Blockiert';
 
   @override
+  String get menu_itemSplitView => 'Splitscreen';
+
+  @override
   String get contextmenu_openInNewTab => 'In neuem Tab öffnen';
 
   @override
@@ -4238,6 +4326,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get contextmenu_newIsolatedTab => 'Neuer isolierter Tab';
+
+  @override
+  String get contextmenu_openInSplitView => 'In geteilter Ansicht öffnen';
 
   @override
   String get contextmenu_openImageInNewTab => 'Bild in neuem Tab öffnen';
@@ -5322,6 +5413,87 @@ class AppLocalizationsDe extends AppLocalizations {
   String search_deletedFromHistory(String site) {
     return '$site aus dem Verlauf gelöscht';
   }
+
+  @override
+  String get splitView_title => 'Geteilte Ansicht';
+
+  @override
+  String get splitView_splitWithAnotherTab => 'Mit anderem Tab teilen…';
+
+  @override
+  String get splitView_showBesideCurrentTab => 'Neben aktuellem Tab anzeigen';
+
+  @override
+  String get splitView_end => 'Geteilte Ansicht beenden';
+
+  @override
+  String get splitView_endSubtitle => 'Beide Tabs bleiben geöffnet';
+
+  @override
+  String get splitView_layout => 'Anordnung';
+
+  @override
+  String get splitView_layoutAutomatic => 'Automatisch';
+
+  @override
+  String get splitView_layoutSideBySide => 'Nebeneinander';
+
+  @override
+  String get splitView_layoutStacked => 'Untereinander';
+
+  @override
+  String get splitView_showOnlyThisPage => 'Nur diese Seite anzeigen';
+
+  @override
+  String get splitView_showBothPages => 'Beide zeigen';
+
+  @override
+  String get splitView_showingOnlyThisPage => 'Nur diese Seite wird angezeigt';
+
+  @override
+  String get splitView_swapSides => 'Seiten tauschen';
+
+  @override
+  String get splitView_equalSizes => 'Gleich groß';
+
+  @override
+  String get splitView_replaceOtherPage => 'Andere Seite ersetzen…';
+
+  @override
+  String get splitView_dividerDescription => 'Trennlinie der geteilten Ansicht';
+
+  @override
+  String get splitView_dividerOptions => 'Optionen der geteilten Ansicht';
+
+  @override
+  String get splitView_crashedTitle => 'Diese Seite ist abgestürzt';
+
+  @override
+  String get splitView_crashedReload => 'Neu laden';
+
+  @override
+  String get splitView_couldNotOpen =>
+      'Geteilte Ansicht konnte nicht geöffnet werden';
+
+  @override
+  String get splitView_mixedPrivacy =>
+      'Private und nicht private Tabs können nicht zusammen angezeigt werden';
+
+  @override
+  String get splitView_routingNotReady =>
+      'Die Verbindung dieses Containers ist noch nicht bereit';
+
+  @override
+  String get splitView_noSplitView => 'Keine geteilte Ansicht';
+
+  @override
+  String get splitView_pickerTitle => 'Daneben anzeigen';
+
+  @override
+  String get splitView_memberMark => 'In geteilter Ansicht';
+
+  @override
+  String get splitView_replaceTitle => 'Andere Seite ersetzen';
 
   @override
   String get tabs_actionSelect => 'Auswählen';
@@ -14517,6 +14689,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get visibilitySwitch_treeTabsDescription =>
       'Tabs, die aus einer Seite geöffnet wurden, unter ihrem Ursprungstab anzeigen';
+
+  @override
+  String get visibilitySwitch_splitViewLabel => 'Geteilte Ansicht';
+
+  @override
+  String get visibilitySwitch_splitViewDescription =>
+      'Zwei Tabs nebeneinander oder übereinander anzeigen';
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel =>

@@ -259,6 +259,12 @@ class _GeckoViewState extends State<GeckoView> {
               layoutDirection: TextDirection.ltr,
               creationParams: {},
               creationParamsCodec: const StandardMessageCodec(),
+              // Native focus entering the page (a tap into a field) must move
+              // Flutter focus onto the platform view too. Without it a Flutter
+              // text field that had focus before keeps it, together with the
+              // engine's text connection, and hardware keys typed into the
+              // page land in that stale connection instead of reaching Gecko.
+              onFocus: () => params.onFocusChanged(true),
             )
             ..addOnPlatformViewCreatedListener((value) {
               params.onPlatformViewCreated(value);

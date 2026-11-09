@@ -21,5 +21,6 @@
   "contextmenu_shareImage": "Поделиться изображением",
   "contextmenu_shareEmailAddress": "Поделиться адресом эл. почты",
   "contextmenu_urlCleanedMessage": "URL-адрес очищен",
-  "contextmenu_urlPreviewAppliedMessage": "Предпросмотр URL-адреса применён"
+  "contextmenu_urlPreviewAppliedMessage": "Предпросмотр URL-адреса применён",
+  "contextmenu_openInSplitView": "Открыть в разделённом экране"
 }

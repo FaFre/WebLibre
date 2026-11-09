@@ -105,6 +105,17 @@ extension BrowserActionL10n on BrowserAction {
         l10n.browserActions_openInPrivateTabTitle,
       BrowserAction.moveTabToContainer =>
         l10n.browserActions_moveTabToContainerTitle,
+      BrowserAction.splitView => l10n.browserActions_splitViewTitle,
+      BrowserAction.splitWithAnotherTab =>
+        l10n.browserActions_splitWithAnotherTabTitle,
+      BrowserAction.toggleSplitSinglePage =>
+        l10n.browserActions_toggleSplitSinglePageTitle,
+      BrowserAction.showSplitControls =>
+        l10n.browserActions_showSplitControlsTitle,
+      BrowserAction.focusOtherSplitPane =>
+        l10n.browserActions_focusOtherSplitPaneTitle,
+      BrowserAction.swapSplitPanes => l10n.browserActions_swapSplitPanesTitle,
+      BrowserAction.endSplitView => l10n.browserActions_endSplitViewTitle,
       BrowserAction.copyLink => l10n.browserActions_copyLinkTitle,
       BrowserAction.siteSettings => l10n.browserActions_siteSettingsTitle,
       BrowserAction.addToHomeScreen => l10n.browserActions_addToHomeScreenTitle,
@@ -229,6 +240,18 @@ extension BrowserActionL10n on BrowserAction {
         l10n.browserActions_openInPrivateTabDescription,
       BrowserAction.moveTabToContainer =>
         l10n.browserActions_moveTabToContainerDescription,
+      BrowserAction.splitView => l10n.browserActions_splitViewDescription,
+      BrowserAction.splitWithAnotherTab =>
+        l10n.browserActions_splitWithAnotherTabDescription,
+      BrowserAction.toggleSplitSinglePage =>
+        l10n.browserActions_toggleSplitSinglePageDescription,
+      BrowserAction.showSplitControls =>
+        l10n.browserActions_showSplitControlsDescription,
+      BrowserAction.focusOtherSplitPane =>
+        l10n.browserActions_focusOtherSplitPaneDescription,
+      BrowserAction.swapSplitPanes =>
+        l10n.browserActions_swapSplitPanesDescription,
+      BrowserAction.endSplitView => l10n.browserActions_endSplitViewDescription,
       BrowserAction.copyLink => l10n.browserActions_copyLinkDescription,
       BrowserAction.siteSettings => l10n.browserActions_siteSettingsDescription,
       BrowserAction.addToHomeScreen =>
@@ -296,6 +319,18 @@ extension BrowserActionL10n on BrowserAction {
         l10n.browserActions_openInPrivateTabKeywords,
       BrowserAction.moveTabToContainer =>
         l10n.browserActions_moveTabToContainerKeywords,
+      BrowserAction.splitView => l10n.browserActions_splitViewKeywords,
+      BrowserAction.splitWithAnotherTab =>
+        l10n.browserActions_splitWithAnotherTabKeywords,
+      BrowserAction.toggleSplitSinglePage =>
+        l10n.browserActions_toggleSplitSinglePageKeywords,
+      BrowserAction.showSplitControls =>
+        l10n.browserActions_showSplitControlsKeywords,
+      BrowserAction.focusOtherSplitPane =>
+        l10n.browserActions_focusOtherSplitPaneKeywords,
+      BrowserAction.swapSplitPanes =>
+        l10n.browserActions_swapSplitPanesKeywords,
+      BrowserAction.endSplitView => l10n.browserActions_endSplitViewKeywords,
       BrowserAction.duplicateTab => l10n.browserActions_duplicateTabKeywords,
       BrowserAction.togglePinTab => l10n.browserActions_togglePinTabKeywords,
       BrowserAction.closeTab => l10n.browserActions_closeTabKeywords,

@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_pick_request.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers/intent.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/auto_hide_scroll_tracker.dart';
@@ -66,6 +67,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_gestures.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_pick.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tree_view.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
@@ -73,6 +75,8 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/w
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_autofocus.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_view_controls_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -435,6 +439,8 @@ class _ToolbarVisibilityAnimator extends ConsumerWidget {
     final toolbarState = ref.watch(
       toolbarVisibilityControllerProvider(selectedTabId),
     );
+    // While split, the two panes share one state, so focus moving between
+    // them does not move the bars (see [ToolbarVisibilityController]).
     final visible =
         !tabInFullScreen && toolbarState == ToolbarVisibility.visible;
 
@@ -1535,6 +1541,16 @@ class BrowserScreen extends HookConsumerWidget {
       generalSettingsWithDefaultsProvider.select((s) => s.sideRailWidth),
     );
     final sideRailDragWidth = ref.watch(sideRailDragWidthProvider);
+    // Auto-hide changes the content size, which with two pages on screen would
+    // resize both and could flip the split mode back and forth. So it is off
+    // while a pair is shown, unless the user chose "Show only this page". A
+    // pair shown alone because it does not fit (or for the keyboard) keeps it
+    // off: there the size change could bring both pages back.
+    final splitBlocksAutoHide = ref.watch(
+      activeSplitPairProvider.select(
+        (pair) => pair != null && !pair.focusedOnly,
+      ),
+    );
 
     // Where the chrome goes, resolved once here and threaded down: the same
     // layout insets the page and draws the bars, so a bar can never be drawn
@@ -1543,7 +1559,9 @@ class BrowserScreen extends HookConsumerWidget {
         ? TabBarPosition.top
         : tabBarPositionSetting;
     final sideRailAutoHide =
-        resolvedPosition.isVertical && sideRailAutoHideSetting;
+        resolvedPosition.isVertical &&
+        sideRailAutoHideSetting &&
+        !splitBlocksAutoHide;
     // Gated in the provider, so the screen does not rebuild for a cursor that
     // changes nothing.
     final cursorInUse = ref.watch(
@@ -1566,7 +1584,8 @@ class BrowserScreen extends HookConsumerWidget {
       autoHideTabBar:
           !isSmallWebActive &&
           resolvedPosition.isHorizontal &&
-          autoHideTabBarSetting,
+          autoHideTabBarSetting &&
+          !splitBlocksAutoHide,
       sideRailAutoHide: sideRailAutoHide,
       cursorInUse: cursorInUse,
       sideRailWidth: sideRailWidth,
@@ -1591,6 +1610,7 @@ class BrowserScreen extends HookConsumerWidget {
       onData: (event) async {
         await ContextMenuRoute(
           hitResult: event.hitResult.toJson(),
+          tabId: event.tabId,
         ).push(context);
       },
     );
@@ -2094,6 +2114,8 @@ class _SheetContainer extends ConsumerWidget {
         final SiteSettingsSheet parameter => _SiteSettingsSheet(
           initialTabState: parameter.tabState,
         ),
+        SplitViewSheet() => const SplitViewControlsSheet(),
+        TabPickerSheet(:final request) => _ViewTabsSheet(pick: request),
       },
       onDismiss: () {
         ref.read(bottomSheetControllerProvider.notifier).requestDismiss();
@@ -2553,12 +2575,16 @@ class _ViewTabsSheet extends HookConsumerWidget {
   /// Matches [DraggableScrollableSheet]'s default.
   static const initialHeight = 0.5;
 
-  const _ViewTabsSheet();
+  /// Shows the tray as a picker for [pick]: a tap picks a tab for it.
+  final TabPickRequest? pick;
+
+  const _ViewTabsSheet({this.pick});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final pick = this.pick;
     final tabsViewMode = ref.watch(effectiveTabsViewModeProvider);
-    final tabsReorderable = ref.watch(tabsReorderableControllerProvider);
+    final userTabsReorderable = ref.watch(tabsReorderableControllerProvider);
 
     final isSyncedScope = ref.watch(
       effectiveTabsTrayScopeProvider.select(
@@ -2566,9 +2592,17 @@ class _ViewTabsSheet extends HookConsumerWidget {
       ),
     );
 
-    final effectiveTabsViewMode = isSyncedScope
+    // A picker lists the open tabs in the user's list or grid. The tree view
+    // groups a whole tree under one tile and opens it in a dialog of its
+    // own, so it picks from the list instead.
+    final effectiveTabsViewMode = pick != null
+        ? (tabsViewMode == TabsViewMode.grid
+              ? TabsViewMode.grid
+              : TabsViewMode.list)
+        : isSyncedScope
         ? TabsViewMode.list
         : tabsViewMode;
+    final tabsReorderable = pick == null && userTabsReorderable;
 
     final draggableScrollableController = useDraggableScrollableController(
       keys: [tabsReorderable],
@@ -2604,7 +2638,8 @@ class _ViewTabsSheet extends HookConsumerWidget {
           // The header and the action bar run behind the system bars, so the
           // bars take their colors (#651).
           extendBehindSystemBars: true,
-          child: TabTrayGestures(
+          child: _PickOrGestures(
+            pick: pick,
             child: switch (effectiveTabsViewMode) {
               TabsViewMode.list => ViewTabListWidget(
                 scrollController: scrollController,
@@ -2643,5 +2678,23 @@ class _ViewTabsSheet extends HookConsumerWidget {
         );
       },
     );
+  }
+}
+
+/// The tray's gestures, or, while it picks a tab, its picker scope instead:
+/// the gestures switch the browser's container and the view mode, which the
+/// picker keeps to itself.
+class _PickOrGestures extends StatelessWidget {
+  final TabPickRequest? pick;
+  final Widget child;
+
+  const _PickOrGestures({required this.pick, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final pick = this.pick;
+    return pick == null
+        ? TabTrayGestures(child: child)
+        : TabTrayPickScope(request: pick, child: child);
   }
 }

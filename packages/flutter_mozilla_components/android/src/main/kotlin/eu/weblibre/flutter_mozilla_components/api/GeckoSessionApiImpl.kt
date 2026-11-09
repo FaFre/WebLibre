@@ -310,7 +310,9 @@ class GeckoSessionApiImpl : GeckoSessionApi {
                     return@suspendCancellableCoroutine
                 }
 
-                components.mainBrowserEngineView?.captureThumbnail { bitmap ->
+                // The selected tab's own view: in split view the other pane
+                // shows a different page.
+                components.browserPanes?.engineViewFor(tab.id)?.captureThumbnail { bitmap ->
                     try {
                         if (bitmap != null) {
                             components.core.store.dispatch(ContentAction.UpdateThumbnailAction(tab.id, bitmap))

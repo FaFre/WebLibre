@@ -860,6 +860,7 @@ mixin $SearchRoute on GoRouteData {
         ) ??
         false,
     tabId: state.uri.queryParameters['tab-id'],
+    splitWithTabId: state.uri.queryParameters['split-with-tab-id'],
   );
 
   SearchRoute get _self => this as SearchRoute;
@@ -873,6 +874,8 @@ mixin $SearchRoute on GoRouteData {
       if (_self.autoSubmitSearch != false)
         'auto-submit-search': _self.autoSubmitSearch.toString(),
       if (_self.tabId != null) 'tab-id': _self.tabId,
+      if (_self.splitWithTabId != null)
+        'split-with-tab-id': _self.splitWithTabId,
     },
   );
 
@@ -939,15 +942,17 @@ mixin $KeyboardShortcutsOverviewRoute on GoRouteData {
 }
 
 mixin $ContextMenuRoute on GoRouteData {
-  static ContextMenuRoute _fromState(GoRouterState state) =>
-      ContextMenuRoute(hitResult: state.uri.queryParameters['hit-result']!);
+  static ContextMenuRoute _fromState(GoRouterState state) => ContextMenuRoute(
+    hitResult: state.uri.queryParameters['hit-result']!,
+    tabId: state.uri.queryParameters['tab-id']!,
+  );
 
   ContextMenuRoute get _self => this as ContextMenuRoute;
 
   @override
   String get location => GoRouteData.$location(
     '/browser/context_menu',
-    queryParams: {'hit-result': _self.hitResult},
+    queryParams: {'hit-result': _self.hitResult, 'tab-id': _self.tabId},
   );
 
   @override

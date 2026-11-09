@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -32,6 +33,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/resolved_toolbar_button.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 /// The switcher bar's cross-axis extent (height when horizontal, width on the
 /// side rail). Mirrors `BrowserTabBar.quickTabSwitcherHeight`; kept as a local
@@ -98,6 +100,13 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
         isPreview: isPreview,
       ),
     );
+    final hiddenButtonIds = ref
+        .watch(
+          generalSettingsShownBy(
+            isPreview: isPreview,
+          ).select((s) => EquatableValue(hiddenToolbarButtonIds(s))),
+        )
+        .value;
 
     final scope = ContextualToolbarScope(
       selectedTabId: previewTab?.id ?? selectedTabId,
@@ -118,6 +127,7 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
         final def = toolbarButtonRegistryById[buttonId];
         return def?.isPrimaryAvailable?.call(scope, ref) ?? true;
       },
+      isHidden: hiddenButtonIds.contains,
     );
     final configById = useMemoized(
       () => {for (final config in configs.value) config.buttonId: config},

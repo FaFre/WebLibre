@@ -85,6 +85,7 @@ class GeckoTabService {
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
     bool excludeFromHistory = false,
+    bool parentIsReferrer = true,
   }) {
     return _api.addTab(
       url: (url ?? Uri.parse('about:blank')).toString(),
@@ -98,6 +99,7 @@ class GeckoTabService {
       historyMetadata: historyMetadata,
       additionalHeaders: additionalHeaders,
       excludeFromHistory: excludeFromHistory,
+      parentIsReferrer: parentIsReferrer,
     );
   }
 

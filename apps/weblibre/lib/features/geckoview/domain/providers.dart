@@ -105,6 +105,8 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
                 parentId: currentTab?.id,
                 tabMode: tabMode,
                 selectTab: true,
+                // A search the user typed, not a link from the current page.
+                parentIsReferrer: false,
               );
           return;
         }

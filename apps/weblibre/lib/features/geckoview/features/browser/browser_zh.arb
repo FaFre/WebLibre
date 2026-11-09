@@ -295,5 +295,6 @@
   "browser_moveTabUp": "上移标签页",
   "browser_moveTabDown": "下移标签页",
   "browser_moveTabLeft": "左移标签页",
-  "browser_moveTabRight": "右移标签页"
+  "browser_moveTabRight": "右移标签页",
+  "browser_tabPickerNothingHere": "此处没有可选择的标签页"
 }

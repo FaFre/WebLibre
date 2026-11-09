@@ -10,8 +10,8 @@ import android.app.Activity
 import android.util.Log
 import android.view.SurfaceView
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import eu.weblibre.flutter_mozilla_components.ext.forEachSurfaceView
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -128,6 +128,8 @@ class EngineViewVisibility(
      * keys typed until a tap.
      */
     private fun focusEngineView() {
+        // In the main browser this is the focused split pane: the coordinator
+        // keeps `activeEngineView` on it while the browser is resumed.
         val view = GlobalComponents.components?.activeEngineView?.asView() ?: return
         if (!view.hasFocus()) {
             view.requestFocus()
@@ -147,21 +149,6 @@ class EngineViewVisibility(
 
         view.visibility = View.INVISIBLE
         hidden += WeakReference(view)
-    }
-
-    private fun forEachSurfaceView(view: View, action: (SurfaceView) -> Unit) {
-        if (view is SurfaceView) {
-            action(view)
-            return
-        }
-
-        if (view !is ViewGroup) {
-            return
-        }
-
-        for (i in 0 until view.childCount) {
-            forEachSurfaceView(view.getChildAt(i), action)
-        }
     }
 
     /**

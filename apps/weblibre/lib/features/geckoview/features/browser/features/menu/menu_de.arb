@@ -150,5 +150,6 @@
   "menu_connectionUnused": "Von keiner Route verwendet",
   "menu_connectionUsageContainerCount": "{count, plural, =1{1 Container} other{{count} Container}}",
   "menu_connectionUsageIsolatedTabCount": "{count, plural, =1{1 isolierter Tab} other{{count} isolierte Tabs}}",
-  "menu_connectionUsageBlocked": "Blockiert"
+  "menu_connectionUsageBlocked": "Blockiert",
+  "menu_itemSplitView": "Splitscreen"
 }

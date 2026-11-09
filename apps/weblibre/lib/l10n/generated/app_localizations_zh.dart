@@ -1433,6 +1433,50 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_duplicateTabDescription => '打开当前标签页的副本';
 
   @override
+  String get browserActions_splitViewTitle => '分屏视图';
+
+  @override
+  String get browserActions_splitViewDescription => '同时显示两个页面，或恢复为一个页面';
+
+  @override
+  String get browserActions_splitWithAnotherTabTitle => '与其他标签页分屏';
+
+  @override
+  String get browserActions_splitWithAnotherTabDescription => '选择要显示在当前页面旁边的页面';
+
+  @override
+  String get browserActions_toggleSplitSinglePageTitle => '显示单个/两个分屏页面';
+
+  @override
+  String get browserActions_toggleSplitSinglePageDescription =>
+      '隐藏分屏视图中的另一个页面，或重新显示';
+
+  @override
+  String get browserActions_showSplitControlsTitle => '分屏视图控制';
+
+  @override
+  String get browserActions_showSplitControlsDescription => '调整分屏视图的布局、大小和页面';
+
+  @override
+  String get browserActions_focusOtherSplitPaneTitle => '切换分屏页面';
+
+  @override
+  String get browserActions_focusOtherSplitPaneDescription =>
+      '将焦点移到分屏视图中的另一个页面';
+
+  @override
+  String get browserActions_swapSplitPanesTitle => '交换分屏页面';
+
+  @override
+  String get browserActions_swapSplitPanesDescription => '交换两个页面的位置';
+
+  @override
+  String get browserActions_endSplitViewTitle => '退出分屏视图';
+
+  @override
+  String get browserActions_endSplitViewDescription => '重新只显示一个页面；两个标签页都会保持打开';
+
+  @override
   String get browserActions_nextTabTitle => '下一个标签页';
 
   @override
@@ -1941,6 +1985,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_duplicateTabKeywords => '克隆标签页,复制标签页';
+
+  @override
+  String get browserActions_splitViewKeywords =>
+      '分屏,并排,两个页面,多任务,split screen,split view';
+
+  @override
+  String get browserActions_splitWithAnotherTabKeywords =>
+      '旁边的页面,选择标签页,替换页面,split';
+
+  @override
+  String get browserActions_toggleSplitSinglePageKeywords => '仅此页面,两个页面,隐藏,全屏';
+
+  @override
+  String get browserActions_showSplitControlsKeywords => '布局,设置,大小,分隔线';
+
+  @override
+  String get browserActions_focusOtherSplitPaneKeywords => '切换窗格,另一侧,焦点,split';
+
+  @override
+  String get browserActions_swapSplitPanesKeywords => '交换位置,交换两侧,swap';
+
+  @override
+  String get browserActions_endSplitViewKeywords => '关闭分屏,单页面,退出,unsplit';
 
   @override
   String get browserActions_togglePinTabKeywords => '固定标签页,取消固定,置顶';
@@ -3297,6 +3364,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_moveTabRight => '右移标签页';
 
   @override
+  String get browser_tabPickerNothingHere => '此处没有可选择的标签页';
+
+  @override
   String get contextualToolbar_tooltipHome => '主页';
 
   @override
@@ -3887,6 +3957,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu_connectionUsageBlocked => '已阻止';
 
   @override
+  String get menu_itemSplitView => '分屏';
+
+  @override
   String get contextmenu_openInNewTab => '在新标签页中打开';
 
   @override
@@ -3900,6 +3973,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get contextmenu_newIsolatedTab => '新建隔离标签页';
+
+  @override
+  String get contextmenu_openInSplitView => '在分屏视图中打开';
 
   @override
   String get contextmenu_openImageInNewTab => '在新标签页中打开图片';
@@ -4908,6 +4984,84 @@ class AppLocalizationsZh extends AppLocalizations {
   String search_deletedFromHistory(String site) {
     return '已从历史记录中删除 $site';
   }
+
+  @override
+  String get splitView_title => '分屏视图';
+
+  @override
+  String get splitView_splitWithAnotherTab => '与其他标签页分屏…';
+
+  @override
+  String get splitView_showBesideCurrentTab => '在当前标签页旁显示';
+
+  @override
+  String get splitView_end => '退出分屏视图';
+
+  @override
+  String get splitView_endSubtitle => '两个标签页都会保持打开';
+
+  @override
+  String get splitView_layout => '布局';
+
+  @override
+  String get splitView_layoutAutomatic => '自动';
+
+  @override
+  String get splitView_layoutSideBySide => '左右并排';
+
+  @override
+  String get splitView_layoutStacked => '上下堆叠';
+
+  @override
+  String get splitView_showOnlyThisPage => '仅显示此页面';
+
+  @override
+  String get splitView_showBothPages => '显示两页';
+
+  @override
+  String get splitView_showingOnlyThisPage => '现仅显示此页面';
+
+  @override
+  String get splitView_swapSides => '交换位置';
+
+  @override
+  String get splitView_equalSizes => '等分大小';
+
+  @override
+  String get splitView_replaceOtherPage => '替换另一个页面…';
+
+  @override
+  String get splitView_dividerDescription => '分屏分隔条';
+
+  @override
+  String get splitView_dividerOptions => '分屏视图选项';
+
+  @override
+  String get splitView_crashedTitle => '此页面已崩溃';
+
+  @override
+  String get splitView_crashedReload => '重新加载';
+
+  @override
+  String get splitView_couldNotOpen => '无法打开分屏视图';
+
+  @override
+  String get splitView_mixedPrivacy => '隐私标签页和非隐私标签页不能同时显示';
+
+  @override
+  String get splitView_routingNotReady => '此容器的连接尚未就绪';
+
+  @override
+  String get splitView_noSplitView => '没有分屏视图';
+
+  @override
+  String get splitView_pickerTitle => '在旁边显示';
+
+  @override
+  String get splitView_memberMark => '在分屏视图中';
+
+  @override
+  String get splitView_replaceTitle => '替换另一个页面';
 
   @override
   String get tabs_actionSelect => '选择';
@@ -13248,6 +13402,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get visibilitySwitch_treeTabsDescription => '把从某个页面打开的标签页显示在其来源标签页下方';
+
+  @override
+  String get visibilitySwitch_splitViewLabel => '分屏视图';
+
+  @override
+  String get visibilitySwitch_splitViewDescription => '并排或上下显示两个标签页';
 
   @override
   String get visibilitySwitch_layoutAdvancedLabel => '自定义工具栏和菜单';

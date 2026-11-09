@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.middleware
 
 import android.os.SystemClock
+import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +42,9 @@ import mozilla.components.support.base.log.logger.Logger
  *
  * Regular tabs are restored lazily, when they are next selected; custom tabs and
  * PWAs are restored as soon as they crash, because nothing ever "selects" them.
+ * So is the other page of a split pair while it is on screen: it is visible
+ * without being selected. A tab left crashed (the loop guard below) shows the
+ * pane's "page crashed" placeholder.
  *
  * @param minimumRestoreInterval Guards against a page that crashes on every
  * load. Restoring reloads the tab, so a deterministic crash would otherwise
@@ -51,6 +55,9 @@ class CrashRecoveryMiddleware(
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Main),
     private val minimumRestoreInterval: Long = MINIMUM_RESTORE_INTERVAL_MS,
     private val elapsedRealtime: () -> Long = SystemClock::elapsedRealtime,
+    private val visibleTabIds: () -> Set<String> = {
+        GlobalComponents.components?.browserPanes?.visibleTabIds.orEmpty()
+    },
 ) : Middleware<BrowserState, BrowserAction> {
     private val logger = Logger("CrashRecoveryMiddleware")
 
@@ -73,7 +80,10 @@ class CrashRecoveryMiddleware(
                 // straight away or it stays a blank window until the process
                 // dies.
                 val isExternalSession = store.state.findCustomTab(action.tabId) != null
-                if (isExternalSession || action.tabId == store.state.selectedTabId) {
+                if (isExternalSession ||
+                    action.tabId == store.state.selectedTabId ||
+                    action.tabId in visibleTabIds()
+                ) {
                     restore(store, action.tabId)
                 }
             }

@@ -295,5 +295,6 @@
   "browser_moveTabUp": "Pindahkan tab ke atas",
   "browser_moveTabDown": "Pindahkan tab ke bawah",
   "browser_moveTabLeft": "Pindahkan tab ke kiri",
-  "browser_moveTabRight": "Pindahkan tab ke kanan"
+  "browser_moveTabRight": "Pindahkan tab ke kanan",
+  "browser_tabPickerNothingHere": "Tidak ada tab untuk dipilih di sini"
 }

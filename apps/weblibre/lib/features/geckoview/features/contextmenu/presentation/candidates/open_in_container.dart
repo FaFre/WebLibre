@@ -30,9 +30,9 @@ import 'package:uuid/enums.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/utils/context_menu_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -55,7 +55,14 @@ class _CreateNewContainer extends _PickerResult {}
 class OpenInContainer extends HookConsumerWidget {
   final HitResult hitResult;
 
-  const OpenInContainer({super.key, required this.hitResult});
+  /// The tab the long press happened in.
+  final String sourceTabId;
+
+  const OpenInContainer({
+    super.key,
+    required this.hitResult,
+    required this.sourceTabId,
+  });
 
   static bool isSupported(HitResult hitResult) {
     return hitResult.isHttpLink();
@@ -98,7 +105,7 @@ class OpenInContainer extends HookConsumerWidget {
 
         if (selectedContainer == null || !context.mounted) return;
 
-        final currentTab = ref.read(selectedTabStateProvider);
+        final currentTab = readContextMenuSourceTab(ref, sourceTabId);
         final tabMode =
             currentTab?.tabMode ??
             TabMode.fromTabType(settings.effectiveDefaultCreateTabType);
