@@ -338,34 +338,6 @@
     "placeholders": { "date": { "type": "String" } }
   },
 
-  "account_bannerTitle": "Support WebLibre",
-  "@account_bannerTitle": {
-    "description": "Heading of the home screen banner inviting users to become supporters."
-  },
-  "account_bannerBody": "Supporter is an optional subscription that funds WebLibre's development and provides the features that need a hosted service to work. The browser and its privacy features need no subscription. <learnMore>Learn more</learnMore>.",
-  "@account_bannerBody": {
-    "description": "Body of the supporter banner on the home screen. The text between <learnMore>…</learnMore> becomes a tappable link to more information; keep the tag pair and translate the text inside it. WebLibre is the app name."
-  },
-  "account_featureSearchLabel": "WebLibre Search",
-  "@account_featureSearchLabel": {
-    "description": "Bullet heading in the supporter banner naming the search feature. Product name."
-  },
-  "account_featureSearchDescription": "A private, ad-free search built into the browser. It blends results from several independent sources, offers tunable search modes, can route over Tor, and lets you preview pages safely — while keeping your searches unlinkable to your account by design.",
-  "@account_featureSearchDescription": {
-    "description": "Bullet text in the supporter banner describing WebLibre Search. Tor is a product name."
-  },
-  "account_featureSyncLabel": "Encrypted account sync",
-  "@account_featureSyncLabel": {
-    "description": "Bullet heading in the supporter banner naming encrypted settings sync."
-  },
-  "account_featureSyncDescription": "Store and restore your WebLibre settings and preferences across profiles and devices. Everything is encrypted on your device before upload, so only you can read it.",
-  "@account_featureSyncDescription": {
-    "description": "Bullet text in the supporter banner describing encrypted settings sync."
-  },
-  "account_becomeSupporter": "Become a Supporter",
-  "@account_becomeSupporter": {
-    "description": "Button in the supporter banner that opens the account screen to subscribe."
-  },
 
   "account_syncSetupEnterPassword": "Please enter your password",
   "@account_syncSetupEnterPassword": {

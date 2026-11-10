@@ -462,30 +462,6 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get account_bannerTitle => 'WebLibre unterstützen';
-
-  @override
-  String get account_bannerBody =>
-      'Supporter ist ein optionales Abonnement, das die Entwicklung von WebLibre finanziert und die Funktionen bereitstellt, die einen gehosteten Dienst benötigen. Der Browser und seine Datenschutzfunktionen brauchen kein Abonnement. <learnMore>Mehr erfahren</learnMore>.';
-
-  @override
-  String get account_featureSearchLabel => 'WebLibre Search';
-
-  @override
-  String get account_featureSearchDescription =>
-      'Eine private, werbefreie Suche direkt im Browser. Sie kombiniert Ergebnisse aus mehreren unabhängigen Quellen, bietet anpassbare Suchmodi, kann über Tor laufen und zeigt Seiten sicher in der Vorschau an. Suchanfragen lassen sich dabei konstruktionsbedingt nicht mit dem Konto verknüpfen.';
-
-  @override
-  String get account_featureSyncLabel => 'Verschlüsselte Kontosynchronisierung';
-
-  @override
-  String get account_featureSyncDescription =>
-      'WebLibre-Einstellungen und -Präferenzen profil- und geräteübergreifend speichern und wiederherstellen. Alles wird vor dem Hochladen auf dem Gerät verschlüsselt und ist nur für den eigenen Zugriff lesbar.';
-
-  @override
-  String get account_becomeSupporter => 'Supporter werden';
-
-  @override
   String get account_syncSetupEnterPassword => 'Bitte Passwort eingeben';
 
   @override

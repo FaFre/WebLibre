@@ -47,11 +47,7 @@ enum PersistedBoolKey {
     defaultValue: true,
     cacheTime: StorageCacheTime(Duration(days: 30)),
   ),
-  tabSuggestions(key: 'TabSuggestions', defaultValue: false),
-  supporterBannerDismissed(
-    key: 'SupporterBannerDismissed',
-    defaultValue: false,
-  );
+  tabSuggestions(key: 'TabSuggestions', defaultValue: false);
 
   const PersistedBoolKey({
     required this.key,

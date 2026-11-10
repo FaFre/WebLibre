@@ -868,48 +868,6 @@ abstract class AppLocalizations {
   /// **'Your subscription will end on {date}'**
   String account_subscriptionEndsOn(String date);
 
-  /// Heading of the home screen banner inviting users to become supporters.
-  ///
-  /// In en, this message translates to:
-  /// **'Support WebLibre'**
-  String get account_bannerTitle;
-
-  /// Body of the supporter banner on the home screen. The text between <learnMore>…</learnMore> becomes a tappable link to more information; keep the tag pair and translate the text inside it. WebLibre is the app name.
-  ///
-  /// In en, this message translates to:
-  /// **'Supporter is an optional subscription that funds WebLibre\'s development and provides the features that need a hosted service to work. The browser and its privacy features need no subscription. <learnMore>Learn more</learnMore>.'**
-  String get account_bannerBody;
-
-  /// Bullet heading in the supporter banner naming the search feature. Product name.
-  ///
-  /// In en, this message translates to:
-  /// **'WebLibre Search'**
-  String get account_featureSearchLabel;
-
-  /// Bullet text in the supporter banner describing WebLibre Search. Tor is a product name.
-  ///
-  /// In en, this message translates to:
-  /// **'A private, ad-free search built into the browser. It blends results from several independent sources, offers tunable search modes, can route over Tor, and lets you preview pages safely — while keeping your searches unlinkable to your account by design.'**
-  String get account_featureSearchDescription;
-
-  /// Bullet heading in the supporter banner naming encrypted settings sync.
-  ///
-  /// In en, this message translates to:
-  /// **'Encrypted account sync'**
-  String get account_featureSyncLabel;
-
-  /// Bullet text in the supporter banner describing encrypted settings sync.
-  ///
-  /// In en, this message translates to:
-  /// **'Store and restore your WebLibre settings and preferences across profiles and devices. Everything is encrypted on your device before upload, so only you can read it.'**
-  String get account_featureSyncDescription;
-
-  /// Button in the supporter banner that opens the account screen to subscribe.
-  ///
-  /// In en, this message translates to:
-  /// **'Become a Supporter'**
-  String get account_becomeSupporter;
-
   /// Error under the password field when setting up encrypted sync without a password.
   ///
   /// In en, this message translates to:

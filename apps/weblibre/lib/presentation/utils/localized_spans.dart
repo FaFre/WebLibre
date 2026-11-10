@@ -54,9 +54,9 @@ String spanPlaceholder(int index) => '$_markerStart$index$_markerEnd';
 ///   spans: [TextSpan(text: fileName, style: bold)],
 /// )
 ///
-/// // "… need no subscription. <learnMore>Learn more</learnMore>."
+/// // "… <learnMore>Learn more</learnMore>."
 /// localizedSpans(
-///   l10n.account_bannerBody,
+///   l10n.feature_explanation,
 ///   tags: {'learnMore': (text) => TextSpan(text: text, recognizer: tap)},
 /// )
 /// ```

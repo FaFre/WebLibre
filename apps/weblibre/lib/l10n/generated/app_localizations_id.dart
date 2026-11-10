@@ -463,30 +463,6 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get account_bannerTitle => 'Dukung WebLibre';
-
-  @override
-  String get account_bannerBody =>
-      'Langganan Pendukung bersifat opsional, mendanai pengembangan WebLibre, dan menyediakan fitur yang memerlukan layanan terhosting. Peramban dan fitur privasinya tidak memerlukan langganan. <learnMore>Pelajari lebih lanjut</learnMore>.';
-
-  @override
-  String get account_featureSearchLabel => 'WebLibre Search';
-
-  @override
-  String get account_featureSearchDescription =>
-      'Pencarian pribadi tanpa iklan yang terintegrasi dalam peramban. Fitur ini memadukan hasil dari beberapa sumber independen, menawarkan mode pencarian yang dapat disesuaikan, dapat disalurkan melalui Tor, dan memungkinkan Anda meninjau halaman dengan aman. Berkat rancangannya, pencarian Anda tidak dapat dikaitkan dengan akun Anda.';
-
-  @override
-  String get account_featureSyncLabel => 'Sinkronisasi akun terenkripsi';
-
-  @override
-  String get account_featureSyncDescription =>
-      'Simpan dan pulihkan pengaturan dan preferensi WebLibre Anda di berbagai profil dan perangkat. Semuanya dienkripsi di perangkat Anda sebelum diunggah, sehingga hanya Anda yang dapat membacanya.';
-
-  @override
-  String get account_becomeSupporter => 'Jadi Pendukung';
-
-  @override
   String get account_syncSetupEnterPassword =>
       'Silakan masukkan kata sandi Anda';
 

@@ -469,30 +469,6 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get account_bannerTitle => 'Поддержите WebLibre';
-
-  @override
-  String get account_bannerBody =>
-      'Подписка сторонника необязательна: она помогает финансировать разработку WebLibre и даёт доступ к функциям, для которых нужен сервер. Сам браузер и его функции защиты приватности доступны без подписки. <learnMore>Подробнее</learnMore>.';
-
-  @override
-  String get account_featureSearchLabel => 'WebLibre Search';
-
-  @override
-  String get account_featureSearchDescription =>
-      'Приватный поиск без рекламы, встроенный в браузер. Он объединяет результаты из нескольких независимых источников, предлагает настраиваемые режимы поиска, может работать через Tor и позволяет безопасно просматривать страницы. Архитектура сервиса не позволяет связать ваши поисковые запросы с аккаунтом.';
-
-  @override
-  String get account_featureSyncLabel => 'Зашифрованная синхронизация аккаунта';
-
-  @override
-  String get account_featureSyncDescription =>
-      'Сохраняйте и восстанавливайте настройки и параметры WebLibre в разных профилях и на разных устройствах. Всё шифруется на устройстве перед отправкой, поэтому прочитать данные можете только вы.';
-
-  @override
-  String get account_becomeSupporter => 'Стать сторонником';
-
-  @override
   String get account_syncSetupEnterPassword => 'Введите пароль';
 
   @override

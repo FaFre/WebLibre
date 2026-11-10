@@ -423,30 +423,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get account_bannerTitle => '支持 WebLibre';
-
-  @override
-  String get account_bannerBody =>
-      '支持者是一项可选订阅，用于资助 WebLibre 的开发，并提供需要托管服务才能运行的功能。浏览器本身及其隐私功能无需订阅。<learnMore>了解详情</learnMore>。';
-
-  @override
-  String get account_featureSearchLabel => 'WebLibre 搜索';
-
-  @override
-  String get account_featureSearchDescription =>
-      '内置于浏览器中的私密、无广告搜索。它融合多个独立来源的结果，提供可调节的搜索模式，可经由 Tor 路由，并让你安全地预览页面——同时在设计上确保你的搜索无法与你的账户关联。';
-
-  @override
-  String get account_featureSyncLabel => '加密账户同步';
-
-  @override
-  String get account_featureSyncDescription =>
-      '在不同配置文件和设备之间存储和恢复你的 WebLibre 设置与首选项。所有内容在上传前都会在你的设备上加密，只有你能读取。';
-
-  @override
-  String get account_becomeSupporter => '成为支持者';
-
-  @override
   String get account_syncSetupEnterPassword => '请输入密码';
 
   @override

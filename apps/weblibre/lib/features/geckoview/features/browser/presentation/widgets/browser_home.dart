@@ -25,7 +25,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/features/account/presentation/widgets/supporter_home_banner.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
@@ -190,12 +189,6 @@ class BrowserHome extends ConsumerWidget {
                           // to slide under. Nothing scrolls while the block is
                           // centred, so the two never fight.
                           const _HomeSearchPillSliver(),
-                          const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: SupporterHomeBanner(),
-                            ),
-                          ),
                           ModuleSurfaceSliverList(
                             surface: ModuleSurface.home,
                             callbacks: callbacks,
