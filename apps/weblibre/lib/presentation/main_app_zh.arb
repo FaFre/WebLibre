@@ -10,6 +10,7 @@
   "mainApp_downloadFailed": "下载失败：{name}",
   "mainApp_containerBlockedWithHost": "{host} 未分配给此容器",
   "mainApp_containerBlockedNoHost": "此网站未分配给此容器",
+  "mainApp_containerBlockedBackgroundWithHost": "{host} 的后台标签页未加载：该网站未分配给其容器",
   "mainApp_sandboxNoCredits": "你的搜索额度已用完。请购买更多额度以继续。",
   "mainApp_sandboxTokenIssuanceFailed": "无法发放新的搜索令牌。请检查网络连接后重试。",
   "mainApp_sandboxFetchPolicyRejected": "抓取策略阻止了此次捕获：{detail}",

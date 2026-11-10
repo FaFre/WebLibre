@@ -14052,7 +14052,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String mainApp_containerBlockedBackgroundWithHost(String host) {
-    return 'The background tab for $host did not load: the site is not assigned to its container';
+    return 'Tab latar belakang untuk $host tidak dimuat: situs tidak ditetapkan ke kontainernya';
   }
 
   @override

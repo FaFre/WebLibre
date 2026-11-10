@@ -12865,7 +12865,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String mainApp_containerBlockedBackgroundWithHost(String host) {
-    return 'The background tab for $host did not load: the site is not assigned to its container';
+    return '$host 的后台标签页未加载：该网站未分配给其容器';
   }
 
   @override

@@ -3824,6 +3824,7 @@
   "mainApp_downloadFailed": "Unduhan gagal: {name}",
   "mainApp_containerBlockedWithHost": "{host} tidak ditetapkan ke kontainer ini",
   "mainApp_containerBlockedNoHost": "Situs ini tidak ditetapkan ke kontainer ini",
+  "mainApp_containerBlockedBackgroundWithHost": "Tab latar belakang untuk {host} tidak dimuat: situs tidak ditetapkan ke kontainernya",
   "mainApp_sandboxNoCredits": "Kredit pencarian Anda sudah habis. Beli lagi untuk melanjutkan.",
   "mainApp_sandboxTokenIssuanceFailed": "Tidak dapat menerbitkan token pencarian baru. Periksa koneksi Anda, lalu coba lagi.",
   "mainApp_sandboxFetchPolicyRejected": "Tangkapan diblokir oleh kebijakan pengambilan: {detail}",

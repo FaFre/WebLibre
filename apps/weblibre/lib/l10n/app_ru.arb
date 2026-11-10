@@ -3824,6 +3824,7 @@
   "mainApp_downloadFailed": "Ошибка загрузки: {name}",
   "mainApp_containerBlockedWithHost": "{host} не назначен этому контейнеру",
   "mainApp_containerBlockedNoHost": "Этот сайт не назначен этому контейнеру",
+  "mainApp_containerBlockedBackgroundWithHost": "Фоновая вкладка для {host} не загрузилась: сайт не назначен её контейнеру",
   "mainApp_sandboxNoCredits": "Поисковые кредиты закончились. Купите ещё, чтобы продолжить.",
   "mainApp_sandboxTokenIssuanceFailed": "Не удалось выдать новые поисковые токены. Проверьте подключение и повторите попытку.",
   "mainApp_sandboxFetchPolicyRejected": "Снимок заблокирован политикой загрузки: {detail}",

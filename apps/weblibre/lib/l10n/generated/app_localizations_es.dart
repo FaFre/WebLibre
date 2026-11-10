@@ -14215,7 +14215,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String mainApp_containerBlockedBackgroundWithHost(String host) {
-    return 'The background tab for $host did not load: the site is not assigned to its container';
+    return 'La pestaña en segundo plano de $host no se cargó: el sitio no está asignado a su contenedor';
   }
 
   @override

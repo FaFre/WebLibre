@@ -14225,7 +14225,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String mainApp_containerBlockedBackgroundWithHost(String host) {
-    return 'The background tab for $host did not load: the site is not assigned to its container';
+    return 'Фоновая вкладка для $host не загрузилась: сайт не назначен её контейнеру';
   }
 
   @override

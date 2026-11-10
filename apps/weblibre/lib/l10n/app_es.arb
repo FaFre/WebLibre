@@ -3824,6 +3824,7 @@
   "mainApp_downloadFailed": "Error en la descarga: {name}",
   "mainApp_containerBlockedWithHost": "{host} no está asignado a este contenedor",
   "mainApp_containerBlockedNoHost": "Este sitio no está asignado a este contenedor",
+  "mainApp_containerBlockedBackgroundWithHost": "La pestaña en segundo plano de {host} no se cargó: el sitio no está asignado a su contenedor",
   "mainApp_sandboxNoCredits": "No te quedan créditos de búsqueda. Compra más para continuar.",
   "mainApp_sandboxTokenIssuanceFailed": "No se pudieron emitir nuevos tokens de búsqueda. Comprueba tu conexión y vuelve a intentarlo.",
   "mainApp_sandboxFetchPolicyRejected": "Captura bloqueada por la política de obtención: {detail}",
