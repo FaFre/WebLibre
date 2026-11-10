@@ -636,7 +636,7 @@ class SearchScreen extends HookConsumerWidget {
               // paired, so the split appears at once.
               selectTab: splitSourceId == null,
               containerSelection: picker != null
-                  ? await picker.containerSelection()
+                  ? picker.containerSelection
                   : containerSelectionFor(selectedContainer),
               onBackBehavior: resolveSearchTabBackBehavior(
                 launchedFromIntent: launchedFromIntent,

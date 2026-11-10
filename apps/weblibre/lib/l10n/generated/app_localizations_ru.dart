@@ -14239,6 +14239,11 @@ class AppLocalizationsRu extends AppLocalizations {
       'Этот сайт не назначен этому контейнеру';
 
   @override
+  String mainApp_containerBlockedBackgroundWithHost(String host) {
+    return 'The background tab for $host did not load: the site is not assigned to its container';
+  }
+
+  @override
   String get mainApp_sandboxNoCredits =>
       'Поисковые кредиты закончились. Купите ещё, чтобы продолжить.';
 

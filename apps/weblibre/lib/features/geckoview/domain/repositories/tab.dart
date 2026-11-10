@@ -69,11 +69,320 @@ ContainerData? resolveAssignedContainerForTabOpen({
   required ContainerData? siteAssignedContainer,
 }) {
   return switch (containerSelection) {
-    UseSelectedContainerTabSelection() || PreferredContainerTabSelection() =>
+    UseSelectedContainerTabSelection() ||
+    PreferredContainerTabSelection() ||
+    OpenedFromTabContainerSelection() =>
       siteAssignedContainer ?? requestedContainer,
     UnassignedContainerTabSelection() ||
     SpecificContainerTabSelection() => requestedContainer,
   };
+}
+
+/// What a background tab's cancelled navigation calls for; see
+/// [BackgroundStandIns.request].
+@visibleForTesting
+sealed class BackgroundReopen {
+  const BackgroundReopen();
+}
+
+/// No tab stands in for this page yet: open one.
+@visibleForTesting
+final class OpenStandIn extends BackgroundReopen {
+  const OpenStandIn();
+}
+
+/// [tabId] stands in for this page: load the new URL in it.
+@visibleForTesting
+final class LoadInStandIn extends BackgroundReopen {
+  final String tabId;
+
+  const LoadInStandIn(this.tabId);
+}
+
+/// The stand-in already shows this URL, or is still being opened and picks
+/// the URL up once it is ([BackgroundStandIns.opened]).
+@visibleForTesting
+final class StandInCurrent extends BackgroundReopen {
+  const StandInCurrent();
+}
+
+/// A page's stand-in: the tab (null while it is being opened), the URL it
+/// should show, and the [BackgroundStandIns.stamp] at which it was opened.
+class _StandIn {
+  String? tabId;
+  Uri url;
+  int openedAt = 0;
+
+  _StandIn(this.url);
+}
+
+/// The tabs that stand in for background tabs' cancelled navigations, so a
+/// page that keeps trying reuses one tab instead of opening one per attempt.
+///
+/// A background page that keeps navigating to a site assigned elsewhere (an
+/// auto-refresh, a login redirect on every attempt) would otherwise open a new
+/// hidden tab each time. Dropping the repeats instead would lose navigations
+/// that only look like them: `/view?id=1` then `/view?id=2`, or a callback
+/// with a fresh code. So each page (origin and path) of a background tab gets
+/// one stand-in tab, and a later navigation to that page loads its URL there:
+/// the latest one wins, as it would have in the tab itself. Another path of
+/// the site is another page with its own stand-in.
+///
+/// Nobody has seen a stand-in: once either tab is selected or closed, the next
+/// navigation opens a new one rather than taking over a page the user may be
+/// on. [sync] applies both from the native store right before each decision:
+/// the Dart tab states keep closed tabs for a while, and the selection events
+/// are debounced, so a stand-in closed or picked a moment ago still looks
+/// open and unseen there. [forget] covers a tab seen and left again.
+@visibleForTesting
+class BackgroundStandIns {
+  /// By source tab, then page: its stand-in.
+  final _standIns = <String, Map<String, _StandIn>>{};
+
+  int _clock = 0;
+
+  /// Now, to pass as [sync]'s `takenAt` when asking the native store for its
+  /// state: a stand-in [opened] after this is not in that state yet.
+  int get stamp => _clock;
+
+  static String _pageOf(Uri uri) =>
+      '${uri.origin}${uri.path.isEmpty ? '/' : uri.path}';
+
+  /// Applies the native store's state, asked for at [takenAt] (a [stamp]):
+  /// drops what involves a closed tab (not among [openTabIds]) and the
+  /// selected tab ([selectedTabId]), and [retire]s the tabs on screen beside
+  /// it ([visibleTabIds], the other page of a split pair).
+  ///
+  /// The state arrives after an await, during which another report can have
+  /// [opened] a stand-in. That tab is missing from [openTabIds] because it is
+  /// newer than them, not because it closed, so it is kept. Without
+  /// [takenAt], the state is taken to be current.
+  void sync({
+    required Iterable<String> openTabIds,
+    String? selectedTabId,
+    Iterable<String> visibleTabIds = const [],
+    int? takenAt,
+  }) {
+    final open = openTabIds.toSet();
+    final asOf = takenAt ?? _clock;
+    _standIns.removeWhere((source, _) => !open.contains(source));
+    for (final pages in _standIns.values) {
+      pages.removeWhere(
+        (_, standIn) =>
+            standIn.tabId != null &&
+            standIn.openedAt <= asOf &&
+            !open.contains(standIn.tabId),
+      );
+    }
+    _standIns.removeWhere((_, pages) => pages.isEmpty);
+    if (selectedTabId != null) forget(selectedTabId);
+    visibleTabIds.forEach(retire);
+  }
+
+  /// What background tab [sourceTabId]'s cancelled navigation to [uri] calls
+  /// for, right after a [sync]. [OpenStandIn] claims the page at once, so a
+  /// report arriving while the tab opens does not open a second one; follow
+  /// it with [opened], or [release] when no tab came of it.
+  BackgroundReopen request(String sourceTabId, Uri uri) {
+    final pages = _standIns.putIfAbsent(sourceTabId, () => {});
+    final page = _pageOf(uri);
+    final standIn = pages[page];
+    if (standIn == null) {
+      pages[page] = _StandIn(uri);
+      return const OpenStandIn();
+    }
+    if (standIn.url == uri) return const StandInCurrent();
+
+    standIn.url = uri;
+    return switch (standIn.tabId) {
+      final tabId? => LoadInStandIn(tabId),
+      null => const StandInCurrent(),
+    };
+  }
+
+  /// Records [standInTabId], opened on [requested], as the stand-in. Returns
+  /// the newer URL the page wants when a navigation came in while it opened,
+  /// for the caller to load in the stand-in right away.
+  ///
+  /// That navigation belongs to the stand-in even if the user has picked
+  /// either tab since: it came in before anyone saw the stand-in, so it would
+  /// have loaded there had the tab been open. What comes in later goes
+  /// through [request], whose load is sent after the caller's.
+  Uri? opened(String sourceTabId, Uri requested, String standInTabId) {
+    final standIn = _standIns[sourceTabId]?[_pageOf(requested)];
+    // Seen or closed in the meantime: nothing stands in for it any more.
+    if (standIn == null) return null;
+
+    standIn
+      ..tabId = standInTabId
+      ..openedAt = ++_clock;
+    return standIn.url == requested ? null : standIn.url;
+  }
+
+  /// Gives back a page whose stand-in could not be opened, so the next
+  /// navigation tries again.
+  void release(String sourceTabId, Uri uri) {
+    final pages = _standIns[sourceTabId];
+    if (pages == null) return;
+    final page = _pageOf(uri);
+    if (pages[page]?.tabId == null) pages.remove(page);
+    if (pages.isEmpty) _standIns.remove(sourceTabId);
+  }
+
+  /// [tabId] was seen: it neither has stand-ins nor stands in any more.
+  void forget(String tabId) {
+    _standIns.remove(tabId);
+    retire(tabId);
+  }
+
+  /// [tabId] is on screen: it no longer stands in for anything, so the next
+  /// navigation of its page opens a new stand-in rather than replace a page
+  /// the user may be reading. Its own stand-ins stay: a split pair's
+  /// unfocused page keeps reusing them while it stays on screen, as a page
+  /// retrying there would otherwise open a tab per attempt.
+  void retire(String tabId) {
+    for (final pages in _standIns.values) {
+      pages.removeWhere((_, standIn) => standIn.tabId == tabId);
+    }
+    _standIns.removeWhere((_, pages) => pages.isEmpty);
+  }
+}
+
+/// What replaced a tab, and the [TabReplacements.undoGeneration] at which the
+/// old tab's close was through (null while it is still under way).
+class _Replacement {
+  final String newTabId;
+  int? closedAt;
+
+  _Replacement(this.newTabId, this.closedAt);
+}
+
+/// Tabs closed because another took their place (a reopen in the assigned
+/// container, a container change), by the tab that replaced them, so a
+/// selection still holding the old tab (a "tab opened" prompt) reaches the
+/// new one.
+///
+/// An alias holds until the engine's undo brings the old tab back under its
+/// id: that tab is then itself again. The old tab being open says nothing by
+/// itself, since it is open until its close is through, and the native store
+/// lists it a moment longer. So an alias is dropped only for a tab whose
+/// close was through before an undo ran ([undone]) and that is open after
+/// it. Each alias keeps the [undoGeneration] at which its close was through,
+/// which a replacement recorded only after its new tab opened carries from
+/// the close, so an undo in between is not lost.
+@visibleForTesting
+class TabReplacements {
+  /// By old tab: what replaced it.
+  final _replacedBy = <String, _Replacement>{};
+
+  /// How many are kept: a prompt holding a replaced tab only lives as long as
+  /// its snackbar.
+  static const limit = 32;
+
+  int _undoGeneration = 0;
+
+  /// How many undos that brought tabs back have run. Read right after a
+  /// close, to pass to [record] as `closedAt` once the replacement exists.
+  int get undoGeneration => _undoGeneration;
+
+  /// Records that [newTabId] took the place of [oldTabId], whose close was
+  /// through at [closedAt] ([undoGeneration] then; now when omitted).
+  void record(String oldTabId, String newTabId, {int? closedAt}) =>
+      _put(oldTabId, _Replacement(newTabId, closedAt ?? _undoGeneration));
+
+  /// Records that [newTabId] took the place of [oldTabId], whose close is
+  /// still to come: follow with [closed] once it is through, or [drop] when
+  /// it fails.
+  void recordClosing(String oldTabId, String newTabId) =>
+      _put(oldTabId, _Replacement(newTabId, null));
+
+  void _put(String oldTabId, _Replacement replacement) {
+    _replacedBy
+      ..remove(oldTabId)
+      ..[oldTabId] = replacement;
+    while (_replacedBy.length > limit) {
+      _replacedBy.remove(_replacedBy.keys.first);
+    }
+  }
+
+  /// [oldTabId]'s close, recorded as still to come, is through.
+  void closed(String oldTabId) {
+    final entry = _replacedBy[oldTabId];
+    if (entry != null) entry.closedAt ??= _undoGeneration;
+  }
+
+  /// Forgets that [oldTabId] was replaced: its close failed, and it stays.
+  void drop(String oldTabId) => _replacedBy.remove(oldTabId);
+
+  /// The engine's undo ran and brought tabs back. A replaced tab closed
+  /// before it may be among them; [resolve] tells by whether it is open.
+  void undone() => _undoGeneration++;
+
+  /// Whether [tabId] was replaced, so [resolve] needs the open tabs.
+  bool has(String tabId) => _replacedBy.containsKey(tabId);
+
+  /// The tab standing in for [tabId] given the tabs open now
+  /// ([openTabIds]): what replaced it, following replacements of
+  /// replacements, unless an undo restored it. A restored tab drops its alias,
+  /// so a later close of it is a close of its own, not a replacement.
+  String resolve(String tabId, {required Set<String> openTabIds}) {
+    var current = tabId;
+    final seen = <String>{current};
+    while (true) {
+      final entry = _replacedBy[current];
+      if (entry == null) return current;
+      final closedAt = entry.closedAt;
+      if (closedAt != null &&
+          _undoGeneration > closedAt &&
+          openTabIds.contains(current)) {
+        _replacedBy.remove(current);
+        return current;
+      }
+      if (!seen.add(entry.newTabId)) return current;
+      current = entry.newTabId;
+    }
+  }
+}
+
+/// Replaces [oldTabId] with the tab [open] opens, then closes [oldTabId]
+/// with [closeOld]. [focused] says whether [oldTabId] was the selected tab
+/// when [open] began, and [open] selects the new tab only in that case.
+///
+/// The user can select [oldTabId] while the replacement opens, e.g. by
+/// tapping a background tab's "tab opened" prompt. Closing it would then
+/// hand the selection to some other tab. So the native selection
+/// ([selectedTabId]) is asked again before the close, and a tab selected in
+/// the meantime passes its selection to the replacement first. The close
+/// goes by the native selection too, so it leaves the replacement selected.
+/// The replacement is selected once more after the close anyway, as for a
+/// [focused] tab, so a close that still moved the selection on (it raced the
+/// selection) does not decide what the user sees.
+///
+/// Past the point of no return: once the replacement exists, the swap is
+/// finished even if a newer navigation has claimed [oldTabId] since.
+/// Abandoning it would leave the new tab created but [oldTabId] still open.
+/// Only a disposed repository ([isMounted]) stops it.
+@visibleForTesting
+Future<String> replaceTabOpeningFirst({
+  required String oldTabId,
+  required bool focused,
+  required Future<String> Function() open,
+  required Future<String?> Function() selectedTabId,
+  required Future<void> Function(String newTabId) closeOld,
+  required Future<void> Function(String tabId) select,
+  required bool Function() isMounted,
+}) async {
+  final newTabId = await open();
+  if (!isMounted()) return newTabId;
+
+  final selectedMeanwhile =
+      !focused && await selectedTabId() == oldTabId && isMounted();
+  if (selectedMeanwhile) await select(newTabId);
+  if (!isMounted()) return newTabId;
+
+  await closeOld(newTabId);
+  if ((focused || selectedMeanwhile) && isMounted()) await select(newTabId);
+  return newTabId;
 }
 
 /// The tab to select after the selected [closedTabId] closes, when it is in
@@ -192,6 +501,74 @@ class TabRepository extends _$TabRepository {
   /// engine has already left.
   final _latestAssignmentRequests = <String, String>{};
 
+  /// The tabs standing in for background tabs' cancelled navigations; see
+  /// [BackgroundStandIns].
+  final _backgroundStandIns = BackgroundStandIns();
+
+  /// Tabs closed because another took their place; see [TabReplacements].
+  final _replacements = TabReplacements();
+
+  /// Closes [oldTabId], then opens the tab that takes its place with
+  /// [openReplacement] and records the replacement ([TabReplacements]). A
+  /// selection of [oldTabId] from then on selects the new tab while
+  /// [oldTabId] stays closed: the "tab opened" prompt of a link opened in the
+  /// background still holds the tab that a container change replaced.
+  Future<String> replaceTabClosingFirst(
+    String oldTabId,
+    Future<String> Function() openReplacement,
+  ) async {
+    // The replacement stands in for it, so it was never closed.
+    await closeTab(oldTabId, keepOffRecentlyClosed: true);
+    // Read now: an undo while the replacement opens may restore it.
+    final closedAt = _replacements.undoGeneration;
+    final newTabId = await openReplacement();
+    if (ref.mounted) {
+      _replacements.record(oldTabId, newTabId, closedAt: closedAt);
+    }
+    return newTabId;
+  }
+
+  /// Closes [oldTabId], which [newTabId] took the place of, and records the
+  /// replacement before the close: a selection while it is under way (a
+  /// close waits for any other in progress) already reaches [newTabId].
+  Future<void> _closeReplacedTab(String oldTabId, String newTabId) async {
+    _replacements.recordClosing(oldTabId, newTabId);
+    try {
+      // The replacement stands in for it, so it was never closed.
+      await closeTab(oldTabId, keepOffRecentlyClosed: true);
+    } catch (_) {
+      _replacements.drop(oldTabId);
+      rethrow;
+    }
+    _replacements.closed(oldTabId);
+  }
+
+  /// The split pair on screen (shown, with the selected tab in it), as of
+  /// the last [_onVisiblePairChange].
+  SplitPair? _visiblePair;
+
+  /// A split pair coming on screen shows its unselected page too, which is
+  /// seen like a selected one ([BackgroundStandIns.forget]); the selection
+  /// listener covers only the selected page. The pair from
+  /// [splitPairShownProvider] and the selection, not [activeSplitPairProvider],
+  /// which is auto-disposed and so cannot be listened to from here.
+  void _onVisiblePairChange() {
+    final pair = ref.read(splitPairShownProvider);
+    final selectedTabId = ref.read(selectedTabProvider);
+    final visible =
+        selectedTabId != null && (pair?.contains(selectedTabId) ?? false)
+        ? pair
+        : null;
+    final previous = _visiblePair;
+    _visiblePair = visible;
+    if (visible == null) return;
+
+    for (final tabId in [visible.firstTabId, visible.secondTabId]) {
+      if (previous?.contains(tabId) ?? false) continue;
+      _backgroundStandIns.forget(tabId);
+    }
+  }
+
   TabBackBehavior? backBehaviorFor(String? tabId) {
     if (tabId == null) {
       return null;
@@ -263,13 +640,7 @@ class TabRepository extends _$TabRepository {
 
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
 
-    var assignedContainer = switch (containerSelection) {
-      UseSelectedContainerTabSelection() =>
-        await ref.read(selectedContainerProvider.notifier).fetchData(),
-      UnassignedContainerTabSelection() => null,
-      SpecificContainerTabSelection(:final container) => container,
-      PreferredContainerTabSelection(:final container) => container,
-    };
+    var assignedContainer = await _requestedContainer(containerSelection);
 
     if (tabMode is RegularTabMode &&
         url != null &&
@@ -347,6 +718,22 @@ class TabRepository extends _$TabRepository {
     return newTabId;
   }
 
+  /// The container [selection] asks for, before a site assignment has its
+  /// say ([resolveAssignedContainerForTabOpen]).
+  Future<ContainerData?> _requestedContainer(
+    TabContainerSelection selection,
+  ) async => switch (selection) {
+    UseSelectedContainerTabSelection() =>
+      await ref.read(selectedContainerProvider.notifier).fetchData(),
+    UnassignedContainerTabSelection() => null,
+    SpecificContainerTabSelection(:final container) => container,
+    PreferredContainerTabSelection(:final container) => container,
+    OpenedFromTabContainerSelection(:final tabId) =>
+      await ref
+          .read(tabDataRepositoryProvider.notifier)
+          .getContainerForCopy(tabId),
+  };
+
   Future<bool> _closeRestoredPrivateCaptureTabs(List<String> tabIds) async {
     if (tabIds.isEmpty) {
       return false;
@@ -383,13 +770,7 @@ class TabRepository extends _$TabRepository {
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
     final db = ref.read(tabDatabaseProvider);
-    final assignedContainer = switch (containerSelection) {
-      UseSelectedContainerTabSelection() =>
-        await ref.read(selectedContainerProvider.notifier).fetchData(),
-      UnassignedContainerTabSelection() => null,
-      SpecificContainerTabSelection(:final container) => container,
-      PreferredContainerTabSelection(:final container) => container,
-    };
+    final assignedContainer = await _requestedContainer(containerSelection);
     // Read once for the whole batch rather than per tab: the setting cannot
     // change while these rows are being written.
     final childPlacement = ref
@@ -682,7 +1063,18 @@ class TabRepository extends _$TabRepository {
     return false;
   }
 
-  Future<bool> selectTab(String tabId) async {
+  Future<bool> selectTab(String requestedTabId) async {
+    // A replaced tab: what replaced it is the tab meant, unless an undo
+    // brought it back ([TabReplacements]). Whether it is open is asked of the
+    // native store; the Dart tab states keep a closed tab for a while.
+    final tabId = _replacements.has(requestedTabId)
+        ? _replacements.resolve(
+            requestedTabId,
+            openTabIds: (await _tabsService.getTabIds()).toSet(),
+          )
+        : requestedTabId;
+    if (!ref.mounted) return false;
+
     // The tab is still a pre-restore placeholder (known to the DB but not to
     // the engine yet): queue the selection until the native state arrives.
     if (!ref.read(browserRestoreCompleteProvider) &&
@@ -1163,7 +1555,12 @@ class TabRepository extends _$TabRepository {
         }
       }
 
-      final selectedTab = ref.read(selectedTabProvider);
+      // Native's selection, not selectedTabProvider: its events are
+      // debounced, so a tab selected a moment ago (a replacement taking over
+      // a closing tab's selection, say) may not be in it yet, and the old
+      // selection would pick a next tab over it.
+      final selectedTab = await _tabsService.getSelectedTabId();
+      if (!ref.mounted) return;
       if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
         await _selectNextTab(selectedTab!, excludedTabIds: tabIds.toSet());
       }
@@ -1349,6 +1746,8 @@ class TabRepository extends _$TabRepository {
     } finally {
       if (!restoresTabs) _suppressNextReclose = false;
     }
+    // A replaced tab can be among those it brought back.
+    if (restoresTabs) _replacements.undone();
     return restoresTabs;
   }
 
@@ -1502,12 +1901,69 @@ class TabRepository extends _$TabRepository {
   //   }
   // }
 
+  /// Shows background tab [sourceTabId]'s cancelled navigation to [uri] in
+  /// its page's stand-in ([BackgroundStandIns]), opening one with [open] when
+  /// there is none. [selectedTabId] is the native store's selection, asked
+  /// for just before.
+  Future<void> _showInStandIn(
+    String sourceTabId,
+    Uri uri,
+    String? selectedTabId,
+    Future<String> Function([Uri? url]) open,
+  ) async {
+    // Which tabs are open, from the native store right now; see
+    // [BackgroundStandIns.sync].
+    final takenAt = _backgroundStandIns.stamp;
+    final openTabIds = await _tabsService.getTabIds();
+    if (!ref.mounted) return;
+    _backgroundStandIns.sync(
+      openTabIds: openTabIds,
+      selectedTabId: selectedTabId,
+      // A split pair shown with the selected tab shows its other page too,
+      // never selected. The pair is Dart's own state, so current already.
+      visibleTabIds: [
+        if (selectedTabId != null)
+          ?ref.read(splitPairShownProvider)?.partnerOf(selectedTabId),
+      ],
+      takenAt: takenAt,
+    );
+
+    switch (_backgroundStandIns.request(sourceTabId, uri)) {
+      case StandInCurrent():
+        return;
+      case LoadInStandIn(:final tabId):
+        // Nobody has seen either tab: the page's latest navigation replaces
+        // the stand-in's, as it would have in the tab itself.
+        await GeckoSessionService(tabId: tabId).loadUrl(url: uri);
+        return;
+      case OpenStandIn():
+        break;
+    }
+
+    final String standInId;
+    try {
+      standInId = await open(uri);
+    } catch (_) {
+      _backgroundStandIns.release(sourceTabId, uri);
+      rethrow;
+    }
+
+    // A newer navigation to the page came in while the stand-in opened: it
+    // loads there, never in another tab ([BackgroundStandIns.opened]). Sent
+    // with no await before it, so a load for a navigation reported from now
+    // on reaches the tab after this one.
+    final newer = _backgroundStandIns.opened(sourceTabId, uri, standInId);
+    if (newer != null) {
+      await GeckoSessionService(tabId: standInId).loadUrl(url: newer);
+    }
+  }
+
   /// Reopens a navigation the container extension cancelled, in the container
   /// the site is assigned to.
   ///
-  /// The extension cancels the request natively and reports it here. Nothing
-  /// else retries it, so a report this drops leaves the tab sitting on a
-  /// navigation that will never happen.
+  /// The extension cancels the request natively and reports it here, for a
+  /// background tab too. Nothing else retries it, so a report this drops
+  /// leaves the tab sitting on a navigation that will never happen.
   Future<void> _handleSiteAssignment(ContainerSiteAssignment event) async {
     // Strict-mode blocks have no destination container to re-open into; the
     // navigation was already cancelled natively and the user is notified via
@@ -1603,12 +2059,19 @@ class TabRepository extends _$TabRepository {
 
       if (event.blocked || tabIsEmpty) {
         final splitView = ref.read(splitViewControllerProvider.notifier);
-        // The unfocused page of a split pair never takes focus by itself: its
-        // replacement (or the tab it opens) stays in the background.
-        final staysUnfocused = splitView.isUnfocusedMember(currentTabState.id);
+        // A background tab (a link opened with "Open in new tab", say) or the
+        // unfocused page of a split pair, which is never the selected tab,
+        // does not take focus by itself: its replacement (or the tab it opens)
+        // stays in the background too. Native's selection, not
+        // selectedTabProvider (nor isUnfocusedMember, which reads it): the
+        // selection events are debounced, so a tab selected a moment ago may
+        // not be in it yet.
+        final selectedTabId = await _tabsService.getSelectedTabId();
+        if (!isCurrentRequest()) return;
+        final staysUnfocused = selectedTabId != currentTabState.id;
 
-        Future<String> openInAssignedContainer() => addTab(
-          url: uri,
+        Future<String> openInAssignedContainer([Uri? url]) => addTab(
+          url: url ?? uri,
           tabMode: currentTabState.tabMode,
           containerSelection: TabContainerSelection.specific(containerData),
           parentId: currentTabState.id,
@@ -1618,24 +2081,28 @@ class TabRepository extends _$TabRepository {
         if (historyIsEmpty) {
           // A replacement: the new tab takes the old one's place, in a split
           // pair too.
-          await splitView.carryOver(currentTabState.id, () async {
-            final newTabId = await openInAssignedContainer();
-
-            // Past the point of no return. The replacement tab exists, so the
-            // swap is finished even if a newer navigation has claimed this tab
-            // since — abandoning it here would leave the new tab created but
-            // unselected.
-            if (ref.mounted) {
-              // The replacement stands in for it, so it was never closed.
-              await closeTab(currentTabState.id, keepOffRecentlyClosed: true);
-              if (ref.mounted && !staysUnfocused) {
-                await selectTab(newTabId);
-              }
-            }
-            return newTabId;
-          });
-        } else {
+          await splitView.carryOver(
+            currentTabState.id,
+            () => replaceTabOpeningFirst(
+              oldTabId: currentTabState.id,
+              focused: !staysUnfocused,
+              open: openInAssignedContainer,
+              selectedTabId: _tabsService.getSelectedTabId,
+              closeOld: (newTabId) =>
+                  _closeReplacedTab(currentTabState.id, newTabId),
+              select: selectTab,
+              isMounted: () => ref.mounted,
+            ),
+          );
+        } else if (!staysUnfocused) {
           await openInAssignedContainer();
+        } else {
+          await _showInStandIn(
+            currentTabState.id,
+            uri,
+            selectedTabId,
+            openInAssignedContainer,
+          );
         }
       } else {
         final latestTabState = ref.read(tabStatesProvider)[tabId];
@@ -1769,11 +2236,16 @@ class TabRepository extends _$TabRepository {
       },
     );
 
+    ref.listen(splitPairShownProvider, (_, _) => _onVisiblePairChange());
+
     ref.listen(
       fireImmediately: true,
       selectedTabProvider,
       (previous, tabId) async {
+        _onVisiblePairChange();
         if (tabId != null) {
+          // Seen now: what it tries next in the background is new again.
+          _backgroundStandIns.forget(tabId);
           await db.tabDao.touchTab(tabId, timestamp: DateTime.now());
         }
       },

@@ -24,6 +24,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
@@ -55,20 +56,17 @@ class OpenInNewTab extends HookConsumerWidget {
     TabMode tabMode,
   ) async {
     // Everything from ref before the first await: the dialog can be
-    // dismissed while the container lookup runs, which unmounts this widget.
+    // dismissed while the tab opens, which unmounts this widget.
     final currentTab = readContextMenuSourceTab(ref, sourceTabId);
     final tabs = ref.read(tabRepositoryProvider.notifier);
-    final containerSelection = await contextMenuContainerSelection(
-      ref,
-      sourceTabId,
-    );
 
     final tabId = await tabs.addTab(
       url: hitResult.tryGetLink(),
       parentId: currentTab?.id,
       selectTab: false,
       tabMode: tabMode,
-      containerSelection: containerSelection,
+      // The menu's page's container, in split view the pane's own.
+      containerSelection: TabContainerSelection.openedFrom(sourceTabId),
     );
 
     if (context.mounted) {

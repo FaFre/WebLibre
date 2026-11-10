@@ -87,6 +87,30 @@ void main() {
         expect(resolved, isNull);
       });
     });
+
+    group('openedFrom (a tab opened from a page)', () {
+      final pageContainer = _container('page', 'page-context');
+
+      test('site assignment still wins', () {
+        final resolved = resolveAssignedContainerForTabOpen(
+          containerSelection: const TabContainerSelection.openedFrom('t'),
+          requestedContainer: pageContainer,
+          siteAssignedContainer: siteAssignedContainer,
+        );
+
+        expect(resolved, siteAssignedContainer);
+      });
+
+      test("otherwise the page's container", () {
+        final resolved = resolveAssignedContainerForTabOpen(
+          containerSelection: const TabContainerSelection.openedFrom('t'),
+          requestedContainer: pageContainer,
+          siteAssignedContainer: null,
+        );
+
+        expect(resolved, pageContainer);
+      });
+    });
   });
 }
 

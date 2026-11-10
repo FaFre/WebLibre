@@ -38,7 +38,6 @@ import 'package:weblibre/features/geckoview/features/split_view/domain/entities/
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_pair_l10n.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -159,6 +158,12 @@ Future<void> showSplitPartnerPicker(
   );
   final router = GoRouter.of(context);
   final searchPicker = _splitSearchRoute(read, sourceTabId).location;
+  // The picker opens on the source's container, where a new page from its
+  // new-tab button goes too ([TabContainerSelection.openedFrom]); the
+  // selected container can be another one.
+  final sourceContainer = await read(
+    tabDataRepositoryProvider.notifier,
+  ).getContainerForCopy(sourceTabId);
 
   sheets.show(
     TabPickerSheet(
@@ -168,7 +173,7 @@ Future<void> showSplitPartnerPicker(
             : l10n.splitView_replaceTitle,
         privateTabs: source?.tabMode is PrivateTabMode,
         excludedTabIds: {sourceTabId, ...excluded},
-        initialContainer: read(selectedContainerDataProvider).value,
+        initialContainer: sourceContainer,
         onPicked: (tabId) async {
           sheets.requestDismiss();
           await destination.pair(tabId);
@@ -299,22 +304,6 @@ SplitErrorReporter splitErrorReporter(BuildContext context) {
   return (error) => show(error.describe(l10n));
 }
 
-/// Where a page opened to be shown beside [sourceTabId] goes: the source's
-/// container unless the URL's site is assigned elsewhere, as for a link
-/// opened from that page. The source need not be the selected tab, so the
-/// selected container says nothing about it.
-///
-/// Reads before its first await.
-Future<TabContainerSelection> splitPartnerContainerSelection(
-  ProviderRead read,
-  String sourceTabId,
-) async {
-  final container = await read(
-    tabDataRepositoryProvider.notifier,
-  ).getTabContainerData(sourceTabId);
-  return TabContainerSelection.preferred(container);
-}
-
 /// What pairing needs, read up front, for a caller that leaves its screen
 /// before it pairs.
 class SplitPairing {
@@ -366,7 +355,6 @@ class SplitPairing {
 class SplitPickerDestination {
   final String sourceTabId;
   final TabContainerSelection? _pickedContainer;
-  final TabDataRepository _tabData;
   final SplitPairing _pairing;
   final SplitErrorReporter _onError;
   final GoRouter _router;
@@ -378,18 +366,14 @@ class SplitPickerDestination {
     required this.sourceTabId,
     TabContainerSelection? pickedContainer,
   }) : _pickedContainer = pickedContainer,
-       _tabData = read(tabDataRepositoryProvider.notifier),
        _pairing = SplitPairing.of(read),
        _onError = splitErrorReporter(context),
        _router = GoRouter.of(context);
 
-  /// Where a new page goes: the picked container, otherwise the source's
-  /// ([splitPartnerContainerSelection]).
-  Future<TabContainerSelection> containerSelection() async =>
-      _pickedContainer ??
-      TabContainerSelection.preferred(
-        await _tabData.getTabContainerData(sourceTabId),
-      );
+  /// Where a new page goes: the picked container, otherwise the source's,
+  /// as for a link opened from it.
+  TabContainerSelection get containerSelection =>
+      _pickedContainer ?? TabContainerSelection.openedFrom(sourceTabId);
 
   /// Pairs [tabId] with the source and selects it once the pair is shown; if
   /// the pair cannot be formed it reports why and selects the tab on its own.
@@ -451,17 +435,12 @@ Future<void> openLinkInSplitView(
   final tabs = ref.read(tabRepositoryProvider.notifier);
   final pairing = SplitPairing.of(ref.read);
 
-  final containerSelection = await splitPartnerContainerSelection(
-    ref.read,
-    sourceTabId,
-  );
-
   final newTabId = await tabs.addTab(
     url: url,
     tabMode: source.tabMode,
     parentId: sourceTabId,
     selectTab: false,
-    containerSelection: containerSelection,
+    containerSelection: TabContainerSelection.openedFrom(sourceTabId),
   );
 
   await pairing.pairAndSelect(

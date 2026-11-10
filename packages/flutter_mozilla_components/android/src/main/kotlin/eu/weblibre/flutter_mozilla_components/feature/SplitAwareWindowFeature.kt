@@ -27,7 +27,8 @@ import mozilla.components.support.ktx.kotlinx.coroutines.flow.filterChanged
  * let the unfocused page take focus without the user touching it. This copy
  * differs in one place: a popup from a page that is on screen but not focused
  * opens in the background. Everything else, popups from the focused page or
- * from a background tab included, behaves exactly as before.
+ * from a background tab included, behaves exactly as before. It also records
+ * the URL each popup was opened for ([PopupRequests]).
  *
  * Derived from android-components `WindowFeature` (MPL-2.0).
  *
@@ -58,13 +59,17 @@ class SplitAwareWindowFeature(
                             }
                         WindowRequest.Type.OPEN ->
                             consumeWindowRequest(tab.id) {
-                                tabsUseCases.addTab(
+                                val popupId = tabsUseCases.addTab(
                                     selectTab = shouldSelectPopupOf(tab.id),
                                     parentId = tab.id,
                                     engineSession = windowRequest.prepare(),
                                     private = tab.content.private,
                                     contextId = tab.contextId,
                                 )
+                                // The tab is on about:blank until it loads; a
+                                // cancelled first navigation is matched to it
+                                // by the URL it was opened for.
+                                PopupRequests.record(popupId, windowRequest.url)
                                 windowRequest.start()
                             }
                         else -> Unit

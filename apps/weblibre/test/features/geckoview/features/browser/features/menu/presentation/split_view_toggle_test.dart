@@ -35,7 +35,8 @@ import 'package:weblibre/features/geckoview/features/browser/features/menu/prese
 import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -82,6 +83,23 @@ class _FakeController extends SplitViewController {
     super.setFocusedOnly(focusedOnly);
   }
 }
+
+/// The focused page `a` is in container A; the selected container says
+/// nothing about it.
+class _FakeTabData extends TabDataRepository {
+  @override
+  void build() {}
+
+  @override
+  Future<ContainerData?> getTabContainerData(String tabId) async =>
+      tabId == 'a' ? _containerA : null;
+}
+
+final _containerA = ContainerData(
+  id: 'A',
+  color: const Color(0xFF2196F3),
+  orderKey: 'a',
+);
 
 class _FakeSelectedTab extends SelectedTab {
   @override
@@ -175,7 +193,7 @@ void main() {
         fifoTabStatesProvider.overrideWith(
           (ref) => EquatableValue([for (final tab in open) (tab, null)]),
         ),
-        selectedContainerDataProvider.overrideWith((ref) => Stream.value(null)),
+        tabDataRepositoryProvider.overrideWith(_FakeTabData.new),
         gestureSettingsWithDefaultsProvider.overrideWith(
           (ref) => GestureSettings.withDefaults(enabled: false),
         ),

@@ -90,7 +90,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
           ),
           selectTab: split == null,
           containerSelection:
-              await split?.containerSelection() ?? target.containerSelection!,
+              split?.containerSelection ?? target.containerSelection!,
           // A result picked in the search screen, not a link from the
           // parent's page.
           parentIsReferrer: false,
@@ -132,7 +132,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
           tabMode: target.tabMode,
           parentId: target.parentId,
           containerSelection:
-              await split?.containerSelection() ?? target.containerSelection!,
+              split?.containerSelection ?? target.containerSelection!,
           onBackBehavior: ReturnToSearchTabBackBehavior(
             tabType: target.tabMode.toTabType(),
           ),

@@ -38,6 +38,17 @@ sealed class TabContainerSelection {
   /// split pane), so they land in that page's container.
   const factory TabContainerSelection.preferred(ContainerData? container) =
       PreferredContainerTabSelection;
+
+  /// For a tab opened from [tabId]'s page: [tabId]'s container (none when it
+  /// is in none), as [TabContainerSelection.preferred], so a site assigned
+  /// elsewhere still wins. Never the selected container: that is the tab
+  /// tray's choice and can differ from the page's, whose container the
+  /// browser chrome shows. Resolved when the tab opens, from the container a
+  /// copy of [tabId] would go into (`TabDataRepository.getContainerForCopy`):
+  /// a tab's row is written after the tab opens, and an empty lookup taken at
+  /// its word would send a link from a page in a container into none.
+  const factory TabContainerSelection.openedFrom(String tabId) =
+      OpenedFromTabContainerSelection;
 }
 
 final class UseSelectedContainerTabSelection extends TabContainerSelection {
@@ -58,4 +69,10 @@ final class PreferredContainerTabSelection extends TabContainerSelection {
   final ContainerData? container;
 
   const PreferredContainerTabSelection(this.container);
+}
+
+final class OpenedFromTabContainerSelection extends TabContainerSelection {
+  final String tabId;
+
+  const OpenedFromTabContainerSelection(this.tabId);
 }

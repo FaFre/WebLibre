@@ -28,6 +28,7 @@ import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -105,6 +106,11 @@ GeckoSelectionActionService selectionActionService(Ref ref) {
                 parentId: currentTab?.id,
                 tabMode: tabMode,
                 selectTab: true,
+                // Text selected on the page: the search opens in that page's
+                // container, like a link from it, not the tab tray's.
+                containerSelection: currentTab == null
+                    ? const TabContainerSelection.useSelected()
+                    : TabContainerSelection.openedFrom(currentTab.id),
                 // A search the user typed, not a link from the current page.
                 parentIsReferrer: false,
               );

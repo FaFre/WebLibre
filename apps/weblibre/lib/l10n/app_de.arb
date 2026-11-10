@@ -3828,6 +3828,7 @@
   "mainApp_downloadFailed": "Download fehlgeschlagen: {name}",
   "mainApp_containerBlockedWithHost": "{host} ist diesem Container nicht zugewiesen",
   "mainApp_containerBlockedNoHost": "Diese Website ist diesem Container nicht zugewiesen",
+  "mainApp_containerBlockedBackgroundWithHost": "Der Hintergrund-Tab für {host} wurde nicht geladen: Die Website ist seinem Container nicht zugewiesen",
   "mainApp_sandboxNoCredits": "Kein Suchguthaben mehr übrig. Zum Fortfahren weiteres Guthaben kaufen.",
   "mainApp_sandboxTokenIssuanceFailed": "Neue Such-Tokens konnten nicht ausgestellt werden. Verbindung prüfen und erneut versuchen.",
   "mainApp_sandboxFetchPolicyRejected": "Erfassung durch Abrufrichtlinie blockiert: {detail}",

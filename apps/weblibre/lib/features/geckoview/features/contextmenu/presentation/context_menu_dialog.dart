@@ -121,10 +121,12 @@ class ContextMenuDialog extends HookConsumerWidget {
           ),
         if (OpenInNewTab.isSupported(effective))
           OpenInNewTab(hitResult: effective, sourceTabId: sourceTabId),
-        if (OpenInSplitView.isSupported(effective))
-          OpenInSplitView(hitResult: effective, sourceTabId: sourceTabId),
+        // The same action with the container (and kind of tab) chosen, so
+        // right under it; split view is another way to show the tab.
         if (showContainerUi && OpenInContainer.isSupported(effective))
           OpenInContainer(hitResult: effective, sourceTabId: sourceTabId),
+        if (OpenInSplitView.isSupported(effective))
+          OpenInSplitView(hitResult: effective, sourceTabId: sourceTabId),
         if (CopyLink.isSupported(effective)) CopyLink(hitResult: effective),
         if (CopyLinkText.isSupported(effective))
           CopyLinkText(hitResult: effective),

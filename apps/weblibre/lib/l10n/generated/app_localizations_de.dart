@@ -14134,6 +14134,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Diese Website ist diesem Container nicht zugewiesen';
 
   @override
+  String mainApp_containerBlockedBackgroundWithHost(String host) {
+    return 'Der Hintergrund-Tab für $host wurde nicht geladen: Die Website ist seinem Container nicht zugewiesen';
+  }
+
+  @override
   String get mainApp_sandboxNoCredits =>
       'Kein Suchguthaben mehr übrig. Zum Fortfahren weiteres Guthaben kaufen.';
 

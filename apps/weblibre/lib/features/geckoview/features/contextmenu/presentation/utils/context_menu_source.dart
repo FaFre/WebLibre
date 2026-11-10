@@ -19,10 +19,7 @@
  */
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
-import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 
 /// The tab a context menu belongs to: the page it was opened in
 /// ([sourceTabId], from the engine event). In split view this can be the
@@ -32,17 +29,3 @@ import 'package:weblibre/features/geckoview/features/split_view/presentation/uti
 /// privacy or referrer would be wrong.
 TabState? readContextMenuSourceTab(WidgetRef ref, String sourceTabId) =>
     ref.read(tabStateProvider(sourceTabId));
-
-/// Where a tab opened from the context menu goes. The selected container, as
-/// always, when the menu belongs to the selected tab; otherwise the source
-/// tab's container (site assignment still wins), so a link from the other
-/// split pane opens in that pane's container.
-Future<TabContainerSelection> contextMenuContainerSelection(
-  WidgetRef ref,
-  String sourceTabId,
-) async {
-  if (sourceTabId == ref.read(selectedTabProvider)) {
-    return const TabContainerSelection.useSelected();
-  }
-  return await splitPartnerContainerSelection(ref.read, sourceTabId);
-}

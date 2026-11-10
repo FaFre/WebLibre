@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/utils/context_menu_source.dart';
@@ -55,8 +56,7 @@ class OpenImageInNewTab extends HookConsumerWidget {
       title: Text(l10n.contextmenu_openImageInNewTab),
       onTap: () async {
         // Everything from ref before the first await: the dialog can be
-        // dismissed while the container lookup runs, which unmounts this
-        // widget.
+        // dismissed while the tab opens, which unmounts this widget.
         final currentTab = readContextMenuSourceTab(ref, sourceTabId);
         final tabMode =
             currentTab?.tabMode ??
@@ -66,17 +66,13 @@ class OpenImageInNewTab extends HookConsumerWidget {
                   .effectiveDefaultCreateTabType,
             );
         final tabs = ref.read(tabRepositoryProvider.notifier);
-        final containerSelection = await contextMenuContainerSelection(
-          ref,
-          sourceTabId,
-        );
 
         final tabId = await tabs.addTab(
           url: hitResult.tryGetSource(),
           parentId: currentTab?.id,
           selectTab: false,
           tabMode: tabMode,
-          containerSelection: containerSelection,
+          containerSelection: TabContainerSelection.openedFrom(sourceTabId),
         );
 
         if (context.mounted) {

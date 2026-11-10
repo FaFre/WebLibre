@@ -12879,6 +12879,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mainApp_containerBlockedNoHost => '此网站未分配给此容器';
 
   @override
+  String mainApp_containerBlockedBackgroundWithHost(String host) {
+    return 'The background tab for $host did not load: the site is not assigned to its container';
+  }
+
+  @override
   String get mainApp_sandboxNoCredits => '你的搜索额度已用完。请购买更多额度以继续。';
 
   @override

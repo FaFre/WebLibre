@@ -26,6 +26,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/extensions/uri.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/certificate_viewer.dart';
@@ -61,19 +62,22 @@ class CertificateTile extends HookConsumerWidget {
     }
 
     Future<void> openCertificateViewer(Uint8List derCertificate) async {
+      // Before onClose, which can take this widget and its ref away.
+      final tabs = ref.read(tabRepositoryProvider.notifier);
+
       onClose();
 
-      await ref
-          .read(tabRepositoryProvider.notifier)
-          .addTab(
-            url: certificateViewerUri(derCertificate),
-            parentId: tabState.id,
-            selectTab: true,
-            tabMode: tabState.tabMode,
-            // The viewer is the browser's page, not one the site links to;
-            // Gecko refuses about:certificate from web content.
-            parentIsReferrer: false,
-          );
+      await tabs.addTab(
+        url: certificateViewerUri(derCertificate),
+        parentId: tabState.id,
+        selectTab: true,
+        tabMode: tabState.tabMode,
+        // Beside the page it describes, in that page's container.
+        containerSelection: TabContainerSelection.openedFrom(tabState.id),
+        // The viewer is the browser's page, not one the site links to;
+        // Gecko refuses about:certificate from web content.
+        parentIsReferrer: false,
+      );
     }
 
     final onCertificateTap = (certificate != null)

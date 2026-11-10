@@ -21,18 +21,21 @@ import 'dart:convert';
 
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:uuid/enums.dart';
+import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/utils/context_menu_source.dart';
+import 'package:weblibre/features/geckoview/features/search/presentation/widgets/animated_tab_type_switcher.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -51,6 +54,9 @@ class _SelectedContainer extends _PickerResult {
 }
 
 class _CreateNewContainer extends _PickerResult {}
+
+/// What the picker returns: where the tab goes, and as which kind of tab.
+typedef _PickerChoice = ({_PickerResult target, TabType tabType});
 
 class OpenInContainer extends HookConsumerWidget {
   final HitResult hitResult;
@@ -80,15 +86,31 @@ class OpenInContainer extends HookConsumerWidget {
       leading: const Icon(MdiIcons.selectGroup),
       title: Text(l10n.contextmenu_openInContainer),
       onTap: () async {
-        final result = await showModalBottomSheet<_PickerResult?>(
+        final pageTabMode =
+            readContextMenuSourceTab(ref, sourceTabId)?.tabMode ??
+            TabMode.fromTabType(settings.effectiveDefaultCreateTabType);
+        final pageTabType = pageTabMode.toTabType();
+
+        final choice = await showModalBottomSheet<_PickerChoice?>(
           context: context,
           anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-          builder: (context) => _ContainerPickerSheet(),
+          builder: (context) => _ContainerPickerSheet(
+            initialTabType: pageTabType,
+            showIsolated:
+                settings.isolatedTabEntryPointsShown ||
+                pageTabType == TabType.isolated,
+          ),
         );
 
-        if (result == null || !context.mounted) return;
+        if (choice == null || !context.mounted) return;
 
-        final selectedContainer = switch (result) {
+        // The page's own kind keeps the page's mode, an isolated page's group
+        // included; another kind is a new tab of that kind.
+        final tabMode = choice.tabType == pageTabType
+            ? pageTabMode
+            : TabMode.fromTabType(choice.tabType);
+
+        final selectedContainer = switch (choice.target) {
           _SelectedContainer(:final container) => container,
           _CreateNewContainer() => await () async {
             final draft = await ref
@@ -106,9 +128,6 @@ class OpenInContainer extends HookConsumerWidget {
         if (selectedContainer == null || !context.mounted) return;
 
         final currentTab = readContextMenuSourceTab(ref, sourceTabId);
-        final tabMode =
-            currentTab?.tabMode ??
-            TabMode.fromTabType(settings.effectiveDefaultCreateTabType);
 
         final tabId = await ref
             .read(tabRepositoryProvider.notifier)
@@ -132,11 +151,28 @@ class OpenInContainer extends HookConsumerWidget {
   }
 }
 
+/// The kind of tab to open, starting on the page's, above the containers to
+/// open the link in: one step instead of a type menu and a container menu.
 class _ContainerPickerSheet extends HookConsumerWidget {
+  final TabType initialTabType;
+  final bool showIsolated;
+
+  const _ContainerPickerSheet({
+    required this.initialTabType,
+    required this.showIsolated,
+  });
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final containersAsync = ref.watch(watchContainersWithCountProvider);
+    final tabType = useState(initialTabType);
+    final colors = AppColors.of(context);
+
+    void pick(_PickerResult target) => Navigator.pop<_PickerChoice>(context, (
+      target: target,
+      tabType: tabType.value,
+    ));
 
     return SafeArea(
       child: Column(
@@ -147,6 +183,19 @@ class _ContainerPickerSheet extends HookConsumerWidget {
             child: Text(
               l10n.contextmenu_selectContainerTitle,
               style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: AnimatedTabTypeSwitcher(
+              selected: tabType.value,
+              onChanged: (value) => tabType.value = value,
+              showIsolatedOption: showIsolated,
+              selectedBackgroundColor: switch (tabType.value) {
+                TabType.private => colors.privateSelectionOverlay,
+                TabType.isolated => colors.isolatedSelectionOverlay,
+                TabType.regular || TabType.child => null,
+              },
             ),
           ),
           Flexible(
@@ -166,10 +215,7 @@ class _ContainerPickerSheet extends HookConsumerWidget {
                         return ContainerListTile(
                           container,
                           isSelected: false,
-                          onTap: () => Navigator.pop(
-                            context,
-                            _SelectedContainer(container),
-                          ),
+                          onTap: () => pick(_SelectedContainer(container)),
                         );
                       },
                     );
@@ -203,7 +249,7 @@ class _ContainerPickerSheet extends HookConsumerWidget {
           ListTile(
             leading: const Icon(Icons.add),
             title: Text(l10n.contextmenu_newContainer),
-            onTap: () => Navigator.pop(context, _CreateNewContainer()),
+            onTap: () => pick(_CreateNewContainer()),
           ),
         ],
       ),

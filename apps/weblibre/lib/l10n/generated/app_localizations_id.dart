@@ -14066,6 +14066,11 @@ class AppLocalizationsId extends AppLocalizations {
       'Situs ini tidak ditetapkan ke kontainer ini';
 
   @override
+  String mainApp_containerBlockedBackgroundWithHost(String host) {
+    return 'The background tab for $host did not load: the site is not assigned to its container';
+  }
+
+  @override
   String get mainApp_sandboxNoCredits =>
       'Kredit pencarian Anda sudah habis. Beli lagi untuk melanjutkan.';
 

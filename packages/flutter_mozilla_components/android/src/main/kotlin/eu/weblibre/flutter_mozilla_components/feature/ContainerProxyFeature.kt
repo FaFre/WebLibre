@@ -1098,14 +1098,33 @@ object ContainerProxyFeature {
                 val details = messageJSON.getJSONObject("result")
 
                 if (status == "success") {
+                    // Absent from an extension older than background reports,
+                    // which reported the highlighted tab only.
+                    val highlighted = details.optBoolean("highlighted", true)
+                    val url = details.getString("url")
+                    val tabUrl = details.tryGetString("tabUrl")
+                    val startUrl = details.tryGetString("startUrl")
                     runOnUiThread {
+                        val tabId = resolveReportedTabId(
+                            components.core.store.state,
+                            highlighted = highlighted,
+                            url = url,
+                            tabUrl = tabUrl,
+                            startUrl = startUrl,
+                        )
+                        if (tabId == null && !highlighted) {
+                            logger.warn(
+                                "Cancelled background navigation matches no single tab; not reported"
+                            )
+                            return@runOnUiThread
+                        }
                         events.onContainerSiteAssignment(
                             EventSequence.next(),
                             ContainerSiteAssignment(
                                 requestId = requestId,
-                                tabId = components.core.store.state.selectedTabId,
+                                tabId = tabId,
                                 originUrl = details.tryGetString("originUrl"),
-                                url = details.getString("url"),
+                                url = url,
                                 blocked = details.getBoolean("blocked"),
                                 strict = details.optBoolean("strict", false)
                             )

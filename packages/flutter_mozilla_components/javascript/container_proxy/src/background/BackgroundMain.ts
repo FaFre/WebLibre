@@ -117,6 +117,14 @@ export default class BackgroundMain {
   private readonly routingWaitMs: number
   private readonly proxyStartWaitMs: number
 
+  /**
+   * The URL each top-level request started at, by request id, which a
+   * redirect keeps. A fresh background tab is created on that URL, so native
+   * finds it by it when a redirect hop is the one cancelled. Only the latest
+   * few are kept: a request is decided within moments.
+   */
+  private readonly requestStartUrls = new Map<string, string>()
+
   constructor (
     { store, routingWaitMs, proxyStartWaitMs }:
     { store: Store, routingWaitMs?: number, proxyStartWaitMs?: number }
@@ -317,6 +325,15 @@ export default class BackgroundMain {
       return {};
     }
 
+    let startUrl = this.requestStartUrls.get(options.requestId)
+    if (startUrl === undefined) {
+      startUrl = options.url
+      this.requestStartUrls.set(options.requestId, startUrl)
+      if (this.requestStartUrls.size > 64) {
+        this.requestStartUrls.delete(this.requestStartUrls.keys().next().value as string)
+      }
+    }
+
     const url = URL.parse(options.url);
     if (url === null) {
       return {};
@@ -339,6 +356,34 @@ export default class BackgroundMain {
     const isStrict = cookieStoreId !== 'private' &&
       this.store.isContextStrict(cookieStoreId)
 
+    // Tells the app what became of the navigation. An allowed one only
+    // matters for the highlighted tab. A cancelled one is reported for every
+    // tab: the app reopens it in its assigned container or says it was
+    // blocked, and a background tab nobody hears about stays blank.
+    const report = (blocked: boolean, strict: boolean): void => {
+      if (!blocked && !tab.highlighted) return
+
+      port.postMessage({
+        type: 'assignedSiteRequested',
+        id: options.requestId,
+        status: 'success',
+        result: {
+          originUrl: options.originUrl,
+          url: options.url,
+          tabId: options.tabId,
+          // The page the tab shows, which a cancelled navigation leaves it
+          // on; about:blank for a tab that never showed one. Native finds a
+          // background tab by it.
+          tabUrl: tab.url,
+          // Where the navigation started, before any redirect.
+          startUrl,
+          highlighted: tab.highlighted,
+          blocked,
+          strict
+        }
+      })
+    }
+
     if (this.store.isSiteOriginAssigned(url)) {
       // In a strict context the site must be assigned to *this* container's own
       // base context (exact match, no proxy equivalence). Non-strict contexts
@@ -348,70 +393,21 @@ export default class BackgroundMain {
         : (cookieStoreId == 'private' || this.store.isSiteOriginInSameContext(url, cookieStoreId))
 
       if (allowed) {
-        if (tab.highlighted) {
-          port.postMessage({
-            "type": "assignedSiteRequested",
-            "id": options.requestId,
-            "status": "success",
-            "result": {
-              "originUrl": options.originUrl,
-              "url": options.url,
-              "tabId": options.tabId,
-              "blocked": false,
-              "strict": false
-            }
-          });
-        }
-
-        // Allow requests when the assigned site already matches the current context,
-        // even if the tab is not highlighted.
-        return {};
-      } else {
-        // Assigned to a different container: cancel here and let the app re-open
-        // it in its assigned container. This applies to strict contexts too —
-        // the site still doesn't load here, it just routes to where it belongs.
-        //Only send events when tab is selected
-        if (tab.highlighted) {
-          port.postMessage({
-            "type": "assignedSiteRequested",
-            "id": options.requestId,
-            "status": "success",
-            "result": {
-              "originUrl": options.originUrl,
-              "url": options.url,
-              "tabId": options.tabId,
-              "blocked": true,
-              "strict": false
-            }
-          });
-        }
-
-        return {
-          cancel: true,
-        };
+        report(false, false)
+        return {}
       }
+
+      // Assigned to a different container: cancel here and let the app re-open
+      // it in its assigned container. This applies to strict contexts too —
+      // the site still doesn't load here, it just routes to where it belongs.
+      report(true, false)
+      return { cancel: true }
     } else if (isStrict) {
       // Strict mode: this container may only load origins assigned to it. The
       // origin is not assigned to any container, so cancel the navigation and
       // report it as a strict block (no destination container).
-      if (tab.highlighted) {
-        port.postMessage({
-          "type": "assignedSiteRequested",
-          "id": options.requestId,
-          "status": "success",
-          "result": {
-            "originUrl": options.originUrl,
-            "url": options.url,
-            "tabId": options.tabId,
-            "blocked": true,
-            "strict": true
-          }
-        });
-      }
-
-      return {
-        cancel: true,
-      };
+      report(true, true)
+      return { cancel: true }
     }
 
     return {};

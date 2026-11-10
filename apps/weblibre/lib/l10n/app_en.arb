@@ -17297,6 +17297,15 @@
   "@mainApp_containerBlockedNoHost": {
     "description": "Message when a page was blocked from loading in the current container because the site is assigned to a different container. Used when the domain cannot be determined."
   },
+  "mainApp_containerBlockedBackgroundWithHost": "The background tab for {host} did not load: the site is not assigned to its container",
+  "@mainApp_containerBlockedBackgroundWithHost": {
+    "description": "Message when a tab opened in the background (not the one on screen) stayed empty because its container (a separate browsing identity) only loads sites assigned to it, and this site is not. host is the website domain, e.g. example.com.",
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
   "mainApp_sandboxNoCredits": "You have no search credits left. Purchase more to continue.",
   "@mainApp_sandboxNoCredits": {
     "description": "Error message when a privacy-preserving page capture from a web search cannot run because the user's prepaid search credits are used up."

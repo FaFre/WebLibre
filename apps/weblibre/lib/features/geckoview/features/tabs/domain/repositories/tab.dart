@@ -121,16 +121,14 @@ class TabDataRepository extends _$TabDataRepository {
 
         if (closeOldTab) {
           // A replacement, which takes the old tab's slot in a split pair.
-          await ref.read(splitViewControllerProvider.notifier).carryOver(
-            tabId,
-            () async {
-              // The replacement stands in for it, so it was never closed.
-              await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .closeTab(tabId, keepOffRecentlyClosed: true);
-              return await openInTarget();
-            },
-          );
+          await ref
+              .read(splitViewControllerProvider.notifier)
+              .carryOver(
+                tabId,
+                () => ref
+                    .read(tabRepositoryProvider.notifier)
+                    .replaceTabClosingFirst(tabId, openInTarget),
+              );
         } else {
           // Another tab next to the original; a pair keeps the original.
           await openInTarget();
@@ -168,20 +166,18 @@ class TabDataRepository extends _$TabDataRepository {
         // A replacement, which takes the old tab's slot in a split pair.
         await ref.read(splitViewControllerProvider.notifier).carryOver(
           tabId,
-          () async {
-            await ref
-                .read(tabRepositoryProvider.notifier)
-                .closeTab(tabId, keepOffRecentlyClosed: true);
-
-            return await ref
-                .read(tabRepositoryProvider.notifier)
-                .addTab(
-                  url: tabState.url,
-                  tabMode: tabState.tabMode,
-                  containerSelection: const TabContainerSelection.unassigned(),
-                  parentId: parentId,
-                  selectTab: selectedTabId == tabState.id,
-                );
+          () {
+            final tabRepository = ref.read(tabRepositoryProvider.notifier);
+            return tabRepository.replaceTabClosingFirst(
+              tabId,
+              () => tabRepository.addTab(
+                url: tabState.url,
+                tabMode: tabState.tabMode,
+                containerSelection: const TabContainerSelection.unassigned(),
+                parentId: parentId,
+                selectTab: selectedTabId == tabState.id,
+              ),
+            );
           },
         );
       }

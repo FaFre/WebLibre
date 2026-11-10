@@ -23132,6 +23132,12 @@ abstract class AppLocalizations {
   /// **'This site is not assigned to this container'**
   String get mainApp_containerBlockedNoHost;
 
+  /// Message when a tab opened in the background (not the one on screen) stayed empty because its container (a separate browsing identity) only loads sites assigned to it, and this site is not. host is the website domain, e.g. example.com.
+  ///
+  /// In en, this message translates to:
+  /// **'The background tab for {host} did not load: the site is not assigned to its container'**
+  String mainApp_containerBlockedBackgroundWithHost(String host);
+
   /// Error message when a privacy-preserving page capture from a web search cannot run because the user's prepaid search credits are used up.
   ///
   /// In en, this message translates to:

@@ -25,6 +25,7 @@ import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/domain/services/app_initialization.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
@@ -264,6 +265,10 @@ class _DownloadStoppedListener extends HookConsumerWidget {
 /// because the active tab's container is in strict mode (only assigned sites
 /// may load). Strict blocks carry no destination container — the load was
 /// already cancelled natively — so this listener only notifies the user.
+///
+/// A background tab is told about once per host until it is selected: a page
+/// there that keeps retrying (an auto-refresh, a redirect on every attempt)
+/// would otherwise cover whatever the user is doing with the same snackbar.
 class _StrictContainerBlockListener extends HookConsumerWidget {
   final Widget child;
 
@@ -275,21 +280,40 @@ class _StrictContainerBlockListener extends HookConsumerWidget {
       eventServiceProvider.select((service) => service.siteAssignementEvent),
     );
 
+    // By background tab: the hosts it was told about.
+    final toldInBackground = useRef(<String, Set<String>>{});
+    // Seen now: what it is blocked from next is news again.
+    ref.listen(selectedTabProvider, (_, tabId) {
+      if (tabId != null) toldInBackground.value.remove(tabId);
+    });
+
     useOnStreamChange(
       siteAssignmentEvents,
-      onData: (event) {
+      onData: (event) async {
         if (!event.strict) {
           return;
         }
 
-        final host = Uri.tryParse(event.url)?.host;
+        final parsedHost = Uri.tryParse(event.url)?.host;
+        final host = (parsedHost?.isNotEmpty ?? false) ? parsedHost : null;
+        final tabId = event.tabId;
+        // A tab opened in the background: "this container" would read as the
+        // container of the page on screen. Native's selection, not
+        // selectedTabProvider: its events are debounced and can lag behind.
+        final selectedTabId = await GeckoTabService().getSelectedTabId();
+        if (!context.mounted) return;
+        final inBackground = tabId != selectedTabId;
+        if (inBackground && tabId != null) {
+          final told = toldInBackground.value.putIfAbsent(tabId, () => {});
+          if (!told.add(host ?? '')) return;
+        }
         final l10n = AppLocalizations.of(context);
-        ui_helper.showInfoMessage(
-          context,
-          host != null && host.isNotEmpty
-              ? l10n.mainApp_containerBlockedWithHost(host)
-              : l10n.mainApp_containerBlockedNoHost,
-        );
+        ui_helper.showInfoMessage(context, switch ((host, inBackground)) {
+          (final host?, true) =>
+            l10n.mainApp_containerBlockedBackgroundWithHost(host),
+          (final host?, false) => l10n.mainApp_containerBlockedWithHost(host),
+          (null, _) => l10n.mainApp_containerBlockedNoHost,
+        });
       },
     );
 

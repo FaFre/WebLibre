@@ -21,8 +21,9 @@ import 'package:weblibre/features/geckoview/features/split_view/domain/entities/
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_view_controls_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -58,6 +59,23 @@ class _FakeController extends SplitViewController {
     SplitPair? arrangement,
   }) async => calls.add('pair:$first,$second');
 }
+
+/// The focused page `a` is in container A; the selected container says
+/// nothing about it.
+class _FakeTabData extends TabDataRepository {
+  @override
+  void build() {}
+
+  @override
+  Future<ContainerData?> getTabContainerData(String tabId) async =>
+      tabId == 'a' ? _containerA : null;
+}
+
+final _containerA = ContainerData(
+  id: 'A',
+  color: const Color(0xFF2196F3),
+  orderKey: 'a',
+);
 
 class _FakeSelectedTab extends SelectedTab {
   @override
@@ -169,7 +187,7 @@ void main() {
         ),
         sandboxSourceUriForTabProvider.overrideWith((ref, tabId) => null),
         genericWebsiteServiceProvider.overrideWith(_NoIcons.new),
-        selectedContainerDataProvider.overrideWith((ref) => Stream.value(null)),
+        tabDataRepositoryProvider.overrideWith(_FakeTabData.new),
       ],
     );
     addTearDown(container.dispose);
@@ -257,6 +275,8 @@ void main() {
     expect(request.title, 'Replace other page');
     expect(request.privateTabs, isFalse);
     expect(request.excludedTabIds, {'a', 'b'});
+    // On the focused page's container, where a new page from it goes too.
+    expect(request.initialContainer?.id, 'A');
   });
 
   testWidgets("a tab picked in the tray takes the other page's place and "

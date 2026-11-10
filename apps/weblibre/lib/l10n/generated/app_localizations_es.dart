@@ -14229,6 +14229,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este sitio no está asignado a este contenedor';
 
   @override
+  String mainApp_containerBlockedBackgroundWithHost(String host) {
+    return 'The background tab for $host did not load: the site is not assigned to its container';
+  }
+
+  @override
   String get mainApp_sandboxNoCredits =>
       'No te quedan créditos de búsqueda. Compra más para continuar.';
 

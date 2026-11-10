@@ -11,8 +11,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_new_tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -22,20 +20,11 @@ class _SelectedTab extends SelectedTab {
   String? build() => 'a';
 }
 
-/// The container lookup for the source tab stays pending until [lookup]
-/// completes, like the database read it stands for.
-class _TabData extends TabDataRepository {
-  final lookup = Completer<ContainerData?>();
-
-  @override
-  void build() {}
-
-  @override
-  Future<ContainerData?> getTabContainerData(String tabId) => lookup.future;
-}
-
 class _Tabs extends TabRepository {
   final opened = <(Uri?, String?, TabContainerSelection)>[];
+
+  /// The tab stays opening until this completes.
+  final opening = Completer<void>();
 
   @override
   void build() {}
@@ -59,14 +48,14 @@ class _Tabs extends TabRepository {
     bool parentIsReferrer = true,
   }) async {
     opened.add((url, parentId, containerSelection));
+    await opening.future;
     return 'new';
   }
 }
 
 void main() {
-  testWidgets('a link from the other pane still opens when the menu is '
-      'dismissed during the container lookup', (tester) async {
-    final tabData = _TabData();
+  testWidgets("a link from the other pane opens in that pane's page "
+      'container, and the menu can go away while it opens', (tester) async {
     final tabs = _Tabs();
     final show = ValueNotifier(true);
     addTearDown(show.dispose);
@@ -78,7 +67,6 @@ void main() {
           tabStateProvider.overrideWith(
             (ref, tabId) => tabId == null ? null : TabState.$default(tabId),
           ),
-          tabDataRepositoryProvider.overrideWith(() => tabData),
           tabRepositoryProvider.overrideWith(() => tabs),
           generalSettingsWithDefaultsProvider.overrideWith(
             (ref) => GeneralSettings.withDefaults(),
@@ -103,16 +91,11 @@ void main() {
     );
 
     await tester.tap(find.text('Open in new tab'));
-    // The menu goes away while the lookup is pending.
+    // The menu goes away while the tab is opening.
     show.value = false;
     await tester.pump();
 
-    final paneContainer = ContainerData(
-      id: 'B',
-      color: const Color(0xFF000000),
-      orderKey: 'b',
-    );
-    tabData.lookup.complete(paneContainer);
+    tabs.opening.complete();
     await tester.pump();
 
     expect(tester.takeException(), isNull);
@@ -122,10 +105,10 @@ void main() {
     expect(parentId, 'b');
     expect(
       selection,
-      isA<PreferredContainerTabSelection>().having(
-        (s) => s.container?.id,
-        'container',
-        'B',
+      isA<OpenedFromTabContainerSelection>().having(
+        (s) => s.tabId,
+        'tabId',
+        'b',
       ),
     );
   });
