@@ -569,6 +569,20 @@ class TabRepository extends _$TabRepository {
     }
   }
 
+  /// Follows [splitPairShownProvider] into [_onVisiblePairChange], listening
+  /// through the container rather than [ref]. A `ref.listen` would make this
+  /// repository a dependent of [splitViewControllerProvider], which reads this
+  /// repository (`SplitViewController.pair` checks routing here): a
+  /// [CircularDependencyError] on every pairing in debug builds.
+  @visibleForTesting
+  void followVisiblePair() {
+    final subscription = ref.container.listen(
+      splitPairShownProvider,
+      (_, _) => _onVisiblePairChange(),
+    );
+    ref.onDispose(subscription.close);
+  }
+
   TabBackBehavior? backBehaviorFor(String? tabId) {
     if (tabId == null) {
       return null;
@@ -2236,7 +2250,7 @@ class TabRepository extends _$TabRepository {
       },
     );
 
-    ref.listen(splitPairShownProvider, (_, _) => _onVisiblePairChange());
+    followVisiblePair();
 
     ref.listen(
       fireImmediately: true,

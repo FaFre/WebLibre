@@ -59,8 +59,10 @@ class _FakeTabStates extends TabStates {
 class _FakeTabRepository extends TabRepository {
   final Set<String> notReady = {};
 
+  // Only the split pair subscription of the real build: it once made this
+  // repository depend on the controller, which reads it while pairing.
   @override
-  void build() {}
+  void build() => followVisiblePair();
 
   @override
   Future<bool> ensureRoutingReady(String tabId) async =>
@@ -169,13 +171,26 @@ void main() {
     );
     addTearDown(container.dispose);
 
-    // Starts the controller and its tab-list listener.
+    // Starts the controller and its tab-list listener, and the tab
+    // repository, which the browser starts with the engine.
     container
       ..listen(splitViewControllerProvider, (_, _) {})
-      ..listen(splitViewReconciliationProvider, (_, _) {});
+      ..listen(splitViewReconciliationProvider, (_, _) {})
+      ..listen(tabRepositoryProvider, (_, _) {});
   });
 
   group('pair', () {
+    test(
+      'reading the tab repository is no dependency cycle while it follows '
+      'the shown pair',
+      () async {
+        // Throws CircularDependencyError in debug builds (tests included)
+        // when the repository subscribes to the pair through its own ref.
+        await controller().pair('a', 'b');
+        expect(pair(), isNotNull);
+      },
+    );
+
     test('forms a pair, and a new request replaces it', () async {
       await controller().pair('a', 'b');
       final first = pair()!;
