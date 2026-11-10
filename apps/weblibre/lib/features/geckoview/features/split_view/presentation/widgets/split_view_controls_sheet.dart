@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -30,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_url_list_tile.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view_inputs.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -213,9 +216,14 @@ class SplitViewControlsSheet extends HookConsumerWidget {
 }
 
 /// The two pages as one outlined card, in pair order (left/top first), with
-/// the swap button on the line between them. The focused page's row is
-/// tinted; tapping the other one focuses it.
-class _PagesCard extends StatelessWidget {
+/// the swap button on the line between them. The rows are unframed, so this
+/// card is the only frame and its clip rounds their container colors. The
+/// focused page's row is highlighted, and the card's outline around it is
+/// drawn in that page's accent, the color of its focus outline in the split
+/// itself; tapping the other row focuses it.
+class _PagesCard extends ConsumerWidget {
+  static const _radius = Radius.circular(20);
+
   final String firstTabId;
   final String secondTabId;
   final String? selectedTabId;
@@ -229,26 +237,51 @@ class _PagesCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final chrome = ref.watch(splitViewChromeControllerProvider);
+    final firstIdentity = ref.watch(splitTabIdentityProvider(firstTabId));
+    final secondIdentity = ref.watch(splitTabIdentityProvider(secondTabId));
+
+    final focusedRow = selectedTabId == firstTabId
+        ? _PairRow.first
+        : selectedTabId == secondTabId
+        ? _PairRow.second
+        : null;
+    final focusedIdentity = switch (focusedRow) {
+      _PairRow.first => firstIdentity,
+      _PairRow.second => secondIdentity,
+      null => null,
+    };
+    // The browser reports its chrome as it starts; until then, the accent of
+    // a regular tab.
+    final focusColor = focusedIdentity == null
+        ? null
+        : chrome == null
+        ? colorScheme.primary
+        : focusedIdentity.accent(chrome);
 
     return Material(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: colorScheme.outlineVariant),
+      // The outline is drawn by the pair, so the focused row's can cover it.
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(_radius),
       ),
       color: colorScheme.surfaceContainerLow,
       clipBehavior: Clip.antiAlias,
       child: _DividedPair(
+        radius: _radius,
+        outlineColor: colorScheme.outlineVariant,
+        focusedRow: focusedRow,
+        focusColor: focusColor,
         first: _PageRow(
           tabId: firstTabId,
-          focused: selectedTabId == firstTabId,
+          focused: focusedRow == _PairRow.first,
         ),
         divider: Divider(height: 1, color: colorScheme.outlineVariant),
         second: _PageRow(
           tabId: secondTabId,
-          focused: selectedTabId == secondTabId,
+          focused: focusedRow == _PairRow.second,
         ),
         button: IconButton.outlined(
           tooltip: l10n.splitView_swapSides,
@@ -272,10 +305,12 @@ class _PagesCard extends StatelessWidget {
 }
 
 /// One page of the pair: the shared open-tab row ([TabUrlListTile]: favicon,
-/// title, URL breadcrumb, container), tinted while focused.
+/// title, URL breadcrumb, container), unframed inside the card and
+/// highlighted while focused.
 class _PageRow extends ConsumerWidget {
-  /// Holds the card's shape while a member's state is not known yet.
-  static const _placeholderHeight = 64.0;
+  /// Holds the card's shape while a member's state is not known yet: an
+  /// unframed row with a one-line title.
+  static const _placeholderHeight = 60.0;
 
   final String tabId;
   final bool focused;
@@ -284,30 +319,23 @@ class _PageRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
     final TabState? tabState = ref.watch(tabStateProvider(tabId));
     final containerData = ref.watch(
       watchTabContainerDataProvider(tabId).select((value) => value.value),
     );
 
-    return Semantics(
+    if (tabState == null) {
+      return const SizedBox(height: _placeholderHeight);
+    }
+
+    return TabUrlListTile(
+      tabState: tabState,
+      containerData: containerData,
+      framed: false,
       selected: focused,
-      child: Material(
-        color: focused
-            ? colorScheme.surfaceContainerHighest
-            : Colors.transparent,
-        child: tabState == null
-            ? const SizedBox(height: _placeholderHeight)
-            : TabUrlListTile(
-                tabState: tabState,
-                containerData: containerData,
-                onTap: focused
-                    ? null
-                    : () => ref
-                          .read(tabRepositoryProvider.notifier)
-                          .selectTab(tabId),
-              ),
-      ),
+      onTap: focused
+          ? null
+          : () => ref.read(tabRepositoryProvider.notifier).selectTab(tabId),
     );
   }
 }
@@ -318,8 +346,22 @@ class _PageRow extends ConsumerWidget {
 /// A Stack cannot do this: it would center the button on the card, which is
 /// on the divider only while both rows are equally tall, and they are not
 /// (titles wrap, text scales).
+///
+/// It also draws the card's outline: [outlineColor] all around, with
+/// [radius] corners, and over it, around [focusedRow] (the divider
+/// included), the focus outline in [focusColor], as wide as the split's own.
+/// Both run inside the edge, so the card's clip leaves them whole.
 class _DividedPair extends MultiChildRenderObjectWidget {
+  final Radius radius;
+  final Color outlineColor;
+  final _PairRow? focusedRow;
+  final Color? focusColor;
+
   _DividedPair({
+    required this.radius,
+    required this.outlineColor,
+    required this.focusedRow,
+    required this.focusColor,
     required Widget first,
     required Widget divider,
     required Widget second,
@@ -327,8 +369,27 @@ class _DividedPair extends MultiChildRenderObjectWidget {
   }) : super(children: [first, divider, second, button]);
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderDividedPair();
+  RenderObject createRenderObject(BuildContext context) => _RenderDividedPair(
+    radius: radius,
+    outlineColor: outlineColor,
+    focusedRow: focusedRow,
+    focusColor: focusColor,
+  );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderDividedPair renderObject,
+  ) {
+    renderObject
+      ..radius = radius
+      ..outlineColor = outlineColor
+      ..focusedRow = focusedRow
+      ..focusColor = focusColor;
+  }
 }
+
+enum _PairRow { first, second }
 
 class _DividedPairParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -336,6 +397,52 @@ class _RenderDividedPair extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _DividedPairParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _DividedPairParentData> {
+  /// The width of the split's own focus outline (`PaneView.OUTLINE_DP`).
+  static const _focusWidth = 2.0;
+  static const _outlineWidth = 1.0;
+
+  _RenderDividedPair({
+    required Radius radius,
+    required Color outlineColor,
+    required _PairRow? focusedRow,
+    required Color? focusColor,
+  }) : _radius = radius,
+       _outlineColor = outlineColor,
+       _focusedRow = focusedRow,
+       _focusColor = focusColor;
+
+  Radius _radius;
+  Radius get radius => _radius;
+  set radius(Radius value) {
+    if (value == _radius) return;
+    _radius = value;
+    markNeedsPaint();
+  }
+
+  Color _outlineColor;
+  Color get outlineColor => _outlineColor;
+  set outlineColor(Color value) {
+    if (value == _outlineColor) return;
+    _outlineColor = value;
+    markNeedsPaint();
+  }
+
+  _PairRow? _focusedRow;
+  _PairRow? get focusedRow => _focusedRow;
+  set focusedRow(_PairRow? value) {
+    if (value == _focusedRow) return;
+    _focusedRow = value;
+    markNeedsPaint();
+  }
+
+  Color? _focusColor;
+  Color? get focusColor => _focusColor;
+  set focusColor(Color? value) {
+    if (value == _focusColor) return;
+    _focusColor = value;
+    markNeedsPaint();
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! _DividedPairParentData) {
@@ -366,9 +473,82 @@ class _RenderDividedPair extends RenderBox
     size = constraints.constrain(Size(constraints.maxWidth, top));
   }
 
+  /// [rect] with its edge moved [inset] inward and the corners that are
+  /// round in [round] following it, so a stroke [inset] * 2 wide drawn on
+  /// it lies just inside [rect].
+  RRect _strokeOutline(
+    Rect rect,
+    double inset, {
+    required bool top,
+    required bool bottom,
+  }) {
+    final corner = Radius.circular(math.max(0, _radius.x - inset));
+    return RRect.fromRectAndCorners(
+      rect.deflate(inset),
+      topLeft: top ? corner : Radius.zero,
+      topRight: top ? corner : Radius.zero,
+      bottomLeft: bottom ? corner : Radius.zero,
+      bottomRight: bottom ? corner : Radius.zero,
+    );
+  }
+
   @override
-  void paint(PaintingContext context, Offset offset) =>
-      defaultPaint(context, offset);
+  void paint(PaintingContext context, Offset offset) {
+    final [first, divider, second, button] = getChildrenAsList();
+    void paintChild(RenderBox child) => context.paintChild(
+      child,
+      (child.parentData! as _DividedPairParentData).offset + offset,
+    );
+
+    // Outlines over the rows, the swap button over the outlines.
+    paintChild(first);
+    paintChild(divider);
+    paintChild(second);
+
+    final bounds = offset & size;
+    context.canvas.drawRRect(
+      _strokeOutline(bounds, _outlineWidth / 2, top: true, bottom: true),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = _outlineWidth
+        ..color = _outlineColor,
+    );
+
+    final focusColor = _focusColor;
+    final focusedRow = _focusedRow;
+    if (focusColor != null && focusedRow != null) {
+      final dividerTop = bounds.top + first.size.height;
+      final dividerBottom = dividerTop + divider.size.height;
+      final rowRect = switch (focusedRow) {
+        _PairRow.first => Rect.fromLTRB(
+          bounds.left,
+          bounds.top,
+          bounds.right,
+          dividerBottom,
+        ),
+        _PairRow.second => Rect.fromLTRB(
+          bounds.left,
+          dividerTop,
+          bounds.right,
+          bounds.bottom,
+        ),
+      };
+      context.canvas.drawRRect(
+        _strokeOutline(
+          rowRect,
+          _focusWidth / 2,
+          top: focusedRow == _PairRow.first,
+          bottom: focusedRow == _PairRow.second,
+        ),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = _focusWidth
+          ..color = focusColor,
+      );
+    }
+
+    paintChild(button);
+  }
 
   // From the last child back, so the button wins over the rows under it.
   @override

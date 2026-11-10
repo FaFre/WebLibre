@@ -19,6 +19,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
+import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view_inputs.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_view_controls_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -188,6 +189,12 @@ void main() {
         sandboxSourceUriForTabProvider.overrideWith((ref, tabId) => null),
         genericWebsiteServiceProvider.overrideWith(_NoIcons.new),
         tabDataRepositoryProvider.overrideWith(_FakeTabData.new),
+        // The focused page `a` is in container A, `b` a regular tab.
+        splitTabIdentityProvider.overrideWith(
+          (ref, tabId) => tabId == 'a'
+              ? ContainerSplitTabIdentity(_containerA.color)
+              : ModeSplitTabIdentity(TabMode.regular),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -225,6 +232,58 @@ void main() {
     expect(tabs.selected, isEmpty);
     await tester.tap(find.text(_titles['b']!));
     expect(tabs.selected, ['b']);
+  });
+
+  testWidgets("the card's outline around the focused page is drawn in its "
+      'split focus color, over the plain outline', (tester) async {
+    await pumpSheet(tester);
+    // As the browser does when it starts.
+    container
+        .read(splitViewChromeControllerProvider.notifier)
+        .report(
+          SplitViewChrome(
+            divider: Colors.grey,
+            grip: Colors.grey,
+            dragPreview: Colors.grey,
+            placeholder: Colors.grey,
+            onPlaceholder: Colors.grey,
+            regularAccent: Colors.grey,
+            privateAccent: Colors.purple,
+            isolatedAccent: Colors.teal,
+            dividerDescription: '',
+            dividerOptionsAction: '',
+            crashedTitle: '',
+            crashedReload: '',
+          ),
+        );
+    await tester.pump();
+
+    final pair = find.byWidgetPredicate(
+      (widget) => widget.runtimeType.toString() == '_DividedPair',
+    );
+    final pairBox = tester.renderObject<RenderBox>(pair);
+    final firstRowBottom =
+        tester.getRect(find.byType(Divider)).bottom - tester.getRect(pair).top;
+    expect(
+      pairBox,
+      paints
+        ..rrect(
+          color: Theme.of(tester.element(pair)).colorScheme.outlineVariant,
+          strokeWidth: 1,
+        )
+        // Around the first row and the divider under it, square at the
+        // bottom, as wide as the split's own focus outline.
+        ..something((method, arguments) {
+          if (method != #drawRRect) return false;
+          final rrect = arguments[0] as RRect;
+          final paint = arguments[1] as Paint;
+          return paint.color.toARGB32() == _containerA.color.toARGB32() &&
+              paint.strokeWidth == 2 &&
+              rrect.bottom == firstRowBottom - 1 &&
+              rrect.blRadiusX == 0 &&
+              rrect.tlRadiusX == 19;
+        }),
+    );
   });
 
   testWidgets('swap, layout, show only this page and equal sizes reach the '

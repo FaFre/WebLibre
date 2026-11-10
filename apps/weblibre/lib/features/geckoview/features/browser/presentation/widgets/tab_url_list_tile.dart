@@ -31,11 +31,20 @@ import 'package:weblibre/presentation/widgets/url_list_tile.dart';
 class TabUrlListTile extends ConsumerWidget {
   final TabState tabState;
   final ContainerData? containerData;
+
+  /// See [UrlListTile.framed].
+  final bool framed;
+
+  /// See [UrlListTile.selected].
+  final bool selected;
+
   final VoidCallback? onTap;
 
   const TabUrlListTile({
     required this.tabState,
     required this.containerData,
+    this.framed = true,
+    this.selected = false,
     this.onTap,
     super.key,
   });
@@ -57,6 +66,8 @@ class TabUrlListTile extends ConsumerWidget {
       containerColor: containerData?.color,
       containerIcon: containerData?.metadata.iconData,
       useCustomColor: containerData?.metadata.useCustomColor ?? false,
+      framed: framed,
+      selected: selected,
       onTap: onTap,
     );
   }

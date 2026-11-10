@@ -37,6 +37,21 @@ class UrlListTile extends StatelessWidget {
   /// varies. The insecure case is carried by the address bar's security icon,
   /// not by these rows.
   final bool showHttpScheme;
+
+  /// A card of its own (the default): margin, rounded corners and, in a
+  /// container, the container's outline. Off for a row inside a card or
+  /// another grouped surface, which supplies the frame: the row then fills
+  /// it edge to edge, and the container's surface and badge reach the
+  /// surrounding card's edge, whose clip rounds them.
+  final bool framed;
+
+  /// Highlights the current item of a list (the focused page, the active
+  /// tab) and announces it as selected. The highlight is the row's own
+  /// background, a step up from the unselected one: `surfaceContainerHighest`,
+  /// or in a container that color tinted with the container's (its
+  /// `surfaceHighColor`), so it shows in any container color.
+  final bool selected;
+
   final VoidCallback? onTap;
 
   const UrlListTile({
@@ -49,12 +64,14 @@ class UrlListTile extends StatelessWidget {
     this.containerIcon,
     this.useCustomColor = false,
     this.showHttpScheme = false,
+    this.framed = true,
+    this.selected = false,
     this.onTap,
   });
 
   static const iconSize = 32.0;
   static const _badgeWidth = 56.0;
-  static const _borderRadius = BorderRadius.all(Radius.circular(12.0));
+  static const _framedRadius = BorderRadius.all(Radius.circular(12.0));
 
   @override
   Widget build(BuildContext context) {
@@ -67,86 +84,99 @@ class UrlListTile extends StatelessWidget {
             useCustomColor: useCustomColor,
           )
         : null;
+    final borderRadius = framed ? _framedRadius : BorderRadius.zero;
+    final Color? background = selected
+        ? containerPalette?.surfaceHighColor ??
+              colorScheme.surfaceContainerHighest
+        : containerPalette?.surfaceColor;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 4.0),
-      decoration: BoxDecoration(
-        color: containerPalette?.surfaceColor,
-        borderRadius: _borderRadius,
-        border: containerPalette != null
-            ? Border.all(color: containerPalette.outlineColor)
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: _borderRadius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          borderRadius: _borderRadius,
-          onTap: onTap,
-          child: Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                  left: 12.0,
-                  top: 10.0,
-                  bottom: 10.0,
-                  // Reserve room for the trailing badge so content never
-                  // slides underneath it.
-                  right: containerPalette != null ? _badgeWidth + 12.0 : 12.0,
-                ),
-                child: Row(
-                  children: [
-                    leading ??
-                        RepaintBoundary(
-                          child: UrlIcon([uri], iconSize: iconSize),
+    // Semantics stays in the tree either way: inserting it on selection
+    // would rebuild the whole row, favicon included. `null` rather than
+    // `false`, so lists without a current item do not read "not selected".
+    return Semantics(
+      selected: selected ? true : null,
+      child: Container(
+        margin: framed
+            ? const EdgeInsets.symmetric(vertical: 3.0, horizontal: 4.0)
+            : EdgeInsets.zero,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: borderRadius,
+          border: framed && containerPalette != null
+              ? Border.all(color: containerPalette.outlineColor)
+              : null,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: borderRadius,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            borderRadius: borderRadius,
+            onTap: onTap,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 12.0,
+                    top: 10.0,
+                    bottom: 10.0,
+                    // Reserve room for the trailing badge so content never
+                    // slides underneath it.
+                    right: containerPalette != null ? _badgeWidth + 12.0 : 12.0,
+                  ),
+                  child: Row(
+                    children: [
+                      leading ??
+                          RepaintBoundary(
+                            child: UrlIcon([uri], iconSize: iconSize),
+                          ),
+                      const SizedBox(width: 14.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 3.0),
+                            UriBreadcrumb(
+                              uri: uri,
+                              showHttpScheme: showHttpScheme,
+                              style: textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
-                    const SizedBox(width: 14.0),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 3.0),
-                          UriBreadcrumb(
-                            uri: uri,
-                            showHttpScheme: showHttpScheme,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                    if (trailing != null) ...[
-                      const SizedBox(width: 8.0),
-                      trailing!,
+                      if (trailing != null) ...[
+                        const SizedBox(width: 8.0),
+                        trailing!,
+                      ],
                     ],
-                  ],
-                ),
-              ),
-              // Stretches to the card height set by the content above without
-              // the extra layout pass an IntrinsicHeight Row would cost.
-              if (containerPalette != null)
-                Positioned(
-                  top: 0.0,
-                  bottom: 0.0,
-                  right: 0.0,
-                  width: _badgeWidth,
-                  child: _ContainerBadge(
-                    palette: containerPalette,
-                    icon: resolveContainerIcon(containerIcon),
                   ),
                 ),
-            ],
+                // Stretches to the card height set by the content above without
+                // the extra layout pass an IntrinsicHeight Row would cost.
+                if (containerPalette != null)
+                  Positioned(
+                    top: 0.0,
+                    bottom: 0.0,
+                    right: 0.0,
+                    width: _badgeWidth,
+                    child: _ContainerBadge(
+                      palette: containerPalette,
+                      icon: resolveContainerIcon(containerIcon),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
