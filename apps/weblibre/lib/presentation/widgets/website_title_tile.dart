@@ -54,7 +54,7 @@ class WebsiteTitleTile extends HookConsumerWidget {
           maxLines: 6,
           overflow: TextOverflow.ellipsis,
         ),
-        subtitle: UriBreadcrumb(uri: sandboxSourceUri),
+        subtitle: _AddressBreadcrumb(uri: sandboxSourceUri),
       );
     }
 
@@ -97,7 +97,7 @@ class _PageInfoTile extends ConsumerWidget {
               maxLines: 6,
               overflow: TextOverflow.ellipsis,
             ),
-            subtitle: UriBreadcrumb(uri: initialTabState.url),
+            subtitle: _AddressBreadcrumb(uri: initialTabState.url),
           );
         },
         error: (error, stackTrace) {
@@ -117,9 +117,22 @@ class _PageInfoTile extends ConsumerWidget {
           ),
           contentPadding: EdgeInsets.zero,
           title: Text(initialTabState.titleOrAuthority),
-          subtitle: UriBreadcrumb(uri: initialTabState.url),
+          subtitle: _AddressBreadcrumb(uri: initialTabState.url),
         ),
       ),
     );
+  }
+}
+
+/// The page's address in the site info sheet, wrapped rather than faded: this
+/// is where a lookalike host (`bank.example.attacker.test`) has to show whole.
+class _AddressBreadcrumb extends StatelessWidget {
+  final Uri uri;
+
+  const _AddressBreadcrumb({required this.uri});
+
+  @override
+  Widget build(BuildContext context) {
+    return UriBreadcrumb(uri: uri, showQuery: true, wrap: true, maxLines: 4);
   }
 }

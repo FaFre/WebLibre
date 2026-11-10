@@ -94,7 +94,7 @@ void main() {
       });
     });
 
-    group('showHttpScheme is false', () {
+    group('showHttpScheme is false hides only https', () {
       testWidgets('hides scheme for https URLs', (tester) async {
         await tester.pumpWidget(
           buildSubject(
@@ -109,7 +109,7 @@ void main() {
         expect(bold, ['example.com']);
       });
 
-      testWidgets('hides scheme for http URLs', (tester) async {
+      testWidgets('still shows the scheme for plain-http URLs', (tester) async {
         await tester.pumpWidget(
           buildSubject(
             uri: Uri.parse('http://example.com'),
@@ -118,9 +118,11 @@ void main() {
         );
 
         final all = allTexts(tester);
-        expect(all, isNot(contains('http')));
+        expect(all, contains('http'));
+        expect(all, contains(' › '));
         final bold = boldTexts(tester);
-        expect(bold, ['example.com']);
+        expect(bold, contains('example.com'));
+        expect(bold, contains('http'));
       });
 
       testWidgets('still shows scheme for non-HTTP URLs', (tester) async {
@@ -139,5 +141,167 @@ void main() {
         expect(bold, contains('ftp'));
       });
     });
+
+    group('showQuery', () {
+      testWidgets('leaves the query and fragment out by default', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          buildSubject(uri: Uri.parse('https://example.com/feed?format=atom')),
+        );
+
+        expect(allTexts(tester), isNot(contains('?format=atom')));
+      });
+
+      testWidgets('appends the query and fragment, not bold', (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: UriBreadcrumb(
+                uri: Uri.parse('https://example.com/feed?format=atom#top'),
+                showQuery: true,
+              ),
+            ),
+          ),
+        );
+
+        expect(allTexts(tester), contains('?format=atom#top'));
+        expect(boldTexts(tester), isNot(contains('?format=atom#top')));
+      });
+    });
+
+    group('wrap', () {
+      Future<String> pumpWrapped(WidgetTester tester, Uri uri) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: SizedBox(
+                width: 120,
+                child: UriBreadcrumb(
+                  uri: uri,
+                  showHttpScheme: false,
+                  showQuery: true,
+                  wrap: true,
+                ),
+              ),
+            ),
+          ),
+        );
+        return tester
+            .widget<RichText>(find.byType(RichText).first)
+            .text
+            .toPlainText();
+      }
+
+      testWidgets('renders one wrapping text with the whole address', (
+        tester,
+      ) async {
+        final text = await pumpWrapped(
+          tester,
+          Uri.parse('https://example.com/a/b?q=1'),
+        );
+
+        expect(text, 'example.com › a › b?q=1');
+        expect(find.byType(SingleChildScrollView), findsNothing);
+        // Wraps instead of overflowing the narrow box.
+        expect(tester.takeException(), isNull);
+        expect(
+          tester.getSize(find.byType(RichText).first).height,
+          greaterThan(30),
+        );
+      });
+
+      testWidgets('keeps the host bold', (tester) async {
+        await pumpWrapped(tester, Uri.parse('https://example.com/a'));
+
+        // Text.rich nests the span under one carrying the default style.
+        TextSpan? host;
+        tester.widget<RichText>(find.byType(RichText).first).text.visitChildren(
+          (span) {
+            if (span is TextSpan && span.text == 'example.com') {
+              host = span;
+              return false;
+            }
+            return true;
+          },
+        );
+        expect(host?.style?.fontWeight, FontWeight.bold);
+      });
+    });
   });
+
+  group('undecodable paths', () {
+    // Uri.tryParse accepts `%FF`, but it is not valid UTF-8, so decoding the
+    // path (Uri.pathSegments) throws.
+    final uri = Uri.parse('https://example.com/caf%C3%A9/%FF/b?q=%FF');
+
+    testWidgets('keep the bad segment encoded in the scrolling line', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: UriBreadcrumb(
+              uri: uri,
+              showHttpScheme: false,
+              showQuery: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(allTextsOf(tester), contains(' › café › %FF › b'));
+      expect(allTextsOf(tester), contains('?q=%FF'));
+    });
+
+    testWidgets('keep the bad segment encoded when wrapped', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: UriBreadcrumb(
+              uri: uri,
+              showHttpScheme: false,
+              showQuery: true,
+              wrap: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(
+        tester.widget<RichText>(find.byType(RichText).first).text.toPlainText(),
+        'example.com › café › %FF › b?q=%FF',
+      );
+    });
+  });
+
+  group('UrlStringBreadcrumb', () {
+    Widget build(String url) {
+      return MaterialApp(
+        home: Scaffold(body: UrlStringBreadcrumb(url: url)),
+      );
+    }
+
+    testWidgets('renders an address with a host as crumbs', (tester) async {
+      await tester.pumpWidget(build('https://example.com/push/'));
+
+      expect(find.byType(UriBreadcrumb), findsOneWidget);
+    });
+
+    testWidgets('falls back to plain text without a host', (tester) async {
+      await tester.pumpWidget(build('not a url'));
+
+      expect(find.byType(UriBreadcrumb), findsNothing);
+      expect(find.text('not a url'), findsOneWidget);
+    });
+  });
+}
+
+List<String> allTextsOf(WidgetTester tester) {
+  return tester
+      .widgetList<Text>(find.byType(Text))
+      .map((t) => t.data ?? '')
+      .toList();
 }

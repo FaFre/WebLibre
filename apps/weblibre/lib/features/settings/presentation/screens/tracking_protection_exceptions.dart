@@ -23,11 +23,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/logger.dart';
-import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/tracking_protection.dart';
 import 'package:weblibre/features/settings/presentation/dialogs/delete_all_exceptions_dialog.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -200,7 +200,7 @@ class _ExceptionTile extends StatelessWidget {
       leading: uri != null
           ? UrlIcon([uri], iconSize: 24)
           : const Icon(MdiIcons.shieldOutline),
-      title: Text(exception.url.uriDisplayString),
+      title: UrlStringBreadcrumb(url: exception.url, showHttpScheme: false),
       trailing: IconButton(
         icon: const Icon(Icons.close),
         onPressed: onDelete,

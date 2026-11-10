@@ -101,7 +101,15 @@ class AppLinkPromptDetails extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (targetUri != null)
-          UriBreadcrumb(uri: targetUri, style: targetStyle)
+          // The full sheet shows the whole link the app would receive; the
+          // banner keeps it to one scrolling line.
+          UriBreadcrumb(
+            uri: targetUri,
+            style: targetStyle,
+            showQuery: !dense,
+            wrap: !dense,
+            maxLines: dense ? null : 4,
+          )
         else
           Text(
             request.target.url,

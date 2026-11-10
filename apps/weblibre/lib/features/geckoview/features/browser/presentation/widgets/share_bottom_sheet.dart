@@ -278,9 +278,15 @@ class _ShareHeader extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (url != null)
+                    // Wrapped with the query: that is what the cleaner
+                    // changes, and what the highlight below says changed.
                     UriBreadcrumb(
                       uri: url!,
                       icon: UrlIcon([url!], iconSize: 20),
+                      showHttpScheme: false,
+                      showQuery: true,
+                      wrap: true,
+                      maxLines: 4,
                       style: TextStyle(
                         color: urlWasCleaned
                             ? colorScheme.primary

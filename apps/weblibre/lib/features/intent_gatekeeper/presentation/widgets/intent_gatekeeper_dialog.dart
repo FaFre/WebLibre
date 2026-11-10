@@ -92,8 +92,13 @@ class IntentGatekeeperDialog extends HookConsumerWidget {
                   color: colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                 ),
+                // The whole link, query included: it is often the payload
+                // the other app hands over, and the user decides on it here.
                 child: UriBreadcrumb(
                   uri: uri,
+                  showQuery: true,
+                  wrap: true,
+                  maxLines: 8,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: colorScheme.primary,
                   ),

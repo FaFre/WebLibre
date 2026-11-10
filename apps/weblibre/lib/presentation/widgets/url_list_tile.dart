@@ -32,10 +32,10 @@ class UrlListTile extends StatelessWidget {
   final IconData? containerIcon;
   final bool useCustomColor;
 
-  /// Off by default, as at every other [UriBreadcrumb] call site: under a title
-  /// that is usually the host itself, a leading `https ›` is a crumb that never
-  /// varies. The insecure case is carried by the address bar's security icon,
-  /// not by these rows.
+  /// Off by default: under a title that is usually the host itself, a leading
+  /// `https ›` is a crumb that never varies. A plain-http address still shows
+  /// `http ›` (see [UriBreadcrumb.showHttpScheme]), since these rows have no
+  /// security icon of their own.
   final bool showHttpScheme;
 
   /// A card of its own (the default): margin, rounded corners and, in a

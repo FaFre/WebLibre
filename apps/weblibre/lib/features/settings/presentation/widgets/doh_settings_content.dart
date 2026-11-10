@@ -24,11 +24,11 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/display_features.dart';
-import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/form_validators.dart';
 
 class DohSettingsContent extends HookConsumerWidget {
@@ -122,7 +122,11 @@ class DohSettingsContent extends HookConsumerWidget {
                 (provider) => RadioListTile.adaptive(
                   value: provider.url,
                   title: Text(provider.name),
-                  subtitle: Text(provider.url.uriDisplayString),
+                  subtitle: UrlStringBreadcrumb(
+                    url: provider.url,
+                    showHttpScheme: false,
+                    showQuery: true,
+                  ),
                 ),
               ),
               if (resolvers.isNotEmpty)
@@ -139,7 +143,11 @@ class DohSettingsContent extends HookConsumerWidget {
                 (provider) => RadioListTile.adaptive(
                   value: provider.url,
                   title: Text(provider.displayName),
-                  subtitle: Text(provider.url.uriDisplayString),
+                  subtitle: UrlStringBreadcrumb(
+                    url: provider.url,
+                    showHttpScheme: false,
+                    showQuery: true,
+                  ),
                   secondary: _ResolverActions(
                     onEdit: () async {
                       final result = await _promptForResolver(

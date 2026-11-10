@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assig
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/form_validators.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -222,7 +223,9 @@ class ContainerSitesScreen extends HookConsumerWidget {
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      subtitle: Text(site.toString()),
+                      // Sites are origins: under the host title, the scheme (and
+                      // port) is what sets one apart.
+                      subtitle: UriBreadcrumb(uri: site),
                       trailing: IconButton(
                         onPressed: () {
                           sites.value = {...sites.value}..remove(site);

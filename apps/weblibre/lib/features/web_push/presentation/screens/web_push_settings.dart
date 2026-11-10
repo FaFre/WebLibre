@@ -27,6 +27,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/features/web_push/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 List<SettingsSectionDefinition> webPushSettingsSections(BuildContext context) {
@@ -428,7 +429,10 @@ class _SubscriptionList extends HookConsumerWidget {
                 leading: Icon(
                   subscription.hasEndpoint ? MdiIcons.web : MdiIcons.webClock,
                 ),
-                title: Text(subscription.scope),
+                title: UrlStringBreadcrumb(
+                  url: subscription.scope,
+                  showHttpScheme: false,
+                ),
                 subtitle: Text(
                   subscription.hasEndpoint
                       ? distributorReady

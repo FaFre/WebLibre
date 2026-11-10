@@ -22,10 +22,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
-import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 
 /// Bottom sheet widget to select a feed from discovered feeds.
 class SelectFeedDialog extends HookConsumerWidget {
@@ -62,7 +62,13 @@ class SelectFeedDialog extends HookConsumerWidget {
                           data.feedData.title.whenNotEmpty ??
                               l10n.webFeed_unnamedFeedTitle,
                         ),
-                        subtitle: Text(uri.displayString),
+                        // The query can be all that tells two feeds of a page
+                        // apart (`?format=atom`).
+                        subtitle: UriBreadcrumb(
+                          uri: uri,
+                          showHttpScheme: false,
+                          showQuery: true,
+                        ),
                         trailing: const Icon(Icons.add),
                         onTap: () {
                           FeedCreateRoute(feedId: uri).pushReplacement(context);
@@ -80,7 +86,13 @@ class SelectFeedDialog extends HookConsumerWidget {
                     loading: () => Skeletonizer(
                       child: ListTile(
                         title: Text(BoneMock.title),
-                        subtitle: Skeleton.keep(child: Text(uri.displayString)),
+                        subtitle: Skeleton.keep(
+                          child: UriBreadcrumb(
+                            uri: uri,
+                            showHttpScheme: false,
+                            showQuery: true,
+                          ),
+                        ),
                       ),
                     ),
                   );

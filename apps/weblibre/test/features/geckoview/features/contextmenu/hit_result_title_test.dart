@@ -23,6 +23,92 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 
 void main() {
+  group('getTitle', () {
+    test('shows the address of a mailto link, not about:blank', () {
+      expect(
+        EmailHitResult(src: 'mailto:jane%40example.com?subject=Hi').getTitle(),
+        'jane@example.com',
+      );
+    });
+
+    test('shows the number of a tel link', () {
+      expect(PhoneHitResult(src: 'tel:+4912345').getTitle(), '+4912345');
+    });
+
+    test('shows a geo link as written', () {
+      expect(GeoHitResult(src: 'geo:52.5,13.4').getTitle(), 'geo:52.5,13.4');
+    });
+
+    test('keeps a page-supplied media title', () {
+      expect(
+        ImageHitResult(
+          src: 'https://cdn.example/a.png',
+          title: 'A cat',
+        ).getTitle(),
+        'A cat',
+      );
+    });
+  });
+
+  group('getTitleUri', () {
+    test('is the link of a plain link', () {
+      expect(
+        UnknownHitResult(src: 'https://example.com/a?b=1').getTitleUri(),
+        Uri.parse('https://example.com/a?b=1'),
+      );
+    });
+
+    test('is the link target of an image link', () {
+      expect(
+        ImageSrcHitResult(
+          src: 'https://cdn.example/a.png',
+          uri: 'https://example.com/page',
+        ).getTitleUri(),
+        Uri.parse('https://example.com/page'),
+      );
+    });
+
+    test('is the source of untitled media', () {
+      expect(
+        ImageHitResult(src: 'https://cdn.example/a.png').getTitleUri(),
+        Uri.parse('https://cdn.example/a.png'),
+      );
+      expect(
+        VideoHitResult(
+          src: 'https://cdn.example/v.mp4',
+          title: '',
+        ).getTitleUri(),
+        Uri.parse('https://cdn.example/v.mp4'),
+      );
+    });
+
+    test('is null when the title is page-supplied text', () {
+      expect(
+        ImageHitResult(
+          src: 'https://cdn.example/a.png',
+          title: 'A cat',
+        ).getTitleUri(),
+        isNull,
+      );
+    });
+
+    test('is null for addresses without a host', () {
+      for (final src in [
+        'data:image/png;base64,iVBORw0KGgo/AAAA',
+        'blob:https://example.com/0f0e',
+        'javascript:void(0)',
+        'file:///sdcard/a.pdf',
+      ]) {
+        expect(UnknownHitResult(src: src).getTitleUri(), isNull, reason: src);
+      }
+    });
+
+    test('is null for mailto, tel and geo links', () {
+      expect(EmailHitResult(src: 'mailto:a@b.c').getTitleUri(), isNull);
+      expect(PhoneHitResult(src: 'tel:1').getTitleUri(), isNull);
+      expect(GeoHitResult(src: 'geo:1,2').getTitleUri(), isNull);
+    });
+  });
   group('tryGetEmailAddress', () {
     test('reads the address of an EmailHitResult, as AC delivers mailto', () {
       final hit = EmailHitResult(src: 'mailto:jane%40example.com?subject=Hi');

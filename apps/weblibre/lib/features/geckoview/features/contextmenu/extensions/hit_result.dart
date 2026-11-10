@@ -91,8 +91,32 @@ extension HitResultX on HitResult {
         (title.isEmpty) ? src.uriDisplayString : title!,
       AudioHitResult(:final src, :final title) =>
         (title.isEmpty) ? src.uriDisplayString : title!,
-      _ => 'about:blank',
+      PhoneHitResult(:final src) => tryGetPhoneNumber() ?? src,
+      EmailHitResult(:final src) => tryGetEmailAddress() ?? src,
+      GeoHitResult(:final src) => src.uriDisplayString,
     };
+  }
+
+  /// The address [getTitle] shows, when it is a web-style address (one with a
+  /// host) rather than a page-supplied title, a phone number or an email
+  /// address: the title then renders it as a breadcrumb. `data:`, `blob:`,
+  /// `javascript:` and `file:` URIs have no host and stay plain text.
+  Uri? getTitleUri() {
+    const maxTitleLength = 2500;
+
+    final candidate = switch (this) {
+      UnknownHitResult(:final src) => src,
+      ImageSrcHitResult(:final uri) => uri,
+      ImageHitResult(:final src, :final title)
+          when title.isEmpty && src.length <= maxTitleLength =>
+        src,
+      VideoHitResult(:final src, :final title) when title.isEmpty => src,
+      AudioHitResult(:final src, :final title) when title.isEmpty => src,
+      _ => null,
+    };
+
+    final uri = candidate.mapNotNull(Uri.tryParse);
+    return (uri != null && uri.authority.isNotEmpty) ? uri : null;
   }
 
   bool get hasSrc => tryGetSource() != null;

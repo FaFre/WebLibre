@@ -30,6 +30,7 @@ import 'package:weblibre/features/addons/presentation/screens/addon_internal_set
 import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/number_format.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -814,7 +815,10 @@ class _DetailsCard extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.public),
               title: Text(l10n.addons_fieldHomepage),
-              subtitle: Text(addon.homepageUrl),
+              subtitle: UrlStringBreadcrumb(
+                url: addon.homepageUrl,
+                showHttpScheme: false,
+              ),
               trailing: const Icon(Icons.open_in_new),
               onTap: () => launchUrl(Uri.parse(addon.homepageUrl)),
             ),
@@ -822,7 +826,10 @@ class _DetailsCard extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.storefront_outlined),
               title: Text(l10n.addons_fieldAddonListing),
-              subtitle: Text(addon.detailUrl),
+              subtitle: UrlStringBreadcrumb(
+                url: addon.detailUrl,
+                showHttpScheme: false,
+              ),
               trailing: const Icon(Icons.open_in_new),
               onTap: () => launchUrl(Uri.parse(addon.detailUrl)),
             ),

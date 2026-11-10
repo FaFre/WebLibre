@@ -47,6 +47,7 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/presentatio
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
+import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 class ContextMenuDialog extends HookConsumerWidget {
@@ -102,16 +103,36 @@ class ContextMenuDialog extends HookConsumerWidget {
 
     final effective = effectiveHitResult.value;
     final showCleanerTile = isCleanable && cleaner.showTile;
+    final titleUri = effective.getTitleUri();
+    final theme = Theme.of(context);
 
     return SimpleDialog(
-      title: AutoSizeText(
-        effective.getTitle(),
-        minFontSize: 18,
-        maxFontSize: DefaultTextStyle.of(context).style.fontSize,
-        maxLines: 10,
-        overflow: TextOverflow.ellipsis,
-        softWrap: true,
-      ),
+      // The whole address, query included and wrapped rather than faded: this
+      // is where a link is checked before opening it, and the cleaner below
+      // changes the query in place.
+      title: titleUri != null
+          ? UriBreadcrumb(
+              uri: titleUri,
+              showHttpScheme: false,
+              showQuery: true,
+              wrap: true,
+              maxLines: 10,
+              style:
+                  (theme.dialogTheme.titleTextStyle ??
+                          theme.textTheme.headlineSmall)
+                      ?.copyWith(
+                        fontSize: 18,
+                        color: theme.colorScheme.onSurface,
+                      ),
+            )
+          : AutoSizeText(
+              effective.getTitle(),
+              minFontSize: 18,
+              maxFontSize: DefaultTextStyle.of(context).style.fontSize,
+              maxLines: 10,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+            ),
       children: [
         if (showCleanerTile)
           UrlCleanerTile(
