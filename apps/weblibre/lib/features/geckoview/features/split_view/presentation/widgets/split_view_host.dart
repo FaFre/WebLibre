@@ -82,7 +82,7 @@ class SplitViewHost extends HookConsumerWidget {
     }, [chrome]);
 
     bool isOwnEpoch(String epoch) =>
-        epoch == ref.read(splitViewNativeSyncProvider.notifier).epoch;
+        epoch == ref.read(splitViewNativeSyncProvider).epoch;
 
     useOnStreamChange(
       service.ratioCommits,

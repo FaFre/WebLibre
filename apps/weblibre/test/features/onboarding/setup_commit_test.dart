@@ -1,3 +1,6 @@
+// Test doubles: the fakes expose fields the tests set and read back.
+// ignore_for_file: riverpod_lint/avoid_public_notifier_properties
+
 /*
  * Copyright (c) 2024-2026 Fabian Freund.
  *

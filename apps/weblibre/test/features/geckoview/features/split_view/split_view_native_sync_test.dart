@@ -93,7 +93,7 @@ void main() {
     expect(pushed.single.revision, 1);
     expect(
       pushed.single.epoch,
-      container.read(splitViewNativeSyncProvider.notifier).epoch,
+      container.read(splitViewNativeSyncProvider).epoch,
     );
     expect(pushed.single.pair, isNull);
   });

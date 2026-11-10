@@ -1,3 +1,6 @@
+// Test doubles: the fakes expose fields the tests set and read back.
+// ignore_for_file: riverpod_lint/avoid_public_notifier_properties
+
 /*
  * Copyright (c) 2024-2026 Fabian Freund.
  *
@@ -44,11 +47,9 @@ import 'package:weblibre/features/user/domain/repositories/onboarding.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 class _FakeGeneralSettingsRepository extends GeneralSettingsRepository {
-  // ignore: riverpod_lint/avoid_public_notifier_properties
   GeneralSettings settings = GeneralSettings.withDefaults();
 
   /// Whether writes fail, like on a full storage.
-  // ignore: riverpod_lint/avoid_public_notifier_properties
   bool failing = false;
 
   @override

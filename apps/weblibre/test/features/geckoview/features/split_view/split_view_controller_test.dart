@@ -1,3 +1,6 @@
+// Test doubles: the fakes expose fields the tests set and read back.
+// ignore_for_file: riverpod_lint/avoid_public_notifier_properties
+
 import 'dart:async';
 
 import 'package:fast_equatable/fast_equatable.dart';
@@ -180,16 +183,13 @@ void main() {
   });
 
   group('pair', () {
-    test(
-      'reading the tab repository is no dependency cycle while it follows '
-      'the shown pair',
-      () async {
-        // Throws CircularDependencyError in debug builds (tests included)
-        // when the repository subscribes to the pair through its own ref.
-        await controller().pair('a', 'b');
-        expect(pair(), isNotNull);
-      },
-    );
+    test('reading the tab repository is no dependency cycle while it follows '
+        'the shown pair', () async {
+      // Throws CircularDependencyError in debug builds (tests included)
+      // when the repository subscribes to the pair through its own ref.
+      await controller().pair('a', 'b');
+      expect(pair(), isNotNull);
+    });
 
     test('forms a pair, and a new request replaces it', () async {
       await controller().pair('a', 'b');

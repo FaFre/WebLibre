@@ -61,8 +61,6 @@ class SplitViewNativeSync extends _$SplitViewNativeSync {
 
   Future<void> _chain = Future.value();
 
-  String get epoch => _epoch;
-
   @override
   SplitViewState build() {
     final pair = ref.watch(splitPairShownProvider);
