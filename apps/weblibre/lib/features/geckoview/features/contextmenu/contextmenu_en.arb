@@ -89,7 +89,19 @@
   },
   "contextmenu_shareEmailAddress": "Share email address",
   "@contextmenu_shareEmailAddress": {
-    "description": "Item in the long-press menu of an email link (mailto:); copies or shares the email address. Same text for both actions."
+    "description": "Item in the long-press menu of an email link (mailto:); opens the system share sheet with the email address."
+  },
+  "contextmenu_copyEmailAddress": "Copy email address",
+  "@contextmenu_copyEmailAddress": {
+    "description": "Item in the long-press menu of an email link (mailto:); copies the email address to the clipboard."
+  },
+  "contextmenu_callPhoneNumber": "Call",
+  "@contextmenu_callPhoneNumber": {
+    "description": "Item in the long-press menu of a phone number link (tel:); opens the phone app with the number filled in, where the user places the call."
+  },
+  "contextmenu_copyPhoneNumber": "Copy phone number",
+  "@contextmenu_copyPhoneNumber": {
+    "description": "Item in the long-press menu of a phone number link (tel:); copies the phone number to the clipboard."
   },
 
   "contextmenu_urlCleanedMessage": "URL cleaned",

@@ -22,7 +22,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -44,7 +43,7 @@ class ShareEmail extends HookConsumerWidget {
       leading: const Icon(MdiIcons.emailArrowRight),
       title: Text(l10n.contextmenu_shareEmailAddress),
       onTap: () async {
-        final email = hitResult.tryGetLink().mapNotNull((url) => url.path);
+        final email = hitResult.tryGetEmailAddress();
         if (email != null) {
           await SharePlus.instance.share(ShareParams(text: email));
 

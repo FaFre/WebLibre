@@ -4399,6 +4399,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get contextmenu_shareEmailAddress => 'Поделиться адресом эл. почты';
 
   @override
+  String get contextmenu_copyEmailAddress => 'Копировать адрес эл. почты';
+
+  @override
+  String get contextmenu_callPhoneNumber => 'Позвонить';
+
+  @override
+  String get contextmenu_copyPhoneNumber => 'Копировать номер телефона';
+
+  @override
   String get contextmenu_urlCleanedMessage => 'URL-адрес очищен';
 
   @override

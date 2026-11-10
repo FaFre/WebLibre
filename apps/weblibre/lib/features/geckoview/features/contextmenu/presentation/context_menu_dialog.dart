@@ -24,11 +24,13 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/call_phone_number.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_email.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_image.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_image_location.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_link.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_link_text.dart';
+import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/copy_phone_number.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/launch_external.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_image_new_tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/candidates/open_in_container.dart';
@@ -145,6 +147,10 @@ class ContextMenuDialog extends HookConsumerWidget {
           CopyImageLocation(hitResult: effective),
         if (ShareEmail.isSupported(effective)) ShareEmail(hitResult: effective),
         if (CopyEmail.isSupported(effective)) CopyEmail(hitResult: effective),
+        if (CallPhoneNumber.isSupported(effective))
+          CallPhoneNumber(hitResult: effective),
+        if (CopyPhoneNumber.isSupported(effective))
+          CopyPhoneNumber(hitResult: effective),
         HookBuilder(
           builder: (context) {
             final isSupported = useCachedFuture(

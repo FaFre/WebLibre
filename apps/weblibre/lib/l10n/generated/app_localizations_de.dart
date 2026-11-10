@@ -4379,6 +4379,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get contextmenu_shareEmailAddress => 'E-Mail-Adresse teilen';
 
   @override
+  String get contextmenu_copyEmailAddress => 'E-Mail-Adresse kopieren';
+
+  @override
+  String get contextmenu_callPhoneNumber => 'Anrufen';
+
+  @override
+  String get contextmenu_copyPhoneNumber => 'Telefonnummer kopieren';
+
+  @override
   String get contextmenu_urlCleanedMessage => 'URL bereinigt';
 
   @override

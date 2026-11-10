@@ -4025,6 +4025,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get contextmenu_shareEmailAddress => '分享电子邮件地址';
 
   @override
+  String get contextmenu_copyEmailAddress => '复制电子邮件地址';
+
+  @override
+  String get contextmenu_callPhoneNumber => '拨打电话';
+
+  @override
+  String get contextmenu_copyPhoneNumber => '复制电话号码';
+
+  @override
   String get contextmenu_urlCleanedMessage => '网址已清理';
 
   @override

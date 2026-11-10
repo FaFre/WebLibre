@@ -21,6 +21,9 @@
   "contextmenu_saveImage": "Bild speichern",
   "contextmenu_shareImage": "Bild teilen",
   "contextmenu_shareEmailAddress": "E-Mail-Adresse teilen",
+  "contextmenu_copyEmailAddress": "E-Mail-Adresse kopieren",
+  "contextmenu_callPhoneNumber": "Anrufen",
+  "contextmenu_copyPhoneNumber": "Telefonnummer kopieren",
   "contextmenu_urlCleanedMessage": "URL bereinigt",
   "contextmenu_urlPreviewAppliedMessage": "URL-Vorschau übernommen"
 }

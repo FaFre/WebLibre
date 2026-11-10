@@ -4299,6 +4299,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contextmenu_shareEmailAddress => 'Share email address';
 
   @override
+  String get contextmenu_copyEmailAddress => 'Copy email address';
+
+  @override
+  String get contextmenu_callPhoneNumber => 'Call';
+
+  @override
+  String get contextmenu_copyPhoneNumber => 'Copy phone number';
+
+  @override
   String get contextmenu_urlCleanedMessage => 'URL cleaned';
 
   @override

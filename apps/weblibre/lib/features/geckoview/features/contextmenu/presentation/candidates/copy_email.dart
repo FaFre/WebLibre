@@ -23,7 +23,6 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -42,9 +41,9 @@ class CopyEmail extends HookConsumerWidget {
 
     return ListTile(
       leading: const Icon(MdiIcons.emailMultiple),
-      title: Text(l10n.contextmenu_shareEmailAddress),
+      title: Text(l10n.contextmenu_copyEmailAddress),
       onTap: () async {
-        final email = hitResult.tryGetLink().mapNotNull((url) => url.host);
+        final email = hitResult.tryGetEmailAddress();
         if (email != null) {
           await Clipboard.setData(ClipboardData(text: email));
 

@@ -4340,6 +4340,15 @@ class AppLocalizationsId extends AppLocalizations {
   String get contextmenu_shareEmailAddress => 'Bagikan alamat email';
 
   @override
+  String get contextmenu_copyEmailAddress => 'Salin alamat email';
+
+  @override
+  String get contextmenu_callPhoneNumber => 'Telepon';
+
+  @override
+  String get contextmenu_copyPhoneNumber => 'Salin nomor telepon';
+
+  @override
   String get contextmenu_urlCleanedMessage => 'URL dibersihkan';
 
   @override

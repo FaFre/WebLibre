@@ -133,11 +133,44 @@ extension HitResultX on HitResult {
         tryGetLink()?.scheme == 'intent';
   }
 
-  bool isMailto() {
-    return this is UnknownHitResult &&
-        hasLink &&
-        tryGetLink()?.scheme == 'mailto';
+  /// The address of a `mailto:` link (`user@example.com`), without the scheme
+  /// or `?subject=` fields. AC delivers these links as [EmailHitResult]; a
+  /// `mailto:` [UnknownHitResult] is accepted too.
+  String? tryGetEmailAddress() {
+    final src = switch (this) {
+      EmailHitResult(:final src) => src,
+      UnknownHitResult(:final src) => src,
+      _ => null,
+    };
+    final uri = src.mapNotNull(Uri.tryParse);
+    if (uri == null || uri.scheme != 'mailto') {
+      return null;
+    }
+    final address = _decodedPath(uri);
+    return address.isEmpty ? null : address;
   }
+
+  bool isMailto() => tryGetEmailAddress() != null;
+
+  /// The `tel:` link to hand to the phone app. AC delivers these links as
+  /// [PhoneHitResult]; a `tel:` [UnknownHitResult] is accepted too.
+  Uri? tryGetPhoneUri() {
+    final src = switch (this) {
+      PhoneHitResult(:final src) => src,
+      UnknownHitResult(:final src) => src,
+      _ => null,
+    };
+    final uri = src.mapNotNull(Uri.tryParse);
+    if (uri == null || uri.scheme != 'tel' || uri.path.isEmpty) {
+      return null;
+    }
+    return uri;
+  }
+
+  /// The number of a `tel:` link (`+49 30 1234`), decoded, as written.
+  String? tryGetPhoneNumber() => tryGetPhoneUri().mapNotNull(_decodedPath);
+
+  bool isTel() => tryGetPhoneUri() != null;
 
   HitResult withCleanedLink(String cleanedUrl) {
     return switch (this) {
@@ -151,5 +184,15 @@ extension HitResultX on HitResult {
       ),
       _ => this,
     };
+  }
+}
+
+/// The decoded path of a `mailto:` or `tel:` URI: `user@example.com` from
+/// `mailto:user@example.com?subject=…`, `+49 123` from `tel:+49%20123`.
+String _decodedPath(Uri uri) {
+  try {
+    return Uri.decodeComponent(uri.path);
+  } on FormatException {
+    return uri.path;
   }
 }

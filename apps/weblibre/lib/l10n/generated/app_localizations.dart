@@ -7432,11 +7432,29 @@ abstract class AppLocalizations {
   /// **'Share image'**
   String get contextmenu_shareImage;
 
-  /// Item in the long-press menu of an email link (mailto:); copies or shares the email address. Same text for both actions.
+  /// Item in the long-press menu of an email link (mailto:); opens the system share sheet with the email address.
   ///
   /// In en, this message translates to:
   /// **'Share email address'**
   String get contextmenu_shareEmailAddress;
+
+  /// Item in the long-press menu of an email link (mailto:); copies the email address to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy email address'**
+  String get contextmenu_copyEmailAddress;
+
+  /// Item in the long-press menu of a phone number link (tel:); opens the phone app with the number filled in, where the user places the call.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get contextmenu_callPhoneNumber;
+
+  /// Item in the long-press menu of a phone number link (tel:); copies the phone number to the clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy phone number'**
+  String get contextmenu_copyPhoneNumber;
 
   /// Short confirmation shown after tracking parameters were removed from the long-pressed link.
   ///
