@@ -512,8 +512,11 @@ String _$canSwitchProfilesHash() => r'8e8ef6c980d557096aa412560c8364ba8f2d29e6';
 ///
 /// For the folder row, which has to name the folder before anything has been
 /// asked of it. Messages about a write check name the folder the check itself
-/// reported (`BackupTreeProbe.folderName`): this may still hold the previous
+/// reported (`BackupFolderCheck.folderName`): this may still hold the previous
 /// folder's name for a moment after the folder changes.
+///
+/// Read natively off the main thread: a provider that stalls leaves the row on
+/// the name read from the uri instead of freezing the screen.
 
 @ProviderFor(backupFolderName)
 final backupFolderNameProvider = BackupFolderNameProvider._();
@@ -526,8 +529,11 @@ final backupFolderNameProvider = BackupFolderNameProvider._();
 ///
 /// For the folder row, which has to name the folder before anything has been
 /// asked of it. Messages about a write check name the folder the check itself
-/// reported (`BackupTreeProbe.folderName`): this may still hold the previous
+/// reported (`BackupFolderCheck.folderName`): this may still hold the previous
 /// folder's name for a moment after the folder changes.
+///
+/// Read natively off the main thread: a provider that stalls leaves the row on
+/// the name read from the uri instead of freezing the screen.
 
 final class BackupFolderNameProvider
     extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
@@ -540,8 +546,11 @@ final class BackupFolderNameProvider
   ///
   /// For the folder row, which has to name the folder before anything has been
   /// asked of it. Messages about a write check name the folder the check itself
-  /// reported (`BackupTreeProbe.folderName`): this may still hold the previous
+  /// reported (`BackupFolderCheck.folderName`): this may still hold the previous
   /// folder's name for a moment after the folder changes.
+  ///
+  /// Read natively off the main thread: a provider that stalls leaves the row on
+  /// the name read from the uri instead of freezing the screen.
   BackupFolderNameProvider._()
     : super(
         from: null,
@@ -567,7 +576,7 @@ final class BackupFolderNameProvider
   }
 }
 
-String _$backupFolderNameHash() => r'9c8fbc57b8eb5061028b2387d79ef46d38246ebe';
+String _$backupFolderNameHash() => r'5083e496c18fc75568602b899aa584256e7684ba';
 
 @ProviderFor(backupList)
 final backupListProvider = BackupListProvider._();

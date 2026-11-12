@@ -58,7 +58,7 @@ final class SettingsExportDirectoryUriProvider
 }
 
 String _$settingsExportDirectoryUriHash() =>
-    r'a819764c0bd230ec6417625a0c62b7743e2cd268';
+    r'9e70b0caf9160731392ab83361fe7913120d74fa';
 
 /// Where settings exports are written, remembered so the folder is picked once.
 ///

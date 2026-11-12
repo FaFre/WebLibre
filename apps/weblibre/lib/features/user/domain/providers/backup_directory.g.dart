@@ -42,7 +42,7 @@ final class BackupDirectoryUriProvider
 }
 
 String _$backupDirectoryUriHash() =>
-    r'966118c9ec159615de5f37527fa8da4ca1e713d1';
+    r'de3f67d93a5965777be517b08835487847befd95';
 
 abstract class _$BackupDirectoryUri extends $Notifier<Uri?> {
   Uri? build();
