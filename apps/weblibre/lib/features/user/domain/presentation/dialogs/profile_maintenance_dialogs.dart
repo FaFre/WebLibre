@@ -265,6 +265,43 @@ Future<bool?> showBackupProfileDialog(
   );
 }
 
+/// Asks to choose the backup folder again after it refused a test file.
+///
+/// Shown before the system picker rather than opening it unannounced: the
+/// picker alone reads as "the app forgot my folder", while what helps — picking
+/// the very same folder again — is the last thing anyone would try without
+/// being told (issue #698).
+///
+/// Returns true when the user wants to choose a folder.
+Future<bool?> showBackupFolderRefusedDialog(
+  BuildContext context, {
+  required String folderName,
+}) {
+  return showDialog<bool?>(
+    context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+    builder: (BuildContext context) {
+      final l10n = AppLocalizations.of(context);
+
+      return AlertDialog(
+        icon: const Icon(MdiIcons.folderAlertOutline),
+        title: Text(l10n.user_backupFolderRefusedTitle(folderName)),
+        content: Text(l10n.user_backupFolderRefusedContent),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.common_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.user_chooseFolderButtonLabel),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 /// The shared "this takes a restart" footnote used by the dialogs here.
 ///
 /// [cost] is what leaving actually discards. It is listed only when there is

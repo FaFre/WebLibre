@@ -68,6 +68,46 @@ extension MaintenanceFailureL10n on MaintenanceFailure {
         l10n.startup_maintenanceBackupFolderUnavailable(
           l10n.profileCopy_nothingChanged,
         ),
+      BackupFolderFullFailure(:final requiredBytes, :final availableBytes) =>
+        switch ((requiredBytes, availableBytes)) {
+          (final required?, final free?) =>
+            l10n.startup_maintenanceBackupFolderTooSmall(
+              formatByteSize(l10n, required),
+              formatByteSize(l10n, free),
+              l10n.profileCopy_nothingChanged,
+            ),
+          _ => l10n.startup_maintenanceBackupFolderFull(
+            l10n.profileCopy_nothingChanged,
+          ),
+        },
+      BackupFolderUnresponsiveFailure() =>
+        l10n.startup_maintenanceBackupFolderUnresponsive(
+          l10n.profileCopy_nothingChanged,
+        ),
+      BackupWriteFailure(:final reason, :final detail) => switch ((
+        reason,
+        detail,
+      )) {
+        (BackupWriteFailureReason.incomplete, _) =>
+          l10n.startup_maintenanceBackupIncomplete(
+            l10n.profileCopy_nothingChanged,
+          ),
+        (BackupWriteFailureReason.archiveUnreadable, _) =>
+          l10n.startup_maintenanceBackupArchiveUnreadable(
+            l10n.profileCopy_nothingChanged,
+          ),
+        // The provider's own words, for a bug report: the only part of the
+        // native answer a person can do anything with.
+        (BackupWriteFailureReason.providerFailed, final detail?) =>
+          l10n.startup_maintenanceBackupWriteFailedDetail(
+            detail,
+            l10n.profileCopy_nothingChanged,
+          ),
+        (BackupWriteFailureReason.providerFailed, null) =>
+          l10n.startup_maintenanceBackupWriteFailed(
+            l10n.profileCopy_nothingChanged,
+          ),
+      },
       ProfileNoLongerExistsFailure() =>
         l10n.startup_maintenanceProfileNoLongerExists,
       RestoreEvidenceUnresolvedFailure() =>

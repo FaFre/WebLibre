@@ -140,6 +140,9 @@ enum MaintenanceFailureKind {
   unsupportedArchiveVersion,
   notEnoughStorage,
   backupTargetUnavailable,
+  backupTargetFull,
+  backupTargetUnresponsive,
+  backupWriteFailed,
   archiveRejected,
   profileNoLongerExists,
   restoreEvidenceUnresolved,
@@ -160,6 +163,9 @@ enum MaintenanceFailureKind {
     MaintenanceFailureKind.unsupportedArchiveVersion ||
     MaintenanceFailureKind.notEnoughStorage ||
     MaintenanceFailureKind.backupTargetUnavailable ||
+    MaintenanceFailureKind.backupTargetFull ||
+    MaintenanceFailureKind.backupTargetUnresponsive ||
+    MaintenanceFailureKind.backupWriteFailed ||
     MaintenanceFailureKind.archiveRejected ||
     MaintenanceFailureKind.profileNoLongerExists ||
     MaintenanceFailureKind.restoreEvidenceUnresolved ||

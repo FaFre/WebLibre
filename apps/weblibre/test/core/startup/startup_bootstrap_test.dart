@@ -167,6 +167,42 @@ class _FakeProfileApi implements GeckoProfileApi {
   Future<void> copyDocumentToFile(String sourceUri, String destPath) async {}
 
   @override
+  Future<bool> hasPersistedTreeGrant(String treeUri) async => true;
+
+  @override
+  Future<String?> treeFolderName(String treeUri) async => null;
+
+  @override
+  Future<BackupTreeProbe> probeBackupTree(String treeUri) async =>
+      BackupTreeProbe(outcome: BackupTreeProbeOutcome.writable);
+
+  @override
+  Future<TreePublication> publishFileToTree(
+    String sourcePath,
+    String treeUri,
+    String fileName,
+    String stagingName,
+    String mimeType,
+  ) async => TreePublication(
+    outcome: BackupTreeProbeOutcome.writable,
+    uri: '$treeUri/$fileName',
+    name: fileName,
+  );
+
+  @override
+  Future<TreePublication> publishBytesToTree(
+    Uint8List bytes,
+    String treeUri,
+    String fileName,
+    String stagingName,
+    String mimeType,
+  ) async => TreePublication(
+    outcome: BackupTreeProbeOutcome.writable,
+    uri: '$treeUri/$fileName',
+    name: fileName,
+  );
+
+  @override
   Future<List<StartupIntentRecord>> claimStartupIntents(
     String engineId,
   ) async => const [];

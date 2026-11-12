@@ -21,6 +21,7 @@ import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/utils/saf_tree_uri.dart';
 
 part 'settings_export_directory.g.dart';
 
@@ -41,7 +42,10 @@ class SettingsExportDirectoryUri extends _$SettingsExportDirectoryUri {
       key: 'SettingsExportDirectoryUri',
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => state?.toString() ?? '',
-      decode: (encoded) => encoded.isEmpty ? null : Uri.parse(encoded),
+      // Folders picked before the picker's URI was normalized were stored
+      // in the document form; read them back the way new picks are stored.
+      decode: (encoded) =>
+          encoded.isEmpty ? null : Uri.parse(normalizeSafTreeUri(encoded)),
     );
 
     return stateOrNull;

@@ -224,7 +224,8 @@ class StartupMaintenanceScreen extends HookWidget {
             argon2Params: Argon2Params.memoryConstrained(),
           ).pack(secret, integrityCheck: integrityCheck);
         },
-        verifyTarget: safTargetIsWritable,
+        verifyTarget: (targetTree) async =>
+            backupTargetFailure(await probeBackupTarget(targetTree)),
         publisher: (archive, targetTree, fileName) async {
           await publishArchiveToSaf(
             archive: archive,
@@ -289,7 +290,8 @@ class StartupMaintenanceScreen extends HookWidget {
         outcome.value = _Outcome(
           done
               ? copy.describeDone
-              : (result.describeFailure(l10n) ??
+              : (runner.lastFailure?.describe(l10n) ??
+                    result.describeFailure(l10n) ??
                     result.error ??
                     l10n.startup_maintenanceTaskDidNotFinish),
           failed: !done,

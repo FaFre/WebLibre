@@ -21,6 +21,7 @@ import 'package:riverpod/experimental/persist.dart';
 import 'package:riverpod_annotation/experimental/persist.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/utils/saf_tree_uri.dart';
 
 part 'backup_directory.g.dart';
 
@@ -29,6 +30,14 @@ class BackupDirectoryUri extends _$BackupDirectoryUri {
   // ignore: use_setters_to_change_properties
   void set(Uri? value) => state = value;
 
+  /// Setting the folder that is already set is still a change. Picking it
+  /// again takes the persistable grant afresh, and in issue #698 that was what
+  /// made a folder whose old grant the provider had stopped honouring usable
+  /// again. So everything read from the folder — its name, the backup list,
+  /// which may be showing a failure from the old grant — is read again.
+  @override
+  bool updateShouldNotify(Uri? previous, Uri? next) => true;
+
   @override
   Uri? build() {
     persist(
@@ -36,7 +45,10 @@ class BackupDirectoryUri extends _$BackupDirectoryUri {
       key: 'BackupDirectoryUri',
       options: const StorageOptions(cacheTime: StorageCacheTime.unsafe_forever),
       encode: (state) => state?.toString() ?? '',
-      decode: (encoded) => encoded.isEmpty ? null : Uri.parse(encoded),
+      // Folders picked before the picker's URI was normalized were stored
+      // in the document form; read them back the way new picks are stored.
+      decode: (encoded) =>
+          encoded.isEmpty ? null : Uri.parse(normalizeSafTreeUri(encoded)),
     );
 
     return stateOrNull;

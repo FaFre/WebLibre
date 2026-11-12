@@ -28,6 +28,8 @@ import eu.weblibre.flutter_mozilla_components.maintenance.ProfileJobsParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.PushOwnershipParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.ProfilePreferencesParticipant
 import eu.weblibre.flutter_mozilla_components.maintenance.PwaShortcutParticipant
+import eu.weblibre.flutter_mozilla_components.maintenance.BackupTreeProbing
+import eu.weblibre.flutter_mozilla_components.maintenance.SafTreeWriter
 import eu.weblibre.flutter_mozilla_components.pigeons.ParticipantStep
 import android.net.Uri
 import android.os.ParcelFileDescriptor
@@ -41,9 +43,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import eu.weblibre.flutter_mozilla_components.lock.AutoLockMode
 import eu.weblibre.flutter_mozilla_components.lock.ProfileUnlockRegistry
+import eu.weblibre.flutter_mozilla_components.pigeons.BackupTreeProbe
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.SharedProfileUnlock
 import eu.weblibre.flutter_mozilla_components.pigeons.SharedUnlockMode
+import eu.weblibre.flutter_mozilla_components.pigeons.TreePublication
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirective
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupDirectiveKind
 import eu.weblibre.flutter_mozilla_components.pigeons.ProfileStartupOwnerType
@@ -379,6 +383,52 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
                 throw error
             }
         }
+    }
+
+    override suspend fun hasPersistedTreeGrant(treeUri: String): Boolean =
+        withContext(Dispatchers.IO) {
+            BackupTreeProbing.hasReadWriteGrant(applicationContext, treeUri)
+        }
+
+    override suspend fun treeFolderName(treeUri: String): String? =
+        withContext(Dispatchers.IO) { SafTreeWriter(applicationContext).folderName(treeUri) }
+
+    override suspend fun probeBackupTree(treeUri: String): BackupTreeProbe =
+        withContext(Dispatchers.IO) { SafTreeWriter(applicationContext).probe(treeUri) }
+
+    override suspend fun publishFileToTree(
+        sourcePath: String,
+        treeUri: String,
+        fileName: String,
+        stagingName: String,
+        mimeType: String,
+    ): TreePublication = withContext(Dispatchers.IO) {
+        val source = File(sourcePath)
+        SafTreeWriter(applicationContext).publish(
+            source = { source.inputStream() },
+            sourceLength = source.length(),
+            treeUri = treeUri,
+            fileName = fileName,
+            stagingName = stagingName,
+            mimeType = mimeType,
+        )
+    }
+
+    override suspend fun publishBytesToTree(
+        bytes: ByteArray,
+        treeUri: String,
+        fileName: String,
+        stagingName: String,
+        mimeType: String,
+    ): TreePublication = withContext(Dispatchers.IO) {
+        SafTreeWriter(applicationContext).publish(
+            source = { bytes.inputStream() },
+            sourceLength = bytes.size.toLong(),
+            treeUri = treeUri,
+            fileName = fileName,
+            stagingName = stagingName,
+            mimeType = mimeType,
+        )
     }
 
     override fun claimStartupIntents(engineId: String): List<StartupIntentRecord> =

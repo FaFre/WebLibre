@@ -44,6 +44,7 @@ import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/utils/remembered_prompt_l10n.dart';
+import 'package:weblibre/utils/saf_tree_uri.dart';
 
 List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
   final l10n = AppLocalizations.of(context);
@@ -766,42 +767,6 @@ class _RefreshRateSection extends HookConsumerWidget {
   }
 }
 
-/// The tree URI a picked folder is addressed by.
-///
-/// `saf_util` takes the persisted grant on the tree URI the system returned, but
-/// hands back `DocumentFile.fromTreeUri(...).uri` — the same folder in its
-/// *document* form, `…/tree/<id>/document/<id>`. Nothing downstream accepts that
-/// form: the grant list is keyed on the tree URI, and Mozilla's writer compares
-/// `directoryPath` against it by exact equality before writing. Saving the
-/// picker's URI verbatim therefore stored a folder that matched no grant, so
-/// every download quietly went to the public Downloads folder instead.
-String normalizeDownloadTreeUri(String uri) {
-  final tree = uri.indexOf('/tree/');
-  if (tree < 0) {
-    return uri;
-  }
-
-  final document = uri.indexOf('/document/', tree);
-
-  return document < 0 ? uri : uri.substring(0, document);
-}
-
-/// Reads a folder name out of a tree URI, for the moment before the document
-/// provider has answered — and for when it never does.
-///
-/// A tree URI ends in the provider's own document id, conventionally
-/// `volume:relative/path`; anything else is shown whole rather than guessed at.
-String describeDownloadTreeUri(String uri) {
-  final documentId = Uri.decodeComponent(uri.split('/').last);
-  final separator = documentId.indexOf(':');
-
-  if (separator < 0 || separator == documentId.length - 1) {
-    return documentId;
-  }
-
-  return documentId.substring(separator + 1);
-}
-
 class _DownloadDirectoryTile extends HookConsumerWidget {
   const _DownloadDirectoryTile();
 
@@ -854,24 +819,21 @@ class _DownloadDirectoryTile extends HookConsumerWidget {
       null => l10n.settings_downloadFolderSubtitleDefault,
       final uri when unavailable =>
         l10n.settings_downloadFolderSubtitleUnavailable(
-          describeDownloadTreeUri(uri),
+          describeSafTreeUri(uri),
         ),
-      final uri => folder.data?.name ?? describeDownloadTreeUri(uri),
+      final uri => folder.data?.name ?? describeSafTreeUri(uri),
     };
 
     Future<void> pick() async {
       try {
-        final picked = await SafUtil().pickDirectory(
-          writePermission: true,
-          persistablePermission: true,
-        );
+        final picked = await pickWritableSafFolder();
         if (picked == null) return;
 
         await ref
             .read(saveGeneralSettingsControllerProvider.notifier)
             .save(
               (currentSettings) => currentSettings.copyWith
-                  .downloadDirectoryUri(normalizeDownloadTreeUri(picked.uri)),
+                  .downloadDirectoryUri(picked.tree.toString()),
             );
       } catch (error, stackTrace) {
         logger.e(

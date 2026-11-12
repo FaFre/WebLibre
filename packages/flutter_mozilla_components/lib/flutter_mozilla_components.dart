@@ -179,6 +179,8 @@ export 'src/pigeons/gecko.g.dart'
         WebExtensionData;
 export 'src/pigeons/startup.g.dart'
     show
+        BackupTreeProbe,
+        BackupTreeProbeOutcome,
         GeckoProfileApi,
         ParticipantStep,
         ProfileLockFlutterApi,
@@ -190,5 +192,7 @@ export 'src/pigeons/startup.g.dart'
         ProfileStartupPromptMode,
         SharedProfileUnlock,
         SharedUnlockMode,
-        StartupIntentRecord;
+        StartupIntentRecord,
+        TreePublication,
+        TreePublicationFault;
 export 'src/pointer_input_surface.dart';

@@ -23,6 +23,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show BackupTreeProbeOutcome, TreePublicationFault;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
@@ -37,104 +39,12 @@ import 'package:weblibre/features/settings/presentation/utils/settings_export_do
 import 'package:weblibre/features/settings/presentation/utils/settings_transfer_service_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/utils/saf_tree_uri.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// MIME type an export is written and picked with. Kept plain `application/json`
 /// so other apps — a file manager, a mail client, a bug tracker — recognise it.
 const _exportMimeType = 'application/json';
-
-/// Writes [bytes] into [target] and returns the name the file ended up with.
-///
-/// The same two-step publication a profile backup uses: a `.partial` name
-/// first, its size checked against what was sent, and only then the rename that
-/// claims the real one. `writeFileBytes` creates the destination before it
-/// writes to it and leaves it there if the write dies half way, so without this
-/// a full volume produces a truncated export wearing a finished file's name —
-/// which is worse than no export at all, because it will be imported one day.
-Future<String> _publishExport({
-  required Uri target,
-  required String fileName,
-  required Uint8List bytes,
-}) async {
-  final util = SafUtil();
-
-  final partial = await SafStream().writeFileBytes(
-    target.toString(),
-    '$fileName$partialArchiveSuffix',
-    _exportMimeType,
-    bytes,
-    overwrite: true,
-  );
-
-  // SAF may hand back a different name than the one asked for, so the returned
-  // uri is the only reliable handle on what was actually created.
-  final partialUri = partial.uri.toString();
-
-  try {
-    final stat = await util.stat(partialUri, false);
-    if (stat == null) {
-      throw const BackupPublicationFailure(
-        'The written export could not be found afterwards',
-      );
-    }
-
-    if (stat.length != bytes.length) {
-      throw BackupPublicationFailure(
-        'Wrote ${bytes.length} bytes but the destination holds ${stat.length}',
-      );
-    }
-
-    final finished = await util.rename(partialUri, false, fileName);
-
-    return finished.name;
-  } catch (_) {
-    try {
-      await util.delete(partialUri, false);
-    } catch (error, stackTrace) {
-      logger.w(
-        'Could not remove a partial export',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-    rethrow;
-  }
-}
-
-/// Whether the export folder is still a folder that can be written to.
-///
-/// Asked only after a write has already failed, to tell "the folder is gone"
-/// apart from "the write did not work this time" — the first is worth
-/// forgetting the folder over, the second is not.
-Future<bool> _targetIsStillThere(Uri target) async {
-  try {
-    final util = SafUtil();
-
-    // Deliberately not `safTargetIsWritable`, which answers false for a folder
-    // it merely could not ask about — it is built for deciding whether to try,
-    // where caution means "no". Here the same false would throw away a folder
-    // that is fine, so the two questions are asked separately and only a real
-    // answer counts.
-    final permitted = await util.hasPersistedPermission(
-      target.toString(),
-      checkRead: true,
-      checkWrite: true,
-    );
-    if (!permitted) return false;
-
-    return await util.exists(target.toString(), true);
-  } catch (error, stackTrace) {
-    logger.w(
-      'Could not check the export folder',
-      error: error,
-      stackTrace: stackTrace,
-    );
-    // Unknown is not gone. Keeping a folder that might be fine costs one error
-    // message; dropping one that was fine costs the user a folder picker every
-    // time the disk is briefly full.
-    return true;
-  }
-}
 
 class SettingsTransferScreen extends HookConsumerWidget {
   const SettingsTransferScreen({super.key});
@@ -172,37 +82,34 @@ class SettingsTransferScreen extends HookConsumerWidget {
     /// Resolves the folder exports are written to, asking for one only when
     /// there is nothing usable remembered.
     ///
-    /// Re-checked rather than trusted: a grant survives a reboot but not the
-    /// user revoking it, the volume being unmounted, or the folder being
-    /// deleted.
+    /// Only the grant list is read here, which costs nothing: a grant that was
+    /// revoked asks for a folder straight away. A folder that is gone, or that
+    /// refuses files although its grant is still on record (#698), is found
+    /// by the write, which says so itself — checking for it here would cost a
+    /// test file in the provider on every export. The grant is asked the way
+    /// the write asks for it, so a folder that passes here is not turned away
+    /// there.
     Future<Uri?> resolveTargetFolder() async {
       final remembered = ref.read(settingsExportDirectoryUriProvider);
-      if (remembered != null && await safTargetIsWritable(remembered)) {
+      if (remembered != null && await safTreeHasGrant(remembered)) {
         return remembered;
       }
 
-      final picked = await SafUtil().pickDirectory(
-        writePermission: true,
-        persistablePermission: true,
-      );
+      final picked = await pickWritableSafFolder();
       if (picked == null) return null;
 
-      final uri = Uri.parse(picked.uri);
-      exportDirectory.set(uri);
+      exportDirectory.set(picked.tree);
 
-      return uri;
+      return picked.tree;
     }
 
     /// Lets the user move exports somewhere else without having to make one
     /// fail first.
     Future<void> chooseExportFolder() async {
-      final picked = await SafUtil().pickDirectory(
-        writePermission: true,
-        persistablePermission: true,
-      );
+      final picked = await pickWritableSafFolder();
       if (picked == null) return;
 
-      exportDirectory.set(Uri.parse(picked.uri));
+      exportDirectory.set(picked.tree);
 
       if (!context.mounted) return;
       showInfoMessage(
@@ -213,7 +120,6 @@ class SettingsTransferScreen extends HookConsumerWidget {
 
     Future<void> exportToFile() async {
       busy.value = true;
-      var targetForgotten = false;
 
       try {
         final text = await buildExport();
@@ -221,26 +127,24 @@ class SettingsTransferScreen extends HookConsumerWidget {
         final target = await resolveTargetFolder();
         if (target == null) return;
 
+        // Written as `.partial`, checked and only then renamed, the way a
+        // profile backup is: a full volume must not leave a truncated export
+        // wearing a finished file's name, because it will be imported one day.
         final String written;
         try {
-          written = await _publishExport(
-            target: target,
-            fileName: settingsExportFileName(DateTime.now()),
+          written = await publishBytesToSaf(
             bytes: Uint8List.fromList(utf8.encode(text)),
+            targetTree: target,
+            fileName: settingsExportFileName(DateTime.now()),
+            mimeType: _exportMimeType,
           );
-        } catch (_) {
+        } on BackupTargetUnavailable {
           // The grant outlives the folder: a target that was deleted, or lives
-          // on a volume that is gone, still answers "yes, you may write here",
-          // so `safTargetIsWritable` keeps handing back the same dead uri and
-          // every export fails the same way with no picker in sight.
-          //
-          // But a full disk fails here too, and forgetting a perfectly good
-          // folder over that is a worse answer than the error. So the target is
-          // asked whether it still exists before it is given up on.
-          if (!await _targetIsStillThere(target)) {
-            exportDirectory.set(null);
-            targetForgotten = true;
-          }
+          // on a volume that is gone, still passes the grant check, so it would
+          // be handed back for every export and each would fail the same way
+          // with no picker in sight. Only a write that blames the folder gives
+          // it up — a full disk or a provider that failed keeps it.
+          exportDirectory.set(null);
           rethrow;
         }
 
@@ -255,12 +159,22 @@ class SettingsTransferScreen extends HookConsumerWidget {
           stackTrace: stackTrace,
         );
         if (context.mounted) {
-          showErrorMessage(
-            context,
-            targetForgotten
-                ? l10n.settings_transferExportFolderGone
-                : l10n.settings_transferSaveFailed('$error'),
-          );
+          showErrorMessage(context, switch (error) {
+            BackupTargetUnavailable(outcome: BackupTreeProbeOutcome.missing) =>
+              l10n.settings_transferExportFolderGone,
+            // Still there, but no grant or no files accepted: choosing it
+            // again renews the access, which "no longer there" would not
+            // suggest.
+            BackupTargetUnavailable() =>
+              l10n.settings_transferExportFolderRefused,
+            BackupTargetFull() => l10n.settings_transferExportFolderFull,
+            BackupWriteFailed(fault: TreePublicationFault.truncated) =>
+              l10n.settings_transferExportIncomplete,
+            BackupWriteFailed(:final detail?) =>
+              l10n.settings_transferSaveFailed(detail),
+            BackupWriteFailed() => l10n.settings_transferSaveFailedNoDetail,
+            _ => l10n.settings_transferSaveFailed('$error'),
+          });
         }
       } finally {
         busy.value = false;

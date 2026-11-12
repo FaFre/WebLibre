@@ -504,6 +504,71 @@ final class CanSwitchProfilesProvider
 
 String _$canSwitchProfilesHash() => r'8e8ef6c980d557096aa412560c8364ba8f2d29e6';
 
+/// The backup folder's name as the user knows it, or null when none is chosen.
+///
+/// Asked from the provider first and read from the tree uri when that fails,
+/// because the case worth naming the folder in is exactly the one where the
+/// provider no longer answers for it.
+///
+/// For the folder row, which has to name the folder before anything has been
+/// asked of it. Messages about a write check name the folder the check itself
+/// reported (`BackupTreeProbe.folderName`): this may still hold the previous
+/// folder's name for a moment after the folder changes.
+
+@ProviderFor(backupFolderName)
+final backupFolderNameProvider = BackupFolderNameProvider._();
+
+/// The backup folder's name as the user knows it, or null when none is chosen.
+///
+/// Asked from the provider first and read from the tree uri when that fails,
+/// because the case worth naming the folder in is exactly the one where the
+/// provider no longer answers for it.
+///
+/// For the folder row, which has to name the folder before anything has been
+/// asked of it. Messages about a write check name the folder the check itself
+/// reported (`BackupTreeProbe.folderName`): this may still hold the previous
+/// folder's name for a moment after the folder changes.
+
+final class BackupFolderNameProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
+  /// The backup folder's name as the user knows it, or null when none is chosen.
+  ///
+  /// Asked from the provider first and read from the tree uri when that fails,
+  /// because the case worth naming the folder in is exactly the one where the
+  /// provider no longer answers for it.
+  ///
+  /// For the folder row, which has to name the folder before anything has been
+  /// asked of it. Messages about a write check name the folder the check itself
+  /// reported (`BackupTreeProbe.folderName`): this may still hold the previous
+  /// folder's name for a moment after the folder changes.
+  BackupFolderNameProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'backupFolderNameProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$backupFolderNameHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String?> create(Ref ref) {
+    return backupFolderName(ref);
+  }
+}
+
+String _$backupFolderNameHash() => r'9c8fbc57b8eb5061028b2387d79ef46d38246ebe';
+
 @ProviderFor(backupList)
 final backupListProvider = BackupListProvider._();
 

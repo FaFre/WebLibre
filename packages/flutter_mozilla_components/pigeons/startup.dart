@@ -123,6 +123,109 @@ class ProfilePasswordReply {
   ProfilePasswordReply({required this.outcome, this.retryAfterMs});
 }
 
+/// What [GeckoProfileApi.probeBackupTree] found, or which way a write into a
+/// SAF tree failed.
+enum BackupTreeProbeOutcome {
+  /// A file was created, written and synced (and, for a probe, removed again).
+  writable,
+
+  /// No persisted read/write grant is on record for the tree.
+  noGrant,
+
+  /// The tree's folder is gone, or is no longer a folder: the provider has no
+  /// row for it, or refused to create a file in it as a document it does not
+  /// have.
+  missing,
+
+  /// The grant is on record and the folder is there, but the provider refused
+  /// access when a file was created or opened in it.
+  refused,
+
+  /// The storage holding the folder is full. Access is fine, and so is the
+  /// folder: it is the space that has to change.
+  noSpace,
+
+  /// Writing failed for a reason that says nothing about access or space — a
+  /// provider that died, or an error nobody recognised. Not evidence against
+  /// the folder.
+  inconclusive,
+}
+
+class BackupTreeProbe {
+  final BackupTreeProbeOutcome outcome;
+
+  /// The folder's display name, when the provider still answers for it.
+  final String? folderName;
+
+  /// The class of the exception the provider threw, for logs.
+  final String? errorClass;
+
+  /// The exception's message, for logs.
+  final String? errorMessage;
+
+  BackupTreeProbe({
+    required this.outcome,
+    this.folderName,
+    this.errorClass,
+    this.errorMessage,
+  });
+}
+
+/// Which way a publication failed when the folder's own answer is not it.
+///
+/// Only with [BackupTreeProbeOutcome.inconclusive]: neither says anything
+/// against the folder or its space.
+enum TreePublicationFault {
+  /// The copy finished without an error, yet the provider holds a different
+  /// number of bytes than were sent.
+  truncated,
+
+  /// The local file could not be read. Nothing the folder did failed.
+  sourceUnreadable,
+}
+
+/// What [GeckoProfileApi.publishFileToTree] or
+/// [GeckoProfileApi.publishBytesToTree] did.
+class TreePublication {
+  /// [BackupTreeProbeOutcome.writable] when the file is in place under its
+  /// final name; otherwise which way writing it failed.
+  final BackupTreeProbeOutcome outcome;
+
+  /// Set with [BackupTreeProbeOutcome.inconclusive] when it is known what went
+  /// wrong, and it was not the folder.
+  final TreePublicationFault? fault;
+
+  /// The published document, when [outcome] is writable.
+  final String? uri;
+
+  /// The name the file ended up with. A provider may change the one asked for,
+  /// for example to avoid a clash.
+  final String? name;
+
+  /// With [BackupTreeProbeOutcome.noSpace], when the volume showed before the
+  /// copy that it lacks the room: the bytes the file needs, and the bytes
+  /// free. Null when the volume filled up during the copy instead.
+  final int? requiredBytes;
+  final int? availableBytes;
+
+  /// The class of the exception the provider threw, for logs.
+  final String? errorClass;
+
+  /// The exception's message, for logs.
+  final String? errorMessage;
+
+  TreePublication({
+    required this.outcome,
+    this.fault,
+    this.uri,
+    this.name,
+    this.requiredBytes,
+    this.availableBytes,
+    this.errorClass,
+    this.errorMessage,
+  });
+}
+
 /// One launch the broker is holding because nothing could receive it.
 ///
 /// Only what survives a process restart unchanged: arbitrary `Parcelable` extras
@@ -203,7 +306,11 @@ abstract class GeckoProfileApi {
   ///
   /// [showPicker] makes the next launch show the profile picker once, whatever
   /// the prompt setting says (it still needs a UI launch and two profiles).
-  bool armProfileRestart(String? targetProfileId, String reason, bool showPicker);
+  bool armProfileRestart(
+    String? targetProfileId,
+    String reason,
+    bool showPicker,
+  );
 
   /// Tears down and exits. Never returns.
   void completeProfileRestart();
@@ -249,6 +356,62 @@ abstract class GeckoProfileApi {
   /// that cannot read its archive says why instead of failing anonymously.
   @async
   void copyDocumentToFile(String sourceUri, String destPath);
+
+  /// Whether a persisted read/write grant covers the SAF tree [treeUri].
+  ///
+  /// Only the grant list is read, compared by tree, so it costs nothing and
+  /// never throws for grants on single documents. Says less than
+  /// [probeBackupTree]: a grant can stay on record for a folder the provider
+  /// no longer writes to (#698).
+  @async
+  bool hasPersistedTreeGrant(String treeUri);
+
+  /// The display name of the folder the SAF tree [treeUri] names, or null when
+  /// the provider gives none.
+  ///
+  /// Asked on a background thread. `saf_util`'s `stat` reads a document's
+  /// name, type, size and date on the main thread, so a cloud or USB provider
+  /// that stalls froze the activity that asked.
+  @async
+  String? treeFolderName(String treeUri);
+
+  /// Checks that a file can really be created in the SAF tree [treeUri].
+  ///
+  /// Creates a hidden document, writes a block to it, syncs it and deletes it
+  /// again. A persisted grant that is still on record, for a folder that still
+  /// exists, can still be refused by the provider when it is used — so only
+  /// doing what a backup does answers whether a backup will work. Writing real
+  /// bytes is what makes a full volume answer: an empty file is usually still
+  /// created on one.
+  @async
+  BackupTreeProbe probeBackupTree(String treeUri);
+
+  /// Copies the local file [sourcePath] into the SAF tree [treeUri] as
+  /// [fileName].
+  ///
+  /// The file is written as [stagingName] and renamed only once the provider
+  /// holds every byte, so an interrupted write never leaves a file under the
+  /// final name. Any failure removes the staging file again. Failures come back
+  /// in the result rather than as an error, classified from the provider's own
+  /// exception, which AndroidX's `DocumentFile.createFile` swallows (#698).
+  @async
+  TreePublication publishFileToTree(
+    String sourcePath,
+    String treeUri,
+    String fileName,
+    String stagingName,
+    String mimeType,
+  );
+
+  /// [publishFileToTree] for bytes already in memory.
+  @async
+  TreePublication publishBytesToTree(
+    Uint8List bytes,
+    String treeUri,
+    String fileName,
+    String stagingName,
+    String mimeType,
+  );
 
   /// Claims the right for this Dart isolate to hold profile state open.
   ///

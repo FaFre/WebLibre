@@ -9379,9 +9379,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_transferExportFolderGone => '导出文件夹已不存在。请重新选择后重试。';
 
   @override
+  String get settings_transferExportFolderRefused =>
+      'WebLibre 已无法保存到导出文件夹。请重新选择该文件夹后重试：再次选择同一文件夹即可恢复访问权限。';
+
+  @override
+  String get settings_transferExportFolderFull => '导出文件夹所在的存储空间已满。请释放空间后重试。';
+
+  @override
+  String get settings_transferExportIncomplete =>
+      '导出文件夹未收到完整的文件，因此未予保留。请重试，或选择其他存储上的文件夹。';
+
+  @override
   String settings_transferSaveFailed(String error) {
     return '无法保存导出内容：$error';
   }
+
+  @override
+  String get settings_transferSaveFailedNoDetail =>
+      '无法保存导出内容。请重试，或选择其他存储上的文件夹。';
 
   @override
   String get settings_transferCopiedToClipboard => '设置已复制到剪贴板';
@@ -11669,6 +11684,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String get user_chooseFolderButtonLabel => '选择文件夹';
 
   @override
+  String get user_backupFolderTitle => '备份文件夹';
+
+  @override
+  String get user_backupFolderNotChosen => '尚未选择。点按以选择备份的保存位置。';
+
+  @override
+  String user_backupFolderRefusedSubtitle(String folderName) {
+    return '无法保存到“$folderName”。点按以重新选择文件夹。';
+  }
+
+  @override
+  String user_backupFolderRefusedTitle(String folderName) {
+    return '无法保存到“$folderName”';
+  }
+
+  @override
+  String get user_backupFolderRefusedContent =>
+      'WebLibre 已无法在此文件夹中创建文件，即使该文件夹仍然存在。请重新选择它：再次选择同一文件夹即可恢复访问权限。如果仍然不行，请选择一个新文件夹，例如“文档”中的文件夹。';
+
+  @override
+  String user_backupFolderStillRefused(String folderName) {
+    return '重新选择“$folderName”没有解决问题：仍然无法在该处保存备份。请尝试新文件夹，例如“文档”中的文件夹。';
+  }
+
+  @override
+  String user_backupFolderRefused(String folderName) {
+    return '无法将备份保存到“$folderName”。请选择其他文件夹，例如“文档”中的文件夹。';
+  }
+
+  @override
+  String user_backupFolderUnresponsive(String folderName) {
+    return '“$folderName”未能及时响应。请确认其存储可用（已连接；如果是云端文件夹，需处于联网状态），或选择其他存储上的文件夹。';
+  }
+
+  @override
+  String user_backupFolderFull(String folderName) {
+    return '“$folderName”所在的存储空间已满。请释放空间，或选择其他存储上的文件夹。';
+  }
+
+  @override
   String get user_noBackupsFound => '未找到备份';
 
   @override
@@ -13073,6 +13128,48 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged) {
     return '无法将备份写入该文件夹。请重新选择文件夹后重试。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderFull(String nothingChanged) {
+    return '备份文件夹所在的存储空间已满。请在该处释放空间后重试，或打开 WebLibre 并将新的备份保存到其他文件夹。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  ) {
+    return '备份需要约 $required，但备份文件夹所在的存储空间仅剩 $free。请在该处释放空间后重试，或打开 WebLibre 并将新的备份保存到其他文件夹。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged) {
+    return '备份文件夹所在的存储没有响应。请确认其可用（已连接；如果是云端文件夹，需处于联网状态）后重试，或打开 WebLibre 并将新的备份保存到其他文件夹。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupIncomplete(String nothingChanged) {
+    return '备份文件夹未收到完整的备份，因此未予保留。请重试。如果问题反复出现，请打开 WebLibre 并将新的备份保存到其他文件夹。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailed(String nothingChanged) {
+    return '无法将备份写入该文件夹。该文件夹仍保持选中。请重试；如果仍然失败，请打开 WebLibre 并将新的备份保存到其他文件夹。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  ) {
+    return '无法将备份写入该文件夹（$detail）。该文件夹仍保持选中。请重试；如果仍然失败，请打开 WebLibre 并将新的备份保存到其他文件夹。$nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged) {
+    return '无法从 WebLibre 自身的存储中读取已完成的备份以将其复制到文件夹。请重试。$nothingChanged';
   }
 
   @override

@@ -14,6 +14,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  */
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show BackupTreeProbeOutcome, TreePublicationFault;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/core/maintenance/backup_operation.dart';
@@ -141,7 +143,10 @@ void main() {
 
     test('a backup folder refusal gets a user-facing message', () {
       final failure = classifyMaintenanceFailure(
-        const saf.BackupTargetUnavailable('grant missing'),
+        const saf.BackupTargetUnavailable(
+          BackupTreeProbeOutcome.noGrant,
+          'grant missing',
+        ),
       );
 
       expect(failure, isA<BackupFolderUnavailableFailure>());
@@ -150,15 +155,117 @@ void main() {
       expect(failure.message, isNot(contains('BackupTargetUnavailable')));
     });
 
-    test('a backup publication failure gets a user-facing message', () {
+    test('a short publication keeps the folder', () {
       final failure = classifyMaintenanceFailure(
-        const saf.BackupPublicationFailure('short write'),
+        const saf.BackupWriteFailed(
+          fault: TreePublicationFault.truncated,
+          detail: 'Wrote 10 of 10 bytes',
+        ),
       );
 
-      expect(failure, isA<BackupFolderUnavailableFailure>());
-      expect(failure.kind, MaintenanceFailureKind.backupTargetUnavailable);
-      expect(failure.message, contains('backup could not be written'));
-      expect(failure.message, isNot(contains('BackupPublicationFailure')));
+      // Not "choose the folder again": a provider that reports the size late
+      // is not a folder that refuses files.
+      expect(failure, isA<BackupWriteFailure>());
+      expect(failure.kind, MaintenanceFailureKind.backupWriteFailed);
+      expect(failure.detailId, BackupWriteFailureReason.incomplete.name);
+      expect(failure.message, contains('did not receive the whole backup'));
+      expect(failure.message, isNot(contains('BackupWriteFailed')));
+    });
+
+    test('a full backup folder is not the app running out of space', () {
+      final failure = classifyMaintenanceFailure(
+        const saf.BackupTargetFull(detail: 'No space left on device'),
+      );
+
+      expect(failure, isA<BackupFolderFullFailure>());
+      expect(failure.kind, MaintenanceFailureKind.backupTargetFull);
+      expect(failure.message, contains('where the backup folder is stored'));
+      expect(failure.message, isNot(contains('BackupTargetFull')));
+    });
+
+    test('a full backup folder survives the restart as itself', () {
+      final task = MaintenanceTask(
+        id: 't',
+        actionId: MaintenanceAction.backup.name,
+        stateId: MaintenanceTaskState.failed.name,
+        profileId: 'p',
+        profileName: 'Work',
+        createdAt: DateTime(2026),
+        errorKindId: const BackupFolderFullFailure().kind.name,
+      );
+
+      expect(task.recordedFailure, isA<BackupFolderFullFailure>());
+    });
+
+    test('a too small backup folder says how much is missing', () {
+      final failure = classifyMaintenanceFailure(
+        const saf.BackupTargetFull(
+          requiredBytes: 3 * 1024 * 1024,
+          availableBytes: 2 * 1024 * 1024,
+        ),
+      );
+
+      expect(failure, isA<BackupFolderFullFailure>());
+      expect(failure.message, contains('3.00 MB'));
+      expect(failure.message, contains('2.00 MB'));
+      expect(failure.message, isNot(contains('no space left')));
+    });
+
+    test("a write that blames nothing keeps the provider's account", () {
+      // Not "choose the folder again": nothing said the folder was at fault.
+      final failure = classifyMaintenanceFailure(
+        const saf.BackupWriteFailed(detail: 'Failed to touch x'),
+      );
+
+      expect(failure, isA<BackupWriteFailure>());
+      expect(failure.detailId, BackupWriteFailureReason.providerFailed.name);
+      expect(failure.message, contains('Failed to touch x'));
+    });
+
+    test('an unreadable archive is not the folder', () {
+      final failure = classifyMaintenanceFailure(
+        const saf.BackupWriteFailed(
+          fault: TreePublicationFault.sourceUnreadable,
+          detail: 'open failed: ENOENT',
+        ),
+      );
+
+      expect(failure, isA<BackupWriteFailure>());
+      expect(failure.detailId, BackupWriteFailureReason.archiveUnreadable.name);
+    });
+
+    test('a write failure survives the restart with its reason', () {
+      for (final reason in BackupWriteFailureReason.values) {
+        final task = MaintenanceTask(
+          id: 't',
+          actionId: MaintenanceAction.backup.name,
+          stateId: MaintenanceTaskState.failed.name,
+          profileId: 'p',
+          profileName: 'Work',
+          createdAt: DateTime(2026),
+          errorKindId: MaintenanceFailureKind.backupWriteFailed.name,
+          errorDetailId: reason.name,
+        );
+
+        expect(
+          task.recordedFailure,
+          isA<BackupWriteFailure>().having((f) => f.reason, 'reason', reason),
+        );
+      }
+    });
+
+    test('an unresponsive backup folder survives the restart as itself', () {
+      final task = MaintenanceTask(
+        id: 't',
+        actionId: MaintenanceAction.backup.name,
+        stateId: MaintenanceTaskState.failed.name,
+        profileId: 'p',
+        profileName: 'Work',
+        createdAt: DateTime(2026),
+        errorKindId: const BackupFolderUnresponsiveFailure().kind.name,
+      );
+
+      expect(task.recordedFailure, isA<BackupFolderUnresponsiveFailure>());
     });
 
     test('an unrecognised failure is passed through verbatim', () {

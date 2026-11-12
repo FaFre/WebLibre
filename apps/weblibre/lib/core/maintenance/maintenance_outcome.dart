@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show TreePublicationFault;
 import 'package:secure_archive/secure_archive.dart';
 import 'package:weblibre/core/maintenance/backup_operation.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart' as saf;
@@ -195,6 +197,113 @@ final class BackupFolderUnavailableFailure extends MaintenanceFailure {
   String get message =>
       'The backup could not be written to the folder. Choose the folder again '
       'and retry. $_nothingChanged';
+}
+
+/// The storage holding the backup folder is full, or visibly too small for
+/// the backup.
+///
+/// Not [NotEnoughStorage], whose message is about the space the work needs in
+/// the app's own storage: freeing that would not help, and retrying after it
+/// fails the same way. Here the folder is fine and stays chosen; it is the
+/// storage it lives on that needs room.
+///
+/// Carries the numbers when the volume showed them before the copy, so a
+/// volume with room left — just not enough — is not called full.
+final class BackupFolderFullFailure extends MaintenanceFailure {
+  const BackupFolderFullFailure({this.requiredBytes, this.availableBytes});
+
+  final int? requiredBytes;
+  final int? availableBytes;
+
+  @override
+  MaintenanceFailureKind get kind => MaintenanceFailureKind.backupTargetFull;
+
+  @override
+  String get message {
+    if ((requiredBytes, availableBytes) case (final required?, final free?)) {
+      return 'The backup needs about ${formatBytes(required)}, and only '
+          '${formatBytes(free)} is free where the backup folder is stored. '
+          'Free up space there, or choose a folder on other storage, and '
+          'retry. $_nothingChanged';
+    }
+    return 'There is no space left where the backup folder is stored. Free up '
+        'space there, or choose a folder on other storage, and retry. '
+        '$_nothingChanged';
+  }
+}
+
+/// The backup folder's storage did not answer the write check in time.
+///
+/// Stops the backup before the pack: the publication would go to the same
+/// provider, and a call blocked in it cannot be cancelled, so the startup
+/// screen would wait on it for good. The folder is kept; it is its storage —
+/// a cloud drive offline, a USB stick that stopped answering — that has to
+/// come back.
+final class BackupFolderUnresponsiveFailure extends MaintenanceFailure {
+  const BackupFolderUnresponsiveFailure();
+
+  @override
+  MaintenanceFailureKind get kind =>
+      MaintenanceFailureKind.backupTargetUnresponsive;
+
+  @override
+  String get message =>
+      "The backup folder's storage did not respond. Make sure it is "
+      'available, or choose a folder on other storage, and retry. '
+      '$_nothingChanged';
+}
+
+/// Which way writing the backup into its folder failed, when nothing blamed
+/// the folder or its space.
+enum BackupWriteFailureReason {
+  /// The copy finished, and the folder held a different number of bytes.
+  incomplete,
+
+  /// The folder's provider failed for a reason it did not say, or one nobody
+  /// recognised.
+  providerFailed,
+
+  /// The packed backup could not be read back from the app's own storage.
+  archiveUnreadable,
+}
+
+/// The backup could not be written into its folder, and nothing says the
+/// folder is to blame.
+///
+/// Its own failure rather than [BackupFolderUnavailableFailure], whose remedy
+/// — choose the folder again — would send the user after a folder that is
+/// fine, and rather than [UnknownMaintenanceFailure], whose raw text carried
+/// enum names and Java class names. [detail] is the provider's own message:
+/// shown beside the translated sentence for a bug report, and lost after a
+/// restart like every other payload.
+final class BackupWriteFailure extends MaintenanceFailure {
+  const BackupWriteFailure(this.reason, {this.detail});
+
+  final BackupWriteFailureReason reason;
+  final String? detail;
+
+  @override
+  MaintenanceFailureKind get kind => MaintenanceFailureKind.backupWriteFailed;
+
+  @override
+  String get detailId => reason.name;
+
+  @override
+  String get message {
+    final sentence = switch (reason) {
+      BackupWriteFailureReason.incomplete =>
+        'The backup folder did not receive the whole backup, so it was not '
+            'kept. Retry; if it keeps happening, choose a folder on other '
+            'storage.',
+      BackupWriteFailureReason.providerFailed =>
+        'The backup could not be written to the folder. Retry; if it keeps '
+            'failing, choose a folder on other storage.',
+      BackupWriteFailureReason.archiveUnreadable =>
+        "The finished backup could not be read back from WebLibre's own "
+            'storage to copy it to the folder. Retry.',
+    };
+    return '$sentence ${detail == null ? '' : '($detail) '}$_nothingChanged';
+  }
 }
 
 /// Which way a staged restore archive failed to be what it has to be.
@@ -381,6 +490,15 @@ extension RecordedMaintenanceFailure on MaintenanceTask {
     MaintenanceFailureKind.notEnoughStorage => const NotEnoughStorage(),
     MaintenanceFailureKind.backupTargetUnavailable =>
       const BackupFolderUnavailableFailure(),
+    MaintenanceFailureKind.backupTargetFull => const BackupFolderFullFailure(),
+    MaintenanceFailureKind.backupTargetUnresponsive =>
+      const BackupFolderUnresponsiveFailure(),
+    MaintenanceFailureKind.backupWriteFailed => switch (BackupWriteFailureReason
+        .values
+        .tryByName(errorDetailId)) {
+      final reason? => BackupWriteFailure(reason),
+      null => null,
+    },
     MaintenanceFailureKind.archiveRejected => switch (RestoreValidationReason
         .values
         .tryByName(errorDetailId)) {
@@ -402,6 +520,22 @@ extension RecordedMaintenanceFailure on MaintenanceTask {
   };
 }
 
+/// What a backup folder write check means for a backup about to be taken.
+///
+/// Null to go ahead: the folder took the test file, or the check reached no
+/// verdict — which is not evidence against the folder, so the backup is let
+/// through to fail, if it does, with its own error. A check that got no
+/// answer in time is a verdict, though: the publication would hang on the
+/// same provider.
+MaintenanceFailure? backupTargetFailure(saf.BackupFolderCheck check) =>
+    switch (check.verdict) {
+      saf.SafFolderVerdict.writable || saf.SafFolderVerdict.unknown => null,
+      saf.SafFolderVerdict.lost => const BackupFolderUnavailableFailure(),
+      saf.SafFolderVerdict.full => const BackupFolderFullFailure(),
+      saf.SafFolderVerdict.unresponsive =>
+        const BackupFolderUnresponsiveFailure(),
+    };
+
 /// Classifies a raw error into the one shape the rest of the app handles.
 ///
 /// The only place a maintenance failure is inspected. Types are preferred wherever
@@ -417,9 +551,24 @@ MaintenanceFailure classifyMaintenanceFailure(Object error) {
       availableBytes: error.availableBytes,
     );
   }
-  if (error is saf.BackupTargetUnavailable ||
-      error is saf.BackupPublicationFailure) {
-    return const BackupFolderUnavailableFailure();
+  // Only a folder that blamed itself is told to be chosen again. A short
+  // write or a failure nobody could place keeps the folder: re-picking one
+  // that is fine is the wrong way to send the user.
+  switch (error) {
+    case saf.BackupTargetUnavailable():
+      return const BackupFolderUnavailableFailure();
+    case saf.BackupTargetFull(:final requiredBytes, :final availableBytes):
+      return BackupFolderFullFailure(
+        requiredBytes: requiredBytes,
+        availableBytes: availableBytes,
+      );
+    case saf.BackupWriteFailed(:final fault, :final detail):
+      return BackupWriteFailure(switch (fault) {
+        TreePublicationFault.truncated => BackupWriteFailureReason.incomplete,
+        TreePublicationFault.sourceUnreadable =>
+          BackupWriteFailureReason.archiveUnreadable,
+        null => BackupWriteFailureReason.providerFailed,
+      }, detail: detail);
   }
   if (error is SecureArchiveException) {
     return switch (error) {

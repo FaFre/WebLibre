@@ -10333,9 +10333,25 @@ class AppLocalizationsEs extends AppLocalizations {
       'La carpeta de exportación ya no existe. Elige otra y vuelve a intentarlo.';
 
   @override
+  String get settings_transferExportFolderRefused =>
+      'WebLibre ya no puede guardar en la carpeta de exportación. Vuelve a elegirla e inténtalo de nuevo: elegir la misma carpeta renueva el acceso.';
+
+  @override
+  String get settings_transferExportFolderFull =>
+      'No queda espacio en el almacenamiento donde está la carpeta de exportación. Libera espacio e inténtalo de nuevo.';
+
+  @override
+  String get settings_transferExportIncomplete =>
+      'La carpeta de exportación no recibió el archivo completo, así que no se conservó. Inténtalo de nuevo o elige una carpeta en otro almacenamiento.';
+
+  @override
   String settings_transferSaveFailed(String error) {
     return 'No se pudo guardar la exportación: $error';
   }
+
+  @override
+  String get settings_transferSaveFailedNoDetail =>
+      'No se pudo guardar la exportación. Inténtalo de nuevo o elige una carpeta en otro almacenamiento.';
 
   @override
   String get settings_transferCopiedToClipboard =>
@@ -12922,6 +12938,47 @@ class AppLocalizationsEs extends AppLocalizations {
   String get user_chooseFolderButtonLabel => 'Elegir carpeta';
 
   @override
+  String get user_backupFolderTitle => 'Carpeta de copias de seguridad';
+
+  @override
+  String get user_backupFolderNotChosen =>
+      'Aún no se ha elegido. Toca para elegir dónde se guardan las copias de seguridad.';
+
+  @override
+  String user_backupFolderRefusedSubtitle(String folderName) {
+    return 'No se puede guardar en «$folderName». Toca para volver a elegir la carpeta.';
+  }
+
+  @override
+  String user_backupFolderRefusedTitle(String folderName) {
+    return 'No se puede guardar en «$folderName»';
+  }
+
+  @override
+  String get user_backupFolderRefusedContent =>
+      'WebLibre ya no puede crear archivos en esta carpeta, aunque siga existiendo. Vuelve a elegirla: elegir la misma carpeta renueva el acceso. Si eso no funciona, elige una carpeta nueva, por ejemplo una dentro de Documentos.';
+
+  @override
+  String user_backupFolderStillRefused(String folderName) {
+    return 'Volver a elegir «$folderName» no ha funcionado: las copias de seguridad siguen sin poder guardarse ahí. Prueba con una carpeta nueva, por ejemplo una dentro de Documentos.';
+  }
+
+  @override
+  String user_backupFolderRefused(String folderName) {
+    return 'No se pueden guardar copias de seguridad en «$folderName». Elige otra carpeta, por ejemplo una dentro de Documentos.';
+  }
+
+  @override
+  String user_backupFolderUnresponsive(String folderName) {
+    return '«$folderName» no respondió a tiempo. Comprueba que su almacenamiento esté disponible (conectado o, si es una carpeta en la nube, en línea) o elige una carpeta en otro almacenamiento.';
+  }
+
+  @override
+  String user_backupFolderFull(String folderName) {
+    return 'No queda espacio en el almacenamiento donde está «$folderName». Libera espacio o elige una carpeta en otro almacenamiento.';
+  }
+
+  @override
   String get user_noBackupsFound => 'No se encontraron copias de seguridad';
 
   @override
@@ -14434,6 +14491,48 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged) {
     return 'No se pudo escribir la copia de seguridad en la carpeta. Vuelve a elegir la carpeta e inténtalo de nuevo. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderFull(String nothingChanged) {
+    return 'No queda espacio en el almacenamiento donde está la carpeta de copias de seguridad. Libera espacio ahí e inténtalo de nuevo, o abre WebLibre e inicia una nueva copia de seguridad en otra carpeta. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  ) {
+    return 'La copia de seguridad necesita unos $required, pero solo quedan $free libres en el almacenamiento donde está la carpeta de copias de seguridad. Libera espacio ahí e inténtalo de nuevo, o abre WebLibre e inicia una nueva copia de seguridad en otra carpeta. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged) {
+    return 'El almacenamiento de la carpeta de copias de seguridad no respondió. Comprueba que esté disponible (conectado o, si es una carpeta en la nube, en línea) e inténtalo de nuevo, o abre WebLibre e inicia una nueva copia de seguridad en otra carpeta. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupIncomplete(String nothingChanged) {
+    return 'La carpeta de copias de seguridad no recibió la copia completa, así que no se conservó. Inténtalo de nuevo. Si vuelve a ocurrir, abre WebLibre e inicia una nueva copia de seguridad en otra carpeta. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailed(String nothingChanged) {
+    return 'No se pudo escribir la copia de seguridad en la carpeta. La carpeta sigue elegida. Inténtalo de nuevo y, si sigue fallando, abre WebLibre e inicia una nueva copia de seguridad en otra carpeta. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  ) {
+    return 'No se pudo escribir la copia de seguridad en la carpeta ($detail). La carpeta sigue elegida. Inténtalo de nuevo y, si sigue fallando, abre WebLibre e inicia una nueva copia de seguridad en otra carpeta. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged) {
+    return 'No se pudo leer la copia de seguridad terminada desde el almacenamiento propio de WebLibre para copiarla a la carpeta. Inténtalo de nuevo. $nothingChanged';
   }
 
   @override

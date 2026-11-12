@@ -34,6 +34,12 @@ void main() {
       const UnsupportedArchiveVersion(version: 9),
       const NotEnoughStorage(),
       const BackupFolderUnavailableFailure(),
+      const BackupFolderFullFailure(),
+      const BackupFolderUnresponsiveFailure(),
+      // Without a detail: like every payload, it does not survive the
+      // restart.
+      for (final reason in BackupWriteFailureReason.values)
+        BackupWriteFailure(reason),
       for (final reason in RestoreValidationReason.values)
         ArchiveRejected(reason, 'detail'),
       profileNoLongerExists,
@@ -81,6 +87,27 @@ void main() {
     ).copyWith(errorDetailId: 'somethingNewer');
 
     expect(task.describeFailure(l10n), l10n.startup_maintenanceRestoreRejected);
+  });
+
+  test('a too small backup folder says how much is missing', () {
+    expect(
+      const BackupFolderFullFailure(
+        requiredBytes: 3 * 1024 * 1024,
+        availableBytes: 2 * 1024 * 1024,
+      ).describe(l10n),
+      allOf(contains('3'), contains('2'), isNot(contains('no space left'))),
+    );
+  });
+
+  test("a failed write shows the provider's words, and no identifiers", () {
+    final text = const BackupWriteFailure(
+      BackupWriteFailureReason.providerFailed,
+      detail: 'Failed to touch x',
+    ).describe(l10n);
+
+    expect(text, contains('Failed to touch x'));
+    expect(text, isNot(contains('inconclusive')));
+    expect(text, isNot(contains('providerFailed')));
   });
 
   test('describes a restart that could not be scheduled when thrown', () {

@@ -2597,6 +2597,18 @@
   "@settings_transferExportFolderGone": {
     "description": "Error when the chosen export folder can no longer be accessed."
   },
+  "settings_transferExportFolderRefused": "WebLibre can no longer save to the export folder. Choose it again and retry: picking the same folder renews the access.",
+  "@settings_transferExportFolderRefused": {
+    "description": "Error when the export folder is still there but no longer accepts new files, or its access was revoked. The next export opens the folder picker."
+  },
+  "settings_transferExportFolderFull": "There's no space left where the export folder is stored. Free up space and try again.",
+  "@settings_transferExportFolderFull": {
+    "description": "Error when exporting settings fails because the storage holding the export folder is full. The folder stays chosen."
+  },
+  "settings_transferExportIncomplete": "The export folder didn't receive the whole file, so it wasn't kept. Try again, or choose a folder on other storage.",
+  "@settings_transferExportIncomplete": {
+    "description": "Error when the export was written but the folder reported holding fewer bytes than were sent, so the incomplete file was removed. The folder stays chosen."
+  },
   "settings_transferSaveFailed": "Could not save the export: {error}",
   "@settings_transferSaveFailed": {
     "description": "Error message when saving the export failed. error is technical error text, usually English.",
@@ -2605,6 +2617,10 @@
         "type": "String"
       }
     }
+  },
+  "settings_transferSaveFailedNoDetail": "Could not save the export. Try again, or choose a folder on other storage.",
+  "@settings_transferSaveFailedNoDetail": {
+    "description": "Error message when saving the export failed and the storage app gave no reason."
   },
   "settings_transferCopiedToClipboard": "Settings copied to the clipboard",
   "@settings_transferCopiedToClipboard": {

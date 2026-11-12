@@ -8,7 +8,6 @@ package eu.weblibre.flutter_mozilla_components
 
 import android.content.Context
 import android.os.Environment
-import android.provider.DocumentsContract
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -65,50 +64,19 @@ object DownloadLocationPreference {
             return defaultLocation()
         }
 
-        val location = normalizeTreeUri(configured)
+        // A folder has two URI forms, and only the tree form works here. The
+        // grant the picker took is recorded against `…/tree/<id>`, and Mozilla's
+        // writer compares `directoryPath` against that list by exact equality.
+        // But the picker WebLibre uses hands back the document form,
+        // `…/tree/<id>/document/<id>`, which matches no grant and would fail
+        // the download in `verifySafPermission`.
+        //
+        // Normalized on read rather than only on write, so a value stored by a
+        // build that did not know this, or carried in by a settings import,
+        // resolves too.
+        val location = SafTreeUris.normalizeTreeUri(configured)
 
         return if (isUsable(context, location)) location else defaultLocation()
-    }
-
-    /**
-     * The tree URI a configured location is addressed by.
-     *
-     * A folder has two URI forms, and only one of them works here. The grant the
-     * picker took is recorded against the tree URI the system returned
-     * (`…/tree/<id>`), and Mozilla's writer compares `directoryPath` against that
-     * list by exact equality before it will write anything. But a picker that
-     * hands back `DocumentFile.fromTreeUri(...).uri` — as the one WebLibre uses
-     * does — gives the *document* form of the same folder,
-     * `…/tree/<id>/document/<id>`, which matches no grant. Stored as-is it would
-     * fail the check here, and had it been let through it would have thrown in
-     * `verifySafPermission` and failed the download outright.
-     *
-     * Normalizing on read rather than only on write, so a value stored by a build
-     * that did not know this — or carried in by a settings import — resolves too.
-     */
-    @VisibleForTesting
-    internal fun normalizeTreeUri(location: String): String {
-        if (!location.startsWith("content://")) {
-            return location
-        }
-
-        val uri = try {
-            location.toUri()
-        } catch (e: IllegalArgumentException) {
-            return location
-        }
-
-        val authority = uri.authority ?: return location
-
-        return try {
-            DocumentsContract.buildTreeDocumentUri(
-                authority,
-                DocumentsContract.getTreeDocumentId(uri),
-            ).toString()
-        } catch (e: IllegalArgumentException) {
-            // Not a tree URI at all; nothing to normalize towards.
-            location
-        }
     }
 
     /** The configured folder, whether or not it is still usable. */

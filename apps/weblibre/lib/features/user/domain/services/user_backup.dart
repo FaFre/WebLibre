@@ -23,7 +23,6 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:saf_stream/saf_stream.dart';
 import 'package:saf_util/saf_util.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:secure_archive/secure_archive.dart';
@@ -59,7 +58,6 @@ final class CloneDeviceLockUnconfirmed implements Exception {
 @Riverpod(keepAlive: true)
 class UserBackupService extends _$UserBackupService {
   static final _safUtil = SafUtil();
-  static final _safStream = SafStream();
 
   Uri _requireBackupDirectoryUri() {
     final uri = ref.read(backupDirectoryUriProvider);
@@ -259,6 +257,15 @@ class UserBackupService extends _$UserBackupService {
     return task;
   }
 
+  /// Moves the backups an old version kept in app storage into [newDirUri],
+  /// and returns how many arrived.
+  ///
+  /// Through the same native write as a new backup, not `saf_stream`: a
+  /// refused folder or a full volume is then reported for what it is instead
+  /// of as a bare "File creation failed" (#698), and a copy that dies half way
+  /// leaves no file wearing a backup's name. A file is only deleted here once
+  /// its copy has its final name. The first failure that blames the folder or
+  /// its space stops the rest, which would only fail the same way.
   Future<int> migrateOldBackups(Uri newDirUri) async {
     try {
       final oldDir = Directory(
@@ -278,14 +285,27 @@ class UserBackupService extends _$UserBackupService {
       await for (final entity in oldDir.list()) {
         if (entity is File && entity.path.endsWith('.weblibre')) {
           try {
-            await _safStream.pasteLocalFile(
-              entity.path,
-              newDirUri.toString(),
-              p.basename(entity.path),
-              'application/octet-stream',
+            await publishArchiveToSaf(
+              archive: entity,
+              targetTree: newDirUri,
+              fileName: p.basename(entity.path),
             );
             await entity.delete();
             count++;
+          } on BackupTargetUnavailable catch (e, s) {
+            logger.w(
+              'Backup folder refused the migration',
+              error: e,
+              stackTrace: s,
+            );
+            break;
+          } on BackupTargetFull catch (e, s) {
+            logger.w(
+              'Backup folder is full; migration stopped',
+              error: e,
+              stackTrace: s,
+            );
+            break;
           } catch (e, s) {
             logger.w(
               'Failed to migrate backup: ${entity.path}',

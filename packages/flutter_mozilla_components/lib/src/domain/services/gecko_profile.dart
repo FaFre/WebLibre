@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter_mozilla_components/src/pigeons/startup.g.dart';
 
 final _apiInstance = GeckoProfileApi();
@@ -120,6 +122,53 @@ class GeckoProfileService {
   /// whose message is its text.
   Future<void> copyDocumentToFile(Uri sourceUri, String destPath) =>
       _api.copyDocumentToFile(sourceUri.toString(), destPath);
+
+  /// Whether a persisted read/write grant covers the SAF tree [treeUri]. See
+  /// [GeckoProfileApi.hasPersistedTreeGrant].
+  Future<bool> hasPersistedTreeGrant(Uri treeUri) =>
+      _api.hasPersistedTreeGrant(treeUri.toString());
+
+  /// The display name of the folder the SAF tree [treeUri] names. See
+  /// [GeckoProfileApi.treeFolderName].
+  Future<String?> treeFolderName(Uri treeUri) =>
+      _api.treeFolderName(treeUri.toString());
+
+  /// Creates, writes, syncs and deletes a hidden file in the SAF tree
+  /// [treeUri], and says how far that got.
+  Future<BackupTreeProbe> probeBackupTree(Uri treeUri) =>
+      _api.probeBackupTree(treeUri.toString());
+
+  /// Copies the local file [sourcePath] into the SAF tree [treeUri] as
+  /// [fileName], by way of [stagingName]. See
+  /// [GeckoProfileApi.publishFileToTree].
+  Future<TreePublication> publishFileToTree({
+    required String sourcePath,
+    required Uri treeUri,
+    required String fileName,
+    required String stagingName,
+    required String mimeType,
+  }) => _api.publishFileToTree(
+    sourcePath,
+    treeUri.toString(),
+    fileName,
+    stagingName,
+    mimeType,
+  );
+
+  /// [publishFileToTree] for bytes already in memory.
+  Future<TreePublication> publishBytesToTree({
+    required Uint8List bytes,
+    required Uri treeUri,
+    required String fileName,
+    required String stagingName,
+    required String mimeType,
+  }) => _api.publishBytesToTree(
+    bytes,
+    treeUri.toString(),
+    fileName,
+    stagingName,
+    mimeType,
+  );
 
   /// Claims every queued launch this engine may deliver, oldest first.
   ///

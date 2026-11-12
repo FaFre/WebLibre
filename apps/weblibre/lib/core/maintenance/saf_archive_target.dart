@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
-import 'package:saf_stream/saf_stream.dart';
-import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/logger.dart';
 
 /// Suffix a backup wears while it is still being written.
@@ -32,43 +32,98 @@ import 'package:weblibre/core/logger.dart';
 /// name is only claimed once the bytes are all there.
 const partialArchiveSuffix = '.partial';
 
-/// The destination folder no longer accepts writes.
+/// The destination folder no longer accepts writes: no grant, gone, or access
+/// refused.
 class BackupTargetUnavailable implements Exception {
-  const BackupTargetUnavailable(this.reason);
+  const BackupTargetUnavailable(this.outcome, [this.detail]);
 
-  final String reason;
+  /// [BackupTreeProbeOutcome.noGrant], [BackupTreeProbeOutcome.missing] or
+  /// [BackupTreeProbeOutcome.refused]: a folder that is gone asks for a
+  /// different sentence than one that refuses files.
+  final BackupTreeProbeOutcome outcome;
 
-  @override
-  String toString() => 'BackupTargetUnavailable($reason)';
-}
-
-/// The bytes that arrived are not the bytes that were sent.
-class BackupPublicationFailure implements Exception {
-  const BackupPublicationFailure(this.reason);
-
-  final String reason;
+  /// The provider's own message, for logs and bug reports.
+  final String? detail;
 
   @override
-  String toString() => 'BackupPublicationFailure($reason)';
+  String toString() =>
+      'BackupTargetUnavailable(${outcome.name}${detail == null ? '' : ': $detail'})';
 }
+
+/// The storage holding the destination folder is full, or visibly too small
+/// for the file.
+///
+/// Kept apart from [BackupTargetUnavailable] because it asks for the opposite
+/// remedy: the folder is fine and must be kept, and it is space that has to be
+/// freed.
+class BackupTargetFull implements Exception {
+  const BackupTargetFull({
+    this.requiredBytes,
+    this.availableBytes,
+    this.detail,
+  });
+
+  /// What the file needs and what is free, when the volume showed before the
+  /// copy that it lacks the room. Null when it filled up during the copy.
+  final int? requiredBytes;
+  final int? availableBytes;
+
+  /// The provider's own message, for logs and bug reports.
+  final String? detail;
+
+  @override
+  String toString() =>
+      'BackupTargetFull(${requiredBytes ?? '?'} needed, '
+      '${availableBytes ?? '?'} free${detail == null ? '' : ': $detail'})';
+}
+
+/// Writing into the destination failed for a reason that says nothing against
+/// the folder or its space: the bytes that arrived are not the bytes that were
+/// sent, a provider died, an error nobody recognised, or the local file that
+/// was to be copied could not be read.
+///
+/// Never answered with "choose the folder again".
+class BackupWriteFailed implements Exception {
+  const BackupWriteFailed({this.fault, this.detail});
+
+  /// Which way it failed, when native could tell; null for a provider that
+  /// failed for a reason of its own.
+  final TreePublicationFault? fault;
+
+  /// The provider's own message, without the classification or exception
+  /// class around it: it is the part a person can read out to a bug report.
+  final String? detail;
+
+  @override
+  String toString() =>
+      'BackupWriteFailed(${fault == null ? '' : '${fault!.name}: '}'
+      '${detail ?? ''})';
+}
+
+/// Asks native whether a persisted read/write grant covers a SAF tree.
+typedef TreeGrantCheck = Future<bool> Function(Uri targetTree);
 
 /// Whether [targetTree] still holds a persisted read/write grant.
 ///
 /// A grant survives reboots but not the user revoking it, the volume being
-/// unmounted, or the folder being deleted — and a backup is queued in one process
-/// and taken in the next, so there is always a window for that to happen.
-Future<bool> safTargetIsWritable(Uri targetTree, {SafUtil? safUtil}) async {
-  final util = safUtil ?? SafUtil();
-
+/// unmounted, or the folder being deleted.
+///
+/// Only the grant list is read, so this costs nothing but says less than
+/// [probeBackupTarget]: a grant can stay on record for a folder the provider no
+/// longer writes to (#698).
+///
+/// Asked natively, the same way the write itself asks before it starts, so the
+/// two cannot disagree. `saf_util`'s check threw on the first persisted grant
+/// that is not on a tree — which a shared file leaves behind — and made every
+/// folder look ungranted.
+Future<bool> safTreeHasGrant(Uri targetTree, {TreeGrantCheck? check}) async {
   try {
-    return await util.hasPersistedPermission(
-      targetTree.toString(),
-      checkRead: true,
-      checkWrite: true,
+    return await (check ?? GeckoProfileService().hasPersistedTreeGrant)(
+      targetTree,
     );
   } catch (error, stackTrace) {
     logger.w(
-      'Could not check the backup folder grant',
+      'Could not check the folder grant',
       error: error,
       stackTrace: stackTrace,
     );
@@ -76,79 +131,222 @@ Future<bool> safTargetIsWritable(Uri targetTree, {SafUtil? safUtil}) async {
   }
 }
 
+/// What a write check, or a write, says about a SAF folder.
+///
+/// The one place a [BackupTreeProbeOutcome] is turned into something to act on.
+/// Every caller — the queued backup, its publication, the backup screen and
+/// settings export — switches over this, so they cannot drift into treating
+/// the same answer differently.
+enum SafFolderVerdict {
+  /// Files can be created in it.
+  writable,
+
+  /// The folder itself is to blame: no grant, gone, or access refused. The
+  /// only verdict that justifies asking for the folder again or forgetting it.
+  lost,
+
+  /// The storage holding it is full. The folder is fine and is kept; it is
+  /// space that has to be freed.
+  full,
+
+  /// The write check got no answer within its time. Only a check comes back
+  /// with this, never an outcome: the provider is hanging — a cloud drive
+  /// offline, a USB stick that stopped answering — and the write that would
+  /// follow would hang on it the same way, with nothing able to cancel it.
+  /// The folder is kept; it is its storage that has to come back.
+  unresponsive,
+
+  /// No verdict: the check could not run, or failed for a reason it could not
+  /// place. Not evidence against the folder, so whatever was about to happen
+  /// goes ahead and reports its own error if it fails.
+  unknown;
+
+  /// The verdict on [outcome].
+  static SafFolderVerdict of(BackupTreeProbeOutcome outcome) =>
+      switch (outcome) {
+        BackupTreeProbeOutcome.writable => writable,
+        BackupTreeProbeOutcome.noGrant ||
+        BackupTreeProbeOutcome.missing ||
+        BackupTreeProbeOutcome.refused => lost,
+        BackupTreeProbeOutcome.noSpace => full,
+        BackupTreeProbeOutcome.inconclusive => unknown,
+      };
+}
+
+/// What a write check found: the verdict, and the folder's name when the
+/// provider gave one.
+final class BackupFolderCheck {
+  const BackupFolderCheck(this.verdict, {this.folderName});
+
+  final SafFolderVerdict verdict;
+
+  /// Null when the check could not run, got no answer in time, or the provider
+  /// did not name the folder.
+  final String? folderName;
+}
+
+/// Asks native to create, write and delete a hidden file in a SAF tree.
+typedef BackupTreeProber = Future<BackupTreeProbe> Function(Uri targetTree);
+
+/// How long [probeBackupTarget] waits for the provider.
+///
+/// The probe is four calls into whatever provider holds the folder, and a
+/// network one (a cloud drive offline, a USB stick that hangs) can block on
+/// each of them indefinitely. Long enough for a slow network provider to start
+/// up and answer a 4 KiB write. Waiting longer costs a few seconds on a hung
+/// provider, while stopping too early can cost a queued backup that has
+/// already restarted the app.
+const backupProbeTimeout = Duration(seconds: 30);
+
+/// Whether a file can really be created in [targetTree] right now.
+///
+/// Stronger than [safTreeHasGrant]. Issue #698: the folder existed and its
+/// grant was still on record, but the provider refused to create the backup
+/// file, and only picking the folder again fixed it. Nothing short of creating
+/// a file notices that.
+///
+/// A check that does not finish within [timeout] is
+/// [SafFolderVerdict.unresponsive], and stops whatever it guards: the write
+/// that would follow goes to the same provider and cannot be cancelled once it
+/// blocks. A check that could not run at all is [SafFolderVerdict.unknown].
+/// A timed-out check is not cancelled either, but it removes its own test file
+/// whenever it does finish.
+Future<BackupFolderCheck> probeBackupTarget(
+  Uri targetTree, {
+  BackupTreeProber? prober,
+  Duration timeout = backupProbeTimeout,
+}) async {
+  try {
+    final probe = await (prober ?? GeckoProfileService().probeBackupTree)(
+      targetTree,
+    ).timeout(timeout);
+    if (probe.outcome != BackupTreeProbeOutcome.writable) {
+      logger.w(
+        'Backup folder failed its write check: ${probe.outcome.name} '
+        '${probe.errorClass ?? ''} ${probe.errorMessage ?? ''}',
+      );
+    }
+    return BackupFolderCheck(
+      SafFolderVerdict.of(probe.outcome),
+      folderName: probe.folderName,
+    );
+  } on TimeoutException {
+    logger.w(
+      'The backup folder write check got no answer within '
+      '${timeout.inSeconds} s',
+    );
+    return const BackupFolderCheck(SafFolderVerdict.unresponsive);
+  } catch (error, stackTrace) {
+    logger.w(
+      'Could not run the backup folder write check',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return const BackupFolderCheck(SafFolderVerdict.unknown);
+  }
+}
+
+/// Hands a write into a SAF tree to native: the file goes in as [stagingName]
+/// and is renamed to [fileName] once it is complete.
+typedef SafTreeWrite =
+    Future<TreePublication> Function(
+      Uri targetTree,
+      String fileName,
+      String stagingName,
+    );
+
 /// Publishes [archive] into [targetTree] as [fileName].
 ///
-/// Writes `<fileName>.partial`, checks the destination is the size it should be,
-/// and only then renames. The rename is the commit: until it happens nothing in
-/// the folder claims to be a restorable backup, and a leftover `.partial` is
-/// self-describing rather than a truncated archive with a trustworthy name.
+/// Writes `<fileName>.partial`, checks the destination holds every byte, and
+/// only then renames. The rename is the commit: until it happens nothing in
+/// the folder claims to be a restorable backup. Native removes the `.partial`
+/// again whenever the publication fails, so a write that died half way does
+/// not keep the space it took on the storage that ran out.
+///
+/// The write goes through the app's own native method rather than
+/// `saf_stream`, which reported every refused create as the same bare
+/// `PluginError` because AndroidX swallows the provider's exception (#698).
 Future<Uri> publishArchiveToSaf({
   required File archive,
   required Uri targetTree,
   required String fileName,
-  SafStream? safStream,
-  SafUtil? safUtil,
+  SafTreeWrite? write,
 }) async {
-  final stream = safStream ?? SafStream();
-  final util = safUtil ?? SafUtil();
+  final publication =
+      await (write ??
+          (tree, name, staging) => GeckoProfileService().publishFileToTree(
+            sourcePath: archive.path,
+            treeUri: tree,
+            fileName: name,
+            stagingName: staging,
+            mimeType: 'application/octet-stream',
+          ))(targetTree, fileName, '$fileName$partialArchiveSuffix');
 
-  if (!await safTargetIsWritable(targetTree, safUtil: util)) {
-    throw const BackupTargetUnavailable(
-      'The backup folder is no longer accessible',
-    );
-  }
-
-  final expectedBytes = await archive.length();
-  final partialName = '$fileName$partialArchiveSuffix';
-
-  final written = await stream.pasteLocalFile(
-    archive.path,
-    targetTree.toString(),
-    partialName,
-    'application/octet-stream',
-    overwrite: true,
-  );
-
-  // SAF may hand back a different name than the one asked for, so the returned
-  // uri is the only reliable handle on what was actually created.
-  final partialUri = written.uri.toString();
-
-  try {
-    final stat = await util.stat(partialUri, false);
-    if (stat == null) {
-      throw const BackupPublicationFailure(
-        'The written backup could not be found afterwards',
-      );
-    }
-
-    if (stat.length != expectedBytes) {
-      // The realistic failure: the volume filled, or the write was cut short.
-      // Caught here the folder is left with a `.partial` nobody will mistake for
-      // a backup, instead of a short archive that looks complete.
-      throw BackupPublicationFailure(
-        'Wrote $expectedBytes bytes but the destination holds ${stat.length}',
-      );
-    }
-
-    final finished = await util.rename(partialUri, false, fileName);
-    return Uri.parse(finished.uri);
-  } catch (_) {
-    await _discardPartial(util, partialUri);
-    rethrow;
-  }
+  return Uri.parse(_checkPublication(publication).uri!);
 }
 
-Future<void> _discardPartial(SafUtil util, String uri) async {
-  try {
-    await util.delete(uri, false);
-  } catch (error, stackTrace) {
-    // Not fatal, and not silent: a stray `.partial` is harmless but should be
-    // explainable if the user sees one.
+/// Publishes [bytes] into [targetTree] as [fileName], the way
+/// [publishArchiveToSaf] publishes a file, and returns the name the file ended
+/// up with.
+Future<String> publishBytesToSaf({
+  required Uint8List bytes,
+  required Uri targetTree,
+  required String fileName,
+  required String mimeType,
+  SafTreeWrite? write,
+}) async {
+  final publication =
+      await (write ??
+          (tree, name, staging) => GeckoProfileService().publishBytesToTree(
+            bytes: bytes,
+            treeUri: tree,
+            fileName: name,
+            stagingName: staging,
+            mimeType: mimeType,
+          ))(targetTree, fileName, '$fileName$partialArchiveSuffix');
+
+  return _checkPublication(publication).name ?? fileName;
+}
+
+/// [publication] when it succeeded; otherwise the failure it stands for,
+/// thrown.
+///
+/// [BackupTargetUnavailable] only when the folder is to blame,
+/// [BackupTargetFull] when its storage is, and otherwise [BackupWriteFailed].
+///
+/// The whole native answer — outcome, exception class, message — is logged
+/// here. What the exceptions carry on is the provider's message alone: callers
+/// show it, and an enum name or a Java class name means nothing to the person
+/// reading it.
+TreePublication _checkPublication(TreePublication publication) {
+  final verdict = SafFolderVerdict.of(publication.outcome);
+  if (verdict != SafFolderVerdict.writable) {
     logger.w(
-      'Could not remove the incomplete backup $uri',
-      error: error,
-      stackTrace: stackTrace,
+      'Writing into the folder failed: ${publication.outcome.name} '
+      '${publication.fault?.name ?? ''} ${publication.errorClass ?? ''} '
+      '${publication.errorMessage ?? ''}',
     );
+  }
+
+  final detail = publication.errorMessage;
+  switch (verdict) {
+    case SafFolderVerdict.writable:
+      if (publication.uri == null) {
+        logger.w('The provider reported success without a document');
+        throw const BackupWriteFailed();
+      }
+      return publication;
+    case SafFolderVerdict.lost:
+      throw BackupTargetUnavailable(publication.outcome, detail);
+    case SafFolderVerdict.full:
+      throw BackupTargetFull(
+        requiredBytes: publication.requiredBytes,
+        availableBytes: publication.availableBytes,
+        detail: detail,
+      );
+    // Unresponsive never comes from an outcome; listed for the switch.
+    case SafFolderVerdict.unknown || SafFolderVerdict.unresponsive:
+      throw BackupWriteFailed(fault: publication.fault, detail: detail);
   }
 }
 

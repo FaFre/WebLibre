@@ -19,11 +19,14 @@
  */
 import 'package:exceptions/exceptions.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show GeckoProfileService;
 import 'package:nullability/nullability.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:saf_util/saf_util_platform_interface.dart';
 import 'package:weblibre/core/filesystem.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/domain/entities/profile.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -35,6 +38,7 @@ import 'package:weblibre/features/user/domain/repositories/general_settings.dart
 import 'package:weblibre/features/user/domain/repositories/profile.dart';
 import 'package:weblibre/features/user/domain/services/fingerprinting.dart';
 import 'package:weblibre/features/user/domain/services/user_backup.dart';
+import 'package:weblibre/utils/saf_tree_uri.dart';
 
 part 'providers.g.dart';
 
@@ -150,6 +154,38 @@ bool canSwitchProfiles(Ref ref) {
     ),
   );
   return severalProfiles || profilesShown;
+}
+
+/// The backup folder's name as the user knows it, or null when none is chosen.
+///
+/// Asked from the provider first and read from the tree uri when that fails,
+/// because the case worth naming the folder in is exactly the one where the
+/// provider no longer answers for it.
+///
+/// For the folder row, which has to name the folder before anything has been
+/// asked of it. Messages about a write check name the folder the check itself
+/// reported (`BackupFolderCheck.folderName`): this may still hold the previous
+/// folder's name for a moment after the folder changes.
+///
+/// Read natively off the main thread: a provider that stalls leaves the row on
+/// the name read from the uri instead of freezing the screen.
+@Riverpod()
+Future<String?> backupFolderName(Ref ref) async {
+  final dirUri = ref.watch(backupDirectoryUriProvider);
+  if (dirUri == null) return null;
+
+  try {
+    final name = await GeckoProfileService().treeFolderName(dirUri);
+    if (name != null && name.isNotEmpty) return name;
+  } catch (error, stackTrace) {
+    logger.w(
+      'Could not read the backup folder name',
+      error: error,
+      stackTrace: stackTrace,
+    );
+  }
+
+  return describeSafTreeUri(dirUri.toString());
 }
 
 @Riverpod()

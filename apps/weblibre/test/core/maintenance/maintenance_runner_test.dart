@@ -8,6 +8,8 @@ import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
 import 'package:weblibre/core/maintenance/maintenance_lease.dart';
 import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/maintenance_runner.dart';
+import 'package:weblibre/core/maintenance/saf_archive_target.dart'
+    show BackupTargetFull;
 import 'package:weblibre/core/startup/models/maintenance_journal.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
@@ -76,6 +78,7 @@ void main() {
 
   MaintenanceRunner runnerFor({
     bool packThrows = false,
+    Object? publishThrows,
     _FakeProfileApi? api,
     Duration heartbeatInterval = MaintenanceLease.defaultHeartbeatInterval,
     Future<void> Function()? whilePacking,
@@ -106,6 +109,7 @@ void main() {
       await output.writeAsString('archive');
     },
     publisher: (archive, targetTree, fileName) async {
+      if (publishThrows != null) throw publishThrows;
       published.add(fileName);
     },
   );
@@ -138,6 +142,36 @@ void main() {
 
     final stored = (await store.read(useCache: false)).taskById('task-1');
     expect(stored?.effectiveState, MaintenanceTaskState.completed);
+  });
+
+  test('the run keeps the numbers the task record cannot', () async {
+    const required = 3 * 1024 * 1024;
+    const free = 2 * 1024 * 1024;
+    final task = await enqueue();
+    final runner = runnerFor(
+      publishThrows: const BackupTargetFull(
+        requiredBytes: required,
+        availableBytes: free,
+      ),
+    );
+
+    final result = await runner.run(task, password: 'hunter2');
+
+    expect(result.effectiveState, MaintenanceTaskState.failed);
+    expect(
+      result.recordedFailure,
+      isA<BackupFolderFullFailure>().having(
+        (f) => f.requiredBytes,
+        'requiredBytes',
+        isNull,
+      ),
+    );
+    expect(
+      runner.lastFailure,
+      isA<BackupFolderFullFailure>()
+          .having((f) => f.requiredBytes, 'requiredBytes', required)
+          .having((f) => f.availableBytes, 'availableBytes', free),
+    );
   });
 
   test(

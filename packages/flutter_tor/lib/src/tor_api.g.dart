@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-  List<Object?>? replyList,
-  String channelName, {
-  required bool isNullValid,
+    List<Object?>? replyList,
+    String channelName, {
+    required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -46,9 +46,8 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed.every(
-          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
-        );
+        a.indexed
+            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -97,31 +96,25 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
+
 /// Transport types for Tor connections
 enum TransportType {
   /// Direct Tor connection (no bridges)
   none,
-
   /// obfs4 pluggable transport
   obfs4,
-
   /// Snowflake pluggable transport (default broker)
   snowflake,
-
   /// Snowflake via AMP cache
   snowflakeAmp,
-
   /// Meek pluggable transport
   meek,
-
   /// Meek via Azure CDN
   meekAzure,
-
   /// WebTunnel pluggable transport
   webtunnel,
-
   /// Custom bridge lines (passthrough)
-  custom,
+  custom;
 }
 
 /// Configuration for starting Tor
@@ -160,8 +153,7 @@ class TorConfiguration {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static TorConfiguration decode(Object result) {
     result as List<Object?>;
@@ -183,11 +175,7 @@ class TorConfiguration {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(transport, other.transport) &&
-        _deepEquals(bridgeLines, other.bridgeLines) &&
-        _deepEquals(entryNodeCountries, other.entryNodeCountries) &&
-        _deepEquals(exitNodeCountries, other.exitNodeCountries) &&
-        _deepEquals(strictNodes, other.strictNodes);
+    return _deepEquals(transport, other.transport) && _deepEquals(bridgeLines, other.bridgeLines) && _deepEquals(entryNodeCountries, other.entryNodeCountries) && _deepEquals(exitNodeCountries, other.exitNodeCountries) && _deepEquals(strictNodes, other.strictNodes);
   }
 
   @override
@@ -236,8 +224,7 @@ class TorStatus {
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static TorStatus decode(Object result) {
     result as List<Object?>;
@@ -259,11 +246,7 @@ class TorStatus {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(isRunning, other.isRunning) &&
-        _deepEquals(socksPort, other.socksPort) &&
-        _deepEquals(bootstrapProgress, other.bootstrapProgress) &&
-        _deepEquals(currentCircuit, other.currentCircuit) &&
-        _deepEquals(exitNodeCountry, other.exitNodeCountry);
+    return _deepEquals(isRunning, other.isRunning) && _deepEquals(socksPort, other.socksPort) && _deepEquals(bootstrapProgress, other.bootstrapProgress) && _deepEquals(currentCircuit, other.currentCircuit) && _deepEquals(exitNodeCountry, other.exitNodeCountry);
   }
 
   @override
@@ -294,12 +277,15 @@ class TorLogMessage {
   int timestamp;
 
   List<Object?> _toList() {
-    return <Object?>[severity, message, timestamp];
+    return <Object?>[
+      severity,
+      message,
+      timestamp,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static TorLogMessage decode(Object result) {
     result as List<Object?>;
@@ -319,9 +305,7 @@ class TorLogMessage {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(severity, other.severity) &&
-        _deepEquals(message, other.message) &&
-        _deepEquals(timestamp, other.timestamp);
+    return _deepEquals(severity, other.severity) && _deepEquals(message, other.message) && _deepEquals(timestamp, other.timestamp);
   }
 
   @override
@@ -336,7 +320,11 @@ class TorLogMessage {
 
 /// Versions of the Tor components bundled with the app
 class TorComponentVersions {
-  TorComponentVersions({required this.tor, this.snowflake, this.lyrebird});
+  TorComponentVersions({
+    required this.tor,
+    this.snowflake,
+    this.lyrebird,
+  });
 
   /// The tor daemon (tor-android), e.g. "0.4.9.14"
   String tor;
@@ -349,12 +337,15 @@ class TorComponentVersions {
   String? lyrebird;
 
   List<Object?> _toList() {
-    return <Object?>[tor, snowflake, lyrebird];
+    return <Object?>[
+      tor,
+      snowflake,
+      lyrebird,
+    ];
   }
 
   Object encode() {
-    return _toList();
-  }
+    return _toList();  }
 
   static TorComponentVersions decode(Object result) {
     result as List<Object?>;
@@ -374,9 +365,7 @@ class TorComponentVersions {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(tor, other.tor) &&
-        _deepEquals(snowflake, other.snowflake) &&
-        _deepEquals(lyrebird, other.lyrebird);
+    return _deepEquals(tor, other.tor) && _deepEquals(snowflake, other.snowflake) && _deepEquals(lyrebird, other.lyrebird);
   }
 
   @override
@@ -389,6 +378,7 @@ class TorComponentVersions {
   }
 }
 
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -396,19 +386,19 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is TransportType) {
+    }    else if (value is TransportType) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    } else if (value is TorConfiguration) {
+    }    else if (value is TorConfiguration) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else if (value is TorStatus) {
+    }    else if (value is TorStatus) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    } else if (value is TorLogMessage) {
+    }    else if (value is TorLogMessage) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is TorComponentVersions) {
+    }    else if (value is TorComponentVersions) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
     } else {
@@ -436,53 +426,50 @@ class _PigeonCodec extends StandardMessageCodec {
   }
 }
 
-const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(
-  _PigeonCodec(),
-);
+const StandardMethodCodec pigeonMethodCodec = StandardMethodCodec(_PigeonCodec());
 
 /// Host API (Flutter -> Native)
 class TorApi {
   /// Constructor for [TorApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
-  TorApi({BinaryMessenger? binaryMessenger, String messageChannelSuffix = ''})
-    : pigeonVar_binaryMessenger = binaryMessenger,
-      pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-          ? '.$messageChannelSuffix'
-          : '';
+  TorApi({
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
+
   /// Start Tor with the given configuration
   /// Returns a Future to avoid blocking the main thread
   Future<int> startTor(TorConfiguration config) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.TorApi.startTor$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.TorApi.startTor$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[config],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[config]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as int;
   }
 
   /// Stop Tor
   Future<void> stopTor() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.TorApi.stopTor$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.TorApi.stopTor$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -492,16 +479,16 @@ class TorApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   /// Get current status
   Future<TorStatus> getStatus() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.TorApi.getStatus$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.TorApi.getStatus$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -511,17 +498,17 @@ class TorApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as TorStatus;
   }
 
   /// Request a new Tor identity (new circuit)
   Future<void> requestNewIdentity() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.TorApi.requestNewIdentity$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.TorApi.requestNewIdentity$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -531,16 +518,16 @@ class TorApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 
   /// Versions of the bundled Tor components. Does not need Tor to run.
   Future<TorComponentVersions> getComponentVersions() async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.TorApi.getComponentVersions$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.TorApi.getComponentVersions$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -550,10 +537,11 @@ class TorApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as TorComponentVersions;
   }
 }
@@ -567,19 +555,17 @@ class TorApi {
 /// not be called multiple times for the same `instanceName`. To deliver
 /// events to multiple listeners, call this method once and listen to the
 /// returned broadcast stream multiple times instead.
-Stream<TorLogMessage> streamLogs({String instanceName = ''}) {
+Stream<TorLogMessage> streamLogs( {String instanceName = ''}) {
   if (instanceName.isNotEmpty) {
     instanceName = '.$instanceName';
   }
-  final EventChannel streamLogsChannel = EventChannel(
-    'dev.flutter.pigeon.flutter_tor.TorEventsApi.streamLogs$instanceName',
-    pigeonMethodCodec,
-  );
+  final EventChannel streamLogsChannel =
+      EventChannel('dev.flutter.pigeon.flutter_tor.TorEventsApi.streamLogs$instanceName', pigeonMethodCodec);
   return streamLogsChannel.receiveBroadcastStream().map((dynamic event) {
     return event as TorLogMessage;
   });
 }
-
+    
 /// Status changes
 ///
 /// Returns a broadcast [Stream] of events from the `streamStatus` event channel.
@@ -588,74 +574,69 @@ Stream<TorLogMessage> streamLogs({String instanceName = ''}) {
 /// not be called multiple times for the same `instanceName`. To deliver
 /// events to multiple listeners, call this method once and listen to the
 /// returned broadcast stream multiple times instead.
-Stream<TorStatus> streamStatus({String instanceName = ''}) {
+Stream<TorStatus> streamStatus( {String instanceName = ''}) {
   if (instanceName.isNotEmpty) {
     instanceName = '.$instanceName';
   }
-  final EventChannel streamStatusChannel = EventChannel(
-    'dev.flutter.pigeon.flutter_tor.TorEventsApi.streamStatus$instanceName',
-    pigeonMethodCodec,
-  );
+  final EventChannel streamStatusChannel =
+      EventChannel('dev.flutter.pigeon.flutter_tor.TorEventsApi.streamStatus$instanceName', pigeonMethodCodec);
   return streamStatusChannel.receiveBroadcastStream().map((dynamic event) {
     return event as TorStatus;
   });
 }
+    
 
 class IPtProxyController {
   /// Constructor for [IPtProxyController]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   IPtProxyController({
-    BinaryMessenger? binaryMessenger,
-    String messageChannelSuffix = '',
-  }) : pigeonVar_binaryMessenger = binaryMessenger,
-       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
-           ? '.$messageChannelSuffix'
-           : '';
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
+
   Future<int> start(TransportType proxyType, String proxy) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.IPtProxyController.start$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.IPtProxyController.start$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[proxyType, proxy],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[proxyType, proxy]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
     return pigeonVar_replyValue! as int;
   }
 
   Future<void> stop(TransportType proxyType) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.flutter_tor.IPtProxyController.stop$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_tor.IPtProxyController.stop$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[proxyType],
-    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[proxyType]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
   }
 }

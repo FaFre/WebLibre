@@ -51,8 +51,14 @@ typedef ArchivePublisher =
 /// Checked *before* the profile is copied and packed. A SAF grant can be revoked
 /// between queueing a backup and the restart that runs it, and discovering that
 /// only at publication means having spent the whole pack on a target that was
-/// never going to accept it.
-typedef ArchiveTargetCheck = Future<bool> Function(Uri targetTree);
+/// never going to accept it. The archive's size is not known yet, so this can
+/// catch a full volume but not one that is merely too small.
+///
+/// Returns the failure to stop with, or null to go ahead. Null also covers a
+/// check that could not reach a verdict: that is not evidence against the
+/// folder, and the write itself then reports what actually goes wrong.
+typedef ArchiveTargetCheck =
+    Future<MaintenanceFailure?> Function(Uri targetTree);
 
 /// How an archive is brought into private storage and expanded.
 typedef ArchiveUnpacker =
@@ -65,7 +71,7 @@ typedef ArchiveUnpacker =
 /// would normally live in profile settings — the SAF target, the options — travels
 /// in the durable task record instead.
 class MaintenanceRunner {
-  const MaintenanceRunner({
+  MaintenanceRunner({
     required this.store,
     required this.lease,
     required this.profilesDir,
@@ -107,6 +113,13 @@ class MaintenanceRunner {
   final Future<int?> Function()? availableBytes;
   final DateTime Function() now;
 
+  /// The failure the latest [run] ended on, whole.
+  ///
+  /// The task record keeps only what survives a restart, so a failure read back
+  /// from it has lost its byte counts and the provider's own message. The
+  /// screen that started the run still has both to show.
+  MaintenanceFailure? lastFailure;
+
   Future<List<MaintenanceParticipant>> _participants() async =>
       participants ?? await resolveNativeParticipants();
 
@@ -118,7 +131,10 @@ class MaintenanceRunner {
   Future<MaintenanceTask> run(
     MaintenanceTask task, {
     required String password,
-  }) => lease.keepAlive(() => _run(task, password: password));
+  }) {
+    lastFailure = null;
+    return lease.keepAlive(() => _run(task, password: password));
+  }
 
   /// Executes [task], recording every state change durably as it goes.
   ///
@@ -171,11 +187,16 @@ class MaintenanceRunner {
         return await _fail(task, profileNoLongerExists);
       }
 
-      final check = verifyTarget;
-      if (check != null && !await check(Uri.parse(targetTreeUri))) {
-        // Actionable rather than a mid-publish I/O error: the user has to grant
-        // the folder again, and nothing has been written yet.
-        return await _fail(task, const BackupFolderUnavailableFailure());
+      // Actionable rather than a mid-publish I/O error, and caught before the
+      // pack: a folder that refuses files has to be chosen again, a volume
+      // that is already full needs space, and nothing has been written yet.
+      // A volume with room left, just not enough for this archive, can only
+      // be told once the archive's size is known: the publication then stops
+      // before copying when the provider shows how much is free, and removes
+      // whatever it wrote when it does not.
+      if (await verifyTarget?.call(Uri.parse(targetTreeUri))
+          case final failure?) {
+        return await _fail(task, failure);
       }
 
       final workDir = Directory(p.join(workRoot.path, 'task_${task.id}'));
@@ -482,6 +503,7 @@ class MaintenanceRunner {
     MaintenanceTaskState state,
     MaintenanceFailure failure,
   ) async {
+    lastFailure = failure;
     final config = await store.mutateTask(
       task.id,
       (current) => current.withState(

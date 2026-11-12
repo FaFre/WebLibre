@@ -16990,11 +16990,35 @@ abstract class AppLocalizations {
   /// **'The export folder is no longer there. Choose one again and retry.'**
   String get settings_transferExportFolderGone;
 
+  /// Error when the export folder is still there but no longer accepts new files, or its access was revoked. The next export opens the folder picker.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre can no longer save to the export folder. Choose it again and retry: picking the same folder renews the access.'**
+  String get settings_transferExportFolderRefused;
+
+  /// Error when exporting settings fails because the storage holding the export folder is full. The folder stays chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s no space left where the export folder is stored. Free up space and try again.'**
+  String get settings_transferExportFolderFull;
+
+  /// Error when the export was written but the folder reported holding fewer bytes than were sent, so the incomplete file was removed. The folder stays chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'The export folder didn\'t receive the whole file, so it wasn\'t kept. Try again, or choose a folder on other storage.'**
+  String get settings_transferExportIncomplete;
+
   /// Error message when saving the export failed. error is technical error text, usually English.
   ///
   /// In en, this message translates to:
   /// **'Could not save the export: {error}'**
   String settings_transferSaveFailed(String error);
+
+  /// Error message when saving the export failed and the storage app gave no reason.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the export. Try again, or choose a folder on other storage.'**
+  String get settings_transferSaveFailedNoDetail;
 
   /// Confirmation after copying the export to the clipboard.
   ///
@@ -21114,6 +21138,60 @@ abstract class AppLocalizations {
   /// **'Choose folder'**
   String get user_chooseFolderButtonLabel;
 
+  /// Title of the row on the Create Backup screen that shows where the backup will be saved. Tapping it opens the system folder picker.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup folder'**
+  String get user_backupFolderTitle;
+
+  /// Subtitle of the backup folder row while no folder has been chosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Not chosen yet. Tap to choose where backups are saved.'**
+  String get user_backupFolderNotChosen;
+
+  /// Subtitle of the backup folder row, shown in the error color, after the folder failed a check that it accepts new files. folderName is the folder's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t save to {folderName}. Tap to choose the folder again.'**
+  String user_backupFolderRefusedSubtitle(String folderName);
+
+  /// Title of the dialog shown when backing up finds that the backup folder no longer accepts new files. folderName is the folder's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t save to \"{folderName}\"'**
+  String user_backupFolderRefusedTitle(String folderName);
+
+  /// Body of that dialog. Explains that re-selecting the same folder in the system picker usually fixes it.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre can no longer create files in this folder, even if it is still there. Choose it again: picking the same folder renews the access. If that doesn\'t help, choose a new folder, for example one in Documents.'**
+  String get user_backupFolderRefusedContent;
+
+  /// Error message when the backup folder failed its check, the user chose that same folder again in the system picker, and it still does not accept new files. folderName is the folder's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Choosing {folderName} again didn\'t help: backups still can\'t be saved there. Try a new folder, for example one in Documents.'**
+  String user_backupFolderStillRefused(String folderName);
+
+  /// Error message when the folder just chosen in the system picker does not accept new files. folderName is the folder's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Backups can\'t be saved to {folderName}. Choose another folder, for example one in Documents.'**
+  String user_backupFolderRefused(String folderName);
+
+  /// Error message when the storage holding the backup folder (a cloud drive, a USB stick) did not answer a test write in time. The folder stays chosen. folderName is the folder's name.
+  ///
+  /// In en, this message translates to:
+  /// **'{folderName} didn\'t respond in time. Make sure its storage is available (connected, or online for a cloud folder), or choose a folder on other storage.'**
+  String user_backupFolderUnresponsive(String folderName);
+
+  /// Error message when the storage holding the backup folder is full. The folder itself is fine and stays chosen. folderName is the folder's name.
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s no space left where {folderName} is stored. Free up space, or choose a folder on other storage.'**
+  String user_backupFolderFull(String folderName);
+
   /// Shown when the backup folder contains no backups.
   ///
   /// In en, this message translates to:
@@ -23435,6 +23513,55 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The backup could not be written to the folder. Choose the folder again and retry. {nothingChanged}'**
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged);
+
+  /// Error message when a backup failed because the storage holding the chosen backup folder (for example an SD card) is full. The folder itself is fine and stays chosen; the app's own storage is not the problem. nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'There\'s no space left where the backup folder is stored. Free up space there and try again, or open WebLibre and start a new backup to another folder. {nothingChanged}'**
+  String startup_maintenanceBackupFolderFull(String nothingChanged);
+
+  /// Error message when a backup failed because the storage holding the chosen backup folder (for example an SD card) has some space left, but not enough for this backup. The folder itself is fine and stays chosen. required and free are formatted sizes such as "1.2 GB"; nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'The backup needs about {required}, but only {free} is free where the backup folder is stored. Free up space there and try again, or open WebLibre and start a new backup to another folder. {nothingChanged}'**
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  );
+
+  /// Error message when a backup was stopped because the storage holding the backup folder (a cloud drive, a USB stick) did not answer a test write in time. The folder stays chosen. nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'The backup folder\'s storage didn\'t respond. Make sure it\'s available (connected, or online for a cloud folder) and try again, or open WebLibre and start a new backup to another folder. {nothingChanged}'**
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged);
+
+  /// Error message when the backup was copied into its folder but the folder reported holding fewer bytes than were sent, so the incomplete file was removed. The folder stays chosen. nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'The backup folder didn\'t receive the whole backup, so it wasn\'t kept. Try again. If it keeps happening, open WebLibre and start a new backup to another folder. {nothingChanged}'**
+  String startup_maintenanceBackupIncomplete(String nothingChanged);
+
+  /// Error message when writing the backup into its folder failed for a reason that does not blame the folder (the storage app crashed, an unrecognised error). Not "choose the folder again": the folder is fine. nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'The backup couldn\'t be written to the folder. The folder stays chosen. Try again, and if it keeps failing, open WebLibre and start a new backup to another folder. {nothingChanged}'**
+  String startup_maintenanceBackupWriteFailed(String nothingChanged);
+
+  /// Same as startup_maintenanceBackupWriteFailed, with the storage app's own error message. detail is untranslated technical text, usually English, kept for bug reports; nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'The backup couldn\'t be written to the folder ({detail}). The folder stays chosen. Try again, and if it keeps failing, open WebLibre and start a new backup to another folder. {nothingChanged}'**
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  );
+
+  /// Error message when the packed backup file in the app's own storage could not be read while copying it into the backup folder. Neither the folder nor its storage is the problem. nothingChanged is "Nothing has been changed."
+  ///
+  /// In en, this message translates to:
+  /// **'The finished backup couldn\'t be read back from WebLibre\'s own storage to copy it to the folder. Try again. {nothingChanged}'**
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged);
 
   /// Error message when a pending profile task refers to a profile that has since been deleted.
   ///

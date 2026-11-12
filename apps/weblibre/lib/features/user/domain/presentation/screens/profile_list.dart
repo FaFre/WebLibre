@@ -55,6 +55,7 @@ class ProfileListScreen extends HookConsumerWidget {
               await ProfileBackupListRoute().push(context);
             },
             icon: const Icon(MdiIcons.backupRestore),
+            tooltip: l10n.user_backupsTitle,
           ),
         ],
       ),

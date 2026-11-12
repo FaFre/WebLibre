@@ -10260,9 +10260,25 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Exportordner existiert nicht mehr. Erneut einen auswählen und noch einmal versuchen.';
 
   @override
+  String get settings_transferExportFolderRefused =>
+      'WebLibre kann nicht mehr im Exportordner speichern. Den Ordner erneut auswählen und noch einmal versuchen: Auch die Auswahl desselben Ordners erneuert den Zugriff.';
+
+  @override
+  String get settings_transferExportFolderFull =>
+      'Am Speicherort des Exportordners ist kein Platz mehr frei. Speicherplatz freigeben und erneut versuchen.';
+
+  @override
+  String get settings_transferExportIncomplete =>
+      'Die Datei ist nicht vollständig im Exportordner angekommen und wurde deshalb nicht behalten. Noch einmal versuchen oder einen Ordner auf einem anderen Speicher auswählen.';
+
+  @override
   String settings_transferSaveFailed(String error) {
     return 'Der Export konnte nicht gespeichert werden: $error';
   }
+
+  @override
+  String get settings_transferSaveFailedNoDetail =>
+      'Der Export konnte nicht gespeichert werden. Noch einmal versuchen oder einen Ordner auf einem anderen Speicher auswählen.';
 
   @override
   String get settings_transferCopiedToClipboard =>
@@ -12824,6 +12840,47 @@ class AppLocalizationsDe extends AppLocalizations {
   String get user_chooseFolderButtonLabel => 'Ordner auswählen';
 
   @override
+  String get user_backupFolderTitle => 'Sicherungsordner';
+
+  @override
+  String get user_backupFolderNotChosen =>
+      'Noch nicht ausgewählt. Tippen, um den Speicherort für Sicherungen auszuwählen.';
+
+  @override
+  String user_backupFolderRefusedSubtitle(String folderName) {
+    return 'Speichern in $folderName nicht möglich. Tippen, um den Ordner erneut auszuwählen.';
+  }
+
+  @override
+  String user_backupFolderRefusedTitle(String folderName) {
+    return 'Speichern in „$folderName“ nicht möglich';
+  }
+
+  @override
+  String get user_backupFolderRefusedContent =>
+      'WebLibre kann in diesem Ordner keine Dateien mehr anlegen, auch wenn er noch vorhanden ist. Den Ordner erneut auswählen: Auch die Auswahl desselben Ordners erneuert den Zugriff. Hilft das nicht, einen neuen Ordner auswählen, zum Beispiel unter Dokumente.';
+
+  @override
+  String user_backupFolderStillRefused(String folderName) {
+    return 'Auch nach erneuter Auswahl von „$folderName“ können dort keine Sicherungen gespeichert werden. Einen neuen Ordner versuchen, zum Beispiel unter Dokumente.';
+  }
+
+  @override
+  String user_backupFolderRefused(String folderName) {
+    return 'In „$folderName“ können keine Sicherungen gespeichert werden. Einen anderen Ordner auswählen, zum Beispiel unter Dokumente.';
+  }
+
+  @override
+  String user_backupFolderUnresponsive(String folderName) {
+    return '„$folderName“ hat nicht rechtzeitig geantwortet. Prüfen, ob der Speicher verfügbar ist (verbunden oder, bei einem Cloud-Ordner, online), oder einen Ordner auf einem anderen Speicher auswählen.';
+  }
+
+  @override
+  String user_backupFolderFull(String folderName) {
+    return 'Am Speicherort von „$folderName“ ist kein Platz mehr frei. Speicherplatz freigeben oder einen Ordner auf einem anderen Speicher auswählen.';
+  }
+
+  @override
   String get user_noBackupsFound => 'Keine Sicherungen gefunden';
 
   @override
@@ -14340,6 +14397,48 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged) {
     return 'Die Sicherung konnte nicht in den Ordner geschrieben werden. Ordner erneut auswählen und noch einmal versuchen. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderFull(String nothingChanged) {
+    return 'Am Speicherort des Sicherungsordners ist kein Platz mehr frei. Dort Speicherplatz freigeben und noch einmal versuchen oder WebLibre öffnen und eine neue Sicherung in einen anderen Ordner starten. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  ) {
+    return 'Die Sicherung benötigt etwa $required, am Speicherort des Sicherungsordners sind aber nur $free frei. Dort Speicherplatz freigeben und noch einmal versuchen oder WebLibre öffnen und eine neue Sicherung in einen anderen Ordner starten. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged) {
+    return 'Der Speicher des Sicherungsordners hat nicht geantwortet. Prüfen, ob er verfügbar ist (verbunden oder, bei einem Cloud-Ordner, online), und noch einmal versuchen oder WebLibre öffnen und eine neue Sicherung in einen anderen Ordner starten. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupIncomplete(String nothingChanged) {
+    return 'Die Sicherung ist nicht vollständig im Sicherungsordner angekommen und wurde deshalb nicht behalten. Noch einmal versuchen. Passiert das wiederholt, WebLibre öffnen und eine neue Sicherung in einen anderen Ordner starten. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailed(String nothingChanged) {
+    return 'Die Sicherung konnte nicht in den Ordner geschrieben werden. Der Ordner bleibt ausgewählt. Noch einmal versuchen und, falls es weiterhin fehlschlägt, WebLibre öffnen und eine neue Sicherung in einen anderen Ordner starten. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  ) {
+    return 'Die Sicherung konnte nicht in den Ordner geschrieben werden ($detail). Der Ordner bleibt ausgewählt. Noch einmal versuchen und, falls es weiterhin fehlschlägt, WebLibre öffnen und eine neue Sicherung in einen anderen Ordner starten. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged) {
+    return 'Die fertige Sicherung konnte nicht aus dem WebLibre-eigenen Speicher gelesen werden, um sie in den Ordner zu kopieren. Noch einmal versuchen. $nothingChanged';
   }
 
   @override

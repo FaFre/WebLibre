@@ -10066,9 +10066,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'The export folder is no longer there. Choose one again and retry.';
 
   @override
+  String get settings_transferExportFolderRefused =>
+      'WebLibre can no longer save to the export folder. Choose it again and retry: picking the same folder renews the access.';
+
+  @override
+  String get settings_transferExportFolderFull =>
+      'There\'s no space left where the export folder is stored. Free up space and try again.';
+
+  @override
+  String get settings_transferExportIncomplete =>
+      'The export folder didn\'t receive the whole file, so it wasn\'t kept. Try again, or choose a folder on other storage.';
+
+  @override
   String settings_transferSaveFailed(String error) {
     return 'Could not save the export: $error';
   }
+
+  @override
+  String get settings_transferSaveFailedNoDetail =>
+      'Could not save the export. Try again, or choose a folder on other storage.';
 
   @override
   String get settings_transferCopiedToClipboard =>
@@ -12578,6 +12594,47 @@ class AppLocalizationsEn extends AppLocalizations {
   String get user_chooseFolderButtonLabel => 'Choose folder';
 
   @override
+  String get user_backupFolderTitle => 'Backup folder';
+
+  @override
+  String get user_backupFolderNotChosen =>
+      'Not chosen yet. Tap to choose where backups are saved.';
+
+  @override
+  String user_backupFolderRefusedSubtitle(String folderName) {
+    return 'Can\'t save to $folderName. Tap to choose the folder again.';
+  }
+
+  @override
+  String user_backupFolderRefusedTitle(String folderName) {
+    return 'Can\'t save to \"$folderName\"';
+  }
+
+  @override
+  String get user_backupFolderRefusedContent =>
+      'WebLibre can no longer create files in this folder, even if it is still there. Choose it again: picking the same folder renews the access. If that doesn\'t help, choose a new folder, for example one in Documents.';
+
+  @override
+  String user_backupFolderStillRefused(String folderName) {
+    return 'Choosing $folderName again didn\'t help: backups still can\'t be saved there. Try a new folder, for example one in Documents.';
+  }
+
+  @override
+  String user_backupFolderRefused(String folderName) {
+    return 'Backups can\'t be saved to $folderName. Choose another folder, for example one in Documents.';
+  }
+
+  @override
+  String user_backupFolderUnresponsive(String folderName) {
+    return '$folderName didn\'t respond in time. Make sure its storage is available (connected, or online for a cloud folder), or choose a folder on other storage.';
+  }
+
+  @override
+  String user_backupFolderFull(String folderName) {
+    return 'There\'s no space left where $folderName is stored. Free up space, or choose a folder on other storage.';
+  }
+
+  @override
   String get user_noBackupsFound => 'No backups found';
 
   @override
@@ -14069,6 +14126,48 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged) {
     return 'The backup could not be written to the folder. Choose the folder again and retry. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderFull(String nothingChanged) {
+    return 'There\'s no space left where the backup folder is stored. Free up space there and try again, or open WebLibre and start a new backup to another folder. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  ) {
+    return 'The backup needs about $required, but only $free is free where the backup folder is stored. Free up space there and try again, or open WebLibre and start a new backup to another folder. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged) {
+    return 'The backup folder\'s storage didn\'t respond. Make sure it\'s available (connected, or online for a cloud folder) and try again, or open WebLibre and start a new backup to another folder. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupIncomplete(String nothingChanged) {
+    return 'The backup folder didn\'t receive the whole backup, so it wasn\'t kept. Try again. If it keeps happening, open WebLibre and start a new backup to another folder. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailed(String nothingChanged) {
+    return 'The backup couldn\'t be written to the folder. The folder stays chosen. Try again, and if it keeps failing, open WebLibre and start a new backup to another folder. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  ) {
+    return 'The backup couldn\'t be written to the folder ($detail). The folder stays chosen. Try again, and if it keeps failing, open WebLibre and start a new backup to another folder. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged) {
+    return 'The finished backup couldn\'t be read back from WebLibre\'s own storage to copy it to the folder. Try again. $nothingChanged';
   }
 
   @override

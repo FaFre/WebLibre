@@ -20,13 +20,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:saf_util/saf_util.dart';
 import 'package:weblibre/core/maintenance/backup_archive_name.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/user/domain/presentation/utils/backup_folder_picker.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/providers/backup_directory.dart';
-import 'package:weblibre/features/user/domain/services/user_backup.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
 
@@ -46,26 +45,6 @@ class ProfileBackupListScreen extends HookConsumerWidget {
     }
   }
 
-  Future<void> _pickDirectory(WidgetRef ref) async {
-    final dir = await SafUtil().pickDirectory(
-      writePermission: true,
-      persistablePermission: true,
-    );
-
-    if (dir != null) {
-      final dirUri = Uri.parse(dir.uri);
-      ref.read(backupDirectoryUriProvider.notifier).set(dirUri);
-
-      final migrated = await ref
-          .read(userBackupServiceProvider.notifier)
-          .migrateOldBackups(dirUri);
-
-      if (migrated > 0) {
-        ref.invalidate(backupListProvider);
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dirUri = ref.watch(backupDirectoryUriProvider);
@@ -79,7 +58,8 @@ class ProfileBackupListScreen extends HookConsumerWidget {
           IconButton(
             icon: const Icon(MdiIcons.folderCog),
             tooltip: l10n.user_changeBackupFolderTooltip,
-            onPressed: () => _pickDirectory(ref),
+            onPressed: () =>
+                chooseBackupFolder(ref, migrateLegacyBackups: true),
           ),
         ],
       ),
@@ -106,7 +86,8 @@ class ProfileBackupListScreen extends HookConsumerWidget {
                       FilledButton.icon(
                         icon: const Icon(MdiIcons.folderPlus),
                         label: Text(l10n.user_chooseFolderButtonLabel),
-                        onPressed: () => _pickDirectory(ref),
+                        onPressed: () =>
+                            chooseBackupFolder(ref, migrateLegacyBackups: true),
                       ),
                     ],
                   ),

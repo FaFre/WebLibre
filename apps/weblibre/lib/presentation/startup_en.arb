@@ -249,6 +249,78 @@
       }
     }
   },
+  "startup_maintenanceBackupFolderFull": "There's no space left where the backup folder is stored. Free up space there and try again, or open WebLibre and start a new backup to another folder. {nothingChanged}",
+  "@startup_maintenanceBackupFolderFull": {
+    "description": "Error message when a backup failed because the storage holding the chosen backup folder (for example an SD card) is full. The folder itself is fine and stays chosen; the app's own storage is not the problem. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupFolderTooSmall": "The backup needs about {required}, but only {free} is free where the backup folder is stored. Free up space there and try again, or open WebLibre and start a new backup to another folder. {nothingChanged}",
+  "@startup_maintenanceBackupFolderTooSmall": {
+    "description": "Error message when a backup failed because the storage holding the chosen backup folder (for example an SD card) has some space left, but not enough for this backup. The folder itself is fine and stays chosen. required and free are formatted sizes such as \"1.2 GB\"; nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "required": {
+        "type": "String"
+      },
+      "free": {
+        "type": "String"
+      },
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupFolderUnresponsive": "The backup folder's storage didn't respond. Make sure it's available (connected, or online for a cloud folder) and try again, or open WebLibre and start a new backup to another folder. {nothingChanged}",
+  "@startup_maintenanceBackupFolderUnresponsive": {
+    "description": "Error message when a backup was stopped because the storage holding the backup folder (a cloud drive, a USB stick) did not answer a test write in time. The folder stays chosen. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupIncomplete": "The backup folder didn't receive the whole backup, so it wasn't kept. Try again. If it keeps happening, open WebLibre and start a new backup to another folder. {nothingChanged}",
+  "@startup_maintenanceBackupIncomplete": {
+    "description": "Error message when the backup was copied into its folder but the folder reported holding fewer bytes than were sent, so the incomplete file was removed. The folder stays chosen. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupWriteFailed": "The backup couldn't be written to the folder. The folder stays chosen. Try again, and if it keeps failing, open WebLibre and start a new backup to another folder. {nothingChanged}",
+  "@startup_maintenanceBackupWriteFailed": {
+    "description": "Error message when writing the backup into its folder failed for a reason that does not blame the folder (the storage app crashed, an unrecognised error). Not \"choose the folder again\": the folder is fine. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupWriteFailedDetail": "The backup couldn't be written to the folder ({detail}). The folder stays chosen. Try again, and if it keeps failing, open WebLibre and start a new backup to another folder. {nothingChanged}",
+  "@startup_maintenanceBackupWriteFailedDetail": {
+    "description": "Same as startup_maintenanceBackupWriteFailed, with the storage app's own error message. detail is untranslated technical text, usually English, kept for bug reports; nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      },
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
+  "startup_maintenanceBackupArchiveUnreadable": "The finished backup couldn't be read back from WebLibre's own storage to copy it to the folder. Try again. {nothingChanged}",
+  "@startup_maintenanceBackupArchiveUnreadable": {
+    "description": "Error message when the packed backup file in the app's own storage could not be read while copying it into the backup folder. Neither the folder nor its storage is the problem. nothingChanged is \"Nothing has been changed.\"",
+    "placeholders": {
+      "nothingChanged": {
+        "type": "String"
+      }
+    }
+  },
   "startup_maintenanceProfileNoLongerExists": "That profile no longer exists.",
   "@startup_maintenanceProfileNoLongerExists": {
     "description": "Error message when a pending profile task refers to a profile that has since been deleted."

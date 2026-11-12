@@ -10348,9 +10348,25 @@ class AppLocalizationsRu extends AppLocalizations {
       'Папки экспорта больше нет. Выберите папку снова и повторите попытку.';
 
   @override
+  String get settings_transferExportFolderRefused =>
+      'WebLibre больше не может сохранять в папку экспорта. Выберите её заново и повторите попытку: повторный выбор той же папки обновляет доступ.';
+
+  @override
+  String get settings_transferExportFolderFull =>
+      'В хранилище, где находится папка экспорта, не осталось места. Освободите место и повторите попытку.';
+
+  @override
+  String get settings_transferExportIncomplete =>
+      'Папка экспорта получила файл не полностью, поэтому он не был сохранён. Повторите попытку или выберите папку в другом хранилище.';
+
+  @override
   String settings_transferSaveFailed(String error) {
     return 'Не удалось сохранить экспорт: $error';
   }
+
+  @override
+  String get settings_transferSaveFailedNoDetail =>
+      'Не удалось сохранить экспорт. Повторите попытку или выберите папку в другом хранилище.';
 
   @override
   String get settings_transferCopiedToClipboard =>
@@ -12926,6 +12942,47 @@ class AppLocalizationsRu extends AppLocalizations {
   String get user_chooseFolderButtonLabel => 'Выбрать папку';
 
   @override
+  String get user_backupFolderTitle => 'Папка резервных копий';
+
+  @override
+  String get user_backupFolderNotChosen =>
+      'Ещё не выбрана. Нажмите, чтобы выбрать, куда сохранять резервные копии.';
+
+  @override
+  String user_backupFolderRefusedSubtitle(String folderName) {
+    return 'Не удаётся сохранить в «$folderName». Нажмите, чтобы выбрать папку заново.';
+  }
+
+  @override
+  String user_backupFolderRefusedTitle(String folderName) {
+    return 'Не удаётся сохранить в «$folderName»';
+  }
+
+  @override
+  String get user_backupFolderRefusedContent =>
+      'WebLibre больше не может создавать файлы в этой папке, даже если она всё ещё существует. Выберите её заново: повторный выбор той же папки обновляет доступ. Если это не поможет, выберите новую папку, например в «Документах».';
+
+  @override
+  String user_backupFolderStillRefused(String folderName) {
+    return 'Повторный выбор «$folderName» не помог: резервные копии по-прежнему нельзя туда сохранить. Попробуйте новую папку, например в «Документах».';
+  }
+
+  @override
+  String user_backupFolderRefused(String folderName) {
+    return 'Невозможно сохранять резервные копии в «$folderName». Выберите другую папку, например в «Документах».';
+  }
+
+  @override
+  String user_backupFolderUnresponsive(String folderName) {
+    return 'Папка «$folderName» не ответила вовремя. Убедитесь, что её хранилище доступно (подключено, а для облачной папки — есть подключение к сети), или выберите папку в другом хранилище.';
+  }
+
+  @override
+  String user_backupFolderFull(String folderName) {
+    return 'В хранилище, где находится папка «$folderName», не осталось места. Освободите место или выберите папку в другом хранилище.';
+  }
+
+  @override
   String get user_noBackupsFound => 'Резервные копии не найдены';
 
   @override
@@ -14445,6 +14502,48 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged) {
     return 'Не удалось записать резервную копию в папку. Выберите папку заново и повторите попытку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderFull(String nothingChanged) {
+    return 'В хранилище, где находится папка резервных копий, не осталось места. Освободите там место и повторите попытку или откройте WebLibre и начните новое резервное копирование в другую папку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  ) {
+    return 'Для резервной копии нужно около $required, но в хранилище, где находится папка резервных копий, свободно только $free. Освободите там место и повторите попытку или откройте WebLibre и начните новое резервное копирование в другую папку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged) {
+    return 'Хранилище папки резервных копий не ответило. Убедитесь, что оно доступно (подключено, а для облачной папки — есть подключение к сети), и повторите попытку или откройте WebLibre и начните новое резервное копирование в другую папку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupIncomplete(String nothingChanged) {
+    return 'Папка резервных копий получила резервную копию не полностью, поэтому копия не была сохранена. Повторите попытку. Если это повторится, откройте WebLibre и начните новое резервное копирование в другую папку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailed(String nothingChanged) {
+    return 'Не удалось записать резервную копию в папку. Папка остаётся выбранной. Повторите попытку, а если ошибка повторится, откройте WebLibre и начните новое резервное копирование в другую папку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  ) {
+    return 'Не удалось записать резервную копию в папку ($detail). Папка остаётся выбранной. Повторите попытку, а если ошибка повторится, откройте WebLibre и начните новое резервное копирование в другую папку. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged) {
+    return 'Не удалось прочитать готовую резервную копию из собственного хранилища WebLibre, чтобы скопировать её в папку. Повторите попытку. $nothingChanged';
   }
 
   @override

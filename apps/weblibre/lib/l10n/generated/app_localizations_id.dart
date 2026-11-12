@@ -10207,9 +10207,25 @@ class AppLocalizationsId extends AppLocalizations {
       'Folder ekspor sudah tidak ada. Pilih lagi, lalu coba ulang.';
 
   @override
+  String get settings_transferExportFolderRefused =>
+      'WebLibre tidak lagi dapat menyimpan ke folder ekspor. Pilih folder itu lagi, lalu coba ulang: memilih folder yang sama akan memperbarui akses.';
+
+  @override
+  String get settings_transferExportFolderFull =>
+      'Penyimpanan tempat folder ekspor berada sudah penuh. Kosongkan ruang, lalu coba ulang.';
+
+  @override
+  String get settings_transferExportIncomplete =>
+      'Folder ekspor tidak menerima berkas secara utuh, jadi berkas itu tidak dipertahankan. Coba ulang, atau pilih folder di penyimpanan lain.';
+
+  @override
   String settings_transferSaveFailed(String error) {
     return 'Tidak dapat menyimpan ekspor: $error';
   }
+
+  @override
+  String get settings_transferSaveFailedNoDetail =>
+      'Tidak dapat menyimpan ekspor. Coba ulang, atau pilih folder di penyimpanan lain.';
 
   @override
   String get settings_transferCopiedToClipboard =>
@@ -12768,6 +12784,47 @@ class AppLocalizationsId extends AppLocalizations {
   String get user_chooseFolderButtonLabel => 'Pilih folder';
 
   @override
+  String get user_backupFolderTitle => 'Folder cadangan';
+
+  @override
+  String get user_backupFolderNotChosen =>
+      'Belum dipilih. Ketuk untuk memilih tempat cadangan disimpan.';
+
+  @override
+  String user_backupFolderRefusedSubtitle(String folderName) {
+    return 'Tidak dapat menyimpan ke \"$folderName\". Ketuk untuk memilih folder lagi.';
+  }
+
+  @override
+  String user_backupFolderRefusedTitle(String folderName) {
+    return 'Tidak dapat menyimpan ke \"$folderName\"';
+  }
+
+  @override
+  String get user_backupFolderRefusedContent =>
+      'WebLibre tidak lagi dapat membuat berkas di folder ini, meskipun folder itu masih ada. Pilih folder itu lagi: memilih folder yang sama akan memperbarui akses. Jika tidak membantu, pilih folder baru, misalnya di dalam Dokumen.';
+
+  @override
+  String user_backupFolderStillRefused(String folderName) {
+    return 'Memilih \"$folderName\" lagi tidak membantu: cadangan tetap tidak dapat disimpan di sana. Coba folder baru, misalnya di dalam Dokumen.';
+  }
+
+  @override
+  String user_backupFolderRefused(String folderName) {
+    return 'Cadangan tidak dapat disimpan ke \"$folderName\". Pilih folder lain, misalnya di dalam Dokumen.';
+  }
+
+  @override
+  String user_backupFolderUnresponsive(String folderName) {
+    return '\"$folderName\" tidak merespons tepat waktu. Pastikan penyimpanannya tersedia (terhubung, atau daring untuk folder cloud), atau pilih folder di penyimpanan lain.';
+  }
+
+  @override
+  String user_backupFolderFull(String folderName) {
+    return 'Penyimpanan tempat \"$folderName\" berada sudah penuh. Kosongkan ruang, atau pilih folder di penyimpanan lain.';
+  }
+
+  @override
   String get user_noBackupsFound => 'Tidak ada cadangan';
 
   @override
@@ -14271,6 +14328,48 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String startup_maintenanceBackupFolderUnavailable(String nothingChanged) {
     return 'Cadangan tidak dapat ditulis ke folder. Pilih folder lagi, lalu coba ulang. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderFull(String nothingChanged) {
+    return 'Penyimpanan tempat folder cadangan berada sudah penuh. Kosongkan ruang di sana, lalu coba ulang, atau buka WebLibre dan mulai cadangan baru ke folder lain. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderTooSmall(
+    String required,
+    String free,
+    String nothingChanged,
+  ) {
+    return 'Cadangan memerlukan sekitar $required, tetapi hanya tersisa $free di penyimpanan tempat folder cadangan berada. Kosongkan ruang di sana, lalu coba ulang, atau buka WebLibre dan mulai cadangan baru ke folder lain. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupFolderUnresponsive(String nothingChanged) {
+    return 'Penyimpanan folder cadangan tidak merespons. Pastikan penyimpanan itu tersedia (terhubung, atau daring untuk folder cloud), lalu coba ulang, atau buka WebLibre dan mulai cadangan baru ke folder lain. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupIncomplete(String nothingChanged) {
+    return 'Folder cadangan tidak menerima cadangan secara utuh, jadi cadangan itu tidak dipertahankan. Coba ulang. Jika terus terjadi, buka WebLibre dan mulai cadangan baru ke folder lain. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailed(String nothingChanged) {
+    return 'Cadangan tidak dapat ditulis ke folder. Folder tetap dipilih. Coba ulang, dan jika terus gagal, buka WebLibre dan mulai cadangan baru ke folder lain. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupWriteFailedDetail(
+    String detail,
+    String nothingChanged,
+  ) {
+    return 'Cadangan tidak dapat ditulis ke folder ($detail). Folder tetap dipilih. Coba ulang, dan jika terus gagal, buka WebLibre dan mulai cadangan baru ke folder lain. $nothingChanged';
+  }
+
+  @override
+  String startup_maintenanceBackupArchiveUnreadable(String nothingChanged) {
+    return 'Cadangan yang sudah selesai tidak dapat dibaca dari penyimpanan internal WebLibre untuk disalin ke folder. Coba ulang. $nothingChanged';
   }
 
   @override

@@ -111,6 +111,72 @@
   "@user_chooseFolderButtonLabel": {
     "description": "Button that opens the system folder picker for backups."
   },
+  "user_backupFolderTitle": "Backup folder",
+  "@user_backupFolderTitle": {
+    "description": "Title of the row on the Create Backup screen that shows where the backup will be saved. Tapping it opens the system folder picker."
+  },
+  "user_backupFolderNotChosen": "Not chosen yet. Tap to choose where backups are saved.",
+  "@user_backupFolderNotChosen": {
+    "description": "Subtitle of the backup folder row while no folder has been chosen."
+  },
+  "user_backupFolderRefusedSubtitle": "Can't save to {folderName}. Tap to choose the folder again.",
+  "@user_backupFolderRefusedSubtitle": {
+    "description": "Subtitle of the backup folder row, shown in the error color, after the folder failed a check that it accepts new files. folderName is the folder's name.",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupFolderRefusedTitle": "Can't save to \"{folderName}\"",
+  "@user_backupFolderRefusedTitle": {
+    "description": "Title of the dialog shown when backing up finds that the backup folder no longer accepts new files. folderName is the folder's name.",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupFolderRefusedContent": "WebLibre can no longer create files in this folder, even if it is still there. Choose it again: picking the same folder renews the access. If that doesn't help, choose a new folder, for example one in Documents.",
+  "@user_backupFolderRefusedContent": {
+    "description": "Body of that dialog. Explains that re-selecting the same folder in the system picker usually fixes it."
+  },
+  "user_backupFolderStillRefused": "Choosing {folderName} again didn't help: backups still can't be saved there. Try a new folder, for example one in Documents.",
+  "@user_backupFolderStillRefused": {
+    "description": "Error message when the backup folder failed its check, the user chose that same folder again in the system picker, and it still does not accept new files. folderName is the folder's name.",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupFolderRefused": "Backups can't be saved to {folderName}. Choose another folder, for example one in Documents.",
+  "@user_backupFolderRefused": {
+    "description": "Error message when the folder just chosen in the system picker does not accept new files. folderName is the folder's name.",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupFolderUnresponsive": "{folderName} didn't respond in time. Make sure its storage is available (connected, or online for a cloud folder), or choose a folder on other storage.",
+  "@user_backupFolderUnresponsive": {
+    "description": "Error message when the storage holding the backup folder (a cloud drive, a USB stick) did not answer a test write in time. The folder stays chosen. folderName is the folder's name.",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
+  "user_backupFolderFull": "There's no space left where {folderName} is stored. Free up space, or choose a folder on other storage.",
+  "@user_backupFolderFull": {
+    "description": "Error message when the storage holding the backup folder is full. The folder itself is fine and stays chosen. folderName is the folder's name.",
+    "placeholders": {
+      "folderName": {
+        "type": "String"
+      }
+    }
+  },
   "user_noBackupsFound": "No backups found",
   "@user_noBackupsFound": {
     "description": "Shown when the backup folder contains no backups."
