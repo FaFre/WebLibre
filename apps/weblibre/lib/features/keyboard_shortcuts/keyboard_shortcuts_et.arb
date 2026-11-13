@@ -1,0 +1,10 @@
+{
+  "keyboardShortcuts_title": "Klaviatuuri kiirklahvid",
+  "@keyboardShortcuts_title": {
+    "description": "Title of the settings screen and of the overview dialog listing keyboard shortcuts for a hardware keyboard."
+  },
+  "keyboardShortcuts_searchHint": "Otsi toiminguid või klahve",
+  "@keyboardShortcuts_searchHint": {
+    "description": "Placeholder of the search field on the keyboard shortcuts screen; the user can search by action name or by key."
+  }
+}

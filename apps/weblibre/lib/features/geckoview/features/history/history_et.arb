@@ -1,0 +1,39 @@
+{
+  "history_titleHistory": "Ajalugu",
+  "@history_titleHistory": {
+    "description": "Title of the browsing history screen."
+  },
+  "history_titleDownloads": "Allalaadimised",
+  "@history_titleDownloads": {
+    "description": "Title of the same screen when it shows downloaded files instead of browsing history."
+  },
+  "history_filterHintHistory": "Filtreeri ajalugu…",
+  "@history_filterHintHistory": {
+    "description": "Placeholder of the search field on the history screen."
+  },
+  "history_filterDate": "Kuupäev",
+  "@history_filterDate": {
+    "description": "Label of the filter button that restricts history to a date range; replaced by the chosen range once set."
+  },
+  "history_filterContainer": "Konteiner",
+  "@history_filterContainer": {
+    "description": "Label of the filter button that restricts history to one container, when no container is selected."
+  },
+  "history_allContainers": "Kõik konteinerid",
+  "@history_allContainers": {
+    "description": "Choice in the container filter: show history from all containers."
+  },
+  "history_unnamedContainer": "Ilma nimeta konteiner",
+  "@history_unnamedContainer": {
+    "description": "Fallback name for a container that has no name."
+  },
+  "history_containerFilterLabel": "Konteiner: {container}",
+  "@history_containerFilterLabel": {
+    "description": "Label of the container filter button while a container is selected. container is its name.",
+    "placeholders": {
+      "container": {
+        "type": "String"
+      }
+    }
+  }
+}

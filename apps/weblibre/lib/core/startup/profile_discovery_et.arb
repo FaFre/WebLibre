@@ -1,0 +1,11 @@
+{
+    "profileDiscovery_recoveredProfileName": "Taastatud profiil {idFragment}",
+    "@profileDiscovery_recoveredProfileName": {
+        "description": "Name given to a browser profile the app found on disk without its metadata and recovered. idFragment is the last 8 characters of the profile id, so recovered profiles can be told apart. Must not contain brackets: profile names with brackets are rejected.",
+        "placeholders": {
+            "idFragment": {
+                "type": "String"
+            }
+        }
+    }
+}

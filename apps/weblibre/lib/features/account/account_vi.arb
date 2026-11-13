@@ -1,0 +1,138 @@
+{
+  "account_screenTitle": "Tài khoản WebLibre",
+  "@account_screenTitle": {
+    "description": "Title of the settings screen for the WebLibre Account (the app's own optional online account for the supporter subscription, search credits and encrypted settings sync). WebLibre is the app name."
+  },
+  "account_searchHint": "Tìm kiếm cài đặt tài khoản",
+  "@account_searchHint": {
+    "description": "Placeholder of the search field on the WebLibre Account screen."
+  },
+  "account_loadFailed": "Tải tài khoản thất bại",
+  "@account_loadFailed": {
+    "description": "Error shown in place of the account screen content when the account state could not be loaded."
+  },
+  "account_sectionAccount": "Tài khoản",
+  "@account_sectionAccount": {
+    "description": "Section heading on the WebLibre Account screen for sign-in status."
+  },
+  "account_sectionSubscription": "Thuê bao",
+  "@account_sectionSubscription": {
+    "description": "Section heading on the WebLibre Account screen for the supporter subscription."
+  },
+  "account_sectionSearchCredits": "Tìm kiếm Tín dụng",
+  "@account_sectionSearchCredits": {
+    "description": "Section heading on the WebLibre Account screen for prepaid search credits."
+  },
+  "account_sectionEncryptedSync": "Đồng bộ được mã hóa",
+  "@account_sectionEncryptedSync": {
+    "description": "Section heading for setting up end-to-end encrypted sync of settings."
+  },
+  "account_signInTitle": "Đăng nhập vào tài khoản WebLibre",
+  "@account_signInTitle": {
+    "description": "Row that starts signing in to the WebLibre Account; also the title of the account section while signed out."
+  },
+  "account_signInKeywords": "đăng nhập, tài khoản, xác thực",
+  "@account_signInKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_signInSyncKeyKeywords": "đồng bộ khóa, đặt lại đồng bộ khóa",
+  "@account_signInSyncKeyKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_signingInTitle": "Đang đăng nhập",
+  "@account_signingInTitle": {
+    "description": "Title of the account section while sign-in is in progress."
+  },
+  "account_signedInTitle": "Đã đăng nhập tài khoản",
+  "@account_signedInTitle": {
+    "description": "Title of the account section while signed in."
+  },
+  "account_signInFailedTitle": "Đăng nhập thất bại",
+  "@account_signInFailedTitle": {
+    "description": "Title of the account section, and heading of the error card, when signing in failed."
+  },
+  "account_syncAcrossDevicesSubtitle": "Đồng bộ cài đặt của bạn giữa các thiết bị",
+  "@account_syncAcrossDevicesSubtitle": {
+    "description": "Line under the sign-in row explaining what the account is for."
+  },
+  "account_signingInSubtitle": "Hoàn tất đăng nhập vào trình duyệt của bạn",
+  "@account_signingInSubtitle": {
+    "description": "Line under the account section while sign-in waits for the user to finish it on the sign-in web page."
+  },
+  "account_signedInFallback": "Đã đăng nhập",
+  "@account_signedInFallback": {
+    "description": "Shown in place of the user's name or email when signed in but neither is known."
+  },
+  "account_entrySupporterSubscriptionTitle": "Thuê bao của người ủng hộ",
+  "@account_entrySupporterSubscriptionTitle": {
+    "description": "Title of the supporter subscription entry, shown as a settings search result."
+  },
+  "account_entrySupporterSubscriptionKeywords": "thanh toán, người ủng hộ",
+  "@account_entrySupporterSubscriptionKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  },
+  "account_entrySupporterSubscriptionSubtitle": "trạng thái, thanh toán và quản lý thuê bao",
+  "@account_entrySupporterSubscriptionSubtitle": {
+    "description": "Summary of the supporter subscription entry, shown as a settings search result."
+  },
+  "account_entrySearchCreditsTitle": "Tìm kiếm tín dụng",
+  "@account_entrySearchCreditsTitle": {
+    "description": "Title of the search credits entry, shown as a settings search result."
+  },
+  "account_entrySettingsSnapshotsSubtitle": "Lưu trữ và khôi phục những cài đặt ứng dụng đã được mã hóa",
+  "@account_entrySettingsSnapshotsSubtitle": {
+    "description": "Summary of the settings snapshots entry, shown as a settings search result."
+  },
+  "account_entrySetupEncryptedSyncTitle": "Thiết lập đồng bộ được mã hóa",
+  "@account_entrySetupEncryptedSyncTitle": {
+    "description": "Title of the encrypted sync setup entry, shown as a settings search result."
+  },
+  "account_entrySetupEncryptedSyncSubtitle": "Bật đồng bộ được mã hóa đầu cuối sử dụng mật khẩu tài khoản của bạn",
+  "@account_entrySetupEncryptedSyncSubtitle": {
+    "description": "Summary of the encrypted sync setup entry, shown as a settings search result."
+  },
+  "account_actionRestore": "Khôi phục",
+  "@account_actionRestore": {
+    "description": "Menu item of a stored snapshot, and confirm button of the restore dialog: replace the current settings with the snapshot."
+  },
+  "account_actionEditLabel": "Chỉnh sửa Nhãn",
+  "@account_actionEditLabel": {
+    "description": "Menu item of a stored snapshot that renames it, and title of the rename dialog."
+  },
+  "account_actionStore": "Lưu trữ",
+  "@account_actionStore": {
+    "description": "Confirm button of the dialog that uploads a new encrypted snapshot."
+  },
+  "account_actionTryAgain": "Thử lại",
+  "@account_actionTryAgain": {
+    "description": "Button on the sign-in error card that starts sign-in again."
+  },
+  "account_actionSignOut": "Đăng xuất",
+  "@account_actionSignOut": {
+    "description": "Confirm button of the sign-out dialog."
+  },
+  "account_actionEnableSync": "Bật đồng bộ hóa",
+  "@account_actionEnableSync": {
+    "description": "Button that sets up encrypted sync with the entered password."
+  },
+  "account_adoptTitleUsable": "Một phiên đăng nhập cũ hơn vẫn còn trên thiết bị này",
+  "@account_adoptTitleUsable": {
+    "description": "Heading of a card about an account sign-in left over from an older app version, before each profile had its own account."
+  },
+  "account_adoptTitleUnusable": "Một phiên đăng nhập cũ hơn không đọc được",
+  "@account_adoptTitleUnusable": {
+    "description": "Heading of the same card when the leftover sign-in is damaged."
+  },
+  "account_adoptRetryError": "Việc đó không hoạt động. Kiểm tra kết nối và thử lại.",
+  "@account_adoptRetryError": {
+    "description": "Error on the leftover sign-in card when using or removing it failed."
+  },
+  "account_adoptNotMine": "Không phải của tôi",
+  "@account_adoptNotMine": {
+    "description": "Button on the leftover sign-in card: this sign-in does not belong to this profile (removes it after confirmation)."
+  },
+  "account_adoptRemoveIt": "Xóa nó đi",
+  "@account_adoptRemoveIt": {
+    "description": "Button on the damaged leftover sign-in card that deletes it."
+  }
+}
