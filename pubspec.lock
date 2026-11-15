@@ -269,10 +269,10 @@ packages:
     dependency: transitive
     description:
       name: crypto
-      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
+      sha256: e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4
       url: "https://pub.dev"
     source: hosted
-    version: "3.0.7"
+    version: "3.0.8"
   cryptography:
     dependency: transitive
     description:
@@ -1730,10 +1730,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "2a122cbe059f8b610d3a5415f42e255b6c17b1f21eee1d960f31080237fb4f11"
+      sha256: "0a10344e901e5b2e63819567951cb6a06673ed6b84f40462188ff5a0c41f371f"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.12"
+    version: "0.7.14"
   text_scroll:
     dependency: transitive
     description:
