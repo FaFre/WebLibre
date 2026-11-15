@@ -1,11 +1,12 @@
 name: Workflow security
 
 # Checks the supply-chain rules build.yml relies on, whenever a workflow, the
-# lockfile or the Dependabot config changes:
+# lockfile, Dependabot config or release helper scripts change:
 # - `lockfile`: .github/workflows/actions.lock covers every `uses:` and each
 #   locked commit still verifies upstream (github/gh-actions-lock's
 #   verify-lockfile.yml). The runner checks it again at job start.
 # - `zizmor`: static audit of the workflows and dependabot.yml.
+# - `release-tests`: release verification helpers, before a tag build needs them.
 #
 # After adding a workflow or a `uses:`, run `gh actions-lock` and commit
 # actions.lock with it. The gh-actions-lock pin below is not tracked by
@@ -16,12 +17,14 @@ on:
     paths:
       - '.github/workflows/**'
       - '.github/dependabot.yml'
+      - 'scripts/release/**'
   push:
     branches:
       - main
     paths:
       - '.github/workflows/**'
       - '.github/dependabot.yml'
+      - 'scripts/release/**'
   workflow_dispatch:
 
 permissions: {}
@@ -31,6 +34,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  release-tests:
+    name: Test release verification scripts
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read # checkout only
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - run: python3 -B -m unittest discover -s scripts/release -p 'test_*.py'
+
   lockfile:
     name: Verify actions.lock
     runs-on: ubuntu-slim

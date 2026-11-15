@@ -13,6 +13,8 @@ the artifacts as they will be published, after re-signing:
 - the package is the track's (`eu.weblibre.gecko`, `.alpha`) and the version
   name is the tag's, both as the artifact declares them and in its build
   manifest;
+- exactly six GitHub APKs (two renderers times three ABIs), plus a Play bundle
+  for stable releases only; all artifacts agree on their component identities;
 - isolation (9.3): no updater receiver or confirmation-free install
   permission in Play's manifest. The dex checks here (no Play Core in GitHub
   APKs, no installer or apksig in the Play bundle) only catch an unminified
@@ -96,8 +98,13 @@ def badging(aapt2: Path, apk: Path) -> dict:
 def parse_badging(out: str) -> dict:
     package = re.search(r"package: name='([^']+)' versionCode='(\d+)'", out)
     name = re.search(r" versionName='([^']*)'", out)
-    sdk = re.search(r"sdkVersion:'(\d+)'", out)
+    # Recent aapt2 versions call this minSdkVersion; older tools use sdkVersion.
+    sdk = re.search(r"^(?:minSdkVersion|sdkVersion):\s*'(\d+)'", out, re.MULTILINE)
     abis = re.search(r"native-code: (.+)", out)
+    if package is None:
+        raise ValueError("aapt2 badging has no package name and numeric versionCode")
+    if sdk is None:
+        raise ValueError("aapt2 badging has no numeric minimum SDK (minSdkVersion or sdkVersion)")
     return {
         "package": package.group(1),
         "versionCode": int(package.group(2)),
@@ -145,6 +152,37 @@ def check_identity(name: str, manifest: dict, expected: dict[str, str]) -> None:
     for key, value in expected.items():
         if manifest.get(key) != value:
             fail(f"{name}: build manifest {key}={manifest.get(key)}, expected {value}")
+
+
+def check_artifact_set(apks: list[Path], track: str, bundle: Path | None) -> None:
+    expected = {
+        f"app-{track}{suffix}-{abi}-release.apk"
+        for suffix in ("", "Impeller")
+        for abi in ABI_DIGITS
+    }
+    actual = {apk.name for apk in apks}
+    if missing := expected - actual:
+        fail(f"missing APKs: {', '.join(sorted(missing))}")
+    if unexpected := actual - expected:
+        fail(f"unexpected APKs: {', '.join(sorted(unexpected))}")
+
+    if track == "stable":
+        if bundle is None:
+            fail("stable releases require a Play bundle (--bundle)")
+        elif not bundle.is_file():
+            fail(f"Play bundle does not exist: {bundle}")
+    elif bundle is not None:
+        fail("bundle: given for an alpha release")
+
+
+def check_components(name: str, actual: dict, expected: dict | None) -> dict:
+    # release.json has one shared component map, so no target may silently
+    # inherit the identities of a different build. An empty map still counts.
+    if expected is None:
+        return actual
+    if actual != expected:
+        fail(f"{name}: build manifest components differ from the other release artifacts")
+    return expected
 
 
 def read_manifest(zip_path: Path, entry: str) -> dict:
@@ -196,8 +234,10 @@ def main() -> int:
     sequence = None
 
     apks = sorted(args.apk_dir.glob("*.apk"))
-    if not apks:
-        fail(f"no APKs in {args.apk_dir}")
+    check_artifact_set(apks, track, args.bundle)
+    if errors:
+        print(f"{len(errors)} check(s) failed", file=sys.stderr)
+        return 1
     for apk in apks:
         match = APK_NAME.match(apk.name)
         if not match:
@@ -212,7 +252,11 @@ def main() -> int:
         if signers != [PRODUCTION_FINGERPRINT]:
             fail(f"{apk.name}: signed by {signers}, expected the production certificate")
 
-        info = badging(aapt2, apk)
+        try:
+            info = badging(aapt2, apk)
+        except ValueError as error:
+            fail(f"{apk.name}: {error}")
+            continue
         manifest = read_manifest(apk, MANIFEST_ENTRY)
         check_identity(apk.name, manifest, {"distribution": "github", "track": track, "renderer": renderer})
         seq = manifest["logicalReleaseSequence"]
@@ -229,7 +273,7 @@ def main() -> int:
         if sequence is not None and seq != sequence:
             fail(f"{apk.name}: release sequence {seq} differs from {sequence}")
         sequence = seq
-        components = components or manifest["components"]
+        components = check_components(apk.name, manifest["components"], components)
 
         targets.append({
             "id": f"{tag}/github/{track}/{renderer}/{abi}",
@@ -265,6 +309,7 @@ def main() -> int:
                 fail(f"bundle: versionCode {code} != sequence {manifest['logicalReleaseSequence']}")
             if sequence is not None and code != sequence:
                 fail(f"bundle: sequence {code} differs from the APKs' {sequence}")
+            components = check_components("bundle", manifest["components"], components)
             for forbidden in ("UPDATE_PACKAGES_WITHOUT_USER_ACTION", "InstallStatusReceiver"):
                 if forbidden in xml:
                     fail(f"bundle: manifest contains {forbidden}")
