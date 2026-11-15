@@ -1274,18 +1274,18 @@ class AppLocalizationsId extends AppLocalizations {
   String get appLinks_removeRuleTooltip => 'Hapus aturan';
 
   @override
-  String get appUpdate_sectionTitle => 'Updates';
+  String get appUpdate_sectionTitle => 'Pembaruan';
 
   @override
   String get appUpdate_sectionKeywords =>
-      'update, upgrade, version, release, new version, self-update';
+      'pembaruan, perbarui, versi, versi baru, rilis, update, upgrade, release';
 
   @override
-  String get appUpdate_appUpdates => 'App updates';
+  String get appUpdate_appUpdates => 'Pembaruan aplikasi';
 
   @override
   String get appUpdate_settingsTileSubtitle =>
-      'Check for and install new versions of WebLibre';
+      'Periksa dan instal versi baru WebLibre';
 
   @override
   String appUpdate_installedVersion(String version) {
@@ -1293,159 +1293,157 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
-  String get appUpdate_statusIdle => 'Not checked yet';
+  String get appUpdate_statusIdle => 'Belum diperiksa';
 
   @override
-  String get appUpdate_statusUpToDate => 'WebLibre is up to date';
+  String get appUpdate_statusUpToDate => 'WebLibre sudah versi terbaru';
 
   @override
   String appUpdate_lastChecked(String time) {
-    return 'Last checked $time';
+    return 'Terakhir diperiksa: $time';
   }
 
   @override
-  String get appUpdate_statusChecking => 'Checking for updates…';
+  String get appUpdate_statusChecking => 'Memeriksa pembaruan…';
 
   @override
   String appUpdate_statusAvailable(String version) {
-    return 'Version $version is available';
+    return 'Versi $version tersedia';
   }
 
   @override
-  String get appUpdate_statusAvailableUnknownVersion =>
-      'An update is available';
+  String get appUpdate_statusAvailableUnknownVersion => 'Pembaruan tersedia';
 
   @override
   String appUpdate_downloadSize(String size) {
-    return 'Download size: $size';
+    return 'Ukuran unduhan: $size';
   }
 
   @override
   String appUpdate_partialDownloaded(String size) {
-    return '$size already downloaded';
+    return '$size sudah diunduh';
   }
 
   @override
   String appUpdate_statusDownloading(String version) {
-    return 'Downloading $version';
+    return 'Mengunduh $version';
   }
 
   @override
-  String get appUpdate_statusDownloadingUnknownVersion =>
-      'Downloading the update';
+  String get appUpdate_statusDownloadingUnknownVersion => 'Mengunduh pembaruan';
 
   @override
   String appUpdate_downloadProgress(String received, String total) {
-    return '$received of $total';
+    return '$received dari $total';
   }
 
   @override
-  String get appUpdate_statusVerifying => 'Verifying download…';
+  String get appUpdate_statusVerifying => 'Memverifikasi unduhan…';
 
   @override
   String appUpdate_statusReady(String version) {
-    return 'Update ready: $version';
+    return 'Pembaruan siap: $version';
   }
 
   @override
-  String get appUpdate_statusReadyUnknownVersion => 'Update ready';
+  String get appUpdate_statusReadyUnknownVersion => 'Pembaruan siap';
 
   @override
   String get appUpdate_statusAwaitingPermission =>
-      'Allow WebLibre to install updates';
+      'Izinkan WebLibre menginstal pembaruan';
 
   @override
-  String get appUpdate_statusAwaitingUserAction => 'Waiting for confirmation';
+  String get appUpdate_statusAwaitingUserAction => 'Menunggu konfirmasi';
 
   @override
-  String get appUpdate_statusInstalling => 'Installing…';
+  String get appUpdate_statusInstalling => 'Menginstal…';
 
   @override
   String get appUpdate_preferencesUnreadable =>
-      'Update settings couldn\'t be read, so automatic checks are off.';
+      'Pengaturan pembaruan tidak dapat dibaca, sehingga pemeriksaan otomatis dinonaktifkan.';
 
   @override
   String get appUpdate_detailsDataDamaged =>
-      'The data that verifies update details was damaged, so details can\'t be shown. Updating still works.';
+      'Data yang memverifikasi detail pembaruan rusak, sehingga detail tidak dapat ditampilkan. Pembaruan tetap berfungsi.';
 
   @override
-  String get appUpdate_securityFixes => 'Includes security fixes';
+  String get appUpdate_securityFixes => 'Berisi perbaikan keamanan';
 
   @override
-  String get appUpdate_securityCritical => 'Includes critical security fixes';
+  String get appUpdate_securityCritical => 'Berisi perbaikan keamanan kritis';
 
   @override
   String get appUpdate_securityLaterVersion =>
-      'A later version fixes a known security issue';
+      'Versi yang lebih baru memperbaiki masalah keamanan yang diketahui';
 
   @override
   String get appUpdate_detailsUnavailable =>
-      'Details for this version aren\'t available';
+      'Detail untuk versi ini tidak tersedia';
 
   @override
-  String get appUpdate_actionCheckNow => 'Check now';
+  String get appUpdate_actionCheckNow => 'Periksa sekarang';
 
   @override
-  String get appUpdate_actionDownload => 'Download';
+  String get appUpdate_actionDownload => 'Unduh';
 
   @override
-  String get appUpdate_actionContinueDownload => 'Continue download';
+  String get appUpdate_actionContinueDownload => 'Lanjutkan unduhan';
 
   @override
-  String get appUpdate_actionInstall => 'Install';
+  String get appUpdate_actionInstall => 'Instal';
 
   @override
-  String get appUpdate_actionAllow => 'Allow…';
+  String get appUpdate_actionAllow => 'Izinkan…';
 
   @override
-  String get appUpdate_actionContinue => 'Continue';
+  String get appUpdate_actionContinue => 'Lanjutkan';
 
   @override
-  String get appUpdate_actionCancelInstallation => 'Cancel installation';
+  String get appUpdate_actionCancelInstallation => 'Batalkan penginstalan';
 
   @override
-  String get appUpdate_actionRestart => 'Restart';
+  String get appUpdate_actionRestart => 'Mulai ulang';
 
   @override
-  String get appUpdate_actionResetTrust => 'Reset and check again';
+  String get appUpdate_actionResetTrust => 'Setel ulang dan periksa lagi';
 
   @override
-  String get appUpdate_actionTurnOnChecks => 'Turn on automatic checks';
+  String get appUpdate_actionTurnOnChecks => 'Aktifkan pemeriksaan otomatis';
 
   @override
-  String get appUpdate_actionKeepOff => 'Keep off';
+  String get appUpdate_actionKeepOff => 'Biarkan nonaktif';
 
   @override
   String appUpdate_whatsNewTitle(String version) {
-    return 'What\'s new in $version';
+    return 'Yang baru di $version';
   }
 
   @override
-  String get appUpdate_fullReleaseNotes => 'Full release notes';
+  String get appUpdate_fullReleaseNotes => 'Catatan rilis lengkap';
 
   @override
-  String get appUpdate_whatChangesTitle => 'What changes';
+  String get appUpdate_whatChangesTitle => 'Yang berubah';
 
   @override
-  String get appUpdate_changeUnchanged => 'unchanged';
+  String get appUpdate_changeUnchanged => 'tidak berubah';
 
   @override
-  String get appUpdate_changeUpgraded => 'upgraded';
+  String get appUpdate_changeUpgraded => 'ditingkatkan';
 
   @override
-  String get appUpdate_changeDowngraded => 'downgraded';
+  String get appUpdate_changeDowngraded => 'diturunkan';
 
   @override
-  String get appUpdate_changeChanged => 'changed';
+  String get appUpdate_changeChanged => 'diubah';
 
   @override
-  String get appUpdate_changeUnknown => 'unknown';
+  String get appUpdate_changeUnknown => 'tidak diketahui';
 
   @override
-  String get appUpdate_componentVersionUnknown => 'Unknown';
+  String get appUpdate_componentVersionUnknown => 'Tidak diketahui';
 
   @override
-  String get appUpdate_componentNotBundled => 'Not included';
+  String get appUpdate_componentNotBundled => 'Tidak disertakan';
 
   @override
   String appUpdate_componentChange(String from, String to) {
@@ -1454,193 +1452,195 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get appUpdate_automaticChecksTitle =>
-      'Check for updates automatically';
+      'Periksa pembaruan secara otomatis';
 
   @override
   String get appUpdate_automaticChecksSubtitle =>
-      'Once a day, with a notice when a new version is out. Downloads and installs only start with a tap.';
+      'Sekali sehari, dengan pemberitahuan saat versi baru dirilis. Unduhan dan penginstalan hanya dimulai setelah Anda mengetuknya.';
 
   @override
   String appUpdate_installedByOther(String app) {
-    return 'This version was installed by $app. If $app keeps WebLibre up to date, automatic checks can be turned off here.';
+    return 'Versi ini diinstal oleh $app. Jika $app yang menjaga WebLibre tetap terbaru, pemeriksaan otomatis dapat dinonaktifkan di sini.';
   }
 
   @override
   String get appUpdate_failureNetwork =>
-      'Couldn\'t reach the update server. Check the connection and try again.';
+      'Tidak dapat menghubungi server pembaruan. Periksa koneksi dan coba lagi.';
 
   @override
   String get appUpdate_failureRoutingUnavailable =>
-      'The connection WebLibre is set to use isn\'t available, so updates can\'t be checked.';
+      'Koneksi yang diatur untuk WebLibre tidak tersedia, sehingga pembaruan tidak dapat diperiksa.';
 
   @override
   String get appUpdate_failureMetadataInvalid =>
-      'The update information couldn\'t be verified.';
+      'Informasi pembaruan tidak dapat diverifikasi.';
 
   @override
   String get appUpdate_failureClientTooOld =>
-      'This version of WebLibre can\'t read the current update information. Install the newest version manually.';
+      'Versi WebLibre ini tidak dapat membaca informasi pembaruan saat ini. Instal versi terbaru secara manual.';
 
   @override
   String get appUpdate_failureMetadataExpired =>
-      'Couldn\'t verify update information. Check the device\'s date and time.';
+      'Tidak dapat memverifikasi informasi pembaruan. Periksa tanggal dan waktu perangkat.';
 
   @override
   String get appUpdate_failureMetadataRollback =>
-      'The update server sent older information than WebLibre already has.';
+      'Server pembaruan mengirim informasi yang lebih lama daripada yang sudah dimiliki WebLibre.';
 
   @override
   String get appUpdate_failureMetadataPredatesBuild =>
-      'Update information for this version isn\'t published yet. Try again later.';
+      'Informasi pembaruan untuk versi ini belum diterbitkan. Coba lagi nanti.';
 
   @override
   String get appUpdate_failureClockSuspect =>
-      'The device\'s date and time seem to be wrong. Correct them and try again.';
+      'Tanggal dan waktu perangkat tampaknya salah. Perbaiki lalu coba lagi.';
 
   @override
   String get appUpdate_failureNoCompatibleTarget =>
-      'A new version exists, but not for this device or build.';
+      'Versi baru tersedia, tetapi tidak untuk perangkat atau build ini.';
 
   @override
   String get appUpdate_failureInsufficientStorage =>
-      'Not enough free storage to download the update.';
+      'Ruang penyimpanan tidak cukup untuk mengunduh pembaruan.';
 
   @override
   String get appUpdate_failureDownloadTooLarge =>
-      'The download was larger than expected and was stopped.';
+      'Unduhan lebih besar dari yang diharapkan dan dihentikan.';
 
   @override
   String get appUpdate_failureDownloadMismatch =>
-      'The downloaded file didn\'t match the published update and was deleted.';
+      'Berkas yang diunduh tidak cocok dengan pembaruan yang diterbitkan dan telah dihapus.';
 
   @override
   String get appUpdate_failureApkInvalid =>
-      'The downloaded update is damaged and was deleted.';
+      'Pembaruan yang diunduh rusak dan telah dihapus.';
 
   @override
   String get appUpdate_failureApkIdentityMismatch =>
-      'The downloaded update is for a different build of WebLibre and was deleted.';
+      'Pembaruan yang diunduh ditujukan untuk build WebLibre lain dan telah dihapus.';
 
   @override
   String get appUpdate_failureSignerUntrusted =>
-      'The downloaded update isn\'t signed by WebLibre and was deleted.';
+      'Pembaruan yang diunduh tidak ditandatangani oleh WebLibre dan telah dihapus.';
 
   @override
   String get appUpdate_failureAuthorizationStale =>
-      'The update information has expired. Connect to the internet so it can be checked again before installing.';
+      'Informasi pembaruan sudah kedaluwarsa. Sambungkan ke internet agar dapat diperiksa lagi sebelum menginstal.';
 
   @override
   String get appUpdate_failureTargetWithdrawn =>
-      'This update was withdrawn by the publisher.';
+      'Pembaruan ini telah ditarik oleh penerbit.';
 
   @override
   String get appUpdate_failureStateCorrupt =>
-      'Update verification data was damaged. Reset it to check again.';
+      'Data verifikasi pembaruan rusak. Setel ulang untuk memeriksa lagi.';
 
   @override
   String get appUpdate_failureInstallPermissionDenied =>
-      'WebLibre isn\'t allowed to install updates.';
+      'WebLibre tidak diizinkan menginstal pembaruan.';
 
   @override
-  String get appUpdate_failureInstallCancelled =>
-      'The installation was cancelled.';
+  String get appUpdate_failureInstallCancelled => 'Penginstalan dibatalkan.';
 
   @override
   String get appUpdate_failureInstallConflict =>
-      'Android couldn\'t install the update because it conflicts with the installed app.';
+      'Android tidak dapat menginstal pembaruan karena bertentangan dengan aplikasi yang terpasang.';
 
   @override
   String get appUpdate_failureInstallIncompatible =>
-      'This update isn\'t compatible with this device.';
+      'Pembaruan ini tidak kompatibel dengan perangkat ini.';
 
   @override
   String get appUpdate_failureInstallStorage =>
-      'Not enough free storage to install the update.';
+      'Ruang penyimpanan tidak cukup untuk menginstal pembaruan.';
 
   @override
   String get appUpdate_failureInstallBlocked =>
-      'Android blocked the installation.';
+      'Android memblokir penginstalan.';
 
   @override
   String get appUpdate_failureInstallUnknown =>
-      'The update couldn\'t be installed.';
+      'Pembaruan tidak dapat diinstal.';
 
   @override
   String get appUpdate_failurePlayNotOwned =>
-      'Google Play doesn\'t manage this installation for the signed-in account, so updates can\'t be checked here.';
+      'Google Play tidak mengelola penginstalan ini untuk akun yang sedang masuk, sehingga pembaruan tidak dapat diperiksa di sini.';
 
   @override
   String get appUpdate_failurePlayUnavailable =>
-      'Google Play can\'t update WebLibre right now.';
+      'Google Play tidak dapat memperbarui WebLibre saat ini.';
 
   @override
-  String get appUpdate_failurePlayError => 'Couldn\'t check with Google Play.';
+  String get appUpdate_failurePlayError =>
+      'Tidak dapat memeriksa melalui Google Play.';
 
   @override
-  String get appUpdate_menuAvailable => 'Update available';
+  String get appUpdate_menuAvailable => 'Pembaruan tersedia';
 
   @override
-  String get appUpdate_menuDownloading => 'Downloading update…';
+  String get appUpdate_menuDownloading => 'Mengunduh pembaruan…';
 
   @override
-  String get appUpdate_menuReady => 'Update ready: restart to install';
+  String get appUpdate_menuReady =>
+      'Pembaruan siap: mulai ulang untuk menginstal';
 
   @override
-  String get appUpdate_menuFinish => 'Finish installing the update';
+  String get appUpdate_menuFinish => 'Selesaikan penginstalan pembaruan';
 
   @override
-  String get appUpdate_menuInstalling => 'Installing update…';
+  String get appUpdate_menuInstalling => 'Menginstal pembaruan…';
 
   @override
   String get appUpdate_menuPreferencesUnreadable =>
-      'Update checks are off: settings couldn\'t be read';
+      'Pemeriksaan pembaruan nonaktif: pengaturan tidak dapat dibaca';
 
   @override
-  String get appUpdate_menuDotLabel => 'Update waiting';
+  String get appUpdate_menuDotLabel => 'Pembaruan menunggu';
 
   @override
   String appUpdate_announcement(String version) {
-    return 'WebLibre $version is available';
+    return 'WebLibre $version tersedia';
   }
 
   @override
   String get appUpdate_announcementUnknownVersion =>
-      'A WebLibre update is available';
+      'Pembaruan WebLibre tersedia';
 
   @override
-  String get appUpdate_announcementView => 'View';
+  String get appUpdate_announcementView => 'Lihat';
 
   @override
   String appUpdate_updatedTo(String version) {
-    return 'Updated to $version';
+    return 'Diperbarui ke $version';
   }
 
   @override
-  String get appUpdate_downloadCancelled => 'Download cancelled';
+  String get appUpdate_downloadCancelled => 'Unduhan dibatalkan';
 
   @override
-  String get appUpdate_installationCancelled => 'Installation cancelled';
+  String get appUpdate_installationCancelled => 'Penginstalan dibatalkan';
 
   @override
-  String get appUpdate_permissionDialogTitle => 'Allow installing updates';
+  String get appUpdate_permissionDialogTitle =>
+      'Izinkan penginstalan pembaruan';
 
   @override
   String get appUpdate_permissionDialogBody =>
-      'Android needs the “Install unknown apps” permission for WebLibre. It is used only for WebLibre\'s own verified updates.';
+      'Android memerlukan izin “Instal aplikasi tak dikenal” untuk WebLibre. Izin ini hanya digunakan untuk pembaruan WebLibre sendiri yang sudah diverifikasi.';
 
   @override
-  String get appUpdate_permissionDialogOpenSettings => 'Open settings';
+  String get appUpdate_permissionDialogOpenSettings => 'Buka pengaturan';
 
   @override
-  String get appUpdate_installDialogTitle => 'Install update?';
+  String get appUpdate_installDialogTitle => 'Instal pembaruan?';
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre will close to install the update. Open it again afterwards.';
+      'WebLibre akan ditutup untuk menginstal pembaruan. Buka kembali setelahnya.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.';
+      'WebLibre akan ditutup untuk menginstal pembaruan. Buka kembali setelahnya. Tab pribadi akan ditutup.';
 
   @override
   String get bangs_menuTitle => 'Bang';

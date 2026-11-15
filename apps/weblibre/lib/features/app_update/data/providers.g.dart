@@ -204,4 +204,4 @@ final class AppUpdateCoordinatorProvider
 }
 
 String _$appUpdateCoordinatorHash() =>
-    r'f96c75054255515b953c3a45da505ced1e2b52d1';
+    r'ef1a235d50916afddbcd9247a5ed5b1e7a112fd2';

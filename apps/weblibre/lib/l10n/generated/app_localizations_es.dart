@@ -1286,18 +1286,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appLinks_removeRuleTooltip => 'Quitar regla';
 
   @override
-  String get appUpdate_sectionTitle => 'Updates';
+  String get appUpdate_sectionTitle => 'Actualizaciones';
 
   @override
   String get appUpdate_sectionKeywords =>
-      'update, upgrade, version, release, new version, self-update';
+      'actualización, actualizar, versión, nueva versión, lanzamiento, update, upgrade, release';
 
   @override
-  String get appUpdate_appUpdates => 'App updates';
+  String get appUpdate_appUpdates => 'Actualizaciones de la aplicación';
 
   @override
   String get appUpdate_settingsTileSubtitle =>
-      'Check for and install new versions of WebLibre';
+      'Buscar e instalar nuevas versiones de WebLibre';
 
   @override
   String appUpdate_installedVersion(String version) {
@@ -1305,159 +1305,161 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get appUpdate_statusIdle => 'Not checked yet';
+  String get appUpdate_statusIdle => 'Aún no se ha comprobado';
 
   @override
-  String get appUpdate_statusUpToDate => 'WebLibre is up to date';
+  String get appUpdate_statusUpToDate => 'WebLibre está actualizado';
 
   @override
   String appUpdate_lastChecked(String time) {
-    return 'Last checked $time';
+    return 'Última comprobación: $time';
   }
 
   @override
-  String get appUpdate_statusChecking => 'Checking for updates…';
+  String get appUpdate_statusChecking => 'Buscando actualizaciones…';
 
   @override
   String appUpdate_statusAvailable(String version) {
-    return 'Version $version is available';
+    return 'La versión $version está disponible';
   }
 
   @override
   String get appUpdate_statusAvailableUnknownVersion =>
-      'An update is available';
+      'Hay una actualización disponible';
 
   @override
   String appUpdate_downloadSize(String size) {
-    return 'Download size: $size';
+    return 'Tamaño de la descarga: $size';
   }
 
   @override
   String appUpdate_partialDownloaded(String size) {
-    return '$size already downloaded';
+    return 'Ya descargado: $size';
   }
 
   @override
   String appUpdate_statusDownloading(String version) {
-    return 'Downloading $version';
+    return 'Descargando $version';
   }
 
   @override
   String get appUpdate_statusDownloadingUnknownVersion =>
-      'Downloading the update';
+      'Descargando la actualización';
 
   @override
   String appUpdate_downloadProgress(String received, String total) {
-    return '$received of $total';
+    return '$received de $total';
   }
 
   @override
-  String get appUpdate_statusVerifying => 'Verifying download…';
+  String get appUpdate_statusVerifying => 'Verificando la descarga…';
 
   @override
   String appUpdate_statusReady(String version) {
-    return 'Update ready: $version';
+    return 'Actualización lista: $version';
   }
 
   @override
-  String get appUpdate_statusReadyUnknownVersion => 'Update ready';
+  String get appUpdate_statusReadyUnknownVersion => 'Actualización lista';
 
   @override
   String get appUpdate_statusAwaitingPermission =>
-      'Allow WebLibre to install updates';
+      'Permite que WebLibre instale actualizaciones';
 
   @override
-  String get appUpdate_statusAwaitingUserAction => 'Waiting for confirmation';
+  String get appUpdate_statusAwaitingUserAction => 'Esperando confirmación';
 
   @override
-  String get appUpdate_statusInstalling => 'Installing…';
+  String get appUpdate_statusInstalling => 'Instalando…';
 
   @override
   String get appUpdate_preferencesUnreadable =>
-      'Update settings couldn\'t be read, so automatic checks are off.';
+      'No se pudieron leer los ajustes de actualización, así que las comprobaciones automáticas están desactivadas.';
 
   @override
   String get appUpdate_detailsDataDamaged =>
-      'The data that verifies update details was damaged, so details can\'t be shown. Updating still works.';
+      'Los datos que verifican los detalles de las actualizaciones están dañados, así que no se pueden mostrar los detalles. Actualizar sigue funcionando.';
 
   @override
-  String get appUpdate_securityFixes => 'Includes security fixes';
+  String get appUpdate_securityFixes => 'Incluye correcciones de seguridad';
 
   @override
-  String get appUpdate_securityCritical => 'Includes critical security fixes';
+  String get appUpdate_securityCritical =>
+      'Incluye correcciones de seguridad críticas';
 
   @override
   String get appUpdate_securityLaterVersion =>
-      'A later version fixes a known security issue';
+      'Una versión posterior corrige un problema de seguridad conocido';
 
   @override
   String get appUpdate_detailsUnavailable =>
-      'Details for this version aren\'t available';
+      'No hay detalles disponibles para esta versión';
 
   @override
-  String get appUpdate_actionCheckNow => 'Check now';
+  String get appUpdate_actionCheckNow => 'Comprobar ahora';
 
   @override
-  String get appUpdate_actionDownload => 'Download';
+  String get appUpdate_actionDownload => 'Descargar';
 
   @override
-  String get appUpdate_actionContinueDownload => 'Continue download';
+  String get appUpdate_actionContinueDownload => 'Continuar la descarga';
 
   @override
-  String get appUpdate_actionInstall => 'Install';
+  String get appUpdate_actionInstall => 'Instalar';
 
   @override
-  String get appUpdate_actionAllow => 'Allow…';
+  String get appUpdate_actionAllow => 'Permitir…';
 
   @override
-  String get appUpdate_actionContinue => 'Continue';
+  String get appUpdate_actionContinue => 'Continuar';
 
   @override
-  String get appUpdate_actionCancelInstallation => 'Cancel installation';
+  String get appUpdate_actionCancelInstallation => 'Cancelar la instalación';
 
   @override
-  String get appUpdate_actionRestart => 'Restart';
+  String get appUpdate_actionRestart => 'Reiniciar';
 
   @override
-  String get appUpdate_actionResetTrust => 'Reset and check again';
+  String get appUpdate_actionResetTrust => 'Restablecer y volver a comprobar';
 
   @override
-  String get appUpdate_actionTurnOnChecks => 'Turn on automatic checks';
+  String get appUpdate_actionTurnOnChecks =>
+      'Activar las comprobaciones automáticas';
 
   @override
-  String get appUpdate_actionKeepOff => 'Keep off';
+  String get appUpdate_actionKeepOff => 'Mantener desactivadas';
 
   @override
   String appUpdate_whatsNewTitle(String version) {
-    return 'What\'s new in $version';
+    return 'Novedades de $version';
   }
 
   @override
-  String get appUpdate_fullReleaseNotes => 'Full release notes';
+  String get appUpdate_fullReleaseNotes => 'Notas de la versión completas';
 
   @override
-  String get appUpdate_whatChangesTitle => 'What changes';
+  String get appUpdate_whatChangesTitle => 'Qué cambia';
 
   @override
-  String get appUpdate_changeUnchanged => 'unchanged';
+  String get appUpdate_changeUnchanged => 'sin cambios';
 
   @override
-  String get appUpdate_changeUpgraded => 'upgraded';
+  String get appUpdate_changeUpgraded => 'actualizado';
 
   @override
-  String get appUpdate_changeDowngraded => 'downgraded';
+  String get appUpdate_changeDowngraded => 'a una versión anterior';
 
   @override
-  String get appUpdate_changeChanged => 'changed';
+  String get appUpdate_changeChanged => 'cambiado';
 
   @override
-  String get appUpdate_changeUnknown => 'unknown';
+  String get appUpdate_changeUnknown => 'desconocido';
 
   @override
-  String get appUpdate_componentVersionUnknown => 'Unknown';
+  String get appUpdate_componentVersionUnknown => 'Desconocida';
 
   @override
-  String get appUpdate_componentNotBundled => 'Not included';
+  String get appUpdate_componentNotBundled => 'No incluido';
 
   @override
   String appUpdate_componentChange(String from, String to) {
@@ -1466,193 +1468,195 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appUpdate_automaticChecksTitle =>
-      'Check for updates automatically';
+      'Buscar actualizaciones automáticamente';
 
   @override
   String get appUpdate_automaticChecksSubtitle =>
-      'Once a day, with a notice when a new version is out. Downloads and installs only start with a tap.';
+      'Una vez al día, con un aviso cuando salga una nueva versión. Las descargas e instalaciones solo empiezan con un toque.';
 
   @override
   String appUpdate_installedByOther(String app) {
-    return 'This version was installed by $app. If $app keeps WebLibre up to date, automatic checks can be turned off here.';
+    return 'Esta versión la instaló $app. Si $app mantiene WebLibre actualizado, aquí puedes desactivar las comprobaciones automáticas.';
   }
 
   @override
   String get appUpdate_failureNetwork =>
-      'Couldn\'t reach the update server. Check the connection and try again.';
+      'No se pudo conectar con el servidor de actualizaciones. Comprueba la conexión y vuelve a intentarlo.';
 
   @override
   String get appUpdate_failureRoutingUnavailable =>
-      'The connection WebLibre is set to use isn\'t available, so updates can\'t be checked.';
+      'La conexión que WebLibre tiene configurada no está disponible, así que no se pueden buscar actualizaciones.';
 
   @override
   String get appUpdate_failureMetadataInvalid =>
-      'The update information couldn\'t be verified.';
+      'No se pudo verificar la información de actualización.';
 
   @override
   String get appUpdate_failureClientTooOld =>
-      'This version of WebLibre can\'t read the current update information. Install the newest version manually.';
+      'Esta versión de WebLibre no puede leer la información de actualización actual. Instala manualmente la versión más reciente.';
 
   @override
   String get appUpdate_failureMetadataExpired =>
-      'Couldn\'t verify update information. Check the device\'s date and time.';
+      'No se pudo verificar la información de actualización. Comprueba la fecha y la hora del dispositivo.';
 
   @override
   String get appUpdate_failureMetadataRollback =>
-      'The update server sent older information than WebLibre already has.';
+      'El servidor de actualizaciones envió información más antigua que la que WebLibre ya tiene.';
 
   @override
   String get appUpdate_failureMetadataPredatesBuild =>
-      'Update information for this version isn\'t published yet. Try again later.';
+      'La información de actualización de esta versión aún no se ha publicado. Vuelve a intentarlo más tarde.';
 
   @override
   String get appUpdate_failureClockSuspect =>
-      'The device\'s date and time seem to be wrong. Correct them and try again.';
+      'La fecha y la hora del dispositivo parecen incorrectas. Corrígelas y vuelve a intentarlo.';
 
   @override
   String get appUpdate_failureNoCompatibleTarget =>
-      'A new version exists, but not for this device or build.';
+      'Hay una nueva versión, pero no para este dispositivo o esta compilación.';
 
   @override
   String get appUpdate_failureInsufficientStorage =>
-      'Not enough free storage to download the update.';
+      'No hay suficiente espacio libre para descargar la actualización.';
 
   @override
   String get appUpdate_failureDownloadTooLarge =>
-      'The download was larger than expected and was stopped.';
+      'La descarga era más grande de lo esperado y se detuvo.';
 
   @override
   String get appUpdate_failureDownloadMismatch =>
-      'The downloaded file didn\'t match the published update and was deleted.';
+      'El archivo descargado no coincidía con la actualización publicada y se eliminó.';
 
   @override
   String get appUpdate_failureApkInvalid =>
-      'The downloaded update is damaged and was deleted.';
+      'La actualización descargada está dañada y se eliminó.';
 
   @override
   String get appUpdate_failureApkIdentityMismatch =>
-      'The downloaded update is for a different build of WebLibre and was deleted.';
+      'La actualización descargada es para otra compilación de WebLibre y se eliminó.';
 
   @override
   String get appUpdate_failureSignerUntrusted =>
-      'The downloaded update isn\'t signed by WebLibre and was deleted.';
+      'La actualización descargada no está firmada por WebLibre y se eliminó.';
 
   @override
   String get appUpdate_failureAuthorizationStale =>
-      'The update information has expired. Connect to the internet so it can be checked again before installing.';
+      'La información de actualización ha caducado. Conéctate a internet para que se pueda volver a comprobar antes de instalar.';
 
   @override
   String get appUpdate_failureTargetWithdrawn =>
-      'This update was withdrawn by the publisher.';
+      'El editor retiró esta actualización.';
 
   @override
   String get appUpdate_failureStateCorrupt =>
-      'Update verification data was damaged. Reset it to check again.';
+      'Los datos de verificación de actualizaciones están dañados. Restablécelos para volver a comprobar.';
 
   @override
   String get appUpdate_failureInstallPermissionDenied =>
-      'WebLibre isn\'t allowed to install updates.';
+      'WebLibre no tiene permiso para instalar actualizaciones.';
 
   @override
-  String get appUpdate_failureInstallCancelled =>
-      'The installation was cancelled.';
+  String get appUpdate_failureInstallCancelled => 'Se canceló la instalación.';
 
   @override
   String get appUpdate_failureInstallConflict =>
-      'Android couldn\'t install the update because it conflicts with the installed app.';
+      'Android no pudo instalar la actualización porque entra en conflicto con la aplicación instalada.';
 
   @override
   String get appUpdate_failureInstallIncompatible =>
-      'This update isn\'t compatible with this device.';
+      'Esta actualización no es compatible con este dispositivo.';
 
   @override
   String get appUpdate_failureInstallStorage =>
-      'Not enough free storage to install the update.';
+      'No hay suficiente espacio libre para instalar la actualización.';
 
   @override
   String get appUpdate_failureInstallBlocked =>
-      'Android blocked the installation.';
+      'Android bloqueó la instalación.';
 
   @override
   String get appUpdate_failureInstallUnknown =>
-      'The update couldn\'t be installed.';
+      'No se pudo instalar la actualización.';
 
   @override
   String get appUpdate_failurePlayNotOwned =>
-      'Google Play doesn\'t manage this installation for the signed-in account, so updates can\'t be checked here.';
+      'Google Play no gestiona esta instalación para la cuenta conectada, así que aquí no se pueden buscar actualizaciones.';
 
   @override
   String get appUpdate_failurePlayUnavailable =>
-      'Google Play can\'t update WebLibre right now.';
+      'Google Play no puede actualizar WebLibre en este momento.';
 
   @override
-  String get appUpdate_failurePlayError => 'Couldn\'t check with Google Play.';
+  String get appUpdate_failurePlayError =>
+      'No se pudo consultar con Google Play.';
 
   @override
-  String get appUpdate_menuAvailable => 'Update available';
+  String get appUpdate_menuAvailable => 'Actualización disponible';
 
   @override
-  String get appUpdate_menuDownloading => 'Downloading update…';
+  String get appUpdate_menuDownloading => 'Descargando la actualización…';
 
   @override
-  String get appUpdate_menuReady => 'Update ready: restart to install';
+  String get appUpdate_menuReady =>
+      'Actualización lista: reinicia para instalar';
 
   @override
-  String get appUpdate_menuFinish => 'Finish installing the update';
+  String get appUpdate_menuFinish => 'Terminar de instalar la actualización';
 
   @override
-  String get appUpdate_menuInstalling => 'Installing update…';
+  String get appUpdate_menuInstalling => 'Instalando la actualización…';
 
   @override
   String get appUpdate_menuPreferencesUnreadable =>
-      'Update checks are off: settings couldn\'t be read';
+      'Comprobaciones desactivadas: no se pudieron leer los ajustes';
 
   @override
-  String get appUpdate_menuDotLabel => 'Update waiting';
+  String get appUpdate_menuDotLabel => 'Actualización pendiente';
 
   @override
   String appUpdate_announcement(String version) {
-    return 'WebLibre $version is available';
+    return 'WebLibre $version está disponible';
   }
 
   @override
   String get appUpdate_announcementUnknownVersion =>
-      'A WebLibre update is available';
+      'Hay una actualización de WebLibre disponible';
 
   @override
-  String get appUpdate_announcementView => 'View';
+  String get appUpdate_announcementView => 'Ver';
 
   @override
   String appUpdate_updatedTo(String version) {
-    return 'Updated to $version';
+    return 'Actualizado a $version';
   }
 
   @override
-  String get appUpdate_downloadCancelled => 'Download cancelled';
+  String get appUpdate_downloadCancelled => 'Descarga cancelada';
 
   @override
-  String get appUpdate_installationCancelled => 'Installation cancelled';
+  String get appUpdate_installationCancelled => 'Instalación cancelada';
 
   @override
-  String get appUpdate_permissionDialogTitle => 'Allow installing updates';
+  String get appUpdate_permissionDialogTitle =>
+      'Permitir instalar actualizaciones';
 
   @override
   String get appUpdate_permissionDialogBody =>
-      'Android needs the “Install unknown apps” permission for WebLibre. It is used only for WebLibre\'s own verified updates.';
+      'Android necesita el permiso «Instalar aplicaciones desconocidas» para WebLibre. Solo se usa para las actualizaciones verificadas de WebLibre.';
 
   @override
-  String get appUpdate_permissionDialogOpenSettings => 'Open settings';
+  String get appUpdate_permissionDialogOpenSettings => 'Abrir ajustes';
 
   @override
-  String get appUpdate_installDialogTitle => 'Install update?';
+  String get appUpdate_installDialogTitle => '¿Instalar la actualización?';
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre will close to install the update. Open it again afterwards.';
+      'WebLibre se cerrará para instalar la actualización. Vuelve a abrirlo después.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.';
+      'WebLibre se cerrará para instalar la actualización. Vuelve a abrirlo después. Las pestañas privadas se cerrarán.';
 
   @override
   String get bangs_menuTitle => 'Bangs';

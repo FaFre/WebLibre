@@ -1166,18 +1166,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appLinks_removeRuleTooltip => '移除规则';
 
   @override
-  String get appUpdate_sectionTitle => 'Updates';
+  String get appUpdate_sectionTitle => '更新';
 
   @override
   String get appUpdate_sectionKeywords =>
-      'update, upgrade, version, release, new version, self-update';
+      '更新,升级,版本,新版本,发布,自动更新,update,upgrade,release';
 
   @override
-  String get appUpdate_appUpdates => 'App updates';
+  String get appUpdate_appUpdates => '应用更新';
 
   @override
-  String get appUpdate_settingsTileSubtitle =>
-      'Check for and install new versions of WebLibre';
+  String get appUpdate_settingsTileSubtitle => '检查并安装 WebLibre 的新版本';
 
   @override
   String appUpdate_installedVersion(String version) {
@@ -1185,159 +1184,153 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get appUpdate_statusIdle => 'Not checked yet';
+  String get appUpdate_statusIdle => '尚未检查';
 
   @override
-  String get appUpdate_statusUpToDate => 'WebLibre is up to date';
+  String get appUpdate_statusUpToDate => 'WebLibre 已是最新版本';
 
   @override
   String appUpdate_lastChecked(String time) {
-    return 'Last checked $time';
+    return '上次检查：$time';
   }
 
   @override
-  String get appUpdate_statusChecking => 'Checking for updates…';
+  String get appUpdate_statusChecking => '正在检查更新…';
 
   @override
   String appUpdate_statusAvailable(String version) {
-    return 'Version $version is available';
+    return '版本 $version 可用';
   }
 
   @override
-  String get appUpdate_statusAvailableUnknownVersion =>
-      'An update is available';
+  String get appUpdate_statusAvailableUnknownVersion => '有可用的更新';
 
   @override
   String appUpdate_downloadSize(String size) {
-    return 'Download size: $size';
+    return '下载大小：$size';
   }
 
   @override
   String appUpdate_partialDownloaded(String size) {
-    return '$size already downloaded';
+    return '已下载 $size';
   }
 
   @override
   String appUpdate_statusDownloading(String version) {
-    return 'Downloading $version';
+    return '正在下载 $version';
   }
 
   @override
-  String get appUpdate_statusDownloadingUnknownVersion =>
-      'Downloading the update';
+  String get appUpdate_statusDownloadingUnknownVersion => '正在下载更新';
 
   @override
   String appUpdate_downloadProgress(String received, String total) {
-    return '$received of $total';
+    return '$received / $total';
   }
 
   @override
-  String get appUpdate_statusVerifying => 'Verifying download…';
+  String get appUpdate_statusVerifying => '正在验证下载内容…';
 
   @override
   String appUpdate_statusReady(String version) {
-    return 'Update ready: $version';
+    return '更新已就绪：$version';
   }
 
   @override
-  String get appUpdate_statusReadyUnknownVersion => 'Update ready';
+  String get appUpdate_statusReadyUnknownVersion => '更新已就绪';
 
   @override
-  String get appUpdate_statusAwaitingPermission =>
-      'Allow WebLibre to install updates';
+  String get appUpdate_statusAwaitingPermission => '请允许 WebLibre 安装更新';
 
   @override
-  String get appUpdate_statusAwaitingUserAction => 'Waiting for confirmation';
+  String get appUpdate_statusAwaitingUserAction => '等待确认';
 
   @override
-  String get appUpdate_statusInstalling => 'Installing…';
+  String get appUpdate_statusInstalling => '正在安装…';
 
   @override
-  String get appUpdate_preferencesUnreadable =>
-      'Update settings couldn\'t be read, so automatic checks are off.';
+  String get appUpdate_preferencesUnreadable => '无法读取更新设置，因此自动检查已关闭。';
 
   @override
   String get appUpdate_detailsDataDamaged =>
-      'The data that verifies update details was damaged, so details can\'t be shown. Updating still works.';
+      '用于验证更新详情的数据已损坏，因此无法显示详情。更新功能仍可正常使用。';
 
   @override
-  String get appUpdate_securityFixes => 'Includes security fixes';
+  String get appUpdate_securityFixes => '包含安全修复';
 
   @override
-  String get appUpdate_securityCritical => 'Includes critical security fixes';
+  String get appUpdate_securityCritical => '包含严重安全修复';
 
   @override
-  String get appUpdate_securityLaterVersion =>
-      'A later version fixes a known security issue';
+  String get appUpdate_securityLaterVersion => '更新的版本修复了一个已知的安全问题';
 
   @override
-  String get appUpdate_detailsUnavailable =>
-      'Details for this version aren\'t available';
+  String get appUpdate_detailsUnavailable => '此版本的详情不可用';
 
   @override
-  String get appUpdate_actionCheckNow => 'Check now';
+  String get appUpdate_actionCheckNow => '立即检查';
 
   @override
-  String get appUpdate_actionDownload => 'Download';
+  String get appUpdate_actionDownload => '下载';
 
   @override
-  String get appUpdate_actionContinueDownload => 'Continue download';
+  String get appUpdate_actionContinueDownload => '继续下载';
 
   @override
-  String get appUpdate_actionInstall => 'Install';
+  String get appUpdate_actionInstall => '安装';
 
   @override
-  String get appUpdate_actionAllow => 'Allow…';
+  String get appUpdate_actionAllow => '允许…';
 
   @override
-  String get appUpdate_actionContinue => 'Continue';
+  String get appUpdate_actionContinue => '继续';
 
   @override
-  String get appUpdate_actionCancelInstallation => 'Cancel installation';
+  String get appUpdate_actionCancelInstallation => '取消安装';
 
   @override
-  String get appUpdate_actionRestart => 'Restart';
+  String get appUpdate_actionRestart => '重新启动';
 
   @override
-  String get appUpdate_actionResetTrust => 'Reset and check again';
+  String get appUpdate_actionResetTrust => '重置并重新检查';
 
   @override
-  String get appUpdate_actionTurnOnChecks => 'Turn on automatic checks';
+  String get appUpdate_actionTurnOnChecks => '开启自动检查';
 
   @override
-  String get appUpdate_actionKeepOff => 'Keep off';
+  String get appUpdate_actionKeepOff => '保持关闭';
 
   @override
   String appUpdate_whatsNewTitle(String version) {
-    return 'What\'s new in $version';
+    return '$version 新功能';
   }
 
   @override
-  String get appUpdate_fullReleaseNotes => 'Full release notes';
+  String get appUpdate_fullReleaseNotes => '完整发布说明';
 
   @override
-  String get appUpdate_whatChangesTitle => 'What changes';
+  String get appUpdate_whatChangesTitle => '变更内容';
 
   @override
-  String get appUpdate_changeUnchanged => 'unchanged';
+  String get appUpdate_changeUnchanged => '未变更';
 
   @override
-  String get appUpdate_changeUpgraded => 'upgraded';
+  String get appUpdate_changeUpgraded => '已升级';
 
   @override
-  String get appUpdate_changeDowngraded => 'downgraded';
+  String get appUpdate_changeDowngraded => '已降级';
 
   @override
-  String get appUpdate_changeChanged => 'changed';
+  String get appUpdate_changeChanged => '已变更';
 
   @override
-  String get appUpdate_changeUnknown => 'unknown';
+  String get appUpdate_changeUnknown => '未知';
 
   @override
-  String get appUpdate_componentVersionUnknown => 'Unknown';
+  String get appUpdate_componentVersionUnknown => '未知';
 
   @override
-  String get appUpdate_componentNotBundled => 'Not included';
+  String get appUpdate_componentNotBundled => '未包含';
 
   @override
   String appUpdate_componentChange(String from, String to) {
@@ -1345,194 +1338,169 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get appUpdate_automaticChecksTitle =>
-      'Check for updates automatically';
+  String get appUpdate_automaticChecksTitle => '自动检查更新';
 
   @override
   String get appUpdate_automaticChecksSubtitle =>
-      'Once a day, with a notice when a new version is out. Downloads and installs only start with a tap.';
+      '每天检查一次，有新版本时发出通知。下载和安装只会在你点按后开始。';
 
   @override
   String appUpdate_installedByOther(String app) {
-    return 'This version was installed by $app. If $app keeps WebLibre up to date, automatic checks can be turned off here.';
+    return '此版本由 $app 安装。如果由 $app 负责更新 WebLibre，可以在此关闭自动检查。';
   }
 
   @override
-  String get appUpdate_failureNetwork =>
-      'Couldn\'t reach the update server. Check the connection and try again.';
+  String get appUpdate_failureNetwork => '无法连接到更新服务器。请检查网络连接后重试。';
 
   @override
   String get appUpdate_failureRoutingUnavailable =>
-      'The connection WebLibre is set to use isn\'t available, so updates can\'t be checked.';
+      'WebLibre 设定使用的连接不可用，因此无法检查更新。';
 
   @override
-  String get appUpdate_failureMetadataInvalid =>
-      'The update information couldn\'t be verified.';
+  String get appUpdate_failureMetadataInvalid => '无法验证更新信息。';
 
   @override
   String get appUpdate_failureClientTooOld =>
-      'This version of WebLibre can\'t read the current update information. Install the newest version manually.';
+      '此版本的 WebLibre 无法读取当前的更新信息。请手动安装最新版本。';
 
   @override
-  String get appUpdate_failureMetadataExpired =>
-      'Couldn\'t verify update information. Check the device\'s date and time.';
+  String get appUpdate_failureMetadataExpired => '无法验证更新信息。请检查设备的日期和时间。';
 
   @override
   String get appUpdate_failureMetadataRollback =>
-      'The update server sent older information than WebLibre already has.';
+      '更新服务器发送的信息比 WebLibre 已有的信息更旧。';
 
   @override
-  String get appUpdate_failureMetadataPredatesBuild =>
-      'Update information for this version isn\'t published yet. Try again later.';
+  String get appUpdate_failureMetadataPredatesBuild => '此版本的更新信息尚未发布。请稍后重试。';
 
   @override
-  String get appUpdate_failureClockSuspect =>
-      'The device\'s date and time seem to be wrong. Correct them and try again.';
+  String get appUpdate_failureClockSuspect => '设备的日期和时间似乎不正确。请更正后重试。';
 
   @override
-  String get appUpdate_failureNoCompatibleTarget =>
-      'A new version exists, but not for this device or build.';
+  String get appUpdate_failureNoCompatibleTarget => '已有新版本，但不适用于此设备或此构建版本。';
 
   @override
-  String get appUpdate_failureInsufficientStorage =>
-      'Not enough free storage to download the update.';
+  String get appUpdate_failureInsufficientStorage => '可用存储空间不足，无法下载更新。';
 
   @override
-  String get appUpdate_failureDownloadTooLarge =>
-      'The download was larger than expected and was stopped.';
+  String get appUpdate_failureDownloadTooLarge => '下载内容超出预期大小，已停止下载。';
 
   @override
-  String get appUpdate_failureDownloadMismatch =>
-      'The downloaded file didn\'t match the published update and was deleted.';
+  String get appUpdate_failureDownloadMismatch => '下载的文件与发布的更新不符，已被删除。';
 
   @override
-  String get appUpdate_failureApkInvalid =>
-      'The downloaded update is damaged and was deleted.';
+  String get appUpdate_failureApkInvalid => '下载的更新已损坏，已被删除。';
 
   @override
   String get appUpdate_failureApkIdentityMismatch =>
-      'The downloaded update is for a different build of WebLibre and was deleted.';
+      '下载的更新适用于其他 WebLibre 构建版本，已被删除。';
 
   @override
-  String get appUpdate_failureSignerUntrusted =>
-      'The downloaded update isn\'t signed by WebLibre and was deleted.';
+  String get appUpdate_failureSignerUntrusted => '下载的更新并非由 WebLibre 签名，已被删除。';
 
   @override
   String get appUpdate_failureAuthorizationStale =>
-      'The update information has expired. Connect to the internet so it can be checked again before installing.';
+      '更新信息已过期。请连接到互联网，以便在安装前重新检查。';
 
   @override
-  String get appUpdate_failureTargetWithdrawn =>
-      'This update was withdrawn by the publisher.';
+  String get appUpdate_failureTargetWithdrawn => '此更新已被发布者撤回。';
 
   @override
-  String get appUpdate_failureStateCorrupt =>
-      'Update verification data was damaged. Reset it to check again.';
+  String get appUpdate_failureStateCorrupt => '更新验证数据已损坏。请重置后重新检查。';
 
   @override
-  String get appUpdate_failureInstallPermissionDenied =>
-      'WebLibre isn\'t allowed to install updates.';
+  String get appUpdate_failureInstallPermissionDenied => 'WebLibre 未获准安装更新。';
 
   @override
-  String get appUpdate_failureInstallCancelled =>
-      'The installation was cancelled.';
+  String get appUpdate_failureInstallCancelled => '安装已取消。';
 
   @override
-  String get appUpdate_failureInstallConflict =>
-      'Android couldn\'t install the update because it conflicts with the installed app.';
+  String get appUpdate_failureInstallConflict => '该更新与已安装的应用冲突，Android 无法安装。';
 
   @override
-  String get appUpdate_failureInstallIncompatible =>
-      'This update isn\'t compatible with this device.';
+  String get appUpdate_failureInstallIncompatible => '此更新与此设备不兼容。';
 
   @override
-  String get appUpdate_failureInstallStorage =>
-      'Not enough free storage to install the update.';
+  String get appUpdate_failureInstallStorage => '可用存储空间不足，无法安装更新。';
 
   @override
-  String get appUpdate_failureInstallBlocked =>
-      'Android blocked the installation.';
+  String get appUpdate_failureInstallBlocked => 'Android 阻止了安装。';
 
   @override
-  String get appUpdate_failureInstallUnknown =>
-      'The update couldn\'t be installed.';
+  String get appUpdate_failureInstallUnknown => '无法安装更新。';
 
   @override
   String get appUpdate_failurePlayNotOwned =>
-      'Google Play doesn\'t manage this installation for the signed-in account, so updates can\'t be checked here.';
+      'Google Play 未为当前登录的账号管理此安装，因此无法在此检查更新。';
 
   @override
-  String get appUpdate_failurePlayUnavailable =>
-      'Google Play can\'t update WebLibre right now.';
+  String get appUpdate_failurePlayUnavailable => 'Google Play 目前无法更新 WebLibre。';
 
   @override
-  String get appUpdate_failurePlayError => 'Couldn\'t check with Google Play.';
+  String get appUpdate_failurePlayError => '无法通过 Google Play 检查。';
 
   @override
-  String get appUpdate_menuAvailable => 'Update available';
+  String get appUpdate_menuAvailable => '有可用更新';
 
   @override
-  String get appUpdate_menuDownloading => 'Downloading update…';
+  String get appUpdate_menuDownloading => '正在下载更新…';
 
   @override
-  String get appUpdate_menuReady => 'Update ready: restart to install';
+  String get appUpdate_menuReady => '更新已就绪：重新启动以安装';
 
   @override
-  String get appUpdate_menuFinish => 'Finish installing the update';
+  String get appUpdate_menuFinish => '完成更新安装';
 
   @override
-  String get appUpdate_menuInstalling => 'Installing update…';
+  String get appUpdate_menuInstalling => '正在安装更新…';
 
   @override
-  String get appUpdate_menuPreferencesUnreadable =>
-      'Update checks are off: settings couldn\'t be read';
+  String get appUpdate_menuPreferencesUnreadable => '更新检查已关闭：无法读取设置';
 
   @override
-  String get appUpdate_menuDotLabel => 'Update waiting';
+  String get appUpdate_menuDotLabel => '有待处理的更新';
 
   @override
   String appUpdate_announcement(String version) {
-    return 'WebLibre $version is available';
+    return 'WebLibre $version 现已推出';
   }
 
   @override
-  String get appUpdate_announcementUnknownVersion =>
-      'A WebLibre update is available';
+  String get appUpdate_announcementUnknownVersion => '有可用的 WebLibre 更新';
 
   @override
-  String get appUpdate_announcementView => 'View';
+  String get appUpdate_announcementView => '查看';
 
   @override
   String appUpdate_updatedTo(String version) {
-    return 'Updated to $version';
+    return '已更新到 $version';
   }
 
   @override
-  String get appUpdate_downloadCancelled => 'Download cancelled';
+  String get appUpdate_downloadCancelled => '下载已取消';
 
   @override
-  String get appUpdate_installationCancelled => 'Installation cancelled';
+  String get appUpdate_installationCancelled => '安装已取消';
 
   @override
-  String get appUpdate_permissionDialogTitle => 'Allow installing updates';
+  String get appUpdate_permissionDialogTitle => '允许安装更新';
 
   @override
   String get appUpdate_permissionDialogBody =>
-      'Android needs the “Install unknown apps” permission for WebLibre. It is used only for WebLibre\'s own verified updates.';
+      'Android 需要为 WebLibre 授予“安装未知应用”权限。此权限仅用于 WebLibre 自身经过验证的更新。';
 
   @override
-  String get appUpdate_permissionDialogOpenSettings => 'Open settings';
+  String get appUpdate_permissionDialogOpenSettings => '打开设置';
 
   @override
-  String get appUpdate_installDialogTitle => 'Install update?';
+  String get appUpdate_installDialogTitle => '要安装更新吗？';
 
   @override
-  String get appUpdate_installDialogBody =>
-      'WebLibre will close to install the update. Open it again afterwards.';
+  String get appUpdate_installDialogBody => 'WebLibre 将关闭以安装更新。安装完成后请重新打开。';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.';
+      'WebLibre 将关闭以安装更新。安装完成后请重新打开。隐私标签页将被关闭。';
 
   @override
   String get bangs_menuTitle => 'Bang 快捷搜索';
