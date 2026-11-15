@@ -1,0 +1,42 @@
+{
+  "account_screenTitle": "WebLibre kasutajakonto",
+  "@account_screenTitle": {
+    "description": "Title of the settings screen for the WebLibre Account (the app's own optional online account for the supporter subscription, search credits and encrypted settings sync). WebLibre is the app name."
+  },
+  "account_searchHint": "Otsi kasutajakonto seadistusi",
+  "@account_searchHint": {
+    "description": "Placeholder of the search field on the WebLibre Account screen."
+  },
+  "account_loadFailed": "Kasutajakonto laadimine ei õnnestunud",
+  "@account_loadFailed": {
+    "description": "Error shown in place of the account screen content when the account state could not be loaded."
+  },
+  "account_sectionAccount": "Kasutajakonto",
+  "@account_sectionAccount": {
+    "description": "Section heading on the WebLibre Account screen for sign-in status."
+  },
+  "account_sectionSubscription": "Tellimus",
+  "@account_sectionSubscription": {
+    "description": "Section heading on the WebLibre Account screen for the supporter subscription."
+  },
+  "account_sectionSettingsSnapshots": "Seadistuste hetktõmmised",
+  "@account_sectionSettingsSnapshots": {
+    "description": "Section heading for encrypted copies of the app's settings stored in the account (\"snapshots\")."
+  },
+  "account_sectionPreferencesSnapshots": "Eelistuste hetktõmmised",
+  "@account_sectionPreferencesSnapshots": {
+    "description": "Section heading for encrypted copies of the browser engine preferences stored in the account."
+  },
+  "account_sectionEncryptedSync": "Krüptitud sünkroonimine",
+  "@account_sectionEncryptedSync": {
+    "description": "Section heading for setting up end-to-end encrypted sync of settings."
+  },
+  "account_signInTitle": "Logi sisse WebLibre kasutajakontoga",
+  "@account_signInTitle": {
+    "description": "Row that starts signing in to the WebLibre Account; also the title of the account section while signed out."
+  },
+  "account_signInKeywords": "sisselogimine, konto, kasutajakonto, autentimine",
+  "@account_signInKeywords": {
+    "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
+  }
+}
