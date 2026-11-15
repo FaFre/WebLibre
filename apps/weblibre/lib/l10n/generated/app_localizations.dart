@@ -2182,11 +2182,29 @@ abstract class AppLocalizations {
   /// **'Check for and install new versions of WebLibre'**
   String get appUpdate_settingsTileSubtitle;
 
-  /// Top line of the App updates screen: the installed version. {version} is a version number.
+  /// Section header on the App updates screen above the update status (up to date, available, downloading, failed …).
   ///
   /// In en, this message translates to:
-  /// **'WebLibre {version}'**
-  String appUpdate_installedVersion(String version);
+  /// **'Status'**
+  String get appUpdate_statusSectionTitle;
+
+  /// Section header on the App updates screen above release notes, used when the offered version has no notes of its own but a link to the full release notes.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new'**
+  String get appUpdate_whatsNewSectionTitle;
+
+  /// Section header on the App updates screen above the automatic-checks switch and the "Check now" row.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get appUpdate_settingsSectionTitle;
+
+  /// Line in the status on the App updates screen naming the installed version. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed: {version}'**
+  String appUpdate_installedLine(String version);
 
   /// Status on the App updates screen when no check for updates has succeeded yet.
   ///
@@ -2475,6 +2493,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This version was installed by {app}. If {app} keeps WebLibre up to date, automatic checks can be turned off here.'**
   String appUpdate_installedByOther(String app);
+
+  /// Headline of the status on the App updates screen when checking for updates failed. The reason follows below it as a separate sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check for updates'**
+  String get appUpdate_failedCheckTitle;
+
+  /// Headline of the status on the App updates screen when downloading the update failed. The reason follows below it as a separate sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t download the update'**
+  String get appUpdate_failedDownloadTitle;
+
+  /// Headline of the status on the App updates screen when installing the update failed. The reason follows below it as a separate sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t install the update'**
+  String get appUpdate_failedInstallTitle;
+
+  /// Headline of the status on the App updates screen when cancelling a waiting installation failed. The reason follows below it as a separate sentence.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t cancel the installation'**
+  String get appUpdate_failedCancelInstallationTitle;
 
   /// Error on the App updates screen.
   ///

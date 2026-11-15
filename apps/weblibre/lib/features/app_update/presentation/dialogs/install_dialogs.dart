@@ -67,7 +67,9 @@ Future<bool> _confirm(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(AppLocalizations.of(context).common_cancel),
         ),
-        FilledButton(
+        // Text buttons, like the app's other confirmations
+        // (RememberablePromptDialog).
+        TextButton(
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(confirmLabel),
         ),

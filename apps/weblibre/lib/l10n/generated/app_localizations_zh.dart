@@ -1179,8 +1179,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appUpdate_settingsTileSubtitle => '检查并安装 WebLibre 的新版本';
 
   @override
-  String appUpdate_installedVersion(String version) {
-    return 'WebLibre $version';
+  String get appUpdate_statusSectionTitle => '状态';
+
+  @override
+  String get appUpdate_whatsNewSectionTitle => '新功能';
+
+  @override
+  String get appUpdate_settingsSectionTitle => '设置';
+
+  @override
+  String appUpdate_installedLine(String version) {
+    return '已安装：$version';
   }
 
   @override
@@ -1348,6 +1357,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String appUpdate_installedByOther(String app) {
     return '此版本由 $app 安装。如果由 $app 负责更新 WebLibre，可以在此关闭自动检查。';
   }
+
+  @override
+  String get appUpdate_failedCheckTitle => '无法检查更新';
+
+  @override
+  String get appUpdate_failedDownloadTitle => '无法下载更新';
+
+  @override
+  String get appUpdate_failedInstallTitle => '无法安装更新';
+
+  @override
+  String get appUpdate_failedCancelInstallationTitle => '无法取消安装';
 
   @override
   String get appUpdate_failureNetwork => '无法连接到更新服务器。请检查网络连接后重试。';

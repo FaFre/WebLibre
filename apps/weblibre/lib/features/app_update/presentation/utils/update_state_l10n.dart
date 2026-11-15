@@ -19,11 +19,11 @@
  */
 import 'package:flutter/widgets.dart';
 import 'package:weblibre/features/app_update/domain/entities/update_state.dart';
-import 'package:weblibre/features/app_update/presentation/utils/update_failure_l10n.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 extension UpdateStateL10n on UpdateState {
-  /// The status card's headline (8.1).
+  /// The status entry's headline (8.1). A failure is headed by the step that
+  /// failed; its reason is a separate line below.
   String headline(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final version = assessment?.appVersion;
@@ -47,7 +47,21 @@ extension UpdateStateL10n on UpdateState {
       UpdateAwaitingPermission() => l10n.appUpdate_statusAwaitingPermission,
       UpdateAwaitingUserAction() => l10n.appUpdate_statusAwaitingUserAction,
       UpdateInstalling() => l10n.appUpdate_statusInstalling,
-      UpdateFailed(:final failure) => failure.describe(context),
+      UpdateFailed(:final operation) => operation.failedTitle(context),
+    };
+  }
+}
+
+extension UpdateOperationL10n on UpdateOperation {
+  /// The headline when this operation failed.
+  String failedTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return switch (this) {
+      UpdateOperation.check => l10n.appUpdate_failedCheckTitle,
+      UpdateOperation.download => l10n.appUpdate_failedDownloadTitle,
+      UpdateOperation.install => l10n.appUpdate_failedInstallTitle,
+      UpdateOperation.cancelInstallation =>
+        l10n.appUpdate_failedCancelInstallationTitle,
     };
   }
 }

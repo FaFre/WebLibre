@@ -56,7 +56,7 @@ Future<void> confirmAndInstall(
   await controller.install(targetId);
 
   // Permission missing: ask right away rather than leaving the user to find
-  // "Allow…" on the card. The install can take long enough for the caller to
+  // "Allow…" in the status. The install can take long enough for the caller to
   // be gone, and its ref with it.
   if (!context.mounted) return;
   if (ref.read(appUpdateStateProvider) is UpdateAwaitingPermission) {

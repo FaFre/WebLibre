@@ -1260,8 +1260,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Check for and install new versions of WebLibre';
 
   @override
-  String appUpdate_installedVersion(String version) {
-    return 'WebLibre $version';
+  String get appUpdate_statusSectionTitle => 'Status';
+
+  @override
+  String get appUpdate_whatsNewSectionTitle => 'What\'s new';
+
+  @override
+  String get appUpdate_settingsSectionTitle => 'Settings';
+
+  @override
+  String appUpdate_installedLine(String version) {
+    return 'Installed: $version';
   }
 
   @override
@@ -1436,6 +1445,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String appUpdate_installedByOther(String app) {
     return 'This version was installed by $app. If $app keeps WebLibre up to date, automatic checks can be turned off here.';
   }
+
+  @override
+  String get appUpdate_failedCheckTitle => 'Couldn\'t check for updates';
+
+  @override
+  String get appUpdate_failedDownloadTitle => 'Couldn\'t download the update';
+
+  @override
+  String get appUpdate_failedInstallTitle => 'Couldn\'t install the update';
+
+  @override
+  String get appUpdate_failedCancelInstallationTitle =>
+      'Couldn\'t cancel the installation';
 
   @override
   String get appUpdate_failureNetwork =>

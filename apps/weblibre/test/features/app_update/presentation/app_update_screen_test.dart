@@ -35,6 +35,8 @@ import 'package:weblibre/features/app_update/domain/services/artifact_selector.d
 import 'package:weblibre/features/app_update/domain/services/update_assessment_service.dart';
 import 'package:weblibre/features/app_update/domain/services/update_coordinator.dart';
 import 'package:weblibre/features/app_update/presentation/screens/app_update_settings.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 import '../fixtures.dart';
@@ -45,7 +47,7 @@ Finder button(String label) => find.ancestor(
   matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
 );
 
-/// Records what the status card asks the updater to do.
+/// Records what the status entry asks the updater to do.
 class RecordingController extends AppUpdateController {
   final calls = <String>[];
 
@@ -108,6 +110,10 @@ void main() {
         overrides: [
           // No native host in widget tests: there is no coordinator.
           appUpdateCoordinatorProvider.overrideWith((ref) => null),
+          // The settings rows' hidden-feature gates, without a database.
+          displayedGeneralSettingsProvider.overrideWithValue(
+            GeneralSettings.withDefaults(),
+          ),
           if (controller != null)
             appUpdateControllerProvider.overrideWith(() => controller),
         ],
@@ -209,7 +215,7 @@ void main() {
 
   for (final MapEntry(key: name, value: (state, headline, action))
       in rows.entries) {
-    testWidgets('status card: $name', (tester) async {
+    testWidgets('status entry: $name', (tester) async {
       await pump(tester, state());
       expect(find.text(headline), findsOneWidget);
       if (action != null) {
@@ -217,6 +223,41 @@ void main() {
       }
     });
   }
+
+  group('a failure is headed by the step that failed, its reason below', () {
+    final cases = <UpdateOperation, String>{
+      UpdateOperation.check: "Couldn't check for updates",
+      UpdateOperation.download: "Couldn't download the update",
+      UpdateOperation.install: "Couldn't install the update",
+      UpdateOperation.cancelInstallation: "Couldn't cancel the installation",
+    };
+
+    for (final MapEntry(key: operation, value: headline) in cases.entries) {
+      testWidgets(operation.name, (tester) async {
+        await pump(
+          tester,
+          UpdateFailed(
+            UpdateFailure(UpdateFailureKind.network),
+            returnTo: UpdateAvailable(assessment),
+            operation: operation,
+          ),
+        );
+        expect(find.text(headline), findsOneWidget);
+        expect(
+          find.text(
+            "Couldn't reach the update server. Check the connection and try "
+            'again.',
+          ),
+          findsOneWidget,
+        );
+      });
+    }
+  });
+
+  testWidgets('the status names the installed version', (tester) async {
+    await pump(tester, UpdateUpToDate());
+    expect(find.text('Installed: ${installed.versionName}'), findsOneWidget);
+  });
 
   group('Retry repeats the operation that failed', () {
     final network = UpdateFailure(UpdateFailureKind.network);
@@ -318,6 +359,9 @@ void main() {
           installedBuildInfoProvider.overrideWithValue(AsyncData(installed)),
           appUpdateCoordinatorProvider.overrideWith(
             (ref) => Future.error(StateError('no directories')),
+          ),
+          displayedGeneralSettingsProvider.overrideWithValue(
+            GeneralSettings.withDefaults(),
           ),
         ],
         child: const MaterialApp(

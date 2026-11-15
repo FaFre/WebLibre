@@ -26,6 +26,7 @@ import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_update/domain/providers.dart';
+import 'package:weblibre/features/app_update/presentation/screens/app_update_settings.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_behavior_screen.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_feedback_screen.dart';
@@ -148,6 +149,14 @@ _CategoryGroups _buildCategories(
       keywords: settingsKeywords(l10n.settings_categoryGeneralKeywords),
       sections: generalSettingsSections(context, hasUpdater: hasUpdater),
       onTap: (context) => GeneralSettingsRoute().push(context),
+      subscreens: [
+        if (hasUpdater)
+          _SettingsSubscreen(
+            title: l10n.appUpdate_appUpdates,
+            sections: appUpdateSettingsSearchSections(context),
+            open: (context) => const AppUpdateSettingsRoute().push(context),
+          ),
+      ],
     ),
     _SettingsCategoryDefinition(
       title: l10n.settings_categoryFeatureControlTitle,

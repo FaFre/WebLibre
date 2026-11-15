@@ -1599,13 +1599,25 @@
   "@appUpdate_settingsTileSubtitle": {
     "description": "Subtitle of the App updates settings row."
   },
-  "appUpdate_installedVersion": "WebLibre {version}",
-  "@appUpdate_installedVersion": {
-    "description": "Top line of the App updates screen: the installed version. {version} is a version number.",
+  "appUpdate_statusSectionTitle": "Status",
+  "@appUpdate_statusSectionTitle": {
+    "description": "Section header on the App updates screen above the update status (up to date, available, downloading, failed …)."
+  },
+  "appUpdate_whatsNewSectionTitle": "What's new",
+  "@appUpdate_whatsNewSectionTitle": {
+    "description": "Section header on the App updates screen above release notes, used when the offered version has no notes of its own but a link to the full release notes."
+  },
+  "appUpdate_settingsSectionTitle": "Settings",
+  "@appUpdate_settingsSectionTitle": {
+    "description": "Section header on the App updates screen above the automatic-checks switch and the \"Check now\" row."
+  },
+  "appUpdate_installedLine": "Installed: {version}",
+  "@appUpdate_installedLine": {
+    "description": "Line in the status on the App updates screen naming the installed version. {version} is a version number.",
     "placeholders": {
       "version": {
         "type": "String",
-        "example": "0.51.0"
+        "example": "0.50.0"
       }
     }
   },
@@ -1868,6 +1880,22 @@
         "example": "Obtainium"
       }
     }
+  },
+  "appUpdate_failedCheckTitle": "Couldn't check for updates",
+  "@appUpdate_failedCheckTitle": {
+    "description": "Headline of the status on the App updates screen when checking for updates failed. The reason follows below it as a separate sentence."
+  },
+  "appUpdate_failedDownloadTitle": "Couldn't download the update",
+  "@appUpdate_failedDownloadTitle": {
+    "description": "Headline of the status on the App updates screen when downloading the update failed. The reason follows below it as a separate sentence."
+  },
+  "appUpdate_failedInstallTitle": "Couldn't install the update",
+  "@appUpdate_failedInstallTitle": {
+    "description": "Headline of the status on the App updates screen when installing the update failed. The reason follows below it as a separate sentence."
+  },
+  "appUpdate_failedCancelInstallationTitle": "Couldn't cancel the installation",
+  "@appUpdate_failedCancelInstallationTitle": {
+    "description": "Headline of the status on the App updates screen when cancelling a waiting installation failed. The reason follows below it as a separate sentence."
   },
   "appUpdate_failureNetwork": "Couldn't reach the update server. Check the connection and try again.",
   "@appUpdate_failureNetwork": {

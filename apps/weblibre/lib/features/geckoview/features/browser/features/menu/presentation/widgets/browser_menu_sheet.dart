@@ -143,18 +143,23 @@ class _BrowserMenuSheet extends ConsumerWidget {
                     slivers: [
                       if (isReordering)
                         const MenuReorderView()
-                      else ...[
-                        // Pinned above the user's sections and outside the
-                        // menu layout (8.3).
-                        const SliverToBoxAdapter(child: AppUpdateMenuRow()),
+                      else
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 8,
                           ),
-                          sliver: _MenuSections(selectedTabId: selectedTabId),
+                          sliver: SliverMainAxisGroup(
+                            slivers: [
+                              // Pinned above the user's sections and outside
+                              // the menu layout (8.3), spaced like a section.
+                              const SliverToBoxAdapter(
+                                child: AppUpdateMenuRow(),
+                              ),
+                              _MenuSections(selectedTabId: selectedTabId),
+                            ],
+                          ),
                         ),
-                      ],
                       contentEnd,
                     ],
                   ),

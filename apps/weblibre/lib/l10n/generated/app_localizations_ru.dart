@@ -1296,8 +1296,17 @@ class AppLocalizationsRu extends AppLocalizations {
       'Поиск и установка новых версий WebLibre';
 
   @override
-  String appUpdate_installedVersion(String version) {
-    return 'WebLibre $version';
+  String get appUpdate_statusSectionTitle => 'Состояние';
+
+  @override
+  String get appUpdate_whatsNewSectionTitle => 'Что нового';
+
+  @override
+  String get appUpdate_settingsSectionTitle => 'Настройки';
+
+  @override
+  String appUpdate_installedLine(String version) {
+    return 'Установлена: $version';
   }
 
   @override
@@ -1472,6 +1481,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String appUpdate_installedByOther(String app) {
     return 'Эта версия установлена приложением $app. Если $app обновляет WebLibre, автоматическую проверку здесь можно отключить.';
   }
+
+  @override
+  String get appUpdate_failedCheckTitle => 'Не удалось проверить обновления';
+
+  @override
+  String get appUpdate_failedDownloadTitle => 'Не удалось загрузить обновление';
+
+  @override
+  String get appUpdate_failedInstallTitle => 'Не удалось установить обновление';
+
+  @override
+  String get appUpdate_failedCancelInstallationTitle =>
+      'Не удалось отменить установку';
 
   @override
   String get appUpdate_failureNetwork =>

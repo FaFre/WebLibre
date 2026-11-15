@@ -23,12 +23,15 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_update/domain/providers.dart';
 import 'package:weblibre/features/app_update/domain/services/update_surface_policy.dart';
 import 'package:weblibre/features/app_update/presentation/utils/update_surface_policy_l10n.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
 /// The update row pinned at the top of the browser menu (8.3). Drawn outside
 /// the customizable menu layout, so it can't be arranged away. It can't be
 /// dismissed either: it stays until the update is installed or a newer state
-/// replaces it.
+/// replaces it. A one-row menu card like the sections below it: the colored
+/// icon and its dot carry the signal, so it doesn't read as a switched-on
+/// quick toggle.
 class AppUpdateMenuRow extends HookConsumerWidget {
   const AppUpdateMenuRow({super.key});
 
@@ -39,18 +42,16 @@ class AppUpdateMenuRow extends HookConsumerWidget {
     if (label == null) return const SizedBox.shrink();
 
     final colorScheme = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-      child: Card.filled(
-        color: colorScheme.secondaryContainer,
-        margin: EdgeInsets.zero,
-        child: ListTile(
+    final unreadable = surface.row == UpdateMenuRow.preferencesUnreadable;
+    return buildMenuCard(
+      context,
+      children: [
+        ListTile(
           leading: Badge(
             isLabelVisible: surface.dot,
             child: Icon(
-              surface.row == UpdateMenuRow.preferencesUnreadable
-                  ? Icons.update_disabled
-                  : Icons.system_update,
+              unreadable ? Icons.update_disabled : Icons.system_update,
+              color: unreadable ? colorScheme.error : colorScheme.primary,
             ),
           ),
           title: Text(label),
@@ -66,7 +67,7 @@ class AppUpdateMenuRow extends HookConsumerWidget {
             await const AppUpdateSettingsRoute().push(context);
           },
         ),
-      ),
+      ],
     );
   }
 }

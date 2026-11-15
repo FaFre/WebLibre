@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_update/data/providers.dart';
 import 'package:weblibre/features/app_update/domain/entities/distribution_policy.dart';
 import 'package:weblibre/features/app_update/domain/entities/installed_build_info.dart';
@@ -26,9 +27,41 @@ import 'package:weblibre/features/app_update/domain/entities/update_state.dart';
 import 'package:weblibre/features/app_update/domain/providers.dart';
 import 'package:weblibre/features/app_update/domain/services/update_coordinator.dart';
 import 'package:weblibre/features/app_update/presentation/widgets/update_details.dart';
-import 'package:weblibre/features/app_update/presentation/widgets/update_status_card.dart';
+import 'package:weblibre/features/app_update/presentation/widgets/update_status_entry.dart';
+import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/failure_widget.dart';
+
+/// What the settings search indexes of this screen.
+///
+/// The screen builds its sections from the live update state, so only its
+/// Settings section is indexed, as search-only entries with the titles the
+/// screen draws: the search opens the screen and highlights the row.
+List<SettingsSectionDefinition> appUpdateSettingsSearchSections(
+  BuildContext context,
+) {
+  final l10n = AppLocalizations.of(context);
+  final keywords = settingsKeywords(l10n.appUpdate_sectionKeywords);
+
+  return [
+    SettingsSectionDefinition(
+      title: l10n.appUpdate_settingsSectionTitle,
+      feature: FeatureId.appUpdates,
+      keywords: keywords,
+      entries: [
+        SettingsEntryDefinition.searchOnly(
+          title: l10n.appUpdate_automaticChecksTitle,
+          subtitle: l10n.appUpdate_automaticChecksSubtitle,
+          keywords: keywords,
+        ),
+        SettingsEntryDefinition.searchOnly(
+          title: l10n.appUpdate_actionCheckNow,
+          keywords: keywords,
+        ),
+      ],
+    ),
+  ];
+}
 
 /// Settings → General → Updates → App updates (8.1).
 class AppUpdateSettingsScreen extends HookConsumerWidget {
@@ -36,7 +69,6 @@ class AppUpdateSettingsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final snapshot = ref.watch(appUpdateControllerProvider);
     final policy = ref.watch(distributionPolicyProvider.select((p) => p.value));
     final installed = ref.watch(
@@ -46,27 +78,50 @@ class AppUpdateSettingsScreen extends HookConsumerWidget {
       appUpdateCoordinatorProvider.select((c) => c.error),
     );
 
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.appUpdate_appUpdates)),
-      body: switch ((snapshot, policy)) {
-        (final UpdateSnapshot snapshot, final DistributionPolicy policy)
-            when policy.hasUpdater =>
-          AppUpdateSettingsBody(
-            snapshot: snapshot,
-            policy: policy,
-            installed: installed,
-            onOpenUrl: (url) => openReleaseNotes(context, ref, url),
-          ),
-        // The updater couldn't be set up (its directories, say): the entry
-        // points stay, so the screen says so instead of staying blank.
-        _ when coordinatorError != null => FailureWidget(
-          exception: coordinatorError,
-          onRetry: () => ref.invalidate(appUpdateCoordinatorProvider),
+    return switch ((snapshot, policy)) {
+      (final UpdateSnapshot snapshot, final DistributionPolicy policy)
+          when policy.hasUpdater =>
+        AppUpdateSettingsBody(
+          snapshot: snapshot,
+          policy: policy,
+          installed: installed,
+          onOpenUrl: (url) => openReleaseNotes(context, ref, url),
         ),
-        (_, null) || (null, DistributionPolicy(hasUpdater: true)) =>
-          const Center(child: CircularProgressIndicator()),
-        _ => const SizedBox.shrink(),
-      },
+      // The updater couldn't be set up (its directories, say): the entry
+      // points stay, so the screen says so instead of staying blank.
+      _ when coordinatorError != null => _AppUpdateScaffold(
+        sliver: SliverFillRemaining(
+          hasScrollBody: false,
+          child: FailureWidget(
+            exception: coordinatorError,
+            onRetry: () => ref.invalidate(appUpdateCoordinatorProvider),
+          ),
+        ),
+      ),
+      (_, null) ||
+      (null, DistributionPolicy(hasUpdater: true)) => const _AppUpdateScaffold(
+        sliver: SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      _ => const _AppUpdateScaffold(sliver: SliverToBoxAdapter()),
+    };
+  }
+}
+
+/// The settings scaffold every state of the screen shares, so its title stays
+/// while it loads or fails.
+class _AppUpdateScaffold extends StatelessWidget {
+  const _AppUpdateScaffold({required this.sliver});
+
+  final Widget sliver;
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsCustomScrollScaffold(
+      title: AppLocalizations.of(context).appUpdate_appUpdates,
+      slivers: [sliver],
     );
   }
 }
@@ -98,115 +153,132 @@ class AppUpdateSettingsBody extends HookConsumerWidget {
     final otherInstaller = policy is GithubUpdates
         ? installed?.otherInstallerLabel
         : null;
+    final notes = assessment == null
+        ? null
+        : releaseNotesSection(
+            context,
+            assessment: assessment,
+            onOpenUrl: onOpenUrl,
+          );
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: 24),
-      children: [
-        if (installed != null)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: Text(
-              l10n.appUpdate_installedVersion(installed!.versionName),
-              style: theme.textTheme.titleLarge,
+    final sections = [
+      SettingsSectionDefinition(
+        title: l10n.appUpdate_statusSectionTitle,
+        entries: [
+          if (preferences.recoveryRequired)
+            SettingsEntryDefinition(
+              title: l10n.appUpdate_preferencesUnreadable,
+              child: UpdateRecoveryEntry(
+                icon: Icons.update_disabled,
+                message: l10n.appUpdate_preferencesUnreadable,
+                actions: [
+                  TextButton(
+                    onPressed: () =>
+                        controller.setAutomaticChecks(enabled: false),
+                    child: Text(l10n.appUpdate_actionKeepOff),
+                  ),
+                  FilledButton(
+                    onPressed: () =>
+                        controller.setAutomaticChecks(enabled: true),
+                    child: Text(l10n.appUpdate_actionTurnOnChecks),
+                  ),
+                ],
+              ),
+            ),
+          // Beside the status, never instead of it: its actions still work
+          // (Play's descriptions are not a condition for updating).
+          if (snapshot.trustDamaged)
+            SettingsEntryDefinition(
+              title: l10n.appUpdate_detailsDataDamaged,
+              child: UpdateRecoveryEntry(
+                icon: Icons.gpp_maybe_outlined,
+                message: l10n.appUpdate_detailsDataDamaged,
+                actions: [
+                  TextButton(
+                    onPressed: controller.resetTrustAndCheck,
+                    child: Text(l10n.appUpdate_actionResetTrust),
+                  ),
+                ],
+              ),
+            ),
+          SettingsEntryDefinition(
+            title: l10n.appUpdate_statusSectionTitle,
+            child: UpdateStatusEntry(
+              state: state,
+              policy: policy,
+              installed: installed,
+              lastSuccess: snapshot.lastSuccess,
             ),
           ),
-        if (preferences.recoveryRequired)
-          _RecoveryCard(
-            message: l10n.appUpdate_preferencesUnreadable,
-            actions: [
-              TextButton(
-                onPressed: () => controller.setAutomaticChecks(enabled: false),
-                child: Text(l10n.appUpdate_actionKeepOff),
-              ),
-              FilledButton(
-                onPressed: () => controller.setAutomaticChecks(enabled: true),
-                child: Text(l10n.appUpdate_actionTurnOnChecks),
-              ),
-            ],
-          ),
-        // Beside the status card, never instead of it: its actions still
-        // work (Play's descriptions are not a condition for updating).
-        if (snapshot.trustDamaged)
-          _RecoveryCard(
-            message: l10n.appUpdate_detailsDataDamaged,
-            actions: [
-              TextButton(
-                onPressed: controller.resetTrustAndCheck,
-                child: Text(l10n.appUpdate_actionResetTrust),
-              ),
-            ],
-          ),
-        UpdateStatusCard(
-          state: state,
-          policy: policy,
-          lastSuccess: snapshot.lastSuccess,
-        ),
-        if (assessment != null) ...[
-          ReleaseNotesView(assessment: assessment, onOpenUrl: onOpenUrl),
-          ComponentChangesList(changes: assessment.componentChanges),
         ],
-        const Divider(),
-        SwitchListTile.adaptive(
-          secondary: const Icon(Icons.update),
-          title: Text(l10n.appUpdate_automaticChecksTitle),
-          subtitle: Text(l10n.appUpdate_automaticChecksSubtitle),
-          value: preferences.automaticChecks,
-          onChanged: (value) => controller.setAutomaticChecks(enabled: value),
-        ),
-        if (state is! UpdateIdle && state is! UpdateUpToDate)
-          ListTile(
-            leading: const Icon(Icons.refresh),
-            title: Text(l10n.appUpdate_actionCheckNow),
-            subtitle: switch (snapshot.lastSuccess) {
-              final time? => Text(lastCheckedText(context, ref, time)),
-              null => null,
-            },
-            // No check starts while a session holds the install slot, also
-            // beneath a failure: the coordinator would ignore the tap.
-            enabled:
-                state is! UpdateChecking &&
-                !state.userInitiated &&
-                state.underlying is! UpdateInstalling &&
-                state.underlying is! UpdateAwaitingUserAction,
-            onTap: controller.checkNow,
-          ),
-        if (otherInstaller != null)
-          ListTile(
-            key: const ValueKey('installed-by-other'),
-            leading: const Icon(Icons.info_outline),
-            title: Text(
-              l10n.appUpdate_installedByOther(otherInstaller),
-              style: theme.textTheme.bodySmall,
+      ),
+      ?notes,
+      if (assessment != null)
+        componentChangesSection(context, changes: assessment.componentChanges),
+      SettingsSectionDefinition(
+        title: l10n.appUpdate_settingsSectionTitle,
+        entries: [
+          SettingsEntryDefinition(
+            title: l10n.appUpdate_automaticChecksTitle,
+            subtitle: l10n.appUpdate_automaticChecksSubtitle,
+            child: SwitchListTile.adaptive(
+              secondary: const Icon(Icons.update),
+              title: Text(l10n.appUpdate_automaticChecksTitle),
+              subtitle: Text(l10n.appUpdate_automaticChecksSubtitle),
+              value: preferences.automaticChecks,
+              onChanged: (value) =>
+                  controller.setAutomaticChecks(enabled: value),
             ),
           ),
-      ],
-    );
-  }
-}
-
-class _RecoveryCard extends StatelessWidget {
-  const _RecoveryCard({required this.message, required this.actions});
-
-  final String message;
-  final List<Widget> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      color: theme.colorScheme.errorContainer,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(message),
-            const SizedBox(height: 12),
-            Wrap(spacing: 8, children: actions),
-          ],
-        ),
+          if (state is! UpdateIdle && state is! UpdateUpToDate)
+            SettingsEntryDefinition(
+              title: l10n.appUpdate_actionCheckNow,
+              child: ListTile(
+                leading: const Icon(Icons.refresh),
+                title: Text(l10n.appUpdate_actionCheckNow),
+                subtitle: switch (snapshot.lastSuccess) {
+                  final time? => Text(lastCheckedText(context, ref, time)),
+                  null => null,
+                },
+                // No check starts while a session holds the install slot,
+                // also beneath a failure: the coordinator would ignore the
+                // tap.
+                enabled:
+                    state is! UpdateChecking &&
+                    !state.userInitiated &&
+                    state.underlying is! UpdateInstalling &&
+                    state.underlying is! UpdateAwaitingUserAction,
+                onTap: controller.checkNow,
+              ),
+            ),
+          if (otherInstaller != null)
+            SettingsEntryDefinition(
+              title: l10n.appUpdate_installedByOther(otherInstaller),
+              child: ListTile(
+                key: const ValueKey('installed-by-other'),
+                leading: const Icon(Icons.info_outline),
+                title: Text(
+                  l10n.appUpdate_installedByOther(otherInstaller),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
+    ];
+
+    return SettingsCustomScrollScaffold(
+      title: l10n.appUpdate_appUpdates,
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+          sliver: SliverToBoxAdapter(
+            child: SettingsSectionList(sections: sections, query: ''),
+          ),
+        ),
+      ],
     );
   }
 }

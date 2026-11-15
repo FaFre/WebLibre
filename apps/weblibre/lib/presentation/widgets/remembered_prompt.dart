@@ -34,7 +34,8 @@ class PromptAnswerAction<T extends Enum> {
   final T answer;
   final String label;
 
-  /// Whether this is the dialog's primary action, drawn filled.
+  /// Whether this is the dialog's primary action. Not drawn differently: the
+  /// app's confirmations use text buttons for every action.
   final bool primary;
 
   const PromptAnswerAction({
@@ -113,16 +114,10 @@ class RememberablePromptDialog<T extends Enum> extends HookWidget {
             child: Text(l10n.common_cancel),
           ),
         for (final action in answers)
-          if (action.primary)
-            TextButton(
-              onPressed: () => _answer(context, action.answer, dontAskAgain),
-              child: Text(action.label),
-            )
-          else
-            TextButton(
-              onPressed: () => _answer(context, action.answer, dontAskAgain),
-              child: Text(action.label),
-            ),
+          TextButton(
+            onPressed: () => _answer(context, action.answer, dontAskAgain),
+            child: Text(action.label),
+          ),
       ],
     );
   }

@@ -21,26 +21,143 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/format.dart';
 import 'package:weblibre/features/app_update/domain/entities/distribution_policy.dart';
+import 'package:weblibre/features/app_update/domain/entities/installed_build_info.dart';
 import 'package:weblibre/features/app_update/domain/entities/release_metadata.dart';
 import 'package:weblibre/features/app_update/domain/entities/update_failure.dart';
 import 'package:weblibre/features/app_update/domain/entities/update_state.dart';
 import 'package:weblibre/features/app_update/domain/providers.dart';
+import 'package:weblibre/features/app_update/presentation/utils/update_failure_l10n.dart';
 import 'package:weblibre/features/app_update/presentation/utils/update_state_l10n.dart';
 import 'package:weblibre/features/app_update/presentation/widgets/update_actions.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/units_l10n.dart';
 
-/// The status card of the Updates screen (8.1): one row of the state table.
-class UpdateStatusCard extends HookConsumerWidget {
-  const UpdateStatusCard({
+/// How a status reads at a glance: the color of its icon badge. Settings
+/// sections share one card color, so the badge carries it.
+enum UpdateStatusTone { neutral, attention, error }
+
+/// The round icon in front of a status or recovery entry.
+class UpdateStatusBadge extends StatelessWidget {
+  const UpdateStatusBadge({super.key, required this.icon, required this.tone});
+
+  final IconData icon;
+  final UpdateStatusTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (background, foreground) = switch (tone) {
+      UpdateStatusTone.neutral => (
+        colorScheme.surfaceContainerHighest,
+        colorScheme.onSurfaceVariant,
+      ),
+      UpdateStatusTone.attention => (
+        colorScheme.secondaryContainer,
+        colorScheme.primary,
+      ),
+      UpdateStatusTone.error => (colorScheme.errorContainer, colorScheme.error),
+    };
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+      child: Icon(icon, color: foreground),
+    );
+  }
+}
+
+/// An entry of the Status section: a badge, a headline or message, lines
+/// below it, and the entry's buttons at the end.
+class UpdateStatusLayout extends StatelessWidget {
+  const UpdateStatusLayout({
+    super.key,
+    required this.badge,
+    this.headline,
+    this.lines = const [],
+    this.actions = const [],
+  });
+
+  final Widget badge;
+  final String? headline;
+  final List<Widget> lines;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              badge,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (headline case final headline?)
+                      Text(headline, style: theme.textTheme.titleMedium),
+                    ...lines,
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (actions.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Wrap(spacing: 8, runSpacing: 8, children: actions),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A recovery message in the Status section: settings that couldn't be read,
+/// or damaged verification data.
+class UpdateRecoveryEntry extends StatelessWidget {
+  const UpdateRecoveryEntry({
+    super.key,
+    required this.icon,
+    required this.message,
+    required this.actions,
+  });
+
+  final IconData icon;
+  final String message;
+  final List<Widget> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return UpdateStatusLayout(
+      badge: UpdateStatusBadge(icon: icon, tone: UpdateStatusTone.error),
+      lines: [Text(message, style: Theme.of(context).textTheme.bodyMedium)],
+      actions: actions,
+    );
+  }
+}
+
+/// The status entry of the Updates screen (8.1): one row of the state table.
+class UpdateStatusEntry extends HookConsumerWidget {
+  const UpdateStatusEntry({
     super.key,
     required this.state,
     required this.policy,
+    required this.installed,
     required this.lastSuccess,
   });
 
   final UpdateState state;
   final DistributionPolicy policy;
+  final InstalledBuildInfo? installed;
   final DateTime? lastSuccess;
 
   @override
@@ -49,14 +166,43 @@ class UpdateStatusCard extends HookConsumerWidget {
     final theme = Theme.of(context);
     final controller = ref.read(appUpdateControllerProvider.notifier);
     final assessment = state.assessment;
+    final secondary = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
 
-    final details = <Widget>[];
-    void line(String text, {TextStyle? style}) => details.add(
+    final lines = <Widget>[];
+    void line(String text, {TextStyle? style}) =>
+        lines.add(Text(text, style: style ?? secondary));
+    void progressBar(double? value) => lines.add(
       Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(text, style: style ?? theme.textTheme.bodyMedium),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: LinearProgressIndicator(value: value),
       ),
     );
+
+    // What is happening right now comes first, under the headline.
+    switch (state) {
+      case UpdateDownloading(:final received, :final total, :final progress):
+        progressBar(progress);
+        if (total != null) {
+          line(
+            l10n.appUpdate_downloadProgress(
+              formatByteSize(l10n, received),
+              formatByteSize(l10n, total),
+            ),
+          );
+        }
+      case UpdateChecking() || UpdateVerifying():
+        progressBar(null);
+      case UpdateFailed(:final failure):
+        line(failure.describe(context), style: theme.textTheme.bodyMedium);
+      default:
+        break;
+    }
+
+    if (installed case final installed?) {
+      line(l10n.appUpdate_installedLine(installed.versionName));
+    }
 
     switch (state) {
       case UpdateUpToDate() || UpdateIdle():
@@ -79,28 +225,6 @@ class UpdateStatusCard extends HookConsumerWidget {
             ),
           );
         }
-      case UpdateDownloading(:final received, :final total, :final progress):
-        details.add(
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: LinearProgressIndicator(value: progress),
-          ),
-        );
-        if (total != null) {
-          line(
-            l10n.appUpdate_downloadProgress(
-              formatByteSize(l10n, received),
-              formatByteSize(l10n, total),
-            ),
-          );
-        }
-      case UpdateChecking() || UpdateVerifying():
-        details.add(
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: LinearProgressIndicator(),
-          ),
-        );
       default:
         break;
     }
@@ -110,7 +234,7 @@ class UpdateStatusCard extends HookConsumerWidget {
         case SecurityClassification.critical:
           line(
             l10n.appUpdate_securityCritical,
-            style: TextStyle(color: theme.colorScheme.error),
+            style: secondary?.copyWith(color: theme.colorScheme.error),
           );
         case SecurityClassification.fixesIncluded:
           line(l10n.appUpdate_securityFixes);
@@ -122,55 +246,20 @@ class UpdateStatusCard extends HookConsumerWidget {
       }
     }
 
-    final actions = _actions(context, ref, controller, l10n);
-    final highlighted = switch (state) {
+    final tone = switch (state) {
+      UpdateFailed() => UpdateStatusTone.error,
       UpdateAvailable() ||
       UpdateReadyToInstall() ||
       UpdateAwaitingPermission() ||
-      UpdateAwaitingUserAction() => true,
-      _ => false,
+      UpdateAwaitingUserAction() => UpdateStatusTone.attention,
+      _ => UpdateStatusTone.neutral,
     };
 
-    return Card(
-      color: state is UpdateFailed
-          ? theme.colorScheme.errorContainer
-          : highlighted
-          ? theme.colorScheme.secondaryContainer
-          : null,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  _icon,
-                  color: highlighted ? theme.colorScheme.primary : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    state.headline(context),
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-              ],
-            ),
-            ...details,
-            if (actions.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.end,
-                children: actions,
-              ),
-            ],
-          ],
-        ),
-      ),
+    return UpdateStatusLayout(
+      badge: UpdateStatusBadge(icon: _icon, tone: tone),
+      headline: state.headline(context),
+      lines: lines,
+      actions: _actions(context, ref, controller, l10n),
     );
   }
 

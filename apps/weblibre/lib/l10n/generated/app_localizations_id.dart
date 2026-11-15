@@ -1288,8 +1288,17 @@ class AppLocalizationsId extends AppLocalizations {
       'Periksa dan instal versi baru WebLibre';
 
   @override
-  String appUpdate_installedVersion(String version) {
-    return 'WebLibre $version';
+  String get appUpdate_statusSectionTitle => 'Status';
+
+  @override
+  String get appUpdate_whatsNewSectionTitle => 'Yang baru';
+
+  @override
+  String get appUpdate_settingsSectionTitle => 'Pengaturan';
+
+  @override
+  String appUpdate_installedLine(String version) {
+    return 'Terpasang: $version';
   }
 
   @override
@@ -1462,6 +1471,19 @@ class AppLocalizationsId extends AppLocalizations {
   String appUpdate_installedByOther(String app) {
     return 'Versi ini diinstal oleh $app. Jika $app yang menjaga WebLibre tetap terbaru, pemeriksaan otomatis dapat dinonaktifkan di sini.';
   }
+
+  @override
+  String get appUpdate_failedCheckTitle => 'Tidak dapat memeriksa pembaruan';
+
+  @override
+  String get appUpdate_failedDownloadTitle => 'Tidak dapat mengunduh pembaruan';
+
+  @override
+  String get appUpdate_failedInstallTitle => 'Tidak dapat menginstal pembaruan';
+
+  @override
+  String get appUpdate_failedCancelInstallationTitle =>
+      'Tidak dapat membatalkan penginstalan';
 
   @override
   String get appUpdate_failureNetwork =>
