@@ -31,25 +31,14 @@ updates:
         patterns:
           - "*"
 
-  # Dart (pub)
+  # Dart (pub): resolve all workspace members together from the root.
   - package-ecosystem: "pub"
-    directory: "/apps/weblibre"
+    directory: "/"
     schedule:
       interval: "weekly"
     cooldown:
       default-days: 7
-  - package-ecosystem: "pub"
-    directory: "/packages/simple_intent_receiver"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-  - package-ecosystem: "pub"
-    directory: "/packages/flutter_mozilla_components"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
+
   # Node.js (npm, for JS/TS)
   - package-ecosystem: "npm"
     directory: "packages/flutter_mozilla_components/javascript/readability"
