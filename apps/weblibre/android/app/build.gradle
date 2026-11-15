@@ -43,6 +43,10 @@ android {
         targetSdk = 37
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        // The pubspec build number. It rises on every published tag, alphas
+        // included (D4), and is what the updater orders releases by. APK
+        // version codes append an ABI digit to it (see abiCodes below).
+        buildConfigField "int", "LOGICAL_RELEASE_SEQUENCE", "${flutterVersionCode.toInteger()}"
         // Whether the Flutter engine renders via Impeller or Skia. Read by
         // io.flutter.embedding.android.EnableImpeller in AndroidManifest.xml.
         // Skia is the default; comparison flavors override this below.
@@ -57,27 +61,58 @@ android {
         ]
     }
 
-    flavorDimensions "track"
+    // Two dimensions (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, D1/D3):
+    //
+    // - distribution: who delivers updates. `github` carries the self-updater
+    //   (installer, apksig, the install permission), `play` the Play in-app
+    //   update bridge, `fdroid` neither. Each has its own source set under
+    //   src/<distribution>, so a variant only ever contains its own updater.
+    // - track: release track and renderer, unchanged from before.
+    //
+    // Only the combinations below are built; androidComponents.beforeVariants
+    // disables the rest.
+    flavorDimensions "distribution", "track"
     productFlavors {
+        github {
+            dimension "distribution"
+            buildConfigField "String", "DISTRIBUTION", '"github"'
+        }
+        play {
+            dimension "distribution"
+            buildConfigField "String", "DISTRIBUTION", '"play"'
+        }
+        fdroid {
+            dimension "distribution"
+            buildConfigField "String", "DISTRIBUTION", '"fdroid"'
+        }
+
         stable {
             dimension "track"
             manifestPlaceholders = [appName: "WebLibre", enableImpeller: "false"]
+            buildConfigField "String", "TRACK", '"stable"'
+            buildConfigField "String", "RENDERER", '"skia"'
         }
         stableImpeller {
             dimension "track"
             manifestPlaceholders = [appName: "WebLibre (Impeller)", enableImpeller: "true"]
+            buildConfigField "String", "TRACK", '"stable"'
+            buildConfigField "String", "RENDERER", '"impeller"'
         }
         alpha {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
             manifestPlaceholders = [appName: "WebLibre Alpha", enableImpeller: "false"]
+            buildConfigField "String", "TRACK", '"alpha"'
+            buildConfigField "String", "RENDERER", '"skia"'
         }
         alphaImpeller {
             dimension "track"
             applicationIdSuffix ".alpha"
             versionNameSuffix "-alpha"
             manifestPlaceholders = [appName: "WebLibre Alpha (Impeller)", enableImpeller: "true"]
+            buildConfigField "String", "TRACK", '"alpha"'
+            buildConfigField "String", "RENDERER", '"impeller"'
         }
     }
 
@@ -103,10 +138,31 @@ android {
         // a plain request lets Gradle take the higher of the two on its next bump.
         implementation 'androidx.glance:glance-appwidget:1.2.0'
         implementation 'com.google.android.material:material:1.14.0'
+
+        // Reference APK verifier for the GitHub self-updater (D13). Pure Java;
+        // kept in step with the Android Gradle Plugin, which ships the same
+        // library. Never in Play or F-Droid variants.
+        githubImplementation 'com.android.tools.build:apksig:9.4.1'
+
+        // The updater bridge's generated Pigeon handlers run on coroutines.
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0'
+
+        testImplementation 'junit:junit:4.13.2'
+        // Android's org.json is a stub on the host JVM.
+        testImplementation 'org.json:json:20260814'
     }
 
     buildFeatures {
         compose true
+        buildConfig true
+    }
+
+    testOptions {
+        unitTests {
+            // Host-side tests of the updater's pure logic; Android calls are
+            // stubs that return defaults.
+            returnDefaultValues = true
+        }
     }
 
     signingConfigs {
@@ -166,6 +222,30 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// The supported distribution × track combinations. Everything else (a Play
+// alpha, an F-Droid Impeller build, ...) is never built, so it can't be
+// published by accident.
+def supportedVariantFlavors = [
+    "githubStable", "githubStableImpeller", "githubAlpha", "githubAlphaImpeller",
+    "playStable", "fdroidStable",
+] as Set
+
+androidComponents {
+    beforeVariants(selector().all()) { variantBuilder ->
+        def flavors = variantBuilder.productFlavors.collectEntries { [(it.first): it.second] }
+        def name = flavors["distribution"] + flavors["track"].capitalize()
+        variantBuilder.enable = supportedVariantFlavors.contains(name)
+    }
+}
+
+// The only file that names Play Core. F-Droid deletes it together with
+// src/play in its prebuild, so the fdroid build never resolves it.
+if (file("play.gradle").exists()) {
+    apply from: "play.gradle"
+}
+
+apply from: "build_manifest.gradle"
 
 //Override version code for f-droid
 ext.abiCodes = ["x86_64": 1, "armeabi-v7a": 2, "arm64-v8a": 3]

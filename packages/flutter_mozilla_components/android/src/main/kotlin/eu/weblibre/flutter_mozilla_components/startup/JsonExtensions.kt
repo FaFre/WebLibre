@@ -37,7 +37,7 @@ import org.json.JSONObject
  * stringified rather than rejected. Dart casts, so it throws. These accessors
  * reject instead, which is what keeps the two parsers agreeing.
  */
-internal fun JSONObject.stringOrNull(name: String): String? {
+fun JSONObject.stringOrNull(name: String): String? {
     if (isNull(name)) return null
     val value = opt(name) as? String ?: return null
     return value.ifEmpty { null }

@@ -98,9 +98,10 @@ enum ParticipantState {
 /// Per-participant record inside a journal. [stateId] keeps the raw string so a
 /// record written by a newer participant version round-trips unchanged.
 @CopyWith()
-@JsonSerializable()
+@JsonSerializable(checked: true)
 class ParticipantRecord with FastEquatable {
   @CopyWithField(immutable: true)
+  @JsonKey(fromJson: requiredString)
   final String id;
 
   @JsonKey(fromJson: _recordVersionFromJson)
@@ -123,12 +124,8 @@ class ParticipantRecord with FastEquatable {
 
   /// A record with no participant id names nothing and can never be acted on,
   /// so it is dropped rather than read as a record about "".
-  static ParticipantRecord? tryFromJson(Map<String, dynamic> json) {
-    final id = json['id'];
-    if (id is! String || id.isEmpty) return null;
-
-    return _$ParticipantRecordFromJson(json);
-  }
+  static ParticipantRecord? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$ParticipantRecordFromJson);
 
   Map<String, dynamic> toJson() => _$ParticipantRecordToJson(this);
 
@@ -139,12 +136,13 @@ class ParticipantRecord with FastEquatable {
 /// Durable evidence of a destructive maintenance operation, stored outside the
 /// `profile-` namespace at `weblibre_maintenance/journals/<taskId>.json`.
 @CopyWith()
-@JsonSerializable()
+@JsonSerializable(checked: true)
 class MaintenanceJournal with FastEquatable {
   @JsonKey(fromJson: _journalVersionFromJson)
   final int version;
 
   @CopyWithField(immutable: true)
+  @JsonKey(fromJson: requiredString)
   final String taskId;
 
   @JsonKey(name: 'kind', fromJson: stringOrEmpty)
@@ -153,6 +151,7 @@ class MaintenanceJournal with FastEquatable {
   @JsonKey(name: 'phase', fromJson: stringOrEmpty)
   final String phaseId;
 
+  @JsonKey(fromJson: requiredString)
   final String targetProfileId;
 
   @JsonKey(fromJson: stringOrNull)
@@ -167,7 +166,7 @@ class MaintenanceJournal with FastEquatable {
   @JsonKey(fromJson: _participantsFromJson)
   final List<ParticipantRecord> participants;
 
-  @JsonKey(fromJson: _updatedAtFromJson, toJson: _updatedAtToJson)
+  @JsonKey(fromJson: dateTimeOrEpoch, toJson: utcIso)
   final DateTime updatedAt;
 
   MaintenanceJournal({
@@ -214,15 +213,8 @@ class MaintenanceJournal with FastEquatable {
 
   /// A journal that names no task or no target profile describes nothing that
   /// can be recovered, so it is dropped rather than read with empty ids.
-  static MaintenanceJournal? tryFromJson(Map<String, dynamic> json) {
-    final taskId = json['taskId'];
-    if (taskId is! String || taskId.isEmpty) return null;
-
-    final targetProfileId = json['targetProfileId'];
-    if (targetProfileId is! String || targetProfileId.isEmpty) return null;
-
-    return _$MaintenanceJournalFromJson(json);
-  }
+  static MaintenanceJournal? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$MaintenanceJournalFromJson);
 
   Map<String, dynamic> toJson() => _$MaintenanceJournalToJson(this);
 
@@ -241,25 +233,8 @@ class MaintenanceJournal with FastEquatable {
   ];
 }
 
-List<ParticipantRecord> _participantsFromJson(Object? value) {
-  if (value is! List) return const [];
-
-  final records = <ParticipantRecord>[];
-  for (final entry in value) {
-    if (entry is! Map) continue;
-    final record = ParticipantRecord.tryFromJson(
-      entry.map((key, value) => MapEntry(key.toString(), value)),
-    );
-    if (record != null) records.add(record);
-  }
-
-  return List.unmodifiable(records);
-}
-
-DateTime _updatedAtFromJson(Object? value) =>
-    dateTimeOrNull(value) ?? DateTime.utc(1970);
-
-String _updatedAtToJson(DateTime value) => value.toUtc().toIso8601String();
+List<ParticipantRecord> _participantsFromJson(Object? value) =>
+    List.unmodifiable(recordsFromJson(value, ParticipantRecord.tryFromJson));
 
 int _journalVersionFromJson(Object? value) =>
     intOr(value, maintenanceJournalVersion);

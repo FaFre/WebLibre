@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/app_update/presentation/widgets/update_menu_row.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -79,13 +80,16 @@ class NavigationMenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationMenuButtonView(
-      onTap: () async {
-        await showBrowserMenuSheet(context);
-      },
-      onLongPress: () async {
-        await SettingsRoute().push(context);
-      },
+    // The live button only: the layout preview draws the bare view.
+    return AppUpdateMenuDot(
+      child: NavigationMenuButtonView(
+        onTap: () async {
+          await showBrowserMenuSheet(context);
+        },
+        onLongPress: () async {
+          await SettingsRoute().push(context);
+        },
+      ),
     );
   }
 }

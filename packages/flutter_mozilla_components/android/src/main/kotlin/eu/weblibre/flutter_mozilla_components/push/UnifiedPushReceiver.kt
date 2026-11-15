@@ -247,7 +247,7 @@ class UnifiedPushReceiver : MessagingReceiver() {
             if (connectorId == null) return UUID.randomUUID().toString()
             return MessageDigest.getInstance("SHA-256")
                 .digest("$scope\u0000$connectorToken\u0000$connectorId".toByteArray())
-                .joinToString("") { "%02x".format(it) }
+                .toHexString()
         }
 
         internal suspend fun <T> runExclusive(block: suspend () -> T): T =

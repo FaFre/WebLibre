@@ -23,6 +23,24 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:weblibre/core/logger.dart';
 
+/// Writes [bytes] to a temp file in the *same* directory, flushes it and
+/// renames it over [file], so a reader never observes a torn file.
+Future<void> writeFileAtomically(File file, List<int> bytes) async {
+  await file.parent.create(recursive: true);
+
+  final temp = File('${file.path}.tmp');
+  final handle = await temp.open(mode: FileMode.writeOnly);
+  try {
+    await handle.truncate(0);
+    await handle.writeFrom(bytes);
+    await handle.flush();
+  } finally {
+    await handle.close();
+  }
+
+  await temp.rename(file.path);
+}
+
 /// Result of a tolerant read of a global JSON record.
 sealed class AtomicJsonRead {
   const AtomicJsonRead();
@@ -85,28 +103,33 @@ class AtomicJsonFile {
       );
     }
 
-    if (contents.trim().isEmpty) {
+    final parsed = parse(contents);
+    if (parsed is AtomicJsonCorrupt) {
+      logger.w('Could not parse ${file.path}: ${parsed.reason}');
       return AtomicJsonCorrupt(
-        'empty',
+        parsed.reason,
         quarantineCorrupt ? await _quarantine() : null,
       );
     }
+    return parsed;
+  }
+
+  /// Parses [contents] as a JSON object. Never throws: anything else is
+  /// [AtomicJsonCorrupt], with no quarantine path.
+  static AtomicJsonRead parse(String contents) {
+    if (contents.trim().isEmpty) return const AtomicJsonCorrupt('empty', null);
 
     Object? decoded;
     try {
       decoded = jsonDecode(contents);
     } catch (e) {
-      logger.w('Could not parse ${file.path}: $e');
-      return AtomicJsonCorrupt(
-        'malformed json: $e',
-        quarantineCorrupt ? await _quarantine() : null,
-      );
+      return AtomicJsonCorrupt('malformed json: $e', null);
     }
 
     if (decoded is! Map) {
       return AtomicJsonCorrupt(
         'root is ${decoded.runtimeType}, expected object',
-        quarantineCorrupt ? await _quarantine() : null,
+        null,
       );
     }
 
@@ -115,21 +138,8 @@ class AtomicJsonFile {
     );
   }
 
-  Future<void> write(Map<String, Object?> json) async {
-    await file.parent.create(recursive: true);
-
-    final temp = File('${file.path}.tmp');
-    final handle = await temp.open(mode: FileMode.writeOnly);
-    try {
-      await handle.truncate(0);
-      await handle.writeString(jsonEncode(json));
-      await handle.flush();
-    } finally {
-      await handle.close();
-    }
-
-    await temp.rename(file.path);
-  }
+  Future<void> write(Map<String, Object?> json) =>
+      writeFileAtomically(file, utf8.encode(jsonEncode(json)));
 
   Future<void> delete() async {
     if (await file.exists()) {

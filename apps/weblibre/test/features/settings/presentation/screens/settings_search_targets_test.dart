@@ -31,7 +31,10 @@ import 'package:weblibre/l10n/generated/app_localizations.dart';
 void main() {
   final l10n = lookupAppLocalizations(const Locale('en'));
 
-  Future<List<SettingsSearchTarget>> targets(WidgetTester tester) async {
+  Future<List<SettingsSearchTarget>> targets(
+    WidgetTester tester, {
+    bool hasUpdater = false,
+  }) async {
     late List<SettingsSearchTarget> result;
     await tester.pumpWidget(
       MaterialApp(
@@ -39,7 +42,7 @@ void main() {
         supportedLocales: AppLocalizations.supportedLocales,
         home: Builder(
           builder: (context) {
-            result = settingsSearchTargets(context);
+            result = settingsSearchTargets(context, hasUpdater: hasUpdater);
             return const SizedBox();
           },
         ),
@@ -50,6 +53,17 @@ void main() {
 
   SettingsSearchTarget byTitle(List<SettingsSearchTarget> all, String title) =>
       all.singleWhere((target) => target.title == title);
+
+  testWidgets('App updates is indexed only where there is an updater', (
+    tester,
+  ) async {
+    // A build without one at runtime (F-Droid, foreign-signed, universal)
+    // would otherwise list a tile that draws nothing, under an empty header.
+    bool listed(List<SettingsSearchTarget> all) =>
+        all.any((target) => target.title == l10n.appUpdate_appUpdates);
+    expect(listed(await targets(tester)), isFalse);
+    expect(listed(await targets(tester, hasUpdater: true)), isTrue);
+  });
 
   testWidgets('hidden settings on subscreens can be found', (tester) async {
     // Without an index entry a setting hidden on its subscreen could only be

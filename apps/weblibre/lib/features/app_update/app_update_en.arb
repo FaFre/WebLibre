@@ -1,0 +1,489 @@
+{
+  "@@locale": "en",
+  "appUpdate_sectionTitle": "Updates",
+  "@appUpdate_sectionTitle": {
+    "description": "Section title in Settings → General that holds the app update entry."
+  },
+  "appUpdate_sectionKeywords": "update, upgrade, version, release, new version, self-update",
+  "@appUpdate_sectionKeywords": {
+    "description": "Comma-separated search synonyms for the Updates section in the settings search. Never displayed."
+  },
+  "appUpdate_appUpdates": "App updates",
+  "@appUpdate_appUpdates": {
+    "description": "Name of the App updates screen: its title, and the rows in Settings and in the About dialog that open it."
+  },
+  "appUpdate_settingsTileSubtitle": "Check for and install new versions of WebLibre",
+  "@appUpdate_settingsTileSubtitle": {
+    "description": "Subtitle of the App updates settings row."
+  },
+  "appUpdate_installedVersion": "WebLibre {version}",
+  "@appUpdate_installedVersion": {
+    "description": "Top line of the App updates screen: the installed version. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_statusIdle": "Not checked yet",
+  "@appUpdate_statusIdle": {
+    "description": "Status on the App updates screen when no check for updates has succeeded yet."
+  },
+  "appUpdate_statusUpToDate": "WebLibre is up to date",
+  "@appUpdate_statusUpToDate": {
+    "description": "Status on the App updates screen when the installed version is the newest."
+  },
+  "appUpdate_lastChecked": "Last checked {time}",
+  "@appUpdate_lastChecked": {
+    "description": "Line under the update status: when the last successful check happened. {time} is a date and time, already formatted.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "Nov 12, 2026, 7:30 AM"
+      }
+    }
+  },
+  "appUpdate_statusChecking": "Checking for updates…",
+  "@appUpdate_statusChecking": {
+    "description": "Status while WebLibre checks for a new version."
+  },
+  "appUpdate_statusAvailable": "Version {version} is available",
+  "@appUpdate_statusAvailable": {
+    "description": "Status when a new version can be downloaded. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_statusAvailableUnknownVersion": "An update is available",
+  "@appUpdate_statusAvailableUnknownVersion": {
+    "description": "Status when an update is available but its version number isn't known (Google Play builds without update details)."
+  },
+  "appUpdate_downloadSize": "Download size: {size}",
+  "@appUpdate_downloadSize": {
+    "description": "Line under an available update: how large the download is. {size} is a formatted file size.",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "178 MB"
+      }
+    }
+  },
+  "appUpdate_partialDownloaded": "{size} already downloaded",
+  "@appUpdate_partialDownloaded": {
+    "description": "Line under an available update when part of it was downloaded before. {size} is a formatted file size.",
+    "placeholders": {
+      "size": {
+        "type": "String",
+        "example": "178 MB"
+      }
+    }
+  },
+  "appUpdate_statusDownloading": "Downloading {version}",
+  "@appUpdate_statusDownloading": {
+    "description": "Status while the update downloads. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_statusDownloadingUnknownVersion": "Downloading the update",
+  "@appUpdate_statusDownloadingUnknownVersion": {
+    "description": "Status while an update downloads whose version number isn't known."
+  },
+  "appUpdate_downloadProgress": "{received} of {total}",
+  "@appUpdate_downloadProgress": {
+    "description": "Download progress under the progress bar. Both are formatted file sizes.",
+    "placeholders": {
+      "received": {
+        "type": "String",
+        "example": "12 MB"
+      },
+      "total": {
+        "type": "String",
+        "example": "178 MB"
+      }
+    }
+  },
+  "appUpdate_statusVerifying": "Verifying download…",
+  "@appUpdate_statusVerifying": {
+    "description": "Status while the downloaded update is checked before it can be installed."
+  },
+  "appUpdate_statusReady": "Update ready: {version}",
+  "@appUpdate_statusReady": {
+    "description": "Status when the update is downloaded, verified and can be installed. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_statusReadyUnknownVersion": "Update ready",
+  "@appUpdate_statusReadyUnknownVersion": {
+    "description": "Status when an update whose version isn't known is ready to install (Google Play)."
+  },
+  "appUpdate_statusAwaitingPermission": "Allow WebLibre to install updates",
+  "@appUpdate_statusAwaitingPermission": {
+    "description": "Status when the update is ready but Android's permission to install apps is missing."
+  },
+  "appUpdate_statusAwaitingUserAction": "Waiting for confirmation",
+  "@appUpdate_statusAwaitingUserAction": {
+    "description": "Status while Android waits for the user to confirm the installation in its own dialog."
+  },
+  "appUpdate_statusInstalling": "Installing…",
+  "@appUpdate_statusInstalling": {
+    "description": "Status while Android installs the update."
+  },
+  "appUpdate_preferencesUnreadable": "Update settings couldn't be read, so automatic checks are off.",
+  "@appUpdate_preferencesUnreadable": {
+    "description": "Shown on the App updates screen when the stored update settings were damaged. Automatic checks stay off until the user decides."
+  },
+  "appUpdate_detailsDataDamaged": "The data that verifies update details was damaged, so details can't be shown. Updating still works.",
+  "@appUpdate_detailsDataDamaged": {
+    "description": "Shown on the App updates screen of Google Play builds when the stored data that verifies release details (notes, security information) was damaged. The update itself can still be downloaded and installed; a reset button follows."
+  },
+  "appUpdate_securityFixes": "Includes security fixes",
+  "@appUpdate_securityFixes": {
+    "description": "Line under an available update when the publisher declared that it fixes security issues."
+  },
+  "appUpdate_securityCritical": "Includes critical security fixes",
+  "@appUpdate_securityCritical": {
+    "description": "Line under an available update when the publisher declared it a critical security release."
+  },
+  "appUpdate_securityLaterVersion": "A later version fixes a known security issue",
+  "@appUpdate_securityLaterVersion": {
+    "description": "Line under an available update when a known security issue affects the installed version but is only fixed in a version after the one offered now."
+  },
+  "appUpdate_detailsUnavailable": "Details for this version aren't available",
+  "@appUpdate_detailsUnavailable": {
+    "description": "Shown on the App updates screen instead of the list of component changes when no verified description of the offered version exists. The update is still offered."
+  },
+  "appUpdate_actionCheckNow": "Check now",
+  "@appUpdate_actionCheckNow": {
+    "description": "Button that checks for a new version right away."
+  },
+  "appUpdate_actionDownload": "Download",
+  "@appUpdate_actionDownload": {
+    "description": "Button that starts downloading the update."
+  },
+  "appUpdate_actionContinueDownload": "Continue download",
+  "@appUpdate_actionContinueDownload": {
+    "description": "Button that continues a download that was interrupted before."
+  },
+  "appUpdate_actionInstall": "Install",
+  "@appUpdate_actionInstall": {
+    "description": "Button that installs the downloaded update."
+  },
+  "appUpdate_actionAllow": "Allow…",
+  "@appUpdate_actionAllow": {
+    "description": "Button that opens Android's settings to allow WebLibre to install updates."
+  },
+  "appUpdate_actionContinue": "Continue",
+  "@appUpdate_actionContinue": {
+    "description": "Button that shows Android's installation confirmation again."
+  },
+  "appUpdate_actionCancelInstallation": "Cancel installation",
+  "@appUpdate_actionCancelInstallation": {
+    "description": "Button that ends an installation that Android hasn't finished."
+  },
+  "appUpdate_actionRestart": "Restart",
+  "@appUpdate_actionRestart": {
+    "description": "Button (Google Play builds) that restarts WebLibre to finish installing a downloaded update."
+  },
+  "appUpdate_actionResetTrust": "Reset and check again",
+  "@appUpdate_actionResetTrust": {
+    "description": "Button shown when the stored update verification data was damaged: deletes it and checks again."
+  },
+  "appUpdate_actionTurnOnChecks": "Turn on automatic checks",
+  "@appUpdate_actionTurnOnChecks": {
+    "description": "Button shown after damaged update settings: turns automatic checks back on."
+  },
+  "appUpdate_actionKeepOff": "Keep off",
+  "@appUpdate_actionKeepOff": {
+    "description": "Button shown after damaged update settings: leaves automatic checks off."
+  },
+  "appUpdate_whatsNewTitle": "What's new in {version}",
+  "@appUpdate_whatsNewTitle": {
+    "description": "Heading above the short release notes of one version. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_fullReleaseNotes": "Full release notes",
+  "@appUpdate_fullReleaseNotes": {
+    "description": "Link that opens the complete release notes in a new tab."
+  },
+  "appUpdate_whatChangesTitle": "What changes",
+  "@appUpdate_whatChangesTitle": {
+    "description": "Heading of the list of bundled components and how the update changes each."
+  },
+  "appUpdate_changeUnchanged": "unchanged",
+  "@appUpdate_changeUnchanged": {
+    "description": "Label next to a bundled component whose version the update doesn't change."
+  },
+  "appUpdate_changeUpgraded": "upgraded",
+  "@appUpdate_changeUpgraded": {
+    "description": "Label next to a bundled component that the update brings to a newer version."
+  },
+  "appUpdate_changeDowngraded": "downgraded",
+  "@appUpdate_changeDowngraded": {
+    "description": "Label next to a bundled component that the update brings to an older version."
+  },
+  "appUpdate_changeChanged": "changed",
+  "@appUpdate_changeChanged": {
+    "description": "Label next to a bundled component that the update changes in a way that can't be ordered (e.g. a pre-release)."
+  },
+  "appUpdate_changeUnknown": "unknown",
+  "@appUpdate_changeUnknown": {
+    "description": "Label next to a bundled component when it isn't known how the update changes it."
+  },
+  "appUpdate_componentVersionUnknown": "Unknown",
+  "@appUpdate_componentVersionUnknown": {
+    "description": "Shown in place of a component version that isn't known."
+  },
+  "appUpdate_componentNotBundled": "Not included",
+  "@appUpdate_componentNotBundled": {
+    "description": "Shown in place of a component version when the build doesn't include that component."
+  },
+  "appUpdate_componentChange": "{from} → {to}",
+  "@appUpdate_componentChange": {
+    "description": "A component's version before and after the update. Both are version numbers or the 'Unknown' label; keep the arrow.",
+    "placeholders": {
+      "from": {
+        "type": "String",
+        "example": "160.0"
+      },
+      "to": {
+        "type": "String",
+        "example": "161.0"
+      }
+    }
+  },
+  "appUpdate_automaticChecksTitle": "Check for updates automatically",
+  "@appUpdate_automaticChecksTitle": {
+    "description": "Switch on the App updates screen."
+  },
+  "appUpdate_automaticChecksSubtitle": "Once a day, with a notice when a new version is out. Downloads and installs only start with a tap.",
+  "@appUpdate_automaticChecksSubtitle": {
+    "description": "Explanation under the automatic-check switch."
+  },
+  "appUpdate_installedByOther": "This version was installed by {app}. If {app} keeps WebLibre up to date, automatic checks can be turned off here.",
+  "@appUpdate_installedByOther": {
+    "description": "Informational line on the App updates screen when another app (for example an update manager) installed the current version. {app} is that app's name.",
+    "placeholders": {
+      "app": {
+        "type": "String",
+        "example": "Obtainium"
+      }
+    }
+  },
+  "appUpdate_failureNetwork": "Couldn't reach the update server. Check the connection and try again.",
+  "@appUpdate_failureNetwork": {
+    "description": "Error on the App updates screen."
+  },
+  "appUpdate_failureRoutingUnavailable": "The connection WebLibre is set to use isn't available, so updates can't be checked.",
+  "@appUpdate_failureRoutingUnavailable": {
+    "description": "Error when the configured proxy or Tor connection is not available. WebLibre never falls back to a direct connection."
+  },
+  "appUpdate_failureMetadataInvalid": "The update information couldn't be verified.",
+  "@appUpdate_failureMetadataInvalid": {
+    "description": "Error when the signed update information is invalid."
+  },
+  "appUpdate_failureClientTooOld": "This version of WebLibre can't read the current update information. Install the newest version manually.",
+  "@appUpdate_failureClientTooOld": {
+    "description": "Error when the update information uses a newer format than this version understands."
+  },
+  "appUpdate_failureMetadataExpired": "Couldn't verify update information. Check the device's date and time.",
+  "@appUpdate_failureMetadataExpired": {
+    "description": "Error when the update information looks expired, usually because the device clock is wrong."
+  },
+  "appUpdate_failureMetadataRollback": "The update server sent older information than WebLibre already has.",
+  "@appUpdate_failureMetadataRollback": {
+    "description": "Error when the update information is older than information accepted before."
+  },
+  "appUpdate_failureMetadataPredatesBuild": "Update information for this version isn't published yet. Try again later.",
+  "@appUpdate_failureMetadataPredatesBuild": {
+    "description": "Error on the App updates screen when the update information was published before the installed version was built, which is normal shortly after a new release. A Retry button is shown next to it."
+  },
+  "appUpdate_failureClockSuspect": "The device's date and time seem to be wrong. Correct them and try again.",
+  "@appUpdate_failureClockSuspect": {
+    "description": "Error when the device clock is far behind."
+  },
+  "appUpdate_failureNoCompatibleTarget": "A new version exists, but not for this device or build.",
+  "@appUpdate_failureNoCompatibleTarget": {
+    "description": "Error when a newer release has no download matching this device and build."
+  },
+  "appUpdate_failureInsufficientStorage": "Not enough free storage to download the update.",
+  "@appUpdate_failureInsufficientStorage": {
+    "description": "Error before a download starts."
+  },
+  "appUpdate_failureDownloadTooLarge": "The download was larger than expected and was stopped.",
+  "@appUpdate_failureDownloadTooLarge": {
+    "description": "Error when a download exceeds its published size."
+  },
+  "appUpdate_failureDownloadMismatch": "The downloaded file didn't match the published update and was deleted.",
+  "@appUpdate_failureDownloadMismatch": {
+    "description": "Error when the downloaded file's checksum doesn't match."
+  },
+  "appUpdate_failureApkInvalid": "The downloaded update is damaged and was deleted.",
+  "@appUpdate_failureApkInvalid": {
+    "description": "Error when the downloaded app package fails verification."
+  },
+  "appUpdate_failureApkIdentityMismatch": "The downloaded update is for a different build of WebLibre and was deleted.",
+  "@appUpdate_failureApkIdentityMismatch": {
+    "description": "Error when the downloaded package is for another build (track, renderer, device type)."
+  },
+  "appUpdate_failureSignerUntrusted": "The downloaded update isn't signed by WebLibre and was deleted.",
+  "@appUpdate_failureSignerUntrusted": {
+    "description": "Error when the downloaded package's signature isn't WebLibre's."
+  },
+  "appUpdate_failureAuthorizationStale": "The update information has expired. Connect to the internet so it can be checked again before installing.",
+  "@appUpdate_failureAuthorizationStale": {
+    "description": "Error when installing offline and the stored update information is too old."
+  },
+  "appUpdate_failureTargetWithdrawn": "This update was withdrawn by the publisher.",
+  "@appUpdate_failureTargetWithdrawn": {
+    "description": "Error when the offered update has been withdrawn."
+  },
+  "appUpdate_failureStateCorrupt": "Update verification data was damaged. Reset it to check again.",
+  "@appUpdate_failureStateCorrupt": {
+    "description": "Error when the stored update verification data is damaged. A reset button follows."
+  },
+  "appUpdate_failureInstallPermissionDenied": "WebLibre isn't allowed to install updates.",
+  "@appUpdate_failureInstallPermissionDenied": {
+    "description": "Error when Android's permission to install apps is missing."
+  },
+  "appUpdate_failureInstallCancelled": "The installation was cancelled.",
+  "@appUpdate_failureInstallCancelled": {
+    "description": "Error when the user cancelled Android's installation dialog."
+  },
+  "appUpdate_failureInstallConflict": "Android couldn't install the update because it conflicts with the installed app.",
+  "@appUpdate_failureInstallConflict": {
+    "description": "Error reported by Android's installer."
+  },
+  "appUpdate_failureInstallIncompatible": "This update isn't compatible with this device.",
+  "@appUpdate_failureInstallIncompatible": {
+    "description": "Error reported by Android's installer."
+  },
+  "appUpdate_failureInstallStorage": "Not enough free storage to install the update.",
+  "@appUpdate_failureInstallStorage": {
+    "description": "Error reported by Android's installer."
+  },
+  "appUpdate_failureInstallBlocked": "Android blocked the installation.",
+  "@appUpdate_failureInstallBlocked": {
+    "description": "Error reported by Android's installer."
+  },
+  "appUpdate_failureInstallUnknown": "The update couldn't be installed.",
+  "@appUpdate_failureInstallUnknown": {
+    "description": "Generic installation error."
+  },
+  "appUpdate_failurePlayNotOwned": "Google Play doesn't manage this installation for the signed-in account, so updates can't be checked here.",
+  "@appUpdate_failurePlayNotOwned": {
+    "description": "Error on Google Play builds. Google Play is a brand name."
+  },
+  "appUpdate_failurePlayUnavailable": "Google Play can't update WebLibre right now.",
+  "@appUpdate_failurePlayUnavailable": {
+    "description": "Error on Google Play builds."
+  },
+  "appUpdate_failurePlayError": "Couldn't check with Google Play.",
+  "@appUpdate_failurePlayError": {
+    "description": "Generic error on Google Play builds."
+  },
+  "appUpdate_menuAvailable": "Update available",
+  "@appUpdate_menuAvailable": {
+    "description": "Row at the top of the browser menu when a new version is available. Opens the App updates screen."
+  },
+  "appUpdate_menuDownloading": "Downloading update…",
+  "@appUpdate_menuDownloading": {
+    "description": "Browser menu row while the update downloads."
+  },
+  "appUpdate_menuReady": "Update ready: restart to install",
+  "@appUpdate_menuReady": {
+    "description": "Browser menu row when the update is ready to install."
+  },
+  "appUpdate_menuFinish": "Finish installing the update",
+  "@appUpdate_menuFinish": {
+    "description": "Browser menu row when the installation waits for the user."
+  },
+  "appUpdate_menuInstalling": "Installing update…",
+  "@appUpdate_menuInstalling": {
+    "description": "Browser menu row while Android installs the update."
+  },
+  "appUpdate_menuPreferencesUnreadable": "Update checks are off: settings couldn't be read",
+  "@appUpdate_menuPreferencesUnreadable": {
+    "description": "Browser menu row when the stored update settings were damaged."
+  },
+  "appUpdate_menuDotLabel": "Update waiting",
+  "@appUpdate_menuDotLabel": {
+    "description": "Accessibility label of the dot on the browser menu button that marks a pending update."
+  },
+  "appUpdate_announcement": "WebLibre {version} is available",
+  "@appUpdate_announcement": {
+    "description": "Snackbar shown once per version when a new version is found. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_announcementUnknownVersion": "A WebLibre update is available",
+  "@appUpdate_announcementUnknownVersion": {
+    "description": "Snackbar shown once when an update with unknown version number is found."
+  },
+  "appUpdate_announcementView": "View",
+  "@appUpdate_announcementView": {
+    "description": "Snackbar action that opens the App updates screen."
+  },
+  "appUpdate_updatedTo": "Updated to {version}",
+  "@appUpdate_updatedTo": {
+    "description": "Snackbar shown once after WebLibre updated itself. {version} is a version number.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.51.0"
+      }
+    }
+  },
+  "appUpdate_downloadCancelled": "Download cancelled",
+  "@appUpdate_downloadCancelled": {
+    "description": "Snackbar after the user cancelled the update download."
+  },
+  "appUpdate_installationCancelled": "Installation cancelled",
+  "@appUpdate_installationCancelled": {
+    "description": "Snackbar after the user cancelled the installation."
+  },
+  "appUpdate_permissionDialogTitle": "Allow installing updates",
+  "@appUpdate_permissionDialogTitle": {
+    "description": "Title of the dialog shown before opening Android's 'Install unknown apps' screen."
+  },
+  "appUpdate_permissionDialogBody": "Android needs the “Install unknown apps” permission for WebLibre. It is used only for WebLibre's own verified updates.",
+  "@appUpdate_permissionDialogBody": {
+    "description": "Body of the permission dialog. 'Install unknown apps' is the name of Android's setting; use the name Android shows in your language."
+  },
+  "appUpdate_permissionDialogOpenSettings": "Open settings",
+  "@appUpdate_permissionDialogOpenSettings": {
+    "description": "Dialog button that opens Android's permission screen."
+  },
+  "appUpdate_installDialogTitle": "Install update?",
+  "@appUpdate_installDialogTitle": {
+    "description": "Title of the confirmation before installing."
+  },
+  "appUpdate_installDialogBody": "WebLibre will close to install the update. Open it again afterwards.",
+  "@appUpdate_installDialogBody": {
+    "description": "Body of the install confirmation when no private tabs are open."
+  },
+  "appUpdate_installDialogBodyPrivateTabs": "WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.",
+  "@appUpdate_installDialogBodyPrivateTabs": {
+    "description": "Body of the install confirmation when private tabs are open: they are lost when the app closes."
+  }
+}

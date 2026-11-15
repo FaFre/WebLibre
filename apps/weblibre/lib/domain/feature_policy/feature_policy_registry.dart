@@ -97,6 +97,16 @@ enum FeatureId {
   /// animations
   appearanceCore('appearance.core', FeaturePolicy.locked()),
 
+  /// App updates: check, download and install new versions (GitHub builds),
+  /// or Google Play's in-app update (Play builds).
+  ///
+  /// Locked: on for every preset under any circumstances and never an
+  /// onboarding choice, so Feature Control can never hide it. Its one
+  /// preference ("Check for updates automatically", default on) is
+  /// installation-level, outside the settings layers and H1
+  /// (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, D7, D9, D10).
+  appUpdates('app.updates', FeaturePolicy.locked()),
+
   /// Tab bar position (Automatic / Top / Bottom) / compact or title style /
   /// ordinary toolbar buttons
   layoutBasic(

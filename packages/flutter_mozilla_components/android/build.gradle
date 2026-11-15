@@ -57,7 +57,8 @@ android {
     }
 
     defaultConfig {
-        minSdk = 24
+        // The app's own minimum: this plugin has no other consumer.
+        minSdk = 26
     }
 
     buildFeatures {

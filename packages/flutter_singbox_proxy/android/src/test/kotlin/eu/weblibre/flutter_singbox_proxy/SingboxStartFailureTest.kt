@@ -1,5 +1,6 @@
 package eu.weblibre.flutter_singbox_proxy
 
+import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyDnsServerConfig
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfile
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfileType
 import kotlin.test.Test
@@ -76,7 +77,16 @@ internal class SingboxStartFailureTest {
             "start dns/https[override-home-id]: parse server address: missing port",
         )
 
-        val failure = SingboxStartFailure.from(error, listOf(home))
+        val server = SingboxProxyDnsServerConfig(
+            tag = "override-home-id",
+            address = "https://dns.example",
+            detourProfileId = home.id,
+            matchDomainSuffixes = emptyList(),
+            matchGeosites = emptyList(),
+            matchInboundProfileIds = listOf(home.id),
+        )
+
+        val failure = SingboxStartFailure.from(error, listOf(home), listOf(server))
 
         assertEquals("parse server address: missing port", failure.message)
         assertEquals(

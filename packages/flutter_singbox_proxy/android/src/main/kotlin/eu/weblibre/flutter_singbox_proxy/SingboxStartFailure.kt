@@ -1,6 +1,7 @@
 package eu.weblibre.flutter_singbox_proxy
 
 import eu.weblibre.flutter_singbox_proxy.generated.FlutterError
+import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyDnsServerConfig
 import eu.weblibre.flutter_singbox_proxy.generated.SingboxProxyProfile
 
 /**
@@ -31,7 +32,12 @@ internal object SingboxStartFailure {
      */
     private val ipcLine = Regex("""^[a-z_]+=.*$""")
 
-    fun from(error: Throwable, profiles: List<SingboxProxyProfile>): FlutterError {
+    /** [dnsServers] are the ones the failed config was built with. */
+    fun from(
+        error: Throwable,
+        profiles: List<SingboxProxyProfile>,
+        dnsServers: List<SingboxProxyDnsServerConfig> = emptyList(),
+    ): FlutterError {
         if (error is FlutterError) return error
 
         val text = redact(error.message.orEmpty())
@@ -40,7 +46,7 @@ internal object SingboxStartFailure {
             ?: return FlutterError(CODE, text, null)
 
         val tag = match.groupValues[1]
-        val profile = profiles.firstOrNull { profile -> ownsTag(profile, tag) }
+        val profile = profiles.firstOrNull { profile -> ownsTag(profile, tag, dnsServers) }
 
         return FlutterError(
             CODE,
@@ -78,19 +84,16 @@ internal object SingboxStartFailure {
 
     /**
      * Whether sing-box's [tag] is one built for [profile]: its inbound and
-     * outbound (`SingboxTagFormat`), or one of the DNS servers the app scopes
-     * to it (`browser-doh-<id>`, `override-<id>`, which carry the id without
-     * its connection prefix).
+     * outbound (`SingboxTagFormat`), or a DNS server dialed through it.
      */
-    private fun ownsTag(profile: SingboxProxyProfile, tag: String): Boolean {
-        if (tag == SingboxTagFormat.outboundTag(profile.id) ||
-            tag == SingboxTagFormat.inboundTag(profile.id)
-        ) {
-            return true
-        }
-        val rawId = SingboxTagFormat.sanitizeTag(profile.id.substringAfter(':'))
-        return tag == "browser-doh-$rawId" || tag == "override-$rawId"
-    }
+    private fun ownsTag(
+        profile: SingboxProxyProfile,
+        tag: String,
+        dnsServers: List<SingboxProxyDnsServerConfig>,
+    ): Boolean =
+        tag == SingboxTagFormat.outboundTag(profile.id) ||
+            tag == SingboxTagFormat.inboundTag(profile.id) ||
+            dnsServers.any { server -> server.tag == tag && server.detourProfileId == profile.id }
 
     /** [text] without the lines of a WireGuard IPC dump, on one line. */
     private fun redact(text: String): String = text.lines()

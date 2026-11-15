@@ -153,3 +153,47 @@ extension $RestartRequestCopyWith on RestartRequest {
   // ignore: library_private_types_in_public_api
   _$RestartRequestCWProxy get copyWith => _$RestartRequestCWProxyImpl(this);
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+RestartRequest _$RestartRequestFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RestartRequest', json, ($checkedConvert) {
+      final val = RestartRequest(
+        requestId: $checkedConvert('requestId', (v) => requiredString(v)),
+        reason: $checkedConvert('reason', (v) => stringOrEmpty(v)),
+        processInstanceId: $checkedConvert(
+          'processInstanceId',
+          (v) => requiredString(v),
+        ),
+        stateId: $checkedConvert('state', (v) => RestartRequest._state(v)),
+        createdAt: $checkedConvert('createdAt', (v) => requiredDateTime(v)),
+        expiresAt: $checkedConvert('expiresAt', (v) => requiredDateTime(v)),
+        version: $checkedConvert(
+          'version',
+          (v) => v == null ? restartRequestVersion : RestartRequest._version(v),
+        ),
+        targetProfileId: $checkedConvert(
+          'targetProfileId',
+          (v) => stringOrNull(v),
+        ),
+        brokerEntryId: $checkedConvert('brokerEntryId', (v) => stringOrNull(v)),
+        appliedAt: $checkedConvert('appliedAt', (v) => dateTimeOrNull(v)),
+      );
+      return val;
+    }, fieldKeyMap: const {'stateId': 'state'});
+
+Map<String, dynamic> _$RestartRequestToJson(RestartRequest instance) =>
+    <String, dynamic>{
+      'version': instance.version,
+      'requestId': instance.requestId,
+      'targetProfileId': instance.targetProfileId,
+      'brokerEntryId': instance.brokerEntryId,
+      'reason': instance.reason,
+      'processInstanceId': instance.processInstanceId,
+      'state': instance.stateId,
+      'createdAt': utcIso(instance.createdAt),
+      'expiresAt': utcIso(instance.expiresAt),
+      'appliedAt': utcIsoOrNull(instance.appliedAt),
+    };

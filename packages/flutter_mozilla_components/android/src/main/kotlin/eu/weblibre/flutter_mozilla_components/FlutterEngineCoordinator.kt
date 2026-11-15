@@ -15,6 +15,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.FlutterJNI
 import io.flutter.embedding.engine.dart.DartExecutor
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -137,6 +138,16 @@ object FlutterEngineCoordinator {
         }
     }
 
+    /**
+     * The app's own plugins, which the generated registrant doesn't know about
+     * (it lists pub packages only). Set once by the application before any
+     * engine exists; [create] adds them to every engine before Dart runs, so a
+     * channel they register is there for a headless engine as much as for one
+     * an activity hosts.
+     */
+    @Volatile
+    var appPlugins: (() -> List<FlutterPlugin>)? = null
+
     @MainThread
     private fun create(context: Context): FlutterEngine {
         // A new isolate starts its own cold start; the old one's progress says
@@ -145,6 +156,7 @@ object FlutterEngineCoordinator {
         DartStartupProgress.reset()
 
         val engine = FlutterEngine(context.applicationContext)
+        appPlugins?.invoke()?.forEach(engine.plugins::add)
         engine.navigationChannel.setInitialRoute("/")
         engine.dartExecutor.executeDartEntrypoint(DartExecutor.DartEntrypoint.createDefault())
         FlutterEngineCache.getInstance().put(ENGINE_ID, engine)

@@ -1670,6 +1670,12 @@ RouteBase get $settingsRoute => GoRouteData.$route(
       factory: $SettingsTransferRoute._fromState,
     ),
     GoRouteData.$route(
+      path: 'app_updates',
+      name: 'AppUpdateSettingsRoute',
+      hasOverriddenOnExit: false,
+      factory: $AppUpdateSettingsRoute._fromState,
+    ),
+    GoRouteData.$route(
       path: 'confirmations',
       name: 'ConfirmationSettingsRoute',
       hasOverriddenOnExit: false,
@@ -1975,6 +1981,27 @@ mixin $SettingsTransferRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/transfer');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AppUpdateSettingsRoute on GoRouteData {
+  static AppUpdateSettingsRoute _fromState(GoRouterState state) =>
+      const AppUpdateSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/app_updates');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -356,7 +356,7 @@ class SingboxRuntimeManager(
                     )
                     state
                 }.getOrElse { error ->
-                    val failure = SingboxStartFailure.from(error, profiles)
+                    val failure = SingboxStartFailure.from(error, profiles, options.dnsConfig?.servers.orEmpty())
                     updateStateLocked(
                         SingboxProxyRuntimeStatus.ERROR,
                         previousState.endpoints,
@@ -426,7 +426,11 @@ class SingboxRuntimeManager(
                     // fails the way a start does — a WireGuard setup error
                     // carries the device's private key — so it is reported the
                     // same way.
-                    val failure = SingboxStartFailure.from(error, activeProfiles)
+                    val failure = SingboxStartFailure.from(
+                        error,
+                        activeProfiles,
+                        activeOptions.dnsConfig?.servers.orEmpty(),
+                    )
                     updateStateLocked(
                         SingboxProxyRuntimeStatus.ERROR,
                         previousState.endpoints,
@@ -482,12 +486,10 @@ class SingboxRuntimeManager(
         val dnsConfig = options.dnsConfig ?: return options
         if (removedProfileIds.isEmpty()) return options
 
-        val removedOutbounds = removedProfileIds.map(SingboxTagFormat::outboundTag).toSet()
-        val removedInbounds = removedProfileIds.map(SingboxTagFormat::inboundTag).toSet()
+        val removed = removedProfileIds.toSet()
         val keptServers = dnsConfig.servers.filterNot { server ->
-            server.detourTag in removedOutbounds ||
-                server.matchOutbounds.any { outbound -> outbound in removedOutbounds } ||
-                server.matchInbounds.any { inbound -> inbound in removedInbounds }
+            server.detourProfileId in removed ||
+                server.matchInboundProfileIds.any { it in removed }
         }
         if (keptServers.size == dnsConfig.servers.size) return options
 

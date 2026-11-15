@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/app_update/presentation/widgets/update_menu_row.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_layout.dart';
@@ -142,7 +143,10 @@ class _BrowserMenuSheet extends ConsumerWidget {
                     slivers: [
                       if (isReordering)
                         const MenuReorderView()
-                      else
+                      else ...[
+                        // Pinned above the user's sections and outside the
+                        // menu layout (8.3).
+                        const SliverToBoxAdapter(child: AppUpdateMenuRow()),
                         SliverPadding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
@@ -150,6 +154,7 @@ class _BrowserMenuSheet extends ConsumerWidget {
                           ),
                           sliver: _MenuSections(selectedTabId: selectedTabId),
                         ),
+                      ],
                       contentEnd,
                     ],
                   ),

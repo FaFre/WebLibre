@@ -401,3 +401,113 @@ extension $StartupIntentQueueCopyWith on StartupIntentQueue {
   _$StartupIntentQueueCWProxy get copyWith =>
       _$StartupIntentQueueCWProxyImpl(this);
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+StartupIntentClaim _$StartupIntentClaimFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('StartupIntentClaim', json, ($checkedConvert) {
+      final val = StartupIntentClaim(
+        processInstanceId: $checkedConvert(
+          'processInstanceId',
+          (v) => requiredString(v),
+        ),
+        engineId: $checkedConvert('engineId', (v) => stringOrEmpty(v)),
+        claimedAt: $checkedConvert('claimedAt', (v) => requiredDateTime(v)),
+        expiresAt: $checkedConvert('expiresAt', (v) => requiredDateTime(v)),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$StartupIntentClaimToJson(StartupIntentClaim instance) =>
+    <String, dynamic>{
+      'processInstanceId': instance.processInstanceId,
+      'engineId': instance.engineId,
+      'claimedAt': utcIso(instance.claimedAt),
+      'expiresAt': utcIso(instance.expiresAt),
+    };
+
+StartupIntentEntry _$StartupIntentEntryFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('StartupIntentEntry', json, ($checkedConvert) {
+      final val = StartupIntentEntry(
+        id: $checkedConvert('id', (v) => requiredString(v)),
+        sequence: $checkedConvert('sequence', (v) => requiredInt(v)),
+        classificationId: $checkedConvert(
+          'classification',
+          (v) => StartupIntentEntry._classification(v),
+        ),
+        createdAt: $checkedConvert('createdAt', (v) => requiredDateTime(v)),
+        expiresAt: $checkedConvert('expiresAt', (v) => requiredDateTime(v)),
+        action: $checkedConvert('action', (v) => stringOrNull(v)),
+        dataUri: $checkedConvert('dataUri', (v) => stringOrNull(v)),
+        mimeType: $checkedConvert('mimeType', (v) => stringOrNull(v)),
+        categories: $checkedConvert(
+          'categories',
+          (v) => v == null ? const [] : stringList(v),
+        ),
+        flags: $checkedConvert(
+          'flags',
+          (v) => v == null ? const [] : stringList(v),
+        ),
+        extras: $checkedConvert(
+          'extras',
+          (v) => v == null ? const {} : sanitizeExtras(v),
+        ),
+        trustedProfileId: $checkedConvert(
+          'trustedProfileId',
+          (v) => stringOrNull(v),
+        ),
+        callerPackage: $checkedConvert('callerPackage', (v) => stringOrNull(v)),
+        payloadDirName: $checkedConvert(
+          'payloadDirName',
+          (v) => stringOrNull(v),
+        ),
+        claim: $checkedConvert('claim', (v) => StartupIntentEntry._claim(v)),
+        acknowledged: $checkedConvert(
+          'acknowledged',
+          (v) => v == null ? false : StartupIntentEntry._acknowledged(v),
+        ),
+      );
+      return val;
+    }, fieldKeyMap: const {'classificationId': 'classification'});
+
+Map<String, dynamic> _$StartupIntentEntryToJson(StartupIntentEntry instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'sequence': instance.sequence,
+      'classification': instance.classificationId,
+      'action': instance.action,
+      'dataUri': instance.dataUri,
+      'mimeType': instance.mimeType,
+      'categories': instance.categories,
+      'flags': instance.flags,
+      'extras': instance.extras,
+      'trustedProfileId': instance.trustedProfileId,
+      'callerPackage': instance.callerPackage,
+      'payloadDirName': instance.payloadDirName,
+      'createdAt': utcIso(instance.createdAt),
+      'expiresAt': utcIso(instance.expiresAt),
+      'claim': instance.claim?.toJson(),
+      'acknowledged': instance.acknowledged,
+    };
+
+StartupIntentQueue _$StartupIntentQueueFromJson(Map<String, dynamic> json) =>
+    StartupIntentQueue(
+      version: json['version'] == null
+          ? startupIntentQueueVersion
+          : StartupIntentQueue._queueVersion(json['version']),
+      nextSequence: json['nextSequence'] == null
+          ? 1
+          : StartupIntentQueue._storedSequence(json['nextSequence']),
+      entries: json['entries'] == null
+          ? const []
+          : StartupIntentQueue._entries(json['entries']),
+    );
+
+Map<String, dynamic> _$StartupIntentQueueToJson(StartupIntentQueue instance) =>
+    <String, dynamic>{
+      'version': instance.version,
+      'nextSequence': instance.nextSequence,
+      'entries': instance.entries.map((e) => e.toJson()).toList(),
+    };

@@ -342,7 +342,7 @@ class GeckoPwaApiImpl(
             "${shortcutKind.shortcutType}::$url::$profileUuid::$contextId"
         }
         val hash = digest.digest(key.toByteArray())
-        val hex = hash.take(16).joinToString("") { "%02x".format(it) }
+        val hex = hash.toHexString(endIndex = 16)
         return "${shortcutKind.idPrefix}_$hex"
     }
 
@@ -362,7 +362,7 @@ class GeckoPwaApiImpl(
             "$url::$profileUuid::$contextId"
         }
         val hash = digest.digest(key.toByteArray())
-        val hex = hash.take(16).joinToString("") { "%02x".format(it) }
+        val hex = hash.toHexString(endIndex = 16)
         return "pwa_$hex"
     }
 

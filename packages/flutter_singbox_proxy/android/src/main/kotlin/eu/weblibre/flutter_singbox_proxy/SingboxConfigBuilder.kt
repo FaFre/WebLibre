@@ -352,10 +352,11 @@ class SingboxConfigBuilder(
         singleFamilyTunnels.forEach { tunnel -> rulesJson.put(otherFamilyRule(tunnel)) }
 
         for (server in dns.servers) {
-            serversJson.put(buildDnsServer(server, server.detourTag?.let(familyByOutbound::get)))
+            val detourTag = server.detourProfileId?.let(::outboundTag)
+            serversJson.put(buildDnsServer(server, detourTag, detourTag?.let(familyByOutbound::get)))
 
             if (server.matchDomainSuffixes.isNotEmpty() ||
-                server.matchInbounds.isNotEmpty()
+                server.matchInboundProfileIds.isNotEmpty()
             ) {
                 rulesJson.put(JSONObject().apply {
                     if (server.matchDomainSuffixes.isNotEmpty()) {
@@ -364,8 +365,8 @@ class SingboxConfigBuilder(
                             JSONArray(server.matchDomainSuffixes)
                         )
                     }
-                    if (server.matchInbounds.isNotEmpty()) {
-                        put("inbound", JSONArray(server.matchInbounds))
+                    if (server.matchInboundProfileIds.isNotEmpty()) {
+                        put("inbound", JSONArray(server.matchInboundProfileIds.map(::inboundTag)))
                     }
                     put("action", "route")
                     put("server", server.tag)
@@ -387,11 +388,13 @@ class SingboxConfigBuilder(
     }
 
     /**
-     * [detourFamily] is the one family the tunnel [server] is reached through
-     * can carry, if it carries only one.
+     * [detourTag] is the outbound [server] is dialed through, and
+     * [detourFamily] the one family that tunnel can carry, if it carries only
+     * one.
      */
     private fun buildDnsServer(
         server: SingboxProxyDnsServerConfig,
+        detourTag: String?,
         detourFamily: IpFamily?,
     ): JSONObject {
         val parsed = parseDnsAddress(server.address)
@@ -401,7 +404,7 @@ class SingboxConfigBuilder(
             parsed.server?.let { put("server", it) }
             parsed.serverPort?.let { put("server_port", it) }
             parsed.path?.let { put("path", it) }
-            server.detourTag?.takeUnless { it == "direct" }?.let { put("detour", it) }
+            detourTag?.let { put("detour", it) }
             // Hostname targets always bootstrap through `local`; sing-box
             // ignores `domain_resolver` for IP-literal servers, so emitting
             // it unconditionally is fine and keeps the JSON uniform.

@@ -1,0 +1,65 @@
+name: Workflow security
+
+# Checks the supply-chain rules build.yml relies on, whenever a workflow, the
+# lockfile or the Dependabot config changes:
+# - `lockfile`: .github/workflows/actions.lock covers every `uses:` and each
+#   locked commit still verifies upstream (github/gh-actions-lock's
+#   verify-lockfile.yml). The runner checks it again at job start.
+# - `zizmor`: static audit of the workflows and dependabot.yml.
+#
+# After adding a workflow or a `uses:`, run `gh actions-lock` and commit
+# actions.lock with it. The gh-actions-lock pin below is not tracked by
+# Dependabot; bump it by hand.
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - '.github/dependabot.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/**'
+      - '.github/dependabot.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: workflow-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lockfile:
+    name: Verify actions.lock
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read # checkout, and upstream lookups through GH_TOKEN
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - run: gh extension install github/gh-actions-lock --pin v0.4.1
+      - run: gh actions-lock --verify
+
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read # checkout, and online audits through the token
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@v0.8.1
+        with:
+          version: 1.32.0
+          collect: all
+          persona: regular
+          # Plain failure with annotations; no code-scanning upload, so the
+          # job needs no `security-events: write`.
+          advanced-security: false
+          annotations: true

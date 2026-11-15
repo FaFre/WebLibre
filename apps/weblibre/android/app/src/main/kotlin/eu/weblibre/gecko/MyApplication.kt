@@ -28,12 +28,15 @@ import android.database.sqlite.SQLiteDatabase
 import android.os.Build
 import android.os.Process
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
+import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
+import eu.weblibre.gecko.update.AppUpdatePlugin
+import eu.weblibre.gecko.update.BuildManifestRuntimeCheck
 import java.io.File
 
 class MyApplication : Application() {
@@ -68,6 +71,11 @@ class MyApplication : Application() {
         MegazordSetup.setupEarlyMainProcess()
 
         if (!isDefaultProcess(this)) return
+
+        // Before any engine exists: the updater's channels are on every
+        // engine from its start, headless ones included.
+        FlutterEngineCoordinator.appPlugins = { listOf(AppUpdatePlugin()) }
+        BuildManifestRuntimeCheck.assertInDebug(this)
 
         // Before anything can commit, because it must not need a profile: private
         // tabs never survive the process, so a private-browsing notification still

@@ -26,6 +26,37 @@
 /// `startup/JsonExtensions.kt`; keep the two readers behaving the same.
 library;
 
+import 'package:json_annotation/json_annotation.dart';
+
+/// [fromJson] (a generated `checked: true` reader) applied to [json], or null
+/// when it rejects a required field ([requiredString] and its siblings).
+T? tryCheckedFromJson<T>(
+  Map<String, Object?> json,
+  T Function(Map<String, dynamic> json) fromJson,
+) {
+  try {
+    return fromJson(json);
+  } on CheckedFromJsonException {
+    return null;
+  }
+}
+
+/// The records of a JSON list that [tryFromJson] can read; any other entry
+/// is dropped.
+List<T> recordsFromJson<T>(
+  Object? value,
+  T? Function(Map<String, Object?> json) tryFromJson,
+) {
+  if (value is! List) return const [];
+  return [
+    for (final entry in value)
+      if (entry is Map)
+        ?tryFromJson(
+          entry.map((key, value) => MapEntry(key.toString(), value)),
+        ),
+  ];
+}
+
 /// A non-empty string, or null for anything else.
 String? stringOrNull(Object? value) =>
     value is String && value.isNotEmpty ? value : null;
@@ -52,6 +83,31 @@ DateTime? dateTimeOrNull(Object? value) {
   if (value is! String || value.isEmpty) return null;
   return DateTime.tryParse(value)?.toUtc();
 }
+
+/// Like [dateTimeOrNull], with the epoch for anything unparseable.
+DateTime dateTimeOrEpoch(Object? value) =>
+    dateTimeOrNull(value) ?? DateTime.utc(1970);
+
+/// For a field without which the whole record is unusable: a non-empty
+/// string, or a [FormatException]. A generated `fromJson` in checked mode
+/// turns that into `CheckedFromJsonException`, which [tryCheckedFromJson]
+/// maps to null.
+String requiredString(Object? value) => value is String && value.isNotEmpty
+    ? value
+    : throw const FormatException('not a non-empty string');
+
+/// Like [requiredString], for an int.
+int requiredInt(Object? value) =>
+    value is int ? value : throw const FormatException('not an integer');
+
+/// Like [requiredString], for a timestamp.
+DateTime requiredDateTime(Object? value) =>
+    dateTimeOrNull(value) ?? (throw const FormatException('not a timestamp'));
+
+/// How every record writes a timestamp: ISO-8601 in UTC.
+String utcIso(DateTime value) => value.toUtc().toIso8601String();
+
+String? utcIsoOrNull(DateTime? value) => value?.toUtc().toIso8601String();
 
 /// The string elements of a list, ignoring any other members.
 List<String> stringList(Object? value) {

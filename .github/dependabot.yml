@@ -1,37 +1,84 @@
 version: 2
+
+# Every ecosystem waits a week before proposing a release (`cooldown`), so a
+# compromised or broken version is usually yanked before it reaches a PR.
+# Security updates are not delayed by it.
 updates:
-  # Dart (pub)
-  - package-ecosystem: "pub"
-    directory: "/app"
+  # GitHub Actions. Bumps the `uses:` tag and regenerates the matching
+  # .github/workflows/actions.lock entry in the same PR; review the changed
+  # `commit` like any dependency bump, and investigate any changed
+  # `owner_id`/`repo_id`.
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Ruby (fastlane, used by the Play publish job)
+  - package-ecosystem: "bundler"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      fastlane:
+        patterns:
+          - "*"
+
+  # Dart (pub)
+  - package-ecosystem: "pub"
+    directory: "/apps/weblibre"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "pub"
     directory: "/packages/simple_intent_receiver"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "pub"
     directory: "/packages/flutter_mozilla_components"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   # Node.js (npm, for JS/TS)
   - package-ecosystem: "npm"
     directory: "packages/flutter_mozilla_components/javascript/readability"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "npm"
     directory: "packages/flutter_mozilla_components/javascript/container_proxy"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   # Gradle (for Kotlin/Java)
   - package-ecosystem: "gradle"
-    directory: "/app"
+    directory: "/apps/weblibre/android"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "gradle"
-    directory: "/packages/simple_intent_receiver"
+    directory: "/packages/simple_intent_receiver/android"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "gradle"
-    directory: "/packages/flutter_mozilla_components"
+    directory: "/packages/flutter_mozilla_components/android"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7

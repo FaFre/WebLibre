@@ -20,6 +20,7 @@
 import 'package:collection/collection.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/startup/models/json_read.dart';
 
 part 'startup_config.g.dart';
@@ -181,25 +182,41 @@ enum MaintenanceFailureKind {
 /// newer build survives a round trip through this one instead of being
 /// rewritten as something it is not. [action]/[state] are `null` exactly when
 /// the raw value is unknown, which is the quarantine condition.
+///
+/// Fields are declared in the order the file lists them.
 @CopyWith()
+@JsonSerializable(checked: true)
 class MaintenanceTask with FastEquatable {
   @CopyWithField(immutable: true)
+  @JsonKey(fromJson: requiredString)
   final String id;
+  @JsonKey(name: 'action', fromJson: stringOrEmpty)
   final String actionId;
-  final String stateId;
+  @JsonKey(fromJson: requiredString)
   final String profileId;
+  @JsonKey(fromJson: stringOrEmpty)
   final String profileName;
+  @JsonKey(name: 'state', fromJson: stringOrEmpty)
+  final String stateId;
+  @JsonKey(fromJson: stringOrNull)
   final String? targetTreeUri;
+  @JsonKey(fromJson: stringOrNull)
   final String? sourceFileUri;
+  @JsonKey(fromJson: stringOrNull)
   final String? sourceDigest;
+  @JsonKey(fromJson: _trueUnlessFalse)
   final bool integrityCheck;
 
   /// Restore only: the installed profile takes the archive's name rather than
   /// keeping the target's. Set by the first-run restore, where the target is a
   /// placeholder the user never chose a name for.
+  @JsonKey(fromJson: _falseUnlessTrue)
   final bool adoptArchiveName;
+  @JsonKey(fromJson: dateTimeOrEpoch, toJson: utcIso)
   final DateTime createdAt;
+  @JsonKey(fromJson: dateTimeOrNull, toJson: utcIsoOrNull)
   final DateTime? startedAt;
+  @JsonKey(fromJson: stringOrNull)
   final String? error;
 
   /// The [MaintenanceFailureKind] id behind [error], when there is one.
@@ -209,6 +226,7 @@ class MaintenanceTask with FastEquatable {
   /// for diagnostics and for [MaintenanceFailureKind.unknown]. Raw, like [actionId]
   /// and [stateId], so a kind written by a newer build round-trips instead of
   /// being rewritten as something this build understands.
+  @JsonKey(name: 'errorKind', fromJson: stringOrNull)
   final String? errorKindId;
 
   /// What the kind alone cannot say, as a raw id: the `RestoreValidationReason`
@@ -217,6 +235,7 @@ class MaintenanceTask with FastEquatable {
   /// Lets the screen translate
   /// a failure read back from disk instead of showing the stored English
   /// [error], which stays for diagnostics.
+  @JsonKey(name: 'errorDetail', fromJson: stringOrNull)
   final String? errorDetailId;
 
   MaintenanceTask({
@@ -285,52 +304,12 @@ class MaintenanceTask with FastEquatable {
     errorDetailId: errorDetailId,
   );
 
-  static MaintenanceTask? tryFromJson(Map<String, Object?> json) {
-    final id = json['id'];
-    if (id is! String || id.isEmpty) return null;
+  /// Null for an entry that names no task or no profile: it can never be
+  /// addressed. Every other field degrades (`json_read.dart`).
+  static MaintenanceTask? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$MaintenanceTaskFromJson);
 
-    final profileId = json['profileId'];
-    if (profileId is! String || profileId.isEmpty) return null;
-
-    final actionId = json['action'];
-    final stateId = json['state'];
-
-    return MaintenanceTask(
-      id: id,
-      actionId: actionId is String ? actionId : '',
-      stateId: stateId is String ? stateId : '',
-      profileId: profileId,
-      profileName: stringOrNull(json['profileName']) ?? '',
-      targetTreeUri: stringOrNull(json['targetTreeUri']),
-      sourceFileUri: stringOrNull(json['sourceFileUri']),
-      sourceDigest: stringOrNull(json['sourceDigest']),
-      integrityCheck: boolOrNull(json['integrityCheck']) ?? true,
-      adoptArchiveName: boolOrNull(json['adoptArchiveName']) ?? false,
-      createdAt: dateTimeOrNull(json['createdAt']) ?? DateTime.utc(1970),
-      startedAt: dateTimeOrNull(json['startedAt']),
-      error: stringOrNull(json['error']),
-      errorKindId: stringOrNull(json['errorKind']),
-      errorDetailId: stringOrNull(json['errorDetail']),
-    );
-  }
-
-  Map<String, Object?> toJson() => {
-    'id': id,
-    'action': actionId,
-    'profileId': profileId,
-    'profileName': profileName,
-    'state': stateId,
-    'targetTreeUri': targetTreeUri,
-    'sourceFileUri': sourceFileUri,
-    'sourceDigest': sourceDigest,
-    'integrityCheck': integrityCheck,
-    'adoptArchiveName': adoptArchiveName,
-    'createdAt': createdAt.toUtc().toIso8601String(),
-    'startedAt': startedAt?.toUtc().toIso8601String(),
-    'error': error,
-    'errorKind': errorKindId,
-    'errorDetail': errorDetailId,
-  };
+  Map<String, Object?> toJson() => _$MaintenanceTaskToJson(this);
 
   @override
   List<Object?> get hashParameters => [
@@ -354,10 +333,18 @@ class MaintenanceTask with FastEquatable {
 
 /// Global startup configuration, readable before any profile database opens.
 @CopyWith()
+@JsonSerializable(explicitToJson: true)
 class StartupConfig with FastEquatable {
+  @JsonKey(fromJson: _version)
   final int version;
+  @JsonKey(
+    unknownEnumValue: ProfilePromptMode.off,
+    defaultValue: ProfilePromptMode.off,
+  )
   final ProfilePromptMode profilePrompt;
+  @JsonKey(fromJson: _trueUnlessFalse)
   final bool honorShortcutProfile;
+  @JsonKey(fromJson: _pendingTasks)
   final List<MaintenanceTask> pendingTasks;
 
   StartupConfig({
@@ -372,41 +359,23 @@ class StartupConfig with FastEquatable {
   /// Tolerant parse. Never throws for structurally odd input: unknown prompt
   /// values fall back to `off`, unaddressable task entries are dropped, and
   /// tasks with an unknown action/state are kept but quarantined.
-  factory StartupConfig.fromJson(Map<String, Object?> json) {
-    final rawTasks = json['pendingTasks'];
-    final tasks = <MaintenanceTask>[];
+  factory StartupConfig.fromJson(Map<String, Object?> json) =>
+      _$StartupConfigFromJson(json);
+
+  Map<String, Object?> toJson() => _$StartupConfigToJson(this);
+
+  static int _version(Object? value) => intOr(value, startupConfigVersion);
+
+  /// Entries that aren't tasks are dropped, and so is a repeated id.
+  static List<MaintenanceTask> _pendingTasks(Object? value) {
     final seenIds = <String>{};
-
-    if (rawTasks is List) {
-      for (final entry in rawTasks) {
-        if (entry is! Map) continue;
-        final task = MaintenanceTask.tryFromJson(
-          entry.map((key, value) => MapEntry(key.toString(), value)),
-        );
-        if (task == null) continue;
-        if (!seenIds.add(task.id)) continue;
-        tasks.add(task);
-      }
-    }
-
-    final version = json['version'];
-
-    return StartupConfig(
-      version: version is int ? version : startupConfigVersion,
-      profilePrompt:
-          ProfilePromptMode.values.tryByName(json['profilePrompt']) ??
-          ProfilePromptMode.off,
-      honorShortcutProfile: boolOrNull(json['honorShortcutProfile']) ?? true,
-      pendingTasks: List.unmodifiable(tasks),
+    return List.unmodifiable(
+      recordsFromJson(
+        value,
+        MaintenanceTask.tryFromJson,
+      ).where((task) => seenIds.add(task.id)),
     );
   }
-
-  Map<String, Object?> toJson() => {
-    'version': version,
-    'profilePrompt': profilePrompt.name,
-    'honorShortcutProfile': honorShortcutProfile,
-    'pendingTasks': pendingTasks.map((task) => task.toJson()).toList(),
-  };
 
   /// Tasks that must keep the process in maintenance, in queue order.
   List<MaintenanceTask> get activeTasks => pendingTasks
@@ -429,3 +398,7 @@ class StartupConfig with FastEquatable {
     pendingTasks,
   ];
 }
+
+bool _trueUnlessFalse(Object? value) => boolOr(value, true);
+
+bool _falseUnlessTrue(Object? value) => boolOr(value, false);

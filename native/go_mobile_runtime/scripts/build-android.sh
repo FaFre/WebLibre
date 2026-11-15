@@ -250,8 +250,14 @@ if [[ $INSTALL_GOMOBILE -eq 1 ]]; then
   needs_gomobile_install=0
   if [[ ! -x "$GOPATH/bin/gomobile" || ! -x "$GOPATH/bin/gobind" ]]; then
     needs_gomobile_install=1
-  elif ! "$GOPATH/bin/gomobile" bind -h 2>&1 | grep -q -- '-libname'; then
-    needs_gomobile_install=1
+  else
+    for tool in gomobile gobind; do
+      installed_version="$(go version -m "$GOPATH/bin/$tool" | awk '$1 == "mod" { print $3 }')"
+      if [[ "$installed_version" != "$GOMOBILE_VERSION" ]]; then
+        needs_gomobile_install=1
+        break
+      fi
+    done
   fi
 
   if [[ $needs_gomobile_install -eq 1 ]]; then
@@ -269,11 +275,11 @@ mkdir -p "$WORK_DIR" "$(dirname "$OUTPUT_AAR")"
 cat > "$WORK_DIR/go.mod" <<EOF
 module eu.weblibre.go_mobile_runtime
 
-go 1.25.5
+go 1.26.10
 
 require (
 	github.com/sagernet/gomobile $GOMOBILE_VERSION
-	github.com/sagernet/sing-box v1.14.4
+	github.com/sagernet/sing-box $SING_BOX_TAG
 	github.com/tladesignz/IPtProxy.git v0.0.0
 )
 
@@ -322,7 +328,17 @@ args+=(
   github.com/tladesignz/IPtProxy.git
 )
 
-"$GOPATH/bin/gomobile" "${args[@]}"
+# Go 1.27.4 tightened cgo's linker allowlist. The pinned Cronet modules use
+# GNU ld's exact-name syntax for this static archive; allow only that flag.
+CGO_LDFLAGS_ALLOW='^-l:libcronet\.a$' "$GOPATH/bin/gomobile" "${args[@]}"
+
+# The pluggable-transport module versions this runtime was linked against, for
+# the app's build manifest (apps/weblibre/android/app/build_manifest.gradle).
+# A pseudo-version is recorded as it is; the manifest treats it as unknown.
+COMPONENTS_JSON="${OUTPUT_AAR%.aar}.components.json"
+snowflake_version="$(go list -m -f '{{.Version}}' gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 2>/dev/null || true)"
+lyrebird_version="$(go list -m -f '{{.Version}}' gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird 2>/dev/null || true)"
+printf '{"snowflake": "%s", "lyrebird": "%s"}\n' "$snowflake_version" "$lyrebird_version" > "$COMPONENTS_JSON"
 popd >/dev/null
 
 echo "Installed $OUTPUT_AAR"

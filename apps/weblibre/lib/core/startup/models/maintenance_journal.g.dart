@@ -237,12 +237,15 @@ extension $MaintenanceJournalCopyWith on MaintenanceJournal {
 // **************************************************************************
 
 ParticipantRecord _$ParticipantRecordFromJson(Map<String, dynamic> json) =>
-    ParticipantRecord(
-      id: json['id'] as String,
-      version: _recordVersionFromJson(json['version']),
-      stateId: _stateIdFromJson(json['state']),
-      error: stringOrNull(json['error']),
-    );
+    $checkedCreate('ParticipantRecord', json, ($checkedConvert) {
+      final val = ParticipantRecord(
+        id: $checkedConvert('id', (v) => requiredString(v)),
+        version: $checkedConvert('version', (v) => _recordVersionFromJson(v)),
+        stateId: $checkedConvert('state', (v) => _stateIdFromJson(v)),
+        error: $checkedConvert('error', (v) => stringOrNull(v)),
+      );
+      return val;
+    }, fieldKeyMap: const {'stateId': 'state'});
 
 Map<String, dynamic> _$ParticipantRecordToJson(ParticipantRecord instance) =>
     <String, dynamic>{
@@ -253,22 +256,32 @@ Map<String, dynamic> _$ParticipantRecordToJson(ParticipantRecord instance) =>
     };
 
 MaintenanceJournal _$MaintenanceJournalFromJson(Map<String, dynamic> json) =>
-    MaintenanceJournal(
-      taskId: json['taskId'] as String,
-      kindId: stringOrEmpty(json['kind']),
-      phaseId: stringOrEmpty(json['phase']),
-      targetProfileId: json['targetProfileId'] as String,
-      updatedAt: _updatedAtFromJson(json['updatedAt']),
-      version: json['version'] == null
-          ? maintenanceJournalVersion
-          : _journalVersionFromJson(json['version']),
-      archiveDigest: stringOrNull(json['archiveDigest']),
-      stagingPath: stringOrNull(json['stagingPath']),
-      oldPath: stringOrNull(json['oldPath']),
-      participants: json['participants'] == null
-          ? const []
-          : _participantsFromJson(json['participants']),
-    );
+    $checkedCreate('MaintenanceJournal', json, ($checkedConvert) {
+      final val = MaintenanceJournal(
+        taskId: $checkedConvert('taskId', (v) => requiredString(v)),
+        kindId: $checkedConvert('kind', (v) => stringOrEmpty(v)),
+        phaseId: $checkedConvert('phase', (v) => stringOrEmpty(v)),
+        targetProfileId: $checkedConvert(
+          'targetProfileId',
+          (v) => requiredString(v),
+        ),
+        updatedAt: $checkedConvert('updatedAt', (v) => dateTimeOrEpoch(v)),
+        version: $checkedConvert(
+          'version',
+          (v) => v == null
+              ? maintenanceJournalVersion
+              : _journalVersionFromJson(v),
+        ),
+        archiveDigest: $checkedConvert('archiveDigest', (v) => stringOrNull(v)),
+        stagingPath: $checkedConvert('stagingPath', (v) => stringOrNull(v)),
+        oldPath: $checkedConvert('oldPath', (v) => stringOrNull(v)),
+        participants: $checkedConvert(
+          'participants',
+          (v) => v == null ? const [] : _participantsFromJson(v),
+        ),
+      );
+      return val;
+    }, fieldKeyMap: const {'kindId': 'kind', 'phaseId': 'phase'});
 
 Map<String, dynamic> _$MaintenanceJournalToJson(MaintenanceJournal instance) =>
     <String, dynamic>{
@@ -281,5 +294,5 @@ Map<String, dynamic> _$MaintenanceJournalToJson(MaintenanceJournal instance) =>
       'stagingPath': instance.stagingPath,
       'oldPath': instance.oldPath,
       'participants': instance.participants.map((e) => e.toJson()).toList(),
-      'updatedAt': _updatedAtToJson(instance.updatedAt),
+      'updatedAt': utcIso(instance.updatedAt),
     };

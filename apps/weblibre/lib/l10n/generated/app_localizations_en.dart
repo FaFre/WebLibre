@@ -1246,6 +1246,375 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLinks_removeRuleTooltip => 'Remove rule';
 
   @override
+  String get appUpdate_sectionTitle => 'Updates';
+
+  @override
+  String get appUpdate_sectionKeywords =>
+      'update, upgrade, version, release, new version, self-update';
+
+  @override
+  String get appUpdate_appUpdates => 'App updates';
+
+  @override
+  String get appUpdate_settingsTileSubtitle =>
+      'Check for and install new versions of WebLibre';
+
+  @override
+  String appUpdate_installedVersion(String version) {
+    return 'WebLibre $version';
+  }
+
+  @override
+  String get appUpdate_statusIdle => 'Not checked yet';
+
+  @override
+  String get appUpdate_statusUpToDate => 'WebLibre is up to date';
+
+  @override
+  String appUpdate_lastChecked(String time) {
+    return 'Last checked $time';
+  }
+
+  @override
+  String get appUpdate_statusChecking => 'Checking for updates…';
+
+  @override
+  String appUpdate_statusAvailable(String version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String get appUpdate_statusAvailableUnknownVersion =>
+      'An update is available';
+
+  @override
+  String appUpdate_downloadSize(String size) {
+    return 'Download size: $size';
+  }
+
+  @override
+  String appUpdate_partialDownloaded(String size) {
+    return '$size already downloaded';
+  }
+
+  @override
+  String appUpdate_statusDownloading(String version) {
+    return 'Downloading $version';
+  }
+
+  @override
+  String get appUpdate_statusDownloadingUnknownVersion =>
+      'Downloading the update';
+
+  @override
+  String appUpdate_downloadProgress(String received, String total) {
+    return '$received of $total';
+  }
+
+  @override
+  String get appUpdate_statusVerifying => 'Verifying download…';
+
+  @override
+  String appUpdate_statusReady(String version) {
+    return 'Update ready: $version';
+  }
+
+  @override
+  String get appUpdate_statusReadyUnknownVersion => 'Update ready';
+
+  @override
+  String get appUpdate_statusAwaitingPermission =>
+      'Allow WebLibre to install updates';
+
+  @override
+  String get appUpdate_statusAwaitingUserAction => 'Waiting for confirmation';
+
+  @override
+  String get appUpdate_statusInstalling => 'Installing…';
+
+  @override
+  String get appUpdate_preferencesUnreadable =>
+      'Update settings couldn\'t be read, so automatic checks are off.';
+
+  @override
+  String get appUpdate_detailsDataDamaged =>
+      'The data that verifies update details was damaged, so details can\'t be shown. Updating still works.';
+
+  @override
+  String get appUpdate_securityFixes => 'Includes security fixes';
+
+  @override
+  String get appUpdate_securityCritical => 'Includes critical security fixes';
+
+  @override
+  String get appUpdate_securityLaterVersion =>
+      'A later version fixes a known security issue';
+
+  @override
+  String get appUpdate_detailsUnavailable =>
+      'Details for this version aren\'t available';
+
+  @override
+  String get appUpdate_actionCheckNow => 'Check now';
+
+  @override
+  String get appUpdate_actionDownload => 'Download';
+
+  @override
+  String get appUpdate_actionContinueDownload => 'Continue download';
+
+  @override
+  String get appUpdate_actionInstall => 'Install';
+
+  @override
+  String get appUpdate_actionAllow => 'Allow…';
+
+  @override
+  String get appUpdate_actionContinue => 'Continue';
+
+  @override
+  String get appUpdate_actionCancelInstallation => 'Cancel installation';
+
+  @override
+  String get appUpdate_actionRestart => 'Restart';
+
+  @override
+  String get appUpdate_actionResetTrust => 'Reset and check again';
+
+  @override
+  String get appUpdate_actionTurnOnChecks => 'Turn on automatic checks';
+
+  @override
+  String get appUpdate_actionKeepOff => 'Keep off';
+
+  @override
+  String appUpdate_whatsNewTitle(String version) {
+    return 'What\'s new in $version';
+  }
+
+  @override
+  String get appUpdate_fullReleaseNotes => 'Full release notes';
+
+  @override
+  String get appUpdate_whatChangesTitle => 'What changes';
+
+  @override
+  String get appUpdate_changeUnchanged => 'unchanged';
+
+  @override
+  String get appUpdate_changeUpgraded => 'upgraded';
+
+  @override
+  String get appUpdate_changeDowngraded => 'downgraded';
+
+  @override
+  String get appUpdate_changeChanged => 'changed';
+
+  @override
+  String get appUpdate_changeUnknown => 'unknown';
+
+  @override
+  String get appUpdate_componentVersionUnknown => 'Unknown';
+
+  @override
+  String get appUpdate_componentNotBundled => 'Not included';
+
+  @override
+  String appUpdate_componentChange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get appUpdate_automaticChecksTitle =>
+      'Check for updates automatically';
+
+  @override
+  String get appUpdate_automaticChecksSubtitle =>
+      'Once a day, with a notice when a new version is out. Downloads and installs only start with a tap.';
+
+  @override
+  String appUpdate_installedByOther(String app) {
+    return 'This version was installed by $app. If $app keeps WebLibre up to date, automatic checks can be turned off here.';
+  }
+
+  @override
+  String get appUpdate_failureNetwork =>
+      'Couldn\'t reach the update server. Check the connection and try again.';
+
+  @override
+  String get appUpdate_failureRoutingUnavailable =>
+      'The connection WebLibre is set to use isn\'t available, so updates can\'t be checked.';
+
+  @override
+  String get appUpdate_failureMetadataInvalid =>
+      'The update information couldn\'t be verified.';
+
+  @override
+  String get appUpdate_failureClientTooOld =>
+      'This version of WebLibre can\'t read the current update information. Install the newest version manually.';
+
+  @override
+  String get appUpdate_failureMetadataExpired =>
+      'Couldn\'t verify update information. Check the device\'s date and time.';
+
+  @override
+  String get appUpdate_failureMetadataRollback =>
+      'The update server sent older information than WebLibre already has.';
+
+  @override
+  String get appUpdate_failureMetadataPredatesBuild =>
+      'Update information for this version isn\'t published yet. Try again later.';
+
+  @override
+  String get appUpdate_failureClockSuspect =>
+      'The device\'s date and time seem to be wrong. Correct them and try again.';
+
+  @override
+  String get appUpdate_failureNoCompatibleTarget =>
+      'A new version exists, but not for this device or build.';
+
+  @override
+  String get appUpdate_failureInsufficientStorage =>
+      'Not enough free storage to download the update.';
+
+  @override
+  String get appUpdate_failureDownloadTooLarge =>
+      'The download was larger than expected and was stopped.';
+
+  @override
+  String get appUpdate_failureDownloadMismatch =>
+      'The downloaded file didn\'t match the published update and was deleted.';
+
+  @override
+  String get appUpdate_failureApkInvalid =>
+      'The downloaded update is damaged and was deleted.';
+
+  @override
+  String get appUpdate_failureApkIdentityMismatch =>
+      'The downloaded update is for a different build of WebLibre and was deleted.';
+
+  @override
+  String get appUpdate_failureSignerUntrusted =>
+      'The downloaded update isn\'t signed by WebLibre and was deleted.';
+
+  @override
+  String get appUpdate_failureAuthorizationStale =>
+      'The update information has expired. Connect to the internet so it can be checked again before installing.';
+
+  @override
+  String get appUpdate_failureTargetWithdrawn =>
+      'This update was withdrawn by the publisher.';
+
+  @override
+  String get appUpdate_failureStateCorrupt =>
+      'Update verification data was damaged. Reset it to check again.';
+
+  @override
+  String get appUpdate_failureInstallPermissionDenied =>
+      'WebLibre isn\'t allowed to install updates.';
+
+  @override
+  String get appUpdate_failureInstallCancelled =>
+      'The installation was cancelled.';
+
+  @override
+  String get appUpdate_failureInstallConflict =>
+      'Android couldn\'t install the update because it conflicts with the installed app.';
+
+  @override
+  String get appUpdate_failureInstallIncompatible =>
+      'This update isn\'t compatible with this device.';
+
+  @override
+  String get appUpdate_failureInstallStorage =>
+      'Not enough free storage to install the update.';
+
+  @override
+  String get appUpdate_failureInstallBlocked =>
+      'Android blocked the installation.';
+
+  @override
+  String get appUpdate_failureInstallUnknown =>
+      'The update couldn\'t be installed.';
+
+  @override
+  String get appUpdate_failurePlayNotOwned =>
+      'Google Play doesn\'t manage this installation for the signed-in account, so updates can\'t be checked here.';
+
+  @override
+  String get appUpdate_failurePlayUnavailable =>
+      'Google Play can\'t update WebLibre right now.';
+
+  @override
+  String get appUpdate_failurePlayError => 'Couldn\'t check with Google Play.';
+
+  @override
+  String get appUpdate_menuAvailable => 'Update available';
+
+  @override
+  String get appUpdate_menuDownloading => 'Downloading update…';
+
+  @override
+  String get appUpdate_menuReady => 'Update ready: restart to install';
+
+  @override
+  String get appUpdate_menuFinish => 'Finish installing the update';
+
+  @override
+  String get appUpdate_menuInstalling => 'Installing update…';
+
+  @override
+  String get appUpdate_menuPreferencesUnreadable =>
+      'Update checks are off: settings couldn\'t be read';
+
+  @override
+  String get appUpdate_menuDotLabel => 'Update waiting';
+
+  @override
+  String appUpdate_announcement(String version) {
+    return 'WebLibre $version is available';
+  }
+
+  @override
+  String get appUpdate_announcementUnknownVersion =>
+      'A WebLibre update is available';
+
+  @override
+  String get appUpdate_announcementView => 'View';
+
+  @override
+  String appUpdate_updatedTo(String version) {
+    return 'Updated to $version';
+  }
+
+  @override
+  String get appUpdate_downloadCancelled => 'Download cancelled';
+
+  @override
+  String get appUpdate_installationCancelled => 'Installation cancelled';
+
+  @override
+  String get appUpdate_permissionDialogTitle => 'Allow installing updates';
+
+  @override
+  String get appUpdate_permissionDialogBody =>
+      'Android needs the “Install unknown apps” permission for WebLibre. It is used only for WebLibre\'s own verified updates.';
+
+  @override
+  String get appUpdate_permissionDialogOpenSettings => 'Open settings';
+
+  @override
+  String get appUpdate_installDialogTitle => 'Install update?';
+
+  @override
+  String get appUpdate_installDialogBody =>
+      'WebLibre will close to install the update. Open it again afterwards.';
+
+  @override
+  String get appUpdate_installDialogBodyPrivateTabs =>
+      'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.';
+
+  @override
   String get bangs_menuTitle => 'Bangs';
 
   @override

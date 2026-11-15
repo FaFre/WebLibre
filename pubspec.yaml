@@ -126,29 +126,36 @@ melos:
         ./gradlew --continue \
           :flutter_mozilla_components:testDebugUnitTest \
           :flutter_singbox_proxy:testDebugUnitTest \
-          :simple_intent_receiver:testDebugUnitTest
+          :simple_intent_receiver:testDebugUnitTest \
+          :app:testGithubStableDebugUnitTest
 
     build-browser:
-      description: Build stable release APKs split per ABI with the Skia renderer
+      description: Build GitHub stable release APKs split per ABI with the Skia renderer
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --flavor stable --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor githubStable --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
     build-browser-impeller:
       description: Build stable comparison APKs split per ABI with Impeller enabled
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --flavor stableImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor githubStableImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
     build-browser-alpha:
       description: Build alpha release APKs split per ABI with the Skia renderer
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --flavor alpha --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor githubAlpha --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
     build-browser-alpha-impeller:
       description: Build alpha comparison APKs split per ABI with Impeller enabled
       run: |
         set -e
         cd apps/weblibre
-        flutter build apk --release --flavor alphaImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+        flutter build apk --release --flavor githubAlphaImpeller --target-platform android-arm,android-arm64,android-x64 --split-per-abi --no-tree-shake-icons
+    build-bundle-play:
+      description: Build the Google Play App Bundle (playStable, Skia)
+      run: |
+        set -e
+        cd apps/weblibre
+        flutter build appbundle --release --flavor playStable --target-platform android-arm,android-arm64,android-x64 --no-tree-shake-icons

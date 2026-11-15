@@ -2158,6 +2158,606 @@ abstract class AppLocalizations {
   /// **'Remove rule'**
   String get appLinks_removeRuleTooltip;
 
+  /// Section title in Settings → General that holds the app update entry.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates'**
+  String get appUpdate_sectionTitle;
+
+  /// Comma-separated search synonyms for the Updates section in the settings search. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'update, upgrade, version, release, new version, self-update'**
+  String get appUpdate_sectionKeywords;
+
+  /// Name of the App updates screen: its title, and the rows in Settings and in the About dialog that open it.
+  ///
+  /// In en, this message translates to:
+  /// **'App updates'**
+  String get appUpdate_appUpdates;
+
+  /// Subtitle of the App updates settings row.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for and install new versions of WebLibre'**
+  String get appUpdate_settingsTileSubtitle;
+
+  /// Top line of the App updates screen: the installed version. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre {version}'**
+  String appUpdate_installedVersion(String version);
+
+  /// Status on the App updates screen when no check for updates has succeeded yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked yet'**
+  String get appUpdate_statusIdle;
+
+  /// Status on the App updates screen when the installed version is the newest.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre is up to date'**
+  String get appUpdate_statusUpToDate;
+
+  /// Line under the update status: when the last successful check happened. {time} is a date and time, already formatted.
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked {time}'**
+  String appUpdate_lastChecked(String time);
+
+  /// Status while WebLibre checks for a new version.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates…'**
+  String get appUpdate_statusChecking;
+
+  /// Status when a new version can be downloaded. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String appUpdate_statusAvailable(String version);
+
+  /// Status when an update is available but its version number isn't known (Google Play builds without update details).
+  ///
+  /// In en, this message translates to:
+  /// **'An update is available'**
+  String get appUpdate_statusAvailableUnknownVersion;
+
+  /// Line under an available update: how large the download is. {size} is a formatted file size.
+  ///
+  /// In en, this message translates to:
+  /// **'Download size: {size}'**
+  String appUpdate_downloadSize(String size);
+
+  /// Line under an available update when part of it was downloaded before. {size} is a formatted file size.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} already downloaded'**
+  String appUpdate_partialDownloaded(String size);
+
+  /// Status while the update downloads. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {version}'**
+  String appUpdate_statusDownloading(String version);
+
+  /// Status while an update downloads whose version number isn't known.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading the update'**
+  String get appUpdate_statusDownloadingUnknownVersion;
+
+  /// Download progress under the progress bar. Both are formatted file sizes.
+  ///
+  /// In en, this message translates to:
+  /// **'{received} of {total}'**
+  String appUpdate_downloadProgress(String received, String total);
+
+  /// Status while the downloaded update is checked before it can be installed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying download…'**
+  String get appUpdate_statusVerifying;
+
+  /// Status when the update is downloaded, verified and can be installed. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'Update ready: {version}'**
+  String appUpdate_statusReady(String version);
+
+  /// Status when an update whose version isn't known is ready to install (Google Play).
+  ///
+  /// In en, this message translates to:
+  /// **'Update ready'**
+  String get appUpdate_statusReadyUnknownVersion;
+
+  /// Status when the update is ready but Android's permission to install apps is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow WebLibre to install updates'**
+  String get appUpdate_statusAwaitingPermission;
+
+  /// Status while Android waits for the user to confirm the installation in its own dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for confirmation'**
+  String get appUpdate_statusAwaitingUserAction;
+
+  /// Status while Android installs the update.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing…'**
+  String get appUpdate_statusInstalling;
+
+  /// Shown on the App updates screen when the stored update settings were damaged. Automatic checks stay off until the user decides.
+  ///
+  /// In en, this message translates to:
+  /// **'Update settings couldn\'t be read, so automatic checks are off.'**
+  String get appUpdate_preferencesUnreadable;
+
+  /// Shown on the App updates screen of Google Play builds when the stored data that verifies release details (notes, security information) was damaged. The update itself can still be downloaded and installed; a reset button follows.
+  ///
+  /// In en, this message translates to:
+  /// **'The data that verifies update details was damaged, so details can\'t be shown. Updating still works.'**
+  String get appUpdate_detailsDataDamaged;
+
+  /// Line under an available update when the publisher declared that it fixes security issues.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes security fixes'**
+  String get appUpdate_securityFixes;
+
+  /// Line under an available update when the publisher declared it a critical security release.
+  ///
+  /// In en, this message translates to:
+  /// **'Includes critical security fixes'**
+  String get appUpdate_securityCritical;
+
+  /// Line under an available update when a known security issue affects the installed version but is only fixed in a version after the one offered now.
+  ///
+  /// In en, this message translates to:
+  /// **'A later version fixes a known security issue'**
+  String get appUpdate_securityLaterVersion;
+
+  /// Shown on the App updates screen instead of the list of component changes when no verified description of the offered version exists. The update is still offered.
+  ///
+  /// In en, this message translates to:
+  /// **'Details for this version aren\'t available'**
+  String get appUpdate_detailsUnavailable;
+
+  /// Button that checks for a new version right away.
+  ///
+  /// In en, this message translates to:
+  /// **'Check now'**
+  String get appUpdate_actionCheckNow;
+
+  /// Button that starts downloading the update.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get appUpdate_actionDownload;
+
+  /// Button that continues a download that was interrupted before.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue download'**
+  String get appUpdate_actionContinueDownload;
+
+  /// Button that installs the downloaded update.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get appUpdate_actionInstall;
+
+  /// Button that opens Android's settings to allow WebLibre to install updates.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow…'**
+  String get appUpdate_actionAllow;
+
+  /// Button that shows Android's installation confirmation again.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get appUpdate_actionContinue;
+
+  /// Button that ends an installation that Android hasn't finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel installation'**
+  String get appUpdate_actionCancelInstallation;
+
+  /// Button (Google Play builds) that restarts WebLibre to finish installing a downloaded update.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get appUpdate_actionRestart;
+
+  /// Button shown when the stored update verification data was damaged: deletes it and checks again.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset and check again'**
+  String get appUpdate_actionResetTrust;
+
+  /// Button shown after damaged update settings: turns automatic checks back on.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on automatic checks'**
+  String get appUpdate_actionTurnOnChecks;
+
+  /// Button shown after damaged update settings: leaves automatic checks off.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep off'**
+  String get appUpdate_actionKeepOff;
+
+  /// Heading above the short release notes of one version. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s new in {version}'**
+  String appUpdate_whatsNewTitle(String version);
+
+  /// Link that opens the complete release notes in a new tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Full release notes'**
+  String get appUpdate_fullReleaseNotes;
+
+  /// Heading of the list of bundled components and how the update changes each.
+  ///
+  /// In en, this message translates to:
+  /// **'What changes'**
+  String get appUpdate_whatChangesTitle;
+
+  /// Label next to a bundled component whose version the update doesn't change.
+  ///
+  /// In en, this message translates to:
+  /// **'unchanged'**
+  String get appUpdate_changeUnchanged;
+
+  /// Label next to a bundled component that the update brings to a newer version.
+  ///
+  /// In en, this message translates to:
+  /// **'upgraded'**
+  String get appUpdate_changeUpgraded;
+
+  /// Label next to a bundled component that the update brings to an older version.
+  ///
+  /// In en, this message translates to:
+  /// **'downgraded'**
+  String get appUpdate_changeDowngraded;
+
+  /// Label next to a bundled component that the update changes in a way that can't be ordered (e.g. a pre-release).
+  ///
+  /// In en, this message translates to:
+  /// **'changed'**
+  String get appUpdate_changeChanged;
+
+  /// Label next to a bundled component when it isn't known how the update changes it.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown'**
+  String get appUpdate_changeUnknown;
+
+  /// Shown in place of a component version that isn't known.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get appUpdate_componentVersionUnknown;
+
+  /// Shown in place of a component version when the build doesn't include that component.
+  ///
+  /// In en, this message translates to:
+  /// **'Not included'**
+  String get appUpdate_componentNotBundled;
+
+  /// A component's version before and after the update. Both are version numbers or the 'Unknown' label; keep the arrow.
+  ///
+  /// In en, this message translates to:
+  /// **'{from} → {to}'**
+  String appUpdate_componentChange(String from, String to);
+
+  /// Switch on the App updates screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates automatically'**
+  String get appUpdate_automaticChecksTitle;
+
+  /// Explanation under the automatic-check switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a day, with a notice when a new version is out. Downloads and installs only start with a tap.'**
+  String get appUpdate_automaticChecksSubtitle;
+
+  /// Informational line on the App updates screen when another app (for example an update manager) installed the current version. {app} is that app's name.
+  ///
+  /// In en, this message translates to:
+  /// **'This version was installed by {app}. If {app} keeps WebLibre up to date, automatic checks can be turned off here.'**
+  String appUpdate_installedByOther(String app);
+
+  /// Error on the App updates screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reach the update server. Check the connection and try again.'**
+  String get appUpdate_failureNetwork;
+
+  /// Error when the configured proxy or Tor connection is not available. WebLibre never falls back to a direct connection.
+  ///
+  /// In en, this message translates to:
+  /// **'The connection WebLibre is set to use isn\'t available, so updates can\'t be checked.'**
+  String get appUpdate_failureRoutingUnavailable;
+
+  /// Error when the signed update information is invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'The update information couldn\'t be verified.'**
+  String get appUpdate_failureMetadataInvalid;
+
+  /// Error when the update information uses a newer format than this version understands.
+  ///
+  /// In en, this message translates to:
+  /// **'This version of WebLibre can\'t read the current update information. Install the newest version manually.'**
+  String get appUpdate_failureClientTooOld;
+
+  /// Error when the update information looks expired, usually because the device clock is wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t verify update information. Check the device\'s date and time.'**
+  String get appUpdate_failureMetadataExpired;
+
+  /// Error when the update information is older than information accepted before.
+  ///
+  /// In en, this message translates to:
+  /// **'The update server sent older information than WebLibre already has.'**
+  String get appUpdate_failureMetadataRollback;
+
+  /// Error on the App updates screen when the update information was published before the installed version was built, which is normal shortly after a new release. A Retry button is shown next to it.
+  ///
+  /// In en, this message translates to:
+  /// **'Update information for this version isn\'t published yet. Try again later.'**
+  String get appUpdate_failureMetadataPredatesBuild;
+
+  /// Error when the device clock is far behind.
+  ///
+  /// In en, this message translates to:
+  /// **'The device\'s date and time seem to be wrong. Correct them and try again.'**
+  String get appUpdate_failureClockSuspect;
+
+  /// Error when a newer release has no download matching this device and build.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version exists, but not for this device or build.'**
+  String get appUpdate_failureNoCompatibleTarget;
+
+  /// Error before a download starts.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough free storage to download the update.'**
+  String get appUpdate_failureInsufficientStorage;
+
+  /// Error when a download exceeds its published size.
+  ///
+  /// In en, this message translates to:
+  /// **'The download was larger than expected and was stopped.'**
+  String get appUpdate_failureDownloadTooLarge;
+
+  /// Error when the downloaded file's checksum doesn't match.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded file didn\'t match the published update and was deleted.'**
+  String get appUpdate_failureDownloadMismatch;
+
+  /// Error when the downloaded app package fails verification.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update is damaged and was deleted.'**
+  String get appUpdate_failureApkInvalid;
+
+  /// Error when the downloaded package is for another build (track, renderer, device type).
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update is for a different build of WebLibre and was deleted.'**
+  String get appUpdate_failureApkIdentityMismatch;
+
+  /// Error when the downloaded package's signature isn't WebLibre's.
+  ///
+  /// In en, this message translates to:
+  /// **'The downloaded update isn\'t signed by WebLibre and was deleted.'**
+  String get appUpdate_failureSignerUntrusted;
+
+  /// Error when installing offline and the stored update information is too old.
+  ///
+  /// In en, this message translates to:
+  /// **'The update information has expired. Connect to the internet so it can be checked again before installing.'**
+  String get appUpdate_failureAuthorizationStale;
+
+  /// Error when the offered update has been withdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'This update was withdrawn by the publisher.'**
+  String get appUpdate_failureTargetWithdrawn;
+
+  /// Error when the stored update verification data is damaged. A reset button follows.
+  ///
+  /// In en, this message translates to:
+  /// **'Update verification data was damaged. Reset it to check again.'**
+  String get appUpdate_failureStateCorrupt;
+
+  /// Error when Android's permission to install apps is missing.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre isn\'t allowed to install updates.'**
+  String get appUpdate_failureInstallPermissionDenied;
+
+  /// Error when the user cancelled Android's installation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'The installation was cancelled.'**
+  String get appUpdate_failureInstallCancelled;
+
+  /// Error reported by Android's installer.
+  ///
+  /// In en, this message translates to:
+  /// **'Android couldn\'t install the update because it conflicts with the installed app.'**
+  String get appUpdate_failureInstallConflict;
+
+  /// Error reported by Android's installer.
+  ///
+  /// In en, this message translates to:
+  /// **'This update isn\'t compatible with this device.'**
+  String get appUpdate_failureInstallIncompatible;
+
+  /// Error reported by Android's installer.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough free storage to install the update.'**
+  String get appUpdate_failureInstallStorage;
+
+  /// Error reported by Android's installer.
+  ///
+  /// In en, this message translates to:
+  /// **'Android blocked the installation.'**
+  String get appUpdate_failureInstallBlocked;
+
+  /// Generic installation error.
+  ///
+  /// In en, this message translates to:
+  /// **'The update couldn\'t be installed.'**
+  String get appUpdate_failureInstallUnknown;
+
+  /// Error on Google Play builds. Google Play is a brand name.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play doesn\'t manage this installation for the signed-in account, so updates can\'t be checked here.'**
+  String get appUpdate_failurePlayNotOwned;
+
+  /// Error on Google Play builds.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play can\'t update WebLibre right now.'**
+  String get appUpdate_failurePlayUnavailable;
+
+  /// Generic error on Google Play builds.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check with Google Play.'**
+  String get appUpdate_failurePlayError;
+
+  /// Row at the top of the browser menu when a new version is available. Opens the App updates screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get appUpdate_menuAvailable;
+
+  /// Browser menu row while the update downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading update…'**
+  String get appUpdate_menuDownloading;
+
+  /// Browser menu row when the update is ready to install.
+  ///
+  /// In en, this message translates to:
+  /// **'Update ready: restart to install'**
+  String get appUpdate_menuReady;
+
+  /// Browser menu row when the installation waits for the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish installing the update'**
+  String get appUpdate_menuFinish;
+
+  /// Browser menu row while Android installs the update.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing update…'**
+  String get appUpdate_menuInstalling;
+
+  /// Browser menu row when the stored update settings were damaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Update checks are off: settings couldn\'t be read'**
+  String get appUpdate_menuPreferencesUnreadable;
+
+  /// Accessibility label of the dot on the browser menu button that marks a pending update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update waiting'**
+  String get appUpdate_menuDotLabel;
+
+  /// Snackbar shown once per version when a new version is found. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre {version} is available'**
+  String appUpdate_announcement(String version);
+
+  /// Snackbar shown once when an update with unknown version number is found.
+  ///
+  /// In en, this message translates to:
+  /// **'A WebLibre update is available'**
+  String get appUpdate_announcementUnknownVersion;
+
+  /// Snackbar action that opens the App updates screen.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get appUpdate_announcementView;
+
+  /// Snackbar shown once after WebLibre updated itself. {version} is a version number.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated to {version}'**
+  String appUpdate_updatedTo(String version);
+
+  /// Snackbar after the user cancelled the update download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download cancelled'**
+  String get appUpdate_downloadCancelled;
+
+  /// Snackbar after the user cancelled the installation.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation cancelled'**
+  String get appUpdate_installationCancelled;
+
+  /// Title of the dialog shown before opening Android's 'Install unknown apps' screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow installing updates'**
+  String get appUpdate_permissionDialogTitle;
+
+  /// Body of the permission dialog. 'Install unknown apps' is the name of Android's setting; use the name Android shows in your language.
+  ///
+  /// In en, this message translates to:
+  /// **'Android needs the “Install unknown apps” permission for WebLibre. It is used only for WebLibre\'s own verified updates.'**
+  String get appUpdate_permissionDialogBody;
+
+  /// Dialog button that opens Android's permission screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get appUpdate_permissionDialogOpenSettings;
+
+  /// Title of the confirmation before installing.
+  ///
+  /// In en, this message translates to:
+  /// **'Install update?'**
+  String get appUpdate_installDialogTitle;
+
+  /// Body of the install confirmation when no private tabs are open.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre will close to install the update. Open it again afterwards.'**
+  String get appUpdate_installDialogBody;
+
+  /// Body of the install confirmation when private tabs are open: they are lost when the app closes.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.'**
+  String get appUpdate_installDialogBodyPrivateTabs;
+
   /// Title of the bangs screen. A "bang" is a shortcut such as "!w" typed before a search to search a specific website directly (a DuckDuckGo convention); keep the term unless your language has an established equivalent.
   ///
   /// In en, this message translates to:

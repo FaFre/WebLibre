@@ -1,0 +1,201 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+// Writes assets/weblibre/build_manifest.json into every variant
+// (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, 4.2).
+//
+// The manifest is the one description of a build: its identity (distribution,
+// track, renderer, release sequence, build time) and the versions of the
+// components it bundles. The installed app reads it (InstalledBuildInfoReader),
+// the self-updater reads it from a candidate APK, whose signature covers it
+// (ApkInspector, check 7), and CI extracts it from the final artifacts to
+// produce release metadata. Nothing here is typed in by hand: every value
+// comes from resolved build inputs, and a value the build can't determine is
+// written as unknown rather than guessed.
+
+import groovy.json.JsonOutput
+
+abstract class WriteBuildManifestTask extends DefaultTask {
+    @Input abstract Property<String> getPackageId()
+    @Input abstract Property<String> getDistribution()
+    @Input abstract Property<String> getTrack()
+    @Input abstract Property<String> getRenderer()
+    @Input abstract Property<Integer> getLogicalReleaseSequence()
+    @Input abstract Property<String> getVersionName()
+    @Input abstract Property<String> getBuildTime()
+    @Input abstract MapProperty<String, Integer> getAbiVersionCodes()
+    @Input abstract MapProperty<String, String> getResolvedModules()
+    @Input abstract MapProperty<String, String> getGoRuntime()
+    @OutputDirectory abstract DirectoryProperty getOutputDir()
+
+    private static Map known(String version, Map extra = [:]) {
+        def entry = [status: "known", version: version]
+        extra.each { k, v -> if (v != null && !v.toString().isEmpty()) entry[k] = v }
+        return entry
+    }
+
+    private static final Map UNKNOWN = [status: "unknown"]
+
+    /** "159.0.20261030161337" -> 159.0 + build ID; anything else is unknown. */
+    private static Map gecko(String resolved) {
+        if (resolved == null) return UNKNOWN
+        def m = resolved =~ /^(\d+(?:\.\d+)*)\.(\d{14})$/
+        return m.matches() ? known(m.group(1), [buildId: m.group(2)]) : UNKNOWN
+    }
+
+    private static Map plain(String resolved) {
+        return resolved == null || resolved.isEmpty() ? UNKNOWN : known(resolved)
+    }
+
+    /** Go module versions: a release tag only. Pseudo-versions are not versions. */
+    private static Map goModule(String resolved) {
+        if (resolved == null) return UNKNOWN
+        def m = resolved =~ /^v?(\d+\.\d+\.\d+)$/
+        return m.matches() ? known(m.group(1)) : UNKNOWN
+    }
+
+    @TaskAction
+    void write() {
+        def modules = resolvedModules.get()
+        def go = goRuntime.get()
+
+        def singbox = go["SING_BOX_TAG"] ?
+            known(go["SING_BOX_TAG"].replaceFirst(/^v/, ""), [revision: go["SING_BOX_COMMIT"]]) :
+            UNKNOWN
+
+        def manifest = [
+            schemaVersion         : 1,
+            packageId             : packageId.get(),
+            distribution          : distribution.get(),
+            track                 : track.get(),
+            renderer              : renderer.get(),
+            logicalReleaseSequence: logicalReleaseSequence.get(),
+            versionName           : versionName.get(),
+            buildTime             : buildTime.get(),
+            abiVersionCodes       : abiVersionCodes.get(),
+            components            : [
+                gecko              : gecko(modules["geckoview"]),
+                androidComponents  : plain(modules["androidComponents"]),
+                applicationServices: plain(modules["applicationServices"]),
+                tor                : plain(modules["tor"]),
+                snowflake          : goModule(go["snowflake"]),
+                lyrebird           : goModule(go["lyrebird"]),
+                singbox            : singbox,
+            ],
+        ]
+
+        def dir = new File(outputDir.get().asFile, "weblibre")
+        dir.mkdirs()
+        new File(dir, "build_manifest.json").text =
+            JsonOutput.prettyPrint(JsonOutput.toJson(manifest)) + "\n"
+    }
+}
+
+def repoRoot = rootProject.file("../../..")
+def goRuntimeDir = new File(repoRoot, "native/go_mobile_runtime")
+
+/** pins.env plus the versions the go runtime build recorded next to its AAR. */
+def readGoRuntime = {
+    def values = [:]
+    def pins = new File(goRuntimeDir, "pins.env")
+    if (pins.exists()) {
+        pins.eachLine { line ->
+            def m = line =~ /^([A-Z_]+)=(\S+)\s*$/
+            if (m.matches()) values[m.group(1)] = m.group(2)
+        }
+    }
+    // Written by scripts/build-android.sh from the resolved Go modules.
+    def sidecar = new File(goRuntimeDir, "build/weblibre-go.components.json")
+    if (sidecar.exists()) {
+        def parsed = new groovy.json.JsonSlurper().parse(sidecar)
+        ["snowflake", "lyrebird"].each { key ->
+            if (parsed[key] instanceof String) values[key] = parsed[key]
+        }
+    }
+    return values
+}
+
+// Reproducible: the time of the commit being built, not the wall clock, so
+// two builds of one commit produce the same manifest (F-Droid builds must
+// match). SOURCE_DATE_EPOCH wins when the build environment sets it.
+def buildTimeProvider = providers.environmentVariable("SOURCE_DATE_EPOCH")
+    .orElse(providers.exec {
+        commandLine "git", "-C", repoRoot.absolutePath, "log", "-1", "--format=%ct"
+        ignoreExitValue = true
+    }.standardOutput.asText.map { it.trim() })
+    .map { epoch ->
+        def seconds = epoch.isLong() ? epoch.toLong() : 0L
+        java.time.Instant.ofEpochSecond(seconds).toString()
+    }
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def flavors = variant.productFlavors.collectEntries { [(it.first): it.second] }
+        def trackFlavor = flavors["track"]
+        def baseCode = android.defaultConfig.versionCode
+
+        def taskName = "writeBuildManifest${variant.name.capitalize()}"
+        def configurationName = "${variant.name}RuntimeClasspath"
+
+        def task = tasks.register(taskName, WriteBuildManifestTask) {
+            packageId.set(variant.applicationId)
+            distribution.set(flavors["distribution"])
+            track.set(trackFlavor.startsWith("alpha") ? "alpha" : "stable")
+            renderer.set(trackFlavor.endsWith("Impeller") ? "impeller" : "skia")
+            logicalReleaseSequence.set(baseCode)
+            versionName.set(android.defaultConfig.versionName +
+                (trackFlavor.startsWith("alpha") ? "-alpha" : ""))
+            buildTime.set(buildTimeProvider)
+            abiVersionCodes.set(project.ext.abiCodes.collectEntries { abi, digit ->
+                [(abi): baseCode * 10 + digit]
+            })
+            goRuntime.set(providers.provider { readGoRuntime() })
+            resolvedModules.set(configurations.named(configurationName).map { configuration ->
+                def found = [:]
+                configuration.incoming.resolutionResult.allComponents.each { component ->
+                    def id = component.moduleVersion
+                    if (id == null) return
+                    if (id.group == "org.mozilla.geckoview" && id.name.startsWith("geckoview")) {
+                        found["geckoview"] = id.version
+                    } else if (id.group == "org.mozilla.components" && id.name == "browser-engine-gecko") {
+                        found["androidComponents"] = id.version
+                    } else if (id.group == "org.mozilla.appservices" && id.name == "full-megazord") {
+                        found["applicationServices"] = id.version
+                    } else if (id.group == "info.guardianproject" && id.name == "tor-android") {
+                        found["tor"] = id.version
+                    }
+                }
+                found
+            })
+        }
+
+        variant.sources.assets?.addGeneratedSourceDirectory(task) { it.outputDir }
+
+        // BuildManifestRuntimeTest compares this manifest with what the
+        // libraries on the unit-test classpath report (4.2).
+        def manifestDir = task.flatMap { it.outputDir }
+        tasks.matching { it.name == "test${variant.name.capitalize()}UnitTest" }.configureEach { Test test ->
+            test.inputs.dir(manifestDir).withPropertyName("buildManifest").withPathSensitivity(PathSensitivity.RELATIVE)
+            test.jvmArgumentProviders.add({
+                ["-Dweblibre.buildManifest=${new File(manifestDir.get().asFile, "weblibre/build_manifest.json")}".toString()]
+            } as CommandLineArgumentProvider)
+        }
+    }
+}

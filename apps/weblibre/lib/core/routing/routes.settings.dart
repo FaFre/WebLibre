@@ -31,6 +31,10 @@ part of 'routes.dart';
       name: 'SettingsTransferRoute',
       path: 'transfer',
     ),
+    TypedGoRoute<AppUpdateSettingsRoute>(
+      name: 'AppUpdateSettingsRoute',
+      path: 'app_updates',
+    ),
     TypedGoRoute<ConfirmationSettingsRoute>(
       name: 'ConfirmationSettingsRoute',
       path: 'confirmations',
@@ -198,6 +202,15 @@ class GeneralSettingsRoute extends GoRouteData with $GeneralSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const GeneralSettingsScreen();
+  }
+}
+
+class AppUpdateSettingsRoute extends GoRouteData with $AppUpdateSettingsRoute {
+  const AppUpdateSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const AppUpdateSettingsScreen();
   }
 }
 

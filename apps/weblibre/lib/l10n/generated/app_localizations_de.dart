@@ -1276,6 +1276,381 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appLinks_removeRuleTooltip => 'Regel entfernen';
 
   @override
+  String get appUpdate_sectionTitle => 'Aktualisierungen';
+
+  @override
+  String get appUpdate_sectionKeywords =>
+      'Update, Aktualisierung, Version, neue Version, Release';
+
+  @override
+  String get appUpdate_appUpdates => 'App-Aktualisierungen';
+
+  @override
+  String get appUpdate_settingsTileSubtitle =>
+      'Neue WebLibre-Versionen suchen und installieren';
+
+  @override
+  String appUpdate_installedVersion(String version) {
+    return 'WebLibre $version';
+  }
+
+  @override
+  String get appUpdate_statusIdle => 'Noch nicht geprüft';
+
+  @override
+  String get appUpdate_statusUpToDate => 'WebLibre ist aktuell';
+
+  @override
+  String appUpdate_lastChecked(String time) {
+    return 'Zuletzt geprüft: $time';
+  }
+
+  @override
+  String get appUpdate_statusChecking => 'Suche nach Aktualisierungen …';
+
+  @override
+  String appUpdate_statusAvailable(String version) {
+    return 'Version $version ist verfügbar';
+  }
+
+  @override
+  String get appUpdate_statusAvailableUnknownVersion =>
+      'Eine Aktualisierung ist verfügbar';
+
+  @override
+  String appUpdate_downloadSize(String size) {
+    return 'Downloadgröße: $size';
+  }
+
+  @override
+  String appUpdate_partialDownloaded(String size) {
+    return '$size bereits heruntergeladen';
+  }
+
+  @override
+  String appUpdate_statusDownloading(String version) {
+    return '$version wird heruntergeladen';
+  }
+
+  @override
+  String get appUpdate_statusDownloadingUnknownVersion =>
+      'Aktualisierung wird heruntergeladen';
+
+  @override
+  String appUpdate_downloadProgress(String received, String total) {
+    return '$received von $total';
+  }
+
+  @override
+  String get appUpdate_statusVerifying => 'Download wird überprüft …';
+
+  @override
+  String appUpdate_statusReady(String version) {
+    return 'Aktualisierung bereit: $version';
+  }
+
+  @override
+  String get appUpdate_statusReadyUnknownVersion => 'Aktualisierung bereit';
+
+  @override
+  String get appUpdate_statusAwaitingPermission =>
+      'Installieren von Aktualisierungen erlauben';
+
+  @override
+  String get appUpdate_statusAwaitingUserAction => 'Warte auf Bestätigung';
+
+  @override
+  String get appUpdate_statusInstalling => 'Wird installiert …';
+
+  @override
+  String get appUpdate_preferencesUnreadable =>
+      'Die Einstellungen für Aktualisierungen konnten nicht gelesen werden, daher ist die automatische Suche aus.';
+
+  @override
+  String get appUpdate_detailsDataDamaged =>
+      'Die Prüfdaten für Details zu Aktualisierungen sind beschädigt, daher können keine Details angezeigt werden. Aktualisieren funktioniert weiterhin.';
+
+  @override
+  String get appUpdate_securityFixes => 'Enthält Sicherheitskorrekturen';
+
+  @override
+  String get appUpdate_securityCritical =>
+      'Enthält kritische Sicherheitskorrekturen';
+
+  @override
+  String get appUpdate_securityLaterVersion =>
+      'Eine spätere Version behebt ein bekanntes Sicherheitsproblem';
+
+  @override
+  String get appUpdate_detailsUnavailable =>
+      'Für diese Version sind keine Details verfügbar';
+
+  @override
+  String get appUpdate_actionCheckNow => 'Jetzt prüfen';
+
+  @override
+  String get appUpdate_actionDownload => 'Herunterladen';
+
+  @override
+  String get appUpdate_actionContinueDownload => 'Download fortsetzen';
+
+  @override
+  String get appUpdate_actionInstall => 'Installieren';
+
+  @override
+  String get appUpdate_actionAllow => 'Erlauben …';
+
+  @override
+  String get appUpdate_actionContinue => 'Fortfahren';
+
+  @override
+  String get appUpdate_actionCancelInstallation => 'Installation abbrechen';
+
+  @override
+  String get appUpdate_actionRestart => 'Neu starten';
+
+  @override
+  String get appUpdate_actionResetTrust => 'Zurücksetzen und erneut prüfen';
+
+  @override
+  String get appUpdate_actionTurnOnChecks => 'Automatische Suche einschalten';
+
+  @override
+  String get appUpdate_actionKeepOff => 'Aus lassen';
+
+  @override
+  String appUpdate_whatsNewTitle(String version) {
+    return 'Neu in $version';
+  }
+
+  @override
+  String get appUpdate_fullReleaseNotes => 'Vollständige Versionshinweise';
+
+  @override
+  String get appUpdate_whatChangesTitle => 'Was sich ändert';
+
+  @override
+  String get appUpdate_changeUnchanged => 'unverändert';
+
+  @override
+  String get appUpdate_changeUpgraded => 'aktualisiert';
+
+  @override
+  String get appUpdate_changeDowngraded => 'herabgestuft';
+
+  @override
+  String get appUpdate_changeChanged => 'geändert';
+
+  @override
+  String get appUpdate_changeUnknown => 'unbekannt';
+
+  @override
+  String get appUpdate_componentVersionUnknown => 'Unbekannt';
+
+  @override
+  String get appUpdate_componentNotBundled => 'Nicht enthalten';
+
+  @override
+  String appUpdate_componentChange(String from, String to) {
+    return '$from → $to';
+  }
+
+  @override
+  String get appUpdate_automaticChecksTitle =>
+      'Automatisch nach Aktualisierungen suchen';
+
+  @override
+  String get appUpdate_automaticChecksSubtitle =>
+      'Einmal täglich, mit einem Hinweis bei einer neuen Version. Download und Installation starten nur auf Antippen.';
+
+  @override
+  String appUpdate_installedByOther(String app) {
+    return 'Diese Version wurde von $app installiert. Wenn $app WebLibre aktuell hält, kann die automatische Suche hier ausgeschaltet werden.';
+  }
+
+  @override
+  String get appUpdate_failureNetwork =>
+      'Der Aktualisierungsserver ist nicht erreichbar. Verbindung prüfen und erneut versuchen.';
+
+  @override
+  String get appUpdate_failureRoutingUnavailable =>
+      'Die eingestellte Verbindung ist nicht verfügbar, daher kann nicht nach Aktualisierungen gesucht werden.';
+
+  @override
+  String get appUpdate_failureMetadataInvalid =>
+      'Die Aktualisierungsinformationen konnten nicht überprüft werden.';
+
+  @override
+  String get appUpdate_failureClientTooOld =>
+      'Diese WebLibre-Version kann die aktuellen Aktualisierungsinformationen nicht lesen. Die neueste Version bitte manuell installieren.';
+
+  @override
+  String get appUpdate_failureMetadataExpired =>
+      'Die Aktualisierungsinformationen konnten nicht überprüft werden. Datum und Uhrzeit des Geräts prüfen.';
+
+  @override
+  String get appUpdate_failureMetadataRollback =>
+      'Der Aktualisierungsserver hat ältere Informationen gesendet, als WebLibre bereits hat.';
+
+  @override
+  String get appUpdate_failureMetadataPredatesBuild =>
+      'Die Aktualisierungsinformationen für diese Version sind noch nicht veröffentlicht. Später erneut versuchen.';
+
+  @override
+  String get appUpdate_failureClockSuspect =>
+      'Datum und Uhrzeit des Geräts scheinen falsch zu sein. Korrigieren und erneut versuchen.';
+
+  @override
+  String get appUpdate_failureNoCompatibleTarget =>
+      'Es gibt eine neue Version, aber nicht für dieses Gerät oder diesen Build.';
+
+  @override
+  String get appUpdate_failureInsufficientStorage =>
+      'Nicht genug freier Speicher für den Download der Aktualisierung.';
+
+  @override
+  String get appUpdate_failureDownloadTooLarge =>
+      'Der Download war größer als erwartet und wurde gestoppt.';
+
+  @override
+  String get appUpdate_failureDownloadMismatch =>
+      'Die heruntergeladene Datei passte nicht zur veröffentlichten Aktualisierung und wurde gelöscht.';
+
+  @override
+  String get appUpdate_failureApkInvalid =>
+      'Die heruntergeladene Aktualisierung ist beschädigt und wurde gelöscht.';
+
+  @override
+  String get appUpdate_failureApkIdentityMismatch =>
+      'Die heruntergeladene Aktualisierung gehört zu einem anderen WebLibre-Build und wurde gelöscht.';
+
+  @override
+  String get appUpdate_failureSignerUntrusted =>
+      'Die heruntergeladene Aktualisierung ist nicht von WebLibre signiert und wurde gelöscht.';
+
+  @override
+  String get appUpdate_failureAuthorizationStale =>
+      'Die Aktualisierungsinformationen sind abgelaufen. Für eine erneute Prüfung vor der Installation wird eine Internetverbindung benötigt.';
+
+  @override
+  String get appUpdate_failureTargetWithdrawn =>
+      'Diese Aktualisierung wurde zurückgezogen.';
+
+  @override
+  String get appUpdate_failureStateCorrupt =>
+      'Die Prüfdaten für Aktualisierungen sind beschädigt. Zum erneuten Prüfen zurücksetzen.';
+
+  @override
+  String get appUpdate_failureInstallPermissionDenied =>
+      'WebLibre darf keine Aktualisierungen installieren.';
+
+  @override
+  String get appUpdate_failureInstallCancelled =>
+      'Die Installation wurde abgebrochen.';
+
+  @override
+  String get appUpdate_failureInstallConflict =>
+      'Android konnte die Aktualisierung nicht installieren, da sie mit der installierten App in Konflikt steht.';
+
+  @override
+  String get appUpdate_failureInstallIncompatible =>
+      'Diese Aktualisierung ist mit diesem Gerät nicht kompatibel.';
+
+  @override
+  String get appUpdate_failureInstallStorage =>
+      'Nicht genug freier Speicher für die Installation der Aktualisierung.';
+
+  @override
+  String get appUpdate_failureInstallBlocked =>
+      'Android hat die Installation blockiert.';
+
+  @override
+  String get appUpdate_failureInstallUnknown =>
+      'Die Aktualisierung konnte nicht installiert werden.';
+
+  @override
+  String get appUpdate_failurePlayNotOwned =>
+      'Google Play verwaltet diese Installation für das angemeldete Konto nicht, daher kann hier nicht nach Aktualisierungen gesucht werden.';
+
+  @override
+  String get appUpdate_failurePlayUnavailable =>
+      'Google Play kann WebLibre gerade nicht aktualisieren.';
+
+  @override
+  String get appUpdate_failurePlayError =>
+      'Prüfung über Google Play fehlgeschlagen.';
+
+  @override
+  String get appUpdate_menuAvailable => 'Aktualisierung verfügbar';
+
+  @override
+  String get appUpdate_menuDownloading =>
+      'Aktualisierung wird heruntergeladen …';
+
+  @override
+  String get appUpdate_menuReady =>
+      'Aktualisierung bereit: zum Installieren neu starten';
+
+  @override
+  String get appUpdate_menuFinish =>
+      'Installation der Aktualisierung abschließen';
+
+  @override
+  String get appUpdate_menuInstalling => 'Aktualisierung wird installiert …';
+
+  @override
+  String get appUpdate_menuPreferencesUnreadable =>
+      'Suche nach Aktualisierungen ist aus: Einstellungen nicht lesbar';
+
+  @override
+  String get appUpdate_menuDotLabel => 'Aktualisierung wartet';
+
+  @override
+  String appUpdate_announcement(String version) {
+    return 'WebLibre $version ist verfügbar';
+  }
+
+  @override
+  String get appUpdate_announcementUnknownVersion =>
+      'Eine WebLibre-Aktualisierung ist verfügbar';
+
+  @override
+  String get appUpdate_announcementView => 'Ansehen';
+
+  @override
+  String appUpdate_updatedTo(String version) {
+    return 'Aktualisiert auf $version';
+  }
+
+  @override
+  String get appUpdate_downloadCancelled => 'Download abgebrochen';
+
+  @override
+  String get appUpdate_installationCancelled => 'Installation abgebrochen';
+
+  @override
+  String get appUpdate_permissionDialogTitle =>
+      'Installieren von Aktualisierungen erlauben';
+
+  @override
+  String get appUpdate_permissionDialogBody =>
+      'Android benötigt für WebLibre die Berechtigung „Unbekannte Apps installieren“. Sie wird nur für WebLibres eigene, geprüfte Aktualisierungen verwendet.';
+
+  @override
+  String get appUpdate_permissionDialogOpenSettings => 'Einstellungen öffnen';
+
+  @override
+  String get appUpdate_installDialogTitle => 'Aktualisierung installieren?';
+
+  @override
+  String get appUpdate_installDialogBody =>
+      'WebLibre wird zum Installieren geschlossen und muss danach wieder geöffnet werden.';
+
+  @override
+  String get appUpdate_installDialogBodyPrivateTabs =>
+      'WebLibre wird zum Installieren geschlossen und muss danach wieder geöffnet werden. Private Tabs werden geschlossen.';
+
+  @override
   String get bangs_menuTitle => 'Bangs';
 
   @override

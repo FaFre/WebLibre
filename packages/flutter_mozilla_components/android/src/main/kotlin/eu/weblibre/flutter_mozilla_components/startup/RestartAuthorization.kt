@@ -102,7 +102,7 @@ data class RestartAuthorization(
 fun restartAuthorizationTokenHash(token: String): String =
     MessageDigest.getInstance("SHA-256")
         .digest(token.toByteArray(Charsets.UTF_8))
-        .joinToString("") { "%02x".format(it) }
+        .toHexString()
 
 /**
  * Single reader/writer for `weblibre_restart/authorization.json`.
@@ -158,6 +158,6 @@ class RestartAuthorizationStore(paths: StartupPaths) {
     private fun newToken(): String {
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
-        return bytes.joinToString("") { "%02x".format(it) }
+        return bytes.toHexString()
     }
 }

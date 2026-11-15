@@ -27,6 +27,7 @@ import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/pending_writes.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -2390,6 +2391,11 @@ class TabRepository extends _$TabRepository {
 
     final tabStateDebouncer = Debouncer(const Duration(seconds: 1));
     Map<String, TabState>? debounceStartValue;
+    // A self-update ends the process without warning; the installer flushes
+    // this first so the last second of tab changes is not lost.
+    final unregisterFlush = ref
+        .read(pendingWritesProvider)
+        .register(tabStateDebouncer.flush);
 
     ref.listen(
       tabStatesProvider,
@@ -2421,6 +2427,7 @@ class TabRepository extends _$TabRepository {
     );
 
     ref.onDispose(() async {
+      unregisterFlush();
       tabStateDebouncer.dispose();
       await tabAddedSub.cancel();
       await tabContentSub.cancel();

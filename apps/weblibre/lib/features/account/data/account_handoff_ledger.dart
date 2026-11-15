@@ -21,11 +21,14 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid_value.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/startup/atomic_json_file.dart';
 import 'package:weblibre/core/startup/models/json_read.dart';
 import 'package:weblibre/core/startup/startup_paths.dart';
+
+part 'account_handoff_ledger.g.dart';
 
 /// How long a started sign-in stays redeemable.
 ///
@@ -48,6 +51,7 @@ const accountHandoffLedgerVersion = 1;
 /// authentication URL and in the callback that echoes it, and nowhere else. So a
 /// copy of this file — leaked through a backup, say — does not let anything forge
 /// a callback that this app would accept.
+@JsonSerializable(checked: true)
 class AccountHandoffRecord {
   const AccountHandoffRecord({
     required this.stateHash,
@@ -57,54 +61,39 @@ class AccountHandoffRecord {
     required this.expiresAt,
   });
 
+  @JsonKey(fromJson: requiredString)
   final String stateHash;
 
   /// The profile that started the sign-in. The reason the ledger is global: a
   /// callback can arrive before any profile is committed, and this is the only
   /// record of where it belongs.
+  @JsonKey(fromJson: _profileId)
   final String profileId;
 
+  @JsonKey(fromJson: _mode)
   final String mode;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime createdAt;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime expiresAt;
 
   bool isExpiredAt(DateTime now) => !now.isBefore(expiresAt);
 
-  Map<String, Object?> toJson() => {
-    'stateHash': stateHash,
-    'profileId': profileId,
-    'mode': mode,
-    'createdAt': createdAt.toUtc().toIso8601String(),
-    'expiresAt': expiresAt.toUtc().toIso8601String(),
-  };
+  Map<String, Object?> toJson() => _$AccountHandoffRecordToJson(this);
 
-  static AccountHandoffRecord? tryFromJson(Map<String, Object?> json) {
-    final stateHash = json['stateHash'];
-    if (stateHash is! String || stateHash.isEmpty) return null;
+  /// Null for a record that is incomplete or can't name a real profile: it
+  /// could never be honoured, and keeping it would only make the ledger
+  /// harder to reason about.
+  static AccountHandoffRecord? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$AccountHandoffRecordFromJson);
 
-    final profileId = json['profileId'];
-    if (profileId is! String || profileId.isEmpty) return null;
-
-    final createdAt = dateTimeOrNull(json['createdAt']);
-    final expiresAt = dateTimeOrNull(json['expiresAt']);
-    if (createdAt == null || expiresAt == null) return null;
-
-    try {
-      UuidValue.withValidation(profileId.toLowerCase());
-    } catch (_) {
-      // A record that cannot name a real profile can never be honoured, and
-      // keeping it would only make the ledger harder to reason about.
-      return null;
-    }
-
-    return AccountHandoffRecord(
-      stateHash: stateHash,
-      profileId: profileId.toLowerCase(),
-      mode: json['mode'] as String? ?? 'handoff',
-      createdAt: createdAt,
-      expiresAt: expiresAt,
-    );
+  static String _profileId(Object? value) {
+    final id = requiredString(value).toLowerCase();
+    UuidValue.withValidation(id);
+    return id;
   }
+
+  static String _mode(Object? value) => value is String ? value : 'handoff';
 }
 
 /// The hash a nonce is stored under.
@@ -137,16 +126,10 @@ class AccountHandoffLedger {
 
     if (result is! AtomicJsonPresent) return const [];
 
-    final raw = result.json['records'];
-    if (raw is! List) return const [];
-
-    return [
-      for (final entry in raw)
-        if (entry is Map)
-          ?AccountHandoffRecord.tryFromJson(
-            entry.map((key, value) => MapEntry(key.toString(), value)),
-          ),
-    ];
+    return recordsFromJson(
+      result.json['records'],
+      AccountHandoffRecord.tryFromJson,
+    );
   }
 
   /// Records that [profileId] started a sign-in identified by [stateNonce].

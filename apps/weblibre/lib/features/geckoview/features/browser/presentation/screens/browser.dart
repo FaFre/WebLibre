@@ -34,6 +34,7 @@ import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
 import 'package:weblibre/extensions/draggable_scrollable_controller.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/app_link_prompt_host.dart';
+import 'package:weblibre/features/app_update/presentation/widgets/update_announcement.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/overlay.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
@@ -2093,9 +2094,11 @@ class BrowserScreen extends HookConsumerWidget {
     );
 
     // The sheet is modal: nothing it covers takes a shortcut.
-    return BrowserKeyboardShortcutScope(
-      enabled: !sheetDisplayed,
-      child: screen,
+    return AppUpdateBrowserListener(
+      child: BrowserKeyboardShortcutScope(
+        enabled: !sheetDisplayed,
+        child: screen,
+      ),
     );
   }
 }

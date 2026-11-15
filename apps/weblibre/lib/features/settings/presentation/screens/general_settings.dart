@@ -31,8 +31,11 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/app_localizations.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/domain/repositories/locale_resolver.dart';
 import 'package:weblibre/extensions/locale.dart';
+import 'package:weblibre/features/app_update/domain/providers.dart';
+import 'package:weblibre/features/app_update/presentation/widgets/app_updates_settings_tile.dart';
 import 'package:weblibre/features/settings/domain/providers/preferred_download_manager.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
@@ -46,7 +49,11 @@ import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/utils/remembered_prompt_l10n.dart';
 import 'package:weblibre/utils/saf_tree_uri.dart';
 
-List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
+/// [hasUpdater] is [appUpdaterAvailableProvider], watched by the caller.
+List<SettingsSectionDefinition> generalSettingsSections(
+  BuildContext context, {
+  required bool hasUpdater,
+}) {
   final l10n = AppLocalizations.of(context);
 
   return [
@@ -164,6 +171,24 @@ List<SettingsSectionDefinition> generalSettingsSections(BuildContext context) {
         ),
       ],
     ),
+    // Only where this installation has an updater at runtime: F-Droid,
+    // debug, foreign-signed and universal builds would show an empty
+    // section, and the search would list a tile that draws nothing.
+    if (hasUpdater)
+      SettingsSectionDefinition(
+        title: l10n.appUpdate_sectionTitle,
+        keywords: settingsKeywords(l10n.appUpdate_sectionKeywords),
+        entries: [
+          SettingsEntryDefinition(
+            title: l10n.appUpdate_appUpdates,
+            subtitle: l10n.appUpdate_settingsTileSubtitle,
+            keywords: settingsKeywords(l10n.appUpdate_sectionKeywords),
+            feature: FeatureId.appUpdates,
+            opensScreen: true,
+            child: const AppUpdatesSettingsTile(),
+          ),
+        ],
+      ),
     SettingsSectionDefinition(
       title: l10n.settings_confirmationsSectionTitle,
       keywords: settingsKeywords(l10n.settings_confirmationsSectionKeywords),
@@ -263,18 +288,19 @@ class _SettingsTransferTile extends StatelessWidget {
   }
 }
 
-class GeneralSettingsScreen extends StatelessWidget {
+class GeneralSettingsScreen extends HookConsumerWidget {
   const GeneralSettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasUpdater = ref.watch(appUpdaterAvailableProvider);
     final l10n = AppLocalizations.of(context);
 
     return SettingsDetailScaffold(
       title: l10n.settings_generalTitle,
       subtitle: l10n.settings_generalSubtitle,
       icon: Icons.tune,
-      sections: generalSettingsSections(context),
+      sections: generalSettingsSections(context, hasUpdater: hasUpdater),
     );
   }
 }

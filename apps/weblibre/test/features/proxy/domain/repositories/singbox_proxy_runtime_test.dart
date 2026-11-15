@@ -719,7 +719,7 @@ void main() {
       expect(servers, isNotEmpty);
       for (final server in servers) {
         expect(server.tag, isNot(contains('profile-2')));
-        expect(server.detourTag ?? '', isNot(contains('profile-2')));
+        expect(server.detourProfileId ?? '', isNot(contains('profile-2')));
       }
       expect(
         servers.where((server) => server.tag.contains('profile-1')),

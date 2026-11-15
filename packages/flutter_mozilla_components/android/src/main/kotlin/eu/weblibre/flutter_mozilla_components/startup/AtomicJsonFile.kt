@@ -21,7 +21,9 @@ package eu.weblibre.flutter_mozilla_components.startup
 
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.channels.FileChannel
 import java.nio.charset.StandardCharsets
+import java.nio.file.StandardOpenOption
 import org.json.JSONObject
 
 /**
@@ -33,9 +35,13 @@ import org.json.JSONObject
  * unit tests that prove Dart/Kotlin parity cannot call into the android.jar stub.
  *
  * Writes land in a same-directory temp file, are flushed and fsynced, then renamed
- * over the target. Readers therefore never observe a torn file.
+ * over the target. Readers therefore never observe a torn file. With
+ * [syncDirectory], the directory is fsynced after the rename as well, so a write
+ * that returned survives a power cut (the app updater's installer journal).
+ *
+ * Public for the app module, which has no copy of its own.
  */
-internal class AtomicJsonFile(private val file: File) {
+class AtomicJsonFile(private val file: File, private val syncDirectory: Boolean = false) {
 
     sealed interface Read {
         /** File does not exist; the caller substitutes its defaults. */
@@ -81,6 +87,12 @@ internal class AtomicJsonFile(private val file: File) {
         if (!temp.renameTo(file)) {
             temp.delete()
             throw java.io.IOException("Could not replace ${file.path}")
+        }
+        if (syncDirectory) {
+            // Best effort: not every file system lets a directory be opened.
+            runCatching {
+                FileChannel.open(file.absoluteFile.parentFile!!.toPath(), StandardOpenOption.READ).use { it.force(true) }
+            }
         }
     }
 

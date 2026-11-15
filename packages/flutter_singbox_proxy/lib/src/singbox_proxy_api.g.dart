@@ -290,11 +290,10 @@ class SingboxProxyDnsServerConfig {
   SingboxProxyDnsServerConfig({
     required this.tag,
     required this.address,
-    this.detourTag,
+    this.detourProfileId,
     this.matchDomainSuffixes = const <String>[],
     this.matchGeosites = const <String>[],
-    this.matchOutbounds = const <String>[],
-    this.matchInbounds = const <String>[],
+    this.matchInboundProfileIds = const <String>[],
   });
 
   /// sing-box server tag, used to reference the server from `dns.rules`.
@@ -305,9 +304,10 @@ class SingboxProxyDnsServerConfig {
   /// bridge (sing-box `type: "local"` with our DoH-backed implementation).
   String address;
 
-  /// Outbound tag to dial the resolver through, or `direct` for direct, or
-  /// null when sing-box should pick automatically.
-  String? detourTag;
+  /// The runtime profile whose outbound the resolver is dialed through, or
+  /// null when sing-box should pick automatically. Native derives the
+  /// outbound tag (`SingboxTagFormat`), so the format lives on one side only.
+  String? detourProfileId;
 
   /// If non-empty, attaches a `dns.rules` entry routing matching domains to
   /// this server.
@@ -316,30 +316,22 @@ class SingboxProxyDnsServerConfig {
   /// Advanced sing-box geosite selectors (e.g. `geosite:cn`).
   List<String> matchGeosites;
 
-  /// If non-empty, attaches a `dns.rules` entry routing queries that *the
-  /// listed outbounds* originate to this server. Note: sing-box treats an
-  /// outbound's own bootstrap lookups (e.g. WireGuard peer hostname
-  /// resolution) as queries from that outbound, so using this for per-profile
-  /// scoping creates a chicken-and-egg loop at startup. Prefer
-  /// [matchInbounds] for "queries from tabs routed through this profile".
-  List<String> matchOutbounds;
-
-  /// If non-empty, attaches a `dns.rules` entry matching the listed inbound
-  /// tags. Queries entering via that inbound (e.g. a tab whose container is
-  /// bound to this profile's local SOCKS inbound) resolve through this
-  /// server. Endpoint-bootstrap lookups don't come from any inbound, so this
-  /// scope safely excludes them.
-  List<String> matchInbounds;
+  /// If non-empty, attaches a `dns.rules` entry matching the inbounds of the
+  /// listed runtime profiles. Queries entering via such an inbound (e.g. a
+  /// tab whose container is bound to this profile's local SOCKS inbound)
+  /// resolve through this server. Endpoint-bootstrap lookups don't come from
+  /// any inbound, so this scope safely excludes them. Native derives the
+  /// inbound tags.
+  List<String> matchInboundProfileIds;
 
   List<Object?> _toList() {
     return <Object?>[
       tag,
       address,
-      detourTag,
+      detourProfileId,
       matchDomainSuffixes,
       matchGeosites,
-      matchOutbounds,
-      matchInbounds,
+      matchInboundProfileIds,
     ];
   }
 
@@ -351,11 +343,10 @@ class SingboxProxyDnsServerConfig {
     return SingboxProxyDnsServerConfig(
       tag: result[0]! as String,
       address: result[1]! as String,
-      detourTag: result[2] as String?,
+      detourProfileId: result[2] as String?,
       matchDomainSuffixes: (result[3]! as List<Object?>).cast<String>(),
       matchGeosites: (result[4]! as List<Object?>).cast<String>(),
-      matchOutbounds: (result[5]! as List<Object?>).cast<String>(),
-      matchInbounds: (result[6]! as List<Object?>).cast<String>(),
+      matchInboundProfileIds: (result[5]! as List<Object?>).cast<String>(),
     );
   }
 
@@ -368,7 +359,7 @@ class SingboxProxyDnsServerConfig {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(tag, other.tag) && _deepEquals(address, other.address) && _deepEquals(detourTag, other.detourTag) && _deepEquals(matchDomainSuffixes, other.matchDomainSuffixes) && _deepEquals(matchGeosites, other.matchGeosites) && _deepEquals(matchOutbounds, other.matchOutbounds) && _deepEquals(matchInbounds, other.matchInbounds);
+    return _deepEquals(tag, other.tag) && _deepEquals(address, other.address) && _deepEquals(detourProfileId, other.detourProfileId) && _deepEquals(matchDomainSuffixes, other.matchDomainSuffixes) && _deepEquals(matchGeosites, other.matchGeosites) && _deepEquals(matchInboundProfileIds, other.matchInboundProfileIds);
   }
 
   @override
@@ -377,7 +368,7 @@ class SingboxProxyDnsServerConfig {
 
   @override
   String toString() {
-    return 'SingboxProxyDnsServerConfig(tag: $tag, address: $address, detourTag: $detourTag, matchDomainSuffixes: $matchDomainSuffixes, matchGeosites: $matchGeosites, matchOutbounds: $matchOutbounds, matchInbounds: $matchInbounds)';
+    return 'SingboxProxyDnsServerConfig(tag: $tag, address: $address, detourProfileId: $detourProfileId, matchDomainSuffixes: $matchDomainSuffixes, matchGeosites: $matchGeosites, matchInboundProfileIds: $matchInboundProfileIds)';
   }
 }
 

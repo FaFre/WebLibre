@@ -1,0 +1,27 @@
+// The only file that names Play Core (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md,
+// D2/3.2). Applied from build.gradle when present; the F-Droid recipe deletes
+// it together with src/play, so the fdroid build never resolves Play
+// artifacts. Billing will reuse this pattern.
+//
+// GeckoView already brings microG's play-services-basement/-tasks, which
+// define the same classes as Google's; Play Core's own copies would be
+// duplicates. Play Core only uses the public Tasks API from them, which
+// microG implements. Confirm on a Play-installed device (gate G5).
+dependencies {
+    playImplementation('com.google.android.play:app-update:2.1.0') {
+        exclude group: 'com.google.android.gms'
+    }
+    playImplementation('com.google.android.play:app-update-ktx:2.1.0') {
+        exclude group: 'com.google.android.gms'
+    }
+    // Task.await() for startUpdateFlow, whose task carries the consent
+    // sheet's result (the ktx's own runTask is internal). Same version as the
+    // app's kotlinx-coroutines-android, and on microG's Tasks like the rest.
+    playImplementation('org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.11.0') {
+        exclude group: 'com.google.android.gms'
+    }
+    // Compile against the same microG classes GeckoView ships at runtime
+    // (InstallException extends ApiException; Play Core returns Tasks).
+    playCompileOnly 'org.microg.gms:play-services-basement:0.3.17.252432'
+    playCompileOnly 'org.microg.gms:play-services-tasks:0.3.17.252432'
+}

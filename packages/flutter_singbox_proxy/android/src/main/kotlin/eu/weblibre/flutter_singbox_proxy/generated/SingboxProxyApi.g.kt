@@ -406,10 +406,11 @@ data class SingboxProxyDnsServerConfig (
    */
   val address: String,
   /**
-   * Outbound tag to dial the resolver through, or `direct` for direct, or
-   * null when sing-box should pick automatically.
+   * The runtime profile whose outbound the resolver is dialed through, or
+   * null when sing-box should pick automatically. Native derives the
+   * outbound tag (`SingboxTagFormat`), so the format lives on one side only.
    */
-  val detourTag: String? = null,
+  val detourProfileId: String? = null,
   /**
    * If non-empty, attaches a `dns.rules` entry routing matching domains to
    * this server.
@@ -418,45 +419,35 @@ data class SingboxProxyDnsServerConfig (
   /** Advanced sing-box geosite selectors (e.g. `geosite:cn`). */
   val matchGeosites: List<String>,
   /**
-   * If non-empty, attaches a `dns.rules` entry routing queries that *the
-   * listed outbounds* originate to this server. Note: sing-box treats an
-   * outbound's own bootstrap lookups (e.g. WireGuard peer hostname
-   * resolution) as queries from that outbound, so using this for per-profile
-   * scoping creates a chicken-and-egg loop at startup. Prefer
-   * [matchInbounds] for "queries from tabs routed through this profile".
+   * If non-empty, attaches a `dns.rules` entry matching the inbounds of the
+   * listed runtime profiles. Queries entering via such an inbound (e.g. a
+   * tab whose container is bound to this profile's local SOCKS inbound)
+   * resolve through this server. Endpoint-bootstrap lookups don't come from
+   * any inbound, so this scope safely excludes them. Native derives the
+   * inbound tags.
    */
-  val matchOutbounds: List<String>,
-  /**
-   * If non-empty, attaches a `dns.rules` entry matching the listed inbound
-   * tags. Queries entering via that inbound (e.g. a tab whose container is
-   * bound to this profile's local SOCKS inbound) resolve through this
-   * server. Endpoint-bootstrap lookups don't come from any inbound, so this
-   * scope safely excludes them.
-   */
-  val matchInbounds: List<String>
+  val matchInboundProfileIds: List<String>
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): SingboxProxyDnsServerConfig {
       val tag = pigeonVar_list[0] as String
       val address = pigeonVar_list[1] as String
-      val detourTag = pigeonVar_list[2] as String?
+      val detourProfileId = pigeonVar_list[2] as String?
       val matchDomainSuffixes = pigeonVar_list[3] as List<String>
       val matchGeosites = pigeonVar_list[4] as List<String>
-      val matchOutbounds = pigeonVar_list[5] as List<String>
-      val matchInbounds = pigeonVar_list[6] as List<String>
-      return SingboxProxyDnsServerConfig(tag, address, detourTag, matchDomainSuffixes, matchGeosites, matchOutbounds, matchInbounds)
+      val matchInboundProfileIds = pigeonVar_list[5] as List<String>
+      return SingboxProxyDnsServerConfig(tag, address, detourProfileId, matchDomainSuffixes, matchGeosites, matchInboundProfileIds)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
       tag,
       address,
-      detourTag,
+      detourProfileId,
       matchDomainSuffixes,
       matchGeosites,
-      matchOutbounds,
-      matchInbounds,
+      matchInboundProfileIds,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -467,22 +458,21 @@ data class SingboxProxyDnsServerConfig (
       return true
     }
     val other = other as SingboxProxyDnsServerConfig
-    return SingboxProxyApiPigeonUtils.deepEquals(this.tag, other.tag) && SingboxProxyApiPigeonUtils.deepEquals(this.address, other.address) && SingboxProxyApiPigeonUtils.deepEquals(this.detourTag, other.detourTag) && SingboxProxyApiPigeonUtils.deepEquals(this.matchDomainSuffixes, other.matchDomainSuffixes) && SingboxProxyApiPigeonUtils.deepEquals(this.matchGeosites, other.matchGeosites) && SingboxProxyApiPigeonUtils.deepEquals(this.matchOutbounds, other.matchOutbounds) && SingboxProxyApiPigeonUtils.deepEquals(this.matchInbounds, other.matchInbounds)
+    return SingboxProxyApiPigeonUtils.deepEquals(this.tag, other.tag) && SingboxProxyApiPigeonUtils.deepEquals(this.address, other.address) && SingboxProxyApiPigeonUtils.deepEquals(this.detourProfileId, other.detourProfileId) && SingboxProxyApiPigeonUtils.deepEquals(this.matchDomainSuffixes, other.matchDomainSuffixes) && SingboxProxyApiPigeonUtils.deepEquals(this.matchGeosites, other.matchGeosites) && SingboxProxyApiPigeonUtils.deepEquals(this.matchInboundProfileIds, other.matchInboundProfileIds)
   }
 
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.tag)
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.address)
-    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.detourTag)
+    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.detourProfileId)
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.matchDomainSuffixes)
     result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.matchGeosites)
-    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.matchOutbounds)
-    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.matchInbounds)
+    result = 31 * result + SingboxProxyApiPigeonUtils.deepHash(this.matchInboundProfileIds)
     return result
   }
   override fun toString(): String {
-    return "SingboxProxyDnsServerConfig(tag=$tag, address=$address, detourTag=$detourTag, matchDomainSuffixes=$matchDomainSuffixes, matchGeosites=$matchGeosites, matchOutbounds=$matchOutbounds, matchInbounds=$matchInbounds)"
+    return "SingboxProxyDnsServerConfig(tag=$tag, address=$address, detourProfileId=$detourProfileId, matchDomainSuffixes=$matchDomainSuffixes, matchGeosites=$matchGeosites, matchInboundProfileIds=$matchInboundProfileIds)"
   }
 }
 

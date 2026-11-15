@@ -102,11 +102,10 @@ class SingboxProxyDnsServerConfig {
   SingboxProxyDnsServerConfig({
     required this.tag,
     required this.address,
-    this.detourTag,
+    this.detourProfileId,
     this.matchDomainSuffixes = const <String>[],
     this.matchGeosites = const <String>[],
-    this.matchOutbounds = const <String>[],
-    this.matchInbounds = const <String>[],
+    this.matchInboundProfileIds = const <String>[],
   });
 
   /// sing-box server tag, used to reference the server from `dns.rules`.
@@ -117,9 +116,10 @@ class SingboxProxyDnsServerConfig {
   /// bridge (sing-box `type: "local"` with our DoH-backed implementation).
   final String address;
 
-  /// Outbound tag to dial the resolver through, or `direct` for direct, or
-  /// null when sing-box should pick automatically.
-  final String? detourTag;
+  /// The runtime profile whose outbound the resolver is dialed through, or
+  /// null when sing-box should pick automatically. Native derives the
+  /// outbound tag (`SingboxTagFormat`), so the format lives on one side only.
+  final String? detourProfileId;
 
   /// If non-empty, attaches a `dns.rules` entry routing matching domains to
   /// this server.
@@ -128,20 +128,13 @@ class SingboxProxyDnsServerConfig {
   /// Advanced sing-box geosite selectors (e.g. `geosite:cn`).
   final List<String> matchGeosites;
 
-  /// If non-empty, attaches a `dns.rules` entry routing queries that *the
-  /// listed outbounds* originate to this server. Note: sing-box treats an
-  /// outbound's own bootstrap lookups (e.g. WireGuard peer hostname
-  /// resolution) as queries from that outbound, so using this for per-profile
-  /// scoping creates a chicken-and-egg loop at startup. Prefer
-  /// [matchInbounds] for "queries from tabs routed through this profile".
-  final List<String> matchOutbounds;
-
-  /// If non-empty, attaches a `dns.rules` entry matching the listed inbound
-  /// tags. Queries entering via that inbound (e.g. a tab whose container is
-  /// bound to this profile's local SOCKS inbound) resolve through this
-  /// server. Endpoint-bootstrap lookups don't come from any inbound, so this
-  /// scope safely excludes them.
-  final List<String> matchInbounds;
+  /// If non-empty, attaches a `dns.rules` entry matching the inbounds of the
+  /// listed runtime profiles. Queries entering via such an inbound (e.g. a
+  /// tab whose container is bound to this profile's local SOCKS inbound)
+  /// resolve through this server. Endpoint-bootstrap lookups don't come from
+  /// any inbound, so this scope safely excludes them. Native derives the
+  /// inbound tags.
+  final List<String> matchInboundProfileIds;
 }
 
 class SingboxProxyDnsConfig {

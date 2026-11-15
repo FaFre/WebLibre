@@ -310,3 +310,98 @@ extension $StartupConfigCopyWith on StartupConfig {
   // ignore: library_private_types_in_public_api
   _$StartupConfigCWProxy get copyWith => _$StartupConfigCWProxyImpl(this);
 }
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+MaintenanceTask _$MaintenanceTaskFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  'MaintenanceTask',
+  json,
+  ($checkedConvert) {
+    final val = MaintenanceTask(
+      id: $checkedConvert('id', (v) => requiredString(v)),
+      actionId: $checkedConvert('action', (v) => stringOrEmpty(v)),
+      stateId: $checkedConvert('state', (v) => stringOrEmpty(v)),
+      profileId: $checkedConvert('profileId', (v) => requiredString(v)),
+      profileName: $checkedConvert('profileName', (v) => stringOrEmpty(v)),
+      createdAt: $checkedConvert('createdAt', (v) => dateTimeOrEpoch(v)),
+      targetTreeUri: $checkedConvert('targetTreeUri', (v) => stringOrNull(v)),
+      sourceFileUri: $checkedConvert('sourceFileUri', (v) => stringOrNull(v)),
+      sourceDigest: $checkedConvert('sourceDigest', (v) => stringOrNull(v)),
+      integrityCheck: $checkedConvert(
+        'integrityCheck',
+        (v) => v == null ? true : _trueUnlessFalse(v),
+      ),
+      adoptArchiveName: $checkedConvert(
+        'adoptArchiveName',
+        (v) => v == null ? false : _falseUnlessTrue(v),
+      ),
+      startedAt: $checkedConvert('startedAt', (v) => dateTimeOrNull(v)),
+      error: $checkedConvert('error', (v) => stringOrNull(v)),
+      errorKindId: $checkedConvert('errorKind', (v) => stringOrNull(v)),
+      errorDetailId: $checkedConvert('errorDetail', (v) => stringOrNull(v)),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'actionId': 'action',
+    'stateId': 'state',
+    'errorKindId': 'errorKind',
+    'errorDetailId': 'errorDetail',
+  },
+);
+
+Map<String, dynamic> _$MaintenanceTaskToJson(MaintenanceTask instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'action': instance.actionId,
+      'profileId': instance.profileId,
+      'profileName': instance.profileName,
+      'state': instance.stateId,
+      'targetTreeUri': instance.targetTreeUri,
+      'sourceFileUri': instance.sourceFileUri,
+      'sourceDigest': instance.sourceDigest,
+      'integrityCheck': instance.integrityCheck,
+      'adoptArchiveName': instance.adoptArchiveName,
+      'createdAt': utcIso(instance.createdAt),
+      'startedAt': utcIsoOrNull(instance.startedAt),
+      'error': instance.error,
+      'errorKind': instance.errorKindId,
+      'errorDetail': instance.errorDetailId,
+    };
+
+StartupConfig _$StartupConfigFromJson(Map<String, dynamic> json) =>
+    StartupConfig(
+      version: json['version'] == null
+          ? startupConfigVersion
+          : StartupConfig._version(json['version']),
+      profilePrompt:
+          $enumDecodeNullable(
+            _$ProfilePromptModeEnumMap,
+            json['profilePrompt'],
+            unknownValue: ProfilePromptMode.off,
+          ) ??
+          ProfilePromptMode.off,
+      honorShortcutProfile: json['honorShortcutProfile'] == null
+          ? true
+          : _trueUnlessFalse(json['honorShortcutProfile']),
+      pendingTasks: json['pendingTasks'] == null
+          ? const []
+          : StartupConfig._pendingTasks(json['pendingTasks']),
+    );
+
+Map<String, dynamic> _$StartupConfigToJson(StartupConfig instance) =>
+    <String, dynamic>{
+      'version': instance.version,
+      'profilePrompt': _$ProfilePromptModeEnumMap[instance.profilePrompt]!,
+      'honorShortcutProfile': instance.honorShortcutProfile,
+      'pendingTasks': instance.pendingTasks.map((e) => e.toJson()).toList(),
+    };
+
+const _$ProfilePromptModeEnumMap = {
+  ProfilePromptMode.off: 'off',
+  ProfilePromptMode.browserOnly: 'browserOnly',
+};

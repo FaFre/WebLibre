@@ -21,10 +21,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/providers/defaults.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/about/domain/providers.dart';
+import 'package:weblibre/features/app_update/domain/entities/component_identity.dart';
+import 'package:weblibre/features/app_update/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -41,6 +42,7 @@ class AboutDialogScreen extends HookConsumerWidget {
         (value) => value.value!,
       ),
     );
+    final hasUpdater = ref.watch(appUpdaterAvailableProvider);
 
     return AboutDialog(
       applicationIcon: SizedBox.square(
@@ -56,6 +58,14 @@ class AboutDialogScreen extends HookConsumerWidget {
           title: Text(l10n.about_componentVersionsTitle),
           subtitle: const _ComponentVersions(),
         ),
+        // No live status here; the Updates screen has it (8.6).
+        if (hasUpdater)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.system_update),
+            title: Text(l10n.appUpdate_appUpdates),
+            onTap: () => const AppUpdateSettingsRoute().push(context),
+          ),
         const Divider(),
         ListTile(
           contentPadding: EdgeInsets.zero,
@@ -162,15 +172,29 @@ class _ComponentVersions extends HookConsumerWidget {
       };
     }
 
-    // Product names, never translated.
+    // One inventory for About, the build manifest and update metadata
+    // (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, 4.1). Product names, never
+    // translated.
     final rows = [
-      ('Gecko', version(gecko, (v) => v.gecko)),
-      ('Android Components', version(gecko, (v) => v.androidComponents)),
-      ('Application Services', version(gecko, (v) => v.applicationServices)),
-      (torBrand, version(tor, (v) => v.tor)),
-      ('Snowflake', version(tor, (v) => v.snowflake)),
-      ('Lyrebird', version(tor, (v) => v.lyrebird)),
-      ('sing-box', version(singbox, (v) => v)),
+      for (final id in ComponentId.values)
+        (
+          id.productName,
+          switch (id) {
+            ComponentId.gecko => version(gecko, (v) => v.gecko),
+            ComponentId.androidComponents => version(
+              gecko,
+              (v) => v.androidComponents,
+            ),
+            ComponentId.applicationServices => version(
+              gecko,
+              (v) => v.applicationServices,
+            ),
+            ComponentId.tor => version(tor, (v) => v.tor),
+            ComponentId.snowflake => version(tor, (v) => v.snowflake),
+            ComponentId.lyrebird => version(tor, (v) => v.lyrebird),
+            ComponentId.singbox => version(singbox, (v) => v),
+          },
+        ),
     ];
 
     final nameStyle = TextStyle(color: Theme.of(context).colorScheme.onSurface);

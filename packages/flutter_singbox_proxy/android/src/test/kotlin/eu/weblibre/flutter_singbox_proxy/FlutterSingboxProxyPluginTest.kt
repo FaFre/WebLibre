@@ -300,8 +300,8 @@ internal class FlutterSingboxProxyPluginTest {
                         dnsServer(
                             tag = "corp",
                             address = "tls://dns.example",
-                            detourTag = "out-profile-1",
-                            matchInbounds = listOf("in-profile-1")
+                            detourProfileId = "profile-1",
+                            matchInboundProfileIds = listOf("profile-1")
                         )
                     ),
                     finalServerTag = null,
@@ -367,7 +367,7 @@ internal class FlutterSingboxProxyPluginTest {
                         dnsServer(
                             tag = "plain",
                             address = "udp://1.2.3.4",
-                            matchInbounds = emptyList()
+                            matchInboundProfileIds = emptyList()
                         )
                     ),
                     finalServerTag = "plain",
@@ -410,8 +410,8 @@ internal class FlutterSingboxProxyPluginTest {
                         dnsServer(
                             tag = "browser-doh-wg-home",
                             address = "https://dns.example/dns-query",
-                            detourTag = "out-singbox_wg-home",
-                            matchInbounds = listOf("in-singbox_wg-home")
+                            detourProfileId = "singbox:wg-home",
+                            matchInboundProfileIds = listOf("singbox:wg-home")
                         )
                     ),
                     finalServerTag = null,
@@ -457,8 +457,8 @@ internal class FlutterSingboxProxyPluginTest {
                         dnsServer(
                             tag = "override-wg-home",
                             address = "udp://10.64.0.1",
-                            detourTag = "out-singbox_wg-home",
-                            matchInbounds = listOf("in-singbox_wg-home")
+                            detourProfileId = "singbox:wg-home",
+                            matchInboundProfileIds = listOf("singbox:wg-home")
                         )
                     ),
                     finalServerTag = null,
@@ -636,8 +636,8 @@ internal class FlutterSingboxProxyPluginTest {
                         dnsServer(
                             tag = "browser-doh-wg-v4",
                             address = "https://dns.example/dns-query",
-                            detourTag = "out-wg-v4",
-                            matchInbounds = listOf("in-wg-v4"),
+                            detourProfileId = "wg-v4",
+                            matchInboundProfileIds = listOf("wg-v4"),
                         ),
                     ),
                     finalServerTag = "browser-doh",
@@ -761,15 +761,14 @@ internal class FlutterSingboxProxyPluginTest {
 private fun dnsServer(
     tag: String,
     address: String,
-    detourTag: String? = null,
+    detourProfileId: String? = null,
     matchDomainSuffixes: List<String> = emptyList(),
-    matchInbounds: List<String> = emptyList()
+    matchInboundProfileIds: List<String> = emptyList()
 ) = SingboxProxyDnsServerConfig(
     tag = tag,
     address = address,
-    detourTag = detourTag,
+    detourProfileId = detourProfileId,
     matchDomainSuffixes = matchDomainSuffixes,
     matchGeosites = emptyList(),
-    matchOutbounds = emptyList(),
-    matchInbounds = matchInbounds
+    matchInboundProfileIds = matchInboundProfileIds
 )

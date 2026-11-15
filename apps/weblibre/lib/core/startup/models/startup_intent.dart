@@ -19,6 +19,7 @@
  */
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/startup/models/json_read.dart';
 
 part 'startup_intent.g.dart';
@@ -57,10 +58,15 @@ enum LaunchClassification {
 /// the same intent twice. Claims expire; a new process can take over an expired
 /// one, but an acknowledged entry is never replayed.
 @CopyWith()
+@JsonSerializable(checked: true)
 class StartupIntentClaim with FastEquatable {
+  @JsonKey(fromJson: requiredString)
   final String processInstanceId;
+  @JsonKey(fromJson: stringOrEmpty)
   final String engineId;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime claimedAt;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime expiresAt;
 
   StartupIntentClaim({
@@ -72,29 +78,10 @@ class StartupIntentClaim with FastEquatable {
 
   bool isExpiredAt(DateTime now) => !now.isBefore(expiresAt);
 
-  static StartupIntentClaim? tryFromJson(Map<String, Object?> json) {
-    final processInstanceId = json['processInstanceId'];
-    final engineId = json['engineId'];
-    final claimedAt = dateTimeOrNull(json['claimedAt']);
-    final expiresAt = dateTimeOrNull(json['expiresAt']);
+  static StartupIntentClaim? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$StartupIntentClaimFromJson);
 
-    if (processInstanceId is! String || processInstanceId.isEmpty) return null;
-    if (claimedAt == null || expiresAt == null) return null;
-
-    return StartupIntentClaim(
-      processInstanceId: processInstanceId,
-      engineId: engineId is String ? engineId : '',
-      claimedAt: claimedAt,
-      expiresAt: expiresAt,
-    );
-  }
-
-  Map<String, Object?> toJson() => {
-    'processInstanceId': processInstanceId,
-    'engineId': engineId,
-    'claimedAt': claimedAt.toUtc().toIso8601String(),
-    'expiresAt': expiresAt.toUtc().toIso8601String(),
-  };
+  Map<String, Object?> toJson() => _$StartupIntentClaimToJson(this);
 
   @override
   List<Object?> get hashParameters => [
@@ -112,26 +99,39 @@ class StartupIntentClaim with FastEquatable {
 /// that must survive restart is either covered by a persistable URI grant or
 /// staged as bytes under [payloadDirName]; when neither is possible the restart
 /// flow is blocked rather than promising a replay it cannot deliver.
+///
+/// Fields are declared in the order the file lists them.
 @CopyWith()
+@JsonSerializable(checked: true, explicitToJson: true)
 class StartupIntentEntry with FastEquatable {
   @CopyWithField(immutable: true)
+  @JsonKey(fromJson: requiredString)
   final String id;
 
   /// Durable monotonic order. Initial and live intents share one sequence, so
   /// total ordering survives engine and process replacement.
+  @JsonKey(fromJson: requiredInt)
   final int sequence;
 
+  @JsonKey(name: 'classification', fromJson: _classification)
   final String classificationId;
+  @JsonKey(fromJson: stringOrNull)
   final String? action;
+  @JsonKey(fromJson: stringOrNull)
   final String? dataUri;
+  @JsonKey(fromJson: stringOrNull)
   final String? mimeType;
+  @JsonKey(fromJson: stringList)
   final List<String> categories;
+  @JsonKey(fromJson: stringList)
   final List<String> flags;
 
   /// Primitive-only extras. See [sanitizeExtras].
+  @JsonKey(fromJson: sanitizeExtras)
   final Map<String, Object?> extras;
 
   /// Set only by native trusted-launch validation.
+  @JsonKey(fromJson: stringOrNull)
   final String? trustedProfileId;
 
   /// The app that sent the launch, resolved when it arrived.
@@ -140,15 +140,23 @@ class StartupIntentEntry with FastEquatable {
   /// running at the moment it is asked, so by replay time it names this app. A
   /// queued launch that forgot its caller replays as internal, which is exactly
   /// the answer that skips the gatekeeper prompt.
+  @JsonKey(fromJson: stringOrNull)
   final String? callerPackage;
 
   /// Relative name of this entry's staged payload directory, when content had
   /// to be copied out of a transient grant.
+  @JsonKey(fromJson: stringOrNull)
   final String? payloadDirName;
 
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime createdAt;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime expiresAt;
+
+  /// An unreadable claim is no claim.
+  @JsonKey(fromJson: _claim)
   final StartupIntentClaim? claim;
+  @JsonKey(fromJson: _acknowledged)
   final bool acknowledged;
 
   StartupIntentEntry({
@@ -203,63 +211,23 @@ class StartupIntentEntry with FastEquatable {
         claim.engineId == engineId;
   }
 
-  static StartupIntentEntry? tryFromJson(Map<String, Object?> json) {
-    final id = json['id'];
-    if (id is! String || id.isEmpty) return null;
+  /// Null for an entry without an id, a sequence or its times: it can't be
+  /// ordered or expired. Every other field degrades (`json_read.dart`).
+  static StartupIntentEntry? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$StartupIntentEntryFromJson);
 
-    final sequence = json['sequence'];
-    if (sequence is! int) return null;
+  Map<String, Object?> toJson() => _$StartupIntentEntryToJson(this);
 
-    final createdAt = dateTimeOrNull(json['createdAt']);
-    final expiresAt = dateTimeOrNull(json['expiresAt']);
-    if (createdAt == null || expiresAt == null) return null;
+  static String _classification(Object? value) =>
+      value is String ? value : LaunchClassification.unknown.name;
 
-    final rawClaim = json['claim'];
+  static StartupIntentClaim? _claim(Object? value) => value is Map
+      ? StartupIntentClaim.tryFromJson(
+          value.map((key, value) => MapEntry(key.toString(), value)),
+        )
+      : null;
 
-    return StartupIntentEntry(
-      id: id,
-      sequence: sequence,
-      classificationId: json['classification'] is String
-          ? json['classification']! as String
-          : LaunchClassification.unknown.name,
-      action: stringOrNull(json['action']),
-      dataUri: stringOrNull(json['dataUri']),
-      mimeType: stringOrNull(json['mimeType']),
-      categories: stringList(json['categories']),
-      flags: stringList(json['flags']),
-      extras: sanitizeExtras(json['extras']),
-      trustedProfileId: stringOrNull(json['trustedProfileId']),
-      callerPackage: stringOrNull(json['callerPackage']),
-      payloadDirName: stringOrNull(json['payloadDirName']),
-      createdAt: createdAt,
-      expiresAt: expiresAt,
-      claim: rawClaim is Map
-          ? StartupIntentClaim.tryFromJson(
-              rawClaim.map((key, value) => MapEntry(key.toString(), value)),
-            )
-          : null,
-      acknowledged: json['acknowledged'] == true,
-    );
-  }
-
-  Map<String, Object?> toJson() => {
-    'id': id,
-    'sequence': sequence,
-    'classification': classificationId,
-    'action': action,
-    'dataUri': dataUri,
-    'mimeType': mimeType,
-    'categories': categories,
-    'flags': flags,
-    'extras': extras,
-    'trustedProfileId': trustedProfileId,
-    'callerPackage': callerPackage,
-    'payloadDirName': payloadDirName,
-    'createdAt': createdAt.toUtc().toIso8601String(),
-    'expiresAt': expiresAt.toUtc().toIso8601String(),
-    'claim': claim?.toJson(),
-    'acknowledged': acknowledged,
-  };
+  static bool _acknowledged(Object? value) => boolOr(value, false);
 
   @override
   List<Object?> get hashParameters => [
@@ -284,11 +252,15 @@ class StartupIntentEntry with FastEquatable {
 
 /// The persisted, ordered queue of unacknowledged launches.
 @CopyWith()
+@JsonSerializable(explicitToJson: true)
 class StartupIntentQueue with FastEquatable {
+  @JsonKey(fromJson: _queueVersion)
   final int version;
 
   /// Next sequence number to hand out. Persisted so ordering survives restart.
+  @JsonKey(fromJson: _storedSequence)
   final int nextSequence;
+  @JsonKey(fromJson: _entries)
   final List<StartupIntentEntry> entries;
 
   StartupIntentQueue({
@@ -300,44 +272,33 @@ class StartupIntentQueue with FastEquatable {
   static final empty = StartupIntentQueue();
 
   factory StartupIntentQueue.fromJson(Map<String, Object?> json) {
-    final rawEntries = json['entries'];
-    final entries = <StartupIntentEntry>[];
-    final seen = <String>{};
-
-    if (rawEntries is List) {
-      for (final raw in rawEntries) {
-        if (raw is! Map) continue;
-        final entry = StartupIntentEntry.tryFromJson(
-          raw.map((key, value) => MapEntry(key.toString(), value)),
-        );
-        if (entry == null) continue;
-        if (!seen.add(entry.id)) continue;
-        entries.add(entry);
-      }
-    }
-
-    entries.sort((a, b) => a.sequence.compareTo(b.sequence));
-
-    final version = json['version'];
-    final nextSequence = json['nextSequence'];
-    final highest = entries.isEmpty ? 0 : entries.last.sequence;
-
-    return StartupIntentQueue(
-      version: version is int ? version : startupIntentQueueVersion,
-      // Never hand out a sequence at or below one already on disk, even if the
-      // stored counter was truncated or rolled back.
-      nextSequence: nextSequence is int && nextSequence > highest
-          ? nextSequence
-          : highest + 1,
-      entries: List.unmodifiable(entries),
-    );
+    final parsed = _$StartupIntentQueueFromJson(json);
+    final highest = parsed.entries.lastOrNull?.sequence ?? 0;
+    // Never hand out a sequence at or below one already on disk, even if the
+    // stored counter was truncated or rolled back.
+    return parsed.nextSequence > highest
+        ? parsed
+        : parsed.copyWith(nextSequence: highest + 1);
   }
 
-  Map<String, Object?> toJson() => {
-    'version': version,
-    'nextSequence': nextSequence,
-    'entries': entries.map((entry) => entry.toJson()).toList(),
-  };
+  Map<String, Object?> toJson() => _$StartupIntentQueueToJson(this);
+
+  static int _queueVersion(Object? value) =>
+      intOr(value, startupIntentQueueVersion);
+
+  /// Corrected against the entries in [StartupIntentQueue.fromJson].
+  static int _storedSequence(Object? value) => intOr(value, 0);
+
+  /// In sequence order, without entries that can't be read or repeat an id.
+  static List<StartupIntentEntry> _entries(Object? value) {
+    final seen = <String>{};
+    final entries = recordsFromJson(
+      value,
+      StartupIntentEntry.tryFromJson,
+    ).where((entry) => seen.add(entry.id)).toList();
+    entries.sort((a, b) => a.sequence.compareTo(b.sequence));
+    return List.unmodifiable(entries);
+  }
 
   @override
   List<Object?> get hashParameters => [version, nextSequence, entries];

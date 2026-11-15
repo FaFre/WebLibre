@@ -19,48 +19,31 @@
  */
 package eu.weblibre.flutter_mozilla_components.startup
 
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 /**
  * UTC timestamps in the exact shape Dart's `DateTime.toUtc().toIso8601String()`
  * produces, so a record written by either side round-trips through the other.
  *
- * `java.time` would be nicer, but `minSdk` is 24 and desugaring is not enabled for
- * this module, so `SimpleDateFormat` it is. Parsing accepts the fractional-second
- * forms Dart can emit (`.mmm` and `.mmmuuu`) as well as none at all.
+ * Written with exactly three fractional digits, as Dart writes them
+ * ([Instant.toString] drops a zero fraction). Read with [Instant.parse], which
+ * also takes the forms Dart can emit (`.mmm`, `.mmmuuu` or none); precision
+ * beyond milliseconds is truncated.
  */
 internal object Iso8601 {
-    private const val WRITE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+    private val writer = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").withZone(ZoneOffset.UTC)
 
-    private val READ_PATTERNS = listOf(
-        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-        "yyyy-MM-dd'T'HH:mm:ss'Z'",
-    )
-
-    fun format(epochMillis: Long): String = formatter(WRITE_PATTERN).format(Date(epochMillis))
+    fun format(epochMillis: Long): String = writer.format(Instant.ofEpochMilli(epochMillis))
 
     fun parse(value: String?): Long? {
         if (value.isNullOrEmpty()) return null
-
-        // Dart emits microsecond precision when it has any; truncate to millis so
-        // SimpleDateFormat does not silently roll the extra digits into seconds.
-        val normalized = Regex("(\\.\\d{3})\\d+Z$").replace(value, "$1Z")
-
-        for (pattern in READ_PATTERNS) {
-            try {
-                return formatter(pattern).parse(normalized)?.time
-            } catch (_: java.text.ParseException) {
-                continue
-            }
+        return try {
+            Instant.parse(value).toEpochMilli()
+        } catch (_: DateTimeParseException) {
+            null
         }
-        return null
-    }
-
-    private fun formatter(pattern: String) = SimpleDateFormat(pattern, Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-        isLenient = false
     }
 }

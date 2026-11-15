@@ -19,13 +19,13 @@
  */
 import 'package:fading_scroll/fading_scroll.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/branding/proxy_brands.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/app_update/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/screens/url_cleaner_settings.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_behavior_screen.dart';
 import 'package:weblibre/features/gestures/presentation/screens/gesture_feedback_screen.dart';
@@ -54,15 +54,16 @@ import 'package:weblibre/presentation/utils/list_format_l10n.dart';
 import 'package:weblibre/presentation/utils/visibility_switch_l10n.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
-class SettingsScreen extends HookWidget {
+class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasUpdater = ref.watch(appUpdaterAvailableProvider);
     final l10n = AppLocalizations.of(context);
     final search = useSettingsSearch();
 
-    final categories = _buildCategories(context);
+    final categories = _buildCategories(context, hasUpdater: hasUpdater);
     final sections = search.normalizedQuery.isEmpty
         ? _buildCategorySections(context, categories)
         : _buildSearchSections([
@@ -133,7 +134,10 @@ typedef _CategoryGroups = ({
   List<_SettingsCategoryDefinition> services,
 });
 
-_CategoryGroups _buildCategories(BuildContext context) {
+_CategoryGroups _buildCategories(
+  BuildContext context, {
+  required bool hasUpdater,
+}) {
   final l10n = AppLocalizations.of(context);
 
   final browser = [
@@ -142,7 +146,7 @@ _CategoryGroups _buildCategories(BuildContext context) {
       subtitle: l10n.settings_categoryGeneralSubtitle,
       icon: Icons.tune,
       keywords: settingsKeywords(l10n.settings_categoryGeneralKeywords),
-      sections: generalSettingsSections(context),
+      sections: generalSettingsSections(context, hasUpdater: hasUpdater),
       onTap: (context) => GeneralSettingsRoute().push(context),
     ),
     _SettingsCategoryDefinition(
@@ -710,8 +714,13 @@ class SettingsSearchTarget {
 ///
 /// Built from the same category definitions as the settings screen, so the two
 /// can never disagree about what exists or where it lives.
-List<SettingsSearchTarget> settingsSearchTargets(BuildContext context) {
-  final categories = _buildCategories(context);
+///
+/// [hasUpdater] is [appUpdaterAvailableProvider], watched by the caller.
+List<SettingsSearchTarget> settingsSearchTargets(
+  BuildContext context, {
+  required bool hasUpdater,
+}) {
+  final categories = _buildCategories(context, hasUpdater: hasUpdater);
 
   return [
     for (final category in [...categories.browser, ...categories.services]) ...[

@@ -20,3 +20,10 @@ certs/
 codenomad/
 native/go_mobile_runtime/.work/
 native/go_mobile_runtime/build/
+
+# Claude Code (local settings, skills, notes)
+.claude/
+
+# Python bytecode
+__pycache__/
+*.pyc

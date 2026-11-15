@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import mozilla.appservices.places.BookmarkRoot
 import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
@@ -42,9 +43,9 @@ object GeckoBookmarksExtensionBridge : BundleEventListener {
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    // application-services Places root guids. Keep in sync with ext-bookmarks.js.
-    private const val ROOT_GUID = "root________"
-    private const val UNFILED_GUID = "unfiled_____"
+    // application-services' Places roots, which ext-bookmarks.js names too.
+    private val ROOT_GUID = BookmarkRoot.Root.id
+    private val UNFILED_GUID = BookmarkRoot.Unfiled.id
 
     private const val TYPE_ITEM = "item"
     private const val TYPE_FOLDER = "folder"

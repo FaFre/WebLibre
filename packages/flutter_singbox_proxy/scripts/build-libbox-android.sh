@@ -4,6 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 PACKAGE_DIR="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+# shellcheck source=../../../native/go_mobile_runtime/pins.env
+source "$PACKAGE_DIR/../../native/go_mobile_runtime/pins.env"
 DEFAULT_SING_BOX_SOURCE="$(cd "$PACKAGE_DIR/../../.." && pwd -P)/sing-box"
 
 SING_BOX_SOURCE="${SING_BOX_SOURCE:-$DEFAULT_SING_BOX_SOURCE}"
@@ -95,13 +97,19 @@ if [[ $INSTALL_GOMOBILE -eq 1 ]]; then
   needs_gomobile_install=0
   if [[ ! -x "$GOPATH/bin/gomobile" || ! -x "$GOPATH/bin/gobind" ]]; then
     needs_gomobile_install=1
-  elif ! "$GOPATH/bin/gomobile" bind -h 2>&1 | grep -q -- '-libname'; then
-    needs_gomobile_install=1
+  else
+    for tool in gomobile gobind; do
+      installed_version="$(go version -m "$GOPATH/bin/$tool" | awk '$1 == "mod" { print $3 }')"
+      if [[ "$installed_version" != "$GOMOBILE_VERSION" ]]; then
+        needs_gomobile_install=1
+        break
+      fi
+    done
   fi
 
   if [[ $needs_gomobile_install -eq 1 ]]; then
-    go install -v github.com/sagernet/gomobile/cmd/gomobile@v0.1.12
-    go install -v github.com/sagernet/gomobile/cmd/gobind@v0.1.12
+    go install -v "$GOMOBILE_MODULE/cmd/gomobile@$GOMOBILE_VERSION"
+    go install -v "$GOMOBILE_MODULE/cmd/gobind@$GOMOBILE_VERSION"
   fi
 fi
 
@@ -116,7 +124,8 @@ if [[ -n "$PLATFORM" ]]; then
   args+=(-platform "$PLATFORM")
 fi
 
-"${args[@]}"
+# Go 1.27.4 rejects Cronet's exact-name archive flag unless explicitly allowed.
+CGO_LDFLAGS_ALLOW='^-l:libcronet\.a$' "${args[@]}"
 
 cp -f libbox.aar "$OUTPUT_DIR/libbox.aar"
 if [[ -f libbox-legacy.aar ]]; then

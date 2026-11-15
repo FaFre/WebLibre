@@ -314,6 +314,6 @@ object RestartCoordinator {
     private fun newToken(): String {
         val bytes = ByteArray(16)
         random.nextBytes(bytes)
-        return bytes.joinToString("") { "%02x".format(it) }
+        return bytes.toHexString()
     }
 }

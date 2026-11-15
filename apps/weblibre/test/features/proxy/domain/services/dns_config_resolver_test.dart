@@ -41,10 +41,10 @@ void main() {
     expect(config, isNotNull);
     expect(config!.finalServerTag, 'browser-doh');
     expect(config.servers, hasLength(2));
-    expect(config.servers.first.detourTag, isNull);
+    expect(config.servers.first.detourProfileId, isNull);
     expect(config.servers.last.tag, 'browser-doh-profile-1');
-    expect(config.servers.last.detourTag, 'out-singbox_profile-1');
-    expect(config.servers.last.matchInbounds, ['in-singbox_profile-1']);
+    expect(config.servers.last.detourProfileId, 'singbox:profile-1');
+    expect(config.servers.last.matchInboundProfileIds, ['singbox:profile-1']);
   });
 
   test('profile override replaces automatic browser DoH mirror', () {
@@ -62,8 +62,8 @@ void main() {
       'override-profile-1',
     ]);
     expect(config.servers.last.address, '10.64.0.1');
-    expect(config.servers.last.detourTag, 'out-singbox_profile-1');
-    expect(config.servers.last.matchInbounds, ['in-singbox_profile-1']);
+    expect(config.servers.last.detourProfileId, 'singbox:profile-1');
+    expect(config.servers.last.matchInboundProfileIds, ['singbox:profile-1']);
   });
 
   test('override for a profile that is not running is ignored', () {

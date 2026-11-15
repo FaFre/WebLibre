@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+set -eu
+
 BASE=$(dirname "$0")
 
 cd "$BASE/../packages/flutter_mozilla_components/javascript/readability" || exit

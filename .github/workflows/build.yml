@@ -1,41 +1,87 @@
 name: Flutter CICD
 
+# plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, 9.1. The production signing key
+# never reaches the build: `build` signs with a throwaway key, `sign` re-signs
+# with the production key and runs nothing from the repository, `verify`
+# checks the signed artifacts and writes release.json, and only the publish
+# jobs can write anywhere. The update catalogue is not produced here: the
+# separate updates repository finds new releases on its own schedule (9.2).
+#
+# Repository settings this relies on (not expressible in YAML): protect `v*`
+# tags; restrict the `release-signing` and `play` environments to `v*` tags;
+# require approval on `play`; enable immutable releases; Settings > Actions >
+# "Require lockfile" (and "Require actions to be pinned to a full-length commit
+# SHA", which the lockfile satisfies).
+#
+# Supply chain (workflow-security.yml checks all of this on every change):
+# - Every `uses:` is a full version tag and the commit it ran is recorded in
+#   `actions.lock` (gh actions-lock), transitive actions included. After adding
+#   a workflow or a `uses:`, run `gh actions-lock` and commit the lockfile.
+# - No cache is read or written: a tag build publishes what it builds, so
+#   nothing a cache could have carried in from another run may reach it.
+# - `${{ }}` never expands inside `run:`; values pass through `env:`.
+# - Checkouts do not persist the token into .git/config.
+
 on:
   push:
     tags:
       - "v*"
 
+permissions: {}
+
+# One run per tag. A re-run of the same tag waits rather than racing a
+# release that is already being published.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-    env:
-      KEY_JKS: ${{ secrets.KEY_JKS }}
-      KEY_PATH: ${{ github.workspace }}/apps/weblibre/key.jks
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+    name: Build (throwaway key)
+    runs-on: ubuntu-24.04
     permissions:
-      contents: write
+      contents: read # checkout only
+    outputs:
+      is_prerelease: ${{ steps.build-type.outputs.is_prerelease }}
+    env:
+      TAG: ${{ github.ref_name }}
     steps:
-      - name: Free Disk Space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: false
-          android: false
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: false
-          swap-storage: false
+      # What jlumbroso/free-disk-space did with dotnet and haskell enabled,
+      # without a third-party action for two `rm`s.
+      - name: Free disk space
+        run: |
+          set -euo pipefail
+          df -h /
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup
+          df -h /
 
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7.0.1
+        with:
+          # Every earlier tag, for the build-number check. Blobs load on
+          # demand: the check reads one pubspec per tag. The repository is
+          # public, so that needs no persisted token.
+          fetch-depth: 0
+          filter: blob:none
+          persist-credentials: false
+
+      - name: Check the build number rises (D4)
+        run: |
+          set -euo pipefail
+          # The check orders tags by creation time, which only an annotated
+          # tag's object carries. checkout can store the pushed tag as a
+          # lightweight ref on its commit, so fetch the tag object itself.
+          git fetch --no-tags --force origin "refs/tags/$TAG:refs/tags/$TAG"
+          python3 scripts/release/check_build_number.py "$TAG"
+
+      - uses: actions/setup-java@v6.2.0
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7.0.0
         with:
-          go-version: '1.25.x'
+          go-version: '1.27.4'
+          cache: false
 
       - name: Install Android NDK
         run: |
@@ -66,55 +112,41 @@ jobs:
       - name: Determine build type
         id: build-type
         run: |
-          if [[ "${{ github.ref_name }}" =~ (pre|alpha) ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+          if [[ "$TAG" =~ (pre|alpha) ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
             echo "Build type: Prerelease (APK only)"
           else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
             echo "Build type: Full release (APK + Bundle + Play Console)"
           fi
 
-      - uses: ruby/setup-ruby@v1
-        if: steps.build-type.outputs.is_prerelease == 'false'
+      - uses: actions/setup-node@v7.1.0
         with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: apps/weblibre
+          node-version: '26.13.1'
+          package-manager-cache: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Cache Go build dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ~/go/bin/gomobile
-            ~/go/bin/gobind
-          key: ${{ runner.os }}-go-runtime-${{ hashFiles('native/go_mobile_runtime/pins.env') }}
-          restore-keys: |
-            ${{ runner.os }}-go-runtime-
-
-      - name: Download bundle dependencies
-        if: steps.build-type.outputs.is_prerelease == 'false'
+      # D20: Flutter and Gradle expect signed outputs, so they get them, from a
+      # key that exists only for this job. The `sign` job replaces every
+      # signature; nothing about the app depends on which key signed the build.
+      - name: Create throwaway signing key
         run: |
-          gem install bundler
-          bundle config path vendor/bundle
-          bundle install
+          set -euo pipefail
+          password="$(openssl rand -hex 24)"
+          keytool -genkeypair -noprompt \
+            -keystore "$RUNNER_TEMP/throwaway.jks" -storetype JKS \
+            -alias throwaway -keyalg RSA -keysize 2048 -validity 2 \
+            -dname "CN=throwaway" -storepass "$password" -keypass "$password"
+          {
+            echo "KEY_PATH=$RUNNER_TEMP/throwaway.jks"
+            echo "KEY_ALIAS=throwaway"
+            echo "KEY_PASSWORD=$password"
+          } >> "$GITHUB_ENV"
 
-      - name: Create key file
-        working-directory: apps/weblibre
-        run: |
-          echo $KEY_JKS | base64 -di > key.jks
-          chmod 600 key.jks
-
-      - uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2.23.0
         with:
           channel: stable
           flutter-version: 3.47.8
-          cache: true
+          cache: false
 
       - name: Setup Flutter dependencies
         run: |
@@ -168,43 +200,306 @@ jobs:
         if: steps.build-type.outputs.is_prerelease == 'false'
         run: melos run build-browser-impeller --no-select
 
-      - name: Build App Bundle
+      - name: Build App Bundle (Play)
+        if: steps.build-type.outputs.is_prerelease == 'false'
+        run: melos run build-bundle-play --no-select
+
+      # Built as a check only (9.3): F-Droid builds and signs its own.
+      - name: Build F-Droid variant (check, not published)
         if: steps.build-type.outputs.is_prerelease == 'false'
         working-directory: apps/weblibre
-        run: flutter build appbundle --flavor stable --target-platform android-arm,android-arm64,android-x64 --no-tree-shake-icons
+        run: flutter build apk --release --flavor fdroidStable --target-platform android-arm64 --split-per-abi --no-tree-shake-icons
 
-      - name: Create github artifact release (Prerelease)
-        if: steps.build-type.outputs.is_prerelease == 'true'
-        uses: ncipollo/release-action@v1.17.0
-        with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/alpha/release/*.apk,apps/weblibre/build/app/outputs/apk/alphaImpeller/release/*.apk"
-          prerelease: true
-
-      - name: Create github artifact release (Full)
+      - name: Check F-Droid variant isolation
         if: steps.build-type.outputs.is_prerelease == 'false'
-        uses: ncipollo/release-action@v1.17.0
-        with:
-          artifacts: "apps/weblibre/build/app/outputs/apk/stable/release/*.apk,apps/weblibre/build/app/outputs/apk/stableImpeller/release/*.apk,apps/weblibre/build/app/outputs/bundle/stableRelease/app-stable-release.aab"
+        run: |
+          set -euo pipefail
+          apk="$(ls apps/weblibre/build/app/outputs/apk/fdroidStable/release/*.apk | head -1)"
+          dex="$RUNNER_TEMP/fdroid-dex"
+          mkdir -p "$dex" && unzip -q -o "$apk" 'classes*.dex' -d "$dex"
+          forbidden=(
+            'com.google.android.play.core.appupdate.'
+            'com.android.apksig.'
+            'eu.weblibre.gecko.update.SessionInstaller'
+            'eu.weblibre.gecko.update.ApkInspector'
+            'eu.weblibre.gecko.update.PlayUpdateClient'
+          )
+          bash scripts/release/check_variant_isolation.sh fdroidStable "${forbidden[@]}"
+          for name in "${forbidden[@]}"; do
+            # And unminified, in case R8 was off for this build. grep reads
+            # the files itself: piped from cat, its early exit on a match
+            # SIGPIPEs cat, pipefail fails the pipeline, and the `if` would
+            # read a found class as absent.
+            descriptor="L${name//.//}"
+            if grep -a -q -F -e "$descriptor" "$dex"/classes*.dex; then
+              echo "fdroidStable contains $name" >&2
+              exit 1
+            fi
+          done
+          # Manifest-declared, so never renamed or removed by R8. Not
+          # REQUEST_INSTALL_PACKAGES: AC's feature-downloads declares it in
+          # every variant. The updater's own permission is the one Play's
+          # check (verify_artifacts.py) looks for too.
+          aapt2="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/aapt2"
+          manifest="$("$aapt2" dump xmltree "$apk" --file AndroidManifest.xml)"
+          if grep -q -F -e 'android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION' -e 'eu.weblibre.gecko.update.InstallStatusReceiver' <<<"$manifest"; then
+            echo "fdroidStable declares the updater's permission or receiver" >&2
+            exit 1
+          fi
 
-      - name: Upload app bundle artifact
-        if: steps.build-type.outputs.is_prerelease == 'false'
-        uses: actions/upload-artifact@v4
+      # The same check for what is published (9.3). R8 renames what it keeps,
+      # so `verify` can't see this in the signed dex.
+      - name: Check GitHub and Play variant isolation
+        env:
+          IS_PRERELEASE: ${{ steps.build-type.outputs.is_prerelease }}
+        run: |
+          set -euo pipefail
+          check() { bash scripts/release/check_variant_isolation.sh "$@"; }
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            github=(githubAlpha githubAlphaImpeller)
+          else
+            github=(githubStable githubStableImpeller)
+          fi
+          for variant in "${github[@]}"; do
+            check "$variant" \
+              'com.google.android.play.core.appupdate.' \
+              'eu.weblibre.gecko.update.PlayUpdateClient'
+          done
+          if [[ "$IS_PRERELEASE" == "false" ]]; then
+            check playStable \
+              'com.android.apksig.' \
+              'eu.weblibre.gecko.update.SessionInstaller' \
+              'eu.weblibre.gecko.update.ApkInspector'
+          fi
+
+      # Published names stay what Obtainium users filter on (F4): the
+      # distribution dimension adds `github-` to Gradle's names.
+      - name: Collect artifacts under their published names
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/dist"
+          mkdir -p "$out/apks" "$out/bundle"
+          shopt -s nullglob
+          for dir in apps/weblibre/build/app/outputs/apk/github*/release; do
+            for apk in "$dir"/app-github-*-release.apk; do
+              name="$(basename "$apk")"
+              cp "$apk" "$out/apks/app-${name#app-github-}"
+            done
+          done
+          for aab in apps/weblibre/build/app/outputs/bundle/playStableRelease/*.aab; do
+            cp "$aab" "$out/bundle/app-stable-release.aab"
+          done
+          ls -l "$out"/apks "$out"/bundle
+
+      - name: Remove throwaway key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/throwaway.jks"
+
+      - uses: actions/upload-artifact@v7.0.2
         with:
-          name: appbundle
-          path: apps/weblibre/build/app/outputs/bundle/stableRelease/app-stable-release.aab
+          name: unsigned
+          path: ${{ runner.temp }}/dist
+          retention-days: 1
+          if-no-files-found: error
+
+  sign:
+    name: Re-sign (production key)
+    needs: build
+    runs-on: ubuntu-24.04
+    environment: release-signing
+    permissions: {} # artifacts only; no repository access
+    steps:
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: unsigned
+          path: dist
+
+      # Only the preinstalled SDK and JDK from here on: no repository code and
+      # no third-party action runs while the production key exists.
+      - name: Re-sign with the production key
+        env:
+          KEY_JKS: ${{ secrets.KEY_JKS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          keystore="$RUNNER_TEMP/release.jks"
+          trap 'shred -u "$keystore" 2>/dev/null || rm -f "$keystore"' EXIT
+          umask 077
+          printf '%s' "$KEY_JKS" | base64 -di > "$keystore"
+          build_tools="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+
+          # Alphas have no bundle: an unmatched glob must expand to nothing,
+          # not reach jarsigner as a literal path.
+          shopt -s nullglob
+          apks=(dist/apks/*.apk)
+          if (( ${#apks[@]} == 0 )); then
+            echo "No APKs to sign" >&2
+            exit 1
+          fi
+
+          for apk in "${apks[@]}"; do
+            # Removes the throwaway signatures and keeps alignment.
+            "$build_tools/apksigner" sign \
+              --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
+              --ks-pass env:KEY_PASSWORD --key-pass env:KEY_PASSWORD \
+              "$apk"
+            "$build_tools/apksigner" verify --print-certs "$apk"
+          done
+
+          for aab in dist/bundle/*.aab; do
+            zip -q -d "$aab" 'META-INF/*' || true
+            jarsigner -keystore "$keystore" \
+              -storepass:env KEY_PASSWORD -keypass:env KEY_PASSWORD \
+              -sigalg SHA256withRSA -digestalg SHA-256 \
+              "$aab" "$KEY_ALIAS"
+            jarsigner -verify "$aab"
+          done
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: signed
+          path: dist
+          retention-days: 7
+          if-no-files-found: error
+
+  verify:
+    name: Verify and describe
+    needs: [build, sign]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read # checkout only
+    env:
+      TAG: ${{ github.ref_name }}
+      IS_PRERELEASE: ${{ needs.build.outputs.is_prerelease }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6.2.0
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: signed
+          path: dist
+
+      - name: Fetch bundletool
+        if: needs.build.outputs.is_prerelease == 'false'
+        run: |
+          set -euo pipefail
+          curl -sSfL -o "$RUNNER_TEMP/bundletool.jar" \
+            https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+          echo "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29  $RUNNER_TEMP/bundletool.jar" | sha256sum -c -
+
+      - name: Verify artifacts and write release.json
+        run: |
+          set -euo pipefail
+          build_tools="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          bundle_args=()
+          if [[ "$IS_PRERELEASE" == "false" ]]; then
+            bundle_args=(--bundle dist/bundle/app-stable-release.aab --bundletool "$RUNNER_TEMP/bundletool.jar")
+          fi
+          python3 scripts/release/verify_artifacts.py \
+            --tag "$TAG" \
+            --prerelease "$IS_PRERELEASE" \
+            --apk-dir dist/apks \
+            "${bundle_args[@]}" \
+            --build-tools "$build_tools" \
+            --notes-dir "release/notes/$TAG" \
+            --out dist/release.json
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: verified
+          path: dist
+          retention-days: 7
+          if-no-files-found: error
+
+  publish-github:
+    name: Publish GitHub release
+    needs: [build, verify]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write # create, upload to and publish the release
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: verified
+          path: dist
+
+      # Draft, upload, compare what GitHub serves with what was verified, and
+      # only then publish. The updates repository finds the release itself.
+      - name: Create, check and publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          IS_PRERELEASE: ${{ needs.build.outputs.is_prerelease }}
+        run: |
+          set -euo pipefail
+          notes="release/notes/$TAG/full.md"
+          args=(--draft --title "$TAG" --verify-tag)
+          if [[ -f "$notes" ]]; then args+=(--notes-file "$notes"); else args+=(--notes ""); fi
+          if [[ "$IS_PRERELEASE" == "true" ]]; then args+=(--prerelease); fi
+
+          shopt -s nullglob
+          files=(dist/apks/*.apk dist/bundle/*.aab dist/release.json)
+          gh release create "$TAG" "${args[@]}" "${files[@]}"
+
+          check="$RUNNER_TEMP/check"
+          mkdir -p "$check"
+          gh release download "$TAG" --dir "$check"
+          for file in "${files[@]}"; do
+            name="$(basename "$file")"
+            test "$(sha256sum < "$file")" = "$(sha256sum < "$check/$name")" \
+              || { echo "$name differs after upload" >&2; exit 1; }
+          done
+
+          gh release edit "$TAG" --draft=false
+
+  publish-play:
+    name: Publish to Google Play
+    needs: [build, verify]
+    if: needs.build.outputs.is_prerelease == 'false'
+    runs-on: ubuntu-24.04
+    environment: play
+    permissions: {} # checkout of a public repository needs no token
+    env:
+      # The Gemfile is at the repository root, fastlane runs from
+      # apps/weblibre. Deployment mode installs exactly Gemfile.lock,
+      # checksums included, and fails instead of re-resolving.
+      BUNDLE_GEMFILE: ${{ github.workspace }}/Gemfile
+      BUNDLE_DEPLOYMENT: 'true'
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ruby/setup-ruby@v1.338.0
+        with:
+          ruby-version: '3.3'
+
+      - name: Install fastlane from Gemfile.lock
+        run: bundle install
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: verified
+          path: dist
 
       - name: Release to Google Play (internal)
-        if: steps.build-type.outputs.is_prerelease == 'false'
         working-directory: apps/weblibre
         env:
           SUPPLY_PACKAGE_NAME: ${{ secrets.ANDROID_PACKAGE_NAME }}
           SUPPLY_JSON_KEY_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
         run: |
           bundle exec fastlane supply \
-          --aab build/app/outputs/bundle/stableRelease/app-stable-release.aab \
+          --aab ../../dist/bundle/app-stable-release.aab \
           --track internal
-
-      - name: Cleanup
-        if: always()
-        working-directory: apps/weblibre
-        run: rm -f key.jks

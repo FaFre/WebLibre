@@ -25,6 +25,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:weblibre/core/database_registry.dart';
 import 'package:weblibre/core/logger.dart';
+import 'package:weblibre/core/providers/pending_writes.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/repositories/pending_quit_deletion.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
@@ -124,6 +125,10 @@ Future<void> exitApp(
   } catch (e, st) {
     logger.e('Failed to shut down GeckoView', error: e, stackTrace: st);
   }
+
+  // 3b. Debounced writes (tab state, including step 1's) before the
+  //     databases close; disposing the container would drop them.
+  await container.read(pendingWritesProvider).flushAll();
 
   // 4. Close all registered databases
   try {

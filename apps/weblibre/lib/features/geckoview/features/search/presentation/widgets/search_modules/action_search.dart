@@ -24,6 +24,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/domain/entities/profile.dart';
+import 'package:weblibre/features/app_update/domain/providers.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
@@ -143,6 +144,7 @@ class ActionSearch extends HookConsumerWidget {
     final sources = ref.watch(
       actionSearchSourcesProvider(hasQuery: query != null),
     );
+    final hasUpdater = ref.watch(appUpdaterAvailableProvider);
 
     bool isAvailable(BrowserAction action) {
       if (pageTabId == null && BrowserActionDispatcher.requiresTab(action)) {
@@ -171,9 +173,10 @@ class ActionSearch extends HookConsumerWidget {
     ];
 
     // Built once per language: the index spans every settings screen.
-    final settingsTargets = useMemoized(() => settingsSearchTargets(context), [
-      Localizations.localeOf(context),
-    ]);
+    final settingsTargets = useMemoized(
+      () => settingsSearchTargets(context, hasUpdater: hasUpdater),
+      [Localizations.localeOf(context), hasUpdater],
+    );
 
     final List<ActionSearchItem> items;
     if (query == null) {

@@ -89,15 +89,13 @@ SingboxProxyDnsConfig? buildDnsConfig({
         continue;
       }
 
-      final outboundTag = _outboundTagForProfile(profileId);
-      final inboundTag = _inboundTagForProfile(profileId);
-
+      final runtimeId = _runtimeProfileId(profileId);
       servers.add(
         SingboxProxyDnsServerConfig(
-          tag: 'browser-doh-${singboxSanitizeTag(profileId)}',
+          tag: 'browser-doh-${_sanitizeTag(profileId)}',
           address: browserDohUrl,
-          detourTag: outboundTag,
-          matchInbounds: [inboundTag],
+          detourProfileId: runtimeId,
+          matchInboundProfileIds: [runtimeId],
         ),
       );
     }
@@ -108,20 +106,18 @@ SingboxProxyDnsConfig? buildDnsConfig({
       return;
     }
 
-    final outboundTag = _outboundTagForProfile(profileId);
-    final inboundTag = _inboundTagForProfile(profileId);
-
     final address = override.remoteServerAddress;
     if (address == null || address.isEmpty) {
       return;
     }
 
+    final runtimeId = _runtimeProfileId(profileId);
     servers.add(
       SingboxProxyDnsServerConfig(
-        tag: 'override-${singboxSanitizeTag(profileId)}',
+        tag: 'override-${_sanitizeTag(profileId)}',
         address: address,
-        detourTag: outboundTag,
-        matchInbounds: [inboundTag],
+        detourProfileId: runtimeId,
+        matchInboundProfileIds: [runtimeId],
       ),
     );
   });
@@ -143,31 +139,12 @@ ProxyDnsDomainStrategy _domainStrategy(
   return ProxyDnsDomainStrategy.preferIpv4;
 }
 
-/// Must mirror Kotlin `SingboxTagFormat.outboundTag(profileId)`.
-///
-/// The Kotlin builder receives the *runtime* profile id (which Dart prefixes
-/// with `singbox:` via [SingboxProxyConnectionId] in
-/// `ProxyProfileX.toRuntimeProfile`), then sanitises it. We must therefore
-/// apply the same prefix here so the detour tag we emit references the same
-/// outbound the builder actually created.
-///
-/// The mirrored Kotlin test lives in `SingboxTagFormatTest.kt` — both must
-/// update together if this format ever changes.
-String _outboundTagForProfile(String profileId) {
-  return singboxOutboundTag(SingboxProxyConnectionId(profileId).encode());
-}
+/// The id the runtime knows the profile by (`ProxyProfileX.toRuntimeProfile`
+/// prefixes it). Native derives the profile's inbound and outbound tags from
+/// it (`SingboxTagFormat`), so the tag format exists on one side only.
+String _runtimeProfileId(String profileId) =>
+    SingboxProxyConnectionId(profileId).encode();
 
-/// Must mirror Kotlin `SingboxTagFormat.inboundTag(profileId)`.
-String _inboundTagForProfile(String profileId) {
-  return singboxInboundTag(SingboxProxyConnectionId(profileId).encode());
-}
-
-/// Public so the format-contract test can assert it directly.
-String singboxOutboundTag(String runtimeProfileId) =>
-    'out-${singboxSanitizeTag(runtimeProfileId)}';
-
-String singboxInboundTag(String runtimeProfileId) =>
-    'in-${singboxSanitizeTag(runtimeProfileId)}';
-
-String singboxSanitizeTag(String value) =>
+/// The DNS servers' own tags are named here; nothing else derives them.
+String _sanitizeTag(String value) =>
     value.replaceAll(RegExp('[^A-Za-z0-9_.-]'), '_');

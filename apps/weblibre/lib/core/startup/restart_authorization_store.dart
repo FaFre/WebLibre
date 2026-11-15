@@ -20,10 +20,13 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/startup/atomic_json_file.dart';
 import 'package:weblibre/core/startup/models/json_read.dart';
 import 'package:weblibre/core/startup/startup_paths.dart';
+
+part 'restart_authorization_store.g.dart';
 
 const restartAuthorizationVersion = 1;
 
@@ -44,6 +47,7 @@ const restartAuthorizationVersion = 1;
 /// **Only the hash of the token is stored**, on the same reasoning as the
 /// account handoff ledger: the token itself lives in the in-flight intent and
 /// nowhere else, so a copy of this file forges nothing.
+@JsonSerializable(checked: true)
 class RestartAuthorization {
   const RestartAuthorization({
     required this.tokenHash,
@@ -53,7 +57,9 @@ class RestartAuthorization {
     this.version = restartAuthorizationVersion,
   });
 
+  @JsonKey(fromJson: _version)
   final int version;
+  @JsonKey(fromJson: requiredString)
   final String tokenHash;
 
   /// The profile the request may name, and only that one.
@@ -61,42 +67,28 @@ class RestartAuthorization {
   /// Bound here rather than trusted from the intent: the id decides what the
   /// next process opens, and an authorization for "some restart" would let a
   /// redirected intent choose the profile.
+  @JsonKey(fromJson: _profileId)
   final String targetProfileId;
 
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime createdAt;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime expiresAt;
 
   bool isExpiredAt(DateTime now) => !now.isBefore(expiresAt);
 
-  Map<String, Object?> toJson() => {
-    'version': version,
-    'tokenHash': tokenHash,
-    'targetProfileId': targetProfileId,
-    'createdAt': createdAt.toUtc().toIso8601String(),
-    'expiresAt': expiresAt.toUtc().toIso8601String(),
-  };
+  Map<String, Object?> toJson() => _$RestartAuthorizationToJson(this);
 
-  static RestartAuthorization? tryFromJson(Map<String, Object?> json) {
-    final tokenHash = json['tokenHash'];
-    if (tokenHash is! String || tokenHash.isEmpty) return null;
+  /// Null unless every field is there: an incomplete record authorizes
+  /// nothing.
+  static RestartAuthorization? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$RestartAuthorizationFromJson);
 
-    final targetProfileId = json['targetProfileId'];
-    if (targetProfileId is! String || targetProfileId.isEmpty) return null;
+  static int _version(Object? value) =>
+      intOr(value, restartAuthorizationVersion);
 
-    final createdAt = dateTimeOrNull(json['createdAt']);
-    final expiresAt = dateTimeOrNull(json['expiresAt']);
-    if (createdAt == null || expiresAt == null) return null;
-
-    final version = json['version'];
-
-    return RestartAuthorization(
-      version: version is int ? version : restartAuthorizationVersion,
-      tokenHash: tokenHash,
-      targetProfileId: targetProfileId.toLowerCase(),
-      createdAt: createdAt,
-      expiresAt: expiresAt,
-    );
-  }
+  static String _profileId(Object? value) =>
+      requiredString(value).toLowerCase();
 }
 
 /// The hash a restart token is stored under. Mirrors Kotlin's

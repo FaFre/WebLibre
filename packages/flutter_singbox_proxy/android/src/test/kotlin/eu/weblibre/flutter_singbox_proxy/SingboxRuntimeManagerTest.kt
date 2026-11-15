@@ -604,18 +604,16 @@ private fun optionsWithResolversFor(vararg profileIds: String) = SingboxProxyRun
                 address = "https://dns.example/dns-query",
                 matchDomainSuffixes = emptyList(),
                 matchGeosites = emptyList(),
-                matchOutbounds = emptyList(),
-                matchInbounds = emptyList(),
+                matchInboundProfileIds = emptyList(),
             ),
         ) + profileIds.map { id ->
             SingboxProxyDnsServerConfig(
                 tag = "browser-doh-$id",
                 address = "https://dns.example/dns-query",
-                detourTag = SingboxTagFormat.outboundTag(id),
+                detourProfileId = id,
                 matchDomainSuffixes = emptyList(),
                 matchGeosites = emptyList(),
-                matchOutbounds = emptyList(),
-                matchInbounds = listOf(SingboxTagFormat.inboundTag(id)),
+                matchInboundProfileIds = listOf(id),
             )
         },
         finalServerTag = "browser-doh",

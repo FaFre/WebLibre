@@ -19,6 +19,7 @@
  */
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:weblibre/core/startup/models/json_read.dart';
 
 part 'restart_request.g.dart';
@@ -41,29 +42,40 @@ enum RestartRequestState {
 /// The old process never writes `current_profile`; it only records the target
 /// here, and the *next* process applies it through `ActiveProfile`.
 @CopyWith()
+@JsonSerializable(checked: true)
 class RestartRequest with FastEquatable {
+  @JsonKey(fromJson: _version)
   final int version;
   @CopyWithField(immutable: true)
+  @JsonKey(fromJson: requiredString)
   final String requestId;
 
   /// The profile the next process should commit, or `null` to re-resolve the
   /// normal candidate (maintenance restarts do not force a profile).
+  @JsonKey(fromJson: stringOrNull)
   final String? targetProfileId;
 
   /// The launch-broker entry the relaunch should replay, if any. Only a token
   /// travels through the `PendingIntent`; the payload stays in the broker.
+  @JsonKey(fromJson: stringOrNull)
   final String? brokerEntryId;
 
+  @JsonKey(fromJson: stringOrEmpty)
   final String reason;
 
   /// Identifies the process that wrote the request, so a `PendingIntent`
   /// delivered back into the still-live old process can be recognised and
   /// rescheduled instead of honoured.
+  @JsonKey(fromJson: requiredString)
   final String processInstanceId;
 
+  @JsonKey(name: 'state', fromJson: _state)
   final String stateId;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime createdAt;
+  @JsonKey(fromJson: requiredDateTime, toJson: utcIso)
   final DateTime expiresAt;
+  @JsonKey(fromJson: dateTimeOrNull, toJson: utcIsoOrNull)
   final DateTime? appliedAt;
 
   RestartRequest({
@@ -91,53 +103,17 @@ class RestartRequest with FastEquatable {
       !isExpiredAt(now) &&
       processInstanceId != currentProcessInstanceId;
 
-  static RestartRequest? tryFromJson(Map<String, Object?> json) {
-    final requestId = json['requestId'];
-    if (requestId is! String || requestId.isEmpty) return null;
+  /// Null when a field the request can't do without is missing; every
+  /// other field degrades (`json_read.dart`).
+  static RestartRequest? tryFromJson(Map<String, Object?> json) =>
+      tryCheckedFromJson(json, _$RestartRequestFromJson);
 
-    final processInstanceId = json['processInstanceId'];
-    if (processInstanceId is! String || processInstanceId.isEmpty) return null;
+  Map<String, Object?> toJson() => _$RestartRequestToJson(this);
 
-    final createdAt = dateTimeOrNull(json['createdAt']);
-    final expiresAt = dateTimeOrNull(json['expiresAt']);
-    if (createdAt == null || expiresAt == null) return null;
+  static int _version(Object? value) => intOr(value, restartRequestVersion);
 
-    final version = json['version'];
-    final targetProfileId = json['targetProfileId'];
-    final brokerEntryId = json['brokerEntryId'];
-    final reason = json['reason'];
-    final stateId = json['state'];
-
-    return RestartRequest(
-      version: version is int ? version : restartRequestVersion,
-      requestId: requestId,
-      targetProfileId: targetProfileId is String && targetProfileId.isNotEmpty
-          ? targetProfileId
-          : null,
-      brokerEntryId: brokerEntryId is String && brokerEntryId.isNotEmpty
-          ? brokerEntryId
-          : null,
-      reason: reason is String ? reason : '',
-      processInstanceId: processInstanceId,
-      stateId: stateId is String ? stateId : RestartRequestState.pending.name,
-      createdAt: createdAt,
-      expiresAt: expiresAt,
-      appliedAt: dateTimeOrNull(json['appliedAt']),
-    );
-  }
-
-  Map<String, Object?> toJson() => {
-    'version': version,
-    'requestId': requestId,
-    'targetProfileId': targetProfileId,
-    'brokerEntryId': brokerEntryId,
-    'reason': reason,
-    'processInstanceId': processInstanceId,
-    'state': stateId,
-    'createdAt': createdAt.toUtc().toIso8601String(),
-    'expiresAt': expiresAt.toUtc().toIso8601String(),
-    'appliedAt': appliedAt?.toUtc().toIso8601String(),
-  };
+  static String _state(Object? value) =>
+      value is String ? value : RestartRequestState.pending.name;
 
   @override
   List<Object?> get hashParameters => [
