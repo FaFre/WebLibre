@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "WebLibre",
+            "name": "WebLibre (Account Prod)",
             "cwd": "apps/weblibre",
             "request": "launch",
             "type": "dart",
@@ -15,10 +15,35 @@
                 "--flavor",
                 "githubAlpha",
                 "--dart-define",
-                "ACCOUNT_BACKEND_ORIGIN=https://account.weblibre.eu/",
+                "SUPABASE_URL=https://erddtdugipagetkjojjr.supabase.co",
+                "--dart-define",
+                "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVyZGR0ZHVnaXBhZ2V0a2pvampyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzOTMxMzEsImV4cCI6MjA5Njk2OTEzMX0.GGrXn_rbd5TPPYRyPd_GvkZuuCRObIOhz4M87kuIsL0",
                 "--dart-define",
                 "SEARCH_BACKEND_ORIGIN=https://search.weblibre.eu/",
+                "--dart-define",
                 "SEARCH_BACKEND_ORIGIN_TOR=http://cfaidty24sakqjqlpqncl2nhq2c6kpdyhseg5vg76yz44hbpzqugk2id.onion",
+            ]
+        },
+        {
+            "name": "WebLibre (Account Test)",
+            "cwd": "apps/weblibre",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--device-user",
+                "0",
+                "--flavor",
+                "githubAlpha",
+                "--dart-define",
+                "SUPABASE_URL=https://wqpnmlqacxijdmbvcxun.supabase.co",
+                "--dart-define",
+                "SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxcG5tbHFhY3hpamRtYnZjeHVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NjQ1MjUsImV4cCI6MjA5MTA0MDUyNX0.5iifJWjp6bYZhfko-oGPPMuwMLAiFdfUXHQqk8W3wxA",
+                "--dart-define",
+                "ACCOUNT_BACKEND_ORIGIN=https://account-test.weblibre.eu/",
+                "--dart-define",
+                "SEARCH_BACKEND_ORIGIN=https://search-test.weblibre.eu/",
+                "--dart-define",
+                "SEARCH_BACKEND_ORIGIN_TOR=http://eyipgwt32zaejr2xwblaswp2ur4qikapofunbqus5dklvf7jxkncirad.onion",
             ]
         },
         {
