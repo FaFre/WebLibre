@@ -1,0 +1,10 @@
+{
+    "profileCopy_pickerContents": "vahekaardid, ajalugu ja seadistused",
+    "@profileCopy_pickerContents": {
+        "description": "List fragment inserted into another sentence on the startup profile picker (\"each profile keeps its own …\"). Names what a browser profile holds. Lowercase, no final period."
+    },
+    "profileCopy_dataDescription": "vahekaardid, ajalugu, järjehoidjad, seadistused ja saitidesse sisselogimise andmed",
+    "@profileCopy_dataDescription": {
+        "description": "List fragment inserted into sentences about deleting, restoring or replacing a browser profile. Names everything the profile holds that would be lost. Lowercase, no final period."
+    }
+}

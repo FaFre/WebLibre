@@ -1,0 +1,22 @@
+{
+    "findInPage_hint": "Otsi lehelt",
+    "@findInPage_hint": {
+        "description": "Placeholder text in the search field of the find-in-page bar, which searches for text on the current web page."
+    },
+    "findInPage_matchPosition": "{current} / {total}",
+    "@findInPage_matchPosition": {
+        "description": "Match counter in the find-in-page bar. current is the position of the highlighted match, total is the number of matches on the page (e.g. \"3 of 12\").",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "findInPage_noMatches": "Otsitavat ei leidu",
+    "@findInPage_noMatches": {
+        "description": "Shown in the find-in-page bar in place of the match counter when the search text does not appear on the page."
+    }
+}
