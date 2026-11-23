@@ -27,3 +27,5 @@ native/go_mobile_runtime/build/
 # Python bytecode
 __pycache__/
 *.pyc
+
+TODO.md
