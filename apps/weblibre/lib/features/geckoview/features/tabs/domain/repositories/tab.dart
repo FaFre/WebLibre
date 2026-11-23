@@ -19,9 +19,12 @@
  */
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_close_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/unlock_incomplete_tabs.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
@@ -30,14 +33,24 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summary.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'tab.g.dart';
 
 @Riverpod(keepAlive: true)
 class TabDataRepository extends _$TabDataRepository {
-  Future<void> assignContainer(
+  /// Moves [tabId] into [targetContainer].
+  ///
+  /// A move between containers with different cookie storage recreates the
+  /// tab, and a locked tab refuses that: it does not close
+  /// ([ContainerMoveResult.lockedNeedsSameContext]), nor does one whose lock
+  /// could not be read ([ContainerMoveResult.locksUnavailable]). Moves that
+  /// keep the storage only update the database and stay allowed. Nothing moves into or
+  /// out of a container being deleted.
+  Future<ContainerMoveResult> assignContainer(
     String tabId,
     ContainerData targetContainer, {
     bool closeOldTab = true,
@@ -49,6 +62,24 @@ class TabDataRepository extends _$TabDataRepository {
     // commits. Left null for manual moves (drag/drop, menu), which keep the
     // tab on its current page.
     Uri? replacementUrl,
+  }) => _whileMoving(
+    tabId,
+    targetContainer.id,
+    (currentContainerData) => _assignContainer(
+      tabId,
+      targetContainer,
+      currentContainerData,
+      closeOldTab: closeOldTab,
+      replacementUrl: replacementUrl,
+    ),
+  );
+
+  Future<ContainerMoveResult> _assignContainer(
+    String tabId,
+    ContainerData targetContainer,
+    ContainerData? currentContainerData, {
+    required bool closeOldTab,
+    required Uri? replacementUrl,
   }) async {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
@@ -59,17 +90,15 @@ class TabDataRepository extends _$TabDataRepository {
           .read(tabDatabaseProvider)
           .tabDao
           .assignContainer(tabId, containerId: targetContainer.id);
-      return;
+      return ContainerMoveResult.moved;
     }
-
-    final currentContainerData = await getTabContainerData(tabId);
 
     // The tab is already in the target container, so there is nothing to
     // reconcile. This guards against churn when an async assignment races a
     // move that already landed the tab in [targetContainer] (recreating it
     // here would spawn a redundant tab and re-trigger its load).
     if (currentContainerData?.id == targetContainer.id) {
-      return;
+      return ContainerMoveResult.moved;
     }
 
     final sameContext =
@@ -120,24 +149,29 @@ class TabDataRepository extends _$TabDataRepository {
             );
 
         if (closeOldTab) {
-          // A replacement, which takes the old tab's slot in a split pair.
-          await ref
-              .read(splitViewControllerProvider.notifier)
-              .carryOver(
-                tabId,
-                () => ref
-                    .read(tabRepositoryProvider.notifier)
-                    .replaceTabClosingFirst(tabId, openInTarget),
-              );
+          final replaced = await _replaceInPlace(tabId, openInTarget);
+          if (replaced != ContainerMoveResult.moved) return replaced;
         } else {
           // Another tab next to the original; a pair keeps the original.
           await openInTarget();
         }
       }
     }
+    return ContainerMoveResult.moved;
   }
 
-  Future<void> unassignContainer(String tabId) async {
+  /// Takes [tabId] out of its container; see [assignContainer] for what a
+  /// locked tab refuses.
+  Future<ContainerMoveResult> unassignContainer(String tabId) => _whileMoving(
+    tabId,
+    null,
+    (currentContainerData) => _unassignContainer(tabId, currentContainerData),
+  );
+
+  Future<ContainerMoveResult> _unassignContainer(
+    String tabId,
+    ContainerData? currentContainerData,
+  ) async {
     final selectedTabId = ref.read(selectedTabProvider);
     final tabState = ref.read(tabStatesProvider)[tabId];
 
@@ -147,13 +181,11 @@ class TabDataRepository extends _$TabDataRepository {
           .read(tabDatabaseProvider)
           .tabDao
           .assignContainer(tabId, containerId: null);
-      return;
+      return ContainerMoveResult.moved;
     }
 
-    final currentContainerData = await getTabContainerData(tabId);
-
     if (currentContainerData?.metadata.contextualIdentity == null) {
-      return await ref
+      await ref
           .read(tabDatabaseProvider)
           .tabDao
           .assignContainer(tabId, containerId: null);
@@ -163,24 +195,85 @@ class TabDataRepository extends _$TabDataRepository {
         // its place in the hierarchy — read before the row disappears.
         final parentId = (await getTabDataById(tabId))?.parentId;
 
-        // A replacement, which takes the old tab's slot in a split pair.
-        await ref.read(splitViewControllerProvider.notifier).carryOver(
+        final replaced = await _replaceInPlace(
           tabId,
-          () {
-            final tabRepository = ref.read(tabRepositoryProvider.notifier);
-            return tabRepository.replaceTabClosingFirst(
-              tabId,
-              () => tabRepository.addTab(
+          () => ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(
                 url: tabState.url,
                 tabMode: tabState.tabMode,
                 containerSelection: const TabContainerSelection.unassigned(),
                 parentId: parentId,
                 selectTab: selectedTabId == tabState.id,
               ),
-            );
-          },
         );
+        if (replaced != ContainerMoveResult.moved) return replaced;
       }
+    }
+    return ContainerMoveResult.moved;
+  }
+
+  /// Closes [tabId] and opens [openReplacement] in its place, which takes its
+  /// slot in a split pair too, unless the close kept the original, which
+  /// then keeps the slot: [ContainerMoveResult.lockedNeedsSameContext] for a
+  /// locked tab, [ContainerMoveResult.locksUnavailable] when the locks could
+  /// not be read.
+  Future<ContainerMoveResult> _replaceInPlace(
+    String tabId,
+    Future<String> Function() openReplacement,
+  ) async {
+    ReplacementResult? replacement;
+    await ref.read(splitViewControllerProvider.notifier).carryOver(
+      tabId,
+      () async {
+        replacement = await ref
+            .read(tabRepositoryProvider.notifier)
+            .replaceTabClosingFirst(tabId, openReplacement);
+        return replacement?.replacementTabId;
+      },
+    );
+    return switch (replacement) {
+      TabReplaced() => ContainerMoveResult.moved,
+      OriginalKept(locksUnavailable: true) =>
+        ContainerMoveResult.locksUnavailable,
+      _ => ContainerMoveResult.lockedNeedsSameContext,
+    };
+  }
+
+  /// Runs [move] of [tabId] into [targetId] holding change reservations on
+  /// the containers it leaves and joins: a deletion of either neither starts
+  /// meanwhile nor lets the move start, and neither may be frozen or being
+  /// frozen or resumed (D19, [ContainerMembershipGate]). A move that reopens
+  /// the tab does so inside them.
+  ///
+  /// [move] gets the container the tab is in, read under the reservations.
+  /// The one reserved had to be read before them: if the tab left it
+  /// meanwhile, the reservations are taken again for where it is now.
+  Future<ContainerMoveResult> _whileMoving(
+    String tabId,
+    String? targetId,
+    Future<ContainerMoveResult> Function(ContainerData? current) move,
+  ) async {
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+    var source = await getTabContainerData(tabId);
+    try {
+      while (true) {
+        final reserved = source;
+        final result = await gate.whileChanging(
+          [reserved?.id, targetId],
+          () async {
+            source = await getTabContainerData(tabId);
+            if (source?.id != reserved?.id) return null;
+            return await move(source);
+          },
+          kind: ContainerChange.membership,
+        );
+        if (result != null) return result;
+      }
+    } on ContainerBeingDeletedException {
+      return ContainerMoveResult.containerBeingDeleted;
+    } on ContainerFrozenException {
+      return ContainerMoveResult.containerFrozen;
     }
   }
 
@@ -189,6 +282,15 @@ class TabDataRepository extends _$TabDataRepository {
         .read(tabDatabaseProvider)
         .tabDao
         .setPinned(tabId, pinned: pinned);
+  }
+
+  /// "Keep awake" (D30): automatic sleep never unloads [tabId] while set.
+  /// Manual sleep still does.
+  Future<void> setSleepExempt(String tabId, {required bool exempt}) {
+    return ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .setSleepExempt(tabId, exempt: exempt);
   }
 
   Future<void> reorderTabs({
@@ -265,7 +367,8 @@ class TabDataRepository extends _$TabDataRepository {
     return tabIds.length;
   }
 
-  Future<int> closeAllTabs({
+  /// Closes every tab of the kinds asked for, keeping locked tabs.
+  Future<CloseResult> closeAllTabs({
     bool includeRegular = true,
     bool includePrivate = true,
     bool includeIsolated = true,
@@ -280,11 +383,33 @@ class TabDataRepository extends _$TabDataRepository {
         )
         .get();
 
-    if (tabIds.isNotEmpty) {
-      await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
-    }
+    return await _closeTabs(tabIds);
+  }
 
-    return tabIds.length;
+  Future<CloseResult> _closeTabs(
+    List<String> tabIds, {
+    bool keepOffRecentlyClosed = false,
+  }) async {
+    if (tabIds.isEmpty) return CloseResult.none;
+    return await ref
+        .read(tabRepositoryProvider.notifier)
+        .closeTabs(tabIds, keepOffRecentlyClosed: keepOffRecentlyClosed);
+  }
+
+  /// The container's tabs that count as locked (in the database, or after an
+  /// unlock that did not finish), for refusing its deletion up front. The
+  /// deletion checks again, natively too.
+  Future<List<String>> lockedTabIdsInContainer(String containerId) async {
+    final members = await getContainerTabIds(containerId);
+    final dbLocked = await ref
+        .read(tabDatabaseProvider)
+        .tabDao
+        .lockedTabIdsAmong(members);
+    final unlockIncomplete = ref.read(unlockIncompleteTabsProvider).value;
+    return [
+      for (final id in members)
+        if (dbLocked.contains(id) || unlockIncomplete.contains(id)) id,
+    ];
   }
 
   /// The tabs [closeContainerTabs] would close, for confirming before it does.
@@ -306,8 +431,9 @@ class TabDataRepository extends _$TabDataRepository {
         .get();
   }
 
+  /// Closes the container's tabs, keeping locked ones.
   /// [keepOffRecentlyClosed] as for [TabRepository.closeTab].
-  Future<List<String>> closeContainerTabs(
+  Future<CloseResult> closeContainerTabs(
     String? containerId, {
     bool includeRegular = true,
     bool includePrivate = true,
@@ -321,16 +447,17 @@ class TabDataRepository extends _$TabDataRepository {
       includeIsolated: includeIsolated,
     );
 
-    if (tabIds.isNotEmpty) {
-      await ref
-          .read(tabRepositoryProvider.notifier)
-          .closeTabs(tabIds, keepOffRecentlyClosed: keepOffRecentlyClosed);
-    }
-
-    return tabIds;
+    return await _closeTabs(
+      tabIds,
+      keepOffRecentlyClosed: keepOffRecentlyClosed,
+    );
   }
 
-  Future<int> closeAllTabsByHost(String? containerId, String host) async {
+  /// Closes the container's tabs on [host], keeping locked ones.
+  Future<CloseResult> closeAllTabsByHost(
+    String? containerId,
+    String host,
+  ) async {
     final tabs = await getContainerTabsData(containerId);
 
     final filtered = tabs
@@ -338,11 +465,7 @@ class TabDataRepository extends _$TabDataRepository {
         .map((tab) => tab.id)
         .toList();
 
-    if (filtered.isNotEmpty) {
-      await ref.read(tabRepositoryProvider.notifier).closeTabs(filtered);
-    }
-
-    return filtered.length;
+    return await _closeTabs(filtered);
   }
 
   Future<TabData?> getTabDataById(String tabId) {
@@ -482,17 +605,15 @@ class TabDataRepository extends _$TabDataRepository {
     }).toList();
   }
 
-  Future<int> deleteUnassignedTabsOlderThan(DateTime threshold) async {
+  /// The automatic cleanup of unassigned tabs; locked tabs are kept (the
+  /// query leaves them out, and the close would keep them anyway).
+  Future<CloseResult> deleteUnassignedTabsOlderThan(DateTime threshold) async {
     final tabIds = await ref
         .read(tabDatabaseProvider)
         .tabDao
         .getUnassignedRegularTabsOlderThan(threshold);
 
-    if (tabIds.isNotEmpty) {
-      await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
-    }
-
-    return tabIds.length;
+    return await _closeTabs(tabIds);
   }
 
   @override

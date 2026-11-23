@@ -30,13 +30,31 @@ part 'desktop_mode.g.dart';
 
 @Riverpod(keepAlive: true)
 class DesktopMode extends _$DesktopMode {
-  // ignore: use_setters_to_change_properties
-  void enabled(bool value) {
-    state = value;
+  /// The user's own choice (the Desktop Site menu item or quick toggle, its
+  /// browser action, a site rule added in the site sheet): applied as a
+  /// reload they asked for, which wakes a sleeping tab or asks to resume a
+  /// frozen container first ([TabSession.requestDesktopSiteExplicitly]). The
+  /// state follows only once it reached the page, so it never shows a mode
+  /// the engine was not given.
+  Future<void> enabled(bool value) async {
+    final applied = await ref
+        .read(tabSessionProvider(tabId: tabId).notifier)
+        .requestDesktopSiteExplicitly(value);
+    if (applied && ref.mounted) state = value;
   }
 
-  void toggle() {
-    state = !state;
+  /// [enabled] with the other mode.
+  Future<void> toggle() => enabled(!state);
+
+  /// The per-site rule's mode, applied on its own: never wakes a sleeping
+  /// tab, whose engine drops the reload.
+  void _applyRule(bool value) {
+    state = value;
+    unawaited(
+      ref
+          .read(tabSessionProvider(tabId: tabId).notifier)
+          .requestDesktopSite(value),
+    );
   }
 
   /// Resolves the desktop-mode state a tab on [host] should have, honouring the
@@ -51,14 +69,6 @@ class DesktopMode extends _$DesktopMode {
 
   @override
   bool build(String tabId) {
-    listenSelf((previous, next) async {
-      if (previous != null) {
-        await ref
-            .read(tabSessionProvider(tabId: tabId).notifier)
-            .requestDesktopSite(next);
-      }
-    });
-
     // Re-apply the per-site rule whenever the tab's host changes. A manual
     // toggle from the menu therefore lasts only for the current host-visit:
     // landing on a ruled host forces desktop on again, and leaving it reverts
@@ -82,16 +92,14 @@ class DesktopMode extends _$DesktopMode {
       if (nextHost == null || nextHost.isEmpty) return;
       if (previous?.url.host != nextHost) {
         final resolved = _resolveForHost(next?.url);
-        // Guard the assignment: `listenSelf` (below) fires on every `state =`
-        // regardless of equality — Riverpod's equality-based skip only covers
-        // the regular watch/listen dependents, not listenSelf. Without this,
-        // every cross-host navigation reapplies the *same* desktop-mode value
-        // and still pays `requestDesktopSite`'s unconditional reload, which is
-        // exactly what was turning ordinary back/forward navigation between
-        // two unruled hosts into a full page reload instead of an (often
+        // Only a change is applied. Every cross-host navigation that
+        // reapplied the *same* desktop-mode value would still pay
+        // `requestDesktopSite`'s unconditional reload, which is exactly what
+        // was turning ordinary back/forward navigation between two unruled
+        // hosts into a full page reload instead of an (often
         // bfcache-eligible) restore.
         if (resolved != state) {
-          state = resolved;
+          _applyRule(resolved);
         }
       }
     });
@@ -107,8 +115,8 @@ class DesktopMode extends _$DesktopMode {
     // The engine seeds a tab's desktop mode from the browser-wide default at
     // creation, and a global-default change re-applies to every tab, so at the
     // moment this notifier (re)builds the engine holds [globalDesktopMode]. When
-    // a per-site rule resolves to a different value, push it now: the listenSelf
-    // guard above skips the initial seed, so without this the rule would never
+    // a per-site rule resolves to a different value, push it now: returning
+    // the seed applies nothing, so without this the rule would never
     // reach Gecko unless the host later changed while this notifier was alive
     // (which only happens when a menu/sheet kept it mounted across a navigation).
     final globalDesktopMode = ref

@@ -41,6 +41,20 @@ extension BrowserActionFeedbackL10n on BrowserActionFeedback {
       BrowserActionFeedback.tabPinned => l10n.browserActions_tabPinnedMessage,
       BrowserActionFeedback.tabUnpinned =>
         l10n.browserActions_tabUnpinnedMessage,
+      BrowserActionFeedback.tabLocked => l10n.browserActions_tabLockedMessage,
+      BrowserActionFeedback.tabUnlocked =>
+        l10n.browserActions_tabUnlockedMessage,
+      BrowserActionFeedback.tabLockFailed => l10n.browser_tabLockFailed,
+      BrowserActionFeedback.tabLockPrivate => l10n.browser_tabLockPrivate,
+      BrowserActionFeedback.tabUnlockFailed => l10n.browser_tabUnlockFailed,
+      BrowserActionFeedback.tabUnlockIncomplete =>
+        l10n.browser_tabUnlockIncompleteMessage,
+      BrowserActionFeedback.lockedTabCannotMove =>
+        l10n.browser_lockedTabCannotMove,
+      BrowserActionFeedback.tabMoveFailed => l10n.browser_tabMoveFailed,
+      BrowserActionFeedback.containerBeingDeleted =>
+        l10n.browser_containerBeingDeleted,
+      BrowserActionFeedback.containerFrozen => l10n.browser_containerFrozen,
       BrowserActionFeedback.homeScreenUnavailable =>
         l10n.browserActions_homeScreenUnavailableMessage,
       BrowserActionFeedback.readerViewUnavailable =>
@@ -52,10 +66,14 @@ extension BrowserActionFeedbackL10n on BrowserActionFeedback {
   }
 }
 
-/// Shows [feedback] as a snackbar.
+/// Shows [feedback] as a snackbar, as an error when the action failed.
 void showBrowserActionFeedback(
   BuildContext context,
   BrowserActionFeedback feedback,
 ) {
-  ui_helper.showInfoMessage(context, feedback.message(context));
+  ui_helper.showOutcomeMessage(
+    context,
+    feedback.message(context),
+    failed: feedback.failed,
+  );
 }

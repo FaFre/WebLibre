@@ -528,7 +528,7 @@
   "settings_autoClearHistorySubtitle": "Eliminar automáticamente el historial de navegación anterior al periodo seleccionado",
   "settings_autoClearUnassignedTabsTitle": "Cerrar automáticamente las pestañas sin asignar",
   "settings_autoClearUnassignedTabsKeywords": "limpiar pestañas",
-  "settings_autoClearUnassignedTabsSubtitle": "Cerrar automáticamente las pestañas sin asignar anteriores al periodo seleccionado",
+  "settings_autoClearUnassignedTabsSubtitle": "Cerrar automáticamente las pestañas sin asignar anteriores al periodo seleccionado. Las pestañas bloqueadas se conservan.",
   "settings_durationNever": "Nunca",
   "settings_duration1Day": "1 día",
   "settings_duration3Days": "3 días",

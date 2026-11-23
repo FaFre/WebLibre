@@ -46,6 +46,7 @@ class _TestSelectedContainer extends SelectedContainer {
   Future<SetContainerResult> setContainerId(
     String id, {
     bool Function()? shouldApply,
+    bool waitForRouting = true,
   }) async {
     state = id;
     return SetContainerResult.success;

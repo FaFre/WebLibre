@@ -35,6 +35,11 @@ class ContextualToolbarScope with FastEquatable {
 
   final bool isPreview;
 
+  /// Whether the selected tab is asleep: it shows "This tab is asleep" until
+  /// the user wakes it (D10), so the buttons acting on its page are
+  /// unavailable. Watched once where the scope is built; false in a preview.
+  final bool pageAsleep;
+
   /// Which configuration set this scope renders for, so shared registry
   /// builders that read sibling button config (e.g. the back button's
   /// stop-loading fallback) consult the correct location.
@@ -45,6 +50,7 @@ class ContextualToolbarScope with FastEquatable {
     required this.displayedSheet,
     required this.tabState,
     required this.isPreview,
+    this.pageAsleep = false,
     HistoryState? historyState,
     this.location = ToolbarConfigLocation.contextual,
   }) : historyState = historyState ?? HistoryState.$default();
@@ -56,6 +62,7 @@ class ContextualToolbarScope with FastEquatable {
     tabState,
     historyState,
     isPreview,
+    pageAsleep,
     location,
   ];
 }

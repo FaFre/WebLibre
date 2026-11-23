@@ -34,6 +34,32 @@ enum BrowserActionFeedback {
   fontSizeAutomatic,
   tabPinned,
   tabUnpinned,
+  tabLocked,
+  tabUnlocked,
+
+  /// Locking did not happen; nothing changed.
+  tabLockFailed,
+
+  /// Private tabs cannot be locked.
+  tabLockPrivate,
+
+  /// Unlocking did not happen; the tab is still locked.
+  tabUnlockFailed,
+
+  /// The unlock's last step failed; the tab stays locked until it is retried.
+  tabUnlockIncomplete,
+
+  /// A locked tab cannot move to a container with other cookie storage.
+  lockedTabCannotMove,
+
+  /// Such a move did not happen: the tab locks could not be read.
+  tabMoveFailed,
+
+  /// The container a tab was to move into or out of is being deleted.
+  containerBeingDeleted,
+
+  /// The container a tab was to move into or out of is frozen (D19).
+  containerFrozen,
 
   /// The page is not one a home screen shortcut can be made for.
   homeScreenUnavailable,
@@ -41,5 +67,32 @@ enum BrowserActionFeedback {
   noClosedTabs,
 
   /// A split view action ran while no split view is shown.
-  noSplitView,
+  noSplitView;
+
+  /// Whether the action ran and failed, shown as an error; the others are
+  /// confirmations, or refusals that say what to do next. A switch, so a new
+  /// feedback has to pick one.
+  bool get failed => switch (this) {
+    tabLockFailed ||
+    tabUnlockFailed ||
+    tabUnlockIncomplete ||
+    tabMoveFailed => true,
+    bookmarkAdded ||
+    bookmarkRemoved ||
+    gesturesEnabled ||
+    gesturesDisabled ||
+    fontSizeAutomatic ||
+    tabPinned ||
+    tabUnpinned ||
+    tabLocked ||
+    tabUnlocked ||
+    tabLockPrivate ||
+    lockedTabCannotMove ||
+    containerBeingDeleted ||
+    containerFrozen ||
+    homeScreenUnavailable ||
+    readerViewUnavailable ||
+    noClosedTabs ||
+    noSplitView => false,
+  };
 }

@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/tab_badge_frame.dart';
 
 /// The split glyph on a tab that belongs to the shown split pair (tab tray,
 /// quick switcher). Takes no space for any other tab.
@@ -52,17 +53,10 @@ class SplitMemberMark extends ConsumerWidget {
       semanticLabel: AppLocalizations.of(context).splitView_memberMark,
     );
 
-    return Padding(
+    return TabBadgeFrame(
       padding: padding,
-      child: withBackground
-          ? DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withAlpha(200),
-                borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-              ),
-              child: Padding(padding: const EdgeInsets.all(6), child: icon),
-            )
-          : icon,
+      withBackground: withBackground,
+      child: icon,
     );
   }
 }

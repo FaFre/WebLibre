@@ -67,9 +67,11 @@ Widget buildMenuSubTile(
   IconData? icon,
   Color? iconColor,
   Widget? trailing,
+  bool enabled = true,
   required VoidCallback onTap,
 }) {
   return ListTile(
+    enabled: enabled,
     contentPadding: const EdgeInsets.only(left: 56, right: 16),
     leading: icon != null ? Icon(icon, color: iconColor, size: 20) : null,
     title: Text(title, style: const TextStyle(fontSize: 14)),

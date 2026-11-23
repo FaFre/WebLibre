@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 
 /// A background tab `old` replaced by `new`, whose opening waits on [opening]
@@ -18,36 +19,47 @@ class _Replacement {
   bool closeSeesStale = false;
   String? _selectedBeforeTransfer;
 
-  Future<String> run({required bool focused}) => replaceTabOpeningFirst(
-    oldTabId: 'old',
-    focused: focused,
-    open: () async {
-      await opening.future;
-      log.add('opened new');
-      // A focused tab's replacement opens selected.
-      if (focused) nativeSelected = 'new';
-      return 'new';
-    },
-    selectedTabId: () async {
-      selectionReads++;
-      return nativeSelected;
-    },
-    closeOld: (newTabId) async {
-      // Closing the selected tab hands the selection to another one.
-      final seen = closeSeesStale ? _selectedBeforeTransfer : nativeSelected;
-      if (seen == 'old') {
-        log.add('selected neighbor');
-        nativeSelected = 'neighbor';
-      }
-      log.add('closed old');
-    },
-    select: (tabId) async {
-      log.add('selected $tabId');
-      _selectedBeforeTransfer ??= nativeSelected;
-      nativeSelected = tabId;
-    },
-    isMounted: () => mounted,
-  );
+  /// The original turned out to be locked: its close keeps it.
+  bool oldIsLocked = false;
+
+  Future<ReplacementResult> run({required bool focused}) =>
+      replaceTabOpeningFirst(
+        oldTabId: 'old',
+        focused: focused,
+        open: () async {
+          await opening.future;
+          log.add('opened new');
+          // A focused tab's replacement opens selected.
+          if (focused) nativeSelected = 'new';
+          return 'new';
+        },
+        selectedTabId: () async {
+          selectionReads++;
+          return nativeSelected;
+        },
+        closeOld: (newTabId) async {
+          if (oldIsLocked) {
+            log.add('kept old');
+            return false;
+          }
+          // Closing the selected tab hands the selection to another one.
+          final seen = closeSeesStale
+              ? _selectedBeforeTransfer
+              : nativeSelected;
+          if (seen == 'old') {
+            log.add('selected neighbor');
+            nativeSelected = 'neighbor';
+          }
+          log.add('closed old');
+          return true;
+        },
+        select: (tabId) async {
+          log.add('selected $tabId');
+          _selectedBeforeTransfer ??= nativeSelected;
+          nativeSelected = tabId;
+        },
+        isMounted: () => mounted,
+      );
 }
 
 void main() {
@@ -60,7 +72,7 @@ void main() {
     replacement.nativeSelected = 'old';
     replacement.opening.complete();
 
-    expect(await done, 'new');
+    expect(await done, TabReplaced('new'));
     expect(replacement.log, [
       'opened new',
       'selected new',
@@ -129,4 +141,21 @@ void main() {
       expect(replacement.log, ['opened new']);
     },
   );
+
+  test('a locked original stays, with the new tab beside it', () async {
+    // The lock arrived after the caller decided to replace the tab: the close
+    // decides, and both tabs stay open, as when the listener opens a site
+    // beside a locked tab.
+    final replacement = _Replacement()
+      ..nativeSelected = 'old'
+      ..oldIsLocked = true;
+    final done = replacement.run(focused: true);
+    replacement.opening.complete();
+
+    final result = await done;
+    expect(result, OriginalKept());
+    expect(result.replacementTabId, isNull);
+    // Nothing is selected again after the close: it replaced nothing.
+    expect(replacement.log, ['opened new', 'kept old']);
+  });
 }

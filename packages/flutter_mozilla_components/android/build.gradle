@@ -2,7 +2,7 @@ group = "eu.weblibre.flutter_mozilla_components"
 version = "1.0-SNAPSHOT"
 
 buildscript {
-    ext.mozillaComponentsVersion = '159.0'
+    ext.mozillaComponentsVersion = '160.0'
 
     repositories {
         google()
@@ -49,6 +49,8 @@ android {
 
     sourceSets {
         main.java.srcDirs += "src/main/kotlin"
+        // The container freeze spike harness (debug builds only).
+        debug.java.srcDirs += "src/debug/kotlin"
         test.java.srcDirs += "src/test/kotlin"
         // Fixtures the proxy extension's own test suite reads too, so a routing
         // rule that changes on one side fails on the other. See

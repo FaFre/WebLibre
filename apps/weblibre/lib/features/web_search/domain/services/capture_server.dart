@@ -440,6 +440,10 @@ class CaptureServer {
     return _resolveCaptureFileSync(captureId) != null;
   }
 
+  /// True once [publish] has been called for [captureId] and it has not been
+  /// revoked since, whether or not its artifact is on disk yet.
+  bool isPublished(String captureId) => _entriesById.containsKey(captureId);
+
   void revoke(String captureId) {
     _entriesById.remove(captureId);
     _failedIds.remove(captureId);

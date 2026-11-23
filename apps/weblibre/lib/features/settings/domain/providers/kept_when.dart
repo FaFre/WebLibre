@@ -69,6 +69,12 @@ enum KeptWhen {
 
   /// An answer to starting a proxy connection is remembered.
   startProxyConnectionRemembered,
+
+  /// An answer to freezing a container is remembered.
+  freezeContainerRemembered,
+
+  /// An answer to putting tabs to sleep is remembered.
+  sleepTabsRemembered,
 }
 
 /// Whether [kept] holds now.
@@ -119,6 +125,10 @@ bool keptWhenHolds(Ref ref, KeptWhen kept) {
     KeptWhen.startProxyConnectionRemembered => remembered(
       RememberedPrompt.startProxyConnection,
     ),
+    KeptWhen.freezeContainerRemembered => remembered(
+      RememberedPrompt.freezeContainer,
+    ),
+    KeptWhen.sleepTabsRemembered => remembered(RememberedPrompt.sleepTabs),
   };
 }
 

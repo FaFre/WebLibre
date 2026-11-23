@@ -101,4 +101,17 @@
         <item quantity="other">Try again in %d minutes.</item>
     </plurals>
 
+    <!-- Text of a paused download's notification while the container it belongs to is frozen: its tabs are unloaded and its background activity is stopped until the user resumes the container in WebLibre. -->
+    <string name="weblibre_download_paused_frozen">Paused because its container is frozen. Resume the container in WebLibre to continue.</string>
+    <!-- Text of a paused download's notification when WebLibre cannot tell which container it belongs to while some container is frozen. -->
+    <string name="weblibre_download_paused_unknown_container">Paused while a container is frozen. Resume the container in WebLibre, or cancel this download.</string>
+    <!-- Text of a paused download's notification when the container it belongs to was deleted and its site data is still being deleted. -->
+    <string name="weblibre_download_paused_deleting">Paused because the site data of its container is being deleted.</string>
+
+    <!-- Title of a web app or custom tab window whose container the user froze in WebLibre: its tabs are unloaded and its background activity is stopped until the container is resumed there. -->
+    <string name="weblibre_frozen_window_title">Its container is frozen</string>
+    <!-- Text under weblibre_frozen_window_title. -->
+    <string name="weblibre_frozen_window_message">Nothing of it loads, and its sites cannot run in the background, until the container is resumed in WebLibre.</string>
+    <!-- Button in a web app or custom tab window whose container is frozen: opens the page in WebLibre, where the container can be resumed. -->
+    <string name="weblibre_frozen_window_open">Open WebLibre to resume</string>
 </resources>

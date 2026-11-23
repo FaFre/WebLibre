@@ -279,11 +279,31 @@ class ContainerHistoryRepository extends _$ContainerHistoryRepository {
   /// remove them separately (explicit clear) or let ON DELETE CASCADE do it
   /// (container deletion). Safe to call before the container itself is deleted.
   Future<void> deletePlacesVisitsForContainer(String containerId) async {
+    await deletePlacesVisits(await placesVisitsForContainer(containerId));
+  }
+
+  /// Deletes [visits] from Mozilla Places, as [placesVisitsForContainer]
+  /// found them.
+  Future<void> deletePlacesVisits(Iterable<VisitInfo> visits) async {
+    final historyRepository = ref.read(historyRepositoryProvider.notifier);
+    for (final visit in visits) {
+      await historyRepository.deleteVisit(visit);
+    }
+  }
+
+  /// The Mozilla Places visits recorded for [containerId] in the relation, as
+  /// [deletePlacesVisitsForContainer] deletes them. Only reads.
+  ///
+  /// Container deletion reads them before deleting the container, whose
+  /// relation rows cascade away with it, and deletes them only once the
+  /// container is gone: a deletion refused for a locked tab deletes no
+  /// history.
+  Future<List<VisitInfo>> placesVisitsForContainer(String containerId) async {
     final relations = await ref
         .read(tabDatabaseProvider)
         .visitContainerDao
         .relationsForContainer(containerId);
-    if (relations.isEmpty) return;
+    if (relations.isEmpty) return const [];
 
     var minTime = relations.first.visitTime;
     var maxTime = relations.first.visitTime;
@@ -349,10 +369,7 @@ class ContainerHistoryRepository extends _$ContainerHistoryRepository {
       }
     }
 
-    final historyRepository = ref.read(historyRepositoryProvider.notifier);
-    for (final visit in toDelete.values) {
-      await historyRepository.deleteVisit(visit);
-    }
+    return toDelete.values.toList();
   }
 
   @override

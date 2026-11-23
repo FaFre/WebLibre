@@ -20,6 +20,7 @@
 import 'dart:ui';
 
 import 'package:fast_equatable/fast_equatable.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -92,6 +93,13 @@ class SplitViewChrome with FastEquatable {
   final String dividerOptionsAction;
   final String crashedTitle;
   final String crashedReload;
+  final String sleepingTitle;
+  final String sleepingWake;
+  final String frozenTitle;
+  final String frozenResume;
+
+  /// Per frozen container: its own placeholder title and detail line.
+  final List<FrozenPlaceholderLabel> frozenContainers;
 
   SplitViewChrome({
     required this.divider,
@@ -106,6 +114,11 @@ class SplitViewChrome with FastEquatable {
     required this.dividerOptionsAction,
     required this.crashedTitle,
     required this.crashedReload,
+    required this.sleepingTitle,
+    required this.sleepingWake,
+    required this.frozenTitle,
+    required this.frozenResume,
+    required this.frozenContainers,
   });
 
   @override
@@ -122,6 +135,11 @@ class SplitViewChrome with FastEquatable {
     dividerOptionsAction,
     crashedTitle,
     crashedReload,
+    sleepingTitle,
+    sleepingWake,
+    frozenTitle,
+    frozenResume,
+    frozenContainers,
   ];
 }
 

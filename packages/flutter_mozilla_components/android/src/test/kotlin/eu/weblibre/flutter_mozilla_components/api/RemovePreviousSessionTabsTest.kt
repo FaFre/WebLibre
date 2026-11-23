@@ -10,6 +10,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import mozilla.components.browser.session.storage.RecoverableBrowserState
+import mozilla.components.browser.state.action.TabListAction
 import mozilla.components.browser.state.action.UndoAction
 import mozilla.components.browser.state.state.BrowserState
 import mozilla.components.browser.state.state.createTab
@@ -82,6 +83,43 @@ class RemovePreviousSessionTabsTest {
         store.removePreviousSessionTabs(emptySet())
 
         assertEquals(listOf("a", "b"), store.state.tabs.map { it.id })
+    }
+
+    @Test
+    fun `a locked restored tab is kept and the rest still go`() {
+        val store = storeWith("restored-1", "locked", "new")
+        val discarded = mutableListOf<List<String>>()
+
+        store.removePreviousSessionTabs(
+            setOf("restored-1", "locked"),
+            beforeRemoval = { discarded += it },
+            isLocked = { it == "locked" },
+        )
+
+        assertEquals(listOf("locked", "new"), store.state.tabs.map { it.id })
+        // Only what goes is kept off the recently closed list.
+        assertEquals(listOf(listOf("restored-1")), discarded)
+        assertTrue(store.state.undoHistory.tabs.isEmpty())
+    }
+
+    @Test
+    fun `when every restored tab is locked nothing is discarded and undo is left alone`() {
+        val store = storeWith("locked", "closed-by-user")
+        // An unrelated close the user can still undo.
+        store.dispatch(TabListAction.RemoveTabAction("closed-by-user"))
+        val tag = store.state.undoHistory.tag
+        val discarded = mutableListOf<List<String>>()
+
+        store.removePreviousSessionTabs(
+            setOf("locked"),
+            beforeRemoval = { discarded += it },
+            isLocked = { it == "locked" },
+        )
+
+        assertEquals(listOf("locked"), store.state.tabs.map { it.id })
+        assertTrue(discarded.isEmpty())
+        assertEquals(tag, store.state.undoHistory.tag)
+        assertEquals(listOf("closed-by-user"), store.state.undoHistory.tabs.map { it.state.id })
     }
 }
 

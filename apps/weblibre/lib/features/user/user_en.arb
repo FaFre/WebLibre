@@ -1011,6 +1011,10 @@
   "@user_deleteBrowsingDataTypeTabsTitle": {
     "description": "Checkbox in the delete browsing data dialog: close all open tabs."
   },
+  "user_deleteBrowsingDataTypeTabsDescription": "Locked tabs are kept",
+  "@user_deleteBrowsingDataTypeTabsDescription": {
+    "description": "Explanation under the \"Open tabs\" checkbox wherever browsing data is deleted (the delete dialog, quitting, the settings): tabs locked with \"Lock tab\" stay open."
+  },
   "user_deleteBrowsingDataTypeHistoryTitle": "Browsing history",
   "@user_deleteBrowsingDataTypeHistoryTitle": {
     "description": "Checkbox in the delete browsing data dialog."

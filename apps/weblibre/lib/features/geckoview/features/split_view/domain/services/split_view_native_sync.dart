@@ -174,6 +174,11 @@ class SplitViewNativeSync extends _$SplitViewNativeSync {
         // one fallback for that moment.
         crashedTitle: chrome?.crashedTitle ?? '',
         crashedReload: chrome?.crashedReload ?? '',
+        sleepingTitle: chrome?.sleepingTitle ?? '',
+        sleepingWake: chrome?.sleepingWake ?? '',
+        frozenTitle: chrome?.frozenTitle ?? '',
+        frozenResume: chrome?.frozenResume ?? '',
+        frozenContainers: chrome?.frozenContainers ?? const [],
       ),
     );
   }

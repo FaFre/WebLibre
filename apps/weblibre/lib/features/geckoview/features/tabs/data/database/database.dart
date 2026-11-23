@@ -41,7 +41,7 @@ import 'package:weblibre/features/search/domain/fts_tokenizer.dart';
 )
 class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
   @override
-  final int schemaVersion = 19;
+  final int schemaVersion = 22;
 
   @override
   final int ftsTokenLimit = 10;
@@ -304,6 +304,21 @@ class TabDatabase extends $TabDatabase with TrigramQueryBuilderMixin {
       // existing row has no known engine opener and is treated like one the
       // app created — a late container repair does not cross it.
       await m.addColumn(schema.tab, schema.tab.engineOpenerId);
+    },
+    from19To20: (m, schema) async {
+      // Nothing to backfill: no tab was locked before this version. The CHECK
+      // is part of the column, so SQLite adds it without rebuilding `tab`.
+      await m.addColumn(schema.tab, schema.tab.isLocked);
+    },
+    from20To21: (m, schema) async {
+      // Nothing to backfill: "Keep awake" starts with this version.
+      await m.addColumn(schema.tab, schema.tab.sleepExempt);
+    },
+    from21To22: (m, schema) async {
+      // Covering indexes for the lock and "Keep awake" streams, which re-run
+      // on every write to `tab`; see definitions.drift.
+      await m.create(schema.idxTabLocked);
+      await m.create(schema.idxTabSleepExempt);
     },
   );
 }

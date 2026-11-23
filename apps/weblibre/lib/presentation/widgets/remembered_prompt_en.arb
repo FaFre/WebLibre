@@ -94,5 +94,30 @@
   "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, connection, container, start, confirmation, don't ask again",
   "@rememberedPrompt_startProxyConnectionKeywords": {
     "description": "Comma-separated search keywords for the switch for asking before starting a proxy connection. Never displayed."
+  },
+
+  "rememberedPrompt_sleepTabsLabel": "Ask before putting tabs to sleep",
+  "@rememberedPrompt_sleepTabsLabel": {
+    "description": "Switch in the Confirmations settings: explain what putting a tab to sleep does, and ask, before doing it. Off, tabs go to sleep without that question; questions about playing media or form results are still asked."
+  },
+  "rememberedPrompt_sleepTabsDescription": "Explains that a sleeping tab's page reloads and may lose unsaved state",
+  "@rememberedPrompt_sleepTabsDescription": {
+    "description": "Subtitle of the switch for asking before putting tabs to sleep."
+  },
+  "rememberedPrompt_sleepTabsKeywords": "sleep, unload, memory, tab, suspend, discard, confirmation, don't ask again",
+  "@rememberedPrompt_sleepTabsKeywords": {
+    "description": "Comma-separated search keywords for the switch for asking before putting tabs to sleep. Never displayed."
+  },
+  "rememberedPrompt_freezeContainerLabel": "Ask before freezing a container",
+  "@rememberedPrompt_freezeContainerLabel": {
+    "description": "Switch in the Confirmations settings: explain what freezing a container does, and ask, before doing it. Off, containers are frozen without that question; questions about playing media or form results are still asked."
+  },
+  "rememberedPrompt_freezeContainerDescription": "Explains that a frozen container's tabs are unloaded and its background activity stops until Resume",
+  "@rememberedPrompt_freezeContainerDescription": {
+    "description": "Subtitle of the switch for asking before freezing a container."
+  },
+  "rememberedPrompt_freezeContainerKeywords": "freeze, pause, container, resume, background, push, confirmation, don't ask again",
+  "@rememberedPrompt_freezeContainerKeywords": {
+    "description": "Comma-separated search keywords for the switch for asking before freezing a container. Never displayed."
   }
 }

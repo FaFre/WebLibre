@@ -216,6 +216,7 @@ void main() {
                 menu: defaultMenuLayout,
                 strictContainers: strictContainers,
                 appLinkContainers: false,
+                autoFreezeContainers: false,
               ),
             ),
           ],

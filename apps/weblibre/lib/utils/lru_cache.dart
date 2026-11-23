@@ -54,6 +54,9 @@ class LRUCache<K, V> {
     return _cache.containsKey(key);
   }
 
+  /// The value of [key], without making it the most recently used.
+  V? peek(K key) => _cache[key];
+
   V? get(K key) {
     final value = _cache.remove(key); // Temporarily remove the item.
 

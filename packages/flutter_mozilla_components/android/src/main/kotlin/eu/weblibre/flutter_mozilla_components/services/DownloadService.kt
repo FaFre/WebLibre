@@ -6,9 +6,13 @@
 
 package eu.weblibre.flutter_mozilla_components.services
 
+import android.app.PendingIntent
 import android.content.Intent
 import eu.weblibre.flutter_mozilla_components.DownloadLocationPreference
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.R
+import eu.weblibre.flutter_mozilla_components.lifecycle.DownloadStartGate
+import mozilla.components.browser.state.state.content.DownloadState
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.feature.downloads.AbstractFetchDownloadService
 import mozilla.components.feature.downloads.DefaultPackageNameProvider
@@ -65,6 +69,37 @@ class DownloadService : AbstractFetchDownloadService() {
             },
         )
     }
+    /**
+     * A4 (5.11): a download of a frozen container's context, or of unknown
+     * context while any container is frozen, does not start, resume or retry;
+     * it stays paused with its notification until Resume or the user cancels.
+     */
+    override fun mayStartDownload(download: DownloadState): Boolean = DownloadStartGate.mayStart(download)
+
+    /** What the paused notification of a held-back download says (A4). */
+    override fun downloadPausedReason(download: DownloadState): CharSequence? =
+        when (DownloadStartGate.holdOf(download)) {
+            DownloadStartGate.Hold.FROZEN -> getString(R.string.weblibre_download_paused_frozen)
+            DownloadStartGate.Hold.UNKNOWN_CONTEXT -> getString(R.string.weblibre_download_paused_unknown_container)
+            DownloadStartGate.Hold.DELETING -> getString(R.string.weblibre_download_paused_deleting)
+            null -> null
+        }
+
+    /**
+     * Tapping a held-back download's notification opens WebLibre, where the
+     * container can be resumed. Null (AC's own behavior) for any other.
+     */
+    override fun downloadPausedContentIntent(download: DownloadState): PendingIntent? {
+        if (DownloadStartGate.holdOf(download) == null) return null
+        val launch = packageManager.getLaunchIntentForPackage(packageName) ?: return null
+        return PendingIntent.getActivity(
+            this,
+            download.id.hashCode(),
+            launch,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+    }
+
     override val downloadFileWriter: DownloadFileWriter by lazy {
         DefaultDownloadFileWriter(
             context = applicationContext,

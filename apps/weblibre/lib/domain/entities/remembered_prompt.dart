@@ -42,7 +42,9 @@ enum RememberedPrompt {
   closeIsolatedTabs(PromptConfirmation.values),
   closeAllTabs(PromptConfirmation.values),
   startTor(PromptConfirmation.values),
-  startProxyConnection(PromptConfirmation.values);
+  startProxyConnection(PromptConfirmation.values),
+  sleepTabs(PromptConfirmation.values),
+  freezeContainer(PromptConfirmation.values);
 
   final List<Enum> answers;
 

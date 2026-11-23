@@ -143,7 +143,7 @@ class TabTreeDialog extends HookConsumerWidget {
 
                       const BrowserRoute().go(context);
                     },
-                    onBeforeDelete: () {
+                    onDeleted: () {
                       if (graph.nodes.length <= 2) {
                         context.pop();
                       }

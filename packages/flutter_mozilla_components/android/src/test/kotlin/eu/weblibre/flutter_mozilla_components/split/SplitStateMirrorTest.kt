@@ -28,7 +28,7 @@ internal fun splitState(epoch: String, revision: Long, pair: eu.weblibre.flutter
         dragPreviewColorArgb = 0,
         placeholderColorArgb = 0,
         onPlaceholderColorArgb = 0,
-        labels = SplitViewLabels("divider", "options", "crashed", "reload"),
+        labels = SplitViewLabels("divider", "options", "crashed", "reload", "asleep", "wake", "frozen", "resume", emptyList()),
     )
 
 class SplitStateMirrorTest {

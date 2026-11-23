@@ -23,6 +23,7 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:uuid/uuid.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -61,13 +62,15 @@ class PendingQuitDeletionRepository extends _$PendingQuitDeletionRepository {
   static const _key = 'pendingQuitDeletion';
   static const _partitionKey = 'browsing_data';
 
-  Future<void> _queue = Future.value();
+  /// Every read and change runs alone, after every earlier one finished,
+  /// failed or not.
+  final _lock = Lock();
 
   @override
   void build() {}
 
   /// The requests not completed yet; empty when none.
-  Future<PendingDeletions> read() => _serialized(readStored);
+  Future<PendingDeletions> read() => _lock.synchronized(readStored);
 
   /// Records a new request for each of [types], replacing an older request of
   /// the same type, and returns them. Outstanding requests of other types stay.
@@ -78,7 +81,7 @@ class PendingQuitDeletionRepository extends _$PendingQuitDeletionRepository {
   Future<PendingDeletions> request(
     Set<DeleteBrowsingDataType> types, {
     Set<String>? tabIds,
-  }) => _serialized(() async {
+  }) => _lock.synchronized(() async {
     final current = {...await readStored()};
     final requested = <DeleteBrowsingDataType, PendingDeletion>{};
 
@@ -99,19 +102,12 @@ class PendingQuitDeletionRepository extends _$PendingQuitDeletionRepository {
   /// Completes the request [requestId] for [type], if it is still the one
   /// recorded; a newer request of the type stays.
   Future<void> complete(DeleteBrowsingDataType type, String requestId) =>
-      _serialized(() async {
+      _lock.synchronized(() async {
         final current = await readStored();
         if (current[type]?.requestId != requestId) return;
 
         await writeStored({...current}..remove(type));
       });
-
-  /// Runs [operation] after every earlier one finished, failed or not.
-  Future<T> _serialized<T>(Future<T> Function() operation) {
-    final result = _queue.then((_) => operation());
-    _queue = result.then<void>((_) {}, onError: (Object _) {});
-    return result;
-  }
 
   /// The stored record. Overridden by tests; everything else goes through the
   /// serialized operations above.

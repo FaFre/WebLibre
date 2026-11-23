@@ -107,7 +107,7 @@ class ProfileAddonUpdaterTest {
 
     private fun updater(
         profileId: String = PROFILE_A,
-        lastCheckedAt: (String) -> Long? = { null },
+        lastCheckedAt: suspend (String) -> Long? = { null },
     ) = ProfileAddonUpdater(
         profileContext = profile(profileId),
         updater = ac,

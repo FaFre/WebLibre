@@ -47,6 +47,8 @@ extension DeleteBrowsingDataTypeL10n on DeleteBrowsingDataType {
     final l10n = AppLocalizations.of(context);
 
     return switch (this) {
+      DeleteBrowsingDataType.tabs =>
+        l10n.user_deleteBrowsingDataTypeTabsDescription,
       DeleteBrowsingDataType.recentSearches =>
         l10n.user_deleteBrowsingDataTypeRecentSearchesDescription,
       DeleteBrowsingDataType.cookies =>

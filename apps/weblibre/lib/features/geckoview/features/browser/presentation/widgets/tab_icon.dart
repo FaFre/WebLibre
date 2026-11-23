@@ -25,6 +25,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/domain/services/generic_website.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
 import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
@@ -42,6 +43,10 @@ class TabIcon extends HookConsumerWidget {
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: tabState.id),
     );
+    // A sleeping tab's favicon is dimmed, beside its sleep badge (7.2).
+    final isAsleep = ref.watch(isTabAsleepProvider(tabState.id));
+    Widget dimmedWhenAsleep(Widget icon) =>
+        isAsleep ? Opacity(opacity: 0.45, child: icon) : icon;
 
     final icon = useCachedFuture(() async {
       if (tabState.icon case final EquatableImage tabIcon
@@ -57,7 +62,9 @@ class TabIcon extends HookConsumerWidget {
     }, [tabState.icon, tabState.url]);
 
     if (sandboxSourceUri != null) {
-      return UrlIcon([sandboxSourceUri], iconSize: iconSize, cacheOnly: true);
+      return dimmedWhenAsleep(
+        UrlIcon([sandboxSourceUri], iconSize: iconSize, cacheOnly: true),
+      );
     }
 
     // While the icon future is still resolving, show the skeleton bone. This is
@@ -77,17 +84,18 @@ class TabIcon extends HookConsumerWidget {
     // render the image directly without wrapping it in Skeletonizer, which the
     // rebuild profiler flagged as the most-rebuilt widget in the tab bar.
     return RepaintBoundary(
-      child:
-          icon.data.mapNotNull(
-            (image) => SafeRawImage(
-              image: image,
-              height: iconSize,
-              width: iconSize,
-              fallback: Icon(MdiIcons.web, size: iconSize),
-              borderRadius: faviconBorderRadius(iconSize),
-            ),
-          ) ??
-          Icon(MdiIcons.web, size: iconSize),
+      child: dimmedWhenAsleep(
+        icon.data.mapNotNull(
+              (image) => SafeRawImage(
+                image: image,
+                height: iconSize,
+                width: iconSize,
+                fallback: Icon(MdiIcons.web, size: iconSize),
+                borderRadius: faviconBorderRadius(iconSize),
+              ),
+            ) ??
+            Icon(MdiIcons.web, size: iconSize),
+      ),
     );
   }
 }

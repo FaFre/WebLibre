@@ -57,6 +57,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -863,15 +864,22 @@ class BookmarkListScreen extends HookConsumerWidget {
               .effectiveDefaultCreateTabType,
         );
 
+    var opened = 0;
     for (final entry in entries) {
-      await ref
-          .read(tabRepositoryProvider.notifier)
-          .addTab(url: entry.url, selectTab: false, tabMode: tabMode);
+      // A refusal holds for every one of them: it is said once.
+      final tabId = await openUnlessContainerRefuses(
+        context,
+        () => ref
+            .read(tabRepositoryProvider.notifier)
+            .addTab(url: entry.url, selectTab: false, tabMode: tabMode),
+      );
+      if (tabId == null) break;
+      opened++;
     }
 
     ref.read(bookmarkListUiStateProvider.notifier).exitSelectionMode();
 
-    if (context.mounted) {
+    if (opened == entries.length && context.mounted) {
       showInfoMessage(
         context,
         AppLocalizations.of(
@@ -1067,16 +1075,20 @@ class BookmarkListScreen extends HookConsumerWidget {
               .effectiveDefaultCreateTabType,
         );
 
-    final tabId = await ref
-        .read(tabRepositoryProvider.notifier)
-        .addTab(
-          url: url,
-          parentId: currentTab?.id,
-          selectTab: selectTab,
-          tabMode: tabMode,
-          // A bookmark, not a link from the current page.
-          parentIsReferrer: false,
-        );
+    final tabId = await openUnlessContainerRefuses(
+      context,
+      () => ref
+          .read(tabRepositoryProvider.notifier)
+          .addTab(
+            url: url,
+            parentId: currentTab?.id,
+            selectTab: selectTab,
+            tabMode: tabMode,
+            // A bookmark, not a link from the current page.
+            parentIsReferrer: false,
+          ),
+    );
+    if (tabId == null) return;
 
     if (selectTab) {
       if (context.mounted) {

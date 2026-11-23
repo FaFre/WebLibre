@@ -30,6 +30,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/providers/menu_visibility.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/hidden_settings.dart';
 import 'package:weblibre/features/settings/domain/providers/pending_settings_highlight.dart';
@@ -81,6 +82,8 @@ Future<List<String>> _pumpScreen(
         generalSettingsWithDefaultsProvider.overrideWith(
           (ref) => value.effective(),
         ),
+        // The sample tabs' "Keep awake" glyph would read the containers.
+        autoFreezingContainerIdsProvider.overrideWithValue(EquatableValue({})),
         windowSizeClassControllerProvider.overrideWith(
           () => _FakeWindowSizeClass(WindowSizeClass.fromSize(size)),
         ),

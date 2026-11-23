@@ -28,16 +28,22 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/clear_site_data_dialog.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
 /// Section widget for clearing site data
 class ClearSiteDataSection extends HookConsumerWidget {
   final Uri url;
+
+  /// The tab the sheet is for, which "Close tab after clearing" closes unless
+  /// it is locked.
+  final String? tabId;
   final ValueChanged<bool>? onExpandedChanged;
 
   const ClearSiteDataSection({
     required this.url,
+    this.tabId,
     this.onExpandedChanged,
     super.key,
   });
@@ -48,6 +54,9 @@ class ClearSiteDataSection extends HookConsumerWidget {
     final isExpanded = useState(false);
     final isClearing = useState(false);
     final closeTabAfterClear = useState(false);
+    // A locked tab is reloaded into the cleared state instead: it does not
+    // close.
+    final isLocked = ref.watch(isTabLockedProvider(tabId));
     final selectedTypes = useState<Set<ClearDataType>>({
       ClearDataType.allSiteData,
       ClearDataType.authSessions,
@@ -152,9 +161,13 @@ class ClearSiteDataSection extends HookConsumerWidget {
           ),
           CheckboxListTile(
             title: Text(l10n.browser_closeTabAfterClearing),
-            subtitle: Text(l10n.browser_closeTabAfterClearingSubtitle),
-            value: closeTabAfterClear.value,
-            onChanged: isClearing.value
+            subtitle: Text(
+              isLocked
+                  ? l10n.browser_closeTabAfterClearingLocked
+                  : l10n.browser_closeTabAfterClearingSubtitle,
+            ),
+            value: closeTabAfterClear.value && !isLocked,
+            onChanged: isClearing.value || isLocked
                 ? null
                 : (value) => closeTabAfterClear.value = value ?? false,
             controlAffinity: ListTileControlAffinity.trailing,
@@ -178,7 +191,7 @@ class ClearSiteDataSection extends HookConsumerWidget {
                         isClearing,
                         baseDomain,
                         selectedTypes.value,
-                        closeTabAfterClear.value,
+                        closeTabAfterClear.value && !isLocked,
                       ),
                 icon: isClearing.value
                     ? const SizedBox(
@@ -275,16 +288,18 @@ class ClearSiteDataSection extends HookConsumerWidget {
     final clearApi = GeckoDeleteBrowsingDataController();
     await clearApi.clearDataForHost(baseDomain, selectedTypes.toList());
 
+    // The sheet's tab, the one whose lock the checkbox follows.
+    final tabId = this.tabId ?? ref.read(selectedTabProvider);
+    if (tabId == null) return;
     if (closeTabAfterClear) {
       // Close the tab instead of reloading it into the just-cleared state
-      final tabId = ref.read(selectedTabProvider);
-      if (tabId != null) {
-        await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-      }
-    } else {
-      // Reload tab
-      await ref.read(selectedTabSessionProvider).reload();
+      final closed = await ref
+          .read(tabRepositoryProvider.notifier)
+          .closeTab(tabId);
+      // Locked since the box was ticked: it stays, so it is reloaded.
+      if (closed.isGone(tabId)) return;
     }
+    await ref.read(tabSessionProvider(tabId: tabId).notifier).reload();
   }
 }
 

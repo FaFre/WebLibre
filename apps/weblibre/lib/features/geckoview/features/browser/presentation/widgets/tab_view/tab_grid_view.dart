@@ -32,6 +32,7 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_tray_rows.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/draggable_scrollable_header.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_context_menu_draggable.dart';
@@ -123,9 +124,12 @@ class _TabDraggable extends HookConsumerWidget {
                     .getContainerData(suggestedContainerId!);
 
                 if (containerData != null) {
-                  await ref
+                  final moved = await ref
                       .read(tabDataRepositoryProvider.notifier)
                       .assignContainer(tabId, containerData);
+                  if (context.mounted) {
+                    showContainerMoveResult(context, moved);
+                  }
                 }
               },
             )

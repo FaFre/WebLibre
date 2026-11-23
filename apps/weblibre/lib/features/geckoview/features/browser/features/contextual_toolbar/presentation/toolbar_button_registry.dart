@@ -35,7 +35,6 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.da
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/providers/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
@@ -47,6 +46,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/delete_data.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_shortcut_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/font_size_bottom_sheet.dart';
@@ -57,7 +57,7 @@ import 'package:weblibre/features/geckoview/features/find_in_page/presentation/c
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -273,6 +273,8 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: readerModeToolbarButtonSpec,
     icon: MdiIcons.bookOpenOutline,
     isPrimaryAvailable: (scope, ref) {
+      // No page to show in reader view until the tab is woken.
+      if (scope.pageAsleep) return false;
       final readerableState =
           scope.tabState?.readerableState ?? ReaderableState.$default();
       final settings = ref.read(
@@ -312,7 +314,8 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: translationToolbarButtonSpec,
     icon: Icons.translate,
     isPrimaryAvailable: (scope, ref) {
-      if (scope.selectedTabId == null) {
+      // No page to translate until the tab is woken.
+      if (scope.selectedTabId == null || scope.pageAsleep) {
         return false;
       }
 
@@ -330,7 +333,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ToolbarButtonDefinition(
     spec: findInPageToolbarButtonSpec,
     icon: Icons.search,
-    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    isPrimaryAvailable: _isPageActionAvailable,
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: scope.isPreview
@@ -522,7 +525,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ToolbarButtonDefinition(
     spec: pageUpToolbarButtonSpec,
     icon: MdiIcons.chevronDoubleUp,
-    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    isPrimaryAvailable: _isPageActionAvailable,
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: _withTabSession(scope, ref, (session) => session.pageUp()),
@@ -538,7 +541,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
   ToolbarButtonDefinition(
     spec: pageDownToolbarButtonSpec,
     icon: MdiIcons.chevronDoubleDown,
-    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    isPrimaryAvailable: _isPageActionAvailable,
     builder: (scope, context, ref) {
       return IconButton(
         onPressed: _withTabSession(scope, ref, (session) => session.pageDown()),
@@ -557,7 +560,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: scrollTopToolbarButtonSpec,
     // As [BrowserAction.scrollTop].
     icon: Icons.vertical_align_top,
-    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    isPrimaryAvailable: _isPageActionAvailable,
     builder: (scope, context, ref) {
       return IconButton(
         tooltip: ToolbarButtonId.scrollTop.label(context),
@@ -574,7 +577,7 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
     spec: scrollBottomToolbarButtonSpec,
     // As [BrowserAction.scrollBottom].
     icon: Icons.vertical_align_bottom,
-    isPrimaryAvailable: (scope, ref) => scope.selectedTabId != null,
+    isPrimaryAvailable: _isPageActionAvailable,
     builder: (scope, context, ref) {
       return IconButton(
         tooltip: ToolbarButtonId.scrollBottom.label(context),
@@ -668,6 +671,12 @@ Set<String> hiddenToolbarButtonIds(GeneralSettings settings) => {
     if (id.action case final action? when !action.isShownIn(settings)) id.name,
 };
 
+/// [ToolbarButtonDefinition.isPrimaryAvailable] of a button that acts on the
+/// selected tab's page: unavailable while the tab is asleep, since it shows
+/// "This tab is asleep" until the user wakes it (D10).
+bool _isPageActionAvailable(ContextualToolbarScope scope, WidgetRef ref) =>
+    scope.selectedTabId != null && !scope.pageAsleep;
+
 /// Runs [action] on the selected tab's session, and nothing in a preview.
 VoidCallback _withTabSession(
   ContextualToolbarScope scope,
@@ -682,38 +691,6 @@ VoidCallback _withTabSession(
       await action(ref.read(tabSessionProvider(tabId: tabId).notifier));
     }
   };
-}
-
-Future<void> _closeTab(
-  BuildContext context,
-  WidgetRef ref,
-  String? selectedTabId,
-) async {
-  if (selectedTabId == null) return;
-
-  final tabState = ref.read(tabStateProvider(selectedTabId));
-  if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-    final allStates = ref.read(tabStatesProvider);
-    final groupCount = allStates.values
-        .where((s) => s.isolationContextId == tabState.isolationContextId)
-        .length;
-    if (groupCount <= 1 && context.mounted) {
-      final confirmed = await ui_helper.confirmIsolatedTabClose(
-        context,
-        ref.read,
-      );
-      if (!confirmed) return;
-    }
-  }
-
-  await ref.read(tabRepositoryProvider.notifier).closeTab(selectedTabId);
-
-  if (context.mounted) {
-    ui_helper.showTabUndoClose(
-      context,
-      ref.read(tabRepositoryProvider.notifier).undoClose,
-    );
-  }
 }
 
 class _ExtensionShortcutToolbarButton extends HookConsumerWidget {
@@ -847,6 +824,10 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
     final host = ref.watch(
       tabStateProvider(scope.selectedTabId).select((s) => s?.url.host),
     );
+    // A preview stands for no tab and follows no locks.
+    final isLocked = ref.watch(
+      isTabLockedProvider(scope.isPreview ? null : scope.selectedTabId),
+    );
 
     return MenuAnchor(
       controller: menuController,
@@ -859,9 +840,7 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
             final otherIds = tabStates.keys
                 .where((id) => id != scope.selectedTabId)
                 .toList();
-            if (otherIds.isNotEmpty) {
-              await closeTabsWithConfirmation(context, ref, otherIds);
-            }
+            await closeTabsReportingLocks(context, ref, otherIds);
           },
           child: Text(l10n.contextualToolbar_actionCloseOthers),
         ),
@@ -874,9 +853,7 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
                   .where((e) => e.value.url.host == host)
                   .map((e) => e.key)
                   .toList();
-              if (sameHostIds.isNotEmpty) {
-                await closeTabsWithConfirmation(context, ref, sameHostIds);
-              }
+              await closeTabsReportingLocks(context, ref, sameHostIds);
             },
             child: Text(l10n.contextualToolbar_actionCloseFromSameHost),
           ),
@@ -891,17 +868,21 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
             if (!context.mounted) return;
 
             final subtreeIds = descendants.keys.toList();
-            if (subtreeIds.isNotEmpty) {
-              await closeTabsWithConfirmation(context, ref, subtreeIds);
-            }
+            await closeTabsReportingLocks(context, ref, subtreeIds);
           },
           child: Text(l10n.contextualToolbar_actionCloseTabAndDescendants),
         ),
       ],
+      // A locked tab does not close: its lock takes the icon's place, the tap
+      // says so and offers Unlock, and the long press still closes the others.
       child: IconButton(
         onPressed: scope.isPreview
             ? () {}
-            : () => _closeTab(context, ref, scope.selectedTabId),
+            : () async {
+                final tabId = scope.selectedTabId;
+                if (tabId == null) return;
+                await closeTabWithConfirmationAndUndo(context, ref, tabId);
+              },
         onLongPress: scope.isPreview
             ? null
             : () {
@@ -911,7 +892,7 @@ class _CloseTabToolbarButton extends HookConsumerWidget {
                   menuController.open();
                 }
               },
-        icon: const Icon(MdiIcons.tabMinus),
+        icon: Icon(isLocked ? MdiIcons.lockOutline : MdiIcons.tabMinus),
       ),
     );
   }
@@ -1184,7 +1165,7 @@ class _DesktopModeToggleButton extends ConsumerWidget {
 
     return IconButton(
       onPressed: () {
-        ref.read(desktopModeProvider(tabId).notifier).toggle();
+        unawaited(ref.read(desktopModeProvider(tabId).notifier).toggle());
       },
       icon: Icon(
         desktopEnabled ? Icons.desktop_windows : Icons.desktop_windows_outlined,

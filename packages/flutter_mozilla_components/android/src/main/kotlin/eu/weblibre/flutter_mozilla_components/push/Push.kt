@@ -12,9 +12,12 @@ import eu.weblibre.flutter_mozilla_components.Components
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.flutter_mozilla_components.lifecycle.ContextPush
+import eu.weblibre.flutter_mozilla_components.lifecycle.PushOutbox
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -104,7 +107,7 @@ data class PushSubscriptionInfo(val scope: String, val hasEndpoint: Boolean)
 /** Profile-scoped UnifiedPush state and Gecko web-push integration. */
 class Push(
     private val components: Components,
-) : AutoCloseable {
+) : AutoCloseable, ContextPush {
     private val initialized = AtomicBoolean(false)
     private val closed = AtomicBoolean(false)
     internal val isClosed: Boolean
@@ -138,6 +141,18 @@ class Push(
         components.core.store
         webPushEngineIntegration.start()
         feature.initialize()
+        // Subscription changes deferred while their container was frozen, for
+        // the ones resumed since (also after a death mid-Resume, D25).
+        eventScope.launch {
+            try {
+                webPushEngineIntegration.drainOutbox()
+            } catch (e: CancellationException) {
+                // Closed meanwhile: stop, the next start drains it.
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not drain the push outbox", e)
+            }
+        }
         eventScope.launch {
             while (!PushMessageScheduler.recover(components.profileApplicationContext)) {
                 delay(RECOVERY_RETRY_DELAY_MS)
@@ -238,6 +253,9 @@ class Push(
     }
 
     suspend fun deliverMessage(scope: String, payload: ByteArray) {
+        // Before any headless session is created: a frozen container's message
+        // is consumed (5.8). The integration checks again on delivery.
+        if (PushContextGate.consumeIfRestricted(scope)) return
         val external = GlobalComponents.isExternalMode
         val deliver: suspend () -> Unit = {
             withContext(Dispatchers.Main.immediate) {
@@ -279,6 +297,35 @@ class Push(
         } finally {
             withContext(Dispatchers.Main.immediate) { session.close() }
         }
+    }
+
+    override suspend fun removeSubscriptions(contextId: String): Boolean = withContext(dispatcher) {
+        check(!closed.get()) { "Push is closed" }
+        subscriptionsDb.listSubscriptions()
+            .filter { PushContextGate.contextOf(it.scope) == contextId }
+            .forEach { subscription ->
+                val removed = CompletableDeferred<Boolean>()
+                feature.unsubscribe(
+                    scope = subscription.scope,
+                    onUnsubscribeError = { removed.complete(false) },
+                    onUnsubscribe = { removed.complete(it) },
+                )
+                if (withTimeoutOrNull(UNSUBSCRIBE_TIMEOUT_MS) { removed.await() } == true) {
+                    // Gone with its subscription: nothing left to tell Gecko.
+                    PushOutbox.delivered(subscription.scope)
+                }
+            }
+        subscriptionsDb.listSubscriptions().none { PushContextGate.contextOf(it.scope) == contextId }
+    }
+
+    override suspend fun contextsWithSubscriptions(): Set<String>? = withContext(dispatcher) {
+        if (closed.get()) return@withContext null
+        subscriptionsDb.listSubscriptions().mapNotNullTo(mutableSetOf()) { PushContextGate.contextOf(it.scope) }
+    }
+
+    override suspend fun drainOutbox(contextIds: Collection<String>?) {
+        if (closed.get() || !initialized.get()) return
+        webPushEngineIntegration.drainOutbox(contextIds)
     }
 
     /**
@@ -435,5 +482,6 @@ class Push(
         // before the push is handed off.
         private const val HEADLESS_SESSION_WARMUP_MS = 1500L
         private const val RECOVERY_RETRY_DELAY_MS = 30000L
+        private const val UNSUBSCRIBE_TIMEOUT_MS = 10000L
     }
 }

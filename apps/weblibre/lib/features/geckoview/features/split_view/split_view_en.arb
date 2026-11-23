@@ -76,6 +76,65 @@
   "@splitView_crashedReload": {
     "description": "Button under \"This page crashed\" that loads the crashed page again."
   },
+  "splitView_sleepingTitle": "This tab is asleep",
+  "@splitView_sleepingTitle": {
+    "description": "Shown in place of the page of a tab the user put to sleep while it was on screen. Its page was unloaded to free memory and loads again when woken."
+  },
+  "splitView_sleepingWake": "Wake",
+  "@splitView_sleepingWake": {
+    "description": "Button under \"This tab is asleep\" that loads the tab's page again. Also read out by screen readers as the button's name."
+  },
+  "splitView_frozenTitle": "This container is frozen",
+  "@splitView_frozenTitle": {
+    "description": "Shown in place of the page of a tab whose container is frozen, when the container's name is not known. A frozen container's tabs stay unloaded and its background activity (push messages, service workers) is stopped until the user resumes the container."
+  },
+  "splitView_frozenTitleNamed": "{container} is frozen",
+  "@splitView_frozenTitleNamed": {
+    "description": "Shown in place of the page of a tab whose container is frozen. A frozen container's tabs stay unloaded and its background activity (push messages, service workers) is stopped until the user resumes the container. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "splitView_freezingTitleNamed": "Freezing {container}…",
+  "@splitView_freezingTitleNamed": {
+    "description": "Shown in place of a tab's page while its container is being frozen: its tabs are unloaded one by one and its background activity stopped. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "splitView_freezeIncompleteTitleNamed": "Freezing {container} did not finish",
+  "@splitView_freezeIncompleteTitleNamed": {
+    "description": "Shown in place of a tab's page when freezing its container stopped part way. New activity of the container stays blocked; the container menu offers Retry and Resume. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "splitView_resumingTitleNamed": "Resuming {container}…",
+  "@splitView_resumingTitleNamed": {
+    "description": "Shown in place of a tab's page while its frozen container is being resumed. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "splitView_resumeIncompleteTitleNamed": "Resuming {container} did not finish",
+  "@splitView_resumeIncompleteTitleNamed": {
+    "description": "Shown in place of a tab's page when resuming its frozen container stopped part way. The Resume button under it tries again. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "splitView_frozenResume": "Resume",
+  "@splitView_frozenResume": {
+    "description": "Button under \"{container} is frozen\" that resumes the container and loads this tab's page again. Also read out by screen readers as the button's name."
+  },
+  "splitView_frozenSkippedMessages": "{count, plural, =1{1 background message was skipped. Skipped messages are not delivered after Resume.} other{{count} background messages were skipped. Skipped messages are not delivered after Resume.}}",
+  "@splitView_frozenSkippedMessages": {
+    "description": "Line under \"{container} is frozen\": while the container was frozen, sites in it sent push messages that were thrown away unread. A message is not necessarily a notification, so do not translate it as notifications.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "splitView_frozenToBeSafeTitleNamed": "{container} was frozen to be safe",
+  "@splitView_frozenToBeSafeTitleNamed": {
+    "description": "Shown in place of a tab's page when WebLibre froze its container itself, because its record of frozen containers was found damaged. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "splitView_frozenToBeSafeDetail": "WebLibre's record of frozen containers was damaged. Resume to load this tab.",
+  "@splitView_frozenToBeSafeDetail": {
+    "description": "Line under \"{container} was frozen to be safe\" in place of a tab's page."
+  },
+  "splitView_frozenRecoveryTitle": "Frozen until WebLibre has restored which containers are frozen",
+  "@splitView_frozenRecoveryTitle": {
+    "description": "Shown in place of a tab's page while WebLibre restores which containers are frozen, after its record of them was found damaged. Every container with its own storage is frozen meanwhile."
+  },
   "splitView_couldNotOpen": "Couldn't open split view",
   "@splitView_couldNotOpen": {
     "description": "Snackbar when two pages could not be shown together, e.g. because the first tab was closed in the meantime. The chosen page opens normally instead."

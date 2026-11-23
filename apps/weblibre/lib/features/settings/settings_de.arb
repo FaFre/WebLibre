@@ -528,7 +528,7 @@
   "settings_autoClearHistorySubtitle": "Browserverlauf, der älter als der gewählte Zeitraum ist, automatisch löschen",
   "settings_autoClearUnassignedTabsTitle": "Nicht zugeordnete Tabs automatisch schließen",
   "settings_autoClearUnassignedTabsKeywords": "Tabs aufräumen",
-  "settings_autoClearUnassignedTabsSubtitle": "Nicht zugeordnete Tabs, die älter als der gewählte Zeitraum sind, automatisch schließen",
+  "settings_autoClearUnassignedTabsSubtitle": "Nicht zugeordnete Tabs, die älter als der gewählte Zeitraum sind, automatisch schließen. Gesperrte Tabs bleiben offen.",
   "settings_durationNever": "Nie",
   "settings_duration1Day": "1 Tag",
   "settings_duration3Days": "3 Tage",
@@ -1122,5 +1122,17 @@
   "settings_featureControlFeaturesToHide": "Werden ausgeblendet",
   "settings_featureControlApplyPresetConfirm": "Anwenden",
   "settings_featureControlApplyPresetUnchanged": "Die angezeigten Funktionen entsprechen bereits „{preset}“.",
-  "settings_featureControlSectionTitle": "Funktionen"
+  "settings_featureControlSectionTitle": "Funktionen",
+  "settings_sleepingTabsSectionTitle": "Schlafende Tabs",
+  "settings_autoSleepTabsTitle": "Tabs automatisch schlafen legen",
+  "settings_autoSleepTabsSubtitle": "Entlädt Tabs, die eine Weile nicht angesehen wurden, solange WebLibre geöffnet ist. „Aufwecken“ lädt einen schlafenden Tab wieder.",
+  "settings_autoSleepTabsKeywords": "schlafen, entladen, Speicher, Arbeitsspeicher, inaktive Tabs, Leerlauf",
+  "settings_autoSleepIdleTitle": "Schlafen nach",
+  "settings_autoSleepIdleSubtitle": "Wie lange ein Tab nicht angezeigt wird, bevor er schlafen gelegt wird",
+  "settings_autoSleepIdleKeywords": "schlafen, Zeitlimit, Leerlauf, inaktiv",
+  "settings_residentTabLimitTitle": "Höchstzahl geladener Tabs",
+  "settings_residentTabLimitSubtitle": "Über diese Zahl geladener Tabs hinaus werden die am längsten nicht angesehenen schlafen gelegt.",
+  "settings_residentTabLimitKeywords": "Grenze, Speicher, geladene Tabs, schlafen",
+  "settings_residentTabLimitOff": "Keine Grenze",
+  "settings_residentTabLimitCount": "{count, plural, =1{1 Tab} other{{count} Tabs}}"
 }

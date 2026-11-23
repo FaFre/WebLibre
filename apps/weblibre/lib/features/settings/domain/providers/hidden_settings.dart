@@ -109,6 +109,15 @@ SettingsSnapshot _snapshot(
           false,
     ),
   );
+  final autoFreezeContainers = ref.watch(
+    watchContainersProvider.select(
+      (containers) =>
+          containers.value?.any(
+            (c) => c.metadata.autoFreezeAfterMinutes != null,
+          ) ??
+          false,
+    ),
+  );
 
   return SettingsSnapshot(
     general: general,
@@ -120,6 +129,7 @@ SettingsSnapshot _snapshot(
     menu: menu,
     strictContainers: strictContainers,
     appLinkContainers: appLinkContainers,
+    autoFreezeContainers: autoFreezeContainers,
   );
 }
 

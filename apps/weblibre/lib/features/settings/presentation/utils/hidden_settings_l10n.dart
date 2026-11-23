@@ -61,6 +61,8 @@ extension HiddenSettingL10n on HiddenSetting {
         l10n.settings_sequentialTabNavigationTitle,
       HiddenSetting.strictMode => l10n.tabs_strictMode,
       HiddenSetting.containerAppLinks => l10n.tabs_isolatedAppLinkSettings,
+      HiddenSetting.containerAutoFreeze => l10n.tabs_autoFreezeTitle,
+      HiddenSetting.autoSleepTabs => l10n.settings_autoSleepTabsTitle,
       HiddenSetting.childTabs => l10n.settings_createChildTabsTitle,
       HiddenSetting.hierarchyGlyphs => l10n.settings_hierarchyDepthTitle,
       HiddenSetting.childTabPlacement => l10n.settings_childTabPlacementTitle,

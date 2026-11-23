@@ -95,6 +95,11 @@ class _FakeSync extends SplitViewNativeSync {
       dividerOptionsAction: '',
       crashedTitle: '',
       crashedReload: '',
+      sleepingTitle: '',
+      sleepingWake: '',
+      frozenTitle: '',
+      frozenResume: '',
+      frozenContainers: const [],
     ),
   );
 

@@ -30,8 +30,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/utils/find_in_page_suggestion.dart';
 import 'package:weblibre/features/geckoview/features/search/domain/providers/search_modules_view.dart';
 import 'package:weblibre/features/geckoview/features/search/presentation/widgets/search_modules/search_module_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/container_filter.dart';
@@ -46,7 +45,6 @@ import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/text_highlight.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class TabSearch extends HookConsumerWidget {
   static const _matchPrefix = '***';
@@ -275,21 +273,12 @@ class TabSearch extends HookConsumerWidget {
                             .selectTab(result.id);
                       }
 
-                      // Offer to locate the match within the page instead of
-                      // opening Find in Page unprompted (see #421).
-                      final query = result.sourceSearchQuery;
-                      if (query != null &&
-                          query.isNotEmpty &&
-                          ref.read(findInPageControllerProvider(result.id)) ==
-                              FindInPageState.hidden() &&
-                          context.mounted) {
-                        final findController = ref.read(
-                          findInPageControllerProvider(result.id).notifier,
-                        );
-                        ui_helper.showFindInPageSuggestion(
+                      if (context.mounted) {
+                        offerFindInPage(
                           context,
-                          query: query,
-                          onFind: () => findController.findAll(text: query),
+                          ref.read,
+                          tabId: result.id,
+                          query: result.sourceSearchQuery,
                         );
                       }
 

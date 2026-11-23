@@ -27,6 +27,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/readerable.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
@@ -105,9 +106,11 @@ class _DesktopModeToggle extends ConsumerWidget {
         label: MenuItemType.desktopMode.label(context),
         active: desktopEnabled,
         onTap: () {
-          ref
-              .read(desktopModeProvider(selectedTabId).notifier)
-              .enabled(!desktopEnabled);
+          unawaited(
+            ref
+                .read(desktopModeProvider(selectedTabId).notifier)
+                .enabled(!desktopEnabled),
+          );
         },
       ),
     );
@@ -122,6 +125,8 @@ class _ReaderModeToggle extends ConsumerWidget {
     final isReaderLoading = ref.watch(
       readerableScreenControllerProvider.select((value) => value.isLoading),
     );
+    // No page to show in reader view until the tab is woken.
+    final asleep = ref.watch(isSelectedTabAsleepProvider);
     final readerabilityState = ref.watch(
       selectedTabStateProvider.select(
         (state) => state?.readerableState ?? ReaderableState.$default(),
@@ -151,7 +156,7 @@ class _ReaderModeToggle extends ConsumerWidget {
             : MdiIcons.bookOpenOutline,
         label: MenuItemType.readerMode.label(context),
         active: readerVisible && isReaderActive,
-        enabled: readerVisible && !isReaderLoading,
+        enabled: readerVisible && !isReaderLoading && !asleep,
         onTap: () async {
           await ref
               .read(readerableScreenControllerProvider.notifier)

@@ -2195,9 +2195,9 @@
   "@settings_autoClearUnassignedTabsKeywords": {
     "description": "Comma-separated search terms for this setting. Not displayed; include synonyms users might type."
   },
-  "settings_autoClearUnassignedTabsSubtitle": "Automatically close unassigned tabs older than the selected time period",
+  "settings_autoClearUnassignedTabsSubtitle": "Automatically close unassigned tabs older than the selected time period. Locked tabs are kept.",
   "@settings_autoClearUnassignedTabsSubtitle": {
-    "description": "Explanation under that setting."
+    "description": "Explanation under \"Auto-Clear Unassigned Tabs\". Tabs locked with \"Lock tab\" are never closed by it."
   },
   "settings_durationNever": "Never",
   "@settings_durationNever": {
@@ -4758,5 +4758,58 @@
   "settings_featureControlSectionTitle": "Features",
   "@settings_featureControlSectionTitle": {
     "description": "Section title used by settings search for the feature switches on the Feature Control screen."
+  },
+  "settings_sleepingTabsSectionTitle": "Sleeping Tabs",
+  "@settings_sleepingTabsSectionTitle": {
+    "description": "Section heading on the browsing settings screen for automatic tab sleep (unloading a tab's page to free memory)."
+  },
+  "settings_autoSleepTabsTitle": "Sleep Tabs Automatically",
+  "@settings_autoSleepTabsTitle": {
+    "description": "Switch: unload tabs the user has not looked at for a while, to free memory."
+  },
+  "settings_autoSleepTabsSubtitle": "While WebLibre is open, unloads tabs you have not looked at for a while. Tap Wake on a sleeping tab to load it again.",
+  "@settings_autoSleepTabsSubtitle": {
+    "description": "Explains automatic tab sleep under its switch, in about one line: what it does, and how a sleeping tab loads again. \"Wake\" is the button on a sleeping tab's page (browser_wakeTabShort)."
+  },
+  "settings_autoSleepTabsKeywords": "sleep, unload, memory, suspend, discard, idle, inactive tabs",
+  "@settings_autoSleepTabsKeywords": {
+    "description": "Comma-separated search words for the automatic tab sleep setting. Never displayed."
+  },
+  "settings_autoSleepIdleTitle": "Sleep After",
+  "@settings_autoSleepIdleTitle": {
+    "description": "Setting title: how long a tab is off screen before automatic sleep unloads it. Followed by a list of durations."
+  },
+  "settings_autoSleepIdleSubtitle": "How long a tab is off screen before it is put to sleep",
+  "@settings_autoSleepIdleSubtitle": {
+    "description": "Explains the 'Sleep After' setting."
+  },
+  "settings_autoSleepIdleKeywords": "sleep, timeout, idle, inactive",
+  "@settings_autoSleepIdleKeywords": {
+    "description": "Comma-separated search words for the 'Sleep After' setting. Never displayed."
+  },
+  "settings_residentTabLimitTitle": "Loaded Tabs Limit",
+  "@settings_residentTabLimitTitle": {
+    "description": "Setting title: how many tabs may keep their page loaded before automatic sleep unloads the oldest ones."
+  },
+  "settings_residentTabLimitSubtitle": "Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.",
+  "@settings_residentTabLimitSubtitle": {
+    "description": "Explains the 'Loaded Tabs Limit' setting."
+  },
+  "settings_residentTabLimitKeywords": "limit, memory, loaded tabs, sleep",
+  "@settings_residentTabLimitKeywords": {
+    "description": "Comma-separated search words for the 'Loaded Tabs Limit' setting. Never displayed."
+  },
+  "settings_residentTabLimitOff": "No Limit",
+  "@settings_residentTabLimitOff": {
+    "description": "Choice of the 'Loaded Tabs Limit' setting: any number of tabs may stay loaded."
+  },
+  "settings_residentTabLimitCount": "{count, plural, =1{1 Tab} other{{count} Tabs}}",
+  "@settings_residentTabLimitCount": {
+    "description": "Choice of the 'Loaded Tabs Limit' setting: at most this many tabs keep their page loaded.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

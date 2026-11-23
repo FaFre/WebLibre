@@ -27,6 +27,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
@@ -34,18 +35,24 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/bro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/bookmark_all_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/select_folder_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/container_freeze_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_sleep_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/clear_container_data_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_private_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/close_all_tabs_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_freeze_l10n.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -100,6 +107,11 @@ class ContainerMenu extends HookConsumerWidget {
   final bool enableCloseFilteredTabs;
 
   final bool enableBookmarkAll;
+
+  /// Adds Freeze, Stop freezing, Retry and Resume for [container] (7.2);
+  /// each decides for itself whether it applies.
+  final bool enableFreeze;
+
   final bool enableAssignedSites;
   final bool enableClearData;
   final bool enableEdit;
@@ -117,6 +129,7 @@ class ContainerMenu extends HookConsumerWidget {
     this.enableCloseTabs = true,
     this.enableCloseFilteredTabs = false,
     this.enableBookmarkAll = true,
+    this.enableFreeze = true,
     this.enableAssignedSites = false,
     this.enableClearData = true,
     this.enableEdit = false,
@@ -130,6 +143,11 @@ class ContainerMenu extends HookConsumerWidget {
 
     final closeIsolatedShown = ref.watch(
       closeIsolatedTabsShownProvider(scopeContainerId),
+    );
+    final sleepShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.isFeatureShown(FeatureId.tabsSleep),
+      ),
     );
 
     final container = this.container;
@@ -166,15 +184,16 @@ class ContainerMenu extends HookConsumerWidget {
         return;
       }
 
-      if (tabIds.isNotEmpty) {
-        await ref.read(tabRepositoryProvider.notifier).closeTabs(tabIds);
-      }
+      if (tabIds.isEmpty) return;
+      final result = await ref
+          .read(tabRepositoryProvider.notifier)
+          .closeTabs(tabIds);
 
       if (context.mounted) {
-        ui_helper.showTabUndoClose(
+        showTabCloseResult(
           context,
+          result,
           ref.read(tabRepositoryProvider.notifier).undoClose,
-          count: tabIds.length,
         );
       }
     }
@@ -198,17 +217,20 @@ class ContainerMenu extends HookConsumerWidget {
             leadingIcon: const Icon(MdiIcons.tabPlus),
             onPressed: enabled
                 ? () async {
-                    final tabId = await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          tabMode: TabMode.regular,
-                          selectTab: false,
-                          containerSelection: container == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(container),
-                        );
+                    final tabs = ref.read(tabRepositoryProvider.notifier);
+                    // A container being deleted refuses the tab.
+                    final tabId = await openUnlessContainerRefuses(
+                      context,
+                      () => tabs.addTab(
+                        tabMode: TabMode.regular,
+                        selectTab: false,
+                        containerSelection: container == null
+                            ? const TabContainerSelection.unassigned()
+                            : TabContainerSelection.specific(container),
+                      ),
+                    );
 
-                    if (context.mounted) {
+                    if (tabId != null && context.mounted) {
                       handleBackgroundTabOpened(context, ref, tabId);
                     }
                   }
@@ -318,17 +340,17 @@ class ContainerMenu extends HookConsumerWidget {
                             return;
                           }
 
-                          await ref
+                          final result = await ref
                               .read(tabRepositoryProvider.notifier)
                               .closeTabs(filteredIds);
 
                           if (context.mounted) {
-                            ui_helper.showTabUndoClose(
+                            showTabCloseResult(
                               context,
+                              result,
                               ref
                                   .read(tabRepositoryProvider.notifier)
                                   .undoClose,
-                              count: filteredIds.length,
                             );
                           }
                         }
@@ -338,6 +360,36 @@ class ContainerMenu extends HookConsumerWidget {
             ],
             child: Text(l10n.browser_menuCloseTabs),
           ),
+        if (enableCloseTabs && sleepShown)
+          MenuItemButton(
+            leadingIcon: const Icon(MdiIcons.sleep),
+            onPressed: enabled
+                ? () async {
+                    final tabIds = await ref
+                        .read(tabDataRepositoryProvider.notifier)
+                        .getContainerTabIds(scopeContainerId);
+                    if (!context.mounted || tabIds.isEmpty) return;
+                    await sleepTabsWithConfirmation(context, ref.read, tabIds);
+                  }
+                : null,
+            child: Text(l10n.browser_menuSleepAllTabs),
+          ),
+        if (enableFreeze && container != null) ...[
+          _FreezeContainerMenuItem(
+            container: container,
+            enabled: enabled,
+            onFreeze: () =>
+                freezeContainerWithConfirmation(context, ref.read, container),
+            onResume: () =>
+                resumeContainerWithFeedback(context, ref.read, container),
+          ),
+          _ResumeContainerMenuItem(
+            containerId: container.id,
+            enabled: enabled,
+            onResume: () =>
+                resumeContainerWithFeedback(context, ref.read, container),
+          ),
+        ],
         if (enableBookmarkAll)
           MenuItemButton(
             leadingIcon: const Icon(MdiIcons.bookmarkPlusOutline),
@@ -403,6 +455,144 @@ class ContainerMenu extends HookConsumerWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// A menu entry's title with the state line under it.
+class _TitleWithState extends StatelessWidget {
+  final String title;
+  final String? state;
+
+  const _TitleWithState({required this.title, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = this.state;
+    if (state == null) return Text(title);
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title),
+        ConstrainedBox(
+          // Long states wrap instead of widening the menu past the screen.
+          constraints: const BoxConstraints(maxWidth: 240),
+          child: Text(
+            state,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// "Freeze container", or while a freeze runs "Stop freezing and resume"
+/// with its progress, or "Try freezing again" after one did not finish (5.4,
+/// 7.2). Freeze follows the feature's visibility; stopping never hides (P5).
+///
+/// Only decides which entry applies; [ContainerMenu] runs it.
+class _FreezeContainerMenuItem extends HookConsumerWidget {
+  final ContainerData container;
+  final bool enabled;
+  final VoidCallback onFreeze;
+  final VoidCallback onResume;
+
+  const _FreezeContainerMenuItem({
+    required this.container,
+    required this.enabled,
+    required this.onFreeze,
+    required this.onResume,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final shown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.isFeatureShown(FeatureId.containerFreeze),
+      ),
+    );
+    final view = ref.watch(containerFreezeStateProvider(container.id));
+    final progress = ref.watch(
+      containerFreezeProgressProvider(
+        container.id,
+      ).select((value) => value.value),
+    );
+    final recovery = ref.watch(freezeRecoveryModeProvider);
+
+    if (view != null && view.operation == LifecycleOperationState.freezing) {
+      return MenuItemButton(
+        onPressed: enabled ? onResume : null,
+        leadingIcon: const Icon(MdiIcons.play),
+        child: _TitleWithState(
+          title: l10n.browser_stopFreezing,
+          state: view.stateLabel(l10n, progress: progress),
+        ),
+      );
+    }
+    if (!shown || recovery) return const SizedBox.shrink();
+    if (view != null) {
+      if (view.phase != ContextFreezePhase.failed ||
+          view.operation != LifecycleOperationState.idle) {
+        return const SizedBox.shrink();
+      }
+      return MenuItemButton(
+        onPressed: enabled ? onFreeze : null,
+        leadingIcon: const Icon(MdiIcons.pause),
+        child: Text(l10n.browser_retryFreeze),
+      );
+    }
+
+    // Unavailable stays visible with its reason (7.2).
+    final hasOwnStorage = container.metadata.contextualIdentity != null;
+    return MenuItemButton(
+      onPressed: enabled && hasOwnStorage ? onFreeze : null,
+      leadingIcon: const Icon(MdiIcons.pause),
+      child: _TitleWithState(
+        title: l10n.browser_menuFreezeContainer,
+        state: hasOwnStorage ? null : l10n.browser_freezeNeedsOwnStorage,
+      ),
+    );
+  }
+}
+
+/// "Resume container" with the container's state under it, for a container
+/// shown as frozen and not being frozen or resumed right now. Never hidden
+/// (P5).
+class _ResumeContainerMenuItem extends HookConsumerWidget {
+  final String containerId;
+  final bool enabled;
+  final VoidCallback onResume;
+
+  const _ResumeContainerMenuItem({
+    required this.containerId,
+    required this.enabled,
+    required this.onResume,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final view = ref.watch(containerFreezeStateProvider(containerId));
+
+    if (view == null || !view.showsFrozen) return const SizedBox.shrink();
+    if (view.operation == LifecycleOperationState.freezing) {
+      // "Stop freezing and resume" stands in for it.
+      return const SizedBox.shrink();
+    }
+    final resuming = view.operation == LifecycleOperationState.resuming;
+    return MenuItemButton(
+      onPressed: enabled && !resuming ? onResume : null,
+      leadingIcon: const Icon(MdiIcons.play),
+      child: _TitleWithState(
+        title: l10n.browser_resumeContainer,
+        state: view.stateLabel(l10n),
+      ),
     );
   }
 }
@@ -505,22 +695,61 @@ Future<void> _clearContainerData(
 
   final shouldReopenTabs = result!.reopenTabs;
 
+  // Isolated tabs reopen in their own contexts, which a frozen container may
+  // refuse (D19): checked before anything is closed.
+  final isolationContextIds = [
+    for (final tab in tabs)
+      if (tab.tabMode == TabModeDbValue.isolated) ?tab.isolationContextId,
+  ];
+  if (shouldReopenTabs &&
+      isolationContextIds.isNotEmpty &&
+      !await ref
+          .read(tabRepositoryProvider.notifier)
+          .mayAddIsolatedTabs(container.id, isolationContextIds)) {
+    if (context.mounted) {
+      ui_helper.showInfoMessage(
+        context,
+        AppLocalizations.of(context).browser_containerFrozen,
+      );
+    }
+    return;
+  }
+
   try {
     // Off the recently closed list, which would keep their back history
-    // past the clearing.
-    final closedTabIds = await ref
+    // past the clearing. Locked tabs stay open: the clear closes their
+    // sessions too, and they reload into the cleared storage with their back
+    // history.
+    final closed = await ref
         .read(tabDataRepositoryProvider.notifier)
         .closeContainerTabs(container.id, keepOffRecentlyClosed: true);
+    // Nothing closed, because the tab locks could not be read: clearing now
+    // would leave every tab open with its back history.
+    if (closed.locksUnavailable) {
+      if (context.mounted) {
+        ui_helper.showErrorMessage(
+          context,
+          AppLocalizations.of(context).browser_closeFailed,
+        );
+      }
+      return;
+    }
+    final closedTabIds = closed.removedTabIds.toSet();
 
     await ref
         .read(browserDataServiceProvider.notifier)
         .clearDataForContext(contextualIdentity);
 
-    if (shouldReopenTabs) {
+    // Only what closed is reopened; a locked tab never left.
+    final reopened = [
+      for (final tab in tabs)
+        if (closedTabIds.contains(tab.id)) tab,
+    ];
+    if (shouldReopenTabs && reopened.isNotEmpty) {
       await ref
           .read(tabRepositoryProvider.notifier)
           .addMultipleTabs(
-            tabs: tabs.map((tab) {
+            tabs: reopened.map((tab) {
               // Re-parent onto the nearest ancestor that survives, so the
               // restored hierarchy doesn't reference closed tabs.
               var parentId = tab.parentId;
@@ -552,7 +781,9 @@ Future<void> _clearContainerData(
         context,
         shouldReopenTabs
             ? l10n.browser_containerDataClearedSuccess
-            : l10n.browser_containerDataClearedWithTabsClosed(tabs.length),
+            : l10n.browser_containerDataClearedWithTabsClosed(
+                closedTabIds.length,
+              ),
       );
     }
   } catch (e, s) {

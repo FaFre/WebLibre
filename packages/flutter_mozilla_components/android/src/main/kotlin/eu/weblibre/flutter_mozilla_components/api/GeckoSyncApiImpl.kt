@@ -19,6 +19,7 @@ import mozilla.components.concept.sync.DeviceCommandOutgoing
 import mozilla.components.concept.sync.TabData
 import mozilla.components.concept.sync.SyncEngine
 import mozilla.components.concept.sync.TabPrivacy
+import mozilla.components.service.fxa.FxaService
 import mozilla.components.service.fxa.manager.SCOPE_PROFILE
 import mozilla.components.service.fxa.manager.SCOPE_SYNC
 import mozilla.components.service.fxa.sync.SyncReason
@@ -61,6 +62,7 @@ class GeckoSyncApiImpl : GeckoSyncApi {
             components.services.accountsAuthFeature.beginAuthentication(
                 context = components.profileApplicationContext,
                 entrypoint = WebLibreFxAEntryPoint.Settings,
+                service = FxaService.Sync.identifier,
                 scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
             )
         }
@@ -75,6 +77,7 @@ class GeckoSyncApiImpl : GeckoSyncApi {
                 context = components.profileApplicationContext,
                 pairingUrl = pairingUrl,
                 entrypoint = WebLibreFxAEntryPoint.Settings,
+                service = FxaService.Sync.identifier,
                 scopes = setOf(SCOPE_PROFILE, SCOPE_SYNC),
             )
         }

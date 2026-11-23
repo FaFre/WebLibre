@@ -40,6 +40,7 @@ import 'package:weblibre/features/settings/presentation/widgets/settings_detail.
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
@@ -106,6 +107,33 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
           keywords: settingsKeywords(l10n.settings_onDeviceAiKeywords),
           hiddenSettings: const [HiddenSetting.localAi],
           child: const _OnDeviceAiTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_sleepingTabsSectionTitle,
+      feature: FeatureId.tabsSleep,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_autoSleepTabsTitle,
+          subtitle: l10n.settings_autoSleepTabsSubtitle,
+          keywords: settingsKeywords(l10n.settings_autoSleepTabsKeywords),
+          hiddenSettings: const [HiddenSetting.autoSleepTabs],
+          child: const _AutoSleepTabsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_autoSleepIdleTitle,
+          subtitle: l10n.settings_autoSleepIdleSubtitle,
+          keywords: settingsKeywords(l10n.settings_autoSleepIdleKeywords),
+          hiddenSettings: const [HiddenSetting.autoSleepTabs],
+          child: const _AutoSleepIdleSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_residentTabLimitTitle,
+          subtitle: l10n.settings_residentTabLimitSubtitle,
+          keywords: settingsKeywords(l10n.settings_residentTabLimitKeywords),
+          hiddenSettings: const [HiddenSetting.autoSleepTabs],
+          child: const _ResidentTabLimitSection(),
         ),
       ],
     ),
@@ -828,6 +856,160 @@ class _CreateChildTabsTile extends HookConsumerWidget {
                   currentSettings.copyWith.createChildTabsOption(value),
             );
       },
+    );
+  }
+}
+
+/// Automatic tab sleep (5.9 of the tab lock and freeze plan); off on every
+/// preset (D12).
+class _AutoSleepTabsTile extends HookConsumerWidget {
+  const _AutoSleepTabsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final autoSleepTabs = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepTabs),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_autoSleepTabsTitle),
+      subtitle: Text(l10n.settings_autoSleepTabsSubtitle),
+      secondary: const Icon(MdiIcons.sleep),
+      value: autoSleepTabs,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.autoSleepTabs(value),
+            );
+      },
+    );
+  }
+}
+
+/// The idle time choices of D12: 10 min, 30 min, 1 h, 4 h.
+const _autoSleepIdleChoices = [10, 30, 60, 240];
+
+class _AutoSleepIdleSection extends HookConsumerWidget {
+  const _AutoSleepIdleSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepTabs),
+    );
+    final idleMinutes = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepIdleMinutes),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text(l10n.settings_autoSleepIdleTitle),
+            subtitle: Text(l10n.settings_autoSleepIdleSubtitle),
+            leading: const Icon(MdiIcons.timerSandComplete),
+            contentPadding: EdgeInsets.zero,
+            enabled: enabled,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40.0),
+            child: DropdownMenu<int>(
+              enabled: enabled,
+              initialSelection: idleMinutes,
+              width: double.infinity,
+              dropdownMenuEntries: [
+                // A stored value outside the choices stays selectable.
+                for (final minutes in {..._autoSleepIdleChoices, idleMinutes})
+                  DropdownMenuEntry(
+                    value: minutes,
+                    label: formatMinutes(l10n, minutes),
+                  ),
+              ],
+              onSelected: (value) async {
+                if (value == null) return;
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.autoSleepIdleMinutes(value),
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The resident limit choices of D12: off, 4, 6, 10, 20.
+const _residentTabLimitChoices = [4, 6, 10, 20];
+
+class _ResidentTabLimitSection extends HookConsumerWidget {
+  const _ResidentTabLimitSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepTabs),
+    );
+    final residentTabLimit = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.residentTabLimit),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: Text(l10n.settings_residentTabLimitTitle),
+            subtitle: Text(l10n.settings_residentTabLimitSubtitle),
+            leading: const Icon(MdiIcons.tabUnselected),
+            contentPadding: EdgeInsets.zero,
+            enabled: enabled,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40.0),
+            child: DropdownMenu<int?>(
+              enabled: enabled,
+              initialSelection: residentTabLimit,
+              width: double.infinity,
+              dropdownMenuEntries: [
+                DropdownMenuEntry(
+                  value: null,
+                  label: l10n.settings_residentTabLimitOff,
+                ),
+                for (final limit in {
+                  ..._residentTabLimitChoices,
+                  ?residentTabLimit,
+                })
+                  DropdownMenuEntry(
+                    value: limit,
+                    label: l10n.settings_residentTabLimitCount(limit),
+                  ),
+              ],
+              onSelected: (value) async {
+                await ref
+                    .read(saveGeneralSettingsControllerProvider.notifier)
+                    .save(
+                      (currentSettings) =>
+                          currentSettings.copyWith.residentTabLimit(value),
+                    );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

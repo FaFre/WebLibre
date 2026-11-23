@@ -2821,7 +2821,7 @@
   "settings_autoClearHistorySubtitle": "Hapus otomatis riwayat penjelajahan yang lebih lama dari jangka waktu yang dipilih",
   "settings_autoClearUnassignedTabsTitle": "Tutup Otomatis Tab Tanpa Kontainer",
   "settings_autoClearUnassignedTabsKeywords": "bersihkan tab, cleanup tabs",
-  "settings_autoClearUnassignedTabsSubtitle": "Tutup otomatis tab tanpa kontainer yang lebih lama dari jangka waktu yang dipilih",
+  "settings_autoClearUnassignedTabsSubtitle": "Tutup otomatis tab tanpa kontainer yang lebih lama dari jangka waktu yang dipilih. Tab yang dikunci tetap dipertahankan.",
   "settings_durationNever": "Jangan pernah",
   "settings_duration1Day": "1 Hari",
   "settings_duration3Days": "3 Hari",

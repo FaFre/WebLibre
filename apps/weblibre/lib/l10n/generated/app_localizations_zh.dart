@@ -1889,6 +1889,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_togglePinTabDescription => '切换当前标签页的固定状态';
 
   @override
+  String get browserActions_toggleLockTabTitle => 'Lock / Unlock Tab';
+
+  @override
+  String get browserActions_toggleLockTabDescription =>
+      'Prevent the current tab from closing, or allow it again';
+
+  @override
   String get browserActions_moveTabBackwardTitle => '标签页前移';
 
   @override
@@ -2014,6 +2021,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_tabUnpinnedMessage => '已取消固定标签页';
+
+  @override
+  String get browserActions_tabLockedMessage => 'Tab locked';
+
+  @override
+  String get browserActions_tabUnlockedMessage => 'Tab unlocked';
 
   @override
   String get browserActions_homeScreenUnavailableMessage => '此页面无法添加到主屏幕';
@@ -2345,6 +2358,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_togglePinTabKeywords => '固定标签页,取消固定,置顶';
+
+  @override
+  String get browserActions_toggleLockTabKeywords =>
+      'lock tab, unlock, keep open, protect, prevent closing';
 
   @override
   String get browserActions_closeTabKeywords => '关闭,移除标签页';
@@ -3111,6 +3128,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_closeTabAfterClearingSubtitle => '数据清除后关闭此标签页';
 
   @override
+  String get browser_closeTabAfterClearingLocked =>
+      'Unlock the tab to close it after clearing';
+
+  @override
   String get browser_clearingEllipsis => '正在清除…';
 
   @override
@@ -3349,6 +3370,463 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browser_unpinTab => '取消固定标签页';
+
+  @override
+  String get browser_lockTab => 'Lock tab';
+
+  @override
+  String get browser_unlockTab => 'Unlock tab';
+
+  @override
+  String get browser_tabLockedLabel => 'Locked';
+
+  @override
+  String get browser_tabUnlockIncompleteLabel =>
+      'Locked, unlocking did not finish';
+
+  @override
+  String get browser_retryUnlockTab => 'Retry unlocking tab';
+
+  @override
+  String get browser_tabUnlockIncompleteMessage =>
+      'Unlocking did not finish. The tab stays locked until it does.';
+
+  @override
+  String get browser_tabLockFailed => 'This tab could not be locked';
+
+  @override
+  String get browser_tabUnlockFailed => 'This tab could not be unlocked';
+
+  @override
+  String get browser_tabLockPrivate => 'Private tabs cannot be locked';
+
+  @override
+  String get browser_lockedTabCannotMove =>
+      'Unlock this tab to move it to a container with its own storage';
+
+  @override
+  String get browser_tabMoveFailed => 'The tab was not moved. Try again.';
+
+  @override
+  String get browser_containerBeingDeleted => 'This container is being deleted';
+
+  @override
+  String get browser_containerFrozen => 'Resume the container first';
+
+  @override
+  String get browser_tabIsLocked => 'This tab is locked';
+
+  @override
+  String get browser_closeFailed => 'Nothing was closed. Try again.';
+
+  @override
+  String browser_lockedTabsKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count locked tabs were kept',
+      one: 'This tab is locked',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_tabsClosedKeptLocked(int closed, int locked) {
+    String _temp0 = intl.Intl.pluralLogic(
+      closed,
+      locale: localeName,
+      other: 'Closed $closed tabs.',
+      one: 'Closed 1 tab.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      locked,
+      locale: localeName,
+      other: 'Kept $locked locked tabs.',
+      one: 'Kept 1 locked tab.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String get browser_menuSleepAllTabs => 'Sleep All Tabs';
+
+  @override
+  String get browser_sleepTab => 'Put to sleep';
+
+  @override
+  String get browser_sleepTabDescription =>
+      'Frees memory by unloading the page. It loads again when you wake the tab. Some unsaved page state may be lost.';
+
+  @override
+  String browser_sleepTabsConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Put $count tabs to sleep?',
+      one: 'Put this tab to sleep?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_wakeTab => 'Wake tab';
+
+  @override
+  String get browser_wakeTabRoutingNotReady =>
+      'This tab\'s connection is not ready yet, so it stays asleep';
+
+  @override
+  String get browser_tabAsleepLabel => 'Asleep';
+
+  @override
+  String get browser_sleepAskTitle => 'Put to sleep anyway?';
+
+  @override
+  String browser_sleepAskMedia(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tabs are playing media. Putting them to sleep stops playback.',
+      one: 'This tab is playing media. Putting it to sleep stops playback.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepAskPostResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pages are the result of a form submission. When they reload, the forms are not sent again, so the pages may not come back as they were.',
+      one:
+          'This page is the result of a form submission. When it reloads, the form is not sent again, so the page may not come back as it was.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepAskFormData(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tabs have text typed into a form. Putting them to sleep may lose it.',
+      one:
+          'This tab has text typed into a form. Putting it to sleep may lose it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepTabsPartial(int slept, int kept) {
+    String _temp0 = intl.Intl.pluralLogic(
+      slept,
+      locale: localeName,
+      other: '$slept tabs were put to sleep.',
+      one: '1 tab was put to sleep.',
+      zero: 'No tabs were put to sleep.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      kept,
+      locale: localeName,
+      other: '$kept tabs were kept awake because of what they are doing.',
+      one: '1 tab was kept awake because of what it is doing.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String get browser_sleepTabFailed => 'This tab could not be put to sleep';
+
+  @override
+  String get browser_sleepRefusedRecording =>
+      'This tab is using the camera, microphone or screen sharing, so it was not put to sleep';
+
+  @override
+  String get browser_sleepRefusedFormData =>
+      'This tab has form input that would be lost, so it was not put to sleep';
+
+  @override
+  String get browser_sleepRefusedUpload =>
+      'A file was chosen for upload in this tab, so it was not put to sleep';
+
+  @override
+  String get browser_sleepRefusedPrintOrPdf =>
+      'This tab is being printed or saved as PDF, so it was not put to sleep';
+
+  @override
+  String get browser_sleepRefusedDownload =>
+      'A download from this tab is still running, so it was not put to sleep';
+
+  @override
+  String get browser_freezeContainer => 'Freeze container';
+
+  @override
+  String get browser_menuFreezeContainer => 'Freeze Container';
+
+  @override
+  String browser_freezeContainerTitle(String container) {
+    return 'Freeze $container?';
+  }
+
+  @override
+  String get browser_freezeContainerDescription =>
+      'Unloads its tabs and stops what its sites do in the background, such as push messages and service workers, until you resume it. Cookies, sign-ins and site data are kept. New tabs opened in it wait until then. Push messages sent meanwhile are skipped.';
+
+  @override
+  String get browser_resumeContainer => 'Resume Container';
+
+  @override
+  String get browser_stopFreezing => 'Stop Freezing and Resume';
+
+  @override
+  String get browser_retryFreeze => 'Try Freezing Again';
+
+  @override
+  String get browser_containerFrozenLabel => 'Frozen';
+
+  @override
+  String get browser_containerFreezing => 'Freezing…';
+
+  @override
+  String browser_containerFreezingProgress(int done, int total) {
+    return 'Freezing… $done of $total';
+  }
+
+  @override
+  String get browser_containerResuming => 'Resuming…';
+
+  @override
+  String get browser_freezeIncompleteLabel => 'Freeze incomplete';
+
+  @override
+  String get browser_resumeIncompleteLabel => 'Resume incomplete';
+
+  @override
+  String get browser_freezeIncompleteBlocked =>
+      'Freeze incomplete: new activity is blocked, some already running may not have stopped';
+
+  @override
+  String get browser_freezeIncompleteUncertain =>
+      'Freeze incomplete: background activity may not be blocked';
+
+  @override
+  String get browser_resumeIncompleteBlocked =>
+      'Resume incomplete: still blocked, resume again';
+
+  @override
+  String get browser_resumeIncompleteLifted =>
+      'Resume incomplete: background activity may already be running';
+
+  @override
+  String get browser_freezeNeedsOwnStorage => 'Needs its own cookie storage';
+
+  @override
+  String get browser_freezeSharedStorage =>
+      'An isolated tab of this container shares its storage with a tab outside it, so it cannot be frozen';
+
+  @override
+  String get browser_resumeSharedWithFrozen =>
+      'An isolated tab of another frozen container shares this container\'s storage. Resume that container first.';
+
+  @override
+  String get browser_freezeRecoveryPending =>
+      'Frozen containers are being restored. Try again in a moment.';
+
+  @override
+  String get browser_undoWaitsForSiteData =>
+      'This tab can\'t come back until its site data is deleted';
+
+  @override
+  String get browser_resumeFreezeStateUnknown =>
+      'The container was not resumed because WebLibre could not check what is frozen. Try again.';
+
+  @override
+  String get browser_freezeBusy =>
+      'This container is busy. Try again in a moment.';
+
+  @override
+  String browser_containerFrozenDone(String container) {
+    return '$container is frozen';
+  }
+
+  @override
+  String browser_containerResumedDone(String container) {
+    return '$container resumed';
+  }
+
+  @override
+  String get browser_freezeFailedShared =>
+      'A tab outside this container uses its storage, so it was not frozen';
+
+  @override
+  String get browser_freezeFailedMembershipChanged =>
+      'A tab joined this container meanwhile, so it was not frozen. Try again.';
+
+  @override
+  String get browser_freezeFailedMemberOutside =>
+      'A tab in this container does not use its storage, so it was not frozen. Close that tab or move it to another container, then try again.';
+
+  @override
+  String get browser_freezeFailedExternalWindow =>
+      'A web app or custom tab of this container is open. Close it, then try again.';
+
+  @override
+  String get browser_freezeFailedEngineRefused =>
+      'The browser engine refused to freeze this container. Nothing was changed.';
+
+  @override
+  String get browser_freezeFailedNotPersisted =>
+      'The frozen state could not be saved, so the container was not frozen';
+
+  @override
+  String get browser_freezeFailedQuiescence =>
+      'Freeze incomplete: some activity did not stop in time. New activity is blocked; resume or try again.';
+
+  @override
+  String get browser_freezeFailedGeneric =>
+      'Freezing this container did not finish. Resume it or try again.';
+
+  @override
+  String get browser_resumeRoutingNotReady =>
+      'This container\'s connection is not ready yet, so it stays frozen';
+
+  @override
+  String get browser_resumeIsolationCleanupFailed =>
+      'The data of a closed isolated tab could not be deleted first, so the container stays frozen. Try again.';
+
+  @override
+  String get browser_resumeFailedBlocked =>
+      'Resuming did not finish. The container is still frozen; try again.';
+
+  @override
+  String get browser_resumeFailedLifted =>
+      'Resuming did not finish. Its sites may already run in the background; try again.';
+
+  @override
+  String get browser_freezeBlockedTitle => 'Can\'t freeze this container yet';
+
+  @override
+  String get browser_freezeBlockedRecording =>
+      'Uses the camera, microphone or screen sharing';
+
+  @override
+  String get browser_freezeBlockedFormData =>
+      'Has form input that would be lost';
+
+  @override
+  String get browser_freezeBlockedUpload => 'A file was chosen for upload';
+
+  @override
+  String get browser_freezeBlockedPrintOrPdf => 'Being printed or saved as PDF';
+
+  @override
+  String get browser_freezeBlockedDownload =>
+      'A download from this container is still running';
+
+  @override
+  String get browser_freezeBlockedUnattributedDownload =>
+      'A download is running whose container is unknown';
+
+  @override
+  String get browser_freezeBlockedTabGone => 'Closed tab';
+
+  @override
+  String get browser_freezeBlockedShowTab => 'Show tab';
+
+  @override
+  String get browser_freezeBlockedViewDownloads => 'View downloads';
+
+  @override
+  String get browser_freezeAskTitle => 'Freeze anyway?';
+
+  @override
+  String browser_freezeAskMedia(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tabs of this container are playing media. Freezing stops playback.',
+      one: 'A tab of this container is playing media. Freezing stops playback.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_freezeAskPostResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pages of this container are the result of a form submission. When they reload after Resume, the forms are not sent again, so the pages may not come back as they were.',
+      one:
+          'A page of this container is the result of a form submission. When it reloads after Resume, the form is not sent again, so the page may not come back as it was.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_freezeAskFormData(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tabs of this container have text typed into a form. Freezing may lose it.',
+      one:
+          'A tab of this container has text typed into a form. Freezing may lose it.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_resumeAndOpenTitle(String container) {
+    return 'Resume $container and open?';
+  }
+
+  @override
+  String get browser_resumeAndOpenContent =>
+      'This container is frozen, so nothing in it loads until it is resumed.';
+
+  @override
+  String get browser_resumeAndOpen => 'Resume and open';
+
+  @override
+  String get browser_resumeAndOpenCancelled =>
+      'Nothing was opened. The container stays frozen.';
+
+  @override
+  String get browser_containerFrozenToBeSafeLabel =>
+      'Frozen to be safe after a damaged record';
+
+  @override
+  String get browser_frozenToBeSafeTitle => 'Containers frozen to be safe';
+
+  @override
+  String browser_frozenToBeSafeContent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze all $count containers that have their own cookie storage. Resume each one when you want its sites to run again.',
+      one:
+          'WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze the container that has its own cookie storage. Resume it when you want its sites to run again.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_frozenToBeSafeShowContainers => 'Show containers';
+
+  @override
+  String get browser_freezeRecoveryFailed =>
+      'WebLibre could not restore which containers are frozen, so every container stays frozen for now';
+
+  @override
+  String browser_containerDeletionNotFinished(String container) {
+    return 'Deleting $container did not finish, so it is still there';
+  }
 
   @override
   String get browser_pinTab => '固定标签页';
@@ -3701,6 +4179,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_tabPickerNothingHere => '此处没有可选择的标签页';
 
   @override
+  String get browser_keepTabAwake => 'Keep awake';
+
+  @override
+  String get browser_allowTabSleeping => 'Allow sleeping';
+
+  @override
+  String get browser_pinTabShort => 'Pin';
+
+  @override
+  String get browser_unpinTabShort => 'Unpin';
+
+  @override
+  String get browser_lockTabShort => 'Lock';
+
+  @override
+  String get browser_unlockTabShort => 'Unlock';
+
+  @override
+  String get browser_sleepTabShort => 'Sleep';
+
+  @override
+  String get browser_wakeTabShort => 'Wake';
+
+  @override
+  String get browser_tabKeptAwakeLabel => 'Kept awake';
+
+  @override
   String get contextualToolbar_tooltipHome => '主页';
 
   @override
@@ -3891,6 +4396,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu_itemMoreDisclosure => '更多';
 
   @override
+  String menu_moreDisclosureSummary(String items, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count more',
+      one: '1 more',
+    );
+    return '$items and $_temp0';
+  }
+
+  @override
   String get menu_itemCloneTab => '复制标签页';
 
   @override
@@ -3922,6 +4438,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get menu_itemPinTopSite => '固定到快捷方式';
+
+  @override
+  String get menu_itemLockTab => 'Lock Tab';
+
+  @override
+  String get menu_itemSleepTab => 'Put Tab to Sleep';
 
   @override
   String get menu_itemFetchFeeds => '获取订阅源';
@@ -4170,6 +4692,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get menu_pinUpdateFailed => '无法更新快捷方式';
+
+  @override
+  String get menu_lockTab => 'Lock Tab';
+
+  @override
+  String get menu_unlockTab => 'Unlock Tab';
+
+  @override
+  String get menu_retryUnlockTab => 'Retry Unlocking Tab';
+
+  @override
+  String get menu_sleepTab => 'Put Tab to Sleep';
+
+  @override
+  String get menu_wakeTab => 'Wake Tab';
 
   @override
   String get menu_fetchFeedsTitle => '获取页面上的订阅源';
@@ -5386,6 +5923,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String get splitView_crashedReload => '重新加载';
 
   @override
+  String get splitView_sleepingTitle => 'This tab is asleep';
+
+  @override
+  String get splitView_sleepingWake => 'Wake';
+
+  @override
+  String get splitView_frozenTitle => 'This container is frozen';
+
+  @override
+  String splitView_frozenTitleNamed(String container) {
+    return '$container is frozen';
+  }
+
+  @override
+  String splitView_freezingTitleNamed(String container) {
+    return 'Freezing $container…';
+  }
+
+  @override
+  String splitView_freezeIncompleteTitleNamed(String container) {
+    return 'Freezing $container did not finish';
+  }
+
+  @override
+  String splitView_resumingTitleNamed(String container) {
+    return 'Resuming $container…';
+  }
+
+  @override
+  String splitView_resumeIncompleteTitleNamed(String container) {
+    return 'Resuming $container did not finish';
+  }
+
+  @override
+  String get splitView_frozenResume => 'Resume';
+
+  @override
+  String splitView_frozenSkippedMessages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count background messages were skipped. Skipped messages are not delivered after Resume.',
+      one:
+          '1 background message was skipped. Skipped messages are not delivered after Resume.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String splitView_frozenToBeSafeTitleNamed(String container) {
+    return '$container was frozen to be safe';
+  }
+
+  @override
+  String get splitView_frozenToBeSafeDetail =>
+      'WebLibre\'s record of frozen containers was damaged. Resume to load this tab.';
+
+  @override
+  String get splitView_frozenRecoveryTitle =>
+      'Frozen until WebLibre has restored which containers are frozen';
+
+  @override
   String get splitView_couldNotOpen => '无法打开分屏视图';
 
   @override
@@ -5430,6 +6030,122 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get tabs_deleteContainerHistoryKeptNote =>
       '如果不勾选，访问记录仍会保留在历史记录中，但不再归属于任何容器。';
+
+  @override
+  String get tabs_deleteContainerAlsoDeleteSiteData => 'Also delete site data';
+
+  @override
+  String get tabs_deleteContainerSiteDataNote =>
+      'Cookies, sign-ins, offline data and notification subscriptions';
+
+  @override
+  String get tabs_deleteContainerSiteDataFrozenNote =>
+      'A frozen container\'s data is deleted with it, so its background activity can never resume.';
+
+  @override
+  String get tabs_siteDataPendingTitle => 'Site data waiting to be deleted';
+
+  @override
+  String get tabs_siteDataPendingExplanation =>
+      'Until their data is deleted, sites of these containers stay blocked. Deleting is retried at every start.';
+
+  @override
+  String get tabs_siteDataPendingDeletedContainer => 'Deleted container';
+
+  @override
+  String tabs_siteDataPendingClosedIsolatedTabs(String container) {
+    return 'Closed isolated tabs in $container';
+  }
+
+  @override
+  String get tabs_siteDataPendingOrphaned => 'Container no longer exists';
+
+  @override
+  String get tabs_siteDataPendingDelete => 'Delete data';
+
+  @override
+  String get tabs_siteDataPendingDeleting => 'Deleting…';
+
+  @override
+  String get tabs_siteDataPendingDeleted => 'Site data deleted';
+
+  @override
+  String get tabs_siteDataPendingFailed =>
+      'The site data could not be deleted yet. It is tried again at the next start.';
+
+  @override
+  String tabs_siteDataPendingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count storage areas',
+      one: '1 storage area',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_freezeRecoveryTitle => 'Restoring frozen containers';
+
+  @override
+  String get tabs_freezeRecoveryRestoring =>
+      'WebLibre\'s record of which containers are frozen was damaged. Until it is restored, every container with its own cookie storage stays frozen.';
+
+  @override
+  String get tabs_freezeRecoveryFailed =>
+      'WebLibre\'s record of which containers are frozen was damaged, and restoring it did not finish. Until it does, every container with its own cookie storage stays frozen.';
+
+  @override
+  String tabs_deleteContainerLockedTabs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count locked tabs are in this container. Unlock these tabs before deleting this container.',
+      one:
+          '1 locked tab is in this container. Unlock it before deleting this container.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_deleteContainerShowTabs => 'Show tabs';
+
+  @override
+  String get tabs_deleteContainerIncomplete =>
+      'Some of this container\'s tabs could not be closed, so the container was kept';
+
+  @override
+  String get tabs_deleteContainerNotPersisted =>
+      'The container was not deleted because its frozen state could not be saved. Try again.';
+
+  @override
+  String get tabs_deleteContainerFreezeStateUnknown =>
+      'The container was not deleted because WebLibre could not check whether it is frozen. Try again.';
+
+  @override
+  String get tabs_deleteContainerSiteDataPending =>
+      'Container deleted; site-data cleanup pending';
+
+  @override
+  String get tabs_deleteContainerOpenInWebApp =>
+      'Close this container\'s web apps and custom tabs first';
+
+  @override
+  String get tabs_deleteContainerSharedStorage =>
+      'An isolated tab of another container uses this frozen container\'s storage. Resume the container before deleting it.';
+
+  @override
+  String get tabs_deleteContainerBusy =>
+      'This container is still being changed. Try again in a moment.';
+
+  @override
+  String get tabs_deleteContainerRecoveryPending =>
+      'No container can be deleted while frozen containers are being restored';
+
+  @override
+  String get tabs_deleteContainerHistoryFailed =>
+      'The container was deleted, but its history could not be deleted';
 
   @override
   String get tabs_deleteContainerButton => '删除容器';
@@ -5651,6 +6367,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tabs_requiresCookieIsolation => '需要启用 Cookie 隔离';
+
+  @override
+  String get tabs_autoFreezeTitle => 'Freeze Automatically';
+
+  @override
+  String get tabs_autoFreezeOff => 'Off';
+
+  @override
+  String tabs_autoFreezeAfterMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'After $count minutes unused, counted while WebLibre is open',
+      one: 'After 1 minute unused, counted while WebLibre is open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tabs_autoFreezeAfterHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'After $count hours unused, counted while WebLibre is open',
+      one: 'After 1 hour unused, counted while WebLibre is open',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_autoFreezeExplanation =>
+      'Freezes this container once none of its tabs has been used for the time you choose. Only time while WebLibre is open counts. Freezing unloads its tabs and stops what it runs in the background, notifications included, until you resume it. It waits while one of its tabs plays media, is in a call, holds a download, or is set to \"Keep awake\". Typed text keeps it waiting until it has been unused for an hour; the text may then be lost.';
 
   @override
   String get tabs_isolatedAppLinkSettings => '独立的应用链接设置';
@@ -9418,7 +10166,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_autoClearUnassignedTabsKeywords => '清理标签页';
 
   @override
-  String get settings_autoClearUnassignedTabsSubtitle => '自动关闭早于所选时间段的未分配标签页';
+  String get settings_autoClearUnassignedTabsSubtitle =>
+      '自动关闭早于所选时间段的未分配标签页。已锁定的标签页会保留。';
 
   @override
   String get settings_durationNever => '从不';
@@ -11382,6 +12131,55 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_featureControlSectionTitle => '功能';
 
   @override
+  String get settings_sleepingTabsSectionTitle => 'Sleeping Tabs';
+
+  @override
+  String get settings_autoSleepTabsTitle => 'Sleep Tabs Automatically';
+
+  @override
+  String get settings_autoSleepTabsSubtitle =>
+      'While WebLibre is open, unloads tabs you have not looked at for a while. Tap Wake on a sleeping tab to load it again.';
+
+  @override
+  String get settings_autoSleepTabsKeywords =>
+      'sleep, unload, memory, suspend, discard, idle, inactive tabs';
+
+  @override
+  String get settings_autoSleepIdleTitle => 'Sleep After';
+
+  @override
+  String get settings_autoSleepIdleSubtitle =>
+      'How long a tab is off screen before it is put to sleep';
+
+  @override
+  String get settings_autoSleepIdleKeywords => 'sleep, timeout, idle, inactive';
+
+  @override
+  String get settings_residentTabLimitTitle => 'Loaded Tabs Limit';
+
+  @override
+  String get settings_residentTabLimitSubtitle =>
+      'Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.';
+
+  @override
+  String get settings_residentTabLimitKeywords =>
+      'limit, memory, loaded tabs, sleep';
+
+  @override
+  String get settings_residentTabLimitOff => 'No Limit';
+
+  @override
+  String settings_residentTabLimitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Tabs',
+      one: '1 Tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get smallWeb_sheetTitle => '小众网络';
 
   @override
@@ -12667,6 +13465,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get user_deleteBrowsingDataTypeTabsTitle => '打开的标签页';
 
   @override
+  String get user_deleteBrowsingDataTypeTabsDescription =>
+      'Locked tabs are kept';
+
+  @override
   String get user_deleteBrowsingDataTypeHistoryTitle => '浏览历史记录';
 
   @override
@@ -13817,6 +14619,28 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String units_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String units_hours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get visibilitySwitch_containersLabel => '容器';
 
   @override
@@ -14082,6 +14906,30 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get rememberedPrompt_startProxyConnectionKeywords =>
       '代理,proxy,vpn,连接,容器,启动,确认,不再询问';
+
+  @override
+  String get rememberedPrompt_sleepTabsLabel =>
+      'Ask before putting tabs to sleep';
+
+  @override
+  String get rememberedPrompt_sleepTabsDescription =>
+      'Explains that a sleeping tab\'s page reloads and may lose unsaved state';
+
+  @override
+  String get rememberedPrompt_sleepTabsKeywords =>
+      'sleep, unload, memory, tab, suspend, discard, confirmation, don\'t ask again';
+
+  @override
+  String get rememberedPrompt_freezeContainerLabel =>
+      'Ask before freezing a container';
+
+  @override
+  String get rememberedPrompt_freezeContainerDescription =>
+      'Explains that a frozen container\'s tabs are unloaded and its background activity stops until Resume';
+
+  @override
+  String get rememberedPrompt_freezeContainerKeywords =>
+      'freeze, pause, container, resume, background, push, confirmation, don\'t ask again';
 
   @override
   String get speechToTextButton_serviceNotAvailable => '语音识别不可用';

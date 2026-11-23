@@ -97,6 +97,7 @@ void main() {
             menu: defaultMenuLayout,
             strictContainers: false,
             appLinkContainers: false,
+            autoFreezeContainers: false,
           ),
         ),
       ],

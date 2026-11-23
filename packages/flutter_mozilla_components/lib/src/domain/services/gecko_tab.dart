@@ -30,6 +30,17 @@ class GeckoTabService {
     return _api.getSelectedTabId();
   }
 
+  /// The tabs in the native store right now that run in session context
+  /// [contextId], private ones included.
+  Future<List<String>> getTabIdsInContext(String contextId) {
+    return _api.getTabIdsInContext(contextId);
+  }
+
+  /// The custom tabs and web app windows running in one of [contextIds].
+  Future<List<String>> getCustomTabIdsInContexts(List<String> contextIds) {
+    return _api.getCustomTabIdsInContexts(contextIds);
+  }
+
   Future<void> syncEvents({
     bool onSelectedTabChange = false,
     bool onTabListChange = false,
@@ -45,6 +56,7 @@ class GeckoTabService {
     bool onBrowserExtensionIcons = false,
     bool onPageExtensionIcons = false,
     bool onTranslationStateChange = false,
+    bool onTabLifecycleChange = false,
   }) {
     return _api.syncEvents(
       onSelectedTabChange: onSelectedTabChange,
@@ -62,6 +74,7 @@ class GeckoTabService {
       onBrowserExtensionIcons: onBrowserExtensionIcons,
       onPageExtensionIcons: onPageExtensionIcons,
       onTranslationStateChange: onTranslationStateChange,
+      onTabLifecycleChange: onTabLifecycleChange,
     );
   }
 
@@ -69,7 +82,8 @@ class GeckoTabService {
     return _api.selectTab(tabId: tabId);
   }
 
-  Future<void> removeTab({required String tabId}) {
+  /// Removes [tabId] unless it is locked, and reports what happened.
+  Future<TabRemovalResult> removeTab({required String tabId}) {
     return _api.removeTab(tabId: tabId);
   }
 
@@ -107,7 +121,8 @@ class GeckoTabService {
     return _api.removeAllTabs(recoverable: recoverable);
   }
 
-  Future<void> removeTabs({required List<String> ids}) {
+  /// Removes [ids], keeping locked tabs, and reports what happened.
+  Future<TabRemovalResult> removeTabs({required List<String> ids}) {
     return _api.removeTabs(ids: ids);
   }
 
@@ -119,12 +134,29 @@ class GeckoTabService {
     return _api.removePrivateTabs();
   }
 
-  /// Restores the most recently closed tabs, if the engine still has them.
+  /// The tabs the pending undo close would bring back, each with the context
+  /// it ran in; empty when there is none.
+  Future<List<PendingUndoTab>> pendingUndoTabs() {
+    return _api.pendingUndoTabs();
+  }
+
+  /// Restores the most recently closed tabs, if the engine still has them,
+  /// once they are back in the engine's store; only when they are exactly
+  /// [expectedTabIds], as [pendingUndoTabs] listed them.
   ///
-  /// Returns whether any tabs are being restored. When none are, the tab list
-  /// does not change at all.
-  Future<bool> undo() {
-    return _api.undo();
+  /// Returns the ids of the tabs that came back; empty when there were none
+  /// to restore, or other ones, and then the tab list does not change at all.
+  Future<List<String>> undo(List<String> expectedTabIds) {
+    return _api.undo(expectedTabIds);
+  }
+
+  /// Drops the pending undo close when it would bring back one of [tabIds] or
+  /// a tab that ran in one of [contextIds]. Returns whether it dropped it.
+  Future<bool> discardUndoOf({
+    required List<String> tabIds,
+    required List<String> contextIds,
+  }) {
+    return _api.discardUndoOf(tabIds, contextIds);
   }
 
   //restoreTabs invokes splitted

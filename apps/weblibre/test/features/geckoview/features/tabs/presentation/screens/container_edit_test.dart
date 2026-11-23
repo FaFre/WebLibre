@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_edit.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
@@ -232,6 +234,92 @@ void main() {
     );
   });
 
+  group('freeze automatically', () {
+    Future<void> pumpEditScreen(
+      WidgetTester tester, {
+      GeneralSettings? settings,
+    }) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            // No onboarding owed: no draft, the displayed layer is the live one.
+            completedOnboardingRevisionProvider.overrideWithValue(
+              const AsyncData(OnboardingRepository.targetRevision),
+            ),
+            generalSettingsWithDefaultsProvider.overrideWithValue(
+              settings ?? GeneralSettings.withDefaults(),
+            ),
+            proxyConnectionOptionsProvider.overrideWith(
+              (ref) => const <ProxyConnectionOption>[],
+            ),
+            singboxProxyProfilesRepositoryProvider.overrideWith(
+              () => _LoadedProfilesRepository(const []),
+            ),
+          ],
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: ContainerEditScreen.edit(
+              initialContainer: ContainerDataWithCount(
+                id: 'container-1',
+                color: Colors.blue,
+                orderKey: 'a',
+                tabCount: 0,
+                metadata: ContainerMetadata.withDefaults(
+                  contextualIdentity: 'context-1',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('is off, and a choice shows how long and how it is counted', (
+      tester,
+    ) async {
+      await pumpEditScreen(tester);
+
+      final row = find.widgetWithText(ListTile, 'Freeze Automatically');
+      expect(
+        find.descendant(of: row, matching: find.text('Off')),
+        findsOneWidget,
+      );
+
+      await tester.ensureVisible(row);
+      await tester.pumpAndSettle();
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('30 minutes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('30 minutes'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: row,
+          matching: find.text(
+            'After 30 minutes unused, counted while WebLibre is open',
+          ),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('is left out while container freeze is hidden', (tester) async {
+      await pumpEditScreen(
+        tester,
+        settings: GeneralSettings.withDefaults().withVisibilitySwitch(
+          VisibilitySwitch.containers,
+          enabled: false,
+        ),
+      );
+
+      expect(find.text('Freeze Automatically'), findsNothing);
+    });
+  });
+
   group('editing a container without cookie isolation', () {
     Future<void> pumpEditScreen(WidgetTester tester) async {
       await tester.pumpWidget(
@@ -344,6 +432,62 @@ void main() {
       expect(find.text('Cookie isolation is off'), findsOneWidget);
     });
   });
+
+  testWidgets('a change the frozen container refuses is said, nothing is '
+      'saved and the screen stays', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          // No onboarding owed: no draft, the displayed layer is the live one.
+          completedOnboardingRevisionProvider.overrideWithValue(
+            const AsyncData(OnboardingRepository.targetRevision),
+          ),
+          generalSettingsWithDefaultsProvider.overrideWithValue(
+            GeneralSettings.withDefaults(),
+          ),
+          proxyConnectionOptionsProvider.overrideWith(
+            (ref) => const <ProxyConnectionOption>[],
+          ),
+          singboxProxyProfilesRepositoryProvider.overrideWith(
+            () => _LoadedProfilesRepository(const []),
+          ),
+          containerRepositoryProvider.overrideWith(
+            _FrozenContainerRepository.new,
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ContainerEditScreen.edit(
+            initialContainer: ContainerDataWithCount(
+              id: 'container-1',
+              color: Colors.blue,
+              orderKey: 'a',
+              tabCount: 0,
+              metadata: ContainerMetadata.withDefaults(
+                contextualIdentity: 'context-1',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.check));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Resume the container first'), findsOneWidget);
+    expect(find.text('Edit Container'), findsOneWidget);
+  });
+}
+
+/// Refuses every replacement, as for a cookie isolation change while the
+/// container is frozen (D19).
+class _FrozenContainerRepository extends ContainerRepository {
+  @override
+  Future<void> replaceContainer(ContainerData container) async =>
+      throw ContainerFrozenException(container.id);
 }
 
 class _LoadedProfilesRepository extends SingboxProxyProfilesRepository {

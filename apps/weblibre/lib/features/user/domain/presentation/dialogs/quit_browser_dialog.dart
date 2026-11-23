@@ -19,6 +19,7 @@
  */
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/presentation/utils/delete_browsing_data_type_l10n.dart';
@@ -142,7 +143,9 @@ class _QuitConfirmationDialog extends HookWidget {
                   title: Text(type.label(context)),
                   subtitle: alwaysDeleted.contains(type)
                       ? Text(l10n.user_quitBrowserDeletedAutomatically)
-                      : null,
+                      : type
+                            .description(context)
+                            .mapNotNull((description) => Text(description)),
                   onChanged: alwaysDeleted.contains(type)
                       ? null
                       : (value) => oneTime.value = value == true

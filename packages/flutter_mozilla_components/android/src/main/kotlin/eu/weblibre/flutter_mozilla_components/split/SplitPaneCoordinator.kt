@@ -10,6 +10,12 @@ import android.graphics.Color
 import android.view.View
 import com.google.android.material.color.MaterialColors
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
+import eu.weblibre.flutter_mozilla_components.feature.RoutingVerdict
+import eu.weblibre.flutter_mozilla_components.lifecycle.HeldTab
+import eu.weblibre.flutter_mozilla_components.lifecycle.PresentationMemory
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
+import eu.weblibre.flutter_mozilla_components.startup.LaunchRouting
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSplitViewEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.SplitAxis
 import eu.weblibre.flutter_mozilla_components.pigeons.SplitPairState
@@ -67,6 +73,12 @@ internal class SplitPaneCoordinator(
     private val mirror: SplitStateMirrorStore = SplitStateMirror,
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
     private val currentTimeMillis: () -> Long = System::currentTimeMillis,
+    private val registry: TabLifecycleRegistry = TabLifecycleRegistry,
+    /** The Wake button of a sleeping tab's placeholder: Dart checks routing, then wakes (D34). */
+    private val onWakeRequested: (tabId: String) -> Unit = {},
+    /** The Resume button of a frozen tab's placeholder: Dart checks routing, then resumes (D34). */
+    private val onResumeRequested: (tabId: String) -> Unit = {},
+    private val presentation: PresentationMemory = PresentationMemory.process,
 ) : LifecycleAwareFeature, UserInteractionHandler, BrowserPanes, SplitPaneLayout.Listener {
 
     private val panes = mutableListOf(firstPane)
@@ -84,8 +96,16 @@ internal class SplitPaneCoordinator(
     /** The selection the last reconcile presented, to tell a change apart. */
     private var lastSelectedTabId: String? = null
 
-    /** See [lastPresentedTabIds]; kept when stopping. */
-    private var presentedTabIds: Set<String> = emptySet()
+    /**
+     * See [lastPresentedTabIds]; kept when stopping, and across coordinators, so
+     * a view rebuilt for a configuration change does not count as presenting
+     * its tabs anew (the schedulers would count them as just seen).
+     */
+    private var presentedTabIds: Set<String>
+        get() = presentation.tabIds
+        set(value) {
+            presentation.tabIds = value
+        }
 
     /**
      * The sessions this coordinator raised to HIGH priority: pages on screen
@@ -118,7 +138,9 @@ internal class SplitPaneCoordinator(
         mirror.addClearListener(onMirrorCleared)
         panes.forEach { pane -> pane.features.forEach { it.start() } }
         scope = store.flowScoped(dispatcher = mainDispatcher) { flow ->
-            combine(flow, mirror.state) { state, split -> reconcileKey(state, split) }
+            combine(flow, mirror.state, registry.heldTabs) { state, split, held ->
+                reconcileKey(state, split, held)
+            }
                 .distinctUntilChanged()
                 .collect { key -> if (key != lastReconciledKey) reconcile() }
         }
@@ -143,6 +165,7 @@ internal class SplitPaneCoordinator(
         val crashed: Boolean,
         val firstContentfulPaint: Boolean,
         val fullScreen: Boolean,
+        val held: HeldTab?,
     )
 
     private data class ReconcileKey(
@@ -151,7 +174,11 @@ internal class SplitPaneCoordinator(
         val tabs: List<TabKey?>,
     )
 
-    private fun reconcileKey(state: BrowserState, split: SplitViewState?): ReconcileKey {
+    private fun reconcileKey(
+        state: BrowserState,
+        split: SplitViewState?,
+        held: Map<String, HeldTab> = registry.heldTabs.value,
+    ): ReconcileKey {
         val ids = listOfNotNull(
             state.selectedTabId,
             split?.pair?.firstTabId,
@@ -168,6 +195,7 @@ internal class SplitPaneCoordinator(
                         tab.engineState.crashed,
                         tab.content.firstContentfulPaint,
                         tab.content.fullScreen,
+                        held[tab.id],
                     )
                 }
             },
@@ -227,6 +255,8 @@ internal class SplitPaneCoordinator(
             onPaneCreated(pane)
         }
 
+        val nextPresented = presentedOf(pair, split, selected.id, presentedTabIds)
+
         // 1. Tab assignment.
         val plan = planBindings(panes.map { it.boundTabId }, targets)
         panes.forEachIndexed { index, pane ->
@@ -239,6 +269,8 @@ internal class SplitPaneCoordinator(
 
         // 2. Session attachment: every release before any attach.
         val tabs = panes.map { pane -> pane.boundTabId?.let { state.findTab(it) } }
+        // A sleeping tab never wakes by coming on screen (D10): its pane shows
+        // the sleeping placeholder, whose Wake goes through Dart (D34).
         panes.forEachIndexed { index, pane ->
             val attached = pane.attachedSession ?: return@forEachIndexed
             if (attached !== desiredSession(tabs[index])) {
@@ -250,11 +282,7 @@ internal class SplitPaneCoordinator(
         // 3. Presentation.
         val focusedPane = panes.first { it.boundTabId == selected.id }
         layout.apply(spec(pair, split, focusedPane))
-        presentedTabIds = if (pair != null && pair.mode != SplitPaneMode.FOCUSED_ONLY) {
-            targets.toSet()
-        } else {
-            setOf(selected.id)
-        }
+        presentedTabIds = nextPresented
         updatePriorities(state, selected.id)
 
         onFocusedEngineView(focusedPane.engineView)
@@ -268,6 +296,48 @@ internal class SplitPaneCoordinator(
         if (selectionChanged && layout.hasFocus() && !focusedPane.hasFocus()) {
             focusedPane.engineView.asView().requestFocus()
         }
+    }
+
+    /**
+     * The tabs on screen: the selected one, and its partner while the layout
+     * draws both. A pair that does not fit the layout's size shows the
+     * focused page alone ([SplitPaneLayout.arrangementAtMeasuredSize]), so its
+     * other page is not presented: the schedulers do not count it as on
+     * screen. The layout says when that changes
+     * ([onShownArrangementChanged]).
+     *
+     * Before the layout has a size, the partner keeps whether it was
+     * presented: panes rebuilt for a configuration change do not drop a page
+     * that was on screen until the new size is known.
+     */
+    private fun presentedOf(
+        pair: SplitPairState?,
+        split: SplitViewState?,
+        selectedTabId: String,
+        previouslyPresented: Set<String>,
+    ): Set<String> {
+        if (pair == null) return setOf(selectedTabId)
+        val requested = arrangementOf(pair.mode)
+        if (requested == PaneArrangement.SINGLE) return setOf(selectedTabId)
+        val pairTabIds = setOf(pair.firstTabId, pair.secondTabId)
+        return when (
+            layout.arrangementAtMeasuredSize(
+                requested,
+                pair.dividerDp,
+                split?.minPaneWidthDp ?: DEFAULT_MIN_WIDTH_DP,
+                split?.minPaneHeightDp ?: DEFAULT_MIN_HEIGHT_DP,
+            )
+        ) {
+            null -> pairTabIds.filterTo(mutableSetOf()) { it == selectedTabId || it in previouslyPresented }
+            PaneArrangement.SINGLE -> setOf(selectedTabId)
+            else -> pairTabIds
+        }
+    }
+
+    private fun arrangementOf(mode: SplitPaneMode?): PaneArrangement = when (mode) {
+        SplitPaneMode.SIDE_BY_SIDE -> PaneArrangement.SIDE_BY_SIDE
+        SplitPaneMode.STACKED -> PaneArrangement.STACKED
+        SplitPaneMode.FOCUSED_ONLY, null -> PaneArrangement.SINGLE
     }
 
     /**
@@ -304,12 +374,33 @@ internal class SplitPaneCoordinator(
         }
     }
 
+    /**
+     * Whether [tab]'s pane shows the sleeping placeholder: it is held, and its
+     * page is gone or being torn down. A held tab that still has its page (a
+     * sleep that is still checking whether it may) keeps showing it, so a
+     * refused sleep never blanks the page.
+     */
+    private fun showsAsleep(tab: TabSessionState): Boolean {
+        val held = registry.heldTabs.value[tab.id] ?: return false
+        return tab.engineState.engineSession == null || held.tearingDown
+    }
+
+    /**
+     * Whether [tab]'s pane shows the frozen placeholder: its context is
+     * restricted, and its page is gone or a freeze is tearing it down. A tab
+     * whose page a freeze has not reached yet keeps showing it.
+     */
+    private fun showsFrozen(tab: TabSessionState): Boolean {
+        if (!registry.isRestricted(tab.contextId)) return false
+        return tab.engineState.engineSession == null || registry.isFreezeTeardown(tab.id)
+    }
+
     private fun desiredSession(tab: TabSessionState?): EngineSession? =
-        tab?.takeUnless { it.engineState.crashed }?.engineState?.engineSession
+        tab?.takeUnless { it.engineState.crashed || showsFrozen(it) || showsAsleep(it) }?.engineState?.engineSession
 
     private fun bringUp(pane: PaneView, tab: TabSessionState?, split: SplitViewState?) {
         if (tab == null) {
-            pane.hideCrashPlaceholder()
+            pane.hidePlaceholder()
             return
         }
 
@@ -317,7 +408,15 @@ internal class SplitPaneCoordinator(
             showCrashPlaceholder(pane, tab.id, split)
             return
         }
-        pane.hideCrashPlaceholder()
+        if (showsFrozen(tab)) {
+            showFrozenPlaceholder(pane, tab, split)
+            return
+        }
+        if (showsAsleep(tab)) {
+            showSleepingPlaceholder(pane, tab.id, split)
+            return
+        }
+        pane.hidePlaceholder()
 
         if (tab.content.firstContentfulPaint) {
             pane.engineView.asView().visibility = View.VISIBLE
@@ -337,11 +436,66 @@ internal class SplitPaneCoordinator(
 
     private fun showCrashPlaceholder(pane: PaneView, tabId: String, split: SplitViewState?) {
         val labels = split?.labels
-        pane.showCrashPlaceholder(
+        showPlaceholder(
+            pane,
+            split,
+            PaneView.PlaceholderKind.CRASHED,
             // Dart sends the localized labels once its theme is known and
             // leaves them empty before that.
             title = labels?.crashedTitle?.takeIf { it.isNotEmpty() } ?: DEFAULT_CRASHED_TITLE,
-            reload = labels?.crashedReload?.takeIf { it.isNotEmpty() } ?: DEFAULT_CRASHED_RELOAD,
+            action = labels?.crashedReload?.takeIf { it.isNotEmpty() } ?: DEFAULT_CRASHED_RELOAD,
+            onAction = { store.dispatch(CrashAction.RestoreCrashedSessionAction(tabId)) },
+        )
+    }
+
+    private fun showSleepingPlaceholder(pane: PaneView, tabId: String, split: SplitViewState?) {
+        val labels = split?.labels
+        showPlaceholder(
+            pane,
+            split,
+            PaneView.PlaceholderKind.SLEEPING,
+            title = labels?.sleepingTitle?.takeIf { it.isNotEmpty() } ?: DEFAULT_SLEEPING_TITLE,
+            action = labels?.sleepingWake?.takeIf { it.isNotEmpty() } ?: DEFAULT_SLEEPING_WAKE,
+            // Never wakes here: routing has to be checked first (D34).
+            onAction = { onWakeRequested(tabId) },
+        )
+    }
+
+    private fun showFrozenPlaceholder(pane: PaneView, tab: TabSessionState, split: SplitViewState?) {
+        val labels = split?.labels
+        // Dart's text for the tab's container, found through the owner of the
+        // tab's context. In recovery mode a context may have no record yet,
+        // and gets the general title.
+        val owner = tab.contextId?.let { registry.recordOf(it)?.ownerId }
+        val own = owner?.let { id -> labels?.frozenContainers?.firstOrNull { it.ownerId == id } }
+        showPlaceholder(
+            pane,
+            split,
+            PaneView.PlaceholderKind.FROZEN,
+            title = own?.title?.takeIf { it.isNotEmpty() }
+                ?: labels?.frozenTitle?.takeIf { it.isNotEmpty() }
+                ?: DEFAULT_FROZEN_TITLE,
+            action = labels?.frozenResume?.takeIf { it.isNotEmpty() } ?: DEFAULT_FROZEN_RESUME,
+            detail = own?.detail,
+            // Never resumes here: routing has to be checked first (D34).
+            onAction = { onResumeRequested(tab.id) },
+        )
+    }
+
+    private fun showPlaceholder(
+        pane: PaneView,
+        split: SplitViewState?,
+        kind: PaneView.PlaceholderKind,
+        title: String,
+        action: String,
+        onAction: () -> Unit,
+        detail: String? = null,
+    ) {
+        pane.showPlaceholder(
+            kind = kind,
+            title = title,
+            action = action,
+            detail = detail,
             backgroundColor = split?.placeholderColorArgb?.toInt()
                 ?: MaterialColors.getColor(
                     pane,
@@ -354,7 +508,7 @@ internal class SplitPaneCoordinator(
                     com.google.android.material.R.attr.colorOnSurface,
                     Color.BLACK,
                 ),
-            onReload = { store.dispatch(CrashAction.RestoreCrashedSessionAction(tabId)) },
+            onAction = onAction,
         )
     }
 
@@ -366,11 +520,7 @@ internal class SplitPaneCoordinator(
         val firstPane = pair?.let { p -> panes.first { it.boundTabId == p.firstTabId } }
         val secondPane = pair?.let { p -> panes.first { it.boundTabId == p.secondTabId } }
         return SplitPaneLayout.Spec(
-            requested = when (pair?.mode) {
-                SplitPaneMode.SIDE_BY_SIDE -> PaneArrangement.SIDE_BY_SIDE
-                SplitPaneMode.STACKED -> PaneArrangement.STACKED
-                SplitPaneMode.FOCUSED_ONLY, null -> PaneArrangement.SINGLE
-            },
+            requested = arrangementOf(pair?.mode),
             first = firstPane ?: focusedPane,
             second = secondPane,
             focused = focusedPane,
@@ -404,7 +554,7 @@ internal class SplitPaneCoordinator(
             stampLastVisible(pane)
             pane.detach()
             pane.boundTabId = null
-            pane.hideCrashPlaceholder()
+            pane.hidePlaceholder()
         }
     }
 
@@ -428,6 +578,8 @@ internal class SplitPaneCoordinator(
     }
 
     override fun onPaneTouched(pane: PaneView) = activate(pane)
+
+    override fun onShownArrangementChanged() = reconcile()
 
     override fun onRatioCommitted(axis: SplitAxis, ratio: Double) {
         val split = mirror.state.value ?: return
@@ -519,5 +671,24 @@ internal class SplitPaneCoordinator(
         // Only shown before Dart pushed its localized labels once.
         private const val DEFAULT_CRASHED_TITLE = "This page crashed"
         private const val DEFAULT_CRASHED_RELOAD = "Reload"
+        private const val DEFAULT_SLEEPING_TITLE = "This tab is asleep"
+        private const val DEFAULT_SLEEPING_WAKE = "Wake"
+        private const val DEFAULT_FROZEN_TITLE = "This container is frozen"
+        private const val DEFAULT_FROZEN_RESUME = "Resume"
     }
 }
+
+/**
+ * Whether the routing this process installed covers [tab]'s context with an
+ * answer that sends nothing out directly by mistake: a direct relation, a live
+ * proxy, or one the extension holds requests for while it starts.
+ */
+internal fun installedRoutingCovers(tab: TabSessionState): Boolean =
+    installedRoutingCovers(LaunchRouting.contextIdFor(tab.contextId, tab.content.private))
+
+/** [installedRoutingCovers] for the routing context [contextId] itself. */
+internal fun installedRoutingCovers(contextId: String): Boolean =
+    when (ContainerProxyFeature.installedRoutingVerdict(contextId)) {
+        RoutingVerdict.DIRECT, RoutingVerdict.LIVE, RoutingVerdict.STARTING -> true
+        RoutingVerdict.UNKNOWN, RoutingVerdict.BLOCKED -> false
+    }

@@ -77,10 +77,6 @@ class ContainerDao extends DatabaseAccessor<TabDatabase>
     );
   }
 
-  Future<void> deleteContainer(String id) {
-    return db.container.deleteOne(ContainerCompanion(id: Value(id)));
-  }
-
   SingleOrNullSelectable<ContainerData> getContainerData(String id) {
     return select(db.container)..where((t) => t.id.equals(id));
   }

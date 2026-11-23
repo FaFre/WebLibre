@@ -14,6 +14,8 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.components.StaleUploads
 import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
+import eu.weblibre.flutter_mozilla_components.tabs.TabCloseProtection
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
@@ -175,6 +177,7 @@ object GlobalComponents {
         // from the same process-global counter as the next profile's, so Dart's
         // recency gate would not reject them.
         _components?.existingCore?.flutterEventMiddleware?.close()
+        _components?.existingCore?.retireLifecycle()
         _components = null
         currentMode = null
         customTabsInHandover = null
@@ -559,6 +562,10 @@ object GlobalComponents {
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
 
         previousComponents?.existingPush?.close()
+        // The outgoing Core is replaced, never torn down (F33): its lifecycle
+        // work stops here, before the new one can act on the same tabs.
+        previousComponents?.existingCore?.retireLifecycle()
+        TabLifecycleRegistry.attach(applicationContext.rootApplicationContext)
 
         // Restore this profile's last routing before the engine — and with it the
         // proxy extension — exists. This runs on every setup, including a rebuild:
@@ -799,6 +806,10 @@ object GlobalComponents {
         val messenger = NoopBinaryMessenger()
 
         HistoryExclusions.loadPersisted(baseContext.applicationContext)
+        // A headless start has no plugin to attach the tab locks; the store's
+        // guard enforces them all the same.
+        TabCloseProtection.attach(baseContext.applicationContext)
+        TabLifecycleRegistry.attach(baseContext.applicationContext)
         historyEvents = null
 
         val selectionActionEvents = GeckoSelectionActionEvents(messenger)

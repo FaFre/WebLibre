@@ -57,6 +57,7 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.selectTab8 => l10n.browserActions_selectTab8Title,
       BrowserAction.selectLastTab => l10n.browserActions_selectLastTabTitle,
       BrowserAction.togglePinTab => l10n.browserActions_togglePinTabTitle,
+      BrowserAction.toggleLockTab => l10n.browserActions_toggleLockTabTitle,
       BrowserAction.moveTabBackward => l10n.browserActions_moveTabBackwardTitle,
       BrowserAction.moveTabForward => l10n.browserActions_moveTabForwardTitle,
       BrowserAction.moveTabToStart => l10n.browserActions_moveTabToStartTitle,
@@ -180,6 +181,8 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.selectLastTab =>
         l10n.browserActions_selectLastTabDescription,
       BrowserAction.togglePinTab => l10n.browserActions_togglePinTabDescription,
+      BrowserAction.toggleLockTab =>
+        l10n.browserActions_toggleLockTabDescription,
       BrowserAction.moveTabBackward =>
         l10n.browserActions_moveTabBackwardDescription,
       BrowserAction.moveTabForward =>
@@ -333,6 +336,7 @@ extension BrowserActionL10n on BrowserAction {
       BrowserAction.endSplitView => l10n.browserActions_endSplitViewKeywords,
       BrowserAction.duplicateTab => l10n.browserActions_duplicateTabKeywords,
       BrowserAction.togglePinTab => l10n.browserActions_togglePinTabKeywords,
+      BrowserAction.toggleLockTab => l10n.browserActions_toggleLockTabKeywords,
       BrowserAction.closeTab => l10n.browserActions_closeTabKeywords,
       BrowserAction.reopenClosedTab =>
         l10n.browserActions_reopenClosedTabKeywords,

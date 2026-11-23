@@ -118,6 +118,11 @@
   "@menu_itemMoreDisclosure": {
     "description": "Name, in menu customization, of a row that collapses the rows after it behind \"More\"."
   },
+  "menu_moreDisclosureSummary": "{items} and {count, plural, =1{1 more} other{{count} more}}",
+  "@menu_moreDisclosureSummary": {
+    "description": "Line under the \"More\" row of the browser menu when it hides more than three rows: items is the list of the first three rows' names (\"Clone Tab, Export, Pin to Shortcuts\"), count how many other rows it hides.",
+    "placeholders": { "items": { "type": "String" }, "count": { "type": "int" } }
+  },
   "menu_itemCloneTab": "Clone Tab",
   "@menu_itemCloneTab": {
     "description": "Name, in menu customization, of the expandable menu group for copying the current tab."
@@ -161,6 +166,14 @@
   "menu_itemPinTopSite": "Pin to Shortcuts",
   "@menu_itemPinTopSite": {
     "description": "Name, in menu customization, of the menu row that pins the site to the home screen shortcuts."
+  },
+  "menu_itemLockTab": "Lock Tab",
+  "@menu_itemLockTab": {
+    "description": "Name, in menu customization, of the menu row that locks the tab so it cannot be closed, or unlocks it. Not the profile lock."
+  },
+  "menu_itemSleepTab": "Put Tab to Sleep",
+  "@menu_itemSleepTab": {
+    "description": "Name, in menu customization, of the menu row that puts the tab to sleep (unloads its page to free memory), or wakes it when it is asleep."
   },
   "menu_itemFetchFeeds": "Fetch Feeds",
   "@menu_itemFetchFeeds": {
@@ -495,6 +508,27 @@
   "menu_pinUpdateFailed": "Failed to update Shortcuts",
   "@menu_pinUpdateFailed": {
     "description": "Error message when changing the home screen shortcuts failed."
+  },
+
+  "menu_lockTab": "Lock Tab",
+  "@menu_lockTab": {
+    "description": "Browser menu row when the tab is not locked: lock it so it cannot be closed until it is unlocked. Not the profile lock."
+  },
+  "menu_unlockTab": "Unlock Tab",
+  "@menu_unlockTab": {
+    "description": "Browser menu row when the tab is locked: unlock it so it can be closed again."
+  },
+  "menu_retryUnlockTab": "Retry Unlocking Tab",
+  "@menu_retryUnlockTab": {
+    "description": "Browser menu row when unlocking the tab did not finish: try the unlock again. The tab stays locked until it does."
+  },
+  "menu_sleepTab": "Put Tab to Sleep",
+  "@menu_sleepTab": {
+    "description": "Browser menu row: put the tab to sleep (unload its page to free memory until it is shown again)."
+  },
+  "menu_wakeTab": "Wake Tab",
+  "@menu_wakeTab": {
+    "description": "Browser menu row when the tab was put to sleep: load its page again."
   },
 
   "menu_fetchFeedsTitle": "Fetch Feeds on Page",

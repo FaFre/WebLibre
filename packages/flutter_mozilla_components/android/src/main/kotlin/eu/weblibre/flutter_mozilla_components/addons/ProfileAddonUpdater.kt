@@ -61,7 +61,7 @@ class ProfileAddonUpdater(
         WorkManager.getInstance(profileContext.rootApplicationContext)
     },
     /** When the add-on was last checked, if ever: here, or by AC's worker before. */
-    private val lastCheckedAt: (addonId: String) -> Long? =
+    private val lastCheckedAt: suspend (addonId: String) -> Long? =
         DefaultAddonUpdater.UpdateAttemptStorage(profileContext.rootApplicationContext).let { storage ->
             { addonId ->
                 listOfNotNull(

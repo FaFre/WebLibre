@@ -12,6 +12,8 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -69,6 +71,15 @@ class SplitPaneLayout @JvmOverloads constructor(
         /** The divider was released at the edge: show [kept] alone. */
         fun onDividerCollapsed(kept: PaneView)
         fun onHandleTapped()
+
+        /**
+         * The arrangement drawn changed at a measure: the layout's own size
+         * changed, so a requested split now fits or no longer does
+         * ([SplitGeometry.effectiveArrangement]), or a new [Spec] was first
+         * drawn. Posted to the main thread, never called during a layout
+         * pass. [arrangementAtMeasuredSize] answers for the new size.
+         */
+        fun onShownArrangementChanged() = Unit
     }
 
     /** What to show. [second] is null in single presentation. */
@@ -105,6 +116,11 @@ class SplitPaneLayout @JvmOverloads constructor(
     private var committedRatio: Double? = null
 
     private var rects: SplitRects? = null
+
+    /** What the last measure drew, to tell a change ([Listener.onShownArrangementChanged]). */
+    private var measuredArrangement: PaneArrangement? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val notifyArrangementChanged = Runnable { listener?.onShownArrangementChanged() }
 
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout().toLong()
@@ -162,6 +178,29 @@ class SplitPaneLayout @JvmOverloads constructor(
         invalidate()
     }
 
+    /**
+     * The arrangement a split requested as [requested] is drawn in at the
+     * size this layout was last measured at: [requested] when both panes fit
+     * it, the focused pane alone otherwise ([SplitGeometry.effectiveArrangement]).
+     * Null before it has been measured at a size, when that is not known yet.
+     */
+    fun arrangementAtMeasuredSize(
+        requested: PaneArrangement,
+        dividerDp: Double,
+        minWidthDp: Double,
+        minHeightDp: Double,
+    ): PaneArrangement? {
+        if (measuredWidth <= 0 || measuredHeight <= 0) return null
+        return SplitGeometry.effectiveArrangement(
+            requested,
+            measuredWidth,
+            measuredHeight,
+            dp(dividerDp),
+            dp(minWidthDp),
+            dp(minHeightDp),
+        )
+    }
+
     /** Cancels a divider stroke in flight; it commits nothing. */
     fun cancelDividerStream() {
         if (!dividerStream && !dragging) return
@@ -214,6 +253,11 @@ class SplitPaneLayout @JvmOverloads constructor(
             dp(current.dragMinHeightDp),
         )
         rects = computed
+        if (effective != measuredArrangement) {
+            measuredArrangement = effective
+            mainHandler.removeCallbacks(notifyArrangementChanged)
+            mainHandler.post(notifyArrangementChanged)
+        }
 
         val shown = shownPanes(current, effective)
         for (i in 0 until childCount) {
@@ -536,6 +580,7 @@ class SplitPaneLayout @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         cancelDividerStream()
+        mainHandler.removeCallbacks(notifyArrangementChanged)
     }
 
     private fun dp(value: Double): Int =

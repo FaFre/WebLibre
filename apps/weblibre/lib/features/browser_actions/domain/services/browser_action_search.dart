@@ -56,6 +56,7 @@ const searchableBrowserActions = <BrowserAction>{
   BrowserAction.moveTabToContainer,
   BrowserAction.duplicateTab,
   BrowserAction.togglePinTab,
+  BrowserAction.toggleLockTab,
   BrowserAction.closeTab,
   BrowserAction.reopenClosedTab,
   BrowserAction.splitWithAnotherTab,

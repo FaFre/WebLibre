@@ -316,6 +316,14 @@
   "@browserActions_togglePinTabDescription": {
     "description": "Explanation under that browser action's name in the action lists: it pins or unpins the current tab (pinned tabs stay at the start of the tab bar)."
   },
+  "browserActions_toggleLockTabTitle": "Lock / Unlock Tab",
+  "@browserActions_toggleLockTabTitle": {
+    "description": "Name of the browser action that locks or unlocks the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. A locked tab cannot be closed until it is unlocked; this is not the profile lock. Keep it short."
+  },
+  "browserActions_toggleLockTabDescription": "Prevent the current tab from closing, or allow it again",
+  "@browserActions_toggleLockTabDescription": {
+    "description": "Explanation under that browser action's name in the action lists: it locks the current tab so it cannot be closed, or unlocks it."
+  },
   "browserActions_moveTabBackwardTitle": "Move Tab Back",
   "@browserActions_moveTabBackwardTitle": {
     "description": "Name of the browser action that moves the current tab one place toward the start of the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short."
@@ -480,6 +488,14 @@
   "browserActions_tabUnpinnedMessage": "Tab unpinned",
   "@browserActions_tabUnpinnedMessage": {
     "description": "Confirmation shown after a gesture, keyboard shortcut or swipe unpinned the tab."
+  },
+  "browserActions_tabLockedMessage": "Tab locked",
+  "@browserActions_tabLockedMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or swipe locked the tab, so it cannot be closed until it is unlocked."
+  },
+  "browserActions_tabUnlockedMessage": "Tab unlocked",
+  "@browserActions_tabUnlockedMessage": {
+    "description": "Confirmation shown after a gesture, keyboard shortcut or swipe unlocked the tab, so it can be closed again."
   },
   "browserActions_homeScreenUnavailableMessage": "This page can't be added to the home screen",
   "@browserActions_homeScreenUnavailableMessage": {
@@ -915,6 +931,10 @@
   },
   "browserActions_togglePinTabKeywords": "pin tab, unpin, sticky",
   "@browserActions_togglePinTabKeywords": {
+    "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
+  },
+  "browserActions_toggleLockTabKeywords": "lock tab, unlock, keep open, protect, prevent closing",
+  "@browserActions_toggleLockTabKeywords": {
     "description": "Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type."
   },
   "browserActions_closeTabKeywords": "close, remove tab",

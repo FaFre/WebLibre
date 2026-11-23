@@ -725,3 +725,406 @@ final class TabTranslationStateFamily extends $Family
   @override
   String toString() => r'tabTranslationStateProvider';
 }
+
+/// Each tab's lifecycle as native enforces it: whether its page is in memory,
+/// and whether it is held asleep (phase T1 of the tab lifecycle plan).
+
+@ProviderFor(TabLifecycleStates)
+final tabLifecycleStatesProvider = TabLifecycleStatesProvider._();
+
+/// Each tab's lifecycle as native enforces it: whether its page is in memory,
+/// and whether it is held asleep (phase T1 of the tab lifecycle plan).
+final class TabLifecycleStatesProvider
+    extends
+        $NotifierProvider<TabLifecycleStates, Map<String, TabLifecycleState>> {
+  /// Each tab's lifecycle as native enforces it: whether its page is in memory,
+  /// and whether it is held asleep (phase T1 of the tab lifecycle plan).
+  TabLifecycleStatesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabLifecycleStatesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$tabLifecycleStatesHash();
+
+  @$internal
+  @override
+  TabLifecycleStates create() => TabLifecycleStates();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<String, TabLifecycleState> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<String, TabLifecycleState>>(
+        value,
+      ),
+    );
+  }
+}
+
+String _$tabLifecycleStatesHash() =>
+    r'05b930e2355849910b57e3c620a4c0b89323e3ce';
+
+/// Each tab's lifecycle as native enforces it: whether its page is in memory,
+/// and whether it is held asleep (phase T1 of the tab lifecycle plan).
+
+abstract class _$TabLifecycleStates
+    extends $Notifier<Map<String, TabLifecycleState>> {
+  Map<String, TabLifecycleState> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              Map<String, TabLifecycleState>,
+              Map<String, TabLifecycleState>
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                Map<String, TabLifecycleState>,
+                Map<String, TabLifecycleState>
+              >,
+              Map<String, TabLifecycleState>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// Whether [tabId] is shown as asleep: it has its own sleep hold and its page
+/// is unloaded. A tab without a session is not asleep for that alone (3.3).
+
+@ProviderFor(isTabAsleep)
+final isTabAsleepProvider = IsTabAsleepFamily._();
+
+/// Whether [tabId] is shown as asleep: it has its own sleep hold and its page
+/// is unloaded. A tab without a session is not asleep for that alone (3.3).
+
+final class IsTabAsleepProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId] is shown as asleep: it has its own sleep hold and its page
+  /// is unloaded. A tab without a session is not asleep for that alone (3.3).
+  IsTabAsleepProvider._({
+    required IsTabAsleepFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabAsleepProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabAsleepHash();
+
+  @override
+  String toString() {
+    return r'isTabAsleepProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabAsleep(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabAsleepProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabAsleepHash() => r'1dace4ee62ce8fa20c197528a259f24ed6431d80';
+
+/// Whether [tabId] is shown as asleep: it has its own sleep hold and its page
+/// is unloaded. A tab without a session is not asleep for that alone (3.3).
+
+final class IsTabAsleepFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  IsTabAsleepFamily._()
+    : super(
+        retry: null,
+        name: r'isTabAsleepProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId] is shown as asleep: it has its own sleep hold and its page
+  /// is unloaded. A tab without a session is not asleep for that alone (3.3).
+
+  IsTabAsleepProvider call(String? tabId) =>
+      IsTabAsleepProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabAsleepProvider';
+}
+
+/// Whether the selected tab is asleep. It shows "This tab is asleep" until the
+/// user wakes it (D10), so actions on its page (find, reader view, translate,
+/// export, print, screenshots) have nothing to act on and are left out or
+/// disabled.
+
+@ProviderFor(isSelectedTabAsleep)
+final isSelectedTabAsleepProvider = IsSelectedTabAsleepProvider._();
+
+/// Whether the selected tab is asleep. It shows "This tab is asleep" until the
+/// user wakes it (D10), so actions on its page (find, reader view, translate,
+/// export, print, screenshots) have nothing to act on and are left out or
+/// disabled.
+
+final class IsSelectedTabAsleepProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether the selected tab is asleep. It shows "This tab is asleep" until the
+  /// user wakes it (D10), so actions on its page (find, reader view, translate,
+  /// export, print, screenshots) have nothing to act on and are left out or
+  /// disabled.
+  IsSelectedTabAsleepProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'isSelectedTabAsleepProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$isSelectedTabAsleepHash();
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    return isSelectedTabAsleep(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+}
+
+String _$isSelectedTabAsleepHash() =>
+    r'0bee57994955e18404fd432585fd781f4534beae';
+
+/// Whether [tabId] has its own sleep hold, loaded or not: it is offered Wake
+/// instead of Put to sleep.
+
+@ProviderFor(isTabSleepHeld)
+final isTabSleepHeldProvider = IsTabSleepHeldFamily._();
+
+/// Whether [tabId] has its own sleep hold, loaded or not: it is offered Wake
+/// instead of Put to sleep.
+
+final class IsTabSleepHeldProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId] has its own sleep hold, loaded or not: it is offered Wake
+  /// instead of Put to sleep.
+  IsTabSleepHeldProvider._({
+    required IsTabSleepHeldFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabSleepHeldProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabSleepHeldHash();
+
+  @override
+  String toString() {
+    return r'isTabSleepHeldProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabSleepHeld(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabSleepHeldProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabSleepHeldHash() => r'113981e23764e5c762cd0991f6f68e512d1f22a4';
+
+/// Whether [tabId] has its own sleep hold, loaded or not: it is offered Wake
+/// instead of Put to sleep.
+
+final class IsTabSleepHeldFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  IsTabSleepHeldFamily._()
+    : super(
+        retry: null,
+        name: r'isTabSleepHeldProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId] has its own sleep hold, loaded or not: it is offered Wake
+  /// instead of Put to sleep.
+
+  IsTabSleepHeldProvider call(String? tabId) =>
+      IsTabSleepHeldProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabSleepHeldProvider';
+}
+
+/// Whether [tabId]'s context is restricted: its container is frozen, or the
+/// registry is in recovery. Independent of its own sleep hold (D26).
+
+@ProviderFor(isTabContextFrozen)
+final isTabContextFrozenProvider = IsTabContextFrozenFamily._();
+
+/// Whether [tabId]'s context is restricted: its container is frozen, or the
+/// registry is in recovery. Independent of its own sleep hold (D26).
+
+final class IsTabContextFrozenProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId]'s context is restricted: its container is frozen, or the
+  /// registry is in recovery. Independent of its own sleep hold (D26).
+  IsTabContextFrozenProvider._({
+    required IsTabContextFrozenFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabContextFrozenProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabContextFrozenHash();
+
+  @override
+  String toString() {
+    return r'isTabContextFrozenProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabContextFrozen(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabContextFrozenProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabContextFrozenHash() =>
+    r'1ff7b964b073b7f2eb3d65cdaf1d22a88c1a6fef';
+
+/// Whether [tabId]'s context is restricted: its container is frozen, or the
+/// registry is in recovery. Independent of its own sleep hold (D26).
+
+final class IsTabContextFrozenFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  IsTabContextFrozenFamily._()
+    : super(
+        retry: null,
+        name: r'isTabContextFrozenProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId]'s context is restricted: its container is frozen, or the
+  /// registry is in recovery. Independent of its own sleep hold (D26).
+
+  IsTabContextFrozenProvider call(String? tabId) =>
+      IsTabContextFrozenProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabContextFrozenProvider';
+}

@@ -35,6 +35,122 @@
   "@tabs_deleteContainerHistoryKeptNote": {
     "description": "Explanation under that checkbox: if left unticked, the history remains but no longer belongs to any container."
   },
+  "tabs_deleteContainerAlsoDeleteSiteData": "Also delete site data",
+  "@tabs_deleteContainerAlsoDeleteSiteData": {
+    "description": "Checkbox in the delete container dialog: also delete the cookies and site data the container kept for itself."
+  },
+  "tabs_deleteContainerSiteDataNote": "Cookies, sign-ins, offline data and notification subscriptions",
+  "@tabs_deleteContainerSiteDataNote": {
+    "description": "Line under \"Also delete site data\" in the delete container dialog, saying what that data is."
+  },
+  "tabs_deleteContainerSiteDataFrozenNote": "A frozen container's data is deleted with it, so its background activity can never resume.",
+  "@tabs_deleteContainerSiteDataFrozenNote": {
+    "description": "Line under \"Also delete site data\" in the delete container dialog when the container is frozen: the checkbox is checked and cannot be unchecked, and this says why."
+  },
+  "tabs_siteDataPendingTitle": "Site data waiting to be deleted",
+  "@tabs_siteDataPendingTitle": {
+    "description": "Heading of a section of the containers screen listing deleted containers whose cookies and site data could not be deleted yet. Their sites stay blocked until it is."
+  },
+  "tabs_siteDataPendingExplanation": "Until their data is deleted, sites of these containers stay blocked. Deleting is retried at every start.",
+  "@tabs_siteDataPendingExplanation": {
+    "description": "Text under the heading \"Site data waiting to be deleted\" on the containers screen."
+  },
+  "tabs_siteDataPendingDeletedContainer": "Deleted container",
+  "@tabs_siteDataPendingDeletedContainer": {
+    "description": "Entry of the list \"Site data waiting to be deleted\": the data of a container the user deleted."
+  },
+  "tabs_siteDataPendingClosedIsolatedTabs": "Closed isolated tabs in {container}",
+  "@tabs_siteDataPendingClosedIsolatedTabs": {
+    "description": "Entry of the list \"Site data waiting to be deleted\": the data of isolated tabs that were closed in a container that still exists, which could not be deleted yet.",
+    "placeholders": {
+      "container": {
+        "type": "String",
+        "example": "Work"
+      }
+    }
+  },
+  "tabs_siteDataPendingOrphaned": "Container no longer exists",
+  "@tabs_siteDataPendingOrphaned": {
+    "description": "Entry of the list \"Site data waiting to be deleted\": data whose container is gone, found when WebLibre checked its records. It is deleted only when the user taps Delete data."
+  },
+  "tabs_siteDataPendingDelete": "Delete data",
+  "@tabs_siteDataPendingDelete": {
+    "description": "Button of an entry in the list \"Site data waiting to be deleted\": delete that data now."
+  },
+  "tabs_siteDataPendingDeleting": "Deleting…",
+  "@tabs_siteDataPendingDeleting": {
+    "description": "Screen-reader label of the progress spinner on an entry in the list \"Site data waiting to be deleted\" while its data is being deleted."
+  },
+  "tabs_siteDataPendingDeleted": "Site data deleted",
+  "@tabs_siteDataPendingDeleted": {
+    "description": "Short message at the bottom of the screen after the site data of a deleted container was deleted from the list \"Site data waiting to be deleted\"."
+  },
+  "tabs_siteDataPendingFailed": "The site data could not be deleted yet. It is tried again at the next start.",
+  "@tabs_siteDataPendingFailed": {
+    "description": "Short message at the bottom of the screen when deleting an entry of the list \"Site data waiting to be deleted\" failed."
+  },
+  "tabs_siteDataPendingCount": "{count, plural, =1{1 storage area} other{{count} storage areas}}",
+  "@tabs_siteDataPendingCount": {
+    "description": "Line under an entry of the list \"Site data waiting to be deleted\": how many separate cookie storages (the container's own and those of its isolated tabs) are waiting.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tabs_freezeRecoveryTitle": "Restoring frozen containers",
+  "@tabs_freezeRecoveryTitle": {
+    "description": "Heading of a section at the top of the containers screen while WebLibre restores which containers are frozen, after its record of them was found damaged."
+  },
+  "tabs_freezeRecoveryRestoring": "WebLibre's record of which containers are frozen was damaged. Until it is restored, every container with its own cookie storage stays frozen.",
+  "@tabs_freezeRecoveryRestoring": {
+    "description": "Text of the section \"Restoring frozen containers\" while restoring is under way."
+  },
+  "tabs_freezeRecoveryFailed": "WebLibre's record of which containers are frozen was damaged, and restoring it did not finish. Until it does, every container with its own cookie storage stays frozen.",
+  "@tabs_freezeRecoveryFailed": {
+    "description": "Text of the section \"Restoring frozen containers\" after an attempt to restore did not finish. A Retry button follows."
+  },
+  "tabs_deleteContainerLockedTabs": "{count, plural, =1{1 locked tab is in this container. Unlock it before deleting this container.} other{{count} locked tabs are in this container. Unlock these tabs before deleting this container.}}",
+  "@tabs_deleteContainerLockedTabs": {
+    "description": "Body of the dialog shown instead of deleting a container that holds locked tabs (tabs locked with \"Lock tab\" cannot be closed until unlocked). Nothing was deleted. count is the number of locked tabs.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tabs_deleteContainerShowTabs": "Show tabs",
+  "@tabs_deleteContainerShowTabs": {
+    "description": "Button in that dialog: open the tab view on this container, where the locked tabs can be unlocked."
+  },
+  "tabs_deleteContainerIncomplete": "Some of this container's tabs could not be closed, so the container was kept",
+  "@tabs_deleteContainerIncomplete": {
+    "description": "Short message at the bottom of the screen when deleting a container stopped because some of its tabs stayed open. The container and those tabs are still there; deleting it again tries again."
+  },
+  "tabs_deleteContainerNotPersisted": "The container was not deleted because its frozen state could not be saved. Try again.",
+  "@tabs_deleteContainerNotPersisted": {
+    "description": "Short message at the bottom of the screen when deleting a frozen container stopped before anything was deleted, because the app could not save that the deletion had started (for example, the storage is full). A frozen container's background activity is stopped until it is resumed. The container is still there; deleting it again tries again."
+  },
+  "tabs_deleteContainerFreezeStateUnknown": "The container was not deleted because WebLibre could not check whether it is frozen. Try again.",
+  "@tabs_deleteContainerFreezeStateUnknown": {
+    "description": "Short message at the bottom of the screen when deleting a container stopped before anything was closed or deleted, because WebLibre could not read its record of which containers are frozen (\"Freeze\" stops a container's background activity until it is resumed). Without it, the app does not know which site data belongs to the container. The container is still there; deleting it again tries again."
+  },
+  "tabs_deleteContainerSiteDataPending": "Container deleted; site-data cleanup pending",
+  "@tabs_deleteContainerSiteDataPending": {
+    "description": "Short message at the bottom of the screen after a frozen container was deleted but its site data (cookies, sign-ins, offline data, notification subscriptions) could not be deleted yet. That data stays blocked from running and the app tries again at every start."
+  },
+  "tabs_deleteContainerOpenInWebApp": "Close this container's web apps and custom tabs first",
+  "@tabs_deleteContainerOpenInWebApp": {
+    "description": "Short message at the bottom of the screen when deleting a container was refused because a web app (an installed site opened in its own window) or a custom tab (a link from another app opened in a WebLibre window) still runs in the container. Nothing was closed or deleted; the user closes those windows and deletes the container again."
+  },
+  "tabs_deleteContainerSharedStorage": "An isolated tab of another container uses this frozen container's storage. Resume the container before deleting it.",
+  "@tabs_deleteContainerSharedStorage": {
+    "description": "Short message at the bottom of the screen when deleting a frozen container was refused (\"Freeze\" stops a container's background activity until it is resumed). After WebLibre found its record of frozen containers damaged, storage that isolated tabs of two containers share was put under this container only; deleting it would delete that storage's site data while the other container's tab still uses it. Nothing was closed or deleted; once the container is resumed, deleting it leaves that storage to the other tab."
+  },
+  "tabs_deleteContainerBusy": "This container is still being changed. Try again in a moment.",
+  "@tabs_deleteContainerBusy": {
+    "description": "Short message at the bottom of the screen when deleting a container could not start: it is already being deleted, or a tab is being added to it or moved in or out of it right now. Nothing was deleted."
+  },
+  "tabs_deleteContainerRecoveryPending": "No container can be deleted while frozen containers are being restored",
+  "@tabs_deleteContainerRecoveryPending": {
+    "description": "Short message at the bottom of the screen when deleting a container was refused because WebLibre found its record of frozen containers damaged and is still restoring which containers are frozen. Until then every container is treated as frozen, and its site data could not be deleted reliably. Nothing was deleted; the Containers screen shows how restoring goes."
+  },
+  "tabs_deleteContainerHistoryFailed": "The container was deleted, but its history could not be deleted",
+  "@tabs_deleteContainerHistoryFailed": {
+    "description": "Short message at the bottom of the screen when a container was deleted with \"Also delete browsing history\" ticked, but deleting that history failed. The visits remain in history without a container."
+  },
   "tabs_deleteContainerButton": "Delete Container",
   "@tabs_deleteContainerButton": {
     "description": "Button at the bottom of the container editor that deletes the container (asks for confirmation)."
@@ -310,6 +426,36 @@
   "tabs_requiresCookieIsolation": "Requires cookie isolation to be enabled",
   "@tabs_requiresCookieIsolation": {
     "description": "Line under a disabled container setting explaining that it needs \"Cookie Isolation\" to be turned on."
+  },
+  "tabs_autoFreezeTitle": "Freeze Automatically",
+  "@tabs_autoFreezeTitle": {
+    "description": "Container editor row and the title of its dialog: freeze this container on its own once none of its tabs has been used for a while. Freezing unloads the container's tabs and stops its background activity until it is resumed."
+  },
+  "tabs_autoFreezeOff": "Off",
+  "@tabs_autoFreezeOff": {
+    "description": "Value of 'Freeze Automatically' in the container editor, and its first choice: the container is never frozen automatically."
+  },
+  "tabs_autoFreezeAfterMinutes": "{count, plural, =1{After 1 minute unused, counted while WebLibre is open} other{After {count} minutes unused, counted while WebLibre is open}}",
+  "@tabs_autoFreezeAfterMinutes": {
+    "description": "Value of 'Freeze Automatically' in the container editor: the container freezes once none of its tabs has been used for this many minutes. Only time while WebLibre is open counts.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tabs_autoFreezeAfterHours": "{count, plural, =1{After 1 hour unused, counted while WebLibre is open} other{After {count} hours unused, counted while WebLibre is open}}",
+  "@tabs_autoFreezeAfterHours": {
+    "description": "Value of 'Freeze Automatically' in the container editor: the container freezes once none of its tabs has been used for this many hours. Only time while WebLibre is open counts.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tabs_autoFreezeExplanation": "Freezes this container once none of its tabs has been used for the time you choose. Only time while WebLibre is open counts. Freezing unloads its tabs and stops what it runs in the background, notifications included, until you resume it. It waits while one of its tabs plays media, is in a call, holds a download, or is set to \"Keep awake\". Typed text keeps it waiting until it has been unused for an hour; the text may then be lost.",
+  "@tabs_autoFreezeExplanation": {
+    "description": "Text at the top of the 'Freeze Automatically' dialog: what the choice does, that only time while WebLibre is open counts, what freezing stops, what keeps the container from freezing, and that typed form text only delays it (for an hour of no use, or the chosen time if longer) and may then be lost. \"Keep awake\" is the tab menu action of the same name."
   },
 
   "tabs_isolatedAppLinkSettings": "Isolated App Link Settings",

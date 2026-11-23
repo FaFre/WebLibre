@@ -15,6 +15,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxyRoutingSnapshot
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxyRoutingStatus
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProxySettings
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoRoutingDemand
+import eu.weblibre.flutter_mozilla_components.split.installedRoutingCovers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -54,6 +55,9 @@ class GeckoContainerProxyApiImpl(
             acknowledgedGeneration = generation,
         )
     }
+
+    override fun routingCoversContexts(contextIds: List<String>): Boolean =
+        contextIds.all { installedRoutingCovers(it) }
 
     override fun takeRoutingDemand(): GeckoRoutingDemand? =
         RoutingDemands.take()?.toPigeon()

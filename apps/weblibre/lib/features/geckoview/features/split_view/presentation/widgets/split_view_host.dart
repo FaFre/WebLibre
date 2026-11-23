@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
@@ -30,6 +31,11 @@ import 'package:weblibre/features/geckoview/features/split_view/domain/providers
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view_inputs.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/services/split_presentation.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/services/split_view_native_sync.dart';
+import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/frozen_placeholder_labels.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/container_freeze.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_data_l10n.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/utils/ui_helper.dart';
 
@@ -54,6 +60,13 @@ class SplitViewHost extends HookConsumerWidget {
       ..listen(splitViewNativeSyncProvider, (_, _) {})
       ..listen(splitViewReconciliationProvider, (_, _) {});
     final service = ref.watch(splitViewServiceProvider);
+    final frozenViews = ref.watch(frozenContainersProvider).value;
+    final freezeRecovery = ref.watch(freezeRecoveryModeProvider);
+    final containers = ref.watch(
+      watchContainersProvider.select(
+        (value) => EquatableValue(value.value ?? const <ContainerData>[]),
+      ),
+    );
 
     final colorScheme = Theme.of(context).colorScheme;
     final appColors = AppColors.of(context);
@@ -71,6 +84,18 @@ class SplitViewHost extends HookConsumerWidget {
       dividerOptionsAction: l10n.splitView_dividerOptions,
       crashedTitle: l10n.splitView_crashedTitle,
       crashedReload: l10n.splitView_crashedReload,
+      sleepingTitle: l10n.splitView_sleepingTitle,
+      sleepingWake: l10n.splitView_sleepingWake,
+      // While the containers are being restored, no record says which tab
+      // belongs to what, so every frozen tab says why (5.6).
+      frozenTitle: freezeRecovery
+          ? l10n.splitView_frozenRecoveryTitle
+          : l10n.splitView_frozenTitle,
+      frozenResume: l10n.splitView_frozenResume,
+      frozenContainers: frozenPlaceholderLabels(l10n, frozenViews, {
+        for (final container in containers.value)
+          container.id: container.displayName(l10n),
+      }),
     );
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {

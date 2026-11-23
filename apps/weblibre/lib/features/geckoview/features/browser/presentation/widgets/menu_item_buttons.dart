@@ -27,6 +27,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:nullability/nullability.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:skeletonizer/skeletonizer.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
@@ -105,20 +106,24 @@ class SaveToPdfMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Reads the page, which an asleep tab does not have until it is woken.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
     final l10n = AppLocalizations.of(context);
 
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.filePdfBox),
       closeOnActivate: false,
-      onPressed: () async {
-        await ref
-            .read(tabSessionProvider(tabId: selectedTabId).notifier)
-            .saveToPdf();
+      onPressed: asleep
+          ? null
+          : () async {
+              await ref
+                  .read(tabSessionProvider(tabId: selectedTabId).notifier)
+                  .saveToPdf();
 
-        if (context.mounted) {
-          MenuController.maybeOf(context)?.close();
-        }
-      },
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
       child: Text(l10n.browser_exportAsPdf),
     );
   }
@@ -131,26 +136,33 @@ class PrintMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Reads the page, which an asleep tab does not have until it is woken.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
     final l10n = AppLocalizations.of(context);
 
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.printer),
       closeOnActivate: false,
-      onPressed: () async {
-        try {
-          await ref
-              .read(tabSessionProvider(tabId: selectedTabId).notifier)
-              .printContent();
-        } catch (e) {
-          if (context.mounted) {
-            ui_helper.showErrorMessage(context, l10n.browser_failedToPrintPage);
-          }
-        }
+      onPressed: asleep
+          ? null
+          : () async {
+              try {
+                await ref
+                    .read(tabSessionProvider(tabId: selectedTabId).notifier)
+                    .printContent();
+              } catch (e) {
+                if (context.mounted) {
+                  ui_helper.showErrorMessage(
+                    context,
+                    l10n.browser_failedToPrintPage,
+                  );
+                }
+              }
 
-        if (context.mounted) {
-          MenuController.maybeOf(context)?.close();
-        }
-      },
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
       child: Text(l10n.browser_print),
     );
   }
@@ -231,31 +243,38 @@ class ShareScreenshotMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Reads the page, which an asleep tab does not have until it is woken.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
     final l10n = AppLocalizations.of(context);
 
     return MenuItemButton(
       leadingIcon: const Icon(Icons.mobile_screen_share),
       closeOnActivate: false,
+      onPressed: asleep
+          ? null
+          : () async {
+              final screenshot = await ref
+                  .read(selectedTabSessionProvider)
+                  .requestScreenshot();
+
+              final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+              if (screenshot != null) {
+                final file = XFile.fromData(screenshot, mimeType: 'image/png');
+
+                await SharePlus.instance.share(
+                  ShareParams(
+                    files: [file],
+                    subject: tabState.titleOrAuthority,
+                  ),
+                );
+              }
+
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
       child: Text(l10n.browser_shareScreenshot),
-      onPressed: () async {
-        final screenshot = await ref
-            .read(selectedTabSessionProvider)
-            .requestScreenshot();
-
-        final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-        if (screenshot != null) {
-          final file = XFile.fromData(screenshot, mimeType: 'image/png');
-
-          await SharePlus.instance.share(
-            ShareParams(files: [file], subject: tabState.titleOrAuthority),
-          );
-        }
-
-        if (context.mounted) {
-          MenuController.maybeOf(context)?.close();
-        }
-      },
     );
   }
 }
@@ -270,30 +289,34 @@ class ExportScreenshotMenuItemButton extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Reads the page, which an asleep tab does not have until it is woken.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
     final l10n = AppLocalizations.of(context);
 
     return MenuItemButton(
       leadingIcon: const Icon(MdiIcons.fileImage),
       closeOnActivate: false,
+      onPressed: asleep
+          ? null
+          : () async {
+              final screenshot = await ref
+                  .read(selectedTabSessionProvider)
+                  .requestScreenshot();
+
+              final tabState = ref.read(tabStateProvider(selectedTabId))!;
+
+              if (screenshot != null) {
+                await FilePicker.saveFile(
+                  fileName: '${tabState.titleOrAuthority}.png',
+                  bytes: screenshot,
+                );
+              }
+
+              if (context.mounted) {
+                MenuController.maybeOf(context)?.close();
+              }
+            },
       child: Text(l10n.browser_exportAsPng),
-      onPressed: () async {
-        final screenshot = await ref
-            .read(selectedTabSessionProvider)
-            .requestScreenshot();
-
-        final tabState = ref.read(tabStateProvider(selectedTabId))!;
-
-        if (screenshot != null) {
-          await FilePicker.saveFile(
-            fileName: '${tabState.titleOrAuthority}.png',
-            bytes: screenshot,
-          );
-        }
-
-        if (context.mounted) {
-          MenuController.maybeOf(context)?.close();
-        }
-      },
     );
   }
 }

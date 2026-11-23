@@ -31,6 +31,8 @@ abstract class _$ContainerMetadataCWProxy {
 
   ContainerMetadata wallpaper(WallpaperOverride? wallpaper);
 
+  ContainerMetadata autoFreezeAfterMinutes(int? autoFreezeAfterMinutes);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
@@ -52,6 +54,7 @@ abstract class _$ContainerMetadataCWProxy {
     bool strictMode,
     bool isolatedAppLinkSettings,
     WallpaperOverride? wallpaper,
+    int? autoFreezeAfterMinutes,
   });
 }
 
@@ -108,6 +111,10 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
   ContainerMetadata wallpaper(WallpaperOverride? wallpaper) =>
       call(wallpaper: wallpaper);
 
+  @override
+  ContainerMetadata autoFreezeAfterMinutes(int? autoFreezeAfterMinutes) =>
+      call(autoFreezeAfterMinutes: autoFreezeAfterMinutes);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `ContainerMetadata(...).copyWith.fieldName(value)`.
@@ -130,6 +137,7 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
     Object? strictMode = const $CopyWithPlaceholder(),
     Object? isolatedAppLinkSettings = const $CopyWithPlaceholder(),
     Object? wallpaper = const $CopyWithPlaceholder(),
+    Object? autoFreezeAfterMinutes = const $CopyWithPlaceholder(),
   }) {
     return ContainerMetadata(
       iconData: iconData == const $CopyWithPlaceholder()
@@ -193,6 +201,11 @@ class _$ContainerMetadataCWProxyImpl implements _$ContainerMetadataCWProxy {
           ? _value.wallpaper
           // ignore: cast_nullable_to_non_nullable
           : wallpaper as WallpaperOverride?,
+      autoFreezeAfterMinutes:
+          autoFreezeAfterMinutes == const $CopyWithPlaceholder()
+          ? _value.autoFreezeAfterMinutes
+          // ignore: cast_nullable_to_non_nullable
+          : autoFreezeAfterMinutes as int?,
     );
   }
 }
@@ -343,6 +356,7 @@ ContainerMetadata _$ContainerMetadataFromJson(
   wallpaper: json['wallpaper'] == null
       ? null
       : WallpaperOverride.fromJson(json['wallpaper'] as Map<String, dynamic>),
+  autoFreezeAfterMinutes: (json['autoFreezeAfterMinutes'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$ContainerMetadataToJson(
@@ -363,6 +377,7 @@ Map<String, dynamic> _$ContainerMetadataToJson(
   'strictMode': instance.strictMode,
   'isolatedAppLinkSettings': instance.isolatedAppLinkSettings,
   'wallpaper': instance.wallpaper?.toJson(),
+  'autoFreezeAfterMinutes': instance.autoFreezeAfterMinutes,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

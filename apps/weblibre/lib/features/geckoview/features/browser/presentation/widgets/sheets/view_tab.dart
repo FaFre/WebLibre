@@ -155,6 +155,7 @@ class ViewTabSheetWidget extends HookConsumerWidget {
             const Divider(),
             ClearSiteDataSection(
               url: initialTabState.url,
+              tabId: initialTabState.id,
               onExpandedChanged: onSectionExpandedChanged,
             ),
           ],

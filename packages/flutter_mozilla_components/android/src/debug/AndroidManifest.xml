@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Debug builds only: the container freeze spike harness (FreezeSpikeReceiver).
+  Only a sender holding DUMP, which is adb's shell and no app, can reach it.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <receiver
+            android:name="eu.weblibre.flutter_mozilla_components.debug.FreezeSpikeReceiver"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="eu.weblibre.debug.FREEZE_SPIKE" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

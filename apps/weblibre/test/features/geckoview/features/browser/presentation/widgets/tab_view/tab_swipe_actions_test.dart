@@ -23,6 +23,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_swipe_actions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -46,10 +47,14 @@ void main() {
     WidgetTester tester, {
     required BrowserAction? left,
     required BrowserAction? right,
+    Set<String> lockedTabIds = const {},
   }) {
     return tester.pumpWidget(
       ProviderScope(
         overrides: [
+          watchLockedTabIdsProvider.overrideWith(
+            (ref) => Stream.value(lockedTabIds),
+          ),
           builtInGestureBindingProvider(
             BuiltInGesture.tabSwipeLeft,
           ).overrideWithValue(left),
@@ -118,6 +123,38 @@ void main() {
     final moved = restingLeft - cardLeft(tester);
     expect(moved, greaterThan(0), reason: 'the swipe is visibly noticed');
     expect(moved, lessThanOrEqualTo(32), reason: 'but never looks armed');
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(dispatcher.runs, isEmpty);
+    expect(cardLeft(tester), restingLeft);
+  });
+
+  testWidgets('a swipe bound to closing does nothing on a locked tab', (
+    tester,
+  ) async {
+    await pumpCard(
+      tester,
+      left: BrowserAction.closeTab,
+      right: null,
+      lockedTabIds: {'tab-1'},
+    );
+    await tester.pump();
+    final restingLeft = cardLeft(tester);
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(cardKey)),
+    );
+    for (var i = 0; i < 10; i++) {
+      await gesture.moveBy(const Offset(-30, 0));
+      await tester.pump();
+    }
+
+    // It rubber-bands like an unbound direction: never armed, so letting go
+    // closes nothing.
+    final moved = restingLeft - cardLeft(tester);
+    expect(moved, lessThanOrEqualTo(32));
 
     await gesture.up();
     await tester.pumpAndSettle();

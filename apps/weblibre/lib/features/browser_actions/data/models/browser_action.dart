@@ -66,6 +66,9 @@ enum BrowserAction {
   selectTab8(MdiIcons.numeric8BoxOutline, BrowserActionCategory.tabs),
   selectLastTab(Icons.last_page, BrowserActionCategory.tabs),
   togglePinTab(MdiIcons.pin, BrowserActionCategory.tabs),
+
+  /// "Lock tab": a locked tab refuses to close until it is unlocked.
+  toggleLockTab(MdiIcons.lockOutline, BrowserActionCategory.tabs),
   moveTabBackward(MdiIcons.chevronLeft, BrowserActionCategory.tabs),
   moveTabForward(MdiIcons.chevronRight, BrowserActionCategory.tabs),
   moveTabToStart(MdiIcons.arrowCollapseLeft, BrowserActionCategory.tabs),

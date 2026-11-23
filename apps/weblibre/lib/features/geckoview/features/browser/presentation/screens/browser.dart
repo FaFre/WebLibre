@@ -55,8 +55,11 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/toolbar_visibility.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/keep_tab_dialog.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/hooks/use_container_freeze_notices.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/layout/browser_chrome_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/providers/browser_viewport_toolbar_insets.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/container_freeze_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/addon_popup_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_fab.dart';
@@ -79,9 +82,11 @@ import 'package:weblibre/features/geckoview/features/search/domain/providers/sea
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_view_controls_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_freeze.dart';
 import 'package:weblibre/features/keyboard_shortcuts/presentation/widgets/browser_keyboard_shortcuts.dart';
 import 'package:weblibre/features/onboarding/presentation/hooks/use_setup_follow_ups.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
@@ -1118,9 +1123,11 @@ class BrowserScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     useSetupFollowUps(context, ref);
+    useContainerFreezeNotices(context, ref);
 
     final eventService = ref.watch(eventServiceProvider);
     final viewportService = ref.watch(viewportServiceProvider);
+    final freezeService = ref.watch(containerFreezeServiceProvider.notifier);
     final activeProxyPromptKeys = useRef(<String>{});
     final pendingProxyLoadErrors = useRef(<String, _PendingProxyLoadError>{});
     final pendingProxyLoadErrorWatches = useRef(
@@ -1421,6 +1428,15 @@ class BrowserScreen extends HookConsumerWidget {
       );
       return null;
     }, [selectedTabIdForProxyPrompt]);
+
+    // A navigation into a frozen container's tab waits here for "Resume and
+    // open" (5.2.1).
+    useEffect(
+      () => freezeService.answerResumeAndOpenWith(
+        (request) => unawaited(answerResumeAndOpen(context, ref.read, request)),
+      ),
+      [freezeService],
+    );
 
     useOnStreamChange(
       eventService.proxyLoadErrorEvents,
@@ -2185,20 +2201,11 @@ class _Browser extends HookConsumerWidget {
       },
       onAcceptWithDetails: (details) async {
         ref.read(willAcceptDropProvider.notifier).clear();
-        if (!await confirmIsolatedTabCloseIfNeeded(details.data.tabId)) {
-          return;
-        }
-
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .closeTab(details.data.tabId);
-
-        if (context.mounted) {
-          ui_helper.showTabUndoClose(
-            context,
-            ref.read(tabRepositoryProvider.notifier).undoClose,
-          );
-        }
+        await closeTabWithConfirmationAndUndoUsing(
+          context,
+          ref.read,
+          details.data.tabId,
+        );
       },
       builder: (context, _, _) {
         return OverlayPortal(
@@ -2320,11 +2327,18 @@ class _Browser extends HookConsumerWidget {
               } else if (onBackBehavior != null) {
                 if (!context.mounted) return false;
 
-                final answer = await showKeepTabDialog(
-                  context,
-                  ref.read,
-                  rememberable: onBackBehavior is BackgroundAppTabBackBehavior,
-                );
+                // A locked tab does not close, so there is nothing to ask:
+                // it is kept.
+                final answer =
+                    tabState != null &&
+                        ref.read(isTabLockedProvider(tabState.id))
+                    ? KeepTabAnswer.keep
+                    : await showKeepTabDialog(
+                        context,
+                        ref.read,
+                        rememberable:
+                            onBackBehavior is BackgroundAppTabBackBehavior,
+                      );
                 if (answer == null) {
                   return true;
                 }
@@ -2379,9 +2393,12 @@ class _Browser extends HookConsumerWidget {
                 // container in turn (#616); leaving the app is the end of
                 // the line instead. On home no tab is on screen, so there is
                 // nothing to close either.
+                // A locked tab is never closed this way either; back then
+                // leaves the app as it would on the container's last tab.
                 var canCloseTab = false;
                 if (tabState != null &&
-                    !ref.read(shouldShowBrowserHomeProvider)) {
+                    !ref.read(shouldShowBrowserHomeProvider) &&
+                    !ref.read(isTabLockedProvider(tabState.id))) {
                   final containerId = await ref
                       .read(tabDataRepositoryProvider.notifier)
                       .getTabContainerId(tabState.id);
@@ -2431,13 +2448,14 @@ class _Browser extends HookConsumerWidget {
                       return true;
                     }
 
-                    await ref
+                    final result = await ref
                         .read(tabRepositoryProvider.notifier)
                         .closeTab(tabState.id);
 
                     if (context.mounted) {
-                      ui_helper.showTabUndoClose(
+                      showTabCloseResult(
                         context,
+                        result,
                         ref.read(tabRepositoryProvider.notifier).undoClose,
                       );
                     }

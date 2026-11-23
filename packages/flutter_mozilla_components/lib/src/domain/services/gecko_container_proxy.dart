@@ -86,4 +86,22 @@ class GeckoContainerProxyService {
       return GeckoProxyRoutingStatus(ready: false);
     }
   }
+
+  /// Whether the routing native installed covers every one of [contextIds] as
+  /// a pane requires before it wakes a tab: direct, a live proxy, or one still
+  /// starting. False while none is installed, for a proxy without an
+  /// endpoint, and when native cannot be asked.
+  Future<bool> routingCoversContexts(List<String> contextIds) async {
+    try {
+      return await _apiInstance.routingCoversContexts(contextIds);
+    } catch (e, s) {
+      developer.log(
+        'Container proxy routing check failed',
+        error: e,
+        stackTrace: s,
+        name: 'GeckoContainerProxyService',
+      );
+      return false;
+    }
+  }
 }

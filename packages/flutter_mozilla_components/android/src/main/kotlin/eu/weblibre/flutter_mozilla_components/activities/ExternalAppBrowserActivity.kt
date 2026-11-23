@@ -29,6 +29,8 @@ import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.PwaConstants
 import eu.weblibre.flutter_mozilla_components.PwaSessionCreator
 import eu.weblibre.flutter_mozilla_components.addons.WebExtensionPromptHost
+import eu.weblibre.flutter_mozilla_components.lifecycle.FrozenWindowHandoffs
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import eu.weblibre.flutter_mozilla_components.lock.ExternalWindowLock
 import eu.weblibre.flutter_mozilla_components.lock.LockedWindowCurtain
 import eu.weblibre.flutter_mozilla_components.lock.ProfileLockedWindow
@@ -207,6 +209,9 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
      * not allowed, for [onResume]. The latest request wins.
      */
     private var deferredShow: (() -> Unit)? = null
+
+    /** The window says its container is frozen instead of showing the page (D18). */
+    private var showingFrozen = false
 
     /** Paused into picture-in-picture, which is not leaving yet. */
     private var pausedIntoPictureInPicture = false
@@ -557,6 +562,33 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
         }
     }
 
+    /**
+     * Shown instead of the page while the window's container is frozen: "Open
+     * WebLibre to resume" opens the page in WebLibre, where the frozen
+     * placeholder's Resume runs the routing check, and "Close" leaves.
+     */
+    private fun showFrozenContainer() {
+        val status = findViewById<View>(R.id.launch_status) ?: return
+        showingFrozen = true
+        status.visibility = View.VISIBLE
+        status.findViewById<View>(R.id.launch_status_progress).visibility = View.GONE
+        status.findViewById<ImageView>(R.id.launch_status_icon).visibility = View.VISIBLE
+        status.findViewById<TextView>(R.id.launch_status_step).visibility = View.GONE
+        status.findViewById<TextView>(R.id.launch_status_title).setText(R.string.weblibre_frozen_window_title)
+        status.findViewById<TextView>(R.id.launch_status_message).setText(R.string.weblibre_frozen_window_message)
+        status.findViewById<MaterialButton>(R.id.launch_status_primary).apply {
+            setText(R.string.weblibre_frozen_window_open)
+            visibility = View.VISIBLE
+            setOnClickListener { openFrozenPageInBrowser() }
+        }
+        status.findViewById<MaterialButton>(R.id.launch_status_secondary).visibility = View.GONE
+        status.findViewById<MaterialButton>(R.id.launch_status_tertiary).apply {
+            setText(R.string.weblibre_launch_action_close)
+            visibility = View.VISIBLE
+            setOnClickListener { finishAndRemoveTask() }
+        }
+    }
+
     private fun hideLaunchStatus() {
         findViewById<View>(R.id.launch_status)?.visibility = View.GONE
     }
@@ -680,7 +712,8 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
         }
 
         // Verify session exists
-        if (components.core.store.state.findCustomTab(sessionId) == null) {
+        val customTab = components.core.store.state.findCustomTab(sessionId)
+        if (customTab == null) {
             if (mayAwaitHandover && GlobalComponents.isHandingOverCustomTabs) {
                 // The app half started (a password check starts it) and its
                 // components take this window's session over only once they
@@ -699,6 +732,16 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
             }
             return
         }
+
+        // D18: a web app or custom tab of a frozen container cannot load, so
+        // it says so instead of staying blank. Resuming needs WebLibre's own
+        // checks (routing first, D34), so it happens there; back here, the
+        // window shows its page once the container is resumed.
+        if (TabLifecycleRegistry.isRestricted(customTab.contextId)) {
+            showFrozenContainer()
+            return
+        }
+        showingFrozen = false
 
         val fragment = ExternalAppBrowserFragment.create(
             customTabSessionId = sessionId,
@@ -766,6 +809,12 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
         } ?: false
         val handedOver = handover.runDeferred()
         if (shown || handedOver) return
+
+        // Back from WebLibre, where the container may have been resumed.
+        if (showingFrozen) {
+            customTabSessionId?.let { showFragment(it) }
+            return
+        }
 
         // Mid-handover the session is missing from the new components without
         // being gone; [onCustomTabsHandedOver] picks it up.
@@ -858,9 +907,10 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
      * tab in that container (see `IntentContainerMode.fromWireValue`), which is
      * also what puts the user in front of the prompt to start its proxy.
      */
-    private fun fallbackToMainActivity() {
-        val url = windowLaunchUrl
-        val contextId = intent?.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID)
+    private fun fallbackToMainActivity(
+        url: String? = windowLaunchUrl,
+        contextId: String? = intent?.getStringExtra(PwaConstants.EXTRA_PWA_CONTEXT_ID),
+    ) {
 
         val mainIntent = Intent().apply {
             setClassName(this@ExternalAppBrowserActivity, "eu.weblibre.gecko.MainActivity")
@@ -875,6 +925,32 @@ open class ExternalAppBrowserActivity : AppCompatActivity(), ProfileLockedWindow
         }
         startActivity(mainIntent)
         finish()
+    }
+
+    /**
+     * "Open WebLibre to resume": the page this window holds, which its frozen
+     * storage keeps from loading, opens in the browser in that same storage,
+     * a container's or an isolation group's, as a tab the owning container's
+     * freeze holds, whose Resume checks routing first (D18, D34). A private
+     * window's page opens in a private tab, which keeps it out of the saved
+     * session and the history as the window kept it. The session
+     * has the page; the launch intent may not (an ordinary custom tab's intent
+     * carries only the session id, and a web app's names its start page).
+     *
+     * Handed over in the process ([FrozenWindowHandoffs]), not as a URL to
+     * open: a generic VIEW launch goes by the user's link-opening setting and
+     * resolves its context only as a container's, so it could load the page
+     * in other storage, unfrozen.
+     */
+    private fun openFrozenPageInBrowser() {
+        val customTab = customTabSessionId?.let { sessionId ->
+            GlobalComponents.components?.core?.store?.state?.findCustomTab(sessionId)
+        }
+        customTab?.contextId?.let { contextId ->
+            val url = customTab.content.url.takeIf { it.isNotBlank() && it != "about:blank" }
+            FrozenWindowHandoffs.put(FrozenWindowHandoffs.Handoff(contextId, url, customTab.content.private))
+        }
+        fallbackToMainActivity(url = null)
     }
 
     override fun onDestroy() {

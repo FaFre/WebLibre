@@ -9,6 +9,7 @@ package eu.weblibre.flutter_mozilla_components.split
 import android.content.Context
 import android.graphics.Bitmap
 import android.view.ContextThemeWrapper
+import android.view.View
 import android.widget.FrameLayout
 import eu.weblibre.flutter_mozilla_components.pigeons.SplitPairState
 import eu.weblibre.flutter_mozilla_components.pigeons.SplitPaneMode
@@ -38,6 +39,7 @@ import mozilla.components.feature.session.SessionUseCases
 import mozilla.components.feature.tabs.TabsUseCases
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.Store
+import eu.weblibre.flutter_mozilla_components.lifecycle.PresentationMemory
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -179,7 +181,15 @@ class SplitPaneCoordinatorTest {
             ),
             middleware = listOf(captured),
         )
-        val layout = SplitPaneLayout(context)
+        // Laid out at a window's size with room for two panes side by side,
+        // so a pair is drawn, and counts as on screen, as both pages.
+        val layout = SplitPaneLayout(context).apply {
+            measure(
+                View.MeasureSpec.makeMeasureSpec(1200, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(800, View.MeasureSpec.EXACTLY),
+            )
+            layout(0, 0, 1200, 800)
+        }
         coordinator = SplitPaneCoordinator(
             store = store,
             tabsUseCases = TabsUseCases(store),
@@ -191,6 +201,7 @@ class SplitPaneCoordinatorTest {
             onFocusedEngineView = {},
             mirror = mirror,
             mainDispatcher = Dispatchers.Unconfined,
+            presentation = PresentationMemory(),
         )
         coordinator.start()
         coordinator.reconcileNow()
@@ -231,7 +242,7 @@ class SplitPaneCoordinatorTest {
                 dragPreviewColorArgb = 0,
                 placeholderColorArgb = 0xFFFFFFFF,
                 onPlaceholderColorArgb = 0xFF000000,
-                labels = SplitViewLabels("divider", "options", "crashed", "reload"),
+                labels = SplitViewLabels("divider", "options", "crashed", "reload", "asleep", "wake", "frozen", "resume", emptyList()),
             ),
         )
         coordinator.reconcileNow()
@@ -391,13 +402,13 @@ class SplitPaneCoordinatorTest {
 
         store.dispatch(CrashAction.SessionCrashedAction("b"))
         coordinator.reconcileNow()
-        assertTrue(paneOf("b").isShowingCrashPlaceholder)
+        assertEquals(PaneView.PlaceholderKind.CRASHED, paneOf("b").placeholderKind)
         assertNull(paneOf("b").attachedSession)
-        assertFalse(paneOf("a").isShowingCrashPlaceholder)
+        assertNull(paneOf("a").placeholderKind)
 
         store.dispatch(CrashAction.RestoreCrashedSessionAction("b"))
         coordinator.reconcileNow()
-        assertFalse(paneOf("b").isShowingCrashPlaceholder)
+        assertNull(paneOf("b").placeholderKind)
         assertSame(sessionB, paneOf("b").attachedSession)
     }
 

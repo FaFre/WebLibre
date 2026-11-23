@@ -73,6 +73,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/entities/contai
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/search_credits/domain/repositories/web_search_settings.dart';
@@ -625,26 +626,32 @@ class SearchScreen extends HookConsumerWidget {
             ? ref.read(selectedTabProvider)
             : null;
 
-        targetTabId = await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: uri,
-              tabMode: effectiveTabMode,
-              parentId: parentId,
-              launchedFromIntent: launchedFromIntent,
-              // In picker mode the new page is selected only once it is
-              // paired, so the split appears at once.
-              selectTab: splitSourceId == null,
-              containerSelection: picker != null
-                  ? picker.containerSelection
-                  : containerSelectionFor(selectedContainer),
-              onBackBehavior: resolveSearchTabBackBehavior(
-                launchedFromIntent: launchedFromIntent,
+        final openedTabId = await openUnlessContainerRefuses(
+          context,
+          () => ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(
+                url: uri,
+                tabMode: effectiveTabMode,
                 parentId: parentId,
+                launchedFromIntent: launchedFromIntent,
+                // In picker mode the new page is selected only once it is
+                // paired, so the split appears at once.
+                selectTab: splitSourceId == null,
+                containerSelection: picker != null
+                    ? picker.containerSelection
+                    : containerSelectionFor(selectedContainer),
+                onBackBehavior: resolveSearchTabBackBehavior(
+                  launchedFromIntent: launchedFromIntent,
+                  parentId: parentId,
+                ),
+                // Typed by the user, not linked from the parent's page.
+                parentIsReferrer: false,
               ),
-              // Typed by the user, not linked from the parent's page.
-              parentIsReferrer: false,
-            );
+        );
+        // Refused into a frozen container, and said so; the screen stays.
+        if (openedTabId == null) return;
+        targetTabId = openedTabId;
 
         // Before picker mode leaves this screen, after which [ref] is gone.
         await highlight(targetTabId);

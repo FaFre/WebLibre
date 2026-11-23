@@ -180,6 +180,7 @@
   "user_searchSuggestionProviderKagi": "Kagi",
   "user_searchSuggestionProviderQwant": "Qwant",
   "user_deleteBrowsingDataTypeTabsTitle": "Offene Tabs",
+  "user_deleteBrowsingDataTypeTabsDescription": "Gesperrte Tabs bleiben offen",
   "user_deleteBrowsingDataTypeHistoryTitle": "Browserverlauf",
   "user_deleteBrowsingDataTypeRecentSearchesTitle": "Letzte Suchen",
   "user_deleteBrowsingDataTypeRecentSearchesDescription": "Auf der Suchseite angezeigte Suchanfragen",

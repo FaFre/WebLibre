@@ -36,6 +36,7 @@ import 'package:weblibre/features/geckoview/features/search/presentation/widgets
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/proxy/presentation/controllers/ensure_proxy_started.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -95,25 +96,28 @@ class BrowserHome extends ConsumerWidget {
       onUriSelected: (uri) async {
         final container = ref.read(selectedContainerDataProvider).value;
 
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: uri,
-              tabMode: _tabModeFor(
-                ref
-                    .read(generalSettingsWithDefaultsProvider)
-                    .effectiveDefaultCreateTabType,
+        await openUnlessContainerRefuses(
+          context,
+          () => ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(
+                url: uri,
+                tabMode: _tabModeFor(
+                  ref
+                      .read(generalSettingsWithDefaultsProvider)
+                      .effectiveDefaultCreateTabType,
+                ),
+                selectTab: true,
+                containerSelection: container == null
+                    ? const TabContainerSelection.unassigned()
+                    : TabContainerSelection.specific(container),
+                // Home is where this tab came from, so that is where back
+                // leads once it runs out of page history — a shortcut used to
+                // be a one-way trip (#623). Covers every module that opens an
+                // address from here, not just the shortcuts grid.
+                onBackBehavior: const ReturnToBrowserHomeTabBackBehavior(),
               ),
-              selectTab: true,
-              containerSelection: container == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(container),
-              // Home is where this tab came from, so that is where back leads
-              // once it runs out of page history — a shortcut used to be a
-              // one-way trip (#623). Covers every module that opens an address
-              // from here, not just the shortcuts grid.
-              onBackBehavior: const ReturnToBrowserHomeTabBackBehavior(),
-            );
+        );
       },
       onTabSelected: (tabId) async {
         await ref.read(tabRepositoryProvider.notifier).selectTab(tabId);

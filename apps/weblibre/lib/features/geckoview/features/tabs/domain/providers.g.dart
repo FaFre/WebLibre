@@ -1259,6 +1259,782 @@ final class WatchPinnedTabIdsProvider
 
 String _$watchPinnedTabIdsHash() => r'3b041fac974914ebd4f99490ea4d380475bd7ab2';
 
+/// Every "Keep awake" tab (D30), by the database.
+
+@ProviderFor(watchSleepExemptTabIds)
+final watchSleepExemptTabIdsProvider = WatchSleepExemptTabIdsProvider._();
+
+/// Every "Keep awake" tab (D30), by the database.
+
+final class WatchSleepExemptTabIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Set<String>>,
+          Set<String>,
+          Stream<Set<String>>
+        >
+    with $FutureModifier<Set<String>>, $StreamProvider<Set<String>> {
+  /// Every "Keep awake" tab (D30), by the database.
+  WatchSleepExemptTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchSleepExemptTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchSleepExemptTabIdsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Set<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Set<String>> create(Ref ref) {
+    return watchSleepExemptTabIds(ref);
+  }
+}
+
+String _$watchSleepExemptTabIdsHash() =>
+    r'e1e572e079cf6f0f945c210b08e0b345069f6ab7';
+
+/// Whether [tabId] is kept awake: automatic sleep leaves it alone.
+
+@ProviderFor(isTabSleepExempt)
+final isTabSleepExemptProvider = IsTabSleepExemptFamily._();
+
+/// Whether [tabId] is kept awake: automatic sleep leaves it alone.
+
+final class IsTabSleepExemptProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId] is kept awake: automatic sleep leaves it alone.
+  IsTabSleepExemptProvider._({
+    required IsTabSleepExemptFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabSleepExemptProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabSleepExemptHash();
+
+  @override
+  String toString() {
+    return r'isTabSleepExemptProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String;
+    return isTabSleepExempt(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabSleepExemptProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabSleepExemptHash() => r'7c5eb627ea25b8a3c87246b7622280eff78d5cc5';
+
+/// Whether [tabId] is kept awake: automatic sleep leaves it alone.
+
+final class IsTabSleepExemptFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String> {
+  IsTabSleepExemptFamily._()
+    : super(
+        retry: null,
+        name: r'isTabSleepExemptProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId] is kept awake: automatic sleep leaves it alone.
+
+  IsTabSleepExemptProvider call(String tabId) =>
+      IsTabSleepExemptProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabSleepExemptProvider';
+}
+
+/// The containers that freeze automatically now (phase C2): with a schedule
+/// and a context of their own, while the freeze feature is shown
+/// ([containerAutoFreezeSchedules]). Empty until those are known.
+
+@ProviderFor(autoFreezingContainerIds)
+final autoFreezingContainerIdsProvider = AutoFreezingContainerIdsProvider._();
+
+/// The containers that freeze automatically now (phase C2): with a schedule
+/// and a context of their own, while the freeze feature is shown
+/// ([containerAutoFreezeSchedules]). Empty until those are known.
+
+final class AutoFreezingContainerIdsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Set<String>>,
+          EquatableValue<Set<String>>,
+          EquatableValue<Set<String>>
+        >
+    with $Provider<EquatableValue<Set<String>>> {
+  /// The containers that freeze automatically now (phase C2): with a schedule
+  /// and a context of their own, while the freeze feature is shown
+  /// ([containerAutoFreezeSchedules]). Empty until those are known.
+  AutoFreezingContainerIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'autoFreezingContainerIdsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$autoFreezingContainerIdsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Set<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Set<String>> create(Ref ref) {
+    return autoFreezingContainerIds(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<Set<String>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<Set<String>>>(value),
+    );
+  }
+}
+
+String _$autoFreezingContainerIdsHash() =>
+    r'7b48d079f27b9583d88c640557373a16d22d657e';
+
+/// The containers native watches for an automatic freeze (phase C2): those
+/// with a schedule and a context of their own, each with its own context and
+/// those of its isolated tabs, while the freeze feature is shown (hidden
+/// means no automatic freeze, H1). Null until the containers and isolated
+/// tabs are known.
+///
+/// The contexts are for detection only. A due container goes to Dart, whose
+/// gated preflight reads its members afresh (D21), so a list that lags a
+/// move by a moment only delays or wastes one due event.
+
+@ProviderFor(containerAutoFreezeSchedules)
+final containerAutoFreezeSchedulesProvider =
+    ContainerAutoFreezeSchedulesProvider._();
+
+/// The containers native watches for an automatic freeze (phase C2): those
+/// with a schedule and a context of their own, each with its own context and
+/// those of its isolated tabs, while the freeze feature is shown (hidden
+/// means no automatic freeze, H1). Null until the containers and isolated
+/// tabs are known.
+///
+/// The contexts are for detection only. A due container goes to Dart, whose
+/// gated preflight reads its members afresh (D21), so a list that lags a
+/// move by a moment only delays or wastes one due event.
+
+final class ContainerAutoFreezeSchedulesProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<List<ContainerAutoFreeze>>?,
+          EquatableValue<List<ContainerAutoFreeze>>?,
+          EquatableValue<List<ContainerAutoFreeze>>?
+        >
+    with $Provider<EquatableValue<List<ContainerAutoFreeze>>?> {
+  /// The containers native watches for an automatic freeze (phase C2): those
+  /// with a schedule and a context of their own, each with its own context and
+  /// those of its isolated tabs, while the freeze feature is shown (hidden
+  /// means no automatic freeze, H1). Null until the containers and isolated
+  /// tabs are known.
+  ///
+  /// The contexts are for detection only. A due container goes to Dart, whose
+  /// gated preflight reads its members afresh (D21), so a list that lags a
+  /// move by a moment only delays or wastes one due event.
+  ContainerAutoFreezeSchedulesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'containerAutoFreezeSchedulesProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$containerAutoFreezeSchedulesHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<List<ContainerAutoFreeze>>?> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<List<ContainerAutoFreeze>>? create(Ref ref) {
+    return containerAutoFreezeSchedules(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<List<ContainerAutoFreeze>>? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride:
+          $SyncValueProvider<EquatableValue<List<ContainerAutoFreeze>>?>(value),
+    );
+  }
+}
+
+String _$containerAutoFreezeSchedulesHash() =>
+    r'5514d83202afab967298ffa6f8a88108edf20d30';
+
+/// Whether [tabId]'s "Keep awake" changes anything now (D30): the tab is
+/// kept awake, and automatic sleep is on or its container freezes
+/// automatically. With automatic sleep off, the shared container list is read
+/// while container freeze is shown; the kept-awake tabs only while some
+/// container freezes automatically, and a tab's container only for a
+/// kept-awake tab.
+
+@ProviderFor(isTabKeptAwakeShown)
+final isTabKeptAwakeShownProvider = IsTabKeptAwakeShownFamily._();
+
+/// Whether [tabId]'s "Keep awake" changes anything now (D30): the tab is
+/// kept awake, and automatic sleep is on or its container freezes
+/// automatically. With automatic sleep off, the shared container list is read
+/// while container freeze is shown; the kept-awake tabs only while some
+/// container freezes automatically, and a tab's container only for a
+/// kept-awake tab.
+
+final class IsTabKeptAwakeShownProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId]'s "Keep awake" changes anything now (D30): the tab is
+  /// kept awake, and automatic sleep is on or its container freezes
+  /// automatically. With automatic sleep off, the shared container list is read
+  /// while container freeze is shown; the kept-awake tabs only while some
+  /// container freezes automatically, and a tab's container only for a
+  /// kept-awake tab.
+  IsTabKeptAwakeShownProvider._({
+    required IsTabKeptAwakeShownFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabKeptAwakeShownProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabKeptAwakeShownHash();
+
+  @override
+  String toString() {
+    return r'isTabKeptAwakeShownProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String;
+    return isTabKeptAwakeShown(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabKeptAwakeShownProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabKeptAwakeShownHash() =>
+    r'8015f2d40ad79384ef2dd3d5a9224210fa58ad4d';
+
+/// Whether [tabId]'s "Keep awake" changes anything now (D30): the tab is
+/// kept awake, and automatic sleep is on or its container freezes
+/// automatically. With automatic sleep off, the shared container list is read
+/// while container freeze is shown; the kept-awake tabs only while some
+/// container freezes automatically, and a tab's container only for a
+/// kept-awake tab.
+
+final class IsTabKeptAwakeShownFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String> {
+  IsTabKeptAwakeShownFamily._()
+    : super(
+        retry: null,
+        name: r'isTabKeptAwakeShownProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId]'s "Keep awake" changes anything now (D30): the tab is
+  /// kept awake, and automatic sleep is on or its container freezes
+  /// automatically. With automatic sleep off, the shared container list is read
+  /// while container freeze is shown; the kept-awake tabs only while some
+  /// container freezes automatically, and a tab's container only for a
+  /// kept-awake tab.
+
+  IsTabKeptAwakeShownProvider call(String tabId) =>
+      IsTabKeptAwakeShownProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabKeptAwakeShownProvider';
+}
+
+/// Whether the tab menu offers "Keep awake" for [tabId]: where it changes
+/// something (automatic sleep is on, or the tab's container freezes
+/// automatically), and for a tab already kept awake, so it can be allowed to
+/// sleep again. [isTabKeptAwakeShown] is the badge: it also needs the tab to
+/// be kept awake.
+
+@ProviderFor(isTabKeepAwakeOffered)
+final isTabKeepAwakeOfferedProvider = IsTabKeepAwakeOfferedFamily._();
+
+/// Whether the tab menu offers "Keep awake" for [tabId]: where it changes
+/// something (automatic sleep is on, or the tab's container freezes
+/// automatically), and for a tab already kept awake, so it can be allowed to
+/// sleep again. [isTabKeptAwakeShown] is the badge: it also needs the tab to
+/// be kept awake.
+
+final class IsTabKeepAwakeOfferedProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether the tab menu offers "Keep awake" for [tabId]: where it changes
+  /// something (automatic sleep is on, or the tab's container freezes
+  /// automatically), and for a tab already kept awake, so it can be allowed to
+  /// sleep again. [isTabKeptAwakeShown] is the badge: it also needs the tab to
+  /// be kept awake.
+  IsTabKeepAwakeOfferedProvider._({
+    required IsTabKeepAwakeOfferedFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabKeepAwakeOfferedProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabKeepAwakeOfferedHash();
+
+  @override
+  String toString() {
+    return r'isTabKeepAwakeOfferedProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String;
+    return isTabKeepAwakeOffered(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabKeepAwakeOfferedProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabKeepAwakeOfferedHash() =>
+    r'301d29b6b0b30c8d4c53fb2f6ce719d80d0b4e64';
+
+/// Whether the tab menu offers "Keep awake" for [tabId]: where it changes
+/// something (automatic sleep is on, or the tab's container freezes
+/// automatically), and for a tab already kept awake, so it can be allowed to
+/// sleep again. [isTabKeptAwakeShown] is the badge: it also needs the tab to
+/// be kept awake.
+
+final class IsTabKeepAwakeOfferedFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String> {
+  IsTabKeepAwakeOfferedFamily._()
+    : super(
+        retry: null,
+        name: r'isTabKeepAwakeOfferedProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether the tab menu offers "Keep awake" for [tabId]: where it changes
+  /// something (automatic sleep is on, or the tab's container freezes
+  /// automatically), and for a tab already kept awake, so it can be allowed to
+  /// sleep again. [isTabKeptAwakeShown] is the badge: it also needs the tab to
+  /// be kept awake.
+
+  IsTabKeepAwakeOfferedProvider call(String tabId) =>
+      IsTabKeepAwakeOfferedProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabKeepAwakeOfferedProvider';
+}
+
+/// Every locked tab, by the database. A tab whose unlock did not finish is
+/// not in it; [effectivelyLockedTabIds] adds those.
+
+@ProviderFor(watchLockedTabIds)
+final watchLockedTabIdsProvider = WatchLockedTabIdsProvider._();
+
+/// Every locked tab, by the database. A tab whose unlock did not finish is
+/// not in it; [effectivelyLockedTabIds] adds those.
+
+final class WatchLockedTabIdsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Set<String>>,
+          Set<String>,
+          Stream<Set<String>>
+        >
+    with $FutureModifier<Set<String>>, $StreamProvider<Set<String>> {
+  /// Every locked tab, by the database. A tab whose unlock did not finish is
+  /// not in it; [effectivelyLockedTabIds] adds those.
+  WatchLockedTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'watchLockedTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$watchLockedTabIdsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<Set<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<Set<String>> create(Ref ref) {
+    return watchLockedTabIds(ref);
+  }
+}
+
+String _$watchLockedTabIdsHash() => r'3f3a4b07d2c7d37dd7fc19b4581fab1ac6a083c5';
+
+/// The tabs that count as locked: locked in the database, or unlocked there by
+/// an unlock that did not finish natively ([UnlockIncompleteTabs]). What every
+/// lock indicator and close control follows.
+
+@ProviderFor(effectivelyLockedTabIds)
+final effectivelyLockedTabIdsProvider = EffectivelyLockedTabIdsProvider._();
+
+/// The tabs that count as locked: locked in the database, or unlocked there by
+/// an unlock that did not finish natively ([UnlockIncompleteTabs]). What every
+/// lock indicator and close control follows.
+
+final class EffectivelyLockedTabIdsProvider
+    extends
+        $FunctionalProvider<
+          EquatableValue<Set<String>>,
+          EquatableValue<Set<String>>,
+          EquatableValue<Set<String>>
+        >
+    with $Provider<EquatableValue<Set<String>>> {
+  /// The tabs that count as locked: locked in the database, or unlocked there by
+  /// an unlock that did not finish natively ([UnlockIncompleteTabs]). What every
+  /// lock indicator and close control follows.
+  EffectivelyLockedTabIdsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectivelyLockedTabIdsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectivelyLockedTabIdsHash();
+
+  @$internal
+  @override
+  $ProviderElement<EquatableValue<Set<String>>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  EquatableValue<Set<String>> create(Ref ref) {
+    return effectivelyLockedTabIds(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(EquatableValue<Set<String>> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<EquatableValue<Set<String>>>(value),
+    );
+  }
+}
+
+String _$effectivelyLockedTabIdsHash() =>
+    r'755702f6878c9fad49b7ca8bb9fed93ba7baf10b';
+
+/// Whether [tabId] counts as locked; see [effectivelyLockedTabIds]. False
+/// for no tab, without following the locks: a preview's or an empty slot's.
+
+@ProviderFor(isTabLocked)
+final isTabLockedProvider = IsTabLockedFamily._();
+
+/// Whether [tabId] counts as locked; see [effectivelyLockedTabIds]. False
+/// for no tab, without following the locks: a preview's or an empty slot's.
+
+final class IsTabLockedProvider extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId] counts as locked; see [effectivelyLockedTabIds]. False
+  /// for no tab, without following the locks: a preview's or an empty slot's.
+  IsTabLockedProvider._({
+    required IsTabLockedFamily super.from,
+    required String? super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabLockedProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabLockedHash();
+
+  @override
+  String toString() {
+    return r'isTabLockedProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String?;
+    return isTabLocked(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabLockedProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabLockedHash() => r'e65464452c161b38016bfea7cacffa4ac4bef973';
+
+/// Whether [tabId] counts as locked; see [effectivelyLockedTabIds]. False
+/// for no tab, without following the locks: a preview's or an empty slot's.
+
+final class IsTabLockedFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String?> {
+  IsTabLockedFamily._()
+    : super(
+        retry: null,
+        name: r'isTabLockedProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId] counts as locked; see [effectivelyLockedTabIds]. False
+  /// for no tab, without following the locks: a preview's or an empty slot's.
+
+  IsTabLockedProvider call(String? tabId) =>
+      IsTabLockedProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabLockedProvider';
+}
+
+/// Whether [tabId]'s unlock did not finish, so it keeps its lock with a
+/// warning and offers to retry.
+
+@ProviderFor(isTabUnlockIncomplete)
+final isTabUnlockIncompleteProvider = IsTabUnlockIncompleteFamily._();
+
+/// Whether [tabId]'s unlock did not finish, so it keeps its lock with a
+/// warning and offers to retry.
+
+final class IsTabUnlockIncompleteProvider
+    extends $FunctionalProvider<bool, bool, bool>
+    with $Provider<bool> {
+  /// Whether [tabId]'s unlock did not finish, so it keeps its lock with a
+  /// warning and offers to retry.
+  IsTabUnlockIncompleteProvider._({
+    required IsTabUnlockIncompleteFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'isTabUnlockIncompleteProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$isTabUnlockIncompleteHash();
+
+  @override
+  String toString() {
+    return r'isTabUnlockIncompleteProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  bool create(Ref ref) {
+    final argument = this.argument as String;
+    return isTabUnlockIncomplete(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(bool value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<bool>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is IsTabUnlockIncompleteProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$isTabUnlockIncompleteHash() =>
+    r'5298081843b49ff4291a5ae11ae3bc68cf5e90e7';
+
+/// Whether [tabId]'s unlock did not finish, so it keeps its lock with a
+/// warning and offers to retry.
+
+final class IsTabUnlockIncompleteFamily extends $Family
+    with $FunctionalFamilyOverride<bool, String> {
+  IsTabUnlockIncompleteFamily._()
+    : super(
+        retry: null,
+        name: r'isTabUnlockIncompleteProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Whether [tabId]'s unlock did not finish, so it keeps its lock with a
+  /// warning and offers to retry.
+
+  IsTabUnlockIncompleteProvider call(String tabId) =>
+      IsTabUnlockIncompleteProvider._(argument: tabId, from: this);
+
+  @override
+  String toString() => r'isTabUnlockIncompleteProvider';
+}
+
 @ProviderFor(watchTabTimestamps)
 final watchTabTimestampsProvider = WatchTabTimestampsProvider._();
 

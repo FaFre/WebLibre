@@ -29,6 +29,7 @@ import 'package:weblibre/features/bangs/data/models/bang_group.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
@@ -145,11 +146,18 @@ class BangDetails extends HookConsumerWidget {
                             .effectiveDefaultCreateTabType,
                       );
 
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(url: url, tabMode: tabMode, selectTab: true);
+                      final tabId = await openUnlessContainerRefuses(
+                        context,
+                        () => ref
+                            .read(tabRepositoryProvider.notifier)
+                            .addTab(
+                              url: url,
+                              tabMode: tabMode,
+                              selectTab: true,
+                            ),
+                      );
 
-                      if (context.mounted) {
+                      if (tabId != null && context.mounted) {
                         const BrowserRoute().go(context);
                       }
                     },

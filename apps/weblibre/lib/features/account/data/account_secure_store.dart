@@ -22,6 +22,7 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/filesystem.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/secure_storage/profile_secure_store.dart';
@@ -65,7 +66,7 @@ class AccountSecureStore {
   /// between another writer's read and write silently reverted that writer's
   /// field, or was itself reverted — a refreshed token thrown away, which is a
   /// sign-out the next time the app starts.
-  Future<void> _writeQueue = Future<void>.value();
+  final _writeLock = Lock();
 
   Future<AccountPersistedData> read() async {
     // Deliberately *not* guarded: a platform failure (a Keystore that is
@@ -105,7 +106,7 @@ class AccountSecureStore {
   Future<AccountPersistedData> update(
     AccountPersistedData Function(AccountPersistedData current) transform,
   ) {
-    return _enqueue(() async {
+    return _writeLock.synchronized(() async {
       final next = transform(await read());
       await write(next);
       return next;
@@ -113,7 +114,7 @@ class AccountSecureStore {
   }
 
   Future<void> clear() {
-    return _enqueue(() => _store.delete(accountSecureBaseKey));
+    return _writeLock.synchronized(() => _store.delete(accountSecureBaseKey));
   }
 
   /// Drops the session and any in-flight sign-in, keeping who the account is and
@@ -125,7 +126,7 @@ class AccountSecureStore {
   /// it is the identity, kept here alongside it, that later lets a re-sign-in
   /// prove the key still belongs to the same account.
   Future<void> clearSession() {
-    return _enqueue(() async {
+    return _writeLock.synchronized(() async {
       final data = await read();
       await write(
         AccountPersistedData(
@@ -136,14 +137,6 @@ class AccountSecureStore {
         ),
       );
     });
-  }
-
-  Future<T> _enqueue<T>(Future<T> Function() action) {
-    final result = _writeQueue.then((_) => action());
-    // The queue must not inherit the failure, or one failed write would poison
-    // every later one.
-    _writeQueue = result.then((_) {}, onError: (_) {});
-    return result;
   }
 }
 

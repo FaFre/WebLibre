@@ -53,21 +53,38 @@ class PaneViewPlaceholderTest {
         pane.layout(0, 0, dp(widthDp), dp(heightDp))
     }
 
-    private fun showCrash() = pane.showCrashPlaceholder(
+    private fun showCrash() = pane.showPlaceholder(
+        kind = PaneView.PlaceholderKind.CRASHED,
         title = "This page crashed",
-        reload = "Reload",
+        action = "Reload",
         backgroundColor = Color.WHITE,
         foregroundColor = Color.BLACK,
-        onReload = { reloads++ },
+        onAction = { reloads++ },
     )
 
     private fun placeholder(): ViewGroup =
         (0 until pane.childCount).map { pane.getChildAt(it) }
             .filterIsInstance<ViewGroup>()
-            .single { it.getChildAt(0) is TextView && it.childCount == 2 && it.getChildAt(1) is MaterialButton }
+            .single {
+                it.childCount == 3 &&
+                    it.getChildAt(0) is TextView &&
+                    it.getChildAt(1) is TextView &&
+                    it.getChildAt(2) is MaterialButton
+            }
 
     private fun title() = placeholder().getChildAt(0) as TextView
-    private fun button() = placeholder().getChildAt(1) as MaterialButton
+    private fun detail() = placeholder().getChildAt(1) as TextView
+    private fun button() = placeholder().getChildAt(2) as MaterialButton
+
+    private fun showFrozen(detail: String?) = pane.showPlaceholder(
+        kind = PaneView.PlaceholderKind.FROZEN,
+        title = "Work is frozen",
+        action = "Resume",
+        backgroundColor = Color.WHITE,
+        foregroundColor = Color.BLACK,
+        onAction = {},
+        detail = detail,
+    )
 
     @Test
     fun aRoomyPaneShowsTheTitleAndALabeledButton() {
@@ -78,6 +95,22 @@ class PaneViewPlaceholderTest {
         assertEquals(View.VISIBLE, title().visibility)
         assertEquals("Reload", button().text.toString())
         assertNull(button().icon)
+    }
+
+    @Test
+    fun aDetailLineShowsUnderTheTitleOnlyWhenThereIsRoomAndOne() {
+        layOut(400, 600)
+        showFrozen("2 background messages were skipped")
+        layOut(400, 600)
+        assertEquals(View.VISIBLE, detail().visibility)
+        assertEquals("2 background messages were skipped", detail().text.toString())
+
+        layOut(48, 600)
+        assertEquals(View.GONE, detail().visibility)
+
+        showCrash()
+        layOut(400, 600)
+        assertEquals(View.GONE, detail().visibility)
     }
 
     @Test

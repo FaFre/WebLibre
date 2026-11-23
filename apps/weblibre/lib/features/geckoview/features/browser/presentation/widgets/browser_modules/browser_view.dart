@@ -59,6 +59,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/gestures/domain/services/gesture_control.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_feedback_overlay.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/entities/intent_source_policy.dart';
@@ -710,18 +711,25 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             sharedContent.containerMode,
                           );
 
-                    launchCover.launchTabOpened(
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: sharedContent.url,
-                            tabMode: tabMode,
-                            launchedFromIntent: true,
-                            selectTab: true,
-                            containerSelection: containerSelection,
-                            onCreated: launchCover.launchTabCreated,
-                          ),
+                    // Gone, its ref could not open the tab either.
+                    if (!mounted) break;
+                    final tabs = ref.read(tabRepositoryProvider.notifier);
+                    // The container the link resolves to refuses the tab
+                    // when it is frozen or being deleted (D19); nothing
+                    // opens then, and the cover lowers.
+                    final tabId = await openUnlessContainerRefuses(
+                      context,
+                      () => tabs.addTab(
+                        url: sharedContent.url,
+                        tabMode: tabMode,
+                        launchedFromIntent: true,
+                        selectTab: true,
+                        containerSelection: containerSelection,
+                        onCreated: launchCover.launchTabCreated,
+                      ),
                     );
+                    if (tabId == null) break;
+                    launchCover.launchTabOpened(tabId);
                     openedTab = true;
                   case SharedText():
                     final bang =
@@ -743,17 +751,22 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                       break;
                     }
 
-                    launchCover.launchTabOpened(
-                      await ref
-                          .read(tabRepositoryProvider.notifier)
-                          .addTab(
-                            url: bang?.getTemplateUrl(sharedContent.text),
-                            tabMode: tabMode,
-                            launchedFromIntent: true,
-                            selectTab: true,
-                            onCreated: launchCover.launchTabCreated,
-                          ),
+                    if (!mounted) break;
+                    final tabs = ref.read(tabRepositoryProvider.notifier);
+                    // A search site assigned to a container being deleted
+                    // refuses the tab.
+                    final tabId = await openUnlessContainerRefuses(
+                      context,
+                      () => tabs.addTab(
+                        url: bang?.getTemplateUrl(sharedContent.text),
+                        tabMode: tabMode,
+                        launchedFromIntent: true,
+                        selectTab: true,
+                        onCreated: launchCover.launchTabCreated,
+                      ),
                     );
+                    if (tabId == null) break;
+                    launchCover.launchTabOpened(tabId);
                     openedTab = true;
                 }
               } finally {

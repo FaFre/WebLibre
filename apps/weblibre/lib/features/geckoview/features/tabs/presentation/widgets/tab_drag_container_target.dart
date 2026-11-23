@@ -22,6 +22,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/providers/global_drop.dart';
 import 'package:weblibre/data/models/drag_data.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 
@@ -57,14 +58,12 @@ class TabDragContainerTarget extends HookConsumerWidget {
         ref.read(willAcceptDropProvider.notifier).clear();
         overlayController.hide();
 
-        if (container != null) {
-          await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .assignContainer(details.data.tabId, container!);
-        } else {
-          await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .unassignContainer(details.data.tabId);
+        final tabData = ref.read(tabDataRepositoryProvider.notifier);
+        final moved = container != null
+            ? await tabData.assignContainer(details.data.tabId, container!)
+            : await tabData.unassignContainer(details.data.tabId);
+        if (context.mounted) {
+          showContainerMoveResult(context, moved);
         }
       },
       builder: (context, candidateData, rejectedData) {

@@ -132,6 +132,12 @@ enum MenuItemType {
   pinTopSite,
   fetchFeeds,
 
+  /// "Lock tab" / "Unlock tab"; left out for a private tab.
+  lockTab,
+
+  /// "Put Tab to Sleep" / "Wake Tab".
+  sleepTab,
+
   // Quick links
   history,
   bookmarks,
@@ -159,7 +165,9 @@ enum MenuItemType {
   /// never hidden (P5). Its guarded children are filtered inside it. The
   /// profile row is the entry to this profile's own controls (lock, password,
   /// backup), which are never hidden; it switches profiles only when there is
-  /// something to switch to (`canSwitchProfilesProvider`).
+  /// something to switch to (`canSwitchProfilesProvider`). The sleep row
+  /// hides with tab sleep: a tab held asleep keeps its Wake on the page
+  /// itself and in the tab menu (P5).
   FeatureId? get feature => switch (this) {
     gestures => FeatureId.inputDrawnGestures,
     manageContainers ||
@@ -167,6 +175,7 @@ enum MenuItemType {
     assignUrlToContainer => FeatureId.containerCore,
     cloneIsolatedTab => FeatureId.tabsIsolatedUi,
     splitView => FeatureId.tabsSplitView,
+    sleepTab => FeatureId.tabsSleep,
     profileSwitch => FeatureId.profilesCurrentProfileControls,
     _ => null,
   };
@@ -214,6 +223,8 @@ enum MenuItemType {
     printPage => MdiIcons.printer,
     pinTopSite => MdiIcons.pin,
     fetchFeeds => Icons.rss_feed,
+    lockTab => MdiIcons.lockOutline,
+    sleepTab => MdiIcons.sleep,
     history => Icons.history,
     bookmarks => MdiIcons.bookmarkMultiple,
     downloads => MdiIcons.fileDownload,
@@ -330,6 +341,8 @@ const List<MenuSectionDefault> menuLayoutDefaults = [
       ),
       MenuItemDefault(MenuItemType.pinTopSite),
       MenuItemDefault(MenuItemType.fetchFeeds),
+      MenuItemDefault(MenuItemType.lockTab),
+      MenuItemDefault(MenuItemType.sleepTab),
     ],
   ),
   MenuSectionDefault(

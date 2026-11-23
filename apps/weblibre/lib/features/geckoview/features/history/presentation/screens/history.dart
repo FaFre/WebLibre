@@ -48,6 +48,7 @@ import 'package:weblibre/features/geckoview/features/history/presentation/utils/
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
@@ -398,13 +399,17 @@ class _HistoryEntryMenu extends HookConsumerWidget {
             onPressed: () async {
               final repo = ref.read(tabRepositoryProvider.notifier);
               final router = GoRouter.of(context);
-              final tabId = await repo.addTab(
-                url: Uri.parse(item.url),
-                tabMode: TabMode.regular,
-                selectTab: false,
+              // A site assigned to a container being deleted is refused.
+              final tabId = await openUnlessContainerRefuses(
+                context,
+                () => repo.addTab(
+                  url: Uri.parse(item.url),
+                  tabMode: TabMode.regular,
+                  selectTab: false,
+                ),
               );
 
-              if (context.mounted) {
+              if (tabId != null && context.mounted) {
                 ui_helper.showTabSwitchMessage(
                   context,
                   onSwitch: () async {
@@ -1063,15 +1068,22 @@ class HistoryScreen extends HookConsumerWidget {
                                     );
                                   }
                                 } else {
-                                  await ref
-                                      .read(tabRepositoryProvider.notifier)
-                                      .addTab(
-                                        url: Uri.parse(item.url),
-                                        tabMode: TabMode.regular,
-                                        selectTab: true,
+                                  final tabs = ref.read(
+                                    tabRepositoryProvider.notifier,
+                                  );
+                                  final tabId =
+                                      await openUnlessContainerRefuses(
+                                        context,
+                                        () => tabs.addTab(
+                                          url: Uri.parse(item.url),
+                                          tabMode: TabMode.regular,
+                                          selectTab: true,
+                                        ),
                                       );
 
-                                  if (context.mounted) {
+                                  // Refused, the screen stays: nothing opened
+                                  // to go back to.
+                                  if (tabId != null && context.mounted) {
                                     context.pop();
                                   }
                                 }

@@ -11,13 +11,13 @@ import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.pigeons.ClearDataType
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoDeleteBrowsingDataController
 import eu.weblibre.flutter_mozilla_components.middleware.clearRecentlyClosedTabs
+import eu.weblibre.flutter_mozilla_components.tabs.TabCloseProtection
+import eu.weblibre.flutter_mozilla_components.tabs.removeTabsNonRecoverably
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import mozilla.components.browser.state.action.EngineAction
-import mozilla.components.browser.state.action.TabListAction
-import mozilla.components.browser.state.action.UndoAction
 import mozilla.components.browser.state.selector.allTabs
 import mozilla.components.browser.state.selector.normalTabs
 import mozilla.components.browser.state.state.BrowserState
@@ -128,6 +128,9 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
      */
     override suspend fun deleteTabs() {
         withContext(Dispatchers.Main) {
+            // Every tab, normal and private. Locked tabs stay: TabCloseGuardMiddleware
+            // removes only the unlocked ones, still non-recoverably, and they are
+            // saved with the session below.
             components.useCases.tabsUseCases.removeAllTabs.invoke(false)
         }
         withContext(Dispatchers.IO) {
@@ -337,29 +340,22 @@ class GeckoDeleteBrowsingDataControllerImpl : GeckoDeleteBrowsingDataController 
 
 /**
  * Removes whichever of [previousSessionTabIds] are still open — limited to
- * [onlyTabIds] when given — and nothing else.
+ * [onlyTabIds] when given — and nothing else. Locked tabs are kept.
  *
- * Not undoable: [mozilla.components.feature.session.middleware.undo.UndoMiddleware]
- * records every [TabListAction.RemoveTabsAction] for "undo close", so the entry it
- * just made is cleared by its tag. Dispatch is synchronous, so the tag read back is
- * that one.
- *
- * Clearing that entry is what files tabs under recently closed, so
- * [beforeRemoval] gets the ids first, to keep them off that list too.
+ * Not undoable, and [beforeRemoval] gets the ids first; see
+ * [removeTabsNonRecoverably].
  */
 internal fun BrowserStore.removePreviousSessionTabs(
     previousSessionTabIds: Set<String>,
     onlyTabIds: Set<String>? = null,
     beforeRemoval: (List<String>) -> Unit = {},
+    isLocked: (String) -> Boolean = TabCloseProtection::isLocked,
 ) {
     val tabIds = state.tabs.map { it.id }.filter {
         it in previousSessionTabIds && (onlyTabIds == null || it in onlyTabIds)
     }
-    if (tabIds.isEmpty()) return
-
-    beforeRemoval(tabIds)
-    dispatch(TabListAction.RemoveTabsAction(tabIds))
-    dispatch(UndoAction.ClearRecoverableTabs(state.undoHistory.tag))
+    // Locked tabs are kept; the deletion still completes for the rest.
+    removeTabsNonRecoverably(tabIds, beforeRemoval, isLocked)
 }
 
 /**

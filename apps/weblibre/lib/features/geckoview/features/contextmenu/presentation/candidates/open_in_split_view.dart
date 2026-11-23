@@ -25,6 +25,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -62,12 +63,16 @@ class OpenInSplitView extends ConsumerWidget {
         if (url == null) return;
         final onError = splitErrorReporter(context);
         // Started before the dialog closes, while its ref is still usable;
-        // the work itself does not depend on the dialog.
-        final opening = openLinkInSplitView(
-          ref,
-          sourceTabId: sourceTabId,
-          url: url,
-          onError: onError,
+        // the work itself does not depend on the dialog. A frozen container,
+        // or one being deleted, refuses the new tab (D19).
+        final opening = openUnlessContainerRefuses(
+          context,
+          () => openLinkInSplitView(
+            ref,
+            sourceTabId: sourceTabId,
+            url: url,
+            onError: onError,
+          ),
         );
         context.pop();
         await opening;

@@ -20,16 +20,22 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/domain/entities/remembered_prompt.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_close_result.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
+/// How many isolation groups closing [tabIds] deletes the data of: groups
+/// all of whose tabs close. A locked tab does not close, so it keeps its group.
 int countIsolatedGroupsRemovedByClosingTabs(
   WidgetRef ref,
   Iterable<String> tabIds,
 ) {
-  final idsToClose = tabIds.toSet();
+  final locked = ref.read(effectivelyLockedTabIdsProvider).value;
+  final idsToClose = tabIds.toSet().difference(locked);
   if (idsToClose.isEmpty) return 0;
 
   final allStates = ref.read(tabStatesProvider);
@@ -88,23 +94,41 @@ Future<bool> confirmBulkTabCloseIfNeeded(
   );
 }
 
-Future<bool> closeTabsWithConfirmation(
+/// Closes [tabIds] after [confirmBulkTabCloseIfNeeded], keeping locked tabs.
+/// Returns what the close did, or null when the user did not go ahead.
+Future<CloseResult?> closeTabsWithConfirmation(
   BuildContext context,
   WidgetRef ref,
   Iterable<String> tabIds,
 ) async {
   final idsToClose = tabIds.toSet().toList();
-  if (idsToClose.isEmpty) return false;
+  if (idsToClose.isEmpty) return null;
 
   final tabRepository = ref.read(tabRepositoryProvider.notifier);
 
   if (!await confirmBulkTabCloseIfNeeded(context, ref, idsToClose)) {
-    return false;
+    return null;
   }
   if (!context.mounted) {
-    return false;
+    return null;
   }
 
-  await tabRepository.closeTabs(idsToClose);
-  return true;
+  return await tabRepository.closeTabs(idsToClose);
+}
+
+/// [closeTabsWithConfirmation] for bulk closes that report nothing of their
+/// own: says what a lock kept open, and only when a lock kept something.
+Future<void> closeTabsReportingLocks(
+  BuildContext context,
+  WidgetRef ref,
+  Iterable<String> tabIds,
+) async {
+  final result = await closeTabsWithConfirmation(context, ref, tabIds);
+  if (context.mounted) {
+    showLockedTabsKept(
+      context,
+      result,
+      ref.read(tabRepositoryProvider.notifier).undoClose,
+    );
+  }
 }

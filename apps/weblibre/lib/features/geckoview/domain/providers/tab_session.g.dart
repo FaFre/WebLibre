@@ -8,11 +8,38 @@ part of 'tab_session.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Commands to one tab's page, or the selected tab's.
+///
+/// The navigations here are the ones a user asks for, so each wakes a
+/// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+/// the engine drops any load into a sleeping tab, and the navigation would
+/// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+/// the navigation does not run. In a frozen container's tab the user is asked
+/// "Resume {container} and open?" instead, and the navigation runs once the
+/// container is resumed.
 
 @ProviderFor(TabSession)
 final tabSessionProvider = TabSessionFamily._();
 
+/// Commands to one tab's page, or the selected tab's.
+///
+/// The navigations here are the ones a user asks for, so each wakes a
+/// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+/// the engine drops any load into a sleeping tab, and the navigation would
+/// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+/// the navigation does not run. In a frozen container's tab the user is asked
+/// "Resume {container} and open?" instead, and the navigation runs once the
+/// container is resumed.
 final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
+  /// Commands to one tab's page, or the selected tab's.
+  ///
+  /// The navigations here are the ones a user asks for, so each wakes a
+  /// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+  /// the engine drops any load into a sleeping tab, and the navigation would
+  /// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+  /// the navigation does not run. In a frozen container's tab the user is asked
+  /// "Resume {container} and open?" instead, and the navigation runs once the
+  /// container is resumed.
   TabSessionProvider._({
     required TabSessionFamily super.from,
     required String? super.argument,
@@ -57,7 +84,17 @@ final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
   }
 }
 
-String _$tabSessionHash() => r'636f0940425d689ff98fabfc61687de828a8eeb9';
+String _$tabSessionHash() => r'6f4006e26774b8400214f6176d00f111a895d991';
+
+/// Commands to one tab's page, or the selected tab's.
+///
+/// The navigations here are the ones a user asks for, so each wakes a
+/// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+/// the engine drops any load into a sleeping tab, and the navigation would
+/// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+/// the navigation does not run. In a frozen container's tab the user is asked
+/// "Resume {container} and open?" instead, and the navigation runs once the
+/// container is resumed.
 
 final class TabSessionFamily extends $Family
     with $ClassFamilyOverride<TabSession, void, void, void, String?> {
@@ -70,12 +107,32 @@ final class TabSessionFamily extends $Family
         isAutoDispose: false,
       );
 
+  /// Commands to one tab's page, or the selected tab's.
+  ///
+  /// The navigations here are the ones a user asks for, so each wakes a
+  /// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+  /// the engine drops any load into a sleeping tab, and the navigation would
+  /// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+  /// the navigation does not run. In a frozen container's tab the user is asked
+  /// "Resume {container} and open?" instead, and the navigation runs once the
+  /// container is resumed.
+
   TabSessionProvider call({required String? tabId}) =>
       TabSessionProvider._(argument: tabId, from: this);
 
   @override
   String toString() => r'tabSessionProvider';
 }
+
+/// Commands to one tab's page, or the selected tab's.
+///
+/// The navigations here are the ones a user asks for, so each wakes a
+/// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+/// the engine drops any load into a sleeping tab, and the navigation would
+/// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+/// the navigation does not run. In a frozen container's tab the user is asked
+/// "Resume {container} and open?" instead, and the navigation runs once the
+/// container is resumed.
 
 abstract class _$TabSession extends $Notifier<void> {
   late final _$args = ref.$arg as String?;

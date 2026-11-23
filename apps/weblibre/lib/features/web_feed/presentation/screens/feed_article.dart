@@ -28,6 +28,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/web_feed/data/models/feed_link.dart';
 import 'package:weblibre/features/web_feed/domain/providers.dart';
@@ -264,15 +265,18 @@ class FeedArticleScreen extends HookConsumerWidget {
                                   .effectiveDefaultCreateTabType,
                             );
 
-                            await ref
-                                .read(tabRepositoryProvider.notifier)
-                                .addTab(
-                                  url: url,
-                                  tabMode: tabMode,
-                                  selectTab: true,
-                                );
+                            final tabId = await openUnlessContainerRefuses(
+                              context,
+                              () => ref
+                                  .read(tabRepositoryProvider.notifier)
+                                  .addTab(
+                                    url: url,
+                                    tabMode: tabMode,
+                                    selectTab: true,
+                                  ),
+                            );
 
-                            if (context.mounted) {
+                            if (tabId != null && context.mounted) {
                               showTabOpenedMessage(
                                 context,
                                 tabName: title.whenNotEmpty,

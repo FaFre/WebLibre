@@ -99,6 +99,13 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
     return status.ready;
   }
 
+  /// Whether the routing in force covers every one of [contextIds] the way a
+  /// pane requires before it wakes a tab: direct, a live proxy, or one still
+  /// starting; never a proxy without an endpoint. False while none is in
+  /// force, so wait for it first ([waitUntilRoutingReady]).
+  Future<bool> routingCovers(List<String> contextIds) =>
+      _service.routingCoversContexts(contextIds);
+
   /// Waits until container routing is in force, up to [timeout].
   ///
   /// The window this covers is a normal part of a cold start — engine start,

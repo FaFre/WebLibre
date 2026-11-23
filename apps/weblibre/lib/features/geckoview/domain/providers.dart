@@ -186,6 +186,12 @@ GeckoEventService eventService(Ref ref) {
   return service;
 }
 
+/// Native's tab lifecycle and container freeze, as one keepAlive instance so
+/// tests can replace it.
+@Riverpod(keepAlive: true)
+GeckoTabLifecycleService geckoTabLifecycleService(Ref ref) =>
+    GeckoTabLifecycleService();
+
 @Riverpod(keepAlive: true)
 GeckoAddonService addonService(Ref ref) {
   final service = GeckoAddonService.setUp();

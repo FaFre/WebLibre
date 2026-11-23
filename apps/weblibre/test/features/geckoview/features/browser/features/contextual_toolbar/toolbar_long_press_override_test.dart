@@ -19,6 +19,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/resolved_toolbar_button.dart';
 
@@ -31,7 +32,7 @@ void main() {
     WidgetTester tester, {
     bool withOwnLongPress = true,
     String? tooltip,
-    bool ignorePointer = false,
+    bool unavailable = false,
   }) {
     Widget button = IconButton(
       tooltip: tooltip,
@@ -39,7 +40,7 @@ void main() {
       onLongPress: withOwnLongPress ? () => events.add('own') : null,
       icon: const Icon(Icons.arrow_back),
     );
-    if (ignorePointer) button = IgnorePointer(child: button);
+    if (unavailable) button = UnavailableToolbarButton(child: button);
 
     return tester.pumpWidget(
       MaterialApp(
@@ -82,11 +83,34 @@ void main() {
   });
 
   testWidgets('fires on a greyed-out button', (tester) async {
-    await pumpButton(tester, ignorePointer: true);
+    await pumpButton(tester, unavailable: true);
 
     await tester.longPress(find.byType(IconButton));
-    await tester.tap(find.byType(IconButton));
+    await tester.tap(find.byType(IconButton), warnIfMissed: false);
 
     expect(events, ['override']);
+  });
+
+  Future<void> focusAndActivate(WidgetTester tester) async {
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+  }
+
+  testWidgets('a keyboard activates an available button', (tester) async {
+    await pumpButton(tester);
+
+    await focusAndActivate(tester);
+
+    expect(events, ['tap']);
+  });
+
+  testWidgets('a keyboard cannot reach a greyed-out button', (tester) async {
+    await pumpButton(tester, unavailable: true);
+
+    await focusAndActivate(tester);
+
+    expect(events, isEmpty);
   });
 }

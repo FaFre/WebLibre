@@ -114,6 +114,8 @@ class PageActionsSection extends HookConsumerWidget {
           );
 
         case MenuItemType.findInPage:
+          if (!availability.findInPage) continue;
+
           tiles[item] = ListTile(
             leading: const Icon(Icons.search),
             title: Text(item.label(context)),

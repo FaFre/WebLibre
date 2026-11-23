@@ -302,6 +302,7 @@ const _$BrowserActionEnumMap = {
   BrowserAction.selectTab8: 'selectTab8',
   BrowserAction.selectLastTab: 'selectLastTab',
   BrowserAction.togglePinTab: 'togglePinTab',
+  BrowserAction.toggleLockTab: 'toggleLockTab',
   BrowserAction.moveTabBackward: 'moveTabBackward',
   BrowserAction.moveTabForward: 'moveTabForward',
   BrowserAction.moveTabToStart: 'moveTabToStart',

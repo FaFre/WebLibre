@@ -24,4 +24,11 @@
         <item quantity="other">In %d Minuten erneut versuchen.</item>
     </plurals>
 
+    <string name="weblibre_download_paused_frozen">Angehalten, weil sein Container eingefroren ist. Den Container in WebLibre fortsetzen, um weiterzumachen.</string>
+    <string name="weblibre_download_paused_unknown_container">Angehalten, solange ein Container eingefroren ist. Den Container in WebLibre fortsetzen oder diesen Download abbrechen.</string>
+    <string name="weblibre_download_paused_deleting">Angehalten, weil die Website-Daten seines Containers gerade gelöscht werden.</string>
+
+    <string name="weblibre_frozen_window_title">Sein Container ist eingefroren</string>
+    <string name="weblibre_frozen_window_message">Nichts davon lädt, und seine Websites können nicht im Hintergrund laufen, bis der Container in WebLibre fortgesetzt wird.</string>
+    <string name="weblibre_frozen_window_open">WebLibre zum Fortsetzen öffnen</string>
 </resources>

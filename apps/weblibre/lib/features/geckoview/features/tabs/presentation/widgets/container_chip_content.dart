@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:nullability/nullability.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_frozen_glyph.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
@@ -75,6 +76,10 @@ Widget buildContainerChipLabel(
             Icon(MdiIcons.pin, size: 14, color: foregroundColor),
             const SizedBox(width: 4),
           ],
+          ContainerFrozenGlyph(
+            containerId: container.id,
+            color: foregroundColor,
+          ),
           Flexible(child: ContainerTitle(container: container)),
           if (trailing != null) ...[const SizedBox(width: 6), trailing],
         ],

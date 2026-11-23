@@ -11,6 +11,7 @@ import eu.weblibre.flutter_mozilla_components.pigeons.AddTabParams
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryMetadataKey as PigeonHistoryMetadataKey
 import eu.weblibre.flutter_mozilla_components.pigeons.LoadUrlFlagsValue
+import eu.weblibre.flutter_mozilla_components.pigeons.PendingUndoTab
 import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation as PigeonRestoreLocation
 import eu.weblibre.flutter_mozilla_components.pigeons.RecoverableTab as PigeonRecoverableTab
 import eu.weblibre.flutter_mozilla_components.pigeons.SourceValue
@@ -19,6 +20,8 @@ import eu.weblibre.flutter_mozilla_components.pigeons.WebExtensionData
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
+import eu.weblibre.flutter_mozilla_components.tabs.discardUndoOf
+import eu.weblibre.flutter_mozilla_components.tabs.reportRemoval
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.HistoryItem
@@ -27,16 +30,20 @@ import eu.weblibre.flutter_mozilla_components.pigeons.ReaderableState
 import eu.weblibre.flutter_mozilla_components.pigeons.RestoreLocation
 import eu.weblibre.flutter_mozilla_components.pigeons.SecurityInfoState
 import eu.weblibre.flutter_mozilla_components.pigeons.TabContentState
+import eu.weblibre.flutter_mozilla_components.pigeons.TabRemovalResult
 import eu.weblibre.flutter_mozilla_components.pigeons.TabTranslationStateData
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationEngineStateData
 import eu.weblibre.flutter_mozilla_components.pigeons.TranslationLanguage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.icons.BrowserIcons
 import mozilla.components.browser.icons.IconRequest
 import mozilla.components.browser.session.storage.RecoverableBrowserState
@@ -193,6 +200,19 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         return components.core.store.state.selectedTabId
     }
 
+    override fun getTabIdsInContext(contextId: String): List<String> {
+        return components.core.store.state.tabs
+            .filter { it.contextId == contextId }
+            .map { it.id }
+    }
+
+    override fun getCustomTabIdsInContexts(contextIds: List<String>): List<String> {
+        val wanted = contextIds.toSet()
+        return components.core.store.state.customTabs
+            .filter { it.contextId in wanted }
+            .map { it.id }
+    }
+
     override fun syncEvents(
         onSelectedTabChange: Boolean,
         onTabListChange: Boolean,
@@ -209,6 +229,7 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         onBrowserExtensionIcons: Boolean,
         onPageExtensionIcons: Boolean,
         onTranslationStateChange: Boolean,
+        onTabLifecycleChange: Boolean,
     ) {
         try {
             val tabs = components.core.store.state.tabs.map { it.copy() }
@@ -232,6 +253,12 @@ class GeckoTabsApiImpl : GeckoTabsApi {
                     EventSequence.next(),
                     components.core.store.state.restoreComplete
                 ) { }
+            }
+
+            if (onTabLifecycleChange) {
+                components.core.tabLifecycle.states().forEach { state ->
+                    components.flutterEvents.onTabLifecycleChange(EventSequence.next(), state) { }
+                }
             }
 
             tabs.forEach { tab ->
@@ -523,10 +550,13 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    override fun removeTab(tabId: String) {
+    override fun removeTab(tabId: String): TabRemovalResult {
         try {
-            components.useCases.tabsUseCases.removeTab(tabId = tabId)
-            logger.debug("$TAG: Removed tab $tabId")
+            val result = components.core.store.reportRemoval(listOf(tabId)) {
+                components.useCases.tabsUseCases.removeTab(tabId = tabId)
+            }
+            logger.debug("$TAG: Removed tab $tabId: $result")
+            return result
         } catch (e: Exception) {
             logger.error("$TAG: Failed to remove tab $tabId", e)
             throw e
@@ -617,10 +647,13 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    override fun removeTabs(ids: List<String>) {
+    override fun removeTabs(ids: List<String>): TabRemovalResult {
         try {
-            components.useCases.tabsUseCases.removeTabs(ids = ids)
-            logger.debug("$TAG: Removed tabs: ${ids.joinToString()}")
+            val result = components.core.store.reportRemoval(ids) {
+                components.useCases.tabsUseCases.removeTabs(ids = ids)
+            }
+            logger.debug("$TAG: Removed tabs: ${ids.joinToString()}: $result")
+            return result
         } catch (e: Exception) {
             logger.error("$TAG: Failed to remove tabs", e)
             throw e
@@ -647,17 +680,59 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 
-    override fun undo(): Boolean {
+    /**
+     * Undoes the last close and answers once its tabs are back in the store.
+     *
+     * AC's `UndoMiddleware` restores in a coroutine it launches on the main
+     * thread, after the undo was dispatched, from the undo history as it was at
+     * that moment: clearing the history afterwards (`discardUndoOf`) does not
+     * stop it. So the undo is not over when the dispatch returns, and the app
+     * holds off container deletions until this answers.
+     */
+    override fun pendingUndoTabs(): List<PendingUndoTab> =
+        components.core.store.state.undoHistory.tabs.map { PendingUndoTab(it.state.id, it.state.contextId) }
+
+    override suspend fun undo(expectedTabIds: List<String>): List<String> = withContext(Dispatchers.Main) {
         try {
-            // Read before dispatching, the way UndoMiddleware.restore reads it. Only tabs change
-            // the tab list: with none recoverable (the history is empty, or its timeout cleared
-            // it) the undo is a no-op and the app hears nothing back.
-            val restoresTabs = components.core.store.state.undoHistory.tabs.isNotEmpty()
+            val store = components.core.store
+            // Read before dispatching, the way UndoMiddleware.restore reads it. With none
+            // recoverable (the history is empty, or its timeout cleared it) the undo is a
+            // no-op and the app hears nothing back.
+            val undone = store.state.undoHistory.tabs.map { it.state.id }
+            if (undone.isEmpty()) return@withContext emptyList()
+            // A close since the caller checked them replaced the undo: not what it checked.
+            if (undone.toSet() != expectedTabIds.toSet()) {
+                logger.debug("$TAG: Undo skipped: it would restore other tabs than the ones checked")
+                return@withContext emptyList()
+            }
+
             components.useCases.tabsUseCases.undo()
-            logger.debug("$TAG: Performed undo operation (restores tabs: $restoresTabs)")
-            return restoresTabs
+            val landed = withTimeoutOrNull(UNDO_RESTORE_TIMEOUT_MILLIS) {
+                store.stateFlow.first { state ->
+                    val open = state.tabs.mapTo(HashSet()) { it.id }
+                    undone.all { it in open }
+                }
+            }
+            if (landed == null) {
+                logger.warn("$TAG: Undone tabs not all back after ${UNDO_RESTORE_TIMEOUT_MILLIS}ms")
+            }
+            val restored = undone.filter { store.state.findTab(it) != null }
+            logger.debug("$TAG: Performed undo operation (restored ${restored.size} tabs)")
+            restored
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             logger.error("$TAG: Failed to perform undo", e)
+            throw e
+        }
+    }
+
+    override fun discardUndoOf(tabIds: List<String>, contextIds: List<String>): Boolean {
+        try {
+            val discarded = components.core.store.discardUndoOf(tabIds.toSet(), contextIds.toSet())
+            logger.debug("$TAG: Undo discarded for a deleted container: $discarded")
+            return discarded
+        } catch (e: Exception) {
+            logger.error("$TAG: Failed to discard the pending undo", e)
             throw e
         }
     }
@@ -875,3 +950,9 @@ class GeckoTabsApiImpl : GeckoTabsApi {
         }
     }
 }
+
+/**
+ * How long [GeckoTabsApiImpl.undo] waits for AC's restore, which is one
+ * dispatch on the main thread away; only a stalled main thread takes longer.
+ */
+private const val UNDO_RESTORE_TIMEOUT_MILLIS = 5_000L

@@ -585,6 +585,8 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                         )
                     },
                     store = components.core.store,
+                    // As Fenix does: storing a decision outlives the fragment.
+                    coroutineScope = components.core.applicationScope,
                 ),
                 owner = this,
                 view = view,
@@ -789,6 +791,12 @@ abstract class BaseBrowserFragment : Fragment(), UserInteractionHandler, Activit
                 updatePullToRefresh()
                 GlobalComponents.viewportApi?.applyToNewEngineView(pane.engineView)
                 browserHandlingScrollFeature?.refreshTargets()
+            },
+            onWakeRequested = { tabId ->
+                components.flutterEvents.onWakeRequested(EventSequence.next(), tabId) { }
+            },
+            onResumeRequested = { tabId ->
+                components.flutterEvents.onResumeRequested(EventSequence.next(), tabId) { }
             },
         )
         paneCoordinator = coordinator

@@ -107,7 +107,7 @@ class DesktopModeSection extends HookConsumerWidget {
       final globalDesktopMode = ref
           .read(generalSettingsWithDefaultsProvider)
           .globalDesktopMode;
-      ref
+      await ref
           .read(desktopModeProvider(tabId).notifier)
           .enabled(enabled || globalDesktopMode);
     } catch (e, s) {

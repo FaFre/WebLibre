@@ -27,9 +27,13 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_freeze_l10n.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_title.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/freeze_recovery_section.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/pending_site_data_section.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_icons.dart';
 import 'package:weblibre/features/proxy/domain/providers/proxy_connection_options.dart';
@@ -68,6 +72,8 @@ class ContainerListScreen extends HookConsumerWidget {
       return CustomScrollView(
         slivers: [
           SliverAppBar.large(title: Text(l10n.tabs_containersTitle)),
+          const FreezeRecoverySection(),
+          const PendingSiteDataSection(),
           if (containers.isEmpty)
             SliverFillRemaining(
               hasScrollBody: false,
@@ -193,6 +199,7 @@ class _ContainerCard extends HookConsumerWidget {
     );
     final proxyOptions = ref.watch(proxyConnectionOptionsProvider);
     final proxyOptionsState = ref.watch(singboxProxyProfilesRepositoryProvider);
+    final freeze = ref.watch(containerFreezeStateProvider(container.id));
     final proxyOptionsLoading =
         proxyOptionsState.isLoading && !proxyOptionsState.hasValue;
 
@@ -253,6 +260,13 @@ class _ContainerCard extends HookConsumerWidget {
                                 icon: Icons.tab_outlined,
                                 label: l10n.tabs_tabCountChip(tabCount),
                               ),
+                              if (freeze != null && freeze.showsFrozen)
+                                _ContainerInfoChip(
+                                  icon: MdiIcons.pause,
+                                  label:
+                                      freeze.shortStateLabel(l10n) ??
+                                      l10n.browser_containerFrozenLabel,
+                                ),
                               if (container.isPinned)
                                 _ContainerInfoChip(
                                   icon: MdiIcons.pin,
@@ -358,7 +372,11 @@ class _ContainerInfoChip extends StatelessWidget {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [Icon(icon), const SizedBox(width: 4), Text(label)],
+          children: [
+            Icon(icon),
+            const SizedBox(width: 4),
+            Flexible(child: Text(label)),
+          ],
         ),
       ),
     );

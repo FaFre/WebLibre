@@ -1813,6 +1813,651 @@ abstract class GeckoRecentlyClosedTabsApi {
   void keepOffRecentlyClosed(List<String> ids);
 }
 
+/// What a removal did to the tabs it was asked to remove.
+///
+/// A tab in none of the lists is still open although it is not locked: native
+/// refused its removal for another reason. Callers count it as a survivor.
+class TabRemovalResult {
+  /// Open before the removal, gone after it.
+  final List<String> removedTabIds;
+
+  /// Still open because they are locked.
+  final List<String> lockedTabIds;
+
+  /// Not open when the removal began.
+  final List<String> missingTabIds;
+
+  const TabRemovalResult({
+    required this.removedTabIds,
+    required this.lockedTabIds,
+    required this.missingTabIds,
+  });
+}
+
+/// Why native did not apply a lock.
+enum TabLockRejection {
+  /// No such tab is open.
+  unknownTab,
+
+  /// Private tabs cannot be locked.
+  privateTab,
+
+  /// Custom tabs and web apps cannot be locked.
+  customTab,
+
+  /// The lock, or the session file that has to hold the tab, could not be
+  /// written. The previous value stays in force.
+  notPersisted,
+}
+
+/// The answer to [GeckoTabLockApi.setTabLocked].
+class TabLockChange {
+  /// Whether native held the tab locked before the call, for a revert.
+  final bool previouslyLocked;
+
+  /// Null when the change was applied.
+  final TabLockRejection? rejection;
+
+  const TabLockChange({required this.previouslyLocked, this.rejection});
+}
+
+/// Native's copy of the tab locks, which it enforces for every removal
+/// (`TabCloseProtection`). Dart's `tab.is_locked` is the record of what the user
+/// asked for; native's set always contains it.
+///
+/// Registered when the plugin attaches: [bootstrapLockedTabs] runs before the
+/// engine starts.
+@HostApi()
+abstract class GeckoTabLockApi {
+  /// The trusted, profile-scoped startup snapshot from the database. Not
+  /// checked against open tabs, which are not restored yet; works before the
+  /// browser components exist. Replaces the persisted set. Throws when it could
+  /// not be persisted, and the previous set stays in force.
+  void bootstrapLockedTabs(List<String> tabIds);
+
+  /// An interactive change, checked against the open tabs. Locking also writes
+  /// the session file before answering, so a tab that was just opened cannot
+  /// be locked and then lost to process death before the next autosave.
+  @async
+  TabLockChange setTabLocked(String tabId, bool locked);
+
+  /// Which of [tabIds] native holds locked right now.
+  List<String> lockedTabIdsAmong(List<String> tabIds);
+
+  /// After the session restore and Dart's catch-up only: native's set becomes
+  /// [tabIds] limited to the open tabs. Returns the ids that were dropped.
+  /// Throws when the new set could not be persisted, and the old one stays.
+  List<String> reconcileLockedTabs(List<String> tabIds);
+}
+
+/// Whether a tab's page is in memory (section 3.3 of
+/// `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`).
+enum TabResidency {
+  /// No engine session: the page loads when something asks for it.
+  unloaded,
+
+  /// A session is being created.
+  initializing,
+
+  /// The page is in memory.
+  resident,
+
+  /// The page's content process crashed.
+  crashed,
+}
+
+/// A tab's own sleep hold: while it has one, nothing loads the page until the
+/// tab is woken. Independent of any restriction of its container (D26).
+enum TabSleepHold { none, manual, automatic }
+
+/// What native is doing to a tab, or to a container's contexts, right now.
+enum LifecycleOperationState { idle, sleeping, freezing, resuming }
+
+/// Why a lifecycle operation did not do what was asked.
+enum LifecycleFailure {
+  /// No such tab is open.
+  unknownTab,
+
+  /// Something the tab is doing would be cut off; see the blockers.
+  protectedActivity,
+
+  /// The page's state did not reach native in time, so it was left loaded.
+  flushTimedOut,
+
+  /// GeckoView could not save the page's state, so it was left loaded.
+  flushFailed,
+
+  /// The tab's session was replaced while it was being put to sleep.
+  sessionChanged,
+
+  /// A newer sleep or wake of the same tab took over.
+  superseded,
+
+  /// The browser components were rebuilt while the operation ran.
+  componentsReplaced,
+
+  /// An automatic sleep found the tab no longer eligible right before its
+  /// teardown: shown, selected, kept awake, the policy turned off, or no
+  /// longer over the resident limit. An automatic freeze found its container
+  /// used, kept awake, busy or no longer scheduled; nothing stays restricted.
+  noLongerEligible,
+
+  /// A tab outside the container uses one of its contexts, or a context is
+  /// another container's or is being deleted.
+  contextShared,
+
+  /// A tab joined the container's contexts after Dart's check.
+  membershipChanged,
+
+  /// A tab Dart counts in the container runs outside its contexts (an
+  /// extension's tab in the default storage), so the freeze would not stop
+  /// it.
+  memberOutsideContexts,
+
+  /// A custom tab or web app runs in one of the contexts (D18).
+  openInExternalWindow,
+
+  /// The engine refused the restriction, and it was rolled back: nothing is
+  /// restricted.
+  engineRefused,
+
+  /// The engine's restriction could not be confirmed either way, and neither
+  /// could its rollback: the contexts stay restricted (D22).
+  rollbackUnconfirmed,
+
+  /// Something of the contexts was still running when the quiescence wait
+  /// ended; see `FreezeOperationResult.stillRunning`.
+  quiescenceTimedOut,
+
+  /// The registry could not be written, so the step that needed it did not
+  /// run.
+  notPersisted,
+
+  /// The registry was found damaged; every container is frozen until the
+  /// containers have been reconstructed (D23).
+  recoveryPending,
+
+  /// The operation needs the browser components, and there are none.
+  componentsUnavailable,
+
+  /// A release could not remove the context's push subscriptions or clear its
+  /// data yet; it stays restricted and is retried (D32).
+  cleanupFailed,
+}
+
+/// Activity that putting a tab to sleep would cut off (D13).
+enum ProtectedActivity {
+  /// Media is playing. Asks: confirmed with `stopMedia`.
+  media,
+
+  /// Camera, microphone or screen sharing is in use. Refuses.
+  recording,
+
+  /// The page holds form input. Asks: confirmed per tab with
+  /// `discardFormDataTabIds`. An automatic sleep or freeze takes it only from
+  /// a tab off screen, or a container unused, for an hour.
+  formData,
+
+  /// A file was chosen for upload on this page. Refuses.
+  upload,
+
+  /// The page is being printed or saved as PDF. Refuses.
+  printOrPdf,
+
+  /// A download started from this tab is still running. Refuses.
+  download,
+
+  /// The page is the result of a form submission, which cannot be restored as
+  /// it was. Asks: confirmed with `discardPostResult`.
+  postResult,
+
+  /// A download whose context is not known is running, and it cannot be told
+  /// apart from one of the container's (5.11). Refuses a freeze.
+  unattributedDownload,
+}
+
+/// A tab's lifecycle as native enforces it. Sent on every change and on
+/// `syncEvents`.
+class TabLifecycleState {
+  final String tabId;
+  final TabResidency residency;
+  final TabSleepHold sleepHold;
+  final LifecycleOperationState operation;
+
+  /// The tab's context is restricted (its container is frozen, or the
+  /// registry is in recovery): nothing loads it until Resume.
+  final bool contextFrozen;
+
+  const TabLifecycleState({
+    required this.tabId,
+    required this.residency,
+    required this.sleepHold,
+    required this.operation,
+    required this.contextFrozen,
+  });
+}
+
+/// What [GeckoTabLifecycleApi.sleepTabs] did to one tab.
+class TabSleepResult {
+  final String tabId;
+
+  /// The tab is held asleep now (also when it already was).
+  final bool asleep;
+
+  /// Null when [asleep].
+  final LifecycleFailure? failure;
+
+  /// With [LifecycleFailure.protectedActivity]: everything that kept the tab
+  /// awake, the askable ones included.
+  final List<ProtectedActivity> blockers;
+
+  const TabSleepResult({
+    required this.tabId,
+    required this.asleep,
+    required this.failure,
+    required this.blockers,
+  });
+}
+
+/// Automatic tab sleep (5.9), built in Dart from the effective settings. Off
+/// unless [enabled]; evaluated only while WebLibre is in the foreground.
+class TabSleepPolicy {
+  final bool enabled;
+
+  /// A tab off screen this long is put to sleep.
+  final int idleMinutes;
+
+  /// When set, the tabs off screen longest are put to sleep while more than
+  /// this many have their page loaded. Soft: tabs that cannot sleep stay.
+  final int? residentLimit;
+
+  /// "Keep awake" tabs (D30), never put to sleep automatically. A container
+  /// with one of them as a member is never frozen automatically either.
+  final List<String> exemptTabIds;
+
+  /// Containers to freeze automatically (phase C2). Evaluated whether or not
+  /// [enabled] is set: that switch is automatic tab sleep only.
+  final List<ContainerAutoFreeze> containers;
+
+  const TabSleepPolicy({
+    required this.enabled,
+    required this.idleMinutes,
+    required this.residentLimit,
+    required this.exemptTabIds,
+    required this.containers,
+  });
+}
+
+/// One container that freezes automatically after [afterMinutes] unused,
+/// counted while WebLibre is in the foreground (5.9). Native only detects
+/// that it is due and tells Dart (`onContainerFreezeDue`); only Dart's gated
+/// preflight starts the freeze (D21).
+class ContainerAutoFreeze {
+  final String ownerId;
+
+  /// Its own context and those of its isolated tabs, as Dart last saw them.
+  /// For detection only: the freeze itself uses the contexts Dart passes.
+  final List<String> contextIds;
+
+  final int afterMinutes;
+
+  const ContainerAutoFreeze({
+    required this.ownerId,
+    required this.contextIds,
+    required this.afterMinutes,
+  });
+}
+
+/// Where a context stands in a container freeze (5.4–5.6). The registry
+/// stores only the restricted phases; [unrestricted] appears in replies.
+enum ContextFreezePhase {
+  unrestricted,
+  freezing,
+  frozen,
+  failed,
+  resuming,
+  deletionPending,
+  releasing,
+  orphaned,
+}
+
+/// Whether the registry could be read (D23). In [recovery] every
+/// non-default context is restricted until the containers are reconstructed.
+enum LifecycleRegistryMode { normal, recovery }
+
+/// The last engine command acknowledged for a context (D33): what the UI says
+/// about background activity follows this, never the stored phase alone.
+enum EngineEnforcement { enforced, uncertain, lifted }
+
+/// What can still be running in a context when a quiescence wait ends.
+enum FreezeActivity {
+  serviceWorkers,
+  documents,
+  processes,
+  channels,
+  connections,
+  webSockets,
+  sockets,
+}
+
+/// One restricted context, as the registry holds it.
+class ContextFreezeState {
+  final String contextId;
+
+  /// The container the context belongs to; null for an orphaned context.
+  final String? ownerId;
+
+  final ContextFreezePhase phase;
+
+  /// With [ContextFreezePhase.deletionPending]: the phase it had before.
+  final ContextFreezePhase? previousPhase;
+
+  /// Why the last operation on it did not finish, while it has not since.
+  final LifecycleFailure? failure;
+
+  final EngineEnforcement enforcement;
+
+  /// A freeze or Resume of its container is running.
+  final LifecycleOperationState operation;
+
+  /// Frozen by the reconstruction after the registry was found damaged, not
+  /// by the user (5.6).
+  final bool recovered;
+
+  /// Push messages consumed unread while it was restricted (5.8).
+  final int undeliveredPushCount;
+
+  const ContextFreezeState({
+    required this.contextId,
+    required this.ownerId,
+    required this.phase,
+    required this.previousPhase,
+    required this.failure,
+    required this.enforcement,
+    required this.operation,
+    required this.recovered,
+    required this.undeliveredPushCount,
+  });
+}
+
+/// A container its contexts' records hold: frozen, being frozen, resumed or
+/// deleted, or a freeze or Resume of it did not finish. A `releasing` record
+/// only waits for its data to be deleted and an `orphaned` one has no
+/// container, so neither holds one. Computed natively from the records.
+class OwnerFreezeState {
+  final String ownerId;
+
+  /// When its contexts differ (a Resume confirmed for some), the phase that
+  /// needs attention first.
+  final ContextFreezePhase phase;
+
+  /// The weakest of its contexts'.
+  final EngineEnforcement enforcement;
+
+  /// A freeze or Resume of it is running.
+  final LifecycleOperationState operation;
+
+  /// Frozen by the reconstruction after the registry was found damaged (5.6).
+  final bool recovered;
+
+  /// Push messages consumed unread while it was restricted, over its
+  /// contexts (5.8).
+  final int undeliveredPushCount;
+
+  /// The contexts whose records hold it.
+  final List<String> contextIds;
+
+  const OwnerFreezeState({
+    required this.ownerId,
+    required this.phase,
+    required this.enforcement,
+    required this.operation,
+    required this.recovered,
+    required this.undeliveredPushCount,
+    required this.contextIds,
+  });
+}
+
+/// The registry as a whole. [revision] increases with every change in this
+/// process; a snapshot with a lower one is older (D27).
+class LifecycleSnapshot {
+  final LifecycleRegistryMode mode;
+  final int revision;
+  final List<ContextFreezeState> contexts;
+
+  /// The containers [contexts] hold, by the same records.
+  final List<OwnerFreezeState> owners;
+
+  const LifecycleSnapshot({
+    required this.mode,
+    required this.revision,
+    required this.contexts,
+    required this.owners,
+  });
+}
+
+/// One thing that kept a container from being frozen: a tab's activity, or a
+/// running download.
+class FreezeBlocker {
+  final String? tabId;
+  final String? downloadId;
+  final ProtectedActivity activity;
+
+  const FreezeBlocker({
+    required this.tabId,
+    required this.downloadId,
+    required this.activity,
+  });
+}
+
+/// What a container operation did. For messages only: the membership gate
+/// rebuilds its state from a fresh snapshot, never from this (D27).
+class FreezeOperationResult {
+  final String ownerId;
+
+  /// The owner's phase afterwards; [ContextFreezePhase.unrestricted] when it
+  /// has no restricted context left.
+  final ContextFreezePhase phase;
+
+  final int revision;
+  final LifecycleFailure? failure;
+
+  /// With [LifecycleFailure.protectedActivity].
+  final List<FreezeBlocker> blockers;
+
+  /// With [LifecycleFailure.quiescenceTimedOut].
+  final List<FreezeActivity> stillRunning;
+
+  /// The contexts the operation could not settle.
+  final List<String> unsettledContextIds;
+
+  const FreezeOperationResult({
+    required this.ownerId,
+    required this.phase,
+    required this.revision,
+    required this.failure,
+    required this.blockers,
+    required this.stillRunning,
+    required this.unsettledContextIds,
+  });
+}
+
+/// What one release (D32) did to one context.
+class ContextReleaseResult {
+  final String contextId;
+
+  /// The record is gone and the engine no longer restricts the context.
+  final bool released;
+
+  final LifecycleFailure? failure;
+
+  /// Native deleted the context's data, acknowledged. False for a context
+  /// without a record: it is released at once and its caller's own cleanup
+  /// applies.
+  final bool dataCleared;
+
+  const ContextReleaseResult({
+    required this.contextId,
+    required this.released,
+    required this.failure,
+    required this.dataCleared,
+  });
+}
+
+/// A container with its own context, and the isolation contexts of its tabs,
+/// for the reconstruction after a damaged registry (5.6).
+class ContainerContexts {
+  final String ownerId;
+  final List<String> contextIds;
+
+  const ContainerContexts({required this.ownerId, required this.contextIds});
+}
+
+/// Tab sleep (phase T1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`).
+/// The holds are process-wide in native (`TabLifecycleRegistry`); the
+/// operations need the browser components and fail with `componentsReplaced`
+/// when those are rebuilt meanwhile.
+@HostApi()
+abstract class GeckoTabLifecycleApi {
+  /// Puts [tabIds] to sleep: holds each, checks what it is doing (D13), saves
+  /// its state and unloads its page. Media and a POST result only refuse
+  /// unless confirmed with [stopMedia] and [discardPostResult]; form input
+  /// only for the tabs of [discardFormDataTabIds], the ones the user was
+  /// asked about, so input found in another tab on the retry still refuses.
+  @async
+  List<TabSleepResult> sleepTabs(
+    List<String> tabIds,
+    bool stopMedia,
+    bool discardPostResult,
+    List<String> discardFormDataTabIds,
+  );
+
+  /// Clears [tabId]'s sleep hold (the placeholder's Wake, the menus' Wake, a
+  /// navigation): only while the routing this process installed covers the
+  /// tab's context (D34), so nothing of it goes out another way. A tab on
+  /// screen loads at once; any other loads when it is shown or something
+  /// reaches it. A sleeping tab never wakes by coming on screen (D10).
+  /// Returns whether it was woken; false for a tab that is not open. Waiting
+  /// out the install window at a cold start is the caller's.
+  bool wakeTab(String tabId);
+
+  /// [tabId]'s lifecycle as native has it now. `onTabLifecycleChange`
+  /// reaches Dart some time after a hold is placed, so a decision that must
+  /// not miss one (a navigation the user asked for, 5.2.1) asks here. Null
+  /// for a tab that is not open.
+  TabLifecycleState? getTabLifecycleState(String tabId);
+
+  /// Replaces the automatic sleep policy. Process-wide: kept across a
+  /// components rebuild, and accepted before the components exist.
+  void setSleepPolicy(TabSleepPolicy policy);
+
+  /// Freezes a container's contexts (5.4). Called only from Dart's gated
+  /// preflight (D21). [memberTabIds] are the tabs Dart found in the
+  /// container; a tab of [contextIds] outside them refuses the freeze.
+  /// [stopMedia], [discardPostResult] and [discardFormDataTabIds] (the tabs
+  /// whose form input the user agreed to lose) confirm what the user was
+  /// asked.
+  @async
+  FreezeOperationResult freezeContexts(
+    String ownerId,
+    List<String> contextIds,
+    List<String> memberTabIds,
+    bool stopMedia,
+    bool discardPostResult,
+    List<String> discardFormDataTabIds,
+    bool automatic,
+  );
+
+  /// Resumes [ownerId]'s contexts (5.5): lifts the restriction, drains the
+  /// deferred subscription changes and wakes [wakeTabId]. Routing for every
+  /// context is the caller's to check first (D34). Also stops a running
+  /// freeze of the owner ("Stop freezing and resume").
+  @async
+  FreezeOperationResult resumeContexts(String ownerId, String? wakeTabId);
+
+  /// Before the container's row is deleted: its contexts become
+  /// `deletionPending` and stay restricted (D28), and [deleteDataOf], storage
+  /// of it without a record whose data the user asked to delete with it
+  /// (D29), is written down as a data deletion, which restricts nothing
+  /// until the row is gone.
+  @async
+  FreezeOperationResult beginContextDeletion(
+    String ownerId,
+    List<String> deleteDataOf,
+  );
+
+  /// The row delete did not happen: back to the phase each context had.
+  @async
+  FreezeOperationResult cancelContextDeletion(String ownerId);
+
+  /// After the row delete: the release procedure for each of its contexts,
+  /// also the storage of its data deletions, recorded as releasing first, so
+  /// its push subscriptions go too and every start retries what is left.
+  @async
+  FreezeOperationResult completeContextDeletion(String ownerId);
+
+  /// FULL start, normal mode, when the gate is seeded: matches the records
+  /// against the containers that exist (5.5), starts pending releases in the
+  /// background, and returns the snapshot afterwards.
+  @async
+  LifecycleSnapshot reconcileOwners(List<String> existingOwnerIds);
+
+  /// The one release procedure (D32): releasing, push subscriptions removed,
+  /// data cleared with an acknowledgment, then lifted and forgotten.
+  @async
+  List<ContextReleaseResult> releaseContexts(List<String> contextIds);
+
+  /// Recovery mode only (D23): freezes each of [owners]' contexts explicitly,
+  /// keeps every other context that has a registration or subscription as
+  /// orphaned, releases [unfreezableContextIds] (used by tabs no freezable
+  /// container owns), and ends the recovery. Refused in normal mode.
+  @async
+  LifecycleSnapshot reconstructFrozenContexts(
+    List<ContainerContexts> owners,
+    List<String> unfreezableContextIds,
+  );
+
+  /// The registry now. Works before the components exist (it is
+  /// process-wide). Seeds the membership gate (5.7).
+  LifecycleSnapshot getLifecycleSnapshot();
+
+  /// What "Open WebLibre to resume" in a web app or custom tab window of a
+  /// frozen context (D18) left for the browser, taken once; null when
+  /// nothing is waiting. Kept in the process, never on an intent, so no
+  /// other app can choose the storage it names.
+  FrozenWindowHandoff? takeFrozenWindowHandoff();
+}
+
+/// The page a web app or custom tab window of a frozen context held, and the
+/// storage it held it in, for the browser to open there (D18).
+class FrozenWindowHandoff {
+  /// The window's storage context: a container's or an isolation group's.
+  final String contextId;
+
+  /// The page; null when the window had none to give.
+  final String? url;
+
+  /// Whether the window was a private one: the page then opens in a private
+  /// tab, kept out of the session and the history as the window kept it.
+  final bool private;
+
+  const FrozenWindowHandoff({
+    required this.contextId,
+    this.url,
+    required this.private,
+  });
+}
+
+/// A tab the pending undo close would bring back.
+class PendingUndoTab {
+  final String tabId;
+
+  /// The context it ran in; null for the default one.
+  final String? contextId;
+
+  const PendingUndoTab({required this.tabId, this.contextId});
+}
+
 @HostApi()
 abstract class GeckoTabsApi {
   /// The ids of every tab in the store right now, in its order — what the
@@ -1822,6 +2467,16 @@ abstract class GeckoTabsApi {
   /// The selected tab in the store right now — what the next
   /// `onSelectedTabChange` will report, without its debounce.
   String? getSelectedTabId();
+
+  /// The ids of the tabs in the store right now that run in session context
+  /// [contextId], private ones included. Read straight from the store, so a
+  /// tab the engine opened a moment ago is in it before any event reports it.
+  List<String> getTabIdsInContext(String contextId);
+
+  /// The ids of the custom tabs and web app windows in the store right now
+  /// that run in one of [contextIds]. They are not tabs: closing tabs never
+  /// reaches them.
+  List<String> getCustomTabIdsInContexts(List<String> contextIds);
 
   void syncEvents({
     required bool onSelectedTabChange,
@@ -1839,11 +2494,13 @@ abstract class GeckoTabsApi {
     required bool onBrowserExtensionIcons,
     required bool onPageExtensionIcons,
     required bool onTranslationStateChange,
+    required bool onTabLifecycleChange,
   });
 
   void selectTab({required String tabId});
 
-  void removeTab({required String tabId});
+  /// Removes [tabId] unless it is locked, and reports what happened.
+  TabRemovalResult removeTab({required String tabId});
 
   String addTab({
     required String url,
@@ -1885,17 +2542,36 @@ abstract class GeckoTabsApi {
 
   void removeAllTabs({required bool recoverable});
 
-  void removeTabs({required List<String> ids});
+  /// Removes [ids], keeping locked tabs, and reports what happened.
+  TabRemovalResult removeTabs({required List<String> ids});
 
   void removeNormalTabs();
 
   void removePrivateTabs();
 
-  /// Restores the most recently closed tabs, if the engine still has them.
+  /// The tabs the pending undo close would bring back, each with the context
+  /// it ran in; empty when there is none.
+  List<PendingUndoTab> pendingUndoTabs();
+
+  /// Restores the most recently closed tabs, if the engine still has them,
+  /// and answers once they are back in the store: AC restores them in a
+  /// coroutine of its own, after the undo was dispatched.
   ///
-  /// Returns whether any tabs are being restored. When none are, the tab list
-  /// does not change at all.
-  bool undo();
+  /// Only when the pending undo close brings back exactly [expectedTabIds]
+  /// (as [pendingUndoTabs] listed them), so that what the caller checked is
+  /// what comes back: a close in between replaced it otherwise.
+  ///
+  /// Returns the ids of the tabs that came back; empty when the engine had
+  /// none to restore, or other ones, and then the tab list does not change
+  /// at all.
+  @async
+  List<String> undo(List<String> expectedTabIds);
+
+  /// Drops the pending undo close when it would bring back one of [tabIds] or
+  /// a tab that ran in one of [contextIds], so that nothing comes back into a
+  /// deleted container. Its other tabs go on the recently closed list, as
+  /// they would once the undo ran out. Returns whether it dropped it.
+  bool discardUndoOf(List<String> tabIds, List<String> contextIds);
 
   //restoreTabs invokes splitted
   void restoreTabsByList({
@@ -2217,6 +2893,13 @@ abstract class GeckoContainerProxyApi {
   /// the extension, so it is safe to call on a hot path.
   GeckoProxyRoutingStatus routingStatus();
 
+  /// Whether the routing this process installed covers every one of
+  /// [contextIds] the way a pane requires before it wakes a tab: a direct
+  /// relation, a live proxy, or one that is still starting. False while none
+  /// is installed, and for a context whose proxy has no endpoint. Reads the
+  /// same cached state as [routingStatus].
+  bool routingCoversContexts(List<String> contextIds);
+
   /// The oldest launch waiting for a proxy to be started, or null when none is.
   /// Consumes it: a demand is answered by starting what it names.
   ///
@@ -2395,6 +3078,38 @@ abstract class GeckoStateEvents {
   );
   @asyncCallback
   void onTabTranslationStateChange(int sequence, TabTranslationStateData state);
+
+  /// A tab's lifecycle changed: its residency, its sleep hold, or an operation
+  /// on it began or ended.
+  @asyncCallback
+  void onTabLifecycleChange(int sequence, TabLifecycleState state);
+
+  /// The user pressed Wake on a sleeping tab's placeholder. Native does not
+  /// wake it: Dart checks the tab's routing first (D34), then calls
+  /// `GeckoTabLifecycleApi.wakeTab`.
+  @asyncCallback
+  void onWakeRequested(int sequence, String tabId);
+
+  /// The registry changed. For what the user sees; the membership gate reads
+  /// its own snapshot (D27).
+  @asyncCallback
+  void onContextFreezeChange(int sequence, LifecycleSnapshot snapshot);
+
+  /// The user pressed Resume on a frozen tab's placeholder. Native does not
+  /// resume: Dart checks routing for every context first (D34).
+  @asyncCallback
+  void onResumeRequested(int sequence, String tabId);
+
+  /// A freeze tore down [done] of [total] tabs (barrier 4).
+  @asyncCallback
+  void onContextFreezeProgress(int sequence, String ownerId, int done, int total);
+
+  /// No member of [ownerId] has been used for its automatic freeze time
+  /// (5.9). Native freezes nothing on its own: Dart runs its gated preflight
+  /// with `automatic` (D21). Sent again at the next evaluation while it stays
+  /// due.
+  @asyncCallback
+  void onContainerFreezeDue(int sequence, String ownerId);
 }
 
 @FlutterApi()
@@ -4075,11 +4790,52 @@ class SplitViewLabels {
   /// Button on that placeholder that restores the page.
   final String crashedReload;
 
+  /// Title of the placeholder shown in place of a sleeping tab's page.
+  final String sleepingTitle;
+
+  /// Button on that placeholder that wakes the tab; also its accessible name.
+  final String sleepingWake;
+
+  /// Title of the placeholder shown in place of a frozen container's tab,
+  /// when [frozenContainers] has no entry for its container.
+  final String frozenTitle;
+
+  /// Button on that placeholder that asks to resume the container; also its
+  /// accessible name.
+  final String frozenResume;
+
+  /// Per frozen container: its own title and detail line.
+  final List<FrozenPlaceholderLabel> frozenContainers;
+
   SplitViewLabels({
     required this.dividerDescription,
     required this.dividerOptionsAction,
     required this.crashedTitle,
     required this.crashedReload,
+    required this.sleepingTitle,
+    required this.sleepingWake,
+    required this.frozenTitle,
+    required this.frozenResume,
+    required this.frozenContainers,
+  });
+}
+
+/// What the frozen placeholder says for the tabs of one container, which
+/// native finds through the registry's owner of the tab's context.
+class FrozenPlaceholderLabel {
+  final String ownerId;
+
+  /// "{container} is frozen", or how far a freeze or Resume got.
+  final String title;
+
+  /// The line under it, such as how many background messages were skipped;
+  /// null for none.
+  final String? detail;
+
+  FrozenPlaceholderLabel({
+    required this.ownerId,
+    required this.title,
+    required this.detail,
   });
 }
 

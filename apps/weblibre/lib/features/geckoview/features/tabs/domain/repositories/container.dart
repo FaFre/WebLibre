@@ -20,15 +20,23 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
+    show VisitInfo;
 import 'package:nullability/nullability.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/uuid.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab/container_deletion.dart';
+import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/site_assignment.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
-import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/color_palette.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
+import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'container.g.dart';
 
@@ -66,6 +74,10 @@ class ContainerRepository extends _$ContainerRepository {
         .get();
   }
 
+  /// Replaces [container]'s row. Changing its storage identity (cookie
+  /// isolation on or off) throws [ContainerFrozenException] while the
+  /// container is frozen or being frozen or resumed (D19): its tabs would
+  /// move to contexts the freeze does not cover.
   Future<void> replaceContainer(ContainerData container) async {
     if (container.metadata.assignedSites.isNotEmpty) {
       if (!await areSitesAvailable(
@@ -76,10 +88,21 @@ class ContainerRepository extends _$ContainerRepository {
       }
     }
 
+    final dao = ref.read(tabDatabaseProvider).containerDao;
+    final current = await dao.getContainerData(container.id).getSingleOrNull();
+    final identityChanges =
+        current != null &&
+        current.metadata.contextualIdentity !=
+            container.metadata.contextualIdentity;
+    if (!identityChanges) return await dao.replaceContainer(container);
+
     return await ref
-        .read(tabDatabaseProvider)
-        .containerDao
-        .replaceContainer(container);
+        .read(containerMembershipGateProvider.notifier)
+        .whileChanging(
+          [container.id],
+          () => dao.replaceContainer(container),
+          kind: ContainerChange.membership,
+        );
   }
 
   Future<void> clearProxyConnectionAssignments(
@@ -143,14 +166,85 @@ class ContainerRepository extends _$ContainerRepository {
         .get();
   }
 
-  Future<void> deleteContainer(String id) async {
-    // Off the recently closed list: reopened, they would come back outside
-    // any container, without its proxy.
-    await ref
-        .read(tabDataRepositoryProvider.notifier)
-        .closeContainerTabs(id, keepOffRecentlyClosed: true);
+  /// Closes the container's tabs and deletes it, unless one of its tabs is
+  /// locked ([ContainerDeletion.delete]); with [deleteHistory],
+  /// its visits in Mozilla Places too, and with [deleteSiteData] the site data
+  /// of its own cookie storage (D29). The site data of a context native has a
+  /// record of is always deleted, by native's release procedure: for its own
+  /// storage (frozen, say) only with [deleteSiteData], otherwise nothing is
+  /// deleted ([ContainerDeletionNeedsSiteData]) and the user is asked again.
+  ///
+  /// Nothing is destroyed before the container is gone: the visits are only
+  /// read beforehand, while the relation rows that find them still exist (they
+  /// cascade away with the container), and deleted afterwards together with
+  /// the container's app-link override. Here rather than in the screen that
+  /// asked, so the cleanup happens even when that screen is gone by then.
+  Future<ContainerDeletionResult> deleteContainer(
+    String id, {
+    bool deleteHistory = false,
+    bool deleteSiteData = false,
+  }) async {
+    final container = await getContainerData(id);
+    final history = ref.read(containerHistoryRepositoryProvider.notifier);
+    final visits = deleteHistory
+        ? await history.placesVisitsForContainer(id)
+        : const <VisitInfo>[];
 
-    return await ref.read(tabDatabaseProvider).containerDao.deleteContainer(id);
+    // The data of a context with a record goes with the container through
+    // native's release procedure (D28, D29); the deletion asks again when
+    // that would delete its own storage's data unasked, and clears that data
+    // itself when asked and native does not (5.5).
+    final result = await ref
+        .read(containerDeletionProvider.notifier)
+        .delete(id, deleteSiteData: deleteSiteData);
+    if (result is! ContainerDeleted) return result;
+
+    // So the override does not outlive the container.
+    try {
+      await removeAppLinkOverrides({container?.metadata.contextualIdentity});
+    } catch (error, stackTrace) {
+      logger.e(
+        'Could not drop the app-link override of deleted container $id',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    try {
+      await history.deletePlacesVisits(visits);
+    } catch (error, stackTrace) {
+      logger.e(
+        'Could not delete the history of deleted container $id',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return ContainerDeleted(
+        historyKept: true,
+        siteDataCleanupPending: result.siteDataCleanupPending,
+      );
+    }
+    return result;
+  }
+
+  /// Drops the per-container app-link overrides (§ container isolation)
+  /// stored for [contextIds], so they do not linger after a container drops
+  /// isolation or is deleted. Null ids are ignored; a no-op when none is
+  /// stored.
+  Future<void> removeAppLinkOverrides(Set<String?> contextIds) async {
+    final ids = contextIds.nonNulls.toSet();
+    if (ids.isEmpty) return;
+
+    await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
+      current,
+    ) {
+      if (!ids.any(current.appLinkContextOverrides.containsKey)) {
+        return current;
+      }
+      return current.copyWith.appLinkContextOverrides(
+        {...current.appLinkContextOverrides}
+          ..removeWhere((key, _) => ids.contains(key)),
+      );
+    });
   }
 
   Future<Set<Color>> getDistinctColors() {

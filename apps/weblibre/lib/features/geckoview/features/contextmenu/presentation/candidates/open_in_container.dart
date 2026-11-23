@@ -40,6 +40,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_list_tile.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -129,20 +130,23 @@ class OpenInContainer extends HookConsumerWidget {
 
         final currentTab = readContextMenuSourceTab(ref, sourceTabId);
 
-        final tabId = await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: hitResult.tryGetLink(),
-              parentId: currentTab?.id,
-              selectTab: false,
-              tabMode: tabMode,
-              containerSelection: TabContainerSelection.specific(
-                selectedContainer,
-              ),
-            );
+        final tabs = ref.read(tabRepositoryProvider.notifier);
+        // A new isolated tab, which a frozen container refuses (D19).
+        final tabId = await openUnlessContainerRefuses(
+          context,
+          () => tabs.addTab(
+            url: hitResult.tryGetLink(),
+            parentId: currentTab?.id,
+            selectTab: false,
+            tabMode: tabMode,
+            containerSelection: TabContainerSelection.specific(
+              selectedContainer,
+            ),
+          ),
+        );
 
         if (context.mounted) {
-          handleBackgroundTabOpened(context, ref, tabId);
+          if (tabId != null) handleBackgroundTabOpened(context, ref, tabId);
 
           context.pop();
         }

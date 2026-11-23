@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.components
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.SharedPreferences
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
@@ -38,8 +39,23 @@ import eu.weblibre.flutter_mozilla_components.middleware.HistoryMetadataService
 import eu.weblibre.flutter_mozilla_components.middleware.SandboxCaptureMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SaveToPDFMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.SplitSurvivorMiddleware
+import eu.weblibre.flutter_mozilla_components.middleware.TabCloseGuardMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.TabUploadsMiddleware
 import eu.weblibre.flutter_mozilla_components.middleware.WebExtensionActiveTabMiddleware
+import eu.weblibre.flutter_mozilla_components.ext.EventSequence
+import eu.weblibre.flutter_mozilla_components.lifecycle.ContainerFreeze
+import eu.weblibre.flutter_mozilla_components.lifecycle.ContainerFreezeScheduler
+import eu.weblibre.flutter_mozilla_components.lifecycle.ContextFreezeEvents
+import eu.weblibre.flutter_mozilla_components.lifecycle.DownloadAttributionMiddleware
+import eu.weblibre.flutter_mozilla_components.lifecycle.FreezePigeonMappers
+import eu.weblibre.flutter_mozilla_components.lifecycle.GeckoSessionContextEngine
+import eu.weblibre.flutter_mozilla_components.lifecycle.PageOutputTracker
+import eu.weblibre.flutter_mozilla_components.lifecycle.PresentationMemory
+import eu.weblibre.flutter_mozilla_components.lifecycle.SleepBlockerProbe
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycle
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleGuardMiddleware
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabSleepScheduler
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoStateEvents
 import eu.weblibre.flutter_mozilla_components.push.WebNotificationDrainCoordinator
@@ -197,7 +213,10 @@ class Core(
      */
     val geckoSitePermissionsStorage by lazy {
         val geckoRuntime = EngineProvider.getOrCreateRuntime(context)
-        GeckoSitePermissionsStorage(geckoRuntime, OnDiskSitePermissionsStorage(context))
+        GeckoSitePermissionsStorage(
+            geckoRuntime,
+            OnDiskSitePermissionsStorage(context, coroutineScope = applicationScope),
+        )
     }
 
     // Addons
@@ -287,10 +306,80 @@ class Core(
     /** Held so tabs WebLibre removes itself can be kept off the list. */
     val recentlyClosedFilterMiddleware = RecentlyClosedFilterMiddleware()
 
+    /** Running PDF saves and prints, which keep a tab from being put to sleep. */
+    val pageOutputTracker = PageOutputTracker()
+
+    /** Created with [store], and started there; see [tabLifecycle]. */
+    @Volatile
+    private var tabLifecycleInstance: TabLifecycle? = null
+
+    /** Automatic tab sleep (5.9), created and started with [store]. */
+    @Volatile
+    private var tabSleepSchedulerInstance: TabSleepScheduler? = null
+
+    /** Container freeze (5.3–5.6), created with [store]; see [containerFreeze]. */
+    @Volatile
+    private var containerFreezeInstance: ContainerFreeze? = null
+
+    /** Automatic container freeze's due detection (C2), created and started with [store]. */
+    @Volatile
+    private var containerFreezeSchedulerInstance: ContainerFreezeScheduler? = null
+
+    /**
+     * Container freeze for this `Core`; the records are process-wide. Made
+     * when [store] is, like [tabLifecycle].
+     */
+    val containerFreeze: ContainerFreeze
+        get() {
+            store
+            return checkNotNull(containerFreezeInstance)
+        }
+
+    /**
+     * Tab sleep for this `Core`; the holds themselves are process-wide. Made
+     * when [store] is, so reading it creates the store, never the other way
+     * round, and nothing forces the engine earlier than the store would.
+     */
+    val tabLifecycle: TabLifecycle
+        get() {
+            store
+            return checkNotNull(tabLifecycleInstance)
+        }
+
+    /**
+     * Stops this `Core`'s lifecycle work for good (3.5). Called on the outgoing
+     * components by both `GlobalComponents.tearDown` and `setUp`, which replaces
+     * components without tearing them down. Creates nothing.
+     */
+    fun retireLifecycle() {
+        tabSleepSchedulerInstance?.retire()
+        containerFreezeSchedulerInstance?.retire()
+        // Before the tab lifecycle: a freeze writes `failed` while its teardown
+        // stops, and keeps the restriction (3.5).
+        containerFreezeInstance?.retire()
+        tabLifecycleInstance?.retire()
+    }
+
     @OptIn(FlowPreview::class)
     val store by lazy {
         BrowserStore(
             middleware = listOf(
+                // First: no other middleware may see the removal of a locked tab,
+                // so the undo and recently closed middleware, and WebLibre's own
+                // removal reactions, only ever see what actually happens.
+                TabCloseGuardMiddleware(
+                    beforeNonRecoverableRemoval = recentlyClosedFilterMiddleware::discard,
+                ),
+                // Keeps tabs held asleep without a session (B1). Only drops and
+                // records, so it can sit ahead of everything that reacts to a
+                // session being created.
+                TabLifecycleGuardMiddleware(
+                    assertInvariants =
+                        (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0,
+                ),
+                // Records each download's context before DownloadMiddleware
+                // starts it, for the download gate (5.11). Only records.
+                DownloadAttributionMiddleware(),
                 // Must run before any engine middleware so we can rewrite
                 // sandbox new-tab URLs before Gecko issues a request.
                 SandboxCaptureMiddleware,
@@ -340,7 +429,7 @@ class Core(
                 SessionPrioritizationMiddleware(),
                 RecordingDevicesMiddleware(context, components.notificationsDelegate),
                 PromptMiddleware(),
-                SaveToPDFMiddleware(),
+                SaveToPDFMiddleware(pageOutputTracker),
                 // Uploads are copied into the activity's cache, never a profile's.
                 TabUploadsMiddleware({
                     components.profileApplicationContext.rootApplicationContext.cacheDir
@@ -365,9 +454,81 @@ class Core(
                 // https://github.com/mozilla-mobile/android-components/issues/11300
                 // https://github.com/mozilla-mobile/android-components/issues/11653
                 trimMemoryAutomatically = false,
+                // B2: a creation accepted before a sleep hold was placed still
+                // creates nothing (AC hunk A3, a-c-weblibre-tab-lifecycle.patch).
+                sessionCreationGate = { tab ->
+                    TabLifecycleRegistry.maySessionBeCreated(tab.id, tab.contextId)
+                },
             )
         ).apply {
             components.events.registerFlowEvents(this)
+
+            val sleepBlockers = SleepBlockerProbe(pageOutputTracker) {
+                // Where TabUploadsMiddleware keeps each tab's chosen files.
+                components.profileApplicationContext.rootApplicationContext.cacheDir
+            }
+            val lifecycle = TabLifecycle(
+                store = this,
+                probe = sleepBlockers,
+                panes = { components.browserPanes },
+                events = { state ->
+                    flutterEvents.onTabLifecycleChange(EventSequence.next(), state) { }
+                },
+            ).also { it.start() }
+            tabLifecycleInstance = lifecycle
+            containerFreezeInstance = ContainerFreeze(
+                store = this,
+                lifecycle = lifecycle,
+                probe = sleepBlockers,
+                engine = GeckoSessionContextEngine { runtime },
+                push = { components.existingPush?.takeUnless { it.isClosed } },
+                panes = { components.browserPanes },
+                events = object : ContextFreezeEvents {
+                    override fun onChange() {
+                        flutterEvents.onContextFreezeChange(
+                            EventSequence.next(),
+                            FreezePigeonMappers.snapshot(),
+                        ) { }
+                    }
+
+                    override fun onProgress(ownerId: String, done: Int, total: Int) {
+                        flutterEvents.onContextFreezeProgress(
+                            EventSequence.next(),
+                            ownerId,
+                            done.toLong(),
+                            total.toLong(),
+                        ) { }
+                    }
+                },
+                stillDue = { request ->
+                    containerFreezeSchedulerInstance?.isStillDue(
+                        request.ownerId,
+                        request.contextIds,
+                        request.memberTabIds,
+                    ) == true
+                },
+                typedTextMayGo = { request ->
+                    containerFreezeSchedulerInstance?.isUnusedFor(
+                        request.ownerId,
+                        TabSleepScheduler.TYPED_TEXT_GRACE_MILLIS,
+                    ) == true
+                },
+            )
+            containerFreezeSchedulerInstance = ContainerFreezeScheduler(
+                store = this,
+                probe = sleepBlockers,
+                presented = PresentationMemory.process.changes,
+                onDue = { ownerId ->
+                    flutterEvents.onContainerFreezeDue(EventSequence.next(), ownerId) { }
+                },
+            ).also { it.start() }
+            tabSleepSchedulerInstance = TabSleepScheduler(
+                store = this,
+                lifecycle = lifecycle,
+                probe = sleepBlockers,
+                presented = PresentationMemory.process.changes,
+                context = context.applicationContext,
+            ).also { it.start() }
 
             icons.install(engine, this)
 

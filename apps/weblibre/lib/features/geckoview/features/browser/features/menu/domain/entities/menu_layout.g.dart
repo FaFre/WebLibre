@@ -187,6 +187,8 @@ const _$MenuItemTypeEnumMap = {
   MenuItemType.printPage: 'printPage',
   MenuItemType.pinTopSite: 'pinTopSite',
   MenuItemType.fetchFeeds: 'fetchFeeds',
+  MenuItemType.lockTab: 'lockTab',
+  MenuItemType.sleepTab: 'sleepTab',
   MenuItemType.history: 'history',
   MenuItemType.bookmarks: 'bookmarks',
   MenuItemType.downloads: 'downloads',

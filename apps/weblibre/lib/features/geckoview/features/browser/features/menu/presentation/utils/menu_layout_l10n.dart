@@ -80,6 +80,8 @@ extension MenuItemTypeL10n on MenuItemType {
       MenuItemType.printPage => l10n.menu_itemPrintPage,
       MenuItemType.pinTopSite => l10n.menu_itemPinTopSite,
       MenuItemType.fetchFeeds => l10n.menu_itemFetchFeeds,
+      MenuItemType.lockTab => l10n.menu_itemLockTab,
+      MenuItemType.sleepTab => l10n.menu_itemSleepTab,
       MenuItemType.history => l10n.menu_itemHistory,
       MenuItemType.bookmarks => l10n.menu_itemBookmarks,
       MenuItemType.downloads => l10n.menu_itemDownloads,

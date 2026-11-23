@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
@@ -31,15 +32,17 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/clone_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_sleep_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/menu_item_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/navigation_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/dialogs/tab_parent_picker.dart';
@@ -84,6 +87,7 @@ class TabMenu extends HookConsumerWidget {
   final bool enableExport;
   final bool enableCloseTab;
   final bool enablePinTab;
+  final bool enableLockTab;
   final bool enableReloadButton;
   final bool enableNavigationButtons;
   final bool enableHierarchy;
@@ -107,6 +111,7 @@ class TabMenu extends HookConsumerWidget {
     this.enableExport = true,
     this.enableCloseTab = true,
     this.enablePinTab = true,
+    this.enableLockTab = true,
     this.enableReloadButton = true,
     this.enableNavigationButtons = true,
     this.enableHierarchy = true,
@@ -134,6 +139,38 @@ class TabMenu extends HookConsumerWidget {
       },
       builder: builder,
       menuChildren: [
+        // At the top, nearest the tab the menu was opened for. The actions
+        // run with this widget's context and ref, since the row is gone once
+        // the menu closed.
+        _TabStateRow(
+          tabId: selectedTabId,
+          showPin: enablePinTab,
+          showLock: enableLockTab,
+          onPinned: (pinned) async {
+            controller.close();
+            await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .setPinned(selectedTabId, pinned: pinned);
+          },
+          onToggleLock: () async {
+            controller.close();
+            await toggleTabLock(context, ref.read, selectedTabId);
+          },
+          onSleep: () async {
+            controller.close();
+            await sleepTabsWithConfirmation(context, ref.read, [selectedTabId]);
+          },
+          onWake: () async {
+            controller.close();
+            await wakeTabFromMenu(context, ref.read, selectedTabId);
+          },
+          onKeepAwake: (exempt) async {
+            controller.close();
+            await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .setSleepExempt(selectedTabId, exempt: exempt);
+          },
+        ),
         if (enableFindInPage)
           MenuItemButton(
             onPressed: () {
@@ -176,12 +213,16 @@ class TabMenu extends HookConsumerWidget {
             selectedTabId: selectedTabId,
             controller: controller,
             onToggle: () {
-              ref.read(desktopModeProvider(selectedTabId).notifier).toggle();
+              unawaited(
+                ref.read(desktopModeProvider(selectedTabId).notifier).toggle(),
+              );
             },
             onEnabledChanged: (value) {
-              ref
-                  .read(desktopModeProvider(selectedTabId).notifier)
-                  .enabled(value);
+              unawaited(
+                ref
+                    .read(desktopModeProvider(selectedTabId).notifier)
+                    .enabled(value),
+              );
             },
           ),
         if (enableFindInPage || enableReaderMode || enableDesktopMode)
@@ -229,38 +270,13 @@ class TabMenu extends HookConsumerWidget {
                 leadingIcon: const Icon(MdiIcons.tab),
                 child: Text(l10n.browser_cloneRegular),
                 onPressed: () async {
-                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                  final containerData = await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .getContainerForCopy(selectedTabId);
-
-                  final cloneUrl =
-                      ref.read(
-                        sandboxSourceUriForTabProvider(tabId: tabState.id),
-                      ) ??
-                      tabState.url;
-                  final tabId = (tabState.tabMode is! RegularTabMode)
-                      ? await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .addTab(
-                              tabMode: TabMode.regular,
-                              url: cloneUrl,
-                              containerSelection: containerData == null
-                                  ? const TabContainerSelection.unassigned()
-                                  : TabContainerSelection.specific(
-                                      containerData,
-                                    ),
-                              selectTab: false,
-                            )
-                      : await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .duplicateTab(
-                              selectTabId: selectedTabId,
-                              containerData: containerData,
-                              selectTab: false,
-                            );
-
-                  if (context.mounted) {
+                  final tabId = await cloneTabAs(
+                    context,
+                    ref.read,
+                    selectedTabId,
+                    TabMode.regular,
+                  );
+                  if (tabId != null && context.mounted) {
                     handleBackgroundTabOpened(context, ref, tabId);
                   }
                 },
@@ -272,38 +288,13 @@ class TabMenu extends HookConsumerWidget {
                 ),
                 child: Text(l10n.browser_clonePrivate),
                 onPressed: () async {
-                  final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                  final containerData = await ref
-                      .read(tabDataRepositoryProvider.notifier)
-                      .getContainerForCopy(selectedTabId);
-
-                  final cloneUrl =
-                      ref.read(
-                        sandboxSourceUriForTabProvider(tabId: tabState.id),
-                      ) ??
-                      tabState.url;
-                  final tabId = (tabState.tabMode is! PrivateTabMode)
-                      ? await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .addTab(
-                              url: cloneUrl,
-                              tabMode: TabMode.private,
-                              containerSelection: containerData == null
-                                  ? const TabContainerSelection.unassigned()
-                                  : TabContainerSelection.specific(
-                                      containerData,
-                                    ),
-                              selectTab: false,
-                            )
-                      : await ref
-                            .read(tabRepositoryProvider.notifier)
-                            .duplicateTab(
-                              selectTabId: selectedTabId,
-                              containerData: containerData,
-                              selectTab: false,
-                            );
-
-                  if (context.mounted) {
+                  final tabId = await cloneTabAs(
+                    context,
+                    ref.read,
+                    selectedTabId,
+                    TabMode.private,
+                  );
+                  if (tabId != null && context.mounted) {
                     handleBackgroundTabOpened(context, ref, tabId);
                   }
                 },
@@ -316,28 +307,13 @@ class TabMenu extends HookConsumerWidget {
                   ),
                   child: Text(l10n.browser_cloneIsolated),
                   onPressed: () async {
-                    final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                    final containerData = await ref
-                        .read(tabDataRepositoryProvider.notifier)
-                        .getContainerForCopy(selectedTabId);
-
-                    final cloneUrl =
-                        ref.read(
-                          sandboxSourceUriForTabProvider(tabId: tabState.id),
-                        ) ??
-                        tabState.url;
-                    final tabId = await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: cloneUrl,
-                          tabMode: TabMode.newIsolated(),
-                          containerSelection: containerData == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(containerData),
-                          selectTab: false,
-                        );
-
-                    if (context.mounted) {
+                    final tabId = await cloneTabAs(
+                      context,
+                      ref.read,
+                      selectedTabId,
+                      TabMode.newIsolated(),
+                    );
+                    if (tabId != null && context.mounted) {
                       handleBackgroundTabOpened(context, ref, tabId);
                     }
                   },
@@ -362,6 +338,7 @@ class TabMenu extends HookConsumerWidget {
                     final selection = await const ContainerSelectionRoute()
                         .push<ContainerSelectionResult?>(context);
 
+                    ContainerMoveResult? moved;
                     switch (selection) {
                       case ContainerSelectionSelected(:final containerId):
                         final containerData = await ref
@@ -373,7 +350,7 @@ class TabMenu extends HookConsumerWidget {
                             tabStateProvider(selectedTabId),
                           )!;
 
-                          await ref
+                          moved = await ref
                               .read(tabDataRepositoryProvider.notifier)
                               .assignContainer(tabState.id, containerData);
                         }
@@ -382,11 +359,14 @@ class TabMenu extends HookConsumerWidget {
                           tabStateProvider(selectedTabId),
                         )!;
 
-                        await ref
+                        moved = await ref
                             .read(tabDataRepositoryProvider.notifier)
                             .unassignContainer(tabState.id);
                       case null:
                         break;
+                    }
+                    if (moved != null && context.mounted) {
+                      showContainerMoveResult(context, moved);
                     }
                   },
                 ),
@@ -484,9 +464,12 @@ class TabMenu extends HookConsumerWidget {
                   onPressed: () async {
                     final tabState = ref.read(tabStateProvider(selectedTabId))!;
 
-                    await ref
+                    final moved = await ref
                         .read(tabDataRepositoryProvider.notifier)
                         .unassignContainer(tabState.id);
+                    if (context.mounted) {
+                      showContainerMoveResult(context, moved);
+                    }
                   },
                 ),
               ),
@@ -603,7 +586,6 @@ class TabMenu extends HookConsumerWidget {
           selectedTabId: selectedTabId,
           controller: controller,
         ),
-        if (enablePinTab) _PinTabMenuItem(selectedTabId: selectedTabId),
         // The actions run with this widget's context and ref: a menu item's
         // onPressed fires after the menu closed and unmounted the item.
         if (enableSplitView)
@@ -618,11 +600,10 @@ class TabMenu extends HookConsumerWidget {
             },
           ),
         if (enableCloseTab)
-          MenuItemButton(
-            onPressed: () =>
+          _CloseTabMenuItem(
+            tabId: selectedTabId,
+            onClose: () =>
                 closeTabWithConfirmationAndUndo(context, ref, selectedTabId),
-            leadingIcon: const Icon(MdiIcons.tabMinus),
-            child: Text(l10n.browser_menuCloseTab),
           ),
         if (enableReloadButton || enableNavigationButtons) const Divider(),
         if (enableReloadButton)
@@ -847,9 +828,11 @@ class _TranslatePageMenuItem extends ConsumerWidget {
         selectedTabId,
       ).select((s) => s?.readerableState.active ?? false),
     );
+    // No page to translate until the tab is woken.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
 
     // Hide when reader mode is active (Fenix-aligned)
-    if (readerActive || engineState?.isEngineSupported != true) {
+    if (readerActive || asleep || engineState?.isEngineSupported != true) {
       return const SizedBox.shrink();
     }
 
@@ -879,35 +862,244 @@ class _TranslatePageMenuItem extends ConsumerWidget {
   }
 }
 
-class _PinTabMenuItem extends ConsumerWidget {
-  final String selectedTabId;
+/// "Close tab", disabled for a locked tab (the Lock toggle at the top of the
+/// menu unlocks it).
+///
+/// Its own widget so the lock is followed only while the menu is open, not by
+/// every tab chip the menu is anchored to. [TabMenu] runs the close, since
+/// this widget is gone by the time a menu item's onPressed fires.
+class _CloseTabMenuItem extends HookConsumerWidget {
+  final String tabId;
+  final VoidCallback onClose;
 
-  const _PinTabMenuItem({required this.selectedTabId});
+  const _CloseTabMenuItem({required this.tabId, required this.onClose});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isLocked = ref.watch(isTabLockedProvider(tabId));
+
+    return MenuItemButton(
+      onPressed: isLocked ? null : onClose,
+      leadingIcon: const Icon(MdiIcons.tabMinus),
+      child: Text(AppLocalizations.of(context).browser_menuCloseTab),
+    );
+  }
+}
+
+/// Pin, Lock, Sleep and Keep awake as one row of labeled toggles, so the
+/// tab's state actions take one row of the menu instead of four and show its
+/// state before acting: a toggle that is on has a tonal indicator, and its
+/// label names what a tap does. Lock is never offered for a private tab;
+/// while an unlock did not finish it says Retry, in the error color. Keep
+/// awake appears only where it changes something ([isTabKeepAwakeOffered]).
+/// Sleep follows its feature, except that a tab held asleep keeps Wake (P5).
+/// The row brings its own divider, and draws nothing while it has no toggle.
+///
+/// Only decides what each toggle shows; [TabMenu] runs the actions, since
+/// this widget is gone once the menu closed.
+class _TabStateRow extends HookConsumerWidget {
+  final String tabId;
+  final bool showPin;
+  final bool showLock;
+  final void Function(bool pinned) onPinned;
+  final VoidCallback onToggleLock;
+  final VoidCallback onSleep;
+  final VoidCallback onWake;
+  final void Function(bool exempt) onKeepAwake;
+
+  const _TabStateRow({
+    required this.tabId,
+    required this.showPin,
+    required this.showLock,
+    required this.onPinned,
+    required this.onToggleLock,
+    required this.onSleep,
+    required this.onWake,
+    required this.onKeepAwake,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final isPinned = ref.watch(
       watchPinnedTabIdsProvider.select(
-        (v) => v.value?.contains(selectedTabId) ?? false,
+        (v) => v.value?.contains(tabId) ?? false,
+      ),
+    );
+    final isPrivate = ref.watch(
+      tabStateProvider(
+        tabId,
+      ).select((state) => state?.tabMode is PrivateTabMode),
+    );
+    final isLocked = ref.watch(isTabLockedProvider(tabId));
+    final unlockIncomplete = ref.watch(isTabUnlockIncompleteProvider(tabId));
+    final held = ref.watch(isTabSleepHeldProvider(tabId));
+    final exempt = ref.watch(isTabSleepExemptProvider(tabId));
+    final keepAwakeOffered = ref.watch(isTabKeepAwakeOfferedProvider(tabId));
+    final sleepShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.isFeatureShown(FeatureId.tabsSleep),
       ),
     );
 
-    return MenuItemButton(
-      closeOnActivate: false,
-      onPressed: () async {
-        await ref
-            .read(tabDataRepositoryProvider.notifier)
-            .setPinned(selectedTabId, pinned: !isPinned);
+    final toggles = [
+      if (showPin)
+        Expanded(
+          child: _TabStateToggle(
+            icon: MdiIcons.pin,
+            label: isPinned
+                ? l10n.browser_unpinTabShort
+                : l10n.browser_pinTabShort,
+            semanticsLabel: isPinned
+                ? l10n.browser_unpinTab
+                : l10n.browser_pinTab,
+            on: isPinned,
+            onTap: () => onPinned(!isPinned),
+          ),
+        ),
+      if (showLock && !isPrivate)
+        Expanded(
+          child: _TabStateToggle(
+            icon: unlockIncomplete
+                ? MdiIcons.lockAlertOutline
+                : MdiIcons.lockOutline,
+            label: unlockIncomplete
+                ? l10n.common_retry
+                : isLocked
+                ? l10n.browser_unlockTabShort
+                : l10n.browser_lockTabShort,
+            semanticsLabel: lockTabActionLabel(
+              l10n,
+              locked: isLocked,
+              unlockIncomplete: unlockIncomplete,
+            ),
+            on: isLocked,
+            error: unlockIncomplete,
+            onTap: onToggleLock,
+          ),
+        ),
+      if (sleepShown || held)
+        Expanded(
+          child: _TabStateToggle(
+            icon: MdiIcons.sleep,
+            label: held
+                ? l10n.browser_wakeTabShort
+                : l10n.browser_sleepTabShort,
+            semanticsLabel: sleepTabActionLabel(l10n, held: held),
+            on: held,
+            onTap: held ? onWake : onSleep,
+          ),
+        ),
+      if (keepAwakeOffered)
+        Expanded(
+          child: _TabStateToggle(
+            icon: MdiIcons.coffee,
+            label: exempt
+                ? l10n.browser_allowTabSleeping
+                : l10n.browser_keepTabAwake,
+            on: exempt,
+            onTap: () => onKeepAwake(!exempt),
+          ),
+        ),
+    ];
+    if (toggles.isEmpty) return const SizedBox.shrink();
 
-        if (context.mounted) {
-          MenuController.maybeOf(context)?.close();
-        }
-      },
-      leadingIcon: Icon(isPinned ? MdiIcons.pinOff : MdiIcons.pin),
-      child: Text(
-        isPinned
-            ? AppLocalizations.of(context).browser_unpinTab
-            : AppLocalizations.of(context).browser_pinTab,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: toggles,
+          ),
+        ),
+        const Divider(),
+      ],
+    );
+  }
+}
+
+/// One toggle of [_TabStateRow]: an icon over a short label, like the menu
+/// sheet's navigation row, with a tonal indicator behind the icon while
+/// [on]. [error] marks a state that needs a retry.
+class _TabStateToggle extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  /// The action's full name for screen readers ("Lock tab"), when [label]
+  /// is a shortened one.
+  final String? semanticsLabel;
+  final bool on;
+  final bool error;
+  final VoidCallback onTap;
+
+  const _TabStateToggle({
+    required this.icon,
+    required this.label,
+    this.semanticsLabel,
+    required this.on,
+    this.error = false,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final (indicator, iconColor, labelColor) = error
+        ? (
+            colorScheme.errorContainer,
+            colorScheme.onErrorContainer,
+            colorScheme.error,
+          )
+        : on
+        ? (
+            colorScheme.secondaryContainer,
+            colorScheme.onSecondaryContainer,
+            colorScheme.onSurface,
+          )
+        : (
+            Colors.transparent,
+            colorScheme.onSurface,
+            colorScheme.onSurfaceVariant,
+          );
+
+    return Semantics(
+      button: true,
+      label: semanticsLabel ?? label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: kThemeChangeDuration,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: indicator,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(icon, size: 24, color: iconColor),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: labelColor, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

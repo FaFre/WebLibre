@@ -45,6 +45,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/container_
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/compact_container_selector.dart';
 import 'package:weblibre/features/share_intent/domain/entities/intent_container_mode.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -247,19 +248,22 @@ class OpenSharedContent extends HookConsumerWidget {
           return;
         }
 
-        await ref
-            .read(tabRepositoryProvider.notifier)
-            .addTab(
-              url: parsedUrl,
-              tabMode: tabMode,
-              containerSelection: selectedContainer.value == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(selectedContainer.value!),
-              launchedFromIntent: true,
-              selectTab: true,
-            );
+        final tabId = await openUnlessContainerRefuses(
+          context,
+          () => ref
+              .read(tabRepositoryProvider.notifier)
+              .addTab(
+                url: parsedUrl,
+                tabMode: tabMode,
+                containerSelection: selectedContainer.value == null
+                    ? const TabContainerSelection.unassigned()
+                    : TabContainerSelection.specific(selectedContainer.value!),
+                launchedFromIntent: true,
+                selectTab: true,
+              ),
+        );
 
-        if (context.mounted) {
+        if (tabId != null && context.mounted) {
           context.pop(true);
         }
       }

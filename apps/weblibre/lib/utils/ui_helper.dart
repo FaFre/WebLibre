@@ -63,13 +63,21 @@ String _truncateForSnackBar(String message) {
   return '${message.substring(0, _kSnackBarErrorMaxChars).trimRight()}…';
 }
 
+/// Shows a failure. An [action] (such as Retry) is drawn in the error color
+/// unless it sets its own `textColor`.
 void showErrorMessage(
   BuildContext context,
   String message, {
   Duration duration = const Duration(seconds: 4),
   bool persist = false,
+  SnackBarAction? action,
 }) {
-  errorMessengerFor(context, duration: duration, persist: persist)(message);
+  errorMessengerFor(
+    context,
+    duration: duration,
+    persist: persist,
+    action: action,
+  )(message);
 }
 
 /// [showErrorMessage] for an outcome known only after an await, when
@@ -81,9 +89,19 @@ void Function(String message) errorMessengerFor(
   BuildContext context, {
   Duration duration = const Duration(seconds: 4),
   bool persist = false,
+  SnackBarAction? action,
 }) {
   final messenger = ScaffoldMessenger.of(context);
   final colorScheme = Theme.of(context).colorScheme;
+  // The default action color is meant for the inverse surface of an info
+  // snackbar and is hard to read on the error snackbar's background.
+  final themedAction = action == null || action.textColor != null
+      ? action
+      : SnackBarAction(
+          label: action.label,
+          onPressed: action.onPressed,
+          textColor: colorScheme.error,
+        );
 
   return (message) {
     if (!messenger.mounted) return;
@@ -96,6 +114,7 @@ void Function(String message) errorMessengerFor(
           style: TextStyle(color: colorScheme.error),
         ),
         backgroundColor: colorScheme.onError,
+        action: themedAction,
         duration: duration,
         persist: persist,
       ),
@@ -110,19 +129,50 @@ void showInfoMessage(
   bool persist = false,
   SnackBarAction? action,
 }) {
-  final snackBar = _createFloatingSnackBar(
-    content: Text(
-      _truncateForSnackBar(message),
-      maxLines: _kSnackBarMaxLines,
-      overflow: TextOverflow.ellipsis,
-    ),
-    action: action,
+  infoMessengerFor(
+    context,
     duration: duration,
     persist: persist,
-  );
-
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    action: action,
+  )(message);
 }
+
+/// [showInfoMessage] for an outcome known only after an await, like
+/// [errorMessengerFor].
+void Function(String message) infoMessengerFor(
+  BuildContext context, {
+  Duration duration = const Duration(seconds: 4),
+  bool persist = false,
+  SnackBarAction? action,
+}) {
+  final messenger = ScaffoldMessenger.of(context);
+
+  return (message) {
+    if (!messenger.mounted) return;
+    messenger.showSnackBar(
+      _createFloatingSnackBar(
+        content: Text(
+          _truncateForSnackBar(message),
+          maxLines: _kSnackBarMaxLines,
+          overflow: TextOverflow.ellipsis,
+        ),
+        action: action,
+        duration: duration,
+        persist: persist,
+      ),
+    );
+  };
+}
+
+/// Shows an outcome's [message]: with [showErrorMessage] when the operation
+/// [failed], with [showInfoMessage] when it was refused or only needs a hint.
+void showOutcomeMessage(
+  BuildContext context,
+  String message, {
+  required bool failed,
+}) => failed
+    ? showErrorMessage(context, message)
+    : showInfoMessage(context, message);
 
 /// Shows [message] with an Undo button. Completes with whether Undo was
 /// tapped before the snackbar went away, for whatever reason it went.

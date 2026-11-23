@@ -30,12 +30,15 @@ import 'package:weblibre/core/uuid.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/app_links/presentation/widgets/container_app_link_settings_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/controllers/container_topic.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/auto_freeze_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/container_isolation_required_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/discard_changes_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/screens/container_sites.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_freeze_l10n.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/color_picker_dialog.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/widgets/container_icon_picker_sheet.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/container_colors.dart';
@@ -49,6 +52,7 @@ import 'package:weblibre/features/wallpaper/domain/entities/wallpaper_override.d
 import 'package:weblibre/features/wallpaper/presentation/widgets/wallpaper_editor.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 enum _DialogMode { create, edit }
 
@@ -131,6 +135,9 @@ class ContainerEditScreen extends HookConsumerWidget {
     );
     final isPinned = useState(initialContainer.isPinned);
     final wallpaper = useState(initialContainer.metadata.wallpaper);
+    final autoFreezeAfterMinutes = useState(
+      initialContainer.metadata.autoFreezeAfterMinutes,
+    );
 
     final textController = useTextEditingController(
       text: initialContainer.name,
@@ -171,6 +178,10 @@ class ContainerEditScreen extends HookConsumerWidget {
                   isolatedAppLinkSettings.value &&
                   contextualIdentity.value != null,
               wallpaper: wallpaper.value,
+              // Freezing restricts the container's own context.
+              autoFreezeAfterMinutes: contextualIdentity.value != null
+                  ? autoFreezeAfterMinutes.value
+                  : null,
             )
             .sanitized(),
       );
@@ -195,7 +206,7 @@ class ContainerEditScreen extends HookConsumerWidget {
       // toggle: drop it when the container is no longer isolated (or lost its
       // contextId) so it can't linger orphaned in GeneralSettings.
       if (!container.metadata.isolatedAppLinkSettings) {
-        await removeContainerAppLinkOverrides(ref, {
+        await repository.removeAppLinkOverrides({
           initialContainer.metadata.contextualIdentity,
           container.metadata.contextualIdentity,
         });
@@ -204,7 +215,17 @@ class ContainerEditScreen extends HookConsumerWidget {
     }
 
     Future<void> saveAndClose() async {
-      final container = await saveContainer();
+      final ContainerData container;
+      try {
+        container = await saveContainer();
+      } on ContainerRefusedTabException catch (refusal) {
+        // Cookie isolation turned on or off while the container is frozen,
+        // or being deleted (D19): nothing was saved, and the edits stay.
+        if (context.mounted) {
+          ui_helper.showInfoMessage(context, refusal.describe(l10n));
+        }
+        return;
+      }
       if (context.mounted) {
         context.pop(container);
       }
@@ -703,6 +724,51 @@ class ContainerEditScreen extends HookConsumerWidget {
                                     clearDataOnExit.value = value;
                                   }
                                 : null,
+                          ),
+                        ),
+                        // Automatic freeze (`container.freeze`, phase C2):
+                        // left out while hidden, when it does not apply
+                        // either (H1). The container keeps its value for when
+                        // the feature is shown again.
+                        HiddenFeatureGate.feature(
+                          FeatureId.containerFreeze,
+                          omitWhenHidden: true,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Divider(height: 1, indent: 56),
+                              explainWhenLocked(
+                                ListTile(
+                                  leading: const Icon(MdiIcons.pause),
+                                  title: Text(l10n.tabs_autoFreezeTitle),
+                                  subtitle: Text(
+                                    isIsolated
+                                        ? autoFreezeSummary(
+                                            l10n,
+                                            autoFreezeAfterMinutes.value,
+                                          )
+                                        : l10n.tabs_requiresCookieIsolation,
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  enabled: isIsolated,
+                                  onTap: isIsolated
+                                      ? () async {
+                                          final choice =
+                                              await showAutoFreezeDialog(
+                                                context,
+                                                current: autoFreezeAfterMinutes
+                                                    .value,
+                                              );
+                                          if (choice == null) return;
+                                          autoFreezeAfterMinutes.value =
+                                              choice == autoFreezeOff
+                                              ? null
+                                              : choice;
+                                        }
+                                      : null,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         // Expert options (`container.strict_mode`,

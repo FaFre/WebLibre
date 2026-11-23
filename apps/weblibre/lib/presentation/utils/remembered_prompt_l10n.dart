@@ -38,6 +38,9 @@ extension RememberedPromptL10n on RememberedPrompt {
       ),
       RememberedPrompt.startProxyConnection =>
         l10n.rememberedPrompt_startProxyConnectionLabel,
+      RememberedPrompt.sleepTabs => l10n.rememberedPrompt_sleepTabsLabel,
+      RememberedPrompt.freezeContainer =>
+        l10n.rememberedPrompt_freezeContainerLabel,
     };
   }
 
@@ -55,6 +58,9 @@ extension RememberedPromptL10n on RememberedPrompt {
       ),
       RememberedPrompt.startProxyConnection =>
         l10n.rememberedPrompt_startProxyConnectionDescription,
+      RememberedPrompt.sleepTabs => l10n.rememberedPrompt_sleepTabsDescription,
+      RememberedPrompt.freezeContainer =>
+        l10n.rememberedPrompt_freezeContainerDescription,
     };
   }
 
@@ -71,6 +77,9 @@ extension RememberedPromptL10n on RememberedPrompt {
       RememberedPrompt.startTor => l10n.rememberedPrompt_startTorKeywords,
       RememberedPrompt.startProxyConnection =>
         l10n.rememberedPrompt_startProxyConnectionKeywords,
+      RememberedPrompt.sleepTabs => l10n.rememberedPrompt_sleepTabsKeywords,
+      RememberedPrompt.freezeContainer =>
+        l10n.rememberedPrompt_freezeContainerKeywords,
     };
   }
 }

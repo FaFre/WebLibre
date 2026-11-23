@@ -6,6 +6,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/features/web_search/domain/services/capture_server.dart';
 
@@ -79,22 +80,26 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
     required WebSearchOpenTarget target,
   }) async {
     final split = _splitDestination(context, ref, target);
-    final tabId = await ref
-        .read(tabRepositoryProvider.notifier)
-        .addTab(
-          url: uri,
-          tabMode: target.tabMode,
-          parentId: target.parentId,
-          onBackBehavior: ReturnToSearchTabBackBehavior(
-            tabType: target.tabMode.toTabType(),
+    final tabId = await openUnlessContainerRefuses(
+      context,
+      () => ref
+          .read(tabRepositoryProvider.notifier)
+          .addTab(
+            url: uri,
+            tabMode: target.tabMode,
+            parentId: target.parentId,
+            onBackBehavior: ReturnToSearchTabBackBehavior(
+              tabType: target.tabMode.toTabType(),
+            ),
+            selectTab: split == null,
+            containerSelection:
+                split?.containerSelection ?? target.containerSelection!,
+            // A result picked in the search screen, not a link from the
+            // parent's page.
+            parentIsReferrer: false,
           ),
-          selectTab: split == null,
-          containerSelection:
-              split?.containerSelection ?? target.containerSelection!,
-          // A result picked in the search screen, not a link from the
-          // parent's page.
-          parentIsReferrer: false,
-        );
+    );
+    if (tabId == null) return;
 
     if (split != null) {
       await split.present(tabId);
@@ -123,22 +128,40 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
     // before our interceptor can redirect, and a cancel falls back to
     // loading the live site. Load the loopback capture URL directly.
     final split = _splitDestination(context, ref, target);
-    final captureUrl = await ref.read(captureServerProvider).publish(captureId);
+    final server = ref.read(captureServerProvider);
+    // Another tab may show this capture already; only an entry published here
+    // is revoked again when no tab comes of it.
+    final publishedHere = !server.isPublished(captureId);
+    final captureUrl = await server.publish(captureId);
+    void revokeUnused() {
+      if (publishedHere) server.revoke(captureId);
+    }
 
-    final tabId = await ref
-        .read(tabRepositoryProvider.notifier)
-        .addTab(
-          url: captureUrl,
-          tabMode: target.tabMode,
-          parentId: target.parentId,
-          containerSelection:
-              split?.containerSelection ?? target.containerSelection!,
-          onBackBehavior: ReturnToSearchTabBackBehavior(
-            tabType: target.tabMode.toTabType(),
+    if (!context.mounted) {
+      revokeUnused();
+      return;
+    }
+    final tabId = await openUnlessContainerRefuses(
+      context,
+      () => ref
+          .read(tabRepositoryProvider.notifier)
+          .addTab(
+            url: captureUrl,
+            tabMode: target.tabMode,
+            parentId: target.parentId,
+            containerSelection:
+                split?.containerSelection ?? target.containerSelection!,
+            onBackBehavior: ReturnToSearchTabBackBehavior(
+              tabType: target.tabMode.toTabType(),
+            ),
+            selectTab: split == null,
+            startLoading: false,
           ),
-          selectTab: split == null,
-          startLoading: false,
-        );
+    );
+    if (tabId == null) {
+      revokeUnused();
+      return;
+    }
 
     // Always register the capture root — even for PDF / PNG. The capture_tab
     // DAO row is what (a) tells Kotlin's middleware to treat this tab as a

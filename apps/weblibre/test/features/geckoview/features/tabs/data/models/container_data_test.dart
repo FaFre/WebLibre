@@ -70,6 +70,46 @@ void main() {
     });
   });
 
+  group('ContainerMetadata autoFreezeAfterMinutes invariant', () {
+    test('is kept with a contextId and round-trips through JSON', () {
+      final metadata = ContainerMetadata.withDefaults(
+        contextualIdentity: 'work',
+        autoFreezeAfterMinutes: 30,
+      );
+
+      expect(metadata.autoFreezeAfterMinutes, 30);
+      expect(metadata.sanitized().autoFreezeAfterMinutes, 30);
+      expect(
+        ContainerMetadata.fromJson(metadata.toJson()).autoFreezeAfterMinutes,
+        30,
+      );
+    });
+
+    test('is normalized away without a contextId (read + sanitized)', () {
+      final metadata = ContainerMetadata.withDefaults(
+        autoFreezeAfterMinutes: 30,
+      );
+      expect(metadata.autoFreezeAfterMinutes, isNull);
+
+      final restored = ContainerMetadata.fromJson({
+        ...metadata.toJson(),
+        'autoFreezeAfterMinutes': 30,
+      });
+      expect(restored.autoFreezeAfterMinutes, isNull);
+      expect(
+        ContainerMetadata.withDefaults(contextualIdentity: 'work')
+            .copyWith(autoFreezeAfterMinutes: 30, contextualIdentity: null)
+            .sanitized()
+            .autoFreezeAfterMinutes,
+        isNull,
+      );
+    });
+
+    test('is off by default', () {
+      expect(ContainerMetadata.withDefaults().autoFreezeAfterMinutes, isNull);
+    });
+  });
+
   group('ContainerMetadata icon serialization', () {
     test('stores MDI icon names', () {
       final metadata = ContainerMetadata.withDefaults(

@@ -85,6 +85,12 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings childTabPlacement(ChildTabPlacement childTabPlacement);
 
+  GeneralSettings autoSleepTabs(bool autoSleepTabs);
+
+  GeneralSettings autoSleepIdleMinutes(int autoSleepIdleMinutes);
+
+  GeneralSettings residentTabLimit(int? residentTabLimit);
+
   GeneralSettings tabIntentOpenSetting(
     TabIntentOpenSetting tabIntentOpenSetting,
   );
@@ -301,6 +307,9 @@ abstract class _$GeneralSettingsCWProxy {
     TabDirection tabListDirection,
     TabDirection tabBarDirection,
     ChildTabPlacement childTabPlacement,
+    bool autoSleepTabs,
+    int autoSleepIdleMinutes,
+    int? residentTabLimit,
     TabIntentOpenSetting tabIntentOpenSetting,
     BookmarkOpenSetting bookmarkOpenSetting,
     BackgroundTabOpenAction backgroundTabOpenAction,
@@ -516,6 +525,18 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings childTabPlacement(ChildTabPlacement childTabPlacement) =>
       call(childTabPlacement: childTabPlacement);
+
+  @override
+  GeneralSettings autoSleepTabs(bool autoSleepTabs) =>
+      call(autoSleepTabs: autoSleepTabs);
+
+  @override
+  GeneralSettings autoSleepIdleMinutes(int autoSleepIdleMinutes) =>
+      call(autoSleepIdleMinutes: autoSleepIdleMinutes);
+
+  @override
+  GeneralSettings residentTabLimit(int? residentTabLimit) =>
+      call(residentTabLimit: residentTabLimit);
 
   @override
   GeneralSettings tabIntentOpenSetting(
@@ -867,6 +888,9 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? tabListDirection = const $CopyWithPlaceholder(),
     Object? tabBarDirection = const $CopyWithPlaceholder(),
     Object? childTabPlacement = const $CopyWithPlaceholder(),
+    Object? autoSleepTabs = const $CopyWithPlaceholder(),
+    Object? autoSleepIdleMinutes = const $CopyWithPlaceholder(),
+    Object? residentTabLimit = const $CopyWithPlaceholder(),
     Object? tabIntentOpenSetting = const $CopyWithPlaceholder(),
     Object? bookmarkOpenSetting = const $CopyWithPlaceholder(),
     Object? backgroundTabOpenAction = const $CopyWithPlaceholder(),
@@ -1126,6 +1150,21 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.childTabPlacement
           // ignore: cast_nullable_to_non_nullable
           : childTabPlacement as ChildTabPlacement,
+      autoSleepTabs:
+          autoSleepTabs == const $CopyWithPlaceholder() || autoSleepTabs == null
+          ? _value.autoSleepTabs
+          // ignore: cast_nullable_to_non_nullable
+          : autoSleepTabs as bool,
+      autoSleepIdleMinutes:
+          autoSleepIdleMinutes == const $CopyWithPlaceholder() ||
+              autoSleepIdleMinutes == null
+          ? _value.autoSleepIdleMinutes
+          // ignore: cast_nullable_to_non_nullable
+          : autoSleepIdleMinutes as int,
+      residentTabLimit: residentTabLimit == const $CopyWithPlaceholder()
+          ? _value.residentTabLimit
+          // ignore: cast_nullable_to_non_nullable
+          : residentTabLimit as int?,
       tabIntentOpenSetting:
           tabIntentOpenSetting == const $CopyWithPlaceholder() ||
               tabIntentOpenSetting == null
@@ -1617,6 +1656,9 @@ GeneralSettings _$GeneralSettingsFromJson(
     _$ChildTabPlacementEnumMap,
     json['childTabPlacement'],
   ),
+  autoSleepTabs: json['autoSleepTabs'] as bool?,
+  autoSleepIdleMinutes: (json['autoSleepIdleMinutes'] as num?)?.toInt(),
+  residentTabLimit: (json['residentTabLimit'] as num?)?.toInt(),
   tabIntentOpenSetting: $enumDecodeNullable(
     _$TabIntentOpenSettingEnumMap,
     json['tabIntentOpenSetting'],
@@ -1802,6 +1844,9 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'tabListDirection': _$TabDirectionEnumMap[instance.tabListDirection]!,
   'tabBarDirection': _$TabDirectionEnumMap[instance.tabBarDirection]!,
   'childTabPlacement': _$ChildTabPlacementEnumMap[instance.childTabPlacement]!,
+  'autoSleepTabs': instance.autoSleepTabs,
+  'autoSleepIdleMinutes': instance.autoSleepIdleMinutes,
+  'residentTabLimit': instance.residentTabLimit,
   'tabIntentOpenSetting':
       _$TabIntentOpenSettingEnumMap[instance.tabIntentOpenSetting]!,
   'bookmarkOpenSetting':
@@ -2034,6 +2079,8 @@ const _$RememberedPromptEnumMap = {
   RememberedPrompt.closeAllTabs: 'closeAllTabs',
   RememberedPrompt.startTor: 'startTor',
   RememberedPrompt.startProxyConnection: 'startProxyConnection',
+  RememberedPrompt.sleepTabs: 'sleepTabs',
+  RememberedPrompt.freezeContainer: 'freezeContainer',
 };
 
 const _$VisibilitySwitchEnumMap = {

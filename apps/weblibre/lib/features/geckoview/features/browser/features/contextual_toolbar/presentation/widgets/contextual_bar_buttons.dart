@@ -24,11 +24,11 @@ import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_update/presentation/widgets/update_menu_row.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/browser_menu_sheet.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/clone_tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/share_bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tabs_action_button.dart';
@@ -36,9 +36,9 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/widget
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart'
     as tab_data;
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
 
@@ -308,15 +308,20 @@ Future<void> _cloneCurrentTabMode(
       .read(tab_data.tabDataRepositoryProvider.notifier)
       .getContainerForCopy(selectedTabId);
 
-  final tabId = await ref
-      .read(tabRepositoryProvider.notifier)
-      .duplicateTab(
-        selectTabId: selectedTabId,
-        containerData: containerData,
-        selectTab: false,
-      );
+  if (!context.mounted) return;
 
-  if (context.mounted) {
+  final tabId = await openUnlessContainerRefuses(
+    context,
+    () => ref
+        .read(tabRepositoryProvider.notifier)
+        .duplicateTab(
+          selectTabId: selectedTabId,
+          containerData: containerData,
+          selectTab: false,
+        ),
+  );
+
+  if (tabId != null && context.mounted) {
     handleBackgroundTabOpened(context, ref, tabId);
   }
 }
@@ -356,62 +361,8 @@ Future<void> _cloneTabAsMode(
   String selectedTabId, {
   required TabMode mode,
 }) async {
-  final tabState = ref.read(tabStateProvider(selectedTabId));
-  if (tabState == null) return;
-
-  // Sandbox-captured tab: clone the canonical source URL so the new tab
-  // either re-captures or loads the real site — never the loopback loader.
-  final cloneUrl =
-      ref.read(sandboxSourceUriForTabProvider(tabId: tabState.id)) ??
-      tabState.url;
-
-  final containerData = await ref
-      .read(tab_data.tabDataRepositoryProvider.notifier)
-      .getContainerForCopy(selectedTabId);
-  final repo = ref.read(tabRepositoryProvider.notifier);
-
-  final tabId = switch (mode) {
-    RegularTabMode() =>
-      tabState.tabMode is RegularTabMode
-          ? await repo.duplicateTab(
-              selectTabId: selectedTabId,
-              containerData: containerData,
-              selectTab: false,
-            )
-          : await repo.addTab(
-              tabMode: TabMode.regular,
-              url: cloneUrl,
-              containerSelection: containerData == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(containerData),
-              selectTab: false,
-            ),
-    PrivateTabMode() =>
-      tabState.tabMode is PrivateTabMode
-          ? await repo.duplicateTab(
-              selectTabId: selectedTabId,
-              containerData: containerData,
-              selectTab: false,
-            )
-          : await repo.addTab(
-              tabMode: TabMode.private,
-              url: cloneUrl,
-              containerSelection: containerData == null
-                  ? const TabContainerSelection.unassigned()
-                  : TabContainerSelection.specific(containerData),
-              selectTab: false,
-            ),
-    IsolatedTabMode() => await repo.addTab(
-      tabMode: TabMode.newIsolated(),
-      url: cloneUrl,
-      containerSelection: containerData == null
-          ? const TabContainerSelection.unassigned()
-          : TabContainerSelection.specific(containerData),
-      selectTab: false,
-    ),
-  };
-
-  if (context.mounted) {
+  final tabId = await cloneTabAs(context, ref.read, selectedTabId, mode);
+  if (tabId != null && context.mounted) {
     handleBackgroundTabOpened(context, ref, tabId);
   }
 }

@@ -1,0 +1,122 @@
+/*
+ * Copyright (c) 2024-2026 Fabian Freund.
+ *
+ * This file is part of WebLibre
+ * (see https://weblibre.eu).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/tab_badge_frame.dart';
+
+/// The sleep glyph on a tab the user put to sleep, and the pause glyph on a
+/// tab of a frozen container (tab tray, tab list, quick switcher); both when
+/// both apply. Takes no space for any other tab.
+///
+/// Shown for as long as the tab is asleep, whether or not the sleep feature is
+/// shown: hiding a feature never hides something that is in force (P5). Never
+/// the snowflake, which marks isolated tabs.
+class TabSleepBadge extends HookConsumerWidget {
+  final String tabId;
+  final double size;
+  final EdgeInsetsGeometry padding;
+  final bool withBackground;
+
+  const TabSleepBadge({
+    required this.tabId,
+    this.size = 14,
+    this.padding = EdgeInsets.zero,
+    this.withBackground = false,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isAsleep = ref.watch(isTabAsleepProvider(tabId));
+    final isFrozen = ref.watch(isTabContextFrozenProvider(tabId));
+    if (!isAsleep && !isFrozen) return const SizedBox.shrink();
+
+    final l10n = AppLocalizations.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    // Both when both apply: Resume keeps the tab's own sleep (D26), so the
+    // two states are separate and each is named (7.2).
+    final icons = [
+      if (isFrozen)
+        Icon(
+          MdiIcons.pause,
+          size: size,
+          color: colorScheme.onSurfaceVariant,
+          semanticLabel: l10n.browser_containerFrozenLabel,
+        ),
+      if (isAsleep)
+        Icon(
+          MdiIcons.sleep,
+          size: size,
+          color: colorScheme.onSurfaceVariant,
+          semanticLabel: l10n.browser_tabAsleepLabel,
+        ),
+    ];
+    final content = icons.length == 1
+        ? icons.single
+        : Row(mainAxisSize: MainAxisSize.min, children: icons);
+
+    return TabBadgeFrame(
+      padding: padding,
+      withBackground: withBackground,
+      child: content,
+    );
+  }
+}
+
+/// The "Keep awake" glyph (D30) on a tab automatic sleep and automatic
+/// freeze leave alone. Shown only while automatic sleep is on or the tab's
+/// container freezes automatically, where it changes something; takes no
+/// space otherwise.
+class TabKeepAwakeBadge extends HookConsumerWidget {
+  final String tabId;
+  final double size;
+  final EdgeInsetsGeometry padding;
+  final bool withBackground;
+
+  const TabKeepAwakeBadge({
+    required this.tabId,
+    this.size = 14,
+    this.padding = EdgeInsets.zero,
+    this.withBackground = false,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shown = ref.watch(isTabKeptAwakeShownProvider(tabId));
+    if (!shown) return const SizedBox.shrink();
+
+    final icon = Icon(
+      MdiIcons.coffee,
+      size: size,
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      semanticLabel: AppLocalizations.of(context).browser_tabKeptAwakeLabel,
+    );
+    return TabBadgeFrame(
+      padding: padding,
+      withBackground: withBackground,
+      child: icon,
+    );
+  }
+}

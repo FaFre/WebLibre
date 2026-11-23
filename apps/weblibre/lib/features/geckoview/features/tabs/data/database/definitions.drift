@@ -34,6 +34,16 @@ CREATE TABLE tab(
   tab_mode ENUM(TabModeDbValue) NOT NULL DEFAULT 0,
   isolation_context_id TEXT,
   is_pinned BOOL NOT NULL DEFAULT 0,
+  -- What the user asked for with "Lock tab": the tab refuses single closes and
+  -- is skipped by bulk ones. Native keeps its own copy (TabCloseProtection),
+  -- which is always a superset of this column; see TabRepository.setTabLocked.
+  -- A private tab can never be locked. Column-level, so adding it is a plain
+  -- ADD COLUMN without rebuilding the table.
+  is_locked BOOL NOT NULL DEFAULT 0 CHECK (is_locked = 0 OR tab_mode != 1),
+  -- "Keep awake" (D30): automatic sleep never unloads this tab, and automatic
+  -- freeze skips its container while it is a member. Manual sleep and freeze
+  -- still apply.
+  sleep_exempt BOOL NOT NULL DEFAULT 0,
   is_probably_readerable BOOL,
   extracted_content_markdown TEXT,
   extracted_content_plain TEXT,
@@ -94,6 +104,14 @@ CREATE INDEX idx_tab_timestamp ON tab(timestamp DESC, id DESC);
 -- and order by `order_key`. `idx_tab_parent_container` cannot serve either:
 -- `container_id` is not its leftmost column.
 CREATE INDEX idx_tab_container_order ON tab(container_id, order_key);
+
+-- `getLockedTabIds` and `getSleepExemptTabIds` back live streams that always
+-- have a listener, so they re-run on every write to `tab`. Without an index
+-- each run reads every row, and on a database that gained these columns by
+-- ADD COLUMN they sit after the page text, so reaching them walks each row's
+-- overflow pages. Covering, so the streams never read a row.
+CREATE INDEX idx_tab_locked ON tab(is_locked, id);
+CREATE INDEX idx_tab_sleep_exempt ON tab(sleep_exempt, id);
 
 CREATE TABLE capture_tab (
   tab_id TEXT NOT NULL PRIMARY KEY REFERENCES tab (id) ON DELETE CASCADE,
@@ -1299,3 +1317,25 @@ isolatedContextContainerPairs:
   WHERE t.tab_mode = 2
     AND t.isolation_context_id IS NOT NULL
     AND t.container_id IS NOT NULL;
+
+-- Every isolation context container :containerId's isolated tabs use,
+-- including any a tab outside it uses too.
+isolationContextIdsInContainer:
+  SELECT DISTINCT isolation_context_id
+  FROM tab
+  WHERE container_id = :containerId
+    AND isolation_context_id IS NOT NULL;
+
+-- The isolation contexts of container :containerId's isolated tabs that no
+-- tab outside it uses. Every tab running in one belongs to the container,
+-- including a window one of them opened a moment ago, before it has a row.
+isolationContextIdsOnlyInContainer:
+  SELECT DISTINCT t.isolation_context_id
+  FROM tab t
+  WHERE t.container_id = :containerId
+    AND t.isolation_context_id IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM tab o
+      WHERE o.isolation_context_id = t.isolation_context_id
+        AND (o.container_id IS NULL OR o.container_id != :containerId)
+    );

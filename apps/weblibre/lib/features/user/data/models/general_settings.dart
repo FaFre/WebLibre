@@ -472,6 +472,19 @@ class GeneralSettings with FastEquatable {
   /// Where a tab opened from another tab is inserted. See
   /// [ChildTabPlacement]; the opener is recorded as the parent either way.
   final ChildTabPlacement childTabPlacement;
+
+  /// Automatic tab sleep (5.9 of the tab lock and freeze plan): tabs off
+  /// screen for [autoSleepIdleMinutes], or the oldest past
+  /// [residentTabLimit], are unloaded while WebLibre is open. Off on every
+  /// preset (D12).
+  final bool autoSleepTabs;
+
+  /// How long a tab is off screen before automatic sleep unloads it.
+  final int autoSleepIdleMinutes;
+
+  /// With automatic sleep on, how many tabs may keep their page loaded before
+  /// the ones off screen longest are unloaded; null for no limit.
+  final int? residentTabLimit;
   final TabIntentOpenSetting tabIntentOpenSetting;
 
   /// Determines what happens when a bookmark is tapped. See
@@ -752,6 +765,9 @@ class GeneralSettings with FastEquatable {
     required this.tabListDirection,
     required this.tabBarDirection,
     required this.childTabPlacement,
+    required this.autoSleepTabs,
+    required this.autoSleepIdleMinutes,
+    required this.residentTabLimit,
     required this.tabIntentOpenSetting,
     required this.bookmarkOpenSetting,
     required this.backgroundTabOpenAction,
@@ -857,6 +873,9 @@ class GeneralSettings with FastEquatable {
     TabDirection? tabListDirection,
     TabDirection? tabBarDirection,
     ChildTabPlacement? childTabPlacement,
+    bool? autoSleepTabs,
+    int? autoSleepIdleMinutes,
+    this.residentTabLimit,
     TabIntentOpenSetting? tabIntentOpenSetting,
     BookmarkOpenSetting? bookmarkOpenSetting,
     BackgroundTabOpenAction? backgroundTabOpenAction,
@@ -971,6 +990,8 @@ class GeneralSettings with FastEquatable {
        tabListDirection = tabListDirection ?? TabDirection.newestFirst,
        tabBarDirection = tabBarDirection ?? TabDirection.newestFirst,
        childTabPlacement = childTabPlacement ?? ChildTabPlacement.afterParent,
+       autoSleepTabs = autoSleepTabs ?? false,
+       autoSleepIdleMinutes = autoSleepIdleMinutes ?? 30,
        tabIntentOpenSetting = tabIntentOpenSetting ?? TabIntentOpenSetting.ask,
        bookmarkOpenSetting = bookmarkOpenSetting ?? BookmarkOpenSetting.ask,
        backgroundTabOpenAction =
@@ -1192,6 +1213,16 @@ class GeneralSettings with FastEquatable {
       settings = settings.copyWith(
         unmountGeckoViewOffRoute: defaults.unmountGeckoViewOffRoute,
       );
+    }
+    if (!isFeatureShown(FeatureId.tabsSleep)) {
+      settings = settings
+          .copyWith(
+            autoSleepTabs: defaults.autoSleepTabs,
+            autoSleepIdleMinutes: defaults.autoSleepIdleMinutes,
+          )
+          // Through the field: copyWith() ignores null, the limit's default.
+          .copyWith
+          .residentTabLimit(defaults.residentTabLimit);
     }
 
     return settings;
@@ -1536,6 +1567,9 @@ class GeneralSettings with FastEquatable {
     tabListDirection,
     tabBarDirection,
     childTabPlacement,
+    autoSleepTabs,
+    autoSleepIdleMinutes,
+    residentTabLimit,
     tabIntentOpenSetting,
     bookmarkOpenSetting,
     backgroundTabOpenAction,

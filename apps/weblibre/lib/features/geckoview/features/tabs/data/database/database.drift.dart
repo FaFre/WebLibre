@@ -63,6 +63,8 @@ abstract class $TabDatabase extends i0.GeneratedDatabase {
     i1.idxTabParentContainer,
     i1.idxTabTimestamp,
     i1.idxTabContainerOrder,
+    i1.idxTabLocked,
+    i1.idxTabSleepExempt,
     captureTab,
     i1.idxCaptureTabCaptureId,
     tabFts,

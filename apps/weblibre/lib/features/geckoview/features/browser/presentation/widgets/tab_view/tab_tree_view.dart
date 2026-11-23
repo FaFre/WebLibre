@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart';
@@ -39,7 +40,6 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_enti
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab_search.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 class _TabTreePreview extends HookConsumerWidget {
   final TabTreeEntity entity;
@@ -150,15 +150,15 @@ class _TabTreePreview extends HookConsumerWidget {
                   return;
                 }
 
-                await ref
+                final result = await ref
                     .read(tabRepositoryProvider.notifier)
                     .closeTabs(tabs.keys.toList());
 
                 if (context.mounted) {
-                  ui_helper.showTabUndoClose(
+                  showTabCloseResult(
                     context,
+                    result,
                     ref.read(tabRepositoryProvider.notifier).undoClose,
-                    count: tabs.length,
                   );
                 }
               },

@@ -49,6 +49,7 @@ class SettingsSnapshot {
     required this.menu,
     required this.strictContainers,
     required this.appLinkContainers,
+    required this.autoFreezeContainers,
   });
 
   final GeneralSettings general;
@@ -64,6 +65,10 @@ class SettingsSnapshot {
 
   /// Whether any container has its own app link settings on.
   final bool appLinkContainers;
+
+  /// Whether any container freezes automatically (phase C2 of the tab lock
+  /// and freeze plan).
+  final bool autoFreezeContainers;
 
   /// This snapshot with [general] in place of its general settings: what
   /// changing the visibility switches to [general]'s would make of it. With
@@ -82,6 +87,7 @@ class SettingsSnapshot {
     menu: menu,
     strictContainers: strictContainers,
     appLinkContainers: appLinkContainers,
+    autoFreezeContainers: autoFreezeContainers,
   );
 
   /// The snapshot as it applies with [general]'s visibility switches.
@@ -112,6 +118,8 @@ class SettingsSnapshot {
           strictContainers && isShown(FeatureId.containerStrictMode),
       appLinkContainers:
           appLinkContainers && isShown(FeatureId.containerAppLinks),
+      autoFreezeContainers:
+          autoFreezeContainers && isShown(FeatureId.containerFreeze),
     );
   }
 
@@ -150,6 +158,7 @@ class SettingsSnapshot {
     menu: defaultMenuLayout,
     strictContainers: false,
     appLinkContainers: false,
+    autoFreezeContainers: false,
   );
 }
 
@@ -262,6 +271,8 @@ enum HiddenSetting {
   sequentialTabNavigation(FeatureId.containerCore, _sequential),
   strictMode(FeatureId.containerStrictMode, _strict),
   containerAppLinks(FeatureId.containerAppLinks, _containerAppLinks),
+  containerAutoFreeze(FeatureId.containerFreeze, _containerAutoFreeze),
+  autoSleepTabs(FeatureId.tabsSleep, _autoSleep),
   childTabs(FeatureId.tabsChildTabCreation, _childTabs),
   hierarchyGlyphs(FeatureId.tabsHierarchyDisplay, _hierarchyGlyphs),
   childTabPlacement(FeatureId.tabsChildTabCreation, _childTabPlacement),
@@ -343,6 +354,11 @@ Object? _sequential(SettingsSnapshot s) =>
     s.general.sequentialTabNavigationCrossContainers;
 Object? _strict(SettingsSnapshot s) => s.strictContainers;
 Object? _containerAppLinks(SettingsSnapshot s) => s.appLinkContainers;
+Object? _containerAutoFreeze(SettingsSnapshot s) => s.autoFreezeContainers;
+// The idle time and the resident limit apply only with automatic sleep on.
+Object? _autoSleep(SettingsSnapshot s) => s.general.autoSleepTabs
+    ? [s.general.autoSleepIdleMinutes, s.general.residentTabLimit]
+    : null;
 Object? _childTabs(SettingsSnapshot s) => s.general.createChildTabsOption;
 Object? _hierarchyGlyphs(SettingsSnapshot s) =>
     s.general.quickTabSwitcherHierarchyGlyphs;

@@ -2821,7 +2821,7 @@
   "settings_autoClearHistorySubtitle": "自动删除早于所选时间段的浏览历史记录",
   "settings_autoClearUnassignedTabsTitle": "自动清除未分配的标签页",
   "settings_autoClearUnassignedTabsKeywords": "清理标签页",
-  "settings_autoClearUnassignedTabsSubtitle": "自动关闭早于所选时间段的未分配标签页",
+  "settings_autoClearUnassignedTabsSubtitle": "自动关闭早于所选时间段的未分配标签页。已锁定的标签页会保留。",
   "settings_durationNever": "从不",
   "settings_duration1Day": "1 天",
   "settings_duration3Days": "3 天",

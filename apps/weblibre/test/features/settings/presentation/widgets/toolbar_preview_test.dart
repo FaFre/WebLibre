@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,6 +26,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/settings/presentation/widgets/layout_part.dart';
 import 'package:weblibre/features/settings/presentation/widgets/toolbar_preview.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -56,6 +58,8 @@ Future<List<FlutterErrorDetails>> _pumpPreview(
           const AsyncData(OnboardingRepository.targetRevision),
         ),
         generalSettingsWithDefaultsProvider.overrideWith((ref) => settings),
+        // The sample tabs' "Keep awake" glyph would read the containers.
+        autoFreezingContainerIdsProvider.overrideWithValue(EquatableValue({})),
         toolbarButtonConfigsProvider.overrideWith(
           (ref, location) =>
               Stream.value(defaultToolbarButtonConfigsFor(location).value),
@@ -374,6 +378,10 @@ void main() {
                 ),
                 generalSettingsWithDefaultsProvider.overrideWith(
                   (ref) => settings,
+                ),
+                // The sample tabs' "Keep awake" glyph would read the containers.
+                autoFreezingContainerIdsProvider.overrideWithValue(
+                  EquatableValue({}),
                 ),
                 toolbarButtonConfigsProvider.overrideWith(
                   (ref, location) => Stream.value(

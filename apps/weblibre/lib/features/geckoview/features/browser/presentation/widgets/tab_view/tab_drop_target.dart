@@ -26,6 +26,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/data/models/drag_data.dart';
 import 'package:weblibre/domain/feature_policy/feature_policy.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
@@ -149,8 +150,10 @@ class TabDropTarget extends HookConsumerWidget {
     ).push<ContainerData?>(context);
 
     if (result != null) {
-      await tabRepo.assignContainer(draggedTabId, result);
-      await tabRepo.assignContainer(targetTabId, result);
+      final results = {
+        for (final tabId in [draggedTabId, targetTabId])
+          await tabRepo.assignContainer(tabId, result),
+      };
 
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);
@@ -160,6 +163,10 @@ class TabDropTarget extends HookConsumerWidget {
             result.name ?? l10n.browser_newContainerFallback,
           ),
         );
+        // Then why a tab is not in it, once for both tabs.
+        for (final moved in results) {
+          showContainerMoveResult(context, moved);
+        }
       }
     }
   }

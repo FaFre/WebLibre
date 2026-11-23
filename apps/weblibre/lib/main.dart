@@ -33,6 +33,7 @@ import 'package:flutter_mozilla_components/flutter_mozilla_components.dart'
         GeckoBrowserService,
         GeckoEngineSettingsService,
         GeckoLoggingService,
+        GeckoTabLockService,
         LogLevel,
         ProfileLockFlutterApi,
         WebExtensionActionType;
@@ -73,8 +74,10 @@ import 'package:weblibre/features/geckoview/features/open_link_tools/domain/serv
 import 'package:weblibre/features/geckoview/features/preferences/data/repositories/preference_observer.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_pruner.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/local_index_settings_sync.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/tab_sleep_policy_replication.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/features/intent_gatekeeper/domain/services/native_gatekeeper_replicator.dart';
 import 'package:weblibre/features/onboarding/domain/services/setup_steps.dart';
@@ -402,23 +405,52 @@ class _MainWidget extends HookConsumerWidget {
       // ("incognito") container could otherwise leak to Places during the
       // startup window. Best-effort: on failure the keepAlive provider still
       // pushes once the databases are readable.
-      try {
-        final snapshot = await readHistoryExclusionSnapshot(
-          ref.read(tabDatabaseProvider),
-        );
+      Future<void> pushHistoryExclusions() async {
+        try {
+          final snapshot = await readHistoryExclusionSnapshot(
+            ref.read(tabDatabaseProvider),
+          );
 
-        await GeckoEngineSettingsService().setHistoryExclusions(
-          excludedTabIds: snapshot.excludedTabIds,
-          knownTabIds: snapshot.knownTabIds,
-          excludedContextIds: snapshot.excludedContextIds,
-        );
-      } catch (e, s) {
-        logger.w(
-          'Failed initial history-exclusion push at startup',
-          error: e,
-          stackTrace: s,
-        );
+          await GeckoEngineSettingsService().setHistoryExclusions(
+            excludedTabIds: snapshot.excludedTabIds,
+            knownTabIds: snapshot.knownTabIds,
+            excludedContextIds: snapshot.excludedContextIds,
+          );
+        } catch (e, s) {
+          logger.w(
+            'Failed initial history-exclusion push at startup',
+            error: e,
+            stackTrace: s,
+          );
+        }
       }
+
+      // Native's tab locks, before the engine starts as well: the session
+      // restore brings back tabs that the engine must refuse to close (a
+      // page's window.close(), an add-on's tabs.remove) before Dart has a say.
+      // Trusted as it stands: the tabs are not restored yet. If this fails,
+      // native keeps the set it persisted, which by the lock protocol holds
+      // every lock the database does; the reconciliation after the restore
+      // repairs the difference.
+      Future<void> pushTabLocks() async {
+        try {
+          final lockedTabIds = await ref
+              .read(tabDatabaseProvider)
+              .tabDao
+              .getLockedTabIds()
+              .get();
+          await GeckoTabLockService().bootstrapLockedTabs(lockedTabIds);
+        } catch (e, s) {
+          logger.w(
+            'Failed initial tab-lock push at startup',
+            error: e,
+            stackTrace: s,
+          );
+        }
+      }
+
+      // Independent of each other; both land before the engine starts.
+      await (pushHistoryExclusions(), pushTabLocks()).wait;
 
       // Keep that snapshot current for the rest of the session. Activated here,
       // at app scope, and never from a screen: the setting is edited from the
@@ -434,6 +466,38 @@ class _MainWidget extends HookConsumerWidget {
         onError: (error, stackTrace) {
           logger.e(
             'Error listening to historyExclusionReplicationProvider',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      );
+
+      // Automatic tab sleep's policy, kept current for the session. Native
+      // keeps it process-wide, so it may land before the components exist.
+      ref.listenManual(
+        fireImmediately: true,
+        tabSleepPolicyReplicationProvider,
+        (previous, next) {},
+        onError: (error, stackTrace) {
+          logger.e(
+            'Error listening to tabSleepPolicyReplicationProvider',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      );
+
+      // Container freeze: seeds the membership gate from native's registry,
+      // reconciles the registry with tab.db once the engine is up, and
+      // answers the frozen placeholders' Resume buttons. App scope, like the
+      // replications above, so it works whatever screen is up.
+      ref.listenManual(
+        fireImmediately: true,
+        containerFreezeServiceProvider,
+        (previous, next) {},
+        onError: (error, stackTrace) {
+          logger.e(
+            'Error listening to containerFreezeServiceProvider',
             error: error,
             stackTrace: stackTrace,
           );

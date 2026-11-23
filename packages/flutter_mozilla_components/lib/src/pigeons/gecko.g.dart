@@ -362,6 +362,165 @@ enum SyncEngineValue {
   tabs;
 }
 
+/// Why native did not apply a lock.
+enum TabLockRejection {
+  /// No such tab is open.
+  unknownTab,
+  /// Private tabs cannot be locked.
+  privateTab,
+  /// Custom tabs and web apps cannot be locked.
+  customTab,
+  /// The lock, or the session file that has to hold the tab, could not be
+  /// written. The previous value stays in force.
+  notPersisted;
+}
+
+/// Whether a tab's page is in memory (section 3.3 of
+/// `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`).
+enum TabResidency {
+  /// No engine session: the page loads when something asks for it.
+  unloaded,
+  /// A session is being created.
+  initializing,
+  /// The page is in memory.
+  resident,
+  /// The page's content process crashed.
+  crashed;
+}
+
+/// A tab's own sleep hold: while it has one, nothing loads the page until the
+/// tab is woken. Independent of any restriction of its container (D26).
+enum TabSleepHold {
+  none,
+  manual,
+  automatic;
+}
+
+/// What native is doing to a tab, or to a container's contexts, right now.
+enum LifecycleOperationState {
+  idle,
+  sleeping,
+  freezing,
+  resuming;
+}
+
+/// Why a lifecycle operation did not do what was asked.
+enum LifecycleFailure {
+  /// No such tab is open.
+  unknownTab,
+  /// Something the tab is doing would be cut off; see the blockers.
+  protectedActivity,
+  /// The page's state did not reach native in time, so it was left loaded.
+  flushTimedOut,
+  /// GeckoView could not save the page's state, so it was left loaded.
+  flushFailed,
+  /// The tab's session was replaced while it was being put to sleep.
+  sessionChanged,
+  /// A newer sleep or wake of the same tab took over.
+  superseded,
+  /// The browser components were rebuilt while the operation ran.
+  componentsReplaced,
+  /// An automatic sleep found the tab no longer eligible right before its
+  /// teardown: shown, selected, kept awake, the policy turned off, or no
+  /// longer over the resident limit. An automatic freeze found its container
+  /// used, kept awake, busy or no longer scheduled; nothing stays restricted.
+  noLongerEligible,
+  /// A tab outside the container uses one of its contexts, or a context is
+  /// another container's or is being deleted.
+  contextShared,
+  /// A tab joined the container's contexts after Dart's check.
+  membershipChanged,
+  /// A tab Dart counts in the container runs outside its contexts (an
+  /// extension's tab in the default storage), so the freeze would not stop
+  /// it.
+  memberOutsideContexts,
+  /// A custom tab or web app runs in one of the contexts (D18).
+  openInExternalWindow,
+  /// The engine refused the restriction, and it was rolled back: nothing is
+  /// restricted.
+  engineRefused,
+  /// The engine's restriction could not be confirmed either way, and neither
+  /// could its rollback: the contexts stay restricted (D22).
+  rollbackUnconfirmed,
+  /// Something of the contexts was still running when the quiescence wait
+  /// ended; see `FreezeOperationResult.stillRunning`.
+  quiescenceTimedOut,
+  /// The registry could not be written, so the step that needed it did not
+  /// run.
+  notPersisted,
+  /// The registry was found damaged; every container is frozen until the
+  /// containers have been reconstructed (D23).
+  recoveryPending,
+  /// The operation needs the browser components, and there are none.
+  componentsUnavailable,
+  /// A release could not remove the context's push subscriptions or clear its
+  /// data yet; it stays restricted and is retried (D32).
+  cleanupFailed;
+}
+
+/// Activity that putting a tab to sleep would cut off (D13).
+enum ProtectedActivity {
+  /// Media is playing. Asks: confirmed with `stopMedia`.
+  media,
+  /// Camera, microphone or screen sharing is in use. Refuses.
+  recording,
+  /// The page holds form input. Asks: confirmed per tab with
+  /// `discardFormDataTabIds`. An automatic sleep or freeze takes it only from
+  /// a tab off screen, or a container unused, for an hour.
+  formData,
+  /// A file was chosen for upload on this page. Refuses.
+  upload,
+  /// The page is being printed or saved as PDF. Refuses.
+  printOrPdf,
+  /// A download started from this tab is still running. Refuses.
+  download,
+  /// The page is the result of a form submission, which cannot be restored as
+  /// it was. Asks: confirmed with `discardPostResult`.
+  postResult,
+  /// A download whose context is not known is running, and it cannot be told
+  /// apart from one of the container's (5.11). Refuses a freeze.
+  unattributedDownload;
+}
+
+/// Where a context stands in a container freeze (5.4–5.6). The registry
+/// stores only the restricted phases; [unrestricted] appears in replies.
+enum ContextFreezePhase {
+  unrestricted,
+  freezing,
+  frozen,
+  failed,
+  resuming,
+  deletionPending,
+  releasing,
+  orphaned;
+}
+
+/// Whether the registry could be read (D23). In [recovery] every
+/// non-default context is restricted until the containers are reconstructed.
+enum LifecycleRegistryMode {
+  normal,
+  recovery;
+}
+
+/// The last engine command acknowledged for a context (D33): what the UI says
+/// about background activity follows this, never the stored phase alone.
+enum EngineEnforcement {
+  enforced,
+  uncertain,
+  lifted;
+}
+
+/// What can still be running in a context when a quiescence wait ends.
+enum FreezeActivity {
+  serviceWorkers,
+  documents,
+  processes,
+  channels,
+  connections,
+  webSockets,
+  sockets;
+}
+
 /// Type of ML model operation
 enum MlProgressType {
   downloading,
@@ -5389,6 +5548,1002 @@ class RecentlyClosedTab {
   }
 }
 
+/// What a removal did to the tabs it was asked to remove.
+///
+/// A tab in none of the lists is still open although it is not locked: native
+/// refused its removal for another reason. Callers count it as a survivor.
+class TabRemovalResult {
+  TabRemovalResult({
+    required this.removedTabIds,
+    required this.lockedTabIds,
+    required this.missingTabIds,
+  });
+
+  /// Open before the removal, gone after it.
+  List<String> removedTabIds;
+
+  /// Still open because they are locked.
+  List<String> lockedTabIds;
+
+  /// Not open when the removal began.
+  List<String> missingTabIds;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      removedTabIds,
+      lockedTabIds,
+      missingTabIds,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static TabRemovalResult decode(Object result) {
+    result as List<Object?>;
+    return TabRemovalResult(
+      removedTabIds: (result[0]! as List<Object?>).cast<String>(),
+      lockedTabIds: (result[1]! as List<Object?>).cast<String>(),
+      missingTabIds: (result[2]! as List<Object?>).cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TabRemovalResult || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(removedTabIds, other.removedTabIds) && _deepEquals(lockedTabIds, other.lockedTabIds) && _deepEquals(missingTabIds, other.missingTabIds);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TabRemovalResult(removedTabIds: $removedTabIds, lockedTabIds: $lockedTabIds, missingTabIds: $missingTabIds)';
+  }
+}
+
+/// The answer to [GeckoTabLockApi.setTabLocked].
+class TabLockChange {
+  TabLockChange({
+    required this.previouslyLocked,
+    this.rejection,
+  });
+
+  /// Whether native held the tab locked before the call, for a revert.
+  bool previouslyLocked;
+
+  /// Null when the change was applied.
+  TabLockRejection? rejection;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      previouslyLocked,
+      rejection,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static TabLockChange decode(Object result) {
+    result as List<Object?>;
+    return TabLockChange(
+      previouslyLocked: result[0]! as bool,
+      rejection: result[1] as TabLockRejection?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TabLockChange || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(previouslyLocked, other.previouslyLocked) && _deepEquals(rejection, other.rejection);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TabLockChange(previouslyLocked: $previouslyLocked, rejection: $rejection)';
+  }
+}
+
+/// A tab's lifecycle as native enforces it. Sent on every change and on
+/// `syncEvents`.
+class TabLifecycleState {
+  TabLifecycleState({
+    required this.tabId,
+    required this.residency,
+    required this.sleepHold,
+    required this.operation,
+    required this.contextFrozen,
+  });
+
+  String tabId;
+
+  TabResidency residency;
+
+  TabSleepHold sleepHold;
+
+  LifecycleOperationState operation;
+
+  /// The tab's context is restricted (its container is frozen, or the
+  /// registry is in recovery): nothing loads it until Resume.
+  bool contextFrozen;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      tabId,
+      residency,
+      sleepHold,
+      operation,
+      contextFrozen,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static TabLifecycleState decode(Object result) {
+    result as List<Object?>;
+    return TabLifecycleState(
+      tabId: result[0]! as String,
+      residency: result[1]! as TabResidency,
+      sleepHold: result[2]! as TabSleepHold,
+      operation: result[3]! as LifecycleOperationState,
+      contextFrozen: result[4]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TabLifecycleState || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(tabId, other.tabId) && _deepEquals(residency, other.residency) && _deepEquals(sleepHold, other.sleepHold) && _deepEquals(operation, other.operation) && _deepEquals(contextFrozen, other.contextFrozen);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TabLifecycleState(tabId: $tabId, residency: $residency, sleepHold: $sleepHold, operation: $operation, contextFrozen: $contextFrozen)';
+  }
+}
+
+/// What [GeckoTabLifecycleApi.sleepTabs] did to one tab.
+class TabSleepResult {
+  TabSleepResult({
+    required this.tabId,
+    required this.asleep,
+    this.failure,
+    required this.blockers,
+  });
+
+  String tabId;
+
+  /// The tab is held asleep now (also when it already was).
+  bool asleep;
+
+  /// Null when [asleep].
+  LifecycleFailure? failure;
+
+  /// With [LifecycleFailure.protectedActivity]: everything that kept the tab
+  /// awake, the askable ones included.
+  List<ProtectedActivity> blockers;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      tabId,
+      asleep,
+      failure,
+      blockers,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static TabSleepResult decode(Object result) {
+    result as List<Object?>;
+    return TabSleepResult(
+      tabId: result[0]! as String,
+      asleep: result[1]! as bool,
+      failure: result[2] as LifecycleFailure?,
+      blockers: (result[3]! as List<Object?>).cast<ProtectedActivity>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TabSleepResult || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(tabId, other.tabId) && _deepEquals(asleep, other.asleep) && _deepEquals(failure, other.failure) && _deepEquals(blockers, other.blockers);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TabSleepResult(tabId: $tabId, asleep: $asleep, failure: $failure, blockers: $blockers)';
+  }
+}
+
+/// Automatic tab sleep (5.9), built in Dart from the effective settings. Off
+/// unless [enabled]; evaluated only while WebLibre is in the foreground.
+class TabSleepPolicy {
+  TabSleepPolicy({
+    required this.enabled,
+    required this.idleMinutes,
+    this.residentLimit,
+    required this.exemptTabIds,
+    required this.containers,
+  });
+
+  bool enabled;
+
+  /// A tab off screen this long is put to sleep.
+  int idleMinutes;
+
+  /// When set, the tabs off screen longest are put to sleep while more than
+  /// this many have their page loaded. Soft: tabs that cannot sleep stay.
+  int? residentLimit;
+
+  /// "Keep awake" tabs (D30), never put to sleep automatically. A container
+  /// with one of them as a member is never frozen automatically either.
+  List<String> exemptTabIds;
+
+  /// Containers to freeze automatically (phase C2). Evaluated whether or not
+  /// [enabled] is set: that switch is automatic tab sleep only.
+  List<ContainerAutoFreeze> containers;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      enabled,
+      idleMinutes,
+      residentLimit,
+      exemptTabIds,
+      containers,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static TabSleepPolicy decode(Object result) {
+    result as List<Object?>;
+    return TabSleepPolicy(
+      enabled: result[0]! as bool,
+      idleMinutes: result[1]! as int,
+      residentLimit: result[2] as int?,
+      exemptTabIds: (result[3]! as List<Object?>).cast<String>(),
+      containers: (result[4]! as List<Object?>).cast<ContainerAutoFreeze>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TabSleepPolicy || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(enabled, other.enabled) && _deepEquals(idleMinutes, other.idleMinutes) && _deepEquals(residentLimit, other.residentLimit) && _deepEquals(exemptTabIds, other.exemptTabIds) && _deepEquals(containers, other.containers);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'TabSleepPolicy(enabled: $enabled, idleMinutes: $idleMinutes, residentLimit: $residentLimit, exemptTabIds: $exemptTabIds, containers: $containers)';
+  }
+}
+
+/// One container that freezes automatically after [afterMinutes] unused,
+/// counted while WebLibre is in the foreground (5.9). Native only detects
+/// that it is due and tells Dart (`onContainerFreezeDue`); only Dart's gated
+/// preflight starts the freeze (D21).
+class ContainerAutoFreeze {
+  ContainerAutoFreeze({
+    required this.ownerId,
+    required this.contextIds,
+    required this.afterMinutes,
+  });
+
+  String ownerId;
+
+  /// Its own context and those of its isolated tabs, as Dart last saw them.
+  /// For detection only: the freeze itself uses the contexts Dart passes.
+  List<String> contextIds;
+
+  int afterMinutes;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      ownerId,
+      contextIds,
+      afterMinutes,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ContainerAutoFreeze decode(Object result) {
+    result as List<Object?>;
+    return ContainerAutoFreeze(
+      ownerId: result[0]! as String,
+      contextIds: (result[1]! as List<Object?>).cast<String>(),
+      afterMinutes: result[2]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ContainerAutoFreeze || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(ownerId, other.ownerId) && _deepEquals(contextIds, other.contextIds) && _deepEquals(afterMinutes, other.afterMinutes);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ContainerAutoFreeze(ownerId: $ownerId, contextIds: $contextIds, afterMinutes: $afterMinutes)';
+  }
+}
+
+/// One restricted context, as the registry holds it.
+class ContextFreezeState {
+  ContextFreezeState({
+    required this.contextId,
+    this.ownerId,
+    required this.phase,
+    this.previousPhase,
+    this.failure,
+    required this.enforcement,
+    required this.operation,
+    required this.recovered,
+    required this.undeliveredPushCount,
+  });
+
+  String contextId;
+
+  /// The container the context belongs to; null for an orphaned context.
+  String? ownerId;
+
+  ContextFreezePhase phase;
+
+  /// With [ContextFreezePhase.deletionPending]: the phase it had before.
+  ContextFreezePhase? previousPhase;
+
+  /// Why the last operation on it did not finish, while it has not since.
+  LifecycleFailure? failure;
+
+  EngineEnforcement enforcement;
+
+  /// A freeze or Resume of its container is running.
+  LifecycleOperationState operation;
+
+  /// Frozen by the reconstruction after the registry was found damaged, not
+  /// by the user (5.6).
+  bool recovered;
+
+  /// Push messages consumed unread while it was restricted (5.8).
+  int undeliveredPushCount;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      contextId,
+      ownerId,
+      phase,
+      previousPhase,
+      failure,
+      enforcement,
+      operation,
+      recovered,
+      undeliveredPushCount,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ContextFreezeState decode(Object result) {
+    result as List<Object?>;
+    return ContextFreezeState(
+      contextId: result[0]! as String,
+      ownerId: result[1] as String?,
+      phase: result[2]! as ContextFreezePhase,
+      previousPhase: result[3] as ContextFreezePhase?,
+      failure: result[4] as LifecycleFailure?,
+      enforcement: result[5]! as EngineEnforcement,
+      operation: result[6]! as LifecycleOperationState,
+      recovered: result[7]! as bool,
+      undeliveredPushCount: result[8]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ContextFreezeState || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(contextId, other.contextId) && _deepEquals(ownerId, other.ownerId) && _deepEquals(phase, other.phase) && _deepEquals(previousPhase, other.previousPhase) && _deepEquals(failure, other.failure) && _deepEquals(enforcement, other.enforcement) && _deepEquals(operation, other.operation) && _deepEquals(recovered, other.recovered) && _deepEquals(undeliveredPushCount, other.undeliveredPushCount);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ContextFreezeState(contextId: $contextId, ownerId: $ownerId, phase: $phase, previousPhase: $previousPhase, failure: $failure, enforcement: $enforcement, operation: $operation, recovered: $recovered, undeliveredPushCount: $undeliveredPushCount)';
+  }
+}
+
+/// A container its contexts' records hold: frozen, being frozen, resumed or
+/// deleted, or a freeze or Resume of it did not finish. A `releasing` record
+/// only waits for its data to be deleted and an `orphaned` one has no
+/// container, so neither holds one. Computed natively from the records.
+class OwnerFreezeState {
+  OwnerFreezeState({
+    required this.ownerId,
+    required this.phase,
+    required this.enforcement,
+    required this.operation,
+    required this.recovered,
+    required this.undeliveredPushCount,
+    required this.contextIds,
+  });
+
+  String ownerId;
+
+  /// When its contexts differ (a Resume confirmed for some), the phase that
+  /// needs attention first.
+  ContextFreezePhase phase;
+
+  /// The weakest of its contexts'.
+  EngineEnforcement enforcement;
+
+  /// A freeze or Resume of it is running.
+  LifecycleOperationState operation;
+
+  /// Frozen by the reconstruction after the registry was found damaged (5.6).
+  bool recovered;
+
+  /// Push messages consumed unread while it was restricted, over its
+  /// contexts (5.8).
+  int undeliveredPushCount;
+
+  /// The contexts whose records hold it.
+  List<String> contextIds;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      ownerId,
+      phase,
+      enforcement,
+      operation,
+      recovered,
+      undeliveredPushCount,
+      contextIds,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static OwnerFreezeState decode(Object result) {
+    result as List<Object?>;
+    return OwnerFreezeState(
+      ownerId: result[0]! as String,
+      phase: result[1]! as ContextFreezePhase,
+      enforcement: result[2]! as EngineEnforcement,
+      operation: result[3]! as LifecycleOperationState,
+      recovered: result[4]! as bool,
+      undeliveredPushCount: result[5]! as int,
+      contextIds: (result[6]! as List<Object?>).cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! OwnerFreezeState || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(ownerId, other.ownerId) && _deepEquals(phase, other.phase) && _deepEquals(enforcement, other.enforcement) && _deepEquals(operation, other.operation) && _deepEquals(recovered, other.recovered) && _deepEquals(undeliveredPushCount, other.undeliveredPushCount) && _deepEquals(contextIds, other.contextIds);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'OwnerFreezeState(ownerId: $ownerId, phase: $phase, enforcement: $enforcement, operation: $operation, recovered: $recovered, undeliveredPushCount: $undeliveredPushCount, contextIds: $contextIds)';
+  }
+}
+
+/// The registry as a whole. [revision] increases with every change in this
+/// process; a snapshot with a lower one is older (D27).
+class LifecycleSnapshot {
+  LifecycleSnapshot({
+    required this.mode,
+    required this.revision,
+    required this.contexts,
+    required this.owners,
+  });
+
+  LifecycleRegistryMode mode;
+
+  int revision;
+
+  List<ContextFreezeState> contexts;
+
+  /// The containers [contexts] hold, by the same records.
+  List<OwnerFreezeState> owners;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      mode,
+      revision,
+      contexts,
+      owners,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static LifecycleSnapshot decode(Object result) {
+    result as List<Object?>;
+    return LifecycleSnapshot(
+      mode: result[0]! as LifecycleRegistryMode,
+      revision: result[1]! as int,
+      contexts: (result[2]! as List<Object?>).cast<ContextFreezeState>(),
+      owners: (result[3]! as List<Object?>).cast<OwnerFreezeState>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! LifecycleSnapshot || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(mode, other.mode) && _deepEquals(revision, other.revision) && _deepEquals(contexts, other.contexts) && _deepEquals(owners, other.owners);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'LifecycleSnapshot(mode: $mode, revision: $revision, contexts: $contexts, owners: $owners)';
+  }
+}
+
+/// One thing that kept a container from being frozen: a tab's activity, or a
+/// running download.
+class FreezeBlocker {
+  FreezeBlocker({
+    this.tabId,
+    this.downloadId,
+    required this.activity,
+  });
+
+  String? tabId;
+
+  String? downloadId;
+
+  ProtectedActivity activity;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      tabId,
+      downloadId,
+      activity,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static FreezeBlocker decode(Object result) {
+    result as List<Object?>;
+    return FreezeBlocker(
+      tabId: result[0] as String?,
+      downloadId: result[1] as String?,
+      activity: result[2]! as ProtectedActivity,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! FreezeBlocker || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(tabId, other.tabId) && _deepEquals(downloadId, other.downloadId) && _deepEquals(activity, other.activity);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'FreezeBlocker(tabId: $tabId, downloadId: $downloadId, activity: $activity)';
+  }
+}
+
+/// What a container operation did. For messages only: the membership gate
+/// rebuilds its state from a fresh snapshot, never from this (D27).
+class FreezeOperationResult {
+  FreezeOperationResult({
+    required this.ownerId,
+    required this.phase,
+    required this.revision,
+    this.failure,
+    required this.blockers,
+    required this.stillRunning,
+    required this.unsettledContextIds,
+  });
+
+  String ownerId;
+
+  /// The owner's phase afterwards; [ContextFreezePhase.unrestricted] when it
+  /// has no restricted context left.
+  ContextFreezePhase phase;
+
+  int revision;
+
+  LifecycleFailure? failure;
+
+  /// With [LifecycleFailure.protectedActivity].
+  List<FreezeBlocker> blockers;
+
+  /// With [LifecycleFailure.quiescenceTimedOut].
+  List<FreezeActivity> stillRunning;
+
+  /// The contexts the operation could not settle.
+  List<String> unsettledContextIds;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      ownerId,
+      phase,
+      revision,
+      failure,
+      blockers,
+      stillRunning,
+      unsettledContextIds,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static FreezeOperationResult decode(Object result) {
+    result as List<Object?>;
+    return FreezeOperationResult(
+      ownerId: result[0]! as String,
+      phase: result[1]! as ContextFreezePhase,
+      revision: result[2]! as int,
+      failure: result[3] as LifecycleFailure?,
+      blockers: (result[4]! as List<Object?>).cast<FreezeBlocker>(),
+      stillRunning: (result[5]! as List<Object?>).cast<FreezeActivity>(),
+      unsettledContextIds: (result[6]! as List<Object?>).cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! FreezeOperationResult || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(ownerId, other.ownerId) && _deepEquals(phase, other.phase) && _deepEquals(revision, other.revision) && _deepEquals(failure, other.failure) && _deepEquals(blockers, other.blockers) && _deepEquals(stillRunning, other.stillRunning) && _deepEquals(unsettledContextIds, other.unsettledContextIds);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'FreezeOperationResult(ownerId: $ownerId, phase: $phase, revision: $revision, failure: $failure, blockers: $blockers, stillRunning: $stillRunning, unsettledContextIds: $unsettledContextIds)';
+  }
+}
+
+/// What one release (D32) did to one context.
+class ContextReleaseResult {
+  ContextReleaseResult({
+    required this.contextId,
+    required this.released,
+    this.failure,
+    required this.dataCleared,
+  });
+
+  String contextId;
+
+  /// The record is gone and the engine no longer restricts the context.
+  bool released;
+
+  LifecycleFailure? failure;
+
+  /// Native deleted the context's data, acknowledged. False for a context
+  /// without a record: it is released at once and its caller's own cleanup
+  /// applies.
+  bool dataCleared;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      contextId,
+      released,
+      failure,
+      dataCleared,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ContextReleaseResult decode(Object result) {
+    result as List<Object?>;
+    return ContextReleaseResult(
+      contextId: result[0]! as String,
+      released: result[1]! as bool,
+      failure: result[2] as LifecycleFailure?,
+      dataCleared: result[3]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ContextReleaseResult || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(contextId, other.contextId) && _deepEquals(released, other.released) && _deepEquals(failure, other.failure) && _deepEquals(dataCleared, other.dataCleared);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ContextReleaseResult(contextId: $contextId, released: $released, failure: $failure, dataCleared: $dataCleared)';
+  }
+}
+
+/// A container with its own context, and the isolation contexts of its tabs,
+/// for the reconstruction after a damaged registry (5.6).
+class ContainerContexts {
+  ContainerContexts({
+    required this.ownerId,
+    required this.contextIds,
+  });
+
+  String ownerId;
+
+  List<String> contextIds;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      ownerId,
+      contextIds,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static ContainerContexts decode(Object result) {
+    result as List<Object?>;
+    return ContainerContexts(
+      ownerId: result[0]! as String,
+      contextIds: (result[1]! as List<Object?>).cast<String>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ContainerContexts || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(ownerId, other.ownerId) && _deepEquals(contextIds, other.contextIds);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'ContainerContexts(ownerId: $ownerId, contextIds: $contextIds)';
+  }
+}
+
+/// The page a web app or custom tab window of a frozen context held, and the
+/// storage it held it in, for the browser to open there (D18).
+class FrozenWindowHandoff {
+  FrozenWindowHandoff({
+    required this.contextId,
+    this.url,
+    required this.private,
+  });
+
+  /// The window's storage context: a container's or an isolation group's.
+  String contextId;
+
+  /// The page; null when the window had none to give.
+  String? url;
+
+  /// Whether the window was a private one: the page then opens in a private
+  /// tab, kept out of the session and the history as the window kept it.
+  bool private;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      contextId,
+      url,
+      private,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static FrozenWindowHandoff decode(Object result) {
+    result as List<Object?>;
+    return FrozenWindowHandoff(
+      contextId: result[0]! as String,
+      url: result[1] as String?,
+      private: result[2]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! FrozenWindowHandoff || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(contextId, other.contextId) && _deepEquals(url, other.url) && _deepEquals(private, other.private);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'FrozenWindowHandoff(contextId: $contextId, url: $url, private: $private)';
+  }
+}
+
+/// A tab the pending undo close would bring back.
+class PendingUndoTab {
+  PendingUndoTab({
+    required this.tabId,
+    this.contextId,
+  });
+
+  String tabId;
+
+  /// The context it ran in; null for the default one.
+  String? contextId;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      tabId,
+      contextId,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static PendingUndoTab decode(Object result) {
+    result as List<Object?>;
+    return PendingUndoTab(
+      tabId: result[0]! as String,
+      contextId: result[1] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! PendingUndoTab || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(tabId, other.tabId) && _deepEquals(contextId, other.contextId);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'PendingUndoTab(tabId: $tabId, contextId: $contextId)';
+  }
+}
+
 class GeckoPref {
   GeckoPref({
     required this.name,
@@ -8083,6 +9238,11 @@ class SplitViewLabels {
     required this.dividerOptionsAction,
     required this.crashedTitle,
     required this.crashedReload,
+    required this.sleepingTitle,
+    required this.sleepingWake,
+    required this.frozenTitle,
+    required this.frozenResume,
+    required this.frozenContainers,
   });
 
   /// Accessibility description of the divider.
@@ -8097,12 +9257,34 @@ class SplitViewLabels {
   /// Button on that placeholder that restores the page.
   String crashedReload;
 
+  /// Title of the placeholder shown in place of a sleeping tab's page.
+  String sleepingTitle;
+
+  /// Button on that placeholder that wakes the tab; also its accessible name.
+  String sleepingWake;
+
+  /// Title of the placeholder shown in place of a frozen container's tab,
+  /// when [frozenContainers] has no entry for its container.
+  String frozenTitle;
+
+  /// Button on that placeholder that asks to resume the container; also its
+  /// accessible name.
+  String frozenResume;
+
+  /// Per frozen container: its own title and detail line.
+  List<FrozenPlaceholderLabel> frozenContainers;
+
   List<Object?> _toList() {
     return <Object?>[
       dividerDescription,
       dividerOptionsAction,
       crashedTitle,
       crashedReload,
+      sleepingTitle,
+      sleepingWake,
+      frozenTitle,
+      frozenResume,
+      frozenContainers,
     ];
   }
 
@@ -8116,6 +9298,11 @@ class SplitViewLabels {
       dividerOptionsAction: result[1]! as String,
       crashedTitle: result[2]! as String,
       crashedReload: result[3]! as String,
+      sleepingTitle: result[4]! as String,
+      sleepingWake: result[5]! as String,
+      frozenTitle: result[6]! as String,
+      frozenResume: result[7]! as String,
+      frozenContainers: (result[8]! as List<Object?>).cast<FrozenPlaceholderLabel>(),
     );
   }
 
@@ -8128,7 +9315,7 @@ class SplitViewLabels {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(dividerDescription, other.dividerDescription) && _deepEquals(dividerOptionsAction, other.dividerOptionsAction) && _deepEquals(crashedTitle, other.crashedTitle) && _deepEquals(crashedReload, other.crashedReload);
+    return _deepEquals(dividerDescription, other.dividerDescription) && _deepEquals(dividerOptionsAction, other.dividerOptionsAction) && _deepEquals(crashedTitle, other.crashedTitle) && _deepEquals(crashedReload, other.crashedReload) && _deepEquals(sleepingTitle, other.sleepingTitle) && _deepEquals(sleepingWake, other.sleepingWake) && _deepEquals(frozenTitle, other.frozenTitle) && _deepEquals(frozenResume, other.frozenResume) && _deepEquals(frozenContainers, other.frozenContainers);
   }
 
   @override
@@ -8137,7 +9324,67 @@ class SplitViewLabels {
 
   @override
   String toString() {
-    return 'SplitViewLabels(dividerDescription: $dividerDescription, dividerOptionsAction: $dividerOptionsAction, crashedTitle: $crashedTitle, crashedReload: $crashedReload)';
+    return 'SplitViewLabels(dividerDescription: $dividerDescription, dividerOptionsAction: $dividerOptionsAction, crashedTitle: $crashedTitle, crashedReload: $crashedReload, sleepingTitle: $sleepingTitle, sleepingWake: $sleepingWake, frozenTitle: $frozenTitle, frozenResume: $frozenResume, frozenContainers: $frozenContainers)';
+  }
+}
+
+/// What the frozen placeholder says for the tabs of one container, which
+/// native finds through the registry's owner of the tab's context.
+class FrozenPlaceholderLabel {
+  FrozenPlaceholderLabel({
+    required this.ownerId,
+    required this.title,
+    this.detail,
+  });
+
+  String ownerId;
+
+  /// "{container} is frozen", or how far a freeze or Resume got.
+  String title;
+
+  /// The line under it, such as how many background messages were skipped;
+  /// null for none.
+  String? detail;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      ownerId,
+      title,
+      detail,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static FrozenPlaceholderLabel decode(Object result) {
+    result as List<Object?>;
+    return FrozenPlaceholderLabel(
+      ownerId: result[0]! as String,
+      title: result[1]! as String,
+      detail: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! FrozenPlaceholderLabel || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(ownerId, other.ownerId) && _deepEquals(title, other.title) && _deepEquals(detail, other.detail);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
+
+  @override
+  String toString() {
+    return 'FrozenPlaceholderLabel(ownerId: $ownerId, title: $title, detail: $detail)';
   }
 }
 
@@ -8453,66 +9700,118 @@ class _PigeonCodecOverflow {
 
     switch (type) {
       case 0:
-        return GeckoFetchResponse.decode(wrapped!);
+        return TabRemovalResult.decode(wrapped!);
       case 1:
-        return BookmarkNode.decode(wrapped!);
+        return TabLockChange.decode(wrapped!);
       case 2:
-        return BookmarkImportNode.decode(wrapped!);
+        return TabLifecycleState.decode(wrapped!);
       case 3:
-        return BookmarkInsertTreeResult.decode(wrapped!);
+        return TabSleepResult.decode(wrapped!);
       case 4:
-        return BookmarkInfo.decode(wrapped!);
+        return TabSleepPolicy.decode(wrapped!);
       case 5:
-        return SitePermissions.decode(wrapped!);
+        return ContainerAutoFreeze.decode(wrapped!);
       case 6:
-        return TrackingProtectionException.decode(wrapped!);
+        return ContextFreezeState.decode(wrapped!);
       case 7:
-        return TrackerLogEntry.decode(wrapped!);
+        return OwnerFreezeState.decode(wrapped!);
       case 8:
-        return TrackingStatisticsRecord.decode(wrapped!);
+        return LifecycleSnapshot.decode(wrapped!);
       case 9:
-        return TrackingStatistics.decode(wrapped!);
+        return FreezeBlocker.decode(wrapped!);
       case 10:
-        return AppLinkTarget.decode(wrapped!);
+        return FreezeOperationResult.decode(wrapped!);
       case 11:
-        return ProtectedTargetPattern.decode(wrapped!);
+        return ContextReleaseResult.decode(wrapped!);
       case 12:
-        return NativeAppLinkRule.decode(wrapped!);
+        return ContainerContexts.decode(wrapped!);
       case 13:
-        return NativeContextAppLinkPolicy.decode(wrapped!);
+        return FrozenWindowHandoff.decode(wrapped!);
       case 14:
-        return AppLinkPolicySnapshot.decode(wrapped!);
+        return PendingUndoTab.decode(wrapped!);
       case 15:
-        return AppLinkPromptRequest.decode(wrapped!);
+        return GeckoPref.decode(wrapped!);
       case 16:
-        return AppLinkResolutionResult.decode(wrapped!);
+        return MlProgressData.decode(wrapped!);
       case 17:
-        return PwaIcon.decode(wrapped!);
+        return GeckoProxySettings.decode(wrapped!);
       case 18:
-        return ShareTargetFiles.decode(wrapped!);
+        return GeckoProxyRoutingSnapshot.decode(wrapped!);
       case 19:
-        return ShareTargetParams.decode(wrapped!);
+        return GeckoRoutingDemand.decode(wrapped!);
       case 20:
-        return ShareTarget.decode(wrapped!);
+        return GeckoProxyRoutingStatus.decode(wrapped!);
       case 21:
-        return ExternalApplicationResource.decode(wrapped!);
+        return ContainerSiteAssignment.decode(wrapped!);
       case 22:
-        return PwaManifest.decode(wrapped!);
+        return ProxyLoadError.decode(wrapped!);
       case 23:
-        return SandboxCaptureEntry.decode(wrapped!);
+        return GeckoHeader.decode(wrapped!);
       case 24:
-        return GestureConfig.decode(wrapped!);
+        return GeckoFetchRequest.decode(wrapped!);
       case 25:
-        return SplitPairState.decode(wrapped!);
+        return GeckoFetchResponse.decode(wrapped!);
       case 26:
-        return SplitViewLabels.decode(wrapped!);
+        return BookmarkNode.decode(wrapped!);
       case 27:
-        return SplitViewState.decode(wrapped!);
+        return BookmarkImportNode.decode(wrapped!);
       case 28:
-        return PushDistributor.decode(wrapped!);
+        return BookmarkInsertTreeResult.decode(wrapped!);
       case 29:
-        return PushStatus.decode(wrapped!);
+        return BookmarkInfo.decode(wrapped!);
       case 30:
+        return SitePermissions.decode(wrapped!);
+      case 31:
+        return TrackingProtectionException.decode(wrapped!);
+      case 32:
+        return TrackerLogEntry.decode(wrapped!);
+      case 33:
+        return TrackingStatisticsRecord.decode(wrapped!);
+      case 34:
+        return TrackingStatistics.decode(wrapped!);
+      case 35:
+        return AppLinkTarget.decode(wrapped!);
+      case 36:
+        return ProtectedTargetPattern.decode(wrapped!);
+      case 37:
+        return NativeAppLinkRule.decode(wrapped!);
+      case 38:
+        return NativeContextAppLinkPolicy.decode(wrapped!);
+      case 39:
+        return AppLinkPolicySnapshot.decode(wrapped!);
+      case 40:
+        return AppLinkPromptRequest.decode(wrapped!);
+      case 41:
+        return AppLinkResolutionResult.decode(wrapped!);
+      case 42:
+        return PwaIcon.decode(wrapped!);
+      case 43:
+        return ShareTargetFiles.decode(wrapped!);
+      case 44:
+        return ShareTargetParams.decode(wrapped!);
+      case 45:
+        return ShareTarget.decode(wrapped!);
+      case 46:
+        return ExternalApplicationResource.decode(wrapped!);
+      case 47:
+        return PwaManifest.decode(wrapped!);
+      case 48:
+        return SandboxCaptureEntry.decode(wrapped!);
+      case 49:
+        return GestureConfig.decode(wrapped!);
+      case 50:
+        return SplitPairState.decode(wrapped!);
+      case 51:
+        return SplitViewLabels.decode(wrapped!);
+      case 52:
+        return FrozenPlaceholderLabel.decode(wrapped!);
+      case 53:
+        return SplitViewState.decode(wrapped!);
+      case 54:
+        return PushDistributor.decode(wrapped!);
+      case 55:
+        return PushStatus.decode(wrapped!);
+      case 56:
         return PushSubscription.decode(wrapped!);
     }
     return null;
@@ -8610,422 +9909,526 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is SyncEngineValue) {
       buffer.putUint8(156);
       writeValue(buffer, value.index);
-    }    else if (value is MlProgressType) {
+    }    else if (value is TabLockRejection) {
       buffer.putUint8(157);
       writeValue(buffer, value.index);
-    }    else if (value is MlProgressStatus) {
+    }    else if (value is TabResidency) {
       buffer.putUint8(158);
       writeValue(buffer, value.index);
-    }    else if (value is ClearDataType) {
+    }    else if (value is TabSleepHold) {
       buffer.putUint8(159);
       writeValue(buffer, value.index);
-    }    else if (value is DownloadControl) {
+    }    else if (value is LifecycleOperationState) {
       buffer.putUint8(160);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchMethod) {
+    }    else if (value is LifecycleFailure) {
       buffer.putUint8(161);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchRedircet) {
+    }    else if (value is ProtectedActivity) {
       buffer.putUint8(162);
       writeValue(buffer, value.index);
-    }    else if (value is GeckoFetchCookiePolicy) {
+    }    else if (value is ContextFreezePhase) {
       buffer.putUint8(163);
       writeValue(buffer, value.index);
-    }    else if (value is BookmarkNodeType) {
+    }    else if (value is LifecycleRegistryMode) {
       buffer.putUint8(164);
       writeValue(buffer, value.index);
-    }    else if (value is SitePermissionStatus) {
+    }    else if (value is EngineEnforcement) {
       buffer.putUint8(165);
       writeValue(buffer, value.index);
-    }    else if (value is AutoplayStatus) {
+    }    else if (value is FreezeActivity) {
       buffer.putUint8(166);
       writeValue(buffer, value.index);
-    }    else if (value is TrackerLogCategory) {
+    }    else if (value is MlProgressType) {
       buffer.putUint8(167);
       writeValue(buffer, value.index);
-    }    else if (value is TrackingStatisticsType) {
+    }    else if (value is MlProgressStatus) {
       buffer.putUint8(168);
       writeValue(buffer, value.index);
-    }    else if (value is NativeAppLinkRuleDecision) {
+    }    else if (value is ClearDataType) {
       buffer.putUint8(169);
       writeValue(buffer, value.index);
-    }    else if (value is AppLinkPromptOwner) {
+    }    else if (value is DownloadControl) {
       buffer.putUint8(170);
       writeValue(buffer, value.index);
-    }    else if (value is AppLinkDecision) {
+    }    else if (value is GeckoFetchMethod) {
       buffer.putUint8(171);
       writeValue(buffer, value.index);
-    }    else if (value is SplitPaneMode) {
+    }    else if (value is GeckoFetchRedircet) {
       buffer.putUint8(172);
       writeValue(buffer, value.index);
-    }    else if (value is SplitAxis) {
+    }    else if (value is GeckoFetchCookiePolicy) {
       buffer.putUint8(173);
       writeValue(buffer, value.index);
-    }    else if (value is PushDistributorStatus) {
+    }    else if (value is BookmarkNodeType) {
       buffer.putUint8(174);
       writeValue(buffer, value.index);
-    }    else if (value is TranslationOptions) {
+    }    else if (value is SitePermissionStatus) {
       buffer.putUint8(175);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationLanguage) {
+      writeValue(buffer, value.index);
+    }    else if (value is AutoplayStatus) {
       buffer.putUint8(176);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationDetectedLanguages) {
+      writeValue(buffer, value.index);
+    }    else if (value is TrackerLogCategory) {
       buffer.putUint8(177);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationPair) {
+      writeValue(buffer, value.index);
+    }    else if (value is TrackingStatisticsType) {
       buffer.putUint8(178);
-      writeValue(buffer, value.encode());
-    }    else if (value is TranslationEngineStateData) {
+      writeValue(buffer, value.index);
+    }    else if (value is NativeAppLinkRuleDecision) {
       buffer.putUint8(179);
-      writeValue(buffer, value.encode());
-    }    else if (value is TabTranslationStateData) {
+      writeValue(buffer, value.index);
+    }    else if (value is AppLinkPromptOwner) {
       buffer.putUint8(180);
-      writeValue(buffer, value.encode());
-    }    else if (value is ReaderState) {
+      writeValue(buffer, value.index);
+    }    else if (value is AppLinkDecision) {
       buffer.putUint8(181);
-      writeValue(buffer, value.encode());
-    }    else if (value is AddTabParams) {
+      writeValue(buffer, value.index);
+    }    else if (value is SplitPaneMode) {
       buffer.putUint8(182);
-      writeValue(buffer, value.encode());
-    }    else if (value is LastMediaAccessState) {
+      writeValue(buffer, value.index);
+    }    else if (value is SplitAxis) {
       buffer.putUint8(183);
-      writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadataKey) {
+      writeValue(buffer, value.index);
+    }    else if (value is PushDistributorStatus) {
       buffer.putUint8(184);
-      writeValue(buffer, value.encode());
-    }    else if (value is PackageCategoryValue) {
+      writeValue(buffer, value.index);
+    }    else if (value is TranslationOptions) {
       buffer.putUint8(185);
       writeValue(buffer, value.encode());
-    }    else if (value is ExternalPackage) {
+    }    else if (value is TranslationLanguage) {
       buffer.putUint8(186);
       writeValue(buffer, value.encode());
-    }    else if (value is LoadUrlFlagsValue) {
+    }    else if (value is TranslationDetectedLanguages) {
       buffer.putUint8(187);
       writeValue(buffer, value.encode());
-    }    else if (value is SourceValue) {
+    }    else if (value is TranslationPair) {
       buffer.putUint8(188);
       writeValue(buffer, value.encode());
-    }    else if (value is TabState) {
+    }    else if (value is TranslationEngineStateData) {
       buffer.putUint8(189);
       writeValue(buffer, value.encode());
-    }    else if (value is RecoverableTab) {
+    }    else if (value is TabTranslationStateData) {
       buffer.putUint8(190);
       writeValue(buffer, value.encode());
-    }    else if (value is IconRequest) {
+    }    else if (value is ReaderState) {
       buffer.putUint8(191);
       writeValue(buffer, value.encode());
-    }    else if (value is ResourceSize) {
+    }    else if (value is AddTabParams) {
       buffer.putUint8(192);
       writeValue(buffer, value.encode());
-    }    else if (value is Resource) {
+    }    else if (value is LastMediaAccessState) {
       buffer.putUint8(193);
       writeValue(buffer, value.encode());
-    }    else if (value is IconResult) {
+    }    else if (value is HistoryMetadataKey) {
       buffer.putUint8(194);
       writeValue(buffer, value.encode());
-    }    else if (value is CookiePartitionKey) {
+    }    else if (value is PackageCategoryValue) {
       buffer.putUint8(195);
       writeValue(buffer, value.encode());
-    }    else if (value is Cookie) {
+    }    else if (value is ExternalPackage) {
       buffer.putUint8(196);
       writeValue(buffer, value.encode());
-    }    else if (value is VisitInfo) {
+    }    else if (value is LoadUrlFlagsValue) {
       buffer.putUint8(197);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlightWeights) {
+    }    else if (value is SourceValue) {
       buffer.putUint8(198);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryHighlight) {
+    }    else if (value is TabState) {
       buffer.putUint8(199);
       writeValue(buffer, value.encode());
-    }    else if (value is TopFrecentSiteInfo) {
+    }    else if (value is RecoverableTab) {
       buffer.putUint8(200);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryMetadata) {
+    }    else if (value is IconRequest) {
       buffer.putUint8(201);
       writeValue(buffer, value.encode());
-    }    else if (value is HistorySuggestion) {
+    }    else if (value is ResourceSize) {
       buffer.putUint8(202);
       writeValue(buffer, value.encode());
-    }    else if (value is PageObservation) {
+    }    else if (value is Resource) {
       buffer.putUint8(203);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryItem) {
+    }    else if (value is IconResult) {
       buffer.putUint8(204);
       writeValue(buffer, value.encode());
-    }    else if (value is HistoryState) {
+    }    else if (value is CookiePartitionKey) {
       buffer.putUint8(205);
       writeValue(buffer, value.encode());
-    }    else if (value is ReaderableState) {
+    }    else if (value is Cookie) {
       buffer.putUint8(206);
       writeValue(buffer, value.encode());
-    }    else if (value is SecurityInfoState) {
+    }    else if (value is VisitInfo) {
       buffer.putUint8(207);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContentState) {
+    }    else if (value is HistoryHighlightWeights) {
       buffer.putUint8(208);
       writeValue(buffer, value.encode());
-    }    else if (value is FindResultState) {
+    }    else if (value is HistoryHighlight) {
       buffer.putUint8(209);
       writeValue(buffer, value.encode());
-    }    else if (value is CustomSelectionAction) {
+    }    else if (value is TopFrecentSiteInfo) {
       buffer.putUint8(210);
       writeValue(buffer, value.encode());
-    }    else if (value is WebExtensionData) {
+    }    else if (value is HistoryMetadata) {
       buffer.putUint8(211);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonUpdatePermissionRequest) {
+    }    else if (value is HistorySuggestion) {
       buffer.putUint8(212);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonInfo) {
+    }    else if (value is PageObservation) {
       buffer.putUint8(213);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonListingPreview) {
+    }    else if (value is HistoryItem) {
       buffer.putUint8(214);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonListing) {
+    }    else if (value is HistoryState) {
       buffer.putUint8(215);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonStoreInfo) {
+    }    else if (value is ReaderableState) {
       buffer.putUint8(216);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonUpdateAttemptInfo) {
+    }    else if (value is SecurityInfoState) {
       buffer.putUint8(217);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoSuggestion) {
+    }    else if (value is TabContentState) {
       buffer.putUint8(218);
       writeValue(buffer, value.encode());
-    }    else if (value is TabContent) {
+    }    else if (value is FindResultState) {
       buffer.putUint8(219);
       writeValue(buffer, value.encode());
-    }    else if (value is ContentBlocking) {
+    }    else if (value is CustomSelectionAction) {
       buffer.putUint8(220);
       writeValue(buffer, value.encode());
-    }    else if (value is DohSettings) {
+    }    else if (value is WebExtensionData) {
       buffer.putUint8(221);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoEngineSettings) {
+    }    else if (value is AddonUpdatePermissionRequest) {
       buffer.putUint8(222);
       writeValue(buffer, value.encode());
-    }    else if (value is AutocompleteResult) {
+    }    else if (value is AddonInfo) {
       buffer.putUint8(223);
       writeValue(buffer, value.encode());
-    }    else if (value is UnknownHitResult) {
+    }    else if (value is AddonListingPreview) {
       buffer.putUint8(224);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageHitResult) {
+    }    else if (value is AddonListing) {
       buffer.putUint8(225);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoHitResult) {
+    }    else if (value is AddonStoreInfo) {
       buffer.putUint8(226);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioHitResult) {
+    }    else if (value is AddonUpdateAttemptInfo) {
       buffer.putUint8(227);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageSrcHitResult) {
+    }    else if (value is GeckoSuggestion) {
       buffer.putUint8(228);
       writeValue(buffer, value.encode());
-    }    else if (value is PhoneHitResult) {
+    }    else if (value is TabContent) {
       buffer.putUint8(229);
       writeValue(buffer, value.encode());
-    }    else if (value is EmailHitResult) {
+    }    else if (value is ContentBlocking) {
       buffer.putUint8(230);
       writeValue(buffer, value.encode());
-    }    else if (value is GeoHitResult) {
+    }    else if (value is DohSettings) {
       buffer.putUint8(231);
       writeValue(buffer, value.encode());
-    }    else if (value is DownloadState) {
+    }    else if (value is GeckoEngineSettings) {
       buffer.putUint8(232);
       writeValue(buffer, value.encode());
-    }    else if (value is ShareInternetResourceState) {
+    }    else if (value is AutocompleteResult) {
       buffer.putUint8(233);
       writeValue(buffer, value.encode());
-    }    else if (value is AddonCollection) {
+    }    else if (value is UnknownHitResult) {
       buffer.putUint8(234);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoComponentVersions) {
+    }    else if (value is ImageHitResult) {
       buffer.putUint8(235);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncEngineStatus) {
+    }    else if (value is VideoHitResult) {
       buffer.putUint8(236);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncAccountInfo) {
+    }    else if (value is AudioHitResult) {
       buffer.putUint8(237);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDevice) {
+    }    else if (value is ImageSrcHitResult) {
       buffer.putUint8(238);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncIncomingTab) {
+    }    else if (value is PhoneHitResult) {
       buffer.putUint8(239);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncRemoteTab) {
+    }    else if (value is EmailHitResult) {
       buffer.putUint8(240);
       writeValue(buffer, value.encode());
-    }    else if (value is SyncDeviceTabs) {
+    }    else if (value is GeoHitResult) {
       buffer.putUint8(241);
       writeValue(buffer, value.encode());
-    }    else if (value is PreferredDownloadManager) {
+    }    else if (value is DownloadState) {
       buffer.putUint8(242);
       writeValue(buffer, value.encode());
-    }    else if (value is PullToRefreshSettings) {
+    }    else if (value is ShareInternetResourceState) {
       buffer.putUint8(243);
       writeValue(buffer, value.encode());
-    }    else if (value is RecentlyClosedTab) {
+    }    else if (value is AddonCollection) {
       buffer.putUint8(244);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoPref) {
+    }    else if (value is GeckoComponentVersions) {
       buffer.putUint8(245);
       writeValue(buffer, value.encode());
-    }    else if (value is MlProgressData) {
+    }    else if (value is SyncEngineStatus) {
       buffer.putUint8(246);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoProxySettings) {
+    }    else if (value is SyncAccountInfo) {
       buffer.putUint8(247);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoProxyRoutingSnapshot) {
+    }    else if (value is SyncDevice) {
       buffer.putUint8(248);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoRoutingDemand) {
+    }    else if (value is SyncIncomingTab) {
       buffer.putUint8(249);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoProxyRoutingStatus) {
+    }    else if (value is SyncRemoteTab) {
       buffer.putUint8(250);
       writeValue(buffer, value.encode());
-    }    else if (value is ContainerSiteAssignment) {
+    }    else if (value is SyncDeviceTabs) {
       buffer.putUint8(251);
       writeValue(buffer, value.encode());
-    }    else if (value is ProxyLoadError) {
+    }    else if (value is PreferredDownloadManager) {
       buffer.putUint8(252);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoHeader) {
+    }    else if (value is PullToRefreshSettings) {
       buffer.putUint8(253);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchRequest) {
+    }    else if (value is RecentlyClosedTab) {
       buffer.putUint8(254);
       writeValue(buffer, value.encode());
-    }    else if (value is GeckoFetchResponse) {
+    }    else if (value is TabRemovalResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 0, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is BookmarkNode) {
+    }    else if (value is TabLockChange) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 1, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is BookmarkImportNode) {
+    }    else if (value is TabLifecycleState) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 2, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is BookmarkInsertTreeResult) {
+    }    else if (value is TabSleepResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 3, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is BookmarkInfo) {
+    }    else if (value is TabSleepPolicy) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 4, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is SitePermissions) {
+    }    else if (value is ContainerAutoFreeze) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 5, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is TrackingProtectionException) {
+    }    else if (value is ContextFreezeState) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 6, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is TrackerLogEntry) {
+    }    else if (value is OwnerFreezeState) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 7, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is TrackingStatisticsRecord) {
+    }    else if (value is LifecycleSnapshot) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 8, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is TrackingStatistics) {
+    }    else if (value is FreezeBlocker) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 9, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is AppLinkTarget) {
+    }    else if (value is FreezeOperationResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 10, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is ProtectedTargetPattern) {
+    }    else if (value is ContextReleaseResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 11, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is NativeAppLinkRule) {
+    }    else if (value is ContainerContexts) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 12, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is NativeContextAppLinkPolicy) {
+    }    else if (value is FrozenWindowHandoff) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 13, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is AppLinkPolicySnapshot) {
+    }    else if (value is PendingUndoTab) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 14, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is AppLinkPromptRequest) {
+    }    else if (value is GeckoPref) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 15, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is AppLinkResolutionResult) {
+    }    else if (value is MlProgressData) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 16, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PwaIcon) {
+    }    else if (value is GeckoProxySettings) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 17, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is ShareTargetFiles) {
+    }    else if (value is GeckoProxyRoutingSnapshot) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 18, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is ShareTargetParams) {
+    }    else if (value is GeckoRoutingDemand) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 19, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is ShareTarget) {
+    }    else if (value is GeckoProxyRoutingStatus) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 20, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is ExternalApplicationResource) {
+    }    else if (value is ContainerSiteAssignment) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 21, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PwaManifest) {
+    }    else if (value is ProxyLoadError) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 22, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is SandboxCaptureEntry) {
+    }    else if (value is GeckoHeader) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 23, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is GestureConfig) {
+    }    else if (value is GeckoFetchRequest) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 24, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is SplitPairState) {
+    }    else if (value is GeckoFetchResponse) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 25, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is SplitViewLabels) {
+    }    else if (value is BookmarkNode) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 26, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is SplitViewState) {
+    }    else if (value is BookmarkImportNode) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 27, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PushDistributor) {
+    }    else if (value is BookmarkInsertTreeResult) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 28, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PushStatus) {
+    }    else if (value is BookmarkInfo) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 29, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
-    }    else if (value is PushSubscription) {
+    }    else if (value is SitePermissions) {
       final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 30, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is TrackingProtectionException) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 31, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is TrackerLogEntry) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 32, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is TrackingStatisticsRecord) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 33, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is TrackingStatistics) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 34, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is AppLinkTarget) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 35, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is ProtectedTargetPattern) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 36, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is NativeAppLinkRule) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 37, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is NativeContextAppLinkPolicy) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 38, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is AppLinkPolicySnapshot) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 39, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is AppLinkPromptRequest) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 40, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is AppLinkResolutionResult) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 41, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is PwaIcon) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 42, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is ShareTargetFiles) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 43, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is ShareTargetParams) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 44, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is ShareTarget) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 45, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is ExternalApplicationResource) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 46, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is PwaManifest) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 47, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is SandboxCaptureEntry) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 48, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is GestureConfig) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 49, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is SplitPairState) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 50, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is SplitViewLabels) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 51, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is FrozenPlaceholderLabel) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 52, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is SplitViewState) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 53, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is PushDistributor) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 54, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is PushStatus) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 55, wrapped: value.encode());
+      buffer.putUint8(255);
+      writeValue(buffer, wrap.encode());
+    }    else if (value is PushSubscription) {
+      final _PigeonCodecOverflow wrap = _PigeonCodecOverflow(type: 56, wrapped: value.encode());
       buffer.putUint8(255);
       writeValue(buffer, wrap.encode());
     } else {
@@ -9122,218 +10525,228 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : SyncEngineValue.values[value];
       case 157:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressType.values[value];
+        return value == null ? null : TabLockRejection.values[value];
       case 158:
         final value = readValue(buffer) as int?;
-        return value == null ? null : MlProgressStatus.values[value];
+        return value == null ? null : TabResidency.values[value];
       case 159:
         final value = readValue(buffer) as int?;
-        return value == null ? null : ClearDataType.values[value];
+        return value == null ? null : TabSleepHold.values[value];
       case 160:
         final value = readValue(buffer) as int?;
-        return value == null ? null : DownloadControl.values[value];
+        return value == null ? null : LifecycleOperationState.values[value];
       case 161:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchMethod.values[value];
+        return value == null ? null : LifecycleFailure.values[value];
       case 162:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchRedircet.values[value];
+        return value == null ? null : ProtectedActivity.values[value];
       case 163:
         final value = readValue(buffer) as int?;
-        return value == null ? null : GeckoFetchCookiePolicy.values[value];
+        return value == null ? null : ContextFreezePhase.values[value];
       case 164:
         final value = readValue(buffer) as int?;
-        return value == null ? null : BookmarkNodeType.values[value];
+        return value == null ? null : LifecycleRegistryMode.values[value];
       case 165:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SitePermissionStatus.values[value];
+        return value == null ? null : EngineEnforcement.values[value];
       case 166:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AutoplayStatus.values[value];
+        return value == null ? null : FreezeActivity.values[value];
       case 167:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackerLogCategory.values[value];
+        return value == null ? null : MlProgressType.values[value];
       case 168:
         final value = readValue(buffer) as int?;
-        return value == null ? null : TrackingStatisticsType.values[value];
+        return value == null ? null : MlProgressStatus.values[value];
       case 169:
         final value = readValue(buffer) as int?;
-        return value == null ? null : NativeAppLinkRuleDecision.values[value];
+        return value == null ? null : ClearDataType.values[value];
       case 170:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinkPromptOwner.values[value];
+        return value == null ? null : DownloadControl.values[value];
       case 171:
         final value = readValue(buffer) as int?;
-        return value == null ? null : AppLinkDecision.values[value];
+        return value == null ? null : GeckoFetchMethod.values[value];
       case 172:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SplitPaneMode.values[value];
+        return value == null ? null : GeckoFetchRedircet.values[value];
       case 173:
         final value = readValue(buffer) as int?;
-        return value == null ? null : SplitAxis.values[value];
+        return value == null ? null : GeckoFetchCookiePolicy.values[value];
       case 174:
         final value = readValue(buffer) as int?;
-        return value == null ? null : PushDistributorStatus.values[value];
+        return value == null ? null : BookmarkNodeType.values[value];
       case 175:
-        return TranslationOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SitePermissionStatus.values[value];
       case 176:
-        return TranslationLanguage.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : AutoplayStatus.values[value];
       case 177:
-        return TranslationDetectedLanguages.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : TrackerLogCategory.values[value];
       case 178:
-        return TranslationPair.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : TrackingStatisticsType.values[value];
       case 179:
-        return TranslationEngineStateData.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NativeAppLinkRuleDecision.values[value];
       case 180:
-        return TabTranslationStateData.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : AppLinkPromptOwner.values[value];
       case 181:
-        return ReaderState.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : AppLinkDecision.values[value];
       case 182:
-        return AddTabParams.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SplitPaneMode.values[value];
       case 183:
-        return LastMediaAccessState.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : SplitAxis.values[value];
       case 184:
-        return HistoryMetadataKey.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : PushDistributorStatus.values[value];
       case 185:
-        return PackageCategoryValue.decode(readValue(buffer)!);
+        return TranslationOptions.decode(readValue(buffer)!);
       case 186:
-        return ExternalPackage.decode(readValue(buffer)!);
+        return TranslationLanguage.decode(readValue(buffer)!);
       case 187:
-        return LoadUrlFlagsValue.decode(readValue(buffer)!);
+        return TranslationDetectedLanguages.decode(readValue(buffer)!);
       case 188:
-        return SourceValue.decode(readValue(buffer)!);
+        return TranslationPair.decode(readValue(buffer)!);
       case 189:
-        return TabState.decode(readValue(buffer)!);
+        return TranslationEngineStateData.decode(readValue(buffer)!);
       case 190:
-        return RecoverableTab.decode(readValue(buffer)!);
+        return TabTranslationStateData.decode(readValue(buffer)!);
       case 191:
-        return IconRequest.decode(readValue(buffer)!);
+        return ReaderState.decode(readValue(buffer)!);
       case 192:
-        return ResourceSize.decode(readValue(buffer)!);
+        return AddTabParams.decode(readValue(buffer)!);
       case 193:
-        return Resource.decode(readValue(buffer)!);
+        return LastMediaAccessState.decode(readValue(buffer)!);
       case 194:
-        return IconResult.decode(readValue(buffer)!);
+        return HistoryMetadataKey.decode(readValue(buffer)!);
       case 195:
-        return CookiePartitionKey.decode(readValue(buffer)!);
+        return PackageCategoryValue.decode(readValue(buffer)!);
       case 196:
-        return Cookie.decode(readValue(buffer)!);
+        return ExternalPackage.decode(readValue(buffer)!);
       case 197:
-        return VisitInfo.decode(readValue(buffer)!);
+        return LoadUrlFlagsValue.decode(readValue(buffer)!);
       case 198:
-        return HistoryHighlightWeights.decode(readValue(buffer)!);
+        return SourceValue.decode(readValue(buffer)!);
       case 199:
-        return HistoryHighlight.decode(readValue(buffer)!);
+        return TabState.decode(readValue(buffer)!);
       case 200:
-        return TopFrecentSiteInfo.decode(readValue(buffer)!);
+        return RecoverableTab.decode(readValue(buffer)!);
       case 201:
-        return HistoryMetadata.decode(readValue(buffer)!);
+        return IconRequest.decode(readValue(buffer)!);
       case 202:
-        return HistorySuggestion.decode(readValue(buffer)!);
+        return ResourceSize.decode(readValue(buffer)!);
       case 203:
-        return PageObservation.decode(readValue(buffer)!);
+        return Resource.decode(readValue(buffer)!);
       case 204:
-        return HistoryItem.decode(readValue(buffer)!);
+        return IconResult.decode(readValue(buffer)!);
       case 205:
-        return HistoryState.decode(readValue(buffer)!);
+        return CookiePartitionKey.decode(readValue(buffer)!);
       case 206:
-        return ReaderableState.decode(readValue(buffer)!);
+        return Cookie.decode(readValue(buffer)!);
       case 207:
-        return SecurityInfoState.decode(readValue(buffer)!);
+        return VisitInfo.decode(readValue(buffer)!);
       case 208:
-        return TabContentState.decode(readValue(buffer)!);
+        return HistoryHighlightWeights.decode(readValue(buffer)!);
       case 209:
-        return FindResultState.decode(readValue(buffer)!);
+        return HistoryHighlight.decode(readValue(buffer)!);
       case 210:
-        return CustomSelectionAction.decode(readValue(buffer)!);
+        return TopFrecentSiteInfo.decode(readValue(buffer)!);
       case 211:
-        return WebExtensionData.decode(readValue(buffer)!);
+        return HistoryMetadata.decode(readValue(buffer)!);
       case 212:
-        return AddonUpdatePermissionRequest.decode(readValue(buffer)!);
+        return HistorySuggestion.decode(readValue(buffer)!);
       case 213:
-        return AddonInfo.decode(readValue(buffer)!);
+        return PageObservation.decode(readValue(buffer)!);
       case 214:
-        return AddonListingPreview.decode(readValue(buffer)!);
+        return HistoryItem.decode(readValue(buffer)!);
       case 215:
-        return AddonListing.decode(readValue(buffer)!);
+        return HistoryState.decode(readValue(buffer)!);
       case 216:
-        return AddonStoreInfo.decode(readValue(buffer)!);
+        return ReaderableState.decode(readValue(buffer)!);
       case 217:
-        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
+        return SecurityInfoState.decode(readValue(buffer)!);
       case 218:
-        return GeckoSuggestion.decode(readValue(buffer)!);
+        return TabContentState.decode(readValue(buffer)!);
       case 219:
-        return TabContent.decode(readValue(buffer)!);
+        return FindResultState.decode(readValue(buffer)!);
       case 220:
-        return ContentBlocking.decode(readValue(buffer)!);
+        return CustomSelectionAction.decode(readValue(buffer)!);
       case 221:
-        return DohSettings.decode(readValue(buffer)!);
+        return WebExtensionData.decode(readValue(buffer)!);
       case 222:
-        return GeckoEngineSettings.decode(readValue(buffer)!);
+        return AddonUpdatePermissionRequest.decode(readValue(buffer)!);
       case 223:
-        return AutocompleteResult.decode(readValue(buffer)!);
+        return AddonInfo.decode(readValue(buffer)!);
       case 224:
-        return UnknownHitResult.decode(readValue(buffer)!);
+        return AddonListingPreview.decode(readValue(buffer)!);
       case 225:
-        return ImageHitResult.decode(readValue(buffer)!);
+        return AddonListing.decode(readValue(buffer)!);
       case 226:
-        return VideoHitResult.decode(readValue(buffer)!);
+        return AddonStoreInfo.decode(readValue(buffer)!);
       case 227:
-        return AudioHitResult.decode(readValue(buffer)!);
+        return AddonUpdateAttemptInfo.decode(readValue(buffer)!);
       case 228:
-        return ImageSrcHitResult.decode(readValue(buffer)!);
+        return GeckoSuggestion.decode(readValue(buffer)!);
       case 229:
-        return PhoneHitResult.decode(readValue(buffer)!);
+        return TabContent.decode(readValue(buffer)!);
       case 230:
-        return EmailHitResult.decode(readValue(buffer)!);
+        return ContentBlocking.decode(readValue(buffer)!);
       case 231:
-        return GeoHitResult.decode(readValue(buffer)!);
+        return DohSettings.decode(readValue(buffer)!);
       case 232:
-        return DownloadState.decode(readValue(buffer)!);
+        return GeckoEngineSettings.decode(readValue(buffer)!);
       case 233:
-        return ShareInternetResourceState.decode(readValue(buffer)!);
+        return AutocompleteResult.decode(readValue(buffer)!);
       case 234:
-        return AddonCollection.decode(readValue(buffer)!);
+        return UnknownHitResult.decode(readValue(buffer)!);
       case 235:
-        return GeckoComponentVersions.decode(readValue(buffer)!);
+        return ImageHitResult.decode(readValue(buffer)!);
       case 236:
-        return SyncEngineStatus.decode(readValue(buffer)!);
+        return VideoHitResult.decode(readValue(buffer)!);
       case 237:
-        return SyncAccountInfo.decode(readValue(buffer)!);
+        return AudioHitResult.decode(readValue(buffer)!);
       case 238:
-        return SyncDevice.decode(readValue(buffer)!);
+        return ImageSrcHitResult.decode(readValue(buffer)!);
       case 239:
-        return SyncIncomingTab.decode(readValue(buffer)!);
+        return PhoneHitResult.decode(readValue(buffer)!);
       case 240:
-        return SyncRemoteTab.decode(readValue(buffer)!);
+        return EmailHitResult.decode(readValue(buffer)!);
       case 241:
-        return SyncDeviceTabs.decode(readValue(buffer)!);
+        return GeoHitResult.decode(readValue(buffer)!);
       case 242:
-        return PreferredDownloadManager.decode(readValue(buffer)!);
+        return DownloadState.decode(readValue(buffer)!);
       case 243:
-        return PullToRefreshSettings.decode(readValue(buffer)!);
+        return ShareInternetResourceState.decode(readValue(buffer)!);
       case 244:
-        return RecentlyClosedTab.decode(readValue(buffer)!);
+        return AddonCollection.decode(readValue(buffer)!);
       case 245:
-        return GeckoPref.decode(readValue(buffer)!);
+        return GeckoComponentVersions.decode(readValue(buffer)!);
       case 246:
-        return MlProgressData.decode(readValue(buffer)!);
+        return SyncEngineStatus.decode(readValue(buffer)!);
       case 247:
-        return GeckoProxySettings.decode(readValue(buffer)!);
+        return SyncAccountInfo.decode(readValue(buffer)!);
       case 248:
-        return GeckoProxyRoutingSnapshot.decode(readValue(buffer)!);
+        return SyncDevice.decode(readValue(buffer)!);
       case 249:
-        return GeckoRoutingDemand.decode(readValue(buffer)!);
+        return SyncIncomingTab.decode(readValue(buffer)!);
       case 250:
-        return GeckoProxyRoutingStatus.decode(readValue(buffer)!);
+        return SyncRemoteTab.decode(readValue(buffer)!);
       case 251:
-        return ContainerSiteAssignment.decode(readValue(buffer)!);
+        return SyncDeviceTabs.decode(readValue(buffer)!);
       case 252:
-        return ProxyLoadError.decode(readValue(buffer)!);
+        return PreferredDownloadManager.decode(readValue(buffer)!);
       case 253:
-        return GeckoHeader.decode(readValue(buffer)!);
+        return PullToRefreshSettings.decode(readValue(buffer)!);
       case 254:
-        return GeckoFetchRequest.decode(readValue(buffer)!);
+        return RecentlyClosedTab.decode(readValue(buffer)!);
       case 255:
         final _PigeonCodecOverflow wrapper = _PigeonCodecOverflow.decode(readValue(buffer)!);
         return wrapper.unwrap();
@@ -10537,6 +11950,455 @@ class GeckoRecentlyClosedTabsApi {
   }
 }
 
+/// Native's copy of the tab locks, which it enforces for every removal
+/// (`TabCloseProtection`). Dart's `tab.is_locked` is the record of what the user
+/// asked for; native's set always contains it.
+///
+/// Registered when the plugin attaches: [bootstrapLockedTabs] runs before the
+/// engine starts.
+class GeckoTabLockApi {
+  /// Constructor for [GeckoTabLockApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoTabLockApi({
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+
+  /// The trusted, profile-scoped startup snapshot from the database. Not
+  /// checked against open tabs, which are not restored yet; works before the
+  /// browser components exist. Replaces the persisted set. Throws when it could
+  /// not be persisted, and the previous set stays in force.
+  Future<void> bootstrapLockedTabs(List<String> tabIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.bootstrapLockedTabs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// An interactive change, checked against the open tabs. Locking also writes
+  /// the session file before answering, so a tab that was just opened cannot
+  /// be locked and then lost to process death before the next autosave.
+  Future<TabLockChange> setTabLocked(String tabId, bool locked) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.setTabLocked$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId, locked]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as TabLockChange;
+  }
+
+  /// Which of [tabIds] native holds locked right now.
+  Future<List<String>> lockedTabIdsAmong(List<String> tabIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.lockedTabIdsAmong$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
+  /// After the session restore and Dart's catch-up only: native's set becomes
+  /// [tabIds] limited to the open tabs. Returns the ids that were dropped.
+  /// Throws when the new set could not be persisted, and the old one stays.
+  Future<List<String>> reconcileLockedTabs(List<String> tabIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.reconcileLockedTabs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+}
+
+/// Tab sleep (phase T1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`).
+/// The holds are process-wide in native (`TabLifecycleRegistry`); the
+/// operations need the browser components and fail with `componentsReplaced`
+/// when those are rebuilt meanwhile.
+class GeckoTabLifecycleApi {
+  /// Constructor for [GeckoTabLifecycleApi]. The [binaryMessenger] named argument is
+  /// available for dependency injection. If it is left null, the default
+  /// BinaryMessenger will be used which routes to the host platform.
+  GeckoTabLifecycleApi({
+      BinaryMessenger? binaryMessenger, 
+      String messageChannelSuffix = '', 
+      })
+      : pigeonVar_binaryMessenger = binaryMessenger,
+        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+
+  final BinaryMessenger? pigeonVar_binaryMessenger;
+  static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
+
+  final String pigeonVar_messageChannelSuffix;
+
+
+  /// Puts [tabIds] to sleep: holds each, checks what it is doing (D13), saves
+  /// its state and unloads its page. Media and a POST result only refuse
+  /// unless confirmed with [stopMedia] and [discardPostResult]; form input
+  /// only for the tabs of [discardFormDataTabIds], the ones the user was
+  /// asked about, so input found in another tab on the retry still refuses.
+  Future<List<TabSleepResult>> sleepTabs(List<String> tabIds, bool stopMedia, bool discardPostResult, List<String> discardFormDataTabIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.sleepTabs$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds, stopMedia, discardPostResult, discardFormDataTabIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<TabSleepResult>();
+  }
+
+  /// Clears [tabId]'s sleep hold (the placeholder's Wake, the menus' Wake, a
+  /// navigation): only while the routing this process installed covers the
+  /// tab's context (D34), so nothing of it goes out another way. A tab on
+  /// screen loads at once; any other loads when it is shown or something
+  /// reaches it. A sleeping tab never wakes by coming on screen (D10).
+  /// Returns whether it was woken; false for a tab that is not open. Waiting
+  /// out the install window at a cold start is the caller's.
+  Future<bool> wakeTab(String tabId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.wakeTab$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// [tabId]'s lifecycle as native has it now. `onTabLifecycleChange`
+  /// reaches Dart some time after a hold is placed, so a decision that must
+  /// not miss one (a navigation the user asked for, 5.2.1) asks here. Null
+  /// for a tab that is not open.
+  Future<TabLifecycleState?> getTabLifecycleState(String tabId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.getTabLifecycleState$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+    return pigeonVar_replyValue as TabLifecycleState?;
+  }
+
+  /// Replaces the automatic sleep policy. Process-wide: kept across a
+  /// components rebuild, and accepted before the components exist.
+  Future<void> setSleepPolicy(TabSleepPolicy policy) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.setSleepPolicy$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[policy]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Freezes a container's contexts (5.4). Called only from Dart's gated
+  /// preflight (D21). [memberTabIds] are the tabs Dart found in the
+  /// container; a tab of [contextIds] outside them refuses the freeze.
+  /// [stopMedia], [discardPostResult] and [discardFormDataTabIds] (the tabs
+  /// whose form input the user agreed to lose) confirm what the user was
+  /// asked.
+  Future<FreezeOperationResult> freezeContexts(String ownerId, List<String> contextIds, List<String> memberTabIds, bool stopMedia, bool discardPostResult, List<String> discardFormDataTabIds, bool automatic) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.freezeContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerId, contextIds, memberTabIds, stopMedia, discardPostResult, discardFormDataTabIds, automatic]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as FreezeOperationResult;
+  }
+
+  /// Resumes [ownerId]'s contexts (5.5): lifts the restriction, drains the
+  /// deferred subscription changes and wakes [wakeTabId]. Routing for every
+  /// context is the caller's to check first (D34). Also stops a running
+  /// freeze of the owner ("Stop freezing and resume").
+  Future<FreezeOperationResult> resumeContexts(String ownerId, String? wakeTabId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.resumeContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerId, wakeTabId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as FreezeOperationResult;
+  }
+
+  /// Before the container's row is deleted: its contexts become
+  /// `deletionPending` and stay restricted (D28), and [deleteDataOf], storage
+  /// of it without a record whose data the user asked to delete with it
+  /// (D29), is written down as a data deletion, which restricts nothing
+  /// until the row is gone.
+  Future<FreezeOperationResult> beginContextDeletion(String ownerId, List<String> deleteDataOf) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.beginContextDeletion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerId, deleteDataOf]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as FreezeOperationResult;
+  }
+
+  /// The row delete did not happen: back to the phase each context had.
+  Future<FreezeOperationResult> cancelContextDeletion(String ownerId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.cancelContextDeletion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as FreezeOperationResult;
+  }
+
+  /// After the row delete: the release procedure for each of its contexts,
+  /// also the storage of its data deletions, recorded as releasing first, so
+  /// its push subscriptions go too and every start retries what is left.
+  Future<FreezeOperationResult> completeContextDeletion(String ownerId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.completeContextDeletion$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as FreezeOperationResult;
+  }
+
+  /// FULL start, normal mode, when the gate is seeded: matches the records
+  /// against the containers that exist (5.5), starts pending releases in the
+  /// background, and returns the snapshot afterwards.
+  Future<LifecycleSnapshot> reconcileOwners(List<String> existingOwnerIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.reconcileOwners$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[existingOwnerIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as LifecycleSnapshot;
+  }
+
+  /// The one release procedure (D32): releasing, push subscriptions removed,
+  /// data cleared with an acknowledgment, then lifted and forgotten.
+  Future<List<ContextReleaseResult>> releaseContexts(List<String> contextIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.releaseContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<ContextReleaseResult>();
+  }
+
+  /// Recovery mode only (D23): freezes each of [owners]' contexts explicitly,
+  /// keeps every other context that has a registration or subscription as
+  /// orphaned, releases [unfreezableContextIds] (used by tabs no freezable
+  /// container owns), and ends the recovery. Refused in normal mode.
+  Future<LifecycleSnapshot> reconstructFrozenContexts(List<ContainerContexts> owners, List<String> unfreezableContextIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.reconstructFrozenContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[owners, unfreezableContextIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as LifecycleSnapshot;
+  }
+
+  /// The registry now. Works before the components exist (it is
+  /// process-wide). Seeds the membership gate (5.7).
+  Future<LifecycleSnapshot> getLifecycleSnapshot() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.getLifecycleSnapshot$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as LifecycleSnapshot;
+  }
+
+  /// What "Open WebLibre to resume" in a web app or custom tab window of a
+  /// frozen context (D18) left for the browser, taken once; null when
+  /// nothing is waiting. Kept in the process, never on an intent, so no
+  /// other app can choose the storage it names.
+  Future<FrozenWindowHandoff?> takeFrozenWindowHandoff() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.takeFrozenWindowHandoff$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+    return pigeonVar_replyValue as FrozenWindowHandoff?;
+  }
+}
+
 class GeckoTabsApi {
   /// Constructor for [GeckoTabsApi]. The [binaryMessenger] named argument is
   /// available for dependency injection. If it is left null, the default
@@ -10596,14 +12458,58 @@ class GeckoTabsApi {
     return pigeonVar_replyValue as String?;
   }
 
-  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onRestoreComplete, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onReaderableStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, required bool onBrowserExtensionsChange, required bool onPageExtensionsChange, required bool onBrowserExtensionIcons, required bool onPageExtensionIcons, required bool onTranslationStateChange, }) async {
+  /// The ids of the tabs in the store right now that run in session context
+  /// [contextId], private ones included. Read straight from the store, so a
+  /// tab the engine opened a moment ago is in it before any event reports it.
+  Future<List<String>> getTabIdsInContext(String contextId) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getTabIdsInContext$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextId]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
+  /// The ids of the custom tabs and web app windows in the store right now
+  /// that run in one of [contextIds]. They are not tabs: closing tabs never
+  /// reaches them.
+  Future<List<String>> getCustomTabIdsInContexts(List<String> contextIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getCustomTabIdsInContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
+  Future<void> syncEvents({required bool onSelectedTabChange, required bool onTabListChange, required bool onRestoreComplete, required bool onTabContentStateChange, required bool onIconChange, required bool onSecurityInfoStateChange, required bool onReaderableStateChange, required bool onHistoryStateChange, required bool onFindResults, required bool onThumbnailChange, required bool onBrowserExtensionsChange, required bool onPageExtensionsChange, required bool onBrowserExtensionIcons, required bool onPageExtensionIcons, required bool onTranslationStateChange, required bool onTabLifecycleChange, }) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.syncEvents$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onRestoreComplete, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onReaderableStateChange, onHistoryStateChange, onFindResults, onThumbnailChange, onBrowserExtensionsChange, onPageExtensionsChange, onBrowserExtensionIcons, onPageExtensionIcons, onTranslationStateChange]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[onSelectedTabChange, onTabListChange, onRestoreComplete, onTabContentStateChange, onIconChange, onSecurityInfoStateChange, onReaderableStateChange, onHistoryStateChange, onFindResults, onThumbnailChange, onBrowserExtensionsChange, onPageExtensionsChange, onBrowserExtensionIcons, onPageExtensionIcons, onTranslationStateChange, onTabLifecycleChange]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
@@ -10632,7 +12538,8 @@ class GeckoTabsApi {
     ;
   }
 
-  Future<void> removeTab({required String tabId}) async {
+  /// Removes [tabId] unless it is locked, and reports what happened.
+  Future<TabRemovalResult> removeTab({required String tabId}) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeTab$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -10642,12 +12549,13 @@ class GeckoTabsApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabId]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
-    _extractReplyValueOrThrow(
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
         pigeonVar_replyList,
         pigeonVar_channelName,
-        isNullValid: true,
+        isNullValid: false,
     )
     ;
+    return pigeonVar_replyValue! as TabRemovalResult;
   }
 
   Future<String> addTab({required String url, required bool selectTab, required bool startLoading, required String? parentId, required LoadUrlFlagsValue flags, required String? contextId, required SourceValue source, required bool private, required HistoryMetadataKey? historyMetadata, required Map<String, String>? additionalHeaders, required bool excludeFromHistory, required bool parentIsReferrer, }) async {
@@ -10706,7 +12614,8 @@ class GeckoTabsApi {
     ;
   }
 
-  Future<void> removeTabs({required List<String> ids}) async {
+  /// Removes [ids], keeping locked tabs, and reports what happened.
+  Future<TabRemovalResult> removeTabs({required List<String> ids}) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.removeTabs$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
@@ -10716,12 +12625,13 @@ class GeckoTabsApi {
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ids]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
-    _extractReplyValueOrThrow(
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
         pigeonVar_replyList,
         pigeonVar_channelName,
-        isNullValid: true,
+        isNullValid: false,
     )
     ;
+    return pigeonVar_replyValue! as TabRemovalResult;
   }
 
   Future<void> removeNormalTabs() async {
@@ -10760,18 +12670,69 @@ class GeckoTabsApi {
     ;
   }
 
-  /// Restores the most recently closed tabs, if the engine still has them.
-  ///
-  /// Returns whether any tabs are being restored. When none are, the tab list
-  /// does not change at all.
-  Future<bool> undo() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.undo$pigeonVar_messageChannelSuffix';
+  /// The tabs the pending undo close would bring back, each with the context
+  /// it ran in; empty when there is none.
+  Future<List<PendingUndoTab>> pendingUndoTabs() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.pendingUndoTabs$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<PendingUndoTab>();
+  }
+
+  /// Restores the most recently closed tabs, if the engine still has them,
+  /// and answers once they are back in the store: AC restores them in a
+  /// coroutine of its own, after the undo was dispatched.
+  ///
+  /// Only when the pending undo close brings back exactly [expectedTabIds]
+  /// (as [pendingUndoTabs] listed them), so that what the caller checked is
+  /// what comes back: a close in between replaced it otherwise.
+  ///
+  /// Returns the ids of the tabs that came back; empty when the engine had
+  /// none to restore, or other ones, and then the tab list does not change
+  /// at all.
+  Future<List<String>> undo(List<String> expectedTabIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.undo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[expectedTabIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return (pigeonVar_replyValue! as List<Object?>).cast<String>();
+  }
+
+  /// Drops the pending undo close when it would bring back one of [tabIds] or
+  /// a tab that ran in one of [contextIds], so that nothing comes back into a
+  /// deleted container. Its other tabs go on the recently closed list, as
+  /// they would once the undo ran out. Returns whether it dropped it.
+  Future<bool> discardUndoOf(List<String> tabIds, List<String> contextIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.discardUndoOf$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[tabIds, contextIds]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
@@ -11397,6 +13358,30 @@ class GeckoContainerProxyApi {
     return pigeonVar_replyValue! as GeckoProxyRoutingStatus;
   }
 
+  /// Whether the routing this process installed covers every one of
+  /// [contextIds] the way a pane requires before it wakes a tab: a direct
+  /// relation, a live proxy, or one that is still starting. False while none
+  /// is installed, and for a context whose proxy has no endpoint. Reads the
+  /// same cached state as [routingStatus].
+  Future<bool> routingCoversContexts(List<String> contextIds) async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.routingCoversContexts$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextIds]);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as bool;
+  }
+
   /// The oldest launch waiting for a proxy to be started, or null when none is.
   /// Consumes it: a demand is answered by starting what it names.
   ///
@@ -11596,6 +13581,32 @@ abstract class GeckoStateEvents {
   Future<void> onTranslationEngineStateChange(int sequence, TranslationEngineStateData state);
 
   Future<void> onTabTranslationStateChange(int sequence, TabTranslationStateData state);
+
+  /// A tab's lifecycle changed: its residency, its sleep hold, or an operation
+  /// on it began or ended.
+  Future<void> onTabLifecycleChange(int sequence, TabLifecycleState state);
+
+  /// The user pressed Wake on a sleeping tab's placeholder. Native does not
+  /// wake it: Dart checks the tab's routing first (D34), then calls
+  /// `GeckoTabLifecycleApi.wakeTab`.
+  Future<void> onWakeRequested(int sequence, String tabId);
+
+  /// The registry changed. For what the user sees; the membership gate reads
+  /// its own snapshot (D27).
+  Future<void> onContextFreezeChange(int sequence, LifecycleSnapshot snapshot);
+
+  /// The user pressed Resume on a frozen tab's placeholder. Native does not
+  /// resume: Dart checks routing for every context first (D34).
+  Future<void> onResumeRequested(int sequence, String tabId);
+
+  /// A freeze tore down [done] of [total] tabs (barrier 4).
+  Future<void> onContextFreezeProgress(int sequence, String ownerId, int done, int total);
+
+  /// No member of [ownerId] has been used for its automatic freeze time
+  /// (5.9). Native freezes nothing on its own: Dart runs its gated preflight
+  /// with `automatic` (D21). Sent again at the next evaluation while it stays
+  /// due.
+  Future<void> onContainerFreezeDue(int sequence, String ownerId);
 
   static void setUp(GeckoStateEvents? api, {
     BinaryMessenger? binaryMessenger, 
@@ -12110,6 +14121,140 @@ abstract class GeckoStateEvents {
           final TabTranslationStateData arg_state = args[1]! as TabTranslationStateData;
           try {
             await api.onTabTranslationStateChange(arg_sequence, arg_state);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabLifecycleChange$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final TabLifecycleState arg_state = args[1]! as TabLifecycleState;
+          try {
+            await api.onTabLifecycleChange(arg_sequence, arg_state);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onWakeRequested$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_tabId = args[1]! as String;
+          try {
+            await api.onWakeRequested(arg_sequence, arg_tabId);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContextFreezeChange$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final LifecycleSnapshot arg_snapshot = args[1]! as LifecycleSnapshot;
+          try {
+            await api.onContextFreezeChange(arg_sequence, arg_snapshot);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onResumeRequested$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_tabId = args[1]! as String;
+          try {
+            await api.onResumeRequested(arg_sequence, arg_tabId);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContextFreezeProgress$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_ownerId = args[1]! as String;
+          final int arg_done = args[2]! as int;
+          final int arg_total = args[3]! as int;
+          try {
+            await api.onContextFreezeProgress(arg_sequence, arg_ownerId, arg_done, arg_total);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          }          catch (e) {
+            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerFreezeDue$messageChannelSuffix', pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          final List<Object?> args = message! as List<Object?>;
+          final int arg_sequence = args[0]! as int;
+          final String arg_ownerId = args[1]! as String;
+          try {
+            await api.onContainerFreezeDue(arg_sequence, arg_ownerId);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

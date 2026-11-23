@@ -54,6 +54,7 @@ extension BrowserActionPolicy on BrowserAction {
     BrowserAction.lastUsedTab ||
     BrowserAction.selectLastTab ||
     BrowserAction.togglePinTab ||
+    BrowserAction.toggleLockTab ||
     BrowserAction.moveTabBackward ||
     BrowserAction.moveTabForward ||
     BrowserAction.moveTabToStart ||

@@ -20,6 +20,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -30,49 +31,119 @@ class DeleteContainerDecision {
   /// visits are kept (shown as uncontained).
   final bool wipeHistory;
 
-  const DeleteContainerDecision({required this.wipeHistory});
+  /// Whether the site data of the container's own cookie storage should also
+  /// be deleted (D29). Always true for a frozen container.
+  final bool deleteSiteData;
+
+  const DeleteContainerDecision({
+    required this.wipeHistory,
+    required this.deleteSiteData,
+  });
 }
 
 /// Confirm container deletion. Returns the decision on confirm, or `null` if
 /// cancelled/dismissed.
+///
+/// [hasOwnStorage] offers "Also delete site data": a container without its
+/// own cookie storage has none of its own. For a [frozen] container it is
+/// checked and cannot be unchecked, with the reason (D29).
 Future<DeleteContainerDecision?> showDeleteContainerDialog(
-  BuildContext context,
-) {
+  BuildContext context, {
+  required bool hasOwnStorage,
+  required bool frozen,
+}) {
   return showDialog<DeleteContainerDecision?>(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => const _DeleteContainerDialog(),
+    builder: (context) =>
+        _DeleteContainerDialog(hasOwnStorage: hasOwnStorage, frozen: frozen),
   );
 }
 
+/// Shown instead of deleting a container that holds [count] locked tabs:
+/// nothing is closed or deleted. Returns whether to show its tabs, where they
+/// can be unlocked.
+Future<bool> showContainerHasLockedTabsDialog(
+  BuildContext context, {
+  required int count,
+}) async {
+  final l10n = AppLocalizations.of(context);
+  final showTabs = await showDialog<bool>(
+    context: context,
+    anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
+    builder: (context) => AlertDialog(
+      icon: const Icon(MdiIcons.lockOutline),
+      title: Text(l10n.tabs_deleteContainerTitle),
+      content: Text(l10n.tabs_deleteContainerLockedTabs(count)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(l10n.common_close),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(l10n.tabs_deleteContainerShowTabs),
+        ),
+      ],
+    ),
+  );
+  return showTabs ?? false;
+}
+
 class _DeleteContainerDialog extends HookWidget {
-  const _DeleteContainerDialog();
+  final bool hasOwnStorage;
+  final bool frozen;
+
+  const _DeleteContainerDialog({
+    required this.hasOwnStorage,
+    required this.frozen,
+  });
 
   @override
   Widget build(BuildContext context) {
     final wipeHistory = useState(false);
+    final deleteSiteData = useState(false);
     final l10n = AppLocalizations.of(context);
 
     return AlertDialog(
       icon: const Icon(Icons.warning),
       title: Text(l10n.tabs_deleteContainerTitle),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(l10n.tabs_deleteContainerConfirm),
-          const SizedBox(height: 8),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            controlAffinity: ListTileControlAffinity.leading,
-            value: wipeHistory.value,
-            onChanged: (value) {
-              wipeHistory.value = value ?? false;
-            },
-            title: Text(l10n.tabs_deleteContainerAlsoDeleteHistory),
-            subtitle: Text(l10n.tabs_deleteContainerHistoryKeptNote),
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.tabs_deleteContainerConfirm),
+            const SizedBox(height: 8),
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: wipeHistory.value,
+              onChanged: (value) {
+                wipeHistory.value = value ?? false;
+              },
+              title: Text(l10n.tabs_deleteContainerAlsoDeleteHistory),
+              subtitle: Text(l10n.tabs_deleteContainerHistoryKeptNote),
+            ),
+            if (hasOwnStorage || frozen)
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: frozen || deleteSiteData.value,
+                onChanged: frozen
+                    ? null
+                    : (value) {
+                        deleteSiteData.value = value ?? false;
+                      },
+                title: Text(l10n.tabs_deleteContainerAlsoDeleteSiteData),
+                subtitle: Text(
+                  frozen
+                      ? l10n.tabs_deleteContainerSiteDataFrozenNote
+                      : l10n.tabs_deleteContainerSiteDataNote,
+                ),
+              ),
+          ],
+        ),
       ),
       actions: <Widget>[
         TextButton(
@@ -85,7 +156,10 @@ class _DeleteContainerDialog extends HookWidget {
           onPressed: () {
             Navigator.pop(
               context,
-              DeleteContainerDecision(wipeHistory: wipeHistory.value),
+              DeleteContainerDecision(
+                wipeHistory: wipeHistory.value,
+                deleteSiteData: frozen || deleteSiteData.value,
+              ),
             );
           },
           child: Text(l10n.common_delete),

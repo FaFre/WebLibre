@@ -5,6 +5,7 @@
 package eu.weblibre.flutter_mozilla_components.push
 
 import android.util.Base64
+import eu.weblibre.flutter_mozilla_components.lifecycle.PushOutbox
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -35,6 +36,7 @@ class WebPushEngineIntegration(
         { ba -> Base64.encodeToString(ba, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP) },
 ) : PushObserver {
 
+    private val logger = Logger("WebPushEngineIntegration")
     private var handler: WebPushHandler? = null
     private val delegate = WebPushEngineDelegate(pushFeature, stringDecoder, byteArrayEncoder)
 
@@ -49,6 +51,7 @@ class WebPushEngineIntegration(
 
     suspend fun deliverMessage(scope: PushScope, payload: ByteArray?) {
         withContext(Dispatchers.Main.immediate) {
+            if (skipForRestrictedContext(scope)) return@withContext
             checkNotNull(handler) { "Web push handler is not initialized" }
                 .onPushMessage(scope, payload)
         }
@@ -56,8 +59,60 @@ class WebPushEngineIntegration(
 
     suspend fun invalidateEndpoint(scope: PushScope) {
         withContext(Dispatchers.Main.immediate) {
-            handler?.onSubscriptionChanged(scope)
+            notifySubscriptionChanged(scope)
         }
+    }
+
+    /**
+     * Hands the deferred subscription changes (D25) of [contextIds] (every
+     * context when null) to Gecko, for contexts no longer restricted, removing
+     * each only after the handoff. Nothing happens without a handler; the next
+     * drain delivers them.
+     */
+    suspend fun drainOutbox(contextIds: Collection<String>? = null) {
+        withContext(Dispatchers.Main.immediate) {
+            val handler = handler ?: return@withContext
+            val deliverable = PushOutbox.deliverable(PushContextGate::isDeferralRestricted)
+            val chosen = if (contextIds == null) {
+                deliverable
+            } else {
+                // Also those of no known context, once the last restriction
+                // went with these.
+                PushOutbox.scopesOf(contextIds + PushContextGate.ANY_CONTEXT).filter { it in deliverable }
+            }
+            chosen.forEach { scope ->
+                handler.onSubscriptionChanged(scope)
+                PushOutbox.delivered(scope)
+            }
+        }
+    }
+
+    /**
+     * A subscription change goes to Gecko unless its context is restricted;
+     * then it waits in the outbox until Resume (5.8). Transport state was
+     * already updated by the caller.
+     */
+    private fun notifySubscriptionChanged(scope: PushScope) {
+        when (val verdict = PushContextGate.verdict(scope)) {
+            PushContextGate.Verdict.Deliver -> handler?.onSubscriptionChanged(scope)
+            is PushContextGate.Verdict.Restricted -> {
+                // A scope whose context cannot be decoded waits until nothing
+                // is restricted.
+                val contextId = verdict.contextId ?: PushContextGate.ANY_CONTEXT
+                if (!PushOutbox.defer(scope, contextId)) {
+                    // Not written: dropping it would leave a stale subscription,
+                    // so it is lost only if the process dies before a drain.
+                    logger.warn("Could not defer a subscription change of a restricted context")
+                }
+            }
+        }
+    }
+
+    /** A message for a restricted context is consumed and counted (D14). */
+    private fun skipForRestrictedContext(scope: PushScope): Boolean {
+        if (!PushContextGate.consumeIfRestricted(scope)) return false
+        logger.info("Skipped a push message: its context is frozen")
+        return true
     }
 
     fun close() {
@@ -68,13 +123,14 @@ class WebPushEngineIntegration(
 
     override fun onMessageReceived(scope: PushScope, message: ByteArray?) {
         coroutineScope.launch {
+            if (skipForRestrictedContext(scope)) return@launch
             handler?.onPushMessage(scope, message)
         }
     }
 
     override fun onSubscriptionChanged(scope: PushScope) {
         coroutineScope.launch {
-            handler?.onSubscriptionChanged(scope)
+            notifySubscriptionChanged(scope)
         }
     }
 }

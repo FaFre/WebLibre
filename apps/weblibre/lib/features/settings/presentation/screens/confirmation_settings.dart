@@ -35,7 +35,9 @@ String _sectionTitle(AppLocalizations l10n, RememberedPrompt prompt) {
   return switch (prompt) {
     RememberedPrompt.keepExternalTab ||
     RememberedPrompt.closeIsolatedTabs ||
-    RememberedPrompt.closeAllTabs => l10n.settings_tabsSectionTitle,
+    RememberedPrompt.closeAllTabs ||
+    RememberedPrompt.sleepTabs ||
+    RememberedPrompt.freezeContainer => l10n.settings_tabsSectionTitle,
     RememberedPrompt.startTor ||
     RememberedPrompt.startProxyConnection => l10n.settings_proxySectionTitle,
   };
@@ -46,7 +48,9 @@ String _sectionTitle(AppLocalizations l10n, RememberedPrompt prompt) {
 /// undone (P5). A switch, so a new [RememberedPrompt] has to pick one.
 FeatureId? _promptFeature(RememberedPrompt prompt) => switch (prompt) {
   RememberedPrompt.keepExternalTab || RememberedPrompt.closeAllTabs => null,
+  RememberedPrompt.sleepTabs => FeatureId.tabsSleep,
   RememberedPrompt.closeIsolatedTabs => FeatureId.tabsIsolatedUi,
+  RememberedPrompt.freezeContainer => FeatureId.containerFreeze,
   RememberedPrompt.startTor => FeatureId.connectionsTorBasic,
   RememberedPrompt.startProxyConnection => FeatureId.connectionsImportVpnProxy,
 };
@@ -55,7 +59,9 @@ FeatureId? _promptFeature(RememberedPrompt prompt) => switch (prompt) {
 /// remembered answer ([_promptFeature]).
 KeptWhen? _promptKeptWhen(RememberedPrompt prompt) => switch (prompt) {
   RememberedPrompt.keepExternalTab || RememberedPrompt.closeAllTabs => null,
+  RememberedPrompt.sleepTabs => KeptWhen.sleepTabsRemembered,
   RememberedPrompt.closeIsolatedTabs => KeptWhen.closeIsolatedTabsRemembered,
+  RememberedPrompt.freezeContainer => KeptWhen.freezeContainerRemembered,
   RememberedPrompt.startTor => KeptWhen.startTorRemembered,
   RememberedPrompt.startProxyConnection =>
     KeptWhen.startProxyConnectionRemembered,
@@ -134,6 +140,8 @@ class _RememberedPromptTile extends HookConsumerWidget {
       RememberedPrompt.closeAllTabs => MdiIcons.closeCircle,
       RememberedPrompt.startTor => TorIcons.onionAlt,
       RememberedPrompt.startProxyConnection => Icons.route_outlined,
+      RememberedPrompt.sleepTabs => MdiIcons.sleep,
+      RememberedPrompt.freezeContainer => MdiIcons.pause,
     });
 
     if (prompt.isConfirmation) {

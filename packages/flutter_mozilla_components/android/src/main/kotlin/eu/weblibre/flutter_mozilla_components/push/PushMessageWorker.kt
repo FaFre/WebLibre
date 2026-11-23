@@ -4,6 +4,7 @@
 
 package eu.weblibre.flutter_mozilla_components.push
 
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -92,12 +93,10 @@ class PushMessageWorker(
             if (existing != null && existing.profileApplicationContext.relativePath != queuedProfile) {
                 return@profile Result.success()
             }
-            val initialized = existing != null || withContext(Dispatchers.Main.immediate) {
-                GlobalComponents.ensureExternalComponents(applicationContext)
-            }
-            if (!initialized) return@profile Result.retry()
 
-            val push = GlobalComponents.pushForProfile(activeProfile) ?: return@profile Result.retry()
+            // Read before anything starts Gecko: a message for a frozen
+            // container's context is consumed here (5.8, F27), so no
+            // components, no runtime and no retry come of it.
             val store = PushMessageStore(activeProfile)
             val message = try {
                 store.get(messageId)
@@ -108,6 +107,26 @@ class PushMessageWorker(
                 }
                 return@profile Result.failure()
             } ?: return@profile Result.success()
+
+            TabLifecycleRegistry.attach(applicationContext)
+            when (PushContextGate.consumeIfRestricted(message.scope) { store.complete(message.id) }) {
+                null -> {
+                    Log.e(TAG, "Unable to mark skipped push message ${message.id} complete")
+                    return@profile Result.retry()
+                }
+                true -> {
+                    Log.i(TAG, "Skipped push message ${message.id}: its context is frozen")
+                    return@profile Result.success()
+                }
+                false -> Unit
+            }
+
+            val initialized = existing != null || withContext(Dispatchers.Main.immediate) {
+                GlobalComponents.ensureExternalComponents(applicationContext)
+            }
+            if (!initialized) return@profile Result.retry()
+
+            val push = GlobalComponents.pushForProfile(activeProfile) ?: return@profile Result.retry()
 
             try {
                 push.deliverMessage(message.scope, message.payload)

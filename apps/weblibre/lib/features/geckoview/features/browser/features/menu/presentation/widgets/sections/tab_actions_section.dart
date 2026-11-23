@@ -32,15 +32,18 @@ import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
-import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/domain/entities/menu_layout.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/utils/menu_layout_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/menu_card.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/content_selection_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/qr_code.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/clone_tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_sleep_actions.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/domain/services/url_cleaner_catalog_service.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/hooks/url_cleaner_controller.dart';
 import 'package:weblibre/features/geckoview/features/open_link_tools/presentation/widgets/url_cleaner_tile.dart';
@@ -91,18 +94,32 @@ class TabActionsSection extends HookConsumerWidget {
     final containerWayOut = ref.watch(
       hiddenContainerWayOutProvider(selectedTabId, enabled: true),
     );
+    final isPrivate = ref.watch(
+      tabStateProvider(
+        selectedTabId,
+      ).select((state) => state?.tabMode is PrivateTabMode),
+    );
     final showMore = useState(false);
+
+    // Private tabs cannot be locked, so the row is not offered for one; left
+    // out here rather than by the row itself, which would leave a divider.
+    final offered = [
+      for (final item in items)
+        if (!(isPrivate && item.type == MenuItemType.lockTab)) item,
+    ];
 
     // Every item is listed, including the Containers row while containers
     // are hidden: it stays, reduced to its ways out (P5); see
     // _ContainerExpansion.
-    final markerIndex = items.indexWhere(
+    final markerIndex = offered.indexWhere(
       (item) => item.type == MenuItemType.moreDisclosure,
     );
-    final upfront = markerIndex == -1 ? items : items.sublist(0, markerIndex);
+    final upfront = markerIndex == -1
+        ? offered
+        : offered.sublist(0, markerIndex);
     final folded = markerIndex == -1
         ? const <MenuItemEntry>[]
-        : items.sublist(markerIndex + 1);
+        : offered.sublist(markerIndex + 1);
 
     // While hidden, the Containers row is only its ways out, each shown when
     // it applies. The "More" row names only what it reveals, so it does not
@@ -132,11 +149,14 @@ class TabActionsSection extends HookConsumerWidget {
           ListTile(
             leading: const Icon(Icons.more_horiz),
             title: Text(MenuItemType.moreDisclosure.label(context)),
+            // The items' own names, not their state ("Lock Tab" for a locked
+            // tab too): the line says what is behind the row.
             subtitle: Text(
-              formatList(
-                AppLocalizations.of(context),
-                foldedShown.map((item) => item.type.label(context)),
-              ),
+              _moreSummary(AppLocalizations.of(context), [
+                for (final item in foldedShown) item.type.label(context),
+              ]),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             trailing: const Icon(Icons.expand_more),
             onTap: () => showMore.value = true,
@@ -171,6 +191,8 @@ class TabActionsSection extends HookConsumerWidget {
     ),
     MenuItemType.pinTopSite => _PinTopSiteTile(selectedTabId: selectedTabId),
     MenuItemType.fetchFeeds => _FetchFeedsTile(selectedTabId: selectedTabId),
+    MenuItemType.lockTab => _LockTabTile(selectedTabId: selectedTabId),
+    MenuItemType.sleepTab => _SleepTabTile(selectedTabId: selectedTabId),
     _ => const SizedBox.shrink(),
   };
 }
@@ -210,6 +232,7 @@ class _ContainerExpansion extends ConsumerWidget {
           final selection = await const ContainerSelectionRoute()
               .push<ContainerSelectionResult?>(context);
 
+          ContainerMoveResult? moved;
           switch (selection) {
             case ContainerSelectionSelected(:final containerId):
               final containerData = await ref
@@ -218,20 +241,25 @@ class _ContainerExpansion extends ConsumerWidget {
 
               if (containerData != null) {
                 final tabState = ref.read(tabStateProvider(selectedTabId))!;
-                await ref
+                moved = await ref
                     .read(tabDataRepositoryProvider.notifier)
                     .assignContainer(tabState.id, containerData);
               }
             case ContainerSelectionUnassigned():
               final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              await ref
+              moved = await ref
                   .read(tabDataRepositoryProvider.notifier)
                   .unassignContainer(tabState.id);
             case null:
               break;
           }
 
-          if (context.mounted) Navigator.pop(context);
+          if (context.mounted) {
+            if (moved != null) {
+              showContainerMoveResult(context, moved);
+            }
+            Navigator.pop(context);
+          }
         },
       ),
       MenuItemType.assignUrlToContainer: () =>
@@ -323,10 +351,13 @@ class _ContainerExpansion extends ConsumerWidget {
           icon: MdiIcons.folderCancelOutline,
           onTap: () async {
             final tabState = ref.read(tabStateProvider(selectedTabId))!;
-            await ref
+            final moved = await ref
                 .read(tabDataRepositoryProvider.notifier)
                 .unassignContainer(tabState.id);
-            if (context.mounted) Navigator.pop(context);
+            if (context.mounted) {
+              showContainerMoveResult(context, moved);
+              Navigator.pop(context);
+            }
           },
         ),
       ),
@@ -364,6 +395,7 @@ class _ShareExpansion extends HookConsumerWidget {
     final sandboxSourceUri = ref.watch(
       sandboxSourceUriForTabProvider(tabId: selectedTabId),
     );
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
     // Sandbox-captured tabs: every share/copy/QR/cleaner action must operate
     // on the canonical source URL — never the loopback loader.
     final tabUrl = sandboxSourceUri ?? tabState?.url;
@@ -436,6 +468,8 @@ class _ShareExpansion extends HookConsumerWidget {
             MenuItemType.shareScreenshot: () => buildMenuSubTile(
               l10n.menu_shareScreenshot,
               icon: Icons.mobile_screen_share,
+              // An asleep tab has no page to take a picture of.
+              enabled: !asleep,
               onTap: () async {
                 final screenshot = await ref
                     .read(selectedTabSessionProvider)
@@ -635,36 +669,13 @@ class _CloneTabExpansion extends ConsumerWidget {
             l10n.menu_cloneTypeRegular,
             icon: MdiIcons.tab,
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final cloneUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
-              final containerData = await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .getContainerForCopy(selectedTabId);
-
-              final tabId = (tabState.tabMode is! RegularTabMode)
-                  ? await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          tabMode: TabMode.regular,
-                          url: cloneUrl,
-                          containerSelection: containerData == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(containerData),
-                          selectTab: false,
-                        )
-                  : await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .duplicateTab(
-                          selectTabId: selectedTabId,
-                          containerData: containerData,
-                          selectTab: false,
-                        );
-
-              if (context.mounted) {
+              final tabId = await cloneTabAs(
+                context,
+                ref.read,
+                selectedTabId,
+                TabMode.regular,
+              );
+              if (tabId != null && context.mounted) {
                 handleBackgroundTabOpened(context, ref, tabId);
                 Navigator.pop(context);
               }
@@ -675,36 +686,13 @@ class _CloneTabExpansion extends ConsumerWidget {
             icon: MdiIcons.dominoMask,
             iconColor: appColors.privateTabPurple,
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final cloneUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
-              final containerData = await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .getContainerForCopy(selectedTabId);
-
-              final tabId = (tabState.tabMode is! PrivateTabMode)
-                  ? await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .addTab(
-                          url: cloneUrl,
-                          tabMode: TabMode.private,
-                          containerSelection: containerData == null
-                              ? const TabContainerSelection.unassigned()
-                              : TabContainerSelection.specific(containerData),
-                          selectTab: false,
-                        )
-                  : await ref
-                        .read(tabRepositoryProvider.notifier)
-                        .duplicateTab(
-                          selectTabId: selectedTabId,
-                          containerData: containerData,
-                          selectTab: false,
-                        );
-
-              if (context.mounted) {
+              final tabId = await cloneTabAs(
+                context,
+                ref.read,
+                selectedTabId,
+                TabMode.private,
+              );
+              if (tabId != null && context.mounted) {
                 handleBackgroundTabOpened(context, ref, tabId);
                 Navigator.pop(context);
               }
@@ -715,28 +703,13 @@ class _CloneTabExpansion extends ConsumerWidget {
             icon: MdiIcons.snowflake,
             iconColor: appColors.isolatedTabTeal,
             onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId))!;
-              final cloneUrl =
-                  ref.read(
-                    sandboxSourceUriForTabProvider(tabId: tabState.id),
-                  ) ??
-                  tabState.url;
-              final containerData = await ref
-                  .read(tabDataRepositoryProvider.notifier)
-                  .getContainerForCopy(selectedTabId);
-
-              final tabId = await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .addTab(
-                    url: cloneUrl,
-                    tabMode: TabMode.newIsolated(),
-                    containerSelection: containerData == null
-                        ? const TabContainerSelection.unassigned()
-                        : TabContainerSelection.specific(containerData),
-                    selectTab: false,
-                  );
-
-              if (context.mounted) {
+              final tabId = await cloneTabAs(
+                context,
+                ref.read,
+                selectedTabId,
+                TabMode.newIsolated(),
+              );
+              if (tabId != null && context.mounted) {
                 handleBackgroundTabOpened(context, ref, tabId);
                 Navigator.pop(context);
               }
@@ -757,6 +730,9 @@ class _ExportExpansion extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    // PDF, PNG and print read the live page, which an asleep tab does not
+    // have; Markdown comes from the tab's saved content.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
 
     return Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -802,6 +778,7 @@ class _ExportExpansion extends ConsumerWidget {
           MenuItemType.exportAsPdf: () => buildMenuSubTile(
             l10n.menu_exportAsPdf,
             icon: MdiIcons.filePdfBox,
+            enabled: !asleep,
             onTap: () async {
               await ref
                   .read(tabSessionProvider(tabId: selectedTabId).notifier)
@@ -812,6 +789,7 @@ class _ExportExpansion extends ConsumerWidget {
           MenuItemType.exportAsPng: () => buildMenuSubTile(
             l10n.menu_exportAsPng,
             icon: MdiIcons.fileImage,
+            enabled: !asleep,
             onTap: () async {
               final screenshot = await ref
                   .read(selectedTabSessionProvider)
@@ -832,6 +810,7 @@ class _ExportExpansion extends ConsumerWidget {
           MenuItemType.printPage: () => buildMenuSubTile(
             l10n.menu_exportPrint,
             icon: MdiIcons.printer,
+            enabled: !asleep,
             trailing: const KeyboardShortcutHint(BrowserAction.printPage),
             onTap: () async {
               try {
@@ -949,18 +928,118 @@ class _PinTopSiteTile extends HookConsumerWidget {
   }
 }
 
-class _FetchFeedsTile extends HookWidget {
+/// How many hidden rows the "More" row names before it only counts the rest.
+const _moreNamedCount = 3;
+
+/// The "More" row's subtitle: the hidden rows' [names], or the first
+/// [_moreNamedCount] of them and how many more, so it stays about one line.
+String _moreSummary(AppLocalizations l10n, List<String> names) =>
+    names.length <= _moreNamedCount
+    ? formatList(l10n, names)
+    : l10n.menu_moreDisclosureSummary(
+        formatList(l10n, names.take(_moreNamedCount)),
+        names.length - _moreNamedCount,
+      );
+
+/// The lock row's title for a tab in that state, in the Title Case of the
+/// sheet's other rows (the tab menu's [lockTabActionLabel] is not).
+String _lockTabTitle(
+  AppLocalizations l10n, {
+  required bool locked,
+  required bool unlockIncomplete,
+}) => unlockIncomplete
+    ? l10n.menu_retryUnlockTab
+    : locked
+    ? l10n.menu_unlockTab
+    : l10n.menu_lockTab;
+
+/// The sleep row's title, in the Title Case of the sheet's other rows (the
+/// tab menu's [sleepTabActionLabel] is not).
+String _sleepTabTitle(AppLocalizations l10n, {required bool held}) =>
+    held ? l10n.menu_wakeTab : l10n.menu_sleepTab;
+
+/// "Lock Tab" / "Unlock Tab", or, while an unlock did not finish, a retry.
+class _LockTabTile extends HookConsumerWidget {
+  final String selectedTabId;
+
+  const _LockTabTile({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final isLocked = ref.watch(isTabLockedProvider(selectedTabId));
+    final unlockIncomplete = ref.watch(
+      isTabUnlockIncompleteProvider(selectedTabId),
+    );
+
+    return ListTile(
+      leading: Icon(
+        lockTabActionIcon(locked: isLocked, unlockIncomplete: unlockIncomplete),
+      ),
+      title: Text(
+        _lockTabTitle(
+          l10n,
+          locked: isLocked,
+          unlockIncomplete: unlockIncomplete,
+        ),
+      ),
+      // Like the sheet's other action rows, no explanation; the subtitle only
+      // reports an unlock that did not finish, because that is a state.
+      subtitle: unlockIncomplete
+          ? Text(l10n.browser_tabUnlockIncompleteMessage)
+          : null,
+      trailing: unlockIncomplete ? const Icon(Icons.refresh) : null,
+      onTap: () async {
+        // Reported from the sheet's context: the snackbar outlives the sheet.
+        await toggleTabLock(context, ref.read, selectedTabId);
+        if (context.mounted) Navigator.pop(context);
+      },
+    );
+  }
+}
+
+/// "Put Tab to Sleep", or "Wake Tab" for a tab held asleep.
+class _SleepTabTile extends HookConsumerWidget {
+  final String selectedTabId;
+
+  const _SleepTabTile({required this.selectedTabId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final held = ref.watch(isTabSleepHeldProvider(selectedTabId));
+
+    return ListTile(
+      leading: Icon(sleepTabActionIcon(held: held)),
+      title: Text(_sleepTabTitle(l10n, held: held)),
+      onTap: () async {
+        // Reported from the sheet's context: the snackbar outlives the sheet.
+        if (held) {
+          await wakeTabFromMenu(context, ref.read, selectedTabId);
+        } else {
+          await sleepTabsWithConfirmation(context, ref.read, [selectedTabId]);
+        }
+        if (context.mounted) Navigator.pop(context);
+      },
+    );
+  }
+}
+
+class _FetchFeedsTile extends HookConsumerWidget {
   final String selectedTabId;
 
   const _FetchFeedsTile({required this.selectedTabId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final showFeeds = useState(false);
+    // The feeds are found in the page, which an asleep tab does not have.
+    final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
 
     if (!showFeeds.value) {
       return ListTile(
+        enabled: !asleep,
         leading: const Icon(Icons.rss_feed),
         title: Text(l10n.menu_fetchFeedsTitle),
         onTap: () {

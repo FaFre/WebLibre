@@ -24,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
 import 'package:weblibre/core/routing/routes.dart';
@@ -32,7 +33,9 @@ import 'package:weblibre/features/browser_actions/domain/entities/browser_action
 import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_feedback_l10n.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_close_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
@@ -60,6 +63,7 @@ import 'package:weblibre/features/geckoview/features/split_view/domain/providers
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_selection_result.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
@@ -136,6 +140,14 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         turnGesturesOn: turnGesturesOn,
         splitBefore: splitBefore,
       );
+    } on ContainerRefusedTabException catch (refusal) {
+      // A new isolated tab, or a duplicate of one, would bring a context of
+      // its own into a frozen container (D19); or the container is going.
+      await _showFeedback(switch (refusal) {
+        ContainerFrozenException() => BrowserActionFeedback.containerFrozen,
+        ContainerBeingDeletedException() =>
+          BrowserActionFeedback.containerBeingDeleted,
+      });
     } catch (error, stackTrace) {
       logger.e(
         'Error executing browser action ${action.name}',
@@ -364,6 +376,23 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
               ? BrowserActionFeedback.tabUnpinned
               : BrowserActionFeedback.tabPinned,
         );
+      case BrowserAction.toggleLockTab:
+        final (:outcome, :wasLocked) = await tabRepository.toggleTabLocked(
+          pageTabId,
+        );
+        await _showFeedback(switch (outcome) {
+          TabLockOutcome.applied =>
+            wasLocked
+                ? BrowserActionFeedback.tabUnlocked
+                : BrowserActionFeedback.tabLocked,
+          TabLockOutcome.privateTab => BrowserActionFeedback.tabLockPrivate,
+          TabLockOutcome.unlockIncomplete =>
+            BrowserActionFeedback.tabUnlockIncomplete,
+          TabLockOutcome.unavailable || TabLockOutcome.notPersisted =>
+            wasLocked
+                ? BrowserActionFeedback.tabUnlockFailed
+                : BrowserActionFeedback.tabLockFailed,
+        });
       case BrowserAction.nextContainer:
         await _switchContainer(ContainerCycleDirection.next);
       case BrowserAction.previousContainer:
@@ -391,7 +420,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
             .read(readerableScreenControllerProvider.notifier)
             .toggleReaderView(!readerActive);
       case BrowserAction.toggleDesktopMode:
-        ref.read(desktopModeProvider(pageTabId).notifier).toggle();
+        await ref.read(desktopModeProvider(pageTabId).notifier).toggle();
       case BrowserAction.findInPage:
         ref.read(findInPageControllerProvider(pageTabId).notifier).show();
       case BrowserAction.findNext:
@@ -691,25 +720,24 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     }
   }
 
-  /// The reopen in progress, which the next one waits for.
-  Future<void> _pendingReopen = Future.value();
+  final _reopenLock = Lock();
 
   /// Reopens one closed tab per call, each after the previous one finished: a
   /// repeated key press must not pick the entry an unfinished restore is
-  /// still taking off the list.
-  Future<void> _reopenClosedTab() {
-    final reopen = _pendingReopen.then((_) => _reopenNextClosedTab());
-    // A failed reopen is reported by [run]; the queue just moves on.
-    _pendingReopen = reopen.catchError((_) {});
-    return reopen;
-  }
+  /// still taking off the list. A failed reopen is reported by [run]; the
+  /// next one goes ahead.
+  Future<void> _reopenClosedTab() =>
+      _reopenLock.synchronized(_reopenNextClosedTab);
 
   /// Reopens the tabs closed last while the engine can still undo that, and
   /// otherwise the newest tab on the recently closed list, which is where
   /// closed tabs go once their undo has run out.
   Future<void> _reopenNextClosedTab() async {
     if (!ref.mounted) return;
-    if (await ref.read(tabRepositoryProvider.notifier).undoClose()) return;
+    // A refused undo said why; reopening an older tab instead would not be
+    // what was asked for.
+    final undone = await ref.read(tabRepositoryProvider.notifier).undoClose();
+    if (undone != UndoCloseOutcome.nothingToUndo) return;
     if (!ref.mounted) return;
 
     // The list is auto-disposed: held open until the restore is done, and
@@ -751,18 +779,30 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     if (!ref.mounted) return;
 
     final tabData = ref.read(tabDataRepositoryProvider.notifier);
+    final ContainerMoveResult result;
     switch (selection) {
       case ContainerSelectionSelected(:final containerId):
         final containerData = await ref
             .read(containerRepositoryProvider.notifier)
             .getContainerData(containerId);
-        if (containerData != null) {
-          await tabData.assignContainer(tabId, containerData);
-        }
+        if (containerData == null) return;
+        result = await tabData.assignContainer(tabId, containerData);
       case ContainerSelectionUnassigned():
-        await tabData.unassignContainer(tabId);
+        result = await tabData.unassignContainer(tabId);
       case null:
+        return;
+    }
+    switch (result) {
+      case ContainerMoveResult.moved:
         break;
+      case ContainerMoveResult.lockedNeedsSameContext:
+        await _showFeedback(BrowserActionFeedback.lockedTabCannotMove);
+      case ContainerMoveResult.locksUnavailable:
+        await _showFeedback(BrowserActionFeedback.tabMoveFailed);
+      case ContainerMoveResult.containerBeingDeleted:
+        await _showFeedback(BrowserActionFeedback.containerBeingDeleted);
+      case ContainerMoveResult.containerFrozen:
+        await _showFeedback(BrowserActionFeedback.containerFrozen);
     }
   }
 

@@ -104,6 +104,62 @@ final class EventServiceProvider
 
 String _$eventServiceHash() => r'3a297348fadda05dc60433d7ce8f662b2ff62c26';
 
+/// Native's tab lifecycle and container freeze, as one keepAlive instance so
+/// tests can replace it.
+
+@ProviderFor(geckoTabLifecycleService)
+final geckoTabLifecycleServiceProvider = GeckoTabLifecycleServiceProvider._();
+
+/// Native's tab lifecycle and container freeze, as one keepAlive instance so
+/// tests can replace it.
+
+final class GeckoTabLifecycleServiceProvider
+    extends
+        $FunctionalProvider<
+          GeckoTabLifecycleService,
+          GeckoTabLifecycleService,
+          GeckoTabLifecycleService
+        >
+    with $Provider<GeckoTabLifecycleService> {
+  /// Native's tab lifecycle and container freeze, as one keepAlive instance so
+  /// tests can replace it.
+  GeckoTabLifecycleServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'geckoTabLifecycleServiceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$geckoTabLifecycleServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<GeckoTabLifecycleService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  GeckoTabLifecycleService create(Ref ref) {
+    return geckoTabLifecycleService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(GeckoTabLifecycleService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<GeckoTabLifecycleService>(value),
+    );
+  }
+}
+
+String _$geckoTabLifecycleServiceHash() =>
+    r'77210cf4dd4ced8cce34c69729175168f06b2aed';
+
 @ProviderFor(addonService)
 final addonServiceProvider = AddonServiceProvider._();
 

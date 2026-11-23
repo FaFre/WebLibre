@@ -6,6 +6,8 @@
 
 package eu.weblibre.flutter_mozilla_components.feature
 
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
+import eu.weblibre.flutter_mozilla_components.tabs.TabCloseProtection
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +30,9 @@ import mozilla.components.support.ktx.kotlinx.coroutines.flow.filterChanged
  * differs in one place: a popup from a page that is on screen but not focused
  * opens in the background. Everything else, popups from the focused page or
  * from a background tab included, behaves exactly as before. It also records
- * the URL each popup was opened for ([PopupRequests]).
+ * the URL each popup was opened for ([PopupRequests]), and leaves a locked tab
+ * open when its page calls `window.close()` ([TabCloseProtection]), and opens
+ * nothing for a page whose container froze after it asked ([TabLifecycleRegistry]).
  *
  * Derived from android-components `WindowFeature` (MPL-2.0).
  *
@@ -39,6 +43,8 @@ class SplitAwareWindowFeature(
     private val tabsUseCases: TabsUseCases,
     private val visibleTabIds: () -> Set<String>,
     private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val isLocked: (String) -> Boolean = TabCloseProtection::isLocked,
+    private val isRestricted: (String?) -> Boolean = { TabLifecycleRegistry.isRestricted(it) },
 ) : LifecycleAwareFeature {
 
     private var scope: CoroutineScope? = null
@@ -55,10 +61,20 @@ class SplitAwareWindowFeature(
                             consumeWindowRequest(tab.id) {
                                 store.state.tabs
                                     .find { it.engineState.engineSession === windowRequest.prepare() }
+                                    // A locked tab ignores the page's window.close();
+                                    // the request is still consumed.
+                                    ?.takeUnless { isLocked(it.id) }
                                     ?.let { tabsUseCases.removeTab(it.id) }
                             }
                         WindowRequest.Type.OPEN ->
                             consumeWindowRequest(tab.id) {
+                                // A request made before the opener's container
+                                // froze, consumed after (B4w): no tab, and the
+                                // prepared session goes.
+                                if (isRestricted(tab.contextId)) {
+                                    windowRequest.prepare().close()
+                                    return@consumeWindowRequest
+                                }
                                 val popupId = tabsUseCases.addTab(
                                     selectTab = shouldSelectPopupOf(tab.id),
                                     parentId = tab.id,

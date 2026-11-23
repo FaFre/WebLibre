@@ -19,6 +19,7 @@
  */
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/contextual_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/repositories/quick_switcher_toolbar_config_repository.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
@@ -48,20 +49,16 @@ abstract interface class ToolbarButtonConfigRepository {
 /// order they were asked for. Lives with the kept-alive repository, so the
 /// order holds even when the editor that asked is gone before its write
 /// lands.
+/// A failed write does not stop the ones after it; its caller sees the failure.
 mixin SerializedSaveAll implements ToolbarButtonConfigRepository {
-  Future<void> _lastWrite = Future.value();
+  final _writeLock = Lock();
 
   /// Stores [configs], the actual write (see [saveAll]).
   Future<void> writeChanged(List<ToolbarButtonConfig> configs);
 
   @override
-  Future<void> saveAll(List<ToolbarButtonConfig> configs) {
-    final write = _lastWrite.then((_) => writeChanged(configs));
-    // A failed write does not stop the ones after it; its caller sees the
-    // failure.
-    _lastWrite = write.then<void>((_) {}, onError: (_) {});
-    return write;
-  }
+  Future<void> saveAll(List<ToolbarButtonConfig> configs) =>
+      _writeLock.synchronized(() => writeChanged(configs));
 }
 
 @Riverpod(keepAlive: true)

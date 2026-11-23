@@ -21,19 +21,62 @@ import 'dart:typed_data';
 
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_freeze.dart';
 
 part 'tab_session.g.dart';
 
+/// Commands to one tab's page, or the selected tab's.
+///
+/// The navigations here are the ones a user asks for, so each wakes a
+/// sleeping tab first (5.2.1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+/// the engine drops any load into a sleeping tab, and the navigation would
+/// otherwise do nothing. A tab whose routing is not ready stays asleep, and
+/// the navigation does not run. In a frozen container's tab the user is asked
+/// "Resume {container} and open?" instead, and the navigation runs once the
+/// container is resumed.
 @Riverpod(keepAlive: true)
 class TabSession extends _$TabSession {
   late GeckoSessionService _sessionService;
+  final _tabsService = GeckoTabService();
+
+  /// The session a navigation goes to, its tab woken when it sleeps; null
+  /// when it stays asleep and the navigation must not run. A tab of a frozen
+  /// container is never woken by a navigation alone: the user is asked
+  /// whether to resume its container first.
+  ///
+  /// For the selected tab, native's selection is read once and both the wake
+  /// and the navigation go to that tab: Dart's selection follows native's
+  /// with a delay, so a navigation right after selecting a sleeping tab would
+  /// wake the tab selected before while the load went to the sleeping one,
+  /// which drops it. The tab's hold and freeze are native's now too, not
+  /// the last event's: one placed a moment ago has not reached Dart yet.
+  Future<GeckoSessionService?> _sessionForNavigation() async {
+    final targetId = tabId ?? await _tabsService.getSelectedTabId();
+    if (targetId == null) return _sessionService;
+    final lifecycle = await ref
+        .read(geckoTabLifecycleServiceProvider)
+        .tabLifecycleState(targetId);
+    final mayRun = lifecycle?.contextFrozen ?? false
+        ? await ref
+              .read(containerFreezeServiceProvider.notifier)
+              .resumeForNavigation(targetId)
+        : await ref
+              .read(tabRepositoryProvider.notifier)
+              .wakeForNavigation(targetId, lifecycle?.sleepHold);
+    if (!mayRun) return null;
+    return tabId == null
+        ? GeckoSessionService(tabId: targetId)
+        : _sessionService;
+  }
 
   Future<void> loadUrl({
     required Uri url,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
     Map<String, String>? additionalHeaders,
-  }) {
-    return _sessionService.loadUrl(
+  }) async {
+    await (await _sessionForNavigation())?.loadUrl(
       url: url,
       flags: flags,
       additionalHeaders: additionalHeaders,
@@ -44,20 +87,20 @@ class TabSession extends _$TabSession {
     return _sessionService.stopLoading();
   }
 
-  Future<void> reload({LoadUrlFlags flags = LoadUrlFlags.NONE}) {
-    return _sessionService.reload(flags: flags);
+  Future<void> reload({LoadUrlFlags flags = LoadUrlFlags.NONE}) async {
+    await (await _sessionForNavigation())?.reload(flags: flags);
   }
 
-  Future<void> goBack() {
-    return _sessionService.goBack();
+  Future<void> goBack() async {
+    await (await _sessionForNavigation())?.goBack();
   }
 
-  Future<void> goForward() {
-    return _sessionService.goForward();
+  Future<void> goForward() async {
+    await (await _sessionForNavigation())?.goForward();
   }
 
-  Future<void> goToHistoryIndex({required int index}) {
-    return _sessionService.goToHistoryIndex(index: index);
+  Future<void> goToHistoryIndex({required int index}) async {
+    await (await _sessionForNavigation())?.goToHistoryIndex(index: index);
   }
 
   Future<void> exitFullscreen() {
@@ -68,8 +111,24 @@ class TabSession extends _$TabSession {
     return _sessionService.requestScreenshot(requireImageResult);
   }
 
+  /// Does not wake a sleeping tab: the per-site desktop rule calls this on
+  /// its own (`DesktopMode`), and nothing automatic may wake a tab. For a
+  /// sleeping tab the engine drops the reload.
   Future<void> requestDesktopSite(bool enable) {
     return _sessionService.requestDesktopSite(enable: enable);
+  }
+
+  /// [requestDesktopSite] for a choice the user made (the Desktop Site menu
+  /// item or quick toggle, its browser action, a site rule added in the site
+  /// sheet): a reload they asked for, so it goes as a navigation does. A
+  /// sleeping tab is woken first, and a frozen container's tab asks
+  /// "Resume {container} and open?". Returns whether it reached the page;
+  /// false when the tab stays asleep or frozen.
+  Future<bool> requestDesktopSiteExplicitly(bool enable) async {
+    final session = await _sessionForNavigation();
+    if (session == null) return false;
+    await session.requestDesktopSite(enable: enable);
+    return true;
   }
 
   Future<void> saveToPdf() {

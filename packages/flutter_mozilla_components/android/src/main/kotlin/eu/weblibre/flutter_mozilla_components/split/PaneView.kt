@@ -34,7 +34,8 @@ import mozilla.components.support.base.feature.LifecycleAwareFeature
 
 /**
  * One page slot of the split layout: a pull-to-refresh layout around an
- * [EngineView], the focus outline, and the crashed-page placeholder.
+ * [EngineView], the focus outline, and the placeholder shown instead of a
+ * crashed or sleeping page.
  *
  * A pane keeps two separate facts. [boundTabId] is the tab the pane is for,
  * and [attachedSession] is the engine session its view actually renders. They
@@ -77,10 +78,12 @@ class PaneView(
 
     private var placeholder: LinearLayout? = null
     private var placeholderTitle: TextView? = null
+    private var placeholderDetail: TextView? = null
+    private var placeholderDetailText: String? = null
     private var placeholderButton: MaterialButton? = null
     private var placeholderReloadLabel = ""
 
-    /** Whether the placeholder is laid out as a lone reload icon; null before it exists. */
+    /** Whether the placeholder is laid out as a lone icon; null before it exists. */
     private var placeholderCompact: Boolean? = null
 
     /** The surface views this pane hid, so showing it again lifts those only. */
@@ -178,12 +181,33 @@ class PaneView(
         hideSurfaces()
     }
 
-    fun showCrashPlaceholder(
+    /** What a placeholder stands in for; each has its own icon (5.1). */
+    enum class PlaceholderKind {
+        /** A crashed page; its button restores it. */
+        CRASHED,
+
+        /** A tab held asleep; its button asks to wake it. */
+        SLEEPING,
+
+        /** A tab of a frozen container; its button asks to resume the container. */
+        FROZEN,
+    }
+
+    /**
+     * Shows a placeholder of [kind] instead of the page: [title], an optional
+     * [detail] line under it, and a button labeled [action] that calls
+     * [onAction]. The label is also the button's accessible name, and its
+     * tooltip when the pane is too small for text, where the detail is left
+     * out too.
+     */
+    fun showPlaceholder(
+        kind: PlaceholderKind,
         title: String,
-        reload: String,
+        action: String,
         backgroundColor: Int,
         foregroundColor: Int,
-        onReload: () -> Unit,
+        onAction: () -> Unit,
+        detail: String? = null,
     ) {
         val view = placeholder ?: createPlaceholder().also { placeholder = it }
         view.setBackgroundColor(backgroundColor)
@@ -191,10 +215,16 @@ class PaneView(
             text = title
             setTextColor(foregroundColor)
         }
-        placeholderReloadLabel = reload
+        placeholderDetailText = detail?.takeIf { it.isNotEmpty() }
+        placeholderDetail?.apply {
+            text = placeholderDetailText
+            setTextColor(foregroundColor)
+        }
+        placeholderKind = kind
+        placeholderReloadLabel = action
         placeholderButton?.apply {
-            contentDescription = reload
-            setOnClickListener { onReload() }
+            contentDescription = action
+            setOnClickListener { onAction() }
         }
         // Re-applies the label in whichever form the current size uses.
         placeholderCompact = null
@@ -203,15 +233,17 @@ class PaneView(
         swipeRefresh.visibility = View.INVISIBLE
     }
 
-    fun hideCrashPlaceholder() {
+    fun hidePlaceholder() {
         val view = placeholder ?: return
         if (view.visibility == View.GONE) return
         view.visibility = View.GONE
+        placeholderKind = null
         swipeRefresh.visibility = View.VISIBLE
     }
 
-    val isShowingCrashPlaceholder: Boolean
-        get() = placeholder?.visibility == View.VISIBLE
+    /** The placeholder shown now, or null while the page is. */
+    var placeholderKind: PlaceholderKind? = null
+        private set
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         // Before the children are measured, so they are measured in the
@@ -241,10 +273,18 @@ class PaneView(
         if (compact) {
             column.setPadding(0, 0, 0, 0)
             title.visibility = View.GONE
+            placeholderDetail?.visibility = View.GONE
             (button.layoutParams as LinearLayout.LayoutParams).topMargin = 0
             button.text = null
             // Tinted by the button's iconTint, like a labeled button's text.
-            button.icon = IconicsDrawable(context, CommunityMaterial.Icon3.cmd_refresh).apply {
+            button.icon = IconicsDrawable(
+                context,
+                when (placeholderKind) {
+                    PlaceholderKind.SLEEPING -> CommunityMaterial.Icon3.cmd_weather_sunny
+                    PlaceholderKind.FROZEN -> CommunityMaterial.Icon3.cmd_play
+                    PlaceholderKind.CRASHED, null -> CommunityMaterial.Icon3.cmd_refresh
+                },
+            ).apply {
                 sizeDp = RELOAD_ICON_DP
             }
             button.iconPadding = 0
@@ -261,6 +301,7 @@ class PaneView(
             val padding = dp(PLACEHOLDER_PADDING_DP)
             column.setPadding(padding, padding, padding, padding)
             title.visibility = View.VISIBLE
+            placeholderDetail?.visibility = if (placeholderDetailText == null) View.GONE else View.VISIBLE
             (button.layoutParams as LinearLayout.LayoutParams).topMargin = dp(PLACEHOLDER_GAP_DP)
             button.icon = null
             button.text = placeholderReloadLabel
@@ -299,6 +340,11 @@ class PaneView(
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             gravity = Gravity.CENTER
         }
+        val detail = TextView(context).apply {
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            gravity = Gravity.CENTER
+            visibility = View.GONE
+        }
         val button = MaterialButton(context)
         buttonDefaults = ButtonDefaults(button)
         val column = LinearLayout(context).apply {
@@ -314,6 +360,13 @@ class PaneView(
                 ),
             )
             addView(
+                detail,
+                LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                ).apply { topMargin = dp(PLACEHOLDER_DETAIL_GAP_DP) },
+            )
+            addView(
                 button,
                 LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -324,6 +377,7 @@ class PaneView(
             isClickable = true
         }
         placeholderTitle = title
+        placeholderDetail = detail
         placeholderButton = button
         addView(
             column,
@@ -345,6 +399,7 @@ class PaneView(
 
         private const val PLACEHOLDER_PADDING_DP = 24f
         private const val PLACEHOLDER_GAP_DP = 16f
+        private const val PLACEHOLDER_DETAIL_GAP_DP = 8f
         private const val MIN_TOUCH_DP = 48f
         private const val RELOAD_ICON_DP = 24
 

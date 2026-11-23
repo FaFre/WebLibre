@@ -18,12 +18,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
+import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -36,17 +38,26 @@ void main() {
   Future<List<String>> pumpTile(
     WidgetTester tester, {
     bool isActive = false,
+    bool locked = false,
   }) async {
     final calls = <String>[];
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          watchLockedTabIdsProvider.overrideWith(
+            (ref) => Stream.value(locked ? const {_tabId} : const <String>{}),
+          ),
           tabStateWithFallbackProvider(
             _tabId,
           ).overrideWith((ref) => Future.value(TabState.$default(_tabId))),
           tabThumbnailProvider(_tabId).overrideWithValue(null),
           sandboxSourceUriForTabProvider(tabId: _tabId).overrideWithValue(null),
+          // The lifecycle badges, on every card: they would open the
+          // databases.
+          isTabAsleepProvider(_tabId).overrideWithValue(false),
+          isTabContextFrozenProvider(_tabId).overrideWithValue(false),
+          isTabKeptAwakeShownProvider(_tabId).overrideWithValue(false),
         ],
         child: MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -110,6 +121,30 @@ void main() {
       ),
       findsOneWidget,
     );
+
+    semantics.dispose();
+  });
+
+  testWidgets('a locked tab shows its lock in the close button, at full '
+      'contrast, and the tap still reaches it', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final calls = await pumpTile(tester, locked: true);
+    await tester.pump();
+
+    // The lock replaces the close icon; the corner badge is not drawn twice.
+    expect(find.byIcon(Icons.close), findsNothing);
+    final lock = find.byIcon(MdiIcons.lockOutline);
+    expect(lock, findsOneWidget);
+    final icon = tester.widget<Icon>(lock);
+    expect(icon.color?.a, 1.0);
+    expect(
+      tester.getSemantics(find.bySemanticsLabel(l10n.browser_tabIsLocked)),
+      isSemantics(isButton: true, hasTapAction: true),
+    );
+
+    await tester.tap(lock);
+    await tester.pump();
+    expect(calls, ['close']);
 
     semantics.dispose();
   });

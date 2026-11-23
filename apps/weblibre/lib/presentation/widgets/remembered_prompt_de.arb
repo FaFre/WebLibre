@@ -18,5 +18,11 @@
   "rememberedPrompt_startTorKeywords": "tor, onion, proxy, starten, bestätigung, nicht mehr fragen",
   "rememberedPrompt_startProxyConnectionLabel": "Vor dem Starten einer Proxy-Verbindung fragen",
   "rememberedPrompt_startProxyConnectionDescription": "Wenn die Proxy-Verbindung eines Containers nicht läuft",
-  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, verbindung, container, starten, bestätigung, nicht mehr fragen"
+  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, verbindung, container, starten, bestätigung, nicht mehr fragen",
+  "rememberedPrompt_sleepTabsLabel": "Vor dem Schlafenlegen von Tabs fragen",
+  "rememberedPrompt_sleepTabsDescription": "Erklärt, dass die Seite eines schlafenden Tabs neu geladen wird und ungespeicherte Inhalte verlieren kann",
+  "rememberedPrompt_sleepTabsKeywords": "schlafen, entladen, speicher, tab, ruhezustand, bestätigung, nicht erneut fragen",
+  "rememberedPrompt_freezeContainerLabel": "Vor dem Einfrieren eines Containers fragen",
+  "rememberedPrompt_freezeContainerDescription": "Erklärt, dass die Tabs eines eingefrorenen Containers entladen werden und seine Hintergrundaktivität bis zum Fortsetzen stoppt",
+  "rememberedPrompt_freezeContainerKeywords": "einfrieren, pausieren, container, fortsetzen, hintergrund, push, bestätigung, nicht mehr fragen"
 }

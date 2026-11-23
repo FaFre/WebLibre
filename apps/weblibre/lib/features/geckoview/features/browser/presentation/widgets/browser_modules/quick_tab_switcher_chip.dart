@@ -26,7 +26,9 @@ import 'package:nullability/nullability.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_lock_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_menu.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_sleep_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_member_mark.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
@@ -44,6 +46,10 @@ class QuickTabSwitcherItem with FastEquatable {
   final TabMode tabMode;
   final bool isHistory;
   final bool isPinned;
+
+  /// The tab cannot be closed until it is unlocked: its chip has no close
+  /// button.
+  final bool isLocked;
   final bool isSandbox;
   final int depth;
   final String title;
@@ -73,6 +79,7 @@ class QuickTabSwitcherItem with FastEquatable {
     required this.title,
     required this.url,
     required this.avatar,
+    this.isLocked = false,
     this.useCustomColor = false,
     this.isSandbox = false,
     this.depth = 0,
@@ -90,6 +97,7 @@ class QuickTabSwitcherItem with FastEquatable {
     TabStateWithContainer state, {
     required String? selectedTabId,
     required Set<String> pinnedTabIds,
+    required Set<String> lockedTabIds,
     required Map<String, int> tabDepthById,
     required Uri? sandboxSourceUri,
     bool isPlaceholder = false,
@@ -110,6 +118,7 @@ class QuickTabSwitcherItem with FastEquatable {
       tabMode: tab.tabMode,
       isHistory: false,
       isPinned: pinnedTabIds.contains(tab.id),
+      isLocked: lockedTabIds.contains(tab.id),
       isSandbox: sandboxSourceUri != null,
       depth: tabDepthById[tab.id] ?? 0,
       url: sandboxSourceUri ?? tab.url,
@@ -149,6 +158,7 @@ class QuickTabSwitcherItem with FastEquatable {
     tabMode,
     isHistory,
     isPinned,
+    isLocked,
     isSandbox,
     depth,
     title,
@@ -218,6 +228,7 @@ buildQuickTabSwitcherChipDecoration(
         (!showTitles &&
             !item.isHistory &&
             !item.isPinned &&
+            !item.isLocked &&
             !item.isSandbox &&
             !item.isGroup &&
             (item.depth == 0 || hierarchyGlyphs == 0 || isVertical) &&
@@ -265,6 +276,11 @@ Widget buildQuickTabSwitcherChipLabel(
         color: marker.color,
         child: avatar,
       );
+    }
+    // Its own corner, so no other marker hides it: it is why the chip has
+    // no close button.
+    if (item.isLocked) {
+      avatar = _RailLockAvatar(tabId: item.id, child: avatar);
     }
   }
   final row = Row(
@@ -327,6 +343,24 @@ Widget buildQuickTabSwitcherChipLabel(
             color: Theme.of(context).colorScheme.primary,
             size: 20,
           ),
+        ),
+      if (showInlineMarkers && item.isLocked)
+        TabLockBadge(
+          tabId: item.id,
+          size: 20,
+          padding: const EdgeInsets.only(left: 8.0),
+        ),
+      if (showInlineMarkers && !item.isPlaceholder)
+        TabSleepBadge(
+          tabId: item.id,
+          size: 20,
+          padding: const EdgeInsets.only(left: 8.0),
+        ),
+      if (showInlineMarkers && !item.isPlaceholder)
+        TabKeepAwakeBadge(
+          tabId: item.id,
+          size: 20,
+          padding: const EdgeInsets.only(left: 8.0),
         ),
       if (showInlineMarkers && !item.isPlaceholder)
         SplitMemberMark(
@@ -437,6 +471,48 @@ class _RailMarkerAvatar extends StatelessWidget {
                 border: Border.all(color: scheme.surfaceContainer),
               ),
               child: Icon(icon, size: 9, color: color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A favicon with the lock badge ([TabLockBadge]) in its top-left corner, for
+/// the narrow rail: the other corners hold [_RailMarkerAvatar]'s marker and
+/// [_RailDepthAvatar]'s nesting badge. The badge carries the lock's state for
+/// screen readers, the unfinished unlock included.
+class _RailLockAvatar extends StatelessWidget {
+  final String tabId;
+  final Widget child;
+
+  const _RailLockAvatar({required this.tabId, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return SizedBox(
+      width: 20,
+      height: 20,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(child: child),
+          Positioned(
+            left: -3,
+            top: -5,
+            child: Container(
+              width: 12,
+              height: 12,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest,
+                shape: BoxShape.circle,
+                border: Border.all(color: scheme.surfaceContainer),
+              ),
+              child: TabLockBadge(tabId: tabId, size: 9),
             ),
           ),
         ],
@@ -673,6 +749,9 @@ class QuickTabSwitcherRow extends StatelessWidget {
       if (item.isSandbox)
         Icon(MdiIcons.archiveLockOutline, color: scheme.tertiary),
       if (item.isPinned) Icon(MdiIcons.pin, color: scheme.primary),
+      // Why the row has no close button, with the lock's state for screen
+      // readers.
+      if (item.isLocked) TabLockBadge(tabId: item.id, size: 18),
       if (item.isHistory) const Icon(MdiIcons.history),
       if (item.isGroup) _GroupSizeBadge(item: item),
     ];

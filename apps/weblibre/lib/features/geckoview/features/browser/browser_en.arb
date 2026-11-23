@@ -514,6 +514,10 @@
   "@browser_closeTabAfterClearingSubtitle": {
     "description": "Explanation under that checkbox."
   },
+  "browser_closeTabAfterClearingLocked": "Unlock the tab to close it after clearing",
+  "@browser_closeTabAfterClearingLocked": {
+    "description": "Under the disabled \"Close tab after clearing\" choice of the clear-site-data sheet when the tab is locked: what to do to be able to choose it."
+  },
   "browser_clearingEllipsis": "Clearing...",
   "@browser_clearingEllipsis": {
     "description": "Label of the clear button while clearing runs."
@@ -820,6 +824,414 @@
   "browser_unpinTab": "Unpin tab",
   "@browser_unpinTab": {
     "description": "Item of the tab menu for a pinned tab: unpin it."
+  },
+  "browser_lockTab": "Lock tab",
+  "@browser_lockTab": {
+    "description": "Item of the tab menu: lock the tab, so it cannot be closed until it is unlocked. Not the profile lock, which asks for a password."
+  },
+  "browser_unlockTab": "Unlock tab",
+  "@browser_unlockTab": {
+    "description": "Item of the tab menu for a locked tab: unlock it, so it can be closed again."
+  },
+  "browser_tabLockedLabel": "Locked",
+  "@browser_tabLockedLabel": {
+    "description": "Read by screen readers for the small lock badge on a tab that cannot be closed until it is unlocked."
+  },
+  "browser_tabUnlockIncompleteLabel": "Locked, unlocking did not finish",
+  "@browser_tabUnlockIncompleteLabel": {
+    "description": "Read by screen readers for the lock badge with a warning sign, on a tab the user unlocked whose unlock did not finish: it still cannot be closed."
+  },
+  "browser_retryUnlockTab": "Retry unlocking tab",
+  "@browser_retryUnlockTab": {
+    "description": "Item of the tab menu for a tab whose unlock did not finish, so it still cannot be closed: tries the unlock again."
+  },
+  "browser_tabUnlockIncompleteMessage": "Unlocking did not finish. The tab stays locked until it does.",
+  "@browser_tabUnlockIncompleteMessage": {
+    "description": "Short message at the bottom of the screen after unlocking a tab did not finish. The tab still cannot be closed; its menu offers to try again."
+  },
+  "browser_tabLockFailed": "This tab could not be locked",
+  "@browser_tabLockFailed": {
+    "description": "Short message at the bottom of the screen when locking a tab failed. Nothing changed; the tab can still be closed."
+  },
+  "browser_tabUnlockFailed": "This tab could not be unlocked",
+  "@browser_tabUnlockFailed": {
+    "description": "Short message at the bottom of the screen when unlocking a tab failed. Nothing changed; the tab is still locked."
+  },
+  "browser_tabLockPrivate": "Private tabs cannot be locked",
+  "@browser_tabLockPrivate": {
+    "description": "Short message at the bottom of the screen when the user tried to lock a private tab."
+  },
+  "browser_lockedTabCannotMove": "Unlock this tab to move it to a container with its own storage",
+  "@browser_lockedTabCannotMove": {
+    "description": "Short message at the bottom of the screen when the user tried to move a locked tab into, or out of, a container that keeps its own cookies. Such a move reopens the tab, which a locked tab does not allow."
+  },
+  "browser_tabMoveFailed": "The tab was not moved. Try again.",
+  "@browser_tabMoveFailed": {
+    "description": "Error message at the bottom of the screen when moving a tab into, or out of, a container that keeps its own cookies did nothing because WebLibre could not check whether the tab is locked (with \"Lock tab\"). Such a move reopens the tab. The tab is still where it was; trying again usually works."
+  },
+  "browser_containerBeingDeleted": "This container is being deleted",
+  "@browser_containerBeingDeleted": {
+    "description": "Short message at the bottom of the screen when the user tried to move a tab into or out of a container that is being deleted right now, or to save a change of its cookie isolation."
+  },
+  "browser_containerFrozen": "Resume the container first",
+  "@browser_containerFrozen": {
+    "description": "Short message at the bottom of the screen when the user tried to move a tab into or out of a frozen container (or one being frozen or resumed), or to save a change of its cookie isolation. A frozen container's tabs stay unloaded and its background activity is stopped until the user resumes it; while frozen, no tab may move in or out of it."
+  },
+  "browser_tabIsLocked": "This tab is locked",
+  "@browser_tabIsLocked": {
+    "description": "Short message at the bottom of the screen when the user tries to close a tab they locked with \"Lock tab\". A locked tab cannot be closed until it is unlocked; nothing was closed."
+  },
+  "browser_closeFailed": "Nothing was closed. Try again.",
+  "@browser_closeFailed": {
+    "description": "Error message at the bottom of the screen when closing one or more tabs did nothing because WebLibre could not check which tabs are locked (with \"Lock tab\"). Every tab is still open; trying again usually works."
+  },
+  "browser_lockedTabsKept": "{count, plural, =1{This tab is locked} other{{count} locked tabs were kept}}",
+  "@browser_lockedTabsKept": {
+    "description": "Short message at the bottom of the screen when the user tried to close tabs and all of them were locked (with \"Lock tab\"), so none was closed. count is the number of locked tabs; for one, the message says that the tab is locked.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_tabsClosedKeptLocked": "{closed, plural, =1{Closed 1 tab.} other{Closed {closed} tabs.}} {locked, plural, =1{Kept 1 locked tab.} other{Kept {locked} locked tabs.}}",
+  "@browser_tabsClosedKeptLocked": {
+    "description": "Short message at the bottom of the screen after closing several tabs, with an Undo button, when some of them were locked (with \"Lock tab\") and stayed open. closed is the number of tabs closed, locked the number kept.",
+    "placeholders": {
+      "closed": { "type": "int" },
+      "locked": { "type": "int" }
+    }
+  },
+  "browser_menuSleepAllTabs": "Sleep All Tabs",
+  "@browser_menuSleepAllTabs": {
+    "description": "Item of the container menu: put every tab of the container to sleep, unloading their pages to free memory. The tabs stay open."
+  },
+  "browser_sleepTab": "Put to sleep",
+  "@browser_sleepTab": {
+    "description": "Item of the tab menu, and confirm button of the sleep dialogs: unload the tab's page to free memory. The tab stays open and its page loads again when it is woken."
+  },
+  "browser_sleepTabDescription": "Frees memory by unloading the page. It loads again when you wake the tab. Some unsaved page state may be lost.",
+  "@browser_sleepTabDescription": {
+    "description": "What putting a tab to sleep does, shown in the dialog the first time a tab is put to sleep. Must not suggest that the page is paused or preserved as it was."
+  },
+  "browser_sleepTabsConfirmTitle": "{count, plural, =1{Put this tab to sleep?} other{Put {count} tabs to sleep?}}",
+  "@browser_sleepTabsConfirmTitle": {
+    "description": "Title of the dialog shown the first time tabs are put to sleep, above browser_sleepTabDescription. It has a \"Don't ask again\" choice.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_wakeTab": "Wake tab",
+  "@browser_wakeTab": {
+    "description": "Item of the tab menu for a sleeping tab: load its page again."
+  },
+  "browser_wakeTabRoutingNotReady": "This tab's connection is not ready yet, so it stays asleep",
+  "@browser_wakeTabRoutingNotReady": {
+    "description": "Short message at the bottom of the screen when a sleeping tab could not be woken because the proxy connection of its container is not ready."
+  },
+  "browser_tabAsleepLabel": "Asleep",
+  "@browser_tabAsleepLabel": {
+    "description": "Screen reader label of the sleep glyph on a tab whose page was unloaded until it is shown or woken."
+  },
+  "browser_sleepAskTitle": "Put to sleep anyway?",
+  "@browser_sleepAskTitle": {
+    "description": "Title of the dialog asking before putting tabs to sleep that are playing media, show the result of a form submission or hold text typed into a form."
+  },
+  "browser_sleepAskMedia": "{count, plural, =1{This tab is playing media. Putting it to sleep stops playback.} other{{count} tabs are playing media. Putting them to sleep stops playback.}}",
+  "@browser_sleepAskMedia": {
+    "description": "Paragraph of the dialog asking before putting tabs to sleep that play audio or video.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_sleepAskPostResult": "{count, plural, =1{This page is the result of a form submission. When it reloads, the form is not sent again, so the page may not come back as it was.} other{{count} pages are the result of a form submission. When they reload, the forms are not sent again, so the pages may not come back as they were.}}",
+  "@browser_sleepAskPostResult": {
+    "description": "Paragraph of the dialog asking before putting tabs to sleep whose page was produced by sending a form (for example a search or an order confirmation).",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_sleepAskFormData": "{count, plural, =1{This tab has text typed into a form. Putting it to sleep may lose it.} other{{count} tabs have text typed into a form. Putting them to sleep may lose it.}}",
+  "@browser_sleepAskFormData": {
+    "description": "Paragraph of the dialog asking before putting tabs to sleep whose page holds text the user typed into a field (a search box, a comment). \"May\": the page sometimes restores it.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_sleepTabsPartial": "{slept, plural, =0{No tabs were put to sleep.} =1{1 tab was put to sleep.} other{{slept} tabs were put to sleep.}} {kept, plural, =1{1 tab was kept awake because of what it is doing.} other{{kept} tabs were kept awake because of what they are doing.}}",
+  "@browser_sleepTabsPartial": {
+    "description": "Short message at the bottom of the screen after putting several tabs to sleep, when some were kept awake (for example because they use the microphone, hold form input or run a download).",
+    "placeholders": { "slept": { "type": "int" }, "kept": { "type": "int" } }
+  },
+  "browser_sleepTabFailed": "This tab could not be put to sleep",
+  "@browser_sleepTabFailed": {
+    "description": "Short message at the bottom of the screen when putting a tab to sleep failed, for example because its page could not be saved in time. The tab stays loaded."
+  },
+  "browser_sleepRefusedRecording": "This tab is using the camera, microphone or screen sharing, so it was not put to sleep",
+  "@browser_sleepRefusedRecording": {
+    "description": "Short message at the bottom of the screen: a tab was not put to sleep because it is recording or sharing the screen."
+  },
+  "browser_sleepRefusedFormData": "This tab has form input that would be lost, so it was not put to sleep",
+  "@browser_sleepRefusedFormData": {
+    "description": "Short message at the bottom of the screen: a tab was not put to sleep because text typed into a form on the page would be lost."
+  },
+  "browser_sleepRefusedUpload": "A file was chosen for upload in this tab, so it was not put to sleep",
+  "@browser_sleepRefusedUpload": {
+    "description": "Short message at the bottom of the screen: a tab was not put to sleep because a file chosen for a form on the page may not have been sent yet."
+  },
+  "browser_sleepRefusedPrintOrPdf": "This tab is being printed or saved as PDF, so it was not put to sleep",
+  "@browser_sleepRefusedPrintOrPdf": {
+    "description": "Short message at the bottom of the screen: a tab was not put to sleep because it is being printed or saved as a PDF right now."
+  },
+  "browser_sleepRefusedDownload": "A download from this tab is still running, so it was not put to sleep",
+  "@browser_sleepRefusedDownload": {
+    "description": "Short message at the bottom of the screen: a tab was not put to sleep because a download it started is not finished."
+  },
+  "browser_freezeContainer": "Freeze container",
+  "@browser_freezeContainer": {
+    "description": "Confirm button of the freeze dialogs: unload every tab of the container and stop its background activity (push messages, service workers, downloads) until the user resumes it. Cookies, sign-ins and site data are kept."
+  },
+  "browser_menuFreezeContainer": "Freeze Container",
+  "@browser_menuFreezeContainer": {
+    "description": "Item of the container menu, in the Title Case of the menu's other items: unload every tab of the container and stop its background activity (push messages, service workers, downloads) until the user resumes it. Cookies, sign-ins and site data are kept."
+  },
+  "browser_freezeContainerTitle": "Freeze {container}?",
+  "@browser_freezeContainerTitle": {
+    "description": "Title of the dialog shown before freezing a container the first time. It has a \"Don't ask again\" choice. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "browser_freezeContainerDescription": "Unloads its tabs and stops what its sites do in the background, such as push messages and service workers, until you resume it. Cookies, sign-ins and site data are kept. New tabs opened in it wait until then. Push messages sent meanwhile are skipped.",
+  "@browser_freezeContainerDescription": {
+    "description": "What freezing a container does, shown in the dialog before the first freeze. Must not suggest that pages are paused or preserved as they were: they are unloaded and load again after Resume."
+  },
+  "browser_resumeContainer": "Resume Container",
+  "@browser_resumeContainer": {
+    "description": "Item of the container menu for a frozen container: lift the freeze, so its tabs can load again and its sites can run in the background."
+  },
+  "browser_stopFreezing": "Stop Freezing and Resume",
+  "@browser_stopFreezing": {
+    "description": "Item of the container menu while the container is being frozen: stop and resume it instead. Not called Cancel, because tabs already unloaded stay unloaded until shown."
+  },
+  "browser_retryFreeze": "Try Freezing Again",
+  "@browser_retryFreeze": {
+    "description": "Item of the container menu when freezing the container did not finish: run the freeze again."
+  },
+  "browser_containerFrozenLabel": "Frozen",
+  "@browser_containerFrozenLabel": {
+    "description": "State of a frozen container under its menu entry, and screen reader label of the pause glyph on a frozen container or on a tab of one."
+  },
+  "browser_containerFreezing": "Freezing…",
+  "@browser_containerFreezing": {
+    "description": "State of a container while it is being frozen, before the first tab was unloaded."
+  },
+  "browser_containerFreezingProgress": "Freezing… {done} of {total}",
+  "@browser_containerFreezingProgress": {
+    "description": "State of a container while it is being frozen: done of its total tabs have been unloaded so far.",
+    "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } }
+  },
+  "browser_containerResuming": "Resuming…",
+  "@browser_containerResuming": {
+    "description": "State of a frozen container while it is being resumed."
+  },
+  "browser_freezeIncompleteLabel": "Freeze incomplete",
+  "@browser_freezeIncompleteLabel": {
+    "description": "Short state on the container's chip in the containers list when freezing it did not finish. The full state appears in the container menu. Keep it to one or two words."
+  },
+  "browser_resumeIncompleteLabel": "Resume incomplete",
+  "@browser_resumeIncompleteLabel": {
+    "description": "Short state on the container's chip in the containers list when resuming it did not finish. The full state appears in the container menu. Keep it to one or two words."
+  },
+  "browser_freezeIncompleteBlocked": "Freeze incomplete: new activity is blocked, some already running may not have stopped",
+  "@browser_freezeIncompleteBlocked": {
+    "description": "State of a container whose freeze stopped part way, while the engine confirmed that it blocks new activity of the container."
+  },
+  "browser_freezeIncompleteUncertain": "Freeze incomplete: background activity may not be blocked",
+  "@browser_freezeIncompleteUncertain": {
+    "description": "State of a container whose freeze stopped part way, when the engine could not confirm that it blocks the container's activity."
+  },
+  "browser_resumeIncompleteBlocked": "Resume incomplete: still blocked, resume again",
+  "@browser_resumeIncompleteBlocked": {
+    "description": "State of a container whose Resume stopped part way: everything stays blocked as while frozen, and Resume can be tried again."
+  },
+  "browser_resumeIncompleteLifted": "Resume incomplete: background activity may already be running",
+  "@browser_resumeIncompleteLifted": {
+    "description": "State of a container whose Resume stopped part way after the engine had already stopped blocking it, so its sites may run in the background although Resume did not finish."
+  },
+  "browser_freezeNeedsOwnStorage": "Needs its own cookie storage",
+  "@browser_freezeNeedsOwnStorage": {
+    "description": "Why \"Freeze container\" is unavailable: the container shares the browser's default cookies and site data, and only a container with its own can be frozen."
+  },
+  "browser_freezeSharedStorage": "An isolated tab of this container shares its storage with a tab outside it, so it cannot be frozen",
+  "@browser_freezeSharedStorage": {
+    "description": "Short message at the bottom of the screen: the container cannot be frozen because one of its isolated tabs uses the same cookie storage as a tab in another container."
+  },
+  "browser_resumeSharedWithFrozen": "An isolated tab of another frozen container shares this container's storage. Resume that container first.",
+  "@browser_resumeSharedWithFrozen": {
+    "description": "Short message at the bottom of the screen: the container was not resumed because an isolated tab in another container that is still frozen uses the same cookie storage; resuming this one would let that tab run. This happens only after WebLibre restored frozen containers from a damaged record."
+  },
+  "browser_freezeRecoveryPending": "Frozen containers are being restored. Try again in a moment.",
+  "@browser_freezeRecoveryPending": {
+    "description": "Short message at the bottom of the screen: freezing or resuming is not possible yet because, after a damaged record was found, WebLibre is restoring which containers are frozen."
+  },
+  "browser_undoWaitsForSiteData": "This tab can't come back until its site data is deleted",
+  "@browser_undoWaitsForSiteData": {
+    "description": "Short message at the bottom of the screen after the user pressed Undo for a closed tab: the tab is not reopened, because the cookies and site data of the storage it ran in are waiting to be deleted (WebLibre retries that at every start)."
+  },
+  "browser_resumeFreezeStateUnknown": "The container was not resumed because WebLibre could not check what is frozen. Try again.",
+  "@browser_resumeFreezeStateUnknown": {
+    "description": "Short message at the bottom of the screen when resuming a frozen container stopped before anything was lifted, because WebLibre could not read its record of which storage is frozen (\"Freeze\" stops a container's background activity until it is resumed). The container stays frozen; resuming again tries again."
+  },
+  "browser_freezeBusy": "This container is busy. Try again in a moment.",
+  "@browser_freezeBusy": {
+    "description": "Short message at the bottom of the screen: the container could not be frozen or resumed because it is being frozen, resumed, deleted or changed right now."
+  },
+  "browser_containerFrozenDone": "{container} is frozen",
+  "@browser_containerFrozenDone": {
+    "description": "Short message at the bottom of the screen after a container was frozen. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "browser_containerResumedDone": "{container} resumed",
+  "@browser_containerResumedDone": {
+    "description": "Short message at the bottom of the screen after a frozen container was resumed. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "browser_freezeFailedShared": "A tab outside this container uses its storage, so it was not frozen",
+  "@browser_freezeFailedShared": {
+    "description": "Short message at the bottom of the screen: the engine refused to freeze the container because a tab of another container runs in its cookie storage."
+  },
+  "browser_freezeFailedMembershipChanged": "A tab joined this container meanwhile, so it was not frozen. Try again.",
+  "@browser_freezeFailedMembershipChanged": {
+    "description": "Short message at the bottom of the screen: a tab opened in the container while it was being frozen, so the freeze was undone."
+  },
+  "browser_freezeFailedMemberOutside": "A tab in this container does not use its storage, so it was not frozen. Close that tab or move it to another container, then try again.",
+  "@browser_freezeFailedMemberOutside": {
+    "description": "Short message at the bottom of the screen: the container was not frozen because one of its tabs runs outside the container's cookie storage (for example a tab an extension opened), so freezing would not stop it."
+  },
+  "browser_freezeFailedExternalWindow": "A web app or custom tab of this container is open. Close it, then try again.",
+  "@browser_freezeFailedExternalWindow": {
+    "description": "Short message at the bottom of the screen: the container cannot be frozen while one of its sites runs as an installed web app or in a custom tab opened from another app."
+  },
+  "browser_freezeFailedEngineRefused": "The browser engine refused to freeze this container. Nothing was changed.",
+  "@browser_freezeFailedEngineRefused": {
+    "description": "Short message at the bottom of the screen: the web engine did not accept the freeze, and it was undone completely."
+  },
+  "browser_freezeFailedNotPersisted": "The frozen state could not be saved, so the container was not frozen",
+  "@browser_freezeFailedNotPersisted": {
+    "description": "Short message at the bottom of the screen: WebLibre could not write the record of the freeze to storage, so it did not start."
+  },
+  "browser_freezeFailedQuiescence": "Freeze incomplete: some activity did not stop in time. New activity is blocked; resume or try again.",
+  "@browser_freezeFailedQuiescence": {
+    "description": "Short message at the bottom of the screen: the container's tabs were unloaded and new activity blocked, but something already running did not stop within the time limit."
+  },
+  "browser_freezeFailedGeneric": "Freezing this container did not finish. Resume it or try again.",
+  "@browser_freezeFailedGeneric": {
+    "description": "Short message at the bottom of the screen when freezing a container stopped part way for another reason. The container menu offers Retry and Resume."
+  },
+  "browser_resumeRoutingNotReady": "This container's connection is not ready yet, so it stays frozen",
+  "@browser_resumeRoutingNotReady": {
+    "description": "Short message at the bottom of the screen: the container was not resumed because the proxy connection of the container, or of one of its isolated tabs, is not ready."
+  },
+  "browser_resumeIsolationCleanupFailed": "The data of a closed isolated tab could not be deleted first, so the container stays frozen. Try again.",
+  "@browser_resumeIsolationCleanupFailed": {
+    "description": "Short message at the bottom of the screen: before resuming, the site data of an isolated tab that was closed while the container was frozen has to be deleted; that could not even start, so nothing was resumed."
+  },
+  "browser_resumeFailedBlocked": "Resuming did not finish. The container is still frozen; try again.",
+  "@browser_resumeFailedBlocked": {
+    "description": "Short message at the bottom of the screen: resuming a container failed, and everything stays blocked as while frozen."
+  },
+  "browser_resumeFailedLifted": "Resuming did not finish. Its sites may already run in the background; try again.",
+  "@browser_resumeFailedLifted": {
+    "description": "Short message at the bottom of the screen: resuming a container did not finish after the engine already stopped blocking it."
+  },
+  "browser_freezeBlockedTitle": "Can't freeze this container yet",
+  "@browser_freezeBlockedTitle": {
+    "description": "Title of the dialog listing what keeps a container from being frozen: tabs using the camera, holding form input, downloads still running and so on."
+  },
+  "browser_freezeBlockedRecording": "Uses the camera, microphone or screen sharing",
+  "@browser_freezeBlockedRecording": {
+    "description": "Reason under a tab's title in the dialog listing what keeps a container from being frozen."
+  },
+  "browser_freezeBlockedFormData": "Has form input that would be lost",
+  "@browser_freezeBlockedFormData": {
+    "description": "Reason under a tab's title in the dialog listing what keeps a container from being frozen."
+  },
+  "browser_freezeBlockedUpload": "A file was chosen for upload",
+  "@browser_freezeBlockedUpload": {
+    "description": "Reason under a tab's title in the dialog listing what keeps a container from being frozen."
+  },
+  "browser_freezeBlockedPrintOrPdf": "Being printed or saved as PDF",
+  "@browser_freezeBlockedPrintOrPdf": {
+    "description": "Reason under a tab's title in the dialog listing what keeps a container from being frozen."
+  },
+  "browser_freezeBlockedDownload": "A download from this container is still running",
+  "@browser_freezeBlockedDownload": {
+    "description": "Row of the dialog listing what keeps a container from being frozen: a download started in the container is not finished. Finish or cancel it first."
+  },
+  "browser_freezeBlockedUnattributedDownload": "A download is running whose container is unknown",
+  "@browser_freezeBlockedUnattributedDownload": {
+    "description": "Row of the dialog listing what keeps a container from being frozen: a running download cannot be traced to a container, so it may belong to this one. Finish or cancel it first."
+  },
+  "browser_freezeBlockedTabGone": "Closed tab",
+  "@browser_freezeBlockedTabGone": {
+    "description": "Stands in for a tab's title in the dialog listing what keeps a container from being frozen, when that tab was closed meanwhile."
+  },
+  "browser_freezeBlockedShowTab": "Show tab",
+  "@browser_freezeBlockedShowTab": {
+    "description": "Button next to a tab in the dialog listing what keeps a container from being frozen: open that tab."
+  },
+  "browser_freezeBlockedViewDownloads": "View downloads",
+  "@browser_freezeBlockedViewDownloads": {
+    "description": "Button next to a running download in the dialog listing what keeps a container from being frozen: open the downloads list."
+  },
+  "browser_freezeAskTitle": "Freeze anyway?",
+  "@browser_freezeAskTitle": {
+    "description": "Title of the dialog asking before freezing a container whose tabs are playing media, show the result of a form submission or hold text typed into a form."
+  },
+  "browser_freezeAskMedia": "{count, plural, =1{A tab of this container is playing media. Freezing stops playback.} other{{count} tabs of this container are playing media. Freezing stops playback.}}",
+  "@browser_freezeAskMedia": {
+    "description": "Paragraph of the dialog asking before freezing a container whose tabs play audio or video.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_freezeAskPostResult": "{count, plural, =1{A page of this container is the result of a form submission. When it reloads after Resume, the form is not sent again, so the page may not come back as it was.} other{{count} pages of this container are the result of a form submission. When they reload after Resume, the forms are not sent again, so the pages may not come back as they were.}}",
+  "@browser_freezeAskPostResult": {
+    "description": "Paragraph of the dialog asking before freezing a container whose tabs show pages produced by sending a form (for example a search or an order confirmation).",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_freezeAskFormData": "{count, plural, =1{A tab of this container has text typed into a form. Freezing may lose it.} other{{count} tabs of this container have text typed into a form. Freezing may lose it.}}",
+  "@browser_freezeAskFormData": {
+    "description": "Paragraph of the dialog asking before freezing a container whose tabs hold text the user typed into a field (a search box, a comment). \"May\": the page sometimes restores it.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_resumeAndOpenTitle": "Resume {container} and open?",
+  "@browser_resumeAndOpenTitle": {
+    "description": "Title of the dialog shown when the user tries to load a page in a tab of a frozen container. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
+  },
+  "browser_resumeAndOpenContent": "This container is frozen, so nothing in it loads until it is resumed.",
+  "@browser_resumeAndOpenContent": {
+    "description": "Text of the dialog shown when the user tries to load a page in a tab of a frozen container."
+  },
+  "browser_resumeAndOpen": "Resume and open",
+  "@browser_resumeAndOpen": {
+    "description": "Confirm button of the dialog shown when the user tries to load a page in a frozen container: resume the container, then load the page."
+  },
+  "browser_resumeAndOpenCancelled": "Nothing was opened. The container stays frozen.",
+  "@browser_resumeAndOpenCancelled": {
+    "description": "Short message at the bottom of the screen after the user cancelled the dialog asking to resume a frozen container to load a page."
+  },
+  "browser_containerFrozenToBeSafeLabel": "Frozen to be safe after a damaged record",
+  "@browser_containerFrozenToBeSafeLabel": {
+    "description": "State of a container under its Resume entry and on the containers screen, when WebLibre froze it itself because its record of frozen containers was found damaged. The user resumes it when they want its sites to run again."
+  },
+  "browser_frozenToBeSafeTitle": "Containers frozen to be safe",
+  "@browser_frozenToBeSafeTitle": {
+    "description": "Title of the dialog shown once after WebLibre found its record of which containers are frozen damaged, and froze every container with its own cookie storage."
+  },
+  "browser_frozenToBeSafeContent": "{count, plural, =1{WebLibre's record of which containers are frozen was damaged, so to be safe it froze the container that has its own cookie storage. Resume it when you want its sites to run again.} other{WebLibre's record of which containers are frozen was damaged, so to be safe it froze all {count} containers that have their own cookie storage. Resume each one when you want its sites to run again.}}",
+  "@browser_frozenToBeSafeContent": {
+    "description": "Text of the dialog shown once after WebLibre found its record of frozen containers damaged. A frozen container's tabs stay unloaded and its sites cannot run in the background until it is resumed.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "browser_frozenToBeSafeShowContainers": "Show containers",
+  "@browser_frozenToBeSafeShowContainers": {
+    "description": "Button of the dialog about containers frozen to be safe: open the list of containers, where each can be resumed."
+  },
+  "browser_freezeRecoveryFailed": "WebLibre could not restore which containers are frozen, so every container stays frozen for now",
+  "@browser_freezeRecoveryFailed": {
+    "description": "Short message at the bottom of the screen with a Retry button: after a damaged record was found, restoring which containers are frozen did not finish. Until it does, the sites of every container with its own storage stay blocked."
+  },
+  "browser_containerDeletionNotFinished": "Deleting {container} did not finish, so it is still there",
+  "@browser_containerDeletionNotFinished": {
+    "description": "Short message at the bottom of the screen at start: WebLibre was closed while a frozen container was being deleted, before anything was removed, so the container is back as it was. container is the container's name, chosen by the user.",
+    "placeholders": { "container": { "type": "String" } }
   },
   "browser_pinTab": "Pin tab",
   "@browser_pinTab": {
@@ -1265,5 +1677,41 @@
   "browser_tabPickerNothingHere": "No tabs to choose here",
   "@browser_tabPickerNothingHere": {
     "description": "Shown in the tab tray while it is used to choose a tab (for example the page to show in split view), when the selected container or filter has no tab that can be chosen."
+  },
+  "browser_keepTabAwake": "Keep awake",
+  "@browser_keepTabAwake": {
+    "description": "Tab menu action: automatic sleep never unloads this tab, and its container is never frozen automatically while the tab is in it. Manual 'Put to sleep' and 'Freeze container' still work."
+  },
+  "browser_allowTabSleeping": "Allow sleeping",
+  "@browser_allowTabSleeping": {
+    "description": "Tab menu action on a tab set to 'Keep awake': lets automatic sleep unload it again."
+  },
+  "browser_pinTabShort": "Pin",
+  "@browser_pinTabShort": {
+    "description": "Short label under the pin icon in the row of tab-state toggles at the top of the tab's long-press menu: pin the tab to the start of the tab bar. Keep it to one short word; \"Pin tab\" is read to screen readers."
+  },
+  "browser_unpinTabShort": "Unpin",
+  "@browser_unpinTabShort": {
+    "description": "Short label under the pin icon in the row of tab-state toggles of the tab's long-press menu, for a pinned tab: unpin it. Keep it to one short word."
+  },
+  "browser_lockTabShort": "Lock",
+  "@browser_lockTabShort": {
+    "description": "Short label under the lock icon in the row of tab-state toggles of the tab's long-press menu: lock the tab so it cannot be closed until it is unlocked. Not the profile lock. Keep it to one short word."
+  },
+  "browser_unlockTabShort": "Unlock",
+  "@browser_unlockTabShort": {
+    "description": "Short label for unlocking a locked tab, so it can be closed again: under the lock icon in the row of tab-state toggles of the tab's long-press menu, and the button of the message \"This tab is locked\" shown when closing it. Keep it to one short word."
+  },
+  "browser_sleepTabShort": "Sleep",
+  "@browser_sleepTabShort": {
+    "description": "Short label under the sleep icon in the row of tab-state toggles of the tab's long-press menu: put the tab to sleep, unloading its page to free memory. Keep it to one short word."
+  },
+  "browser_wakeTabShort": "Wake",
+  "@browser_wakeTabShort": {
+    "description": "Short label under the sleep icon in the row of tab-state toggles of the tab's long-press menu, for a tab put to sleep: load its page again. Keep it to one short word."
+  },
+  "browser_tabKeptAwakeLabel": "Kept awake",
+  "@browser_tabKeptAwakeLabel": {
+    "description": "Accessibility label of the small indicator on a tab set to 'Keep awake'."
   }
 }

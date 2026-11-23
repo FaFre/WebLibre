@@ -28,6 +28,7 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/gestures/data/models/built_in_gesture.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
 import 'package:weblibre/presentation/widgets/single_finger_horizontal_drag.dart';
@@ -78,6 +79,9 @@ class TabSwipeActions extends HookConsumerWidget {
     final rightAction = ref.watch(
       builtInGestureBindingProvider(BuiltInGesture.tabSwipeRight),
     );
+    // A locked tab does not close, so a swipe bound to closing does nothing:
+    // it rubber-bands like an unbound one.
+    final isLocked = ref.watch(isTabLockedProvider(tabId));
 
     final dragStart = useRef(0.0);
     // A ValueNotifier rather than useState: the drag fires per pointer event,
@@ -99,8 +103,12 @@ class TabSwipeActions extends HookConsumerWidget {
       return () => springBack.removeListener(tick);
     }, [springBack]);
 
-    BrowserAction? actionFor(double offset) =>
-        offset < 0 ? leftAction : (offset > 0 ? rightAction : null);
+    BrowserAction? actionFor(double offset) {
+      final action = offset < 0
+          ? leftAction
+          : (offset > 0 ? rightAction : null);
+      return isLocked && action == BrowserAction.closeTab ? null : action;
+    }
 
     double displacementFor(double travel) {
       final action = actionFor(travel);

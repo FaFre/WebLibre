@@ -27,6 +27,7 @@ import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/extensions/hit_result.dart';
 import 'package:weblibre/features/geckoview/features/contextmenu/presentation/utils/context_menu_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_actions.dart';
 import 'package:weblibre/features/geckoview/features/tabs/utils/background_tab_open.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -67,16 +68,20 @@ class OpenImageInNewTab extends HookConsumerWidget {
             );
         final tabs = ref.read(tabRepositoryProvider.notifier);
 
-        final tabId = await tabs.addTab(
-          url: hitResult.tryGetSource(),
-          parentId: currentTab?.id,
-          selectTab: false,
-          tabMode: tabMode,
-          containerSelection: TabContainerSelection.openedFrom(sourceTabId),
+        // A frozen container, or one being deleted, refuses the tab (D19).
+        final tabId = await openUnlessContainerRefuses(
+          context,
+          () => tabs.addTab(
+            url: hitResult.tryGetSource(),
+            parentId: currentTab?.id,
+            selectTab: false,
+            tabMode: tabMode,
+            containerSelection: TabContainerSelection.openedFrom(sourceTabId),
+          ),
         );
 
         if (context.mounted) {
-          handleBackgroundTabOpened(context, ref, tabId);
+          if (tabId != null) handleBackgroundTabOpened(context, ref, tabId);
 
           context.pop();
         }

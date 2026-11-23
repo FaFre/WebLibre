@@ -477,6 +477,8 @@ typedef $TabCreateCompanionBuilder =
       i0.Value<i7.TabModeDbValue> tabMode,
       i0.Value<String?> isolationContextId,
       i0.Value<bool> isPinned,
+      i0.Value<bool> isLocked,
+      i0.Value<bool> sleepExempt,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -498,6 +500,8 @@ typedef $TabUpdateCompanionBuilder =
       i0.Value<i7.TabModeDbValue> tabMode,
       i0.Value<String?> isolationContextId,
       i0.Value<bool> isPinned,
+      i0.Value<bool> isLocked,
+      i0.Value<bool> sleepExempt,
       i0.Value<bool?> isProbablyReaderable,
       i0.Value<String?> extractedContentMarkdown,
       i0.Value<String?> extractedContentPlain,
@@ -630,6 +634,16 @@ class $TabFilterComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.ColumnFilters<bool> get isPinned => $composableBuilder(
     column: $table.isPinned,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<bool> get isLocked => $composableBuilder(
+    column: $table.isLocked,
+    builder: (column) => i0.ColumnFilters(column),
+  );
+
+  i0.ColumnFilters<bool> get sleepExempt => $composableBuilder(
+    column: $table.sleepExempt,
     builder: (column) => i0.ColumnFilters(column),
   );
 
@@ -801,6 +815,16 @@ class $TabOrderingComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
     builder: (column) => i0.ColumnOrderings(column),
   );
 
+  i0.ColumnOrderings<bool> get isLocked => $composableBuilder(
+    column: $table.isLocked,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
+  i0.ColumnOrderings<bool> get sleepExempt => $composableBuilder(
+    column: $table.sleepExempt,
+    builder: (column) => i0.ColumnOrderings(column),
+  );
+
   i0.ColumnOrderings<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
     builder: (column) => i0.ColumnOrderings(column),
@@ -925,6 +949,14 @@ class $TabAnnotationComposer extends i0.Composer<i0.GeneratedDatabase, i3.Tab> {
 
   i0.GeneratedColumn<bool> get isPinned =>
       $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  i0.GeneratedColumn<bool> get isLocked =>
+      $composableBuilder(column: $table.isLocked, builder: (column) => column);
+
+  i0.GeneratedColumn<bool> get sleepExempt => $composableBuilder(
+    column: $table.sleepExempt,
+    builder: (column) => column,
+  );
 
   i0.GeneratedColumn<bool> get isProbablyReaderable => $composableBuilder(
     column: $table.isProbablyReaderable,
@@ -1082,6 +1114,8 @@ class $TabTableManager
                 i0.Value<i7.TabModeDbValue> tabMode = const i0.Value.absent(),
                 i0.Value<String?> isolationContextId = const i0.Value.absent(),
                 i0.Value<bool> isPinned = const i0.Value.absent(),
+                i0.Value<bool> isLocked = const i0.Value.absent(),
+                i0.Value<bool> sleepExempt = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -1103,6 +1137,8 @@ class $TabTableManager
                 tabMode: tabMode,
                 isolationContextId: isolationContextId,
                 isPinned: isPinned,
+                isLocked: isLocked,
+                sleepExempt: sleepExempt,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -1124,6 +1160,8 @@ class $TabTableManager
                 i0.Value<i7.TabModeDbValue> tabMode = const i0.Value.absent(),
                 i0.Value<String?> isolationContextId = const i0.Value.absent(),
                 i0.Value<bool> isPinned = const i0.Value.absent(),
+                i0.Value<bool> isLocked = const i0.Value.absent(),
+                i0.Value<bool> sleepExempt = const i0.Value.absent(),
                 i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
                 i0.Value<String?> extractedContentMarkdown =
                     const i0.Value.absent(),
@@ -1145,6 +1183,8 @@ class $TabTableManager
                 tabMode: tabMode,
                 isolationContextId: isolationContextId,
                 isPinned: isPinned,
+                isLocked: isLocked,
+                sleepExempt: sleepExempt,
                 isProbablyReaderable: isProbablyReaderable,
                 extractedContentMarkdown: extractedContentMarkdown,
                 extractedContentPlain: extractedContentPlain,
@@ -3550,6 +3590,25 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     $customConstraints: 'NOT NULL DEFAULT 0',
     defaultValue: const i0.CustomExpression('0'),
   );
+  late final i0.GeneratedColumn<bool> isLocked = i0.GeneratedColumn<bool>(
+    'is_locked',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'NOT NULL DEFAULT 0 CHECK (is_locked = 0 OR tab_mode != 1)',
+    defaultValue: const i0.CustomExpression('0'),
+  );
+  late final i0.GeneratedColumn<bool> sleepExempt = i0.GeneratedColumn<bool>(
+    'sleep_exempt',
+    aliasedName,
+    false,
+    type: i0.DriftSqlType.bool,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0',
+    defaultValue: const i0.CustomExpression('0'),
+  );
   late final i0.GeneratedColumn<bool> isProbablyReaderable =
       i0.GeneratedColumn<bool>(
         'is_probably_readerable',
@@ -3632,6 +3691,8 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
     tabMode,
     isolationContextId,
     isPinned,
+    isLocked,
+    sleepExempt,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -3701,6 +3762,14 @@ class Tab extends i0.Table with i0.TableInfo<Tab, i3.TabData> {
         i0.DriftSqlType.bool,
         data['${effectivePrefix}is_pinned'],
       )!,
+      isLocked: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}is_locked'],
+      )!,
+      sleepExempt: attachedDatabase.typeMapping.read(
+        i0.DriftSqlType.bool,
+        data['${effectivePrefix}sleep_exempt'],
+      )!,
       isProbablyReaderable: attachedDatabase.typeMapping.read(
         i0.DriftSqlType.bool,
         data['${effectivePrefix}is_probably_readerable'],
@@ -3769,6 +3838,18 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
   final i7.TabModeDbValue tabMode;
   final String? isolationContextId;
   final bool isPinned;
+
+  /// What the user asked for with "Lock tab": the tab refuses single closes and
+  /// is skipped by bulk ones. Native keeps its own copy (TabCloseProtection),
+  /// which is always a superset of this column; see TabRepository.setTabLocked.
+  /// A private tab can never be locked. Column-level, so adding it is a plain
+  /// ADD COLUMN without rebuilding the table.
+  final bool isLocked;
+
+  /// "Keep awake" (D30): automatic sleep never unloads this tab, and automatic
+  /// freeze skips its container while it is a member. Manual sleep and freeze
+  /// still apply.
+  final bool sleepExempt;
   final bool? isProbablyReaderable;
   final String? extractedContentMarkdown;
   final String? extractedContentPlain;
@@ -3794,6 +3875,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     required this.tabMode,
     this.isolationContextId,
     required this.isPinned,
+    required this.isLocked,
+    required this.sleepExempt,
     this.isProbablyReaderable,
     this.extractedContentMarkdown,
     this.extractedContentPlain,
@@ -3834,6 +3917,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       map['isolation_context_id'] = i0.Variable<String>(isolationContextId);
     }
     map['is_pinned'] = i0.Variable<bool>(isPinned);
+    map['is_locked'] = i0.Variable<bool>(isLocked);
+    map['sleep_exempt'] = i0.Variable<bool>(sleepExempt);
     if (!nullToAbsent || isProbablyReaderable != null) {
       map['is_probably_readerable'] = i0.Variable<bool>(isProbablyReaderable);
     }
@@ -3880,6 +3965,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
         json['isolation_context_id'],
       ),
       isPinned: serializer.fromJson<bool>(json['is_pinned']),
+      isLocked: serializer.fromJson<bool>(json['is_locked']),
+      sleepExempt: serializer.fromJson<bool>(json['sleep_exempt']),
       isProbablyReaderable: serializer.fromJson<bool?>(
         json['is_probably_readerable'],
       ),
@@ -3916,6 +4003,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
       ),
       'isolation_context_id': serializer.toJson<String?>(isolationContextId),
       'is_pinned': serializer.toJson<bool>(isPinned),
+      'is_locked': serializer.toJson<bool>(isLocked),
+      'sleep_exempt': serializer.toJson<bool>(sleepExempt),
       'is_probably_readerable': serializer.toJson<bool?>(isProbablyReaderable),
       'extracted_content_markdown': serializer.toJson<String?>(
         extractedContentMarkdown,
@@ -3942,6 +4031,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     i7.TabModeDbValue? tabMode,
     i0.Value<String?> isolationContextId = const i0.Value.absent(),
     bool? isPinned,
+    bool? isLocked,
+    bool? sleepExempt,
     i0.Value<bool?> isProbablyReaderable = const i0.Value.absent(),
     i0.Value<String?> extractedContentMarkdown = const i0.Value.absent(),
     i0.Value<String?> extractedContentPlain = const i0.Value.absent(),
@@ -3965,6 +4056,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
         ? isolationContextId.value
         : this.isolationContextId,
     isPinned: isPinned ?? this.isPinned,
+    isLocked: isLocked ?? this.isLocked,
+    sleepExempt: sleepExempt ?? this.sleepExempt,
     isProbablyReaderable: isProbablyReaderable.present
         ? isProbablyReaderable.value
         : this.isProbablyReaderable,
@@ -3997,6 +4090,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           ..write('tabMode: $tabMode, ')
           ..write('isolationContextId: $isolationContextId, ')
           ..write('isPinned: $isPinned, ')
+          ..write('isLocked: $isLocked, ')
+          ..write('sleepExempt: $sleepExempt, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -4021,6 +4116,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
     tabMode,
     isolationContextId,
     isPinned,
+    isLocked,
+    sleepExempt,
     isProbablyReaderable,
     extractedContentMarkdown,
     extractedContentPlain,
@@ -4044,6 +4141,8 @@ class TabData extends i0.DataClass implements i0.Insertable<i3.TabData> {
           other.tabMode == this.tabMode &&
           other.isolationContextId == this.isolationContextId &&
           other.isPinned == this.isPinned &&
+          other.isLocked == this.isLocked &&
+          other.sleepExempt == this.sleepExempt &&
           other.isProbablyReaderable == this.isProbablyReaderable &&
           other.extractedContentMarkdown == this.extractedContentMarkdown &&
           other.extractedContentPlain == this.extractedContentPlain &&
@@ -4065,6 +4164,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
   final i0.Value<i7.TabModeDbValue> tabMode;
   final i0.Value<String?> isolationContextId;
   final i0.Value<bool> isPinned;
+  final i0.Value<bool> isLocked;
+  final i0.Value<bool> sleepExempt;
   final i0.Value<bool?> isProbablyReaderable;
   final i0.Value<String?> extractedContentMarkdown;
   final i0.Value<String?> extractedContentPlain;
@@ -4084,6 +4185,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.tabMode = const i0.Value.absent(),
     this.isolationContextId = const i0.Value.absent(),
     this.isPinned = const i0.Value.absent(),
+    this.isLocked = const i0.Value.absent(),
+    this.sleepExempt = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -4104,6 +4207,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     this.tabMode = const i0.Value.absent(),
     this.isolationContextId = const i0.Value.absent(),
     this.isPinned = const i0.Value.absent(),
+    this.isLocked = const i0.Value.absent(),
+    this.sleepExempt = const i0.Value.absent(),
     this.isProbablyReaderable = const i0.Value.absent(),
     this.extractedContentMarkdown = const i0.Value.absent(),
     this.extractedContentPlain = const i0.Value.absent(),
@@ -4127,6 +4232,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Expression<int>? tabMode,
     i0.Expression<String>? isolationContextId,
     i0.Expression<bool>? isPinned,
+    i0.Expression<bool>? isLocked,
+    i0.Expression<bool>? sleepExempt,
     i0.Expression<bool>? isProbablyReaderable,
     i0.Expression<String>? extractedContentMarkdown,
     i0.Expression<String>? extractedContentPlain,
@@ -4148,6 +4255,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       if (isolationContextId != null)
         'isolation_context_id': isolationContextId,
       if (isPinned != null) 'is_pinned': isPinned,
+      if (isLocked != null) 'is_locked': isLocked,
+      if (sleepExempt != null) 'sleep_exempt': sleepExempt,
       if (isProbablyReaderable != null)
         'is_probably_readerable': isProbablyReaderable,
       if (extractedContentMarkdown != null)
@@ -4174,6 +4283,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     i0.Value<i7.TabModeDbValue>? tabMode,
     i0.Value<String?>? isolationContextId,
     i0.Value<bool>? isPinned,
+    i0.Value<bool>? isLocked,
+    i0.Value<bool>? sleepExempt,
     i0.Value<bool?>? isProbablyReaderable,
     i0.Value<String?>? extractedContentMarkdown,
     i0.Value<String?>? extractedContentPlain,
@@ -4194,6 +4305,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
       tabMode: tabMode ?? this.tabMode,
       isolationContextId: isolationContextId ?? this.isolationContextId,
       isPinned: isPinned ?? this.isPinned,
+      isLocked: isLocked ?? this.isLocked,
+      sleepExempt: sleepExempt ?? this.sleepExempt,
       isProbablyReaderable: isProbablyReaderable ?? this.isProbablyReaderable,
       extractedContentMarkdown:
           extractedContentMarkdown ?? this.extractedContentMarkdown,
@@ -4248,6 +4361,12 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
     if (isPinned.present) {
       map['is_pinned'] = i0.Variable<bool>(isPinned.value);
     }
+    if (isLocked.present) {
+      map['is_locked'] = i0.Variable<bool>(isLocked.value);
+    }
+    if (sleepExempt.present) {
+      map['sleep_exempt'] = i0.Variable<bool>(sleepExempt.value);
+    }
     if (isProbablyReaderable.present) {
       map['is_probably_readerable'] = i0.Variable<bool>(
         isProbablyReaderable.value,
@@ -4294,6 +4413,8 @@ class TabCompanion extends i0.UpdateCompanion<i3.TabData> {
           ..write('tabMode: $tabMode, ')
           ..write('isolationContextId: $isolationContextId, ')
           ..write('isPinned: $isPinned, ')
+          ..write('isLocked: $isLocked, ')
+          ..write('sleepExempt: $sleepExempt, ')
           ..write('isProbablyReaderable: $isProbablyReaderable, ')
           ..write('extractedContentMarkdown: $extractedContentMarkdown, ')
           ..write('extractedContentPlain: $extractedContentPlain, ')
@@ -4740,6 +4861,14 @@ i0.Index get idxTabTimestamp => i0.Index(
 i0.Index get idxTabContainerOrder => i0.Index(
   'idx_tab_container_order',
   'CREATE INDEX idx_tab_container_order ON tab (container_id, order_key)',
+);
+i0.Index get idxTabLocked => i0.Index(
+  'idx_tab_locked',
+  'CREATE INDEX idx_tab_locked ON tab (is_locked, id)',
+);
+i0.Index get idxTabSleepExempt => i0.Index(
+  'idx_tab_sleep_exempt',
+  'CREATE INDEX idx_tab_sleep_exempt ON tab (sleep_exempt, id)',
 );
 
 class CaptureTab extends i0.Table
@@ -7472,6 +7601,28 @@ class DefinitionsDrift extends i9.ModularAccessor {
         isolationContextId: row.readNullable<String>('isolation_context_id'),
         containerId: row.readNullable<String>('container_id'),
       ),
+    );
+  }
+
+  i0.Selectable<String?> isolationContextIdsInContainer({String? containerId}) {
+    return customSelect(
+      'SELECT DISTINCT isolation_context_id FROM tab WHERE container_id = ?1 AND isolation_context_id IS NOT NULL',
+      variables: [i0.Variable<String>(containerId)],
+      readsFrom: {this.tab},
+    ).map(
+      (i0.QueryRow row) => row.readNullable<String>('isolation_context_id'),
+    );
+  }
+
+  i0.Selectable<String?> isolationContextIdsOnlyInContainer({
+    String? containerId,
+  }) {
+    return customSelect(
+      'SELECT DISTINCT t.isolation_context_id FROM tab AS t WHERE t.container_id = ?1 AND t.isolation_context_id IS NOT NULL AND NOT EXISTS (SELECT 1 AS _c0 FROM tab AS o WHERE o.isolation_context_id = t.isolation_context_id AND(o.container_id IS NULL OR o.container_id != ?1))',
+      variables: [i0.Variable<String>(containerId)],
+      readsFrom: {this.tab},
+    ).map(
+      (i0.QueryRow row) => row.readNullable<String>('isolation_context_id'),
     );
   }
 

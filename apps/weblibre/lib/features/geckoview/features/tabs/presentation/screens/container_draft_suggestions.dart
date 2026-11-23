@@ -29,6 +29,7 @@ import 'package:nullability/nullability.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_preview.dart';
 import 'package:weblibre/features/geckoview/features/browser/utils/grid_calculations.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
@@ -197,9 +198,12 @@ class ContainerDraftSuggestionsScreen extends HookConsumerWidget {
 
                 if (result != null) {
                   for (final tab in selectedTabs) {
-                    await ref
+                    final moved = await ref
                         .read(tabDataRepositoryProvider.notifier)
                         .assignContainer(tab, result);
+                    if (context.mounted) {
+                      showContainerMoveResult(context, moved);
+                    }
                   }
 
                   selectedContainerTabs.value = {};

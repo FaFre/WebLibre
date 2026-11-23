@@ -21,6 +21,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
+import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:nullability/nullability.dart';
@@ -31,7 +32,10 @@ import 'package:weblibre/core/providers/pending_writes.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/extensions/uri.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_close_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_wake.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/pending_tab_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
@@ -39,9 +43,12 @@ import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_list.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab/background_stand_ins.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab/isolation_context_cleanup.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab/tab_close_lock.dart';
+import 'package:weblibre/features/geckoview/domain/repositories/tab/tab_locks.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_data.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/startup_browsing_data_cleanup.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
@@ -52,9 +59,13 @@ import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_freeze.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -62,6 +73,7 @@ import 'package:weblibre/features/user/domain/repositories/proxy_routing_setting
 import 'package:weblibre/utils/debouncer.dart';
 
 part 'tab.g.dart';
+part 'tab.replacements.dart';
 
 @visibleForTesting
 ContainerData? resolveAssignedContainerForTabOpen({
@@ -77,313 +89,6 @@ ContainerData? resolveAssignedContainerForTabOpen({
     UnassignedContainerTabSelection() ||
     SpecificContainerTabSelection() => requestedContainer,
   };
-}
-
-/// What a background tab's cancelled navigation calls for; see
-/// [BackgroundStandIns.request].
-@visibleForTesting
-sealed class BackgroundReopen {
-  const BackgroundReopen();
-}
-
-/// No tab stands in for this page yet: open one.
-@visibleForTesting
-final class OpenStandIn extends BackgroundReopen {
-  const OpenStandIn();
-}
-
-/// [tabId] stands in for this page: load the new URL in it.
-@visibleForTesting
-final class LoadInStandIn extends BackgroundReopen {
-  final String tabId;
-
-  const LoadInStandIn(this.tabId);
-}
-
-/// The stand-in already shows this URL, or is still being opened and picks
-/// the URL up once it is ([BackgroundStandIns.opened]).
-@visibleForTesting
-final class StandInCurrent extends BackgroundReopen {
-  const StandInCurrent();
-}
-
-/// A page's stand-in: the tab (null while it is being opened), the URL it
-/// should show, and the [BackgroundStandIns.stamp] at which it was opened.
-class _StandIn {
-  String? tabId;
-  Uri url;
-  int openedAt = 0;
-
-  _StandIn(this.url);
-}
-
-/// The tabs that stand in for background tabs' cancelled navigations, so a
-/// page that keeps trying reuses one tab instead of opening one per attempt.
-///
-/// A background page that keeps navigating to a site assigned elsewhere (an
-/// auto-refresh, a login redirect on every attempt) would otherwise open a new
-/// hidden tab each time. Dropping the repeats instead would lose navigations
-/// that only look like them: `/view?id=1` then `/view?id=2`, or a callback
-/// with a fresh code. So each page (origin and path) of a background tab gets
-/// one stand-in tab, and a later navigation to that page loads its URL there:
-/// the latest one wins, as it would have in the tab itself. Another path of
-/// the site is another page with its own stand-in.
-///
-/// Nobody has seen a stand-in: once either tab is selected or closed, the next
-/// navigation opens a new one rather than taking over a page the user may be
-/// on. [sync] applies both from the native store right before each decision:
-/// the Dart tab states keep closed tabs for a while, and the selection events
-/// are debounced, so a stand-in closed or picked a moment ago still looks
-/// open and unseen there. [forget] covers a tab seen and left again.
-@visibleForTesting
-class BackgroundStandIns {
-  /// By source tab, then page: its stand-in.
-  final _standIns = <String, Map<String, _StandIn>>{};
-
-  int _clock = 0;
-
-  /// Now, to pass as [sync]'s `takenAt` when asking the native store for its
-  /// state: a stand-in [opened] after this is not in that state yet.
-  int get stamp => _clock;
-
-  static String _pageOf(Uri uri) =>
-      '${uri.origin}${uri.path.isEmpty ? '/' : uri.path}';
-
-  /// Applies the native store's state, asked for at [takenAt] (a [stamp]):
-  /// drops what involves a closed tab (not among [openTabIds]) and the
-  /// selected tab ([selectedTabId]), and [retire]s the tabs on screen beside
-  /// it ([visibleTabIds], the other page of a split pair).
-  ///
-  /// The state arrives after an await, during which another report can have
-  /// [opened] a stand-in. That tab is missing from [openTabIds] because it is
-  /// newer than them, not because it closed, so it is kept. Without
-  /// [takenAt], the state is taken to be current.
-  void sync({
-    required Iterable<String> openTabIds,
-    String? selectedTabId,
-    Iterable<String> visibleTabIds = const [],
-    int? takenAt,
-  }) {
-    final open = openTabIds.toSet();
-    final asOf = takenAt ?? _clock;
-    _standIns.removeWhere((source, _) => !open.contains(source));
-    for (final pages in _standIns.values) {
-      pages.removeWhere(
-        (_, standIn) =>
-            standIn.tabId != null &&
-            standIn.openedAt <= asOf &&
-            !open.contains(standIn.tabId),
-      );
-    }
-    _standIns.removeWhere((_, pages) => pages.isEmpty);
-    if (selectedTabId != null) forget(selectedTabId);
-    visibleTabIds.forEach(retire);
-  }
-
-  /// What background tab [sourceTabId]'s cancelled navigation to [uri] calls
-  /// for, right after a [sync]. [OpenStandIn] claims the page at once, so a
-  /// report arriving while the tab opens does not open a second one; follow
-  /// it with [opened], or [release] when no tab came of it.
-  BackgroundReopen request(String sourceTabId, Uri uri) {
-    final pages = _standIns.putIfAbsent(sourceTabId, () => {});
-    final page = _pageOf(uri);
-    final standIn = pages[page];
-    if (standIn == null) {
-      pages[page] = _StandIn(uri);
-      return const OpenStandIn();
-    }
-    if (standIn.url == uri) return const StandInCurrent();
-
-    standIn.url = uri;
-    return switch (standIn.tabId) {
-      final tabId? => LoadInStandIn(tabId),
-      null => const StandInCurrent(),
-    };
-  }
-
-  /// Records [standInTabId], opened on [requested], as the stand-in. Returns
-  /// the newer URL the page wants when a navigation came in while it opened,
-  /// for the caller to load in the stand-in right away.
-  ///
-  /// That navigation belongs to the stand-in even if the user has picked
-  /// either tab since: it came in before anyone saw the stand-in, so it would
-  /// have loaded there had the tab been open. What comes in later goes
-  /// through [request], whose load is sent after the caller's.
-  Uri? opened(String sourceTabId, Uri requested, String standInTabId) {
-    final standIn = _standIns[sourceTabId]?[_pageOf(requested)];
-    // Seen or closed in the meantime: nothing stands in for it any more.
-    if (standIn == null) return null;
-
-    standIn
-      ..tabId = standInTabId
-      ..openedAt = ++_clock;
-    return standIn.url == requested ? null : standIn.url;
-  }
-
-  /// Gives back a page whose stand-in could not be opened, so the next
-  /// navigation tries again.
-  void release(String sourceTabId, Uri uri) {
-    final pages = _standIns[sourceTabId];
-    if (pages == null) return;
-    final page = _pageOf(uri);
-    if (pages[page]?.tabId == null) pages.remove(page);
-    if (pages.isEmpty) _standIns.remove(sourceTabId);
-  }
-
-  /// [tabId] was seen: it neither has stand-ins nor stands in any more.
-  void forget(String tabId) {
-    _standIns.remove(tabId);
-    retire(tabId);
-  }
-
-  /// [tabId] is on screen: it no longer stands in for anything, so the next
-  /// navigation of its page opens a new stand-in rather than replace a page
-  /// the user may be reading. Its own stand-ins stay: a split pair's
-  /// unfocused page keeps reusing them while it stays on screen, as a page
-  /// retrying there would otherwise open a tab per attempt.
-  void retire(String tabId) {
-    for (final pages in _standIns.values) {
-      pages.removeWhere((_, standIn) => standIn.tabId == tabId);
-    }
-    _standIns.removeWhere((_, pages) => pages.isEmpty);
-  }
-}
-
-/// What replaced a tab, and the [TabReplacements.undoGeneration] at which the
-/// old tab's close was through (null while it is still under way).
-class _Replacement {
-  final String newTabId;
-  int? closedAt;
-
-  _Replacement(this.newTabId, this.closedAt);
-}
-
-/// Tabs closed because another took their place (a reopen in the assigned
-/// container, a container change), by the tab that replaced them, so a
-/// selection still holding the old tab (a "tab opened" prompt) reaches the
-/// new one.
-///
-/// An alias holds until the engine's undo brings the old tab back under its
-/// id: that tab is then itself again. The old tab being open says nothing by
-/// itself, since it is open until its close is through, and the native store
-/// lists it a moment longer. So an alias is dropped only for a tab whose
-/// close was through before an undo ran ([undone]) and that is open after
-/// it. Each alias keeps the [undoGeneration] at which its close was through,
-/// which a replacement recorded only after its new tab opened carries from
-/// the close, so an undo in between is not lost.
-@visibleForTesting
-class TabReplacements {
-  /// By old tab: what replaced it.
-  final _replacedBy = <String, _Replacement>{};
-
-  /// How many are kept: a prompt holding a replaced tab only lives as long as
-  /// its snackbar.
-  static const limit = 32;
-
-  int _undoGeneration = 0;
-
-  /// How many undos that brought tabs back have run. Read right after a
-  /// close, to pass to [record] as `closedAt` once the replacement exists.
-  int get undoGeneration => _undoGeneration;
-
-  /// Records that [newTabId] took the place of [oldTabId], whose close was
-  /// through at [closedAt] ([undoGeneration] then; now when omitted).
-  void record(String oldTabId, String newTabId, {int? closedAt}) =>
-      _put(oldTabId, _Replacement(newTabId, closedAt ?? _undoGeneration));
-
-  /// Records that [newTabId] took the place of [oldTabId], whose close is
-  /// still to come: follow with [closed] once it is through, or [drop] when
-  /// it fails.
-  void recordClosing(String oldTabId, String newTabId) =>
-      _put(oldTabId, _Replacement(newTabId, null));
-
-  void _put(String oldTabId, _Replacement replacement) {
-    _replacedBy
-      ..remove(oldTabId)
-      ..[oldTabId] = replacement;
-    while (_replacedBy.length > limit) {
-      _replacedBy.remove(_replacedBy.keys.first);
-    }
-  }
-
-  /// [oldTabId]'s close, recorded as still to come, is through.
-  void closed(String oldTabId) {
-    final entry = _replacedBy[oldTabId];
-    if (entry != null) entry.closedAt ??= _undoGeneration;
-  }
-
-  /// Forgets that [oldTabId] was replaced: its close failed, and it stays.
-  void drop(String oldTabId) => _replacedBy.remove(oldTabId);
-
-  /// The engine's undo ran and brought tabs back. A replaced tab closed
-  /// before it may be among them; [resolve] tells by whether it is open.
-  void undone() => _undoGeneration++;
-
-  /// Whether [tabId] was replaced, so [resolve] needs the open tabs.
-  bool has(String tabId) => _replacedBy.containsKey(tabId);
-
-  /// The tab standing in for [tabId] given the tabs open now
-  /// ([openTabIds]): what replaced it, following replacements of
-  /// replacements, unless an undo restored it. A restored tab drops its alias,
-  /// so a later close of it is a close of its own, not a replacement.
-  String resolve(String tabId, {required Set<String> openTabIds}) {
-    var current = tabId;
-    final seen = <String>{current};
-    while (true) {
-      final entry = _replacedBy[current];
-      if (entry == null) return current;
-      final closedAt = entry.closedAt;
-      if (closedAt != null &&
-          _undoGeneration > closedAt &&
-          openTabIds.contains(current)) {
-        _replacedBy.remove(current);
-        return current;
-      }
-      if (!seen.add(entry.newTabId)) return current;
-      current = entry.newTabId;
-    }
-  }
-}
-
-/// Replaces [oldTabId] with the tab [open] opens, then closes [oldTabId]
-/// with [closeOld]. [focused] says whether [oldTabId] was the selected tab
-/// when [open] began, and [open] selects the new tab only in that case.
-///
-/// The user can select [oldTabId] while the replacement opens, e.g. by
-/// tapping a background tab's "tab opened" prompt. Closing it would then
-/// hand the selection to some other tab. So the native selection
-/// ([selectedTabId]) is asked again before the close, and a tab selected in
-/// the meantime passes its selection to the replacement first. The close
-/// goes by the native selection too, so it leaves the replacement selected.
-/// The replacement is selected once more after the close anyway, as for a
-/// [focused] tab, so a close that still moved the selection on (it raced the
-/// selection) does not decide what the user sees.
-///
-/// Past the point of no return: once the replacement exists, the swap is
-/// finished even if a newer navigation has claimed [oldTabId] since.
-/// Abandoning it would leave the new tab created but [oldTabId] still open.
-/// Only a disposed repository ([isMounted]) stops it.
-@visibleForTesting
-Future<String> replaceTabOpeningFirst({
-  required String oldTabId,
-  required bool focused,
-  required Future<String> Function() open,
-  required Future<String?> Function() selectedTabId,
-  required Future<void> Function(String newTabId) closeOld,
-  required Future<void> Function(String tabId) select,
-  required bool Function() isMounted,
-}) async {
-  final newTabId = await open();
-  if (!isMounted()) return newTabId;
-
-  final selectedMeanwhile =
-      !focused && await selectedTabId() == oldTabId && isMounted();
-  if (selectedMeanwhile) await select(newTabId);
-  if (!isMounted()) return newTabId;
-
-  await closeOld(newTabId);
-  if ((focused || selectedMeanwhile) && isMounted()) await select(newTabId);
-  return newTabId;
 }
 
 /// The tab to select after the selected [closedTabId] closes, when it is in
@@ -489,9 +194,19 @@ class TabRepository extends _$TabRepository {
   bool _reclosing = false;
   bool _suppressNextReclose = false;
 
+  /// Each undo close still waiting for the rows of the tabs it brought back,
+  /// with the completer that says they are written; see [undoClose].
+  final _undoRows = <({Set<String> tabIds, Completer<void> landed})>[];
+
   final _tabBackBehavior = <String, TabBackBehavior>{};
-  final _closeLock = Lock();
-  final _pendingIsolationCleanup = <String>{};
+
+  /// Held by every close and every lock change; see [tabCloseLockProvider].
+  Lock get _closeLock => ref.read(tabCloseLockProvider);
+
+  /// Isolation contexts whose tabs are gone, cleaned up after each tab list
+  /// sync; see [IsolationContextCleanup].
+  IsolationContextCleanup get _isolationCleanup =>
+      ref.read(isolationContextCleanupProvider.notifier);
 
   /// The site-assignment request currently being handled for each tab.
   ///
@@ -506,42 +221,69 @@ class TabRepository extends _$TabRepository {
   /// [BackgroundStandIns].
   final _backgroundStandIns = BackgroundStandIns();
 
+  /// Runs [_showInStandIn] one report at a time.
+  final _standInLock = Lock();
+
   /// Tabs closed because another took their place; see [TabReplacements].
   final _replacements = TabReplacements();
+
+  /// The tab lock protocol; every use is under [_closeLock].
+  TabLocks get _locks => ref.read(tabLocksProvider.notifier);
+
+  GeckoTabLifecycleService get _tabLifecycle =>
+      ref.read(geckoTabLifecycleServiceProvider);
 
   /// Closes [oldTabId], then opens the tab that takes its place with
   /// [openReplacement] and records the replacement ([TabReplacements]). A
   /// selection of [oldTabId] from then on selects the new tab while
   /// [oldTabId] stays closed: the "tab opened" prompt of a link opened in the
   /// background still holds the tab that a container change replaced.
-  Future<String> replaceTabClosingFirst(
+  ///
+  /// The close decides, not a check before it: a lock can arrive after any
+  /// such check, and the close is where locks are read under the close lock.
+  /// When [oldTabId] survives it, locked or with the locks unreadable,
+  /// nothing is opened or recorded ([OriginalKept]).
+  Future<ReplacementResult> replaceTabClosingFirst(
     String oldTabId,
     Future<String> Function() openReplacement,
   ) async {
     // The replacement stands in for it, so it was never closed.
-    await closeTab(oldTabId, keepOffRecentlyClosed: true);
+    final closed = await closeTab(oldTabId, keepOffRecentlyClosed: true);
+    if (!closed.isGone(oldTabId)) {
+      return OriginalKept(locksUnavailable: closed.locksUnavailable);
+    }
     // Read now: an undo while the replacement opens may restore it.
     final closedAt = _replacements.undoGeneration;
     final newTabId = await openReplacement();
     if (ref.mounted) {
       _replacements.record(oldTabId, newTabId, closedAt: closedAt);
     }
-    return newTabId;
+    return TabReplaced(newTabId);
   }
 
   /// Closes [oldTabId], which [newTabId] took the place of, and records the
   /// replacement before the close: a selection while it is under way (a
   /// close waits for any other in progress) already reaches [newTabId].
-  Future<void> _closeReplacedTab(String oldTabId, String newTabId) async {
+  ///
+  /// Returns whether [oldTabId] went. A locked one stays, as does one whose
+  /// lock could not be read, and the record is dropped: the new tab is then
+  /// just a tab beside it.
+  Future<bool> _closeReplacedTab(String oldTabId, String newTabId) async {
     _replacements.recordClosing(oldTabId, newTabId);
+    final CloseResult closed;
     try {
       // The replacement stands in for it, so it was never closed.
-      await closeTab(oldTabId, keepOffRecentlyClosed: true);
+      closed = await closeTab(oldTabId, keepOffRecentlyClosed: true);
     } catch (_) {
       _replacements.drop(oldTabId);
       rethrow;
     }
+    if (!closed.isGone(oldTabId)) {
+      _replacements.drop(oldTabId);
+      return false;
+    }
     _replacements.closed(oldTabId);
+    return true;
   }
 
   /// The split pair on screen (shown, with the selected tab in it), as of
@@ -676,61 +418,123 @@ class TabRepository extends _$TabRepository {
       );
     }
 
-    final validatedParentId = await _resolveParentId(parentId);
-
-    final effectiveIsolationContextId = tabMode.isolationContextId;
-
-    final effectiveContextId = tabMode is IsolatedTabMode
-        ? effectiveIsolationContextId
-        : assignedContainer?.metadata.contextualIdentity;
-
-    final newTabId = await tabDao.upsertTabTransactional(
+    // Held until the row is written: a container being deleted takes no new
+    // tab, and a deletion does not start while one joins (see
+    // [ContainerMembershipGate]). Not redirected elsewhere, which would
+    // change how the page is routed. An isolated tab would bring a context of
+    // its own into the container, which a freeze does not cover (D19).
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+    return await gate.whileChanging(
+      [assignedContainer?.id],
+      kind: await _changeKind(
+        assignedContainer?.id,
+        [if (tabMode is IsolatedTabMode) tabMode.isolationContextId],
+        carriesRequestState:
+            (additionalHeaders?.isNotEmpty ?? false) ||
+            flags != LoadUrlFlags.NONE,
+      ),
       () async {
-        final tabId = await _tabsService.addTab(
-          url: url,
-          selectTab: selectTab,
-          startLoading: startLoading,
-          parentId: validatedParentId,
-          flags: flags,
-          contextId: effectiveContextId,
-          source: source,
-          private: tabMode is PrivateTabMode,
-          historyMetadata: historyMetadata,
-          additionalHeaders: additionalHeaders,
-          // Carried into the engine so the exclusion is in place before the tab
-          // loads; the replicated snapshot only follows once its row is written.
-          excludeFromHistory:
-              assignedContainer?.metadata.excludeFromHistory ?? false,
-          parentIsReferrer: parentIsReferrer,
+        final container = await _stillExisting(assignedContainer);
+        final validatedParentId = await _resolveParentId(parentId);
+
+        final effectiveIsolationContextId = tabMode.isolationContextId;
+
+        final effectiveContextId = tabMode is IsolatedTabMode
+            ? effectiveIsolationContextId
+            : container?.metadata.contextualIdentity;
+
+        final newTabId = await tabDao.upsertTabTransactional(
+          () async {
+            final tabId = await _tabsService.addTab(
+              url: url,
+              selectTab: selectTab,
+              startLoading: startLoading,
+              parentId: validatedParentId,
+              flags: flags,
+              contextId: effectiveContextId,
+              source: source,
+              private: tabMode is PrivateTabMode,
+              historyMetadata: historyMetadata,
+              additionalHeaders: additionalHeaders,
+              // Carried into the engine so the exclusion is in place before the
+              // tab loads; the replicated snapshot only follows once its row is
+              // written.
+              excludeFromHistory:
+                  container?.metadata.excludeFromHistory ?? false,
+              parentIsReferrer: parentIsReferrer,
+            );
+            onCreated?.call(tabId);
+            return tabId;
+          },
+          parentId: Value(validatedParentId),
+          containerId: Value(container?.id),
+          url: Value(url),
+          tabMode: Value(tabMode),
+          childPlacement: ref
+              .read(generalSettingsWithDefaultsProvider)
+              .childTabPlacement,
         );
-        onCreated?.call(tabId);
-        return tabId;
+
+        if (launchedFromIntent) {
+          _tabBackBehavior[newTabId] =
+              onBackBehavior ?? const BackgroundAppTabBackBehavior();
+        } else if (onBackBehavior != null) {
+          _tabBackBehavior[newTabId] = onBackBehavior;
+        }
+
+        if (selectTab && ref.mounted) {
+          _clearForceBrowserHome();
+
+          await ref
+              .read(selectedContainerProvider.notifier)
+              .followTab(container?.id);
+        }
+
+        return newTabId;
       },
-      parentId: Value(validatedParentId),
-      containerId: Value(assignedContainer?.id),
-      url: Value(url),
-      tabMode: Value(tabMode),
-      childPlacement: ref
-          .read(generalSettingsWithDefaultsProvider)
-          .childTabPlacement,
     );
+  }
 
-    if (launchedFromIntent) {
-      _tabBackBehavior[newTabId] =
-          onBackBehavior ?? const BackgroundAppTabBackBehavior();
-    } else if (onBackBehavior != null) {
-      _tabBackBehavior[newTabId] = onBackBehavior;
+  /// What adding tabs to [containerId] does to its membership, with
+  /// [isolationContextIds] the contexts of the isolated ones among them. An
+  /// isolated tab brings a context of its own into the container, which a
+  /// freeze does not cover (D19), unless native already restricts that
+  /// context for the container: a group whose last tab closed while it was
+  /// frozen, reopened by an undo or a recreation.
+  ///
+  /// A request whose meaning depends on extra headers or load flags
+  /// ([carriesRequestState]) is refused by a frozen container too: it takes
+  /// a new tab held, with only its plain URL waiting for Resume (5.2.1).
+  Future<ContainerChange> _changeKind(
+    String? containerId,
+    List<String> isolationContextIds, {
+    bool carriesRequestState = false,
+  }) async {
+    if (containerId == null) return ContainerChange.addition;
+    if (carriesRequestState) return ContainerChange.membership;
+    if (isolationContextIds.isEmpty) return ContainerChange.addition;
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+    await gate.seed();
+    final owned = gate.contextsHolding(containerId).toSet();
+    return owned.containsAll(isolationContextIds)
+        ? ContainerChange.addition
+        : ContainerChange.membership;
+  }
+
+  /// Whether isolated tabs in [isolationContextIds] may be added to
+  /// [containerId] now ([_changeKind]): for a check before something that
+  /// cannot be undone, such as closing the tabs a recreation reopens.
+  Future<bool> mayAddIsolatedTabs(
+    String containerId,
+    List<String> isolationContextIds,
+  ) async {
+    if (await _changeKind(containerId, isolationContextIds) ==
+        ContainerChange.addition) {
+      return true;
     }
-
-    if (selectTab && ref.mounted) {
-      _clearForceBrowserHome();
-
-      await ref
-          .read(selectedContainerProvider.notifier)
-          .followTab(assignedContainer?.id);
-    }
-
-    return newTabId;
+    return !ref
+        .read(containerMembershipGateProvider.notifier)
+        .isRestricted(containerId);
   }
 
   /// The container [selection] asks for, before a site assignment has its
@@ -748,6 +552,19 @@ class TabRepository extends _$TabRepository {
           .read(tabDataRepositoryProvider.notifier)
           .getContainerForCopy(tabId),
   };
+
+  /// [container] read again once the change reservation on it is held. A
+  /// deletion that finished between the caller's lookup and the reservation
+  /// leaves no row, and a tab must not land in it (nor take its identity as it
+  /// was before an edit). Throws [ContainerBeingDeletedException] then, as for
+  /// a deletion still running.
+  Future<ContainerData?> _stillExisting(ContainerData? container) async {
+    if (container == null) return null;
+    return await ref
+            .read(containerRepositoryProvider.notifier)
+            .getContainerData(container.id) ??
+        (throw ContainerBeingDeletedException(container.id));
+  }
 
   Future<bool> _closeRestoredPrivateCaptureTabs(List<String> tabIds) async {
     if (tabIds.isEmpty) {
@@ -786,75 +603,87 @@ class TabRepository extends _$TabRepository {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
     final db = ref.read(tabDatabaseProvider);
     final assignedContainer = await _requestedContainer(containerSelection);
-    // Read once for the whole batch rather than per tab: the setting cannot
-    // change while these rows are being written.
-    final childPlacement = ref
-        .read(generalSettingsWithDefaultsProvider)
-        .childTabPlacement;
+    // As for addTab.
+    return await ref.read(containerMembershipGateProvider.notifier).whileChanging(
+      [assignedContainer?.id],
+      kind: await _changeKind(assignedContainer?.id, [
+        for (final tab in tabs)
+          if (isIsolatedContextId(tab.contextId)) tab.contextId!,
+      ]),
+      () async {
+        final container = await _stillExisting(assignedContainer);
+        // Read once for the whole batch rather than per tab: the setting cannot
+        // change while these rows are being written.
+        final childPlacement = ref
+            .read(generalSettingsWithDefaultsProvider)
+            .childTabPlacement;
 
-    final createdTabIds = await db.transaction(() async {
-      final createdTabIds = await _tabsService.addMultipleTabs(
-        tabs: tabs,
-        selectTabId: selectTabId,
-        // Carried into the engine so the exclusion is in place before these tabs
-        // load; the replicated snapshot only follows once their rows are
-        // written. One value for the batch — they all land in this container.
-        excludeFromHistory:
-            assignedContainer?.metadata.excludeFromHistory ?? false,
-      );
-      // Build sets for validation
-      final creatingTabIds = createdTabIds.toSet();
-      final parentIdsToValidate = tabs
-          .map((tab) => tab.parentId)
-          .whereType<String>()
-          .where((id) => !creatingTabIds.contains(id))
-          .toSet();
+        final createdTabIds = await db.transaction(() async {
+          final createdTabIds = await _tabsService.addMultipleTabs(
+            tabs: tabs,
+            selectTabId: selectTabId,
+            // Carried into the engine so the exclusion is in place before these
+            // tabs load; the replicated snapshot only follows once their rows
+            // are written. One value for the batch — they all land in this
+            // container.
+            excludeFromHistory: container?.metadata.excludeFromHistory ?? false,
+          );
+          // Build sets for validation
+          final creatingTabIds = createdTabIds.toSet();
+          final parentIdsToValidate = tabs
+              .map((tab) => tab.parentId)
+              .whereType<String>()
+              .where((id) => !creatingTabIds.contains(id))
+              .toSet();
 
-      // Batch validate parent IDs that aren't in the current creation batch
-      final existingParentIds = await tabDao
-          .getExistingTabIds(parentIdsToValidate)
-          .get()
-          .then((ids) => ids.toSet());
+          // Batch validate parent IDs that aren't in the current creation batch
+          final existingParentIds = await tabDao
+              .getExistingTabIds(parentIdsToValidate)
+              .get()
+              .then((ids) => ids.toSet());
 
-      // Upsert all tabs in the database
-      for (var i = 0; i < createdTabIds.length; i++) {
-        final tabId = createdTabIds[i];
-        final tab = tabs[i];
+          // Upsert all tabs in the database
+          for (var i = 0; i < createdTabIds.length; i++) {
+            final tabId = createdTabIds[i];
+            final tab = tabs[i];
 
-        // Validate parent exists in either the batch being created or database
-        String? validatedParentId;
-        if (tab.parentId != null) {
-          if (creatingTabIds.contains(tab.parentId) ||
-              existingParentIds.contains(tab.parentId)) {
-            validatedParentId = tab.parentId;
+            // Validate parent exists in either the batch being created or
+            // database
+            String? validatedParentId;
+            if (tab.parentId != null) {
+              if (creatingTabIds.contains(tab.parentId) ||
+                  existingParentIds.contains(tab.parentId)) {
+                validatedParentId = tab.parentId;
+              }
+            }
+
+            await tabDao.insertTab(
+              tabId,
+              parentId: Value(validatedParentId),
+              source: TabSource.manual,
+              containerId: Value(container?.id),
+              url: Value(Uri.tryParse(tab.url)),
+              childPlacement: childPlacement,
+              tabMode: Value(
+                isIsolatedContextId(tab.contextId)
+                    ? TabMode.isolated(tab.contextId!)
+                    : tab.private
+                    ? TabMode.private
+                    : TabMode.regular,
+              ),
+            );
           }
+
+          return createdTabIds;
+        });
+
+        if (selectTabId != null && ref.mounted) {
+          _clearForceBrowserHome();
         }
 
-        await tabDao.insertTab(
-          tabId,
-          parentId: Value(validatedParentId),
-          source: TabSource.manual,
-          containerId: Value(assignedContainer?.id),
-          url: Value(Uri.tryParse(tab.url)),
-          childPlacement: childPlacement,
-          tabMode: Value(
-            isIsolatedContextId(tab.contextId)
-                ? TabMode.isolated(tab.contextId!)
-                : tab.private
-                ? TabMode.private
-                : TabMode.regular,
-          ),
-        );
-      }
-
-      return createdTabIds;
-    });
-
-    if (selectTabId != null && ref.mounted) {
-      _clearForceBrowserHome();
-    }
-
-    return createdTabIds;
+        return createdTabIds;
+      },
+    );
   }
 
   Future<String> duplicateTab({
@@ -863,76 +692,87 @@ class TabRepository extends _$TabRepository {
     required bool selectTab,
   }) async {
     final tabDao = ref.read(tabDatabaseProvider).tabDao;
-
     final sourceTabMode =
         await tabDao.getTabMode(selectTabId).getSingleOrNull() ??
         TabMode.regular;
 
-    // Duplicating an isolated tab creates a new isolation group
-    final duplicateIsolationContextId = sourceTabMode is IsolatedTabMode
-        ? newIsolatedContextId()
-        : null;
+    // As for addTab: a duplicate of an isolated tab brings a new isolation
+    // context into the container.
+    return await ref.read(containerMembershipGateProvider.notifier).whileChanging(
+      [containerData?.id],
+      kind: sourceTabMode is IsolatedTabMode
+          ? ContainerChange.membership
+          : ContainerChange.addition,
+      () async {
+        final container = await _stillExisting(containerData);
 
-    final duplicateTabMode = sourceTabMode is IsolatedTabMode
-        ? TabMode.isolated(duplicateIsolationContextId!)
-        : sourceTabMode;
+        // Duplicating an isolated tab creates a new isolation group
+        final duplicateIsolationContextId = sourceTabMode is IsolatedTabMode
+            ? newIsolatedContextId()
+            : null;
 
-    // Isolated tabs always use their isolation context ID
-    final effectiveContextId = sourceTabMode is IsolatedTabMode
-        ? duplicateIsolationContextId
-        : containerData?.metadata.contextualIdentity;
+        final duplicateTabMode = sourceTabMode is IsolatedTabMode
+            ? TabMode.isolated(duplicateIsolationContextId!)
+            : sourceTabMode;
 
-    // Place the duplicate as a sibling of the source — same parent — and
-    // insert it right after the source's full subtree, so existing
-    // children of the source are not split from their parent.
-    final sourceData = await tabDao
-        .getTabDataById(selectTabId)
-        .getSingleOrNull();
-    final sourceParentId = sourceData?.parentId;
-    final anchorTabId =
-        await tabDao
-            .lastSubtreeTabIdByOrderKey(
-              selectTabId,
-              containerId: containerData?.id,
-            )
-            .getSingleOrNull() ??
-        selectTabId;
+        // Isolated tabs always use their isolation context ID
+        final effectiveContextId = sourceTabMode is IsolatedTabMode
+            ? duplicateIsolationContextId
+            : container?.metadata.contextualIdentity;
 
-    final newTabId = await tabDao.upsertTabTransactional(
-      () {
-        return _tabsService.duplicateTab(
-          selectTabId: selectTabId,
-          newContextId: effectiveContextId,
-          selectNewTab: selectTab,
-          excludeFromHistory:
-              containerData?.metadata.excludeFromHistory ?? false,
+        // Place the duplicate as a sibling of the source — same parent — and
+        // insert it right after the source's full subtree, so existing
+        // children of the source are not split from their parent.
+        final sourceData = await tabDao
+            .getTabDataById(selectTabId)
+            .getSingleOrNull();
+        final sourceParentId = sourceData?.parentId;
+        final anchorTabId =
+            await tabDao
+                .lastSubtreeTabIdByOrderKey(
+                  selectTabId,
+                  containerId: container?.id,
+                )
+                .getSingleOrNull() ??
+            selectTabId;
+
+        final newTabId = await tabDao.upsertTabTransactional(
+          () {
+            return _tabsService.duplicateTab(
+              selectTabId: selectTabId,
+              newContextId: effectiveContextId,
+              selectNewTab: selectTab,
+              excludeFromHistory:
+                  container?.metadata.excludeFromHistory ?? false,
+            );
+          },
+          parentId: Value(sourceParentId),
+          afterTabId: Value(anchorTabId),
+          containerId: Value(container?.id),
+          tabMode: Value(duplicateTabMode),
         );
+
+        // The duplicate is a new isolation group, so it starts with no route of
+        // its own — carry the source's over, or the copy silently falls back to
+        // its container's routing.
+        if (sourceTabMode case IsolatedTabMode(
+          :final isolationContextId,
+        ) when ref.mounted) {
+          await ref
+              .read(proxyRoutingSettingsRepositoryProvider.notifier)
+              .copyIsolationContextRoute(
+                isolationContextId,
+                duplicateIsolationContextId!,
+              );
+        }
+
+        if (selectTab && ref.mounted) {
+          _clearForceBrowserHome();
+        }
+
+        return newTabId;
       },
-      parentId: Value(sourceParentId),
-      afterTabId: Value(anchorTabId),
-      containerId: Value(containerData?.id),
-      tabMode: Value(duplicateTabMode),
     );
-
-    // The duplicate is a new isolation group, so it starts with no route of its
-    // own — carry the source's over, or the copy silently falls back to its
-    // container's routing.
-    if (sourceTabMode case IsolatedTabMode(
-      :final isolationContextId,
-    ) when ref.mounted) {
-      await ref
-          .read(proxyRoutingSettingsRepositoryProvider.notifier)
-          .copyIsolationContextRoute(
-            isolationContextId,
-            duplicateIsolationContextId!,
-          );
-    }
-
-    if (selectTab && ref.mounted) {
-      _clearForceBrowserHome();
-    }
-
-    return newTabId;
   }
 
   Future<bool> selectPreviouslyOpenedTab(String tabId) async {
@@ -1106,8 +946,13 @@ class TabRepository extends _$TabRepository {
         .read(tabDataRepositoryProvider.notifier)
         .getTabContainerData(tabId);
 
+    // A frozen container's tab shows its placeholder and loads nothing, so
+    // its routing is not waited for (5.5).
+    final frozen = ref
+        .read(containerMembershipGateProvider.notifier)
+        .isFrozen(containerData?.id);
     if (!ref.mounted ||
-        !await _routingReadyFor(tabId, containerData) ||
+        (!frozen && !await _routingReadyFor(tabId, containerData)) ||
         !ref.mounted) {
       partnerCheck?.result.ignore();
       return false;
@@ -1165,6 +1010,33 @@ class TabRepository extends _$TabRepository {
         .getTabContainerData(tabId);
     if (!ref.mounted) return false;
     return await _routingReadyFor(tabId, containerData);
+  }
+
+  /// Whether every one of [contextIds] may run, as far as proxy routing is
+  /// concerned (D34): for a Resume, which has no single tab to check. As for
+  /// a Wake, routing has to be installed whatever the contexts route through,
+  /// and then the installed routing's verdict for each context decides, as a
+  /// pane's does before it wakes a tab. That verdict resolves a context the
+  /// way the extension does, so a container without a proxy of its own that
+  /// inherits the global one, and an isolation group that follows its
+  /// container or the global route, are checked by the route they actually
+  /// take. Unavailable routing never falls back to direct: a proxy without an
+  /// endpoint keeps them frozen.
+  Future<bool> ensureRoutingReadyForContexts(
+    Iterable<String> contextIds,
+  ) async {
+    final contexts = contextIds.toSet().toList();
+    final routing = ref.read(containerProxyRepositoryProvider.notifier);
+    final ready =
+        await routing.waitUntilRoutingReady() &&
+        await routing.routingCovers(contexts);
+    if (!ready) {
+      logger.w(
+        'Contexts $contexts not resumed: routing is not installed or has no '
+        'route out for one of them',
+      );
+    }
+    return ready;
   }
 
   /// Starts checking the routing of the split partner that selecting [tabId]
@@ -1481,9 +1353,16 @@ class TabRepository extends _$TabRepository {
     // Out of candidates in this container. By default the search widens to
     // unassigned tabs and then to other containers, which drags the user out
     // of the container they were working in; the home target keeps them here.
+    //
+    // Not while the container is being deleted: there is nothing to stay in,
+    // and a custom-URL target would open a tab in it, which the membership
+    // gate refuses with an exception that aborts the deletion half way.
     if (ref
-        .read(generalSettingsWithDefaultsProvider)
-        .homeTargetOnLastTabClosed) {
+            .read(generalSettingsWithDefaultsProvider)
+            .homeTargetOnLastTabClosed &&
+        !ref
+            .read(containerMembershipGateProvider.notifier)
+            .isBeingDeleted(currentContainerId)) {
       await ref
           .read(homeTargetControllerProvider.notifier)
           .applyTarget(
@@ -1539,61 +1418,146 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  Future<void> _closeTabsInternal(
+  /// With [discardUndo], the removal cannot be undone: native's pending undo
+  /// close is dropped before the close lock is released, so no undo can
+  /// slip in between.
+  Future<CloseResult> _closeTabsInternal(
     List<String> tabIds, {
     required bool recordTombstones,
     bool keepOffRecentlyClosed = false,
+    bool discardUndo = false,
   }) {
     return _closeLock.synchronized(() async {
-      if (tabIds.isEmpty) {
-        return;
-      }
-
-      if (keepOffRecentlyClosed) {
-        await _recentlyClosedService.keepOff(tabIds);
-      }
-
-      if (recordTombstones) {
-        await ref
-            .read(tabDatabaseProvider)
-            .tabDao
-            .addClosedTabTombstones(tabIds);
-      }
-
-      for (final tabId in tabIds) {
-        _tabBackBehavior.remove(tabId);
-        final isolationContextId = ref
-            .read(tabStatesProvider)[tabId]
-            ?.isolationContextId;
-        if (isolationContextId != null) {
-          _pendingIsolationCleanup.add(isolationContextId);
+      CloseResult result;
+      try {
+        result = await closeTabsLocked(
+          tabIds,
+          recordTombstones: recordTombstones,
+          keepOffRecentlyClosed: keepOffRecentlyClosed,
+        );
+        if (discardUndo && result.removedTabIds.isNotEmpty) {
+          await _tabsService.discardUndoOf(
+            tabIds: result.removedTabIds,
+            contextIds: const [],
+          );
         }
+      } on TabLocksUnavailableException catch (error) {
+        logger.e(
+          'Did not close $tabIds: the tab locks could not be read',
+          error: error.cause,
+          stackTrace: error.causeStackTrace,
+        );
+        result = CloseResult(locksUnavailable: true);
       }
-
-      // Native's selection, not selectedTabProvider: its events are
-      // debounced, so a tab selected a moment ago (a replacement taking over
-      // a closing tab's selection, say) may not be in it yet, and the old
-      // selection would pick a next tab over it.
-      final selectedTab = await _tabsService.getSelectedTabId();
-      if (!ref.mounted) return;
-      if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
-        await _selectNextTab(selectedTab!, excludedTabIds: tabIds.toSet());
-      }
-
-      await _preservePromotedChildOrderOnClose(tabIds);
-
-      if (tabIds.length == 1) {
-        await _tabsService.removeTab(tabId: tabIds.single);
-      } else {
-        await _tabsService.removeTabs(ids: tabIds);
-      }
+      await _locks.reconcileIfDue();
+      return result;
     });
   }
 
+  /// The close itself, for callers that already hold the close lock
+  /// ([tabCloseLockProvider], not reentrant): [_closeTabsInternal] and
+  /// `ContainerDeletion`.
+  ///
+  /// Locked tabs are taken out before any side effect
+  /// ([TabLocks.lockedAmong]).
+  /// Every lock change runs under [_closeLock] too, so native's removal below
+  /// cannot disagree with this preflight. Throws
+  /// [TabLocksUnavailableException], having done nothing, when the locks
+  /// could not be read: a close that turns out refused must not have left a
+  /// tombstone, a selection change or a hierarchy change behind.
+  Future<CloseResult> closeTabsLocked(
+    List<String> requestedTabIds, {
+    required bool recordTombstones,
+    bool keepOffRecentlyClosed = false,
+  }) async {
+    assert(_closeLock.locked, 'Runs under the close lock');
+    final requested = requestedTabIds.toSet().toList();
+    if (requested.isEmpty) {
+      return CloseResult.none;
+    }
+
+    final (:locked, :nativeOnly) = await _locks.lockedAmong(requested);
+    if (nativeOnly) {
+      // Refused this time; the reconciliation completes the unlock.
+      _locks.markReconcileDue();
+    }
+    final skippedLocked = [
+      for (final id in requested)
+        if (locked.contains(id)) id,
+    ];
+    final tabIds = [
+      for (final id in requested)
+        if (!locked.contains(id)) id,
+    ];
+
+    if (tabIds.isEmpty) {
+      return CloseResult(skippedLockedTabIds: skippedLocked);
+    }
+
+    if (keepOffRecentlyClosed) {
+      await _recentlyClosedService.keepOff(tabIds);
+    }
+
+    if (recordTombstones) {
+      await ref.read(tabDatabaseProvider).tabDao.addClosedTabTombstones(tabIds);
+    }
+
+    for (final tabId in tabIds) {
+      _tabBackBehavior.remove(tabId);
+      final isolationContextId = ref
+          .read(tabStatesProvider)[tabId]
+          ?.isolationContextId;
+      if (isolationContextId != null) {
+        _isolationCleanup.add(isolationContextId);
+      }
+    }
+
+    // Native's selection, not selectedTabProvider: its events are
+    // debounced, so a tab selected a moment ago (a replacement taking over
+    // a closing tab's selection, say) may not be in it yet, and the old
+    // selection would pick a next tab over it.
+    final selectedTab = await _tabsService.getSelectedTabId();
+    if (!ref.mounted) return CloseResult(skippedLockedTabIds: skippedLocked);
+    if (selectedTab.mapNotNull(tabIds.contains) ?? false) {
+      await _selectNextTab(selectedTab!, excludedTabIds: tabIds.toSet());
+    }
+
+    await _preservePromotedChildOrderOnClose(tabIds);
+
+    final removal = tabIds.length == 1
+        ? await _tabsService.removeTab(tabId: tabIds.single)
+        : await _tabsService.removeTabs(ids: tabIds);
+
+    // Every lock change runs under the close lock, so native cannot have
+    // locked one of these since the preflight read its locks.
+    assert(
+      removal.lockedTabIds.isEmpty,
+      'Native kept locked tabs the preflight let through: '
+      '${removal.lockedTabIds}',
+    );
+    if (removal.lockedTabIds.isNotEmpty) {
+      logger.e(
+        'Native kept locked tabs the preflight let through: '
+        '${removal.lockedTabIds}',
+      );
+    }
+
+    return CloseResult(
+      removedTabIds: removal.removedTabIds,
+      skippedLockedTabIds: [...skippedLocked, ...removal.lockedTabIds],
+      missingTabIds: removal.missingTabIds,
+    );
+  }
+
+  /// Closes [tabId] unless it is locked, and reports what happened.
+  ///
   /// With [keepOffRecentlyClosed], for a close the user did not ask for (the
   /// tab is recreated elsewhere, its container is deleted), the tab never goes
   /// on the recently closed list.
-  Future<void> closeTab(String tabId, {bool keepOffRecentlyClosed = false}) {
+  Future<CloseResult> closeTab(
+    String tabId, {
+    bool keepOffRecentlyClosed = false,
+  }) {
     return _closeTabsInternal(
       [tabId],
       recordTombstones: true,
@@ -1601,8 +1565,9 @@ class TabRepository extends _$TabRepository {
     );
   }
 
+  /// Closes [tabIds], keeping locked tabs, and reports what happened.
   /// [keepOffRecentlyClosed] as for [closeTab].
-  Future<void> closeTabs(
+  Future<CloseResult> closeTabs(
     List<String> tabIds, {
     bool keepOffRecentlyClosed = false,
   }) {
@@ -1612,6 +1577,98 @@ class TabRepository extends _$TabRepository {
       keepOffRecentlyClosed: keepOffRecentlyClosed,
     );
   }
+
+  /// Puts [tabIds] to sleep (5.2 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`):
+  /// each is held, checked for activity a sleep would cut off (D13), saved and
+  /// unloaded, and stays unloaded until it is woken. Playing media and a POST
+  /// result refuse unless confirmed with [stopMedia] and [discardPostResult],
+  /// form input unless its tab is in [discardFormDataTabIds]. Nothing is
+  /// closed, so no tombstone, undo or recently-closed entry results.
+  Future<List<TabSleepResult>> sleepTabs(
+    List<String> tabIds, {
+    bool stopMedia = false,
+    bool discardPostResult = false,
+    List<String> discardFormDataTabIds = const [],
+  }) {
+    return _tabLifecycle.sleepTabs(
+      tabIds,
+      stopMedia: stopMedia,
+      discardPostResult: discardPostResult,
+      discardFormDataTabIds: discardFormDataTabIds,
+    );
+  }
+
+  /// Wakes [tabId] once routing is installed, and only while it covers the
+  /// tab's own context, which native checks (D34): an isolated tab's own
+  /// route counts, not just its container's. Without routing it stays
+  /// asleep, so nothing of it goes out another way. Native also leaves a
+  /// frozen container's tab asleep, with its hold.
+  Future<TabWakeOutcome> wakeTab(String tabId) async {
+    final ready = await ref
+        .read(containerProxyRepositoryProvider.notifier)
+        .waitUntilRoutingReady();
+    if (!ref.mounted) return TabWakeOutcome.routingNotReady;
+    if (!ready) {
+      logger.w('Tab $tabId not woken: routing is not installed');
+      return TabWakeOutcome.routingNotReady;
+    }
+    if (await _tabLifecycle.wakeTab(tabId)) return TabWakeOutcome.woken;
+    final state = await _tabLifecycle.tabLifecycleState(tabId);
+    if (state?.contextFrozen ?? false) {
+      logger.w('Tab $tabId not woken: its container is frozen');
+      return TabWakeOutcome.containerFrozen;
+    }
+    logger.w('Tab $tabId not woken: its routing has no route out');
+    return TabWakeOutcome.routingNotReady;
+  }
+
+  /// Before a navigation the user asked for in [tabId] (5.2.1), whose sleep
+  /// [hold] native reported just now: a sleeping tab is woken first, so the
+  /// navigation runs once rather than being dropped with the tab still
+  /// asleep. False when it stays asleep; the caller must not navigate then,
+  /// and the user is told why when it was its routing.
+  Future<bool> wakeForNavigation(String tabId, TabSleepHold? hold) async {
+    if (hold == null || hold == TabSleepHold.none) return true;
+    final outcome = await wakeTab(tabId);
+    if (outcome == TabWakeOutcome.woken) return true;
+    logger.w('Not navigating sleeping tab $tabId: $outcome');
+    // A frozen container's tab is asked about before ("Resume and open?"):
+    // frozen only since then, it says nothing more.
+    if (outcome == TabWakeOutcome.routingNotReady && ref.mounted) {
+      ref
+          .read(containerFreezeNoticesProvider.notifier)
+          .add(const NavigationWaitsForRouting());
+    }
+    return false;
+  }
+
+  /// Locks or unlocks [tabId]: a locked tab refuses to close and is skipped
+  /// by every bulk close until it is unlocked ([TabLocks]). Under
+  /// [_closeLock], like every close, so no close can fall between the lock's
+  /// two writes.
+  Future<TabLockOutcome> setTabLocked(String tabId, {required bool locked}) =>
+      _closeLock.synchronized(() => _locks.setLocked(tabId, locked: locked));
+
+  /// Locks [tabId], or unlocks it when it counts as locked ([isTabLocked]),
+  /// which includes a tab whose unlock did not finish, so this is also its
+  /// retry. The state is read under [_closeLock] with the change, from the
+  /// database rather than a lock stream that may not have loaded yet.
+  /// [wasLocked] is what was read.
+  Future<({TabLockOutcome outcome, bool wasLocked})> toggleTabLocked(
+    String tabId,
+  ) => _closeLock.synchronized(() async {
+    final wasLocked = await _locks.isLocked(tabId);
+    final outcome = await _locks.setLocked(tabId, locked: !wasLocked);
+    return (outcome: outcome, wasLocked: wasLocked);
+  });
+
+  /// Whether [tabId] counts as locked: in the database, or after an unlock
+  /// that did not finish. For choosing what to offer; the close decides.
+  Future<bool> isTabLocked(String tabId) => _locks.isLocked(tabId);
+
+  /// Retries a reconciliation after an unlock that did not finish.
+  Future<bool> retryLockReconciliation() =>
+      _closeLock.synchronized(_locks.reconcile);
 
   Future<void> _clearTombstonesForCurrentTabs(List<String> tabIds) {
     return ref
@@ -1625,69 +1682,6 @@ class TabRepository extends _$TabRepository {
         .read(tabDatabaseProvider)
         .tabDao
         .preservePromotedChildOrderOnClose(tabIds);
-  }
-
-  /// Clears Gecko browsing data and removes proxy alias for an isolation
-  /// context if no more tabs share it.
-  Future<void> _cleanupIsolationContextIfEmpty(String contextId) async {
-    final tabDao = ref.read(tabDatabaseProvider).tabDao;
-
-    // Re-verify count after close (handles concurrent close races)
-    final remaining = await tabDao.tabsInIsolationGroup(contextId).getSingle();
-
-    if (remaining > 0) return;
-
-    // Guard against debounced DB persistence: a sibling tab can already be
-    // active in-memory for this context before isolation_context_id is written.
-    final activeTabs = ref.read(tabListProvider).value;
-    final activeStates = ref.read(tabStatesProvider);
-    final hasActiveSibling = activeTabs.any((tabId) {
-      final state = activeStates[tabId];
-      if (state == null) return false;
-
-      return state.isolationContextId == contextId ||
-          state.contextId == contextId;
-    });
-
-    if (hasActiveSibling) {
-      logger.i(
-        'Skipping isolation cleanup for active context still in memory: $contextId',
-      );
-      return;
-    }
-
-    logger.i('Cleaning up isolation context: $contextId');
-
-    // Clear Gecko browsing data for this context
-    try {
-      await ref
-          .read(browserDataServiceProvider.notifier)
-          .clearDataForContext(contextId);
-    } catch (e, st) {
-      logger.e(
-        'Failed to clear data for isolation context $contextId',
-        error: e,
-        stackTrace: st,
-      );
-    }
-
-    // The alias derived from the group's container needs no teardown: it is
-    // computed from the tabs that reference the context, so dropping those tabs
-    // removes it from the next routing snapshot. A route the *user* set on the
-    // group is stored, though, and would outlive every tab that could use it.
-    if (!ref.mounted) return;
-
-    try {
-      await ref
-          .read(proxyRoutingSettingsRepositoryProvider.notifier)
-          .clearIsolationContextRoute(contextId);
-    } catch (e, st) {
-      logger.e(
-        'Failed to drop the isolation route for $contextId',
-        error: e,
-        stackTrace: st,
-      );
-    }
   }
 
   /// Re-attaches restored tabs the database lists under no container although
@@ -1729,21 +1723,106 @@ class TabRepository extends _$TabRepository {
     }
   }
 
-  Future<void> _drainPendingIsolationCleanup() async {
-    if (_pendingIsolationCleanup.isEmpty) return;
-
-    final pending = Set<String>.of(_pendingIsolationCleanup);
-    _pendingIsolationCleanup.clear();
-
-    for (final contextId in pending) {
-      if (!ref.mounted) break;
-      await _cleanupIsolationContextIfEmpty(contextId);
+  /// Reopens the tabs closed last, while the engine can still undo that
+  /// close.
+  ///
+  /// Which containers the undone tabs come back into is only known once they
+  /// are back, so no container may be deleted meanwhile: nothing is reopened
+  /// while one is being deleted, and no deletion starts until the reopened
+  /// tabs have their rows. Both ends are confirmed rather than assumed: the
+  /// engine answers once its restore is in its store (it runs after the undo
+  /// was dispatched, and clearing the undo history does not stop it), and the
+  /// rows are checked after every tab list sync.
+  ///
+  /// Held the same way, no freeze starts meanwhile, and a frozen container
+  /// takes back only tabs whose storage its freeze holds
+  /// ([_undoRefusal]).
+  Future<UndoCloseOutcome> undoClose() async {
+    final outcome = await ref
+        .read(containerMembershipGateProvider.notifier)
+        .whileChangingAnywhere(_undoCloseHeld);
+    if (outcome == null) {
+      logger.w(
+        'Undo skipped while a container is being deleted or a Resume '
+        'releases isolation groups',
+      );
+      return UndoCloseOutcome.refused;
     }
+    return outcome;
   }
 
-  /// Reopens the tabs closed last, while the engine can still undo that
-  /// close. Returns whether anything was reopened.
-  Future<bool> undoClose() async {
+  /// Why one of [pending] may not come back, as the notice that says so;
+  /// null when all of them may. Not into storage whose release has begun
+  /// (`releasing`), whatever its container's state: its data is being
+  /// deleted, and a release that did not finish is retried and would wipe
+  /// the tab's page, though the container may have resumed since. Nor into a
+  /// frozen container while its freeze does not hold the storage the tab ran
+  /// in. The tab's row comes back as it was closed, with its container, and
+  /// its page in that storage. An isolation group whose last tab it was left
+  /// the container's rows with it, so a freeze since did not cover it: back,
+  /// it would run in a container shown as frozen. A tab whose storage the
+  /// freeze holds comes back frozen with it, and one of a container that is
+  /// not restricted comes back as ever.
+  Future<ContainerFreezeNotice?> _undoRefusal(
+    List<PendingUndoTab> pending,
+  ) async {
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+    await gate.seed();
+    for (final tab in pending) {
+      final contextId = tab.contextId;
+      if (contextId != null &&
+          gate.contextRecord(contextId)?.phase ==
+              ContextFreezePhase.releasing) {
+        logger.w(
+          'Undo refused: storage $contextId waits for its data deletion',
+        );
+        return const UndoWaitsForSiteDataDeletion();
+      }
+      final containerId = tabDao.undoRowOf(tab.tabId)?.containerId;
+      if (containerId == null || !gate.isRestricted(containerId)) continue;
+      if (contextId != null && gate.isContextRestricted(contextId)) continue;
+      logger.w(
+        'Undo refused: a tab would run in frozen container $containerId',
+      );
+      return PageNotOpened(ContainerFrozenException(containerId));
+    }
+    return null;
+  }
+
+  /// How long an undo waits for the rows of the tabs the engine confirmed it
+  /// restored, so that a sync that never comes cannot hold off container
+  /// deletion for good. Not a completion signal: reaching it is an error.
+  static const _undoRowsBackstop = Duration(seconds: 30);
+
+  /// How often an undo checks the tabs to undo again when a close came
+  /// between its check and the engine's undo ([_undoCloseHeld]).
+  static const _undoAttempts = 3;
+
+  Future<UndoCloseOutcome> _undoCloseHeld() async {
+    // A close between the check and the undo replaces what there is to undo,
+    // and the engine refuses the request for the tabs that were checked: the
+    // new ones are checked in turn. Taken for nothing to undo, the refusal
+    // would reopen an older tab from Recently Closed instead.
+    for (var attempt = 0; attempt < _undoAttempts; attempt++) {
+      final pending = await _tabsService.pendingUndoTabs();
+      if (pending.isEmpty) return UndoCloseOutcome.nothingToUndo;
+      if (await _undoRefusal(pending) case final refusal?) {
+        if (ref.mounted) {
+          ref.read(containerFreezeNoticesProvider.notifier).add(refusal);
+        }
+        return UndoCloseOutcome.refused;
+      }
+      final restored = await _undoChecked(pending);
+      if (restored.isNotEmpty) return await _awaitUndoRows(restored);
+    }
+    logger.w('Undo skipped: tabs kept closing while it was checked');
+    return UndoCloseOutcome.refused;
+  }
+
+  /// Has the engine undo the close of [pending], and only that: empty when
+  /// a close since replaced it, or nothing could be restored.
+  Future<List<String>> _undoChecked(List<PendingUndoTab> pending) async {
     // Suppress the next reclose pass: undo can resurrect a tab whose
     // tombstone is still on disk (from a previous session); without this
     // flag the listener would immediately re-close it.
@@ -1755,15 +1834,68 @@ class TabRepository extends _$TabRepository {
     // startup, the session restore itself -- skip the reclose pass and delete
     // the tombstones of tabs the user had closed, bringing them back for good.
     _suppressNextReclose = true;
-    var restoresTabs = false;
+    var restored = const <String>[];
     try {
-      restoresTabs = await _tabsService.undo();
+      // Only what was checked: a close since replaced the pending undo.
+      restored = await _tabsService.undo([
+        for (final tab in pending) tab.tabId,
+      ]);
     } finally {
-      if (!restoresTabs) _suppressNextReclose = false;
+      if (restored.isEmpty) _suppressNextReclose = false;
     }
+    return restored;
+  }
+
+  /// Waits, after an undo that brought back [restored], until their rows
+  /// are there, so no container deletion starts before.
+  Future<UndoCloseOutcome> _awaitUndoRows(List<String> restored) async {
     // A replaced tab can be among those it brought back.
-    if (restoresTabs) _replacements.undone();
-    return restoresTabs;
+    _replacements.undone();
+
+    final rows = (tabIds: restored.toSet(), landed: Completer<void>());
+    _undoRows.add(rows);
+    // Their tab list change may have been synced before the engine answered.
+    await _checkUndoRows(await _tabsService.getTabIds());
+    await rows.landed.future.timeout(
+      _undoRowsBackstop,
+      onTimeout: () {
+        logger.e(
+          'Undone tabs ${rows.tabIds} have no rows after '
+          '${_undoRowsBackstop.inSeconds}s; container deletion is allowed again',
+        );
+        _undoRows.remove(rows);
+      },
+    );
+    return UndoCloseOutcome.reopened;
+  }
+
+  /// Completes each pending undo once every tab it restored that is still
+  /// open ([openTabIds]) has its row. A restored tab closed again needs none.
+  Future<void> _checkUndoRows(Iterable<String> openTabIds) async {
+    if (_undoRows.isEmpty) return;
+    final pending = [..._undoRows];
+    final open = openTabIds.toSet();
+    final waiting = {
+      for (final rows in pending)
+        for (final id in rows.tabIds)
+          if (open.contains(id)) id,
+    };
+    final withRows = waiting.isEmpty
+        ? const <String>{}
+        : (await ref
+                  .read(tabDatabaseProvider)
+                  .tabDao
+                  .getExistingTabIds(waiting)
+                  .get())
+              .toSet();
+    for (final rows in pending) {
+      // Timed out meanwhile.
+      if (!_undoRows.contains(rows)) continue;
+      if (rows.tabIds.where(open.contains).every(withRows.contains)) {
+        _undoRows.remove(rows);
+        rows.landed.complete();
+      }
+    }
   }
 
   /// Reopens [tab] from the recently closed list with its back history, in the
@@ -1788,58 +1920,71 @@ class TabRepository extends _$TabRepository {
           ref.read(containerRepositoryProvider.notifier).getContainerData(id),
     );
 
-    if (containerId != null && container == null) {
-      await _recentlyClosedService.remove(tab.id);
-      await tabDao.deleteClosedTabContainers([tab.id]);
+    // As for addTab: the tab is restored into its container.
+    return await ref
+        .read(containerMembershipGateProvider.notifier)
+        .whileChanging([container?.id], () async {
+          // Read again under the reservation: a deletion that finished since
+          // the lookup sends the tab back unassigned, as one that finished
+          // before it.
+          final current = await container.mapNotNull(
+            (container) => ref
+                .read(containerRepositoryProvider.notifier)
+                .getContainerData(container.id),
+          );
+          if (containerId != null && current == null) {
+            await _recentlyClosedService.remove(tab.id);
+            await tabDao.deleteClosedTabContainers([tab.id]);
 
-      return await addTab(
-        url: Uri.tryParse(tab.url),
-        tabMode: TabMode.regular,
-        selectTab: selectTab,
-        containerSelection: const TabContainerSelection.unassigned(),
-      );
-    }
-
-    // Its close left a tombstone, which would have the tab list listener close
-    // it again as a stale restore.
-    await tabDao.deleteClosedTabTombstones([tab.id]);
-
-    final String restoredId;
-    try {
-      restoredId = await tabDao.upsertTabTransactional(
-        () async =>
-            await _recentlyClosedService.restore(
-              tab.id,
-              contextId: container?.metadata.contextualIdentity,
+            return await addTab(
+              url: Uri.tryParse(tab.url),
+              tabMode: TabMode.regular,
               selectTab: selectTab,
-              excludeFromHistory:
-                  container?.metadata.excludeFromHistory ?? false,
-            ) ??
-            (throw const _NoLongerClosed()),
-        parentId: const Value(null),
-        containerId: Value(container?.id),
-        url: Value(Uri.tryParse(tab.url)),
-        title: Value(tab.title),
-        tabMode: const Value(TabMode.regular),
-        childPlacement: ref
-            .read(generalSettingsWithDefaultsProvider)
-            .childTabPlacement,
-      );
-    } on _NoLongerClosed {
-      return null;
-    }
+              containerSelection: const TabContainerSelection.unassigned(),
+            );
+          }
 
-    await tabDao.deleteClosedTabContainers([restoredId]);
+          // Its close left a tombstone, which would have the tab list listener
+          // close it again as a stale restore.
+          await tabDao.deleteClosedTabTombstones([tab.id]);
 
-    if (selectTab && ref.mounted) {
-      _clearForceBrowserHome();
+          final String restoredId;
+          try {
+            restoredId = await tabDao.upsertTabTransactional(
+              () async =>
+                  await _recentlyClosedService.restore(
+                    tab.id,
+                    contextId: current?.metadata.contextualIdentity,
+                    selectTab: selectTab,
+                    excludeFromHistory:
+                        current?.metadata.excludeFromHistory ?? false,
+                  ) ??
+                  (throw const _NoLongerClosed()),
+              parentId: const Value(null),
+              containerId: Value(current?.id),
+              url: Value(Uri.tryParse(tab.url)),
+              title: Value(tab.title),
+              tabMode: const Value(TabMode.regular),
+              childPlacement: ref
+                  .read(generalSettingsWithDefaultsProvider)
+                  .childTabPlacement,
+            );
+          } on _NoLongerClosed {
+            return null;
+          }
 
-      await ref
-          .read(selectedContainerProvider.notifier)
-          .followTab(container?.id);
-    }
+          await tabDao.deleteClosedTabContainers([restoredId]);
 
-    return restoredId;
+          if (selectTab && ref.mounted) {
+            _clearForceBrowserHome();
+
+            await ref
+                .read(selectedContainerProvider.notifier)
+                .followTab(current?.id);
+          }
+
+          return restoredId;
+        });
   }
 
   Future<bool> _recloseRestoredClosedTabs(List<String> tabIds) async {
@@ -1867,12 +2012,20 @@ class TabRepository extends _$TabRepository {
       // recordTombstones: false — the tombstone already exists from the
       // original close; rewriting it would bump closed_at into this session
       // and disable the resurrection check on the next emission.
-      await _closeTabsInternal(
+      final result = await _closeTabsInternal(
         restoredClosedTabIds.toList(growable: false),
         recordTombstones: false,
       );
 
-      return true;
+      // A locked tab is never closed again as a stale restore. Its tombstone
+      // would only keep asking.
+      if (result.skippedLockedTabIds.isNotEmpty) {
+        await tabDao.deleteClosedTabTombstones(result.skippedLockedTabIds);
+      }
+
+      // Without a removal no tab list change follows, and the caller has to
+      // go on with this one.
+      return result.closedAny;
     } finally {
       _reclosing = false;
     }
@@ -1892,20 +2045,10 @@ class TabRepository extends _$TabRepository {
   //       final syncTabsResult = await tabDao.syncTabs(
   //         retainTabIds: ref.read(tabListProvider).value,
   //       );
-  //       _pendingIsolationCleanup.addAll(
+  //       _isolationCleanup.addAll(
   //         syncTabsResult.deletedIsolationContextIds,
   //       );
-
-  //       if (_pendingIsolationCleanup.isNotEmpty) {
-  //         final pending = Set<String>.of(_pendingIsolationCleanup);
-  //         _pendingIsolationCleanup.clear();
-
-  //         for (final contextId in pending) {
-  //           if (!ref.mounted) return;
-  //           logger.i('Cleaning orphaned isolation context: $contextId');
-  //           await _cleanupIsolationContextIfEmpty(contextId);
-  //         }
-  //       }
+  //       await _isolationCleanup.drain();
   //     });
   //   } catch (e, st) {
   //     logger.e(
@@ -1916,20 +2059,42 @@ class TabRepository extends _$TabRepository {
   //   }
   // }
 
-  /// Shows background tab [sourceTabId]'s cancelled navigation to [uri] in
-  /// its page's stand-in ([BackgroundStandIns]), opening one with [open] when
-  /// there is none. [selectedTabId] is the native store's selection, asked
-  /// for just before.
+  /// Shows [report]'s cancelled navigation in its page's stand-in
+  /// ([BackgroundStandIns]), opening one with [open] when there is none.
+  ///
+  /// One report at a time. A report that comes in while its page's stand-in
+  /// opens is loaded there by the open, and then has nothing left to do
+  /// ([BackgroundStandIns.opened]).
   Future<void> _showInStandIn(
-    String sourceTabId,
-    Uri uri,
-    String? selectedTabId,
+    StandInReport report,
+    Future<String> Function([Uri? url]) open,
+  ) {
+    // Before waiting for its turn: an open in progress picks it up.
+    _backgroundStandIns.arrived(report);
+    return _standInLock.synchronized(() async {
+      try {
+        await _standInTurn(report, open);
+      } finally {
+        _backgroundStandIns.done(report);
+      }
+    });
+  }
+
+  /// [report]'s turn under [_standInLock]; see [_showInStandIn].
+  Future<void> _standInTurn(
+    StandInReport report,
     Future<String> Function([Uri? url]) open,
   ) async {
-    // Which tabs are open, from the native store right now; see
-    // [BackgroundStandIns.sync].
-    final takenAt = _backgroundStandIns.stamp;
-    final openTabIds = await _tabsService.getTabIds();
+    // Superseded or loaded already while it waited: nothing to ask native
+    // for, and the latest report is not kept waiting behind this one.
+    if (!_backgroundStandIns.isWaiting(report)) return;
+
+    // Which tabs are open and selected, from the native store at its turn;
+    // see [BackgroundStandIns.sync].
+    final (openTabIds, selectedTabId) = await (
+      _tabsService.getTabIds(),
+      _tabsService.getSelectedTabId(),
+    ).wait;
     if (!ref.mounted) return;
     _backgroundStandIns.sync(
       openTabIds: openTabIds,
@@ -1940,9 +2105,10 @@ class TabRepository extends _$TabRepository {
         if (selectedTabId != null)
           ?ref.read(splitPairShownProvider)?.partnerOf(selectedTabId),
       ],
-      takenAt: takenAt,
     );
+    if (!_backgroundStandIns.take(report)) return;
 
+    final StandInReport(:sourceTabId, :uri) = report;
     switch (_backgroundStandIns.request(sourceTabId, uri)) {
       case StandInCurrent():
         return;
@@ -1950,26 +2116,38 @@ class TabRepository extends _$TabRepository {
         // Nobody has seen either tab: the page's latest navigation replaces
         // the stand-in's, as it would have in the tab itself.
         await GeckoSessionService(tabId: tabId).loadUrl(url: uri);
-        return;
       case OpenStandIn():
-        break;
-    }
-
-    final String standInId;
-    try {
-      standInId = await open(uri);
-    } catch (_) {
-      _backgroundStandIns.release(sourceTabId, uri);
-      rethrow;
-    }
-
-    // A newer navigation to the page came in while the stand-in opened: it
-    // loads there, never in another tab ([BackgroundStandIns.opened]). Sent
-    // with no await before it, so a load for a navigation reported from now
-    // on reaches the tab after this one.
-    final newer = _backgroundStandIns.opened(sourceTabId, uri, standInId);
-    if (newer != null) {
-      await GeckoSessionService(tabId: standInId).loadUrl(url: newer);
+        final String standInId;
+        try {
+          standInId = await open(uri);
+        } catch (_) {
+          _backgroundStandIns.openFailed();
+          rethrow;
+        }
+        // A report that came in meanwhile is loaded only while its source
+        // and the stand-in are still open. Unknown when the tabs cannot be
+        // listed: the stand-in is recorded unchecked, and that report waits
+        // for its turn ([BackgroundStandIns.opened]).
+        List<String>? stillOpen;
+        try {
+          stillOpen = await _tabsService.getTabIds();
+        } catch (error, stackTrace) {
+          logger.w(
+            'Could not list the open tabs after opening stand-in $standInId',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+        if (!ref.mounted) return;
+        final newer = _backgroundStandIns.opened(
+          sourceTabId,
+          uri,
+          standInId,
+          openTabIds: stillOpen,
+        );
+        if (newer != null) {
+          await GeckoSessionService(tabId: standInId).loadUrl(url: newer);
+        }
     }
   }
 
@@ -2072,6 +2250,35 @@ class TabRepository extends _$TabRepository {
       final tabIsEmpty =
           currentTabState.url == TabState.defaultUrl && historyIsEmpty;
 
+      // A locked tab is never replaced: the site opens beside it. Only a hint
+      // for which branch to take; if a lock arrives after it, the replacement
+      // helpers keep the original all the same.
+      final locked = await isTabLocked(currentTabState.id);
+      if (!isCurrentRequest()) return;
+
+      // The container refuses what follows while it is being deleted (D35),
+      // and while it is frozen, a tab that moves into it or an isolated tab
+      // opened in it (D19): the user is asked to resume it first (5.2.1).
+      // A regular tab opened in a frozen container is held there, and needs
+      // neither.
+      final gate = ref.read(containerMembershipGateProvider.notifier);
+      if (gate.isBeingDeleted(containerData.id)) {
+        _reportPageNotOpened(ContainerBeingDeletedException(containerData.id));
+        return;
+      }
+      if (!(event.blocked || tabIsEmpty) ||
+          currentTabState.tabMode is IsolatedTabMode) {
+        await gate.seed();
+        if (!isCurrentRequest()) return;
+        if (gate.isRestricted(containerData.id) &&
+            (!await ref
+                    .read(containerFreezeServiceProvider.notifier)
+                    .resumeToOpen(containerData.id) ||
+                !isCurrentRequest())) {
+          return;
+        }
+      }
+
       if (event.blocked || tabIsEmpty) {
         final splitView = ref.read(splitViewControllerProvider.notifier);
         // A background tab (a link opened with "Open in new tab", say) or the
@@ -2093,12 +2300,13 @@ class TabRepository extends _$TabRepository {
           selectTab: !staysUnfocused,
         );
 
-        if (historyIsEmpty) {
+        if (historyIsEmpty && !locked) {
           // A replacement: the new tab takes the old one's place, in a split
-          // pair too.
+          // pair too — unless the original turned out to be locked, when the
+          // slot stays with it.
           await splitView.carryOver(
             currentTabState.id,
-            () => replaceTabOpeningFirst(
+            () async => (await replaceTabOpeningFirst(
               oldTabId: currentTabState.id,
               focused: !staysUnfocused,
               open: openInAssignedContainer,
@@ -2107,15 +2315,18 @@ class TabRepository extends _$TabRepository {
                   _closeReplacedTab(currentTabState.id, newTabId),
               select: selectTab,
               isMounted: () => ref.mounted,
-            ),
+            )).replacementTabId,
           );
         } else if (!staysUnfocused) {
           await openInAssignedContainer();
         } else {
           await _showInStandIn(
-            currentTabState.id,
-            uri,
-            selectedTabId,
+            StandInReport(
+              sourceTabId: currentTabState.id,
+              uri: uri,
+              selectedTabId: selectedTabId,
+              isCurrent: isCurrentRequest,
+            ),
             openInAssignedContainer,
           );
         }
@@ -2129,28 +2340,48 @@ class TabRepository extends _$TabRepository {
         }
 
         if (originUri == null) {
-          await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .assignContainer(
-                latestTabState.id,
-                containerData,
-                replacementUrl: uri,
-              );
+          final tabData = ref.read(tabDataRepositoryProvider.notifier);
+          var moved = await tabData.assignContainer(
+            latestTabState.id,
+            containerData,
+            closeOldTab: !locked,
+            replacementUrl: uri,
+          );
+          // Locked after the hint above, or its lock could not be read: the
+          // original stayed and nothing was opened, so the site opens beside
+          // it as for any locked tab.
+          if ((moved == ContainerMoveResult.lockedNeedsSameContext ||
+                  moved == ContainerMoveResult.locksUnavailable) &&
+              isCurrentRequest()) {
+            moved = await tabData.assignContainer(
+              latestTabState.id,
+              containerData,
+              closeOldTab: false,
+              replacementUrl: uri,
+            );
+          }
+          _reportMoveRefusal(containerData.id, moved);
         } else if (latestTabState.url == originUri) {
-          await ref
-              .read(tabDataRepositoryProvider.notifier)
-              .assignContainer(
-                latestTabState.id,
-                containerData,
-                closeOldTab: false,
-                replacementUrl: uri,
-              );
+          _reportMoveRefusal(
+            containerData.id,
+            await ref
+                .read(tabDataRepositoryProvider.notifier)
+                .assignContainer(
+                  latestTabState.id,
+                  containerData,
+                  closeOldTab: false,
+                  replacementUrl: uri,
+                ),
+          );
         } else {
           logger.w(
             'Could not match origin url for assignment ${latestTabState.url} to request ${event.originUrl}',
           );
         }
       }
+    } on ContainerRefusedTabException catch (refusal) {
+      // Frozen or being deleted after the checks above.
+      _reportPageNotOpened(refusal);
     } catch (error, stackTrace) {
       // The stream's `onError` never sees what an async listener throws.
       logger.e(
@@ -2163,6 +2394,283 @@ class TabRepository extends _$TabRepository {
         _latestAssignmentRequests.remove(tabId);
       }
     }
+  }
+
+  /// Tells the user that a site assigned to a container did not open there,
+  /// because the container refused it; the browser shows it.
+  void _reportPageNotOpened(ContainerRefusedTabException refusal) {
+    logger.w('Site not opened: $refusal');
+    if (!ref.mounted) return;
+    ref
+        .read(containerFreezeNoticesProvider.notifier)
+        .add(PageNotOpened(refusal));
+  }
+
+  /// [_reportPageNotOpened] for a move into [containerId] that its container
+  /// refused (a lock stays silent: the site opened beside the tab).
+  void _reportMoveRefusal(String containerId, ContainerMoveResult result) {
+    switch (result) {
+      case ContainerMoveResult.containerFrozen:
+        _reportPageNotOpened(ContainerFrozenException(containerId));
+      case ContainerMoveResult.containerBeingDeleted:
+        _reportPageNotOpened(ContainerBeingDeletedException(containerId));
+      case ContainerMoveResult.moved ||
+          ContainerMoveResult.lockedNeedsSameContext ||
+          ContainerMoveResult.locksUnavailable:
+        break;
+    }
+  }
+
+  /// Gives tab [tabId], which the engine opened (from tab [openerId], when it
+  /// names one), its row. The tab added listener in [build]; a method so that
+  /// tests can call it.
+  @visibleForTesting
+  Future<void> handleTabAdded(String tabId, {String? openerId}) async {
+    final db = ref.read(tabDatabaseProvider);
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+
+    Future<void> insert(Value<String?> containerId) => db.tabDao.insertTab(
+      tabId,
+      parentId: const Value.absent(),
+      // Link an engine-opened tab to its opener and place it per the child
+      // tab placement setting right away, so it never has to move once the
+      // parent is seeded from engine state. An app-created tab already has
+      // its row (manual source wins the upsert), so this is a no-op for it.
+      openerId: Value(openerId),
+      childPlacement: ref
+          .read(generalSettingsWithDefaultsProvider)
+          .childTabPlacement,
+      source: TabSource.addedEvent,
+      containerId: containerId,
+    );
+
+    // A tab opened from another tab runs in its opener's context, so
+    // `insertTab` files it with the opener rather than with whatever
+    // container is selected. A tab without an opener (an extension's
+    // `tabs.create`) still lands in the selected container, unless that one
+    // is frozen: it runs in the default storage, which no freeze holds, and
+    // would be a running page in a container shown as frozen (native refuses
+    // to freeze one that has such a tab).
+    final String? targetContainerId;
+    String? inheritedContainerId;
+    if (openerId == null) {
+      final selected = ref.read(selectedContainerProvider);
+      targetContainerId = await _runsOutsideFreezeOf(tabId, selected)
+          ? null
+          : selected;
+    } else {
+      final openerHasRow = (await db.tabDao.getExistingTabIds({
+        openerId,
+      }).get()).isNotEmpty;
+      targetContainerId = openerHasRow
+          ? await db.tabDao.getTabContainerId(openerId).getSingleOrNull()
+          : null;
+      if (targetContainerId == null) {
+        inheritedContainerId = await _containerOfRowlessOpener(
+          openerId,
+          openerHasRow: openerHasRow,
+        );
+      }
+    }
+
+    if (inheritedContainerId != null) {
+      // The opener belonged to a container its row does not name (any more):
+      // the tab gets a row under no container first, then goes where that
+      // container's tabs go: into it, or closed with it.
+      await insert(const Value(null));
+      gate.recordOpenedFrom(inheritedContainerId, tabId);
+      await _settleTabOfContainer(tabId, inheritedContainerId);
+      return;
+    }
+
+    try {
+      // Joining a container, the row holds its reservation like any other
+      // addition ([ContainerMembershipGate]).
+      await gate.whileChanging(
+        [targetContainerId],
+        () => insert(
+          openerId == null
+              ? Value(targetContainerId)
+              : const Value<String?>.absent(),
+        ),
+        openedTabId: openerId == null ? null : tabId,
+      );
+    } on ContainerBeingDeletedException catch (refusal) {
+      // The tab exists already, so it gets a row all the same, under no
+      // container: its row cannot join a container that is going away.
+      await insert(const Value(null));
+      // A window one of the container's pages opened belongs to it: the
+      // deletion closes it with the container's own tabs, as it was told
+      // by the refusal. An extension's tab only would have been filed under
+      // the selected container, and runs wherever the extension put it.
+      if (openerId != null) {
+        await _settleTabOfContainer(tabId, refusal.containerId);
+      }
+    }
+  }
+
+  /// Whether [containerId] is restricted ([ContainerMembershipGate.isRestricted])
+  /// and tab [tabId] runs in storage its freeze does not hold: its context,
+  /// as far as it is known yet, has no restriction. False for no container.
+  Future<bool> _runsOutsideFreezeOf(String tabId, String? containerId) async {
+    if (containerId == null) return false;
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+    await gate.seed();
+    if (!gate.isRestricted(containerId)) return false;
+    final contextId = ref.read(tabStatesProvider)[tabId]?.contextId;
+    return contextId == null || !gate.isContextRestricted(contextId);
+  }
+
+  /// The container the tab [openerId] belonged to although its row names
+  /// none, or null when it belonged to none:
+  ///
+  /// - a tab a deletion took, refused while it ran, or that such a tab
+  ///   opened ([ContainerMembershipGate.deletionLineageOf]), while that
+  ///   container is being deleted or is gone. A deletion that was refused
+  ///   left its tabs' rows in place, so they decide then;
+  /// - a tab closed before this event arrived: the container its row had
+  ///   when it went ([TabDao.closedTabContainers]).
+  Future<String?> _containerOfRowlessOpener(
+    String openerId, {
+    required bool openerHasRow,
+  }) async {
+    final db = ref.read(tabDatabaseProvider);
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+
+    final lineage = gate.deletionLineageOf(openerId);
+    if (lineage != null &&
+        (gate.isBeingDeleted(lineage) ||
+            await db.containerDao.getContainerData(lineage).getSingleOrNull() ==
+                null)) {
+      return lineage;
+    }
+    // A row under no container is an unassigned tab's.
+    if (openerHasRow) return null;
+    return (await db.tabDao.closedTabContainers([
+      openerId,
+    ]))[openerId]?.containerId;
+  }
+
+  /// Settles tab [tabId], which belongs to container [containerId] though its
+  /// row names none (a window opened from the container's page while it was
+  /// being deleted, or after its opener's row went), once no deletion of the
+  /// container is in flight: closed when the container went, unless the
+  /// deletion closed it already, and filed into the container otherwise.
+  Future<void> _settleTabOfContainer(String tabId, String containerId) async {
+    final gate = ref.read(containerMembershipGateProvider.notifier);
+    await gate.deletionFinished(containerId);
+    if (!ref.mounted) return;
+
+    final db = ref.read(tabDatabaseProvider);
+    try {
+      final containerKept =
+          await db.containerDao
+              .getContainerData(containerId)
+              .getSingleOrNull() !=
+          null;
+      if (!containerKept) {
+        // Missing, when the deletion closed it: nothing happens then. Not
+        // undoable: the deletion dropped the undo of its own tabs already,
+        // and an undo of this one would bring it back into the deleted
+        // container's storage, with no container left to route it.
+        await _closeTabsInternal(
+          [tabId],
+          recordTombstones: true,
+          keepOffRecentlyClosed: true,
+          discardUndo: true,
+        );
+        return;
+      }
+
+      await gate.whileChanging(
+        [containerId],
+        () => db.tabDao.assignContainer(tabId, containerId: containerId),
+        openedTabId: tabId,
+      );
+    } on ContainerBeingDeletedException {
+      // Another deletion of it started meanwhile, and was told of the tab.
+      await _settleTabOfContainer(tabId, containerId);
+    } catch (error, stackTrace) {
+      // The stream's `onError` never sees what an async listener throws.
+      logger.e(
+        'Could not settle tab $tabId, opened while container $containerId '
+        'was being deleted',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Brings the rows in line with the engine's tab list after it changed.
+  /// The tab list listener in [build]; a method so that tests can call it.
+  @visibleForTesting
+  Future<void> handleTabListChange(
+    EquatableValue<List<String>>? previous,
+    EquatableValue<List<String>> next,
+  ) async {
+    try {
+      await _syncTabList(previous, next);
+    } finally {
+      // An undo close waits for its tabs' rows, which this sync may have
+      // written.
+      if (_undoRows.isNotEmpty && ref.mounted) {
+        await _checkUndoRows(next.value);
+      }
+    }
+  }
+
+  Future<void> _syncTabList(
+    EquatableValue<List<String>>? previous,
+    EquatableValue<List<String>> next,
+  ) async {
+    final db = ref.read(tabDatabaseProvider);
+    if (_suppressNextReclose) {
+      _suppressNextReclose = false;
+      // Drop tombstones for the tabs that just came back via undo so
+      // future emissions don't treat them as resurrections.
+      await _clearTombstonesForCurrentTabs(next.value);
+    } else if (await _recloseRestoredClosedTabs(next.value)) {
+      return;
+    } else if (await _closeRestoredPrivateCaptureTabs(next.value)) {
+      return;
+    }
+
+    //Only sync tabs if there has been a previous value or is not empty.
+    //Additionally require the native session restore to have completed:
+    //a partial pre-restore list (e.g. a share-intent tab arriving first)
+    //must not delete the cached rows of tabs that are still being
+    //restored.
+    final shouldSyncTabs =
+        ref.read(browserRestoreCompleteProvider) &&
+        (next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false));
+
+    if (shouldSyncTabs) {
+      final syncTabsResult = await db.tabDao.syncTabs(
+        retainTabIds: next.value,
+        childPlacement: ref
+            .read(generalSettingsWithDefaultsProvider)
+            .childTabPlacement,
+      );
+      // Capture isolation contexts from rows deleted by syncTabs
+      // (orphaned tabs from crashes, or tabs the engine dropped).
+      _isolationCleanup.addAll(syncTabsResult.deletedIsolationContextIds);
+    }
+
+    // Process pending isolation context cleanups after syncTabs
+    // has deleted the rows, so the count check is accurate.
+    await _isolationCleanup.drain();
+
+    // One-shot orphan cleanup after tab list stabilizes (5s debounce).
+    // Also runs for DB-only contexts whose rows were already deleted
+    // by syncTabs above (those are handled via _isolationCleanup).
+    // if (!orphanCleanupDone) {
+    //   orphanCleanupTimer?.cancel();
+    //   orphanCleanupTimer = Timer(const Duration(seconds: 5), () async {
+    //     if (orphanCleanupDone || !ref.mounted) return;
+    //     orphanCleanupDone = true;
+    //     await _cleanupOrphanedIsolationContexts();
+    //   });
+    // }
   }
 
   @override
@@ -2185,29 +2693,8 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
-      (event) async {
-        // A tab opened from another tab runs in its opener's context, so
-        // `insertTab` files it with the opener rather than with whatever
-        // container is selected. A tab without an opener (an extension's
-        // `tabs.create`) still lands in the selected container.
-        final containerId = event.parentId == null
-            ? Value(ref.read(selectedContainerProvider))
-            : const Value<String?>.absent();
-        await db.tabDao.insertTab(
-          event.tabId,
-          parentId: const Value.absent(),
-          // Link an engine-opened tab to its opener and place it per the child
-          // tab placement setting right away, so it never has to move once the
-          // parent is seeded from engine state. An app-created tab already has
-          // its row (manual source wins the upsert), so this is a no-op for it.
-          openerId: Value(event.parentId),
-          childPlacement: ref
-              .read(generalSettingsWithDefaultsProvider)
-              .childTabPlacement,
-          source: TabSource.addedEvent,
-          containerId: containerId,
-        );
-      },
+      (event) async =>
+          await handleTabAdded(event.tabId, openerId: event.parentId),
       onError: (Object error, StackTrace stackTrace) {
         logger.e(
           'Error in tab added stream',
@@ -2251,6 +2738,30 @@ class TabRepository extends _$TabRepository {
       },
     );
 
+    // Wake on a sleeping tab's placeholder: native only asks, because the
+    // routing has to be checked first (D34).
+    final wakeRequestSub = eventSerivce.wakeRequestEvents.listen(
+      (tabId) async {
+        try {
+          await wakeTab(tabId);
+        } catch (error, stackTrace) {
+          // The stream's `onError` never sees what an async listener throws.
+          logger.e(
+            'Could not wake $tabId from its placeholder',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        logger.e(
+          'Error in wake request stream',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      },
+    );
+
     followVisiblePair();
 
     ref.listen(
@@ -2275,57 +2786,7 @@ class TabRepository extends _$TabRepository {
 
     ref.listen(
       tabListProvider,
-      (previous, next) async {
-        if (_suppressNextReclose) {
-          _suppressNextReclose = false;
-          // Drop tombstones for the tabs that just came back via undo so
-          // future emissions don't treat them as resurrections.
-          await _clearTombstonesForCurrentTabs(next.value);
-        } else if (await _recloseRestoredClosedTabs(next.value)) {
-          return;
-        } else if (await _closeRestoredPrivateCaptureTabs(next.value)) {
-          return;
-        }
-
-        //Only sync tabs if there has been a previous value or is not empty.
-        //Additionally require the native session restore to have completed:
-        //a partial pre-restore list (e.g. a share-intent tab arriving first)
-        //must not delete the cached rows of tabs that are still being
-        //restored.
-        final shouldSyncTabs =
-            ref.read(browserRestoreCompleteProvider) &&
-            (next.value.isNotEmpty || (previous?.value.isNotEmpty ?? false));
-
-        if (shouldSyncTabs) {
-          final syncTabsResult = await db.tabDao.syncTabs(
-            retainTabIds: next.value,
-            childPlacement: ref
-                .read(generalSettingsWithDefaultsProvider)
-                .childTabPlacement,
-          );
-          // Capture isolation contexts from rows deleted by syncTabs
-          // (orphaned tabs from crashes, or tabs the engine dropped).
-          _pendingIsolationCleanup.addAll(
-            syncTabsResult.deletedIsolationContextIds,
-          );
-        }
-
-        // Process pending isolation context cleanups after syncTabs
-        // has deleted the rows, so the count check is accurate.
-        await _drainPendingIsolationCleanup();
-
-        // One-shot orphan cleanup after tab list stabilizes (5s debounce).
-        // Also runs for DB-only contexts whose rows were already deleted
-        // by syncTabs above (those are handled via _pendingIsolationCleanup).
-        // if (!orphanCleanupDone) {
-        //   orphanCleanupTimer?.cancel();
-        //   orphanCleanupTimer = Timer(const Duration(seconds: 5), () async {
-        //     if (orphanCleanupDone || !ref.mounted) return;
-        //     orphanCleanupDone = true;
-        //     await _cleanupOrphanedIsolationContexts();
-        //   });
-        // }
-      },
+      (previous, next) async => await handleTabListChange(previous, next),
       onError: (Object error, StackTrace stackTrace) {
         logger.e(
           'Error listening to tabListProvider',
@@ -2380,12 +2841,16 @@ class TabRepository extends _$TabRepository {
           return;
         }
 
-        _pendingIsolationCleanup.addAll(
-          syncTabsResult.deletedIsolationContextIds,
-        );
-        await _drainPendingIsolationCleanup();
+        _isolationCleanup.addAll(syncTabsResult.deletedIsolationContextIds);
+        await _isolationCleanup.drain();
 
         await _reattachTabsToContextContainers();
+
+        // Now that the restored tabs are open and the database has caught up
+        // with them, native's locks become the database's: a lock native took
+        // but the database never acknowledged is dropped, and an unlock native
+        // missed is completed.
+        if (ref.mounted) await _closeLock.synchronized(_locks.reconcile);
       }
     });
 
@@ -2432,6 +2897,7 @@ class TabRepository extends _$TabRepository {
       await tabAddedSub.cancel();
       await tabContentSub.cancel();
       await containerSiteAssignementSub.cancel();
+      await wakeRequestSub.cancel();
     });
   }
 }

@@ -27,12 +27,14 @@ import 'package:weblibre/features/geckoview/domain/entities/states/tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_icon.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_lock_badge.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_sleep_badge.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_depth_indicator.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_swipe_actions.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/domain/entities/find_in_page_state.dart';
-import 'package:weblibre/features/geckoview/features/find_in_page/presentation/controllers/find_in_page.dart';
+import 'package:weblibre/features/geckoview/features/find_in_page/presentation/utils/find_in_page_suggestion.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/widgets/split_member_mark.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
@@ -45,27 +47,6 @@ import 'package:weblibre/presentation/widgets/safe_raw_image.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/presentation/widgets/url_icon.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
-
-Future<bool> _confirmIsolatedTabCloseIfNeeded(
-  BuildContext context,
-  WidgetRef ref,
-  String tabId,
-) async {
-  final allStates = ref.read(tabStatesProvider);
-  final tabState = allStates[tabId];
-  final contextId = tabState?.isolationContextId;
-
-  if (contextId == null) return true;
-
-  final groupCount = allStates.values
-      .where((state) => state.isolationContextId == contextId)
-      .length;
-
-  if (groupCount > 1) return true;
-  if (!context.mounted) return false;
-
-  return await ui_helper.confirmIsolatedTabClose(context, ref.read);
-}
 
 class GridTabItemContainer extends StatelessWidget {
   final bool isActive;
@@ -193,6 +174,10 @@ class GridTabPreview extends HookConsumerWidget {
     final isPinned = ref.watch(
       tabPinBadgeShownProvider(tabId, enabled: showPinBadge),
     );
+    final isLocked = ref.watch(isTabLockedProvider(tabId));
+    final unlockIncomplete = ref.watch(isTabUnlockIncompleteProvider(tabId));
+    final hasCloseButton =
+        onDelete != null || onDeleteAll != null || onCloseSubtree != null;
 
     final modeTextColor = switch (tabState.tabMode) {
       PrivateTabMode() => appColors.privateTabForeground,
@@ -247,9 +232,7 @@ class GridTabPreview extends HookConsumerWidget {
                     else
                       Center(child: TabIcon(tabState: tabState, iconSize: 48)),
                     // Close button overlay
-                    if (onDelete != null ||
-                        onDeleteAll != null ||
-                        onCloseSubtree != null)
+                    if (hasCloseButton)
                       Positioned(
                         top: 0.0,
                         right: 0.0,
@@ -277,6 +260,8 @@ class GridTabPreview extends HookConsumerWidget {
                           ],
                           child: _GridCloseButton(
                             onTap: onDelete,
+                            locked: isLocked,
+                            unlockIncomplete: unlockIncomplete,
                             onLongPress:
                                 onDeleteAll != null || onCloseSubtree != null
                                 ? () {
@@ -305,80 +290,87 @@ class GridTabPreview extends HookConsumerWidget {
                         withBackground: true,
                       ),
                     ),
-                    if (trailingChild != null ||
-                        isPinned ||
-                        groupToggle != null)
-                      Positioned(
-                        top: 6.0,
-                        left: 6.0,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (groupToggle != null) ...[
-                              groupToggle!,
-                              if (trailingChild != null || isPinned)
-                                const SizedBox(width: 4),
-                            ],
-                            ?trailingChild,
-                            if (isPinned)
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  left: trailingChild != null ? 4.0 : 0,
-                                ),
-                                child: SizedBox(
-                                  width: 28,
-                                  height: 28,
-                                  child: Material(
-                                    color: colorScheme.surfaceContainerHighest
-                                        .withAlpha(200),
+                    // Always there: the lock, sleep, frozen and keep-awake
+                    // badges show for any tab, and are empty otherwise. Each
+                    // shown item keeps 4 px to the next, in the tab list's
+                    // order.
+                    Positioned(
+                      top: 6.0,
+                      left: 6.0,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (groupToggle != null) ...[
+                            groupToggle!,
+                            const SizedBox(width: 4),
+                          ],
+                          if (trailingChild != null) ...[
+                            trailingChild!,
+                            const SizedBox(width: 4),
+                          ],
+                          if (isPinned)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 4),
+                              child: SizedBox(
+                                width: 28,
+                                height: 28,
+                                child: Material(
+                                  color: colorScheme.surfaceContainerHighest
+                                      .withAlpha(200),
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8.0),
+                                  ),
+                                  child: InkWell(
                                     borderRadius: const BorderRadius.all(
                                       Radius.circular(8.0),
                                     ),
-                                    child: InkWell(
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(8.0),
-                                      ),
-                                      onTap: () async {
-                                        await ref
-                                            .read(
-                                              tabDataRepositoryProvider
-                                                  .notifier,
-                                            )
-                                            .setPinned(tabId, pinned: false);
+                                    onTap: () async {
+                                      await ref
+                                          .read(
+                                            tabDataRepositoryProvider.notifier,
+                                          )
+                                          .setPinned(tabId, pinned: false);
 
-                                        if (context.mounted) {
-                                          ui_helper.showInfoMessage(
-                                            context,
-                                            l10n.browser_tabUnpinned,
-                                            action: SnackBarAction(
-                                              label: l10n.common_undo,
-                                              onPressed: () async {
-                                                await ref
-                                                    .read(
-                                                      tabDataRepositoryProvider
-                                                          .notifier,
-                                                    )
-                                                    .setPinned(
-                                                      tabId,
-                                                      pinned: true,
-                                                    );
-                                              },
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      child: Icon(
-                                        MdiIcons.pin,
-                                        size: 16,
-                                        color: colorScheme.primary,
-                                      ),
+                                      if (context.mounted) {
+                                        ui_helper.showInfoMessage(
+                                          context,
+                                          l10n.browser_tabUnpinned,
+                                          action: SnackBarAction(
+                                            label: l10n.common_undo,
+                                            onPressed: () async {
+                                              await ref
+                                                  .read(
+                                                    tabDataRepositoryProvider
+                                                        .notifier,
+                                                  )
+                                                  .setPinned(
+                                                    tabId,
+                                                    pinned: true,
+                                                  );
+                                            },
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Icon(
+                                      MdiIcons.pin,
+                                      size: 16,
+                                      color: colorScheme.primary,
                                     ),
                                   ),
                                 ),
                               ),
-                          ],
-                        ),
+                            ),
+                          ..._stateBadges(
+                            tabId,
+                            size: 16,
+                            withBackground: true,
+                            // The close button shows the lock instead.
+                            withLock: !hasCloseButton,
+                          ),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -510,6 +502,10 @@ class ListTabPreview extends HookConsumerWidget {
     final isPinned = ref.watch(
       tabPinBadgeShownProvider(tabId, enabled: showPinBadge),
     );
+    final isLocked = ref.watch(isTabLockedProvider(tabId));
+    final unlockIncomplete = ref.watch(isTabUnlockIncompleteProvider(tabId));
+    final hasCloseButton =
+        onDelete != null || onDeleteAll != null || onCloseSubtree != null;
 
     final leadingWidget = switch ((tabListShowFavicons, thumbnail)) {
       (false, final thumbnail?) when !thumbnail.isDisposed => ClipRRect(
@@ -608,6 +604,8 @@ class ListTabPreview extends HookConsumerWidget {
                               ),
                               const SizedBox(width: 4),
                             ],
+                            // The close button shows the lock instead.
+                            ..._stateBadges(tabId, withLock: !hasCloseButton),
                             SplitMemberMark(
                               tabId: tabId,
                               padding: const EdgeInsets.only(right: 4),
@@ -635,9 +633,7 @@ class ListTabPreview extends HookConsumerWidget {
                     ),
                   ),
                   ?groupToggle,
-                  if (onDelete != null ||
-                      onDeleteAll != null ||
-                      onCloseSubtree != null)
+                  if (hasCloseButton)
                     MenuAnchor(
                       controller: extendedDeleteMenuController,
                       builder: (context, controller, child) {
@@ -659,7 +655,9 @@ class ListTabPreview extends HookConsumerWidget {
                           ),
                       ],
                       child: IconButton(
-                        tooltip: l10n.browser_tooltipCloseTab,
+                        tooltip: isLocked
+                            ? l10n.browser_tabIsLocked
+                            : l10n.browser_tooltipCloseTab,
                         onPressed: onDelete,
                         onLongPress:
                             onDeleteAll != null || onCloseSubtree != null
@@ -671,8 +669,14 @@ class ListTabPreview extends HookConsumerWidget {
                                 }
                               }
                             : null,
+                        // A locked tab does not close: its lock takes the
+                        // close button's place, the tap says so and offers
+                        // Unlock, and closing by host or subtree stays.
                         icon: Icon(
-                          Icons.close,
+                          _closeSlotIcon(
+                            locked: isLocked,
+                            unlockIncomplete: unlockIncomplete,
+                          ),
                           size: 20,
                           color: colorScheme.onSurfaceVariant,
                         ),
@@ -795,7 +799,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
   final double deleteThreshold;
 
   final void Function() onClose;
-  final void Function()? onBeforeDelete;
+  final void Function()? onDeleted;
 
   final Widget? groupToggle;
   final int depth;
@@ -806,7 +810,7 @@ class SingleGridTabPreview extends HookConsumerWidget {
     required this.onClose,
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
-    this.onBeforeDelete,
+    this.onDeleted,
     this.groupToggle,
     this.depth = 0,
     super.key,
@@ -824,22 +828,14 @@ class SingleGridTabPreview extends HookConsumerWidget {
         groupToggle: groupToggle,
         depth: depth,
         onTap: () async {
-          // Offer to locate the match within the page instead of opening Find
-          // in Page unprompted (see #421). Shown before onClose so it surfaces
-          // on the root messenger and survives the tray closing.
-          final query = sourceSearchQuery;
-          if (tabId != activeTabId &&
-              query != null &&
-              query.isNotEmpty &&
-              ref.read(findInPageControllerProvider(tabId)) ==
-                  FindInPageState.hidden()) {
-            final findController = ref.read(
-              findInPageControllerProvider(tabId).notifier,
-            );
-            ui_helper.showFindInPageSuggestion(
+          // Shown before onClose so it surfaces on the root messenger and
+          // survives the tray closing.
+          if (tabId != activeTabId) {
+            offerFindInPage(
               context,
-              query: query,
-              onFind: () => findController.findAll(text: query),
+              ref.read,
+              tabId: tabId,
+              query: sourceSearchQuery,
             );
           }
 
@@ -854,15 +850,15 @@ class SingleGridTabPreview extends HookConsumerWidget {
               .read(tabDataRepositoryProvider.notifier)
               .getTabContainerId(tabId);
 
-          final count = await ref
+          final result = await ref
               .read(tabDataRepositoryProvider.notifier)
               .closeAllTabsByHost(containerId, host);
 
           if (context.mounted) {
-            ui_helper.showTabUndoClose(
+            showTabCloseResult(
               context,
+              result,
               ref.read(tabRepositoryProvider.notifier).undoClose,
-              count: count,
             );
           }
         },
@@ -873,36 +869,26 @@ class SingleGridTabPreview extends HookConsumerWidget {
               .then((descendants) => descendants.keys.toList());
           if (!context.mounted) return;
 
-          final didClose = await closeTabsWithConfirmation(
+          final result = await closeTabsWithConfirmation(
             context,
             ref,
             subtreeIds,
           );
 
-          if (context.mounted && didClose) {
-            ui_helper.showTabUndoClose(
+          if (context.mounted && result != null) {
+            showTabCloseResult(
               context,
-              ref.read(tabRepositoryProvider.notifier).undoClose,
-              count: subtreeIds.length,
-            );
-          }
-        },
-        onDelete: () async {
-          onBeforeDelete?.call();
-
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            return;
-          }
-
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-          if (context.mounted) {
-            ui_helper.showTabUndoClose(
-              context,
+              result,
               ref.read(tabRepositoryProvider.notifier).undoClose,
             );
           }
         },
+        onDelete: () => closeTabWithConfirmationAndUndoUsing(
+          context,
+          ref.read,
+          tabId,
+          onRemoved: onDeleted,
+        ),
       ),
     );
 
@@ -921,7 +907,7 @@ class SingleListTabPreview extends HookConsumerWidget {
   final double deleteThreshold;
 
   final void Function() onClose;
-  final void Function()? onBeforeDelete;
+  final void Function()? onDeleted;
 
   final Widget? groupToggle;
   final int depth;
@@ -932,7 +918,7 @@ class SingleListTabPreview extends HookConsumerWidget {
     required this.onClose,
     required this.sourceSearchQuery,
     this.deleteThreshold = 100,
-    this.onBeforeDelete,
+    this.onDeleted,
     this.groupToggle,
     this.depth = 0,
     super.key,
@@ -948,22 +934,14 @@ class SingleListTabPreview extends HookConsumerWidget {
         groupToggle: groupToggle,
         depth: depth,
         onTap: () async {
-          // Offer to locate the match within the page instead of opening Find
-          // in Page unprompted (see #421). Shown before onClose so it surfaces
-          // on the root messenger and survives the tray closing.
-          final query = sourceSearchQuery;
-          if (tabId != activeTabId &&
-              query != null &&
-              query.isNotEmpty &&
-              ref.read(findInPageControllerProvider(tabId)) ==
-                  FindInPageState.hidden()) {
-            final findController = ref.read(
-              findInPageControllerProvider(tabId).notifier,
-            );
-            ui_helper.showFindInPageSuggestion(
+          // Shown before onClose so it surfaces on the root messenger and
+          // survives the tray closing.
+          if (tabId != activeTabId) {
+            offerFindInPage(
               context,
-              query: query,
-              onFind: () => findController.findAll(text: query),
+              ref.read,
+              tabId: tabId,
+              query: sourceSearchQuery,
             );
           }
 
@@ -978,15 +956,15 @@ class SingleListTabPreview extends HookConsumerWidget {
               .read(tabDataRepositoryProvider.notifier)
               .getTabContainerId(tabId);
 
-          final count = await ref
+          final result = await ref
               .read(tabDataRepositoryProvider.notifier)
               .closeAllTabsByHost(containerId, host);
 
           if (context.mounted) {
-            ui_helper.showTabUndoClose(
+            showTabCloseResult(
               context,
+              result,
               ref.read(tabRepositoryProvider.notifier).undoClose,
-              count: count,
             );
           }
         },
@@ -997,36 +975,26 @@ class SingleListTabPreview extends HookConsumerWidget {
               .then((descendants) => descendants.keys.toList());
           if (!context.mounted) return;
 
-          final didClose = await closeTabsWithConfirmation(
+          final result = await closeTabsWithConfirmation(
             context,
             ref,
             subtreeIds,
           );
 
-          if (context.mounted && didClose) {
-            ui_helper.showTabUndoClose(
+          if (context.mounted && result != null) {
+            showTabCloseResult(
               context,
-              ref.read(tabRepositoryProvider.notifier).undoClose,
-              count: subtreeIds.length,
-            );
-          }
-        },
-        onDelete: () async {
-          onBeforeDelete?.call();
-
-          if (!await _confirmIsolatedTabCloseIfNeeded(context, ref, tabId)) {
-            return;
-          }
-
-          await ref.read(tabRepositoryProvider.notifier).closeTab(tabId);
-
-          if (context.mounted) {
-            ui_helper.showTabUndoClose(
-              context,
+              result,
               ref.read(tabRepositoryProvider.notifier).undoClose,
             );
           }
         },
+        onDelete: () => closeTabWithConfirmationAndUndoUsing(
+          context,
+          ref.read,
+          tabId,
+          onRemoved: onDeleted,
+        ),
       ),
     );
 
@@ -1116,7 +1084,19 @@ class _GridCloseButton extends StatelessWidget {
   /// Opens the menu of wider close actions.
   final VoidCallback? onLongPress;
 
-  const _GridCloseButton({required this.onTap, required this.onLongPress});
+  /// The tab is locked: its lock takes the close icon's place. The tap says
+  /// so and offers Unlock, and the menu of wider close actions stays.
+  final bool locked;
+
+  /// The tab's unlock did not finish: the lock is drawn with an alert.
+  final bool unlockIncomplete;
+
+  const _GridCloseButton({
+    required this.onTap,
+    required this.onLongPress,
+    this.locked = false,
+    this.unlockIncomplete = false,
+  });
 
   static const _inset = 6.0;
   static const _visualSize = 28.0;
@@ -1128,7 +1108,9 @@ class _GridCloseButton extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: AppLocalizations.of(context).browser_tooltipCloseTab,
+      label: locked
+          ? AppLocalizations.of(context).browser_tabIsLocked
+          : AppLocalizations.of(context).browser_tooltipCloseTab,
       onTap: onTap,
       onLongPress: onLongPress,
       excludeSemantics: true,
@@ -1154,7 +1136,10 @@ class _GridCloseButton extends StatelessWidget {
                     onTap: onTap,
                     onLongPress: onLongPress,
                     child: Icon(
-                      Icons.close,
+                      _closeSlotIcon(
+                        locked: locked,
+                        unlockIncomplete: unlockIncomplete,
+                      ),
                       size: 16,
                       color: colorScheme.onSurfaceVariant,
                     ),
@@ -1167,4 +1152,48 @@ class _GridCloseButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The close button's icon: the tab's lock instead while it is locked, as
+/// its lock badge draws it.
+IconData _closeSlotIcon({
+  required bool locked,
+  required bool unlockIncomplete,
+}) => unlockIncomplete
+    ? MdiIcons.lockAlertOutline
+    : locked
+    ? MdiIcons.lockOutline
+    : Icons.close;
+
+/// The lock, sleep and keep-awake badges of [tabId], in that order; each
+/// takes no space when it does not apply. Without [withLock] when the card's
+/// close button shows the lock in its place.
+List<Widget> _stateBadges(
+  String tabId, {
+  double size = 14,
+  bool withBackground = false,
+  bool withLock = true,
+}) {
+  const padding = EdgeInsets.only(right: 4);
+  return [
+    if (withLock)
+      TabLockBadge(
+        tabId: tabId,
+        size: size,
+        withBackground: withBackground,
+        padding: padding,
+      ),
+    TabSleepBadge(
+      tabId: tabId,
+      size: size,
+      withBackground: withBackground,
+      padding: padding,
+    ),
+    TabKeepAwakeBadge(
+      tabId: tabId,
+      size: size,
+      withBackground: withBackground,
+      padding: padding,
+    ),
+  ];
 }

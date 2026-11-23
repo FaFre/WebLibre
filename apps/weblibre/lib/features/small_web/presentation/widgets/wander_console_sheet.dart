@@ -128,7 +128,7 @@ class _WanderConsoleSheet extends HookConsumerWidget {
                       onToggleAllConsoles: (value) {
                         showAllConsoles.value = value;
                       },
-                      onAddConsole: () => _showAddConsoleDialog(context, ref),
+                      onAddConsole: () => _showAddConsoleDialog(context),
                     );
                   },
                   loading: () => _WanderConsoleSheetLoading(
@@ -588,21 +588,19 @@ class _ConsoleListTile extends ConsumerWidget {
   }
 }
 
-Future<void> _showAddConsoleDialog(BuildContext context, WidgetRef ref) {
+Future<void> _showAddConsoleDialog(BuildContext context) {
   return showDialog(
     context: context,
     anchorPoint: preferredAnchorPoint(MediaQuery.of(context)),
-    builder: (context) => _AddConsoleDialog(ref: ref),
+    builder: (context) => const _AddConsoleDialog(),
   );
 }
 
-class _AddConsoleDialog extends HookWidget {
-  final WidgetRef ref;
-
-  const _AddConsoleDialog({required this.ref});
+class _AddConsoleDialog extends HookConsumerWidget {
+  const _AddConsoleDialog();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final formKey = useMemoized(() => GlobalKey<FormState>());
 

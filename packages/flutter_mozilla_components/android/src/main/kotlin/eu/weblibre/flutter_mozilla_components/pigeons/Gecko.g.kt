@@ -648,6 +648,261 @@ enum class SyncEngineValue(val raw: Int) {
   }
 }
 
+/** Why native did not apply a lock. */
+enum class TabLockRejection(val raw: Int) {
+  /** No such tab is open. */
+  UNKNOWN_TAB(0),
+  /** Private tabs cannot be locked. */
+  PRIVATE_TAB(1),
+  /** Custom tabs and web apps cannot be locked. */
+  CUSTOM_TAB(2),
+  /**
+   * The lock, or the session file that has to hold the tab, could not be
+   * written. The previous value stays in force.
+   */
+  NOT_PERSISTED(3);
+
+  companion object {
+    fun ofRaw(raw: Int): TabLockRejection? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/**
+ * Whether a tab's page is in memory (section 3.3 of
+ * `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`).
+ */
+enum class TabResidency(val raw: Int) {
+  /** No engine session: the page loads when something asks for it. */
+  UNLOADED(0),
+  /** A session is being created. */
+  INITIALIZING(1),
+  /** The page is in memory. */
+  RESIDENT(2),
+  /** The page's content process crashed. */
+  CRASHED(3);
+
+  companion object {
+    fun ofRaw(raw: Int): TabResidency? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/**
+ * A tab's own sleep hold: while it has one, nothing loads the page until the
+ * tab is woken. Independent of any restriction of its container (D26).
+ */
+enum class TabSleepHold(val raw: Int) {
+  NONE(0),
+  MANUAL(1),
+  AUTOMATIC(2);
+
+  companion object {
+    fun ofRaw(raw: Int): TabSleepHold? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** What native is doing to a tab, or to a container's contexts, right now. */
+enum class LifecycleOperationState(val raw: Int) {
+  IDLE(0),
+  SLEEPING(1),
+  FREEZING(2),
+  RESUMING(3);
+
+  companion object {
+    fun ofRaw(raw: Int): LifecycleOperationState? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** Why a lifecycle operation did not do what was asked. */
+enum class LifecycleFailure(val raw: Int) {
+  /** No such tab is open. */
+  UNKNOWN_TAB(0),
+  /** Something the tab is doing would be cut off; see the blockers. */
+  PROTECTED_ACTIVITY(1),
+  /** The page's state did not reach native in time, so it was left loaded. */
+  FLUSH_TIMED_OUT(2),
+  /** GeckoView could not save the page's state, so it was left loaded. */
+  FLUSH_FAILED(3),
+  /** The tab's session was replaced while it was being put to sleep. */
+  SESSION_CHANGED(4),
+  /** A newer sleep or wake of the same tab took over. */
+  SUPERSEDED(5),
+  /** The browser components were rebuilt while the operation ran. */
+  COMPONENTS_REPLACED(6),
+  /**
+   * An automatic sleep found the tab no longer eligible right before its
+   * teardown: shown, selected, kept awake, the policy turned off, or no
+   * longer over the resident limit. An automatic freeze found its container
+   * used, kept awake, busy or no longer scheduled; nothing stays restricted.
+   */
+  NO_LONGER_ELIGIBLE(7),
+  /**
+   * A tab outside the container uses one of its contexts, or a context is
+   * another container's or is being deleted.
+   */
+  CONTEXT_SHARED(8),
+  /** A tab joined the container's contexts after Dart's check. */
+  MEMBERSHIP_CHANGED(9),
+  /**
+   * A tab Dart counts in the container runs outside its contexts (an
+   * extension's tab in the default storage), so the freeze would not stop
+   * it.
+   */
+  MEMBER_OUTSIDE_CONTEXTS(10),
+  /** A custom tab or web app runs in one of the contexts (D18). */
+  OPEN_IN_EXTERNAL_WINDOW(11),
+  /**
+   * The engine refused the restriction, and it was rolled back: nothing is
+   * restricted.
+   */
+  ENGINE_REFUSED(12),
+  /**
+   * The engine's restriction could not be confirmed either way, and neither
+   * could its rollback: the contexts stay restricted (D22).
+   */
+  ROLLBACK_UNCONFIRMED(13),
+  /**
+   * Something of the contexts was still running when the quiescence wait
+   * ended; see `FreezeOperationResult.stillRunning`.
+   */
+  QUIESCENCE_TIMED_OUT(14),
+  /**
+   * The registry could not be written, so the step that needed it did not
+   * run.
+   */
+  NOT_PERSISTED(15),
+  /**
+   * The registry was found damaged; every container is frozen until the
+   * containers have been reconstructed (D23).
+   */
+  RECOVERY_PENDING(16),
+  /** The operation needs the browser components, and there are none. */
+  COMPONENTS_UNAVAILABLE(17),
+  /**
+   * A release could not remove the context's push subscriptions or clear its
+   * data yet; it stays restricted and is retried (D32).
+   */
+  CLEANUP_FAILED(18);
+
+  companion object {
+    fun ofRaw(raw: Int): LifecycleFailure? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** Activity that putting a tab to sleep would cut off (D13). */
+enum class ProtectedActivity(val raw: Int) {
+  /** Media is playing. Asks: confirmed with `stopMedia`. */
+  MEDIA(0),
+  /** Camera, microphone or screen sharing is in use. Refuses. */
+  RECORDING(1),
+  /**
+   * The page holds form input. Asks: confirmed per tab with
+   * `discardFormDataTabIds`. An automatic sleep or freeze takes it only from
+   * a tab off screen, or a container unused, for an hour.
+   */
+  FORM_DATA(2),
+  /** A file was chosen for upload on this page. Refuses. */
+  UPLOAD(3),
+  /** The page is being printed or saved as PDF. Refuses. */
+  PRINT_OR_PDF(4),
+  /** A download started from this tab is still running. Refuses. */
+  DOWNLOAD(5),
+  /**
+   * The page is the result of a form submission, which cannot be restored as
+   * it was. Asks: confirmed with `discardPostResult`.
+   */
+  POST_RESULT(6),
+  /**
+   * A download whose context is not known is running, and it cannot be told
+   * apart from one of the container's (5.11). Refuses a freeze.
+   */
+  UNATTRIBUTED_DOWNLOAD(7);
+
+  companion object {
+    fun ofRaw(raw: Int): ProtectedActivity? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/**
+ * Where a context stands in a container freeze (5.4–5.6). The registry
+ * stores only the restricted phases; [unrestricted] appears in replies.
+ */
+enum class ContextFreezePhase(val raw: Int) {
+  UNRESTRICTED(0),
+  FREEZING(1),
+  FROZEN(2),
+  FAILED(3),
+  RESUMING(4),
+  DELETION_PENDING(5),
+  RELEASING(6),
+  ORPHANED(7);
+
+  companion object {
+    fun ofRaw(raw: Int): ContextFreezePhase? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/**
+ * Whether the registry could be read (D23). In [recovery] every
+ * non-default context is restricted until the containers are reconstructed.
+ */
+enum class LifecycleRegistryMode(val raw: Int) {
+  NORMAL(0),
+  RECOVERY(1);
+
+  companion object {
+    fun ofRaw(raw: Int): LifecycleRegistryMode? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/**
+ * The last engine command acknowledged for a context (D33): what the UI says
+ * about background activity follows this, never the stored phase alone.
+ */
+enum class EngineEnforcement(val raw: Int) {
+  ENFORCED(0),
+  UNCERTAIN(1),
+  LIFTED(2);
+
+  companion object {
+    fun ofRaw(raw: Int): EngineEnforcement? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+/** What can still be running in a context when a quiescence wait ends. */
+enum class FreezeActivity(val raw: Int) {
+  SERVICE_WORKERS(0),
+  DOCUMENTS(1),
+  PROCESSES(2),
+  CHANNELS(3),
+  CONNECTIONS(4),
+  WEB_SOCKETS(5),
+  SOCKETS(6);
+
+  companion object {
+    fun ofRaw(raw: Int): FreezeActivity? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Type of ML model operation */
 enum class MlProgressType(val raw: Int) {
   DOWNLOADING(0),
@@ -5059,6 +5314,903 @@ data class RecentlyClosedTab (
   }
 }
 
+/**
+ * What a removal did to the tabs it was asked to remove.
+ *
+ * A tab in none of the lists is still open although it is not locked: native
+ * refused its removal for another reason. Callers count it as a survivor.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TabRemovalResult (
+  /** Open before the removal, gone after it. */
+  val removedTabIds: List<String>,
+  /** Still open because they are locked. */
+  val lockedTabIds: List<String>,
+  /** Not open when the removal began. */
+  val missingTabIds: List<String>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TabRemovalResult {
+      val removedTabIds = pigeonVar_list[0] as List<String>
+      val lockedTabIds = pigeonVar_list[1] as List<String>
+      val missingTabIds = pigeonVar_list[2] as List<String>
+      return TabRemovalResult(removedTabIds, lockedTabIds, missingTabIds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      removedTabIds,
+      lockedTabIds,
+      missingTabIds,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as TabRemovalResult
+    return GeckoPigeonUtils.deepEquals(this.removedTabIds, other.removedTabIds) && GeckoPigeonUtils.deepEquals(this.lockedTabIds, other.lockedTabIds) && GeckoPigeonUtils.deepEquals(this.missingTabIds, other.missingTabIds)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.removedTabIds)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.lockedTabIds)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.missingTabIds)
+    return result
+  }
+  override fun toString(): String {
+    return "TabRemovalResult(removedTabIds=$removedTabIds, lockedTabIds=$lockedTabIds, missingTabIds=$missingTabIds)"
+  }
+}
+
+/**
+ * The answer to [GeckoTabLockApi.setTabLocked].
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TabLockChange (
+  /** Whether native held the tab locked before the call, for a revert. */
+  val previouslyLocked: Boolean,
+  /** Null when the change was applied. */
+  val rejection: TabLockRejection? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TabLockChange {
+      val previouslyLocked = pigeonVar_list[0] as Boolean
+      val rejection = pigeonVar_list[1] as TabLockRejection?
+      return TabLockChange(previouslyLocked, rejection)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      previouslyLocked,
+      rejection,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as TabLockChange
+    return GeckoPigeonUtils.deepEquals(this.previouslyLocked, other.previouslyLocked) && GeckoPigeonUtils.deepEquals(this.rejection, other.rejection)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.previouslyLocked)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.rejection)
+    return result
+  }
+  override fun toString(): String {
+    return "TabLockChange(previouslyLocked=$previouslyLocked, rejection=$rejection)"
+  }
+}
+
+/**
+ * A tab's lifecycle as native enforces it. Sent on every change and on
+ * `syncEvents`.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TabLifecycleState (
+  val tabId: String,
+  val residency: TabResidency,
+  val sleepHold: TabSleepHold,
+  val operation: LifecycleOperationState,
+  /**
+   * The tab's context is restricted (its container is frozen, or the
+   * registry is in recovery): nothing loads it until Resume.
+   */
+  val contextFrozen: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TabLifecycleState {
+      val tabId = pigeonVar_list[0] as String
+      val residency = pigeonVar_list[1] as TabResidency
+      val sleepHold = pigeonVar_list[2] as TabSleepHold
+      val operation = pigeonVar_list[3] as LifecycleOperationState
+      val contextFrozen = pigeonVar_list[4] as Boolean
+      return TabLifecycleState(tabId, residency, sleepHold, operation, contextFrozen)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      tabId,
+      residency,
+      sleepHold,
+      operation,
+      contextFrozen,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as TabLifecycleState
+    return GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.residency, other.residency) && GeckoPigeonUtils.deepEquals(this.sleepHold, other.sleepHold) && GeckoPigeonUtils.deepEquals(this.operation, other.operation) && GeckoPigeonUtils.deepEquals(this.contextFrozen, other.contextFrozen)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.residency)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.sleepHold)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.operation)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextFrozen)
+    return result
+  }
+  override fun toString(): String {
+    return "TabLifecycleState(tabId=$tabId, residency=$residency, sleepHold=$sleepHold, operation=$operation, contextFrozen=$contextFrozen)"
+  }
+}
+
+/**
+ * What [GeckoTabLifecycleApi.sleepTabs] did to one tab.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TabSleepResult (
+  val tabId: String,
+  /** The tab is held asleep now (also when it already was). */
+  val asleep: Boolean,
+  /** Null when [asleep]. */
+  val failure: LifecycleFailure? = null,
+  /**
+   * With [LifecycleFailure.protectedActivity]: everything that kept the tab
+   * awake, the askable ones included.
+   */
+  val blockers: List<ProtectedActivity>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TabSleepResult {
+      val tabId = pigeonVar_list[0] as String
+      val asleep = pigeonVar_list[1] as Boolean
+      val failure = pigeonVar_list[2] as LifecycleFailure?
+      val blockers = pigeonVar_list[3] as List<ProtectedActivity>
+      return TabSleepResult(tabId, asleep, failure, blockers)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      tabId,
+      asleep,
+      failure,
+      blockers,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as TabSleepResult
+    return GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.asleep, other.asleep) && GeckoPigeonUtils.deepEquals(this.failure, other.failure) && GeckoPigeonUtils.deepEquals(this.blockers, other.blockers)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.asleep)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.failure)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.blockers)
+    return result
+  }
+  override fun toString(): String {
+    return "TabSleepResult(tabId=$tabId, asleep=$asleep, failure=$failure, blockers=$blockers)"
+  }
+}
+
+/**
+ * Automatic tab sleep (5.9), built in Dart from the effective settings. Off
+ * unless [enabled]; evaluated only while WebLibre is in the foreground.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class TabSleepPolicy (
+  val enabled: Boolean,
+  /** A tab off screen this long is put to sleep. */
+  val idleMinutes: Long,
+  /**
+   * When set, the tabs off screen longest are put to sleep while more than
+   * this many have their page loaded. Soft: tabs that cannot sleep stay.
+   */
+  val residentLimit: Long? = null,
+  /**
+   * "Keep awake" tabs (D30), never put to sleep automatically. A container
+   * with one of them as a member is never frozen automatically either.
+   */
+  val exemptTabIds: List<String>,
+  /**
+   * Containers to freeze automatically (phase C2). Evaluated whether or not
+   * [enabled] is set: that switch is automatic tab sleep only.
+   */
+  val containers: List<ContainerAutoFreeze>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TabSleepPolicy {
+      val enabled = pigeonVar_list[0] as Boolean
+      val idleMinutes = pigeonVar_list[1] as Long
+      val residentLimit = pigeonVar_list[2] as Long?
+      val exemptTabIds = pigeonVar_list[3] as List<String>
+      val containers = pigeonVar_list[4] as List<ContainerAutoFreeze>
+      return TabSleepPolicy(enabled, idleMinutes, residentLimit, exemptTabIds, containers)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      enabled,
+      idleMinutes,
+      residentLimit,
+      exemptTabIds,
+      containers,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as TabSleepPolicy
+    return GeckoPigeonUtils.deepEquals(this.enabled, other.enabled) && GeckoPigeonUtils.deepEquals(this.idleMinutes, other.idleMinutes) && GeckoPigeonUtils.deepEquals(this.residentLimit, other.residentLimit) && GeckoPigeonUtils.deepEquals(this.exemptTabIds, other.exemptTabIds) && GeckoPigeonUtils.deepEquals(this.containers, other.containers)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.enabled)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.idleMinutes)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.residentLimit)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.exemptTabIds)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.containers)
+    return result
+  }
+  override fun toString(): String {
+    return "TabSleepPolicy(enabled=$enabled, idleMinutes=$idleMinutes, residentLimit=$residentLimit, exemptTabIds=$exemptTabIds, containers=$containers)"
+  }
+}
+
+/**
+ * One container that freezes automatically after [afterMinutes] unused,
+ * counted while WebLibre is in the foreground (5.9). Native only detects
+ * that it is due and tells Dart (`onContainerFreezeDue`); only Dart's gated
+ * preflight starts the freeze (D21).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ContainerAutoFreeze (
+  val ownerId: String,
+  /**
+   * Its own context and those of its isolated tabs, as Dart last saw them.
+   * For detection only: the freeze itself uses the contexts Dart passes.
+   */
+  val contextIds: List<String>,
+  val afterMinutes: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ContainerAutoFreeze {
+      val ownerId = pigeonVar_list[0] as String
+      val contextIds = pigeonVar_list[1] as List<String>
+      val afterMinutes = pigeonVar_list[2] as Long
+      return ContainerAutoFreeze(ownerId, contextIds, afterMinutes)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      ownerId,
+      contextIds,
+      afterMinutes,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ContainerAutoFreeze
+    return GeckoPigeonUtils.deepEquals(this.ownerId, other.ownerId) && GeckoPigeonUtils.deepEquals(this.contextIds, other.contextIds) && GeckoPigeonUtils.deepEquals(this.afterMinutes, other.afterMinutes)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ownerId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextIds)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.afterMinutes)
+    return result
+  }
+  override fun toString(): String {
+    return "ContainerAutoFreeze(ownerId=$ownerId, contextIds=$contextIds, afterMinutes=$afterMinutes)"
+  }
+}
+
+/**
+ * One restricted context, as the registry holds it.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ContextFreezeState (
+  val contextId: String,
+  /** The container the context belongs to; null for an orphaned context. */
+  val ownerId: String? = null,
+  val phase: ContextFreezePhase,
+  /** With [ContextFreezePhase.deletionPending]: the phase it had before. */
+  val previousPhase: ContextFreezePhase? = null,
+  /** Why the last operation on it did not finish, while it has not since. */
+  val failure: LifecycleFailure? = null,
+  val enforcement: EngineEnforcement,
+  /** A freeze or Resume of its container is running. */
+  val operation: LifecycleOperationState,
+  /**
+   * Frozen by the reconstruction after the registry was found damaged, not
+   * by the user (5.6).
+   */
+  val recovered: Boolean,
+  /** Push messages consumed unread while it was restricted (5.8). */
+  val undeliveredPushCount: Long
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ContextFreezeState {
+      val contextId = pigeonVar_list[0] as String
+      val ownerId = pigeonVar_list[1] as String?
+      val phase = pigeonVar_list[2] as ContextFreezePhase
+      val previousPhase = pigeonVar_list[3] as ContextFreezePhase?
+      val failure = pigeonVar_list[4] as LifecycleFailure?
+      val enforcement = pigeonVar_list[5] as EngineEnforcement
+      val operation = pigeonVar_list[6] as LifecycleOperationState
+      val recovered = pigeonVar_list[7] as Boolean
+      val undeliveredPushCount = pigeonVar_list[8] as Long
+      return ContextFreezeState(contextId, ownerId, phase, previousPhase, failure, enforcement, operation, recovered, undeliveredPushCount)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      contextId,
+      ownerId,
+      phase,
+      previousPhase,
+      failure,
+      enforcement,
+      operation,
+      recovered,
+      undeliveredPushCount,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ContextFreezeState
+    return GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.ownerId, other.ownerId) && GeckoPigeonUtils.deepEquals(this.phase, other.phase) && GeckoPigeonUtils.deepEquals(this.previousPhase, other.previousPhase) && GeckoPigeonUtils.deepEquals(this.failure, other.failure) && GeckoPigeonUtils.deepEquals(this.enforcement, other.enforcement) && GeckoPigeonUtils.deepEquals(this.operation, other.operation) && GeckoPigeonUtils.deepEquals(this.recovered, other.recovered) && GeckoPigeonUtils.deepEquals(this.undeliveredPushCount, other.undeliveredPushCount)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ownerId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.phase)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.previousPhase)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.failure)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.enforcement)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.operation)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.recovered)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.undeliveredPushCount)
+    return result
+  }
+  override fun toString(): String {
+    return "ContextFreezeState(contextId=$contextId, ownerId=$ownerId, phase=$phase, previousPhase=$previousPhase, failure=$failure, enforcement=$enforcement, operation=$operation, recovered=$recovered, undeliveredPushCount=$undeliveredPushCount)"
+  }
+}
+
+/**
+ * A container its contexts' records hold: frozen, being frozen, resumed or
+ * deleted, or a freeze or Resume of it did not finish. A `releasing` record
+ * only waits for its data to be deleted and an `orphaned` one has no
+ * container, so neither holds one. Computed natively from the records.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class OwnerFreezeState (
+  val ownerId: String,
+  /**
+   * When its contexts differ (a Resume confirmed for some), the phase that
+   * needs attention first.
+   */
+  val phase: ContextFreezePhase,
+  /** The weakest of its contexts'. */
+  val enforcement: EngineEnforcement,
+  /** A freeze or Resume of it is running. */
+  val operation: LifecycleOperationState,
+  /** Frozen by the reconstruction after the registry was found damaged (5.6). */
+  val recovered: Boolean,
+  /**
+   * Push messages consumed unread while it was restricted, over its
+   * contexts (5.8).
+   */
+  val undeliveredPushCount: Long,
+  /** The contexts whose records hold it. */
+  val contextIds: List<String>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): OwnerFreezeState {
+      val ownerId = pigeonVar_list[0] as String
+      val phase = pigeonVar_list[1] as ContextFreezePhase
+      val enforcement = pigeonVar_list[2] as EngineEnforcement
+      val operation = pigeonVar_list[3] as LifecycleOperationState
+      val recovered = pigeonVar_list[4] as Boolean
+      val undeliveredPushCount = pigeonVar_list[5] as Long
+      val contextIds = pigeonVar_list[6] as List<String>
+      return OwnerFreezeState(ownerId, phase, enforcement, operation, recovered, undeliveredPushCount, contextIds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      ownerId,
+      phase,
+      enforcement,
+      operation,
+      recovered,
+      undeliveredPushCount,
+      contextIds,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as OwnerFreezeState
+    return GeckoPigeonUtils.deepEquals(this.ownerId, other.ownerId) && GeckoPigeonUtils.deepEquals(this.phase, other.phase) && GeckoPigeonUtils.deepEquals(this.enforcement, other.enforcement) && GeckoPigeonUtils.deepEquals(this.operation, other.operation) && GeckoPigeonUtils.deepEquals(this.recovered, other.recovered) && GeckoPigeonUtils.deepEquals(this.undeliveredPushCount, other.undeliveredPushCount) && GeckoPigeonUtils.deepEquals(this.contextIds, other.contextIds)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ownerId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.phase)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.enforcement)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.operation)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.recovered)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.undeliveredPushCount)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextIds)
+    return result
+  }
+  override fun toString(): String {
+    return "OwnerFreezeState(ownerId=$ownerId, phase=$phase, enforcement=$enforcement, operation=$operation, recovered=$recovered, undeliveredPushCount=$undeliveredPushCount, contextIds=$contextIds)"
+  }
+}
+
+/**
+ * The registry as a whole. [revision] increases with every change in this
+ * process; a snapshot with a lower one is older (D27).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class LifecycleSnapshot (
+  val mode: LifecycleRegistryMode,
+  val revision: Long,
+  val contexts: List<ContextFreezeState>,
+  /** The containers [contexts] hold, by the same records. */
+  val owners: List<OwnerFreezeState>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): LifecycleSnapshot {
+      val mode = pigeonVar_list[0] as LifecycleRegistryMode
+      val revision = pigeonVar_list[1] as Long
+      val contexts = pigeonVar_list[2] as List<ContextFreezeState>
+      val owners = pigeonVar_list[3] as List<OwnerFreezeState>
+      return LifecycleSnapshot(mode, revision, contexts, owners)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      mode,
+      revision,
+      contexts,
+      owners,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as LifecycleSnapshot
+    return GeckoPigeonUtils.deepEquals(this.mode, other.mode) && GeckoPigeonUtils.deepEquals(this.revision, other.revision) && GeckoPigeonUtils.deepEquals(this.contexts, other.contexts) && GeckoPigeonUtils.deepEquals(this.owners, other.owners)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.mode)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.revision)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contexts)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.owners)
+    return result
+  }
+  override fun toString(): String {
+    return "LifecycleSnapshot(mode=$mode, revision=$revision, contexts=$contexts, owners=$owners)"
+  }
+}
+
+/**
+ * One thing that kept a container from being frozen: a tab's activity, or a
+ * running download.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class FreezeBlocker (
+  val tabId: String? = null,
+  val downloadId: String? = null,
+  val activity: ProtectedActivity
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): FreezeBlocker {
+      val tabId = pigeonVar_list[0] as String?
+      val downloadId = pigeonVar_list[1] as String?
+      val activity = pigeonVar_list[2] as ProtectedActivity
+      return FreezeBlocker(tabId, downloadId, activity)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      tabId,
+      downloadId,
+      activity,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as FreezeBlocker
+    return GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.downloadId, other.downloadId) && GeckoPigeonUtils.deepEquals(this.activity, other.activity)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.downloadId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.activity)
+    return result
+  }
+  override fun toString(): String {
+    return "FreezeBlocker(tabId=$tabId, downloadId=$downloadId, activity=$activity)"
+  }
+}
+
+/**
+ * What a container operation did. For messages only: the membership gate
+ * rebuilds its state from a fresh snapshot, never from this (D27).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class FreezeOperationResult (
+  val ownerId: String,
+  /**
+   * The owner's phase afterwards; [ContextFreezePhase.unrestricted] when it
+   * has no restricted context left.
+   */
+  val phase: ContextFreezePhase,
+  val revision: Long,
+  val failure: LifecycleFailure? = null,
+  /** With [LifecycleFailure.protectedActivity]. */
+  val blockers: List<FreezeBlocker>,
+  /** With [LifecycleFailure.quiescenceTimedOut]. */
+  val stillRunning: List<FreezeActivity>,
+  /** The contexts the operation could not settle. */
+  val unsettledContextIds: List<String>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): FreezeOperationResult {
+      val ownerId = pigeonVar_list[0] as String
+      val phase = pigeonVar_list[1] as ContextFreezePhase
+      val revision = pigeonVar_list[2] as Long
+      val failure = pigeonVar_list[3] as LifecycleFailure?
+      val blockers = pigeonVar_list[4] as List<FreezeBlocker>
+      val stillRunning = pigeonVar_list[5] as List<FreezeActivity>
+      val unsettledContextIds = pigeonVar_list[6] as List<String>
+      return FreezeOperationResult(ownerId, phase, revision, failure, blockers, stillRunning, unsettledContextIds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      ownerId,
+      phase,
+      revision,
+      failure,
+      blockers,
+      stillRunning,
+      unsettledContextIds,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as FreezeOperationResult
+    return GeckoPigeonUtils.deepEquals(this.ownerId, other.ownerId) && GeckoPigeonUtils.deepEquals(this.phase, other.phase) && GeckoPigeonUtils.deepEquals(this.revision, other.revision) && GeckoPigeonUtils.deepEquals(this.failure, other.failure) && GeckoPigeonUtils.deepEquals(this.blockers, other.blockers) && GeckoPigeonUtils.deepEquals(this.stillRunning, other.stillRunning) && GeckoPigeonUtils.deepEquals(this.unsettledContextIds, other.unsettledContextIds)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ownerId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.phase)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.revision)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.failure)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.blockers)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.stillRunning)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.unsettledContextIds)
+    return result
+  }
+  override fun toString(): String {
+    return "FreezeOperationResult(ownerId=$ownerId, phase=$phase, revision=$revision, failure=$failure, blockers=$blockers, stillRunning=$stillRunning, unsettledContextIds=$unsettledContextIds)"
+  }
+}
+
+/**
+ * What one release (D32) did to one context.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ContextReleaseResult (
+  val contextId: String,
+  /** The record is gone and the engine no longer restricts the context. */
+  val released: Boolean,
+  val failure: LifecycleFailure? = null,
+  /**
+   * Native deleted the context's data, acknowledged. False for a context
+   * without a record: it is released at once and its caller's own cleanup
+   * applies.
+   */
+  val dataCleared: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ContextReleaseResult {
+      val contextId = pigeonVar_list[0] as String
+      val released = pigeonVar_list[1] as Boolean
+      val failure = pigeonVar_list[2] as LifecycleFailure?
+      val dataCleared = pigeonVar_list[3] as Boolean
+      return ContextReleaseResult(contextId, released, failure, dataCleared)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      contextId,
+      released,
+      failure,
+      dataCleared,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ContextReleaseResult
+    return GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.released, other.released) && GeckoPigeonUtils.deepEquals(this.failure, other.failure) && GeckoPigeonUtils.deepEquals(this.dataCleared, other.dataCleared)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.released)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.failure)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.dataCleared)
+    return result
+  }
+  override fun toString(): String {
+    return "ContextReleaseResult(contextId=$contextId, released=$released, failure=$failure, dataCleared=$dataCleared)"
+  }
+}
+
+/**
+ * A container with its own context, and the isolation contexts of its tabs,
+ * for the reconstruction after a damaged registry (5.6).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class ContainerContexts (
+  val ownerId: String,
+  val contextIds: List<String>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ContainerContexts {
+      val ownerId = pigeonVar_list[0] as String
+      val contextIds = pigeonVar_list[1] as List<String>
+      return ContainerContexts(ownerId, contextIds)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      ownerId,
+      contextIds,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as ContainerContexts
+    return GeckoPigeonUtils.deepEquals(this.ownerId, other.ownerId) && GeckoPigeonUtils.deepEquals(this.contextIds, other.contextIds)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ownerId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextIds)
+    return result
+  }
+  override fun toString(): String {
+    return "ContainerContexts(ownerId=$ownerId, contextIds=$contextIds)"
+  }
+}
+
+/**
+ * The page a web app or custom tab window of a frozen context held, and the
+ * storage it held it in, for the browser to open there (D18).
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class FrozenWindowHandoff (
+  /** The window's storage context: a container's or an isolation group's. */
+  val contextId: String,
+  /** The page; null when the window had none to give. */
+  val url: String? = null,
+  /**
+   * Whether the window was a private one: the page then opens in a private
+   * tab, kept out of the session and the history as the window kept it.
+   */
+  val private: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): FrozenWindowHandoff {
+      val contextId = pigeonVar_list[0] as String
+      val url = pigeonVar_list[1] as String?
+      val private = pigeonVar_list[2] as Boolean
+      return FrozenWindowHandoff(contextId, url, private)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      contextId,
+      url,
+      private,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as FrozenWindowHandoff
+    return GeckoPigeonUtils.deepEquals(this.contextId, other.contextId) && GeckoPigeonUtils.deepEquals(this.url, other.url) && GeckoPigeonUtils.deepEquals(this.private, other.private)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.url)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.private)
+    return result
+  }
+  override fun toString(): String {
+    return "FrozenWindowHandoff(contextId=$contextId, url=$url, private=$private)"
+  }
+}
+
+/**
+ * A tab the pending undo close would bring back.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class PendingUndoTab (
+  val tabId: String,
+  /** The context it ran in; null for the default one. */
+  val contextId: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): PendingUndoTab {
+      val tabId = pigeonVar_list[0] as String
+      val contextId = pigeonVar_list[1] as String?
+      return PendingUndoTab(tabId, contextId)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      tabId,
+      contextId,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as PendingUndoTab
+    return GeckoPigeonUtils.deepEquals(this.tabId, other.tabId) && GeckoPigeonUtils.deepEquals(this.contextId, other.contextId)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.tabId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.contextId)
+    return result
+  }
+  override fun toString(): String {
+    return "PendingUndoTab(tabId=$tabId, contextId=$contextId)"
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class GeckoPref (
   val name: String,
@@ -7429,7 +8581,23 @@ data class SplitViewLabels (
   /** Title of the placeholder shown in place of a crashed page. */
   val crashedTitle: String,
   /** Button on that placeholder that restores the page. */
-  val crashedReload: String
+  val crashedReload: String,
+  /** Title of the placeholder shown in place of a sleeping tab's page. */
+  val sleepingTitle: String,
+  /** Button on that placeholder that wakes the tab; also its accessible name. */
+  val sleepingWake: String,
+  /**
+   * Title of the placeholder shown in place of a frozen container's tab,
+   * when [frozenContainers] has no entry for its container.
+   */
+  val frozenTitle: String,
+  /**
+   * Button on that placeholder that asks to resume the container; also its
+   * accessible name.
+   */
+  val frozenResume: String,
+  /** Per frozen container: its own title and detail line. */
+  val frozenContainers: List<FrozenPlaceholderLabel>
 )
  {
   companion object {
@@ -7438,7 +8606,12 @@ data class SplitViewLabels (
       val dividerOptionsAction = pigeonVar_list[1] as String
       val crashedTitle = pigeonVar_list[2] as String
       val crashedReload = pigeonVar_list[3] as String
-      return SplitViewLabels(dividerDescription, dividerOptionsAction, crashedTitle, crashedReload)
+      val sleepingTitle = pigeonVar_list[4] as String
+      val sleepingWake = pigeonVar_list[5] as String
+      val frozenTitle = pigeonVar_list[6] as String
+      val frozenResume = pigeonVar_list[7] as String
+      val frozenContainers = pigeonVar_list[8] as List<FrozenPlaceholderLabel>
+      return SplitViewLabels(dividerDescription, dividerOptionsAction, crashedTitle, crashedReload, sleepingTitle, sleepingWake, frozenTitle, frozenResume, frozenContainers)
     }
   }
   fun toList(): List<Any?> {
@@ -7447,6 +8620,11 @@ data class SplitViewLabels (
       dividerOptionsAction,
       crashedTitle,
       crashedReload,
+      sleepingTitle,
+      sleepingWake,
+      frozenTitle,
+      frozenResume,
+      frozenContainers,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -7457,7 +8635,7 @@ data class SplitViewLabels (
       return true
     }
     val other = other as SplitViewLabels
-    return GeckoPigeonUtils.deepEquals(this.dividerDescription, other.dividerDescription) && GeckoPigeonUtils.deepEquals(this.dividerOptionsAction, other.dividerOptionsAction) && GeckoPigeonUtils.deepEquals(this.crashedTitle, other.crashedTitle) && GeckoPigeonUtils.deepEquals(this.crashedReload, other.crashedReload)
+    return GeckoPigeonUtils.deepEquals(this.dividerDescription, other.dividerDescription) && GeckoPigeonUtils.deepEquals(this.dividerOptionsAction, other.dividerOptionsAction) && GeckoPigeonUtils.deepEquals(this.crashedTitle, other.crashedTitle) && GeckoPigeonUtils.deepEquals(this.crashedReload, other.crashedReload) && GeckoPigeonUtils.deepEquals(this.sleepingTitle, other.sleepingTitle) && GeckoPigeonUtils.deepEquals(this.sleepingWake, other.sleepingWake) && GeckoPigeonUtils.deepEquals(this.frozenTitle, other.frozenTitle) && GeckoPigeonUtils.deepEquals(this.frozenResume, other.frozenResume) && GeckoPigeonUtils.deepEquals(this.frozenContainers, other.frozenContainers)
   }
 
   override fun hashCode(): Int {
@@ -7466,10 +8644,70 @@ data class SplitViewLabels (
     result = 31 * result + GeckoPigeonUtils.deepHash(this.dividerOptionsAction)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.crashedTitle)
     result = 31 * result + GeckoPigeonUtils.deepHash(this.crashedReload)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.sleepingTitle)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.sleepingWake)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.frozenTitle)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.frozenResume)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.frozenContainers)
     return result
   }
   override fun toString(): String {
-    return "SplitViewLabels(dividerDescription=$dividerDescription, dividerOptionsAction=$dividerOptionsAction, crashedTitle=$crashedTitle, crashedReload=$crashedReload)"
+    return "SplitViewLabels(dividerDescription=$dividerDescription, dividerOptionsAction=$dividerOptionsAction, crashedTitle=$crashedTitle, crashedReload=$crashedReload, sleepingTitle=$sleepingTitle, sleepingWake=$sleepingWake, frozenTitle=$frozenTitle, frozenResume=$frozenResume, frozenContainers=$frozenContainers)"
+  }
+}
+
+/**
+ * What the frozen placeholder says for the tabs of one container, which
+ * native finds through the registry's owner of the tab's context.
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class FrozenPlaceholderLabel (
+  val ownerId: String,
+  /** "{container} is frozen", or how far a freeze or Resume got. */
+  val title: String,
+  /**
+   * The line under it, such as how many background messages were skipped;
+   * null for none.
+   */
+  val detail: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): FrozenPlaceholderLabel {
+      val ownerId = pigeonVar_list[0] as String
+      val title = pigeonVar_list[1] as String
+      val detail = pigeonVar_list[2] as String?
+      return FrozenPlaceholderLabel(ownerId, title, detail)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      ownerId,
+      title,
+      detail,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other == null || other.javaClass != javaClass) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    val other = other as FrozenPlaceholderLabel
+    return GeckoPigeonUtils.deepEquals(this.ownerId, other.ownerId) && GeckoPigeonUtils.deepEquals(this.title, other.title) && GeckoPigeonUtils.deepEquals(this.detail, other.detail)
+  }
+
+  override fun hashCode(): Int {
+    var result = javaClass.hashCode()
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.ownerId)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.title)
+    result = 31 * result + GeckoPigeonUtils.deepHash(this.detail)
+    return result
+  }
+  override fun toString(): String {
+    return "FrozenPlaceholderLabel(ownerId=$ownerId, title=$title, detail=$detail)"
   }
 }
 
@@ -7747,66 +8985,118 @@ private data class GeckoPigeonInternalCodecOverflow (
         
     when (type.toInt()) {
       0 ->
-        return GeckoFetchResponse.fromList(wrapped as List<Any?>)
+        return TabRemovalResult.fromList(wrapped as List<Any?>)
       1 ->
-        return BookmarkNode.fromList(wrapped as List<Any?>)
+        return TabLockChange.fromList(wrapped as List<Any?>)
       2 ->
-        return BookmarkImportNode.fromList(wrapped as List<Any?>)
+        return TabLifecycleState.fromList(wrapped as List<Any?>)
       3 ->
-        return BookmarkInsertTreeResult.fromList(wrapped as List<Any?>)
+        return TabSleepResult.fromList(wrapped as List<Any?>)
       4 ->
-        return BookmarkInfo.fromList(wrapped as List<Any?>)
+        return TabSleepPolicy.fromList(wrapped as List<Any?>)
       5 ->
-        return SitePermissions.fromList(wrapped as List<Any?>)
+        return ContainerAutoFreeze.fromList(wrapped as List<Any?>)
       6 ->
-        return TrackingProtectionException.fromList(wrapped as List<Any?>)
+        return ContextFreezeState.fromList(wrapped as List<Any?>)
       7 ->
-        return TrackerLogEntry.fromList(wrapped as List<Any?>)
+        return OwnerFreezeState.fromList(wrapped as List<Any?>)
       8 ->
-        return TrackingStatisticsRecord.fromList(wrapped as List<Any?>)
+        return LifecycleSnapshot.fromList(wrapped as List<Any?>)
       9 ->
-        return TrackingStatistics.fromList(wrapped as List<Any?>)
+        return FreezeBlocker.fromList(wrapped as List<Any?>)
       10 ->
-        return AppLinkTarget.fromList(wrapped as List<Any?>)
+        return FreezeOperationResult.fromList(wrapped as List<Any?>)
       11 ->
-        return ProtectedTargetPattern.fromList(wrapped as List<Any?>)
+        return ContextReleaseResult.fromList(wrapped as List<Any?>)
       12 ->
-        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
+        return ContainerContexts.fromList(wrapped as List<Any?>)
       13 ->
-        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
+        return FrozenWindowHandoff.fromList(wrapped as List<Any?>)
       14 ->
-        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
+        return PendingUndoTab.fromList(wrapped as List<Any?>)
       15 ->
-        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
+        return GeckoPref.fromList(wrapped as List<Any?>)
       16 ->
-        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+        return MlProgressData.fromList(wrapped as List<Any?>)
       17 ->
-        return PwaIcon.fromList(wrapped as List<Any?>)
+        return GeckoProxySettings.fromList(wrapped as List<Any?>)
       18 ->
-        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+        return GeckoProxyRoutingSnapshot.fromList(wrapped as List<Any?>)
       19 ->
-        return ShareTargetParams.fromList(wrapped as List<Any?>)
+        return GeckoRoutingDemand.fromList(wrapped as List<Any?>)
       20 ->
-        return ShareTarget.fromList(wrapped as List<Any?>)
+        return GeckoProxyRoutingStatus.fromList(wrapped as List<Any?>)
       21 ->
-        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+        return ContainerSiteAssignment.fromList(wrapped as List<Any?>)
       22 ->
-        return PwaManifest.fromList(wrapped as List<Any?>)
+        return ProxyLoadError.fromList(wrapped as List<Any?>)
       23 ->
-        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+        return GeckoHeader.fromList(wrapped as List<Any?>)
       24 ->
-        return GestureConfig.fromList(wrapped as List<Any?>)
+        return GeckoFetchRequest.fromList(wrapped as List<Any?>)
       25 ->
-        return SplitPairState.fromList(wrapped as List<Any?>)
+        return GeckoFetchResponse.fromList(wrapped as List<Any?>)
       26 ->
-        return SplitViewLabels.fromList(wrapped as List<Any?>)
+        return BookmarkNode.fromList(wrapped as List<Any?>)
       27 ->
-        return SplitViewState.fromList(wrapped as List<Any?>)
+        return BookmarkImportNode.fromList(wrapped as List<Any?>)
       28 ->
-        return PushDistributor.fromList(wrapped as List<Any?>)
+        return BookmarkInsertTreeResult.fromList(wrapped as List<Any?>)
       29 ->
-        return PushStatus.fromList(wrapped as List<Any?>)
+        return BookmarkInfo.fromList(wrapped as List<Any?>)
       30 ->
+        return SitePermissions.fromList(wrapped as List<Any?>)
+      31 ->
+        return TrackingProtectionException.fromList(wrapped as List<Any?>)
+      32 ->
+        return TrackerLogEntry.fromList(wrapped as List<Any?>)
+      33 ->
+        return TrackingStatisticsRecord.fromList(wrapped as List<Any?>)
+      34 ->
+        return TrackingStatistics.fromList(wrapped as List<Any?>)
+      35 ->
+        return AppLinkTarget.fromList(wrapped as List<Any?>)
+      36 ->
+        return ProtectedTargetPattern.fromList(wrapped as List<Any?>)
+      37 ->
+        return NativeAppLinkRule.fromList(wrapped as List<Any?>)
+      38 ->
+        return NativeContextAppLinkPolicy.fromList(wrapped as List<Any?>)
+      39 ->
+        return AppLinkPolicySnapshot.fromList(wrapped as List<Any?>)
+      40 ->
+        return AppLinkPromptRequest.fromList(wrapped as List<Any?>)
+      41 ->
+        return AppLinkResolutionResult.fromList(wrapped as List<Any?>)
+      42 ->
+        return PwaIcon.fromList(wrapped as List<Any?>)
+      43 ->
+        return ShareTargetFiles.fromList(wrapped as List<Any?>)
+      44 ->
+        return ShareTargetParams.fromList(wrapped as List<Any?>)
+      45 ->
+        return ShareTarget.fromList(wrapped as List<Any?>)
+      46 ->
+        return ExternalApplicationResource.fromList(wrapped as List<Any?>)
+      47 ->
+        return PwaManifest.fromList(wrapped as List<Any?>)
+      48 ->
+        return SandboxCaptureEntry.fromList(wrapped as List<Any?>)
+      49 ->
+        return GestureConfig.fromList(wrapped as List<Any?>)
+      50 ->
+        return SplitPairState.fromList(wrapped as List<Any?>)
+      51 ->
+        return SplitViewLabels.fromList(wrapped as List<Any?>)
+      52 ->
+        return FrozenPlaceholderLabel.fromList(wrapped as List<Any?>)
+      53 ->
+        return SplitViewState.fromList(wrapped as List<Any?>)
+      54 ->
+        return PushDistributor.fromList(wrapped as List<Any?>)
+      55 ->
+        return PushStatus.fromList(wrapped as List<Any?>)
+      56 ->
         return PushSubscription.fromList(wrapped as List<Any?>)
     }
     return null
@@ -7957,492 +9247,492 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
       }
       157.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          MlProgressType.ofRaw(it.toInt())
+          TabLockRejection.ofRaw(it.toInt())
         }
       }
       158.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          MlProgressStatus.ofRaw(it.toInt())
+          TabResidency.ofRaw(it.toInt())
         }
       }
       159.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          ClearDataType.ofRaw(it.toInt())
+          TabSleepHold.ofRaw(it.toInt())
         }
       }
       160.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          DownloadControl.ofRaw(it.toInt())
+          LifecycleOperationState.ofRaw(it.toInt())
         }
       }
       161.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          GeckoFetchMethod.ofRaw(it.toInt())
+          LifecycleFailure.ofRaw(it.toInt())
         }
       }
       162.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          GeckoFetchRedircet.ofRaw(it.toInt())
+          ProtectedActivity.ofRaw(it.toInt())
         }
       }
       163.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          GeckoFetchCookiePolicy.ofRaw(it.toInt())
+          ContextFreezePhase.ofRaw(it.toInt())
         }
       }
       164.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          BookmarkNodeType.ofRaw(it.toInt())
+          LifecycleRegistryMode.ofRaw(it.toInt())
         }
       }
       165.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          SitePermissionStatus.ofRaw(it.toInt())
+          EngineEnforcement.ofRaw(it.toInt())
         }
       }
       166.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          AutoplayStatus.ofRaw(it.toInt())
+          FreezeActivity.ofRaw(it.toInt())
         }
       }
       167.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          TrackerLogCategory.ofRaw(it.toInt())
+          MlProgressType.ofRaw(it.toInt())
         }
       }
       168.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          TrackingStatisticsType.ofRaw(it.toInt())
+          MlProgressStatus.ofRaw(it.toInt())
         }
       }
       169.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          NativeAppLinkRuleDecision.ofRaw(it.toInt())
+          ClearDataType.ofRaw(it.toInt())
         }
       }
       170.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          AppLinkPromptOwner.ofRaw(it.toInt())
+          DownloadControl.ofRaw(it.toInt())
         }
       }
       171.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          AppLinkDecision.ofRaw(it.toInt())
+          GeckoFetchMethod.ofRaw(it.toInt())
         }
       }
       172.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          SplitPaneMode.ofRaw(it.toInt())
+          GeckoFetchRedircet.ofRaw(it.toInt())
         }
       }
       173.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          SplitAxis.ofRaw(it.toInt())
+          GeckoFetchCookiePolicy.ofRaw(it.toInt())
         }
       }
       174.toByte() -> {
         return (readValue(buffer) as Long?)?.let {
-          PushDistributorStatus.ofRaw(it.toInt())
+          BookmarkNodeType.ofRaw(it.toInt())
         }
       }
       175.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationOptions.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          SitePermissionStatus.ofRaw(it.toInt())
         }
       }
       176.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationLanguage.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          AutoplayStatus.ofRaw(it.toInt())
         }
       }
       177.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationDetectedLanguages.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          TrackerLogCategory.ofRaw(it.toInt())
         }
       }
       178.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationPair.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          TrackingStatisticsType.ofRaw(it.toInt())
         }
       }
       179.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TranslationEngineStateData.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          NativeAppLinkRuleDecision.ofRaw(it.toInt())
         }
       }
       180.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TabTranslationStateData.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          AppLinkPromptOwner.ofRaw(it.toInt())
         }
       }
       181.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          ReaderState.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          AppLinkDecision.ofRaw(it.toInt())
         }
       }
       182.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          AddTabParams.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          SplitPaneMode.ofRaw(it.toInt())
         }
       }
       183.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          LastMediaAccessState.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          SplitAxis.ofRaw(it.toInt())
         }
       }
       184.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryMetadataKey.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          PushDistributorStatus.ofRaw(it.toInt())
         }
       }
       185.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PackageCategoryValue.fromList(it)
+          TranslationOptions.fromList(it)
         }
       }
       186.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ExternalPackage.fromList(it)
+          TranslationLanguage.fromList(it)
         }
       }
       187.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          LoadUrlFlagsValue.fromList(it)
+          TranslationDetectedLanguages.fromList(it)
         }
       }
       188.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SourceValue.fromList(it)
+          TranslationPair.fromList(it)
         }
       }
       189.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabState.fromList(it)
+          TranslationEngineStateData.fromList(it)
         }
       }
       190.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecoverableTab.fromList(it)
+          TabTranslationStateData.fromList(it)
         }
       }
       191.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          IconRequest.fromList(it)
+          ReaderState.fromList(it)
         }
       }
       192.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ResourceSize.fromList(it)
+          AddTabParams.fromList(it)
         }
       }
       193.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Resource.fromList(it)
+          LastMediaAccessState.fromList(it)
         }
       }
       194.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          IconResult.fromList(it)
+          HistoryMetadataKey.fromList(it)
         }
       }
       195.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CookiePartitionKey.fromList(it)
+          PackageCategoryValue.fromList(it)
         }
       }
       196.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          Cookie.fromList(it)
+          ExternalPackage.fromList(it)
         }
       }
       197.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VisitInfo.fromList(it)
+          LoadUrlFlagsValue.fromList(it)
         }
       }
       198.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryHighlightWeights.fromList(it)
+          SourceValue.fromList(it)
         }
       }
       199.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryHighlight.fromList(it)
+          TabState.fromList(it)
         }
       }
       200.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TopFrecentSiteInfo.fromList(it)
+          RecoverableTab.fromList(it)
         }
       }
       201.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryMetadata.fromList(it)
+          IconRequest.fromList(it)
         }
       }
       202.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistorySuggestion.fromList(it)
+          ResourceSize.fromList(it)
         }
       }
       203.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PageObservation.fromList(it)
+          Resource.fromList(it)
         }
       }
       204.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryItem.fromList(it)
+          IconResult.fromList(it)
         }
       }
       205.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          HistoryState.fromList(it)
+          CookiePartitionKey.fromList(it)
         }
       }
       206.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ReaderableState.fromList(it)
+          Cookie.fromList(it)
         }
       }
       207.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SecurityInfoState.fromList(it)
+          VisitInfo.fromList(it)
         }
       }
       208.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabContentState.fromList(it)
+          HistoryHighlightWeights.fromList(it)
         }
       }
       209.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          FindResultState.fromList(it)
+          HistoryHighlight.fromList(it)
         }
       }
       210.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CustomSelectionAction.fromList(it)
+          TopFrecentSiteInfo.fromList(it)
         }
       }
       211.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          WebExtensionData.fromList(it)
+          HistoryMetadata.fromList(it)
         }
       }
       212.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonUpdatePermissionRequest.fromList(it)
+          HistorySuggestion.fromList(it)
         }
       }
       213.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonInfo.fromList(it)
+          PageObservation.fromList(it)
         }
       }
       214.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonListingPreview.fromList(it)
+          HistoryItem.fromList(it)
         }
       }
       215.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonListing.fromList(it)
+          HistoryState.fromList(it)
         }
       }
       216.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonStoreInfo.fromList(it)
+          ReaderableState.fromList(it)
         }
       }
       217.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonUpdateAttemptInfo.fromList(it)
+          SecurityInfoState.fromList(it)
         }
       }
       218.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoSuggestion.fromList(it)
+          TabContentState.fromList(it)
         }
       }
       219.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TabContent.fromList(it)
+          FindResultState.fromList(it)
         }
       }
       220.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContentBlocking.fromList(it)
+          CustomSelectionAction.fromList(it)
         }
       }
       221.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DohSettings.fromList(it)
+          WebExtensionData.fromList(it)
         }
       }
       222.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoEngineSettings.fromList(it)
+          AddonUpdatePermissionRequest.fromList(it)
         }
       }
       223.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AutocompleteResult.fromList(it)
+          AddonInfo.fromList(it)
         }
       }
       224.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          UnknownHitResult.fromList(it)
+          AddonListingPreview.fromList(it)
         }
       }
       225.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageHitResult.fromList(it)
+          AddonListing.fromList(it)
         }
       }
       226.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoHitResult.fromList(it)
+          AddonStoreInfo.fromList(it)
         }
       }
       227.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioHitResult.fromList(it)
+          AddonUpdateAttemptInfo.fromList(it)
         }
       }
       228.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageSrcHitResult.fromList(it)
+          GeckoSuggestion.fromList(it)
         }
       }
       229.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PhoneHitResult.fromList(it)
+          TabContent.fromList(it)
         }
       }
       230.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          EmailHitResult.fromList(it)
+          ContentBlocking.fromList(it)
         }
       }
       231.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeoHitResult.fromList(it)
+          DohSettings.fromList(it)
         }
       }
       232.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          DownloadState.fromList(it)
+          GeckoEngineSettings.fromList(it)
         }
       }
       233.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ShareInternetResourceState.fromList(it)
+          AutocompleteResult.fromList(it)
         }
       }
       234.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AddonCollection.fromList(it)
+          UnknownHitResult.fromList(it)
         }
       }
       235.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoComponentVersions.fromList(it)
+          ImageHitResult.fromList(it)
         }
       }
       236.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncEngineStatus.fromList(it)
+          VideoHitResult.fromList(it)
         }
       }
       237.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncAccountInfo.fromList(it)
+          AudioHitResult.fromList(it)
         }
       }
       238.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncDevice.fromList(it)
+          ImageSrcHitResult.fromList(it)
         }
       }
       239.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncIncomingTab.fromList(it)
+          PhoneHitResult.fromList(it)
         }
       }
       240.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncRemoteTab.fromList(it)
+          EmailHitResult.fromList(it)
         }
       }
       241.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SyncDeviceTabs.fromList(it)
+          GeoHitResult.fromList(it)
         }
       }
       242.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PreferredDownloadManager.fromList(it)
+          DownloadState.fromList(it)
         }
       }
       243.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          PullToRefreshSettings.fromList(it)
+          ShareInternetResourceState.fromList(it)
         }
       }
       244.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          RecentlyClosedTab.fromList(it)
+          AddonCollection.fromList(it)
         }
       }
       245.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoPref.fromList(it)
+          GeckoComponentVersions.fromList(it)
         }
       }
       246.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MlProgressData.fromList(it)
+          SyncEngineStatus.fromList(it)
         }
       }
       247.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxySettings.fromList(it)
+          SyncAccountInfo.fromList(it)
         }
       }
       248.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxyRoutingSnapshot.fromList(it)
+          SyncDevice.fromList(it)
         }
       }
       249.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoRoutingDemand.fromList(it)
+          SyncIncomingTab.fromList(it)
         }
       }
       250.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoProxyRoutingStatus.fromList(it)
+          SyncRemoteTab.fromList(it)
         }
       }
       251.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ContainerSiteAssignment.fromList(it)
+          SyncDeviceTabs.fromList(it)
         }
       }
       252.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ProxyLoadError.fromList(it)
+          PreferredDownloadManager.fromList(it)
         }
       }
       253.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoHeader.fromList(it)
+          PullToRefreshSettings.fromList(it)
         }
       }
       254.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GeckoFetchRequest.fromList(it)
+          RecentlyClosedTab.fromList(it)
         }
       }
       255.toByte() -> {
@@ -8567,550 +9857,680 @@ private open class GeckoPigeonCodec : StandardMessageCodec() {
         stream.write(156)
         writeValue(stream, value.raw.toLong())
       }
-      is MlProgressType -> {
+      is TabLockRejection -> {
         stream.write(157)
         writeValue(stream, value.raw.toLong())
       }
-      is MlProgressStatus -> {
+      is TabResidency -> {
         stream.write(158)
         writeValue(stream, value.raw.toLong())
       }
-      is ClearDataType -> {
+      is TabSleepHold -> {
         stream.write(159)
         writeValue(stream, value.raw.toLong())
       }
-      is DownloadControl -> {
+      is LifecycleOperationState -> {
         stream.write(160)
         writeValue(stream, value.raw.toLong())
       }
-      is GeckoFetchMethod -> {
+      is LifecycleFailure -> {
         stream.write(161)
         writeValue(stream, value.raw.toLong())
       }
-      is GeckoFetchRedircet -> {
+      is ProtectedActivity -> {
         stream.write(162)
         writeValue(stream, value.raw.toLong())
       }
-      is GeckoFetchCookiePolicy -> {
+      is ContextFreezePhase -> {
         stream.write(163)
         writeValue(stream, value.raw.toLong())
       }
-      is BookmarkNodeType -> {
+      is LifecycleRegistryMode -> {
         stream.write(164)
         writeValue(stream, value.raw.toLong())
       }
-      is SitePermissionStatus -> {
+      is EngineEnforcement -> {
         stream.write(165)
         writeValue(stream, value.raw.toLong())
       }
-      is AutoplayStatus -> {
+      is FreezeActivity -> {
         stream.write(166)
         writeValue(stream, value.raw.toLong())
       }
-      is TrackerLogCategory -> {
+      is MlProgressType -> {
         stream.write(167)
         writeValue(stream, value.raw.toLong())
       }
-      is TrackingStatisticsType -> {
+      is MlProgressStatus -> {
         stream.write(168)
         writeValue(stream, value.raw.toLong())
       }
-      is NativeAppLinkRuleDecision -> {
+      is ClearDataType -> {
         stream.write(169)
         writeValue(stream, value.raw.toLong())
       }
-      is AppLinkPromptOwner -> {
+      is DownloadControl -> {
         stream.write(170)
         writeValue(stream, value.raw.toLong())
       }
-      is AppLinkDecision -> {
+      is GeckoFetchMethod -> {
         stream.write(171)
         writeValue(stream, value.raw.toLong())
       }
-      is SplitPaneMode -> {
+      is GeckoFetchRedircet -> {
         stream.write(172)
         writeValue(stream, value.raw.toLong())
       }
-      is SplitAxis -> {
+      is GeckoFetchCookiePolicy -> {
         stream.write(173)
         writeValue(stream, value.raw.toLong())
       }
-      is PushDistributorStatus -> {
+      is BookmarkNodeType -> {
         stream.write(174)
         writeValue(stream, value.raw.toLong())
       }
-      is TranslationOptions -> {
+      is SitePermissionStatus -> {
         stream.write(175)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationLanguage -> {
+      is AutoplayStatus -> {
         stream.write(176)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationDetectedLanguages -> {
+      is TrackerLogCategory -> {
         stream.write(177)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationPair -> {
+      is TrackingStatisticsType -> {
         stream.write(178)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TranslationEngineStateData -> {
+      is NativeAppLinkRuleDecision -> {
         stream.write(179)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TabTranslationStateData -> {
+      is AppLinkPromptOwner -> {
         stream.write(180)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is ReaderState -> {
+      is AppLinkDecision -> {
         stream.write(181)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is AddTabParams -> {
+      is SplitPaneMode -> {
         stream.write(182)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is LastMediaAccessState -> {
+      is SplitAxis -> {
         stream.write(183)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is HistoryMetadataKey -> {
+      is PushDistributorStatus -> {
         stream.write(184)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is PackageCategoryValue -> {
+      is TranslationOptions -> {
         stream.write(185)
         writeValue(stream, value.toList())
       }
-      is ExternalPackage -> {
+      is TranslationLanguage -> {
         stream.write(186)
         writeValue(stream, value.toList())
       }
-      is LoadUrlFlagsValue -> {
+      is TranslationDetectedLanguages -> {
         stream.write(187)
         writeValue(stream, value.toList())
       }
-      is SourceValue -> {
+      is TranslationPair -> {
         stream.write(188)
         writeValue(stream, value.toList())
       }
-      is TabState -> {
+      is TranslationEngineStateData -> {
         stream.write(189)
         writeValue(stream, value.toList())
       }
-      is RecoverableTab -> {
+      is TabTranslationStateData -> {
         stream.write(190)
         writeValue(stream, value.toList())
       }
-      is IconRequest -> {
+      is ReaderState -> {
         stream.write(191)
         writeValue(stream, value.toList())
       }
-      is ResourceSize -> {
+      is AddTabParams -> {
         stream.write(192)
         writeValue(stream, value.toList())
       }
-      is Resource -> {
+      is LastMediaAccessState -> {
         stream.write(193)
         writeValue(stream, value.toList())
       }
-      is IconResult -> {
+      is HistoryMetadataKey -> {
         stream.write(194)
         writeValue(stream, value.toList())
       }
-      is CookiePartitionKey -> {
+      is PackageCategoryValue -> {
         stream.write(195)
         writeValue(stream, value.toList())
       }
-      is Cookie -> {
+      is ExternalPackage -> {
         stream.write(196)
         writeValue(stream, value.toList())
       }
-      is VisitInfo -> {
+      is LoadUrlFlagsValue -> {
         stream.write(197)
         writeValue(stream, value.toList())
       }
-      is HistoryHighlightWeights -> {
+      is SourceValue -> {
         stream.write(198)
         writeValue(stream, value.toList())
       }
-      is HistoryHighlight -> {
+      is TabState -> {
         stream.write(199)
         writeValue(stream, value.toList())
       }
-      is TopFrecentSiteInfo -> {
+      is RecoverableTab -> {
         stream.write(200)
         writeValue(stream, value.toList())
       }
-      is HistoryMetadata -> {
+      is IconRequest -> {
         stream.write(201)
         writeValue(stream, value.toList())
       }
-      is HistorySuggestion -> {
+      is ResourceSize -> {
         stream.write(202)
         writeValue(stream, value.toList())
       }
-      is PageObservation -> {
+      is Resource -> {
         stream.write(203)
         writeValue(stream, value.toList())
       }
-      is HistoryItem -> {
+      is IconResult -> {
         stream.write(204)
         writeValue(stream, value.toList())
       }
-      is HistoryState -> {
+      is CookiePartitionKey -> {
         stream.write(205)
         writeValue(stream, value.toList())
       }
-      is ReaderableState -> {
+      is Cookie -> {
         stream.write(206)
         writeValue(stream, value.toList())
       }
-      is SecurityInfoState -> {
+      is VisitInfo -> {
         stream.write(207)
         writeValue(stream, value.toList())
       }
-      is TabContentState -> {
+      is HistoryHighlightWeights -> {
         stream.write(208)
         writeValue(stream, value.toList())
       }
-      is FindResultState -> {
+      is HistoryHighlight -> {
         stream.write(209)
         writeValue(stream, value.toList())
       }
-      is CustomSelectionAction -> {
+      is TopFrecentSiteInfo -> {
         stream.write(210)
         writeValue(stream, value.toList())
       }
-      is WebExtensionData -> {
+      is HistoryMetadata -> {
         stream.write(211)
         writeValue(stream, value.toList())
       }
-      is AddonUpdatePermissionRequest -> {
+      is HistorySuggestion -> {
         stream.write(212)
         writeValue(stream, value.toList())
       }
-      is AddonInfo -> {
+      is PageObservation -> {
         stream.write(213)
         writeValue(stream, value.toList())
       }
-      is AddonListingPreview -> {
+      is HistoryItem -> {
         stream.write(214)
         writeValue(stream, value.toList())
       }
-      is AddonListing -> {
+      is HistoryState -> {
         stream.write(215)
         writeValue(stream, value.toList())
       }
-      is AddonStoreInfo -> {
+      is ReaderableState -> {
         stream.write(216)
         writeValue(stream, value.toList())
       }
-      is AddonUpdateAttemptInfo -> {
+      is SecurityInfoState -> {
         stream.write(217)
         writeValue(stream, value.toList())
       }
-      is GeckoSuggestion -> {
+      is TabContentState -> {
         stream.write(218)
         writeValue(stream, value.toList())
       }
-      is TabContent -> {
+      is FindResultState -> {
         stream.write(219)
         writeValue(stream, value.toList())
       }
-      is ContentBlocking -> {
+      is CustomSelectionAction -> {
         stream.write(220)
         writeValue(stream, value.toList())
       }
-      is DohSettings -> {
+      is WebExtensionData -> {
         stream.write(221)
         writeValue(stream, value.toList())
       }
-      is GeckoEngineSettings -> {
+      is AddonUpdatePermissionRequest -> {
         stream.write(222)
         writeValue(stream, value.toList())
       }
-      is AutocompleteResult -> {
+      is AddonInfo -> {
         stream.write(223)
         writeValue(stream, value.toList())
       }
-      is UnknownHitResult -> {
+      is AddonListingPreview -> {
         stream.write(224)
         writeValue(stream, value.toList())
       }
-      is ImageHitResult -> {
+      is AddonListing -> {
         stream.write(225)
         writeValue(stream, value.toList())
       }
-      is VideoHitResult -> {
+      is AddonStoreInfo -> {
         stream.write(226)
         writeValue(stream, value.toList())
       }
-      is AudioHitResult -> {
+      is AddonUpdateAttemptInfo -> {
         stream.write(227)
         writeValue(stream, value.toList())
       }
-      is ImageSrcHitResult -> {
+      is GeckoSuggestion -> {
         stream.write(228)
         writeValue(stream, value.toList())
       }
-      is PhoneHitResult -> {
+      is TabContent -> {
         stream.write(229)
         writeValue(stream, value.toList())
       }
-      is EmailHitResult -> {
+      is ContentBlocking -> {
         stream.write(230)
         writeValue(stream, value.toList())
       }
-      is GeoHitResult -> {
+      is DohSettings -> {
         stream.write(231)
         writeValue(stream, value.toList())
       }
-      is DownloadState -> {
+      is GeckoEngineSettings -> {
         stream.write(232)
         writeValue(stream, value.toList())
       }
-      is ShareInternetResourceState -> {
+      is AutocompleteResult -> {
         stream.write(233)
         writeValue(stream, value.toList())
       }
-      is AddonCollection -> {
+      is UnknownHitResult -> {
         stream.write(234)
         writeValue(stream, value.toList())
       }
-      is GeckoComponentVersions -> {
+      is ImageHitResult -> {
         stream.write(235)
         writeValue(stream, value.toList())
       }
-      is SyncEngineStatus -> {
+      is VideoHitResult -> {
         stream.write(236)
         writeValue(stream, value.toList())
       }
-      is SyncAccountInfo -> {
+      is AudioHitResult -> {
         stream.write(237)
         writeValue(stream, value.toList())
       }
-      is SyncDevice -> {
+      is ImageSrcHitResult -> {
         stream.write(238)
         writeValue(stream, value.toList())
       }
-      is SyncIncomingTab -> {
+      is PhoneHitResult -> {
         stream.write(239)
         writeValue(stream, value.toList())
       }
-      is SyncRemoteTab -> {
+      is EmailHitResult -> {
         stream.write(240)
         writeValue(stream, value.toList())
       }
-      is SyncDeviceTabs -> {
+      is GeoHitResult -> {
         stream.write(241)
         writeValue(stream, value.toList())
       }
-      is PreferredDownloadManager -> {
+      is DownloadState -> {
         stream.write(242)
         writeValue(stream, value.toList())
       }
-      is PullToRefreshSettings -> {
+      is ShareInternetResourceState -> {
         stream.write(243)
         writeValue(stream, value.toList())
       }
-      is RecentlyClosedTab -> {
+      is AddonCollection -> {
         stream.write(244)
         writeValue(stream, value.toList())
       }
-      is GeckoPref -> {
+      is GeckoComponentVersions -> {
         stream.write(245)
         writeValue(stream, value.toList())
       }
-      is MlProgressData -> {
+      is SyncEngineStatus -> {
         stream.write(246)
         writeValue(stream, value.toList())
       }
-      is GeckoProxySettings -> {
+      is SyncAccountInfo -> {
         stream.write(247)
         writeValue(stream, value.toList())
       }
-      is GeckoProxyRoutingSnapshot -> {
+      is SyncDevice -> {
         stream.write(248)
         writeValue(stream, value.toList())
       }
-      is GeckoRoutingDemand -> {
+      is SyncIncomingTab -> {
         stream.write(249)
         writeValue(stream, value.toList())
       }
-      is GeckoProxyRoutingStatus -> {
+      is SyncRemoteTab -> {
         stream.write(250)
         writeValue(stream, value.toList())
       }
-      is ContainerSiteAssignment -> {
+      is SyncDeviceTabs -> {
         stream.write(251)
         writeValue(stream, value.toList())
       }
-      is ProxyLoadError -> {
+      is PreferredDownloadManager -> {
         stream.write(252)
         writeValue(stream, value.toList())
       }
-      is GeckoHeader -> {
+      is PullToRefreshSettings -> {
         stream.write(253)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchRequest -> {
+      is RecentlyClosedTab -> {
         stream.write(254)
         writeValue(stream, value.toList())
       }
-      is GeckoFetchResponse -> {
+      is TabRemovalResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 0, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is BookmarkNode -> {
+      is TabLockChange -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 1, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is BookmarkImportNode -> {
+      is TabLifecycleState -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 2, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is BookmarkInsertTreeResult -> {
+      is TabSleepResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 3, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is BookmarkInfo -> {
+      is TabSleepPolicy -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 4, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SitePermissions -> {
+      is ContainerAutoFreeze -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 5, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingProtectionException -> {
+      is ContextFreezeState -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 6, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackerLogEntry -> {
+      is OwnerFreezeState -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 7, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingStatisticsRecord -> {
+      is LifecycleSnapshot -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 8, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is TrackingStatistics -> {
+      is FreezeBlocker -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 9, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkTarget -> {
+      is FreezeOperationResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 10, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ProtectedTargetPattern -> {
+      is ContextReleaseResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 11, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is NativeAppLinkRule -> {
+      is ContainerContexts -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 12, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is NativeContextAppLinkPolicy -> {
+      is FrozenWindowHandoff -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 13, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPolicySnapshot -> {
+      is PendingUndoTab -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 14, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkPromptRequest -> {
+      is GeckoPref -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 15, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is AppLinkResolutionResult -> {
+      is MlProgressData -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 16, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaIcon -> {
+      is GeckoProxySettings -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 17, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetFiles -> {
+      is GeckoProxyRoutingSnapshot -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 18, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTargetParams -> {
+      is GeckoRoutingDemand -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 19, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ShareTarget -> {
+      is GeckoProxyRoutingStatus -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 20, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is ExternalApplicationResource -> {
+      is ContainerSiteAssignment -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 21, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PwaManifest -> {
+      is ProxyLoadError -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 22, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SandboxCaptureEntry -> {
+      is GeckoHeader -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 23, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is GestureConfig -> {
+      is GeckoFetchRequest -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 24, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SplitPairState -> {
+      is GeckoFetchResponse -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 25, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SplitViewLabels -> {
+      is BookmarkNode -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 26, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is SplitViewState -> {
+      is BookmarkImportNode -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 27, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushDistributor -> {
+      is BookmarkInsertTreeResult -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 28, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushStatus -> {
+      is BookmarkInfo -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 29, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
-      is PushSubscription -> {
+      is SitePermissions -> {
         val wrap = GeckoPigeonInternalCodecOverflow(type = 30, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is TrackingProtectionException -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 31, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is TrackerLogEntry -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 32, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is TrackingStatisticsRecord -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 33, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is TrackingStatistics -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 34, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is AppLinkTarget -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 35, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is ProtectedTargetPattern -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 36, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is NativeAppLinkRule -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 37, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is NativeContextAppLinkPolicy -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 38, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is AppLinkPolicySnapshot -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 39, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is AppLinkPromptRequest -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 40, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is AppLinkResolutionResult -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 41, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PwaIcon -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 42, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is ShareTargetFiles -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 43, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is ShareTargetParams -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 44, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is ShareTarget -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 45, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is ExternalApplicationResource -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 46, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PwaManifest -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 47, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is SandboxCaptureEntry -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 48, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is GestureConfig -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 49, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is SplitPairState -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 50, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is SplitViewLabels -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 51, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is FrozenPlaceholderLabel -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 52, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is SplitViewState -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 53, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushDistributor -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 54, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushStatus -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 55, wrapped = value.toList())
+        stream.write(255)
+        writeValue(stream, wrap.toList())
+      }
+      is PushSubscription -> {
+        val wrap = GeckoPigeonInternalCodecOverflow(type = 56, wrapped = value.toList())
         stream.write(255)
         writeValue(stream, wrap.toList())
       }
@@ -10378,6 +11798,502 @@ interface GeckoRecentlyClosedTabsApi {
     }
   }
 }
+/**
+ * Native's copy of the tab locks, which it enforces for every removal
+ * (`TabCloseProtection`). Dart's `tab.is_locked` is the record of what the user
+ * asked for; native's set always contains it.
+ *
+ * Registered when the plugin attaches: [bootstrapLockedTabs] runs before the
+ * engine starts.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoTabLockApi {
+  /**
+   * The trusted, profile-scoped startup snapshot from the database. Not
+   * checked against open tabs, which are not restored yet; works before the
+   * browser components exist. Replaces the persisted set. Throws when it could
+   * not be persisted, and the previous set stays in force.
+   */
+  fun bootstrapLockedTabs(tabIds: List<String>)
+  /**
+   * An interactive change, checked against the open tabs. Locking also writes
+   * the session file before answering, so a tab that was just opened cannot
+   * be locked and then lost to process death before the next autosave.
+   */
+  suspend fun setTabLocked(tabId: String, locked: Boolean): TabLockChange
+  /** Which of [tabIds] native holds locked right now. */
+  fun lockedTabIdsAmong(tabIds: List<String>): List<String>
+  /**
+   * After the session restore and Dart's catch-up only: native's set becomes
+   * [tabIds] limited to the open tabs. Returns the ids that were dropped.
+   * Throws when the new set could not be persisted, and the old one stays.
+   */
+  fun reconcileLockedTabs(tabIds: List<String>): List<String>
+
+  companion object {
+    /** The codec used by GeckoTabLockApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoTabLockApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoTabLockApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.bootstrapLockedTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              api.bootstrapLockedTabs(tabIdsArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.setTabLocked$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            val lockedArg = args[1] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.setTabLocked(tabIdArg, lockedArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.lockedTabIdsAmong$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              listOf(api.lockedTabIdsAmong(tabIdsArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLockApi.reconcileLockedTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              listOf(api.reconcileLockedTabs(tabIdsArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
+/**
+ * Tab sleep (phase T1 of `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`).
+ * The holds are process-wide in native (`TabLifecycleRegistry`); the
+ * operations need the browser components and fail with `componentsReplaced`
+ * when those are rebuilt meanwhile.
+ *
+ * Generated interface from Pigeon that represents a handler of messages from Flutter.
+ */
+interface GeckoTabLifecycleApi {
+  /**
+   * Puts [tabIds] to sleep: holds each, checks what it is doing (D13), saves
+   * its state and unloads its page. Media and a POST result only refuse
+   * unless confirmed with [stopMedia] and [discardPostResult]; form input
+   * only for the tabs of [discardFormDataTabIds], the ones the user was
+   * asked about, so input found in another tab on the retry still refuses.
+   */
+  suspend fun sleepTabs(tabIds: List<String>, stopMedia: Boolean, discardPostResult: Boolean, discardFormDataTabIds: List<String>): List<TabSleepResult>
+  /**
+   * Clears [tabId]'s sleep hold (the placeholder's Wake, the menus' Wake, a
+   * navigation): only while the routing this process installed covers the
+   * tab's context (D34), so nothing of it goes out another way. A tab on
+   * screen loads at once; any other loads when it is shown or something
+   * reaches it. A sleeping tab never wakes by coming on screen (D10).
+   * Returns whether it was woken; false for a tab that is not open. Waiting
+   * out the install window at a cold start is the caller's.
+   */
+  fun wakeTab(tabId: String): Boolean
+  /**
+   * [tabId]'s lifecycle as native has it now. `onTabLifecycleChange`
+   * reaches Dart some time after a hold is placed, so a decision that must
+   * not miss one (a navigation the user asked for, 5.2.1) asks here. Null
+   * for a tab that is not open.
+   */
+  fun getTabLifecycleState(tabId: String): TabLifecycleState?
+  /**
+   * Replaces the automatic sleep policy. Process-wide: kept across a
+   * components rebuild, and accepted before the components exist.
+   */
+  fun setSleepPolicy(policy: TabSleepPolicy)
+  /**
+   * Freezes a container's contexts (5.4). Called only from Dart's gated
+   * preflight (D21). [memberTabIds] are the tabs Dart found in the
+   * container; a tab of [contextIds] outside them refuses the freeze.
+   * [stopMedia], [discardPostResult] and [discardFormDataTabIds] (the tabs
+   * whose form input the user agreed to lose) confirm what the user was
+   * asked.
+   */
+  suspend fun freezeContexts(ownerId: String, contextIds: List<String>, memberTabIds: List<String>, stopMedia: Boolean, discardPostResult: Boolean, discardFormDataTabIds: List<String>, automatic: Boolean): FreezeOperationResult
+  /**
+   * Resumes [ownerId]'s contexts (5.5): lifts the restriction, drains the
+   * deferred subscription changes and wakes [wakeTabId]. Routing for every
+   * context is the caller's to check first (D34). Also stops a running
+   * freeze of the owner ("Stop freezing and resume").
+   */
+  suspend fun resumeContexts(ownerId: String, wakeTabId: String?): FreezeOperationResult
+  /**
+   * Before the container's row is deleted: its contexts become
+   * `deletionPending` and stay restricted (D28), and [deleteDataOf], storage
+   * of it without a record whose data the user asked to delete with it
+   * (D29), is written down as a data deletion, which restricts nothing
+   * until the row is gone.
+   */
+  suspend fun beginContextDeletion(ownerId: String, deleteDataOf: List<String>): FreezeOperationResult
+  /** The row delete did not happen: back to the phase each context had. */
+  suspend fun cancelContextDeletion(ownerId: String): FreezeOperationResult
+  /**
+   * After the row delete: the release procedure for each of its contexts,
+   * also the storage of its data deletions, recorded as releasing first, so
+   * its push subscriptions go too and every start retries what is left.
+   */
+  suspend fun completeContextDeletion(ownerId: String): FreezeOperationResult
+  /**
+   * FULL start, normal mode, when the gate is seeded: matches the records
+   * against the containers that exist (5.5), starts pending releases in the
+   * background, and returns the snapshot afterwards.
+   */
+  suspend fun reconcileOwners(existingOwnerIds: List<String>): LifecycleSnapshot
+  /**
+   * The one release procedure (D32): releasing, push subscriptions removed,
+   * data cleared with an acknowledgment, then lifted and forgotten.
+   */
+  suspend fun releaseContexts(contextIds: List<String>): List<ContextReleaseResult>
+  /**
+   * Recovery mode only (D23): freezes each of [owners]' contexts explicitly,
+   * keeps every other context that has a registration or subscription as
+   * orphaned, releases [unfreezableContextIds] (used by tabs no freezable
+   * container owns), and ends the recovery. Refused in normal mode.
+   */
+  suspend fun reconstructFrozenContexts(owners: List<ContainerContexts>, unfreezableContextIds: List<String>): LifecycleSnapshot
+  /**
+   * The registry now. Works before the components exist (it is
+   * process-wide). Seeds the membership gate (5.7).
+   */
+  fun getLifecycleSnapshot(): LifecycleSnapshot
+  /**
+   * What "Open WebLibre to resume" in a web app or custom tab window of a
+   * frozen context (D18) left for the browser, taken once; null when
+   * nothing is waiting. Kept in the process, never on an intent, so no
+   * other app can choose the storage it names.
+   */
+  fun takeFrozenWindowHandoff(): FrozenWindowHandoff?
+
+  companion object {
+    /** The codec used by GeckoTabLifecycleApi. */
+    val codec: MessageCodec<Any?> by lazy {
+      GeckoPigeonCodec()
+    }
+    /** Sets up an instance of `GeckoTabLifecycleApi` to handle messages through the `binaryMessenger`. */
+    @JvmOverloads
+    fun setUp(binaryMessenger: BinaryMessenger, api: GeckoTabLifecycleApi?, messageChannelSuffix: String = "") {
+      val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.sleepTabs$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdsArg = args[0] as List<String>
+            val stopMediaArg = args[1] as Boolean
+            val discardPostResultArg = args[2] as Boolean
+            val discardFormDataTabIdsArg = args[3] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.sleepTabs(tabIdsArg, stopMediaArg, discardPostResultArg, discardFormDataTabIdsArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.wakeTab$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.wakeTab(tabIdArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.getTabLifecycleState$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.getTabLifecycleState(tabIdArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.setSleepPolicy$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val policyArg = args[0] as TabSleepPolicy
+            val wrapped: List<Any?> = try {
+              api.setSleepPolicy(policyArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.freezeContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ownerIdArg = args[0] as String
+            val contextIdsArg = args[1] as List<String>
+            val memberTabIdsArg = args[2] as List<String>
+            val stopMediaArg = args[3] as Boolean
+            val discardPostResultArg = args[4] as Boolean
+            val discardFormDataTabIdsArg = args[5] as List<String>
+            val automaticArg = args[6] as Boolean
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.freezeContexts(ownerIdArg, contextIdsArg, memberTabIdsArg, stopMediaArg, discardPostResultArg, discardFormDataTabIdsArg, automaticArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.resumeContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ownerIdArg = args[0] as String
+            val wakeTabIdArg = args[1] as String?
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.resumeContexts(ownerIdArg, wakeTabIdArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.beginContextDeletion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ownerIdArg = args[0] as String
+            val deleteDataOfArg = args[1] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.beginContextDeletion(ownerIdArg, deleteDataOfArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.cancelContextDeletion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ownerIdArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.cancelContextDeletion(ownerIdArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.completeContextDeletion$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ownerIdArg = args[0] as String
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.completeContextDeletion(ownerIdArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.reconcileOwners$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val existingOwnerIdsArg = args[0] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.reconcileOwners(existingOwnerIdsArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.releaseContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdsArg = args[0] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.releaseContexts(contextIdsArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.reconstructFrozenContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val ownersArg = args[0] as List<ContainerContexts>
+            val unfreezableContextIdsArg = args[1] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.reconstructFrozenContexts(ownersArg, unfreezableContextIdsArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.getLifecycleSnapshot$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.getLifecycleSnapshot())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabLifecycleApi.takeFrozenWindowHandoff$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.takeFrozenWindowHandoff())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+    }
+  }
+}
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface GeckoTabsApi {
   /**
@@ -10390,22 +12306,55 @@ interface GeckoTabsApi {
    * `onSelectedTabChange` will report, without its debounce.
    */
   fun getSelectedTabId(): String?
-  fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean)
+  /**
+   * The ids of the tabs in the store right now that run in session context
+   * [contextId], private ones included. Read straight from the store, so a
+   * tab the engine opened a moment ago is in it before any event reports it.
+   */
+  fun getTabIdsInContext(contextId: String): List<String>
+  /**
+   * The ids of the custom tabs and web app windows in the store right now
+   * that run in one of [contextIds]. They are not tabs: closing tabs never
+   * reaches them.
+   */
+  fun getCustomTabIdsInContexts(contextIds: List<String>): List<String>
+  fun syncEvents(onSelectedTabChange: Boolean, onTabListChange: Boolean, onRestoreComplete: Boolean, onTabContentStateChange: Boolean, onIconChange: Boolean, onSecurityInfoStateChange: Boolean, onReaderableStateChange: Boolean, onHistoryStateChange: Boolean, onFindResults: Boolean, onThumbnailChange: Boolean, onBrowserExtensionsChange: Boolean, onPageExtensionsChange: Boolean, onBrowserExtensionIcons: Boolean, onPageExtensionIcons: Boolean, onTranslationStateChange: Boolean, onTabLifecycleChange: Boolean)
   fun selectTab(tabId: String)
-  fun removeTab(tabId: String)
+  /** Removes [tabId] unless it is locked, and reports what happened. */
+  fun removeTab(tabId: String): TabRemovalResult
   fun addTab(url: String, selectTab: Boolean, startLoading: Boolean, parentId: String?, flags: LoadUrlFlagsValue, contextId: String?, source: SourceValue, private: Boolean, historyMetadata: HistoryMetadataKey?, additionalHeaders: Map<String, String>?, excludeFromHistory: Boolean, parentIsReferrer: Boolean): String
   fun addMultipleTabs(tabs: List<AddTabParams>, selectTabId: String?, excludeFromHistory: Boolean): List<String>
   fun removeAllTabs(recoverable: Boolean)
-  fun removeTabs(ids: List<String>)
+  /** Removes [ids], keeping locked tabs, and reports what happened. */
+  fun removeTabs(ids: List<String>): TabRemovalResult
   fun removeNormalTabs()
   fun removePrivateTabs()
   /**
-   * Restores the most recently closed tabs, if the engine still has them.
-   *
-   * Returns whether any tabs are being restored. When none are, the tab list
-   * does not change at all.
+   * The tabs the pending undo close would bring back, each with the context
+   * it ran in; empty when there is none.
    */
-  fun undo(): Boolean
+  fun pendingUndoTabs(): List<PendingUndoTab>
+  /**
+   * Restores the most recently closed tabs, if the engine still has them,
+   * and answers once they are back in the store: AC restores them in a
+   * coroutine of its own, after the undo was dispatched.
+   *
+   * Only when the pending undo close brings back exactly [expectedTabIds]
+   * (as [pendingUndoTabs] listed them), so that what the caller checked is
+   * what comes back: a close in between replaced it otherwise.
+   *
+   * Returns the ids of the tabs that came back; empty when the engine had
+   * none to restore, or other ones, and then the tab list does not change
+   * at all.
+   */
+  suspend fun undo(expectedTabIds: List<String>): List<String>
+  /**
+   * Drops the pending undo close when it would bring back one of [tabIds] or
+   * a tab that ran in one of [contextIds], so that nothing comes back into a
+   * deleted container. Its other tabs go on the recently closed list, as
+   * they would once the undo ran out. Returns whether it dropped it.
+   */
+  fun discardUndoOf(tabIds: List<String>, contextIds: List<String>): Boolean
   fun restoreTabsByList(tabs: List<RecoverableTab>, selectTabId: String?, restoreLocation: RestoreLocation)
   /**
    * Selects an already existing tab with the matching [HistoryMetadataKey] or otherwise
@@ -10466,6 +12415,40 @@ interface GeckoTabsApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getTabIdsInContext$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.getTabIdsInContext(contextIdArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.getCustomTabIdsInContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              listOf(api.getCustomTabIdsInContexts(contextIdsArg))
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.syncEvents$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -10485,8 +12468,9 @@ interface GeckoTabsApi {
             val onBrowserExtensionIconsArg = args[12] as Boolean
             val onPageExtensionIconsArg = args[13] as Boolean
             val onTranslationStateChangeArg = args[14] as Boolean
+            val onTabLifecycleChangeArg = args[15] as Boolean
             val wrapped: List<Any?> = try {
-              api.syncEvents(onSelectedTabChangeArg, onTabListChangeArg, onRestoreCompleteArg, onTabContentStateChangeArg, onIconChangeArg, onSecurityInfoStateChangeArg, onReaderableStateChangeArg, onHistoryStateChangeArg, onFindResultsArg, onThumbnailChangeArg, onBrowserExtensionsChangeArg, onPageExtensionsChangeArg, onBrowserExtensionIconsArg, onPageExtensionIconsArg, onTranslationStateChangeArg)
+              api.syncEvents(onSelectedTabChangeArg, onTabListChangeArg, onRestoreCompleteArg, onTabContentStateChangeArg, onIconChangeArg, onSecurityInfoStateChangeArg, onReaderableStateChangeArg, onHistoryStateChangeArg, onFindResultsArg, onThumbnailChangeArg, onBrowserExtensionsChangeArg, onPageExtensionsChangeArg, onBrowserExtensionIconsArg, onPageExtensionIconsArg, onTranslationStateChangeArg, onTabLifecycleChangeArg)
               listOf(null)
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
@@ -10522,8 +12506,7 @@ interface GeckoTabsApi {
             val args = message as List<Any?>
             val tabIdArg = args[0] as String
             val wrapped: List<Any?> = try {
-              api.removeTab(tabIdArg)
-              listOf(null)
+              listOf(api.removeTab(tabIdArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -10605,8 +12588,7 @@ interface GeckoTabsApi {
             val args = message as List<Any?>
             val idsArg = args[0] as List<String>
             val wrapped: List<Any?> = try {
-              api.removeTabs(idsArg)
-              listOf(null)
+              listOf(api.removeTabs(idsArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -10649,11 +12631,48 @@ interface GeckoTabsApi {
         }
       }
       run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.undo$separatedMessageChannelSuffix", codec)
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.pendingUndoTabs$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
-              listOf(api.undo())
+              listOf(api.pendingUndoTabs())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.undo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val expectedTabIdsArg = args[0] as List<String>
+            CoroutineScope(Dispatchers.Main).launch {
+              val wrapped: List<Any?> = try {
+                listOf(api.undo(expectedTabIdsArg))
+              } catch (exception: Throwable) {
+                GeckoPigeonUtils.wrapError(exception)
+              }
+              reply.reply(wrapped)
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoTabsApi.discardUndoOf$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val tabIdsArg = args[0] as List<String>
+            val contextIdsArg = args[1] as List<String>
+            val wrapped: List<Any?> = try {
+              listOf(api.discardUndoOf(tabIdsArg, contextIdsArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -11219,6 +13238,14 @@ interface GeckoContainerProxyApi {
    */
   fun routingStatus(): GeckoProxyRoutingStatus
   /**
+   * Whether the routing this process installed covers every one of
+   * [contextIds] the way a pane requires before it wakes a tab: a direct
+   * relation, a live proxy, or one that is still starting. False while none
+   * is installed, and for a context whose proxy has no endpoint. Reads the
+   * same cached state as [routingStatus].
+   */
+  fun routingCoversContexts(contextIds: List<String>): Boolean
+  /**
    * The oldest launch waiting for a proxy to be started, or null when none is.
    * Consumes it: a demand is answered by starting what it names.
    *
@@ -11291,6 +13318,23 @@ interface GeckoContainerProxyApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               listOf(api.routingStatus())
+            } catch (exception: Throwable) {
+              GeckoPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.flutter_mozilla_components.GeckoContainerProxyApi.routingCoversContexts$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextIdsArg = args[0] as List<String>
+            val wrapped: List<Any?> = try {
+              listOf(api.routingCoversContexts(contextIdsArg))
             } catch (exception: Throwable) {
               GeckoPigeonUtils.wrapError(exception)
             }
@@ -11853,6 +13897,132 @@ class GeckoStateEvents(private val binaryMessenger: BinaryMessenger, private val
     val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabTranslationStateChange$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(sequenceArg, stateArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * A tab's lifecycle changed: its residency, its sleep hold, or an operation
+   * on it began or ended.
+   */
+  fun onTabLifecycleChange(sequenceArg: Long, stateArg: TabLifecycleState, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onTabLifecycleChange$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, stateArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * The user pressed Wake on a sleeping tab's placeholder. Native does not
+   * wake it: Dart checks the tab's routing first (D34), then calls
+   * `GeckoTabLifecycleApi.wakeTab`.
+   */
+  fun onWakeRequested(sequenceArg: Long, tabIdArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onWakeRequested$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, tabIdArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * The registry changed. For what the user sees; the membership gate reads
+   * its own snapshot (D27).
+   */
+  fun onContextFreezeChange(sequenceArg: Long, snapshotArg: LifecycleSnapshot, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContextFreezeChange$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, snapshotArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * The user pressed Resume on a frozen tab's placeholder. Native does not
+   * resume: Dart checks routing for every context first (D34).
+   */
+  fun onResumeRequested(sequenceArg: Long, tabIdArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onResumeRequested$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, tabIdArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /** A freeze tore down [done] of [total] tabs (barrier 4). */
+  fun onContextFreezeProgress(sequenceArg: Long, ownerIdArg: String, doneArg: Long, totalArg: Long, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContextFreezeProgress$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, ownerIdArg, doneArg, totalArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(GeckoPigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  /**
+   * No member of [ownerId] has been used for its automatic freeze time
+   * (5.9). Native freezes nothing on its own: Dart runs its gated preflight
+   * with `automatic` (D21). Sent again at the next evaluation while it stays
+   * due.
+   */
+  fun onContainerFreezeDue(sequenceArg: Long, ownerIdArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.flutter_mozilla_components.GeckoStateEvents.onContainerFreezeDue$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(sequenceArg, ownerIdArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

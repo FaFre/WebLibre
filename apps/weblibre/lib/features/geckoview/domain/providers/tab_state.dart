@@ -262,6 +262,7 @@ class TabStates extends _$TabStates {
     ref.read(tabHistoryStatesProvider.notifier).removeTabs(tabIds);
     ref.read(tabFindResultStatesProvider.notifier).removeTabs(tabIds);
     ref.read(tabTranslationStatesProvider.notifier).removeTabs(tabIds);
+    ref.read(tabLifecycleStatesProvider.notifier).removeTabs(tabIds);
   }
 
   Future<TabState> patchedState(String id) async {
@@ -507,6 +508,19 @@ class TabStates extends _$TabStates {
           );
         },
       ),
+      eventService.tabLifecycleEvents.listen(
+        (event) {
+          if (isClosed(event.tabId)) return;
+          ref.read(tabLifecycleStatesProvider.notifier).update(event);
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          logger.e(
+            'Error in tab lifecycle events',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      ),
     ];
 
     ref.listen(
@@ -522,6 +536,7 @@ class TabStates extends _$TabStates {
             onHistoryStateChange: true,
             onFindResults: true,
             onTranslationStateChange: true,
+            onTabLifecycleChange: true,
           );
         }
       },

@@ -124,7 +124,7 @@ final class SplitViewNativeSyncProvider
 }
 
 String _$splitViewNativeSyncHash() =>
-    r'191f2631b39941f05085e21dfcd1e54f3174f2c5';
+    r'9295caecf969d9184a5d6863d5adba2437f09f56';
 
 /// Keeps native's split mirror equal to the Dart state.
 ///

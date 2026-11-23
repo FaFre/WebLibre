@@ -657,6 +657,19 @@ enum FeatureId {
     ),
   ),
 
+  /// Container freeze: "Freeze container" unloads a container's tabs and
+  /// stops its background activity in the engine until Resume (phase C1 of
+  /// `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`). Hidden means no
+  /// Freeze entry; hiding never resumes anything (P1), and a frozen
+  /// container's indicator and Resume never hide (P5). Expert only for now.
+  containerFreeze(
+    'container.freeze',
+    FeaturePolicy.guarded(
+      [VisibilitySwitch.containers, VisibilitySwitch.expertDetails],
+      uiRequires: [FeatureId.containerCookieIsolation],
+    ),
+  ),
+
   /// Clear Container Data and Clear Data on Exit
   containerSiteDataClearing(
     'container.site_data_clearing',
@@ -777,6 +790,20 @@ enum FeatureId {
   tabsSplitView(
     'tabs.split_view',
     FeaturePolicy.guarded([VisibilitySwitch.splitView]),
+  ),
+
+  /// Tab sleep: "Put to sleep" unloads a tab's page until it is shown again
+  /// or woken, and "Sleep all tabs" does it for a container (phase T1 of
+  /// `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`), plus automatic sleep
+  /// and "Keep awake" (T2). Expert only for now. Hidden means no Put to
+  /// sleep or Sleep all tabs and no automatic sleep (H1); a tab held asleep
+  /// keeps its Wake and a kept-awake tab its "Allow sleeping" (P5). Its
+  /// initial value is automatic sleep, off on every preset (D12).
+  tabsSleep(
+    'tabs.sleep',
+    FeaturePolicy.guarded([
+      VisibilitySwitch.expertDetails,
+    ], initial: PresetValues.all(PolicyToken.disabled)),
   ),
 
   /// Quick tab switcher: Recently Used Tabs or disabled

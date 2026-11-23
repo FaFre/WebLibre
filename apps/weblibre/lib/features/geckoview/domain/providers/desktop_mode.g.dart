@@ -57,7 +57,7 @@ final class DesktopModeProvider extends $NotifierProvider<DesktopMode, bool> {
   }
 }
 
-String _$desktopModeHash() => r'c59d0ebe59e074939295a7fc4e1a4d67c419ae94';
+String _$desktopModeHash() => r'9a730db396ebf6f020a311756cac90f1d8abb007';
 
 final class DesktopModeFamily extends $Family
     with $ClassFamilyOverride<DesktopMode, bool, bool, bool, String> {

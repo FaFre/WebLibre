@@ -3502,6 +3502,18 @@ abstract class AppLocalizations {
   /// **'Toggle the pinned state of the current tab'**
   String get browserActions_togglePinTabDescription;
 
+  /// Name of the browser action that locks or unlocks the current tab, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. A locked tab cannot be closed until it is unlocked; this is not the profile lock. Keep it short.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock / Unlock Tab'**
+  String get browserActions_toggleLockTabTitle;
+
+  /// Explanation under that browser action's name in the action lists: it locks the current tab so it cannot be closed, or unlocks it.
+  ///
+  /// In en, this message translates to:
+  /// **'Prevent the current tab from closing, or allow it again'**
+  String get browserActions_toggleLockTabDescription;
+
   /// Name of the browser action that moves the current tab one place toward the start of the tab bar, shown in the lists for assigning keyboard shortcuts, drawn gestures and swipe or long-press actions. Keep it short.
   ///
   /// In en, this message translates to:
@@ -3747,6 +3759,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tab unpinned'**
   String get browserActions_tabUnpinnedMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or swipe locked the tab, so it cannot be closed until it is unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab locked'**
+  String get browserActions_tabLockedMessage;
+
+  /// Confirmation shown after a gesture, keyboard shortcut or swipe unlocked the tab, so it can be closed again.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab unlocked'**
+  String get browserActions_tabUnlockedMessage;
 
   /// Shown when a gesture or keyboard shortcut asked to add the page to the Android home screen, but the page is not eligible (for example a plain HTTP or internal page).
   ///
@@ -4395,6 +4419,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'pin tab, unpin, sticky'**
   String get browserActions_togglePinTabKeywords;
+
+  /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
+  ///
+  /// In en, this message translates to:
+  /// **'lock tab, unlock, keep open, protect, prevent closing'**
+  String get browserActions_toggleLockTabKeywords;
 
   /// Comma-separated search terms for this browser action in the search screen's Actions section. Not displayed; include synonyms users might type.
   ///
@@ -5722,6 +5752,12 @@ abstract class AppLocalizations {
   /// **'Close this tab once data is cleared'**
   String get browser_closeTabAfterClearingSubtitle;
 
+  /// Under the disabled "Close tab after clearing" choice of the clear-site-data sheet when the tab is locked: what to do to be able to choose it.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the tab to close it after clearing'**
+  String get browser_closeTabAfterClearingLocked;
+
   /// Label of the clear button while clearing runs.
   ///
   /// In en, this message translates to:
@@ -6159,6 +6195,588 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unpin tab'**
   String get browser_unpinTab;
+
+  /// Item of the tab menu: lock the tab, so it cannot be closed until it is unlocked. Not the profile lock, which asks for a password.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock tab'**
+  String get browser_lockTab;
+
+  /// Item of the tab menu for a locked tab: unlock it, so it can be closed again.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock tab'**
+  String get browser_unlockTab;
+
+  /// Read by screen readers for the small lock badge on a tab that cannot be closed until it is unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get browser_tabLockedLabel;
+
+  /// Read by screen readers for the lock badge with a warning sign, on a tab the user unlocked whose unlock did not finish: it still cannot be closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked, unlocking did not finish'**
+  String get browser_tabUnlockIncompleteLabel;
+
+  /// Item of the tab menu for a tab whose unlock did not finish, so it still cannot be closed: tries the unlock again.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry unlocking tab'**
+  String get browser_retryUnlockTab;
+
+  /// Short message at the bottom of the screen after unlocking a tab did not finish. The tab still cannot be closed; its menu offers to try again.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocking did not finish. The tab stays locked until it does.'**
+  String get browser_tabUnlockIncompleteMessage;
+
+  /// Short message at the bottom of the screen when locking a tab failed. Nothing changed; the tab can still be closed.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab could not be locked'**
+  String get browser_tabLockFailed;
+
+  /// Short message at the bottom of the screen when unlocking a tab failed. Nothing changed; the tab is still locked.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab could not be unlocked'**
+  String get browser_tabUnlockFailed;
+
+  /// Short message at the bottom of the screen when the user tried to lock a private tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Private tabs cannot be locked'**
+  String get browser_tabLockPrivate;
+
+  /// Short message at the bottom of the screen when the user tried to move a locked tab into, or out of, a container that keeps its own cookies. Such a move reopens the tab, which a locked tab does not allow.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock this tab to move it to a container with its own storage'**
+  String get browser_lockedTabCannotMove;
+
+  /// Error message at the bottom of the screen when moving a tab into, or out of, a container that keeps its own cookies did nothing because WebLibre could not check whether the tab is locked (with "Lock tab"). Such a move reopens the tab. The tab is still where it was; trying again usually works.
+  ///
+  /// In en, this message translates to:
+  /// **'The tab was not moved. Try again.'**
+  String get browser_tabMoveFailed;
+
+  /// Short message at the bottom of the screen when the user tried to move a tab into or out of a container that is being deleted right now, or to save a change of its cookie isolation.
+  ///
+  /// In en, this message translates to:
+  /// **'This container is being deleted'**
+  String get browser_containerBeingDeleted;
+
+  /// Short message at the bottom of the screen when the user tried to move a tab into or out of a frozen container (or one being frozen or resumed), or to save a change of its cookie isolation. A frozen container's tabs stay unloaded and its background activity is stopped until the user resumes it; while frozen, no tab may move in or out of it.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume the container first'**
+  String get browser_containerFrozen;
+
+  /// Short message at the bottom of the screen when the user tries to close a tab they locked with "Lock tab". A locked tab cannot be closed until it is unlocked; nothing was closed.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab is locked'**
+  String get browser_tabIsLocked;
+
+  /// Error message at the bottom of the screen when closing one or more tabs did nothing because WebLibre could not check which tabs are locked (with "Lock tab"). Every tab is still open; trying again usually works.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was closed. Try again.'**
+  String get browser_closeFailed;
+
+  /// Short message at the bottom of the screen when the user tried to close tabs and all of them were locked (with "Lock tab"), so none was closed. count is the number of locked tabs; for one, the message says that the tab is locked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This tab is locked} other{{count} locked tabs were kept}}'**
+  String browser_lockedTabsKept(int count);
+
+  /// Short message at the bottom of the screen after closing several tabs, with an Undo button, when some of them were locked (with "Lock tab") and stayed open. closed is the number of tabs closed, locked the number kept.
+  ///
+  /// In en, this message translates to:
+  /// **'{closed, plural, =1{Closed 1 tab.} other{Closed {closed} tabs.}} {locked, plural, =1{Kept 1 locked tab.} other{Kept {locked} locked tabs.}}'**
+  String browser_tabsClosedKeptLocked(int closed, int locked);
+
+  /// Item of the container menu: put every tab of the container to sleep, unloading their pages to free memory. The tabs stay open.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep All Tabs'**
+  String get browser_menuSleepAllTabs;
+
+  /// Item of the tab menu, and confirm button of the sleep dialogs: unload the tab's page to free memory. The tab stays open and its page loads again when it is woken.
+  ///
+  /// In en, this message translates to:
+  /// **'Put to sleep'**
+  String get browser_sleepTab;
+
+  /// What putting a tab to sleep does, shown in the dialog the first time a tab is put to sleep. Must not suggest that the page is paused or preserved as it was.
+  ///
+  /// In en, this message translates to:
+  /// **'Frees memory by unloading the page. It loads again when you wake the tab. Some unsaved page state may be lost.'**
+  String get browser_sleepTabDescription;
+
+  /// Title of the dialog shown the first time tabs are put to sleep, above browser_sleepTabDescription. It has a "Don't ask again" choice.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Put this tab to sleep?} other{Put {count} tabs to sleep?}}'**
+  String browser_sleepTabsConfirmTitle(int count);
+
+  /// Item of the tab menu for a sleeping tab: load its page again.
+  ///
+  /// In en, this message translates to:
+  /// **'Wake tab'**
+  String get browser_wakeTab;
+
+  /// Short message at the bottom of the screen when a sleeping tab could not be woken because the proxy connection of its container is not ready.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab\'s connection is not ready yet, so it stays asleep'**
+  String get browser_wakeTabRoutingNotReady;
+
+  /// Screen reader label of the sleep glyph on a tab whose page was unloaded until it is shown or woken.
+  ///
+  /// In en, this message translates to:
+  /// **'Asleep'**
+  String get browser_tabAsleepLabel;
+
+  /// Title of the dialog asking before putting tabs to sleep that are playing media, show the result of a form submission or hold text typed into a form.
+  ///
+  /// In en, this message translates to:
+  /// **'Put to sleep anyway?'**
+  String get browser_sleepAskTitle;
+
+  /// Paragraph of the dialog asking before putting tabs to sleep that play audio or video.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This tab is playing media. Putting it to sleep stops playback.} other{{count} tabs are playing media. Putting them to sleep stops playback.}}'**
+  String browser_sleepAskMedia(int count);
+
+  /// Paragraph of the dialog asking before putting tabs to sleep whose page was produced by sending a form (for example a search or an order confirmation).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This page is the result of a form submission. When it reloads, the form is not sent again, so the page may not come back as it was.} other{{count} pages are the result of a form submission. When they reload, the forms are not sent again, so the pages may not come back as they were.}}'**
+  String browser_sleepAskPostResult(int count);
+
+  /// Paragraph of the dialog asking before putting tabs to sleep whose page holds text the user typed into a field (a search box, a comment). "May": the page sometimes restores it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This tab has text typed into a form. Putting it to sleep may lose it.} other{{count} tabs have text typed into a form. Putting them to sleep may lose it.}}'**
+  String browser_sleepAskFormData(int count);
+
+  /// Short message at the bottom of the screen after putting several tabs to sleep, when some were kept awake (for example because they use the microphone, hold form input or run a download).
+  ///
+  /// In en, this message translates to:
+  /// **'{slept, plural, =0{No tabs were put to sleep.} =1{1 tab was put to sleep.} other{{slept} tabs were put to sleep.}} {kept, plural, =1{1 tab was kept awake because of what it is doing.} other{{kept} tabs were kept awake because of what they are doing.}}'**
+  String browser_sleepTabsPartial(int slept, int kept);
+
+  /// Short message at the bottom of the screen when putting a tab to sleep failed, for example because its page could not be saved in time. The tab stays loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab could not be put to sleep'**
+  String get browser_sleepTabFailed;
+
+  /// Short message at the bottom of the screen: a tab was not put to sleep because it is recording or sharing the screen.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab is using the camera, microphone or screen sharing, so it was not put to sleep'**
+  String get browser_sleepRefusedRecording;
+
+  /// Short message at the bottom of the screen: a tab was not put to sleep because text typed into a form on the page would be lost.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab has form input that would be lost, so it was not put to sleep'**
+  String get browser_sleepRefusedFormData;
+
+  /// Short message at the bottom of the screen: a tab was not put to sleep because a file chosen for a form on the page may not have been sent yet.
+  ///
+  /// In en, this message translates to:
+  /// **'A file was chosen for upload in this tab, so it was not put to sleep'**
+  String get browser_sleepRefusedUpload;
+
+  /// Short message at the bottom of the screen: a tab was not put to sleep because it is being printed or saved as a PDF right now.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab is being printed or saved as PDF, so it was not put to sleep'**
+  String get browser_sleepRefusedPrintOrPdf;
+
+  /// Short message at the bottom of the screen: a tab was not put to sleep because a download it started is not finished.
+  ///
+  /// In en, this message translates to:
+  /// **'A download from this tab is still running, so it was not put to sleep'**
+  String get browser_sleepRefusedDownload;
+
+  /// Confirm button of the freeze dialogs: unload every tab of the container and stop its background activity (push messages, service workers, downloads) until the user resumes it. Cookies, sign-ins and site data are kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze container'**
+  String get browser_freezeContainer;
+
+  /// Item of the container menu, in the Title Case of the menu's other items: unload every tab of the container and stop its background activity (push messages, service workers, downloads) until the user resumes it. Cookies, sign-ins and site data are kept.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze Container'**
+  String get browser_menuFreezeContainer;
+
+  /// Title of the dialog shown before freezing a container the first time. It has a "Don't ask again" choice. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze {container}?'**
+  String browser_freezeContainerTitle(String container);
+
+  /// What freezing a container does, shown in the dialog before the first freeze. Must not suggest that pages are paused or preserved as they were: they are unloaded and load again after Resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Unloads its tabs and stops what its sites do in the background, such as push messages and service workers, until you resume it. Cookies, sign-ins and site data are kept. New tabs opened in it wait until then. Push messages sent meanwhile are skipped.'**
+  String get browser_freezeContainerDescription;
+
+  /// Item of the container menu for a frozen container: lift the freeze, so its tabs can load again and its sites can run in the background.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Container'**
+  String get browser_resumeContainer;
+
+  /// Item of the container menu while the container is being frozen: stop and resume it instead. Not called Cancel, because tabs already unloaded stay unloaded until shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Freezing and Resume'**
+  String get browser_stopFreezing;
+
+  /// Item of the container menu when freezing the container did not finish: run the freeze again.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Freezing Again'**
+  String get browser_retryFreeze;
+
+  /// State of a frozen container under its menu entry, and screen reader label of the pause glyph on a frozen container or on a tab of one.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get browser_containerFrozenLabel;
+
+  /// State of a container while it is being frozen, before the first tab was unloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezing…'**
+  String get browser_containerFreezing;
+
+  /// State of a container while it is being frozen: done of its total tabs have been unloaded so far.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezing… {done} of {total}'**
+  String browser_containerFreezingProgress(int done, int total);
+
+  /// State of a frozen container while it is being resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Resuming…'**
+  String get browser_containerResuming;
+
+  /// Short state on the container's chip in the containers list when freezing it did not finish. The full state appears in the container menu. Keep it to one or two words.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze incomplete'**
+  String get browser_freezeIncompleteLabel;
+
+  /// Short state on the container's chip in the containers list when resuming it did not finish. The full state appears in the container menu. Keep it to one or two words.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume incomplete'**
+  String get browser_resumeIncompleteLabel;
+
+  /// State of a container whose freeze stopped part way, while the engine confirmed that it blocks new activity of the container.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze incomplete: new activity is blocked, some already running may not have stopped'**
+  String get browser_freezeIncompleteBlocked;
+
+  /// State of a container whose freeze stopped part way, when the engine could not confirm that it blocks the container's activity.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze incomplete: background activity may not be blocked'**
+  String get browser_freezeIncompleteUncertain;
+
+  /// State of a container whose Resume stopped part way: everything stays blocked as while frozen, and Resume can be tried again.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume incomplete: still blocked, resume again'**
+  String get browser_resumeIncompleteBlocked;
+
+  /// State of a container whose Resume stopped part way after the engine had already stopped blocking it, so its sites may run in the background although Resume did not finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume incomplete: background activity may already be running'**
+  String get browser_resumeIncompleteLifted;
+
+  /// Why "Freeze container" is unavailable: the container shares the browser's default cookies and site data, and only a container with its own can be frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs its own cookie storage'**
+  String get browser_freezeNeedsOwnStorage;
+
+  /// Short message at the bottom of the screen: the container cannot be frozen because one of its isolated tabs uses the same cookie storage as a tab in another container.
+  ///
+  /// In en, this message translates to:
+  /// **'An isolated tab of this container shares its storage with a tab outside it, so it cannot be frozen'**
+  String get browser_freezeSharedStorage;
+
+  /// Short message at the bottom of the screen: the container was not resumed because an isolated tab in another container that is still frozen uses the same cookie storage; resuming this one would let that tab run. This happens only after WebLibre restored frozen containers from a damaged record.
+  ///
+  /// In en, this message translates to:
+  /// **'An isolated tab of another frozen container shares this container\'s storage. Resume that container first.'**
+  String get browser_resumeSharedWithFrozen;
+
+  /// Short message at the bottom of the screen: freezing or resuming is not possible yet because, after a damaged record was found, WebLibre is restoring which containers are frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen containers are being restored. Try again in a moment.'**
+  String get browser_freezeRecoveryPending;
+
+  /// Short message at the bottom of the screen after the user pressed Undo for a closed tab: the tab is not reopened, because the cookies and site data of the storage it ran in are waiting to be deleted (WebLibre retries that at every start).
+  ///
+  /// In en, this message translates to:
+  /// **'This tab can\'t come back until its site data is deleted'**
+  String get browser_undoWaitsForSiteData;
+
+  /// Short message at the bottom of the screen when resuming a frozen container stopped before anything was lifted, because WebLibre could not read its record of which storage is frozen ("Freeze" stops a container's background activity until it is resumed). The container stays frozen; resuming again tries again.
+  ///
+  /// In en, this message translates to:
+  /// **'The container was not resumed because WebLibre could not check what is frozen. Try again.'**
+  String get browser_resumeFreezeStateUnknown;
+
+  /// Short message at the bottom of the screen: the container could not be frozen or resumed because it is being frozen, resumed, deleted or changed right now.
+  ///
+  /// In en, this message translates to:
+  /// **'This container is busy. Try again in a moment.'**
+  String get browser_freezeBusy;
+
+  /// Short message at the bottom of the screen after a container was frozen. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'{container} is frozen'**
+  String browser_containerFrozenDone(String container);
+
+  /// Short message at the bottom of the screen after a frozen container was resumed. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'{container} resumed'**
+  String browser_containerResumedDone(String container);
+
+  /// Short message at the bottom of the screen: the engine refused to freeze the container because a tab of another container runs in its cookie storage.
+  ///
+  /// In en, this message translates to:
+  /// **'A tab outside this container uses its storage, so it was not frozen'**
+  String get browser_freezeFailedShared;
+
+  /// Short message at the bottom of the screen: a tab opened in the container while it was being frozen, so the freeze was undone.
+  ///
+  /// In en, this message translates to:
+  /// **'A tab joined this container meanwhile, so it was not frozen. Try again.'**
+  String get browser_freezeFailedMembershipChanged;
+
+  /// Short message at the bottom of the screen: the container was not frozen because one of its tabs runs outside the container's cookie storage (for example a tab an extension opened), so freezing would not stop it.
+  ///
+  /// In en, this message translates to:
+  /// **'A tab in this container does not use its storage, so it was not frozen. Close that tab or move it to another container, then try again.'**
+  String get browser_freezeFailedMemberOutside;
+
+  /// Short message at the bottom of the screen: the container cannot be frozen while one of its sites runs as an installed web app or in a custom tab opened from another app.
+  ///
+  /// In en, this message translates to:
+  /// **'A web app or custom tab of this container is open. Close it, then try again.'**
+  String get browser_freezeFailedExternalWindow;
+
+  /// Short message at the bottom of the screen: the web engine did not accept the freeze, and it was undone completely.
+  ///
+  /// In en, this message translates to:
+  /// **'The browser engine refused to freeze this container. Nothing was changed.'**
+  String get browser_freezeFailedEngineRefused;
+
+  /// Short message at the bottom of the screen: WebLibre could not write the record of the freeze to storage, so it did not start.
+  ///
+  /// In en, this message translates to:
+  /// **'The frozen state could not be saved, so the container was not frozen'**
+  String get browser_freezeFailedNotPersisted;
+
+  /// Short message at the bottom of the screen: the container's tabs were unloaded and new activity blocked, but something already running did not stop within the time limit.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze incomplete: some activity did not stop in time. New activity is blocked; resume or try again.'**
+  String get browser_freezeFailedQuiescence;
+
+  /// Short message at the bottom of the screen when freezing a container stopped part way for another reason. The container menu offers Retry and Resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezing this container did not finish. Resume it or try again.'**
+  String get browser_freezeFailedGeneric;
+
+  /// Short message at the bottom of the screen: the container was not resumed because the proxy connection of the container, or of one of its isolated tabs, is not ready.
+  ///
+  /// In en, this message translates to:
+  /// **'This container\'s connection is not ready yet, so it stays frozen'**
+  String get browser_resumeRoutingNotReady;
+
+  /// Short message at the bottom of the screen: before resuming, the site data of an isolated tab that was closed while the container was frozen has to be deleted; that could not even start, so nothing was resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'The data of a closed isolated tab could not be deleted first, so the container stays frozen. Try again.'**
+  String get browser_resumeIsolationCleanupFailed;
+
+  /// Short message at the bottom of the screen: resuming a container failed, and everything stays blocked as while frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Resuming did not finish. The container is still frozen; try again.'**
+  String get browser_resumeFailedBlocked;
+
+  /// Short message at the bottom of the screen: resuming a container did not finish after the engine already stopped blocking it.
+  ///
+  /// In en, this message translates to:
+  /// **'Resuming did not finish. Its sites may already run in the background; try again.'**
+  String get browser_resumeFailedLifted;
+
+  /// Title of the dialog listing what keeps a container from being frozen: tabs using the camera, holding form input, downloads still running and so on.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t freeze this container yet'**
+  String get browser_freezeBlockedTitle;
+
+  /// Reason under a tab's title in the dialog listing what keeps a container from being frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the camera, microphone or screen sharing'**
+  String get browser_freezeBlockedRecording;
+
+  /// Reason under a tab's title in the dialog listing what keeps a container from being frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Has form input that would be lost'**
+  String get browser_freezeBlockedFormData;
+
+  /// Reason under a tab's title in the dialog listing what keeps a container from being frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'A file was chosen for upload'**
+  String get browser_freezeBlockedUpload;
+
+  /// Reason under a tab's title in the dialog listing what keeps a container from being frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Being printed or saved as PDF'**
+  String get browser_freezeBlockedPrintOrPdf;
+
+  /// Row of the dialog listing what keeps a container from being frozen: a download started in the container is not finished. Finish or cancel it first.
+  ///
+  /// In en, this message translates to:
+  /// **'A download from this container is still running'**
+  String get browser_freezeBlockedDownload;
+
+  /// Row of the dialog listing what keeps a container from being frozen: a running download cannot be traced to a container, so it may belong to this one. Finish or cancel it first.
+  ///
+  /// In en, this message translates to:
+  /// **'A download is running whose container is unknown'**
+  String get browser_freezeBlockedUnattributedDownload;
+
+  /// Stands in for a tab's title in the dialog listing what keeps a container from being frozen, when that tab was closed meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed tab'**
+  String get browser_freezeBlockedTabGone;
+
+  /// Button next to a tab in the dialog listing what keeps a container from being frozen: open that tab.
+  ///
+  /// In en, this message translates to:
+  /// **'Show tab'**
+  String get browser_freezeBlockedShowTab;
+
+  /// Button next to a running download in the dialog listing what keeps a container from being frozen: open the downloads list.
+  ///
+  /// In en, this message translates to:
+  /// **'View downloads'**
+  String get browser_freezeBlockedViewDownloads;
+
+  /// Title of the dialog asking before freezing a container whose tabs are playing media, show the result of a form submission or hold text typed into a form.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze anyway?'**
+  String get browser_freezeAskTitle;
+
+  /// Paragraph of the dialog asking before freezing a container whose tabs play audio or video.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{A tab of this container is playing media. Freezing stops playback.} other{{count} tabs of this container are playing media. Freezing stops playback.}}'**
+  String browser_freezeAskMedia(int count);
+
+  /// Paragraph of the dialog asking before freezing a container whose tabs show pages produced by sending a form (for example a search or an order confirmation).
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{A page of this container is the result of a form submission. When it reloads after Resume, the form is not sent again, so the page may not come back as it was.} other{{count} pages of this container are the result of a form submission. When they reload after Resume, the forms are not sent again, so the pages may not come back as they were.}}'**
+  String browser_freezeAskPostResult(int count);
+
+  /// Paragraph of the dialog asking before freezing a container whose tabs hold text the user typed into a field (a search box, a comment). "May": the page sometimes restores it.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{A tab of this container has text typed into a form. Freezing may lose it.} other{{count} tabs of this container have text typed into a form. Freezing may lose it.}}'**
+  String browser_freezeAskFormData(int count);
+
+  /// Title of the dialog shown when the user tries to load a page in a tab of a frozen container. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume {container} and open?'**
+  String browser_resumeAndOpenTitle(String container);
+
+  /// Text of the dialog shown when the user tries to load a page in a tab of a frozen container.
+  ///
+  /// In en, this message translates to:
+  /// **'This container is frozen, so nothing in it loads until it is resumed.'**
+  String get browser_resumeAndOpenContent;
+
+  /// Confirm button of the dialog shown when the user tries to load a page in a frozen container: resume the container, then load the page.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume and open'**
+  String get browser_resumeAndOpen;
+
+  /// Short message at the bottom of the screen after the user cancelled the dialog asking to resume a frozen container to load a page.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was opened. The container stays frozen.'**
+  String get browser_resumeAndOpenCancelled;
+
+  /// State of a container under its Resume entry and on the containers screen, when WebLibre froze it itself because its record of frozen containers was found damaged. The user resumes it when they want its sites to run again.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen to be safe after a damaged record'**
+  String get browser_containerFrozenToBeSafeLabel;
+
+  /// Title of the dialog shown once after WebLibre found its record of which containers are frozen damaged, and froze every container with its own cookie storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Containers frozen to be safe'**
+  String get browser_frozenToBeSafeTitle;
+
+  /// Text of the dialog shown once after WebLibre found its record of frozen containers damaged. A frozen container's tabs stay unloaded and its sites cannot run in the background until it is resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze the container that has its own cookie storage. Resume it when you want its sites to run again.} other{WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze all {count} containers that have their own cookie storage. Resume each one when you want its sites to run again.}}'**
+  String browser_frozenToBeSafeContent(int count);
+
+  /// Button of the dialog about containers frozen to be safe: open the list of containers, where each can be resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Show containers'**
+  String get browser_frozenToBeSafeShowContainers;
+
+  /// Short message at the bottom of the screen with a Retry button: after a damaged record was found, restoring which containers are frozen did not finish. Until it does, the sites of every container with its own storage stay blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre could not restore which containers are frozen, so every container stays frozen for now'**
+  String get browser_freezeRecoveryFailed;
+
+  /// Short message at the bottom of the screen at start: WebLibre was closed while a frozen container was being deleted, before anything was removed, so the container is back as it was. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting {container} did not finish, so it is still there'**
+  String browser_containerDeletionNotFinished(String container);
 
   /// Item of the tab menu: pin the tab to the start of the tab bar.
   ///
@@ -6796,6 +7414,60 @@ abstract class AppLocalizations {
   /// **'No tabs to choose here'**
   String get browser_tabPickerNothingHere;
 
+  /// Tab menu action: automatic sleep never unloads this tab, and its container is never frozen automatically while the tab is in it. Manual 'Put to sleep' and 'Freeze container' still work.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep awake'**
+  String get browser_keepTabAwake;
+
+  /// Tab menu action on a tab set to 'Keep awake': lets automatic sleep unload it again.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow sleeping'**
+  String get browser_allowTabSleeping;
+
+  /// Short label under the pin icon in the row of tab-state toggles at the top of the tab's long-press menu: pin the tab to the start of the tab bar. Keep it to one short word; "Pin tab" is read to screen readers.
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get browser_pinTabShort;
+
+  /// Short label under the pin icon in the row of tab-state toggles of the tab's long-press menu, for a pinned tab: unpin it. Keep it to one short word.
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get browser_unpinTabShort;
+
+  /// Short label under the lock icon in the row of tab-state toggles of the tab's long-press menu: lock the tab so it cannot be closed until it is unlocked. Not the profile lock. Keep it to one short word.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get browser_lockTabShort;
+
+  /// Short label for unlocking a locked tab, so it can be closed again: under the lock icon in the row of tab-state toggles of the tab's long-press menu, and the button of the message "This tab is locked" shown when closing it. Keep it to one short word.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get browser_unlockTabShort;
+
+  /// Short label under the sleep icon in the row of tab-state toggles of the tab's long-press menu: put the tab to sleep, unloading its page to free memory. Keep it to one short word.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get browser_sleepTabShort;
+
+  /// Short label under the sleep icon in the row of tab-state toggles of the tab's long-press menu, for a tab put to sleep: load its page again. Keep it to one short word.
+  ///
+  /// In en, this message translates to:
+  /// **'Wake'**
+  String get browser_wakeTabShort;
+
+  /// Accessibility label of the small indicator on a tab set to 'Keep awake'.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept awake'**
+  String get browser_tabKeptAwakeLabel;
+
   /// Tooltip of the toolbar button that opens the home page.
   ///
   /// In en, this message translates to:
@@ -7174,6 +7846,12 @@ abstract class AppLocalizations {
   /// **'More'**
   String get menu_itemMoreDisclosure;
 
+  /// Line under the "More" row of the browser menu when it hides more than three rows: items is the list of the first three rows' names ("Clone Tab, Export, Pin to Shortcuts"), count how many other rows it hides.
+  ///
+  /// In en, this message translates to:
+  /// **'{items} and {count, plural, =1{1 more} other{{count} more}}'**
+  String menu_moreDisclosureSummary(String items, int count);
+
   /// Name, in menu customization, of the expandable menu group for copying the current tab.
   ///
   /// In en, this message translates to:
@@ -7239,6 +7917,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pin to Shortcuts'**
   String get menu_itemPinTopSite;
+
+  /// Name, in menu customization, of the menu row that locks the tab so it cannot be closed, or unlocks it. Not the profile lock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Tab'**
+  String get menu_itemLockTab;
+
+  /// Name, in menu customization, of the menu row that puts the tab to sleep (unloads its page to free memory), or wakes it when it is asleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Put Tab to Sleep'**
+  String get menu_itemSleepTab;
 
   /// Name, in menu customization, of the menu row that looks for news feeds (RSS/Atom) on the page.
   ///
@@ -7713,6 +8403,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to update Shortcuts'**
   String get menu_pinUpdateFailed;
+
+  /// Browser menu row when the tab is not locked: lock it so it cannot be closed until it is unlocked. Not the profile lock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Tab'**
+  String get menu_lockTab;
+
+  /// Browser menu row when the tab is locked: unlock it so it can be closed again.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Tab'**
+  String get menu_unlockTab;
+
+  /// Browser menu row when unlocking the tab did not finish: try the unlock again. The tab stays locked until it does.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry Unlocking Tab'**
+  String get menu_retryUnlockTab;
+
+  /// Browser menu row: put the tab to sleep (unload its page to free memory until it is shown again).
+  ///
+  /// In en, this message translates to:
+  /// **'Put Tab to Sleep'**
+  String get menu_sleepTab;
+
+  /// Browser menu row when the tab was put to sleep: load its page again.
+  ///
+  /// In en, this message translates to:
+  /// **'Wake Tab'**
+  String get menu_wakeTab;
 
   /// Browser menu row that looks for news feeds (RSS/Atom) on the current page.
   ///
@@ -9850,6 +10570,84 @@ abstract class AppLocalizations {
   /// **'Reload'**
   String get splitView_crashedReload;
 
+  /// Shown in place of the page of a tab the user put to sleep while it was on screen. Its page was unloaded to free memory and loads again when woken.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab is asleep'**
+  String get splitView_sleepingTitle;
+
+  /// Button under "This tab is asleep" that loads the tab's page again. Also read out by screen readers as the button's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Wake'**
+  String get splitView_sleepingWake;
+
+  /// Shown in place of the page of a tab whose container is frozen, when the container's name is not known. A frozen container's tabs stay unloaded and its background activity (push messages, service workers) is stopped until the user resumes the container.
+  ///
+  /// In en, this message translates to:
+  /// **'This container is frozen'**
+  String get splitView_frozenTitle;
+
+  /// Shown in place of the page of a tab whose container is frozen. A frozen container's tabs stay unloaded and its background activity (push messages, service workers) is stopped until the user resumes the container. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'{container} is frozen'**
+  String splitView_frozenTitleNamed(String container);
+
+  /// Shown in place of a tab's page while its container is being frozen: its tabs are unloaded one by one and its background activity stopped. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezing {container}…'**
+  String splitView_freezingTitleNamed(String container);
+
+  /// Shown in place of a tab's page when freezing its container stopped part way. New activity of the container stays blocked; the container menu offers Retry and Resume. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezing {container} did not finish'**
+  String splitView_freezeIncompleteTitleNamed(String container);
+
+  /// Shown in place of a tab's page while its frozen container is being resumed. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Resuming {container}…'**
+  String splitView_resumingTitleNamed(String container);
+
+  /// Shown in place of a tab's page when resuming its frozen container stopped part way. The Resume button under it tries again. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'Resuming {container} did not finish'**
+  String splitView_resumeIncompleteTitleNamed(String container);
+
+  /// Button under "{container} is frozen" that resumes the container and loads this tab's page again. Also read out by screen readers as the button's name.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get splitView_frozenResume;
+
+  /// Line under "{container} is frozen": while the container was frozen, sites in it sent push messages that were thrown away unread. A message is not necessarily a notification, so do not translate it as notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 background message was skipped. Skipped messages are not delivered after Resume.} other{{count} background messages were skipped. Skipped messages are not delivered after Resume.}}'**
+  String splitView_frozenSkippedMessages(int count);
+
+  /// Shown in place of a tab's page when WebLibre froze its container itself, because its record of frozen containers was found damaged. container is the container's name, chosen by the user.
+  ///
+  /// In en, this message translates to:
+  /// **'{container} was frozen to be safe'**
+  String splitView_frozenToBeSafeTitleNamed(String container);
+
+  /// Line under "{container} was frozen to be safe" in place of a tab's page.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre\'s record of frozen containers was damaged. Resume to load this tab.'**
+  String get splitView_frozenToBeSafeDetail;
+
+  /// Shown in place of a tab's page while WebLibre restores which containers are frozen, after its record of them was found damaged. Every container with its own storage is frozen meanwhile.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen until WebLibre has restored which containers are frozen'**
+  String get splitView_frozenRecoveryTitle;
+
   /// Snackbar when two pages could not be shown together, e.g. because the first tab was closed in the meantime. The chosen page opens normally instead.
   ///
   /// In en, this message translates to:
@@ -9939,6 +10737,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'When this is unchecked, visits remain in history but are no longer assigned to a container.'**
   String get tabs_deleteContainerHistoryKeptNote;
+
+  /// Checkbox in the delete container dialog: also delete the cookies and site data the container kept for itself.
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete site data'**
+  String get tabs_deleteContainerAlsoDeleteSiteData;
+
+  /// Line under "Also delete site data" in the delete container dialog, saying what that data is.
+  ///
+  /// In en, this message translates to:
+  /// **'Cookies, sign-ins, offline data and notification subscriptions'**
+  String get tabs_deleteContainerSiteDataNote;
+
+  /// Line under "Also delete site data" in the delete container dialog when the container is frozen: the checkbox is checked and cannot be unchecked, and this says why.
+  ///
+  /// In en, this message translates to:
+  /// **'A frozen container\'s data is deleted with it, so its background activity can never resume.'**
+  String get tabs_deleteContainerSiteDataFrozenNote;
+
+  /// Heading of a section of the containers screen listing deleted containers whose cookies and site data could not be deleted yet. Their sites stay blocked until it is.
+  ///
+  /// In en, this message translates to:
+  /// **'Site data waiting to be deleted'**
+  String get tabs_siteDataPendingTitle;
+
+  /// Text under the heading "Site data waiting to be deleted" on the containers screen.
+  ///
+  /// In en, this message translates to:
+  /// **'Until their data is deleted, sites of these containers stay blocked. Deleting is retried at every start.'**
+  String get tabs_siteDataPendingExplanation;
+
+  /// Entry of the list "Site data waiting to be deleted": the data of a container the user deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted container'**
+  String get tabs_siteDataPendingDeletedContainer;
+
+  /// Entry of the list "Site data waiting to be deleted": the data of isolated tabs that were closed in a container that still exists, which could not be deleted yet.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed isolated tabs in {container}'**
+  String tabs_siteDataPendingClosedIsolatedTabs(String container);
+
+  /// Entry of the list "Site data waiting to be deleted": data whose container is gone, found when WebLibre checked its records. It is deleted only when the user taps Delete data.
+  ///
+  /// In en, this message translates to:
+  /// **'Container no longer exists'**
+  String get tabs_siteDataPendingOrphaned;
+
+  /// Button of an entry in the list "Site data waiting to be deleted": delete that data now.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete data'**
+  String get tabs_siteDataPendingDelete;
+
+  /// Screen-reader label of the progress spinner on an entry in the list "Site data waiting to be deleted" while its data is being deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting…'**
+  String get tabs_siteDataPendingDeleting;
+
+  /// Short message at the bottom of the screen after the site data of a deleted container was deleted from the list "Site data waiting to be deleted".
+  ///
+  /// In en, this message translates to:
+  /// **'Site data deleted'**
+  String get tabs_siteDataPendingDeleted;
+
+  /// Short message at the bottom of the screen when deleting an entry of the list "Site data waiting to be deleted" failed.
+  ///
+  /// In en, this message translates to:
+  /// **'The site data could not be deleted yet. It is tried again at the next start.'**
+  String get tabs_siteDataPendingFailed;
+
+  /// Line under an entry of the list "Site data waiting to be deleted": how many separate cookie storages (the container's own and those of its isolated tabs) are waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 storage area} other{{count} storage areas}}'**
+  String tabs_siteDataPendingCount(int count);
+
+  /// Heading of a section at the top of the containers screen while WebLibre restores which containers are frozen, after its record of them was found damaged.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring frozen containers'**
+  String get tabs_freezeRecoveryTitle;
+
+  /// Text of the section "Restoring frozen containers" while restoring is under way.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre\'s record of which containers are frozen was damaged. Until it is restored, every container with its own cookie storage stays frozen.'**
+  String get tabs_freezeRecoveryRestoring;
+
+  /// Text of the section "Restoring frozen containers" after an attempt to restore did not finish. A Retry button follows.
+  ///
+  /// In en, this message translates to:
+  /// **'WebLibre\'s record of which containers are frozen was damaged, and restoring it did not finish. Until it does, every container with its own cookie storage stays frozen.'**
+  String get tabs_freezeRecoveryFailed;
+
+  /// Body of the dialog shown instead of deleting a container that holds locked tabs (tabs locked with "Lock tab" cannot be closed until unlocked). Nothing was deleted. count is the number of locked tabs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 locked tab is in this container. Unlock it before deleting this container.} other{{count} locked tabs are in this container. Unlock these tabs before deleting this container.}}'**
+  String tabs_deleteContainerLockedTabs(int count);
+
+  /// Button in that dialog: open the tab view on this container, where the locked tabs can be unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Show tabs'**
+  String get tabs_deleteContainerShowTabs;
+
+  /// Short message at the bottom of the screen when deleting a container stopped because some of its tabs stayed open. The container and those tabs are still there; deleting it again tries again.
+  ///
+  /// In en, this message translates to:
+  /// **'Some of this container\'s tabs could not be closed, so the container was kept'**
+  String get tabs_deleteContainerIncomplete;
+
+  /// Short message at the bottom of the screen when deleting a frozen container stopped before anything was deleted, because the app could not save that the deletion had started (for example, the storage is full). A frozen container's background activity is stopped until it is resumed. The container is still there; deleting it again tries again.
+  ///
+  /// In en, this message translates to:
+  /// **'The container was not deleted because its frozen state could not be saved. Try again.'**
+  String get tabs_deleteContainerNotPersisted;
+
+  /// Short message at the bottom of the screen when deleting a container stopped before anything was closed or deleted, because WebLibre could not read its record of which containers are frozen ("Freeze" stops a container's background activity until it is resumed). Without it, the app does not know which site data belongs to the container. The container is still there; deleting it again tries again.
+  ///
+  /// In en, this message translates to:
+  /// **'The container was not deleted because WebLibre could not check whether it is frozen. Try again.'**
+  String get tabs_deleteContainerFreezeStateUnknown;
+
+  /// Short message at the bottom of the screen after a frozen container was deleted but its site data (cookies, sign-ins, offline data, notification subscriptions) could not be deleted yet. That data stays blocked from running and the app tries again at every start.
+  ///
+  /// In en, this message translates to:
+  /// **'Container deleted; site-data cleanup pending'**
+  String get tabs_deleteContainerSiteDataPending;
+
+  /// Short message at the bottom of the screen when deleting a container was refused because a web app (an installed site opened in its own window) or a custom tab (a link from another app opened in a WebLibre window) still runs in the container. Nothing was closed or deleted; the user closes those windows and deletes the container again.
+  ///
+  /// In en, this message translates to:
+  /// **'Close this container\'s web apps and custom tabs first'**
+  String get tabs_deleteContainerOpenInWebApp;
+
+  /// Short message at the bottom of the screen when deleting a frozen container was refused ("Freeze" stops a container's background activity until it is resumed). After WebLibre found its record of frozen containers damaged, storage that isolated tabs of two containers share was put under this container only; deleting it would delete that storage's site data while the other container's tab still uses it. Nothing was closed or deleted; once the container is resumed, deleting it leaves that storage to the other tab.
+  ///
+  /// In en, this message translates to:
+  /// **'An isolated tab of another container uses this frozen container\'s storage. Resume the container before deleting it.'**
+  String get tabs_deleteContainerSharedStorage;
+
+  /// Short message at the bottom of the screen when deleting a container could not start: it is already being deleted, or a tab is being added to it or moved in or out of it right now. Nothing was deleted.
+  ///
+  /// In en, this message translates to:
+  /// **'This container is still being changed. Try again in a moment.'**
+  String get tabs_deleteContainerBusy;
+
+  /// Short message at the bottom of the screen when deleting a container was refused because WebLibre found its record of frozen containers damaged and is still restoring which containers are frozen. Until then every container is treated as frozen, and its site data could not be deleted reliably. Nothing was deleted; the Containers screen shows how restoring goes.
+  ///
+  /// In en, this message translates to:
+  /// **'No container can be deleted while frozen containers are being restored'**
+  String get tabs_deleteContainerRecoveryPending;
+
+  /// Short message at the bottom of the screen when a container was deleted with "Also delete browsing history" ticked, but deleting that history failed. The visits remain in history without a container.
+  ///
+  /// In en, this message translates to:
+  /// **'The container was deleted, but its history could not be deleted'**
+  String get tabs_deleteContainerHistoryFailed;
 
   /// Button at the bottom of the container editor that deletes the container (asks for confirmation).
   ///
@@ -10332,6 +11292,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Requires cookie isolation to be enabled'**
   String get tabs_requiresCookieIsolation;
+
+  /// Container editor row and the title of its dialog: freeze this container on its own once none of its tabs has been used for a while. Freezing unloads the container's tabs and stops its background activity until it is resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze Automatically'**
+  String get tabs_autoFreezeTitle;
+
+  /// Value of 'Freeze Automatically' in the container editor, and its first choice: the container is never frozen automatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get tabs_autoFreezeOff;
+
+  /// Value of 'Freeze Automatically' in the container editor: the container freezes once none of its tabs has been used for this many minutes. Only time while WebLibre is open counts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{After 1 minute unused, counted while WebLibre is open} other{After {count} minutes unused, counted while WebLibre is open}}'**
+  String tabs_autoFreezeAfterMinutes(int count);
+
+  /// Value of 'Freeze Automatically' in the container editor: the container freezes once none of its tabs has been used for this many hours. Only time while WebLibre is open counts.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{After 1 hour unused, counted while WebLibre is open} other{After {count} hours unused, counted while WebLibre is open}}'**
+  String tabs_autoFreezeAfterHours(int count);
+
+  /// Text at the top of the 'Freeze Automatically' dialog: what the choice does, that only time while WebLibre is open counts, what freezing stops, what keeps the container from freezing, and that typed form text only delays it (for an hour of no use, or the chosen time if longer) and may then be lost. "Keep awake" is the tab menu action of the same name.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezes this container once none of its tabs has been used for the time you choose. Only time while WebLibre is open counts. Freezing unloads its tabs and stops what it runs in the background, notifications included, until you resume it. It waits while one of its tabs plays media, is in a call, holds a download, or is set to \"Keep awake\". Typed text keeps it waiting until it has been unused for an hour; the text may then be lost.'**
+  String get tabs_autoFreezeExplanation;
 
   /// Switch in the container editor: use separate open-in-app settings for this container.
   ///
@@ -17044,10 +18034,10 @@ abstract class AppLocalizations {
   /// **'cleanup tabs'**
   String get settings_autoClearUnassignedTabsKeywords;
 
-  /// Explanation under that setting.
+  /// Explanation under "Auto-Clear Unassigned Tabs". Tabs locked with "Lock tab" are never closed by it.
   ///
   /// In en, this message translates to:
-  /// **'Automatically close unassigned tabs older than the selected time period'**
+  /// **'Automatically close unassigned tabs older than the selected time period. Locked tabs are kept.'**
   String get settings_autoClearUnassignedTabsSubtitle;
 
   /// Time period option for automatic clearing: never clear.
@@ -20622,6 +21612,78 @@ abstract class AppLocalizations {
   /// **'Features'**
   String get settings_featureControlSectionTitle;
 
+  /// Section heading on the browsing settings screen for automatic tab sleep (unloading a tab's page to free memory).
+  ///
+  /// In en, this message translates to:
+  /// **'Sleeping Tabs'**
+  String get settings_sleepingTabsSectionTitle;
+
+  /// Switch: unload tabs the user has not looked at for a while, to free memory.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Tabs Automatically'**
+  String get settings_autoSleepTabsTitle;
+
+  /// Explains automatic tab sleep under its switch, in about one line: what it does, and how a sleeping tab loads again. "Wake" is the button on a sleeping tab's page (browser_wakeTabShort).
+  ///
+  /// In en, this message translates to:
+  /// **'While WebLibre is open, unloads tabs you have not looked at for a while. Tap Wake on a sleeping tab to load it again.'**
+  String get settings_autoSleepTabsSubtitle;
+
+  /// Comma-separated search words for the automatic tab sleep setting. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'sleep, unload, memory, suspend, discard, idle, inactive tabs'**
+  String get settings_autoSleepTabsKeywords;
+
+  /// Setting title: how long a tab is off screen before automatic sleep unloads it. Followed by a list of durations.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep After'**
+  String get settings_autoSleepIdleTitle;
+
+  /// Explains the 'Sleep After' setting.
+  ///
+  /// In en, this message translates to:
+  /// **'How long a tab is off screen before it is put to sleep'**
+  String get settings_autoSleepIdleSubtitle;
+
+  /// Comma-separated search words for the 'Sleep After' setting. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'sleep, timeout, idle, inactive'**
+  String get settings_autoSleepIdleKeywords;
+
+  /// Setting title: how many tabs may keep their page loaded before automatic sleep unloads the oldest ones.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded Tabs Limit'**
+  String get settings_residentTabLimitTitle;
+
+  /// Explains the 'Loaded Tabs Limit' setting.
+  ///
+  /// In en, this message translates to:
+  /// **'Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.'**
+  String get settings_residentTabLimitSubtitle;
+
+  /// Comma-separated search words for the 'Loaded Tabs Limit' setting. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'limit, memory, loaded tabs, sleep'**
+  String get settings_residentTabLimitKeywords;
+
+  /// Choice of the 'Loaded Tabs Limit' setting: any number of tabs may stay loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'No Limit'**
+  String get settings_residentTabLimitOff;
+
+  /// Choice of the 'Loaded Tabs Limit' setting: at most this many tabs keep their page loaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Tab} other{{count} Tabs}}'**
+  String settings_residentTabLimitCount(int count);
+
   /// Title of the Small Web panel. The "small web" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout.
   ///
   /// In en, this message translates to:
@@ -22754,6 +23816,12 @@ abstract class AppLocalizations {
   /// **'Open tabs'**
   String get user_deleteBrowsingDataTypeTabsTitle;
 
+  /// Explanation under the "Open tabs" checkbox wherever browsing data is deleted (the delete dialog, quitting, the settings): tabs locked with "Lock tab" stay open.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked tabs are kept'**
+  String get user_deleteBrowsingDataTypeTabsDescription;
+
   /// Checkbox in the delete browsing data dialog.
   ///
   /// In en, this message translates to:
@@ -24654,6 +25722,18 @@ abstract class AppLocalizations {
   /// **'{value} ms'**
   String units_milliseconds(String value);
 
+  /// A duration in whole minutes, e.g. "30 minutes" as a choice in a list of durations.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute} other{{count} minutes}}'**
+  String units_minutes(int count);
+
+  /// A duration in whole hours, e.g. "4 hours" as a choice in a list of durations.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
+  String units_hours(int count);
+
   /// Name of a visibility switch in Customize and Settings > Feature Control. When on, the browser shows the controls for creating and configuring containers (separate cookie and login spaces).
   ///
   /// In en, this message translates to:
@@ -25061,6 +26141,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'proxy, vpn, connection, container, start, confirmation, don\'t ask again'**
   String get rememberedPrompt_startProxyConnectionKeywords;
+
+  /// Switch in the Confirmations settings: explain what putting a tab to sleep does, and ask, before doing it. Off, tabs go to sleep without that question; questions about playing media or form results are still asked.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before putting tabs to sleep'**
+  String get rememberedPrompt_sleepTabsLabel;
+
+  /// Subtitle of the switch for asking before putting tabs to sleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Explains that a sleeping tab\'s page reloads and may lose unsaved state'**
+  String get rememberedPrompt_sleepTabsDescription;
+
+  /// Comma-separated search keywords for the switch for asking before putting tabs to sleep. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'sleep, unload, memory, tab, suspend, discard, confirmation, don\'t ask again'**
+  String get rememberedPrompt_sleepTabsKeywords;
+
+  /// Switch in the Confirmations settings: explain what freezing a container does, and ask, before doing it. Off, containers are frozen without that question; questions about playing media or form results are still asked.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before freezing a container'**
+  String get rememberedPrompt_freezeContainerLabel;
+
+  /// Subtitle of the switch for asking before freezing a container.
+  ///
+  /// In en, this message translates to:
+  /// **'Explains that a frozen container\'s tabs are unloaded and its background activity stops until Resume'**
+  String get rememberedPrompt_freezeContainerDescription;
+
+  /// Comma-separated search keywords for the switch for asking before freezing a container. Never displayed.
+  ///
+  /// In en, this message translates to:
+  /// **'freeze, pause, container, resume, background, push, confirmation, don\'t ask again'**
+  String get rememberedPrompt_freezeContainerKeywords;
 
   /// Error message shown when the user taps the voice-input button but the device has no speech recognition service.
   ///

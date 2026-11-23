@@ -2821,7 +2821,7 @@
   "settings_autoClearHistorySubtitle": "Автоматически удалять историю просмотра старше выбранного периода",
   "settings_autoClearUnassignedTabsTitle": "Автоочистка вкладок без контейнера",
   "settings_autoClearUnassignedTabsKeywords": "очистка вкладок",
-  "settings_autoClearUnassignedTabsSubtitle": "Автоматически закрывать вкладки без контейнера старше выбранного периода",
+  "settings_autoClearUnassignedTabsSubtitle": "Автоматически закрывать вкладки без контейнера старше выбранного периода. Заблокированные вкладки сохраняются.",
   "settings_durationNever": "Никогда",
   "settings_duration1Day": "1 день",
   "settings_duration3Days": "3 дня",

@@ -254,6 +254,11 @@ void main() {
             dividerOptionsAction: '',
             crashedTitle: '',
             crashedReload: '',
+            sleepingTitle: '',
+            sleepingWake: '',
+            frozenTitle: '',
+            frozenResume: '',
+            frozenContainers: const [],
           ),
         );
     await tester.pump();

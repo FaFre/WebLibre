@@ -20,6 +20,7 @@
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/pwa/domain/providers.dart';
 
@@ -28,6 +29,7 @@ part 'page_action_availability.g.dart';
 /// Which conditional rows of the menu's page actions apply to
 /// [selectedTabId].
 typedef PageActionAvailability = ({
+  bool findInPage,
   bool translate,
   bool installable,
   bool shortcutable,
@@ -45,6 +47,18 @@ PageActionAvailability pageActionAvailability(
   required bool translateInLayout,
   required bool addToHomeScreenInLayout,
 }) {
+  // An asleep tab shows "This tab is asleep" until it is woken: there is no
+  // page to search, translate or install.
+  final asleep = ref.watch(isTabAsleepProvider(selectedTabId));
+  if (asleep) {
+    return (
+      findInPage: false,
+      translate: false,
+      installable: false,
+      shortcutable: false,
+    );
+  }
+
   var translate = false;
   if (translateInLayout) {
     // Hidden while reader mode is active (Fenix-aligned).
@@ -67,6 +81,7 @@ PageActionAvailability pageActionAvailability(
       addToHomeScreenInLayout && ref.watch(isCurrentTabShortcutableProvider);
 
   return (
+    findInPage: true,
     translate: translate,
     installable: installable,
     shortcutable: shortcutable,

@@ -25,15 +25,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
-import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_close_confirmation.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/history_menu.dart';
 import 'package:weblibre/features/geckoview/features/readerview/presentation/controllers/readerable.dart';
-import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/menu_controller.dart';
-import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// The fixed row pinned below the menu's scrolling content: back,
 /// forward, close and reload for the tab in front.
@@ -62,6 +61,7 @@ class MenuNavigationRow extends HookConsumerWidget {
         selectedTabId,
       ).select((state) => state?.readerableState.active ?? false),
     );
+    final isLocked = ref.watch(isTabLockedProvider(selectedTabId));
 
     final backMenuController = useMenuController();
     final forwardMenuController = useMenuController();
@@ -141,9 +141,7 @@ class MenuNavigationRow extends HookConsumerWidget {
                 final otherIds = tabStates.keys
                     .where((id) => id != selectedTabId)
                     .toList();
-                if (otherIds.isNotEmpty) {
-                  await closeTabsWithConfirmation(context, ref, otherIds);
-                }
+                await closeTabsReportingLocks(context, ref, otherIds);
                 if (context.mounted) {
                   Navigator.pop(context);
                 }
@@ -159,9 +157,7 @@ class MenuNavigationRow extends HookConsumerWidget {
                       .where((e) => e.value.url.host == host)
                       .map((e) => e.key)
                       .toList();
-                  if (sameHostIds.isNotEmpty) {
-                    await closeTabsWithConfirmation(context, ref, sameHostIds);
-                  }
+                  await closeTabsReportingLocks(context, ref, sameHostIds);
                   if (context.mounted) {
                     Navigator.pop(context);
                   }
@@ -177,9 +173,7 @@ class MenuNavigationRow extends HookConsumerWidget {
                 if (!context.mounted) return;
 
                 final subtreeIds = descendants.keys.toList();
-                if (subtreeIds.isNotEmpty) {
-                  await closeTabsWithConfirmation(context, ref, subtreeIds);
-                }
+                await closeTabsReportingLocks(context, ref, subtreeIds);
                 if (context.mounted) {
                   Navigator.pop(context);
                 }
@@ -190,37 +184,17 @@ class MenuNavigationRow extends HookConsumerWidget {
           child: _buildNavIcon(
             icon: MdiIcons.tabMinus,
             label: l10n.menu_navCloseTab,
-            onTap: () async {
-              final tabState = ref.read(tabStateProvider(selectedTabId));
-              if (tabState != null && tabState.tabMode is IsolatedTabMode) {
-                final allStates = ref.read(tabStatesProvider);
-                final groupCount = allStates.values
-                    .where(
-                      (s) =>
-                          s.isolationContextId == tabState.isolationContextId,
-                    )
-                    .length;
-                if (groupCount <= 1 && context.mounted) {
-                  final confirmed = await ui_helper.confirmIsolatedTabClose(
-                    context,
-                    ref.read,
-                  );
-                  if (!confirmed) return;
-                }
-              }
-
-              await ref
-                  .read(tabRepositoryProvider.notifier)
-                  .closeTab(selectedTabId);
-
-              if (context.mounted) {
-                Navigator.pop(context);
-                ui_helper.showTabUndoClose(
-                  context,
-                  ref.read(tabRepositoryProvider.notifier).undoClose,
-                );
-              }
-            },
+            // A locked tab does not close; closing the others still works.
+            disabled: isLocked,
+            keepLongPress: true,
+            onTap: () => closeTabWithConfirmationAndUndoUsing(
+              context,
+              ref.read,
+              selectedTabId,
+              onClosed: () {
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
             onLongPress: () {
               if (closeMenuController.isOpen) {
                 closeMenuController.close();
@@ -269,10 +243,12 @@ class MenuNavigationRow extends HookConsumerWidget {
     );
   }
 
+  /// [keepLongPress] leaves [onLongPress] working while [disabled].
   Widget _buildNavIcon({
     required IconData icon,
     required String label,
     bool disabled = false,
+    bool keepLongPress = false,
     required VoidCallback onTap,
     VoidCallback? onLongPress,
   }) {
@@ -281,7 +257,7 @@ class MenuNavigationRow extends HookConsumerWidget {
         final colorScheme = Theme.of(context).colorScheme;
         return InkWell(
           onTap: disabled ? null : onTap,
-          onLongPress: disabled ? null : onLongPress,
+          onLongPress: disabled && !keepLongPress ? null : onLongPress,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
             padding: const EdgeInsets.symmetric(

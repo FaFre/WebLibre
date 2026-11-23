@@ -26,6 +26,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_material_design_icons/flutter_material_design_icons.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
 import 'package:weblibre/features/geckoview/domain/providers/restore_complete.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
@@ -36,6 +37,7 @@ import 'package:weblibre/features/geckoview/features/browser/presentation/contro
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/accordion_drop.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/close_tab_helper.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_view_reorder.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/quick_tab_switcher_chip.dart';
@@ -143,6 +145,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         (value) => value.value ?? const <String>{},
       ),
     );
+    final lockedTabIds = ref.watch(effectivelyLockedTabIdsProvider).value;
     final sandboxCaptureMap =
         ref.watch(sandboxCaptureMapProvider.select((value) => value.value)) ??
         const {};
@@ -191,6 +194,7 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
               state,
               selectedTabId: selectedTabId,
               pinnedTabIds: pinnedTabIds,
+              lockedTabIds: lockedTabIds,
               tabDepthById: tabDepthById,
               sandboxSourceUri: parseSandboxSource(
                 sandboxCaptureMap[state.$1.id],
@@ -227,6 +231,8 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
       final canClose =
           (!isVertical || isWideRail) &&
           !item.isPlaceholder &&
+          // A locked tab does not close.
+          !item.isLocked &&
           closeButtonMode.showsFor(isActive: item.isActive);
 
       if (isWideRail) {
@@ -466,7 +472,13 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
         case final AccordionMoveDrop drop:
           final targetId = drop.targetContainerId;
           if (targetId == null) {
-            await tabData.unassignContainer(drop.tabId);
+            final moved = await tabData.unassignContainer(drop.tabId);
+            if (moved != ContainerMoveResult.moved) {
+              if (context.mounted) {
+                showContainerMoveResult(context, moved);
+              }
+              return;
+            }
           } else {
             ContainerDataWithCount? target;
             for (final container in containers) {
@@ -476,7 +488,13 @@ class AccordionQuickTabSwitcher extends HookConsumerWidget {
               }
             }
             if (target == null) return;
-            await tabData.assignContainer(drop.tabId, target);
+            final moved = await tabData.assignContainer(drop.tabId, target);
+            if (moved != ContainerMoveResult.moved) {
+              if (context.mounted) {
+                showContainerMoveResult(context, moved);
+              }
+              return;
+            }
           }
 
           // A move that keeps the Gecko context keeps the tab, and it can be

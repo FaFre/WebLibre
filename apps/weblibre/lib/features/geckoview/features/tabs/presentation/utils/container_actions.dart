@@ -17,69 +17,153 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:weblibre/features/geckoview/features/history/domain/repositories/container_history.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
+import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_lock_l10n.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/models/container_data.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/container_freeze.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/presentation/dialogs/delete_container_dialog.dart';
-import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
-
-/// Remove any per-container app-link overrides (§ container isolation) stored
-/// for [contextIds] in GeneralSettings. Null ids are ignored; a no-op when none
-/// are present. Keeps overrides from lingering after a container drops
-/// isolation or is deleted.
-Future<void> removeContainerAppLinkOverrides(
-  WidgetRef ref,
-  Set<String?> contextIds,
-) async {
-  final ids = contextIds.nonNulls.toSet();
-  if (ids.isEmpty) return;
-
-  await ref.read(generalSettingsRepositoryProvider.notifier).updateSettings((
-    current,
-  ) {
-    if (!ids.any(current.appLinkContextOverrides.containsKey)) return current;
-    return current.copyWith.appLinkContextOverrides(
-      {...current.appLinkContextOverrides}
-        ..removeWhere((key, _) => ids.contains(key)),
-    );
-  });
-}
+import 'package:weblibre/features/geckoview/features/tabs/presentation/utils/container_freeze_l10n.dart';
+import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
 
 /// Ask for confirmation and delete [container], honouring the dialog's
 /// wipe-history choice. Returns whether the container was deleted.
 ///
 /// Shared by the container edit screen and the container context menu so both
 /// entry points perform the same cleanup.
+///
+/// A container with locked tabs is not deleted, and says so before asking.
+/// Nothing is destroyed before the deletion has succeeded: the history to
+/// delete is only read beforehand (its relation rows go with the container),
+/// and the history and the app-link override go once the container did.
 Future<bool> confirmAndDeleteContainer(
   BuildContext context,
   WidgetRef ref,
   ContainerData container,
 ) async {
-  final result = await showDeleteContainerDialog(context);
-  if (result == null) {
+  final locked = await ref
+      .read(tabDataRepositoryProvider.notifier)
+      .lockedTabIdsInContainer(container.id);
+  if (!context.mounted) return false;
+  if (locked.isNotEmpty) {
+    await _refuseForLockedTabs(context, ref, container, locked.length);
     return false;
   }
 
-  // Delete the container's Places visits BEFORE the container itself so the
-  // relation rows still exist to find them; deleting the container then
-  // dissolves the relations via ON DELETE CASCADE.
-  if (result.wipeHistory) {
-    await ref
-        .read(containerHistoryRepositoryProvider.notifier)
-        .deletePlacesVisitsForContainer(container.id);
+  // A record of its own storage: frozen, being frozen or resumed, or a
+  // deletion that did not finish. Native deletes that storage's site data
+  // with it either way (D28). A record of an isolation group only is not
+  // one: its own storage is cleared only if asked.
+  final identity = container.metadata.contextualIdentity;
+  final frozen =
+      identity != null &&
+      (ref
+              .read(contextFreezeSnapshotProvider)
+              .value
+              ?.contexts
+              .any((context) => context.contextId == identity) ??
+          false);
+  final decision = await showDeleteContainerDialog(
+    context,
+    hasOwnStorage: identity != null,
+    frozen: frozen,
+  );
+  if (decision == null || !context.mounted) {
+    return false;
   }
 
-  await ref
+  return await _deleteContainer(context, ref, container, decision);
+}
+
+Future<bool> _deleteContainer(
+  BuildContext context,
+  WidgetRef ref,
+  ContainerData container,
+  DeleteContainerDecision decision,
+) async {
+  // The cleanup the deletion owes happens in the repository, whether or not
+  // this screen is still there when it finishes; only what is said depends on
+  // it.
+  final result = await ref
       .read(containerRepositoryProvider.notifier)
-      .deleteContainer(container.id);
+      .deleteContainer(
+        container.id,
+        deleteHistory: decision.wipeHistory,
+        deleteSiteData: decision.deleteSiteData,
+      );
+  if (!context.mounted) return result is ContainerDeleted;
 
-  // Drop the container's app-link override so it doesn't outlive it.
-  await removeContainerAppLinkOverrides(ref, {
-    container.metadata.contextualIdentity,
-  });
+  switch (result) {
+    case ContainerDeletionBlockedByLockedTabs(:final count):
+      await _refuseForLockedTabs(context, ref, container, count);
+      return false;
+    case ContainerDeletionNeedsSiteData():
+      // Frozen since the dialog was answered, or before its snapshot had
+      // loaded: its site data goes with it, which was not agreed to. Asked
+      // again, with that said; nothing was closed or deleted.
+      final again = await showDeleteContainerDialog(
+        context,
+        hasOwnStorage: true,
+        frozen: true,
+      );
+      if (again == null || !context.mounted) return false;
+      return await _deleteContainer(context, ref, container, again);
+    case _:
+      final outcome = result.describe(AppLocalizations.of(context));
+      if (outcome != null) {
+        ui_helper.showOutcomeMessage(
+          context,
+          outcome.text,
+          failed: outcome.failed,
+        );
+      }
+      return result is ContainerDeleted;
+  }
+}
 
-  return true;
+/// Says that [container] holds [count] locked tabs and offers to show them.
+Future<void> _refuseForLockedTabs(
+  BuildContext context,
+  WidgetRef ref,
+  ContainerData container,
+  int count,
+) async {
+  final showTabs = await showContainerHasLockedTabsDialog(
+    context,
+    count: count,
+  );
+  if (!showTabs || !context.mounted) return;
+
+  await ref
+      .read(selectedContainerProvider.notifier)
+      .setContainerId(container.id);
+  if (context.mounted) const TabViewRoute().go(context);
+}
+
+/// Runs [open], which opens a tab into a container. When the container
+/// refuses it, says why and returns null: a frozen one ("Resume the container
+/// first": a new isolated tab, or a duplicate of one, would bring a context
+/// of its own into it, D19), or one being deleted.
+///
+/// The message is resolved from [context] before [open] runs, so it still
+/// shows when the menu or dialog that asked has closed in the meantime.
+Future<T?> openUnlessContainerRefuses<T>(
+  BuildContext context,
+  Future<T> Function() open,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final showInfo = ui_helper.infoMessengerFor(context);
+  try {
+    return await open();
+  } on ContainerRefusedTabException catch (refusal) {
+    showInfo(refusal.describe(l10n));
+    return null;
+  }
 }

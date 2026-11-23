@@ -98,7 +98,7 @@ final class PageActionAvailabilityProvider
 }
 
 String _$pageActionAvailabilityHash() =>
-    r'fe78543ad665732f17e0df2124fbe3c2addc4a98';
+    r'7628276343de242ee460cd6ff031465d176ba265';
 
 /// Whether the Translate and Add to home screen rows apply.
 ///

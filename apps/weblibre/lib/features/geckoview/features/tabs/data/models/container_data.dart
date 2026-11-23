@@ -103,6 +103,13 @@ class ContainerMetadata with FastEquatable {
   // the same thing with cookie isolation off.
   final WallpaperOverride? wallpaper;
 
+  // Freeze the container automatically once none of its tabs was used for
+  // this many minutes, counted while WebLibre is in the foreground (phase C2
+  // of the tab lock and freeze plan). Null never freezes it automatically.
+  // Freezing restricts the container's own Gecko context, so it is
+  // normalized to null when [contextualIdentity] is null.
+  final int? autoFreezeAfterMinutes;
+
   ContainerMetadata({
     required this.iconData,
     required this.contextualIdentity,
@@ -116,6 +123,7 @@ class ContainerMetadata with FastEquatable {
     required this.strictMode,
     required this.isolatedAppLinkSettings,
     required this.wallpaper,
+    required this.autoFreezeAfterMinutes,
   });
 
   ContainerMetadata.withDefaults({
@@ -131,6 +139,7 @@ class ContainerMetadata with FastEquatable {
     bool? strictMode,
     bool? isolatedAppLinkSettings,
     WallpaperOverride? wallpaper,
+    int? autoFreezeAfterMinutes,
   }) : this(
          iconData: iconData,
          contextualIdentity: contextualIdentity,
@@ -151,6 +160,10 @@ class ContainerMetadata with FastEquatable {
          isolatedAppLinkSettings:
              (isolatedAppLinkSettings ?? false) && contextualIdentity != null,
          wallpaper: wallpaper,
+         // Freezing needs a context of the container's own.
+         autoFreezeAfterMinutes: contextualIdentity != null
+             ? autoFreezeAfterMinutes
+             : null,
        );
 
   /// Enforce the settings that only mean something for a cookie-isolated
@@ -171,6 +184,12 @@ class ContainerMetadata with FastEquatable {
     // override on the tab's contextId.
     if (result.isolatedAppLinkSettings && result.contextualIdentity == null) {
       result = result.copyWith(isolatedAppLinkSettings: false);
+    }
+    // Freezing restricts the container's own context: without one there is
+    // nothing to freeze.
+    if (result.autoFreezeAfterMinutes != null &&
+        result.contextualIdentity == null) {
+      result = result.copyWith(autoFreezeAfterMinutes: null);
     }
     // Routing is keyed on the cookie-store context too: the snapshot skips a
     // container without one, so a proxy or bypass kept here is a setting the
@@ -207,6 +226,7 @@ class ContainerMetadata with FastEquatable {
     strictMode,
     isolatedAppLinkSettings,
     wallpaper,
+    autoFreezeAfterMinutes,
   ];
 }
 

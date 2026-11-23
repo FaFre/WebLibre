@@ -20,5 +20,15 @@
   "@units_milliseconds": {
     "description": "A duration in milliseconds, e.g. \"300 ms\" on a slider. value is the already formatted number. Use your language's usual unit symbol.",
     "placeholders": { "value": { "type": "String" } }
+  },
+  "units_minutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "@units_minutes": {
+    "description": "A duration in whole minutes, e.g. \"30 minutes\" as a choice in a list of durations.",
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "units_hours": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "@units_hours": {
+    "description": "A duration in whole hours, e.g. \"4 hours\" as a choice in a list of durations.",
+    "placeholders": { "count": { "type": "int" } }
   }
 }

@@ -92,6 +92,7 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
     final liveTabId = previewTab == null ? selectedTabId : null;
     final liveTabState = ref.watch(tabStateProvider(liveTabId));
     final liveHistoryState = ref.watch(tabHistoryStateProvider(liveTabId));
+    final livePageAsleep = ref.watch(isTabAsleepProvider(liveTabId));
     final tabState = previewTab?.tabState ?? liveTabState;
     final historyState = previewTab?.historyState ?? liveHistoryState;
     final configs = ref.watch(
@@ -114,6 +115,7 @@ class QuickSwitcherButtonRow extends HookConsumerWidget {
       tabState: tabState,
       historyState: historyState,
       isPreview: isPreview,
+      pageAsleep: livePageAsleep,
       location: ToolbarConfigLocation.quickSwitcher,
     );
 

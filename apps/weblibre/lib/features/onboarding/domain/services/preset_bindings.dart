@@ -305,6 +305,13 @@ final Map<FeatureId, PresetBinding> presetBindings = {
         GeneralSettings.withDefaults().createChildTabsOption ==
         _enabled(FeatureId.tabsChildTabCreation, token),
   ),
+  FeatureId.tabsSleep: CodeDefaultPresetBinding(
+    // Automatic sleep is off on every preset in v1 (D12); manual sleep has
+    // no setting.
+    (token) =>
+        GeneralSettings.withDefaults().autoSleepTabs ==
+        _enabled(FeatureId.tabsSleep, token),
+  ),
   FeatureId.layoutStackingSimple: GeneralPresetBinding(
     (settings, token) => switch (token) {
       PolicyToken.recentlyUsedTabs => settings.copyWith(

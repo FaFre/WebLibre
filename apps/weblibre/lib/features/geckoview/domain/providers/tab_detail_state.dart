@@ -32,12 +32,14 @@
 /// widget that actually shows it.
 library;
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/domain/entities/equatable_image.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/find_result.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/history.dart';
 import 'package:weblibre/features/geckoview/domain/entities/states/translation.dart';
+import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 
 part 'tab_detail_state.g.dart';
 
@@ -208,6 +210,82 @@ TranslationState tabTranslationState(Ref ref, String? tabId) {
       (s) => s[tabId] ?? TranslationState.$default(),
     ),
   );
+}
+
+/// Each tab's lifecycle as native enforces it: whether its page is in memory,
+/// and whether it is held asleep (phase T1 of the tab lifecycle plan).
+@Riverpod(keepAlive: true)
+class TabLifecycleStates extends _$TabLifecycleStates {
+  @override
+  Map<String, TabLifecycleState> build() => const {};
+
+  void update(TabLifecycleState lifecycle) {
+    if (state[lifecycle.tabId] == lifecycle) {
+      return;
+    }
+
+    state = {...state}..[lifecycle.tabId] = lifecycle;
+  }
+
+  /// Drops the entries of [tabIds], tabs that have closed (see `TabStates`).
+  void removeTabs(Set<String> tabIds) {
+    state = state.withoutTabs(tabIds);
+  }
+}
+
+/// Whether [tabId] is shown as asleep: it has its own sleep hold and its page
+/// is unloaded. A tab without a session is not asleep for that alone (3.3).
+@Riverpod()
+bool isTabAsleep(Ref ref, String? tabId) {
+  if (tabId == null) {
+    return false;
+  }
+
+  return ref.watch(
+    tabLifecycleStatesProvider.select((s) => s[tabId]?.isAsleep ?? false),
+  );
+}
+
+/// Whether the selected tab is asleep. It shows "This tab is asleep" until the
+/// user wakes it (D10), so actions on its page (find, reader view, translate,
+/// export, print, screenshots) have nothing to act on and are left out or
+/// disabled.
+@Riverpod()
+bool isSelectedTabAsleep(Ref ref) =>
+    ref.watch(isTabAsleepProvider(ref.watch(selectedTabProvider)));
+
+/// Whether [tabId] has its own sleep hold, loaded or not: it is offered Wake
+/// instead of Put to sleep.
+@Riverpod()
+bool isTabSleepHeld(Ref ref, String? tabId) {
+  if (tabId == null) {
+    return false;
+  }
+
+  return ref.watch(
+    tabLifecycleStatesProvider.select(
+      (s) => (s[tabId]?.sleepHold ?? TabSleepHold.none) != TabSleepHold.none,
+    ),
+  );
+}
+
+/// Whether [tabId]'s context is restricted: its container is frozen, or the
+/// registry is in recovery. Independent of its own sleep hold (D26).
+@Riverpod()
+bool isTabContextFrozen(Ref ref, String? tabId) {
+  if (tabId == null) {
+    return false;
+  }
+
+  return ref.watch(
+    tabLifecycleStatesProvider.select((s) => s[tabId]?.contextFrozen ?? false),
+  );
+}
+
+extension TabLifecycleStateAsleep on TabLifecycleState {
+  /// Held asleep and unloaded (3.3 of the tab lifecycle plan).
+  bool get isAsleep =>
+      sleepHold != TabSleepHold.none && residency == TabResidency.unloaded;
 }
 
 extension TabKeyedState<T> on Map<String, T> {

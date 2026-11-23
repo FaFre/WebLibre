@@ -38,6 +38,7 @@ SettingsSnapshot _snapshot({
   EngineSettings? engine,
   bool strictContainers = false,
   bool appLinkContainers = false,
+  bool autoFreezeContainers = false,
 }) => SettingsSnapshot(
   general: general ?? GeneralSettings.withDefaults(),
   engine: engine ?? EngineSettings.withDefaults(),
@@ -51,6 +52,7 @@ SettingsSnapshot _snapshot({
   menu: defaultMenuLayout,
   strictContainers: strictContainers,
   appLinkContainers: appLinkContainers,
+  autoFreezeContainers: autoFreezeContainers,
 );
 
 GeneralSettings _hide(GeneralSettings settings, VisibilitySwitch s) =>
@@ -88,6 +90,22 @@ void main() {
         HiddenSetting.javascript,
         HiddenSetting.strictMode,
       });
+    });
+
+    test('automatic container freeze stops applying while container freeze '
+        'is hidden', () {
+      expect(
+        _snapshot(autoFreezeContainers: true).suspended,
+        isNot(contains(HiddenSetting.containerAutoFreeze)),
+      );
+      final hidden = _snapshot(
+        general: _hide(
+          GeneralSettings.withDefaults(),
+          VisibilitySwitch.containers,
+        ),
+        autoFreezeContainers: true,
+      );
+      expect(hidden.suspended, contains(HiddenSetting.containerAutoFreeze));
     });
 
     test('exempt settings are never suspended: Secure DNS, the sync '
