@@ -1630,11 +1630,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre will close to install the update. Open it again afterwards.';
+      'Android asks you to confirm the update. WebLibre then closes to install it. Open it again afterwards.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.';
+      'Android asks you to confirm the update. WebLibre then closes to install it. Open it again afterwards. Private tabs will be closed.';
 
   @override
   String get bangs_menuTitle => 'Bangs';

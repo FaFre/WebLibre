@@ -675,6 +675,88 @@ void main() {
     },
   );
 
+  group("a declined confirmation is the user's choice, not a failure", () {
+    clockedTest('the live event returns to the staged file', () async {
+      final b = backend();
+      final ready = await downloaded(b) as UpdateReadyToInstall;
+      final events = <UpdateEvent>[];
+      final sub = b.events.listen(events.add);
+      host.installerController.add(
+        InstallerStatusEvent(
+          sessionId: 4,
+          nonce: 'c',
+          phase: InstallerPhase.failed,
+          failure: NativeFailure.installCancelled,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        events.single.reduce(UpdateAwaitingUserAction(ready.assessment)),
+        UpdateReadyToInstall(ready.assessment),
+      );
+      // Still acknowledged: native must not report it again.
+      await events.single.onApplied!();
+      expect(host.acknowledged, [(4, 'c')]);
+      await sub.cancel();
+    });
+
+    clockedTest('so does one recorded before commit returned', () async {
+      final b = backend();
+      final ready = await downloaded(b) as UpdateReadyToInstall;
+      host.committedResult = InstallCommitResult(
+        committed: true,
+        phase: InstallerPhase.failed,
+        failure: NativeFailure.installCancelled,
+        sessionId: 5,
+        nonce: 'd',
+      );
+      expect(
+        await b.requestInstallation(ready.assessment),
+        UpdateReadyToInstall(ready.assessment),
+      );
+      expect(host.acknowledged, [(5, 'd')]);
+    });
+
+    clockedTest("a verifier's rejection is still reported", () async {
+      // Android aborts a session its verifier rejects; native reports that as
+      // installBlocked, never as a decline.
+      final b = backend();
+      final ready = await downloaded(b) as UpdateReadyToInstall;
+      final events = <UpdateEvent>[];
+      final sub = b.events.listen(events.add);
+      host.installerController.add(
+        InstallerStatusEvent(
+          sessionId: 6,
+          nonce: 'v',
+          phase: InstallerPhase.failed,
+          failure: NativeFailure.installBlocked,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      final failed =
+          events.single.reduce(UpdateAwaitingUserAction(ready.assessment))!
+              as UpdateFailed;
+      expect(failed.kind, UpdateFailureKind.installBlocked);
+      expect(failed.returnTo, UpdateReadyToInstall(ready.assessment));
+      await sub.cancel();
+    });
+
+    clockedTest('a decline found at recovery returns quietly too', () async {
+      final b = backend();
+      final ready = await downloaded(b) as UpdateReadyToInstall;
+      await b.requestInstallation(ready.assessment);
+      host.reconciliation = InstallerReconciliation(
+        result: ReconcileResult.failed,
+        ours: false,
+        failure: NativeFailure.installCancelled,
+        expected: host.commits.single,
+      );
+      final state = (await backend().recover()).state;
+      expect(state, isA<UpdateReadyToInstall>());
+      expect(await staged('apk').exists(), isTrue);
+    });
+  });
+
   clockedTest('a catalogue that only moves the download URL still authorizes '
       'the staged file', () async {
     final b = backend();

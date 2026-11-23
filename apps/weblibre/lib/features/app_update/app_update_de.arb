@@ -105,6 +105,6 @@
   "appUpdate_permissionDialogBody": "Android benötigt für WebLibre die Berechtigung „Unbekannte Apps installieren“. Sie wird nur für WebLibres eigene, geprüfte Aktualisierungen verwendet.",
   "appUpdate_permissionDialogOpenSettings": "Einstellungen öffnen",
   "appUpdate_installDialogTitle": "Aktualisierung installieren?",
-  "appUpdate_installDialogBody": "WebLibre wird zum Installieren geschlossen und muss danach wieder geöffnet werden.",
-  "appUpdate_installDialogBodyPrivateTabs": "WebLibre wird zum Installieren geschlossen und muss danach wieder geöffnet werden. Private Tabs werden geschlossen."
+  "appUpdate_installDialogBody": "Android bittet zuerst um Bestätigung. Dann wird WebLibre zum Installieren geschlossen und muss danach wieder geöffnet werden.",
+  "appUpdate_installDialogBodyPrivateTabs": "Android bittet zuerst um Bestätigung. Dann wird WebLibre zum Installieren geschlossen und muss danach wieder geöffnet werden. Private Tabs werden geschlossen."
 }

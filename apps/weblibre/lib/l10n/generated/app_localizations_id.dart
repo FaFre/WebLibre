@@ -1658,11 +1658,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre akan ditutup untuk menginstal pembaruan. Buka kembali setelahnya.';
+      'Android akan meminta konfirmasi pembaruan. Lalu WebLibre akan ditutup untuk menginstalnya. Buka kembali setelahnya.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre akan ditutup untuk menginstal pembaruan. Buka kembali setelahnya. Tab pribadi akan ditutup.';
+      'Android akan meminta konfirmasi pembaruan. Lalu WebLibre akan ditutup untuk menginstalnya. Buka kembali setelahnya. Tab pribadi akan ditutup.';
 
   @override
   String get bangs_menuTitle => 'Bang';

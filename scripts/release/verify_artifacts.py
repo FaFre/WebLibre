@@ -17,9 +17,10 @@ the artifacts as they will be published, after re-signing:
   for stable releases only; all artifacts agree on their component identities,
   and none of them is unknown or missing;
 - isolation (9.3): no updater receiver or confirmation-free install
-  permission in Play's manifest. The dex checks here (no Play Core in GitHub
-  APKs, no installer or apksig in the Play bundle) only catch an unminified
-  build: R8 renames what it keeps. The `build` job checks each variant's R8
+  permission in Play's manifest, and that permission in no GitHub APK either
+  (#722: every self-update shows Android's confirmation). The dex checks here
+  (no Play Core in GitHub APKs, no installer or apksig in the Play bundle)
+  only catch an unminified build: R8 renames what it keeps. The `build` job checks each variant's R8
   mapping, which lists the original name of every class left in it;
 - release-note summaries within the limits of 5.2.
 
@@ -62,6 +63,8 @@ MAX_SUMMARY_BYTES = 3 * 1024
 # The app's BuildComponent wire names (pigeons/app_update.dart). Clients read a
 # missing entry as unknown, so every one of them must be in the manifest.
 REQUIRED_COMPONENTS = ("gecko", "androidComponents", "applicationServices", "tor", "singbox")
+# Lets Android skip the install confirmation. Declared by no variant (#722).
+CONFIRMATION_FREE_PERMISSION = "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION"
 
 errors: list[str] = []
 
@@ -105,6 +108,7 @@ def parse_badging(out: str) -> dict:
     # Recent aapt2 versions call this minSdkVersion; older tools use sdkVersion.
     sdk = re.search(r"^(?:minSdkVersion|sdkVersion):\s*'(\d+)'", out, re.MULTILINE)
     abis = re.search(r"native-code: (.+)", out)
+    permissions = re.findall(r"^uses-permission(?:-sdk-23)?: name='([^']+)'", out, re.MULTILINE)
     if package is None:
         raise ValueError("aapt2 badging has no package name and numeric versionCode")
     if sdk is None:
@@ -115,6 +119,7 @@ def parse_badging(out: str) -> dict:
         "versionName": name.group(1) if name else None,
         "minSdk": int(sdk.group(1)),
         "abis": sorted(re.findall(r"'([^']+)'", abis.group(1))) if abis else [],
+        "permissions": sorted(set(permissions)),
     }
 
 
@@ -292,6 +297,8 @@ def main() -> int:
         )
         if b"Lcom/google/android/play/core/appupdate/" in dex_bytes(apk):
             fail(f"{apk.name}: GitHub APK contains Play Core")
+        if CONFIRMATION_FREE_PERMISSION in info["permissions"]:
+            fail(f"{apk.name}: declares {CONFIRMATION_FREE_PERMISSION}")
 
         if sequence is not None and seq != sequence:
             fail(f"{apk.name}: release sequence {seq} differs from {sequence}")
@@ -333,7 +340,7 @@ def main() -> int:
             if sequence is not None and code != sequence:
                 fail(f"bundle: sequence {code} differs from the APKs' {sequence}")
             components = check_components("bundle", manifest["components"], components)
-            for forbidden in ("UPDATE_PACKAGES_WITHOUT_USER_ACTION", "InstallStatusReceiver"):
+            for forbidden in (CONFIRMATION_FREE_PERMISSION, "InstallStatusReceiver"):
                 if forbidden in xml:
                     fail(f"bundle: manifest contains {forbidden}")
             dex = dex_bytes(args.bundle, "base/dex/")

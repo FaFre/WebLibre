@@ -28,6 +28,7 @@ import android.content.pm.PackageInstaller
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
+import java.io.IOException
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.UUID
@@ -190,9 +191,6 @@ class SessionInstaller(
             setAppPackageName(context.packageName)
             setSize(expected.byteLength)
             setInstallReason(PackageManager.INSTALL_REASON_USER)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
-            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 setPackageSource(PackageInstaller.PACKAGE_SOURCE_OTHER)
             }
@@ -200,8 +198,13 @@ class SessionInstaller(
 
         val sessionId = try {
             installer.createSession(params)
-        } catch (e: Exception) {
+        } catch (e: IOException) {
+            // Unsatisfiable parameters: no space, or unavailable media.
             return refused(NativeFailure.INSTALL_STORAGE, e.toString())
+        } catch (e: Exception) {
+            // Rejected parameters or no installer service (SecurityException,
+            // IllegalArgumentException): nothing the user can free up.
+            return refused(NativeFailure.INSTALL_UNKNOWN, e.toString())
         }
         val nonce = UUID.randomUUID().toString()
         try {
@@ -396,7 +399,7 @@ class SessionInstaller(
      * it). Dart retires it with [acknowledgeFailure] once its state shows it;
      * until then reconciliation reports it.
      */
-    fun onStatus(sessionId: Int, nonce: String?, status: Int, message: String?, confirmation: Intent?) {
+    fun onStatus(sessionId: Int, nonce: String?, status: Int, legacyStatus: Int?, message: String?, confirmation: Intent?) {
         val event = synchronized(this) {
             val state = journal.state()
             if (state == null || state.sessionId != sessionId || state.nonce != nonce || nonce == null) {
@@ -428,7 +431,7 @@ class SessionInstaller(
                 }
 
                 else -> {
-                    val failure = failureKind(status)
+                    val failure = failureKind(status, legacyStatus)
                     journal.write(state.copy(phase = InstallerPhase.FAILED, failure = failure, lastMessage = message))
                     PendingConfirmation.clear()
                     InstallerStatusEvent(sessionId.toLong(), nonce, InstallerPhase.FAILED, failure = failure, message = message)
@@ -466,8 +469,25 @@ class SessionInstaller(
                 .also { shared = it }
         }
 
-        fun failureKind(status: Int): NativeFailure = when (status) {
-            PackageInstaller.STATUS_FAILURE_ABORTED -> NativeFailure.INSTALL_CANCELLED
+        // PackageManager's INSTALL_FAILED_* codes, hidden from the public SDK.
+        private const val INSTALL_FAILED_VERIFICATION_TIMEOUT = -21
+        private const val INSTALL_FAILED_VERIFICATION_FAILURE = -22
+        private const val INSTALL_FAILED_ABORTED = -115
+
+        /**
+         * [legacyStatus] is the internal code behind [status]
+         * ([InstallStatusReceiver.EXTRA_LEGACY_STATUS]). Android reports a
+         * declined confirmation, an abandoned session and a verifier's
+         * rejection all as `STATUS_FAILURE_ABORTED`. Only the first two are
+         * [NativeFailure.INSTALL_CANCELLED], which Dart doesn't report as a
+         * failure; an abort Android doesn't explain is never taken for one.
+         */
+        fun failureKind(status: Int, legacyStatus: Int?): NativeFailure = when (status) {
+            PackageInstaller.STATUS_FAILURE_ABORTED -> when (legacyStatus) {
+                INSTALL_FAILED_ABORTED -> NativeFailure.INSTALL_CANCELLED
+                INSTALL_FAILED_VERIFICATION_FAILURE, INSTALL_FAILED_VERIFICATION_TIMEOUT -> NativeFailure.INSTALL_BLOCKED
+                else -> NativeFailure.INSTALL_UNKNOWN
+            }
             PackageInstaller.STATUS_FAILURE_BLOCKED -> NativeFailure.INSTALL_BLOCKED
             PackageInstaller.STATUS_FAILURE_CONFLICT -> NativeFailure.INSTALL_CONFLICT
             PackageInstaller.STATUS_FAILURE_INCOMPATIBLE -> NativeFailure.INSTALL_INCOMPATIBLE

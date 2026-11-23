@@ -105,6 +105,6 @@
   "appUpdate_permissionDialogBody": "Android требует для WebLibre разрешение «Установка неизвестных приложений». Оно используется только для собственных проверенных обновлений WebLibre.",
   "appUpdate_permissionDialogOpenSettings": "Открыть настройки",
   "appUpdate_installDialogTitle": "Установить обновление?",
-  "appUpdate_installDialogBody": "WebLibre закроется, чтобы установить обновление. Затем откройте его снова.",
-  "appUpdate_installDialogBodyPrivateTabs": "WebLibre закроется, чтобы установить обновление. Затем откройте его снова. Приватные вкладки будут закрыты."
+  "appUpdate_installDialogBody": "Android попросит подтвердить обновление. Затем WebLibre закроется, чтобы установить его. После этого откройте приложение снова.",
+  "appUpdate_installDialogBodyPrivateTabs": "Android попросит подтвердить обновление. Затем WebLibre закроется, чтобы установить его. После этого откройте приложение снова. Приватные вкладки будут закрыты."
 }

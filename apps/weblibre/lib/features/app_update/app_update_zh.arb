@@ -105,6 +105,6 @@
   "appUpdate_permissionDialogBody": "Android 需要为 WebLibre 授予“安装未知应用”权限。此权限仅用于 WebLibre 自身经过验证的更新。",
   "appUpdate_permissionDialogOpenSettings": "打开设置",
   "appUpdate_installDialogTitle": "要安装更新吗？",
-  "appUpdate_installDialogBody": "WebLibre 将关闭以安装更新。安装完成后请重新打开。",
-  "appUpdate_installDialogBodyPrivateTabs": "WebLibre 将关闭以安装更新。安装完成后请重新打开。隐私标签页将被关闭。"
+  "appUpdate_installDialogBody": "Android 会请你确认更新。随后 WebLibre 将关闭以安装更新。安装完成后请重新打开。",
+  "appUpdate_installDialogBodyPrivateTabs": "Android 会请你确认更新。随后 WebLibre 将关闭以安装更新。安装完成后请重新打开。隐私标签页将被关闭。"
 }

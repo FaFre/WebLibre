@@ -241,8 +241,10 @@ jobs:
           done
           # Manifest-declared, so never renamed or removed by R8. Not
           # REQUEST_INSTALL_PACKAGES: AC's feature-downloads declares it in
-          # every variant. The updater's own permission is the one Play's
-          # check (verify_artifacts.py) looks for too.
+          # every variant. UPDATE_PACKAGES_WITHOUT_USER_ACTION is declared in
+          # no variant (#722): this step rejects it in F-Droid's build, and
+          # verify_artifacts.py in every published GitHub APK and the Play
+          # bundle.
           aapt2="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/aapt2"
           manifest="$("$aapt2" dump xmltree "$apk" --file AndroidManifest.xml)"
           if grep -q -F -e 'android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION' -e 'eu.weblibre.gecko.update.InstallStatusReceiver' <<<"$manifest"; then

@@ -49,6 +49,7 @@ class InstallStatusReceiver : BroadcastReceiver() {
             sessionId = sessionId,
             nonce = intent.getStringExtra(EXTRA_NONCE),
             status = status,
+            legacyStatus = if (intent.hasExtra(EXTRA_LEGACY_STATUS)) intent.getIntExtra(EXTRA_LEGACY_STATUS, 0) else null,
             message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE),
             confirmation = confirmation,
         )
@@ -57,5 +58,13 @@ class InstallStatusReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION = "eu.weblibre.gecko.update.INSTALL_STATUS"
         const val EXTRA_NONCE = "eu.weblibre.gecko.update.NONCE"
+
+        /**
+         * `PackageInstaller.EXTRA_LEGACY_STATUS`, a `@SystemApi` constant the
+         * public SDK doesn't expose: the internal `INSTALL_FAILED_*` code
+         * behind [PackageInstaller.EXTRA_STATUS], which tells a declined
+         * confirmation from a verifier's rejection (both `STATUS_FAILURE_ABORTED`).
+         */
+        const val EXTRA_LEGACY_STATUS = "android.content.pm.extra.LEGACY_STATUS"
     }
 }

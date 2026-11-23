@@ -125,12 +125,29 @@ class InstallerJournalTest {
 
     @Test
     fun installerStatusesMapToFailureKinds() {
-        assertEquals(NativeFailure.INSTALL_CANCELLED, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_ABORTED))
-        assertEquals(NativeFailure.INSTALL_BLOCKED, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_BLOCKED))
-        assertEquals(NativeFailure.INSTALL_CONFLICT, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_CONFLICT))
-        assertEquals(NativeFailure.INSTALL_INCOMPATIBLE, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_INCOMPATIBLE))
-        assertEquals(NativeFailure.APK_INVALID, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_INVALID))
-        assertEquals(NativeFailure.INSTALL_STORAGE, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_STORAGE))
-        assertEquals(NativeFailure.INSTALL_UNKNOWN, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE))
+        assertEquals(NativeFailure.INSTALL_BLOCKED, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_BLOCKED, null))
+        assertEquals(NativeFailure.INSTALL_CONFLICT, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_CONFLICT, null))
+        assertEquals(NativeFailure.INSTALL_INCOMPATIBLE, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_INCOMPATIBLE, null))
+        assertEquals(NativeFailure.APK_INVALID, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_INVALID, null))
+        assertEquals(NativeFailure.INSTALL_STORAGE, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE_STORAGE, null))
+        assertEquals(NativeFailure.INSTALL_UNKNOWN, SessionInstaller.failureKind(android.content.pm.PackageInstaller.STATUS_FAILURE, null))
+    }
+
+    /**
+     * Android sends STATUS_FAILURE_ABORTED for a declined confirmation, an
+     * abandoned session and a verifier's rejection alike; only the first two
+     * are the quiet INSTALL_CANCELLED.
+     */
+    @Test
+    fun onlyAConfirmedDeclineIsACancellation() {
+        val aborted = android.content.pm.PackageInstaller.STATUS_FAILURE_ABORTED
+        // INSTALL_FAILED_ABORTED: "User rejected permissions", "Session was abandoned".
+        assertEquals(NativeFailure.INSTALL_CANCELLED, SessionInstaller.failureKind(aborted, -115))
+        // INSTALL_FAILED_VERIFICATION_FAILURE and _TIMEOUT.
+        assertEquals(NativeFailure.INSTALL_BLOCKED, SessionInstaller.failureKind(aborted, -22))
+        assertEquals(NativeFailure.INSTALL_BLOCKED, SessionInstaller.failureKind(aborted, -21))
+        // Unexplained: never taken for a decline.
+        assertEquals(NativeFailure.INSTALL_UNKNOWN, SessionInstaller.failureKind(aborted, null))
+        assertEquals(NativeFailure.INSTALL_UNKNOWN, SessionInstaller.failureKind(aborted, -110))
     }
 }

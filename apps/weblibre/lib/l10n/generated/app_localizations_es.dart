@@ -1677,11 +1677,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre se cerrará para instalar la actualización. Vuelve a abrirlo después.';
+      'Android te pedirá que confirmes la actualización. Luego WebLibre se cerrará para instalarla. Vuelve a abrirlo después.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre se cerrará para instalar la actualización. Vuelve a abrirlo después. Las pestañas privadas se cerrarán.';
+      'Android te pedirá que confirmes la actualización. Luego WebLibre se cerrará para instalarla. Vuelve a abrirlo después. Las pestañas privadas se cerrarán.';
 
   @override
   String get bangs_menuTitle => 'Bangs';

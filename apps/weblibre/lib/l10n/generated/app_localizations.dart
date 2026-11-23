@@ -2788,16 +2788,16 @@ abstract class AppLocalizations {
   /// **'Install update?'**
   String get appUpdate_installDialogTitle;
 
-  /// Body of the install confirmation when no private tabs are open.
+  /// Body of WebLibre's install confirmation when no private tabs are open. Android shows its own confirmation after it.
   ///
   /// In en, this message translates to:
-  /// **'WebLibre will close to install the update. Open it again afterwards.'**
+  /// **'Android asks you to confirm the update. WebLibre then closes to install it. Open it again afterwards.'**
   String get appUpdate_installDialogBody;
 
-  /// Body of the install confirmation when private tabs are open: they are lost when the app closes.
+  /// Body of WebLibre's install confirmation when private tabs are open: they are lost when the app closes. Android shows its own confirmation after it.
   ///
   /// In en, this message translates to:
-  /// **'WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.'**
+  /// **'Android asks you to confirm the update. WebLibre then closes to install it. Open it again afterwards. Private tabs will be closed.'**
   String get appUpdate_installDialogBodyPrivateTabs;
 
   /// Title of the bangs screen. A "bang" is a shortcut such as "!w" typed before a search to search a specific website directly (a DuckDuckGo convention); keep the term unless your language has an established equivalent.

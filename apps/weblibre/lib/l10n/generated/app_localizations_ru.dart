@@ -1668,11 +1668,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre закроется, чтобы установить обновление. Затем откройте его снова.';
+      'Android попросит подтвердить обновление. Затем WebLibre закроется, чтобы установить его. После этого откройте приложение снова.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre закроется, чтобы установить обновление. Затем откройте его снова. Приватные вкладки будут закрыты.';
+      'Android попросит подтвердить обновление. Затем WebLibre закроется, чтобы установить его. После этого откройте приложение снова. Приватные вкладки будут закрыты.';
 
   @override
   String get bangs_menuTitle => 'Бэнги';

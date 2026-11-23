@@ -1669,11 +1669,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre wird zum Installieren geschlossen und muss danach wieder geöffnet werden.';
+      'Android bittet zuerst um Bestätigung. Dann wird WebLibre zum Installieren geschlossen und muss danach wieder geöffnet werden.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre wird zum Installieren geschlossen und muss danach wieder geöffnet werden. Private Tabs werden geschlossen.';
+      'Android bittet zuerst um Bestätigung. Dann wird WebLibre zum Installieren geschlossen und muss danach wieder geöffnet werden. Private Tabs werden geschlossen.';
 
   @override
   String get bangs_menuTitle => 'Bangs';

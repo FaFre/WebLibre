@@ -1517,11 +1517,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appUpdate_installDialogTitle => '要安装更新吗？';
 
   @override
-  String get appUpdate_installDialogBody => 'WebLibre 将关闭以安装更新。安装完成后请重新打开。';
+  String get appUpdate_installDialogBody =>
+      'Android 会请你确认更新。随后 WebLibre 将关闭以安装更新。安装完成后请重新打开。';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre 将关闭以安装更新。安装完成后请重新打开。隐私标签页将被关闭。';
+      'Android 会请你确认更新。随后 WebLibre 将关闭以安装更新。安装完成后请重新打开。隐私标签页将被关闭。';
 
   @override
   String get bangs_menuTitle => 'Bang 快捷搜索';

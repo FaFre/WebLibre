@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  GitHub builds only: the self-updater's permissions and its status receiver
-  (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, 7.5). Play and F-Droid variants
-  merge neither UPDATE_PACKAGES_WITHOUT_USER_ACTION nor the receiver, which CI
-  checks (9.3). REQUEST_INSTALL_PACKAGES reaches them anyway: AC's
-  feature-downloads declares it in every variant.
+  GitHub builds only: the self-updater's status receiver
+  (plans/APP_UPDATER_IMPLEMENTATION_PLAN.md, 7.5), which Play and F-Droid
+  variants never merge; CI checks that (9.3). REQUEST_INSTALL_PACKAGES is not
+  GitHub-only: AC's feature-downloads declares it in every variant, and it is
+  repeated here only to name what the updater needs.
+
+  UPDATE_PACKAGES_WITHOUT_USER_ACTION is deliberately declared nowhere (#722:
+  a system scanner flagged the alpha as an installer). Every update therefore
+  shows Android's confirmation. CI rejects the permission in F-Droid's build,
+  every published GitHub APK and the Play bundle.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <!-- Lets Android skip the second confirmation for an app updating itself
-         (API 31+); the install is still only ever started by a tap. -->
-    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
 
     <application>
         <receiver

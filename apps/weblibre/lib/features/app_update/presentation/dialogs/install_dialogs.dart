@@ -32,7 +32,8 @@ Future<bool> showInstallPermissionDialog(BuildContext context) {
   );
 }
 
-/// "WebLibre will close to install the update" (8.5 step 2).
+/// Before Android's own install confirmation, which every update shows (#722),
+/// and the close that follows (8.5 step 2).
 Future<bool> showInstallConfirmDialog(
   BuildContext context, {
   required bool privateTabsOpen,

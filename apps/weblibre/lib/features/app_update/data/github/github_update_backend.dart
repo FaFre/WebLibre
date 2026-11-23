@@ -128,13 +128,14 @@ class GithubUpdateBackend implements UpdateBackend {
   }
 
   /// An installation that ended without succeeding while nobody listened.
-  /// Treated as the live event would have been: a file Android rejected is
-  /// deleted before the resting state is derived, so Retry never commits it
-  /// again.
-  Future<UpdateFailed> _recoveredFailure(
+  /// Treated as the live event would have been: a declined confirmation is
+  /// no failure, and a file Android rejected is deleted before the resting
+  /// state is derived, so Retry never commits it again.
+  Future<UpdateState> _recoveredFailure(
     InstallerReconciliation reconciliation,
   ) async {
     final kind = reconciliation.failure.kind;
+    if (kind == UpdateFailureKind.installCancelled) return await _derive();
     final sha = reconciliation.expected?.sha256;
     if (kind == UpdateFailureKind.apkInvalid && sha != null) {
       await _deleteStaged(sha);
@@ -657,13 +658,23 @@ class GithubUpdateBackend implements UpdateBackend {
     }
   }
 
-  /// Android ended a committed session without installing it.
-  UpdateFailed _installFailed(
+  /// Android ended a committed session without installing it. One the user
+  /// declined in Android's confirmation, which every update shows (#722), is
+  /// their choice, not a failure: back to the staged file, nothing reported.
+  /// Native reports `installCancelled` only when Android's code confirms a
+  /// decline or an abandonment; a verifier's rejection, which Android also
+  /// reports as aborted, arrives as `installBlocked` and is shown.
+  UpdateState _installFailed(
     UpdateAssessment? assessment,
     NativeFailure? failure,
     String? message,
   ) {
     final kind = failure.kind;
+    if (kind == UpdateFailureKind.installCancelled) {
+      return assessment == null
+          ? UpdateIdle()
+          : UpdateReadyToInstall(assessment);
+    }
     if (assessment == null) {
       return UpdateFailed(
         UpdateFailure(kind, message),

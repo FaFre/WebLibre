@@ -2089,13 +2089,13 @@
   "@appUpdate_installDialogTitle": {
     "description": "Title of the confirmation before installing."
   },
-  "appUpdate_installDialogBody": "WebLibre will close to install the update. Open it again afterwards.",
+  "appUpdate_installDialogBody": "Android asks you to confirm the update. WebLibre then closes to install it. Open it again afterwards.",
   "@appUpdate_installDialogBody": {
-    "description": "Body of the install confirmation when no private tabs are open."
+    "description": "Body of WebLibre's install confirmation when no private tabs are open. Android shows its own confirmation after it."
   },
-  "appUpdate_installDialogBodyPrivateTabs": "WebLibre will close to install the update. Open it again afterwards. Private tabs will be closed.",
+  "appUpdate_installDialogBodyPrivateTabs": "Android asks you to confirm the update. WebLibre then closes to install it. Open it again afterwards. Private tabs will be closed.",
   "@appUpdate_installDialogBodyPrivateTabs": {
-    "description": "Body of the install confirmation when private tabs are open: they are lost when the app closes."
+    "description": "Body of WebLibre's install confirmation when private tabs are open: they are lost when the app closes. Android shows its own confirmation after it."
   },
   "bangs_menuTitle": "Bangs",
   "@bangs_menuTitle": {

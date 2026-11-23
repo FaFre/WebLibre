@@ -23,6 +23,9 @@ BADGING = (
     "platformBuildVersionName='16' platformBuildVersionCode='36'\n"
     "sdkVersion:'26'\n"
     "targetSdkVersion:'36'\n"
+    "uses-permission: name='android.permission.INTERNET'\n"
+    "uses-permission-sdk-23: name='android.permission.REQUEST_INSTALL_PACKAGES'\n"
+    "uses-permission: name='android.permission.REQUEST_INSTALL_PACKAGES'\n"
     "native-code: 'arm64-v8a'\n"
 )
 
@@ -52,6 +55,11 @@ class Checks(unittest.TestCase):
         self.assertEqual(info["versionName"], "0.50.0")
         self.assertEqual(info["minSdk"], 26)
         self.assertEqual(info["abis"], ["arm64-v8a"])
+        # Both declaration forms, each name once.
+        self.assertEqual(
+            info["permissions"],
+            ["android.permission.INTERNET", "android.permission.REQUEST_INSTALL_PACKAGES"],
+        )
 
     def test_badging_min_sdk_version(self) -> None:
         # Recent aapt2 versions renamed sdkVersion to minSdkVersion.
@@ -131,6 +139,7 @@ class ReleaseVerification(unittest.TestCase):
         self.bundle = None
         self.prerelease = True
         self.minimum_sdk = "26"
+        self.permissions = ["android.permission.REQUEST_INSTALL_PACKAGES"]
         self.components = {
             "gecko": {"status": "known", "version": "159.0", "buildId": "20261030161337"},
             "androidComponents": {"status": "known", "version": "159.0"},
@@ -181,10 +190,11 @@ class ReleaseVerification(unittest.TestCase):
             abi = va.APK_NAME.fullmatch(apk.name).group("abi")
             code = recorded["logicalReleaseSequence"] * 10 + va.ABI_DIGITS[abi]
             sdk = f"minSdkVersion:'{self.minimum_sdk}'\n" if self.minimum_sdk is not None else ""
+            permissions = "".join(f"uses-permission: name='{name}'\n" for name in self.permissions)
             return (
                 f"package: name='{recorded['packageId']}' versionCode='{code}' "
                 f"versionName='{recorded['versionName']}'\n"
-                f"{sdk}targetSdkVersion:'37'\nnative-code: '{abi}'\n"
+                f"{sdk}targetSdkVersion:'37'\n{permissions}native-code: '{abi}'\n"
             )
         if args[0] == "java":
             recorded = va.read_manifest(Path(args[-1]), "base/" + va.MANIFEST_ENTRY)
@@ -352,6 +362,32 @@ class ReleaseVerification(unittest.TestCase):
         self.create_release()
         self.minimum_sdk = None
         self.assert_rejected("minimum SDK")
+
+    def test_no_github_apk_may_skip_the_install_confirmation(self) -> None:
+        # #722: the permission only ever lived in the GitHub manifest.
+        allowed = self.permissions
+        for prerelease in (True, False):
+            with self.subTest(prerelease=prerelease):
+                for apk in self.apks.glob("*.apk"):
+                    apk.unlink()
+                self.create_release(prerelease=prerelease)
+                self.permissions = [*allowed, va.CONFIRMATION_FREE_PERMISSION]
+                self.assert_rejected(f"declares {va.CONFIRMATION_FREE_PERMISSION}")
+                self.permissions = allowed
+
+    def test_the_bundle_may_not_skip_the_install_confirmation(self) -> None:
+        self.create_release(prerelease=False)
+        tool_output = self.tool_output
+
+        def with_permission(*args: str) -> str:
+            out = tool_output(*args)
+            if args[0] == "java":
+                permission = f'<uses-permission android:name="{va.CONFIRMATION_FREE_PERMISSION}"/>'
+                out = out.replace("<application/>", permission + "<application/>")
+            return out
+
+        self.tool_output = with_permission
+        self.assert_rejected(f"bundle: manifest contains {va.CONFIRMATION_FREE_PERMISSION}")
 
 
 if __name__ == "__main__":
