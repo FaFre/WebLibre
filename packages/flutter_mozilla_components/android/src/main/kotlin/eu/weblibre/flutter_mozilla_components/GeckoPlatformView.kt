@@ -88,6 +88,7 @@ private class NativeFragmentView(
     override fun onFlutterViewAttached(flutterView: View) {
         super.onFlutterViewAttached(flutterView)
         container.attachPointerInput(flutterView)
+        EngineViewVisibility.keepFocusHighlightOff(flutterView)
 
         // A Dart half that restarted has lost the ready state it was told when
         // components came up, and nothing else would tell it again: the engine

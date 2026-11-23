@@ -67,6 +67,14 @@ class _GeckoViewState extends State<GeckoView> {
   );
 
   final browserService = GeckoBrowserService();
+
+  /// Flutter's focus on the page: held while the platform view, or anything
+  /// under it, has focus. It never takes focus itself.
+  final _pageFocus = FocusNode(
+    debugLabel: 'GeckoView page',
+    canRequestFocus: false,
+    skipTraversal: true,
+  );
   late final AppLifecycleListener _listener;
   StreamSubscription<bool>? _viewReadySubscription;
 
@@ -201,6 +209,15 @@ class _GeckoViewState extends State<GeckoView> {
         'setEngineViewVisible',
         widget.isPainted,
       );
+
+      // Hiding the page drops its native focus onto the Flutter view, and
+      // showing it does not give it back. Flutter focus stays on the page
+      // through that without an event, so it is checked here, and only here:
+      // when focus is elsewhere (Find in Page, the address editor) the page
+      // must not take it.
+      if (widget.isPainted && _pageFocus.hasFocus) {
+        await _restoreEngineViewFocus(true);
+      }
     } catch (error, stackTrace) {
       developer.log(
         'Failed to set engine view visibility',
@@ -218,13 +235,17 @@ class _GeckoViewState extends State<GeckoView> {
   /// view, into a sheet or a dialog, but doesn't give it back when focus
   /// returns: the page would stay without its caret, its keyboard and the keys
   /// typed until a tap.
+  ///
+  /// The native side may still be waiting for the page to be shown and laid
+  /// out; losing Flutter focus before then cancels that request.
   Future<void> _restoreEngineViewFocus(bool focused) async {
-    if (!focused) return;
     try {
-      await _engineView.invokeMethod<void>('focusEngineView');
+      await _engineView.invokeMethod<void>(
+        focused ? 'focusEngineView' : 'cancelEngineViewFocus',
+      );
     } catch (error, stackTrace) {
       developer.log(
-        'Failed to focus engine view',
+        'Failed to ${focused ? 'focus' : 'release'} engine view',
         name: 'GeckoView',
         level: 900,
         error: error,
@@ -238,6 +259,7 @@ class _GeckoViewState extends State<GeckoView> {
     platform.setMethodCallHandler(null);
     unawaited(_viewReadySubscription?.cancel());
     _listener.dispose();
+    _pageFocus.dispose();
 
     super.dispose();
   }
@@ -245,8 +267,7 @@ class _GeckoViewState extends State<GeckoView> {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      canRequestFocus: false,
-      skipTraversal: true,
+      focusNode: _pageFocus,
       onFocusChange: (focused) => unawaited(_restoreEngineViewFocus(focused)),
       child: PlatformViewLink(
         viewType: 'eu.weblibre/gecko',

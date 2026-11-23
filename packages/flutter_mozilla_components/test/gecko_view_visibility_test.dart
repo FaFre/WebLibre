@@ -27,6 +27,9 @@ void main() {
       'dev.flutter.pigeon.flutter_mozilla_components.PointerInputHostApi.reset';
 
   late List<bool> calls;
+
+  /// Every call on the channel, visibility ones included, in order.
+  late List<String> methods;
   late StreamController<bool> viewReady;
 
   final messenger =
@@ -39,11 +42,14 @@ void main() {
 
   setUp(() {
     calls = [];
+    methods = [];
     viewReady = StreamController<bool>.broadcast();
 
     messenger.setMockMethodCallHandler(visibility, (call) async {
-      expect(call.method, 'setEngineViewVisible');
-      calls.add(call.arguments as bool);
+      methods.add(call.method);
+      if (call.method == 'setEngineViewVisible') {
+        calls.add(call.arguments as bool);
+      }
       return true;
     });
 
@@ -138,5 +144,44 @@ void main() {
     await tester.pump();
 
     expect(calls, isEmpty);
+  });
+
+  testWidgets('showing the page does not take focus Flutter keeps elsewhere', (
+    tester,
+  ) async {
+    await pumpPainted(tester, isPainted: true);
+    await tester.pump();
+
+    await pumpPainted(tester, isPainted: false);
+    await tester.pump();
+    await pumpPainted(tester, isPainted: true);
+    await tester.pump();
+
+    // Find in Page, the address editor: a Flutter field has the focus.
+    expect(methods, ['setEngineViewVisible', 'setEngineViewVisible']);
+  });
+
+  testWidgets('showing the page gives it focus when Flutter focus is on it', (
+    tester,
+  ) async {
+    await pumpPainted(tester, isPainted: true);
+    await tester.pump();
+
+    // What the platform view's `onFocus` does when native focus enters the page.
+    Focus.of(tester.element(find.byType(PlatformViewLink))).children.first
+        .requestFocus();
+    await tester.pump();
+    methods.clear();
+
+    await pumpPainted(tester, isPainted: false);
+    await tester.pump();
+    await pumpPainted(tester, isPainted: true);
+    await tester.pump();
+
+    expect(methods, [
+      'setEngineViewVisible',
+      'setEngineViewVisible',
+      'focusEngineView',
+    ]);
   });
 }

@@ -28,11 +28,14 @@ import android.util.Log
 import android.view.ActionMode
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.feature.TextSelectionTracker
@@ -44,6 +47,7 @@ import eu.weblibre.simple_intent_receiver.IntentApprovals
 import eu.weblibre.simple_intent_receiver.IntentCallerResolver
 import eu.weblibre.simple_intent_receiver.IntentReceiverHost
 import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.android.FlutterView
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.plugin.common.MethodChannel
@@ -85,6 +89,7 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         // the plugin's undelivered backlog survives that replacement. After
         // process death there is no backlog, so Android's launch must be taken.
         isRestoredLaunch = savedInstanceState?.getString(STATE_INTENT_PROCESS) == intentProcessId
+        keepFlutterViewFocusHighlightOff()
         super.onCreate(null)
 
         enableTransparentSystemBars()
@@ -93,6 +98,44 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
 
         // Restored straight into a pinned task (e.g. the process was killed while in PiP).
         checkAndExitPiP()
+    }
+
+    /**
+     * Switches Android's default focus highlight off for the [FlutterView] the
+     * moment its fragment has created it, which is before it is attached and so
+     * before it can gain focus.
+     *
+     * The highlight is a translucent wash over the whole window. A hardware
+     * keyboard or D-pad (focus outside touch mode) makes the view take focus on
+     * a cold launch, and the flag only takes effect on the *next* focus change:
+     * setting it after the first gain, for example once Gecko attaches, leaves
+     * the wash in place. All of the app's UI is drawn by Flutter, so it is
+     * never wanted. Registered before `super.onCreate`, which is what adds the
+     * fragment.
+     */
+    private fun keepFlutterViewFocusHighlightOff() {
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentViewCreated(
+                    fm: FragmentManager,
+                    f: Fragment,
+                    v: View,
+                    savedInstanceState: Bundle?,
+                ) {
+                    findFlutterView(v)?.defaultFocusHighlightEnabled = false
+                }
+            },
+            false,
+        )
+    }
+
+    private fun findFlutterView(view: View): FlutterView? {
+        if (view is FlutterView) return view
+        if (view !is ViewGroup) return null
+        for (index in 0 until view.childCount) {
+            findFlutterView(view.getChildAt(index))?.let { return it }
+        }
+        return null
     }
 
     /**
