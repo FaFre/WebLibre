@@ -93,6 +93,7 @@ import 'package:weblibre/features/share_intent/domain/services/sharing_intent.da
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
 import 'package:weblibre/features/user/data/database/riverpod_storage.dart';
 import 'package:weblibre/features/user/data/providers.dart';
+import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/cache.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -1003,6 +1004,10 @@ void main() async {
   // this engine to check a password asks as soon as Dart runs, and is told to
   // ask again until a profile is active.
   ProfileLockFlutterApi.setUp(ExternalWindowPasswordCheck());
+
+  // Before anything is drawn: a cover an earlier engine left on the window
+  // would hide this engine's startup screens.
+  unawaited(resetBrowserLockCoverForNewEngine());
 
   await HomeWidget.setAppGroupId('weblibre');
 

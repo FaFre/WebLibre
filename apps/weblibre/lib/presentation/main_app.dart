@@ -28,6 +28,7 @@ import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/sync/domain/entities/sync_repository_state.dart';
 import 'package:weblibre/features/sync/domain/repositories/sync.dart';
+import 'package:weblibre/features/user/domain/presentation/widgets/browser_lock_cover_color.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/utils/app_initialization_l10n.dart';
@@ -135,12 +136,15 @@ class MainApp extends HookConsumerWidget {
               uiScaleFactor: uiScaleFactor,
               disableAnimations: disableAnimations,
               child: NavigationBarStyle(
-                child: MultiFingerTapGuard(
-                  child: _SyncEventListener(
-                    child: _SandboxCaptureErrorListener(
-                      child: _DownloadStoppedListener(
-                        child: _StrictContainerBlockListener(
-                          child: child ?? const SizedBox.shrink(),
+                // Only this shell shows a profile, hence the lock screen.
+                child: BrowserLockCoverColor(
+                  child: MultiFingerTapGuard(
+                    child: _SyncEventListener(
+                      child: _SandboxCaptureErrorListener(
+                        child: _DownloadStoppedListener(
+                          child: _StrictContainerBlockListener(
+                            child: child ?? const SizedBox.shrink(),
+                          ),
                         ),
                       ),
                     ),

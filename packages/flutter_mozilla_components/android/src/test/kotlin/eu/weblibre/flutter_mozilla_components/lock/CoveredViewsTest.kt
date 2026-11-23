@@ -103,6 +103,23 @@ class CoveredViewsTest {
     }
 
     @Test
+    fun withoutBlockingFocusOnlyAccessibilityIsTaken() {
+        // The browser window's lock screen raises its keyboard while covered.
+        assertTrue(pageField.requestFocus())
+        val pageFocusability = page.descendantFocusability
+        val keepsFocus = CoveredViews(listOf(page, status), blocksFocus = false)
+
+        keepsFocus.cover()
+        assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS, page.importantForAccessibility)
+        assertTrue(pageField.hasFocus())
+        assertEquals(pageFocusability, page.descendantFocusability)
+
+        keepsFocus.uncover()
+        assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_YES, status.importantForAccessibility)
+        assertTrue(pageField.hasFocus())
+    }
+
+    @Test
     fun coveringTwiceKeepsTheFirstSetup() {
         covered.cover()
         covered.cover()

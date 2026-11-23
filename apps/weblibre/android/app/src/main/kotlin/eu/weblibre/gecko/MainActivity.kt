@@ -26,6 +26,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.ActionMode
+import android.view.KeyEvent
 import android.view.View
 import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
@@ -35,6 +36,7 @@ import androidx.activity.enableEdgeToEdge
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.HomePressDispatcher
 import eu.weblibre.flutter_mozilla_components.feature.TextSelectionTracker
+import eu.weblibre.flutter_mozilla_components.lock.BrowserLockCover
 import eu.weblibre.flutter_mozilla_components.startup.LaunchTrust
 import eu.weblibre.flutter_mozilla_components.startup.StartupIntentBroker
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
@@ -87,9 +89,30 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
 
         enableTransparentSystemBars()
         watchNavigationBarLayout()
+        BrowserLockCover.attach(this)
 
         // Restored straight into a pinned task (e.g. the process was killed while in PiP).
         checkAndExitPiP()
+    }
+
+    /**
+     * A locked profile's window is covered from the moment it goes out of sight
+     * until Dart has drawn its lock decision; see [BrowserLockCover].
+     */
+    override fun onStart() {
+        super.onStart()
+        BrowserLockCover.onStart(this)
+    }
+
+    override fun onStop() {
+        BrowserLockCover.onStop(this)
+        super.onStop()
+    }
+
+    /** Keys go nowhere while the window is covered, as touches do not. */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (BrowserLockCover.consumesKey(this, event)) return true
+        return super.dispatchKeyEvent(event)
     }
 
     /**
@@ -426,6 +449,7 @@ class MainActivity : FlutterFragmentActivity(), IntentReceiverHost {
         // (a translucent activity on top, a split-screen focus change) only
         // hides the toolbar, and the mode that survives it reports no new start.
         TextSelectionTracker.reset()
+        BrowserLockCover.detach(this)
 
         if (!isFinishing) {
             Log.d(TAG, "onDestroy: system-initiated destroy, clearing stale engine")

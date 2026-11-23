@@ -61,6 +61,23 @@ class LockScreen extends HookConsumerWidget {
     final passwordText = useValueListenable(password).text;
     final passwordError = useState<String?>(null);
 
+    // The password field takes the focus, and with it the keyboard, once the
+    // window has focus (`resumed`), not at its first frame as `autofocus`
+    // would. Coming back to a profile that locked while away, this screen is
+    // built while the window is still returning (`inactive`), and Android
+    // takes a keyboard asked for then straight down again when the window
+    // gains focus: the Flutter view does not report itself as a text editor
+    // (`HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR`).
+    final windowFocused = useAppLifecycleState() == AppLifecycleState.resumed;
+    final didFocusPassword = useRef(false);
+    useEffect(() {
+      if (usesPassword && windowFocused && !didFocusPassword.value) {
+        didFocusPassword.value = true;
+        refocusPasswordField(context, passwordFocus);
+      }
+      return null;
+    }, [usesPassword, windowFocused]);
+
     /// Why the last device prompt did not pass, when the system said why.
     final deviceAuthFailure = useState<DeviceAuthFailure?>(null);
 
@@ -225,7 +242,6 @@ class LockScreen extends HookConsumerWidget {
                         controller: password,
                         focusNode: passwordFocus,
                         enabled: !isAuthenticating.value && !isSwitching.value,
-                        autofocus: true,
                         keyboardType: TextInputType.visiblePassword,
                         textInputAction: TextInputAction.done,
                         onChanged: (_) => passwordError.value = null,

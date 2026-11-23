@@ -42,6 +42,7 @@ import java.io.InputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import eu.weblibre.flutter_mozilla_components.lock.AutoLockMode
+import eu.weblibre.flutter_mozilla_components.lock.BrowserLockCover
 import eu.weblibre.flutter_mozilla_components.lock.ProfileUnlockRegistry
 import eu.weblibre.flutter_mozilla_components.pigeons.BackupTreeProbe
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
@@ -632,6 +633,28 @@ class GeckoProfileApiImpl(private val applicationContext: Context) : GeckoProfil
 
     override fun clearSharedProfileUnlock(profileId: String) {
         ProfileUnlockRegistry.forgetShared(profileId)
+    }
+
+    override fun setBrowserLockCover(armed: Boolean) {
+        BrowserLockCover.arm(armed)
+    }
+
+    override fun currentBrowserLockCoverDeparture(): Long? = BrowserLockCover.currentDeparture()
+
+    override fun releaseBrowserLockCover(departure: Long, afterFreshFrame: Boolean) {
+        BrowserLockCover.release(departure, afterFreshFrame)
+    }
+
+    override fun disarmBrowserLockCoverForNewEngine() {
+        BrowserLockCover.disarmForNewEngine()
+    }
+
+    override fun liftLeftoverBrowserLockCover() {
+        BrowserLockCover.liftLeftoverCover()
+    }
+
+    override fun setBrowserLockCoverColor(argb: Long) {
+        BrowserLockCover.setColor(argb.toInt())
     }
 
     override fun getSharedProfileUnlock(profileId: String): SharedProfileUnlock? {

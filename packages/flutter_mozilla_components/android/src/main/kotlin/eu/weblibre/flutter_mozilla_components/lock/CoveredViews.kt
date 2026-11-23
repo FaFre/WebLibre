@@ -30,8 +30,16 @@ import java.lang.ref.WeakReference
  * underneath, and a hardware keyboard keeps typing into whatever had focus.
  * [cover] hides [views] from accessibility and blocks focus into them;
  * [uncover] puts back how they were set up before, and the focus.
+ *
+ * Without [blocksFocus], only accessibility is taken away, for a cover over
+ * views that must keep the focus and the keyboard with it: the browser
+ * window's lock screen raises its keyboard while still covered
+ * ([BrowserLockCover], which keeps keys out itself).
  */
-internal class CoveredViews(private val views: List<ViewGroup>) {
+internal class CoveredViews(
+    private val views: List<ViewGroup>,
+    private val blocksFocus: Boolean = true,
+) {
     private class Setup(
         val view: ViewGroup,
         val importantForAccessibility: Int,
@@ -49,7 +57,7 @@ internal class CoveredViews(private val views: List<ViewGroup>) {
     fun cover() {
         if (setup != null) return
 
-        val focused = views.firstNotNullOfOrNull { it.findFocus() }
+        val focused = if (blocksFocus) views.firstNotNullOfOrNull { it.findFocus() } else null
         focusBeforeCover = focused?.let(::WeakReference)
 
         setup = views.map { view ->
@@ -57,7 +65,7 @@ internal class CoveredViews(private val views: List<ViewGroup>) {
         }
         views.forEach { view ->
             view.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-            view.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+            if (blocksFocus) view.descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
         }
 
         // Blocking keeps focus from moving in, but leaves a view that has it.

@@ -228,4 +228,37 @@ class GeckoProfileService {
   /// holds, or null.
   Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) =>
       _api.getSharedProfileUnlock(profileId);
+
+  /// Whether the browser window is covered when it goes out of sight, and
+  /// kept out of the system's screenshots of it.
+  Future<void> setBrowserLockCover({required bool armed}) =>
+      _api.setBrowserLockCover(armed);
+
+  /// The departure the browser window is back from, or null while it is out
+  /// of sight. Asked before deciding, and passed to [releaseBrowserLockCover].
+  Future<int?> currentBrowserLockCoverDeparture() =>
+      _api.currentBrowserLockCoverDeparture();
+
+  /// Lifts the cover put up when the window went out of sight for
+  /// [departure].
+  ///
+  /// [afterFreshFrame] when the decision changed what the window shows: the
+  /// cover then also waits until Flutter shows nothing from before.
+  Future<void> releaseBrowserLockCover(
+    int departure, {
+    required bool afterFreshFrame,
+  }) => _api.releaseBrowserLockCover(departure, afterFreshFrame);
+
+  /// A new Flutter engine is starting: disarms the cover until it arms it.
+  Future<void> disarmBrowserLockCoverForNewEngine() =>
+      _api.disarmBrowserLockCoverForNewEngine();
+
+  /// Lifts a cover an earlier engine left, unless this engine armed it since.
+  Future<void> liftLeftoverBrowserLockCover() =>
+      _api.liftLeftoverBrowserLockCover();
+
+  /// Paints the cover, and what the system shows instead of a screenshot of
+  /// the window, in the app's background colour ([argb]).
+  Future<void> setBrowserLockCoverColor(int argb) =>
+      _api.setBrowserLockCoverColor(argb);
 }

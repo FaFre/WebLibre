@@ -8,12 +8,42 @@ part of 'profile_auth.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Whether the profile is open in the browser.
+///
+/// The lock is decided when the app leaves and again at the first sign of it
+/// coming back, not once it is in front: Flutter reports `resumed` only when
+/// the window has focus, which can be half a second after it is on screen,
+/// and it draws meanwhile. Deciding on leaving means the first frame drawn on
+/// the way back is already the lock screen. What the window and the system
+/// show before that frame, native covers (`BrowserLockCover`): this arms it
+/// while the profile is open and a lock applies on some return, and lifts it
+/// once the decision is drawn.
 
 @ProviderFor(ProfileAuthState)
 final profileAuthStateProvider = ProfileAuthStateProvider._();
 
+/// Whether the profile is open in the browser.
+///
+/// The lock is decided when the app leaves and again at the first sign of it
+/// coming back, not once it is in front: Flutter reports `resumed` only when
+/// the window has focus, which can be half a second after it is on screen,
+/// and it draws meanwhile. Deciding on leaving means the first frame drawn on
+/// the way back is already the lock screen. What the window and the system
+/// show before that frame, native covers (`BrowserLockCover`): this arms it
+/// while the profile is open and a lock applies on some return, and lifts it
+/// once the decision is drawn.
 final class ProfileAuthStateProvider
     extends $NotifierProvider<ProfileAuthState, bool> {
+  /// Whether the profile is open in the browser.
+  ///
+  /// The lock is decided when the app leaves and again at the first sign of it
+  /// coming back, not once it is in front: Flutter reports `resumed` only when
+  /// the window has focus, which can be half a second after it is on screen,
+  /// and it draws meanwhile. Deciding on leaving means the first frame drawn on
+  /// the way back is already the lock screen. What the window and the system
+  /// show before that frame, native covers (`BrowserLockCover`): this arms it
+  /// while the profile is open and a lock applies on some return, and lifts it
+  /// once the decision is drawn.
   ProfileAuthStateProvider._()
     : super(
         from: null,
@@ -41,7 +71,18 @@ final class ProfileAuthStateProvider
   }
 }
 
-String _$profileAuthStateHash() => r'fb338695d6e21974fec049886d96f42b5be504bc';
+String _$profileAuthStateHash() => r'0d3778afe60bb47e4a490fd9ae06ef9b126f595e';
+
+/// Whether the profile is open in the browser.
+///
+/// The lock is decided when the app leaves and again at the first sign of it
+/// coming back, not once it is in front: Flutter reports `resumed` only when
+/// the window has focus, which can be half a second after it is on screen,
+/// and it draws meanwhile. Deciding on leaving means the first frame drawn on
+/// the way back is already the lock screen. What the window and the system
+/// show before that frame, native covers (`BrowserLockCover`): this arms it
+/// while the profile is open and a lock applies on some return, and lifts it
+/// once the decision is drawn.
 
 abstract class _$ProfileAuthState extends $Notifier<bool> {
   bool build();

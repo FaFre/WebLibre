@@ -19,6 +19,7 @@
  */
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:local_auth/local_auth.dart';
@@ -166,7 +167,7 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
 
     if (auth == null) return false;
     if (auth.$2.autoLockMode == AutoLockMode.timeout) {
-      return DateTime.now().difference(auth.$1) < auth.$2.timeout;
+      return clock.now().difference(auth.$1) < auth.$2.timeout;
     }
 
     // Background mode cache stays valid until app background eviction.
@@ -181,7 +182,7 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
   /// [unlockedAt] backdates an unlock adopted from elsewhere, so its timeout
   /// runs from when it was really made.
   void remember(String authKey, AuthSettings settings, {DateTime? unlockedAt}) {
-    final at = unlockedAt ?? DateTime.now();
+    final at = unlockedAt ?? clock.now();
     _cache[authKey] = (at, settings);
     _shareProfileUnlock(authKey, settings, at);
   }
@@ -226,7 +227,7 @@ class LocalAuthenticationService extends _$LocalAuthenticationService {
             profileId,
             mode: mode,
             timeout: settings!.timeout,
-            age: DateTime.now().difference(unlockedAt ?? DateTime.now()),
+            age: clock.now().difference(unlockedAt ?? clock.now()),
           );
 
     // The windows ask again when it did not arrive; the browser's own lock

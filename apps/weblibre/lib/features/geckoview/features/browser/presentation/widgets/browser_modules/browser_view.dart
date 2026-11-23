@@ -70,7 +70,6 @@ import 'package:weblibre/features/share_intent/domain/entities/intent_container_
 import 'package:weblibre/features/share_intent/domain/entities/shared_content.dart';
 import 'package:weblibre/features/tor/domain/services/tor_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/features/user/domain/providers/profile_auth.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/wallpaper/domain/providers.dart';
 import 'package:weblibre/features/web_feed/domain/providers/add_dialog_blocking.dart';
@@ -974,10 +973,6 @@ class _BrowserViewState extends ConsumerState<BrowserView>
           );
           _timerPaused = false;
         }
-
-        unawaited(
-          ref.read(profileAuthStateProvider.notifier).revalidateAfterResume(),
-        );
 
         if (_suggestionCountTime != null &&
             DateTime.now().difference(_suggestionCountTime!) >

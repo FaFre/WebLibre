@@ -275,6 +275,27 @@ class _FakeProfileApi implements GeckoProfileApi {
   @override
   Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) async =>
       null;
+
+  @override
+  Future<void> setBrowserLockCover(bool armed) async {}
+
+  @override
+  Future<int?> currentBrowserLockCoverDeparture() async => null;
+
+  @override
+  Future<void> releaseBrowserLockCover(
+    int departure,
+    bool afterFreshFrame,
+  ) async {}
+
+  @override
+  Future<void> disarmBrowserLockCoverForNewEngine() async {}
+
+  @override
+  Future<void> liftLeftoverBrowserLockCover() async {}
+
+  @override
+  Future<void> setBrowserLockCoverColor(int argb) async {}
 }
 
 void main() {
