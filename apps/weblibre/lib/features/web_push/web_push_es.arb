@@ -48,5 +48,10 @@
   "webPush_subscriptionsSectionTitle": "Suscripciones",
   "webPush_indexSiteSubscriptionsTitle": "Suscripciones de sitios",
   "webPush_indexSiteSubscriptionsKeywords": "sitios, suscripciones, subscriptions",
-  "webPush_indexSiteSubscriptionsSubtitle": "Sitios web que pueden enviarte notificaciones"
+  "webPush_indexSiteSubscriptionsSubtitle": "Sitios web que pueden enviarte notificaciones",
+  "webPush_notificationSiteDataBeingDeleted": "Los datos de este sitio se están eliminando, así que se quitó su notificación",
+  "webPush_notificationContainerFrozen": "El contenedor de este sitio está congelado, así que su notificación no se abrió. Púlsala de nuevo para reanudar el contenedor.",
+  "webPush_notificationRoutingNotReady": "La conexión de este sitio aún no está lista, así que su notificación no se abrió. Púlsala de nuevo en un momento.",
+  "webPush_notificationGroupWithoutRoute": "Todas las pestañas aisladas de este sitio están cerradas, así que su notificación no usaría la conexión de su contenedor y no se abrió.",
+  "webPush_notificationContainerDeleted": "El contenedor de este sitio se eliminó, así que se quitó su notificación"
 }

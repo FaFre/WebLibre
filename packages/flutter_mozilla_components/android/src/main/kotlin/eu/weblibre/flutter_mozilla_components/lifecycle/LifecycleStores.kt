@@ -128,17 +128,35 @@ object UndeliveredPushCounts {
 }
 
 /**
- * Subscription changes deferred while their context is restricted (D25, 5.8):
- * one entry per scope with its context, written before the change's entry point
- * returns. An entry is removed only after it was handed to Gecko, so delivery
- * is at least once. Independent of the registry's phases: Resume never deletes
- * it, it drains it.
+ * Subscription changes Gecko has not been told about yet, one entry per scope.
+ *
+ * Two things put a scope here, and one entry can carry both:
+ *
+ * - a deferral (D25, 5.8): the change arrived while its context was restricted,
+ *   so it waits under that context until Resume drains it. Written before the
+ *   change's entry point returns;
+ * - a write-ahead version: the endpoint and keys a NEW_ENDPOINT or an
+ *   invalidation is about to write into the subscription row, recorded before
+ *   the write. Without it, a process death after the row write and before the
+ *   delayed notification left the new endpoint stored and Gecko uninformed, and
+ *   the next renewal found nothing to report.
+ *
+ * An entry goes only when Gecko was handed the version it stands for
+ * ([handedOff]): a drain that finds the row at another version, or a subscribe
+ * answer carrying an older one, leaves it. A removed subscription takes its
+ * entry along ([removed]). Delivery is at least once, never exactly once.
+ * Independent of the registry's phases: Resume never deletes it, it drains it.
  */
 object PushOutbox {
     private val logger = Logger("PushOutbox")
     private val lock = Any()
     internal var store: JsonStore = LifecycleFiles.store("push_outbox.json", strict = true)
+
+    /** Deferred scopes and the context they wait under. */
     private var entries: MutableMap<String, String>? = null
+
+    /** Scopes with a write-ahead version, and that version. */
+    private var versions: MutableMap<String, String> = mutableMapOf()
 
     /**
      * Whether the file may lack something [entries] has: the last write
@@ -151,9 +169,15 @@ object PushOutbox {
         entries?.let { return it }
         val read = store.read() ?: return mutableMapOf()
         val loaded = mutableMapOf<String, String>()
+        val loadedVersions = mutableMapOf<String, String>()
         when (read) {
-            is AtomicJsonFile.Read.Present -> read.json.optJSONObject(KEY_ENTRIES)?.let { json ->
-                json.keys().forEach { scope -> loaded[scope] = json.optString(scope) }
+            is AtomicJsonFile.Read.Present -> {
+                read.json.optJSONObject(KEY_ENTRIES)?.let { json ->
+                    json.keys().forEach { scope -> loaded[scope] = json.optString(scope) }
+                }
+                read.json.optJSONObject(KEY_VERSIONS)?.let { json ->
+                    json.keys().forEach { scope -> loadedVersions[scope] = json.optString(scope) }
+                }
             }
             // A lost change leaves a site with a stale subscription until it
             // checks; keep the damage for inspection (the next write replaces
@@ -165,13 +189,14 @@ object PushOutbox {
             AtomicJsonFile.Read.Absent -> Unit
         }
         entries = loaded
+        versions = loadedVersions
         return loaded
     }
 
     /**
      * Defers [scope]'s change; returns whether it is written. One already
      * deferred is written again while an earlier write failed: storage may
-     * be back.
+     * be back. A write-ahead version of the scope stays with it.
      */
     fun defer(scope: String, contextId: String): Boolean = synchronized(lock) {
         val entries = current()
@@ -180,24 +205,65 @@ object PushOutbox {
         persist(entries)
     }
 
+    /**
+     * Records that [scope]'s row is about to change to [version]; returns
+     * whether it is written. Called before the write, so that a death after it
+     * still reaches Gecko at the next start.
+     */
+    fun record(scope: String, version: String): Boolean = synchronized(lock) {
+        val entries = current()
+        if (versions[scope] == version && !unwritten) return true
+        versions[scope] = version
+        persist(entries)
+    }
+
+    /** The version [scope]'s pending change stands for, or null for none or a deferral alone. */
+    fun pendingVersion(scope: String): String? = synchronized(lock) {
+        current()
+        versions[scope]
+    }
+
     /** The deferred scopes of [contextIds]. */
     fun scopesOf(contextIds: Collection<String>): List<String> = synchronized(lock) {
         current().filterValues { it in contextIds }.keys.sorted()
     }
 
-    /** The deferred scopes whose context [isRestricted] no longer restricts. */
+    /**
+     * The scopes whose change may go to Gecko now: deferred ones whose context
+     * [isRestricted] no longer restricts, and write-ahead ones never deferred.
+     */
     fun deliverable(isRestricted: (String) -> Boolean): List<String> = synchronized(lock) {
-        current().filterValues { !isRestricted(it) }.keys.sorted()
+        val entries = current()
+        val deferred = entries.filterValues { !isRestricted(it) }.keys
+        (deferred + versions.keys.filterNot { it in entries }).sorted()
     }
 
-    /** Forgets [scope] after it was handed to Gecko. */
-    fun delivered(scope: String) = synchronized(lock) {
+    /**
+     * Gecko was told about [scope] at [version]. Forgets the entry unless it
+     * waits for another version: a newer change still on its way, or one whose
+     * row write has not happened.
+     */
+    fun handedOff(scope: String, version: String) = synchronized(lock) {
         val entries = current()
-        if (entries.remove(scope) != null) persist(entries)
+        val pending = versions[scope]
+        if (pending != null && pending != version) return@synchronized
+        val deferred = entries.remove(scope) != null
+        if (versions.remove(scope) != null || deferred) persist(entries)
+    }
+
+    /** [scope]'s subscription is gone, and with it anything left to tell Gecko. */
+    fun removed(scope: String) = synchronized(lock) {
+        val entries = current()
+        val deferred = entries.remove(scope) != null
+        if (versions.remove(scope) != null || deferred) persist(entries)
     }
 
     private fun persist(entries: Map<String, String>): Boolean = try {
-        store.write(JSONObject().put(KEY_ENTRIES, JSONObject(entries as Map<*, *>)))
+        store.write(
+            JSONObject()
+                .put(KEY_ENTRIES, JSONObject(entries as Map<*, *>))
+                .put(KEY_VERSIONS, JSONObject(versions as Map<*, *>)),
+        )
         unwritten = false
         true
     } catch (e: IOException) {
@@ -209,10 +275,12 @@ object PushOutbox {
     internal fun resetForTest(store: JsonStore) = synchronized(lock) {
         this.store = store
         entries = null
+        versions = mutableMapOf()
         unwritten = false
     }
 
     private const val KEY_ENTRIES = "entries"
+    private const val KEY_VERSIONS = "versions"
 }
 
 /**

@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import org.ironfoxoss.unifiedpush.PushError
 import org.ironfoxoss.unifiedpush.SubscriptionsDB
-import org.unifiedpush.android.connector.data.PushEndpoint
 
 internal object PushProfileState {
     private const val PREFS_NAME = "weblibre_push"
@@ -44,15 +43,6 @@ internal object PushProfileState {
             .remove(KEY_LAST_ERROR_SCOPE)
             .remove(KEY_LAST_ERROR_TYPE)
             .commit()
-    }
-
-    fun updateEndpoint(context: Context, scope: String, endpoint: PushEndpoint): Boolean {
-        val keys = endpoint.pubKeySet ?: return false
-        SubscriptionsDB(context).use { db ->
-            db.updateEndpoint(scope, endpoint.url, keys.pubKey, keys.auth)
-        }
-        clearError(context, scope)
-        return true
     }
 
     fun removeEndpoint(context: Context, scope: String) {

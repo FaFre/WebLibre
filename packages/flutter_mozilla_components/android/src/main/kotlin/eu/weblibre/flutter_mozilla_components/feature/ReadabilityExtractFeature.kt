@@ -85,7 +85,9 @@ class ReadabilityExtractFeature(
     }
 
     private fun ensureExtensionInstalled() {
-        extensionController.install(
+        BuiltInExtensionInstalls.install(
+            READER_EXTRACT_EXTENSION_ID,
+            extensionController,
             engine,
             onSuccess = { extension ->
                 sessionScope = store.flowScoped(dispatcher = Dispatchers.Main) { flow ->

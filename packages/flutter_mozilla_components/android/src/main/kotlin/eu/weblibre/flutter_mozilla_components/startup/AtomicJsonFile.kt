@@ -152,6 +152,25 @@ class AtomicJsonFile(
         }
     }
 
+    /**
+     * Makes a file that is already visible durable, or throws.
+     *
+     * A reader cannot tell a durable file from one whose [write] ended in
+     * [UnconfirmedWriteException]: renamed into place, but with its directory
+     * entry possibly lost to a power cut. A record that later steps rely on
+     * surviving calls this before acting on it. Syncs the file, its directory,
+     * and the directory above, which a first write may just have created.
+     */
+    fun confirmDurable() {
+        FileChannel.open(file.toPath(), StandardOpenOption.READ).use { it.force(true) }
+        var directory = file.absoluteFile.parentFile
+        repeat(2) {
+            val dir = directory ?: return
+            FileChannel.open(dir.toPath(), StandardOpenOption.READ).use { it.force(true) }
+            directory = dir.parentFile
+        }
+    }
+
     fun delete(): Boolean = !file.exists() || file.delete()
 
     /**

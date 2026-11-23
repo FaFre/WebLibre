@@ -64,6 +64,10 @@ enum BrowserActionFeedback {
   /// The page is not one a home screen shortcut can be made for.
   homeScreenUnavailable,
   readerViewUnavailable,
+
+  /// The action works on the page's content, and the tab is asleep: there is
+  /// no page loaded to scroll, search, translate or print until it is woken.
+  pageAsleep,
   noClosedTabs,
 
   /// A split view action ran while no split view is shown.
@@ -92,6 +96,7 @@ enum BrowserActionFeedback {
     containerFrozen ||
     homeScreenUnavailable ||
     readerViewUnavailable ||
+    pageAsleep ||
     noClosedTabs ||
     noSplitView => false,
   };

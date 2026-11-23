@@ -1889,11 +1889,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_togglePinTabDescription => '切换当前标签页的固定状态';
 
   @override
-  String get browserActions_toggleLockTabTitle => 'Lock / Unlock Tab';
+  String get browserActions_toggleLockTabTitle => '锁定/解锁标签页';
 
   @override
-  String get browserActions_toggleLockTabDescription =>
-      'Prevent the current tab from closing, or allow it again';
+  String get browserActions_toggleLockTabDescription => '禁止关闭当前标签页，或重新允许关闭';
 
   @override
   String get browserActions_moveTabBackwardTitle => '标签页前移';
@@ -2023,16 +2022,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browserActions_tabUnpinnedMessage => '已取消固定标签页';
 
   @override
-  String get browserActions_tabLockedMessage => 'Tab locked';
+  String get browserActions_tabLockedMessage => '已锁定标签页';
 
   @override
-  String get browserActions_tabUnlockedMessage => 'Tab unlocked';
+  String get browserActions_tabUnlockedMessage => '已解锁标签页';
 
   @override
   String get browserActions_homeScreenUnavailableMessage => '此页面无法添加到主屏幕';
 
   @override
   String get browserActions_readerViewUnavailableMessage => '此页面不支持阅读模式';
+
+  @override
+  String get browserActions_pageAsleepMessage => '此标签页正在休眠。请先将其唤醒。';
 
   @override
   String get browserActions_noClosedTabsMessage => '没有最近关闭的标签页';
@@ -2361,7 +2363,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get browserActions_toggleLockTabKeywords =>
-      'lock tab, unlock, keep open, protect, prevent closing';
+      '锁定标签页,解锁,保持打开,保护,防止关闭,lock';
 
   @override
   String get browserActions_closeTabKeywords => '关闭,移除标签页';
@@ -3128,8 +3130,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_closeTabAfterClearingSubtitle => '数据清除后关闭此标签页';
 
   @override
-  String get browser_closeTabAfterClearingLocked =>
-      'Unlock the tab to close it after clearing';
+  String get browser_closeTabAfterClearingLocked => '解锁标签页，才能在清除后将其关闭';
 
   @override
   String get browser_clearingEllipsis => '正在清除…';
@@ -3372,60 +3373,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_unpinTab => '取消固定标签页';
 
   @override
-  String get browser_lockTab => 'Lock tab';
+  String get browser_lockTab => '锁定标签页';
 
   @override
-  String get browser_unlockTab => 'Unlock tab';
+  String get browser_unlockTab => '解锁标签页';
 
   @override
-  String get browser_tabLockedLabel => 'Locked';
+  String get browser_tabLockedLabel => '已锁定';
 
   @override
-  String get browser_tabUnlockIncompleteLabel =>
-      'Locked, unlocking did not finish';
+  String get browser_tabUnlockIncompleteLabel => '已锁定，解锁未完成';
 
   @override
-  String get browser_retryUnlockTab => 'Retry unlocking tab';
+  String get browser_retryUnlockTab => '重试解锁标签页';
 
   @override
-  String get browser_tabUnlockIncompleteMessage =>
-      'Unlocking did not finish. The tab stays locked until it does.';
+  String get browser_tabUnlockIncompleteMessage => '解锁未完成。在完成之前，该标签页会保持锁定。';
 
   @override
-  String get browser_tabLockFailed => 'This tab could not be locked';
+  String get browser_tabLockFailed => '无法锁定此标签页';
 
   @override
-  String get browser_tabUnlockFailed => 'This tab could not be unlocked';
+  String get browser_tabUnlockFailed => '无法解锁此标签页';
 
   @override
-  String get browser_tabLockPrivate => 'Private tabs cannot be locked';
+  String get browser_tabLockPrivate => '隐私标签页无法锁定';
 
   @override
-  String get browser_lockedTabCannotMove =>
-      'Unlock this tab to move it to a container with its own storage';
+  String get browser_lockedTabCannotMove => '解锁此标签页后，才能将其移到拥有独立存储的容器';
 
   @override
-  String get browser_tabMoveFailed => 'The tab was not moved. Try again.';
+  String get browser_tabMoveFailed => '未移动该标签页。请重试。';
 
   @override
-  String get browser_containerBeingDeleted => 'This container is being deleted';
+  String get browser_containerBeingDeleted => '此容器正在删除';
 
   @override
-  String get browser_containerFrozen => 'Resume the container first';
+  String get browser_containerFrozen => '请先恢复该容器';
 
   @override
-  String get browser_tabIsLocked => 'This tab is locked';
+  String get browser_tabIsLocked => '此标签页已锁定';
 
   @override
-  String get browser_closeFailed => 'Nothing was closed. Try again.';
+  String get browser_closeFailed => '未关闭任何内容。请重试。';
 
   @override
   String browser_lockedTabsKept(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count locked tabs were kept',
-      one: 'This tab is locked',
+      other: '已保留 $count 个已锁定的标签页',
+      one: '此标签页已锁定',
     );
     return '$_temp0';
   }
@@ -3435,60 +3433,56 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       closed,
       locale: localeName,
-      other: 'Closed $closed tabs.',
-      one: 'Closed 1 tab.',
+      other: '已关闭 $closed 个标签页。',
     );
     String _temp1 = intl.Intl.pluralLogic(
       locked,
       locale: localeName,
-      other: 'Kept $locked locked tabs.',
-      one: 'Kept 1 locked tab.',
+      other: '已保留 $locked 个已锁定的标签页。',
     );
-    return '$_temp0 $_temp1';
+    return '$_temp0$_temp1';
   }
 
   @override
-  String get browser_menuSleepAllTabs => 'Sleep All Tabs';
+  String get browser_menuSleepAllTabs => '让所有标签页休眠';
 
   @override
-  String get browser_sleepTab => 'Put to sleep';
+  String get browser_sleepTab => '休眠';
 
   @override
   String get browser_sleepTabDescription =>
-      'Frees memory by unloading the page. It loads again when you wake the tab. Some unsaved page state may be lost.';
+      '通过卸载页面来释放内存。唤醒标签页时，页面会重新加载。页面上未保存的部分状态可能会丢失。';
 
   @override
   String browser_sleepTabsConfirmTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Put $count tabs to sleep?',
-      one: 'Put this tab to sleep?',
+      other: '要让 $count 个标签页休眠吗？',
+      one: '要让此标签页休眠吗？',
     );
     return '$_temp0';
   }
 
   @override
-  String get browser_wakeTab => 'Wake tab';
+  String get browser_wakeTab => '唤醒标签页';
 
   @override
-  String get browser_wakeTabRoutingNotReady =>
-      'This tab\'s connection is not ready yet, so it stays asleep';
+  String get browser_wakeTabRoutingNotReady => '此标签页的连接尚未就绪，因此保持休眠';
 
   @override
-  String get browser_tabAsleepLabel => 'Asleep';
+  String get browser_tabAsleepLabel => '休眠中';
 
   @override
-  String get browser_sleepAskTitle => 'Put to sleep anyway?';
+  String get browser_sleepAskTitle => '仍要休眠吗？';
 
   @override
   String browser_sleepAskMedia(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count tabs are playing media. Putting them to sleep stops playback.',
-      one: 'This tab is playing media. Putting it to sleep stops playback.',
+      other: '$count 个标签页正在播放媒体。让它们休眠会停止播放。',
+      one: '此标签页正在播放媒体。让它休眠会停止播放。',
     );
     return '$_temp0';
   }
@@ -3498,10 +3492,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count pages are the result of a form submission. When they reload, the forms are not sent again, so the pages may not come back as they were.',
-      one:
-          'This page is the result of a form submission. When it reloads, the form is not sent again, so the page may not come back as it was.',
+      other: '$count 个页面是提交表单后的结果。重新加载时不会再次提交表单，因此这些页面可能无法恢复原样。',
+      one: '此页面是提交表单后的结果。重新加载时不会再次提交表单，因此页面可能无法恢复原样。',
     );
     return '$_temp0';
   }
@@ -3511,10 +3503,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count tabs have text typed into a form. Putting them to sleep may lose it.',
-      one:
-          'This tab has text typed into a form. Putting it to sleep may lose it.',
+      other: '$count 个标签页中有输入到表单里的文字。让它们休眠可能会丢失这些文字。',
+      one: '此标签页中有输入到表单里的文字。让它休眠可能会丢失这些文字。',
     );
     return '$_temp0';
   }
@@ -3524,232 +3514,207 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       slept,
       locale: localeName,
-      other: '$slept tabs were put to sleep.',
-      one: '1 tab was put to sleep.',
-      zero: 'No tabs were put to sleep.',
+      other: '已让 $slept 个标签页休眠。',
+      zero: '没有标签页被休眠。',
     );
     String _temp1 = intl.Intl.pluralLogic(
       kept,
       locale: localeName,
-      other: '$kept tabs were kept awake because of what they are doing.',
-      one: '1 tab was kept awake because of what it is doing.',
+      other: '$kept 个标签页因正在执行操作而保持唤醒。',
     );
-    return '$_temp0 $_temp1';
+    return '$_temp0$_temp1';
   }
 
   @override
-  String get browser_sleepTabFailed => 'This tab could not be put to sleep';
+  String get browser_sleepTabFailed => '无法让此标签页休眠';
 
   @override
-  String get browser_sleepRefusedRecording =>
-      'This tab is using the camera, microphone or screen sharing, so it was not put to sleep';
+  String get browser_sleepRefusedRecording => '此标签页正在使用摄像头、麦克风或屏幕共享，因此未让其休眠';
 
   @override
-  String get browser_sleepRefusedFormData =>
-      'This tab has form input that would be lost, so it was not put to sleep';
+  String get browser_sleepRefusedFormData => '此标签页中的表单输入会丢失，因此未让其休眠';
 
   @override
-  String get browser_sleepRefusedUpload =>
-      'A file was chosen for upload in this tab, so it was not put to sleep';
+  String get browser_sleepRefusedUpload => '此标签页中已选择要上传的文件，因此未让其休眠';
 
   @override
-  String get browser_sleepRefusedPrintOrPdf =>
-      'This tab is being printed or saved as PDF, so it was not put to sleep';
+  String get browser_sleepRefusedPrintOrPdf => '此标签页正在打印或保存为 PDF，因此未让其休眠';
 
   @override
-  String get browser_sleepRefusedDownload =>
-      'A download from this tab is still running, so it was not put to sleep';
+  String get browser_sleepRefusedDownload => '此标签页中的下载仍在进行，因此未让其休眠';
 
   @override
-  String get browser_freezeContainer => 'Freeze container';
+  String get browser_freezeContainer => '冻结容器';
 
   @override
-  String get browser_menuFreezeContainer => 'Freeze Container';
+  String get browser_menuFreezeContainer => '冻结容器';
 
   @override
   String browser_freezeContainerTitle(String container) {
-    return 'Freeze $container?';
+    return '要冻结容器“$container”吗？';
   }
 
   @override
   String get browser_freezeContainerDescription =>
-      'Unloads its tabs and stops what its sites do in the background, such as push messages and service workers, until you resume it. Cookies, sign-ins and site data are kept. New tabs opened in it wait until then. Push messages sent meanwhile are skipped.';
+      '卸载其标签页，并停止其网站在后台执行的操作（如推送消息和 Service Worker），直到你恢复它。Cookie、登录信息和网站数据会保留。在其中打开的新标签页会等到那时再加载。在此期间发送的推送消息会被跳过。';
 
   @override
-  String get browser_resumeContainer => 'Resume Container';
+  String get browser_resumeContainer => '恢复容器';
 
   @override
-  String get browser_stopFreezing => 'Stop Freezing and Resume';
+  String get browser_stopFreezing => '停止冻结并恢复';
 
   @override
-  String get browser_retryFreeze => 'Try Freezing Again';
+  String get browser_retryFreeze => '重新尝试冻结';
 
   @override
-  String get browser_containerFrozenLabel => 'Frozen';
+  String get browser_containerFrozenLabel => '已冻结';
 
   @override
-  String get browser_containerFreezing => 'Freezing…';
+  String get browser_containerFreezing => '正在冻结…';
 
   @override
   String browser_containerFreezingProgress(int done, int total) {
-    return 'Freezing… $done of $total';
+    return '正在冻结… $done/$total';
   }
 
   @override
-  String get browser_containerResuming => 'Resuming…';
+  String get browser_containerResuming => '正在恢复…';
 
   @override
-  String get browser_freezeIncompleteLabel => 'Freeze incomplete';
+  String get browser_freezeIncompleteLabel => '冻结未完成';
 
   @override
-  String get browser_resumeIncompleteLabel => 'Resume incomplete';
+  String get browser_resumeIncompleteLabel => '恢复未完成';
 
   @override
   String get browser_freezeIncompleteBlocked =>
-      'Freeze incomplete: new activity is blocked, some already running may not have stopped';
+      '冻结未完成：新的活动已被阻止，但已在运行的部分活动可能尚未停止';
 
   @override
-  String get browser_freezeIncompleteUncertain =>
-      'Freeze incomplete: background activity may not be blocked';
+  String get browser_freezeIncompleteUncertain => '冻结未完成：后台活动可能未被阻止';
 
   @override
-  String get browser_resumeIncompleteBlocked =>
-      'Resume incomplete: still blocked, resume again';
+  String get browser_resumeIncompleteBlocked => '恢复未完成：仍处于阻止状态，请再次恢复';
 
   @override
-  String get browser_resumeIncompleteLifted =>
-      'Resume incomplete: background activity may already be running';
+  String get browser_resumeIncompleteLifted => '恢复未完成：后台活动可能已在运行';
 
   @override
-  String get browser_freezeNeedsOwnStorage => 'Needs its own cookie storage';
+  String get browser_freezeNeedsOwnStorage => '需要独立的 Cookie 存储';
 
   @override
-  String get browser_freezeSharedStorage =>
-      'An isolated tab of this container shares its storage with a tab outside it, so it cannot be frozen';
+  String get browser_freezeSharedStorage => '此容器中的某个隔离标签页与容器外的标签页共用存储，因此无法冻结';
 
   @override
   String get browser_resumeSharedWithFrozen =>
-      'An isolated tab of another frozen container shares this container\'s storage. Resume that container first.';
+      '另一个已冻结容器的隔离标签页与此容器共用存储。请先恢复那个容器。';
 
   @override
-  String get browser_freezeRecoveryPending =>
-      'Frozen containers are being restored. Try again in a moment.';
+  String get browser_freezeRecoveryPending => '正在还原已冻结的容器。请稍后重试。';
 
   @override
-  String get browser_undoWaitsForSiteData =>
-      'This tab can\'t come back until its site data is deleted';
+  String get browser_undoWaitsForSiteData => '在其网站数据被删除之前，此标签页无法恢复';
 
   @override
   String get browser_resumeFreezeStateUnknown =>
-      'The container was not resumed because WebLibre could not check what is frozen. Try again.';
+      '未恢复该容器，因为 WebLibre 无法确认哪些内容已冻结。请重试。';
 
   @override
-  String get browser_freezeBusy =>
-      'This container is busy. Try again in a moment.';
+  String get browser_freezeBusy => '此容器正忙。请稍后重试。';
 
   @override
   String browser_containerFrozenDone(String container) {
-    return '$container is frozen';
+    return '容器“$container”已冻结';
   }
 
   @override
   String browser_containerResumedDone(String container) {
-    return '$container resumed';
+    return '容器“$container”已恢复';
   }
 
   @override
-  String get browser_freezeFailedShared =>
-      'A tab outside this container uses its storage, so it was not frozen';
+  String get browser_freezeFailedShared => '容器外的某个标签页正在使用它的存储，因此未冻结';
 
   @override
   String get browser_freezeFailedMembershipChanged =>
-      'A tab joined this container meanwhile, so it was not frozen. Try again.';
+      '在此期间有标签页加入了此容器，因此未冻结。请重试。';
 
   @override
   String get browser_freezeFailedMemberOutside =>
-      'A tab in this container does not use its storage, so it was not frozen. Close that tab or move it to another container, then try again.';
+      '此容器中有标签页没有使用它的存储，因此未冻结。请关闭该标签页或将其移到其他容器，然后重试。';
 
   @override
   String get browser_freezeFailedExternalWindow =>
-      'A web app or custom tab of this container is open. Close it, then try again.';
+      '此容器的网页应用或自定义标签页处于打开状态。请先关闭，然后重试。';
 
   @override
-  String get browser_freezeFailedEngineRefused =>
-      'The browser engine refused to freeze this container. Nothing was changed.';
+  String get browser_freezeFailedEngineRefused => '浏览器引擎拒绝冻结此容器。未做任何更改。';
 
   @override
-  String get browser_freezeFailedNotPersisted =>
-      'The frozen state could not be saved, so the container was not frozen';
+  String get browser_freezeFailedNotPersisted => '无法保存冻结状态，因此未冻结该容器';
 
   @override
   String get browser_freezeFailedQuiescence =>
-      'Freeze incomplete: some activity did not stop in time. New activity is blocked; resume or try again.';
+      '冻结未完成：部分活动未能及时停止。新的活动已被阻止；请恢复或重试。';
 
   @override
-  String get browser_freezeFailedGeneric =>
-      'Freezing this container did not finish. Resume it or try again.';
+  String get browser_freezeFailedGeneric => '未完成冻结此容器。请恢复它或重试。';
 
   @override
-  String get browser_resumeRoutingNotReady =>
-      'This container\'s connection is not ready yet, so it stays frozen';
+  String get browser_resumeRoutingNotReady => '此容器的连接尚未就绪，因此保持冻结';
 
   @override
   String get browser_resumeIsolationCleanupFailed =>
-      'The data of a closed isolated tab could not be deleted first, so the container stays frozen. Try again.';
+      '无法先删除已关闭隔离标签页的数据，因此容器保持冻结。请重试。';
 
   @override
-  String get browser_resumeFailedBlocked =>
-      'Resuming did not finish. The container is still frozen; try again.';
+  String get browser_resumeFailedBlocked => '恢复未完成。容器仍处于冻结状态；请重试。';
 
   @override
-  String get browser_resumeFailedLifted =>
-      'Resuming did not finish. Its sites may already run in the background; try again.';
+  String get browser_resumeFailedLifted => '恢复未完成。其网站可能已在后台运行；请重试。';
 
   @override
-  String get browser_freezeBlockedTitle => 'Can\'t freeze this container yet';
+  String get browser_freezeBlockedTitle => '暂时无法冻结此容器';
 
   @override
-  String get browser_freezeBlockedRecording =>
-      'Uses the camera, microphone or screen sharing';
+  String get browser_freezeBlockedRecording => '正在使用摄像头、麦克风或屏幕共享';
 
   @override
-  String get browser_freezeBlockedFormData =>
-      'Has form input that would be lost';
+  String get browser_freezeBlockedFormData => '有会丢失的表单输入';
 
   @override
-  String get browser_freezeBlockedUpload => 'A file was chosen for upload';
+  String get browser_freezeBlockedUpload => '已选择要上传的文件';
 
   @override
-  String get browser_freezeBlockedPrintOrPdf => 'Being printed or saved as PDF';
+  String get browser_freezeBlockedPrintOrPdf => '正在打印或保存为 PDF';
 
   @override
-  String get browser_freezeBlockedDownload =>
-      'A download from this container is still running';
+  String get browser_freezeBlockedDownload => '此容器中的下载仍在进行';
 
   @override
   String get browser_freezeBlockedUnattributedDownload =>
-      'A download is running whose container is unknown';
+      '有一个下载正在进行，但不知道它属于哪个容器';
 
   @override
-  String get browser_freezeBlockedTabGone => 'Closed tab';
+  String get browser_freezeBlockedTabGone => '已关闭的标签页';
 
   @override
-  String get browser_freezeBlockedShowTab => 'Show tab';
+  String get browser_freezeBlockedShowTab => '显示标签页';
 
   @override
-  String get browser_freezeBlockedViewDownloads => 'View downloads';
+  String get browser_freezeBlockedViewDownloads => '查看下载';
 
   @override
-  String get browser_freezeAskTitle => 'Freeze anyway?';
+  String get browser_freezeAskTitle => '仍要冻结吗？';
 
   @override
   String browser_freezeAskMedia(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count tabs of this container are playing media. Freezing stops playback.',
-      one: 'A tab of this container is playing media. Freezing stops playback.',
+      other: '此容器中有 $count 个标签页正在播放媒体。冻结会停止播放。',
+      one: '此容器中有一个标签页正在播放媒体。冻结会停止播放。',
     );
     return '$_temp0';
   }
@@ -3759,10 +3724,8 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count pages of this container are the result of a form submission. When they reload after Resume, the forms are not sent again, so the pages may not come back as they were.',
-      one:
-          'A page of this container is the result of a form submission. When it reloads after Resume, the form is not sent again, so the page may not come back as it was.',
+      other: '此容器中有 $count 个页面是提交表单后的结果。恢复后重新加载时不会再次提交表单，因此这些页面可能无法恢复原样。',
+      one: '此容器中有一个页面是提交表单后的结果。恢复后重新加载时不会再次提交表单，因此页面可能无法恢复原样。',
     );
     return '$_temp0';
   }
@@ -3772,36 +3735,31 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count tabs of this container have text typed into a form. Freezing may lose it.',
-      one:
-          'A tab of this container has text typed into a form. Freezing may lose it.',
+      other: '此容器中有 $count 个标签页含有输入到表单里的文字。冻结可能会丢失这些文字。',
+      one: '此容器中有一个标签页含有输入到表单里的文字。冻结可能会丢失这些文字。',
     );
     return '$_temp0';
   }
 
   @override
   String browser_resumeAndOpenTitle(String container) {
-    return 'Resume $container and open?';
+    return '要恢复容器“$container”并打开吗？';
   }
 
   @override
-  String get browser_resumeAndOpenContent =>
-      'This container is frozen, so nothing in it loads until it is resumed.';
+  String get browser_resumeAndOpenContent => '此容器已冻结，在恢复之前，其中的任何内容都不会加载。';
 
   @override
-  String get browser_resumeAndOpen => 'Resume and open';
+  String get browser_resumeAndOpen => '恢复并打开';
 
   @override
-  String get browser_resumeAndOpenCancelled =>
-      'Nothing was opened. The container stays frozen.';
+  String get browser_resumeAndOpenCancelled => '未打开任何内容。容器仍保持冻结。';
 
   @override
-  String get browser_containerFrozenToBeSafeLabel =>
-      'Frozen to be safe after a damaged record';
+  String get browser_containerFrozenToBeSafeLabel => '因记录损坏，为安全起见已冻结';
 
   @override
-  String get browser_frozenToBeSafeTitle => 'Containers frozen to be safe';
+  String get browser_frozenToBeSafeTitle => '为安全起见已冻结的容器';
 
   @override
   String browser_frozenToBeSafeContent(int count) {
@@ -3809,23 +3767,23 @@ class AppLocalizationsZh extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze all $count containers that have their own cookie storage. Resume each one when you want its sites to run again.',
+          'WebLibre 记录哪些容器已冻结的数据已损坏，为安全起见，已冻结全部 $count 个拥有独立 Cookie 存储的容器。需要让某个容器的网站再次运行时，请逐个恢复。',
       one:
-          'WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze the container that has its own cookie storage. Resume it when you want its sites to run again.',
+          'WebLibre 记录哪些容器已冻结的数据已损坏，为安全起见，已冻结拥有独立 Cookie 存储的容器。需要让其网站再次运行时，请恢复它。',
     );
     return '$_temp0';
   }
 
   @override
-  String get browser_frozenToBeSafeShowContainers => 'Show containers';
+  String get browser_frozenToBeSafeShowContainers => '显示容器';
 
   @override
   String get browser_freezeRecoveryFailed =>
-      'WebLibre could not restore which containers are frozen, so every container stays frozen for now';
+      'WebLibre 无法还原哪些容器已冻结，因此目前所有容器都保持冻结';
 
   @override
   String browser_containerDeletionNotFinished(String container) {
-    return 'Deleting $container did not finish, so it is still there';
+    return '未完成删除容器“$container”，因此它仍然存在';
   }
 
   @override
@@ -4179,31 +4137,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get browser_tabPickerNothingHere => '此处没有可选择的标签页';
 
   @override
-  String get browser_keepTabAwake => 'Keep awake';
+  String get browser_keepTabAwake => '保持唤醒';
 
   @override
-  String get browser_allowTabSleeping => 'Allow sleeping';
+  String get browser_allowTabSleeping => '允许休眠';
 
   @override
-  String get browser_pinTabShort => 'Pin';
+  String get browser_keepTabAwakeDescription =>
+      '自动休眠和自动冻结会跳过保持唤醒的标签页。你仍可手动让它休眠，或冻结它所在的容器。';
 
   @override
-  String get browser_unpinTabShort => 'Unpin';
+  String get browser_pinTabShort => '固定';
 
   @override
-  String get browser_lockTabShort => 'Lock';
+  String get browser_unpinTabShort => '取消固定';
 
   @override
-  String get browser_unlockTabShort => 'Unlock';
+  String get browser_lockTabShort => '锁定';
 
   @override
-  String get browser_sleepTabShort => 'Sleep';
+  String get browser_unlockTabShort => '解锁';
 
   @override
-  String get browser_wakeTabShort => 'Wake';
+  String get browser_sleepTabShort => '休眠';
 
   @override
-  String get browser_tabKeptAwakeLabel => 'Kept awake';
+  String get browser_wakeTabShort => '唤醒';
+
+  @override
+  String get browser_tabKeptAwakeLabel => '已保持唤醒';
 
   @override
   String get contextualToolbar_tooltipHome => '主页';
@@ -4397,13 +4359,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String menu_moreDisclosureSummary(String items, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count more',
-      one: '1 more',
-    );
-    return '$items and $_temp0';
+    return '$items，以及另外 $count 项';
   }
 
   @override
@@ -4440,10 +4396,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu_itemPinTopSite => '固定到快捷方式';
 
   @override
-  String get menu_itemLockTab => 'Lock Tab';
+  String get menu_itemLockTab => '锁定标签页';
 
   @override
-  String get menu_itemSleepTab => 'Put Tab to Sleep';
+  String get menu_itemSleepTab => '让标签页休眠';
 
   @override
   String get menu_itemFetchFeeds => '获取订阅源';
@@ -4694,19 +4650,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get menu_pinUpdateFailed => '无法更新快捷方式';
 
   @override
-  String get menu_lockTab => 'Lock Tab';
+  String get menu_lockTab => '锁定标签页';
 
   @override
-  String get menu_unlockTab => 'Unlock Tab';
+  String get menu_unlockTab => '解锁标签页';
 
   @override
-  String get menu_retryUnlockTab => 'Retry Unlocking Tab';
+  String get menu_retryUnlockTab => '重试解锁标签页';
 
   @override
-  String get menu_sleepTab => 'Put Tab to Sleep';
+  String get menu_sleepTab => '让标签页休眠';
 
   @override
-  String get menu_wakeTab => 'Wake Tab';
+  String get menu_wakeTab => '唤醒标签页';
 
   @override
   String get menu_fetchFeedsTitle => '获取页面上的订阅源';
@@ -5923,67 +5879,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String get splitView_crashedReload => '重新加载';
 
   @override
-  String get splitView_sleepingTitle => 'This tab is asleep';
+  String get splitView_sleepingTitle => '此标签页正在休眠';
 
   @override
-  String get splitView_sleepingWake => 'Wake';
+  String get splitView_sleepingWake => '唤醒';
 
   @override
-  String get splitView_frozenTitle => 'This container is frozen';
+  String get splitView_frozenTitle => '此容器已冻结';
 
   @override
   String splitView_frozenTitleNamed(String container) {
-    return '$container is frozen';
+    return '容器“$container”已冻结';
   }
 
   @override
   String splitView_freezingTitleNamed(String container) {
-    return 'Freezing $container…';
+    return '正在冻结容器“$container”…';
   }
 
   @override
   String splitView_freezeIncompleteTitleNamed(String container) {
-    return 'Freezing $container did not finish';
+    return '未完成冻结容器“$container”';
   }
 
   @override
   String splitView_resumingTitleNamed(String container) {
-    return 'Resuming $container…';
+    return '正在恢复容器“$container”…';
   }
 
   @override
   String splitView_resumeIncompleteTitleNamed(String container) {
-    return 'Resuming $container did not finish';
+    return '未完成恢复容器“$container”';
   }
 
   @override
-  String get splitView_frozenResume => 'Resume';
+  String get splitView_frozenResume => '恢复';
 
   @override
   String splitView_frozenSkippedMessages(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count background messages were skipped. Skipped messages are not delivered after Resume.',
-      one:
-          '1 background message was skipped. Skipped messages are not delivered after Resume.',
+      other: '已跳过 $count 条后台消息。跳过的消息在恢复后不会送达。',
     );
     return '$_temp0';
   }
 
   @override
   String splitView_frozenToBeSafeTitleNamed(String container) {
-    return '$container was frozen to be safe';
+    return '为安全起见，已冻结容器“$container”';
   }
 
   @override
   String get splitView_frozenToBeSafeDetail =>
-      'WebLibre\'s record of frozen containers was damaged. Resume to load this tab.';
+      'WebLibre 记录冻结容器的数据已损坏。恢复容器即可加载此标签页。';
 
   @override
-  String get splitView_frozenRecoveryTitle =>
-      'Frozen until WebLibre has restored which containers are frozen';
+  String get splitView_frozenRecoveryTitle => '在 WebLibre 还原冻结容器记录之前保持冻结';
 
   @override
   String get splitView_couldNotOpen => '无法打开分屏视图';
@@ -6032,120 +5984,107 @@ class AppLocalizationsZh extends AppLocalizations {
       '如果不勾选，访问记录仍会保留在历史记录中，但不再归属于任何容器。';
 
   @override
-  String get tabs_deleteContainerAlsoDeleteSiteData => 'Also delete site data';
+  String get tabs_deleteContainerAlsoDeleteSiteData => '同时删除网站数据';
 
   @override
-  String get tabs_deleteContainerSiteDataNote =>
-      'Cookies, sign-ins, offline data and notification subscriptions';
+  String get tabs_deleteContainerSiteDataNote => 'Cookie、登录信息、离线数据和通知订阅';
 
   @override
   String get tabs_deleteContainerSiteDataFrozenNote =>
-      'A frozen container\'s data is deleted with it, so its background activity can never resume.';
+      '已冻结容器的数据会随容器一并删除，这样它的后台活动永远不会再恢复。';
 
   @override
-  String get tabs_siteDataPendingTitle => 'Site data waiting to be deleted';
+  String get tabs_siteDataPendingTitle => '等待删除的网站数据';
 
   @override
   String get tabs_siteDataPendingExplanation =>
-      'Until their data is deleted, sites of these containers stay blocked. Deleting is retried at every start.';
+      '在这些数据被删除之前，这些容器中的网站会保持被阻止状态。每次启动时都会重试删除。';
 
   @override
-  String get tabs_siteDataPendingDeletedContainer => 'Deleted container';
+  String get tabs_siteDataPendingDeletedContainer => '已删除的容器';
 
   @override
   String tabs_siteDataPendingClosedIsolatedTabs(String container) {
-    return 'Closed isolated tabs in $container';
+    return '$container 中已关闭的隔离标签页';
   }
 
   @override
-  String get tabs_siteDataPendingOrphaned => 'Container no longer exists';
+  String get tabs_siteDataPendingOrphaned => '容器已不存在';
 
   @override
-  String get tabs_siteDataPendingDelete => 'Delete data';
+  String get tabs_siteDataPendingDelete => '删除数据';
 
   @override
-  String get tabs_siteDataPendingDeleting => 'Deleting…';
+  String get tabs_siteDataPendingDeleting => '正在删除…';
 
   @override
-  String get tabs_siteDataPendingDeleted => 'Site data deleted';
+  String get tabs_siteDataPendingDeleted => '网站数据已删除';
 
   @override
-  String get tabs_siteDataPendingFailed =>
-      'The site data could not be deleted yet. It is tried again at the next start.';
+  String get tabs_siteDataPendingFailed => '暂时无法删除网站数据，下次启动时会重试。';
 
   @override
   String tabs_siteDataPendingCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count storage areas',
-      one: '1 storage area',
+      other: '$count 个存储区域',
     );
     return '$_temp0';
   }
 
   @override
-  String get tabs_freezeRecoveryTitle => 'Restoring frozen containers';
+  String get tabs_freezeRecoveryTitle => '正在还原已冻结的容器';
 
   @override
   String get tabs_freezeRecoveryRestoring =>
-      'WebLibre\'s record of which containers are frozen was damaged. Until it is restored, every container with its own cookie storage stays frozen.';
+      'WebLibre 记录哪些容器已冻结的数据已损坏。在还原之前，每个拥有独立 Cookie 存储的容器都会保持冻结。';
 
   @override
   String get tabs_freezeRecoveryFailed =>
-      'WebLibre\'s record of which containers are frozen was damaged, and restoring it did not finish. Until it does, every container with its own cookie storage stays frozen.';
+      'WebLibre 记录哪些容器已冻结的数据已损坏，且还原未能完成。在完成之前，每个拥有独立 Cookie 存储的容器都会保持冻结。';
 
   @override
   String tabs_deleteContainerLockedTabs(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count locked tabs are in this container. Unlock these tabs before deleting this container.',
-      one:
-          '1 locked tab is in this container. Unlock it before deleting this container.',
+      other: '此容器中有 $count 个已锁定的标签页。请先解锁，再删除此容器。',
     );
     return '$_temp0';
   }
 
   @override
-  String get tabs_deleteContainerShowTabs => 'Show tabs';
+  String get tabs_deleteContainerShowTabs => '显示标签页';
 
   @override
-  String get tabs_deleteContainerIncomplete =>
-      'Some of this container\'s tabs could not be closed, so the container was kept';
+  String get tabs_deleteContainerIncomplete => '此容器中的部分标签页无法关闭，因此已保留该容器';
 
   @override
-  String get tabs_deleteContainerNotPersisted =>
-      'The container was not deleted because its frozen state could not be saved. Try again.';
+  String get tabs_deleteContainerNotPersisted => '未删除该容器，因为无法保存它的冻结状态。请重试。';
 
   @override
   String get tabs_deleteContainerFreezeStateUnknown =>
-      'The container was not deleted because WebLibre could not check whether it is frozen. Try again.';
+      '未删除该容器，因为 WebLibre 无法确认它是否已冻结。请重试。';
 
   @override
-  String get tabs_deleteContainerSiteDataPending =>
-      'Container deleted; site-data cleanup pending';
+  String get tabs_deleteContainerSiteDataPending => '容器已删除；网站数据清理待完成';
 
   @override
-  String get tabs_deleteContainerOpenInWebApp =>
-      'Close this container\'s web apps and custom tabs first';
+  String get tabs_deleteContainerOpenInWebApp => '请先关闭此容器的网页应用和自定义标签页';
 
   @override
   String get tabs_deleteContainerSharedStorage =>
-      'An isolated tab of another container uses this frozen container\'s storage. Resume the container before deleting it.';
+      '另一个容器的隔离标签页正在使用此已冻结容器的存储。请先恢复该容器，再删除它。';
 
   @override
-  String get tabs_deleteContainerBusy =>
-      'This container is still being changed. Try again in a moment.';
+  String get tabs_deleteContainerBusy => '此容器仍在更改中。请稍后重试。';
 
   @override
-  String get tabs_deleteContainerRecoveryPending =>
-      'No container can be deleted while frozen containers are being restored';
+  String get tabs_deleteContainerRecoveryPending => '在还原已冻结的容器期间，无法删除任何容器';
 
   @override
-  String get tabs_deleteContainerHistoryFailed =>
-      'The container was deleted, but its history could not be deleted';
+  String get tabs_deleteContainerHistoryFailed => '容器已删除，但无法删除其历史记录';
 
   @override
   String get tabs_deleteContainerButton => '删除容器';
@@ -6369,18 +6308,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabs_requiresCookieIsolation => '需要启用 Cookie 隔离';
 
   @override
-  String get tabs_autoFreezeTitle => 'Freeze Automatically';
+  String get tabs_autoFreezeTitle => '自动冻结';
 
   @override
-  String get tabs_autoFreezeOff => 'Off';
+  String get tabs_autoFreezeOff => '关闭';
 
   @override
   String tabs_autoFreezeAfterMinutes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'After $count minutes unused, counted while WebLibre is open',
-      one: 'After 1 minute unused, counted while WebLibre is open',
+      other: '未使用 $count 分钟后，仅在 WebLibre 打开时计时',
     );
     return '$_temp0';
   }
@@ -6390,15 +6328,14 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'After $count hours unused, counted while WebLibre is open',
-      one: 'After 1 hour unused, counted while WebLibre is open',
+      other: '未使用 $count 小时后，仅在 WebLibre 打开时计时',
     );
     return '$_temp0';
   }
 
   @override
   String get tabs_autoFreezeExplanation =>
-      'Freezes this container once none of its tabs has been used for the time you choose. Only time while WebLibre is open counts. Freezing unloads its tabs and stops what it runs in the background, notifications included, until you resume it. It waits while one of its tabs plays media, is in a call, holds a download, or is set to \"Keep awake\". Typed text keeps it waiting until it has been unused for an hour; the text may then be lost.';
+      '在你选定的时间内，此容器的所有标签页都未被使用时，会自动冻结它。仅计算 WebLibre 处于打开状态的时间。冻结会卸载其标签页，并停止它在后台运行的一切（包括通知），直到你恢复它。如果其中某个标签页正在播放媒体、处于通话中、有下载任务，或被设为“保持唤醒”，冻结会等待。输入的文字会让冻结一直等待，直到容器闲置满一小时；之后文字可能会丢失。';
 
   @override
   String get tabs_isolatedAppLinkSettings => '独立的应用链接设置';
@@ -12131,50 +12068,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_featureControlSectionTitle => '功能';
 
   @override
-  String get settings_sleepingTabsSectionTitle => 'Sleeping Tabs';
+  String get settings_sleepingTabsSectionTitle => '休眠标签页';
 
   @override
-  String get settings_autoSleepTabsTitle => 'Sleep Tabs Automatically';
+  String get settings_autoSleepTabsTitle => '自动休眠标签页';
 
   @override
   String get settings_autoSleepTabsSubtitle =>
-      'While WebLibre is open, unloads tabs you have not looked at for a while. Tap Wake on a sleeping tab to load it again.';
+      'WebLibre 打开期间，会卸载你一段时间没有查看的标签页。点按休眠标签页上的“唤醒”即可重新加载。';
 
   @override
   String get settings_autoSleepTabsKeywords =>
-      'sleep, unload, memory, suspend, discard, idle, inactive tabs';
+      '休眠,卸载,内存,挂起,丢弃,空闲,不活动的标签页,sleep';
 
   @override
-  String get settings_autoSleepIdleTitle => 'Sleep After';
+  String get settings_autoSleepIdleTitle => '闲置后休眠';
 
   @override
-  String get settings_autoSleepIdleSubtitle =>
-      'How long a tab is off screen before it is put to sleep';
+  String get settings_autoSleepIdleSubtitle => '标签页离开屏幕多久后会被休眠';
 
   @override
-  String get settings_autoSleepIdleKeywords => 'sleep, timeout, idle, inactive';
+  String get settings_autoSleepIdleKeywords => '休眠,超时,空闲,不活动,sleep';
 
   @override
-  String get settings_residentTabLimitTitle => 'Loaded Tabs Limit';
+  String get settings_residentTabLimitTitle => '已加载标签页上限';
 
   @override
   String get settings_residentTabLimitSubtitle =>
-      'Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.';
+      '已加载的标签页超过此数量时，你最久没有查看的标签页会被休眠。';
 
   @override
-  String get settings_residentTabLimitKeywords =>
-      'limit, memory, loaded tabs, sleep';
+  String get settings_residentTabLimitKeywords => '上限,内存,已加载标签页,休眠,limit';
 
   @override
-  String get settings_residentTabLimitOff => 'No Limit';
+  String get settings_residentTabLimitOff => '无限制';
 
   @override
   String settings_residentTabLimitCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Tabs',
-      one: '1 Tab',
+      other: '$count 个标签页',
     );
     return '$_temp0';
   }
@@ -13465,8 +13399,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get user_deleteBrowsingDataTypeTabsTitle => '打开的标签页';
 
   @override
-  String get user_deleteBrowsingDataTypeTabsDescription =>
-      'Locked tabs are kept';
+  String get user_deleteBrowsingDataTypeTabsDescription => '已锁定的标签页会保留';
 
   @override
   String get user_deleteBrowsingDataTypeHistoryTitle => '浏览历史记录';
@@ -13794,6 +13727,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get webPush_indexSiteSubscriptionsSubtitle => '允许向你发送通知的网站';
+
+  @override
+  String get webPush_notificationSiteDataBeingDeleted => '此网站的数据正在删除，因此已移除它的通知';
+
+  @override
+  String get webPush_notificationContainerFrozen =>
+      '此网站的容器已冻结，因此未打开它的通知。再次点按该通知即可恢复容器。';
+
+  @override
+  String get webPush_notificationRoutingNotReady =>
+      '此网站的连接尚未就绪，因此未打开它的通知。请稍后再次点按该通知。';
+
+  @override
+  String get webPush_notificationGroupWithoutRoute =>
+      '此网站的隔离标签页已全部关闭，它的通知不会使用其容器的连接，因此未打开。';
+
+  @override
+  String get webPush_notificationContainerDeleted => '此网站的容器已删除，因此已移除它的通知';
 
   @override
   String get webSearch_fetchPageDataTitle => '获取页面数据';
@@ -14623,8 +14574,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count minutes',
-      one: '1 minute',
+      other: '$count 分钟',
     );
     return '$_temp0';
   }
@@ -14634,8 +14584,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count hours',
-      one: '1 hour',
+      other: '$count 小时',
     );
     return '$_temp0';
   }
@@ -14908,28 +14857,26 @@ class AppLocalizationsZh extends AppLocalizations {
       '代理,proxy,vpn,连接,容器,启动,确认,不再询问';
 
   @override
-  String get rememberedPrompt_sleepTabsLabel =>
-      'Ask before putting tabs to sleep';
+  String get rememberedPrompt_sleepTabsLabel => '让标签页休眠前询问';
 
   @override
   String get rememberedPrompt_sleepTabsDescription =>
-      'Explains that a sleeping tab\'s page reloads and may lose unsaved state';
+      '说明休眠标签页的页面会重新加载，并可能丢失未保存的状态';
 
   @override
   String get rememberedPrompt_sleepTabsKeywords =>
-      'sleep, unload, memory, tab, suspend, discard, confirmation, don\'t ask again';
+      '休眠,卸载,内存,标签页,挂起,丢弃,确认,不再询问,sleep';
 
   @override
-  String get rememberedPrompt_freezeContainerLabel =>
-      'Ask before freezing a container';
+  String get rememberedPrompt_freezeContainerLabel => '冻结容器前询问';
 
   @override
   String get rememberedPrompt_freezeContainerDescription =>
-      'Explains that a frozen container\'s tabs are unloaded and its background activity stops until Resume';
+      '说明已冻结容器的标签页会被卸载，其后台活动会停止，直到恢复';
 
   @override
   String get rememberedPrompt_freezeContainerKeywords =>
-      'freeze, pause, container, resume, background, push, confirmation, don\'t ask again';
+      '冻结,暂停,容器,恢复,后台,推送,确认,不再询问,freeze';
 
   @override
   String get speechToTextButton_serviceNotAvailable => '语音识别不可用';

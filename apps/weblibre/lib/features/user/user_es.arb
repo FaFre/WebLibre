@@ -180,6 +180,7 @@
   "user_searchSuggestionProviderKagi": "Kagi",
   "user_searchSuggestionProviderQwant": "Qwant",
   "user_deleteBrowsingDataTypeTabsTitle": "Pestañas abiertas",
+  "user_deleteBrowsingDataTypeTabsDescription": "Las pestañas bloqueadas se conservan",
   "user_deleteBrowsingDataTypeHistoryTitle": "Historial de navegación",
   "user_deleteBrowsingDataTypeRecentSearchesTitle": "Búsquedas recientes",
   "user_deleteBrowsingDataTypeRecentSearchesDescription": "Consultas que se muestran en la página de búsqueda",

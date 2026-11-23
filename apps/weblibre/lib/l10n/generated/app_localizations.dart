@@ -3784,6 +3784,12 @@ abstract class AppLocalizations {
   /// **'Reader view isn\'t available for this page'**
   String get browserActions_readerViewUnavailableMessage;
 
+  /// Shown when a gesture, keyboard shortcut or long press asked for something that works on a page's content (scrolling, finding text, reader view, translating, printing, adding to the home screen) while the selected tab is asleep. An asleep tab has no page loaded until the user wakes it, so there is nothing for the action to work on.
+  ///
+  /// In en, this message translates to:
+  /// **'This tab is asleep. Wake it first.'**
+  String get browserActions_pageAsleepMessage;
+
   /// Shown when a gesture or keyboard shortcut asked to reopen a closed tab, but there is none to reopen.
   ///
   /// In en, this message translates to:
@@ -7425,6 +7431,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow sleeping'**
   String get browser_allowTabSleeping;
+
+  /// Explains the tab menu's 'Keep awake' action: shown as the hint of its button and as the message after it is turned on. A tab that is kept awake is skipped by automatic sleep and, through its container, by automatic freeze. Putting it to sleep, or freezing its container, by hand still works.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic sleep and automatic freeze skip a tab that is kept awake. You can still put it to sleep or freeze its container yourself.'**
+  String get browser_keepTabAwakeDescription;
 
   /// Short label under the pin icon in the row of tab-state toggles at the top of the tab's long-press menu: pin the tab to the start of the tab bar. Keep it to one short word; "Pin tab" is read to screen readers.
   ///
@@ -24427,6 +24439,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Websites allowed to send you notifications'**
   String get webPush_indexSiteSubscriptionsSubtitle;
+
+  /// Short message at the bottom of the screen after the user tapped a website's notification: the cookies and site data of the storage the website ran in are waiting to be deleted (a deleted container's data, which WebLibre keeps retrying, or a group of isolated tabs that were all closed while their container was frozen, deleted when the container resumes), so the website can no longer be woken, and the notification was removed.
+  ///
+  /// In en, this message translates to:
+  /// **'This site\'s data is being deleted, so its notification was removed'**
+  String get webPush_notificationSiteDataBeingDeleted;
+
+  /// Short message at the bottom of the screen after the user tapped a website's notification and nothing opened: the container the website ran in is frozen, and WebLibre could not ask whether to resume it (no screen was up yet, or the container was frozen a moment before). The notification is still showing; tapping it again asks whether to resume the container.
+  ///
+  /// In en, this message translates to:
+  /// **'This site\'s container is frozen, so its notification did not open. Tap it again to resume the container.'**
+  String get webPush_notificationContainerFrozen;
+
+  /// Short message at the bottom of the screen after the user tapped a website's notification and nothing opened: the proxy connection of the container (or of the browser) the website runs in is not ready, and WebLibre does not wake the website without it. The notification is still showing and can be tapped again.
+  ///
+  /// In en, this message translates to:
+  /// **'This site\'s connection is not ready yet, so its notification did not open. Tap it again in a moment.'**
+  String get webPush_notificationRoutingNotReady;
+
+  /// Short message at the bottom of the screen after the user tapped a website's notification and nothing opened. The website ran in a group of isolated tabs inside a container, and every tab of that group is closed (a web app window still uses it). Without a tab, the group no longer takes the proxy connection its container sets, so WebLibre does not wake the website. The notification is still showing.
+  ///
+  /// In en, this message translates to:
+  /// **'This site\'s isolated tabs are all closed, so its notification would not use its container\'s connection and did not open.'**
+  String get webPush_notificationGroupWithoutRoute;
+
+  /// Short message at the bottom of the screen after the user tapped a website's notification: the website ran in a container that was deleted while its site data was kept. Without the container there is no proxy connection for it, so WebLibre does not wake the website, and the notification was removed.
+  ///
+  /// In en, this message translates to:
+  /// **'This site\'s container was deleted, so its notification was removed'**
+  String get webPush_notificationContainerDeleted;
 
   /// Title of the dialog for choosing how to fetch a web search result page through the privacy-preserving server (as a text preview, full copy, PDF or image).
   ///

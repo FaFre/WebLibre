@@ -3,6 +3,11 @@ version = "1.0-SNAPSHOT"
 
 buildscript {
     ext.mozillaComponentsVersion = '160.0'
+    // Its own version: fennec-components publishes unifiedpush-ac with a patch
+    // level (SubscriptionsDB.updateEndpoint fix), and Android Components'
+    // metadata still asks for 160.0. Keep in step with fennec-components'
+    // prebuild.sh and build.sh.
+    ext.unifiedPushAcVersion = '160.0.1'
 
     repositories {
         google()
@@ -121,6 +126,13 @@ dependencies {
     implementation "org.mozilla.components:concept-toolbar:$mozillaComponentsVersion"
     implementation "org.mozilla.components:concept-awesomebar:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-engine-gecko:$mozillaComponentsVersion"
+    // WebLibre's GeckoView rebuilt with the service worker window context,
+    // notification posting (E12) and lazy listener handoff patches. The last
+    // keeps a built-in extension's native connect from being dropped at
+    // startup (gecko-weblibre-lazy-listener-handoff.patch, not upstream yet).
+    // AC pins its own build with `requires`, so this higher build wins; drop
+    // it once AC is published against a GeckoView that has the patches.
+    implementation "org.mozilla.geckoview:geckoview-omni:160.0.20261122064810"
     implementation "org.mozilla.components:browser-errorpages:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-state:$mozillaComponentsVersion"
     implementation "org.mozilla.components:browser-session-storage:$mozillaComponentsVersion"
@@ -152,7 +164,7 @@ dependencies {
     implementation "org.mozilla.components:lib-publicsuffixlist:$mozillaComponentsVersion"
     implementation "org.mozilla.components:service-firefox-accounts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:support-appservices:$mozillaComponentsVersion"
-    implementation "org.ironfoxoss.unifiedpush:unifiedpush:$mozillaComponentsVersion"
+    implementation "org.ironfoxoss.unifiedpush:unifiedpush:$unifiedPushAcVersion"
     implementation ('org.unifiedpush.android:connector:3.3.5') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
     }

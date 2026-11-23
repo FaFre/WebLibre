@@ -46,7 +46,9 @@ object SandboxCaptureFeature : SandboxCaptureApi {
     )
 
     fun install(engine: Engine) {
-        extensionController.install(
+        BuiltInExtensionInstalls.install(
+            EXTENSION_ID,
+            extensionController,
             engine,
             onSuccess = {
                 logger.debug("Installed sandbox_capture webextension")

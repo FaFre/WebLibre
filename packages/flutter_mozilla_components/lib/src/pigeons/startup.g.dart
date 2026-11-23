@@ -10,9 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:meta/meta.dart' show immutable, protected, visibleForTesting;
 
 Object? _extractReplyValueOrThrow(
-    List<Object?>? replyList,
-    String channelName, {
-    required bool isNullValid,
+  List<Object?>? replyList,
+  String channelName, {
+  required bool isNullValid,
 }) {
   if (replyList == null) {
     throw PlatformException(
@@ -34,8 +34,11 @@ Object? _extractReplyValueOrThrow(
   return replyList.firstOrNull;
 }
 
-
-List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty = false}) {
+List<Object?> wrapResponse({
+  Object? result,
+  PlatformException? error,
+  bool empty = false,
+}) {
   if (empty) {
     return <Object?>[];
   }
@@ -44,6 +47,7 @@ List<Object?> wrapResponse({Object? result, PlatformException? error, bool empty
   }
   return <Object?>[error.code, error.message, error.details];
 }
+
 bool _deepEquals(Object? a, Object? b) {
   if (identical(a, b)) {
     return true;
@@ -56,8 +60,9 @@ bool _deepEquals(Object? a, Object? b) {
   }
   if (a is List && b is List) {
     return a.length == b.length &&
-        a.indexed
-            .every(((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]));
+        a.indexed.every(
+          ((int, dynamic) item) => _deepEquals(item.$2, b[item.$1]),
+        );
   }
   if (a is Map && b is Map) {
     if (a.length != b.length) {
@@ -106,60 +111,49 @@ int _deepHash(Object? value) {
   return value.hashCode;
 }
 
-
 /// What a Dart owner must do next with the process profile decision.
 enum ProfileStartupDirectiveKind {
   /// A profile is already committed; adopt it and boot.
   committed,
+
   /// The caller holds a selection lease and must commit or release it.
   select,
+
   /// The caller holds a maintenance lease and must run recovery or queued work.
   maintenance,
+
   /// Another owner holds the decision, or the process is terminating. The caller
   /// must never fall back to reading `current_profile` itself.
-  unavailable;
+  unavailable,
 }
 
 /// Which kind of Dart owner is asking. Only a UI owner can show a picker.
-enum ProfileStartupOwnerType {
-  ui,
-  headless;
-}
+enum ProfileStartupOwnerType { ui, headless }
 
 /// One step of the participant transaction protocol.
-enum ParticipantStep {
-  discover,
-  prepare,
-  apply,
-  verify,
-  finalize,
-  rollback;
-}
+enum ParticipantStep { discover, prepare, apply, verify, finalize, rollback }
 
 /// Mirrors the `profilePrompt` setting in `startup_config.json`.
-enum ProfileStartupPromptMode {
-  off,
-  browserOnly;
-}
+enum ProfileStartupPromptMode { off, browserOnly }
 
 /// The auto-lock modes whose unlock holds across windows.
 ///
 /// Background mode is absent on purpose: switching between the browser and a
 /// Custom Tab or PWA window counts as leaving, so its unlock is never shared.
-enum SharedUnlockMode {
-  timeout,
-  startup;
-}
+enum SharedUnlockMode { timeout, startup }
 
 enum ProfilePasswordOutcome {
   accepted,
   rejected,
+
   /// Not checked: an earlier run of wrong attempts is still being waited out.
   throttled,
+
   /// The app half has not activated a profile yet. Asking again later is right.
   unavailable,
+
   /// The check could not run or record its result. Not a pass.
-  failed;
+  failed,
 }
 
 /// What [GeckoProfileApi.probeBackupTree] found, or which way a write into a
@@ -167,22 +161,27 @@ enum ProfilePasswordOutcome {
 enum BackupTreeProbeOutcome {
   /// A file was created, written and synced (and, for a probe, removed again).
   writable,
+
   /// No persisted read/write grant is on record for the tree.
   noGrant,
+
   /// The tree's folder is gone, or is no longer a folder: the provider has no
   /// row for it, or refused to create a file in it as a document it does not
   /// have.
   missing,
+
   /// The grant is on record and the folder is there, but the provider refused
   /// access when a file was created or opened in it.
   refused,
+
   /// The storage holding the folder is full. Access is fine, and so is the
   /// folder: it is the space that has to change.
   noSpace,
+
   /// Writing failed for a reason that says nothing about access or space — a
   /// provider that died, or an error nobody recognised. Not evidence against
   /// the folder.
-  inconclusive;
+  inconclusive,
 }
 
 /// Which way a publication failed when the folder's own answer is not it.
@@ -193,8 +192,9 @@ enum TreePublicationFault {
   /// The copy finished without an error, yet the provider holds a different
   /// number of bytes than were sent.
   truncated,
+
   /// The local file could not be read. Nothing the folder did failed.
-  sourceUnreadable;
+  sourceUnreadable,
 }
 
 class ProfileStartupDirective {
@@ -243,7 +243,8 @@ class ProfileStartupDirective {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ProfileStartupDirective decode(Object result) {
     result as List<Object?>;
@@ -268,7 +269,14 @@ class ProfileStartupDirective {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(kind, other.kind) && _deepEquals(profileId, other.profileId) && _deepEquals(candidateProfileId, other.candidateProfileId) && _deepEquals(leaseId, other.leaseId) && _deepEquals(showPicker, other.showPicker) && _deepEquals(maintenanceTaskId, other.maintenanceTaskId) && _deepEquals(recoveryRequired, other.recoveryRequired) && _deepEquals(reason, other.reason);
+    return _deepEquals(kind, other.kind) &&
+        _deepEquals(profileId, other.profileId) &&
+        _deepEquals(candidateProfileId, other.candidateProfileId) &&
+        _deepEquals(leaseId, other.leaseId) &&
+        _deepEquals(showPicker, other.showPicker) &&
+        _deepEquals(maintenanceTaskId, other.maintenanceTaskId) &&
+        _deepEquals(recoveryRequired, other.recoveryRequired) &&
+        _deepEquals(reason, other.reason);
   }
 
   @override
@@ -299,15 +307,12 @@ class SharedProfileUnlock {
   int ageMs;
 
   List<Object?> _toList() {
-    return <Object?>[
-      mode,
-      timeoutMs,
-      ageMs,
-    ];
+    return <Object?>[mode, timeoutMs, ageMs];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static SharedProfileUnlock decode(Object result) {
     result as List<Object?>;
@@ -327,7 +332,9 @@ class SharedProfileUnlock {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(mode, other.mode) && _deepEquals(timeoutMs, other.timeoutMs) && _deepEquals(ageMs, other.ageMs);
+    return _deepEquals(mode, other.mode) &&
+        _deepEquals(timeoutMs, other.timeoutMs) &&
+        _deepEquals(ageMs, other.ageMs);
   }
 
   @override
@@ -341,10 +348,7 @@ class SharedProfileUnlock {
 }
 
 class ProfilePasswordReply {
-  ProfilePasswordReply({
-    required this.outcome,
-    this.retryAfterMs,
-  });
+  ProfilePasswordReply({required this.outcome, this.retryAfterMs});
 
   ProfilePasswordOutcome outcome;
 
@@ -352,14 +356,12 @@ class ProfilePasswordReply {
   int? retryAfterMs;
 
   List<Object?> _toList() {
-    return <Object?>[
-      outcome,
-      retryAfterMs,
-    ];
+    return <Object?>[outcome, retryAfterMs];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static ProfilePasswordReply decode(Object result) {
     result as List<Object?>;
@@ -378,7 +380,8 @@ class ProfilePasswordReply {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(outcome, other.outcome) && _deepEquals(retryAfterMs, other.retryAfterMs);
+    return _deepEquals(outcome, other.outcome) &&
+        _deepEquals(retryAfterMs, other.retryAfterMs);
   }
 
   @override
@@ -411,16 +414,12 @@ class BackupTreeProbe {
   String? errorMessage;
 
   List<Object?> _toList() {
-    return <Object?>[
-      outcome,
-      folderName,
-      errorClass,
-      errorMessage,
-    ];
+    return <Object?>[outcome, folderName, errorClass, errorMessage];
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static BackupTreeProbe decode(Object result) {
     result as List<Object?>;
@@ -441,7 +440,10 @@ class BackupTreeProbe {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(outcome, other.outcome) && _deepEquals(folderName, other.folderName) && _deepEquals(errorClass, other.errorClass) && _deepEquals(errorMessage, other.errorMessage);
+    return _deepEquals(outcome, other.outcome) &&
+        _deepEquals(folderName, other.folderName) &&
+        _deepEquals(errorClass, other.errorClass) &&
+        _deepEquals(errorMessage, other.errorMessage);
   }
 
   @override
@@ -510,7 +512,8 @@ class TreePublication {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static TreePublication decode(Object result) {
     result as List<Object?>;
@@ -535,7 +538,14 @@ class TreePublication {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(outcome, other.outcome) && _deepEquals(fault, other.fault) && _deepEquals(uri, other.uri) && _deepEquals(name, other.name) && _deepEquals(requiredBytes, other.requiredBytes) && _deepEquals(availableBytes, other.availableBytes) && _deepEquals(errorClass, other.errorClass) && _deepEquals(errorMessage, other.errorMessage);
+    return _deepEquals(outcome, other.outcome) &&
+        _deepEquals(fault, other.fault) &&
+        _deepEquals(uri, other.uri) &&
+        _deepEquals(name, other.name) &&
+        _deepEquals(requiredBytes, other.requiredBytes) &&
+        _deepEquals(availableBytes, other.availableBytes) &&
+        _deepEquals(errorClass, other.errorClass) &&
+        _deepEquals(errorMessage, other.errorMessage);
   }
 
   @override
@@ -605,7 +615,8 @@ class StartupIntentRecord {
   }
 
   Object encode() {
-    return _toList();  }
+    return _toList();
+  }
 
   static StartupIntentRecord decode(Object result) {
     result as List<Object?>;
@@ -631,7 +642,15 @@ class StartupIntentRecord {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(id, other.id) && _deepEquals(sequence, other.sequence) && _deepEquals(action, other.action) && _deepEquals(dataUri, other.dataUri) && _deepEquals(mimeType, other.mimeType) && _deepEquals(categories, other.categories) && _deepEquals(extras, other.extras) && _deepEquals(trustedProfileId, other.trustedProfileId) && _deepEquals(callerPackage, other.callerPackage);
+    return _deepEquals(id, other.id) &&
+        _deepEquals(sequence, other.sequence) &&
+        _deepEquals(action, other.action) &&
+        _deepEquals(dataUri, other.dataUri) &&
+        _deepEquals(mimeType, other.mimeType) &&
+        _deepEquals(categories, other.categories) &&
+        _deepEquals(extras, other.extras) &&
+        _deepEquals(trustedProfileId, other.trustedProfileId) &&
+        _deepEquals(callerPackage, other.callerPackage);
   }
 
   @override
@@ -644,7 +663,6 @@ class StartupIntentRecord {
   }
 }
 
-
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -652,46 +670,46 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    }    else if (value is ProfileStartupDirectiveKind) {
+    } else if (value is ProfileStartupDirectiveKind) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is ProfileStartupOwnerType) {
+    } else if (value is ProfileStartupOwnerType) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    }    else if (value is ParticipantStep) {
+    } else if (value is ParticipantStep) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    }    else if (value is ProfileStartupPromptMode) {
+    } else if (value is ProfileStartupPromptMode) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    }    else if (value is SharedUnlockMode) {
+    } else if (value is SharedUnlockMode) {
       buffer.putUint8(133);
       writeValue(buffer, value.index);
-    }    else if (value is ProfilePasswordOutcome) {
+    } else if (value is ProfilePasswordOutcome) {
       buffer.putUint8(134);
       writeValue(buffer, value.index);
-    }    else if (value is BackupTreeProbeOutcome) {
+    } else if (value is BackupTreeProbeOutcome) {
       buffer.putUint8(135);
       writeValue(buffer, value.index);
-    }    else if (value is TreePublicationFault) {
+    } else if (value is TreePublicationFault) {
       buffer.putUint8(136);
       writeValue(buffer, value.index);
-    }    else if (value is ProfileStartupDirective) {
+    } else if (value is ProfileStartupDirective) {
       buffer.putUint8(137);
       writeValue(buffer, value.encode());
-    }    else if (value is SharedProfileUnlock) {
+    } else if (value is SharedProfileUnlock) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    }    else if (value is ProfilePasswordReply) {
+    } else if (value is ProfilePasswordReply) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    }    else if (value is BackupTreeProbe) {
+    } else if (value is BackupTreeProbe) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    }    else if (value is TreePublication) {
+    } else if (value is TreePublication) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    }    else if (value is StartupIntentRecord) {
+    } else if (value is StartupIntentRecord) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
     } else {
@@ -751,112 +769,126 @@ class GeckoProfileApi {
   /// available for dependency injection. If it is left null, the default
   /// BinaryMessenger will be used which routes to the host platform.
   GeckoProfileApi({
-      BinaryMessenger? binaryMessenger, 
-      String messageChannelSuffix = '', 
-      })
-      : pigeonVar_binaryMessenger = binaryMessenger,
-        pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+    BinaryMessenger? binaryMessenger,
+    String messageChannelSuffix = '',
+  }) : pigeonVar_binaryMessenger = binaryMessenger,
+       pigeonVar_messageChannelSuffix = messageChannelSuffix.isNotEmpty
+           ? '.$messageChannelSuffix'
+           : '';
 
   final BinaryMessenger? pigeonVar_binaryMessenger;
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
   final String pigeonVar_messageChannelSuffix;
 
-
-  Future<ProfileStartupDirective> beginStartup(ProfileStartupOwnerType ownerType, String engineId, ProfileStartupPromptMode promptMode) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.beginStartup$pigeonVar_messageChannelSuffix';
+  Future<ProfileStartupDirective> beginStartup(
+    ProfileStartupOwnerType ownerType,
+    String engineId,
+    ProfileStartupPromptMode promptMode,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.beginStartup$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerType, engineId, promptMode]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ownerType, engineId, promptMode],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as ProfileStartupDirective;
   }
 
   /// Commits the profile chosen under [leaseId]. Returns false for a stale lease
   /// or a profile that no longer validates; the caller must not proceed.
   Future<bool> commitSelection(String leaseId, String profileId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.commitSelection$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.commitSelection$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId, profileId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId, profileId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> heartbeatSelection(String leaseId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.heartbeatSelection$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.heartbeatSelection$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> releaseSelection(String leaseId, String reason) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.releaseSelection$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.releaseSelection$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId, reason]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId, reason],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> heartbeatMaintenance(String leaseId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.heartbeatMaintenance$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.heartbeatMaintenance$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
@@ -868,79 +900,91 @@ class GeckoProfileApi {
   /// owner, and an ordinary trip to a password manager can expire the lease.
   /// Any heartbeat or boundary assertion releases it again.
   Future<bool> holdMaintenanceHeartbeat(String leaseId, bool held) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.holdMaintenanceHeartbeat$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.holdMaintenanceHeartbeat$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId, held]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId, held],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   /// The fencing check every destructive maintenance boundary must pass.
-  Future<bool> assertMaintenanceLease(String leaseId, String? taskId, String boundary) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.assertMaintenanceLease$pigeonVar_messageChannelSuffix';
+  Future<bool> assertMaintenanceLease(
+    String leaseId,
+    String? taskId,
+    String boundary,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.assertMaintenanceLease$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId, taskId, boundary]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId, taskId, boundary],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> suspendMaintenance(String leaseId, String? taskId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.suspendMaintenance$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.suspendMaintenance$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId, taskId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId, taskId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   Future<bool> finishMaintenance(String leaseId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.finishMaintenance$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.finishMaintenance$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[leaseId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[leaseId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
@@ -952,28 +996,35 @@ class GeckoProfileApi {
   ///
   /// [showPicker] makes the next launch show the profile picker once, whatever
   /// the prompt setting says (it still needs a UI launch and two profiles).
-  Future<bool> armProfileRestart(String? targetProfileId, String reason, bool showPicker) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.armProfileRestart$pigeonVar_messageChannelSuffix';
+  Future<bool> armProfileRestart(
+    String? targetProfileId,
+    String reason,
+    bool showPicker,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.armProfileRestart$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[targetProfileId, reason, showPicker]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[targetProfileId, reason, showPicker],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   /// Tears down and exits. Never returns.
   Future<void> completeProfileRestart() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.completeProfileRestart$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.completeProfileRestart$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -983,11 +1034,10 @@ class GeckoProfileApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   /// Ids of the native maintenance participants this build registers.
@@ -995,7 +1045,8 @@ class GeckoProfileApi {
   /// Dart orchestrates them; native owns what each one actually touches. An
   /// empty list means a directory-scoped operation is all this build can do.
   Future<List<String>> listMaintenanceParticipants() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.listMaintenanceParticipants$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.listMaintenanceParticipants$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1005,32 +1056,47 @@ class GeckoProfileApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return (pigeonVar_replyValue! as List<Object?>).cast<String>();
   }
 
   /// Runs one participant step. Returns false when the step refused; the caller
   /// treats that as a failure of the participant, not of the channel.
-  Future<bool> runMaintenanceParticipantStep(String participantId, ParticipantStep step, String taskId, String profileId, String journalKind, String workDirPath) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.runMaintenanceParticipantStep$pigeonVar_messageChannelSuffix';
+  Future<bool> runMaintenanceParticipantStep(
+    String participantId,
+    ParticipantStep step,
+    String taskId,
+    String profileId,
+    String journalKind,
+    String workDirPath,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.runMaintenanceParticipantStep$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[participantId, step, taskId, profileId, journalKind, workDirPath]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[
+        participantId,
+        step,
+        taskId,
+        profileId,
+        journalKind,
+        workDirPath,
+      ],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
@@ -1038,21 +1104,23 @@ class GeckoProfileApi {
   /// determined. Used for backup preflight, so an unknown answer must not be
   /// reported as zero.
   Future<int?> getAvailableBytes(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getAvailableBytes$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getAvailableBytes$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[path]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[path],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as int?;
   }
 
@@ -1068,21 +1136,23 @@ class GeckoProfileApi {
   /// treat that as "the window is still open", never as a failure of the
   /// operation.
   Future<bool> syncDirectory(String path) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.syncDirectory$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.syncDirectory$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[path]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[path],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
@@ -1091,21 +1161,23 @@ class GeckoProfileApi {
   /// Throws with the platform's own exception class and message, so a restore
   /// that cannot read its archive says why instead of failing anonymously.
   Future<void> copyDocumentToFile(String sourceUri, String destPath) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.copyDocumentToFile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.copyDocumentToFile$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sourceUri, destPath]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[sourceUri, destPath],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   /// Whether a persisted read/write grant covers the SAF tree [treeUri].
@@ -1115,21 +1187,23 @@ class GeckoProfileApi {
   /// [probeBackupTree]: a grant can stay on record for a folder the provider
   /// no longer writes to (#698).
   Future<bool> hasPersistedTreeGrant(String treeUri) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.hasPersistedTreeGrant$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.hasPersistedTreeGrant$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[treeUri]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[treeUri],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
@@ -1140,21 +1214,23 @@ class GeckoProfileApi {
   /// name, type, size and date on the main thread, so a cloud or USB provider
   /// that stalls froze the activity that asked.
   Future<String?> treeFolderName(String treeUri) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.treeFolderName$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.treeFolderName$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[treeUri]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[treeUri],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as String?;
   }
 
@@ -1167,21 +1243,23 @@ class GeckoProfileApi {
   /// bytes is what makes a full volume answer: an empty file is usually still
   /// created on one.
   Future<BackupTreeProbe> probeBackupTree(String treeUri) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.probeBackupTree$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.probeBackupTree$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[treeUri]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[treeUri],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as BackupTreeProbe;
   }
 
@@ -1193,42 +1271,58 @@ class GeckoProfileApi {
   /// final name. Any failure removes the staging file again. Failures come back
   /// in the result rather than as an error, classified from the provider's own
   /// exception, which AndroidX's `DocumentFile.createFile` swallows (#698).
-  Future<TreePublication> publishFileToTree(String sourcePath, String treeUri, String fileName, String stagingName, String mimeType) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.publishFileToTree$pigeonVar_messageChannelSuffix';
+  Future<TreePublication> publishFileToTree(
+    String sourcePath,
+    String treeUri,
+    String fileName,
+    String stagingName,
+    String mimeType,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.publishFileToTree$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[sourcePath, treeUri, fileName, stagingName, mimeType]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[sourcePath, treeUri, fileName, stagingName, mimeType],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as TreePublication;
   }
 
   /// [publishFileToTree] for bytes already in memory.
-  Future<TreePublication> publishBytesToTree(Uint8List bytes, String treeUri, String fileName, String stagingName, String mimeType) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.publishBytesToTree$pigeonVar_messageChannelSuffix';
+  Future<TreePublication> publishBytesToTree(
+    Uint8List bytes,
+    String treeUri,
+    String fileName,
+    String stagingName,
+    String mimeType,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.publishBytesToTree$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[bytes, treeUri, fileName, stagingName, mimeType]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[bytes, treeUri, fileName, stagingName, mimeType],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as TreePublication;
   }
 
@@ -1236,41 +1330,53 @@ class GeckoProfileApi {
   ///
   /// Returns false when another isolate holds it; the caller retries or gives
   /// up, and never opens a database anyway.
-  Future<bool> claimProfileAccess(ProfileStartupOwnerType ownerType, String engineId, String? taskId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.claimProfileAccess$pigeonVar_messageChannelSuffix';
+  Future<bool> claimProfileAccess(
+    ProfileStartupOwnerType ownerType,
+    String engineId,
+    String? taskId,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.claimProfileAccess$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerType, engineId, taskId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ownerType, engineId, taskId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
-  Future<bool> releaseProfileAccess(ProfileStartupOwnerType ownerType, String engineId, String? taskId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.releaseProfileAccess$pigeonVar_messageChannelSuffix';
+  Future<bool> releaseProfileAccess(
+    ProfileStartupOwnerType ownerType,
+    String engineId,
+    String? taskId,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.releaseProfileAccess$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[ownerType, engineId, taskId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[ownerType, engineId, taskId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
@@ -1280,66 +1386,73 @@ class GeckoProfileApi {
   /// looked first and claimed afterwards would let a second engine read the same
   /// entry in between.
   Future<List<StartupIntentRecord>> claimStartupIntents(String engineId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.claimStartupIntents$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.claimStartupIntents$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[engineId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[engineId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return (pigeonVar_replyValue! as List<Object?>).cast<StartupIntentRecord>();
   }
 
   /// Marks a queued launch delivered, so it is never replayed.
   Future<bool> acknowledgeStartupIntent(String entryId, String engineId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.acknowledgeStartupIntent$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.acknowledgeStartupIntent$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[entryId, engineId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[entryId, engineId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   /// Hands a claimed launch back undelivered, for another engine or another run.
   Future<bool> releaseStartupIntent(String entryId, String engineId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.releaseStartupIntent$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.releaseStartupIntent$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[entryId, engineId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[entryId, engineId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: false,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: false,
+    );
     return pigeonVar_replyValue! as bool;
   }
 
   Future<String?> getCommittedProfileId() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getCommittedProfileId$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getCommittedProfileId$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1349,16 +1462,16 @@ class GeckoProfileApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as String?;
   }
 
   Future<String?> getBoundProfileFolder() async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getBoundProfileFolder$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getBoundProfileFolder$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1368,11 +1481,10 @@ class GeckoProfileApi {
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as String?;
   }
 
@@ -1381,61 +1493,72 @@ class GeckoProfileApi {
   ///
   /// The age keeps an unlock the browser adopted from a window from starting
   /// its timeout over on the way back.
-  Future<void> recordSharedProfileUnlock(String profileId, SharedUnlockMode mode, int timeoutMs, int ageMs) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.recordSharedProfileUnlock$pigeonVar_messageChannelSuffix';
+  Future<void> recordSharedProfileUnlock(
+    String profileId,
+    SharedUnlockMode mode,
+    int timeoutMs,
+    int ageMs,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.recordSharedProfileUnlock$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileId, mode, timeoutMs, ageMs]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profileId, mode, timeoutMs, ageMs],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   /// Drops a shared unlock: the profile was locked again, or its lock
   /// settings no longer allow sharing one.
   Future<void> clearSharedProfileUnlock(String profileId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.clearSharedProfileUnlock$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.clearSharedProfileUnlock$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profileId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
   }
 
   /// The shared unlock of [profileId] that still holds, or null.
   Future<SharedProfileUnlock?> getSharedProfileUnlock(String profileId) async {
-    final pigeonVar_channelName = 'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getSharedProfileUnlock$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.flutter_mozilla_components.GeckoProfileApi.getSharedProfileUnlock$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[profileId]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[profileId],
+    );
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-        pigeonVar_replyList,
-        pigeonVar_channelName,
-        isNullValid: true,
-    )
-    ;
+      pigeonVar_replyList,
+      pigeonVar_channelName,
+      isNullValid: true,
+    );
     return pigeonVar_replyValue as SharedProfileUnlock?;
   }
 }
@@ -1448,18 +1571,25 @@ class GeckoProfileApi {
 abstract class ProfileLockFlutterApi {
   static const MessageCodec<Object?> pigeonChannelCodec = _PigeonCodec();
 
-  Future<ProfilePasswordReply> checkProfilePassword(String profileId, String password);
+  Future<ProfilePasswordReply> checkProfilePassword(
+    String profileId,
+    String password,
+  );
 
-  static void setUp(ProfileLockFlutterApi? api, {
-    BinaryMessenger? binaryMessenger, 
+  static void setUp(
+    ProfileLockFlutterApi? api, {
+    BinaryMessenger? binaryMessenger,
     String messageChannelSuffix = '',
-  }) 
-{
-    messageChannelSuffix = messageChannelSuffix.isNotEmpty ? '.$messageChannelSuffix' : '';
+  }) {
+    messageChannelSuffix = messageChannelSuffix.isNotEmpty
+        ? '.$messageChannelSuffix'
+        : '';
     {
       final pigeonVar_channel = BasicMessageChannel<Object?>(
-          'dev.flutter.pigeon.flutter_mozilla_components.ProfileLockFlutterApi.checkProfilePassword$messageChannelSuffix', pigeonChannelCodec,
-          binaryMessenger: binaryMessenger);
+        'dev.flutter.pigeon.flutter_mozilla_components.ProfileLockFlutterApi.checkProfilePassword$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
       if (api == null) {
         pigeonVar_channel.setMessageHandler(null);
       } else {
@@ -1468,12 +1598,17 @@ abstract class ProfileLockFlutterApi {
           final String arg_profileId = args[0]! as String;
           final String arg_password = args[1]! as String;
           try {
-            final ProfilePasswordReply output = await api.checkProfilePassword(arg_profileId, arg_password);
+            final ProfilePasswordReply output = await api.checkProfilePassword(
+              arg_profileId,
+              arg_password,
+            );
             return wrapResponse(result: output);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);
-          }          catch (e) {
-            return wrapResponse(error: PlatformException(code: 'error', message: e.toString()));
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
           }
         });
       }

@@ -3,5 +3,7 @@
   "units_bytes": "{value} Б",
   "units_kilobytes": "{value} КБ",
   "units_megabytes": "{value} МБ",
-  "units_milliseconds": "{value} мс"
+  "units_milliseconds": "{value} мс",
+  "units_minutes": "{count, plural, one{{count} минута} few{{count} минуты} many{{count} минут} other{{count} минуты}}",
+  "units_hours": "{count, plural, one{{count} час} few{{count} часа} many{{count} часов} other{{count} часа}}"
 }

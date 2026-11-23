@@ -2196,6 +2196,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Reader view isn\'t available for this page';
 
   @override
+  String get browserActions_pageAsleepMessage =>
+      'This tab is asleep. Wake it first.';
+
+  @override
   String get browserActions_noClosedTabsMessage => 'No recently closed tabs';
 
   @override
@@ -4466,6 +4470,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get browser_allowTabSleeping => 'Allow sleeping';
+
+  @override
+  String get browser_keepTabAwakeDescription =>
+      'Automatic sleep and automatic freeze skip a tab that is kept awake. You can still put it to sleep or freeze its container yourself.';
 
   @override
   String get browser_pinTabShort => 'Pin';
@@ -14792,6 +14800,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get webPush_indexSiteSubscriptionsSubtitle =>
       'Websites allowed to send you notifications';
+
+  @override
+  String get webPush_notificationSiteDataBeingDeleted =>
+      'This site\'s data is being deleted, so its notification was removed';
+
+  @override
+  String get webPush_notificationContainerFrozen =>
+      'This site\'s container is frozen, so its notification did not open. Tap it again to resume the container.';
+
+  @override
+  String get webPush_notificationRoutingNotReady =>
+      'This site\'s connection is not ready yet, so its notification did not open. Tap it again in a moment.';
+
+  @override
+  String get webPush_notificationGroupWithoutRoute =>
+      'This site\'s isolated tabs are all closed, so its notification would not use its container\'s connection and did not open.';
+
+  @override
+  String get webPush_notificationContainerDeleted =>
+      'This site\'s container was deleted, so its notification was removed';
 
   @override
   String get webSearch_fetchPageDataTitle => 'Fetch Page Data';

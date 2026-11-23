@@ -139,6 +139,8 @@ export 'src/pigeons/gecko.g.dart'
         NativeAppLinkRule,
         NativeAppLinkRuleDecision,
         NativeContextAppLinkPolicy,
+        NotificationClickHandoff,
+        NotificationClickOutcome,
         OwnerFreezeState,
         PendingUndoTab,
         PhoneHitResult,

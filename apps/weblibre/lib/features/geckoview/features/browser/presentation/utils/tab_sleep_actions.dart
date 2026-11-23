@@ -26,6 +26,7 @@ import 'package:weblibre/features/geckoview/domain/entities/tab_wake.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/dialogs/cut_off_activity_dialog.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/utils/tab_sleep_result_l10n.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/widgets/remembered_prompt.dart';
 import 'package:weblibre/utils/ui_helper.dart' as ui_helper;
@@ -126,6 +127,25 @@ Future<void> sleepTabsWithConfirmation(
   )) {
     ui_helper.showOutcomeMessage(context, text, failed: failed);
   }
+}
+
+/// Sets or clears "Keep awake" for [tabId] (D30). Turning it on says what it
+/// covers: automatic sleep and automatic freeze only, never a sleep or freeze
+/// the user starts, which the menu's button has no room to explain.
+Future<void> setTabKeptAwakeFromMenu(
+  BuildContext context,
+  ProviderRead read,
+  String tabId, {
+  required bool exempt,
+}) async {
+  await read(
+    tabDataRepositoryProvider.notifier,
+  ).setSleepExempt(tabId, exempt: exempt);
+  if (!exempt || !context.mounted) return;
+  ui_helper.showInfoMessage(
+    context,
+    AppLocalizations.of(context).browser_keepTabAwakeDescription,
+  );
 }
 
 /// Wakes [tabId]: once its routing is ready, its page loads again (D34). A

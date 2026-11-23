@@ -48,5 +48,10 @@
   "webPush_subscriptionsSectionTitle": "订阅",
   "webPush_indexSiteSubscriptionsTitle": "网站订阅",
   "webPush_indexSiteSubscriptionsKeywords": "网站,订阅",
-  "webPush_indexSiteSubscriptionsSubtitle": "允许向你发送通知的网站"
+  "webPush_indexSiteSubscriptionsSubtitle": "允许向你发送通知的网站",
+  "webPush_notificationSiteDataBeingDeleted": "此网站的数据正在删除，因此已移除它的通知",
+  "webPush_notificationContainerFrozen": "此网站的容器已冻结，因此未打开它的通知。再次点按该通知即可恢复容器。",
+  "webPush_notificationRoutingNotReady": "此网站的连接尚未就绪，因此未打开它的通知。请稍后再次点按该通知。",
+  "webPush_notificationGroupWithoutRoute": "此网站的隔离标签页已全部关闭，它的通知不会使用其容器的连接，因此未打开。",
+  "webPush_notificationContainerDeleted": "此网站的容器已删除，因此已移除它的通知"
 }

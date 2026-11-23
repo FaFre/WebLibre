@@ -1686,6 +1686,10 @@
   "@browser_allowTabSleeping": {
     "description": "Tab menu action on a tab set to 'Keep awake': lets automatic sleep unload it again."
   },
+  "browser_keepTabAwakeDescription": "Automatic sleep and automatic freeze skip a tab that is kept awake. You can still put it to sleep or freeze its container yourself.",
+  "@browser_keepTabAwakeDescription": {
+    "description": "Explains the tab menu's 'Keep awake' action: shown as the hint of its button and as the message after it is turned on. A tab that is kept awake is skipped by automatic sleep and, through its container, by automatic freeze. Putting it to sleep, or freezing its container, by hand still works."
+  },
   "browser_pinTabShort": "Pin",
   "@browser_pinTabShort": {
     "description": "Short label under the pin icon in the row of tab-state toggles at the top of the tab's long-press menu: pin the tab to the start of the tab bar. Keep it to one short word; \"Pin tab\" is read to screen readers."

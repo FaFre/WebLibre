@@ -3,5 +3,7 @@
   "units_bytes": "{value} B",
   "units_kilobytes": "{value} KB",
   "units_megabytes": "{value} MB",
-  "units_milliseconds": "{value} 毫秒"
+  "units_milliseconds": "{value} 毫秒",
+  "units_minutes": "{count, plural, other{{count} 分钟}}",
+  "units_hours": "{count, plural, other{{count} 小时}}"
 }

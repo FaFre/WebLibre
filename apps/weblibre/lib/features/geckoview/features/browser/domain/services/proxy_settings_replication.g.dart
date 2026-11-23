@@ -170,7 +170,7 @@ final class ProxySettingsReplicationProvider
 }
 
 String _$proxySettingsReplicationHash() =>
-    r'c6c3fd6ecec8a98671939eb9c9d9b45db8d408e1';
+    r'61a0c8498f0677b10ae9d820841fd88c21c405f6';
 
 /// Single serialised writer that installs [containerRoutingSnapshotProvider]
 /// into Gecko's proxy extension.

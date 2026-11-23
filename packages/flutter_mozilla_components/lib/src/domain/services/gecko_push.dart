@@ -84,6 +84,25 @@ class GeckoPushService extends GeckoPushEvents {
 
   Future<List<PushSubscription>> getSubscriptions() => _api.getSubscriptions();
 
+  /// The web-notification tap waiting for the browser, taken once (E12); null
+  /// when none waits.
+  Future<NotificationClickHandoff?> takeNotificationClick() =>
+      _api.takeNotificationClick();
+
+  /// Hands the tap [clickId] to Gecko and cancels its notification, while
+  /// native still holds the routing snapshot of [routingGeneration].
+  Future<NotificationClickOutcome> deliverNotificationClick(
+    String clickId, {
+    required int routingGeneration,
+  }) => _api.deliverNotificationClick(clickId, routingGeneration);
+
+  /// Ends the tap [clickId] without delivering it. Its notification stays
+  /// showing, unless [dismissNotification] says nothing is left for it to open.
+  Future<void> releaseNotificationClick(
+    String clickId, {
+    required bool dismissNotification,
+  }) => _api.releaseNotificationClick(clickId, dismissNotification);
+
   // GeckoPushEvents implementation
 
   @override

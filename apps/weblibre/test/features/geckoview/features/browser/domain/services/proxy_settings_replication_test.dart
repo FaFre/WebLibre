@@ -487,6 +487,53 @@ void main() {
   );
 
   test(
+    'the installed snapshot carries the generation it was acknowledged under',
+    () async {
+      const profileId = SingboxProxyConnectionId('profile-1');
+      final runtime = _FakeSingboxRuntimeRepository(null);
+      final harness = await _harness(
+        containers: [
+          _container(
+            id: 'container-1',
+            contextId: 'context-a',
+            proxyConnectionId: profileId,
+          ),
+        ],
+        runtimeRepository: runtime,
+      );
+      await harness.awaitSnapshot();
+      final replication = harness.container.read(
+        proxySettingsReplicationProvider.notifier,
+      );
+      final first = replication.installedGenerationIf((_) => true);
+      expect(first, harness.containerProxy.applied.length);
+      expect(replication.installedGenerationIf((_) => false), isNull);
+
+      runtime.emit(
+        SingboxProxyRuntimeState(
+          status: SingboxProxyRuntimeStatus.running,
+          endpoints: [
+            SingboxProxyRuntimeEndpoint(
+              profileId: profileId.encode(),
+              host: '127.0.0.1',
+              port: 12080,
+              username: 'user',
+              password: 'pass',
+            ),
+          ],
+        ),
+      );
+      await pumpEventQueue();
+
+      // A push since: native holds another generation now.
+      expect(
+        replication.installedGenerationIf((_) => true),
+        allOf(isNotNull, isNot(first)),
+      );
+    },
+  );
+
+  test(
     'waitUntilProxyInstalled is not satisfied by the endpoint a start replaced',
     () async {
       const profileId = SingboxProxyConnectionId('profile-1');
@@ -940,6 +987,10 @@ class _FakeContainerProxyRepository extends ContainerProxyRepository {
 
   @override
   Future<bool> isRoutingReady() async => applied.isNotEmpty;
+
+  /// One generation per acknowledged push, as the real repository counts.
+  @override
+  int? appliedGeneration() => applied.isEmpty ? null : applied.length;
 
   @override
   void build() {}

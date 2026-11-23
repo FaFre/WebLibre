@@ -20,7 +20,12 @@ typedef IconUpdateEvent = ({String url, Uint8List bytes});
 typedef ThumbnailEvent = ({String tabId, Uint8List? bytes});
 typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
-typedef TabAddedEvent = ({String tabId, String? parentId});
+typedef TabAddedEvent = ({
+  String tabId,
+  String? parentId,
+  String? contextId,
+  bool openedByServiceWorker,
+});
 
 /// A freeze's teardown progress (barrier 4): [done] of [total] tabs.
 typedef ContextFreezeProgress = ({String ownerId, int done, int total});
@@ -364,10 +369,18 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  Future<void> onTabAdded(int sequence, String tabId, String? parentId) async {
+  Future<void> onTabAdded(
+    int sequence,
+    String tabId,
+    String? parentId,
+    String? contextId,
+    bool openedByServiceWorker,
+  ) async {
     _tabAddedSubject.addWhenMoreRecent(sequence, null, (
       tabId: tabId,
       parentId: parentId,
+      contextId: contextId,
+      openedByServiceWorker: openedByServiceWorker,
     ));
   }
 

@@ -102,6 +102,13 @@ class StartupPaths(val filesDir: File) {
     val pushOwnershipFile: File
         get() = File(File(filesDir, PUSH_DIR_NAME), PUSH_OWNERSHIP_FILE_NAME)
 
+    /**
+     * State of the one-time push transport migration. Outside every profile for
+     * the same reason as [pushOwnershipFile], and because it names several.
+     */
+    val pushTransportMigrationFile: File
+        get() = File(File(filesDir, PUSH_DIR_NAME), PUSH_TRANSPORT_MIGRATION_FILE_NAME)
+
     val startupIntentsDir: File
         get() = File(filesDir, STARTUP_INTENTS_DIR_NAME)
 
@@ -150,6 +157,7 @@ class StartupPaths(val filesDir: File) {
 
         const val PUSH_DIR_NAME = "weblibre_push"
         const val PUSH_OWNERSHIP_FILE_NAME = "ownership.json"
+        const val PUSH_TRANSPORT_MIGRATION_FILE_NAME = "transport_migration.json"
 
         const val STARTUP_INTENTS_DIR_NAME = "weblibre_startup_intents"
         const val STARTUP_INTENT_QUEUE_FILE_NAME = "queue.json"

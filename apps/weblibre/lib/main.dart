@@ -100,6 +100,7 @@ import 'package:weblibre/features/user/domain/services/external_window_password_
 import 'package:weblibre/features/user/domain/services/profile_restart_request.dart';
 import 'package:weblibre/features/web_feed/presentation/controllers/fetch_articles.dart';
 import 'package:weblibre/features/web_feed/utils/fetch_entrypoint.dart';
+import 'package:weblibre/features/web_push/domain/services/web_notification_click.dart';
 import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_controller.dart';
 import 'package:weblibre/presentation/hooks/on_initialization.dart';
 import 'package:weblibre/presentation/main_app.dart';
@@ -498,6 +499,22 @@ class _MainWidget extends HookConsumerWidget {
         onError: (error, stackTrace) {
           logger.e(
             'Error listening to containerFreezeServiceProvider',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        },
+      );
+
+      // Web-notification taps: native parks a tap and opens the app, this
+      // hands it to Gecko once the engine is up and the route is ready (E12).
+      // App scope so a tap is answered whatever screen is up.
+      ref.listenManual(
+        fireImmediately: true,
+        webNotificationClickServiceProvider,
+        (previous, next) {},
+        onError: (error, stackTrace) {
+          logger.e(
+            'Error listening to webNotificationClickServiceProvider',
             error: error,
             stackTrace: stackTrace,
           );

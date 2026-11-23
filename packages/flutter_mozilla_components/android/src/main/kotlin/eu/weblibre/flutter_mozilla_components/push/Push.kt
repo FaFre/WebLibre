@@ -14,6 +14,8 @@ import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.lifecycle.ContextPush
 import eu.weblibre.flutter_mozilla_components.lifecycle.PushOutbox
+import eu.weblibre.flutter_mozilla_components.rootApplicationContext
+import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
+import org.ironfoxoss.unifiedpush.DefaultDistributorManager
 import org.ironfoxoss.unifiedpush.PushError
 import org.ironfoxoss.unifiedpush.SubscriptionsDB
 import org.ironfoxoss.unifiedpush.UnifiedPushFeature
@@ -104,7 +107,19 @@ data class PushStatusSnapshot(
 
 data class PushSubscriptionInfo(val scope: String, val hasEndpoint: Boolean)
 
-/** Profile-scoped UnifiedPush state and Gecko web-push integration. */
+/**
+ * Profile-scoped UnifiedPush state and Gecko web-push integration.
+ *
+ * ## Threads
+ *
+ * Every connector call runs on the receiver's executor, between broadcasts and
+ * never beside one ([UnifiedPushReceiver.runExclusive]): the connector's status
+ * getters change its state too, and a handoff or an UNREGISTERED handled in the
+ * middle of a registration would leave a REGISTER for a token it removed. Each
+ * call is its own task, so no broadcast waits for more than one of them. The
+ * receiver's executor may wait for this instance's dispatcher (its callbacks do),
+ * so nothing here ever blocks the dispatcher on the executor: it suspends.
+ */
 class Push(
     private val components: Components,
 ) : AutoCloseable, ContextPush {
@@ -112,59 +127,234 @@ class Push(
     private val closed = AtomicBoolean(false)
     internal val isClosed: Boolean
         get() = closed.get()
+
+    /** [initialize] ran: the engine's web push delegate is registered. */
+    internal val isInitialized: Boolean
+        get() = initialized.get()
+
+    /**
+     * This instance was closed before a delivery reached Gecko. In a process
+     * that keeps its profile, a component rebuild (external to full) is what
+     * closes it, and the instance that replaced it serves the same profile.
+     */
+    class ClosedException : IllegalStateException("Push is closed")
     private val dispatcher: ExecutorCoroutineDispatcher =
         Executors.newSingleThreadExecutor { runnable ->
             Thread(runnable, "WebLibrePush-${components.profileApplicationContext.relativePath.hashCode()}")
         }.asCoroutineDispatcher()
     private val eventScope = CoroutineScope(dispatcher + SupervisorJob())
 
+    /**
+     * Completes when this instance's start has settled; [started] says how.
+     *
+     * Gecko's delegate, the settings calls and the status wait for it, because
+     * the start may first have to wait for the transport migration and clear the
+     * endpoints a restore left. The receiver's callbacks never wait: the start
+     * itself waits for the receiver's executor. They cannot run early either,
+     * since a tree whose transport was replaced has no token to call back for.
+     */
+    private val startup = CompletableDeferred<Unit>()
+
+    @Volatile
+    private var started = false
+
     private val context: Context
         get() = components.profileApplicationContext
 
     private val prefs = PushProfileState.prefs(context)
     private val subscriptionsDb = SubscriptionsDB(context)
+    private val distributors = DefaultDistributorManager()
+    private val renewal = RegistrationRenewal(context, subscriptionsDb, distributors)
+    private val privateCleanup = PrivateSubscriptionCleanup(context, subscriptionsDb, distributors)
 
-    val feature = UnifiedPushFeature(
+    private val feature = UnifiedPushFeature(
         context = context,
         coroutineContext = dispatcher,
         db = subscriptionsDb,
+        up = ExclusiveDistributorManager(distributors),
     )
 
-    private val webPushEngineIntegration =
-        WebPushEngineIntegration(components.core.engine, feature)
+    private val webPushEngineIntegration = WebPushEngineIntegration(
+        engine = components.core.engine,
+        pushFeature = feature,
+        rowVersion = { scope ->
+            withContext(dispatcher) { SubscriptionVersion.of(subscriptionsDb.getSubscription(scope, null)) }
+        },
+        whenReady = ::whenReady,
+    )
 
     fun initialize() {
         check(!closed.get()) { "Push is closed" }
         if (!initialized.compareAndSet(false, true)) return
 
-        restoreRememberedDistributor()
         components.core.store
+        // Registered at once, as before: the delegate's requests wait for the
+        // start below rather than being refused while it runs.
         webPushEngineIntegration.start()
-        feature.initialize()
-        // Subscription changes deferred while their container was frozen, for
-        // the ones resumed since (also after a death mid-Resume, D25).
-        eventScope.launch {
-            try {
-                webPushEngineIntegration.drainOutbox()
-            } catch (e: CancellationException) {
-                // Closed meanwhile: stop, the next start drains it.
-                throw e
-            } catch (e: Exception) {
-                Log.w(TAG, "Could not drain the push outbox", e)
-            }
+        eventScope.launch { startUp() }
+    }
+
+    /**
+     * Off the main thread, in order: the transport check, the endpoint reset,
+     * the remembered distributor, then the outbox and the registrations.
+     */
+    private suspend fun startUp() {
+        val open = try {
+            transportOpen() && clearReplacedEndpoints()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Push could not verify its transport", e)
+            false
         }
-        eventScope.launch {
-            while (!PushMessageScheduler.recover(components.profileApplicationContext)) {
-                delay(RECOVERY_RETRY_DELAY_MS)
+        if (!open) {
+            Log.e(TAG, "Push stays off in this process; the next start tries again")
+            finishStart(false)
+            return
+        }
+
+        try {
+            UnifiedPushReceiver.runExclusive { restoreRememberedDistributor() }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not restore the remembered distributor", e)
+        }
+        finishStart(true)
+
+        // Before the outbox, which would hand their changes to Gecko. The
+        // renewal skips what this leaves.
+        removePrivateSubscriptions()
+
+        // Subscription changes deferred while their container was frozen, for
+        // the ones resumed since (also after a death mid-Resume, D25), and
+        // changes a death kept from Gecko after their row was written.
+        try {
+            webPushEngineIntegration.drainOutbox()
+        } catch (e: CancellationException) {
+            // Closed meanwhile: stop, the next start drains it.
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not drain the push outbox", e)
+        }
+
+        registerAll()
+
+        while (!PushMessageScheduler.recover(components.profileApplicationContext)) {
+            delay(RECOVERY_RETRY_DELAY_MS)
+        }
+        notifyIfDistributorMissing()
+    }
+
+    /** Waits for the one-time transport migration, which runs on its own thread. */
+    private suspend fun transportOpen(): Boolean = withContext(Dispatchers.IO) {
+        PushTransportMigration.awaitOpen(
+            StartupPaths(context.rootApplicationContext),
+            STARTUP_TRANSPORT_TIMEOUT_MS,
+        )
+    }
+
+    /**
+     * A clone, a restore or the transport migration left subscription rows that
+     * still carry the endpoints and keys of a transport this tree no longer has.
+     * They go before Gecko, the settings or a registration can read them. The
+     * scopes stay: the registrations below ask for new endpoints, and Gecko learns
+     * each as a subscription change.
+     */
+    private suspend fun clearReplacedEndpoints(): Boolean = withContext(dispatcher) {
+        val marker = PushTransportFiles.endpointResetMarker(components.profileApplicationContext)
+        if (!marker.exists()) return@withContext true
+
+        subscriptionsDb.listSubscriptions().forEach { subscriptionsDb.removeEndpoint(it.scope) }
+        if (!marker.delete() && marker.exists()) {
+            // Left behind, it would clear the new endpoints at the next start too.
+            Log.e(TAG, "Could not remove the endpoint reset marker")
+            return@withContext false
+        }
+        Log.i(TAG, "Cleared the endpoints of a replaced push transport")
+        true
+    }
+
+    private fun finishStart(open: Boolean) {
+        if (open) started = true
+        startup.complete(Unit)
+    }
+
+    /** Whether push may be read, once its start has settled. */
+    private suspend fun awaitStart(): Boolean {
+        startup.await()
+        return started && !closed.get()
+    }
+
+    /** [awaitStart] for a callback: runs [block] once the start settled, or at once. */
+    private fun whenReady(block: (Boolean) -> Unit) {
+        startup.invokeOnCompletion {
+            try {
+                block(started && !closed.get())
+            } catch (error: Throwable) {
+                Log.w(TAG, "A web push request failed", error)
             }
-            notifyIfDistributorMissing()
         }
     }
 
-    fun status(): PushStatusSnapshot {
-        val available = UnifiedPush.getDistributors(context).map { it.toDistributorInfo() }
-        val acknowledged = UnifiedPush.getAckDistributor(context)
-        val saved = UnifiedPush.getSavedDistributor(context)
+    private suspend fun requireStarted() {
+        check(awaitStart()) { "Push could not start in this process" }
+    }
+
+    /** See [PrivateSubscriptionCleanup]; what it leaves, the next start tries again. */
+    private suspend fun removePrivateSubscriptions() {
+        try {
+            withContext(dispatcher) { privateCleanup.run(closed::get) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not remove the push subscriptions of private browsing", e)
+        }
+    }
+
+    /** See [RegistrationRenewal]. */
+    private suspend fun registerAll() {
+        try {
+            renewal.run(closed::get)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not renew the push registrations", e)
+        }
+    }
+
+    suspend fun status(): PushStatusSnapshot {
+        if (!awaitStart()) {
+            // Without the connector, which was never opened: what is installed,
+            // what this profile chose, and why nothing more is known.
+            return snapshot(
+                installed = UnifiedPush.getDistributors(context),
+                acknowledged = null,
+                saved = null,
+                lastError = START_FAILED_ERROR,
+            )
+        }
+
+        // The saved and acknowledged getters drop uninstalled distributors and
+        // may broadcast UNREGISTERED: they change connector state, so they take
+        // the receiver's turn like every other connector call.
+        val (installed, acknowledged, saved) = UnifiedPushReceiver.runExclusive {
+            Triple(
+                UnifiedPush.getDistributors(context),
+                UnifiedPush.getAckDistributor(context),
+                UnifiedPush.getSavedDistributor(context),
+            )
+        }
+        return snapshot(installed, acknowledged, saved, PushProfileState.lastError(context))
+    }
+
+    private fun snapshot(
+        installed: List<String>,
+        acknowledged: String?,
+        saved: String?,
+        lastError: String?,
+    ): PushStatusSnapshot {
+        val available = installed.map { it.toDistributorInfo() }
         val remembered = rememberedDistributor()
         val status = when {
             acknowledged != null -> DistributorStatus.READY
@@ -179,60 +369,90 @@ class Push(
             status = status,
             current = (acknowledged ?: saved ?: remembered)?.toDistributorInfo(),
             available = available,
-            lastError = PushProfileState.lastError(context),
+            lastError = lastError,
         )
     }
 
-    suspend fun setDistributor(packageName: String) = UnifiedPushReceiver.runExclusive {
-        withContext(dispatcher) {
-            check(!closed.get()) { "Push is closed" }
-            require(UnifiedPush.getDistributors(context).contains(packageName)) {
-                "UnifiedPush distributor is not installed: $packageName"
-            }
+    suspend fun setDistributor(packageName: String) {
+        requireStarted()
+        UnifiedPushReceiver.runExclusive {
+            withContext(dispatcher) {
+                check(!closed.get()) { "Push is closed" }
+                require(UnifiedPush.getDistributors(context).contains(packageName)) {
+                    "UnifiedPush distributor is not installed: $packageName"
+                }
 
-            val current = UnifiedPush.getSavedDistributor(context) ?: rememberedDistributor()
-            if (current != null && current != packageName) {
+                val current = UnifiedPush.getSavedDistributor(context) ?: rememberedDistributor()
+                if (current != null && current != packageName) {
+                    removeTransportRegistrationsAndEndpoints()
+                }
+                UnifiedPush.saveDistributor(context, packageName)
+                rememberDistributor(packageName)
+                PushProfileState.clearError(context)
+                cancelMissingDistributorNotification()
+            }
+        }
+        registerAll()
+    }
+
+    suspend fun removeDistributor() {
+        requireStarted()
+        UnifiedPushReceiver.runExclusive {
+            withContext(dispatcher) {
+                check(!closed.get()) { "Push is closed" }
                 removeTransportRegistrationsAndEndpoints()
+                prefs.edit().remove(PushProfileState.KEY_SELECTED_DISTRIBUTOR).commit()
+                PushProfileState.clearError(context)
+                cancelMissingDistributorNotification()
             }
-            UnifiedPush.saveDistributor(context, packageName)
-            rememberDistributor(packageName)
-            PushProfileState.clearError(context)
-            cancelMissingDistributorNotification()
-            feature.renewRegistration()
         }
     }
 
-    suspend fun removeDistributor() = UnifiedPushReceiver.runExclusive {
-        withContext(dispatcher) {
-            check(!closed.get()) { "Push is closed" }
-            removeTransportRegistrationsAndEndpoints()
-            prefs.edit().remove(PushProfileState.KEY_SELECTED_DISTRIBUTOR).commit()
-            PushProfileState.clearError(context)
-            cancelMissingDistributorNotification()
+    suspend fun renewRegistration() {
+        requireStarted()
+        UnifiedPushReceiver.runExclusive {
+            withContext(dispatcher) {
+                check(!closed.get()) { "Push is closed" }
+                restoreRememberedDistributor()
+            }
+        }
+        registerAll()
+    }
+
+    suspend fun subscriptions(): List<PushSubscriptionInfo> {
+        requireStarted()
+        return withContext(dispatcher) {
+            subscriptionsDb.listSubscriptions().map {
+                PushSubscriptionInfo(scope = it.scope, hasEndpoint = it.endpoint != null)
+            }
         }
     }
 
-    suspend fun renewRegistration() = UnifiedPushReceiver.runExclusive {
-        withContext(dispatcher) {
-            check(!closed.get()) { "Push is closed" }
-            restoreRememberedDistributor()
-            feature.renewRegistration()
-        }
-    }
-
-    suspend fun subscriptions(): List<PushSubscriptionInfo> = withContext(dispatcher) {
-        subscriptionsDb.listSubscriptions().map {
-            PushSubscriptionInfo(scope = it.scope, hasEndpoint = it.endpoint != null)
-        }
-    }
-
+    /**
+     * A NEW_ENDPOINT handled while this instance exists.
+     *
+     * When it changes the row, the new version goes into [PushOutbox] **before**
+     * the feature writes it. The feature tells Gecko only 100 ms after its write,
+     * so a death in between used to leave the new endpoint stored, Gecko
+     * uninformed, and the next renewal with nothing to report. The entry is
+     * cleared only by a handoff of this version. An unchanged endpoint records
+     * nothing, and the feature does not notify for it.
+     */
     suspend fun onNewEndpoint(scope: String, endpoint: PushEndpoint) = withContext(dispatcher) {
+        val keys = endpoint.pubKeySet
+        if (keys != null) {
+            val stored = subscriptionsDb.getSubscription(scope, null)
+            val incoming = SubscriptionVersion.of(endpoint.url, keys.pubKey, keys.auth)
+            if (stored != null && SubscriptionVersion.of(stored) != incoming) {
+                recordChange(scope, incoming)
+            }
+        }
         feature.onNewEndpoint(scope, endpoint)
-        if (endpoint.pubKeySet != null) PushProfileState.clearError(context, scope)
+        if (keys != null) PushProfileState.clearError(context, scope)
     }
 
     suspend fun invalidateEndpoint(scope: String) = withContext(dispatcher) {
-        subscriptionsDb.removeEndpoint(scope)
+        clearEndpoint(scope)
         PushProfileState.clearError(context, scope)
         webPushEngineIntegration.invalidateEndpoint(scope)
     }
@@ -252,14 +472,17 @@ class Push(
         PushProfileState.recordTemporaryUnavailable(context, scope)
     }
 
+    /** Throws [ClosedException] once this instance is closed and the message has not reached Gecko. */
     suspend fun deliverMessage(scope: String, payload: ByteArray) {
+        // Not a headless session on the engine of a set already replaced.
+        if (closed.get()) throw ClosedException()
         // Before any headless session is created: a frozen container's message
         // is consumed (5.8). The integration checks again on delivery.
         if (PushContextGate.consumeIfRestricted(scope)) return
         val external = GlobalComponents.isExternalMode
         val deliver: suspend () -> Unit = {
             withContext(Dispatchers.Main.immediate) {
-                check(!closed.get()) { "Push is closed" }
+                if (closed.get()) throw ClosedException()
                 check(GeckoThread.isStateAtLeast(GeckoThread.State.RUNNING)) {
                     "Gecko is not running"
                 }
@@ -299,68 +522,68 @@ class Push(
         }
     }
 
-    override suspend fun removeSubscriptions(contextId: String): Boolean = withContext(dispatcher) {
+    override suspend fun removeSubscriptions(contextId: String): Boolean {
         check(!closed.get()) { "Push is closed" }
-        subscriptionsDb.listSubscriptions()
-            .filter { PushContextGate.contextOf(it.scope) == contextId }
-            .forEach { subscription ->
-                val removed = CompletableDeferred<Boolean>()
-                feature.unsubscribe(
-                    scope = subscription.scope,
-                    onUnsubscribeError = { removed.complete(false) },
-                    onUnsubscribe = { removed.complete(it) },
-                )
-                if (withTimeoutOrNull(UNSUBSCRIBE_TIMEOUT_MS) { removed.await() } == true) {
-                    // Gone with its subscription: nothing left to tell Gecko.
-                    PushOutbox.delivered(subscription.scope)
+        if (!awaitStart()) return false
+        return withContext(dispatcher) {
+            subscriptionsDb.listSubscriptions()
+                .filter { PushContextGate.contextOf(it.scope) == contextId }
+                .forEach { subscription ->
+                    val removed = CompletableDeferred<Boolean>()
+                    feature.unsubscribe(
+                        scope = subscription.scope,
+                        onUnsubscribeError = { removed.complete(false) },
+                        onUnsubscribe = { removed.complete(it) },
+                    )
+                    if (withTimeoutOrNull(UNSUBSCRIBE_TIMEOUT_MS) { removed.await() } == true) {
+                        // Gone with its subscription: nothing left to tell Gecko.
+                        PushOutbox.removed(subscription.scope)
+                    }
                 }
-            }
-        subscriptionsDb.listSubscriptions().none { PushContextGate.contextOf(it.scope) == contextId }
+            subscriptionsDb.listSubscriptions().none { PushContextGate.contextOf(it.scope) == contextId }
+        }
     }
 
-    override suspend fun contextsWithSubscriptions(): Set<String>? = withContext(dispatcher) {
-        if (closed.get()) return@withContext null
-        subscriptionsDb.listSubscriptions().mapNotNullTo(mutableSetOf()) { PushContextGate.contextOf(it.scope) }
+    override suspend fun contextsWithSubscriptions(): Set<String>? {
+        if (closed.get() || !awaitStart()) return null
+        return withContext(dispatcher) {
+            subscriptionsDb.listSubscriptions().mapNotNullTo(mutableSetOf()) { PushContextGate.contextOf(it.scope) }
+        }
     }
 
     override suspend fun drainOutbox(contextIds: Collection<String>?) {
         if (closed.get() || !initialized.get()) return
+        if (!awaitStart()) return
         webPushEngineIntegration.drainOutbox(contextIds)
-    }
-
-    /**
-     * Detach the now-inactive profile's push transport. Best-effort: a stale
-     * registration is harmless and is cleaned up when that profile next becomes
-     * active. Subscriptions and the remembered distributor are preserved.
-     */
-    suspend fun detachTransportForSwitch() {
-        ActiveProfile.withProfileLock {
-            UnifiedPushReceiver.runExclusive {
-                withContext(dispatcher) {
-                    if (!closed.get()) {
-                        removeTransportRegistrationsAndEndpoints(notifyGecko = false)
-                    }
-                }
-            }
-        }
     }
 
     /**
      * Quiesce push ahead of a restart. Best-effort by design.
      *
-     * It writes no profile state. Under the restart protocol the target lives in
-     * the durable restart request and is applied by the *next* process, so this
-     * process must never leave disk saying B while it is still serving A.
+     * The transport stays. The profile being left keeps its registrations, so
+     * its endpoints stay valid while another profile is active, and its next
+     * start renews them. Only the active profile receives: a broadcast for this
+     * one in another profile's process is declined, unacknowledged. Choosing or
+     * removing a distributor in the settings still unregisters.
      *
-     * What is still worth doing here is the exclusivity: [detachTransportForSwitch]
-     * takes the profile lock and receiver exclusivity, so an in-flight delivery
-     * cannot straddle the restart boundary.
+     * It writes no profile state either. Under the restart protocol the target
+     * lives in the durable restart request and is applied by the *next* process,
+     * so this process must never leave disk saying B while it is still serving A.
+     *
+     * The profile lock and the receiver's exclusivity are a drain: they wait for
+     * a delivery or a distributor change already running, so it cannot straddle
+     * the restart boundary. They do not stop a broadcast that arrives after them,
+     * which still runs before the process exits; that is safe, because a message
+     * is persisted before its ACK.
      */
     suspend fun suspendForRestart() {
-        runCatching { detachTransportForSwitch() }
-            .onFailure { error ->
-                Log.w(TAG, "Failed to detach push transport before restart", error)
+        runCatching {
+            ActiveProfile.withProfileLock {
+                UnifiedPushReceiver.runExclusive { }
             }
+        }.onFailure { error ->
+            Log.w(TAG, "Failed to drain push before restart", error)
+        }
     }
 
     fun emitStatusChanged() {
@@ -400,6 +623,8 @@ class Push(
     private fun beginClose(): Boolean {
         if (!closed.compareAndSet(false, true)) return false
         eventScope.cancel()
+        // Releases whatever still waits for a start that will not come.
+        startup.complete(Unit)
         if (initialized.get()) {
             webPushEngineIntegration.close()
         }
@@ -417,6 +642,7 @@ class Push(
         }
     }
 
+    /** Connector calls: only on the receiver's executor ([UnifiedPushReceiver.runExclusive]). */
     private fun restoreRememberedDistributor() {
         if (UnifiedPush.getSavedDistributor(context) != null) return
         val remembered = rememberedDistributor() ?: return
@@ -425,11 +651,28 @@ class Push(
         }
     }
 
-    private suspend fun removeTransportRegistrationsAndEndpoints(notifyGecko: Boolean = true) {
+    /** Connector calls: only on the receiver's executor ([UnifiedPushReceiver.runExclusive]). */
+    private suspend fun removeTransportRegistrationsAndEndpoints() {
         UnifiedPush.removeDistributor(context)
         subscriptionsDb.listSubscriptions().forEach {
-            subscriptionsDb.removeEndpoint(it.scope)
-            if (notifyGecko) webPushEngineIntegration.invalidateEndpoint(it.scope)
+            clearEndpoint(it.scope)
+            webPushEngineIntegration.invalidateEndpoint(it.scope)
+        }
+    }
+
+    /** Empties [scope]'s row, recording the change first as [onNewEndpoint] does. */
+    private fun clearEndpoint(scope: String) {
+        if (subscriptionsDb.getSubscription(scope, null)?.endpoint != null) {
+            recordChange(scope, SubscriptionVersion.NONE)
+        }
+        subscriptionsDb.removeEndpoint(scope)
+    }
+
+    private fun recordChange(scope: String, version: String) {
+        if (!PushOutbox.record(scope, version)) {
+            // As for a frozen context's deferral: the change still goes to Gecko
+            // in this process, and only a death before that loses it.
+            Log.w(TAG, "Could not record a subscription change before writing it")
         }
     }
 
@@ -440,7 +683,7 @@ class Push(
         prefs.edit().putString(PushProfileState.KEY_SELECTED_DISTRIBUTOR, packageName).commit()
     }
 
-    private fun notifyIfDistributorMissing() {
+    private suspend fun notifyIfDistributorMissing() {
         if (status().status != DistributorStatus.UNAVAILABLE) return
         val notificationManager = NotificationManagerCompat.from(context)
         if (!notificationManager.areNotificationsEnabled()) return
@@ -483,5 +726,9 @@ class Push(
         private const val HEADLESS_SESSION_WARMUP_MS = 1500L
         private const val RECOVERY_RETRY_DELAY_MS = 30000L
         private const val UNSUBSCRIBE_TIMEOUT_MS = 10000L
+        // The migration deletes files; it should take milliseconds. Longer
+        // means storage trouble, and push then stays off in this process.
+        private const val STARTUP_TRANSPORT_TIMEOUT_MS = 30000L
+        private const val START_FAILED_ERROR = "Push could not start; it will try again when the app restarts"
     }
 }

@@ -180,6 +180,7 @@
   "user_searchSuggestionProviderKagi": "Kagi",
   "user_searchSuggestionProviderQwant": "Qwant",
   "user_deleteBrowsingDataTypeTabsTitle": "打开的标签页",
+  "user_deleteBrowsingDataTypeTabsDescription": "已锁定的标签页会保留",
   "user_deleteBrowsingDataTypeHistoryTitle": "浏览历史记录",
   "user_deleteBrowsingDataTypeRecentSearchesTitle": "最近搜索",
   "user_deleteBrowsingDataTypeRecentSearchesDescription": "搜索页面上显示的查询",

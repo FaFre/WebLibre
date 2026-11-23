@@ -1122,5 +1122,17 @@
   "settings_featureControlFeaturesToHide": "将隐藏的功能",
   "settings_featureControlApplyPresetConfirm": "应用",
   "settings_featureControlApplyPresetUnchanged": "显示的功能已与“{preset}”一致。",
-  "settings_featureControlSectionTitle": "功能"
+  "settings_featureControlSectionTitle": "功能",
+  "settings_sleepingTabsSectionTitle": "休眠标签页",
+  "settings_autoSleepTabsTitle": "自动休眠标签页",
+  "settings_autoSleepTabsSubtitle": "WebLibre 打开期间，会卸载你一段时间没有查看的标签页。点按休眠标签页上的“唤醒”即可重新加载。",
+  "settings_autoSleepTabsKeywords": "休眠,卸载,内存,挂起,丢弃,空闲,不活动的标签页,sleep",
+  "settings_autoSleepIdleTitle": "闲置后休眠",
+  "settings_autoSleepIdleSubtitle": "标签页离开屏幕多久后会被休眠",
+  "settings_autoSleepIdleKeywords": "休眠,超时,空闲,不活动,sleep",
+  "settings_residentTabLimitTitle": "已加载标签页上限",
+  "settings_residentTabLimitSubtitle": "已加载的标签页超过此数量时，你最久没有查看的标签页会被休眠。",
+  "settings_residentTabLimitKeywords": "上限,内存,已加载标签页,休眠,limit",
+  "settings_residentTabLimitOff": "无限制",
+  "settings_residentTabLimitCount": "{count, plural, other{{count} 个标签页}}"
 }

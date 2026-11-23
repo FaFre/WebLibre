@@ -94,7 +94,7 @@ final class PendingQuitDeletionRepositoryProvider
 }
 
 String _$pendingQuitDeletionRepositoryHash() =>
-    r'0be63edfdd8db8927d0a48d03f3dc3d6099fa7bb';
+    r'fe6326e4a9888302e412a3227d318fcb992a1ea7';
 
 /// What explicit Quits set out to delete and has not been deleted yet: a
 /// request per type, recorded before a Quit starts deleting and completed as

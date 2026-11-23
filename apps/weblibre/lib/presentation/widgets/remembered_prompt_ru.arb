@@ -18,5 +18,11 @@
   "rememberedPrompt_startTorKeywords": "tor, onion, прокси, запустить, подтверждение, больше не спрашивать",
   "rememberedPrompt_startProxyConnectionLabel": "Спрашивать перед запуском прокси-подключения",
   "rememberedPrompt_startProxyConnectionDescription": "Когда прокси-подключение контейнера не запущено",
-  "rememberedPrompt_startProxyConnectionKeywords": "прокси, vpn, подключение, контейнер, запустить, подтверждение, больше не спрашивать, proxy"
+  "rememberedPrompt_startProxyConnectionKeywords": "прокси, vpn, подключение, контейнер, запустить, подтверждение, больше не спрашивать, proxy",
+  "rememberedPrompt_sleepTabsLabel": "Спрашивать перед усыплением вкладок",
+  "rememberedPrompt_sleepTabsDescription": "Объясняет, что страница спящей вкладки загружается заново и может потерять несохранённое состояние",
+  "rememberedPrompt_sleepTabsKeywords": "сон, выгрузка, память, вкладка, приостановить, подтверждение, больше не спрашивать, sleep",
+  "rememberedPrompt_freezeContainerLabel": "Спрашивать перед заморозкой контейнера",
+  "rememberedPrompt_freezeContainerDescription": "Объясняет, что вкладки замороженного контейнера выгружаются, а его фоновая активность останавливается до возобновления",
+  "rememberedPrompt_freezeContainerKeywords": "заморозка, пауза, контейнер, возобновить, фон, push, подтверждение, больше не спрашивать, freeze"
 }

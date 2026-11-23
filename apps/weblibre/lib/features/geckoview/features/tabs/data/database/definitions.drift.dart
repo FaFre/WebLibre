@@ -7580,6 +7580,14 @@ class DefinitionsDrift extends i9.ModularAccessor {
     ).map((i0.QueryRow row) => row.read<int>('count'));
   }
 
+  i0.Selectable<String?> isolationGroupContainerIds({String? contextId}) {
+    return customSelect(
+      'SELECT DISTINCT container_id FROM tab WHERE isolation_context_id = ?1',
+      variables: [i0.Variable<String>(contextId)],
+      readsFrom: {this.tab},
+    ).map((i0.QueryRow row) => row.readNullable<String>('container_id'));
+  }
+
   i0.Selectable<String?> allIsolationContextIds() {
     return customSelect(
       'SELECT DISTINCT isolation_context_id FROM tab WHERE isolation_context_id IS NOT NULL',

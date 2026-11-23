@@ -86,7 +86,9 @@ object ReaderViewAppearanceFeature {
     fun install(runtime: WebExtensionRuntime, prefs: SharedPreferences) {
         pureBlack = prefs.getBoolean(PREF_KEY, false)
 
-        extensionController.install(
+        BuiltInExtensionInstalls.install(
+            EXTENSION_ID,
+            extensionController,
             runtime,
             onSuccess = {
                 logger.debug("Installed reader view extension: ${it.id}")

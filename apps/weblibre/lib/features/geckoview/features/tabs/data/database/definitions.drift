@@ -1308,6 +1308,11 @@ strictContextAssignments:
 tabsInIsolationGroup:
   SELECT COUNT(*) AS count FROM tab WHERE isolation_context_id = :contextId;
 
+-- The containers of isolation group :contextId's tabs, NULL for tabs in
+-- none; no row when it has no tab.
+isolationGroupContainerIds:
+  SELECT DISTINCT container_id FROM tab WHERE isolation_context_id = :contextId;
+
 allIsolationContextIds:
   SELECT DISTINCT isolation_context_id FROM tab WHERE isolation_context_id IS NOT NULL;
 

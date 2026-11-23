@@ -8,6 +8,7 @@ import android.util.Log
 import eu.weblibre.flutter_mozilla_components.ext.EventSequence
 import eu.weblibre.flutter_mozilla_components.ext.resize
 import eu.weblibre.flutter_mozilla_components.ext.toWebPBytes
+import eu.weblibre.flutter_mozilla_components.notifications.ServiceWorkerWindows
 import eu.weblibre.flutter_mozilla_components.pigeons.AudioHitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.EmailHitResult
 import eu.weblibre.flutter_mozilla_components.pigeons.FindResultState
@@ -115,11 +116,15 @@ class FlutterEventMiddleware(private val flutterEvents: GeckoStateEvents) : Midd
                 }
             }
             is TabListAction.AddTabAction -> {
+                val openedByServiceWorker =
+                    ServiceWorkerWindows.take(action.tab.engineState.engineSession)
                 runOnUiThread {
                     flutterEvents.onTabAdded(
                         EventSequence.next(),
                         action.tab.id,
-                        action.tab.parentId
+                        action.tab.parentId,
+                        action.tab.contextId,
+                        openedByServiceWorker,
                     ) { _ -> }
                 }
             }

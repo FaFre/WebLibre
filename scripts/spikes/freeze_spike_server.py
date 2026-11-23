@@ -35,6 +35,7 @@ import html
 import json
 import os
 import re
+import secrets
 import select
 import socket
 import sys
@@ -50,6 +51,21 @@ WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
 DOWNLOAD_BYTES = 2 * 1024 * 1024  # 1 KiB a second: about 34 minutes
 HOLD_SECONDS = 600
 TURN_URL = "turn:127.0.0.1:3478?transport=tcp"  # set from --turn-host/--turn-port
+# The value of this run's storage markers (spike-<tag> cookies): a marker left
+# by an earlier run reads as stale, so it cannot make a wrong-storage test pass.
+RUN_MARKER = secrets.token_hex(8)
+
+
+def spike_markers(cookie_header):
+    """Only the spike-<tag> markers a Cookie header carries, each named as this
+    run's or stale. Cookies are not scoped by port, so the header can hold
+    other localhost services' session cookies, which are never shown or logged."""
+    markers = []
+    for part in (cookie_header or "").split(";"):
+        name, _, value = part.strip().partition("=")
+        if name.startswith("spike-"):
+            markers.append(f"{name} ({'this run' if value == RUN_MARKER else 'stale'})")
+    return ", ".join(markers) or "none"
 
 _print_lock = threading.Lock()
 
@@ -249,7 +265,17 @@ class Handler(BaseHTTPRequestHandler):
             return self.send_push(tag)
         self.begin(tag)
         if path == "/":
-            return self.reply(200, PAGE.replace("@TURN_URL@", TURN_URL).encode(), "text/html; charset=utf-8")
+            # The cookie marks this storage: the page a notification opens
+            # (/opened) shows which markers it carried, so which storage it ran in.
+            return self.reply(
+                200, PAGE.replace("@TURN_URL@", TURN_URL).encode(), "text/html; charset=utf-8",
+                extra={"Set-Cookie": f"spike-{tag}={RUN_MARKER}; Path=/; Max-Age=86400"})
+        if path == "/opened":
+            markers = spike_markers(self.headers.get("Cookie"))
+            log(f"[{tag}] /opened loaded in a window; storage markers it carried: {markers}")
+            STATS.hit(tag, "opened")
+            return self.reply(200, OPENED_PAGE.format(tag=html.escape(tag), markers=html.escape(markers)).encode(),
+                              "text/html; charset=utf-8")
         if path in SCRIPTS:
             return self.reply(200, SCRIPTS[path].encode(), "text/javascript; charset=utf-8")
         if path == "/ping":
@@ -520,11 +546,28 @@ self.addEventListener('message', e => e.waitUntil(
 self.addEventListener('push', e => e.waitUntil(Promise.allSettled([
   fetch(`/ping?${q('sw-push')}`),
   self.registration.showNotification('Freeze spike push (' + tag + ')',
-    { body: 'Service worker ran at ' + new Date().toLocaleTimeString() + (e.data ? ' ' + e.data.text() : ''), tag: 'spike-' + tag }),
+    { body: 'Service worker ran at ' + new Date().toLocaleTimeString() + (e.data ? ' ' + e.data.text() : ''), tag: 'spike-' + tag,
+    // E12 device test: a button, to try the action path next to the plain tap.
+    actions: tag.startsWith('open') ? [{ action: 'reply', title: 'Reply' }] : [] }),
 ])));
 self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  e.waitUntil(fetch(`/ping?${q('sw-notificationclick')}`));
+  // E12 device test N4: a tag with "keep" leaves the notification alone, so what
+  // the app does to it on a button or a body tap can be told from the site's own
+  // close(), which cancels it at once.
+  if (!tag.includes('keep')) e.notification.close();
+  // A button reports itself and opens nothing; a tap on the body is the plain click.
+  if (e.action) {
+    e.waitUntil(fetch(`/ping?${q('sw-action-' + e.action)}`));
+    return;
+  }
+  e.waitUntil(Promise.all([
+    fetch(`/ping?${q('sw-notificationclick')}`),
+    // E12 device test: only a tag starting "open" also opens a window, so the
+    // S1 tags keep their old behaviour. A refusal is reported, not swallowed.
+    tag.startsWith('open')
+      ? self.clients.openWindow(`/opened?${q('opened')}`).catch(() => fetch(`/ping?${q('openwindow-refused')}`))
+      : null,
+  ]));
 });
 self.addEventListener('pushsubscriptionchange', e => e.waitUntil(fetch(`/ping?${q('sw-pushsubscriptionchange')}`)));
 """,
@@ -547,6 +590,17 @@ fetch(`/keepalive?src=keepalive-worker&tag=${encodeURIComponent(tag)}`,
 postMessage('sent');
 """,
 }
+
+OPENED_PAGE = """<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Opened by a notification</title></head>
+<body style="font-family:sans-serif;font-size:1.3em;padding:1em">
+<h1>Opened by a notification click</h1>
+<p>Tag: <b>{tag}</b></p>
+<p>Storage markers this page carried: <b>{markers}</b></p>
+<p>In the right container this shows <b>spike-{tag} (this run)</b>. In the default storage, or another container, it shows <b>none</b>, another tag's marker, or a stale one from an earlier run.</p>
+</body></html>
+"""
 
 FORM_PAGE = """<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

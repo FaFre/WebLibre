@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/domain/entities/tab_container_select
 import 'package:weblibre/features/geckoview/domain/entities/tab_lock.dart';
 import 'package:weblibre/features/geckoview/domain/providers/desktop_mode.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
+import 'package:weblibre/features/geckoview/domain/providers/tab_detail_state.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
@@ -106,7 +107,9 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
   ///
   /// Actions that work on a page do nothing while no tab is selected; the ones
   /// that act on the browser itself (opening a tab, a screen, switching
-  /// containers) still run.
+  /// containers) still run. The ones that work on the page's content
+  /// ([needsLivePage]) say the tab is asleep instead of running on a tab with
+  /// no page.
   ///
   /// A binding to an action whose feature is hidden asks once whether to show
   /// that feature, and does nothing if declined: every trigger that
@@ -117,21 +120,34 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     tabId ??= ref.read(selectedTabProvider);
     if (tabId == null && requiresTab(action)) return;
 
-    // A toggle means the opposite of what the user sees now. Showing the
-    // feature below can bring a stored state back, so decide first.
-    final turnGesturesOn = !ref
-        .read(gestureSettingsWithDefaultsProvider)
-        .effectiveEnabled;
-    // The same for split view: a pair kept while it was hidden comes back on
-    // screen once it is shown, but the user saw one page and asked to split.
-    final splitBefore = splitToggleStateOf(
-      tabId == null ? null : _shownSplitPairWith(tabId),
-    );
-
     try {
       // Inside the try: gestures and shortcuts never await run(), so an
-      // error asking to show the feature would go unhandled. Asking reports
-      // a failed save itself; the action then does not run.
+      // error here would go unhandled.
+      //
+      // Before anything is asked or decided, like the check above: an asleep
+      // tab has no page for the action to work on, and showing a feature
+      // would not change that. Saying so is all there is to do; waking is the
+      // user's choice (D10).
+      if (tabId != null &&
+          needsLivePage(action) &&
+          // ignore: riverpod_lint/only_use_keep_alive_inside_keep_alive
+          ref.read(isTabAsleepProvider(tabId))) {
+        await _showFeedback(BrowserActionFeedback.pageAsleep);
+        return;
+      }
+
+      // A toggle means the opposite of what the user sees now. Showing the
+      // feature below can bring a stored state back, so decide first.
+      final turnGesturesOn = !ref
+          .read(gestureSettingsWithDefaultsProvider)
+          .effectiveEnabled;
+      // The same for split view: a pair kept while it was hidden comes back on
+      // screen once it is shown, but the user saw one page and asked to split.
+      final splitBefore = splitToggleStateOf(
+        tabId == null ? null : _shownSplitPairWith(tabId),
+      );
+
+      // Asking reports a failed save itself; the action then does not run.
       if (!await _ensureShown(action)) return;
 
       await _execute(
@@ -242,6 +258,35 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     BrowserAction.newProxyProfile ||
     BrowserAction.backupProfile => false,
     _ => true,
+  };
+
+  /// Whether [action] works on the page's content or its engine session, which
+  /// a tab that is asleep (D10) does not have: there is nothing to scroll,
+  /// search, read in reader view, translate, print or take a manifest from
+  /// until the user wakes it.
+  ///
+  /// The same actions the toolbar and the menus leave out or disable while
+  /// the selected tab sleeps, so a gesture or shortcut tells the user
+  /// ([BrowserActionFeedback.pageAsleep]) instead of doing nothing.
+  ///
+  /// Not listed, because they keep working: navigations, which wake the tab
+  /// first (5.2.1); everything that reads only the tab's address or title
+  /// (copy link, share, bookmarks, open in a private tab, duplicate); and
+  /// whatever applies once the page loads (desktop site, font size).
+  static bool needsLivePage(BrowserAction action) => switch (action) {
+    BrowserAction.scrollTop ||
+    BrowserAction.scrollBottom ||
+    BrowserAction.pageUp ||
+    BrowserAction.pageDown ||
+    BrowserAction.findInPage ||
+    BrowserAction.findNext ||
+    BrowserAction.findPrevious ||
+    BrowserAction.toggleReaderMode ||
+    BrowserAction.translatePage ||
+    BrowserAction.printPage ||
+    BrowserAction.addToHomeScreen ||
+    BrowserAction.subscribeToPageFeed => true,
+    _ => false,
   };
 
   /// Performs [action]. [tabId] is only null for actions [requiresTab] lets

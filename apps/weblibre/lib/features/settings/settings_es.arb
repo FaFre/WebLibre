@@ -1122,5 +1122,17 @@
   "settings_featureControlFeaturesToHide": "Funciones que se ocultarán",
   "settings_featureControlApplyPresetConfirm": "Aplicar",
   "settings_featureControlApplyPresetUnchanged": "Las funciones que se muestran ya coinciden con «{preset}».",
-  "settings_featureControlSectionTitle": "Funciones"
+  "settings_featureControlSectionTitle": "Funciones",
+  "settings_sleepingTabsSectionTitle": "Pestañas en suspensión",
+  "settings_autoSleepTabsTitle": "Suspender pestañas automáticamente",
+  "settings_autoSleepTabsSubtitle": "Mientras WebLibre está abierto, descarga de la memoria las pestañas que no has mirado durante un tiempo. Toca Reactivar en una pestaña en suspensión para cargarla de nuevo.",
+  "settings_autoSleepTabsKeywords": "suspender, suspensión, descargar, memoria, descartar, inactivas, pestañas inactivas, sleep",
+  "settings_autoSleepIdleTitle": "Suspender tras",
+  "settings_autoSleepIdleSubtitle": "Cuánto tiempo está una pestaña fuera de pantalla antes de ponerla en suspensión",
+  "settings_autoSleepIdleKeywords": "suspender, tiempo de espera, inactividad, inactiva, sleep",
+  "settings_residentTabLimitTitle": "Límite de pestañas cargadas",
+  "settings_residentTabLimitSubtitle": "Por encima de este número de pestañas cargadas, se ponen en suspensión las que miraste hace más tiempo.",
+  "settings_residentTabLimitKeywords": "límite, memoria, pestañas cargadas, suspensión, limit",
+  "settings_residentTabLimitOff": "Sin límite",
+  "settings_residentTabLimitCount": "{count, plural, =1{1 pestaña} other{{count} pestañas}}"
 }

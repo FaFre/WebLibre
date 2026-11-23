@@ -100,6 +100,31 @@ Future<void> _show(
       ui_helper.showInfoMessage(context, l10n.browser_wakeTabRoutingNotReady);
     case UndoWaitsForSiteDataDeletion():
       ui_helper.showInfoMessage(context, l10n.browser_undoWaitsForSiteData);
+    case NotificationSiteDataBeingDeleted():
+      ui_helper.showInfoMessage(
+        context,
+        l10n.webPush_notificationSiteDataBeingDeleted,
+      );
+    case NotificationContainerFrozen():
+      ui_helper.showInfoMessage(
+        context,
+        l10n.webPush_notificationContainerFrozen,
+      );
+    case NotificationWaitsForRouting():
+      ui_helper.showInfoMessage(
+        context,
+        l10n.webPush_notificationRoutingNotReady,
+      );
+    case NotificationGroupWithoutRoute():
+      ui_helper.showInfoMessage(
+        context,
+        l10n.webPush_notificationGroupWithoutRoute,
+      );
+    case NotificationContainerDeleted():
+      ui_helper.showInfoMessage(
+        context,
+        l10n.webPush_notificationContainerDeleted,
+      );
     case ContainerDeletionNotFinished(:final containerIds):
       final repository = ref.read(containerRepositoryProvider.notifier);
       for (final containerId in containerIds) {

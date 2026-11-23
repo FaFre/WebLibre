@@ -18,5 +18,11 @@
   "rememberedPrompt_startTorKeywords": "tor, onion, proxy, iniciar, confirmación, no volver a preguntar",
   "rememberedPrompt_startProxyConnectionLabel": "Preguntar antes de iniciar una conexión proxy",
   "rememberedPrompt_startProxyConnectionDescription": "Cuando la conexión proxy de un contenedor no se está ejecutando",
-  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, conexión, contenedor, iniciar, confirmación, no volver a preguntar"
+  "rememberedPrompt_startProxyConnectionKeywords": "proxy, vpn, conexión, contenedor, iniciar, confirmación, no volver a preguntar",
+  "rememberedPrompt_sleepTabsLabel": "Preguntar antes de poner pestañas en suspensión",
+  "rememberedPrompt_sleepTabsDescription": "Explica que la página de una pestaña en suspensión se vuelve a cargar y puede perder el estado sin guardar",
+  "rememberedPrompt_sleepTabsKeywords": "suspender, suspensión, descargar, memoria, pestaña, descartar, confirmación, no volver a preguntar, sleep",
+  "rememberedPrompt_freezeContainerLabel": "Preguntar antes de congelar un contenedor",
+  "rememberedPrompt_freezeContainerDescription": "Explica que las pestañas de un contenedor congelado se descargan y su actividad en segundo plano se detiene hasta que se reanude",
+  "rememberedPrompt_freezeContainerKeywords": "congelar, pausar, contenedor, reanudar, segundo plano, push, confirmación, no volver a preguntar, freeze"
 }

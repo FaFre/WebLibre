@@ -26,6 +26,7 @@ import 'package:weblibre/core/maintenance/maintenance_lease.dart';
 import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/maintenance_participant.dart';
 import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
+import 'package:weblibre/core/maintenance/push_transport_scrub.dart';
 import 'package:weblibre/core/startup/models/maintenance_journal.dart';
 import 'package:weblibre/core/startup/startup_paths.dart';
 import 'package:weblibre/domain/entities/profile.dart';
@@ -198,6 +199,7 @@ class RestoreOperation {
         archiveDigest: archiveDigest,
         stagingPath: staging.path,
         oldPath: old.path,
+        scrubsPushTransport: true,
         updatedAt: now(),
       ),
     );
@@ -243,6 +245,12 @@ class RestoreOperation {
         // later check — `verified`, and all of recovery — enforces the real
         // invariant with no knowledge that a re-addressing happened.
         await validateStaging(staging, targetProfileId);
+
+        // Before anything is moved aside, so the replacement never holds the
+        // archive's push tokens and keys, not even for a crash's length. Not
+        // even for a scope the target also has: the archive may be another
+        // profile's, or this one's from before a site account changed.
+        await scrubPushTransport(staging);
       });
 
       final target = targetDir(targetProfileId);
@@ -424,6 +432,29 @@ class RestoreOperation {
         _context(journal.taskId, journal.targetProfileId, tree, rollbackDir);
 
     Future<RestoreRecovery> finish(RestoreRecoveryResult result) async {
+      // Before the journal goes, which is what releases the profile. Recovery
+      // can keep a tree without unpacking it again, and one an older build
+      // unpacked still holds the archive's push transport. A rolled-back
+      // original is left alone. Not in a participant's best-effort finalize:
+      // a failure here keeps the restore in recovery.
+      switch (result) {
+        case RestoreRecoveryResult.restored:
+          await scrubPushTransport(target);
+        case RestoreRecoveryResult.indeterminate:
+          // A journal of this build means any replacement was scrubbed before
+          // it was installed. One of an older build cannot tell the original
+          // from an unscrubbed replacement, so the one-time migration resets
+          // the tree's transport with every one it may share credentials with.
+          if (!journal.scrubsPushTransport) {
+            await markPushTransportUnknown(
+              target,
+              syncDirectory: journals.syncDirectory,
+            );
+          }
+        case RestoreRecoveryResult.rolledBack:
+          break;
+      }
+
       await _discardWorkspace(staging, old);
       await _discardParticipantWork(rollbackDir);
       // Whichever tree recovery settled on is the live profile now, and the
@@ -480,6 +511,8 @@ class RestoreOperation {
       var kept = true;
       try {
         await validateStaging(staging, journal.targetProfileId);
+        // An older build's staging was never scrubbed.
+        await scrubPushTransport(staging);
         await staging.rename(target.path);
       } on RestoreValidationFailure catch (error) {
         logger.w('Rolling back restore: $error');

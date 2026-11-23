@@ -357,14 +357,10 @@ class IntentReceiverActivity : Activity() {
      * components can be served under it.
      */
     private fun bindProcessProfile(descriptor: LaunchDescriptor): Boolean {
-        val honorShortcutProfile = runCatching {
-            StartupConfig.read(StartupPaths(applicationContext)).honorShortcutProfile
-        }.getOrDefault(true)
-
         val result = StartupArbiter.tryCommitExternal(
             requestedProfileId = descriptor.trustedProfileId,
             trusted = descriptor.bindsTrustedProfile,
-            honorShortcutProfile = honorShortcutProfile,
+            honorShortcutProfile = StartupConfig.honorShortcutProfile(applicationContext),
         )
 
         return when (result) {

@@ -32,10 +32,8 @@ import java.io.File
  * Keeps the global push ownership map in step with a profile's data.
  *
  * The map is the only piece of a profile's push state that lives *outside* the
- * profile — the connector's own database is inside it, and therefore already
- * travels in the archive. What travels badly is the claim "this token belongs to
- * this profile": after a restore the profile's tokens came out of an archive, and
- * whether a distributor still honours them is not something this side can know.
+ * profile. Nothing of it travels: archives leave the connector database out, and
+ * a restored or cloned tree registers anew with tokens of its own.
  *
  * So restore and delete **purge** rather than rewrite. The map is a cache whose
  * only power is to make the receiver decline a broadcast, so a missing entry costs
@@ -47,7 +45,6 @@ class PushOwnershipParticipant(private val context: Context) : MaintenancePartic
         const val ID = "pushOwnership"
         const val VERSION = 1
 
-        private const val SNAPSHOT_FILE = "push_ownership.json"
         private const val ROLLBACK_FILE = "push_ownership.rollback.json"
     }
 
@@ -57,17 +54,17 @@ class PushOwnershipParticipant(private val context: Context) : MaintenancePartic
         get() = PushOwnershipStore(StartupPaths(context.applicationContext))
 
     /**
-     * Captures the profile's entries, as archive content or as undo data.
+     * Captures the profile's entries as undo data for a restore or delete.
      *
-     * The backup snapshot is informational: a restore does not replay it, for the
-     * reason above. It is written anyway so a support question about a profile's
-     * push registrations can be answered from the archive alone.
+     * Nothing goes into a backup: the entries are connector tokens, which are
+     * secrets (whoever holds one can send this app NEW_ENDPOINT or UNREGISTERED
+     * for it), and a restore never replayed them anyway.
      */
     override fun prepare(workDir: File, profileId: String, kind: String): Boolean {
+        if (kind == "backup") return true
         val entries = store.entriesForProfile(profileId)
-        val name = if (kind == "backup") SNAPSHOT_FILE else ROLLBACK_FILE
 
-        AtomicJsonFile(File(workDir, name)).write(
+        AtomicJsonFile(File(workDir, ROLLBACK_FILE)).write(
             JSONObject().apply {
                 put("profileId", profileId.lowercase())
                 put("entries", JSONArray().apply { entries.forEach { put(it.toJson()) } })

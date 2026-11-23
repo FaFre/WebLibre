@@ -29,6 +29,10 @@ import org.ironfoxoss.unifiedpush.Pusher
 class WebPushEngineIntegration(
     private val engine: Engine,
     private val pushFeature: Pusher,
+    /** [SubscriptionVersion] of a scope's row as stored now, read off the main thread. */
+    private val rowVersion: suspend (PushScope) -> String,
+    /** Runs its argument once push may be read, with false when its start failed. */
+    whenReady: ((Boolean) -> Unit) -> Unit,
     private val coroutineScope: CoroutineScope = MainScope(),
     stringDecoder: (String) -> ByteArray =
         { s -> Base64.decode(s.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP) },
@@ -38,7 +42,7 @@ class WebPushEngineIntegration(
 
     private val logger = Logger("WebPushEngineIntegration")
     private var handler: WebPushHandler? = null
-    private val delegate = WebPushEngineDelegate(pushFeature, stringDecoder, byteArrayEncoder)
+    private val delegate = WebPushEngineDelegate(pushFeature, whenReady, stringDecoder, byteArrayEncoder)
 
     fun start() {
         handler = engine.registerWebPushDelegate(delegate)
@@ -57,32 +61,55 @@ class WebPushEngineIntegration(
         }
     }
 
+    /** The caller already emptied [scope]'s row. */
     suspend fun invalidateEndpoint(scope: PushScope) {
         withContext(Dispatchers.Main.immediate) {
-            notifySubscriptionChanged(scope)
+            notifySubscriptionChanged(scope, SubscriptionVersion.NONE)
         }
     }
 
     /**
-     * Hands the deferred subscription changes (D25) of [contextIds] (every
-     * context when null) to Gecko, for contexts no longer restricted, removing
-     * each only after the handoff. Nothing happens without a handler; the next
-     * drain delivers them.
+     * Hands the pending subscription changes of [contextIds] (every context
+     * when null) to Gecko: deferred ones (D25) of contexts no longer
+     * restricted and, with null, write-ahead ones a previous process left.
+     * Each goes only once its row holds the version it was recorded for, and
+     * is removed only after the handoff. Nothing happens without a handler; the
+     * next drain delivers them.
      */
     suspend fun drainOutbox(contextIds: Collection<String>? = null) {
+        if (handler == null) return
+        val deliverable = PushOutbox.deliverable(PushContextGate::isDeferralRestricted)
+        val chosen = if (contextIds == null) {
+            deliverable
+        } else {
+            // Also those of no known context, once the last restriction
+            // went with these.
+            PushOutbox.scopesOf(contextIds + PushContextGate.ANY_CONTEXT).filter { it in deliverable }
+        }
+        if (chosen.isEmpty()) return
+
+        // Read before the hop to main, where SQLite has no business. A row that
+        // changes in between has recorded its own newer version, which the
+        // handoff below then leaves in place.
+        val stored = chosen.associateWith { rowVersion(it) }
         withContext(Dispatchers.Main.immediate) {
             val handler = handler ?: return@withContext
-            val deliverable = PushOutbox.deliverable(PushContextGate::isDeferralRestricted)
-            val chosen = if (contextIds == null) {
-                deliverable
-            } else {
-                // Also those of no known context, once the last restriction
-                // went with these.
-                PushOutbox.scopesOf(contextIds + PushContextGate.ANY_CONTEXT).filter { it in deliverable }
-            }
             chosen.forEach { scope ->
+                // The same check as live delivery: a write-ahead entry a
+                // death left behind was never deferred, though its context
+                // may be frozen. It waits under that context instead.
+                val verdict = PushContextGate.verdict(scope)
+                if (verdict is PushContextGate.Verdict.Restricted) {
+                    PushOutbox.defer(scope, verdict.contextId ?: PushContextGate.ANY_CONTEXT)
+                    return@forEach
+                }
+                val version = stored.getValue(scope)
+                val pending = PushOutbox.pendingVersion(scope)
+                // Recorded but not written yet, or never written: telling Gecko
+                // now would hand it the old row.
+                if (pending != null && pending != version) return@forEach
                 handler.onSubscriptionChanged(scope)
-                PushOutbox.delivered(scope)
+                PushOutbox.handedOff(scope, version)
             }
         }
     }
@@ -90,11 +117,14 @@ class WebPushEngineIntegration(
     /**
      * A subscription change goes to Gecko unless its context is restricted;
      * then it waits in the outbox until Resume (5.8). Transport state was
-     * already updated by the caller.
+     * already updated by the caller, and [version] is what the row holds.
      */
-    private fun notifySubscriptionChanged(scope: PushScope) {
+    private fun notifySubscriptionChanged(scope: PushScope, version: String) {
         when (val verdict = PushContextGate.verdict(scope)) {
-            PushContextGate.Verdict.Deliver -> handler?.onSubscriptionChanged(scope)
+            PushContextGate.Verdict.Deliver -> handler?.let {
+                it.onSubscriptionChanged(scope)
+                PushOutbox.handedOff(scope, version)
+            }
             is PushContextGate.Verdict.Restricted -> {
                 // A scope whose context cannot be decoded waits until nothing
                 // is restricted.
@@ -130,21 +160,35 @@ class WebPushEngineIntegration(
 
     override fun onSubscriptionChanged(scope: PushScope) {
         coroutineScope.launch {
-            notifySubscriptionChanged(scope)
+            // The feature notifies after its row write, so the row is the
+            // version Gecko's worker will read.
+            notifySubscriptionChanged(scope, rowVersion(scope))
         }
     }
 }
 
+/**
+ * Answers Gecko's subscription requests. Each waits for push's start, which may
+ * have to clear restored endpoints first; a failed start answers "no
+ * subscription" rather than exposing a transport that was never verified.
+ * Private browsing gets no subscription at all ([PrivatePushScopes]).
+ */
 internal class WebPushEngineDelegate(
     private val pushFeature: PushSubscriptionProcessor,
+    private val whenReady: ((Boolean) -> Unit) -> Unit,
     private val stringDecoder: (String) -> ByteArray,
     private val byteArrayEncoder: (ByteArray) -> String,
 ) : WebPushDelegate {
     private val logger = Logger("WebPushEngineDelegate")
 
     override fun onGetSubscription(scope: String, onSubscription: (WebPushSubscription?) -> Unit) {
-        pushFeature.getSubscription(scope) {
-            onSubscription(it?.toEnginePushSubscription(stringDecoder))
+        // Also one an earlier build stored and the start has not removed yet.
+        if (PrivatePushScopes.isPrivate(scope)) return onSubscription(null)
+        whenReady { ready ->
+            if (!ready) return@whenReady onSubscription(null)
+            pushFeature.getSubscription(scope) {
+                onSubscription(it?.toEnginePushSubscription(stringDecoder))
+            }
         }
     }
 
@@ -153,30 +197,44 @@ internal class WebPushEngineDelegate(
         serverKey: ByteArray?,
         onSubscribe: (WebPushSubscription?) -> Unit,
     ) {
-        pushFeature.subscribe(
-            scope = scope,
-            appServerKey = serverKey?.let { byteArrayEncoder(it) },
-            onSubscribeError = {
-                logger.error("Error on push onSubscribe.")
-                onSubscribe(null)
-            },
-            onSubscribe = { subscription ->
-                onSubscribe(subscription.toEnginePushSubscription(stringDecoder))
-            },
-        )
+        if (PrivatePushScopes.isPrivate(scope)) {
+            logger.info("Refused a push subscription of private browsing")
+            return onSubscribe(null)
+        }
+        whenReady { ready ->
+            if (!ready) return@whenReady onSubscribe(null)
+            pushFeature.subscribe(
+                scope = scope,
+                appServerKey = serverKey?.let { byteArrayEncoder(it) },
+                onSubscribeError = {
+                    logger.error("Error on push onSubscribe.")
+                    onSubscribe(null)
+                },
+                onSubscribe = { subscription ->
+                    onSubscribe(subscription.toEnginePushSubscription(stringDecoder))
+                    // The subscription this answer carries, not the row: a newer
+                    // endpoint committed meanwhile keeps its own entry.
+                    PushOutbox.handedOff(scope, SubscriptionVersion.of(subscription))
+                },
+            )
+        }
     }
 
     override fun onUnsubscribe(scope: String, onUnsubscribe: (Boolean) -> Unit) {
-        pushFeature.unsubscribe(
-            scope = scope,
-            onUnsubscribeError = {
-                logger.error("Error on push onUnsubscribe.")
-                onUnsubscribe(false)
-            },
-            onUnsubscribe = {
-                onUnsubscribe(it)
-            },
-        )
+        whenReady { ready ->
+            if (!ready) return@whenReady onUnsubscribe(false)
+            pushFeature.unsubscribe(
+                scope = scope,
+                onUnsubscribeError = {
+                    logger.error("Error on push onUnsubscribe.")
+                    onUnsubscribe(false)
+                },
+                onUnsubscribe = { removed ->
+                    if (removed) PushOutbox.removed(scope)
+                    onUnsubscribe(removed)
+                },
+            )
+        }
     }
 }
 

@@ -84,7 +84,7 @@ final class TabSessionProvider extends $NotifierProvider<TabSession, void> {
   }
 }
 
-String _$tabSessionHash() => r'6f4006e26774b8400214f6176d00f111a895d991';
+String _$tabSessionHash() => r'd438f9e481b45732dc4122c848dc16fee1339646';
 
 /// Commands to one tab's page, or the selected tab's.
 ///

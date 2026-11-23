@@ -505,6 +505,10 @@
   "@browserActions_readerViewUnavailableMessage": {
     "description": "Shown when a gesture or keyboard shortcut asked for reader view on a page that cannot be shown in reader view."
   },
+  "browserActions_pageAsleepMessage": "This tab is asleep. Wake it first.",
+  "@browserActions_pageAsleepMessage": {
+    "description": "Shown when a gesture, keyboard shortcut or long press asked for something that works on a page's content (scrolling, finding text, reader view, translating, printing, adding to the home screen) while the selected tab is asleep. An asleep tab has no page loaded until the user wakes it, so there is nothing for the action to work on."
+  },
   "browserActions_noClosedTabsMessage": "No recently closed tabs",
   "@browserActions_noClosedTabsMessage": {
     "description": "Shown when a gesture or keyboard shortcut asked to reopen a closed tab, but there is none to reopen."

@@ -30,6 +30,7 @@ import android.os.Process
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.FlutterEngineCoordinator
 import eu.weblibre.flutter_mozilla_components.MegazordSetup
+import eu.weblibre.flutter_mozilla_components.ProcessLogSink
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.push.PushMessageScheduler
 import eu.weblibre.flutter_mozilla_components.services.StalePrivateNotification
@@ -56,6 +57,10 @@ class MyApplication : Application() {
         // Gecko's child services run in their own processes from the merged
         // manifest. Startup orchestration belongs to the default app process only.
         if (!isDefaultProcess(base)) return
+
+        // First, so mozilla-components' log lines reach logcat from the start
+        // and on starts that never run Dart.
+        ProcessLogSink.install(base)
 
         StartupArbiter.initialize(
             paths = StartupPaths(base.filesDir),

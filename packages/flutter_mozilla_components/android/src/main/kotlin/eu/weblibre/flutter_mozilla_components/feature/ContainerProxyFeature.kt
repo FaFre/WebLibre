@@ -1075,9 +1075,18 @@ object ContainerProxyFeature {
         }
     }
 
-    private class ContainerProxyBackgroundMessageHandler(
-        private var events: GeckoStateEvents
-    ) : MessageHandler {
+    /**
+     * The newest component set's event sink.
+     *
+     * The background port keeps the handler that was registered when it connected.
+     * After a rebuild, that can be the handler of a headless set, whose sink goes
+     * to a no-op messenger. So the handler reads the sink at the time of each
+     * message.
+     */
+    @Volatile
+    private var events: GeckoStateEvents? = null
+
+    private class ContainerProxyBackgroundMessageHandler : MessageHandler {
         override fun onPortConnected(port: Port) {
             ContainerProxyFeature.onPortConnected()
         }
@@ -1118,7 +1127,7 @@ object ContainerProxyFeature {
                             )
                             return@runOnUiThread
                         }
-                        events.onContainerSiteAssignment(
+                        events?.onContainerSiteAssignment(
                             EventSequence.next(),
                             ContainerSiteAssignment(
                                 requestId = requestId,
@@ -1143,10 +1152,13 @@ object ContainerProxyFeature {
      * "android-components".
      */
     fun install(runtime: WebExtensionRuntime, events: GeckoStateEvents) {
+        this.events = events
         extensionController.registerBackgroundMessageHandler(
-            ContainerProxyBackgroundMessageHandler(events)
+            ContainerProxyBackgroundMessageHandler()
         )
-        extensionController.install(
+        BuiltInExtensionInstalls.install(
+            CONTAINER_PROXY_REPORTER_EXTENSION_ID,
+            extensionController,
             runtime,
             onSuccess = {
                 logger.debug("Installed ContainerProxy webextension: ${it.id}")

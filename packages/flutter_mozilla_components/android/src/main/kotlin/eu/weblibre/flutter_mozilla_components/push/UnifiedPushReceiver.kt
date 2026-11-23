@@ -6,12 +6,12 @@ package eu.weblibre.flutter_mozilla_components.push
 
 import android.content.Context
 import android.content.Intent
+import android.os.SystemClock
 import android.util.Log
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
 import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.rootApplicationContext
-import eu.weblibre.flutter_mozilla_components.startup.ProfileCandidateResolver
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
 import java.security.MessageDigest
@@ -35,6 +35,9 @@ class UnifiedPushReceiver : MessagingReceiver() {
             return
         }
 
+        // Stamped before goAsync: the broadcast's deadline counts from here, so
+        // time spent queued behind other work on the executor counts too.
+        val receivedAt = SystemClock.elapsedRealtime()
         val pendingResult = goAsync()
         synchronized(submissionLock) {
             executor.execute {
@@ -69,6 +72,17 @@ class UnifiedPushReceiver : MessagingReceiver() {
                         return@execute
                     }
 
+                    // Nothing may open the connector or decrypt into the queue
+                    // until the one-time transport migration is done: a tree an
+                    // older build cloned may hold another profile's keys. It runs
+                    // on its own thread; this waits only what is left of the
+                    // broadcast's budget, and declines without an ACK after that.
+                    val remaining = BROADCAST_BUDGET_MS - (SystemClock.elapsedRealtime() - receivedAt)
+                    if (!PushTransportMigration.awaitOpen(StartupPaths(application), remaining)) {
+                        Log.w(TAG, "Push transport not verified yet; leaving the broadcast unacknowledged")
+                        return@execute
+                    }
+
                     currentToken.set(token)
                     currentMessageId.set(runCatching { intent.getStringExtra(EXTRA_MESSAGE_ID) }.getOrNull())
                     super.onReceive(profileContext, intent)
@@ -79,8 +93,19 @@ class UnifiedPushReceiver : MessagingReceiver() {
                     currentToken.remove()
                     currentMessageId.remove()
                     pendingResult.finish()
+                    logLatency(action, receivedAt)
                 }
             }
+        }
+    }
+
+    /** Receipt to `finish()`, for the device runs that check the broadcast deadline. */
+    private fun logLatency(action: String?, receivedAt: Long) {
+        val elapsed = SystemClock.elapsedRealtime() - receivedAt
+        if (elapsed >= SLOW_BROADCAST_MS) {
+            Log.w(TAG, "Broadcast ${action?.substringAfterLast('.')} finished ${elapsed} ms after receipt")
+        } else {
+            Log.d(TAG, "Broadcast ${action?.substringAfterLast('.')} finished ${elapsed} ms after receipt")
         }
     }
 
@@ -108,9 +133,13 @@ class UnifiedPushReceiver : MessagingReceiver() {
             push.emitStatusChanged()
             return
         }
-        if (PushProfileState.updateEndpoint(context, instance, endpoint)) {
-            Log.i(TAG, "Persisted endpoint for cold profile callback")
-        }
+        // Without Push nothing can tell Gecko, and a row written here would make
+        // the next start's renewal find the same values and stay quiet: the site
+        // would keep the old endpoint. So the row is left alone. The connector
+        // still ACKs, and the renewal at the next start asks the distributor
+        // again and passes the change on.
+        if (endpoint.pubKeySet != null) PushProfileState.clearError(context, instance)
+        Log.i(TAG, "Endpoint for a profile without push running; the next start renews it")
     }
 
     override fun onRegistrationFailed(context: Context, reason: FailedReason, instance: String) {
@@ -166,26 +195,17 @@ class UnifiedPushReceiver : MessagingReceiver() {
         val owner = runCatching { ownershipStore(application).ownerOf(token) }.getOrNull()
             ?: return true
 
-        val committed = StartupArbiter.committedProfileId()
-        if (committed != null) {
-            if (owner.profileId == committed) return true
-            Log.i(TAG, "Push for ${owner.profileId} arrived in a process serving $committed")
-            return false
-        }
+        // The committed profile, or the one this process *would* bind to: the
+        // arbiter's in-memory candidate, which a restart target has already
+        // replaced while `current_profile` still names the old process's profile.
+        // Committing just to discover the message belongs elsewhere would spend
+        // the process's one identity on nothing. Null is "not knowable yet"
+        // (maintenance, a requested picker, a restart): the commit below decides.
+        val serving = runCatching { StartupArbiter.peekProfileId() }.getOrNull() ?: return true
+        if (owner.profileId == serving) return true
 
-        // Nothing is committed yet, so compare against the profile this process
-        // *would* bind to. Committing to the candidate just to discover the message
-        // belongs elsewhere would spend the process's one identity on nothing.
-        val candidate = runCatching {
-            ProfileCandidateResolver.resolveOnDisk(StartupPaths(application)).profileId
-        }.getOrNull()
-
-        if (candidate != null && owner.profileId != candidate) {
-            Log.i(TAG, "Push for ${owner.profileId} would have committed $candidate; declining")
-            return false
-        }
-
-        return true
+        Log.i(TAG, "Push for ${owner.profileId} arrived in a process for $serving; declining")
+        return false
     }
 
     /**
@@ -234,6 +254,10 @@ class UnifiedPushReceiver : MessagingReceiver() {
             "org.unifiedpush.android.connector.REGISTRATION_FAILED",
             "org.unifiedpush.android.connector.TEMP_UNAVAILABLE",
         )
+        // What is left of a goAsync() receiver's roughly 10 s after this, for the
+        // transport check; the rest stays for the connector's own work.
+        private const val BROADCAST_BUDGET_MS = 5000L
+        private const val SLOW_BROADCAST_MS = 2000L
         private val executor = Executors.newSingleThreadExecutor()
         private val submissionLock = Any()
         private val currentToken = ThreadLocal<String?>()
@@ -248,6 +272,23 @@ class UnifiedPushReceiver : MessagingReceiver() {
             return MessageDigest.getInstance("SHA-256")
                 .digest("$scope\u0000$connectorToken\u0000$connectorId".toByteArray())
                 .toHexString()
+        }
+
+        /**
+         * Queues [block] on the executor and returns at once. For connector calls
+         * made from a thread the executor may be waiting for, where [runExclusive]
+         * would deadlock.
+         */
+        internal fun submitExclusive(block: () -> Unit) {
+            synchronized(submissionLock) {
+                executor.execute {
+                    try {
+                        block()
+                    } catch (error: Throwable) {
+                        Log.w(TAG, "A queued connector call failed", error)
+                    }
+                }
+            }
         }
 
         internal suspend fun <T> runExclusive(block: suspend () -> T): T =

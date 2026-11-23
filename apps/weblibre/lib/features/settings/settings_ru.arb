@@ -1122,5 +1122,17 @@
   "settings_featureControlFeaturesToHide": "Будут скрыты",
   "settings_featureControlApplyPresetConfirm": "Применить",
   "settings_featureControlApplyPresetUnchanged": "Показанные функции уже соответствуют «{preset}».",
-  "settings_featureControlSectionTitle": "Функции"
+  "settings_featureControlSectionTitle": "Функции",
+  "settings_sleepingTabsSectionTitle": "Спящие вкладки",
+  "settings_autoSleepTabsTitle": "Автоматически усыплять вкладки",
+  "settings_autoSleepTabsSubtitle": "Пока WebLibre открыт, выгружает вкладки, которые вы давно не просматривали. Нажмите «Разбудить» на спящей вкладке, чтобы загрузить её снова.",
+  "settings_autoSleepTabsKeywords": "сон, спящий режим, выгрузка, память, приостановить, простой, неактивные вкладки, sleep",
+  "settings_autoSleepIdleTitle": "Усыплять через",
+  "settings_autoSleepIdleSubtitle": "Как долго вкладка находится вне экрана, прежде чем её усыпят",
+  "settings_autoSleepIdleKeywords": "сон, тайм-аут, простой, неактивна, sleep",
+  "settings_residentTabLimitTitle": "Лимит загруженных вкладок",
+  "settings_residentTabLimitSubtitle": "Если загруженных вкладок больше этого числа, вкладки, которые вы просматривали давнее всего, усыпляются.",
+  "settings_residentTabLimitKeywords": "лимит, память, загруженные вкладки, сон, limit",
+  "settings_residentTabLimitOff": "Без ограничений",
+  "settings_residentTabLimitCount": "{count, plural, one{{count} вкладка} few{{count} вкладки} many{{count} вкладок} other{{count} вкладки}}"
 }

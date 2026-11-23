@@ -225,5 +225,25 @@
   "webPush_indexSiteSubscriptionsSubtitle": "Websites allowed to send you notifications",
   "@webPush_indexSiteSubscriptionsSubtitle": {
     "description": "Short explanation of the site subscriptions list, shown as a settings search result."
+  },
+  "webPush_notificationSiteDataBeingDeleted": "This site's data is being deleted, so its notification was removed",
+  "@webPush_notificationSiteDataBeingDeleted": {
+    "description": "Short message at the bottom of the screen after the user tapped a website's notification: the cookies and site data of the storage the website ran in are waiting to be deleted (a deleted container's data, which WebLibre keeps retrying, or a group of isolated tabs that were all closed while their container was frozen, deleted when the container resumes), so the website can no longer be woken, and the notification was removed."
+  },
+  "webPush_notificationContainerFrozen": "This site's container is frozen, so its notification did not open. Tap it again to resume the container.",
+  "@webPush_notificationContainerFrozen": {
+    "description": "Short message at the bottom of the screen after the user tapped a website's notification and nothing opened: the container the website ran in is frozen, and WebLibre could not ask whether to resume it (no screen was up yet, or the container was frozen a moment before). The notification is still showing; tapping it again asks whether to resume the container."
+  },
+  "webPush_notificationRoutingNotReady": "This site's connection is not ready yet, so its notification did not open. Tap it again in a moment.",
+  "@webPush_notificationRoutingNotReady": {
+    "description": "Short message at the bottom of the screen after the user tapped a website's notification and nothing opened: the proxy connection of the container (or of the browser) the website runs in is not ready, and WebLibre does not wake the website without it. The notification is still showing and can be tapped again."
+  },
+  "webPush_notificationGroupWithoutRoute": "This site's isolated tabs are all closed, so its notification would not use its container's connection and did not open.",
+  "@webPush_notificationGroupWithoutRoute": {
+    "description": "Short message at the bottom of the screen after the user tapped a website's notification and nothing opened. The website ran in a group of isolated tabs inside a container, and every tab of that group is closed (a web app window still uses it). Without a tab, the group no longer takes the proxy connection its container sets, so WebLibre does not wake the website. The notification is still showing."
+  },
+  "webPush_notificationContainerDeleted": "This site's container was deleted, so its notification was removed",
+  "@webPush_notificationContainerDeleted": {
+    "description": "Short message at the bottom of the screen after the user tapped a website's notification: the website ran in a container that was deleted while its site data was kept. Without the container there is no proxy connection for it, so WebLibre does not wake the website, and the notification was removed."
   }
 }

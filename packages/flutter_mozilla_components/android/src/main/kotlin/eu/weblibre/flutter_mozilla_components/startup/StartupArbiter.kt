@@ -19,6 +19,7 @@
  */
 package eu.weblibre.flutter_mozilla_components.startup
 
+import eu.weblibre.flutter_mozilla_components.push.PushTransportMigration
 import java.security.SecureRandom
 import mozilla.components.support.base.log.logger.Logger
 
@@ -131,6 +132,12 @@ object StartupArbiter {
      */
     const val RESTART_REQUIRED_REASON = "maintenanceRestartRequired"
 
+    /**
+     * [StartupDirective.reason] when no maintenance lease is handed out because
+     * the push transports could not be recorded first. Reopening tries again.
+     */
+    const val PUSH_EVIDENCE_REASON = "pushTransportEvidenceUnrecorded"
+
     private val logger = Logger("StartupArbiter")
     private val random = SecureRandom()
 
@@ -153,6 +160,12 @@ object StartupArbiter {
      */
     var restartRequiredForRecovery: Boolean = false
         private set
+
+    /**
+     * Whether the push transport migration's evidence is durable. Only false
+     * after a failed capture, and then no maintenance lease is handed out.
+     */
+    private var pushEvidenceRecorded = true
 
     private val committedCallbacks = mutableListOf<(String, String) -> Unit>()
 
@@ -183,6 +196,7 @@ object StartupArbiter {
         val reservation = MaintenanceReservation.resolve(paths)
         state = if (reservation.required) {
             logger.warn("Reserving maintenance: ${reservation.reason}")
+            pushEvidenceRecorded = recordPushEvidence(paths, reservation.scan)
             StartupState.MaintenanceReserved(
                 taskId = reservation.taskId,
                 recoveryRequired = reservation.recoveryRequired,
@@ -219,6 +233,7 @@ object StartupArbiter {
         pendingProfileId = null
         pendingRelativePath = null
         restartRequiredForRecovery = false
+        pushEvidenceRecorded = true
         processInstanceId = newToken()
     }
 
@@ -251,22 +266,37 @@ object StartupArbiter {
      * shown.
      *
      * Null means the answer is not knowable yet rather than "no": maintenance,
-     * a selection in flight and a restart all withhold it, and so does having no
-     * valid profile at all. A caller that gets null retries; it must not fall
-     * back to committing.
+     * a selection in flight, a requested picker and a restart all withhold it,
+     * and so does having no valid profile at all. A caller that gets null
+     * retries; it must not fall back to committing.
      *
      * A candidate is a *prediction*, not a promise — a picker or a trusted
      * launch can still land somewhere else — so it may only be used to rule work
      * out, never to rule it in.
      */
     fun peekProfileFolder(): String? = arbitrate {
-        tick()
         val paths = this.paths ?: return@arbitrate null
+        peekLocked()?.let { paths.relativeProfilePath(it) }
+    }
 
-        when (val current = state) {
-            is StartupState.Committed -> current.relativePath
+    /**
+     * [peekProfileFolder] as a profile id, for callers that hold one, such as the
+     * push receiver's ownership map.
+     */
+    fun peekProfileId(): String? = arbitrate { peekLocked() }
+
+    /**
+     * What [tryCommitExternal] would bind an untrusted caller to: the in-memory
+     * candidate, which a restart target has already replaced while
+     * `current_profile` still names the profile the old process served. Null
+     * while a requested picker holds such commits back.
+     */
+    private fun peekLocked(): String? {
+        tick()
+        return when (val current = state) {
+            is StartupState.Committed -> current.profileId
             is StartupState.Unresolved ->
-                resolveCandidate()?.let { paths.relativeProfilePath(it) }
+                if (current.pickerRequested) null else current.candidateProfileId
             else -> null
         }
     }
@@ -368,7 +398,14 @@ object StartupArbiter {
                 }
 
             is StartupState.MaintenanceReserved ->
-                if (restartRequiredForRecovery) {
+                if (!ensurePushEvidence()) {
+                    StartupDirective(
+                        StartupDirectiveKind.UNAVAILABLE,
+                        maintenanceTaskId = current.taskId,
+                        recoveryRequired = current.recoveryRequired,
+                        reason = PUSH_EVIDENCE_REASON,
+                    )
+                } else if (restartRequiredForRecovery) {
                     // A lease already expired mid-operation in this process. Handing
                     // out another one would let destructive work resume in exactly
                     // the process that just proved it can stall, and against state
@@ -571,6 +608,12 @@ object StartupArbiter {
             is StartupState.Unresolved -> {
                 val profileId = target ?: current.candidateProfileId
                 when {
+                    // The lock screen's "choose another profile" asked for the
+                    // picker; a push, a worker or a link must not answer it with
+                    // the candidate first. Only an authenticated launch naming
+                    // its profile may still commit, as it may answer an open one.
+                    current.pickerRequested && target == null ->
+                        ExternalCommitResult.SelectionInProgress
                     profileId == null -> ExternalCommitResult.NoValidProfile
                     !commitLocked(profileId, "external") ->
                         ExternalCommitResult.NoValidProfile
@@ -869,7 +912,12 @@ object StartupArbiter {
                 if (now < current.deadlineMillis) return
                 logger.warn("Selection lease expired")
                 val candidate = current.candidateProfileId
-                if (candidate != null && isValidProfile(candidate)) {
+                if (current.pickerRequested) {
+                    // The picker stops its heartbeat in the background, so an
+                    // expired lease is no answer to a picker the user asked for:
+                    // the request stays, and the next owner offers it again.
+                    state = current.toUnresolved()
+                } else if (candidate != null && isValidProfile(candidate)) {
                     commitLocked(candidate, "selection watchdog")
                 } else {
                     // First run with no candidate stays unresolved; native code
@@ -992,6 +1040,28 @@ object StartupArbiter {
         } catch (error: Throwable) {
             logger.error("Profile commitment callback failed", error)
         }
+    }
+
+    /**
+     * Records which push transports exist before maintenance may delete or
+     * replace a profile, and with it the only evidence that two of them share
+     * credentials. File checks only, and once per install: an existing record
+     * is kept. False when the record could not be made durable.
+     */
+    private fun recordPushEvidence(paths: StartupPaths, scan: MaintenanceScan): Boolean = try {
+        PushTransportMigration.captureEvidence(paths, scan)
+        true
+    } catch (error: Exception) {
+        logger.error("Could not record the push transports; maintenance waits for them", error)
+        false
+    }
+
+    /** Retries a capture that failed at [initialize]; no lease is handed out without it. */
+    private fun ensurePushEvidence(): Boolean {
+        if (pushEvidenceRecorded) return true
+        val paths = this.paths ?: return false
+        pushEvidenceRecorded = recordPushEvidence(paths, MaintenanceScan.scan(paths))
+        return pushEvidenceRecorded
     }
 
     /**

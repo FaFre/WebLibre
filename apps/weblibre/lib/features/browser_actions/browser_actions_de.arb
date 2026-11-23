@@ -125,6 +125,7 @@
   "browserActions_tabUnlockedMessage": "Tab entsperrt",
   "browserActions_homeScreenUnavailableMessage": "Diese Seite kann nicht zum Startbildschirm hinzugefügt werden",
   "browserActions_readerViewUnavailableMessage": "Leseansicht ist für diese Seite nicht verfügbar",
+  "browserActions_pageAsleepMessage": "Dieser Tab schläft. Zuerst aufwecken.",
   "browserActions_noClosedTabsMessage": "Keine kürzlich geschlossenen Tabs",
   "browserActions_sharePageTitle": "Teilen",
   "browserActions_sharePageDescription": "Die aktuelle Seite teilen",

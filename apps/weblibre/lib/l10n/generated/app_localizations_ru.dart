@@ -2078,11 +2078,12 @@ class AppLocalizationsRu extends AppLocalizations {
       'Переключить закрепление текущей вкладки';
 
   @override
-  String get browserActions_toggleLockTabTitle => 'Lock / Unlock Tab';
+  String get browserActions_toggleLockTabTitle =>
+      'Заблокировать / разблокировать вкладку';
 
   @override
   String get browserActions_toggleLockTabDescription =>
-      'Prevent the current tab from closing, or allow it again';
+      'Запретить закрытие текущей вкладки или снова разрешить его';
 
   @override
   String get browserActions_moveTabBackwardTitle => 'Переместить вкладку назад';
@@ -2227,10 +2228,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browserActions_tabUnpinnedMessage => 'Вкладка откреплена';
 
   @override
-  String get browserActions_tabLockedMessage => 'Tab locked';
+  String get browserActions_tabLockedMessage => 'Вкладка заблокирована';
 
   @override
-  String get browserActions_tabUnlockedMessage => 'Tab unlocked';
+  String get browserActions_tabUnlockedMessage => 'Вкладка разблокирована';
 
   @override
   String get browserActions_homeScreenUnavailableMessage =>
@@ -2239,6 +2240,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get browserActions_readerViewUnavailableMessage =>
       'Режим чтения недоступен для этой страницы';
+
+  @override
+  String get browserActions_pageAsleepMessage =>
+      'Эта вкладка спит. Сначала разбудите её.';
 
   @override
   String get browserActions_noClosedTabsMessage =>
@@ -2619,7 +2624,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get browserActions_toggleLockTabKeywords =>
-      'lock tab, unlock, keep open, protect, prevent closing';
+      'заблокировать вкладку, разблокировать, держать открытой, защитить, запретить закрытие, lock';
 
   @override
   String get browserActions_closeTabKeywords => 'закрыть, убрать вкладку';
@@ -3462,7 +3467,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get browser_closeTabAfterClearingLocked =>
-      'Unlock the tab to close it after clearing';
+      'Разблокируйте вкладку, чтобы закрыть её после очистки';
 
   @override
   String get browser_clearingEllipsis => 'Очистка…';
@@ -3719,60 +3724,63 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browser_unpinTab => 'Открепить вкладку';
 
   @override
-  String get browser_lockTab => 'Lock tab';
+  String get browser_lockTab => 'Заблокировать вкладку';
 
   @override
-  String get browser_unlockTab => 'Unlock tab';
+  String get browser_unlockTab => 'Разблокировать вкладку';
 
   @override
-  String get browser_tabLockedLabel => 'Locked';
+  String get browser_tabLockedLabel => 'Заблокирована';
 
   @override
   String get browser_tabUnlockIncompleteLabel =>
-      'Locked, unlocking did not finish';
+      'Заблокирована, разблокировка не завершена';
 
   @override
-  String get browser_retryUnlockTab => 'Retry unlocking tab';
+  String get browser_retryUnlockTab => 'Повторить разблокировку вкладки';
 
   @override
   String get browser_tabUnlockIncompleteMessage =>
-      'Unlocking did not finish. The tab stays locked until it does.';
+      'Разблокировка не завершена. Вкладка остаётся заблокированной, пока она не завершится.';
 
   @override
-  String get browser_tabLockFailed => 'This tab could not be locked';
+  String get browser_tabLockFailed => 'Не удалось заблокировать эту вкладку';
 
   @override
-  String get browser_tabUnlockFailed => 'This tab could not be unlocked';
+  String get browser_tabUnlockFailed => 'Не удалось разблокировать эту вкладку';
 
   @override
-  String get browser_tabLockPrivate => 'Private tabs cannot be locked';
+  String get browser_tabLockPrivate => 'Приватные вкладки нельзя заблокировать';
 
   @override
   String get browser_lockedTabCannotMove =>
-      'Unlock this tab to move it to a container with its own storage';
+      'Разблокируйте эту вкладку, чтобы переместить её в контейнер с собственным хранилищем';
 
   @override
-  String get browser_tabMoveFailed => 'The tab was not moved. Try again.';
+  String get browser_tabMoveFailed =>
+      'Вкладка не перемещена. Повторите попытку.';
 
   @override
-  String get browser_containerBeingDeleted => 'This container is being deleted';
+  String get browser_containerBeingDeleted => 'Этот контейнер удаляется';
 
   @override
-  String get browser_containerFrozen => 'Resume the container first';
+  String get browser_containerFrozen => 'Сначала возобновите контейнер';
 
   @override
-  String get browser_tabIsLocked => 'This tab is locked';
+  String get browser_tabIsLocked => 'Эта вкладка заблокирована';
 
   @override
-  String get browser_closeFailed => 'Nothing was closed. Try again.';
+  String get browser_closeFailed => 'Ничего не закрыто. Повторите попытку.';
 
   @override
   String browser_lockedTabsKept(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count locked tabs were kept',
-      one: 'This tab is locked',
+      other: 'Сохранено $count заблокированной вкладки',
+      many: 'Сохранено $count заблокированных вкладок',
+      few: 'Сохранены $count заблокированные вкладки',
+      one: 'Сохранена $count заблокированная вкладка',
     );
     return '$_temp0';
   }
@@ -3782,51 +3790,57 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       closed,
       locale: localeName,
-      other: 'Closed $closed tabs.',
-      one: 'Closed 1 tab.',
+      other: 'Закрыто $closed вкладки.',
+      many: 'Закрыто $closed вкладок.',
+      few: 'Закрыты $closed вкладки.',
+      one: 'Закрыта $closed вкладка.',
     );
     String _temp1 = intl.Intl.pluralLogic(
       locked,
       locale: localeName,
-      other: 'Kept $locked locked tabs.',
-      one: 'Kept 1 locked tab.',
+      other: 'Сохранено $locked заблокированной вкладки.',
+      many: 'Сохранено $locked заблокированных вкладок.',
+      few: 'Сохранены $locked заблокированные вкладки.',
+      one: 'Сохранена $locked заблокированная вкладка.',
     );
     return '$_temp0 $_temp1';
   }
 
   @override
-  String get browser_menuSleepAllTabs => 'Sleep All Tabs';
+  String get browser_menuSleepAllTabs => 'Усыпить все вкладки';
 
   @override
-  String get browser_sleepTab => 'Put to sleep';
+  String get browser_sleepTab => 'Усыпить';
 
   @override
   String get browser_sleepTabDescription =>
-      'Frees memory by unloading the page. It loads again when you wake the tab. Some unsaved page state may be lost.';
+      'Освобождает память, выгружая страницу. Страница загрузится снова, когда вы разбудите вкладку. Часть несохранённого состояния страницы может быть потеряна.';
 
   @override
   String browser_sleepTabsConfirmTitle(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Put $count tabs to sleep?',
-      one: 'Put this tab to sleep?',
+      other: 'Усыпить $count вкладки?',
+      many: 'Усыпить $count вкладок?',
+      few: 'Усыпить $count вкладки?',
+      one: 'Усыпить $count вкладку?',
     );
     return '$_temp0';
   }
 
   @override
-  String get browser_wakeTab => 'Wake tab';
+  String get browser_wakeTab => 'Разбудить вкладку';
 
   @override
   String get browser_wakeTabRoutingNotReady =>
-      'This tab\'s connection is not ready yet, so it stays asleep';
+      'Соединение этой вкладки ещё не готово, поэтому она остаётся спящей';
 
   @override
-  String get browser_tabAsleepLabel => 'Asleep';
+  String get browser_tabAsleepLabel => 'Спит';
 
   @override
-  String get browser_sleepAskTitle => 'Put to sleep anyway?';
+  String get browser_sleepAskTitle => 'Всё равно усыпить?';
 
   @override
   String browser_sleepAskMedia(int count) {
@@ -3834,8 +3848,13 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count tabs are playing media. Putting them to sleep stops playback.',
-      one: 'This tab is playing media. Putting it to sleep stops playback.',
+          '$count вкладки воспроизводят медиа. Если их усыпить, воспроизведение остановится.',
+      many:
+          '$count вкладок воспроизводят медиа. Если их усыпить, воспроизведение остановится.',
+      few:
+          '$count вкладки воспроизводят медиа. Если их усыпить, воспроизведение остановится.',
+      one:
+          '$count вкладка воспроизводит медиа. Если её усыпить, воспроизведение остановится.',
     );
     return '$_temp0';
   }
@@ -3846,9 +3865,13 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count pages are the result of a form submission. When they reload, the forms are not sent again, so the pages may not come back as they were.',
+          '$count страницы — результат отправки форм. При перезагрузке формы не отправляются повторно, поэтому страницы могут вернуться не в прежнем виде.',
+      many:
+          '$count страниц — результат отправки форм. При перезагрузке формы не отправляются повторно, поэтому страницы могут вернуться не в прежнем виде.',
+      few:
+          '$count страницы — результат отправки форм. При перезагрузке формы не отправляются повторно, поэтому страницы могут вернуться не в прежнем виде.',
       one:
-          'This page is the result of a form submission. When it reloads, the form is not sent again, so the page may not come back as it was.',
+          '$count страница — результат отправки формы. При перезагрузке форма не отправляется повторно, поэтому страница может вернуться не в прежнем виде.',
     );
     return '$_temp0';
   }
@@ -3859,9 +3882,13 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count tabs have text typed into a form. Putting them to sleep may lose it.',
+          'В $count вкладках введён текст в форму. Если их усыпить, он может быть потерян.',
+      many:
+          'В $count вкладках введён текст в форму. Если их усыпить, он может быть потерян.',
+      few:
+          'В $count вкладках введён текст в форму. Если их усыпить, он может быть потерян.',
       one:
-          'This tab has text typed into a form. Putting it to sleep may lose it.',
+          'В $count вкладке введён текст в форму. Если её усыпить, он может быть потерян.',
     );
     return '$_temp0';
   }
@@ -3871,223 +3898,231 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       slept,
       locale: localeName,
-      other: '$slept tabs were put to sleep.',
-      one: '1 tab was put to sleep.',
-      zero: 'No tabs were put to sleep.',
+      other: 'Усыплено $slept вкладки.',
+      many: 'Усыплено $slept вкладок.',
+      few: 'Усыплены $slept вкладки.',
+      one: 'Усыплена $slept вкладка.',
+      zero: 'Ни одна вкладка не усыплена.',
     );
     String _temp1 = intl.Intl.pluralLogic(
       kept,
       locale: localeName,
-      other: '$kept tabs were kept awake because of what they are doing.',
-      one: '1 tab was kept awake because of what it is doing.',
+      other: '$kept вкладки остались активными из-за текущей работы.',
+      many: '$kept вкладок остались активными из-за текущей работы.',
+      few: '$kept вкладки остались активными из-за текущей работы.',
+      one: '$kept вкладка осталась активной из-за текущей работы.',
     );
     return '$_temp0 $_temp1';
   }
 
   @override
-  String get browser_sleepTabFailed => 'This tab could not be put to sleep';
+  String get browser_sleepTabFailed => 'Не удалось усыпить эту вкладку';
 
   @override
   String get browser_sleepRefusedRecording =>
-      'This tab is using the camera, microphone or screen sharing, so it was not put to sleep';
+      'Эта вкладка использует камеру, микрофон или демонстрацию экрана, поэтому её не усыпили';
 
   @override
   String get browser_sleepRefusedFormData =>
-      'This tab has form input that would be lost, so it was not put to sleep';
+      'В этой вкладке есть данные формы, которые были бы потеряны, поэтому её не усыпили';
 
   @override
   String get browser_sleepRefusedUpload =>
-      'A file was chosen for upload in this tab, so it was not put to sleep';
+      'В этой вкладке выбран файл для загрузки на сервер, поэтому её не усыпили';
 
   @override
   String get browser_sleepRefusedPrintOrPdf =>
-      'This tab is being printed or saved as PDF, so it was not put to sleep';
+      'Эта вкладка печатается или сохраняется в PDF, поэтому её не усыпили';
 
   @override
   String get browser_sleepRefusedDownload =>
-      'A download from this tab is still running, so it was not put to sleep';
+      'Загрузка из этой вкладки ещё идёт, поэтому её не усыпили';
 
   @override
-  String get browser_freezeContainer => 'Freeze container';
+  String get browser_freezeContainer => 'Заморозить контейнер';
 
   @override
-  String get browser_menuFreezeContainer => 'Freeze Container';
+  String get browser_menuFreezeContainer => 'Заморозить контейнер';
 
   @override
   String browser_freezeContainerTitle(String container) {
-    return 'Freeze $container?';
+    return 'Заморозить контейнер «$container»?';
   }
 
   @override
   String get browser_freezeContainerDescription =>
-      'Unloads its tabs and stops what its sites do in the background, such as push messages and service workers, until you resume it. Cookies, sign-ins and site data are kept. New tabs opened in it wait until then. Push messages sent meanwhile are skipped.';
+      'Выгружает его вкладки и останавливает то, что его сайты делают в фоне, например push-сообщения и service worker, пока вы не возобновите его. Куки, данные входа и данные сайтов сохраняются. Новые вкладки, открытые в нём, ждут до этого момента. Push-сообщения, отправленные за это время, пропускаются.';
 
   @override
-  String get browser_resumeContainer => 'Resume Container';
+  String get browser_resumeContainer => 'Возобновить контейнер';
 
   @override
-  String get browser_stopFreezing => 'Stop Freezing and Resume';
+  String get browser_stopFreezing => 'Остановить заморозку и возобновить';
 
   @override
-  String get browser_retryFreeze => 'Try Freezing Again';
+  String get browser_retryFreeze => 'Повторить заморозку';
 
   @override
-  String get browser_containerFrozenLabel => 'Frozen';
+  String get browser_containerFrozenLabel => 'Заморожен';
 
   @override
-  String get browser_containerFreezing => 'Freezing…';
+  String get browser_containerFreezing => 'Заморозка…';
 
   @override
   String browser_containerFreezingProgress(int done, int total) {
-    return 'Freezing… $done of $total';
+    return 'Заморозка… $done из $total';
   }
 
   @override
-  String get browser_containerResuming => 'Resuming…';
+  String get browser_containerResuming => 'Возобновление…';
 
   @override
-  String get browser_freezeIncompleteLabel => 'Freeze incomplete';
+  String get browser_freezeIncompleteLabel => 'Заморозка не завершена';
 
   @override
-  String get browser_resumeIncompleteLabel => 'Resume incomplete';
+  String get browser_resumeIncompleteLabel => 'Возобновление не завершено';
 
   @override
   String get browser_freezeIncompleteBlocked =>
-      'Freeze incomplete: new activity is blocked, some already running may not have stopped';
+      'Заморозка не завершена: новая активность заблокирована, часть уже запущенной могла не остановиться';
 
   @override
   String get browser_freezeIncompleteUncertain =>
-      'Freeze incomplete: background activity may not be blocked';
+      'Заморозка не завершена: фоновая активность может быть не заблокирована';
 
   @override
   String get browser_resumeIncompleteBlocked =>
-      'Resume incomplete: still blocked, resume again';
+      'Возобновление не завершено: всё ещё заблокирован, возобновите снова';
 
   @override
   String get browser_resumeIncompleteLifted =>
-      'Resume incomplete: background activity may already be running';
+      'Возобновление не завершено: фоновая активность, возможно, уже работает';
 
   @override
-  String get browser_freezeNeedsOwnStorage => 'Needs its own cookie storage';
+  String get browser_freezeNeedsOwnStorage =>
+      'Требуется собственное хранилище куки';
 
   @override
   String get browser_freezeSharedStorage =>
-      'An isolated tab of this container shares its storage with a tab outside it, so it cannot be frozen';
+      'Изолированная вкладка этого контейнера делит хранилище с вкладкой вне него, поэтому его нельзя заморозить';
 
   @override
   String get browser_resumeSharedWithFrozen =>
-      'An isolated tab of another frozen container shares this container\'s storage. Resume that container first.';
+      'Изолированная вкладка другого замороженного контейнера делит хранилище с этим контейнером. Сначала возобновите тот контейнер.';
 
   @override
   String get browser_freezeRecoveryPending =>
-      'Frozen containers are being restored. Try again in a moment.';
+      'Замороженные контейнеры восстанавливаются. Повторите попытку чуть позже.';
 
   @override
   String get browser_undoWaitsForSiteData =>
-      'This tab can\'t come back until its site data is deleted';
+      'Эту вкладку нельзя вернуть, пока не удалены её данные сайта';
 
   @override
   String get browser_resumeFreezeStateUnknown =>
-      'The container was not resumed because WebLibre could not check what is frozen. Try again.';
+      'Контейнер не возобновлён, потому что WebLibre не смог проверить, что заморожено. Повторите попытку.';
 
   @override
   String get browser_freezeBusy =>
-      'This container is busy. Try again in a moment.';
+      'Этот контейнер занят. Повторите попытку чуть позже.';
 
   @override
   String browser_containerFrozenDone(String container) {
-    return '$container is frozen';
+    return 'Контейнер «$container» заморожен';
   }
 
   @override
   String browser_containerResumedDone(String container) {
-    return '$container resumed';
+    return 'Контейнер «$container» возобновлён';
   }
 
   @override
   String get browser_freezeFailedShared =>
-      'A tab outside this container uses its storage, so it was not frozen';
+      'Вкладка вне этого контейнера использует его хранилище, поэтому он не был заморожен';
 
   @override
   String get browser_freezeFailedMembershipChanged =>
-      'A tab joined this container meanwhile, so it was not frozen. Try again.';
+      'Тем временем в этот контейнер добавилась вкладка, поэтому он не был заморожен. Повторите попытку.';
 
   @override
   String get browser_freezeFailedMemberOutside =>
-      'A tab in this container does not use its storage, so it was not frozen. Close that tab or move it to another container, then try again.';
+      'Одна из вкладок этого контейнера не использует его хранилище, поэтому он не был заморожен. Закройте эту вкладку или переместите её в другой контейнер и повторите попытку.';
 
   @override
   String get browser_freezeFailedExternalWindow =>
-      'A web app or custom tab of this container is open. Close it, then try again.';
+      'Открыто веб-приложение или Custom Tab этого контейнера. Закройте его и повторите попытку.';
 
   @override
   String get browser_freezeFailedEngineRefused =>
-      'The browser engine refused to freeze this container. Nothing was changed.';
+      'Движок браузера отказался замораживать этот контейнер. Ничего не изменено.';
 
   @override
   String get browser_freezeFailedNotPersisted =>
-      'The frozen state could not be saved, so the container was not frozen';
+      'Не удалось сохранить состояние заморозки, поэтому контейнер не был заморожен';
 
   @override
   String get browser_freezeFailedQuiescence =>
-      'Freeze incomplete: some activity did not stop in time. New activity is blocked; resume or try again.';
+      'Заморозка не завершена: часть активности не остановилась вовремя. Новая активность заблокирована; возобновите или повторите попытку.';
 
   @override
   String get browser_freezeFailedGeneric =>
-      'Freezing this container did not finish. Resume it or try again.';
+      'Заморозка этого контейнера не завершена. Возобновите его или повторите попытку.';
 
   @override
   String get browser_resumeRoutingNotReady =>
-      'This container\'s connection is not ready yet, so it stays frozen';
+      'Соединение этого контейнера ещё не готово, поэтому он остаётся замороженным';
 
   @override
   String get browser_resumeIsolationCleanupFailed =>
-      'The data of a closed isolated tab could not be deleted first, so the container stays frozen. Try again.';
+      'Сначала не удалось удалить данные закрытой изолированной вкладки, поэтому контейнер остаётся замороженным. Повторите попытку.';
 
   @override
   String get browser_resumeFailedBlocked =>
-      'Resuming did not finish. The container is still frozen; try again.';
+      'Возобновление не завершено. Контейнер всё ещё заморожен; повторите попытку.';
 
   @override
   String get browser_resumeFailedLifted =>
-      'Resuming did not finish. Its sites may already run in the background; try again.';
+      'Возобновление не завершено. Его сайты, возможно, уже работают в фоне; повторите попытку.';
 
   @override
-  String get browser_freezeBlockedTitle => 'Can\'t freeze this container yet';
+  String get browser_freezeBlockedTitle =>
+      'Пока нельзя заморозить этот контейнер';
 
   @override
   String get browser_freezeBlockedRecording =>
-      'Uses the camera, microphone or screen sharing';
+      'Использует камеру, микрофон или демонстрацию экрана';
 
   @override
   String get browser_freezeBlockedFormData =>
-      'Has form input that would be lost';
+      'Есть данные формы, которые были бы потеряны';
 
   @override
-  String get browser_freezeBlockedUpload => 'A file was chosen for upload';
+  String get browser_freezeBlockedUpload =>
+      'Выбран файл для загрузки на сервер';
 
   @override
-  String get browser_freezeBlockedPrintOrPdf => 'Being printed or saved as PDF';
+  String get browser_freezeBlockedPrintOrPdf =>
+      'Печатается или сохраняется в PDF';
 
   @override
   String get browser_freezeBlockedDownload =>
-      'A download from this container is still running';
+      'Загрузка из этого контейнера ещё идёт';
 
   @override
   String get browser_freezeBlockedUnattributedDownload =>
-      'A download is running whose container is unknown';
+      'Идёт загрузка, контейнер которой неизвестен';
 
   @override
-  String get browser_freezeBlockedTabGone => 'Closed tab';
+  String get browser_freezeBlockedTabGone => 'Закрытая вкладка';
 
   @override
-  String get browser_freezeBlockedShowTab => 'Show tab';
+  String get browser_freezeBlockedShowTab => 'Показать вкладку';
 
   @override
-  String get browser_freezeBlockedViewDownloads => 'View downloads';
+  String get browser_freezeBlockedViewDownloads => 'Показать загрузки';
 
   @override
-  String get browser_freezeAskTitle => 'Freeze anyway?';
+  String get browser_freezeAskTitle => 'Всё равно заморозить?';
 
   @override
   String browser_freezeAskMedia(int count) {
@@ -4095,8 +4130,13 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count tabs of this container are playing media. Freezing stops playback.',
-      one: 'A tab of this container is playing media. Freezing stops playback.',
+          '$count вкладки этого контейнера воспроизводят медиа. Заморозка остановит воспроизведение.',
+      many:
+          '$count вкладок этого контейнера воспроизводят медиа. Заморозка остановит воспроизведение.',
+      few:
+          '$count вкладки этого контейнера воспроизводят медиа. Заморозка остановит воспроизведение.',
+      one:
+          '$count вкладка этого контейнера воспроизводит медиа. Заморозка остановит воспроизведение.',
     );
     return '$_temp0';
   }
@@ -4107,9 +4147,13 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count pages of this container are the result of a form submission. When they reload after Resume, the forms are not sent again, so the pages may not come back as they were.',
+          '$count страницы этого контейнера — результат отправки форм. При перезагрузке после возобновления формы не отправляются повторно, поэтому страницы могут вернуться не в прежнем виде.',
+      many:
+          '$count страниц этого контейнера — результат отправки форм. При перезагрузке после возобновления формы не отправляются повторно, поэтому страницы могут вернуться не в прежнем виде.',
+      few:
+          '$count страницы этого контейнера — результат отправки форм. При перезагрузке после возобновления формы не отправляются повторно, поэтому страницы могут вернуться не в прежнем виде.',
       one:
-          'A page of this container is the result of a form submission. When it reloads after Resume, the form is not sent again, so the page may not come back as it was.',
+          '$count страница этого контейнера — результат отправки формы. При перезагрузке после возобновления форма не отправляется повторно, поэтому страница может вернуться не в прежнем виде.',
     );
     return '$_temp0';
   }
@@ -4120,35 +4164,40 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count tabs of this container have text typed into a form. Freezing may lose it.',
+          'В $count вкладках этого контейнера введён текст в форму. При заморозке он может быть потерян.',
+      many:
+          'В $count вкладках этого контейнера введён текст в форму. При заморозке он может быть потерян.',
+      few:
+          'В $count вкладках этого контейнера введён текст в форму. При заморозке он может быть потерян.',
       one:
-          'A tab of this container has text typed into a form. Freezing may lose it.',
+          'В $count вкладке этого контейнера введён текст в форму. При заморозке он может быть потерян.',
     );
     return '$_temp0';
   }
 
   @override
   String browser_resumeAndOpenTitle(String container) {
-    return 'Resume $container and open?';
+    return 'Возобновить контейнер «$container» и открыть?';
   }
 
   @override
   String get browser_resumeAndOpenContent =>
-      'This container is frozen, so nothing in it loads until it is resumed.';
+      'Этот контейнер заморожен, поэтому в нём ничего не загружается, пока он не возобновлён.';
 
   @override
-  String get browser_resumeAndOpen => 'Resume and open';
+  String get browser_resumeAndOpen => 'Возобновить и открыть';
 
   @override
   String get browser_resumeAndOpenCancelled =>
-      'Nothing was opened. The container stays frozen.';
+      'Ничего не открыто. Контейнер остаётся замороженным.';
 
   @override
   String get browser_containerFrozenToBeSafeLabel =>
-      'Frozen to be safe after a damaged record';
+      'Заморожен в целях безопасности после повреждения записи';
 
   @override
-  String get browser_frozenToBeSafeTitle => 'Containers frozen to be safe';
+  String get browser_frozenToBeSafeTitle =>
+      'Контейнеры заморожены в целях безопасности';
 
   @override
   String browser_frozenToBeSafeContent(int count) {
@@ -4156,23 +4205,27 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          'WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze all $count containers that have their own cookie storage. Resume each one when you want its sites to run again.',
+          'Запись WebLibre о том, какие контейнеры заморожены, была повреждена, поэтому для безопасности были заморожены все $count контейнера с собственным хранилищем куки. Возобновите каждый из них, когда захотите, чтобы его сайты снова работали.',
+      many:
+          'Запись WebLibre о том, какие контейнеры заморожены, была повреждена, поэтому для безопасности были заморожены все $count контейнеров с собственным хранилищем куки. Возобновите каждый из них, когда захотите, чтобы его сайты снова работали.',
+      few:
+          'Запись WebLibre о том, какие контейнеры заморожены, была повреждена, поэтому для безопасности были заморожены все $count контейнера с собственным хранилищем куки. Возобновите каждый из них, когда захотите, чтобы его сайты снова работали.',
       one:
-          'WebLibre\'s record of which containers are frozen was damaged, so to be safe it froze the container that has its own cookie storage. Resume it when you want its sites to run again.',
+          'Запись WebLibre о том, какие контейнеры заморожены, была повреждена, поэтому для безопасности был заморожен $count контейнер с собственным хранилищем куки. Возобновите его, когда захотите, чтобы его сайты снова работали.',
     );
     return '$_temp0';
   }
 
   @override
-  String get browser_frozenToBeSafeShowContainers => 'Show containers';
+  String get browser_frozenToBeSafeShowContainers => 'Показать контейнеры';
 
   @override
   String get browser_freezeRecoveryFailed =>
-      'WebLibre could not restore which containers are frozen, so every container stays frozen for now';
+      'WebLibre не удалось восстановить список замороженных контейнеров, поэтому пока все контейнеры остаются замороженными';
 
   @override
   String browser_containerDeletionNotFinished(String container) {
-    return 'Deleting $container did not finish, so it is still there';
+    return 'Удаление контейнера «$container» не завершено, поэтому он по-прежнему на месте';
   }
 
   @override
@@ -4555,31 +4608,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get browser_tabPickerNothingHere => 'Здесь нет вкладок для выбора';
 
   @override
-  String get browser_keepTabAwake => 'Keep awake';
+  String get browser_keepTabAwake => 'Не усыплять';
 
   @override
-  String get browser_allowTabSleeping => 'Allow sleeping';
+  String get browser_allowTabSleeping => 'Разрешить сон';
 
   @override
-  String get browser_pinTabShort => 'Pin';
+  String get browser_keepTabAwakeDescription =>
+      'Автоматический спящий режим и автоматическая заморозка пропускают вкладку, которую не усыпляют. Вручную её по-прежнему можно усыпить, а её контейнер — заморозить.';
 
   @override
-  String get browser_unpinTabShort => 'Unpin';
+  String get browser_pinTabShort => 'Закрепить';
 
   @override
-  String get browser_lockTabShort => 'Lock';
+  String get browser_unpinTabShort => 'Открепить';
 
   @override
-  String get browser_unlockTabShort => 'Unlock';
+  String get browser_lockTabShort => 'Заблокировать';
 
   @override
-  String get browser_sleepTabShort => 'Sleep';
+  String get browser_unlockTabShort => 'Разблокировать';
 
   @override
-  String get browser_wakeTabShort => 'Wake';
+  String get browser_sleepTabShort => 'Усыпить';
 
   @override
-  String get browser_tabKeptAwakeLabel => 'Kept awake';
+  String get browser_wakeTabShort => 'Разбудить';
+
+  @override
+  String get browser_tabKeptAwakeLabel => 'Не усыпляется';
 
   @override
   String get contextualToolbar_tooltipHome => 'Домой';
@@ -4789,13 +4846,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String menu_moreDisclosureSummary(String items, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: '$count more',
-      one: '1 more',
-    );
-    return '$items and $_temp0';
+    return '$items и ещё $count';
   }
 
   @override
@@ -4832,10 +4883,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menu_itemPinTopSite => 'Закрепить в ярлыках';
 
   @override
-  String get menu_itemLockTab => 'Lock Tab';
+  String get menu_itemLockTab => 'Заблокировать вкладку';
 
   @override
-  String get menu_itemSleepTab => 'Put Tab to Sleep';
+  String get menu_itemSleepTab => 'Усыпить вкладку';
 
   @override
   String get menu_itemFetchFeeds => 'Найти ленты';
@@ -5087,19 +5138,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get menu_pinUpdateFailed => 'Не удалось обновить ярлыки';
 
   @override
-  String get menu_lockTab => 'Lock Tab';
+  String get menu_lockTab => 'Заблокировать вкладку';
 
   @override
-  String get menu_unlockTab => 'Unlock Tab';
+  String get menu_unlockTab => 'Разблокировать вкладку';
 
   @override
-  String get menu_retryUnlockTab => 'Retry Unlocking Tab';
+  String get menu_retryUnlockTab => 'Повторить разблокировку вкладки';
 
   @override
-  String get menu_sleepTab => 'Put Tab to Sleep';
+  String get menu_sleepTab => 'Усыпить вкладку';
 
   @override
-  String get menu_wakeTab => 'Wake Tab';
+  String get menu_wakeTab => 'Разбудить вкладку';
 
   @override
   String get menu_fetchFeedsTitle => 'Найти ленты на странице';
@@ -6417,41 +6468,41 @@ class AppLocalizationsRu extends AppLocalizations {
   String get splitView_crashedReload => 'Перезагрузить';
 
   @override
-  String get splitView_sleepingTitle => 'This tab is asleep';
+  String get splitView_sleepingTitle => 'Эта вкладка спит';
 
   @override
-  String get splitView_sleepingWake => 'Wake';
+  String get splitView_sleepingWake => 'Разбудить';
 
   @override
-  String get splitView_frozenTitle => 'This container is frozen';
+  String get splitView_frozenTitle => 'Этот контейнер заморожен';
 
   @override
   String splitView_frozenTitleNamed(String container) {
-    return '$container is frozen';
+    return 'Контейнер «$container» заморожен';
   }
 
   @override
   String splitView_freezingTitleNamed(String container) {
-    return 'Freezing $container…';
+    return 'Заморозка контейнера «$container»…';
   }
 
   @override
   String splitView_freezeIncompleteTitleNamed(String container) {
-    return 'Freezing $container did not finish';
+    return 'Заморозка контейнера «$container» не завершена';
   }
 
   @override
   String splitView_resumingTitleNamed(String container) {
-    return 'Resuming $container…';
+    return 'Возобновление контейнера «$container»…';
   }
 
   @override
   String splitView_resumeIncompleteTitleNamed(String container) {
-    return 'Resuming $container did not finish';
+    return 'Возобновление контейнера «$container» не завершено';
   }
 
   @override
-  String get splitView_frozenResume => 'Resume';
+  String get splitView_frozenResume => 'Возобновить';
 
   @override
   String splitView_frozenSkippedMessages(int count) {
@@ -6459,25 +6510,29 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count background messages were skipped. Skipped messages are not delivered after Resume.',
+          'Пропущено $count фонового сообщения. Пропущенные сообщения не доставляются после возобновления.',
+      many:
+          'Пропущено $count фоновых сообщений. Пропущенные сообщения не доставляются после возобновления.',
+      few:
+          'Пропущено $count фоновых сообщения. Пропущенные сообщения не доставляются после возобновления.',
       one:
-          '1 background message was skipped. Skipped messages are not delivered after Resume.',
+          'Пропущено $count фоновое сообщение. Пропущенные сообщения не доставляются после возобновления.',
     );
     return '$_temp0';
   }
 
   @override
   String splitView_frozenToBeSafeTitleNamed(String container) {
-    return '$container was frozen to be safe';
+    return 'Контейнер «$container» заморожен в целях безопасности';
   }
 
   @override
   String get splitView_frozenToBeSafeDetail =>
-      'WebLibre\'s record of frozen containers was damaged. Resume to load this tab.';
+      'Запись WebLibre о замороженных контейнерах была повреждена. Возобновите работу контейнера, чтобы загрузить эту вкладку.';
 
   @override
   String get splitView_frozenRecoveryTitle =>
-      'Frozen until WebLibre has restored which containers are frozen';
+      'Заморожено, пока WebLibre не восстановит список замороженных контейнеров';
 
   @override
   String get splitView_couldNotOpen => 'Не удалось разделить экран';
@@ -6531,68 +6586,72 @@ class AppLocalizationsRu extends AppLocalizations {
       'Если флажок снят, посещения останутся в истории, но больше не будут привязаны к контейнеру.';
 
   @override
-  String get tabs_deleteContainerAlsoDeleteSiteData => 'Also delete site data';
+  String get tabs_deleteContainerAlsoDeleteSiteData =>
+      'Также удалить данные сайтов';
 
   @override
   String get tabs_deleteContainerSiteDataNote =>
-      'Cookies, sign-ins, offline data and notification subscriptions';
+      'Куки, данные входа, офлайн-данные и подписки на уведомления';
 
   @override
   String get tabs_deleteContainerSiteDataFrozenNote =>
-      'A frozen container\'s data is deleted with it, so its background activity can never resume.';
+      'Данные замороженного контейнера удаляются вместе с ним, чтобы его фоновая активность больше никогда не возобновилась.';
 
   @override
-  String get tabs_siteDataPendingTitle => 'Site data waiting to be deleted';
+  String get tabs_siteDataPendingTitle => 'Данные сайтов, ожидающие удаления';
 
   @override
   String get tabs_siteDataPendingExplanation =>
-      'Until their data is deleted, sites of these containers stay blocked. Deleting is retried at every start.';
+      'Пока их данные не удалены, сайты этих контейнеров остаются заблокированными. Удаление повторяется при каждом запуске.';
 
   @override
-  String get tabs_siteDataPendingDeletedContainer => 'Deleted container';
+  String get tabs_siteDataPendingDeletedContainer => 'Удалённый контейнер';
 
   @override
   String tabs_siteDataPendingClosedIsolatedTabs(String container) {
-    return 'Closed isolated tabs in $container';
+    return 'Закрытые изолированные вкладки в $container';
   }
 
   @override
-  String get tabs_siteDataPendingOrphaned => 'Container no longer exists';
+  String get tabs_siteDataPendingOrphaned => 'Контейнера больше не существует';
 
   @override
-  String get tabs_siteDataPendingDelete => 'Delete data';
+  String get tabs_siteDataPendingDelete => 'Удалить данные';
 
   @override
-  String get tabs_siteDataPendingDeleting => 'Deleting…';
+  String get tabs_siteDataPendingDeleting => 'Удаление…';
 
   @override
-  String get tabs_siteDataPendingDeleted => 'Site data deleted';
+  String get tabs_siteDataPendingDeleted => 'Данные сайтов удалены';
 
   @override
   String get tabs_siteDataPendingFailed =>
-      'The site data could not be deleted yet. It is tried again at the next start.';
+      'Данные сайтов пока не удалось удалить. Попытка повторится при следующем запуске.';
 
   @override
   String tabs_siteDataPendingCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count storage areas',
-      one: '1 storage area',
+      other: '$count области хранения',
+      many: '$count областей хранения',
+      few: '$count области хранения',
+      one: '$count область хранения',
     );
     return '$_temp0';
   }
 
   @override
-  String get tabs_freezeRecoveryTitle => 'Restoring frozen containers';
+  String get tabs_freezeRecoveryTitle =>
+      'Восстановление замороженных контейнеров';
 
   @override
   String get tabs_freezeRecoveryRestoring =>
-      'WebLibre\'s record of which containers are frozen was damaged. Until it is restored, every container with its own cookie storage stays frozen.';
+      'Запись WebLibre о том, какие контейнеры заморожены, была повреждена. Пока она не восстановлена, каждый контейнер с собственным хранилищем куки остаётся замороженным.';
 
   @override
   String get tabs_freezeRecoveryFailed =>
-      'WebLibre\'s record of which containers are frozen was damaged, and restoring it did not finish. Until it does, every container with its own cookie storage stays frozen.';
+      'Запись WebLibre о том, какие контейнеры заморожены, была повреждена, и восстановление не завершилось. Пока оно не завершится, каждый контейнер с собственным хранилищем куки остаётся замороженным.';
 
   @override
   String tabs_deleteContainerLockedTabs(int count) {
@@ -6600,51 +6659,55 @@ class AppLocalizationsRu extends AppLocalizations {
       count,
       locale: localeName,
       other:
-          '$count locked tabs are in this container. Unlock these tabs before deleting this container.',
+          'В этом контейнере $count заблокированной вкладки. Разблокируйте их перед удалением контейнера.',
+      many:
+          'В этом контейнере $count заблокированных вкладок. Разблокируйте их перед удалением контейнера.',
+      few:
+          'В этом контейнере $count заблокированные вкладки. Разблокируйте их перед удалением контейнера.',
       one:
-          '1 locked tab is in this container. Unlock it before deleting this container.',
+          'В этом контейнере $count заблокированная вкладка. Разблокируйте её перед удалением контейнера.',
     );
     return '$_temp0';
   }
 
   @override
-  String get tabs_deleteContainerShowTabs => 'Show tabs';
+  String get tabs_deleteContainerShowTabs => 'Показать вкладки';
 
   @override
   String get tabs_deleteContainerIncomplete =>
-      'Some of this container\'s tabs could not be closed, so the container was kept';
+      'Некоторые вкладки этого контейнера не удалось закрыть, поэтому контейнер сохранён';
 
   @override
   String get tabs_deleteContainerNotPersisted =>
-      'The container was not deleted because its frozen state could not be saved. Try again.';
+      'Контейнер не удалён, потому что не удалось сохранить его состояние заморозки. Повторите попытку.';
 
   @override
   String get tabs_deleteContainerFreezeStateUnknown =>
-      'The container was not deleted because WebLibre could not check whether it is frozen. Try again.';
+      'Контейнер не удалён, потому что WebLibre не смог проверить, заморожен ли он. Повторите попытку.';
 
   @override
   String get tabs_deleteContainerSiteDataPending =>
-      'Container deleted; site-data cleanup pending';
+      'Контейнер удалён; очистка данных сайтов ожидает выполнения';
 
   @override
   String get tabs_deleteContainerOpenInWebApp =>
-      'Close this container\'s web apps and custom tabs first';
+      'Сначала закройте веб-приложения и Custom Tab этого контейнера';
 
   @override
   String get tabs_deleteContainerSharedStorage =>
-      'An isolated tab of another container uses this frozen container\'s storage. Resume the container before deleting it.';
+      'Изолированная вкладка другого контейнера использует хранилище этого замороженного контейнера. Возобновите контейнер перед удалением.';
 
   @override
   String get tabs_deleteContainerBusy =>
-      'This container is still being changed. Try again in a moment.';
+      'Этот контейнер ещё изменяется. Повторите попытку чуть позже.';
 
   @override
   String get tabs_deleteContainerRecoveryPending =>
-      'No container can be deleted while frozen containers are being restored';
+      'Пока восстанавливаются замороженные контейнеры, удалять контейнеры нельзя';
 
   @override
   String get tabs_deleteContainerHistoryFailed =>
-      'The container was deleted, but its history could not be deleted';
+      'Контейнер удалён, но удалить его историю не удалось';
 
   @override
   String get tabs_deleteContainerButton => 'Удалить контейнер';
@@ -6885,18 +6948,24 @@ class AppLocalizationsRu extends AppLocalizations {
       'Требуется включённая изоляция куки';
 
   @override
-  String get tabs_autoFreezeTitle => 'Freeze Automatically';
+  String get tabs_autoFreezeTitle => 'Замораживать автоматически';
 
   @override
-  String get tabs_autoFreezeOff => 'Off';
+  String get tabs_autoFreezeOff => 'Выключен';
 
   @override
   String tabs_autoFreezeAfterMinutes(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'After $count minutes unused, counted while WebLibre is open',
-      one: 'After 1 minute unused, counted while WebLibre is open',
+      other:
+          'Через $count минуты без использования, считается, пока WebLibre открыт',
+      many:
+          'Через $count минут без использования, считается, пока WebLibre открыт',
+      few:
+          'Через $count минуты без использования, считается, пока WebLibre открыт',
+      one:
+          'Через $count минуту без использования, считается, пока WebLibre открыт',
     );
     return '$_temp0';
   }
@@ -6906,15 +6975,21 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'After $count hours unused, counted while WebLibre is open',
-      one: 'After 1 hour unused, counted while WebLibre is open',
+      other:
+          'Через $count часа без использования, считается, пока WebLibre открыт',
+      many:
+          'Через $count часов без использования, считается, пока WebLibre открыт',
+      few:
+          'Через $count часа без использования, считается, пока WebLibre открыт',
+      one:
+          'Через $count час без использования, считается, пока WebLibre открыт',
     );
     return '$_temp0';
   }
 
   @override
   String get tabs_autoFreezeExplanation =>
-      'Freezes this container once none of its tabs has been used for the time you choose. Only time while WebLibre is open counts. Freezing unloads its tabs and stops what it runs in the background, notifications included, until you resume it. It waits while one of its tabs plays media, is in a call, holds a download, or is set to \"Keep awake\". Typed text keeps it waiting until it has been unused for an hour; the text may then be lost.';
+      'Замораживает этот контейнер, когда ни одна из его вкладок не использовалась в течение выбранного времени. Учитывается только время, пока WebLibre открыт. Заморозка выгружает его вкладки и останавливает всё, что он выполняет в фоне, включая уведомления, пока вы не возобновите его. Заморозка откладывается, пока одна из его вкладок воспроизводит медиа, участвует в звонке, держит загрузку или помечена «Не усыплять». Введённый текст откладывает заморозку, пока контейнер не простоит без использования час; после этого текст может быть потерян.';
 
   @override
   String get tabs_isolatedAppLinkSettings =>
@@ -13362,50 +13437,53 @@ class AppLocalizationsRu extends AppLocalizations {
   String get settings_featureControlSectionTitle => 'Функции';
 
   @override
-  String get settings_sleepingTabsSectionTitle => 'Sleeping Tabs';
+  String get settings_sleepingTabsSectionTitle => 'Спящие вкладки';
 
   @override
-  String get settings_autoSleepTabsTitle => 'Sleep Tabs Automatically';
+  String get settings_autoSleepTabsTitle => 'Автоматически усыплять вкладки';
 
   @override
   String get settings_autoSleepTabsSubtitle =>
-      'While WebLibre is open, unloads tabs you have not looked at for a while. Tap Wake on a sleeping tab to load it again.';
+      'Пока WebLibre открыт, выгружает вкладки, которые вы давно не просматривали. Нажмите «Разбудить» на спящей вкладке, чтобы загрузить её снова.';
 
   @override
   String get settings_autoSleepTabsKeywords =>
-      'sleep, unload, memory, suspend, discard, idle, inactive tabs';
+      'сон, спящий режим, выгрузка, память, приостановить, простой, неактивные вкладки, sleep';
 
   @override
-  String get settings_autoSleepIdleTitle => 'Sleep After';
+  String get settings_autoSleepIdleTitle => 'Усыплять через';
 
   @override
   String get settings_autoSleepIdleSubtitle =>
-      'How long a tab is off screen before it is put to sleep';
+      'Как долго вкладка находится вне экрана, прежде чем её усыпят';
 
   @override
-  String get settings_autoSleepIdleKeywords => 'sleep, timeout, idle, inactive';
+  String get settings_autoSleepIdleKeywords =>
+      'сон, тайм-аут, простой, неактивна, sleep';
 
   @override
-  String get settings_residentTabLimitTitle => 'Loaded Tabs Limit';
+  String get settings_residentTabLimitTitle => 'Лимит загруженных вкладок';
 
   @override
   String get settings_residentTabLimitSubtitle =>
-      'Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.';
+      'Если загруженных вкладок больше этого числа, вкладки, которые вы просматривали давнее всего, усыпляются.';
 
   @override
   String get settings_residentTabLimitKeywords =>
-      'limit, memory, loaded tabs, sleep';
+      'лимит, память, загруженные вкладки, сон, limit';
 
   @override
-  String get settings_residentTabLimitOff => 'No Limit';
+  String get settings_residentTabLimitOff => 'Без ограничений';
 
   @override
   String settings_residentTabLimitCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count Tabs',
-      one: '1 Tab',
+      other: '$count вкладки',
+      many: '$count вкладок',
+      few: '$count вкладки',
+      one: '$count вкладка',
     );
     return '$_temp0';
   }
@@ -14803,7 +14881,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get user_deleteBrowsingDataTypeTabsDescription =>
-      'Locked tabs are kept';
+      'Заблокированные вкладки сохраняются';
 
   @override
   String get user_deleteBrowsingDataTypeHistoryTitle => 'История просмотра';
@@ -15160,6 +15238,26 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get webPush_indexSiteSubscriptionsSubtitle =>
       'Сайты, которым разрешено присылать уведомления';
+
+  @override
+  String get webPush_notificationSiteDataBeingDeleted =>
+      'Данные этого сайта удаляются, поэтому его уведомление было удалено';
+
+  @override
+  String get webPush_notificationContainerFrozen =>
+      'Контейнер этого сайта заморожен, поэтому его уведомление не открылось. Нажмите на него ещё раз, чтобы возобновить контейнер.';
+
+  @override
+  String get webPush_notificationRoutingNotReady =>
+      'Соединение этого сайта ещё не готово, поэтому его уведомление не открылось. Нажмите на него ещё раз чуть позже.';
+
+  @override
+  String get webPush_notificationGroupWithoutRoute =>
+      'Все изолированные вкладки этого сайта закрыты, поэтому его уведомление не использовало бы соединение своего контейнера и не открылось.';
+
+  @override
+  String get webPush_notificationContainerDeleted =>
+      'Контейнер этого сайта был удалён, поэтому его уведомление было удалено';
 
   @override
   String get webSearch_fetchPageDataTitle => 'Получение данных страницы';
@@ -16046,8 +16144,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count minutes',
-      one: '1 minute',
+      other: '$count минуты',
+      many: '$count минут',
+      few: '$count минуты',
+      one: '$count минута',
     );
     return '$_temp0';
   }
@@ -16057,8 +16157,10 @@ class AppLocalizationsRu extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count hours',
-      one: '1 hour',
+      other: '$count часа',
+      many: '$count часов',
+      few: '$count часа',
+      one: '$count час',
     );
     return '$_temp0';
   }
@@ -16366,27 +16468,27 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get rememberedPrompt_sleepTabsLabel =>
-      'Ask before putting tabs to sleep';
+      'Спрашивать перед усыплением вкладок';
 
   @override
   String get rememberedPrompt_sleepTabsDescription =>
-      'Explains that a sleeping tab\'s page reloads and may lose unsaved state';
+      'Объясняет, что страница спящей вкладки загружается заново и может потерять несохранённое состояние';
 
   @override
   String get rememberedPrompt_sleepTabsKeywords =>
-      'sleep, unload, memory, tab, suspend, discard, confirmation, don\'t ask again';
+      'сон, выгрузка, память, вкладка, приостановить, подтверждение, больше не спрашивать, sleep';
 
   @override
   String get rememberedPrompt_freezeContainerLabel =>
-      'Ask before freezing a container';
+      'Спрашивать перед заморозкой контейнера';
 
   @override
   String get rememberedPrompt_freezeContainerDescription =>
-      'Explains that a frozen container\'s tabs are unloaded and its background activity stops until Resume';
+      'Объясняет, что вкладки замороженного контейнера выгружаются, а его фоновая активность останавливается до возобновления';
 
   @override
   String get rememberedPrompt_freezeContainerKeywords =>
-      'freeze, pause, container, resume, background, push, confirmation, don\'t ask again';
+      'заморозка, пауза, контейнер, возобновить, фон, push, подтверждение, больше не спрашивать, freeze';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

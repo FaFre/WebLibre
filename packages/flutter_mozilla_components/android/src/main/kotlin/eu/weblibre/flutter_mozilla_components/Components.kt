@@ -67,7 +67,9 @@ class Components(val profileApplicationContext: ProfileContext,
         )
     }
     val events by lazy { Events(flutterEvents) }
-    val useCases by lazy { UseCases(profileApplicationContext, core.engine, core.store, core.webAppShortcutManager) }
+    // Typed: Core's service worker delegate reads it while `core.store` is being
+    // built, and inferring its type from `core.store` there is a cycle.
+    val useCases: UseCases by lazy { UseCases(profileApplicationContext, core.engine, core.store, core.webAppShortcutManager) }
     val services by lazy {
         Services(
             profileApplicationContext,

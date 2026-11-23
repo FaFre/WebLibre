@@ -48,5 +48,10 @@
   "webPush_subscriptionsSectionTitle": "Подписки",
   "webPush_indexSiteSubscriptionsTitle": "Подписки сайтов",
   "webPush_indexSiteSubscriptionsKeywords": "сайты, подписки",
-  "webPush_indexSiteSubscriptionsSubtitle": "Сайты, которым разрешено присылать уведомления"
+  "webPush_indexSiteSubscriptionsSubtitle": "Сайты, которым разрешено присылать уведомления",
+  "webPush_notificationSiteDataBeingDeleted": "Данные этого сайта удаляются, поэтому его уведомление было удалено",
+  "webPush_notificationContainerFrozen": "Контейнер этого сайта заморожен, поэтому его уведомление не открылось. Нажмите на него ещё раз, чтобы возобновить контейнер.",
+  "webPush_notificationRoutingNotReady": "Соединение этого сайта ещё не готово, поэтому его уведомление не открылось. Нажмите на него ещё раз чуть позже.",
+  "webPush_notificationGroupWithoutRoute": "Все изолированные вкладки этого сайта закрыты, поэтому его уведомление не использовало бы соединение своего контейнера и не открылось.",
+  "webPush_notificationContainerDeleted": "Контейнер этого сайта был удалён, поэтому его уведомление было удалено"
 }

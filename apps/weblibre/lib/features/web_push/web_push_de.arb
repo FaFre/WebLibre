@@ -48,5 +48,10 @@
   "webPush_subscriptionsSectionTitle": "Abonnements",
   "webPush_indexSiteSubscriptionsTitle": "Website-Abonnements",
   "webPush_indexSiteSubscriptionsKeywords": "Websites, Abonnements, Seiten",
-  "webPush_indexSiteSubscriptionsSubtitle": "Websites, die Benachrichtigungen senden dürfen"
+  "webPush_indexSiteSubscriptionsSubtitle": "Websites, die Benachrichtigungen senden dürfen",
+  "webPush_notificationSiteDataBeingDeleted": "Die Daten dieser Website werden gelöscht, deshalb wurde die Benachrichtigung entfernt",
+  "webPush_notificationContainerFrozen": "Der Container dieser Website ist eingefroren, deshalb wurde die Benachrichtigung nicht geöffnet. Erneut darauf tippen, um den Container fortzusetzen.",
+  "webPush_notificationRoutingNotReady": "Die Verbindung dieser Website ist noch nicht bereit, deshalb wurde die Benachrichtigung nicht geöffnet. Gleich erneut darauf tippen.",
+  "webPush_notificationGroupWithoutRoute": "Alle isolierten Tabs dieser Website sind geschlossen. Die Benachrichtigung würde daher nicht die Verbindung ihres Containers nutzen und wurde nicht geöffnet.",
+  "webPush_notificationContainerDeleted": "Der Container dieser Website wurde gelöscht, deshalb wurde die Benachrichtigung entfernt"
 }

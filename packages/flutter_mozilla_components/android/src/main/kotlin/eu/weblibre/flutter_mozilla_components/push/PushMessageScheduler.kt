@@ -13,6 +13,8 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.ProfileWorkTags
+import eu.weblibre.flutter_mozilla_components.rootApplicationContext
+import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -51,7 +53,14 @@ object PushMessageScheduler {
         )
     }
 
+    /**
+     * Enqueues a job for each queued message; false when something is left to
+     * retry. Also false until the push transport migration is done, which may
+     * delete the queue instead.
+     */
     fun recover(context: ProfileContext): Boolean {
+        val paths = StartupPaths(context.rootApplicationContext)
+        if (!PushTransportMigration.awaitOpen(paths, TRANSPORT_TIMEOUT_MS)) return false
         val store = PushMessageStore(context)
         return store.ids().map { messageId ->
             runCatching { enqueue(context, messageId) }
@@ -93,6 +102,7 @@ object PushMessageScheduler {
 
     private const val MIN_BACKOFF_SECONDS = 10L
     private const val RECOVERY_RETRY_SECONDS = 30L
+    private const val TRANSPORT_TIMEOUT_MS = 30000L
     private const val TAG = "PushMessageScheduler"
     private val recoveringProfiles = ConcurrentHashMap.newKeySet<String>()
     private val recoveryExecutor = Executors.newSingleThreadScheduledExecutor { runnable ->

@@ -18,5 +18,11 @@
   "rememberedPrompt_startTorKeywords": "tor, onion, proksi, proxy, mulai, konfirmasi, jangan tanya lagi",
   "rememberedPrompt_startProxyConnectionLabel": "Tanya sebelum memulai koneksi proksi",
   "rememberedPrompt_startProxyConnectionDescription": "Saat koneksi proksi sebuah kontainer sedang tidak berjalan",
-  "rememberedPrompt_startProxyConnectionKeywords": "proksi, proxy, vpn, koneksi, kontainer, mulai, konfirmasi, jangan tanya lagi"
+  "rememberedPrompt_startProxyConnectionKeywords": "proksi, proxy, vpn, koneksi, kontainer, mulai, konfirmasi, jangan tanya lagi",
+  "rememberedPrompt_sleepTabsLabel": "Tanya sebelum menidurkan tab",
+  "rememberedPrompt_sleepTabsDescription": "Menjelaskan bahwa halaman tab yang tidur dimuat ulang dan dapat kehilangan status yang belum disimpan",
+  "rememberedPrompt_sleepTabsKeywords": "tidur, lepas, memori, tab, suspend, buang, konfirmasi, jangan tanya lagi, sleep",
+  "rememberedPrompt_freezeContainerLabel": "Tanya sebelum membekukan kontainer",
+  "rememberedPrompt_freezeContainerDescription": "Menjelaskan bahwa tab kontainer yang dibekukan dilepas dari memori dan aktivitas latar belakangnya berhenti sampai dilanjutkan",
+  "rememberedPrompt_freezeContainerKeywords": "bekukan, jeda, kontainer, lanjutkan, latar belakang, push, konfirmasi, jangan tanya lagi, freeze"
 }

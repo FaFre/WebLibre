@@ -7,6 +7,7 @@
 package eu.weblibre.flutter_mozilla_components.lifecycle
 
 import eu.weblibre.flutter_mozilla_components.push.PushContextGate
+import eu.weblibre.flutter_mozilla_components.push.SubscriptionVersion
 import eu.weblibre.flutter_mozilla_components.startup.AtomicJsonFile
 import java.io.IOException
 import java.util.concurrent.Executor
@@ -134,7 +135,7 @@ class FreezeGatesTest {
         registry.removeRecords(listOf("ctx"), gen)
         assertEquals(listOf("https://a.example^ctx"), PushOutbox.deliverable(registry::isRestricted))
 
-        PushOutbox.delivered("https://a.example^ctx")
+        PushOutbox.handedOff("https://a.example^ctx", SubscriptionVersion.NONE)
         assertEquals(0, outbox.json!!.getJSONObject("entries").length())
     }
 

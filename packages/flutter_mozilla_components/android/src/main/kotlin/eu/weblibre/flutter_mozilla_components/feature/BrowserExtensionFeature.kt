@@ -79,9 +79,15 @@ object BrowserExtensionFeature {
         }
     }
 
-    private class ExtensionBackgroundMessageHandler(
-        private val extensionEvents: BrowserExtensionEvents
-    ) : MessageHandler {
+    /**
+     * The newest component set's event sink, read at the time of each message.
+     * The port keeps the handler that was registered when it connected, which
+     * after a rebuild can be a headless set's, whose sink is a no-op.
+     */
+    @Volatile
+    private var extensionEvents: BrowserExtensionEvents? = null
+
+    private class ExtensionBackgroundMessageHandler : MessageHandler {
         override fun onPortMessage(message: Any, port: Port) {
             runBlocking {
                 withContext(Dispatchers.Default) {
@@ -93,7 +99,7 @@ object BrowserExtensionFeature {
                             val url = messageJSON.getString("url")
 
                             runOnUiThread {
-                                extensionEvents.onFeedRequested(
+                                extensionEvents?.onFeedRequested(
                                     EventSequence.next(),
                                     url
                                 ) { _ -> }
@@ -126,10 +132,13 @@ object BrowserExtensionFeature {
      * "android-components".
      */
     fun install(runtime: WebExtensionRuntime, extensionEvents: BrowserExtensionEvents) {
+        this.extensionEvents = extensionEvents
         extensionController.registerBackgroundMessageHandler(
-            ExtensionBackgroundMessageHandler(extensionEvents)
+            ExtensionBackgroundMessageHandler()
         )
-        extensionController.install(
+        BuiltInExtensionInstalls.install(
+            PREF_MANAGER_REPORTER_EXTENSION_ID,
+            extensionController,
             runtime,
             onSuccess = {
                 logger.debug("Installed browser_extension webextension: ${it.id}")

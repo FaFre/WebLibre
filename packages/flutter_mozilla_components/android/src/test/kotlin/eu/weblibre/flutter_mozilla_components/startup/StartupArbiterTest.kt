@@ -24,9 +24,6 @@ import java.nio.file.Files
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -35,11 +32,22 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.json.JSONObject
+import org.junit.After
+import org.junit.Assume.assumeTrue
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 private const val PROFILE_A = "0199a0b1-1111-7111-8111-111111111111"
 private const val PROFILE_B = "0199a0b1-2222-7222-8222-222222222222"
 private const val MISSING = "0199a0b1-9999-7999-8999-999999999999"
 
+// Robolectric for android.util.Log, which the push transport migration that
+// reserving maintenance runs logs to.
+@RunWith(RobolectricTestRunner::class)
+@Config(manifest = Config.NONE, sdk = [33])
 class StartupArbiterTest {
 
     private lateinit var filesDir: File
@@ -60,7 +68,7 @@ class StartupArbiterTest {
         }
     }
 
-    @BeforeTest
+    @Before
     fun setUp() {
         filesDir = Files.createTempDirectory("weblibre_arbiter").toFile()
         paths = StartupPaths(filesDir)
@@ -71,7 +79,7 @@ class StartupArbiterTest {
         StartupArbiter.resetForTest()
     }
 
-    @AfterTest
+    @After
     fun tearDown() {
         StartupArbiter.resetForTest()
         filesDir.deleteRecursively()
@@ -164,6 +172,161 @@ class StartupArbiterTest {
         initialize()
 
         assertNull(StartupArbiter.peekProfileFolder())
+    }
+
+    @Test
+    fun peekFollowsTheRestartTargetWhileDiskStillNamesTheOldProfile() {
+        // A switch from A to B: the new process applies the target in memory,
+        // and `current_profile` keeps naming A until B commits. Push and its
+        // workers rule work in or out from this, so B's must not be declined
+        // and A's must not slip through to a commit of B.
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(PROFILE_B)
+        initialize()
+
+        assertEquals(PROFILE_B, StartupArbiter.peekProfileId())
+        assertEquals(paths.relativeProfilePath(PROFILE_B), StartupArbiter.peekProfileFolder())
+        assertEquals(PROFILE_A, paths.currentProfileFile.readText())
+
+        val committed = StartupArbiter.tryCommitExternal(requestedProfileId = null, trusted = false)
+        assertEquals(ExternalCommitResult.CommittedRequested(PROFILE_B), committed)
+        assertEquals(PROFILE_B, StartupArbiter.peekProfileId())
+    }
+
+    @Test
+    fun aRequestedPickerIsNotAnsweredByAPushOrAWorker() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+        initialize()
+
+        // Not knowable yet: the user is about to choose.
+        assertNull(StartupArbiter.peekProfileId())
+        assertNull(StartupArbiter.peekProfileFolder())
+        assertEquals(
+            ExternalCommitResult.SelectionInProgress,
+            StartupArbiter.tryCommitExternal(requestedProfileId = null, trusted = false),
+        )
+        assertTrue(writer.persisted.isEmpty())
+
+        val directive = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+        assertTrue(directive.showPicker)
+    }
+
+    @Test
+    fun anAuthenticatedLaunchNamingItsProfileMayStillCommitPastARequestedPicker() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+        initialize()
+
+        assertEquals(
+            ExternalCommitResult.CommittedRequested(PROFILE_B),
+            StartupArbiter.tryCommitExternal(requestedProfileId = PROFILE_B, trusted = true),
+        )
+    }
+
+    @Test
+    fun anIdleRequestedPickerKeepsItsRequestInsteadOfCommitting() {
+        // The picker stops its heartbeat in the background. Five minutes later
+        // a push used to commit the candidate inside the watchdog, opening the
+        // profile the user could not unlock.
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        writeRestartRequest(null, showPicker = true)
+        initialize()
+        val stale = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF).leaseId!!
+
+        advance(StartupArbiter.SELECTION_TIMEOUT_MS)
+
+        assertEquals(
+            ExternalCommitResult.SelectionInProgress,
+            StartupArbiter.tryCommitExternal(requestedProfileId = null, trusted = false),
+        )
+        val state = assertIs<StartupState.Unresolved>(StartupArbiter.currentState())
+        assertTrue(state.pickerRequested)
+        assertTrue(writer.persisted.isEmpty())
+
+        // The tap on the dead lease is refused; asking again offers the picker.
+        assertFalse(StartupArbiter.commitSelection(stale, PROFILE_B))
+        val again = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+        assertEquals(StartupDirectiveKind.SELECT, again.kind)
+        assertTrue(again.showPicker)
+    }
+
+    @Test
+    fun theOrdinaryPromptSettingAloneStillAllowsAHeadlessCommit() {
+        writeProfile(PROFILE_A)
+        writeProfile(PROFILE_B)
+        paths.currentProfileFile.writeText(PROFILE_A)
+        initialize()
+
+        assertEquals(PROFILE_A, StartupArbiter.peekProfileId())
+        assertEquals(
+            ExternalCommitResult.CommittedRequested(PROFILE_A),
+            StartupArbiter.tryCommitExternal(requestedProfileId = null, trusted = false),
+        )
+    }
+
+    @Test
+    fun reservingMaintenanceRecordsThePushTransportsFirst() {
+        // A queued delete or restore can remove a transport before anything
+        // commits; the one-time push migration has to have seen it.
+        writeProfile(PROFILE_A)
+        File(paths.profileDir(PROFILE_A), "databases/unifiedpush-connector").apply {
+            parentFile.mkdirs()
+            writeText("tokens")
+        }
+        writeIncompleteJournal()
+
+        initialize()
+
+        assertIs<StartupState.MaintenanceReserved>(StartupArbiter.currentState())
+        val recorded = JSONObject(paths.pushTransportMigrationFile.readText())
+        assertEquals("evidence", recorded.getString("phase"))
+        assertEquals(PROFILE_A, recorded.getJSONArray("legacy").getString(0))
+    }
+
+    @Test
+    fun maintenanceWaitsUntilThePushTransportsAreRecorded() {
+        // A delete or a restore could remove the only evidence that two
+        // profiles share push credentials, so no lease without the record.
+        writeProfile(PROFILE_A)
+        writeIncompleteJournal()
+        paths.profilesDir.setReadable(false)
+        try {
+            assumeTrue("running with permission checks", paths.profilesDir.listFiles() == null)
+            initialize()
+
+            val refused = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+
+            assertEquals(StartupDirectiveKind.UNAVAILABLE, refused.kind)
+            assertEquals(StartupArbiter.PUSH_EVIDENCE_REASON, refused.reason)
+            assertEquals("task-1", refused.maintenanceTaskId)
+            assertNull(refused.leaseId)
+            assertFalse(paths.pushTransportMigrationFile.exists())
+        } finally {
+            paths.profilesDir.setReadable(true)
+        }
+
+        // The next attempt records it, and maintenance goes ahead.
+        val directive = StartupArbiter.beginStartup(ui, ProfilePromptMode.OFF)
+        assertEquals(StartupDirectiveKind.MAINTENANCE, directive.kind)
+        assertTrue(paths.pushTransportMigrationFile.exists())
+    }
+
+    @Test
+    fun anOrdinaryStartRecordsNothingForPush() {
+        writeProfile(PROFILE_A)
+
+        initialize()
+
+        assertFalse(paths.pushTransportMigrationFile.exists())
     }
 
     @Test

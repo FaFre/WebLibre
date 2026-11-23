@@ -59,6 +59,7 @@ extension BrowserActionFeedbackL10n on BrowserActionFeedback {
         l10n.browserActions_homeScreenUnavailableMessage,
       BrowserActionFeedback.readerViewUnavailable =>
         l10n.browserActions_readerViewUnavailableMessage,
+      BrowserActionFeedback.pageAsleep => l10n.browserActions_pageAsleepMessage,
       BrowserActionFeedback.noClosedTabs =>
         l10n.browserActions_noClosedTabsMessage,
       BrowserActionFeedback.noSplitView => l10n.splitView_noSplitView,

@@ -19,6 +19,7 @@
  */
 package eu.weblibre.flutter_mozilla_components.startup
 
+import android.content.Context
 import org.json.JSONObject
 
 const val STARTUP_CONFIG_VERSION = 1
@@ -161,5 +162,12 @@ data class StartupConfig(
                 is AtomicJsonFile.Read.Corrupt -> DEFAULTS
                 is AtomicJsonFile.Read.Present -> fromJson(result.json)
             }
+
+        /**
+         * Whether a trusted launch may pick the profile it names
+         * ([StartupArbiter.tryCommitExternal]). Unreadable counts as the default.
+         */
+        fun honorShortcutProfile(context: Context): Boolean =
+            runCatching { read(StartupPaths(context)).honorShortcutProfile }.getOrDefault(true)
     }
 }

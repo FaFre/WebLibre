@@ -11,6 +11,7 @@ import 'package:weblibre/core/maintenance/maintenance_journal_store.dart';
 import 'package:weblibre/core/maintenance/maintenance_lease.dart';
 import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/maintenance_participant.dart';
+import 'package:weblibre/core/maintenance/push_transport_scrub.dart';
 import 'package:weblibre/core/maintenance/restore_operation.dart';
 import 'package:weblibre/core/startup/models/maintenance_journal.dart';
 import 'package:weblibre/core/startup/startup_paths.dart';
@@ -634,6 +635,257 @@ void main() {
         restoreWith(_FakeProfileApi()).recover(journal),
         throwsA(isA<RestoreUnrecoverable>()),
       );
+    });
+  });
+
+  group('push transport', () {
+    // The connector database and the payload queue identify the profile they
+    // were made for; a tree that kept them in another profile could decrypt
+    // the source's messages.
+    String inTree(Directory tree, String relative) =>
+        p.joinAll([tree.path, ...p.posix.split(relative)]);
+
+    Future<void> seedTransport(Directory tree) async {
+      for (final relative in PushTransportPaths.connectorFiles.take(2)) {
+        final file = File(inTree(tree, relative));
+        await file.parent.create(recursive: true);
+        await file.writeAsString('tokens and keys');
+      }
+      final queued = File(
+        inTree(tree, '${PushTransportPaths.queuedMessages}/m1.push'),
+      );
+      await queued.parent.create(recursive: true);
+      await queued.writeAsString('decrypted payload');
+    }
+
+    bool hasConnector(Directory tree) => PushTransportPaths.connectorFiles.any(
+      (relative) => File(inTree(tree, relative)).existsSync(),
+    );
+
+    bool hasQueue(Directory tree) =>
+        Directory(inTree(tree, PushTransportPaths.queuedMessages)).existsSync();
+
+    bool hasMarker(Directory tree, String relative) =>
+        File(inTree(tree, relative)).existsSync();
+
+    Future<MaintenanceJournal> journalAt(
+      RestorePhase phase, {
+      bool scrubsPushTransport = false,
+    }) => journals.write(
+      MaintenanceJournal(
+        taskId: 'task-1',
+        kindId: MaintenanceJournalKind.restore.name,
+        phaseId: phase.name,
+        targetProfileId: _target,
+        stagingPath: paths.restoreStagingDir('task-1').path,
+        oldPath: paths.restoreOldDir('task-1').path,
+        scrubsPushTransport: scrubsPushTransport,
+        updatedAt: DateTime.utc(2026, 8, 19),
+      ),
+    );
+
+    test('archives leave out every file of the transport', () {
+      for (final relative in [
+        ...PushTransportPaths.connectorFiles,
+        PushTransportPaths.queuedMessages,
+        '${PushTransportPaths.queuedMessages}/m1.push',
+        PushTransportPaths.endpointResetMarker,
+        PushTransportPaths.transportUnknownMarker,
+      ]) {
+        expect(BackupExclusions.isExcluded(relative), isTrue, reason: relative);
+      }
+      // The subscription rows travel: the restored profile renews them.
+      expect(
+        BackupExclusions.isExcluded(
+          'databases/feature_unifiedpush_subscriptions',
+        ),
+        isFalse,
+      );
+    });
+
+    test('a restore installs the archive without its transport', () async {
+      await makeProfile(_target);
+      await seedTransport(profileDir(_target));
+      MaintenanceJournal? written;
+
+      await restoreWith(
+        _FakeProfileApi(),
+        unpack: (archive, staging) async {
+          await fillStaging(staging);
+          await seedTransport(staging);
+          written = await journals.read('task-1');
+        },
+      ).run(taskId: 'task-1', targetProfileId: _target, archive: File('x'));
+
+      final target = profileDir(_target);
+      expect(markerOf(_target), 'restored');
+      expect(hasConnector(target), isFalse);
+      expect(hasQueue(target), isFalse);
+      expect(hasMarker(target, PushTransportPaths.endpointResetMarker), isTrue);
+      expect(written!.scrubsPushTransport, isTrue);
+    });
+
+    test('scrubbing is idempotent', () async {
+      final tree = await makeProfile(_target);
+      await seedTransport(tree);
+
+      await scrubPushTransport(tree);
+      await scrubPushTransport(tree);
+
+      expect(hasConnector(tree), isFalse);
+      expect(hasMarker(tree, PushTransportPaths.endpointResetMarker), isTrue);
+    });
+
+    test(
+      'recovery scrubs staging an older build left before it installs',
+      () async {
+        await makeProfile(_target);
+        await moveTargetAside();
+        await fillStaging(paths.restoreStagingDir('task-1'));
+        await seedTransport(paths.restoreStagingDir('task-1'));
+        final journal = await journalAt(RestorePhase.oldMoved);
+
+        final recovery = await restoreWith(_FakeProfileApi()).recover(journal);
+
+        expect(recovery.result, RestoreRecoveryResult.restored);
+        expect(markerOf(_target), 'restored');
+        expect(hasConnector(profileDir(_target)), isFalse);
+        expect(hasQueue(profileDir(_target)), isFalse);
+      },
+    );
+
+    test('recovery scrubs an installed replacement it keeps', () async {
+      await makeProfile(_target, marker: 'restored');
+      await seedTransport(profileDir(_target));
+      await Directory(
+        paths.restoreOldDir('task-1').path,
+      ).create(recursive: true);
+      final journal = await journalAt(RestorePhase.installed);
+
+      await restoreWith(_FakeProfileApi()).recover(journal);
+
+      expect(hasConnector(profileDir(_target)), isFalse);
+      expect(
+        hasMarker(profileDir(_target), PushTransportPaths.endpointResetMarker),
+        isTrue,
+      );
+    });
+
+    test('recovery past the barrier scrubs before releasing', () async {
+      await makeProfile(_target, marker: 'restored');
+      await seedTransport(profileDir(_target));
+      final journal = await journalAt(RestorePhase.verified);
+
+      await restoreWith(_FakeProfileApi()).recover(journal);
+
+      expect(hasConnector(profileDir(_target)), isFalse);
+      expect(paths.journalFile('task-1').existsSync(), isFalse);
+    });
+
+    test('a rolled-back original keeps its transport', () async {
+      await makeProfile(_target);
+      await seedTransport(profileDir(_target));
+      await moveTargetAside();
+      final journal = await journalAt(RestorePhase.oldMoved);
+
+      final recovery = await restoreWith(_FakeProfileApi()).recover(journal);
+
+      expect(recovery.result, RestoreRecoveryResult.rolledBack);
+      expect(hasConnector(profileDir(_target)), isTrue);
+      expect(hasQueue(profileDir(_target)), isTrue);
+      expect(
+        hasMarker(profileDir(_target), PushTransportPaths.endpointResetMarker),
+        isFalse,
+      );
+    });
+
+    test(
+      "an older build's ambiguous restore is left to the migration",
+      () async {
+        // The old build kept the replacement, shredded `old` and died before
+        // its journal went. Original or unscrubbed replacement, nothing says.
+        await makeProfile(_target);
+        await seedTransport(profileDir(_target));
+        final journal = await journalAt(RestorePhase.installed);
+
+        final recovery = await restoreWith(_FakeProfileApi()).recover(journal);
+
+        final target = profileDir(_target);
+        expect(recovery.result, RestoreRecoveryResult.indeterminate);
+        expect(hasQueue(target), isFalse);
+        expect(
+          hasMarker(target, PushTransportPaths.transportUnknownMarker),
+          isTrue,
+        );
+        // The connector database stays for the migration, which resets it
+        // with every transport it may share credentials with.
+        expect(hasConnector(target), isTrue);
+      },
+    );
+
+    test('this build\'s ambiguous restore leaves the target alone', () async {
+      // Any replacement this build installed was scrubbed before it went in,
+      // so here the target is the untouched original.
+      await makeProfile(_target);
+      await seedTransport(profileDir(_target));
+      final journal = await journalAt(
+        RestorePhase.installed,
+        scrubsPushTransport: true,
+      );
+
+      final recovery = await restoreWith(_FakeProfileApi()).recover(journal);
+
+      final target = profileDir(_target);
+      expect(recovery.result, RestoreRecoveryResult.indeterminate);
+      expect(hasConnector(target), isTrue);
+      expect(hasQueue(target), isTrue);
+      expect(
+        hasMarker(target, PushTransportPaths.transportUnknownMarker),
+        isFalse,
+      );
+    });
+
+    test('the unknown marker is synced before recovery lets go', () async {
+      // Once the journal goes, the marker is the only evidence left.
+      final tree = await makeProfile(_target);
+      final synced = <String>[];
+
+      await markPushTransportUnknown(
+        tree,
+        syncDirectory: (path) async {
+          synced.add(path);
+          return true;
+        },
+      );
+
+      expect(synced, [p.join(tree.path, 'no_backup')]);
+      expect(
+        hasMarker(tree, PushTransportPaths.transportUnknownMarker),
+        isTrue,
+      );
+    });
+
+    test('a marker sync that cannot be taken does not hold recovery', () async {
+      final tree = await makeProfile(_target);
+
+      await markPushTransportUnknown(tree, syncDirectory: (_) async => false);
+
+      expect(
+        hasMarker(tree, PushTransportPaths.transportUnknownMarker),
+        isTrue,
+      );
+    });
+
+    test('an older journal reads as one that did not scrub', () {
+      final journal = MaintenanceJournal.tryFromJson({
+        'taskId': 'task-1',
+        'kind': 'restore',
+        'phase': 'installed',
+        'targetProfileId': _target,
+        'updatedAt': '2026-08-19T00:00:00.000Z',
+      });
+
+      expect(journal!.scrubsPushTransport, isFalse);
     });
   });
 

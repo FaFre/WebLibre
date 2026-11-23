@@ -1232,6 +1232,16 @@
                     "description": "Safe Browsing also classifies frames, scripts and other subresources, so a malicious embed on a safe page is caught"
                 }
             }
+        },
+        "Private Browsing": {
+            "description": "Keep what private tabs do from outliving them",
+            "preferences": {
+                "dom.webnotifications.privateBrowsing.enabled": {
+                    "value": false,
+                    "title": "No notifications or push in private tabs",
+                    "description": "A private tab's site sees the notification permission as denied and cannot subscribe to push, so it cannot keep a push endpoint that outlives the private session and links it to the next one"
+                }
+            }
         }
     }
 }

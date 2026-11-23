@@ -35,12 +35,12 @@ class ProfileContext(private val base: Context, val relativePath: String) :
     val profileId: String? = ProfileUuid.fromDirName(profilePrefix)
 
     private var customFilesDir: File = File(subfolderRoot, "files")
-    private var customNoBackupFilesDir: File = File(subfolderRoot, "no_backup")
+    private var customNoBackupFilesDir: File = File(subfolderRoot, NO_BACKUP_DIR_NAME)
     private var customObbDir: File = File(subfolderRoot, "obb")
     private var customCacheDir: File = File(subfolderRoot, "cache")
     private var customCodeCacheDir: File = File(subfolderRoot, "code_cache")
     private var customDataDir: File = subfolderRoot
-    private val databasesDir: File get() = File(customDataDir, "databases")
+    private val databasesDir: File get() = File(customDataDir, DATABASES_DIR_NAME)
     private var customExternalCacheDir: File? =
         base.externalCacheDir?.parentFile?.let { File(File(it, relativePath), "cache") }
     private var customExternalFilesDir: File? =
@@ -243,6 +243,14 @@ class ProfileContext(private val base: Context, val relativePath: String) :
 
     companion object {
         private val logger = Logger("ProfileContext")
+
+        /**
+         * Where a profile tree keeps its databases and its `noBackupFilesDir`,
+         * relative to the profile folder. For code that reaches into a profile
+         * it holds no context for, such as the push transport migration.
+         */
+        internal const val DATABASES_DIR_NAME = "databases"
+        internal const val NO_BACKUP_DIR_NAME = "no_backup"
 
         /**
          * The Room databases AC opens through a profile's context, which Android

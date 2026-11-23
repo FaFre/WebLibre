@@ -16,6 +16,7 @@ import eu.weblibre.flutter_mozilla_components.GeckoViewFactory
 import eu.weblibre.flutter_mozilla_components.EngineProvider
 import eu.weblibre.flutter_mozilla_components.EngineViewVisibility
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.ProcessLogSink
 import eu.weblibre.flutter_mozilla_components.ProfileContext
 import eu.weblibre.flutter_mozilla_components.activities.ExternalAppBrowserActivity
 import eu.weblibre.flutter_mozilla_components.feature.DefaultSelectionActionDelegate
@@ -288,7 +289,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
                     LogLevel.ERROR -> Log.Priority.ERROR
                 };
 
-                Log.addSink(PriorityAwareLogSink(level, geckoLogging))
+                ProcessLogSink.attach(this, PriorityAwareLogSink(level, geckoLogging))
 
                 // Store startup settings before runtime creation
                 GlobalComponents.startupSettings = startupSettings
@@ -514,7 +515,7 @@ class GeckoBrowserApiImpl : GeckoBrowserApi {
         // UnifiedPush distributor management. The event sink was installed above, before
         // GlobalComponents.setUp initialized push.
         pushApi?.dispose()
-        pushApi = GeckoPushApiImpl()
+        pushApi = GeckoPushApiImpl(_flutterPluginBinding.applicationContext)
         GeckoPushApi.setUp(
             _flutterPluginBinding.binaryMessenger,
             pushApi

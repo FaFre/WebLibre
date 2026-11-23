@@ -49,6 +49,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selec
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/storage_owners.dart';
 import 'package:weblibre/features/proxy/data/proxy_connection.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
@@ -1076,6 +1077,26 @@ void main() {
       expect(native.calls, ['resume work -']);
     });
 
+    test('remembers the container of an isolation group it lifts without a '
+        'tab, whose record named it until then', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addTab(
+        'iso',
+        containerId: 'work',
+        mode: TabMode.isolated('iso1_x'),
+      );
+      native.restrict('work', ['ctx-work', 'iso1_app', 'iso1_x']);
+      _answerWindows({'pwa': 'iso1_app'});
+
+      await service().resume('work');
+
+      expect(gate().contextRecord('iso1_app'), isNull);
+      final owners = container.read(storageOwnersProvider.notifier);
+      expect((await owners.containerOwning('iso1_app'))?.id, 'work');
+      // A group with a tab is found by its tab.
+      expect((await owners.containerOwning('iso1_x'))?.id, 'work');
+    });
+
     test('checks a container without a proxy of its own too, which can '
         'take the global one', () async {
       container = makeContainer(routingReady: false);
@@ -1475,6 +1496,331 @@ void main() {
         ]);
       },
     );
+  });
+
+  group('a tapped web notification', () {
+    test('wakes a storage nothing restricts without asking', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      expect(
+        await service().resumeStorageToOpen('ctx-work'),
+        StorageOpening.open,
+      );
+      expect(requests, isEmpty);
+      expect(container.read(containerFreezeNoticesProvider), isEmpty);
+    });
+
+    test('asks to resume the container whose freeze holds the storage, and a '
+        'yes opens', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work']);
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      final opening = service().resumeStorageToOpen('ctx-work');
+      await pumpEventQueue();
+      expect(requests.single.containerId, 'work');
+      // A page that opens in a new tab, so no tab to wake.
+      expect(requests.single.tabId, isNull);
+
+      requests.single.complete(resumed: true);
+      expect(await opening, StorageOpening.open);
+    });
+
+    test('an isolation group is asked about as its owner container', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addTab(
+        'iso',
+        containerId: 'work',
+        mode: TabMode.isolated('iso1_s'),
+      );
+      native.restrict('work', ['ctx-work', 'iso1_s']);
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      final opening = service().resumeStorageToOpen('iso1_s');
+      await pumpEventQueue();
+
+      expect(requests.single.containerId, 'work');
+      requests.single.complete(resumed: false);
+      expect(await opening, StorageOpening.declined);
+    });
+
+    test('an isolation group left without a tab while frozen is not asked '
+        'about: the Resume deletes its data', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work', 'iso1_gone']);
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      expect(
+        await service().resumeStorageToOpen('iso1_gone'),
+        StorageOpening.dataBeingDeleted,
+      );
+      expect(requests, isEmpty);
+      expect(native.calls, isEmpty);
+      expect(container.read(containerFreezeNoticesProvider), [
+        isA<NotificationSiteDataBeingDeleted>(),
+      ]);
+    });
+
+    test('an isolation group a web app keeps is asked about', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work', 'iso1_app']);
+      _answerWindows({'pwa': 'iso1_app'});
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      final opening = service().resumeStorageToOpen('iso1_app');
+      await pumpEventQueue();
+
+      requests.single.complete(resumed: true);
+      expect(await opening, StorageOpening.open);
+    });
+
+    test('an isolation group whose web app closed while the user was asked '
+        'is gone after a yes', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work', 'iso1_app']);
+      _answerWindows({'pwa': 'iso1_app'});
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      final opening = service().resumeStorageToOpen('iso1_app');
+      await pumpEventQueue();
+      // The Resume found it unused, and released it.
+      _answerWindows({});
+
+      requests.single.complete(resumed: true);
+      expect(await opening, StorageOpening.dataBeingDeleted);
+      expect(container.read(containerFreezeNoticesProvider), [
+        isA<NotificationSiteDataBeingDeleted>(),
+      ]);
+    });
+
+    test('a cancel leaves it frozen and declined', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work']);
+      addTearDown(
+        service().answerResumeAndOpenWith(
+          (request) => request.complete(resumed: false),
+        ),
+      );
+
+      expect(
+        await service().resumeStorageToOpen('ctx-work'),
+        StorageOpening.declined,
+      );
+      expect(native.calls, isEmpty);
+    });
+
+    test('waits for a screen that is not up yet, as at a cold start', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work']);
+      final opening = service().resumeStorageToOpen('ctx-work');
+      await pumpEventQueue();
+
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+      await pumpEventQueue();
+
+      requests.single.complete(resumed: true);
+      expect(await opening, StorageOpening.open);
+    });
+
+    test('gives up on a screen that never comes, stays frozen, and tells the '
+        'user once a screen is up', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work']);
+
+      expect(
+        await service().resumeStorageToOpen(
+          'ctx-work',
+          waitForScreen: const Duration(milliseconds: 20),
+        ),
+        StorageOpening.declined,
+      );
+      expect(native.calls, isEmpty);
+      // Kept until the browser screen takes it: the notification stays, and
+      // the next tap asks.
+      expect(container.read(containerFreezeNoticesProvider), [
+        isA<NotificationContainerFrozen>(),
+      ]);
+    });
+
+    test('a cancel tells the user nothing', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native.restrict('work', ['ctx-work']);
+      addTearDown(
+        service().answerResumeAndOpenWith(
+          (request) => request.complete(resumed: false),
+        ),
+      );
+
+      await service().resumeStorageToOpen('ctx-work');
+
+      expect(container.read(containerFreezeNoticesProvider), isEmpty);
+    });
+
+    test('storage that only waits for its data to be deleted has no container '
+        'to resume: the user is told', () async {
+      native.restrict('gone', [
+        'ctx-gone',
+      ], phase: ContextFreezePhase.releasing);
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      expect(
+        await service().resumeStorageToOpen('ctx-gone'),
+        StorageOpening.dataBeingDeleted,
+      );
+      expect(requests, isEmpty);
+      expect(container.read(containerFreezeNoticesProvider), [
+        isA<NotificationSiteDataBeingDeleted>(),
+      ]);
+    });
+
+    test('storage that only waits for its data to be deleted is not asked '
+        'about while another storage of its container is frozen', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      native
+        ..restrict('work', ['ctx-work'])
+        ..restrict('work', ['iso1_gone'], phase: ContextFreezePhase.releasing);
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      expect(
+        await service().resumeStorageToOpen('iso1_gone'),
+        StorageOpening.dataBeingDeleted,
+      );
+      expect(requests, isEmpty);
+    });
+
+    test('an orphaned storage is the same', () async {
+      native.restrict(null, ['ctx-orphan'], phase: ContextFreezePhase.orphaned);
+
+      expect(
+        await service().resumeStorageToOpen('ctx-orphan'),
+        StorageOpening.dataBeingDeleted,
+      );
+    });
+
+    test('while the frozen containers are restored, every storage waits and '
+        'the user is told', () async {
+      native.recovery = true;
+      final requests = <ResumeAndOpenRequest>[];
+      addTearDown(service().answerResumeAndOpenWith(requests.add));
+
+      expect(
+        await service().resumeStorageToOpen('ctx-work'),
+        StorageOpening.waitsForRecovery,
+      );
+      expect(requests, isEmpty);
+      expect(container.read(containerFreezeNoticesProvider), [
+        isA<NavigationWaitsForRecovery>(),
+      ]);
+    });
+  });
+
+  group('storage owners', () {
+    StorageOwners owners() => container.read(storageOwnersProvider.notifier);
+
+    Future<void> closeAllTabs() async => owners().rememberDeletedTabs(
+      (await db.tabDao.syncTabs(retainTabIds: [])).deletedIsolationContainers,
+    );
+
+    test('remember the container of an isolation group whose last tab '
+        'closed', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addTab(
+        'iso',
+        containerId: 'work',
+        mode: TabMode.isolated('iso1_x'),
+      );
+
+      await closeAllTabs();
+
+      expect((await owners().containerOwning('iso1_x'))?.id, 'work');
+    });
+
+    test('remember every container of a group whose last tabs closed '
+        'together', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('home', contextId: 'ctx-home');
+      await addTab('a', containerId: 'work', mode: TabMode.isolated('iso1_x'));
+      await addTab('b', containerId: 'home', mode: TabMode.isolated('iso1_x'));
+
+      await closeAllTabs();
+
+      expect(
+        (await owners().lastContainersOf('iso1_x'))?.map((c) => c?.id),
+        unorderedEquals(['work', 'home']),
+      );
+    });
+
+    test('know a group whose last tabs were in no container', () async {
+      await addTab('iso', mode: TabMode.isolated('iso1_x'));
+      expect(await owners().hasTabs('iso1_x'), isTrue);
+
+      await closeAllTabs();
+
+      expect(await owners().hasTabs('iso1_x'), isFalse);
+      expect(await owners().containerOwning('iso1_x'), isNull);
+      expect(await owners().lastContainersOf('iso1_x'), [null]);
+    });
+
+    test('go by the tabs a group has, also when none of them is in a '
+        'container', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addTab('a', containerId: 'work', mode: TabMode.isolated('iso1_x'));
+      await addTab('b', mode: TabMode.isolated('iso1_x'));
+
+      owners().rememberDeletedTabs(
+        (await db.tabDao.syncTabs(
+          retainTabIds: ['b'],
+        )).deletedIsolationContainers,
+      );
+
+      expect(await owners().containerOwning('iso1_x'), isNull);
+    });
+
+    test('forget a group once its data is deleted', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addTab(
+        'iso',
+        containerId: 'work',
+        mode: TabMode.isolated('iso1_x'),
+      );
+      await closeAllTabs();
+
+      owners().forget('iso1_x');
+
+      expect(await owners().containerOwning('iso1_x'), isNull);
+      expect(await owners().lastContainersOf('iso1_x'), isNull);
+    });
+
+    test('do not know a group whose tabs closed before they were '
+        'watched', () async {
+      expect(await owners().containerOwning('iso1_x'), isNull);
+      expect(await owners().lastContainersOf('iso1_x'), isNull);
+    });
+
+    test('do not know the last containers once one of them is '
+        'deleted', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addTab(
+        'iso',
+        containerId: 'work',
+        mode: TabMode.isolated('iso1_x'),
+      );
+      await closeAllTabs();
+
+      await (db.delete(db.container)..where((c) => c.id.equals('work'))).go();
+
+      expect(await owners().lastContainersOf('iso1_x'), isNull);
+    });
   });
 
   group('messages', () {

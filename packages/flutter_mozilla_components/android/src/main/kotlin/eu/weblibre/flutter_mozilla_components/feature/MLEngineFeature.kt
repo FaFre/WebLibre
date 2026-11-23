@@ -150,7 +150,9 @@ object MLEngineFeature {
         extensionController.registerBackgroundMessageHandler(
             PrefManagerReporterBackgroundMessageHandler(),
         )
-        extensionController.install(
+        BuiltInExtensionInstalls.install(
+            ML_ENGINE_REPORTER_EXTENSION_ID,
+            extensionController,
             runtime,
             onSuccess = {
                 logger.debug("Installed ml-engine webextension: ${it.id}")

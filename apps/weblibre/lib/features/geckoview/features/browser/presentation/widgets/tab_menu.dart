@@ -166,9 +166,12 @@ class TabMenu extends HookConsumerWidget {
           },
           onKeepAwake: (exempt) async {
             controller.close();
-            await ref
-                .read(tabDataRepositoryProvider.notifier)
-                .setSleepExempt(selectedTabId, exempt: exempt);
+            await setTabKeptAwakeFromMenu(
+              context,
+              ref.read,
+              selectedTabId,
+              exempt: exempt,
+            );
           },
         ),
         if (enableFindInPage)
@@ -997,6 +1000,7 @@ class _TabStateRow extends HookConsumerWidget {
             label: exempt
                 ? l10n.browser_allowTabSleeping
                 : l10n.browser_keepTabAwake,
+            description: l10n.browser_keepTabAwakeDescription,
             on: exempt,
             onTap: () => onKeepAwake(!exempt),
           ),
@@ -1030,6 +1034,10 @@ class _TabStateToggle extends StatelessWidget {
   /// The action's full name for screen readers ("Lock tab"), when [label]
   /// is a shortened one.
   final String? semanticsLabel;
+
+  /// What the toggle does beyond its label, for a toggle whose label cannot
+  /// say it: read out after the label, and shown on a long press or hover.
+  final String? description;
   final bool on;
   final bool error;
   final VoidCallback onTap;
@@ -1038,6 +1046,7 @@ class _TabStateToggle extends StatelessWidget {
     required this.icon,
     required this.label,
     this.semanticsLabel,
+    this.description,
     required this.on,
     this.error = false,
     required this.onTap,
@@ -1064,43 +1073,51 @@ class _TabStateToggle extends StatelessWidget {
             colorScheme.onSurfaceVariant,
           );
 
+    final toggle = InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: kThemeChangeDuration,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: indicator,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, size: 24, color: iconColor),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: labelColor, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final description = this.description;
     return Semantics(
       button: true,
       label: semanticsLabel ?? label,
+      hint: description,
       excludeSemantics: true,
       onTap: onTap,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: kThemeChangeDuration,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: indicator,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, size: 24, color: iconColor),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: labelColor, fontSize: 12),
-              ),
-            ],
-          ),
-        ),
-      ),
+      child: description == null
+          ? toggle
+          : Tooltip(
+              message: description,
+              // Read out as the hint above.
+              excludeFromSemantics: true,
+              child: toggle,
+            ),
     );
   }
 }

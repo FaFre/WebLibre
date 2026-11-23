@@ -24,7 +24,8 @@ import eu.weblibre.flutter_mozilla_components.history.FallbackHistoryDelegate
 import eu.weblibre.flutter_mozilla_components.middleware.HistoryDelegateBindingMiddleware
 import eu.weblibre.flutter_mozilla_components.PermissionStorage
 import eu.weblibre.flutter_mozilla_components.services.MediaSessionService
-import eu.weblibre.flutter_mozilla_components.activities.NotificationActivity
+import eu.weblibre.flutter_mozilla_components.notifications.ProfileWebNotifications
+import eu.weblibre.flutter_mozilla_components.notifications.WebLibreServiceWorkerDelegate
 import eu.weblibre.flutter_mozilla_components.R
 import eu.weblibre.flutter_mozilla_components.ext.getPreferenceKey
 import eu.weblibre.flutter_mozilla_components.applinks.PendingAppLinkStores
@@ -101,7 +102,6 @@ import mozilla.components.feature.session.HistoryDelegate
 import mozilla.components.feature.session.middleware.LastAccessMiddleware
 import mozilla.components.feature.session.middleware.undo.UndoMiddleware
 import mozilla.components.feature.sitepermissions.OnDiskSitePermissionsStorage
-import mozilla.components.feature.webnotifications.WebNotificationFeature
 import mozilla.components.concept.base.crash.Breadcrumb
 import mozilla.components.concept.base.crash.CrashReporting
 import mozilla.components.support.base.worker.Frequency
@@ -143,7 +143,9 @@ class Core(
         PreferenceManager.getDefaultSharedPreferences(context)
     }
 
-    val engineSettings by lazy {
+    // Typed: the service worker delegate in [store] reads it, and inferring its
+    // type from the initializer there is a cycle.
+    val engineSettings: DefaultSettings by lazy {
         DefaultSettings(
             requestInterceptor = requestInterceptor,
             // Engine-wide fallback only. Every session in the store is given its
@@ -532,21 +534,29 @@ class Core(
 
             icons.install(engine, this)
 
-            // WebNotificationFeature self-registers as the engine's notification
-            // delegate in its init; immediately wrap it with the drain
-            // coordinator so headless deliveries observe onShowNotification while
-            // notifications still display exactly as before.
-            val webNotificationFeature = WebNotificationFeature(
-                context,
-                engine,
-                icons,
-                R.drawable.ic_launcher_foreground,
-                geckoSitePermissionsStorage,
-                NotificationActivity::class.java,
+            // The drain coordinator is the engine's notification delegate, so
+            // headless deliveries observe onShowNotification while notifications
+            // display as AC's WebNotificationFeature showed them, with a tap
+            // that names its profile (see ProfileWebNotifications).
+            webNotificationDrainCoordinator.delegate = ProfileWebNotifications(
+                context = components.profileApplicationContext.rootApplicationContext,
+                profileId = components.profileApplicationContext.profileId,
+                browserIcons = icons,
+                smallIcon = R.drawable.ic_launcher_foreground,
+                sitePermissionsStorage = geckoSitePermissionsStorage,
                 notificationsDelegate = components.notificationsDelegate,
             )
-            webNotificationDrainCoordinator.delegate = webNotificationFeature
             engine.registerWebNotificationDelegate(webNotificationDrainCoordinator)
+
+            // clients.openWindow() from a notificationclick handler, in the
+            // storage of the click that woke the worker. See
+            // WebLibreServiceWorkerDelegate for why not AC's.
+            val geckoRuntime = EngineProvider.getOrCreateRuntime(context)
+            geckoRuntime.serviceWorkerDelegate = WebLibreServiceWorkerDelegate(
+                runtime = geckoRuntime,
+                engineSettings = engineSettings,
+                tabs = { components.useCases.tabsUseCases },
+            )
 
             MediaSessionFeature(context, MediaSessionService::class.java, this).start()
         }

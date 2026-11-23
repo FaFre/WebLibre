@@ -99,6 +99,8 @@ abstract class _$MaintenanceJournalCWProxy {
 
   MaintenanceJournal participants(List<ParticipantRecord> participants);
 
+  MaintenanceJournal scrubsPushTransport(bool scrubsPushTransport);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `MaintenanceJournal(...).copyWith.fieldName(value)`.
@@ -117,6 +119,7 @@ abstract class _$MaintenanceJournalCWProxy {
     String? stagingPath,
     String? oldPath,
     List<ParticipantRecord> participants,
+    bool scrubsPushTransport,
   });
 }
 
@@ -159,6 +162,10 @@ class _$MaintenanceJournalCWProxyImpl implements _$MaintenanceJournalCWProxy {
   MaintenanceJournal participants(List<ParticipantRecord> participants) =>
       call(participants: participants);
 
+  @override
+  MaintenanceJournal scrubsPushTransport(bool scrubsPushTransport) =>
+      call(scrubsPushTransport: scrubsPushTransport);
+
   /// Creates a new instance with the provided field values.
   /// Omitted fields keep their values; explicit `null` clears nullable fields.
   /// The public API rejects `null` for non-nullable fields. To update a single field use `MaintenanceJournal(...).copyWith.fieldName(value)`.
@@ -178,6 +185,7 @@ class _$MaintenanceJournalCWProxyImpl implements _$MaintenanceJournalCWProxy {
     Object? stagingPath = const $CopyWithPlaceholder(),
     Object? oldPath = const $CopyWithPlaceholder(),
     Object? participants = const $CopyWithPlaceholder(),
+    Object? scrubsPushTransport = const $CopyWithPlaceholder(),
   }) {
     return MaintenanceJournal(
       taskId: _value.taskId,
@@ -220,6 +228,12 @@ class _$MaintenanceJournalCWProxyImpl implements _$MaintenanceJournalCWProxy {
           ? _value.participants
           // ignore: cast_nullable_to_non_nullable
           : participants as List<ParticipantRecord>,
+      scrubsPushTransport:
+          scrubsPushTransport == const $CopyWithPlaceholder() ||
+              scrubsPushTransport == null
+          ? _value.scrubsPushTransport
+          // ignore: cast_nullable_to_non_nullable
+          : scrubsPushTransport as bool,
     );
   }
 }
@@ -279,6 +293,10 @@ MaintenanceJournal _$MaintenanceJournalFromJson(Map<String, dynamic> json) =>
           'participants',
           (v) => v == null ? const [] : _participantsFromJson(v),
         ),
+        scrubsPushTransport: $checkedConvert(
+          'scrubsPushTransport',
+          (v) => v == null ? false : _falseIfAbsent(v),
+        ),
       );
       return val;
     }, fieldKeyMap: const {'kindId': 'kind', 'phaseId': 'phase'});
@@ -294,5 +312,6 @@ Map<String, dynamic> _$MaintenanceJournalToJson(MaintenanceJournal instance) =>
       'stagingPath': instance.stagingPath,
       'oldPath': instance.oldPath,
       'participants': instance.participants.map((e) => e.toJson()).toList(),
+      'scrubsPushTransport': instance.scrubsPushTransport,
       'updatedAt': utcIso(instance.updatedAt),
     };

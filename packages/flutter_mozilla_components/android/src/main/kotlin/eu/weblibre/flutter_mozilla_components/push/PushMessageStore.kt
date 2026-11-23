@@ -32,7 +32,7 @@ internal class CorruptPushMessageException(
 class PushMessageStore internal constructor(
     private val directory: File,
 ) {
-    constructor(context: Context) : this(File(context.noBackupFilesDir, DIRECTORY_NAME))
+    constructor(context: Context) : this(File(context.noBackupFilesDir, PushTransportFiles.QUEUED_MESSAGES_DIR))
 
     @Synchronized
     fun persist(scope: String, payload: ByteArray, id: String = UUID.randomUUID().toString()): StoredPushMessage {
@@ -179,7 +179,6 @@ class PushMessageStore internal constructor(
     }
 
     companion object {
-        private const val DIRECTORY_NAME = "queued_push_messages"
         private const val FILE_EXTENSION = "push"
         private const val COMPLETED_EXTENSION = "delivered"
         private const val COMPLETED_MARKER = 1

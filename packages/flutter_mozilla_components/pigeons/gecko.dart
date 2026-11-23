@@ -3017,8 +3017,24 @@ abstract class GeckoStateEvents {
   /// [parentId] is the engine's opener for the tab — set for a tab opened
   /// from a page (`window.open`, `target="_blank"`) — so the app can place the
   /// row beside its opener the moment it is inserted.
+  ///
+  /// [contextId] is the session context the tab runs in (null for the default
+  /// storage), so a tab with no opener, such as the page a notification's
+  /// service worker opens, can be filed under the container whose storage it
+  /// uses rather than whichever one is selected.
+  ///
+  /// [openedByServiceWorker] is true for the page a service worker's
+  /// `clients.openWindow()` opened, which Gecko allows only while the worker
+  /// handles a notification click: the engine created and selected it with
+  /// nothing in Dart asking for it.
   @asyncCallback
-  void onTabAdded(int sequence, String tabId, String? parentId);
+  void onTabAdded(
+    int sequence,
+    String tabId,
+    String? parentId,
+    String? contextId,
+    bool openedByServiceWorker,
+  );
 
   @asyncCallback
   void onTabListChange(int sequence, List<String> tabIds);
@@ -3102,7 +3118,12 @@ abstract class GeckoStateEvents {
 
   /// A freeze tore down [done] of [total] tabs (barrier 4).
   @asyncCallback
-  void onContextFreezeProgress(int sequence, String ownerId, int done, int total);
+  void onContextFreezeProgress(
+    int sequence,
+    String ownerId,
+    int done,
+    int total,
+  );
 
   /// No member of [ownerId] has been used for its automatic freeze time
   /// (5.9). Native freezes nothing on its own: Dart runs its gated preflight
@@ -5029,6 +5050,90 @@ abstract class GeckoPushApi {
   /// through the site's notification permission instead.
   @async
   List<PushSubscription> getSubscriptions();
+
+  /// The web-notification tap that is waiting for the browser, taken once; null
+  /// when none waits (E12). Kept in the process, never on an intent, so no
+  /// other app can choose which notification Gecko is told was clicked. A tap
+  /// whose notification no longer shows (replaced under its tag, or closed) is
+  /// skipped. The tap stays answerable by its id until
+  /// [deliverNotificationClick] or [releaseNotificationClick] ends it.
+  NotificationClickHandoff? takeNotificationClick();
+
+  /// Hands the tap [clickId] to Gecko, which wakes the site's service worker or
+  /// fires the page's own `onclick`, and cancels the Android notification for
+  /// a tap on the notification itself (a button leaves it). The worker's
+  /// `clients.openWindow()` then opens a tab in the tap's storage. Dart calls
+  /// it once routing is ready for that storage, with the generation of the
+  /// routing snapshot it checked ([routingGeneration]); native checks that it
+  /// still holds that snapshot, and that it carries that storage's traffic.
+  @async
+  NotificationClickOutcome deliverNotificationClick(
+    String clickId,
+    int routingGeneration,
+  );
+
+  /// Ends the tap [clickId] without delivering it, because Dart decided not to:
+  /// the user declined to resume its storage, or the storage's data is being
+  /// deleted. The Android notification stays showing, to be tapped again,
+  /// unless [dismissNotification] is true (nothing is left for it to open).
+  void releaseNotificationClick(String clickId, bool dismissNotification);
+}
+
+/// A web-notification tap taken from the process (E12).
+class NotificationClickHandoff {
+  /// What [GeckoPushApi.deliverNotificationClick] takes.
+  final String clickId;
+
+  /// The session context the notification came from; null for the default
+  /// storage.
+  final String? contextId;
+
+  /// Whether the notification came from private browsing, whose worker runs in
+  /// private storage and takes the private route.
+  final bool private;
+
+  const NotificationClickHandoff({
+    required this.clickId,
+    this.contextId,
+    required this.private,
+  });
+}
+
+/// What became of a tap handed to [GeckoPushApi.deliverNotificationClick].
+///
+/// Unless it says otherwise, nothing was delivered and the tap is still held
+/// by its id: Dart releases it ([GeckoPushApi.releaseNotificationClick]), and
+/// its notification stays showing, to be tapped again.
+enum NotificationClickOutcome {
+  /// Gecko was given the click, and a tap on the notification itself took the
+  /// notification away. The tap is over.
+  delivered,
+
+  /// Its storage is restricted by a freeze (or the frozen state is being
+  /// restored).
+  contextRestricted,
+
+  /// The routing this process installed does not carry its storage's traffic:
+  /// it names a proxy with no endpoint that nothing is starting, or none is
+  /// installed yet. Native's verdict, the one a pane goes by before it wakes a
+  /// tab.
+  routeUnavailable,
+
+  /// The routing this process holds is no longer the snapshot Dart checked:
+  /// another one was installed since, or none is.
+  routingChanged,
+
+  /// Its notification no longer shows: the site replaced it under the same
+  /// tag, which Gecko would take the click for, or closed it. The tap is
+  /// over, and a replacement is left showing.
+  superseded,
+
+  /// No such tap: it was delivered already, belongs to another profile, or
+  /// the process lost it. Nothing is held.
+  notFound,
+
+  /// There is no engine to deliver to yet.
+  engineUnavailable,
 }
 
 /// Kotlin → Dart. Push registration lifecycle.

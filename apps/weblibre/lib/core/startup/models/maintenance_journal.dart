@@ -166,6 +166,17 @@ class MaintenanceJournal with FastEquatable {
   @JsonKey(fromJson: _participantsFromJson)
   final List<ParticipantRecord> participants;
 
+  /// Whether the restore that wrote this strips the push transport from its
+  /// replacement before installing it (`scrubPushTransport`).
+  ///
+  /// Absent, and so false, in a journal an older build wrote. That is the
+  /// evidence recovery needs when the directories alone cannot say whether
+  /// the target is the original or the replacement: a replacement this build
+  /// installed is always scrubbed, one an older build installed may still hold
+  /// the archive's tokens and keys.
+  @JsonKey(fromJson: _falseIfAbsent)
+  final bool scrubsPushTransport;
+
   @JsonKey(fromJson: dateTimeOrEpoch, toJson: utcIso)
   final DateTime updatedAt;
 
@@ -180,6 +191,7 @@ class MaintenanceJournal with FastEquatable {
     this.stagingPath,
     this.oldPath,
     this.participants = const [],
+    this.scrubsPushTransport = false,
   });
 
   MaintenanceJournalKind? get kind =>
@@ -229,9 +241,12 @@ class MaintenanceJournal with FastEquatable {
     stagingPath,
     oldPath,
     participants,
+    scrubsPushTransport,
     updatedAt,
   ];
 }
+
+bool _falseIfAbsent(Object? value) => boolOr(value, false);
 
 List<ParticipantRecord> _participantsFromJson(Object? value) =>
     List.unmodifiable(recordsFromJson(value, ParticipantRecord.tryFromJson));

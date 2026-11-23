@@ -256,12 +256,71 @@ final class ResumeNotFinished extends ContainerFreezeNotice with FastEquatable {
   List<Object?> get hashParameters => [containerId, outcome];
 }
 
+/// A web notification the user tapped was dismissed: the site's data that its
+/// storage holds waits to be deleted (`releasing`, `orphaned`), so no
+/// container is left to resume, or it is an isolation group with no tab left
+/// that a Resume of its container deletes; nothing could open it (E12).
+final class NotificationSiteDataBeingDeleted extends ContainerFreezeNotice {
+  const NotificationSiteDataBeingDeleted();
+}
+
+/// A web notification the user tapped was dismissed: it came from the storage
+/// of a container that was deleted with its site data kept, which has no
+/// route of its own any more (E12).
+final class NotificationContainerDeleted extends ContainerFreezeNotice {
+  const NotificationContainerDeleted();
+}
+
+/// A web notification the user tapped did not open: its storage is frozen,
+/// and no screen could ask to resume it, or native refused the click although
+/// Dart's copy of the registry said nothing about it (E12). The notification
+/// stays, and a second tap asks "Resume and open?".
+final class NotificationContainerFrozen extends ContainerFreezeNotice {
+  const NotificationContainerFrozen();
+}
+
+/// A web notification the user tapped did not open: the proxy routing of its
+/// storage is not ready, and the site's service worker is not woken without
+/// it (E12, D34). The notification stays, to be tapped again.
+final class NotificationWaitsForRouting extends ContainerFreezeNotice {
+  const NotificationWaitsForRouting();
+}
+
+/// A web notification the user tapped did not open: it came from an isolation
+/// group that has no tab left, which routing then sends the general way
+/// rather than its container's, and the two differ (E12). The notification
+/// stays.
+final class NotificationGroupWithoutRoute extends ContainerFreezeNotice {
+  const NotificationGroupWithoutRoute();
+}
+
 /// A page the user opened was not opened in the container its site is
 /// assigned to, which refused it ([refusal]). Nothing opened in its place.
 final class PageNotOpened extends ContainerFreezeNotice {
   final ContainerRefusedTabException refusal;
 
   const PageNotOpened(this.refusal);
+}
+
+/// Whether a web notification's service worker may be woken in its storage,
+/// which a freeze may restrict (E12), and why not.
+enum StorageOpening {
+  /// Not restricted, or resumed after the user said yes.
+  open,
+
+  /// Stays frozen: the user cancelled, no screen could ask (the user is told
+  /// once one is up), or the Resume did not finish. The notification stays,
+  /// to be tapped again.
+  declined,
+
+  /// The storage's data waits to be deleted, with no container to resume, or
+  /// is deleted by the Resume (an isolation group nothing uses). The user was
+  /// told, and the notification has nothing left to open.
+  dataBeingDeleted,
+
+  /// Every storage is restricted while the frozen containers are restored
+  /// after a damaged record (5.6). The user was told; the notification stays.
+  waitsForRecovery,
 }
 
 /// How far restoring the frozen containers after a damaged registry got

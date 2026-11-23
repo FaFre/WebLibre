@@ -170,6 +170,8 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     // the old messenger across an engine restart. Progress is advisory, so
     // dropping the sink only costs the percentage, never the import itself.
     GlobalComponents.bookmarksEvents = null
+    // Native log lines go back to logcat rather than to this engine's messenger.
+    ProcessLogSink.detach(browserApi)
     // The split pair lives in the detaching engine's memory. Kept here it
     // would be a pair nobody controls, so native drops to single presentation
     // until the next engine pushes its own state.

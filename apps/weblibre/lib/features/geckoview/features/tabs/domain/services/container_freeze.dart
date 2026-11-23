@@ -38,6 +38,7 @@ import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/storage_owners.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 part 'container_freeze.g.dart';
@@ -61,6 +62,11 @@ class ContainerFreezeService extends _$ContainerFreezeService {
   /// The screens that answer "Resume and open?", newest last, each with the
   /// requests it was handed and has not answered yet.
   final _answerers = <_ResumeAnswerer>[];
+
+  /// Completes when the next screen starts answering "Resume and open?", for a
+  /// request that came before any did (a notification tapped while WebLibre
+  /// starts); null while nothing waits.
+  Completer<void>? _screenUp;
 
   GeckoTabLifecycleService get _lifecycle =>
       ref.read(geckoTabLifecycleServiceProvider);
@@ -136,10 +142,9 @@ class ContainerFreezeService extends _$ContainerFreezeService {
       }
       final contextId = handoff.contextId;
       final isolated = isIsolatedContextId(contextId);
-      final container = await _containerOfStorage(
-        contextId,
-        isolated: isolated,
-      );
+      final container = await ref
+          .read(storageOwnersProvider.notifier)
+          .containerOwning(contextId);
       await ref
           .read(tabRepositoryProvider.notifier)
           .addTab(
@@ -164,30 +169,6 @@ class ContainerFreezeService extends _$ContainerFreezeService {
         stackTrace: stackTrace,
       );
     }
-  }
-
-  /// The container a page of storage [contextId] opens under: the one whose
-  /// freeze holds that storage, else the container it belongs to (its own,
-  /// or for an [isolated] group the one of its tabs). Null when none does.
-  Future<ContainerData?> _containerOfStorage(
-    String contextId, {
-    required bool isolated,
-  }) async {
-    await _gate.seed();
-    if (_gate.contextRecord(contextId)?.ownerId case final ownerId?) {
-      return await _containerData(ownerId);
-    }
-    final db = ref.read(tabDatabaseProvider);
-    if (!isolated) {
-      return await db.containerDao
-          .getContainerByContextualIdentity(contextId)
-          .getSingleOrNull();
-    }
-    final pairs = await db.tabDao.isolatedContextContainerPairs().get();
-    final containerId = pairs
-        .firstWhereOrNull((pair) => pair.isolationContextId == contextId)
-        ?.containerId;
-    return containerId == null ? null : await _containerData(containerId);
   }
 
   /// Once per process, when the engine is up: in normal mode, matches native's
@@ -622,6 +603,14 @@ class ContainerFreezeService extends _$ContainerFreezeService {
           return const ResumeRoutingNotReady();
         }
       }
+      // A group the lift lets run with no tab of its own (a web app window
+      // kept it) loses the only record of its container with its own:
+      // remembered, so a page its worker opens is filed under it.
+      ref.read(storageOwnersProvider.notifier).rememberLifted([
+        for (final contextId in _gate.contextsHolding(containerId))
+          if (isIsolatedContextId(contextId) && !isolation.contains(contextId))
+            contextId,
+      ], containerId);
       final result = await _lifecycle.resumeContexts(
         containerId,
         wakeTabId: wakeTabId,
@@ -756,16 +745,96 @@ class ContainerFreezeService extends _$ContainerFreezeService {
       return false;
     }
     return await _askToResume(
-      ResumeAndOpenRequest(containerId: containerId, tabId: tabId),
-    );
+          ResumeAndOpenRequest(containerId: containerId, tabId: tabId),
+        ) ==
+        _ResumeAnswer.resumed;
   }
 
   /// Before opening a page in [containerId] that its freeze would refuse (a
   /// site assigned to it, reached from an isolated tab or a tab that moves):
   /// asks "Resume {container} and open?" as [resumeForNavigation] does. True
   /// when it was resumed, and the page may open.
-  Future<bool> resumeToOpen(String containerId) =>
-      _askToResume(ResumeAndOpenRequest(containerId: containerId));
+  Future<bool> resumeToOpen(String containerId) async =>
+      await _askToResume(ResumeAndOpenRequest(containerId: containerId)) ==
+      _ResumeAnswer.resumed;
+
+  /// How long a tapped notification waits for a screen to ask on: past the
+  /// start of the browser screen on a cold start.
+  static const _screenWait = Duration(seconds: 10);
+
+  /// Before a tapped web notification wakes the service worker of storage
+  /// [contextId] (E12): a storage a freeze restricts is asked about first,
+  /// "Resume {container} and open?", as a page that opens in a frozen
+  /// container is ([resumeToOpen]). The worker would otherwise be kept down
+  /// by the engine and the tap dropped without a word.
+  ///
+  /// A storage that only waits for its data to be deleted has no container to
+  /// resume, even while another storage of its container is frozen, and
+  /// recovery restricts every storage until the frozen containers are
+  /// restored: the user is told for both ([_notices]). So is an isolation
+  /// group whose last tab closed while its container was frozen, with nothing
+  /// else using it: a Resume releases it before it lifts anything (D32), and
+  /// its data is deleted rather than opened. Checked again after a yes, for a
+  /// web app window that kept it and closed while the user was asked.
+  ///
+  /// What the registry does not say is open. Native refuses a click for a
+  /// restricted storage on its own, so this decides what the user is asked
+  /// and told, not whether the click is let through.
+  ///
+  /// A request that finds no screen to ask on waits up to [waitForScreen]
+  /// for one, then stays [StorageOpening.declined], and the user is told once
+  /// a screen is up.
+  Future<StorageOpening> resumeStorageToOpen(
+    String contextId, {
+    Duration waitForScreen = _screenWait,
+  }) async {
+    await _gate.seed();
+    if (!_gate.isContextRestricted(contextId)) return StorageOpening.open;
+
+    if (_gate.isInRecovery()) {
+      _notices.add(const NavigationWaitsForRecovery());
+      return StorageOpening.waitsForRecovery;
+    }
+    // Its own record decides, not its owner's freeze: a `releasing` record
+    // keeps its owner, which another storage of it may still hold frozen, and
+    // a Resume of that owner would leave this one restricted.
+    final record = _gate.contextRecord(contextId);
+    final ownerId = record?.ownerId;
+    if (ownerId == null ||
+        !_gate.contextsHolding(ownerId).contains(contextId) ||
+        (settledFreezePhases.contains(record?.phase) &&
+            await _releasedOnResume(contextId))) {
+      _notices.add(const NotificationSiteDataBeingDeleted());
+      return StorageOpening.dataBeingDeleted;
+    }
+    switch (await _askToResume(
+      ResumeAndOpenRequest(containerId: ownerId),
+      waitForScreen: waitForScreen,
+    )) {
+      case _ResumeAnswer.resumed:
+        if (await _releasedOnResume(contextId)) {
+          _notices.add(const NotificationSiteDataBeingDeleted());
+          return StorageOpening.dataBeingDeleted;
+        }
+        return StorageOpening.open;
+      case _ResumeAnswer.declined:
+        return StorageOpening.declined;
+      case _ResumeAnswer.noScreen:
+        // Shown once a screen is up: the notification stays, and the next
+        // tap asks.
+        _notices.add(const NotificationContainerFrozen());
+        return StorageOpening.declined;
+    }
+  }
+
+  /// Whether [contextId] is an isolation group nothing uses any more, which a
+  /// Resume of its container releases rather than lifts ([resume]), or
+  /// released already.
+  Future<bool> _releasedOnResume(String contextId) async =>
+      isIsolatedContextId(contextId) &&
+      await ref
+          .read(isolationContextCleanupProvider.notifier)
+          .isUnused(contextId);
 
   /// Makes [answer] the one that answers "Resume and open?" requests, until
   /// the returned function is called: the newest of the screens that called
@@ -776,6 +845,8 @@ class ContainerFreezeService extends _$ContainerFreezeService {
   ) {
     final answerer = _ResumeAnswerer(answer);
     _answerers.add(answerer);
+    _screenUp?.complete();
+    _screenUp = null;
     return () {
       _answerers.remove(answerer);
       for (final request in [...answerer.pending]) {
@@ -784,19 +855,30 @@ class ContainerFreezeService extends _$ContainerFreezeService {
     };
   }
 
-  Future<bool> _askToResume(ResumeAndOpenRequest request) async {
+  /// Asks the newest screen to answer [request]. With [waitForScreen], a
+  /// request that finds none waits that long for one to start answering.
+  Future<_ResumeAnswer> _askToResume(
+    ResumeAndOpenRequest request, {
+    Duration waitForScreen = Duration.zero,
+  }) async {
+    if (_answerers.isEmpty && waitForScreen > Duration.zero) {
+      final up = _screenUp ??= Completer<void>();
+      await up.future.timeout(waitForScreen, onTimeout: () {});
+    }
     final answerer = _answerers.lastOrNull;
     if (answerer == null) {
       logger.w(
         'Page for frozen container ${request.containerId} dropped: no screen '
         'to ask on',
       );
-      return false;
+      return _ResumeAnswer.noScreen;
     }
     answerer.pending.add(request);
     try {
       answerer.answer(request);
-      return await request.answered;
+      return await request.answered
+          ? _ResumeAnswer.resumed
+          : _ResumeAnswer.declined;
     } finally {
       answerer.pending.remove(request);
     }
@@ -852,4 +934,16 @@ final class _ResumeAnswerer {
   final pending = <ResumeAndOpenRequest>{};
 
   _ResumeAnswerer(this.answer);
+}
+
+/// How a "Resume and open?" request ended.
+enum _ResumeAnswer {
+  /// The user said yes and the container was resumed.
+  resumed,
+
+  /// The user said no, or the Resume did not finish.
+  declined,
+
+  /// No screen was up to ask on.
+  noScreen,
 }

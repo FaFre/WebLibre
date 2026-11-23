@@ -20,6 +20,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as p;
 import 'package:weblibre/core/asset_database.dart';
 import 'package:weblibre/core/maintenance/participant_category.dart';
+import 'package:weblibre/core/maintenance/push_transport_scrub.dart';
 import 'package:weblibre/core/startup/models/json_read.dart';
 
 part 'backup_manifest.g.dart';
@@ -104,6 +105,46 @@ abstract final class BackupExclusions {
       path: 'databases/sites.db$assetStampSuffix',
       reason: 'Install stamp for an excluded asset database',
       recreatedOnRestore: true,
+    ),
+    // The push transport identifies the profile it was made for, so it never
+    // moves into another tree; restore strips it from older archives too. One
+    // entry per file of `PushTransportPaths.connectorFiles`, for the same
+    // reason as the stamps above (and a const list cannot loop over it).
+    BackupExclusion(
+      path: PushTransportPaths.connectorDatabase,
+      reason: 'Push registrations and keys, made anew by the restored profile',
+      recreatedOnRestore: true,
+    ),
+    BackupExclusion(
+      path: '${PushTransportPaths.connectorDatabase}-journal',
+      reason: 'Part of the excluded push registration database',
+      recreatedOnRestore: true,
+    ),
+    BackupExclusion(
+      path: '${PushTransportPaths.connectorDatabase}-wal',
+      reason: 'Part of the excluded push registration database',
+      recreatedOnRestore: true,
+    ),
+    BackupExclusion(
+      path: '${PushTransportPaths.connectorDatabase}-shm',
+      reason: 'Part of the excluded push registration database',
+      recreatedOnRestore: true,
+    ),
+    BackupExclusion(
+      path: PushTransportPaths.queuedMessages,
+      reason:
+          'Decrypted push messages not yet delivered by the profile that received them',
+      recreatedOnRestore: false,
+    ),
+    BackupExclusion(
+      path: PushTransportPaths.endpointResetMarker,
+      reason: 'Local push state; restore writes its own',
+      recreatedOnRestore: true,
+    ),
+    BackupExclusion(
+      path: PushTransportPaths.transportUnknownMarker,
+      reason: 'Local push state of an interrupted restore',
+      recreatedOnRestore: false,
     ),
   ];
 

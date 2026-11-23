@@ -258,8 +258,9 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
 
   /// The snapshot the extension last acknowledged, as far as this writer knows.
   /// Null until the first install, and again once the extension is found to
-  /// have lost its routing.
-  ContainerRoutingSnapshot? _installed;
+  /// have lost its routing. With the generation it was acknowledged under, as
+  /// native records it too ([ContainerProxyRepository.appliedGeneration]).
+  ({ContainerRoutingSnapshot snapshot, int? generation})? _installed;
   final _installedWaiters = <_InstalledWaiter>[];
 
   /// Completes true once the extension has acknowledged the endpoint the app
@@ -287,8 +288,18 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
           installed.proxyEndpoint(encodedProxyId) == current;
     }
 
-    final installed = _installed;
-    if (installed != null && test(installed)) return Future.value(true);
+    return waitUntilInstalled(test, timeout: timeout);
+  }
+
+  /// Completes true once the snapshot the extension holds passes [test], at
+  /// once when the one it holds already does, or false when [timeout] passes
+  /// first. For acting on a route only once the extension enforces it, not
+  /// once the app computed it.
+  Future<bool> waitUntilInstalled(
+    bool Function(ContainerRoutingSnapshot installed) test, {
+    required Duration timeout,
+  }) {
+    if (installedSatisfies(test)) return Future.value(true);
 
     final waiter = _InstalledWaiter(test);
     _installedWaiters.add(waiter);
@@ -308,11 +319,18 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
     bool Function(ContainerRoutingSnapshot snapshot) test,
   ) {
     final installed = _installed;
-    return installed != null && test(installed);
+    return installed != null && test(installed.snapshot);
   }
 
-  void _markInstalled(ContainerRoutingSnapshot snapshot) {
-    _installed = snapshot;
+  /// The generation of the snapshot the extension holds when it satisfies
+  /// [test], else null. For an action native carries out later: native can
+  /// then refuse it when the routing it holds by then is another one.
+  int? installedGenerationIf(
+    bool Function(ContainerRoutingSnapshot snapshot) test,
+  ) => installedSatisfies(test) ? _installed?.generation : null;
+
+  void _markInstalled(ContainerRoutingSnapshot snapshot, int? generation) {
+    _installed = (snapshot: snapshot, generation: generation);
 
     final satisfied = _installedWaiters
         .where((waiter) => waiter.test(snapshot))
@@ -347,11 +365,12 @@ class ProxySettingsReplication extends _$ProxySettingsReplication {
           // pref on every launch, with no in-app way back.
           await baseline.setRequired(required: requiresProxy);
 
-          await ref
-              .read(containerProxyRepositoryProvider.notifier)
-              .applySnapshot(pending);
+          final repository = ref.read(
+            containerProxyRepositoryProvider.notifier,
+          );
+          await repository.applySnapshot(pending);
 
-          _markInstalled(pending);
+          _markInstalled(pending, repository.appliedGeneration());
           _startReadinessProbe();
         } catch (error, stackTrace) {
           // Until this lands the extension blocks everything, so retrying is

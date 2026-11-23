@@ -67,6 +67,13 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
 
   var _generation = 0;
   ContainerRoutingSnapshot? _appliedSnapshot;
+  int? _appliedGeneration;
+
+  /// The generation the extension acknowledged for the snapshot
+  /// [applySnapshot] installed last; null before the first. Native keeps the
+  /// same number for what it holds, so an action Dart checked against one
+  /// snapshot can ask native whether it still holds that one.
+  int? appliedGeneration() => _appliedGeneration;
 
   /// Installs [snapshot] unless the extension already acknowledged an identical
   /// one. Throws if the extension does not acknowledge it.
@@ -89,6 +96,7 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
           .timeout(_snapshotAckTimeout);
 
       _appliedSnapshot = snapshot;
+      _appliedGeneration = _generation;
     });
   }
 

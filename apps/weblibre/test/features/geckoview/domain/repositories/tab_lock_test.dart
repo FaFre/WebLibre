@@ -53,6 +53,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/providers/conta
 import 'package:weblibre/features/geckoview/features/tabs/domain/providers/selected_container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/container.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/storage_owners.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/data/models/proxy_routing_settings.dart';
 import 'package:weblibre/features/user/data/providers.dart';
@@ -1272,6 +1273,26 @@ void main() {
       expect(routes.cleared, ['iso1_g']);
     });
 
+    test('the last containers of an isolation group are forgotten once its '
+        'data is deleted', () async {
+      await addTab('iso', mode: TabMode.isolated('iso1_g'));
+      await addTab('outside');
+      native
+        ..selected = 'outside'
+        ..customTabContextOf['pwa'] = 'iso1_g';
+      final owners = container.read(storageOwnersProvider.notifier);
+
+      await repository().closeTab('iso');
+      await repository().handleTabListChange(null, EquatableValue(['outside']));
+      // Kept for a page its web app window opens.
+      expect(await owners.lastContainersOf('iso1_g'), [null]);
+
+      native.customTabContextOf.remove('pwa');
+      await isolationCleanup().drain();
+
+      expect(await owners.lastContainersOf('iso1_g'), isNull);
+    });
+
     test('an isolation group native released with its record is not '
         'cleared again, and one without a record is', () async {
       await addTab('kept', mode: TabMode.isolated('iso1_g'));
@@ -1699,6 +1720,364 @@ void main() {
         await db.tabDao.getTabContainerId('ext2').getSingleOrNull(),
         isNull,
       );
+    });
+  });
+
+  group("tabs with no opener that run in a container's storage", () {
+    // The page a notification's service worker opens, in the storage of the
+    // container whose site it came from, whichever container is on screen.
+    test('belong to that container, not the selected one', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      container = makeContainer(selectedContainer: 'play');
+      native.open.add('notified');
+
+      await repository().handleTabAdded('notified', contextId: 'ctx-work');
+
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        'work',
+      );
+    });
+
+    test('of an isolation group belong to the container of its tabs', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      await addTab(
+        'iso',
+        containerId: 'work',
+        mode: TabMode.isolated('iso1_g'),
+      );
+      container = makeContainer(selectedContainer: 'play');
+      native.open.add('notified');
+
+      await repository().handleTabAdded('notified', contextId: 'iso1_g');
+
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        'work',
+      );
+    });
+
+    test(
+      'in the default storage still go into the selected container',
+      () async {
+        await addContainer('work', contextId: 'ctx-work');
+        container = makeContainer(selectedContainer: 'work');
+        native.open.add('notified');
+
+        await repository().handleTabAdded('notified', contextId: null);
+
+        expect(
+          await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+          'work',
+        );
+      },
+    );
+
+    test(
+      'of a context no container uses fall back to the selected one',
+      () async {
+        await addContainer('work', contextId: 'ctx-work');
+        container = makeContainer(selectedContainer: 'work');
+        native.open.add('notified');
+
+        await repository().handleTabAdded('notified', contextId: 'ctx-gone');
+
+        expect(
+          await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+          'work',
+        );
+      },
+    );
+
+    test('of an isolation group go by the tabs it has, also when none of '
+        'them is in a container', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      container = makeContainer(selectedContainer: 'play');
+      await addTab('a', containerId: 'work', mode: TabMode.isolated('iso1_g'));
+      await addTab('b', mode: TabMode.isolated('iso1_g'));
+      // 'a' closes; 'b', moved out of the container, stays in the group.
+      container
+          .read(storageOwnersProvider.notifier)
+          .rememberDeletedTabs(
+            (await db.tabDao.syncTabs(
+              retainTabIds: ['b'],
+            )).deletedIsolationContainers,
+          );
+      native.open.add('notified');
+
+      await repository().handleTabAdded(
+        'notified',
+        contextId: 'iso1_g',
+        openedByServiceWorker: true,
+      );
+
+      // Filed under 'work', it would give the whole group that route.
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        isNull,
+      );
+    });
+
+    test('are closed with their container when it is being deleted', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      container = makeContainer(selectedContainer: 'play');
+      await addTab('a', containerId: 'work');
+      await addTab('outside');
+      native.selected = 'outside';
+      final gate = container.read(containerMembershipGateProvider.notifier);
+      final release = Completer<void>();
+      final deleting = gate.whileDeleting('work', () => release.future);
+      await pumpEventQueue();
+
+      native.open.add('notified');
+      final added = repository().handleTabAdded(
+        'notified',
+        contextId: 'ctx-work',
+        openedByServiceWorker: true,
+      );
+      await pumpEventQueue();
+
+      // Told to the deletion, as a window of one of its pages is.
+      expect(gate.tabsOpenedDuringDeletion('work'), {'notified'});
+
+      await db.tabDao.deleteContainerIfOnlyClosedTabs(
+        'work',
+        closedTabIds: {'a'},
+      );
+      release.complete();
+      await deleting;
+      await added;
+
+      // Not left running in the deleted container's storage.
+      expect(native.open, isNot(contains('notified')));
+    });
+
+    test('belong to that container when the tab list sync wrote their row '
+        'first', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      container = makeContainer(selectedContainer: 'play');
+      await addTab('outside');
+      native
+        ..selected = 'outside'
+        ..open.add('notified');
+
+      // The tab list reaches Dart before the tab added event: a placeholder.
+      await repository().handleTabListChange(
+        null,
+        EquatableValue(['outside', 'notified']),
+      );
+      expect(await db.tabDao.getTabSource('notified'), TabSource.syncEvent);
+
+      await repository().handleTabAdded(
+        'notified',
+        contextId: 'ctx-work',
+        openedByServiceWorker: true,
+      );
+
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        'work',
+      );
+    });
+
+    test('are told to a deletion of their container when the tab list sync '
+        'wrote their row first', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      container = makeContainer(selectedContainer: 'play');
+      await addTab('a', containerId: 'work');
+      await addTab('outside');
+      native
+        ..selected = 'outside'
+        ..open.add('notified');
+      await repository().handleTabListChange(
+        null,
+        EquatableValue(['a', 'outside', 'notified']),
+      );
+      final gate = container.read(containerMembershipGateProvider.notifier);
+      final release = Completer<void>();
+      final deleting = gate.whileDeleting('work', () => release.future);
+      await pumpEventQueue();
+
+      final added = repository().handleTabAdded(
+        'notified',
+        contextId: 'ctx-work',
+        openedByServiceWorker: true,
+      );
+      await pumpEventQueue();
+
+      expect(gate.tabsOpenedDuringDeletion('work'), {'notified'});
+
+      await db.tabDao.deleteContainerIfOnlyClosedTabs(
+        'work',
+        closedTabIds: {'a'},
+      );
+      release.complete();
+      await deleting;
+      await added;
+
+      expect(native.open, isNot(contains('notified')));
+    });
+
+    test('a tab the app added keeps its row', () async {
+      await addContainer('work', contextId: 'ctx-work');
+      await addContainer('play', contextId: 'ctx-play');
+      container = makeContainer(selectedContainer: 'play');
+      await addTab('added', containerId: 'play');
+
+      await repository().handleTabAdded('added', contextId: 'ctx-work');
+
+      expect(
+        await db.tabDao.getTabContainerId('added').getSingleOrNull(),
+        'play',
+      );
+    });
+  });
+
+  group('the page a notification click opens', () {
+    // The engine creates and selects it on its own, so nothing in Dart picks
+    // it the way a tab the user chose lifts a "stay on home": the startup home
+    // target latches it over a cold start's session before the click is
+    // handed to the engine, and the home button sets it. Native says which
+    // tab it is: the one its service worker delegate opened.
+    setUp(() async {
+      await addContainer('work', contextId: 'ctx-work');
+      container = makeContainer(selectedContainer: 'work');
+    });
+
+    bool homeForced() => container.read(forceBrowserHomeProvider);
+
+    void latchHome() =>
+        container.read(forceBrowserHomeProvider.notifier).request();
+
+    Future<void> openedByWorker(String tabId, {String? contextId}) =>
+        repository().handleTabAdded(
+          tabId,
+          contextId: contextId,
+          openedByServiceWorker: true,
+        );
+
+    test('lifts a latched home once it is filed', () async {
+      native.open.add('notified');
+      latchHome();
+
+      await openedByWorker('notified', contextId: 'ctx-work');
+
+      expect(homeForced(), isFalse);
+    });
+
+    test(
+      'in the default storage belongs to no container, not the selected one',
+      () async {
+        native.open.add('notified');
+
+        await openedByWorker('notified');
+
+        expect(
+          await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+          isNull,
+        );
+      },
+    );
+
+    test('of a context no container uses belongs to no container', () async {
+      native.open.add('notified');
+
+      await openedByWorker('notified', contextId: 'ctx-gone');
+
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        isNull,
+      );
+    });
+
+    test("in a container's storage still belongs to that container", () async {
+      await addContainer('play', contextId: 'ctx-play');
+      native.open.add('notified');
+
+      await openedByWorker('notified', contextId: 'ctx-play');
+
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        'play',
+      );
+    });
+
+    test('of an isolation group with no tab left belongs to the container '
+        "whose freeze still holds the group's storage", () async {
+      // Its last tab closed while the container was frozen: no row names
+      // the group's container any more, native's registry does.
+      await addContainer('play', contextId: 'ctx-play');
+      lifecycle.restrict('work', ['ctx-work', 'iso1_g']);
+      await container.read(containerMembershipGateProvider.notifier).refresh();
+      native.open.add('notified');
+
+      await openedByWorker('notified', contextId: 'iso1_g');
+
+      expect(
+        await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+        'work',
+      );
+    });
+
+    test(
+      'in the storage of a deleted container belongs to no container',
+      () async {
+        // A record whose owner is gone only waits for its data to be deleted.
+        lifecycle.restrict('deleted', ['ctx-deleted']);
+        await container
+            .read(containerMembershipGateProvider.notifier)
+            .refresh();
+        native.open.add('notified');
+
+        await openedByWorker('notified', contextId: 'ctx-deleted');
+
+        expect(
+          await db.tabDao.getTabContainerId('notified').getSingleOrNull(),
+          isNull,
+        );
+      },
+    );
+
+    test('does not lift it for a tab no service worker opened', () async {
+      native.open.add('ext');
+      latchHome();
+
+      await repository().handleTabAdded('ext', contextId: 'ctx-work');
+
+      expect(homeForced(), isTrue);
+    });
+
+    test(
+      'lifts it for every such tab, however late and however many',
+      () async {
+        // Nothing is waited for or used up: a second tap's page, or a slow
+        // worker's, is the click's page as much as the first.
+        native.open.addAll(['first', 'second']);
+        latchHome();
+
+        await openedByWorker('first');
+        expect(homeForced(), isFalse);
+
+        latchHome();
+        await openedByWorker('second');
+        expect(homeForced(), isFalse);
+      },
+    );
+
+    test('is not a tab a page opened, which has an opener', () async {
+      await addTab('a');
+      native.open.add('popup');
+      latchHome();
+
+      await repository().handleTabAdded('popup', openerId: 'a');
+
+      expect(homeForced(), isTrue);
     });
   });
 

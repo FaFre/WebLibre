@@ -31,6 +31,7 @@ import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/maintenance/clone_participant_policy.dart';
 import 'package:weblibre/core/maintenance/maintenance_outcome.dart';
 import 'package:weblibre/core/maintenance/plaintext_cleanup.dart';
+import 'package:weblibre/core/maintenance/push_transport_scrub.dart';
 import 'package:weblibre/core/maintenance/saf_archive_target.dart';
 import 'package:weblibre/core/startup/models/startup_config.dart';
 import 'package:weblibre/core/startup/startup_config_store.dart';
@@ -188,6 +189,13 @@ class UserBackupService extends _$UserBackupService {
           // inherit it. See [applyCloneParticipantPolicy] for what a future
           // build could keep.
           await applyCloneParticipantPolicy(outputDirectory);
+
+          // Nor the source's push transport: its tokens and keys would let the
+          // clone decrypt the source's messages. The clone keeps the
+          // subscriptions, without endpoints, and registers them once the user
+          // chooses a distributor for it; the archive's choice went with the
+          // connector database.
+          await scrubPushTransport(outputDirectory);
 
           // Addressed to its new id *before* the rename, never after. The
           // archive's own `metadata.json` names the profile it was taken from,

@@ -180,6 +180,7 @@
   "user_searchSuggestionProviderKagi": "Kagi",
   "user_searchSuggestionProviderQwant": "Qwant",
   "user_deleteBrowsingDataTypeTabsTitle": "Tab terbuka",
+  "user_deleteBrowsingDataTypeTabsDescription": "Tab terkunci dipertahankan",
   "user_deleteBrowsingDataTypeHistoryTitle": "Riwayat penjelajahan",
   "user_deleteBrowsingDataTypeRecentSearchesTitle": "Pencarian terbaru",
   "user_deleteBrowsingDataTypeRecentSearchesDescription": "Kueri yang ditampilkan di halaman pencarian",

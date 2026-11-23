@@ -81,7 +81,7 @@ final class IsolationContextCleanupProvider
 }
 
 String _$isolationContextCleanupHash() =>
-    r'0eb1543120c68d2b453e0e280bef08594c367a58';
+    r'39ed97f9cb21df0feac89dec708d8a154ce51c76';
 
 /// Deleting the data of isolation contexts no tab uses any more, for the tab
 /// repository: an isolated tab's context is cleared once its group's last

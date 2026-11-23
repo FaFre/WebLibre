@@ -18,5 +18,11 @@
   "rememberedPrompt_startTorKeywords": "tor,onion,洋葱,代理,proxy,启动,确认,不再询问",
   "rememberedPrompt_startProxyConnectionLabel": "启动代理连接前询问",
   "rememberedPrompt_startProxyConnectionDescription": "当容器的代理连接未运行时",
-  "rememberedPrompt_startProxyConnectionKeywords": "代理,proxy,vpn,连接,容器,启动,确认,不再询问"
+  "rememberedPrompt_startProxyConnectionKeywords": "代理,proxy,vpn,连接,容器,启动,确认,不再询问",
+  "rememberedPrompt_sleepTabsLabel": "让标签页休眠前询问",
+  "rememberedPrompt_sleepTabsDescription": "说明休眠标签页的页面会重新加载，并可能丢失未保存的状态",
+  "rememberedPrompt_sleepTabsKeywords": "休眠,卸载,内存,标签页,挂起,丢弃,确认,不再询问,sleep",
+  "rememberedPrompt_freezeContainerLabel": "冻结容器前询问",
+  "rememberedPrompt_freezeContainerDescription": "说明已冻结容器的标签页会被卸载，其后台活动会停止，直到恢复",
+  "rememberedPrompt_freezeContainerKeywords": "冻结,暂停,容器,恢复,后台,推送,确认,不再询问,freeze"
 }

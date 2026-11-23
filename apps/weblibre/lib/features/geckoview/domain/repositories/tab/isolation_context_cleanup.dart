@@ -31,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/domain/services/bro
 import 'package:weblibre/features/geckoview/features/tabs/data/providers.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/storage_owners.dart';
 import 'package:weblibre/features/user/data/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/proxy_routing_settings.dart';
 
@@ -88,6 +89,16 @@ class IsolationContextCleanup extends _$IsolationContextCleanup {
 
   /// Queues [contextId] for the next [drain].
   void add(String contextId) => addAll([contextId]);
+
+  /// Queues the isolation groups of tab rows just deleted, and remembers the
+  /// containers of those rows for each ([StorageOwners.rememberDeletedTabs]),
+  /// which [drain] forgets again once a group's data is deleted.
+  void addDeletedRows(Map<String, Set<String?>> groupContainers) {
+    ref
+        .read(storageOwnersProvider.notifier)
+        .rememberDeletedTabs(groupContainers);
+    addAll(groupContainers.keys);
+  }
 
   /// Releases those of [contextIds] no tab uses any more, isolation groups of
   /// a frozen container whose last tab closed while it was frozen: through
@@ -154,6 +165,43 @@ class IsolationContextCleanup extends _$IsolationContextCleanup {
     }
   }
 
+  /// Whether nothing uses isolation context [contextId] any more: no tab, also
+  /// none that has no row yet, and no web app or custom tab window. Its data
+  /// is deleted then, at once, or for a group of a frozen container when the
+  /// container is resumed ([releaseEmpty]).
+  Future<bool> isUnused(String contextId) async =>
+      await _usage(contextId) == _Usage.none;
+
+  /// What still uses isolation context [contextId].
+  Future<_Usage> _usage(String contextId) async {
+    final tabDao = ref.read(tabDatabaseProvider).tabDao;
+
+    // Re-verify count after close (handles concurrent close races)
+    final remaining = await tabDao.tabsInIsolationGroup(contextId).getSingle();
+    if (remaining > 0) return _Usage.tab;
+
+    // Guard against debounced DB persistence: a sibling tab can already be
+    // active in-memory for this context before isolation_context_id is written.
+    final activeTabs = ref.read(tabListProvider).value;
+    final activeStates = ref.read(tabStatesProvider);
+    final hasActiveSibling = activeTabs.any((tabId) {
+      final state = activeStates[tabId];
+      if (state == null) return false;
+
+      return state.isolationContextId == contextId ||
+          state.contextId == contextId;
+    });
+    if (hasActiveSibling) return _Usage.tabInMemory;
+
+    // A web app or custom tab window opened from the group runs in its
+    // storage too, and is no tab: its cookies and site data stay while it is
+    // open. Nothing reports its closing.
+    final windows = await _tabsService.getCustomTabIdsInContexts([contextId]);
+    if (windows.isNotEmpty) return _Usage.window;
+
+    return _Usage.none;
+  }
+
   /// [_cleanUpIfEmpty], [_Cleanup.retry] when it threw: the context is kept
   /// for the next [drain] rather than dropped, its data still there.
   Future<_Cleanup> _tryCleanUp(
@@ -184,43 +232,25 @@ class IsolationContextCleanup extends _$IsolationContextCleanup {
     String contextId, {
     bool releaseFrozen = false,
   }) async {
-    final tabDao = ref.read(tabDatabaseProvider).tabDao;
-
-    // Re-verify count after close (handles concurrent close races)
-    final remaining = await tabDao.tabsInIsolationGroup(contextId).getSingle();
-
-    if (remaining > 0) return _Cleanup.done;
-
-    // Guard against debounced DB persistence: a sibling tab can already be
-    // active in-memory for this context before isolation_context_id is written.
-    final activeTabs = ref.read(tabListProvider).value;
-    final activeStates = ref.read(tabStatesProvider);
-    final hasActiveSibling = activeTabs.any((tabId) {
-      final state = activeStates[tabId];
-      if (state == null) return false;
-
-      return state.isolationContextId == contextId ||
-          state.contextId == contextId;
-    });
-
-    if (hasActiveSibling) {
-      logger.i(
-        'Skipping isolation cleanup for active context still in memory: $contextId',
-      );
-      return _Cleanup.done;
-    }
-
-    // A web app or custom tab window opened from the group runs in its
-    // storage too, and is no tab: its cookies and site data stay while it is
-    // open. Nothing reports its closing here, so the context stays queued,
-    // also across a restart, until a later drain finds the window gone.
-    final windows = await _tabsService.getCustomTabIdsInContexts([contextId]);
-    if (windows.isNotEmpty) {
-      logger.i(
-        'Skipping isolation cleanup for context $contextId: a web app or '
-        'custom tab still uses it',
-      );
-      return _Cleanup.inUseByWindow;
+    switch (await _usage(contextId)) {
+      case _Usage.tab:
+        return _Cleanup.done;
+      case _Usage.tabInMemory:
+        logger.i(
+          'Skipping isolation cleanup for active context still in memory: '
+          '$contextId',
+        );
+        return _Cleanup.done;
+      case _Usage.window:
+        // Nothing reports the window's closing, so the context stays queued,
+        // also across a restart, until a later drain finds the window gone.
+        logger.i(
+          'Skipping isolation cleanup for context $contextId: a web app or '
+          'custom tab still uses it',
+        );
+        return _Cleanup.inUseByWindow;
+      case _Usage.none:
+        break;
     }
 
     logger.i('Cleaning up isolation context: $contextId');
@@ -333,6 +363,9 @@ class IsolationContextCleanup extends _$IsolationContextCleanup {
     // group is stored, though, and would outlive every tab that could use it.
     final outcome = settled ? _Cleanup.done : _Cleanup.retry;
     if (!ref.mounted) return outcome;
+    // No page opens in it any more: what was remembered of its last tabs for
+    // one is not needed.
+    if (settled) ref.read(storageOwnersProvider.notifier).forget(contextId);
 
     try {
       await ref
@@ -347,6 +380,21 @@ class IsolationContextCleanup extends _$IsolationContextCleanup {
     }
     return outcome;
   }
+}
+
+/// What still uses an isolation context.
+enum _Usage {
+  /// A tab with a row.
+  tab,
+
+  /// A tab whose row does not name the context yet.
+  tabInMemory,
+
+  /// A web app or custom tab window.
+  window,
+
+  /// Nothing.
+  none,
 }
 
 /// How far a context's cleanup got.

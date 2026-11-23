@@ -57,11 +57,18 @@
         android:enableOnBackInvokedCallback="true"
         android:memtagMode="async">
         
+        <!-- A web notification's tap: parks it and opens the app. In a task of
+             its own and never in recents, so the app's task does not start
+             from the tap's intent: relaunched from recents, it would deliver
+             the tap a second time and open another window. -->
         <activity 
             android:name="eu.weblibre.flutter_mozilla_components.activities.NotificationActivity" 
             android:theme="@style/Theme.AppCompat.Translucent" 
             android:exported="false"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
 
         <receiver
             android:name="eu.weblibre.flutter_mozilla_components.gatekeeper.GatekeeperNotificationActionReceiver"

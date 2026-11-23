@@ -1122,5 +1122,17 @@
   "settings_featureControlFeaturesToHide": "Fitur yang akan disembunyikan",
   "settings_featureControlApplyPresetConfirm": "Terapkan",
   "settings_featureControlApplyPresetUnchanged": "Fitur yang ditampilkan sudah sesuai dengan \"{preset}\".",
-  "settings_featureControlSectionTitle": "Fitur"
+  "settings_featureControlSectionTitle": "Fitur",
+  "settings_sleepingTabsSectionTitle": "Tab Tidur",
+  "settings_autoSleepTabsTitle": "Tidurkan Tab Otomatis",
+  "settings_autoSleepTabsSubtitle": "Selama WebLibre terbuka, melepas tab yang sudah lama tidak Anda lihat dari memori. Ketuk Bangunkan pada tab yang tidur untuk memuatnya lagi.",
+  "settings_autoSleepTabsKeywords": "tidur, lepas, memori, suspend, buang, siaga, tab tidak aktif, sleep",
+  "settings_autoSleepIdleTitle": "Tidur Setelah",
+  "settings_autoSleepIdleSubtitle": "Berapa lama tab berada di luar layar sebelum ditidurkan",
+  "settings_autoSleepIdleKeywords": "tidur, batas waktu, siaga, tidak aktif, sleep",
+  "settings_residentTabLimitTitle": "Batas Tab yang Dimuat",
+  "settings_residentTabLimitSubtitle": "Jika jumlah tab yang dimuat melebihi batas ini, tab yang paling lama tidak Anda lihat akan ditidurkan.",
+  "settings_residentTabLimitKeywords": "batas, memori, tab dimuat, tidur, limit",
+  "settings_residentTabLimitOff": "Tanpa Batas",
+  "settings_residentTabLimitCount": "{count, plural, other{{count} tab}}"
 }

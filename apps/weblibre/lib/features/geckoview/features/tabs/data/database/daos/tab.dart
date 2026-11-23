@@ -37,11 +37,13 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summar
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 
 class SyncTabsResult {
-  final Set<String> deletedIsolationContextIds;
+  /// The isolation contexts of the deleted rows, each with the containers of
+  /// its deleted rows (null for rows in none).
+  final Map<String, Set<String?>> deletedIsolationContainers;
   final int deletedCount;
 
   const SyncTabsResult({
-    required this.deletedIsolationContextIds,
+    required this.deletedIsolationContainers,
     required this.deletedCount,
   });
 }
@@ -196,6 +198,16 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         query.where(db.tab.id.isNotIn(excludedTabIds));
       }
     });
+  }
+
+  /// What wrote tab [tabId]'s row; null when it has none.
+  Future<TabSource?> getTabSource(String tabId) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.source])
+      ..where(db.tab.id.equals(tabId));
+    return query
+        .map((row) => row.readWithConverter(db.tab.source))
+        .getSingleOrNull();
   }
 
   SingleOrNullSelectable<String?> getTabContainerId(String tabId) {
@@ -1845,10 +1857,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds)))
               .goAndReturn();
 
-      final deletedIsolationContextIds = <String>{
-        for (final tab in deleted)
-          if (tab.isolationContextId != null) tab.isolationContextId!,
-      };
+      final deletedIsolationContainers = <String, Set<String?>>{};
+      for (final tab in deleted) {
+        if (tab.isolationContextId case final contextId?) {
+          (deletedIsolationContainers[contextId] ??= {}).add(tab.containerId);
+        }
+      }
 
       await _recordClosedTabContainers(deleted);
 
@@ -1895,7 +1909,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       await _resolvePendingParents(childPlacement: childPlacement);
 
       return SyncTabsResult(
-        deletedIsolationContextIds: deletedIsolationContextIds,
+        deletedIsolationContainers: deletedIsolationContainers,
         deletedCount: deleted.length,
       );
     });
@@ -1930,6 +1944,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
 
   SingleSelectable<int> tabsInIsolationGroup(String contextId) {
     return db.definitionsDrift.tabsInIsolationGroup(contextId: contextId);
+  }
+
+  /// The containers of isolation group [contextId]'s tabs, null for tabs in
+  /// none; empty when it has no tab.
+  Future<List<String?>> containerIdsInIsolationGroup(String contextId) {
+    return db.definitionsDrift
+        .isolationGroupContainerIds(contextId: contextId)
+        .get();
   }
 
   Selectable<String?> allIsolationContextIds() {

@@ -48,5 +48,10 @@
   "webPush_subscriptionsSectionTitle": "Langganan",
   "webPush_indexSiteSubscriptionsTitle": "Langganan Situs",
   "webPush_indexSiteSubscriptionsKeywords": "situs, langganan, sites, subscriptions",
-  "webPush_indexSiteSubscriptionsSubtitle": "Situs web yang diizinkan mengirimi Anda notifikasi"
+  "webPush_indexSiteSubscriptionsSubtitle": "Situs web yang diizinkan mengirimi Anda notifikasi",
+  "webPush_notificationSiteDataBeingDeleted": "Data situs ini sedang dihapus, sehingga notifikasinya dihapus",
+  "webPush_notificationContainerFrozen": "Kontainer situs ini dibekukan, sehingga notifikasinya tidak terbuka. Ketuk lagi untuk melanjutkan kontainer.",
+  "webPush_notificationRoutingNotReady": "Koneksi situs ini belum siap, sehingga notifikasinya tidak terbuka. Ketuk lagi sebentar lagi.",
+  "webPush_notificationGroupWithoutRoute": "Semua tab terisolasi situs ini sudah ditutup, sehingga notifikasinya tidak akan memakai koneksi kontainernya dan tidak dibuka.",
+  "webPush_notificationContainerDeleted": "Kontainer situs ini sudah dihapus, sehingga notifikasinya dihapus"
 }

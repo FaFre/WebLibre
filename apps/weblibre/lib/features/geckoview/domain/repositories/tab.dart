@@ -66,6 +66,7 @@ import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/co
 import 'package:weblibre/features/geckoview/features/tabs/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_freeze.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/services/container_membership_gate.dart';
+import 'package:weblibre/features/geckoview/features/tabs/domain/services/storage_owners.dart';
 import 'package:weblibre/features/proxy/domain/repositories/container_proxy.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
@@ -2045,8 +2046,8 @@ class TabRepository extends _$TabRepository {
   //       final syncTabsResult = await tabDao.syncTabs(
   //         retainTabIds: ref.read(tabListProvider).value,
   //       );
-  //       _isolationCleanup.addAll(
-  //         syncTabsResult.deletedIsolationContextIds,
+  //       _isolationCleanup.addDeletedRows(
+  //         syncTabsResult.deletedIsolationContainers,
   //       );
   //       await _isolationCleanup.drain();
   //     });
@@ -2424,10 +2425,25 @@ class TabRepository extends _$TabRepository {
   /// Gives tab [tabId], which the engine opened (from tab [openerId], when it
   /// names one), its row. The tab added listener in [build]; a method so that
   /// tests can call it.
+  ///
+  /// [openedByServiceWorker]: the tab is the page a service worker's
+  /// `clients.openWindow()` opened, which Gecko allows only while the worker
+  /// handles a notification click, so the user just tapped a notification.
+  /// The engine created and selected it with nothing in Dart asking for it, so
+  /// nothing would lift a "stay on home", and the page would load behind the
+  /// home surface: the startup home target latches it over a cold start's
+  /// session while the click is still on its way to the engine, and the home
+  /// button sets it. Such a tab lifts it, as a tab the user picked would.
   @visibleForTesting
-  Future<void> handleTabAdded(String tabId, {String? openerId}) async {
+  Future<void> handleTabAdded(
+    String tabId, {
+    String? openerId,
+    String? contextId,
+    bool openedByServiceWorker = false,
+  }) async {
     final db = ref.read(tabDatabaseProvider);
     final gate = ref.read(containerMembershipGateProvider.notifier);
+    final isNotificationWindow = openerId == null && openedByServiceWorker;
 
     Future<void> insert(Value<String?> containerId) => db.tabDao.insertTab(
       tabId,
@@ -2446,18 +2462,38 @@ class TabRepository extends _$TabRepository {
 
     // A tab opened from another tab runs in its opener's context, so
     // `insertTab` files it with the opener rather than with whatever
-    // container is selected. A tab without an opener (an extension's
-    // `tabs.create`) still lands in the selected container, unless that one
-    // is frozen: it runs in the default storage, which no freeze holds, and
-    // would be a running page in a container shown as frozen (native refuses
-    // to freeze one that has such a tab).
+    // container is selected. A tab without an opener runs in a context of its
+    // own: when that is a container's storage (the page a notification's
+    // service worker opens), the tab belongs to that container
+    // ([StorageOwners]). The page a notification opens in any other storage
+    // belongs to none, whichever container is on screen. Otherwise (an
+    // extension's `tabs.create`, which runs in the default storage) it still
+    // lands in the selected container, unless that one is frozen: the tab runs
+    // in storage no freeze holds, and would be a running page in a container
+    // shown as frozen (native refuses to freeze one that has such a tab).
+    //
+    // A tab the app added has its row already, which this insert leaves as it
+    // is, so its storage's owner is not looked up. Not so a placeholder the
+    // tab list sync wrote before this event (`syncEvent`): this insert
+    // replaces it, container and all.
     final String? targetContainerId;
     String? inheritedContainerId;
+    ContainerData? owner;
     if (openerId == null) {
       final selected = ref.read(selectedContainerProvider);
-      targetContainerId = await _runsOutsideFreezeOf(tabId, selected)
-          ? null
-          : selected;
+      if (contextId != null) {
+        final rowSource = await db.tabDao.getTabSource(tabId);
+        if (rowSource == null || rowSource == TabSource.syncEvent) {
+          owner = await ref
+              .read(storageOwnersProvider.notifier)
+              .containerOwning(contextId);
+        }
+      }
+      targetContainerId =
+          owner?.id ??
+          (isNotificationWindow || await _runsOutsideFreezeOf(tabId, selected)
+              ? null
+              : selected);
     } else {
       final openerHasRow = (await db.tabDao.getExistingTabIds({
         openerId,
@@ -2483,6 +2519,11 @@ class TabRepository extends _$TabRepository {
       return;
     }
 
+    // A window one of the container's pages opened belongs to it, and so does
+    // a page that runs in its storage (a notification's). An extension's tab
+    // only would be filed under the selected container, and runs wherever the
+    // extension put it.
+    final belongsToContainer = openerId != null || owner != null;
     try {
       // Joining a container, the row holds its reservation like any other
       // addition ([ContainerMembershipGate]).
@@ -2493,20 +2534,24 @@ class TabRepository extends _$TabRepository {
               ? Value(targetContainerId)
               : const Value<String?>.absent(),
         ),
-        openedTabId: openerId == null ? null : tabId,
+        openedTabId: belongsToContainer ? tabId : null,
       );
     } on ContainerBeingDeletedException catch (refusal) {
       // The tab exists already, so it gets a row all the same, under no
       // container: its row cannot join a container that is going away.
       await insert(const Value(null));
-      // A window one of the container's pages opened belongs to it: the
-      // deletion closes it with the container's own tabs, as it was told
-      // by the refusal. An extension's tab only would have been filed under
-      // the selected container, and runs wherever the extension put it.
-      if (openerId != null) {
+      // One that belongs to the container goes with it: the deletion closes
+      // it with the container's own tabs, as it was told by the refusal, and
+      // one it missed is closed once it is over. Left under no container, it
+      // would run in the deleted container's storage on the general route.
+      if (belongsToContainer) {
         await _settleTabOfContainer(tabId, refusal.containerId);
       }
     }
+
+    // After the tab is filed, so that home does not come down onto a page
+    // whose container the selection has not followed yet.
+    if (isNotificationWindow && ref.mounted) _clearForceBrowserHome();
   }
 
   /// Whether [containerId] is restricted ([ContainerMembershipGate.isRestricted])
@@ -2653,7 +2698,9 @@ class TabRepository extends _$TabRepository {
       );
       // Capture isolation contexts from rows deleted by syncTabs
       // (orphaned tabs from crashes, or tabs the engine dropped).
-      _isolationCleanup.addAll(syncTabsResult.deletedIsolationContextIds);
+      _isolationCleanup.addDeletedRows(
+        syncTabsResult.deletedIsolationContainers,
+      );
     }
 
     // Process pending isolation context cleanups after syncTabs
@@ -2693,8 +2740,12 @@ class TabRepository extends _$TabRepository {
     final db = ref.watch(tabDatabaseProvider);
 
     final tabAddedSub = eventSerivce.tabAddedStream.listen(
-      (event) async =>
-          await handleTabAdded(event.tabId, openerId: event.parentId),
+      (event) async => await handleTabAdded(
+        event.tabId,
+        openerId: event.parentId,
+        contextId: event.contextId,
+        openedByServiceWorker: event.openedByServiceWorker,
+      ),
       onError: (Object error, StackTrace stackTrace) {
         logger.e(
           'Error in tab added stream',
@@ -2841,7 +2892,9 @@ class TabRepository extends _$TabRepository {
           return;
         }
 
-        _isolationCleanup.addAll(syncTabsResult.deletedIsolationContextIds);
+        _isolationCleanup.addDeletedRows(
+          syncTabsResult.deletedIsolationContainers,
+        );
         await _isolationCleanup.drain();
 
         await _reattachTabsToContextContainers();

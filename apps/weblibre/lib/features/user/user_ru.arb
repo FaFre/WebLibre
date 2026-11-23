@@ -180,6 +180,7 @@
   "user_searchSuggestionProviderKagi": "Kagi",
   "user_searchSuggestionProviderQwant": "Qwant",
   "user_deleteBrowsingDataTypeTabsTitle": "Открытые вкладки",
+  "user_deleteBrowsingDataTypeTabsDescription": "Заблокированные вкладки сохраняются",
   "user_deleteBrowsingDataTypeHistoryTitle": "История просмотра",
   "user_deleteBrowsingDataTypeRecentSearchesTitle": "Недавние запросы",
   "user_deleteBrowsingDataTypeRecentSearchesDescription": "Запросы, показываемые на странице поиска",

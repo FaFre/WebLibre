@@ -2241,6 +2241,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Leseansicht ist für diese Seite nicht verfügbar';
 
   @override
+  String get browserActions_pageAsleepMessage =>
+      'Dieser Tab schläft. Zuerst aufwecken.';
+
+  @override
   String get browserActions_noClosedTabsMessage =>
       'Keine kürzlich geschlossenen Tabs';
 
@@ -3742,7 +3746,8 @@ class AppLocalizationsDe extends AppLocalizations {
       'Tab entsperren, um ihn in einen Container mit eigenem Speicher zu verschieben';
 
   @override
-  String get browser_tabMoveFailed => 'The tab was not moved. Try again.';
+  String get browser_tabMoveFailed =>
+      'Der Tab wurde nicht verschoben. Erneut versuchen.';
 
   @override
   String get browser_containerBeingDeleted =>
@@ -4558,6 +4563,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get browser_allowTabSleeping => 'Schlafen erlauben';
+
+  @override
+  String get browser_keepTabAwakeDescription =>
+      'Automatisches Schlafenlegen und automatisches Einfrieren überspringen einen Tab, der wach gehalten wird. Von Hand lässt er sich trotzdem schlafen legen, und sein Container lässt sich einfrieren.';
 
   @override
   String get browser_pinTabShort => 'Anheften';
@@ -6545,7 +6554,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String tabs_siteDataPendingClosedIsolatedTabs(String container) {
-    return 'Closed isolated tabs in $container';
+    return 'Geschlossene isolierte Tabs in $container';
   }
 
   @override
@@ -6613,7 +6622,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get tabs_deleteContainerFreezeStateUnknown =>
-      'The container was not deleted because WebLibre could not check whether it is frozen. Try again.';
+      'Der Container wurde nicht gelöscht, weil WebLibre nicht prüfen konnte, ob er eingefroren ist. Erneut versuchen.';
 
   @override
   String get tabs_deleteContainerSiteDataPending =>
@@ -15086,6 +15095,26 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get webPush_indexSiteSubscriptionsSubtitle =>
       'Websites, die Benachrichtigungen senden dürfen';
+
+  @override
+  String get webPush_notificationSiteDataBeingDeleted =>
+      'Die Daten dieser Website werden gelöscht, deshalb wurde die Benachrichtigung entfernt';
+
+  @override
+  String get webPush_notificationContainerFrozen =>
+      'Der Container dieser Website ist eingefroren, deshalb wurde die Benachrichtigung nicht geöffnet. Erneut darauf tippen, um den Container fortzusetzen.';
+
+  @override
+  String get webPush_notificationRoutingNotReady =>
+      'Die Verbindung dieser Website ist noch nicht bereit, deshalb wurde die Benachrichtigung nicht geöffnet. Gleich erneut darauf tippen.';
+
+  @override
+  String get webPush_notificationGroupWithoutRoute =>
+      'Alle isolierten Tabs dieser Website sind geschlossen. Die Benachrichtigung würde daher nicht die Verbindung ihres Containers nutzen und wurde nicht geöffnet.';
+
+  @override
+  String get webPush_notificationContainerDeleted =>
+      'Der Container dieser Website wurde gelöscht, deshalb wurde die Benachrichtigung entfernt';
 
   @override
   String get webSearch_fetchPageDataTitle => 'Seitendaten abrufen';

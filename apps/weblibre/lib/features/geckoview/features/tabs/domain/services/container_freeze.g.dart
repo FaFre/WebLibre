@@ -78,7 +78,7 @@ final class ContainerFreezeServiceProvider
 }
 
 String _$containerFreezeServiceHash() =>
-    r'de47b08d82e14ca979d4f0fcfebc81502afa49aa';
+    r'810f1e8783ae36e97dd3f57aafffe52a22ecb791';
 
 /// Container freeze on Dart's side (5.3, 5.5, 5.7 of
 /// `plans/TAB_LOCK_AND_FREEZE_IMPLEMENTATION_PLAN.md`): the only way a freeze
