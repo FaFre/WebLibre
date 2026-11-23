@@ -50,7 +50,7 @@ dependencies:
   google_fonts: ^9.0.0
   graphview: ^1.5.1
   home_widget: ^0.10.0
-  hooks_riverpod: ^3.4.3
+  hooks_riverpod: ^3.5.0
   html: ^0.15.7
   http: ^1.6.0
   intl: ^0.20.3
