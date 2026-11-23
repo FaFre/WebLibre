@@ -4777,7 +4777,7 @@
   },
   "settings_autoSleepIdleTitle": "Sleep After",
   "@settings_autoSleepIdleTitle": {
-    "description": "Setting title: how long a tab is off screen before automatic sleep unloads it. Followed by a list of durations."
+    "description": "Setting title: how long a tab is off screen before automatic sleep unloads it. Set with a slider of durations from 1 minute to 24 hours; the chosen duration shows beside the title."
   },
   "settings_autoSleepIdleSubtitle": "How long a tab is off screen before it is put to sleep",
   "@settings_autoSleepIdleSubtitle": {
@@ -4789,11 +4789,15 @@
   },
   "settings_residentTabLimitTitle": "Loaded Tabs Limit",
   "@settings_residentTabLimitTitle": {
-    "description": "Setting title: how many tabs may keep their page loaded before automatic sleep unloads the oldest ones."
+    "description": "Setting title: how many tabs may keep their page loaded before automatic sleep unloads the oldest ones. Set with a slider from 1 tab to 20 tabs, then 'No Limit'; the chosen value shows beside the title."
   },
   "settings_residentTabLimitSubtitle": "Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.",
   "@settings_residentTabLimitSubtitle": {
     "description": "Explains the 'Loaded Tabs Limit' setting."
+  },
+  "settings_residentTabLimitOneSubtitle": "Tabs on screen always stay loaded. Other tabs are put to sleep after you leave them, unless they are kept awake, still loading or in use.",
+  "@settings_residentTabLimitOneSubtitle": {
+    "description": "Replaces the explanation under the 'Loaded Tabs Limit' setting while 1 tab is chosen: what that limit means in practice. \"Tabs on screen\" is plural because split view shows two tabs at once. \"Kept awake\" refers to the tab menu's 'Keep awake' action (browser_keepTabAwake); \"in use\" covers tabs playing media, using the camera or microphone, downloading, or holding typed text."
   },
   "settings_residentTabLimitKeywords": "limit, memory, loaded tabs, sleep",
   "@settings_residentTabLimitKeywords": {

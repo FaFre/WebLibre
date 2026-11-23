@@ -18,10 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:intl/intl.dart';
+import 'package:weblibre/features/settings/presentation/widgets/stops_slider_tile.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 
 /// A gesture distance, shown as a percentage of its default.
 ///
@@ -29,7 +28,7 @@ import 'package:weblibre/presentation/hooks/keyed_state.dart';
 /// reads as the shipped behaviour, and every step from there as more or less
 /// of it. The slider runs from [gestureDistanceMinFactor] to
 /// [gestureDistanceMaxFactor] of the default in [gestureDistanceFactorStep]s.
-class RelativeDistanceSliderTile extends HookWidget {
+class RelativeDistanceSliderTile extends StatelessWidget {
   const RelativeDistanceSliderTile({
     required this.title,
     required this.subtitle,
@@ -51,83 +50,37 @@ class RelativeDistanceSliderTile extends HookWidget {
   final Future<void> Function(double value) onChanged;
   final bool enabled;
 
-  static final _divisions =
-      ((gestureDistanceMaxFactor - gestureDistanceMinFactor) /
-              gestureDistanceFactorStep)
+  /// The factors of the default, from whole quarters so each is exact.
+  static final _factors = [
+    for (
+      var quarter = (gestureDistanceMinFactor / gestureDistanceFactorStep)
           .round();
-
-  /// [factor] on the nearest step of the range. A stored distance that is not
-  /// on one (from an older build, or synced from one) shows as its nearest.
-  static double _snap(double factor) {
-    final clamped = factor.clamp(
-      gestureDistanceMinFactor,
-      gestureDistanceMaxFactor,
-    );
-    final stepIndex =
-        ((clamped - gestureDistanceMinFactor) / gestureDistanceFactorStep)
-            .round();
-    return gestureDistanceMinFactor + stepIndex * gestureDistanceFactorStep;
-  }
-
-  static String _percent(double factor) =>
-      NumberFormat.percentPattern().format(factor);
+      quarter <= (gestureDistanceMaxFactor / gestureDistanceFactorStep).round();
+      quarter++
+    )
+      quarter * gestureDistanceFactorStep,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final factor = useKeyedState(_snap(value / defaultValue), [value]);
-
-    final sliderLabel = _percent(factor.value);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(title),
-            subtitle: Text(subtitle),
-            leading: Icon(icon),
-            contentPadding: EdgeInsets.zero,
-            enabled: enabled,
-          ),
-          Row(
-            children: [
-              Text(
-                sliderLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: enabled ? null : Theme.of(context).disabledColor,
-                ),
-              ),
-              Expanded(
-                child: Slider(
-                  min: gestureDistanceMinFactor,
-                  max: gestureDistanceMaxFactor,
-                  divisions: _divisions,
-                  label: sliderLabel,
-                  // Without it a screen reader announces the position within
-                  // the track as a percentage, so the default read out as
-                  // "27%" while the screen shows 100%.
-                  semanticFormatterCallback: _percent,
-                  value: factor.value,
-                  onChanged: enabled
-                      ? (value) {
-                          factor.value = value;
-                        }
-                      : null,
-                  onChangeEnd: enabled
-                      ? (value) async {
-                          final snapped = _snap(value);
-                          factor.value = snapped;
-                          await onChanged(defaultValue * snapped);
-                        }
-                      : null,
-                ),
-              ),
-            ],
-          ),
-        ],
+    // Clamped as the tab bar and pull to refresh apply it.
+    final (:stops, :value) = stopsWithValue(
+      _factors,
+      (this.value / defaultValue).clamp(
+        gestureDistanceMinFactor,
+        gestureDistanceMaxFactor,
       ),
+    );
+
+    return StopsSliderTile<double>(
+      title: title,
+      subtitle: subtitle,
+      icon: icon,
+      enabled: enabled,
+      stops: stops,
+      value: value,
+      labelFor: formatPercent,
+      onChanged: (factor) => onChanged(defaultValue * factor),
     );
   }
 }

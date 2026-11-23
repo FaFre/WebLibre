@@ -1132,6 +1132,7 @@
   "settings_autoSleepIdleKeywords": "休眠,超时,空闲,不活动,sleep",
   "settings_residentTabLimitTitle": "已加载标签页上限",
   "settings_residentTabLimitSubtitle": "已加载的标签页超过此数量时，你最久没有查看的标签页会被休眠。",
+  "settings_residentTabLimitOneSubtitle": "屏幕上的标签页始终保持加载。其他标签页会在你离开后被休眠，除非它们被设为保持唤醒、仍在加载或正在使用。",
   "settings_residentTabLimitKeywords": "上限,内存,已加载标签页,休眠,limit",
   "settings_residentTabLimitOff": "无限制",
   "settings_residentTabLimitCount": "{count, plural, other{{count} 个标签页}}"

@@ -71,12 +71,20 @@ void main() {
     expect(find.text('150%'), findsOneWidget);
   });
 
-  testWidgets('a distance off the steps shows its nearest step', (
+  testWidgets('a distance off the steps shows as itself, not a neighbour', (
     tester,
   ) async {
     await pumpTile(tester, value: defaultAutoHideTabBarDistance * 1.6);
 
-    expect(find.text('150%'), findsOneWidget);
+    expect(find.text('160%'), findsOneWidget);
+  });
+
+  testWidgets('a distance beyond the range shows as the limit it applies as', (
+    tester,
+  ) async {
+    await pumpTile(tester, value: defaultAutoHideTabBarDistance * 5);
+
+    expect(find.text('300%'), findsOneWidget);
   });
 
   testWidgets('the percentage is written the way the UI language writes it', (

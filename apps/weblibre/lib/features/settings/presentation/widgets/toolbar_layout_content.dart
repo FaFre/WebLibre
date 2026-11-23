@@ -29,11 +29,12 @@ import 'package:weblibre/features/settings/presentation/controllers/save_setting
 import 'package:weblibre/features/settings/presentation/utils/quick_tab_switcher_placement_l10n.dart';
 import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/stops_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/tab_bar_position_radio_group.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 /// The parts of the toolbar the Toolbar & Layout screen groups its settings
@@ -865,15 +866,17 @@ class _QuickTabSwitcherPlacementSection extends HookConsumerWidget {
   }
 }
 
+final _quickTabSwitcherTitleWidthStops = [
+  for (
+    var width = minQuickTabSwitcherTitleWidth;
+    width <= maxQuickTabSwitcherTitleWidth;
+    width += quickTabSwitcherTitleWidthStep
+  )
+    width,
+];
+
 class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
   const _QuickTabSwitcherTitleWidthTile();
-
-  static final _divisions =
-      ((maxQuickTabSwitcherTitleWidth - minQuickTabSwitcherTitleWidth) /
-              quickTabSwitcherTitleWidthStep)
-          .round();
-
-  static String _label(double width) => '${width.round()} px';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -890,66 +893,27 @@ class _QuickTabSwitcherTitleWidthTile extends HookConsumerWidget {
     );
 
     final l10n = AppLocalizations.of(context);
-    final sliderValue = useKeyedState(titleWidth, [titleWidth]);
+    final (:stops, :value) = stopsWithValue(
+      _quickTabSwitcherTitleWidthStops,
+      titleWidth,
+    );
 
-    final enabled = switcherEnabled && showTitles;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(l10n.settings_titleWidthTitle),
-            subtitle: Text(l10n.settings_titleWidthSubtitle),
-            leading: const Icon(MdiIcons.arrowExpandHorizontal),
-            contentPadding: EdgeInsets.zero,
-            enabled: enabled,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Slider(
-                  min: minQuickTabSwitcherTitleWidth,
-                  max: maxQuickTabSwitcherTitleWidth,
-                  divisions: _divisions,
-                  label: _label(sliderValue.value),
-                  value: sliderValue.value.clamp(
-                    minQuickTabSwitcherTitleWidth,
-                    maxQuickTabSwitcherTitleWidth,
-                  ),
-                  onChanged: enabled
-                      ? (value) {
-                          sliderValue.value = value;
-                        }
-                      : null,
-                  onChangeEnd: enabled
-                      ? (value) async {
-                          final normalized =
-                              (value / quickTabSwitcherTitleWidthStep).round() *
-                              quickTabSwitcherTitleWidthStep;
-                          sliderValue.value = normalized;
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .quickTabSwitcherTitleWidth(normalized),
-                              );
-                        }
-                      : null,
-                ),
-              ),
-              Text(
-                _label(sliderValue.value),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
-        ],
-      ),
+    return StopsSliderTile<double>(
+      title: l10n.settings_titleWidthTitle,
+      subtitle: l10n.settings_titleWidthSubtitle,
+      icon: MdiIcons.arrowExpandHorizontal,
+      enabled: switcherEnabled && showTitles,
+      stops: stops,
+      value: value,
+      labelFor: (width) => formatPixels(l10n, width),
+      onChanged: (width) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.quickTabSwitcherTitleWidth(width),
+            );
+      },
     );
   }
 }
@@ -1061,11 +1025,17 @@ class _QuickTabSwitcherShowTitlesTile extends HookConsumerWidget {
   }
 }
 
+final _quickTabSwitcherHierarchyGlyphsStops = [
+  for (
+    var glyphs = minQuickTabSwitcherHierarchyGlyphs;
+    glyphs <= maxQuickTabSwitcherHierarchyGlyphs;
+    glyphs++
+  )
+    glyphs,
+];
+
 class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
   const _QuickTabSwitcherHierarchyGlyphsTile();
-
-  static String _label(AppLocalizations l10n, int glyphs) =>
-      l10n.settings_hierarchyGlyphsLabel(glyphs);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1081,71 +1051,27 @@ class _QuickTabSwitcherHierarchyGlyphsTile extends HookConsumerWidget {
       ),
     );
 
-    final sliderValue = useKeyedState(hierarchyGlyphs.toDouble(), [
+    final glyphStops = stopsWithValue(
+      _quickTabSwitcherHierarchyGlyphsStops,
       hierarchyGlyphs,
-    ]);
+    );
 
-    final currentGlyphs = sliderValue.value.round();
-    final enabled = switcherEnabled;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(l10n.settings_hierarchyDepthTitle),
-            subtitle: Text(l10n.settings_hierarchyDepthSubtitle),
-            leading: const Icon(MdiIcons.fileTree),
-            contentPadding: EdgeInsets.zero,
-            enabled: enabled,
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Slider(
-                  min: minQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                  max: maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                  divisions:
-                      maxQuickTabSwitcherHierarchyGlyphs -
-                      minQuickTabSwitcherHierarchyGlyphs,
-                  label: _label(l10n, currentGlyphs),
-                  value: sliderValue.value.clamp(
-                    minQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                    maxQuickTabSwitcherHierarchyGlyphs.toDouble(),
-                  ),
-                  onChanged: enabled
-                      ? (value) {
-                          sliderValue.value = value;
-                        }
-                      : null,
-                  onChangeEnd: enabled
-                      ? (value) async {
-                          final normalized = value.round();
-                          sliderValue.value = normalized.toDouble();
-                          await ref
-                              .read(
-                                saveGeneralSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .quickTabSwitcherHierarchyGlyphs(
-                                      normalized,
-                                    ),
-                              );
-                        }
-                      : null,
-                ),
-              ),
-              Text(
-                _label(l10n, currentGlyphs),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ],
-          ),
-        ],
-      ),
+    return StopsSliderTile<int>(
+      title: l10n.settings_hierarchyDepthTitle,
+      subtitle: l10n.settings_hierarchyDepthSubtitle,
+      icon: MdiIcons.fileTree,
+      enabled: switcherEnabled,
+      stops: glyphStops.stops,
+      value: glyphStops.value,
+      labelFor: l10n.settings_hierarchyGlyphsLabel,
+      onChanged: (glyphs) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) => currentSettings.copyWith
+                  .quickTabSwitcherHierarchyGlyphs(glyphs),
+            );
+      },
     );
   }
 }

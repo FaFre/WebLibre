@@ -21648,7 +21648,7 @@ abstract class AppLocalizations {
   /// **'sleep, unload, memory, suspend, discard, idle, inactive tabs'**
   String get settings_autoSleepTabsKeywords;
 
-  /// Setting title: how long a tab is off screen before automatic sleep unloads it. Followed by a list of durations.
+  /// Setting title: how long a tab is off screen before automatic sleep unloads it. Set with a slider of durations from 1 minute to 24 hours; the chosen duration shows beside the title.
   ///
   /// In en, this message translates to:
   /// **'Sleep After'**
@@ -21666,7 +21666,7 @@ abstract class AppLocalizations {
   /// **'sleep, timeout, idle, inactive'**
   String get settings_autoSleepIdleKeywords;
 
-  /// Setting title: how many tabs may keep their page loaded before automatic sleep unloads the oldest ones.
+  /// Setting title: how many tabs may keep their page loaded before automatic sleep unloads the oldest ones. Set with a slider from 1 tab to 20 tabs, then 'No Limit'; the chosen value shows beside the title.
   ///
   /// In en, this message translates to:
   /// **'Loaded Tabs Limit'**
@@ -21677,6 +21677,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.'**
   String get settings_residentTabLimitSubtitle;
+
+  /// Replaces the explanation under the 'Loaded Tabs Limit' setting while 1 tab is chosen: what that limit means in practice. "Tabs on screen" is plural because split view shows two tabs at once. "Kept awake" refers to the tab menu's 'Keep awake' action (browser_keepTabAwake); "in use" covers tabs playing media, using the camera or microphone, downloading, or holding typed text.
+  ///
+  /// In en, this message translates to:
+  /// **'Tabs on screen always stay loaded. Other tabs are put to sleep after you leave them, unless they are kept awake, still loading or in use.'**
+  String get settings_residentTabLimitOneSubtitle;
 
   /// Comma-separated search words for the 'Loaded Tabs Limit' setting. Never displayed.
   ///
@@ -25763,6 +25769,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value} ms'**
   String units_milliseconds(String value);
+
+  /// A length in screen pixels, e.g. "64 px" on a slider. value is the already formatted number. Use your language's usual unit symbol.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} px'**
+  String units_pixels(String value);
 
   /// A duration in whole minutes, e.g. "30 minutes" as a choice in a list of durations.
   ///

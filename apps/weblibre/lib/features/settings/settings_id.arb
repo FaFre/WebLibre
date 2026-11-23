@@ -1132,6 +1132,7 @@
   "settings_autoSleepIdleKeywords": "tidur, batas waktu, siaga, tidak aktif, sleep",
   "settings_residentTabLimitTitle": "Batas Tab yang Dimuat",
   "settings_residentTabLimitSubtitle": "Jika jumlah tab yang dimuat melebihi batas ini, tab yang paling lama tidak Anda lihat akan ditidurkan.",
+  "settings_residentTabLimitOneSubtitle": "Tab di layar selalu tetap dimuat. Tab lain ditidurkan setelah Anda meninggalkannya, kecuali tab tersebut dibuat tetap aktif, masih memuat, atau sedang digunakan.",
   "settings_residentTabLimitKeywords": "batas, memori, tab dimuat, tidur, limit",
   "settings_residentTabLimitOff": "Tanpa Batas",
   "settings_residentTabLimitCount": "{count, plural, other{{count} tab}}"

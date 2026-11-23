@@ -1132,6 +1132,7 @@
   "settings_autoSleepIdleKeywords": "schlafen, Zeitlimit, Leerlauf, inaktiv",
   "settings_residentTabLimitTitle": "Höchstzahl geladener Tabs",
   "settings_residentTabLimitSubtitle": "Über diese Zahl geladener Tabs hinaus werden die am längsten nicht angesehenen schlafen gelegt.",
+  "settings_residentTabLimitOneSubtitle": "Angezeigte Tabs bleiben immer geladen. Andere Tabs werden nach dem Verlassen schlafen gelegt, außer sie werden wach gehalten, laden noch oder werden gerade verwendet.",
   "settings_residentTabLimitKeywords": "Grenze, Speicher, geladene Tabs, schlafen",
   "settings_residentTabLimitOff": "Keine Grenze",
   "settings_residentTabLimitCount": "{count, plural, =1{1 Tab} other{{count} Tabs}}"

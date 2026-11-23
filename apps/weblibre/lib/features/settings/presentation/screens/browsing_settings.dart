@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/stops_slider_tile.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
@@ -889,8 +891,28 @@ class _AutoSleepTabsTile extends HookConsumerWidget {
   }
 }
 
-/// The idle time choices of D12: 10 min, 30 min, 1 h, 4 h.
-const _autoSleepIdleChoices = [10, 30, 60, 240];
+/// The idle time stops, in minutes: by minutes at the short end, by hours at
+/// the long end. They include every choice of D12 (10 min, 30 min, 1 h,
+/// 4 h), so a stored choice keeps its place on the slider.
+const _autoSleepIdleStops = [
+  1,
+  2,
+  3,
+  5,
+  10,
+  15,
+  20,
+  30,
+  45,
+  60,
+  120,
+  180,
+  240,
+  360,
+  480,
+  720,
+  1440,
+];
 
 class _AutoSleepIdleSection extends HookConsumerWidget {
   const _AutoSleepIdleSection();
@@ -905,52 +927,38 @@ class _AutoSleepIdleSection extends HookConsumerWidget {
     );
     final l10n = AppLocalizations.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(l10n.settings_autoSleepIdleTitle),
-            subtitle: Text(l10n.settings_autoSleepIdleSubtitle),
-            leading: const Icon(MdiIcons.timerSandComplete),
-            contentPadding: EdgeInsets.zero,
-            enabled: enabled,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 40.0),
-            child: DropdownMenu<int>(
-              enabled: enabled,
-              initialSelection: idleMinutes,
-              width: double.infinity,
-              dropdownMenuEntries: [
-                // A stored value outside the choices stays selectable.
-                for (final minutes in {..._autoSleepIdleChoices, idleMinutes})
-                  DropdownMenuEntry(
-                    value: minutes,
-                    label: formatMinutes(l10n, minutes),
-                  ),
-              ],
-              onSelected: (value) async {
-                if (value == null) return;
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.autoSleepIdleMinutes(value),
-                    );
-              },
-            ),
-          ),
-        ],
-      ),
+    // Native sleeps a tab after at least a minute (TabSleepPolicies), so a
+    // stored 0 or less is shown as the minute it applies as.
+    final (:stops, :value) = stopsWithValue(
+      _autoSleepIdleStops,
+      math.max(1, idleMinutes),
+    );
+
+    return StopsSliderTile<int>(
+      title: l10n.settings_autoSleepIdleTitle,
+      subtitle: l10n.settings_autoSleepIdleSubtitle,
+      icon: MdiIcons.timerSandComplete,
+      enabled: enabled,
+      stops: stops,
+      value: value,
+      labelFor: (minutes) => formatMinutes(l10n, minutes),
+      onChanged: (minutes) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.autoSleepIdleMinutes(minutes),
+            );
+      },
     );
   }
 }
 
-/// The resident limit choices of D12: off, 4, 6, 10, 20.
-const _residentTabLimitChoices = [4, 6, 10, 20];
+/// The resident limit stops: every count from 1 to 20, then no limit (null)
+/// at the end of the track. They include every choice of D12 (4, 6, 10, 20).
+final _residentTabLimitCountStops = [
+  for (var limit = 1; limit <= 20; limit++) limit,
+];
 
 class _ResidentTabLimitSection extends HookConsumerWidget {
   const _ResidentTabLimitSection();
@@ -965,51 +973,34 @@ class _ResidentTabLimitSection extends HookConsumerWidget {
     );
     final l10n = AppLocalizations.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(l10n.settings_residentTabLimitTitle),
-            subtitle: Text(l10n.settings_residentTabLimitSubtitle),
-            leading: const Icon(MdiIcons.tabUnselected),
-            contentPadding: EdgeInsets.zero,
-            enabled: enabled,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 40.0),
-            child: DropdownMenu<int?>(
-              enabled: enabled,
-              initialSelection: residentTabLimit,
-              width: double.infinity,
-              dropdownMenuEntries: [
-                DropdownMenuEntry(
-                  value: null,
-                  label: l10n.settings_residentTabLimitOff,
-                ),
-                for (final limit in {
-                  ..._residentTabLimitChoices,
-                  ?residentTabLimit,
-                })
-                  DropdownMenuEntry(
-                    value: limit,
-                    label: l10n.settings_residentTabLimitCount(limit),
-                  ),
-              ],
-              onSelected: (value) async {
-                await ref
-                    .read(saveGeneralSettingsControllerProvider.notifier)
-                    .save(
-                      (currentSettings) =>
-                          currentSettings.copyWith.residentTabLimit(value),
-                    );
-              },
-            ),
-          ),
-        ],
-      ),
+    // Native applies a limit of 0 or less as no limit (TabSleepPolicies).
+    final limit = residentTabLimit != null && residentTabLimit > 0
+        ? residentTabLimit
+        : null;
+    final counts = limit == null
+        ? (stops: _residentTabLimitCountStops, value: null)
+        : stopsWithValue(_residentTabLimitCountStops, limit);
+
+    return StopsSliderTile<int?>(
+      title: l10n.settings_residentTabLimitTitle,
+      subtitle: l10n.settings_residentTabLimitSubtitle,
+      subtitleFor: (limit) =>
+          limit == 1 ? l10n.settings_residentTabLimitOneSubtitle : null,
+      icon: MdiIcons.tabUnselected,
+      enabled: enabled,
+      stops: [...counts.stops, null],
+      value: counts.value,
+      labelFor: (limit) => limit == null
+          ? l10n.settings_residentTabLimitOff
+          : l10n.settings_residentTabLimitCount(limit),
+      onChanged: (limit) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.residentTabLimit(limit),
+            );
+      },
     );
   }
 }

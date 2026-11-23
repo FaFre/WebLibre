@@ -13073,6 +13073,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Beyond this number of loaded tabs, the ones you looked at longest ago are put to sleep.';
 
   @override
+  String get settings_residentTabLimitOneSubtitle =>
+      'Tabs on screen always stay loaded. Other tabs are put to sleep after you leave them, unless they are kept awake, still loading or in use.';
+
+  @override
   String get settings_residentTabLimitKeywords =>
       'limit, memory, loaded tabs, sleep';
 
@@ -15685,6 +15689,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String units_milliseconds(String value) {
     return '$value ms';
+  }
+
+  @override
+  String units_pixels(String value) {
+    return '$value px';
   }
 
   @override

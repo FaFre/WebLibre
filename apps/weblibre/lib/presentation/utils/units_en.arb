@@ -21,6 +21,11 @@
     "description": "A duration in milliseconds, e.g. \"300 ms\" on a slider. value is the already formatted number. Use your language's usual unit symbol.",
     "placeholders": { "value": { "type": "String" } }
   },
+  "units_pixels": "{value} px",
+  "@units_pixels": {
+    "description": "A length in screen pixels, e.g. \"64 px\" on a slider. value is the already formatted number. Use your language's usual unit symbol.",
+    "placeholders": { "value": { "type": "String" } }
+  },
   "units_minutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
   "@units_minutes": {
     "description": "A duration in whole minutes, e.g. \"30 minutes\" as a choice in a list of durations.",

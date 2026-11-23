@@ -13417,6 +13417,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Por encima de este número de pestañas cargadas, se ponen en suspensión las que miraste hace más tiempo.';
 
   @override
+  String get settings_residentTabLimitOneSubtitle =>
+      'Las pestañas en pantalla siempre siguen cargadas. Las demás se ponen en suspensión después de salir de ellas, salvo que se mantengan activas, sigan cargando o estén en uso.';
+
+  @override
   String get settings_residentTabLimitKeywords =>
       'límite, memoria, pestañas cargadas, suspensión, limit';
 
@@ -16078,6 +16082,11 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String units_milliseconds(String value) {
     return '$value ms';
+  }
+
+  @override
+  String units_pixels(String value) {
+    return '$value px';
   }
 
   @override

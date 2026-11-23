@@ -13469,6 +13469,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Если загруженных вкладок больше этого числа, вкладки, которые вы просматривали давнее всего, усыпляются.';
 
   @override
+  String get settings_residentTabLimitOneSubtitle =>
+      'Вкладки на экране всегда остаются загруженными. Остальные вкладки усыпляются после того, как вы с них уходите, если только их не отметили «Не усыплять», они ещё не загрузились или используются.';
+
+  @override
   String get settings_residentTabLimitKeywords =>
       'лимит, память, загруженные вкладки, сон, limit';
 
@@ -16137,6 +16141,11 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String units_milliseconds(String value) {
     return '$value мс';
+  }
+
+  @override
+  String units_pixels(String value) {
+    return '$value пикс.';
   }
 
   @override

@@ -13242,6 +13242,10 @@ class AppLocalizationsId extends AppLocalizations {
       'Jika jumlah tab yang dimuat melebihi batas ini, tab yang paling lama tidak Anda lihat akan ditidurkan.';
 
   @override
+  String get settings_residentTabLimitOneSubtitle =>
+      'Tab di layar selalu tetap dimuat. Tab lain ditidurkan setelah Anda meninggalkannya, kecuali tab tersebut dibuat tetap aktif, masih memuat, atau sedang digunakan.';
+
+  @override
   String get settings_residentTabLimitKeywords =>
       'batas, memori, tab dimuat, tidur, limit';
 
@@ -15880,6 +15884,11 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String units_milliseconds(String value) {
     return '$value ms';
+  }
+
+  @override
+  String units_pixels(String value) {
+    return '$value px';
   }
 
   @override

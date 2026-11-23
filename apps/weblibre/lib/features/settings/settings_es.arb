@@ -1132,6 +1132,7 @@
   "settings_autoSleepIdleKeywords": "suspender, tiempo de espera, inactividad, inactiva, sleep",
   "settings_residentTabLimitTitle": "Límite de pestañas cargadas",
   "settings_residentTabLimitSubtitle": "Por encima de este número de pestañas cargadas, se ponen en suspensión las que miraste hace más tiempo.",
+  "settings_residentTabLimitOneSubtitle": "Las pestañas en pantalla siempre siguen cargadas. Las demás se ponen en suspensión después de salir de ellas, salvo que se mantengan activas, sigan cargando o estén en uso.",
   "settings_residentTabLimitKeywords": "límite, memoria, pestañas cargadas, suspensión, limit",
   "settings_residentTabLimitOff": "Sin límite",
   "settings_residentTabLimitCount": "{count, plural, =1{1 pestaña} other{{count} pestañas}}"

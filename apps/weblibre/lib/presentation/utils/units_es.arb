@@ -4,6 +4,7 @@
   "units_kilobytes": "{value} KB",
   "units_megabytes": "{value} MB",
   "units_milliseconds": "{value} ms",
+  "units_pixels": "{value} px",
   "units_minutes": "{count, plural, =1{1 minuto} other{{count} minutos}}",
   "units_hours": "{count, plural, =1{1 hora} other{{count} horas}}"
 }

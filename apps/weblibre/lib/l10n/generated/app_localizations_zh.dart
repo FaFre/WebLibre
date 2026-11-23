@@ -12098,6 +12098,10 @@ class AppLocalizationsZh extends AppLocalizations {
       '已加载的标签页超过此数量时，你最久没有查看的标签页会被休眠。';
 
   @override
+  String get settings_residentTabLimitOneSubtitle =>
+      '屏幕上的标签页始终保持加载。其他标签页会在你离开后被休眠，除非它们被设为保持唤醒、仍在加载或正在使用。';
+
+  @override
   String get settings_residentTabLimitKeywords => '上限,内存,已加载标签页,休眠,limit';
 
   @override
@@ -14567,6 +14571,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String units_milliseconds(String value) {
     return '$value 毫秒';
+  }
+
+  @override
+  String units_pixels(String value) {
+    return '$value 像素';
   }
 
   @override

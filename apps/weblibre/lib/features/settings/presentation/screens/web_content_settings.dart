@@ -22,12 +22,13 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/stops_slider_tile.dart';
 import 'package:weblibre/features/user/data/models/engine_settings.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/engine_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 
 List<SettingsSectionDefinition> webContentSettingsSections(
   BuildContext context,
@@ -172,6 +173,12 @@ class _AutomaticFontSizeAdjustmentTile extends HookConsumerWidget {
   }
 }
 
+/// The font size stops, 50% to 300% in tenths, divided from whole tenths so
+/// each is the exact percentage it reads as.
+final _fontSizeFactorStops = [
+  for (var tenth = 5; tenth <= 30; tenth++) tenth / 10,
+];
+
 class _FontSizeFactorSlider extends HookConsumerWidget {
   const _FontSizeFactorSlider();
 
@@ -184,69 +191,30 @@ class _FontSizeFactorSlider extends HookConsumerWidget {
     final fontSizeFactor = ref.watch(
       storedEngineSettingsProvider.select((s) => s.fontSizeFactor),
     );
-    final sliderValue = useKeyedState(fontSizeFactor, [fontSizeFactor]);
 
-    final sliderLabel = '${(sliderValue.value * 100).round()}%';
+    final (:stops, :value) = stopsWithValue(
+      _fontSizeFactorStops,
+      fontSizeFactor,
+    );
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(l10n.settings_fontSizeFactorTitle),
-            subtitle: Text(
-              automaticFontSizeAdjustment
-                  ? l10n.settings_disabledWhileAutomaticFontSize
-                  : l10n.settings_fontSizeFactorSubtitle,
-            ),
-            leading: const Icon(MdiIcons.formatSize),
-            contentPadding: EdgeInsets.zero,
-            enabled: !automaticFontSizeAdjustment,
-          ),
-          Row(
-            children: [
-              Text(
-                sliderLabel,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: automaticFontSizeAdjustment
-                      ? Theme.of(context).disabledColor
-                      : null,
-                ),
-              ),
-              Expanded(
-                child: Slider(
-                  min: 0.5,
-                  max: 3.0,
-                  divisions: 25,
-                  label: sliderLabel,
-                  value: sliderValue.value.clamp(0.5, 3.0),
-                  onChanged: automaticFontSizeAdjustment
-                      ? null
-                      : (value) {
-                          sliderValue.value = value;
-                        },
-                  onChangeEnd: automaticFontSizeAdjustment
-                      ? null
-                      : (value) async {
-                          final rounded = (value * 10).round() / 10;
-                          sliderValue.value = rounded;
-                          await ref
-                              .read(
-                                saveEngineSettingsControllerProvider.notifier,
-                              )
-                              .save(
-                                (currentSettings) => currentSettings.copyWith
-                                    .fontSizeFactor(rounded),
-                              );
-                        },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return StopsSliderTile<double>(
+      title: l10n.settings_fontSizeFactorTitle,
+      subtitle: automaticFontSizeAdjustment
+          ? l10n.settings_disabledWhileAutomaticFontSize
+          : l10n.settings_fontSizeFactorSubtitle,
+      icon: MdiIcons.formatSize,
+      enabled: !automaticFontSizeAdjustment,
+      stops: stops,
+      value: value,
+      labelFor: formatPercent,
+      onChanged: (factor) async {
+        await ref
+            .read(saveEngineSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.fontSizeFactor(factor),
+            );
+      },
     );
   }
 }

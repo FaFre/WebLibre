@@ -40,13 +40,14 @@ import 'package:weblibre/features/settings/domain/providers/preferred_download_m
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/custom_list_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/stops_slider_tile.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/providers.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 import 'package:weblibre/presentation/hooks/cached_future.dart';
-import 'package:weblibre/presentation/hooks/keyed_state.dart';
 import 'package:weblibre/presentation/utils/remembered_prompt_l10n.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 import 'package:weblibre/utils/saf_tree_uri.dart';
 
 /// [hasUpdater] is [appUpdaterAvailableProvider], watched by the caller.
@@ -357,76 +358,48 @@ class _DefaultBrowserTile extends HookConsumerWidget {
   }
 }
 
+/// The UI zoom stops, divided from whole steps so each is the exact
+/// percentage it reads as.
+final _uiScaleFactorStops = () {
+  final stepsPerUnit = (1 / uiScaleFactorStep).round();
+  return [
+    for (
+      var step = (minUiScaleFactor * stepsPerUnit).round();
+      step <= (maxUiScaleFactor * stepsPerUnit).round();
+      step++
+    )
+      step / stepsPerUnit,
+  ];
+}();
+
 class _UiZoomSection extends HookConsumerWidget {
   const _UiZoomSection();
-
-  static final _sliderDivisions =
-      ((maxUiScaleFactor - minUiScaleFactor) / uiScaleFactorStep).round();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final uiScaleFactor = ref.watch(
       storedGeneralSettingsProvider.select((s) => s.uiScaleFactor),
     );
-    final sliderValue = useKeyedState(uiScaleFactor, [uiScaleFactor]);
-
-    final sliderLabel = '${(sliderValue.value * 100).round()}%';
     final l10n = AppLocalizations.of(context);
+    final (:stops, :value) = stopsWithValue(_uiScaleFactorStops, uiScaleFactor);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(l10n.settings_uiZoomTitle),
-            subtitle: Text(l10n.settings_uiZoomSubtitle),
-            leading: const Icon(Icons.zoom_in),
-            contentPadding: EdgeInsets.zero,
-          ),
-          Row(
-            children: [
-              Text(sliderLabel, style: Theme.of(context).textTheme.titleLarge),
-              Expanded(
-                child: Slider(
-                  min: minUiScaleFactor,
-                  max: maxUiScaleFactor,
-                  divisions: _sliderDivisions,
-                  label: sliderLabel,
-                  value: sliderValue.value.clamp(
-                    minUiScaleFactor,
-                    maxUiScaleFactor,
-                  ),
-                  onChanged: (value) {
-                    sliderValue.value = value;
-                  },
-                  onChangeEnd: (value) async {
-                    final normalized = _normalizeUiScale(value);
-                    sliderValue.value = normalized;
-                    await ref
-                        .read(saveGeneralSettingsControllerProvider.notifier)
-                        .save(
-                          (currentSettings) => currentSettings.copyWith
-                              .uiScaleFactor(normalized),
-                        );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return StopsSliderTile<double>(
+      title: l10n.settings_uiZoomTitle,
+      subtitle: l10n.settings_uiZoomSubtitle,
+      icon: Icons.zoom_in,
+      stops: stops,
+      value: value,
+      labelFor: formatPercent,
+      onChanged: (factor) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.uiScaleFactor(factor),
+            );
+      },
     );
   }
-}
-
-double _normalizeUiScale(double value) {
-  final clampedValue = value.clamp(minUiScaleFactor, maxUiScaleFactor);
-  final stepIndex = ((clampedValue - minUiScaleFactor) / uiScaleFactorStep)
-      .round();
-  final normalized = minUiScaleFactor + (stepIndex * uiScaleFactorStep);
-  return normalized.clamp(minUiScaleFactor, maxUiScaleFactor);
 }
 
 class _DisableAnimationsTile extends HookConsumerWidget {
