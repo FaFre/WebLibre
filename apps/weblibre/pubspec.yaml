@@ -81,7 +81,7 @@ dependencies:
   qr_code_scanner_plus: ^2.3.2
   quick_actions: ^1.1.1
   riverpod: ^3.4.3
-  riverpod_annotation: ^4.0.7
+  riverpod_annotation: ^4.0.8
   rss_dart: ^1.0.14
   rxdart: ^0.28.0
   saf_stream: ^4.0.3
