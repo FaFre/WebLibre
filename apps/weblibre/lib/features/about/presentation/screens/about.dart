@@ -190,8 +190,6 @@ class _ComponentVersions extends HookConsumerWidget {
               (v) => v.applicationServices,
             ),
             ComponentId.tor => version(tor, (v) => v.tor),
-            ComponentId.snowflake => version(tor, (v) => v.snowflake),
-            ComponentId.lyrebird => version(tor, (v) => v.lyrebird),
             ComponentId.singbox => version(singbox, (v) => v),
           },
         ),

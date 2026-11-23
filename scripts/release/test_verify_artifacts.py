@@ -133,6 +133,9 @@ class ReleaseVerification(unittest.TestCase):
         self.minimum_sdk = "26"
         self.components = {
             "gecko": {"status": "known", "version": "159.0", "buildId": "20261030161337"},
+            "androidComponents": {"status": "known", "version": "159.0"},
+            "applicationServices": {"status": "known", "version": "147.0"},
+            "tor": {"status": "known", "version": "0.4.8.21"},
             "singbox": {"status": "known", "version": "1.13.0", "revision": "a" * 40},
         }
         va.errors.clear()
@@ -308,6 +311,34 @@ class ReleaseVerification(unittest.TestCase):
         recorded["components"]["gecko"]["version"] = "158.0"
         self.write_manifest(self.bundle, recorded, bundle=True)
         self.assert_rejected("components differ")
+
+    def test_an_unidentified_component_blocks_the_release(self) -> None:
+        self.components["singbox"] = {"status": "unknown"}
+        self.create_release()
+        self.assert_rejected("component singbox is not identified")
+
+    def test_an_unidentified_component_is_reported_once(self) -> None:
+        self.components["singbox"] = {"status": "unknown"}
+        self.create_release()
+        self.assert_rejected("component singbox is not identified")
+        self.assertEqual(
+            sum("component singbox is not identified" in error for error in va.errors), 1
+        )
+
+    def test_a_missing_component_blocks_the_release(self) -> None:
+        del self.components["tor"]
+        self.create_release()
+        self.assert_rejected("component tor is missing")
+
+    def test_a_known_component_needs_a_version(self) -> None:
+        self.components["singbox"] = {"status": "known", "version": ""}
+        self.create_release()
+        self.assert_rejected("component singbox is not identified")
+
+    def test_a_component_that_is_not_bundled_is_identified(self) -> None:
+        self.components["tor"] = {"status": "notBundled"}
+        self.create_release()
+        self.assertEqual(self.verify(), 0, va.errors)
 
     def test_empty_components_do_not_skip_consistency_checks(self) -> None:
         self.create_release()

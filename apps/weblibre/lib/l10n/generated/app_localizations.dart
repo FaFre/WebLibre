@@ -346,7 +346,7 @@ abstract class AppLocalizations {
   /// **'Copyright © Fabian Freund, 2024-2026'**
   String get about_copyright;
 
-  /// Section title in the About dialog; below it is a list of the bundled components (Gecko, Android Components, Application Services, Tor, Snowflake, Lyrebird, sing-box), each next to its version number. The component names are product names and are not translated.
+  /// Section title in the About dialog; below it is a list of the bundled components (Gecko, Android Components, Application Services, Tor, sing-box), each next to its version number. The component names are product names and are not translated.
   ///
   /// In en, this message translates to:
   /// **'Component Versions'**

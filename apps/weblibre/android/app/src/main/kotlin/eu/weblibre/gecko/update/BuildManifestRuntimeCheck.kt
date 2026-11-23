@@ -21,7 +21,6 @@ package eu.weblibre.gecko.update
 
 import android.content.Context
 import eu.weblibre.gecko.BuildConfig
-import io.nekohasekai.IPtProxy.IPtProxy
 import io.nekohasekai.libbox.Libbox
 import kotlin.concurrent.thread
 
@@ -31,12 +30,14 @@ import kotlin.concurrent.thread
  * describing the release wrongly in its metadata.
  *
  * Gecko, Android Components and Application Services are compiled constants
- * ([jvmReported]), checked on the host by `BuildManifestRuntimeTest` too. The
- * Go runtime's components ([goReported]) can only be asked on a device; they
- * are the ones most likely to drift, because the gomobile AAR is built apart
- * from the pins the manifest reads. Tor is left out: reading
+ * ([jvmReported]), checked on the host by `BuildManifestRuntimeTest` too.
+ * sing-box ([goReported]) can only be asked on a device; it is the one most
+ * likely to drift, because the gomobile AAR is built apart from the pins the
+ * manifest reads. Tor is left out: reading
  * `TorService.VERSION_NAME` loads libtor, and its manifest entry comes from
- * the same resolved artifact the APK packages.
+ * the same resolved artifact the APK packages. IPtProxy, linked into the same
+ * AAR, is not checked: it reports no release version of its own, so a stale
+ * AAR after an IPtProxy-only pin bump goes unnoticed here.
  */
 object BuildManifestRuntimeCheck {
     /** What a library says about itself. */
@@ -78,16 +79,11 @@ object BuildManifestRuntimeCheck {
     }
 
     /**
-     * The Go runtime's own answers, normalized the way the manifest records
-     * them (`build_manifest.gradle`): no leading `v`, Snowflake's appended
-     * revision and Lyrebird's name prefix dropped. These calls load the Go
+     * The Go runtime's own answer, normalized the way the manifest records it
+     * (`build_manifest.gradle`): no leading `v`. This call loads the Go
      * runtime.
      */
     fun goReported(): Map<BuildComponent, Reported> = buildMap {
-        goVersion { IPtProxy.snowflakeVersion() }?.let { put(BuildComponent.SNOWFLAKE, Reported(it)) }
-        goVersion { IPtProxy.lyrebirdVersion().trim().removePrefix("lyrebird-") }?.let {
-            put(BuildComponent.LYREBIRD, Reported(it))
-        }
         goVersion { Libbox.version() }?.takeUnless { it == "unknown" }?.let {
             put(BuildComponent.SINGBOX, Reported(it))
         }
@@ -107,7 +103,8 @@ object BuildManifestRuntimeCheck {
             val wrong = mismatches(manifest, jvmReported() + goReported())
             check(wrong.isEmpty()) {
                 "The build manifest disagrees with the packaged libraries " +
-                    "(rebuild the Go runtime if pins.env changed): ${wrong.joinToString("; ")}"
+                    "(rebuild the Go runtime if the sing-box pins in pins.env changed): " +
+                    wrong.joinToString("; ")
             }
         }
     }

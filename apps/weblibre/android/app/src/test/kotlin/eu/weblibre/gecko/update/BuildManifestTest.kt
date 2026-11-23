@@ -38,7 +38,7 @@ class BuildManifestTest {
           "abiVersionCodes": {"x86_64": 431, "armeabi-v7a": 432, "arm64-v8a": 433},
           "components": {
             "gecko": {"status": "known", "version": "160.0", "buildId": "20261124093000"},
-            "lyrebird": {"status": "unknown"},
+            "applicationServices": {"status": "unknown"},
             "singbox": {"status": "known", "version": "1.14.4", "revision": "c005f353"}
           }
         }
@@ -54,7 +54,7 @@ class BuildManifestTest {
         val gecko = manifest.components.first { it.id == BuildComponent.GECKO }
         assertEquals("160.0", gecko.version)
         assertEquals("20261124093000", gecko.buildId)
-        assertEquals(ComponentStatus.UNKNOWN, manifest.components.first { it.id == BuildComponent.LYREBIRD }.status)
+        assertEquals(ComponentStatus.UNKNOWN, manifest.components.first { it.id == BuildComponent.APPLICATION_SERVICES }.status)
         // Absent from the manifest: unknown, never guessed.
         assertEquals(ComponentStatus.UNKNOWN, manifest.components.first { it.id == BuildComponent.TOR }.status)
         assertEquals(BuildComponent.entries, manifest.components.map { it.id })

@@ -14,7 +14,8 @@ the artifacts as they will be published, after re-signing:
   name is the tag's, both as the artifact declares them and in its build
   manifest;
 - exactly six GitHub APKs (two renderers times three ABIs), plus a Play bundle
-  for stable releases only; all artifacts agree on their component identities;
+  for stable releases only; all artifacts agree on their component identities,
+  and none of them is unknown or missing;
 - isolation (9.3): no updater receiver or confirmation-free install
   permission in Play's manifest. The dex checks here (no Play Core in GitHub
   APKs, no installer or apksig in the Play bundle) only catch an unminified
@@ -58,6 +59,9 @@ ANDROID_NS = "http://schemas.android.com/apk/res/android"
 SHIPPED_LANGUAGES = {"en", "de", "es", "id", "ru", "zh"}
 MAX_SUMMARY_CHARS = 2000
 MAX_SUMMARY_BYTES = 3 * 1024
+# The app's BuildComponent wire names (pigeons/app_update.dart). Clients read a
+# missing entry as unknown, so every one of them must be in the manifest.
+REQUIRED_COMPONENTS = ("gecko", "androidComponents", "applicationServices", "tor", "singbox")
 
 errors: list[str] = []
 
@@ -175,14 +179,33 @@ def check_artifact_set(apks: list[Path], track: str, bundle: Path | None) -> Non
         fail("bundle: given for an alpha release")
 
 
+def is_identified(entry: object) -> bool:
+    """Whether the app reads this entry as something other than unknown
+    (componentIdentityFromJson): not bundled, or known with a version."""
+    if not isinstance(entry, dict):
+        return False
+    if entry.get("status") == "notBundled":
+        return True
+    version = entry.get("version")
+    return entry.get("status") == "known" and isinstance(version, str) and version != ""
+
+
 def check_components(name: str, actual: dict, expected: dict | None) -> dict:
     # release.json has one shared component map, so no target may silently
     # inherit the identities of a different build. An empty map still counts.
-    if expected is None:
-        return actual
-    if actual != expected:
-        fail(f"{name}: build manifest components differ from the other release artifacts")
-    return expected
+    if expected is not None:
+        if actual != expected:
+            fail(f"{name}: build manifest components differ from the other release artifacts")
+        return expected
+    # A component the build could not identify, or left out, would reach users
+    # as an unexplained "unknown" in the update dialog, so it blocks the
+    # release. Checked on the first artifact only: the others must equal it.
+    for component in sorted(set(REQUIRED_COMPONENTS) | set(actual)):
+        if component not in actual:
+            fail(f"{name}: component {component} is missing from the build manifest")
+        elif not is_identified(actual[component]):
+            fail(f"{name}: component {component} is not identified in the build manifest")
+    return actual
 
 
 def read_manifest(zip_path: Path, entry: str) -> dict:

@@ -322,25 +322,14 @@ class TorLogMessage {
 class TorComponentVersions {
   TorComponentVersions({
     required this.tor,
-    this.snowflake,
-    this.lyrebird,
   });
 
   /// The tor daemon (tor-android), e.g. "0.4.9.14"
   String tor;
 
-  /// The Snowflake pluggable transport, or null when it cannot be determined
-  String? snowflake;
-
-  /// The Lyrebird pluggable transport (obfs4, meek, WebTunnel), or null when it
-  /// cannot be determined
-  String? lyrebird;
-
   List<Object?> _toList() {
     return <Object?>[
       tor,
-      snowflake,
-      lyrebird,
     ];
   }
 
@@ -351,8 +340,6 @@ class TorComponentVersions {
     result as List<Object?>;
     return TorComponentVersions(
       tor: result[0]! as String,
-      snowflake: result[1] as String?,
-      lyrebird: result[2] as String?,
     );
   }
 
@@ -365,7 +352,7 @@ class TorComponentVersions {
     if (identical(this, other)) {
       return true;
     }
-    return _deepEquals(tor, other.tor) && _deepEquals(snowflake, other.snowflake) && _deepEquals(lyrebird, other.lyrebird);
+    return _deepEquals(tor, other.tor);
   }
 
   @override
@@ -374,7 +361,7 @@ class TorComponentVersions {
 
   @override
   String toString() {
-    return 'TorComponentVersions(tor: $tor, snowflake: $snowflake, lyrebird: $lyrebird)';
+    return 'TorComponentVersions(tor: $tor)';
   }
 }
 

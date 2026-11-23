@@ -89,13 +89,7 @@ void main() {
     return texts.last.data!;
   }
 
-  final allVersions = AsyncValue.data(
-    TorComponentVersions(
-      tor: '0.4.9.14',
-      snowflake: '2.13.1',
-      lyrebird: '0.8.1',
-    ),
-  );
+  final allVersions = AsyncValue.data(TorComponentVersions(tor: '0.4.9.14'));
 
   testWidgets('lists every component next to its version', (tester) async {
     await pumpAbout(
@@ -109,8 +103,6 @@ void main() {
     expect(versionOf(tester, 'Android Components'), '159.0');
     expect(versionOf(tester, 'Application Services'), '149.0');
     expect(versionOf(tester, torBrand), '0.4.9.14');
-    expect(versionOf(tester, 'Snowflake'), '2.13.1');
-    expect(versionOf(tester, 'Lyrebird'), '0.8.1');
     expect(versionOf(tester, 'sing-box'), '1.14.4');
   });
 
@@ -125,8 +117,6 @@ void main() {
     );
 
     expect(versionOf(tester, torBrand), '0.4.9.14');
-    expect(versionOf(tester, 'Snowflake'), 'N/A');
-    expect(versionOf(tester, 'Lyrebird'), 'N/A');
     expect(versionOf(tester, 'sing-box'), 'N/A');
     expect(versionOf(tester, 'Gecko'), '159.0-20261020123456');
   });
@@ -145,8 +135,6 @@ void main() {
     );
 
     expect(versionOf(tester, torBrand), 'N/A');
-    expect(versionOf(tester, 'Snowflake'), 'N/A');
-    expect(versionOf(tester, 'Lyrebird'), 'N/A');
     expect(versionOf(tester, 'sing-box'), '');
     expect(versionOf(tester, 'Gecko'), '159.0-20261020123456');
   });
@@ -172,8 +160,6 @@ void main() {
       '159.0',
       '149.0',
       '0.4.9.14',
-      '2.13.1',
-      '0.8.1',
       '1.14.4',
     ]) {
       // All of its natural width, or the whole row when even that is too

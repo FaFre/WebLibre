@@ -108,17 +108,10 @@ class TorLogMessage {
 
 /// Versions of the Tor components bundled with the app
 class TorComponentVersions {
-  TorComponentVersions({required this.tor, this.snowflake, this.lyrebird});
+  TorComponentVersions({required this.tor});
 
   /// The tor daemon (tor-android), e.g. "0.4.9.14"
   final String tor;
-
-  /// The Snowflake pluggable transport, or null when it cannot be determined
-  final String? snowflake;
-
-  /// The Lyrebird pluggable transport (obfs4, meek, WebTunnel), or null when it
-  /// cannot be determined
-  final String? lyrebird;
 }
 
 /// Host API (Flutter -> Native)

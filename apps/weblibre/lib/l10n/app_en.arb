@@ -182,7 +182,7 @@
   },
   "about_componentVersionsTitle": "Component Versions",
   "@about_componentVersionsTitle": {
-    "description": "Section title in the About dialog; below it is a list of the bundled components (Gecko, Android Components, Application Services, Tor, Snowflake, Lyrebird, sing-box), each next to its version number. The component names are product names and are not translated."
+    "description": "Section title in the About dialog; below it is a list of the bundled components (Gecko, Android Components, Application Services, Tor, sing-box), each next to its version number. The component names are product names and are not translated."
   },
   "about_notAvailable": "N/A",
   "@about_notAvailable": {

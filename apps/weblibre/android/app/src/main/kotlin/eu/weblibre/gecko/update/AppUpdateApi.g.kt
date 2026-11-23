@@ -239,9 +239,7 @@ enum class BuildComponent(val raw: Int) {
   ANDROID_COMPONENTS(1),
   APPLICATION_SERVICES(2),
   TOR(3),
-  SNOWFLAKE(4),
-  LYREBIRD(5),
-  SINGBOX(6);
+  SINGBOX(4);
 
   companion object {
     fun ofRaw(raw: Int): BuildComponent? {

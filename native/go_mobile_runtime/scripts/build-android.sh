@@ -332,13 +332,6 @@ args+=(
 # GNU ld's exact-name syntax for this static archive; allow only that flag.
 CGO_LDFLAGS_ALLOW='^-l:libcronet\.a$' "$GOPATH/bin/gomobile" "${args[@]}"
 
-# The pluggable-transport module versions this runtime was linked against, for
-# the app's build manifest (apps/weblibre/android/app/build_manifest.gradle).
-# A pseudo-version is recorded as it is; the manifest treats it as unknown.
-COMPONENTS_JSON="${OUTPUT_AAR%.aar}.components.json"
-snowflake_version="$(go list -m -f '{{.Version}}' gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/snowflake/v2 2>/dev/null || true)"
-lyrebird_version="$(go list -m -f '{{.Version}}' gitlab.torproject.org/tpo/anti-censorship/pluggable-transports/lyrebird 2>/dev/null || true)"
-printf '{"snowflake": "%s", "lyrebird": "%s"}\n' "$snowflake_version" "$lyrebird_version" > "$COMPONENTS_JSON"
 popd >/dev/null
 
 echo "Installed $OUTPUT_AAR"

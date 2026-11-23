@@ -191,8 +191,6 @@ extension on native.BuildComponent {
     native.BuildComponent.applicationServices =>
       ComponentId.applicationServices,
     native.BuildComponent.tor => ComponentId.tor,
-    native.BuildComponent.snowflake => ComponentId.snowflake,
-    native.BuildComponent.lyrebird => ComponentId.lyrebird,
     native.BuildComponent.singbox => ComponentId.singbox,
   };
 }

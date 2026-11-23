@@ -29,8 +29,6 @@ enum ComponentId {
   androidComponents('Android Components'),
   applicationServices('Application Services'),
   tor(torBrand),
-  snowflake('Snowflake'),
-  lyrebird('Lyrebird'),
   singbox('sing-box');
 
   const ComponentId(this.productName);

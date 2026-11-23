@@ -51,8 +51,6 @@ enum BuildComponent {
   androidComponents,
   applicationServices,
   tor,
-  snowflake,
-  lyrebird,
   singbox,
 }
 

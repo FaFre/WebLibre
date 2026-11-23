@@ -407,29 +407,18 @@ data class TorLogMessage (
  */
 data class TorComponentVersions (
   /** The tor daemon (tor-android), e.g. "0.4.9.14" */
-  val tor: String,
-  /** The Snowflake pluggable transport, or null when it cannot be determined */
-  val snowflake: String? = null,
-  /**
-   * The Lyrebird pluggable transport (obfs4, meek, WebTunnel), or null when it
-   * cannot be determined
-   */
-  val lyrebird: String? = null
+  val tor: String
 )
  {
   companion object {
     fun fromList(pigeonVar_list: List<Any?>): TorComponentVersions {
       val tor = pigeonVar_list[0] as String
-      val snowflake = pigeonVar_list[1] as String?
-      val lyrebird = pigeonVar_list[2] as String?
-      return TorComponentVersions(tor, snowflake, lyrebird)
+      return TorComponentVersions(tor)
     }
   }
   fun toList(): List<Any?> {
     return listOf(
       tor,
-      snowflake,
-      lyrebird,
     )
   }
   override fun equals(other: Any?): Boolean {
@@ -440,18 +429,16 @@ data class TorComponentVersions (
       return true
     }
     val other = other as TorComponentVersions
-    return TorApiPigeonUtils.deepEquals(this.tor, other.tor) && TorApiPigeonUtils.deepEquals(this.snowflake, other.snowflake) && TorApiPigeonUtils.deepEquals(this.lyrebird, other.lyrebird)
+    return TorApiPigeonUtils.deepEquals(this.tor, other.tor)
   }
 
   override fun hashCode(): Int {
     var result = javaClass.hashCode()
     result = 31 * result + TorApiPigeonUtils.deepHash(this.tor)
-    result = 31 * result + TorApiPigeonUtils.deepHash(this.snowflake)
-    result = 31 * result + TorApiPigeonUtils.deepHash(this.lyrebird)
     return result
   }
   override fun toString(): String {
-    return "TorComponentVersions(tor=$tor, snowflake=$snowflake, lyrebird=$lyrebird)"
+    return "TorComponentVersions(tor=$tor)"
   }
 }
 private open class TorApiPigeonCodec : StandardMessageCodec() {

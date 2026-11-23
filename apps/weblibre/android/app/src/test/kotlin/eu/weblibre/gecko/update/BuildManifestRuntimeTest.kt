@@ -52,7 +52,7 @@ class BuildManifestRuntimeTest {
           "components": {
             "gecko": {"status": "known", "version": "159.0", "buildId": "20261030161337"},
             "androidComponents": {"status": "known", "version": "159.0"},
-            "lyrebird": {"status": "unknown"},
+            "applicationServices": {"status": "unknown"},
             "singbox": {"status": "known", "version": "1.14.4", "revision": "c005f353"}
           }
         }
@@ -83,8 +83,8 @@ class BuildManifestRuntimeTest {
 
     @Test
     fun whatNeitherSideClaimsIsNotCompared() {
-        // Lyrebird is unknown in the manifest; Tor is reported by nothing.
-        val reported = mapOf(BuildComponent.LYREBIRD to Reported("0.6.1"))
+        // Application Services is unknown in the manifest; Tor is reported by nothing.
+        val reported = mapOf(BuildComponent.APPLICATION_SERVICES to Reported("159.0"))
         assertEquals(emptyList<String>(), BuildManifestRuntimeCheck.mismatches(manifest, reported))
     }
 

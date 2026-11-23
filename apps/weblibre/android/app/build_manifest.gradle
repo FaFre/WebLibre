@@ -64,13 +64,6 @@ abstract class WriteBuildManifestTask extends DefaultTask {
         return resolved == null || resolved.isEmpty() ? UNKNOWN : known(resolved)
     }
 
-    /** Go module versions: a release tag only. Pseudo-versions are not versions. */
-    private static Map goModule(String resolved) {
-        if (resolved == null) return UNKNOWN
-        def m = resolved =~ /^v?(\d+\.\d+\.\d+)$/
-        return m.matches() ? known(m.group(1)) : UNKNOWN
-    }
-
     @TaskAction
     void write() {
         def modules = resolvedModules.get()
@@ -95,8 +88,6 @@ abstract class WriteBuildManifestTask extends DefaultTask {
                 androidComponents  : plain(modules["androidComponents"]),
                 applicationServices: plain(modules["applicationServices"]),
                 tor                : plain(modules["tor"]),
-                snowflake          : goModule(go["snowflake"]),
-                lyrebird           : goModule(go["lyrebird"]),
                 singbox            : singbox,
             ],
         ]
@@ -111,7 +102,7 @@ abstract class WriteBuildManifestTask extends DefaultTask {
 def repoRoot = rootProject.file("../../..")
 def goRuntimeDir = new File(repoRoot, "native/go_mobile_runtime")
 
-/** pins.env plus the versions the go runtime build recorded next to its AAR. */
+/** The Go runtime's source pins (pins.env). */
 def readGoRuntime = {
     def values = [:]
     def pins = new File(goRuntimeDir, "pins.env")
@@ -119,14 +110,6 @@ def readGoRuntime = {
         pins.eachLine { line ->
             def m = line =~ /^([A-Z_]+)=(\S+)\s*$/
             if (m.matches()) values[m.group(1)] = m.group(2)
-        }
-    }
-    // Written by scripts/build-android.sh from the resolved Go modules.
-    def sidecar = new File(goRuntimeDir, "build/weblibre-go.components.json")
-    if (sidecar.exists()) {
-        def parsed = new groovy.json.JsonSlurper().parse(sidecar)
-        ["snowflake", "lyrebird"].each { key ->
-            if (parsed[key] instanceof String) values[key] = parsed[key]
         }
     }
     return values
