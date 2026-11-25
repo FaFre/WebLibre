@@ -1,0 +1,54 @@
+{
+  "addons_managerTitle": "Tiện ích mở rộng",
+  "@addons_managerTitle": {
+    "description": "Title of the screen for managing browser extensions (add-ons)."
+  },
+  "addons_tabInstalled": "Đã cài đặt",
+  "@addons_tabInstalled": {
+    "description": "Tab on the extensions screen listing installed extensions."
+  },
+  "addons_tabBrowse": "Duyệt",
+  "@addons_tabBrowse": {
+    "description": "Tab on the extensions screen for finding extensions in Mozilla's add-on store."
+  },
+  "addons_loadFailedTitle": "Không thể tải tiện ích mở rộng",
+  "@addons_loadFailedTitle": {
+    "description": "Error heading when the list of extensions could not be loaded; technical details follow below."
+  },
+  "addons_noExtensionsFound": "Không tìm thấy tiện ích mở rộng.",
+  "@addons_noExtensionsFound": {
+    "description": "Shown when a search in the add-on store finds nothing."
+  },
+  "addons_noneInstalledMessage": "Chưa có tiện ích mở rộng nào được cài.\nDuyệt qua cửa hàng để tìm vài cái.",
+  "@addons_noneInstalledMessage": {
+    "description": "Shown on the Installed tab when no extension is installed. Keep the line break (\\n)."
+  },
+  "addons_genericTitle": "Tiện ích mở rộng",
+  "@addons_genericTitle": {
+    "description": "Title of the extension details screen when the extension could not be loaded."
+  },
+  "addons_notFound": "Không tìm thấy tiện ích mở rộng này.",
+  "@addons_notFound": {
+    "description": "Message when the requested extension does not exist (e.g. it was removed)."
+  },
+  "addons_platformAndroid": "Android",
+  "@addons_platformAndroid": {
+    "description": "Segment of the store switch: browse extensions made for Firefox on Android."
+  },
+  "addons_platformDesktop": "Máy tính",
+  "@addons_platformDesktop": {
+    "description": "Segment of the store switch: browse extensions made for desktop Firefox."
+  },
+  "addons_searchHint": "Tìm kiếm addons.mozilla.org",
+  "@addons_searchHint": {
+    "description": "Placeholder of the add-on store search field. addons.mozilla.org is a web address; keep it unchanged."
+  },
+  "addons_desktopCompatibilityWarning": "Tiện ích mở rộng cho máy tính không được đánh giá cho di động. Một vài cái có thể không hoạt động, sập, hoặc hoạt động không như mong đợi trên Android.",
+  "@addons_desktopCompatibilityWarning": {
+    "description": "Warning shown while browsing desktop extensions: they were not tested on phones."
+  },
+  "addons_actionInstall": "Cài đặt",
+  "@addons_actionInstall": {
+    "description": "Button on an add-on store listing that installs the extension."
+  }
+}
