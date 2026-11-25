@@ -1,0 +1,34 @@
+{
+  "menu_sectionQuickToggles": "Kiirnupud",
+  "@menu_sectionQuickToggles": {
+    "description": "Name of a section of the main browser menu with on/off toggles (desktop site, reader mode, gestures); shown when customizing the menu."
+  },
+  "menu_sectionPageActions": "Toimingud lehtedega",
+  "@menu_sectionPageActions": {
+    "description": "Name of the browser menu section with actions on the current page; shown when customizing the menu."
+  },
+  "menu_sectionExtensions": "Lisamoodulid",
+  "@menu_sectionExtensions": {
+    "description": "Name of the browser menu section listing browser extensions; shown when customizing the menu."
+  },
+  "menu_sectionTabActions": "Toimingud vahekaartidega",
+  "@menu_sectionTabActions": {
+    "description": "Name of the browser menu section with actions on the current tab (share, clone, export…); shown when customizing the menu."
+  },
+  "menu_sectionQuickLinks": "Kiirlingid",
+  "@menu_sectionQuickLinks": {
+    "description": "Name of the browser menu section with links to history, bookmarks and other screens; shown when customizing the menu."
+  },
+  "menu_sectionConnection": "Ühendus",
+  "@menu_sectionConnection": {
+    "description": "Name of the browser menu section showing how the tab connects (proxy/Tor routing); shown when customizing the menu."
+  },
+  "menu_sectionProfile": "Profiil ja rakendus",
+  "@menu_sectionProfile": {
+    "description": "Name of the browser menu section with profile switching, sync and settings; shown when customizing the menu."
+  },
+  "menu_sectionAbout": "Rakenduse teave",
+  "@menu_sectionAbout": {
+    "description": "Name of the browser menu section with app information; shown when customizing the menu."
+  }
+}

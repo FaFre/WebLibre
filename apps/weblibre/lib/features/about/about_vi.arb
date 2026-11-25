@@ -1,0 +1,18 @@
+{
+  "about_feedbackTitle": "Phản hồi",
+  "@about_feedbackTitle": {
+    "description": "Row in the About dialog that opens the page for sending feedback or reporting issues."
+  },
+  "about_donateTitle": "Quyên góp",
+  "@about_donateTitle": {
+    "description": "Row in the About dialog that opens the page for donating to the project."
+  },
+  "about_documentationTitle": "Tài liệu",
+  "@about_documentationTitle": {
+    "description": "Row in the About dialog that opens the online documentation."
+  },
+  "about_githubTitle": "GitHub",
+  "@about_githubTitle": {
+    "description": "Row in the About dialog that opens the project repository on GitHub. GitHub is a brand name."
+  }
+}

@@ -1,0 +1,50 @@
+{
+    "wallpaper_title": "Taustapilt",
+    "@wallpaper_title": {
+        "description": "Title of the settings screen for choosing the home page wallpaper image."
+    },
+    "wallpaper_settingsDescription": "Kuvatakse avalehe taustal igas konteineris, millel puudub oma taustapilt.",
+    "@wallpaper_settingsDescription": {
+        "description": "Explanation at the top of the wallpaper settings screen. Containers (separate browsing identities) can set their own wallpaper, which overrides this one."
+    },
+    "wallpaper_chooseImage": "Vali pilt",
+    "@wallpaper_chooseImage": {
+        "description": "Button that opens the file picker to pick a wallpaper image, shown while no wallpaper is set."
+    },
+    "wallpaper_replace": "Asenda",
+    "@wallpaper_replace": {
+        "description": "Button that opens the file picker to pick a different wallpaper image, shown while a wallpaper is already set."
+    },
+    "wallpaper_blurLabel": "Hägusta",
+    "@wallpaper_blurLabel": {
+        "description": "Label of the slider that controls how strongly the wallpaper image is blurred."
+    },
+    "wallpaper_dimLabel": "Tausta sulandumine",
+    "@wallpaper_dimLabel": {
+        "description": "Label of the slider that controls how strongly the wallpaper image is faded into the app background color."
+    },
+    "wallpaper_dimDescription": "Pildi sulandumisel rakenduse tausta jääb tekst loetavaks nii heleda kui tumeda kujunduse puhul.",
+    "@wallpaper_dimDescription": {
+        "description": "Help text under the wallpaper dim slider explaining why the image is dimmed."
+    },
+    "wallpaper_editorDefaultDescription": "Avaleht kasutab tavalist taustaplaani.",
+    "@wallpaper_editorDefaultDescription": {
+        "description": "Shown in the wallpaper editor while no image is chosen, explaining that the home page then uses its normal background."
+    },
+    "wallpaper_importErrorUnreadable": "Selle faili lugemine ei õnnestunud",
+    "@wallpaper_importErrorUnreadable": {
+        "description": "Error message when the file picked as a wallpaper could not be opened or read."
+    },
+    "wallpaper_importErrorTooLarge": "See pilt on liiga suur",
+    "@wallpaper_importErrorTooLarge": {
+        "description": "Error message when the image picked as a wallpaper exceeds the size limit."
+    },
+    "wallpaper_importErrorNotAnImage": "See fail pole pilt",
+    "@wallpaper_importErrorNotAnImage": {
+        "description": "Error message when the file picked as a wallpaper is not an image file."
+    },
+    "wallpaper_importErrorDecodeFailed": "Selle pildi lugemine ei õnnestunud",
+    "@wallpaper_importErrorDecodeFailed": {
+        "description": "Error message when the file picked as a wallpaper looks like an image but its contents could not be decoded (e.g. corrupt or unsupported format)."
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "appLinks_bannerTitleNamed": "Kas avad selle lingi rakenduses {appName}?",
+  "@appLinks_bannerTitleNamed": {
+    "description": "Question in the banner shown when a tapped link can be opened by an installed app instead of the browser. appName is that app's name.",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "appLinks_bannerTitleGeneric": "Kas avad selle lingi mõne rakendusega?",
+  "@appLinks_bannerTitleGeneric": {
+    "description": "Question in the banner shown when a tapped link can be opened by an installed app instead of the browser, when the app's name is unknown."
+  }
+}
