@@ -165,7 +165,7 @@ dependencies {
     implementation "org.mozilla.components:service-firefox-accounts:$mozillaComponentsVersion"
     implementation "org.mozilla.components:support-appservices:$mozillaComponentsVersion"
     implementation "org.ironfoxoss.unifiedpush:unifiedpush:$unifiedPushAcVersion"
-    implementation ('org.unifiedpush.android:connector:3.3.5') {
+    implementation ('org.unifiedpush.android:connector:3.3.6') {
         exclude group: 'com.google.protobuf', module: 'protobuf-java'
     }
 
